@@ -1,0 +1,24 @@
+{
+  "name": "eternajs",
+  "version": "1.0.0",
+  "description": "Javascript port of the Eterna ActionScript game",
+  "main": "./dist/main.js",
+  "scripts": {
+    "webpack": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Tim Conkling",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/pixi.js": "^4.7.3",
+    "awesome-typescript-loader": "^5.0.0",
+    "source-map-loader": "^0.2.3",
+    "typescript": "^2.8.3",
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.15"
+  },
+  "dependencies": {
+    "pixi.js": "^4.7.3"
+  }
+}
