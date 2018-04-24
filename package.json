@@ -19,6 +19,7 @@
     "webpack-cli": "^2.0.15"
   },
   "dependencies": {
+    "es6-promise": "^4.2.4",
     "pixi.js": "^4.7.3"
   }
 }

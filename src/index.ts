@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import 'es6-promise';
 
 let app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 document.body.appendChild(app.view);
@@ -22,3 +23,26 @@ app.ticker.add(function(delta) {
     // creates frame-independent transformation
     bunny.rotation += 0.1 * delta;
 });
+
+function delay(milliseconds: number, count: number): Promise<number> {
+    return new Promise<number>(resolve => {
+        setTimeout(() => {
+            resolve(count);
+        }, milliseconds);
+    });
+}
+
+// async function always returns a Promise
+async function dramaticWelcome(): Promise<void> {
+    console.log("Hello");
+
+    for (let i = 0; i < 5; i++) {
+        // await is converting Promise<number> into number
+        const count:number = await delay(500, i);
+        console.log(count);
+    }
+
+    console.log("World!");
+}
+
+dramaticWelcome();
