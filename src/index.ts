@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import 'es6-promise';
 
 let app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 document.body.appendChild(app.view);
@@ -46,3 +45,5 @@ async function dramaticWelcome(): Promise<void> {
 }
 
 dramaticWelcome();
+
+let mapTest: Map<string, string> = new Map();
