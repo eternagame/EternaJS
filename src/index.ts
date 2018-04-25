@@ -47,3 +47,5 @@ async function dramaticWelcome(): Promise<void> {
 dramaticWelcome();
 
 let mapTest: Map<string, string> = new Map();
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
