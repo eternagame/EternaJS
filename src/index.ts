@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { Signal, SignalConnection } from "typed-signals";
 
 let app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 document.body.appendChild(app.view);
@@ -49,3 +50,15 @@ dramaticWelcome();
 let mapTest: Map<string, string> = new Map();
 
 console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+
+let sig: Signal<(s: string) => void> = new Signal();
+let conn1: SignalConnection = null;
+let conn2: SignalConnection = null;
+conn1 = sig.connect(s => {
+    console.log(`sig1: ${s}`);
+    conn2.disconnect();
+});
+conn2 = sig.connect(s => {
+    console.log(`sig2: ${s}`)
+});
+sig.emit("test");
