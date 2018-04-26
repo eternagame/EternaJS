@@ -62,3 +62,30 @@ conn2 = sig.connect(s => {
     console.log(`sig2: ${s}`)
 });
 sig.emit("test");
+
+interface Test {
+    foo(): void;
+}
+
+class BaseClass {
+    public name: string = "BaseClass";
+}
+
+class SubClass extends BaseClass implements Test {
+    public constructor () {
+        super();
+        this.name = "SubClass";
+    }
+
+    foo(): void {
+        console.log(this.name);
+    }
+}
+
+let objs: BaseClass[] = [ new BaseClass(), new SubClass() ];
+
+for (let obj of objs) {
+    if ((<Test> (obj as any)).foo) {
+        (<Test> (obj as any)).foo();
+    }
+}

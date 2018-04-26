@@ -1,22 +1,28 @@
+import {Container} from "pixi.js";
+import {Signal, SignalConnections} from "typed-signals";
+import {Assert} from "../util/Assert";
+import {UnitSignal} from "../util/Signals";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
 import {GameObjectContainer} from "./GameObjectContainer";
 import {GameObjectRef} from "./GameObjectRef";
 import {ModeStack} from "./ModeStack";
-import Container = PIXI.Container;
+import {Updatable} from "./Updatable";
 
 export class AppMode implements GameObjectContainer {
+    public readonly updateBegan: Signal<(dt: number) => void> = new Signal();
+
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
      * The resultant Array will not have any null objects, so it may be smaller than the Array
      * that was passed in.
      */
-    public static getObjects (objectRefs :Array<GameObjectRef>) :Array<GameObject> {
+    public static getObjects (objectRefs :GameObjectRef[]) :GameObject[] {
         // Array.map would be appropriate here, except that the resultant
         // Array might contain fewer entries than the source.
 
-        let objs :Array<GameObject> = [];
-        for (let ref :GameObjectRef of objectRefs) {
+        let objs :GameObject[] = [];
+        for (let ref of objectRefs) {
             if (!ref.isNull) {
                 objs.push(ref.object);
             }
@@ -29,17 +35,21 @@ export class AppMode implements GameObjectContainer {
         this._rootObject = new RootObject(this);
     }
 
-    public get modeSprite () :Container {
+    public get regs () :SignalConnections {
+        return this._regs;
+    }
+
+    public /*final*/ get modeSprite () :Container {
         return this._modeSprite;
     }
 
     /** Returns the ModeStack that this AppMode lives in */
-    public get modeStack (): ModeStack {
+    public /*final*/ get modeStack () :ModeStack {
         return this._modeStack;
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId (id :any) :void {
+    public destroyObjectWithId (id :Object) :void {
         let obj :GameObject = this.getObjectWithId(id);
         if (null != obj) {
             obj.destroySelf();
@@ -47,33 +57,32 @@ export class AppMode implements GameObjectContainer {
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId (id :any) :GameObject {
+    public getObjectWithId (id :Object) :any {
         return this._idObjects.get(id);
     }
-
 
     /** @return total time the mode has been running, as measured by calls to update(). */
     public get time () :number {
         return this._runningTime;
     }
 
-    public addObject (obj: GameObjectBase, displayParent? :Container, displayIdx? :number) :GameObjectRef {
+    public addObject (obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
-    public addNamedObject (name :String, obj :GameObjectBase, displayParent? :Container, displayIdx?: number) :GameObjectRef {
+    public addNamedObject (name :string, obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public replaceNamedObject (name :String, obj :GameObjectBase, displayParent? :Container, displayIdx?: number) :GameObjectRef {
+    public replaceNamedObject (name :string, obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public getNamedObject (name :String) :GameObjectBase {
+    public getNamedObject (name :string) :GameObjectBase {
         return this._rootObject.getNamedObject(name);
     }
 
-    public hasNamedObject (name :String) :boolean {
+    public hasNamedObject (name :string) :boolean {
         return this._rootObject.hasNamedObject(name);
     }
 
@@ -81,7 +90,7 @@ export class AppMode implements GameObjectContainer {
         this._rootObject.removeObject(obj);
     }
 
-    public removeNamedObjects (name :String) :void {
+    public removeNamedObjects (name :string) :void {
         this._rootObject.removeNamedObjects(name);
     }
 
@@ -93,12 +102,7 @@ export class AppMode implements GameObjectContainer {
     protected update (dt :number) :void {
         this._runningTime += dt;
         // update all Updatable objects
-        this._update.emit(dt);
-    }
-
-    /** Called right before Starling renders the display list. */
-    protected render () :void {
-        this._willRender.emit();
+        this.updateBegan.emit(dt);
     }
 
     /** Called when the mode is added to the mode stack */
@@ -121,23 +125,24 @@ export class AppMode implements GameObjectContainer {
     protected registerObject (obj :GameObjectBase) :void {
     }
 
-    _setupInternal (modeStack :ModeStack) :void {
+    /*internal*/ setupInternal (modeStack :ModeStack) :void {
         this._modeStack = modeStack;
-        // _touchInput = new TouchInput(_modeSprite);
-        // _moviePlayer = new MoviePlayer(_modeSprite);
         this.setup();
     }
 
-    _disposeInternal () :void {
+    /*internal*/ disposeInternal () :void {
         Assert.isTrue(!this._disposed, "already disposed");
         this._disposed = true;
 
         this.dispose();
 
-        this._rootObject.disposeInternal();
+        this._rootObject._disposeInternal();
         this._rootObject = null;
 
         this._idObjects = null;
+
+        this._regs.disconnectAll();
+        this._regs = null;
 
         this._modeStack = null;
 
@@ -145,74 +150,54 @@ export class AppMode implements GameObjectContainer {
         this._modeSprite = null;
     }
 
-    _enterInternal () :void {
+    /*internal*/ enterInternal () :void {
         this._active = true;
         this.enter();
-        // _entered.emit();
+        this._entered.emit();
     }
 
-    _exitInternal () :void {
+    /*internal*/ exitInternal () :void {
         this._active = false;
         this.exit();
     }
 
-    _updateInternal (dt :number) :void {
+    /*internal*/ updateInternal (dt :number) :void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
-    _renderInternal () :void {
-        this.render();
+    /*internal*/ registerObjectInternal (obj :GameObjectBase) :void {
+        // Handle IDs
+        let ids :any[] = obj.ids;
+        if (ids.length > 0) {
+            this._regs.add(obj.destroyed.connect(() => {
+                for (let id of ids) {
+                    this._idObjects.delete(id);
+                }
+            }));
+
+            for (let id of ids) {
+                Assert.isFalse(this._idObjects.has(id), "two objects with the same ID added to the AppMode");
+                this._idObjects.set(id, obj);
+            }
+        }
+
+        // Handle Updatable and Renderable
+        let updatable: Updatable = <Updatable> (obj as any);
+        if (typeof(updatable.update) !== "undefined") {
+            obj.regs.add(this.updateBegan.connect(updatable.update));
+        }
+
+        // let renderable :Renderable = (<Renderable>obj );
+        // if (renderable != null) {
+        //     obj.regs.add(this.willRender.connect(renderable.willRender));
+        // }
+
+        this.registerObject(obj);
     }
 
-    // _registerObjectInternal (obj :GameObjectBase) :void {
-    //     // Handle IDs
-    //     let ids :Array<any> = obj.ids;
-    //     if (ids.length > 0) {
-    //         _regs.add(obj.destroyed.connect(function () :void {
-    //             for each (var id :Object in ids) {
-    //                 _idObjects.remove(id);
-    //             }
-    //         }));
-    //         for each (var id :Object in ids) {
-    //             var existing :GameObject = _idObjects.put(id, obj);
-    //             Preconditions.isTrue(null == existing,
-    //                 "two objects with the same ID added to the AppMode",
-    //                 "id", id, "new", obj, "existing", existing);
-    //         }
-    //     }
-    //
-    //     // Handle groups
-    //     var groups :Array = obj.groups;
-    //     if (groups.length > 0) {
-    //         _regs.add(obj.destroyed.connect(function () :void {
-    //             // perform group removal at the end of an update, so that
-    //             // group iteration is safe during the update
-    //             _updateComplete.connect(function () :void {
-    //                 for each (var group :Object in groups) {
-    //                     Arrays.removeFirst(_groupedObjects.get(group), obj.ref);
-    //                 }
-    //             }).once();
-    //
-    //         }));
-    //         for each (var group :Object in groups) {
-    //             (_groupedObjects.get(group) as Array).push(obj.ref);
-    //         }
-    //     }
-    //
-    //     // Handle Updatable and Renderable
-    //     var updatable :Updatable = (obj as Updatable);
-    //     if (updatable != null) {
-    //         obj.regs.add(_update.connect(updatable.update));
-    //     }
-    //
-    //     var renderable :Renderable = (obj as Renderable);
-    //     if (renderable != null) {
-    //         obj.regs.add(_willRender.connect(renderable.willRender));
-    //     }
-    //
-    //     registerObject(obj);
-    // }
+    protected _updateComplete :UnitSignal = new UnitSignal();
+    protected _entered :UnitSignal = new UnitSignal();
 
     protected _modeSprite :Container = new Container();
     protected _modeStack :ModeStack;
@@ -221,16 +206,16 @@ export class AppMode implements GameObjectContainer {
 
     protected _rootObject :RootObject;
 
-    protected _idObjects :Map<any, GameObject> = new Map();
+    protected _idObjects: Map<any, GameObjectBase> = new Map();
 
-    // protected _regs :Listeners = new Listeners();
+    protected _regs :SignalConnections = new SignalConnections();
 
     protected _active :boolean;
     protected _disposed :boolean;
 }
 
 class RootObject extends GameObject {
-    public constructor (mode :AppMode) {
+    constructor (mode :AppMode) {
         super();
         this._mode = mode;
         this._ref = new GameObjectRef();

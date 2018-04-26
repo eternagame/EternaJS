@@ -1,8 +1,18 @@
-import {GameObjectRef} from "./GameObjectRef";
-import {GameObjectContainer} from "./GameObjectContainer";
+import {Container} from "pixi.js";
+import {SignalConnections} from "typed-signals";
+import {UnitSignal} from "../util/Signals";
 import {AppMode} from "./AppMode";
+import {GameObjectContainer} from "./GameObjectContainer";
+import {GameObjectRef} from "./GameObjectRef";
+import {ModeStack} from "./ModeStack";
 
 export class GameObjectBase {
+    public get destroyed (): UnitSignal {
+        if (this._destroyed == null) {
+            this._destroyed = new UnitSignal();
+        }
+        return this._destroyed;
+    }
 
     /**
      * Returns the IDs of this object. (Objects can have multiple IDs.)
@@ -10,57 +20,45 @@ export class GameObjectBase {
      * Objects cannot change their IDs once added to a mode. An ID can be any object;
      * though it's common to use Classes and Strings.
      * <code>
-     * override public get ids () :Array {
+     * override public function get ids () :Array {
      *     return [ "Hello", MyClass ].concat(super.ids);
-     * }
-         * </code>
-     */
-    public get ids () :Array<any> {
-        return GameObjectBase.EMPTY_ARRAY;
-    }
-
-    /**
-     * Override to return the groups that this object belongs to. E.g.:
-     * <code>
-         * override public get groups () :Array {
-     *     return [ "Foo", MyClass ].concat(super.groups);
      * }
      * </code>
      */
-    public get groups () :Array<any> {
+    public get ids () :any[] {
         return GameObjectBase.EMPTY_ARRAY;
     }
 
     /**
      * Returns the unique GameObjectRef that stores a reference to this GameObject.
      */
-    // public get ref () :GameObjectRef {
-    //     return this._ref;
-    // }
-    //
-    // public get parent () :GameObjectContainer {
-    //     return this._parent;
-    // }
+    public /*final*/ get ref () :GameObjectRef {
+        return this._ref;
+    }
+
+    public /*final*/ get parent () :GameObjectContainer {
+        return this._parent;
+    }
 
     /**
      * Returns the AppMode that this object is contained in.
      */
-    // public get mode () :AppMode {
-    //     return this._mode;
-    // }
+    public /*final*/ get mode () :AppMode {
+        return this._mode;
+    }
 
     /**
      * Returns the ModeStack that this object is a part of
      */
-    // public get modeStack (): ModeStack {
-    //     return this._mode.modeStack;
-    // }
+    public /*final*/ get modeStack () :ModeStack {
+        return this._mode.modeStack;
+    }
 
     /**
      * Returns true if the object is in an AppMode and is "live"
      * (not pending removal from the database)
      */
-    public get isLiveObject () :boolean {
+    public /*final*/ get isLiveObject () :boolean {
         return (this._ref != null && this._ref._obj != null);
     }
 
@@ -69,20 +67,20 @@ export class GameObjectBase {
      * If a subclass needs to cleanup after itself after being destroyed, it should do
      * so either in removedFromDb or dispose.
      */
-    public destroySelf () :void {
+    public /*final*/ destroySelf () :void {
         if (this._parent != null) {
             this._parent.removeObject(this);
         }
     }
 
-    // public get regs () :Listeners {
-    //     if (this._regs == null) {
-    //         this._regs = new Listeners();
-    //     }
-    //     return this._regs;
-    // }
+    public get regs () :SignalConnections {
+        if (this._regs == null) {
+            this._regs = new SignalConnections();
+        }
+        return this._regs;
+    }
 
-    // public toString () :String {
+    // public toString () :string {
     //     return StringUtil.simpleToString(this, [ "ids", "groups" ]);
     // }
 
@@ -119,54 +117,58 @@ export class GameObjectBase {
     protected dispose () :void {
     }
 
-    /** @internal */
-    // _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
-    //     Assert.isTrue(this is DisplayComponent, "obj must implement DisplayComponent");
-    //
-    //     // Attach the object to a display parent.
-    //     // (This is purely a convenience - the client is free to do the attaching themselves)
-    //     let disp :DisplayObject = (this as DisplayComponent).display;
-    //     Assert.isTrue(null != disp,
-    //         "obj must return a non-null displayObject to be attached to a display parent");
-    //
-    //     if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
-    //         displayParent.addChild(disp);
-    //     } else {
-    //         displayParent.addChildAt(disp, displayIdx);
-    //     }
-    // }
+    /*internal*/ _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
+        // Assert.isTrue(this instanceof DisplayComponent, "obj must implement DisplayComponent");
+        //
+        // // Attach the object to a display parent.
+        // // (This is purely a convenience - the client is free to do the attaching themselves)
+        // let disp :DisplayObject = (<DisplayComponent>this).display;
+        // Assert.isTrue(null != disp, "obj must return a non-null displayObject to be attached to a display parent");
+        //
+        // if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
+        //     displayParent.addChild(disp);
+        // } else {
+        //     displayParent.addChildAt(disp, displayIdx);
+        // }
+    }
 
-    /** internal */
-    _addedInternal () :void {
+    /*internal*/ _addedInternal () :void {
         this.added();
     }
 
-    _removedInternal () :void {
+    /*internal*/ _removedInternal () :void {
         this._ref._obj = null;
         this._parent = null;
         this._mode = null;
 
         this.removed();
+        if (this._destroyed != null) {
+            this._destroyed.emit();
+        }
         this._disposeInternal();
     }
 
-    _disposeInternal () :void {
+    /*internal*/ _disposeInternal () :void {
         this._ref._obj = null;
         this.dispose();
-        // if (this._regs != null) {
-        //     this._regs.close();
-        //     this._regs = null;
-        // }
+        if (this._regs != null) {
+            this._regs.disconnectAll();
+            this._regs = null;
+        }
     }
 
-    get _wasRemoved () :boolean {
+    /*internal*/ get _wasRemoved () :boolean {
         return (this._ref != null && this._ref._obj == null);
     }
 
-    private _name: String;
-    private _ref: GameObjectRef;
-    private _parent :GameObjectContainer;
-    private _mode: AppMode;
+    // lazily instantiated
+    private _regs :SignalConnections;
+    private _destroyed :UnitSignal;
 
-    protected static readonly EMPTY_ARRAY :Array<any> = [];
+    /*internal*/ _name :string;
+    /*internal*/ _ref :GameObjectRef;
+    /*internal*/ _parent :GameObjectContainer;
+    /*internal*/ _mode :AppMode;
+
+    protected static EMPTY_ARRAY :any[] = [];
 }

@@ -4,7 +4,7 @@ A Javascript port of the Eterna game
 
 ## Setup (on a Mac)
 
-The project uses NPM for dependency management and webpack for packaging.
+The project uses NPM for dependency management, webpack for packaging, and babel to polyfill ES2015 language features into ES5 and earlier.
 
 * Install `npm` (via `nodejs`): 
     - https://nodejs.org/en/download/ 
