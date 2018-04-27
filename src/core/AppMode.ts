@@ -183,14 +183,9 @@ export class AppMode {
 
         // Handle Updatable and Renderable
         let updatable: Updatable = <Updatable> (obj as any);
-        if (typeof(updatable.update) !== "undefined") {
-            obj.regs.add(this.updateBegan.connect(updatable.update));
+        if (updatable.update !== undefined) {
+            obj.regs.add(this.updateBegan.connect(dt => updatable.update(dt)));
         }
-
-        // let renderable :Renderable = (<Renderable>obj );
-        // if (renderable != null) {
-        //     obj.regs.add(this.willRender.connect(renderable.willRender));
-        // }
 
         this.registerObject(obj);
     }
