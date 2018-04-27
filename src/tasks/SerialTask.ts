@@ -41,6 +41,6 @@ export class SerialTask extends ObjectTask {
     }
 }
 
-    protected _subtasks :ObjectTask[];
-    protected _nextIdx :number = 0;
+    private readonly _subtasks :ObjectTask[];
+    private _nextIdx :number = 0;
 }

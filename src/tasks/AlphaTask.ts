@@ -2,17 +2,17 @@ import {DisplayObject} from "pixi.js";
 import {EasingFunc} from "../util/Easing";
 import {DisplayObjectTask} from "./DisplayObjectTask";
 
-export class RotationTask extends DisplayObjectTask {
-    constructor (radians :number, time :number = 0, easingFn :EasingFunc = null, target :DisplayObject = null)  {
+export class AlphaTask extends DisplayObjectTask {
+    constructor (alpha :number, time :number = 0, easingFn :EasingFunc = null, target :DisplayObject = null) {
         super(time, easingFn, target);
-        this._to = radians;
+        this._to = alpha;
     }
 
     /*override*/ protected updateValues () :void {
         if (this._from === undefined) {
-            this._from = this._target.rotation;
+            this._from = this._target.alpha;
         }
-        this._target.rotation = this.interpolate(this._from, this._to);
+        this._target.alpha = this.interpolate(this._from, this._to);
     }
 
     private readonly _to :number;
