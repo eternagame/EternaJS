@@ -1,5 +1,8 @@
+import {Container} from "pixi.js";
 import {GameObjectBase} from "./GameObjectBase";
 
 export class ObjectTask extends GameObjectBase {
-    // do not declare IDs
+    /*internal*/ _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
+        throw new Error("Tasks cannot manage DisplayObjects");
+    }
 }

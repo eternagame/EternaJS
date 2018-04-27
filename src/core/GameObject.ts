@@ -1,10 +1,15 @@
-import {Container} from "pixi.js";
+import {Container, DisplayObject} from "pixi.js";
 import {Assert} from "../util/Assert";
 import {GameObjectBase} from "./GameObjectBase";
 import {GameObjectContainer} from "./GameObjectContainer";
 import {GameObjectRef} from "./GameObjectRef";
 
 export class GameObject extends GameObjectBase implements GameObjectContainer {
+    /** The DisplayObject that this GameObject manages, if any */
+    public get display (): DisplayObject {
+        return null;
+    }
+
     public addObject (obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
         return this._addObjectInternal(obj, null, false, displayParent, displayIdx);
     }
@@ -126,6 +131,18 @@ export class GameObject extends GameObjectBase implements GameObjectContainer {
         }
 
         return ref;
+    }
+
+    /*internal*/ _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
+        // Attach the object to a display parent.
+        // (This is purely a convenience - the client is free to do the attaching themselves)
+        Assert.isTrue(null != this.display, "obj must manage a non-null DisplayObject to be attached to a display parent");
+
+        if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
+            displayParent.addChild(this.display);
+        } else {
+            displayParent.addChildAt(this.display, displayIdx);
+        }
     }
 
     /*internal*/ _registerObject (obj :GameObjectBase) :void {

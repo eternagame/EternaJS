@@ -118,18 +118,7 @@ export class GameObjectBase {
     }
 
     /*internal*/ _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
-        // Assert.isTrue(this instanceof DisplayComponent, "obj must implement DisplayComponent");
-        //
-        // // Attach the object to a display parent.
-        // // (This is purely a convenience - the client is free to do the attaching themselves)
-        // let disp :DisplayObject = (<DisplayComponent>this).display;
-        // Assert.isTrue(null != disp, "obj must return a non-null displayObject to be attached to a display parent");
-        //
-        // if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
-        //     displayParent.addChild(disp);
-        // } else {
-        //     displayParent.addChildAt(disp, displayIdx);
-        // }
+        // implemented by subclasses
     }
 
     /*internal*/ _addedInternal () :void {
