@@ -27,7 +27,7 @@ export class SerialTask extends ObjectTask {
 
         if (this._nextIdx < this._subtasks.length) {
             let newTask :ObjectTask = this._subtasks[this._nextIdx++];
-            this.regs.add(newTask.destroyed.connect(this.nextTask));
+            this.regs.add(newTask.destroyed.connect(() => { this.nextTask(); }));
             this.parent.addObject(newTask);
         } else {
             this.destroySelf();
@@ -42,5 +42,5 @@ export class SerialTask extends ObjectTask {
 }
 
     protected _subtasks :ObjectTask[];
-    protected _nextIdx :number;
+    protected _nextIdx :number = 0;
 }

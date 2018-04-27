@@ -32,19 +32,11 @@ class TestMode extends AppMode {
 
         this.addObject(bunny, this._modeSprite);
 
-        // bunny.addObject(new RotationTask(Math.PI, 0.5, Easing.linear));
-
         bunny.addObject(new RepeatingTask((): ObjectTask => {
             return new SerialTask(
-                new RotationTask(Math.PI, 0.5, Easing.linear),
                 new RotationTask(Math.PI * 2, 1, Easing.linear),
                 new RotationTask(0, 0)
             );
         }));
     }
-
-    // protected update (dt: number): void {
-    //     super.update(dt);
-    //     this._bunny.rotation += (Math.PI * dt);
-    // }
 }
