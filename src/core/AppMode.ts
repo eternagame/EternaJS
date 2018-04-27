@@ -4,12 +4,11 @@ import {Assert} from "../util/Assert";
 import {UnitSignal} from "../util/Signals";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
-import {GameObjectContainer} from "./GameObjectContainer";
 import {GameObjectRef} from "./GameObjectRef";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 
-export class AppMode implements GameObjectContainer {
+export class AppMode {
     public readonly updateBegan: Signal<(dt: number) => void> = new Signal();
 
     /**

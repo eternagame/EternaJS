@@ -2,7 +2,7 @@ import {Container} from "pixi.js";
 import {SignalConnections} from "typed-signals";
 import {UnitSignal} from "../util/Signals";
 import {AppMode} from "./AppMode";
-import {GameObjectContainer} from "./GameObjectContainer";
+import {GameObject} from "./GameObject";
 import {GameObjectRef} from "./GameObjectRef";
 import {ModeStack} from "./ModeStack";
 
@@ -36,7 +36,7 @@ export class GameObjectBase {
         return this._ref;
     }
 
-    public /*final*/ get parent () :GameObjectContainer {
+    public /*final*/ get parent () :GameObject {
         return this._parent;
     }
 
@@ -156,7 +156,7 @@ export class GameObjectBase {
 
     /*internal*/ _name :string;
     /*internal*/ _ref :GameObjectRef;
-    /*internal*/ _parent :GameObjectContainer;
+    /*internal*/ _parent :GameObject;
     /*internal*/ _mode :AppMode;
 
     protected static EMPTY_ARRAY :any[] = [];

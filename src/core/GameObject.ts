@@ -1,10 +1,9 @@
 import {Container, DisplayObject} from "pixi.js";
 import {Assert} from "../util/Assert";
 import {GameObjectBase} from "./GameObjectBase";
-import {GameObjectContainer} from "./GameObjectContainer";
 import {GameObjectRef} from "./GameObjectRef";
 
-export class GameObject extends GameObjectBase implements GameObjectContainer {
+export class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */
     public get display (): DisplayObject {
         return null;
