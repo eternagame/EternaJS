@@ -11,7 +11,7 @@ import {Easing} from "./flashbang/util/Easing";
 
 export class EternaApp extends FlashbangApp {
     protected createPixi (): Application {
-        return new Application(800, 600, {backgroundColor: 0x1099bb});
+        return new Application(1024, 768, {backgroundColor: 0x1099bb});
     }
 
     protected setup (): void {
@@ -21,18 +21,18 @@ export class EternaApp extends FlashbangApp {
 
 class TestMode extends AppMode {
     protected setup (): void {
-        let bunny: SpriteObject = new SpriteObject(Sprite.fromImage('assets/bunny.png'));
+        let clock: SpriteObject = new SpriteObject(Sprite.fromImage('assets/clock.png'));
 
         // center the sprite's anchor point
-        bunny.sprite.anchor.set(0.5);
+        clock.sprite.anchor.set(0.5);
 
         // move the sprite to the center of the screen
-        bunny.sprite.x = Flashbang.stageWidth * 0.5;
-        bunny.sprite.y = Flashbang.stageHeight * 0.5;
+        clock.sprite.x = Flashbang.stageWidth * 0.5;
+        clock.sprite.y = Flashbang.stageHeight * 0.5;
 
-        this.addObject(bunny, this._modeSprite);
+        this.addObject(clock, this._modeSprite);
 
-        bunny.addObject(new RepeatingTask((): ObjectTask => {
+        clock.addObject(new RepeatingTask((): ObjectTask => {
             return new SerialTask(
                 new RotationTask(Math.PI * 2, 1, Easing.linear),
                 new RotationTask(0, 0)
