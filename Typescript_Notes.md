@@ -29,13 +29,16 @@
 * For anonymous functions, prefer lambda-style:
     - `addCallback(() => { ... })` vs `addCallback(function (): void { ... }`
     - Lambda-style lets you access `this`
+* Use lambda-style for passing member functions as callbacks:
+    - `addCallback(() => { this.onCallback(); })` instead of `addCallback(this.onCallback)`
+    - Otherwise, `this` will improperly bound when the callback is invoked
 * Cannot use `instanceof` with interfaces:
     ```
     interface MyInterface { interfaceFunc(): void };
     let obj: MyClass = new MyClass();
     if (obj instanceof MyInterface) { ... } // compile error
     ```
-    Instead, use "type guards": https://www.typescriptlang.org/docs/handbook/advanced-types.html
+    Instead, use ["type guards"](https://www.typescriptlang.org/docs/handbook/advanced-types.html):
     ```
     let obj: MyClass = new MyClass();
     if (<MyInterface>(obj as any).interfaceFunc) {
