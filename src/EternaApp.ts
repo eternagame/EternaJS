@@ -1,13 +1,13 @@
 import {Application, Sprite} from "pixi.js";
-import {AppMode} from "./core/AppMode";
-import {Flashbang} from "./core/Flashbang";
-import {FlashbangApp} from "./core/FlashbangApp";
-import {ObjectTask} from "./core/ObjectTask";
-import {SpriteObject} from "./objects/SpriteObject";
-import {RepeatingTask} from "./tasks/RepeatingTask";
-import {RotationTask} from "./tasks/RotationTask";
-import {SerialTask} from "./tasks/SerialTask";
-import {Easing} from "./util/Easing";
+import {AppMode} from "./flashbang/core/AppMode";
+import {Flashbang} from "./flashbang/core/Flashbang";
+import {FlashbangApp} from "./flashbang/core/FlashbangApp";
+import {ObjectTask} from "./flashbang/core/ObjectTask";
+import {SpriteObject} from "./flashbang/objects/SpriteObject";
+import {RepeatingTask} from "./flashbang/tasks/RepeatingTask";
+import {RotationTask} from "./flashbang/tasks/RotationTask";
+import {SerialTask} from "./flashbang/tasks/SerialTask";
+import {Easing} from "./flashbang/util/Easing";
 
 export class EternaApp extends FlashbangApp {
     protected createPixi (): Application {
