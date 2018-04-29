@@ -1,4 +1,5 @@
 import {Application, Sprite} from "pixi.js";
+import {Background} from "./Background";
 import {AppMode} from "./flashbang/core/AppMode";
 import {Flashbang} from "./flashbang/core/Flashbang";
 import {FlashbangApp} from "./flashbang/core/FlashbangApp";
@@ -21,22 +22,24 @@ export class EternaApp extends FlashbangApp {
 
 class TestMode extends AppMode {
     protected setup (): void {
-        let clock: SpriteObject = new SpriteObject(Sprite.fromImage('assets/clock.png'));
+        this.addObject(new Background(20, false), this.modeSprite);
 
-        // center the sprite's anchor point
-        clock.sprite.anchor.set(0.5);
-
-        // move the sprite to the center of the screen
-        clock.sprite.x = Flashbang.stageWidth * 0.5;
-        clock.sprite.y = Flashbang.stageHeight * 0.5;
-
-        this.addObject(clock, this._modeSprite);
-
-        clock.addObject(new RepeatingTask((): ObjectTask => {
-            return new SerialTask(
-                new RotationTask(Math.PI * 2, 1, Easing.linear),
-                new RotationTask(0, 0)
-            );
-        }));
+        // let clock: SpriteObject = new SpriteObject(Sprite.fromImage('assets/clock.png'));
+        //
+        // // center the sprite's anchor point
+        // clock.sprite.anchor.set(0.5);
+        //
+        // // move the sprite to the center of the screen
+        // clock.sprite.x = Flashbang.stageWidth * 0.5;
+        // clock.sprite.y = Flashbang.stageHeight * 0.5;
+        //
+        // this.addObject(clock, this._modeSprite);
+        //
+        // clock.addObject(new RepeatingTask((): ObjectTask => {
+        //     return new SerialTask(
+        //         new RotationTask(Math.PI * 2, 1, Easing.linear),
+        //         new RotationTask(0, 0)
+        //     );
+        // }));
     }
 }

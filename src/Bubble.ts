@@ -1,6 +1,14 @@
+import {Sprite, Point} from "pixi.js";
+import {Flashbang} from "./flashbang/core/Flashbang";
+import {Updatable} from "./flashbang/core/Updatable";
 import {SpriteObject} from "./flashbang/objects/SpriteObject";
+import {AlphaTask} from "./flashbang/tasks/AlphaTask";
+import {ParallelTask} from "./flashbang/tasks/ParallelTask";
+import {ScaleTask} from "./flashbang/tasks/ScaleTask";
+import {Easing} from "./flashbang/util/Easing";
+import {Images} from "./Images";
 
-export class Bubble extends SpriteObject {
+export class Bubble extends SpriteObject implements Updatable {
     public is_paused: boolean;
 
     constructor(foreground:boolean) {
@@ -8,12 +16,14 @@ export class Bubble extends SpriteObject {
 
         this._foreground = foreground;
 
-        let bubble_type:boolean;
+        // TSC: clean up this badness
+        let useBlueBubble :boolean;
+        let bubbleType: number = 0;
         if (this._foreground) {
             this._bubbleSize = 3;
-            bubble_type = (Math.random() < 0.75);
+            useBlueBubble = (Math.random() < 0.75);
         } else {
-            bubble_type = (Math.random() < 0.5);
+            useBlueBubble = (Math.random() < 0.5);
 
             let size_number:number = Math.random();
             if (size_number < 0.33) this._bubbleSize = 0;
@@ -21,44 +31,48 @@ export class Bubble extends SpriteObject {
             else this._bubbleSize = 2;
         }
 
-        if(bubble_type) {
-            if( this._bubbleSize == 0) this._bubbleType = 0;
-            else if (this._bubbleSize == 1) this._bubbleType = 1;
-            else if (this._bubbleSize == 2) this._bubbleType = 2;
-            else this._bubbleType = 3;
+        if(useBlueBubble) {
+            if( this._bubbleSize == 0) bubbleType = 0;
+            else if (this._bubbleSize == 1) bubbleType = 1;
+            else if (this._bubbleSize == 2) bubbleType = 2;
+            else bubbleType = 3;
         } else {
-            if (this._bubbleSize == 0) this._bubbleType = 4;
-            else if (this._bubbleSize == 1) this._bubbleType = 5;
-            else if (this._bubbleSize == 2) this._bubbleType = 6;
-            else this._bubbleType = 7;
+            if (this._bubbleSize == 0) bubbleType = 4;
+            else if (this._bubbleSize == 1) bubbleType = 5;
+            else if (this._bubbleSize == 2) bubbleType = 6;
+            else bubbleType = 7;
         }
 
         if (!this._foreground) {
-            this._bitmap = new Bitmap();
-            this._bitmap.bitmapData = Bubble.bitmap_data_[this._bubbleType];
-            this.addChild(this._bitmap);
+            this._bitmap = Sprite.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
+            this.sprite.addChild(this._bitmap);
         }
 
         this.set_auto_hide(false);
     }
 
-    public init():void {
+    public init(): void {
         this._accX = 0;
         this._accY = 0;
 
         if (!this._foreground) {
-            this.set_pos(new UDim(0,0,Math.random() * this.offscreen_width_,Math.random() * this.offscreen_height_));
-            this.set_animator(new GameAnimatorScaler(0, 1.0, 1.0));
-            this.set_animator(new GameAnimatorFader(0, 1.0, 1.0, false));
+            this.sprite.scale.x = 0;
+            this.sprite.scale.y = 0;
+            this.sprite.alpha = 0;
+            this.sprite.x = Math.random() * Flashbang.stageWidth;
+            this.sprite.y = Math.random() * Flashbang.stageHeight;
+
+            this.addObject(new ParallelTask(
+                new ScaleTask(1, 1, 1),
+                new AlphaTask(1, 1, Easing.easeOut)
+            ));
+
         } else {
-            this.set_pos(new UDim(0,0, Math.random() * this.offscreen_width_, Math.random() * (this.offscreen_height_ + 200) + this.offscreen_height_));
+            this.sprite.x = Math.random() * Flashbang.stageWidth;
+            this.sprite.y = (Math.random() * (Flashbang.stageHeight + 200)) + Flashbang.stageHeight;
         }
 
         this._lastTime = -1;
-    }
-
-    public get_bitmap():BitmapData {
-        return Bubble.bitmap_data_[this._bubbleType];
     }
 
     public set_force(force_x:number, force_y:number):void {
@@ -70,15 +84,19 @@ export class Bubble extends SpriteObject {
         this._hideTime = active ? this._lastTime + Math.random() * 6 * 1000.0 : -1;
     }
 
-    /*override*/ public update(current_time:number, paused:boolean):void {
-        if (paused || (this.y < 0 - Bubble.bitmap_data_[this._bubbleType].height)) {
+    /*override*/ public update(dt: number):void {
+        const current_time = this._lastTime + dt;
+        const tex = this._bitmap.texture;
+
+        if (this.is_paused || (this.sprite.y < - tex.height)) {
             this._lastTime = current_time;
             return;
         }
 
-        let m_x = this.mouseX - Bubble.bitmap_data_[this._bubbleType].width / 2.0;
-        let m_y = this.mouseY - Bubble.bitmap_data_[this._bubbleType].height / 2.0;
-        let dist = m_x*m_x + m_y*m_y;
+        let mouseLoc = this.sprite.toLocal(Flashbang.mouse, null, Bubble.P);
+        let m_x = mouseLoc.x - tex.width / 2.0;
+        let m_y = mouseLoc.y - tex.height / 2.0;
+        let dist = Math.max(m_x*m_x + m_y*m_y, 0.01);
         if (dist < 10000) {
             if (this._foreground) {
                 this._accX += -500 * m_x * 2 / (dist);
@@ -102,48 +120,47 @@ export class Bubble extends SpriteObject {
                 this._accY += -110;
             }
 
-            this._accX += this.NormalDistPRNG.random() * 5;
+            this._accX += NormalDistPRNG.random() * 5;
         }
 
-        let dt:number = (current_time - this._lastTime) / 1000.0;
         let dvx:number = dt * this._accX;
         let dvy:number = dt * this._accY;
 
-        this.y += dvy;
-        this.x += dvx;
+        this.sprite.y += dvy;
+        this.sprite.x += dvx;
 
         this._lastTime = current_time;
 
-        if (this.y < 0 - Bubble.bitmap_data_[this._bubbleType].height) {
-            if (this._hideTime < 0 || this._hideTime >= current_time) {
-                this.init();
-            }
+        if (this.sprite.y < - tex.height && (this._hideTime < 0 || this._hideTime >= current_time)) {
+            this.init();
         }
 
         this._accX *= 0.5;
         this._accY *= 0.5;
     }
 
-    private _bitmap:Bitmap;
-    private _bubbleSize:number;
-    private _bubbleType:number;
+    private readonly _bitmap: Sprite;
+    private readonly _bubbleSize: number;
+    private readonly _foreground: boolean;
 
-    private _lastTime:number;
-    private _hideTime:number;
-    private _foreground:boolean;
+    private _lastTime: number = 0;
+    private _hideTime: number;
 
     private _accX:number;
     private _accY:number;
+
     private static BUBBLE_NAMES: string[] = [
-        "Bubble00",
-        "Bubble01",
-        "Bubble02",
-        "Bubble03",
-        "Bubble10",
-        "Bubble11",
-        "Bubble12",
-        "Bubble13"
+        Images.Bubble00,
+        Images.Bubble01,
+        Images.Bubble02,
+        Images.Bubble03,
+        Images.Bubble10,
+        Images.Bubble11,
+        Images.Bubble12,
+        Images.Bubble13
     ];
+
+    private static readonly P: Point = new Point();
 }
 
 

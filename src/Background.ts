@@ -1,4 +1,5 @@
 import {Graphics} from "pixi.js";
+import {Bubble} from "./Bubble";
 import {Flashbang} from "./flashbang/core/Flashbang";
 import {SpriteObject} from "./flashbang/objects/SpriteObject";
 
@@ -9,11 +10,14 @@ export class Background extends SpriteObject {
         // this._bgGradientBitmap = new Bitmap;
         // this.addChild(this._bgGradientBitmap);
 
+        this.render_background();
+
         this._bubbles = [];
         for (let ii:number = 0; ii < bubbleCount; ii++) {
             let bub: Bubble = new Bubble(foreground);
-            bub.visible = false;
-            this.addObject(bub);
+            // bub.sprite.visible = false;
+            bub.init();
+            this.addObject(bub, this.sprite);
             this._bubbles.push(bub);
         }
 
@@ -23,10 +27,10 @@ export class Background extends SpriteObject {
 
     public disable_bubbles(disable:boolean):void {
         for (let ii:number = 0; ii < this._bubbles.length; ii++) {
-            if (!disable && !this._bubbles[ii].visible) {
+            if (!disable && !this._bubbles[ii].sprite.visible) {
                 this._bubbles[ii].init();
             }
-            this._bubbles[ii].visible = !disable;
+            this._bubbles[ii].sprite.visible = !disable;
         }
     }
 
@@ -108,5 +112,5 @@ export class Background extends SpriteObject {
 
     private _foreground: boolean;
     private _isFrozen: boolean;
-    private _bubbles: any[];
+    private _bubbles: Bubble[];
 }
