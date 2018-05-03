@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello World</title>
+</head>
+<body>
+<script src="./hello_world.js"></script>
+<script>
+    var HelloWorld = HelloWorld({noInitialRun: true});
+
+    // Don't call compiled code until the module is fully initialized
+    HelloWorld['onRuntimeInitialized'] = function() {
+        console.log('HelloWorld initialized');
+        console.log(HelloWorld.do_sqrt(9));
+        console.log(HelloWorld.GetStruct());
+    };
+</script>
+</body>
+</html>
