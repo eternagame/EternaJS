@@ -9,11 +9,31 @@
 <script>
     var HelloWorld = HelloWorld({noInitialRun: true});
 
+    function STLvector_to_array(v) {
+        var out = [];
+        for (var i = 0; i < v.size(); i++) {
+            out.push(v.get(i));
+        }
+        return out;
+    }
+
     // Don't call compiled code until the module is fully initialized
     HelloWorld['onRuntimeInitialized'] = function() {
+        const my_str = "Hello from JS";
+
         console.log('HelloWorld initialized');
-        console.log(HelloWorld.do_sqrt(9));
-        console.log(HelloWorld.GetStruct());
+        console.log(`"${my_str}".length = ${HelloWorld.GetStringLength(my_str)}`);
+
+        var myStruct = HelloWorld.GetStruct();
+        myStruct.vectorArray = STLvector_to_array(myStruct.floatVec);
+        console.log(myStruct);
+
+        var myClass = HelloWorld.GetStructPtr();
+        console.log(`{floatVal: ${myClass.floatVal}, stringVal: ${myClass.stringVal}}`);
+        console.log(myClass);
+        myClass.delete();
+
+        HelloWorld.SendLog();
     };
 </script>
 </body>
