@@ -5,7 +5,6 @@ em++ -O3 --bind -s 'EXPORT_NAME="nupack"' -s MODULARIZE=1 --std=c++11 \
     backtrack.c \
     CalculateEnergy.c \
     DNAGlobals.c \
-    EmscriptenBridge.cpp \
     ene.c \
     GetEnergy.c \
     hash.c \
@@ -20,4 +19,7 @@ em++ -O3 --bind -s 'EXPORT_NAME="nupack"' -s MODULARIZE=1 --std=c++11 \
     pknots.c \
     ReadCommandLineNPK.c \
     sumexp.c \
-    utils.c
+    utils.c \
+    emscripten/Bindings.cpp \
+    emscripten/EmscriptenUtils.cpp \
+    emscripten/FullEval.cpp
