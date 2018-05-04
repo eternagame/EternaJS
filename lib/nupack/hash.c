@@ -39,7 +39,7 @@ static int hash_grow(hash *h)
     old_recs = h->records;
 
     if (h->size_index == sizes_count - 1) return -1;
-    if ((h->records = calloc(sizes[++h->size_index],
+    if ((h->records = (record *)calloc(sizes[++h->size_index],
                     sizeof(struct record))) == NULL) {
         h->records = old_recs;
         return -1;
@@ -62,7 +62,7 @@ static unsigned int strhash(const char *str)
 {
     int c;
     int hash = 5381;
-    while (c = *str++)
+    while ((c = *str++))
         hash = hash * 33 + c;
     return hash == 0 ? 1 : hash;
 }
@@ -84,11 +84,11 @@ hash * hash_new(unsigned int capacity) {
 
     capacity /= load_factor;
 
-    for (i=0; i < sizes_count; i++) 
+    for (i=0; i < sizes_count; i++)
         if (sizes[i] > capacity) { sind = i; break; }
 
     if ((h = (hash *)calloc(1,sizeof(struct hash))) == NULL) return NULL;
-    if ((h->records = calloc(sizes[sind], sizeof(struct record))) == NULL) {
+    if ((h->records = (record *)calloc(sizes[sind], sizeof(struct record))) == NULL) {
         free(h);
         return NULL;
     }
@@ -185,7 +185,7 @@ void * hash_remove(hash *h, const char *key, const unsigned int len)
         }
         ind = (code + (int)pow(++off, 2)) % size;
     }
- 
+
     return NULL;
 }
 
