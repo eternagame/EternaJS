@@ -44,8 +44,10 @@ add_executable(nupack
         emscripten/FullEval.h
         emscripten/Bindings.cpp
         emscripten/EmscriptenUtils.cpp
-        emscripten/EmscriptenUtils.h)
+        emscripten/EmscriptenUtils.h
+        emscripten/FullFold.cpp
+        emscripten/FullFold.h)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    set_target_properties(nupack PROPERTIES LINK_FLAGS "-o dist/engine.js --bind -O3 -std=c++11")
+    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -O0 -std=c++11")
 endif ()

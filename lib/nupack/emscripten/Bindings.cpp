@@ -2,6 +2,7 @@
 #include <emscripten/bind.h>
 
 #include "FullEval.h"
+#include "FullFold.h"
 #include "EmscriptenUtils.h"
 
 #include "../pfuncUtilsHeader.h"
@@ -32,10 +33,17 @@ int main() {
 EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<int>("VectorInt");
 
-    class_<FullEvalResult>("FullAlchEvalResult")
+    class_<FullEvalResult>("FullEvalResult")
             .constructor()
             .property("energyContributions", &FullEvalResult::energyContributions)
             .property("energy", &FullEvalResult::energy);
 
     function("FullEval", &FullEval, allow_raw_pointers());
+
+    class_<FullFoldResult>("FullFoldResult")
+            .property("mfe", &FullFoldResult::mfe)
+            .property("structure", &FullFoldResult::structure);
+
+    function("FullFoldDefault", &FullFoldDefault, allow_raw_pointers());
+    function("FullFoldTemperature", &FullFoldTemperature, allow_raw_pointers());
 }

@@ -35,25 +35,31 @@ static void _eos_cb(int index, int fe) {
 
 extern void (*eos_cb)(int index, int fe);
 
-FullEvalResult* FullEval (int temperature_in, std::string string, std::string structure) {
+FullEvalResult* FullEval (int temperature_in, const std::string& string_in, const std::string& structure_in) {
+    auto auto_string = MakeCString(string_in);
+    auto auto_structure = MakeCString(structure_in);
+
+    char* string = auto_string.get();
+    char* structure = auto_structure.get();
+    char* pc;
     float energy = 0;
     int seqNum[MAXSEQLENGTH+1];
+    int tmpLength;
     int num_cuts = 0;
 
     FullEvalResult* result = new FullEvalResult();
+
     gEvalResult = result; // set the collecting array
     eos_cb = _eos_cb; // activate the callback
 
-    size_t pc = 0;
-    while (pc != std::string::npos) {
-        pc = string.find('&', pc);
-        if (pc != std::string::npos) {
+    do {
+        pc = strchr(string, '&');
+        if (pc) {
             num_cuts++;
-            string[pc] = '+';
-            structure[pc] = '+';
+            (*pc) = '+';
+            structure[pc - string] = '+';
         }
-    }
-
+    } while(pc);
     if(0) TraceJS(string);
     if(0) TraceJS(structure);
 
@@ -64,14 +70,13 @@ FullEvalResult* FullEval (int temperature_in, std::string string, std::string st
     }
 #endif
 
-    // TSC: is it safe to cast these to (char *)?
-    convertSeq((char *) string.c_str(), seqNum, (int) string.length());
+    tmpLength = strlen(string);
+    convertSeq(string, seqNum, tmpLength);
 
-    energy = (float) naEnergyPairsOrParensFullWithSym(
-            NULL, (char *) structure.c_str(),
-            seqNum, RNA,
-            DANGLETYPE, temperature_in, TRUE, SODIUM_CONC, MAGNESIUM_CONC,
-            USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    energy = (float) naEnergyPairsOrParensFullWithSym(NULL, structure,
+                                               seqNum, RNA,
+                                               DANGLETYPE, temperature_in, TRUE, SODIUM_CONC, MAGNESIUM_CONC,
+                                               USE_LONG_HELIX_FOR_SALT_CORRECTION);
 #ifdef WATER_MOD
     energy += (water_mod * .01);
 #endif

@@ -12,3 +12,11 @@ void TraceJS (const char* text) {
 void TraceJS (const std::string& text) {
     TraceJS(text.c_str());
 }
+
+std::unique_ptr<char[]> MakeCString (const std::string& string) {
+    size_t size = string.size();
+    std::unique_ptr<char[]> outString(new char[size + 1]);
+    memcpy(outString.get(), string.c_str(), size + 1);
+
+    return outString;
+}

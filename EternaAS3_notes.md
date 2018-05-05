@@ -18,25 +18,16 @@ Did:
 
 Questions:
 
-* Where should I be developing? (Currently in a private github repo)
-    - Will get a github
-* IRC chat? (we don’t have proper sockets on the web - would have to set up a relay server) (https://github.com/elementalalchemist/txircd)
-    - Already done
-* EternaScript? Is this the same as RScript?
-    - No - RScript is for the tutorial, and is AS3-based
-    - EternaScript is just javascript, with an interface into the AS3 game
-* Solving for eval() of javascript feels like a separate project
-    - (Yes - we'll just keep this as is for now)
 * Help set up milestones? I don’t know everything there is to know.
 * Unit tests or other methods of evaluating things like “RNAInverse” and the various Folders?
-* "Rearchitecting" vagueness -
-    - I'm massaging things to make them more understandable and making minor refactors as I go
-    - Are there specific "this needs to be refactored to solve X" requests?
+
+Questions (Week 2)
+
+* nupack - FullAlchFold: "constraints" seem to be unused?
 
 NEW TODO:
 
 * Audit the database writes that the existing client makes, to decide what should stick around and what's not safe
-* RNAInverse isn't needed
 * C folders:
     - Vienna/Vienna2 should be stable
     - NuPACK should have unit tests

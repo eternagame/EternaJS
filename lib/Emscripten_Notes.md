@@ -1,0 +1,14 @@
+# Emscripten notes
+
+* C from JS: http://kripken.github.io/emscripten-site/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html
+* "Embind": http://kripken.github.io/emscripten-site/docs/porting/connecting_cpp_and_javascript/embind.html#embind
+* When is it safe to call compiled functions: https://kripken.github.io/emscripten-site/docs/getting_started/FAQ.html#faq-when-safe-to-call-compiled-functions
+
+# Building folders
+
+* Download & install `emscripten`: https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk
+* Install `cmake`: https://cmake.org/download/
+* `$ source /path/to/emscripten/emsdk_env.sh`
+    - (Adds emscripten build tools to the path; do this once per shell)
+* `$ emconfigure cmake && emmake make clean && emmake make`
+    - (From, eg, the nupack directory)
