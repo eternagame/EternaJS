@@ -49,5 +49,7 @@ add_executable(nupack
         emscripten/FullFold.h)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -O0 -std=c++11")
+    # - exporting our module as 'nupack'
+    # - all files inside the 'assets' folder will be mapped to / in the virtual FS
+    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -O3 -std=c++11 --preload-file assets@/")
 endif ()
