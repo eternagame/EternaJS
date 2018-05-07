@@ -32,6 +32,7 @@ int main() {
 
 EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<int>("VectorInt");
+    register_vector<double>("VectorDouble");
 
     class_<FullEvalResult>("FullEvalResult")
             .constructor()
@@ -46,4 +47,11 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("FullFoldDefault", &FullFoldDefault, allow_raw_pointers());
     function("FullFoldTemperature", &FullFoldTemperature, allow_raw_pointers());
+    function("FullFoldWithBindingSite", &FullFoldWithBindingSite, allow_raw_pointers());
+
+    class_<DotPlotResult>("DotPlotResult")
+            .property("energy", &DotPlotResult::energy)
+            .property("plot", &DotPlotResult::plot);
+
+    function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 }
