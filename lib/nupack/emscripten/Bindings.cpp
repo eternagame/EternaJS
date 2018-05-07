@@ -35,23 +35,25 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<double>("VectorDouble");
 
     class_<FullEvalResult>("FullEvalResult")
-            .constructor()
-            .property("energyContributions", &FullEvalResult::energyContributions)
-            .property("energy", &FullEvalResult::energy);
+        .constructor()
+        .property("energyContributions", &FullEvalResult::energyContributions)
+        .property("energy", &FullEvalResult::energy);
 
     function("FullEval", &FullEval, allow_raw_pointers());
 
     class_<FullFoldResult>("FullFoldResult")
-            .property("mfe", &FullFoldResult::mfe)
-            .property("structure", &FullFoldResult::structure);
+        .property("mfe", &FullFoldResult::mfe)
+        .property("structure", &FullFoldResult::structure);
 
     function("FullFoldDefault", &FullFoldDefault, allow_raw_pointers());
     function("FullFoldTemperature", &FullFoldTemperature, allow_raw_pointers());
     function("FullFoldWithBindingSite", &FullFoldWithBindingSite, allow_raw_pointers());
+    function("CoFoldSequence", &CoFoldSequence, allow_raw_pointers());
+    function("CoFoldSequenceWithBindingSite", &CoFoldSequenceWithBindingSite, allow_raw_pointers());
 
     class_<DotPlotResult>("DotPlotResult")
-            .property("energy", &DotPlotResult::energy)
-            .property("plot", &DotPlotResult::plot);
+        .property("energy", &DotPlotResult::energy)
+        .property("plot", &DotPlotResult::plot);
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 }

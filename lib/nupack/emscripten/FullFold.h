@@ -18,6 +18,7 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string
 FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, const std::string& structString);
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString);
 FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus);
-FullFoldResult* CoFoldSequence (double temperature_in, const std::string& seqString, const std::string& structString);
+FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString);
+FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int site_i, int site_p, int site_j, int site_q, int site_bonus);
 
 #endif //NUPACK_FULLFOLD_H
