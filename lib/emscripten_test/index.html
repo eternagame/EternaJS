@@ -7,7 +7,7 @@
 <body>
 <script src="./hello_world.js"></script>
 <script>
-    var HelloWorld = HelloWorld({noInitialRun: true});
+    console.log('HelloWorld initializing...');
 
     function STLvector_to_array(v) {
         var out = [];
@@ -17,8 +17,12 @@
         return out;
     }
 
-    // Don't call compiled code until the module is fully initialized
-    HelloWorld['onRuntimeInitialized'] = function() {
+    // If noInitialRun is _false_, main() will be automatically after
+    // our promise resolves. Instead, we call it manually as the first statement
+    // in the callback.
+    HelloWorld({noInitialRun: true}).then(function(HelloWorld) {
+        HelloWorld.callMain();
+
         const my_str = "Hello from JS";
 
         console.log('HelloWorld initialized');
@@ -34,7 +38,7 @@
         myClass.delete();
 
         HelloWorld.SendLog();
-    };
+    });
 </script>
 </body>
 </html>

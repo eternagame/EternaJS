@@ -197,3 +197,60 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, int site_
 
     return result;
 }
+
+FullFoldResult* CoFoldSequence (double temperature_in, const std::string& seqString, const std::string& structString) {
+    auto autoSeqString = MakeCString(seqString);
+    auto autoStructure = MakeCString(structString);
+
+    char* string = autoSeqString.get();
+    char* structure = autoStructure.get();
+
+    int seqNum[MAXSEQLENGTH+1];
+    int tmpLength;
+    dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
+    DBL_TYPE mfe;
+    int j;
+    char* pc;
+
+    do {
+        pc = strchr(string, '&');
+        if (pc) (*pc) = '+';
+    } while(pc);
+    if (0) TraceJS(string);
+
+    tmpLength = strlen(string);
+    convertSeq(string, seqNum, tmpLength);
+
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = mfe;
+    result->structure = structure;
+
+    mfe = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                         DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
+
+    for (j = 0; j < mfeStructs.seqlength; j++) {
+        if (mfeStructs.validStructs[0].theStruct[j] > j) {
+            structure[j] = '(';
+        } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
+            structure[j] = '.';
+        } else
+            structure[j] = ')';
+
+    }
+    structure[mfeStructs.seqlength] = 0;
+    strcpy(constraints, structure);
+    for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
+        if ((*pc) == '+') {
+            structure[j++] = '&';
+        } else {
+            structure[j++] = constraints[i++];
+        }
+    }
+    structure[j] = 0;
+    result->mfe = mfeStructs.validStructs[0].correctedEnergy;
+    clearDnaStructures(&mfeStructs);
+    free(constraints);
+
+    return result;
+}

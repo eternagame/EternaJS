@@ -45,11 +45,17 @@ MyClass* GetStructPtr () {
 }
 
 void SendLog () {
-    TraceJS("Hello from C++!");
+    char* text = "Hello from C++ ... !";
+    text[5] = 0;
+    std::string tt = text;
+    TraceJS(tt.c_str());
+
+    // TraceJS("Hello from C++!");
 }
 
 int main() {
     std::cout << GetStruct().stringVal;
+    TraceJS("main() run");
     return 0;
 }
 
