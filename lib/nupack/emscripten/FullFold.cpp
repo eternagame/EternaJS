@@ -11,8 +11,6 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string
     char* string = autoSeqString.get();
     char* structure = autoStructure.get();
 
-//    char* constraints = (char *) malloc(sizeof(char)*(string_in.length() + 1));
-
     int seqNum[MAXSEQLENGTH+1];
     int tmpLength;
     dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
@@ -30,14 +28,13 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string
             structure[j] = '(';
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
             structure[j] = '.';
-        } else
+        } else {
             structure[j] = ')';
-
+        }
     }
     structure[mfeStructs.seqlength] = 0;
     mfe = mfeStructs.validStructs[0].correctedEnergy;
     clearDnaStructures(&mfeStructs);
-//    free(constraints);
 
     FullFoldResult* result = new FullFoldResult();
     result->mfe = mfe;
@@ -52,8 +49,6 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
 
     char* string = autoSeqString.get();
     char* structure = autoStructure.get();
-
-//    char* constraints = (char *) malloc(sizeof(char)*(string_in.length() + 1));
 
     int seqNum[MAXSEQLENGTH+1];
     int tmpLength;
@@ -73,14 +68,13 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
             structure[j] = '(';
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
             structure[j] = '.';
-        } else
+        } else {
             structure[j] = ')';
-
+        }
     }
     structure[mfeStructs.seqlength] = 0;
     mfe = mfeStructs.validStructs[0].correctedEnergy;
     clearDnaStructures(&mfeStructs);
-//    free(constraints);
 
     FullFoldResult* result = new FullFoldResult();
     result->mfe = mfe;
@@ -189,7 +183,6 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, int site_
         } else {
             result->structure.push_back(')');
         }
-
     }
 
     result->mfe = mfeStructs.validStructs[0].correctedEnergy;
@@ -230,9 +223,9 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
             structure[j] = '(';
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
             structure[j] = '.';
-        } else
+        } else {
             structure[j] = ')';
-
+        }
     }
     structure[mfeStructs.seqlength] = 0;
 
@@ -299,9 +292,9 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
             structure[j] = '(';
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
             structure[j] = '.';
-        } else
+        } else {
             structure[j] = ')';
-
+        }
     }
     structure[mfeStructs.seqlength] = 0;
 
