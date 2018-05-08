@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello World</title>
+</head>
+<body>
+<script src="./nupack.js"></script>
+<script>
+    console.log('Nupack initializing...');
+
+    function FullFold (name, seq, struct) {
+        console.log(`Folding ${name}...`);
+
+        let t0 = performance.now();
+        let fullFoldResult = nupack.FullFoldDefault(seq, struct);
+        let t1 = performance.now();
+
+        console.log(`${name} complete! (${t1 - t0}ms)`);
+
+        fullFoldResult.delete();
+    }
+
+    // If noInitialRun is _false_, main() will be automatically called after
+    // our promise resolves. Instead, we call it manually as the first statement
+    // in the callback.
+    nupack({noInitialRun: true}).then(function(nupack) {
+        window.nupack = nupack;
+
+        nupack.callMain();
+        console.log('Nupack intialized');
+
+        // http://www.eternagame.org/web/puzzle/8284172/
+        const MINILOOP_SEQ = 'UAAAAAAG';
+        const MINILOOP_STRUCT = '((....))';
+
+        // http://www.eternagame.org/web/puzzle/13833/
+        const SNOWFLAKE_SEQ = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
+
+        const SNOWFLAKE_STRUCT = '((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
+
+        FullFold('Miniloop', MINILOOP_SEQ, MINILOOP_STRUCT);
+        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+        console.log('Done!');
+    });
+</script>
+</body>
+</html>
