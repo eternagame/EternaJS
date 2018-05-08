@@ -11,5 +11,6 @@
 * Install `cmake`: https://cmake.org/download/
 * `$ source /path/to/emscripten/emsdk_env.sh`
     - (Adds emscripten build tools to the path; do this once per shell)
-* `$ emconfigure cmake && emmake make clean && emmake make`
+* `$ emconfigure cmake -DCMAKE_BUILD_TYPE=Release && emmake make clean && emmake make`
     - (From, eg, the nupack directory)
+    - Pass `-DCMAKE_BUILD_TYPE=Debug` for a debug build (-O0 optimizations), or `Release` for a release build (-O3 optimizations)
