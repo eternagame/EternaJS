@@ -49,7 +49,9 @@ add_executable(nupack
         emscripten/FullFold.h)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    # - exporting our module as 'nupack'
-    # - all files inside the 'assets' folder will be mapped to / in the virtual FS
-    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -O3 -std=c++11 --preload-file assets@/")
+    # -s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1: export our module as 'nupack'
+    # --preload-file assets@/ : map all files inside the 'assets' folder to / in the virtual FS
+    # -s WASM=1: wasm enabled
+    # -s LEGACY_VM_SUPPORT=1: support IE11 (incompatible with WASM=1)
+    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -O0 -std=c++11 -s WASM=0 -s LEGACY_VM_SUPPORT=1 --preload-file assets@/")
 endif ()
