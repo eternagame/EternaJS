@@ -14,6 +14,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 include_directories(.)
+include_directories(../emscripten_common)
 
 add_executable(nupack
         backtrack.c
@@ -46,10 +47,10 @@ add_executable(nupack
         emscripten/FullEval.cpp
         emscripten/FullEval.h
         emscripten/Bindings.cpp
-        emscripten/EmscriptenUtils.cpp
-        emscripten/EmscriptenUtils.h
         emscripten/FullFold.cpp
-        emscripten/FullFold.h)
+        emscripten/FullFold.h
+        ../emscripten_common/EmscriptenUtils.cpp
+        ../emscripten_common/EmscriptenUtils.h)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(CMAKE_C_COMPILER "emcc")
