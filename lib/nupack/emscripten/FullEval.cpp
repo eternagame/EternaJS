@@ -35,9 +35,9 @@ static void _eos_cb(int index, int fe) {
 
 extern void (*eos_cb)(int index, int fe);
 
-FullEvalResult* FullEval (int temperature_in, const std::string& string_in, const std::string& structure_in) {
-    auto auto_string = MakeCString(string_in);
-    auto auto_structure = MakeCString(structure_in);
+FullEvalResult* FullEval (int temperature_in, const std::string& seqString, const std::string& structString) {
+    auto auto_string = MakeCString(seqString);
+    auto auto_structure = MakeCString(structString);
 
     char* string = auto_string.get();
     char* structure = auto_structure.get();

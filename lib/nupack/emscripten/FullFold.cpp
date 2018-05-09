@@ -19,9 +19,9 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string
     tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
-    mfe = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                         DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
-                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     for (int j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
@@ -59,9 +59,9 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
     tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
-    mfe = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                         DANGLETYPE, temperature_in, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
-                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                   DANGLETYPE, temperature_in, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     for (j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
@@ -166,9 +166,9 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, int site_
     g_site_j = site_j;
     g_site_q = site_q;
     g_site_bonus = site_bonus;
-    double energy = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                            DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
-                            USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   USE_LONG_HELIX_FOR_SALT_CORRECTION);
     // clean up
     binding_site_cb = NULL;
     binding_cb = NULL;
@@ -214,9 +214,9 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
     tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
-    mfe = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                         DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
-                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     for (j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
@@ -280,9 +280,9 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
     g_site_j = site_j;
     g_site_q = site_q;
     g_site_bonus = site_bonus;
-    mfe = mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                         DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
-                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
+    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   USE_LONG_HELIX_FOR_SALT_CORRECTION);
     // clean up
     binding_site_cb = NULL;
     binding_cb = NULL;

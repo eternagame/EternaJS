@@ -3,12 +3,9 @@
 
 #include "FullEval.h"
 #include "FullFold.h"
-#include "EmscriptenUtils.h"
 
 #include "../pfuncUtilsHeader.h"
 #include "../DNAExternals.h"
-
-using namespace emscripten;
 
 //entry point for code
 int main() {
@@ -29,6 +26,7 @@ int main() {
     return 0;
 }
 
+using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<int>("VectorInt");

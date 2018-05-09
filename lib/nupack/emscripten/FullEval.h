@@ -9,6 +9,6 @@ struct FullEvalResult {
     float energy;
 };
 
-FullEvalResult* FullEval (int temperature_in, const std::string& string_in, const std::string& structure_in);
+FullEvalResult* FullEval (int temperature_in, const std::string& seqString, const std::string& structString);
 
 #endif //NUPACK_FULLEVAL_H

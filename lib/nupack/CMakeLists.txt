@@ -13,12 +13,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    set(CMAKE_C_COMPILER "emcc")
-endif ()
-
 include_directories(.)
-include_directories(/export/emsdk/emscripten/1.37.39/system/include)
 
 add_executable(nupack
         backtrack.c
@@ -57,6 +52,8 @@ add_executable(nupack
         emscripten/FullFold.h)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    set(CMAKE_C_COMPILER "emcc")
+
     # -s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1: export our module as 'nupack'
     # --preload-file assets@/ : map all files inside the 'assets' folder to / in the virtual FS
     # -s WASM=1: wasm enabled
