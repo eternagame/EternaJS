@@ -229,7 +229,7 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
     }
     structure[mfeStructs.seqlength] = 0;
 
-    std::unique_ptr<char[]> structureCopy(new char[strlen(structure + 1)]);
+    std::unique_ptr<char[]> structureCopy(new char[strlen(structure) + 1]);
     strcpy(structureCopy.get(), structure);
     for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
         if ((*pc) == '+') {
@@ -298,7 +298,7 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
     }
     structure[mfeStructs.seqlength] = 0;
 
-    std::unique_ptr<char[]> structureCopy(new char[strlen(structure + 1)]);
+    std::unique_ptr<char[]> structureCopy(new char[strlen(structure) + 1]);
     strcpy(structureCopy.get(), structure);
     for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
         if ((*pc) == '+') {
