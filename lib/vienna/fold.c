@@ -68,7 +68,9 @@ INLINE PRIVATE int  LoopEnergy(int n1, int n2, int type, int type_2,
 			 int si1, int sj1, int sp1, int sq1);
 INLINE PRIVATE int  LoopEnergyNew(int n1, int n2, int type, int type_2,
 			 int si1, int sj1, int sp1, int sq1, int index_i, int index_p, int index_j, int index_q);
-INLINE int  HairpinE(int size, int type, int si1, int sj1, const char *string);
+
+// TSC 5/9/18 - fix 'warning: unresolved symbol: HairpinE' emscripten link issue
+/*INLINE*/ int  HairpinE(int size, int type, int si1, int sj1, const char *string);
 
 #define MAXSECTORS      500     /* dimension for a backtrack array */
 #define LOCALITY        0.      /* locality parameter for base-pairs */
@@ -865,7 +867,8 @@ char *backtrack_fold_from_pair(char *sequence, int i, int j) {
 }
 /*---------------------------------------------------------------------------*/
 
-INLINE int HairpinE(int size, int type, int si1, int sj1, const char *string) {
+// TSC 5/9/18 - fix 'warning: unresolved symbol: HairpinE' emscripten link issue
+/*INLINE*/ int HairpinE(int size, int type, int si1, int sj1, const char *string) {
   int energy;
   energy = (size <= 30) ? P->hairpin[size] :
     P->hairpin[30]+(int)(P->lxc*log((size)/30.));
