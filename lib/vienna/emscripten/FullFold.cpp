@@ -168,72 +168,70 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
     return result;
 }
 
-DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, const std::string& probabilitiesString, const std::string& dotplotStructString) {
-//    auto autoSeqString = MakeCString(seqString);
-//    auto autoProbString = MakeCString(probabilitiesString);
-//    auto autoDotPlotString = MakeCString(dotplotStructString);
-//    char* string = autoSeqString.get();
-//    char* probabilities = autoProbString.get();
-//    char* dotplot_structure = autoDotPlotString.get();
-//
-//    const char* structure = "";
-//
-//    char* constraints = InitConstraints(string, structure);
-//
-//    int   i, length;
-//    double energy;
-//    double min_en;
-//    double kT, sfact=1.07;
-//    double tmp;
-//    char *probabilities;
-//    char *probIndex;
-//
-//    plist *pl,*mf,*pl1;
-//
-//    length = (int) strlen(string);
-//
-//    AS3_ArrayValue(fold_type_args, "DoubleType, StrType, StrType", &temperature, &probabilities, &dotplot_structure);
-//    temperature = temperature_in;
-//    probabilities = (char *) malloc(sizeof(char) * length * length * 30);
-//    probIndex = probabilities;
-//
-//    kT = (temperature+273.15)*1.98717/1000.; /* in Kcal */
-//    pf_scale = exp(-(sfact*min_en)/kT/length);
-//
-//    init_pf_fold(length);
-//    energy = pf_fold(string,constraints);
-//
-//    pl = make_plist(length, 1e-5);
-//    mf = b2plist(dotplot_structure);
-//
-//    //fprintf(stderr, "case 1-2 %d", sizeof(char) * length * length * 30);
-//
-//    /* print boxes in upper right half*/
-//    //int pcount = 0;
-//    for (pl1=pl; pl1->i>0; pl1++) {
-//        tmp = sqrt(pl1->p);
-//        //pcount++;
-//        probIndex += sprintf(probIndex, "%d %d %1.9f ubox ", pl1->i, pl1->j, tmp);
-//    }
-//
-//    /* print boxes in lower left half (mfe) */
-//    for (pl1=mf; pl1->i>0; pl1++) {
-//        tmp = sqrt(pl1->p);
-//        //pcount++;
-//        probIndex += sprintf(probIndex, "%d %d %1.7f lbox ", pl1->i, pl1->j, tmp);
-//    }
-//
-//    free_pf_arrays();
-//    free(constraints);
-//    free(pl);
-//    free(mf);
-//
-//    DotPlotResult* result = new DotPlotResult();
-//    result->energy = energy;
-//    result->plot
-//
-//    return AS3_Array("DoubleType, StrType, StrType", energy, dotplot_structure, probabilities);
-    Die("TODO: GetDotPlot");
+DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, const std::string& dotplotStructString) {
+    auto autoSeqString = MakeCString(seqString);
+    auto autoDotPlotString = MakeCString(dotplotStructString);
+    char* string = autoSeqString.get();
+    char* dotplot_structure = autoDotPlotString.get();
+
+    const char* structure = "";
+
+    char* constraints = InitConstraints(string, structure);
+
+    int    length;
+    double energy;
+    double min_en = 0;
+    double kT, sfact=1.07;
+    double tmp;
+    char *probabilities;
+    char *probIndex;
+
+    plist *pl,*mf,*pl1;
+
+    length = (int) strlen(string);
+
+    temperature = temperature_in;
+    probabilities = (char *) malloc(sizeof(char) * length * length * 30);
+    probIndex = probabilities;
+
+    kT = (temperature+273.15)*1.98717/1000.; /* in Kcal */
+    pf_scale = exp(-(sfact*min_en)/kT/length);
+
+    init_pf_fold(length);
+    energy = pf_fold(string,constraints);
+
+    pl = make_plist(length, 1e-5);
+    mf = b2plist(dotplot_structure);
+
+    //fprintf(stderr, "case 1-2 %d", sizeof(char) * length * length * 30);
+
+    /* print boxes in upper right half*/
+    //int pcount = 0;
+    for (pl1=pl; pl1->i>0; pl1++) {
+        tmp = sqrt(pl1->p);
+        //pcount++;
+        probIndex += sprintf(probIndex, "%d %d %1.9f ubox ", pl1->i, pl1->j, tmp);
+    }
+
+    /* print boxes in lower left half (mfe) */
+    for (pl1=mf; pl1->i>0; pl1++) {
+        tmp = sqrt(pl1->p);
+        //pcount++;
+        probIndex += sprintf(probIndex, "%d %d %1.7f lbox ", pl1->i, pl1->j, tmp);
+    }
+
+    DotPlotResult* result = new DotPlotResult();
+    result->energy = energy;
+    result->structure = dotplot_structure;
+    result->probabilitiesString = probabilities;
+
+    free_pf_arrays();
+    free(constraints);
+    free(pl);
+    free(mf);
+    free(probabilities);
+
+    return result;
 }
 
 FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus) {

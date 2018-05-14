@@ -11,12 +11,13 @@ struct FullFoldResult {
 
 struct DotPlotResult {
     double energy;
-    std::vector<double> plot;
+    std::string structure;
+    std::string probabilitiesString;
 };
 
 FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string& structString);
 FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, const std::string& structString);
-DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, const std::string& probabilitiesString, const std::string& dotplotStructString);
+DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, const std::string& dotplotStructString);
 FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus);
 FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString);
 FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int site_i, int site_p, int site_j, int site_q, int site_bonus);
