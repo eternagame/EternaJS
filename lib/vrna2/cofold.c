@@ -111,6 +111,10 @@ PRIVATE void  backtrack(const char *sequence);
 PRIVATE int   fill_arrays(const char *sequence);
 PRIVATE void  free_end(int *array, int i, int start);
 
+/* TSC - 5/14/18 -- defined in fold.c */
+int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
+                 int index_i, int index_p, int index_j, int index_q, paramT* P);
+
 /*
 #################################
 # BEGIN OF FUNCTION DEFINITIONS #
