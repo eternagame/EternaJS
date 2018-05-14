@@ -195,7 +195,7 @@ DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, 
     probIndex = probabilities;
 
     kT = (temperature+273.15)*1.98717/1000.; /* in Kcal */
-    pf_scale = exp(-(sfact*min_en)/kT/length);
+    pf_scale = exp(-(sfact*min_en)/kT/length); // This probably isn't being used?
 
     init_pf_fold(length);
     energy = pf_fold(string,constraints);
@@ -234,14 +234,119 @@ DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, 
     return result;
 }
 
-FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus) {
-    Die("TODO: FullFoldWithBindingSite");
+FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, const std::string& structString, int switch_bp_i, int switch_bp_p, int switch_bp_j, int switch_bp_q, int switch_bp_bonus) {
+    auto autoSeqString = MakeCString(seqString);
+    auto autoStructure = MakeCString(structString);
+
+    char* string = autoSeqString.get();
+    char* structure = autoStructure.get();
+
+    char* constraints = InitConstraints(string, structure);
+
+    double energy = fold_with_binding_site(string, constraints,switch_bp_i, switch_bp_p, switch_bp_j, switch_bp_q, switch_bp_bonus);
+    strcpy(structure, constraints);
+
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = energy;
+    result->structure = structure;
+
+    free_arrays();
+    free(constraints);
+
+    return result;
 }
 
 FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString) {
-    Die("TODO: CoFoldSequence");
+    auto autoSeqString = MakeCString(seqString);
+    auto autoStructure = MakeCString(structString);
+
+    char* string = autoSeqString.get();
+    char* structure = autoStructure.get();
+
+    char* constraints = InitConstraints(string, structure);
+
+    if(0) fprintf(stderr,"ViennaRNA : string: %s", string);
+    char* cut = strchr(string, '&');
+    if (cut) {
+        *cut = '\0';
+        strcat(string, cut+1);
+        cut_point = cut - string;
+        if (constraints[0]) {
+            constraints[cut_point] = '\0';
+            strcat(constraints, constraints+cut_point+1);
+        }
+        cut_point++;
+    } else {
+        fprintf(stderr, "missing cut point\n");
+
+        FullFoldResult* result = new FullFoldResult();
+        result->mfe = 0;
+        result->structure = "";
+        return result;
+    }
+
+    double energy = cofold(string, constraints);
+    cut_point--; // back to 0-based
+    strcpy(structure, constraints);
+    structure[cut_point] = 0;
+    strcat(structure, "&");
+    strcat(structure, constraints+cut_point);
+
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = energy;
+    result->structure = structure;
+
+    // clean-up
+    cut_point = -1;
+    free_co_arrays(); // IMPORTANT, NOT free_arrays()
+    free(constraints);
+
+    return result;
 }
 
-FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int site_i, int site_p, int site_j, int site_q, int site_bonus) {
-    Die("TODO: CoFoldSequenceWithBindingSite");
+FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int switch_bp_i, int switch_bp_p, int switch_bp_j, int switch_bp_q, int switch_bp_bonus) {
+    auto autoSeqString = MakeCString(seqString);
+    auto autoStructure = MakeCString(structString);
+
+    char* string = autoSeqString.get();
+    char* structure = autoStructure.get();
+
+    char* constraints = InitConstraints(string, structure);
+
+    if(0) fprintf(stderr,"ViennaRNA : string: %s", string);
+    char* cut = strchr(string, '&');
+    if (cut) {
+        *cut = '\0';
+        strcat(string, cut+1);
+        cut_point = cut - string;
+        if (constraints[0]) {
+            constraints[cut_point] = '\0';
+            strcat(constraints, constraints+cut_point+1);
+        }
+        cut_point++;
+    } else {
+        fprintf(stderr, "missing cut point\n");
+        FullFoldResult* result = new FullFoldResult();
+        result->mfe = 0;
+        result->structure = "";
+        return result;
+    }
+
+    double energy = cofold_with_binding_site(string, constraints,switch_bp_i,  switch_bp_p, switch_bp_j, switch_bp_q, switch_bp_bonus);
+    cut_point--; // back to 0-based
+    strcpy(structure, constraints);
+    structure[cut_point] = 0;
+    strcat(structure, "&");
+    strcat(structure, constraints+cut_point);
+
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = energy;
+    result->structure = structure;
+
+    // clean-up
+    cut_point = -1;
+    free_co_arrays(); // IMPORTANT, NOT free_arrays()
+    free(constraints);
+
+    return result;
 }
