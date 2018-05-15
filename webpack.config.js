@@ -8,7 +8,7 @@ var packageJson = require('./package.json');
 var vendorDependencies = Object.keys(packageJson['dependencies']);
 
 module.exports = {
-    entry: ['babel-polyfill', "./src/index.ts"],
+    entry: ['babel-polyfill', "./src/eterna/index.ts"],
     output: {
         filename: "bundle.js",
         path: __dirname + "/dist"

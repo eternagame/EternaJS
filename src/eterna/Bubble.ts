@@ -1,11 +1,11 @@
 import {Sprite, Point} from "pixi.js";
-import {Flashbang} from "./flashbang/core/Flashbang";
-import {Updatable} from "./flashbang/core/Updatable";
-import {SpriteObject} from "./flashbang/objects/SpriteObject";
-import {AlphaTask} from "./flashbang/tasks/AlphaTask";
-import {ParallelTask} from "./flashbang/tasks/ParallelTask";
-import {ScaleTask} from "./flashbang/tasks/ScaleTask";
-import {Easing} from "./flashbang/util/Easing";
+import {Flashbang} from "../flashbang/core/Flashbang";
+import {Updatable} from "../flashbang/core/Updatable";
+import {SpriteObject} from "../flashbang/objects/SpriteObject";
+import {AlphaTask} from "../flashbang/tasks/AlphaTask";
+import {ParallelTask} from "../flashbang/tasks/ParallelTask";
+import {ScaleTask} from "../flashbang/tasks/ScaleTask";
+import {Easing} from "../flashbang/util/Easing";
 import {Images} from "./Images";
 
 export class Bubble extends SpriteObject implements Updatable {
