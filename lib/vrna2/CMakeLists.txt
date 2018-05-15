@@ -129,8 +129,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     # -s 'EXPORT_NAME=\"vrna2\"' -s MODULARIZE=1: export our module as 'vrna2'
     # --preload-file assets@/ : map all files inside the 'assets' folder to / in the virtual FS
     # -s WASM=1: wasm enabled
+    # -s SINGLE_FILE=1: merge all outputs into a single file
     # -s LEGACY_VM_SUPPORT=1: support IE11 (incompatible with WASM=1)
-    set_target_properties(vrna2 PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"vrna2\"' -s MODULARIZE=1 --bind -std=c++11 -s WASM=1")
+    set_target_properties(vrna2 PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"vrna2\"' -s MODULARIZE=1 --bind -std=c++11 -s WASM=1 -s SINGLE_FILE=1")
     set_target_properties(vrna2 PROPERTIES LINK_FLAGS_DEBUG "-O0")
     set_target_properties(vrna2 PROPERTIES LINK_FLAGS_RELEASE "-O3")
 endif ()
