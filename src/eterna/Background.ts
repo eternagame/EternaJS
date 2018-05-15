@@ -1,7 +1,7 @@
 import {Graphics} from "pixi.js";
 import {Bubble} from "./Bubble";
-import {Flashbang} from "./flashbang/core/Flashbang";
-import {SpriteObject} from "./flashbang/objects/SpriteObject";
+import {Flashbang} from "../flashbang/core/Flashbang";
+import {SpriteObject} from "../flashbang/objects/SpriteObject";
 
 export class Background extends SpriteObject {
     constructor(bubbleCount: number, foreground: boolean = false) {
