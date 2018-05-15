@@ -12,6 +12,7 @@ CTestTestfile.cmake
 # JetBrains CLion
 vienna.cbp
 nupack.cbp
+vrna2.cbp
 cmake-build-debug/
 cmake-build-release/
 
