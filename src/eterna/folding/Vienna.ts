@@ -1,15 +1,27 @@
 import {EPars} from "../EPars";
 import {RNALayout} from "../Pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
+import {Emscripten} from "../util/Emscripten";
+import * as vienna_lib from "./engines/vienna_lib/index";
+import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vienna_lib/index";
 import {Folder} from "./Folder";
 
 export class Vienna extends Folder {
     public static readonly NAME: string = "Vienna";
 
-    constructor(loaded_cb: () => void = null) {
-        super(loaded_cb);
-        this.on_loaded();
-        this._functional = true;
+    /**
+     * Asynchronously creates a new instance of the Vienna folder.
+     * @returns {Promise<Vienna>}
+     */
+    public static Create(): Promise<Vienna> {
+        return import('./engines/vienna')
+            .then((module: any) => Emscripten.loadProgram(module))
+            .then((program: any) => new Vienna(program));
+    }
+
+    private constructor(lib: vienna_lib) {
+        super();
+        this._lib = lib;
     }
 
     /*override*/
@@ -18,23 +30,33 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): any[] {
-
+    public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): number[] {
         let key: Object = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
-        let ret_array: any[] = this.get_cache(key);
+        let ret_array: number[] = this.get_cache(key);
         if (ret_array != null) {
             // console.log("dotplot cache hit");
             return ret_array.slice();
         }
 
-        let leng: number = seq.length;
-        let prob_str: string = "";
         let secstruct_str: string = EPars.pairs_array_to_parenthesis(pairs);
-        let struct_str: string = "";
         let seq_str: string = EPars.sequence_array_to_string(seq);
 
-        let seq_ret: any[] = this._lib.fullAlchFold(2, new Array(temp.toString(), prob_str, secstruct_str), seq_str, struct_str);
-        let temp_array: any[] = CSVParser.parse_into_array_with_white_spaces(seq_ret[2]);
+        let probabilitiesString: string;
+        let result: DotPlotResult;
+        try {
+            result = this._lib.GetDotPlot(temp, seq_str, secstruct_str);
+            probabilitiesString = result.probabilitiesString;
+        } catch (e) {
+            console.error(`GetDotPlot error: ${e}`);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
+            }
+        }
+
+        let temp_array: string[] = CSVParser.parse_into_array_with_white_spaces(probabilitiesString);
         ret_array = [];
 
         if (temp_array.length % 4 != 0) {
@@ -43,13 +65,13 @@ export class Vienna extends Folder {
 
         for (let ii: number = 0; ii < temp_array.length; ii += 4) {
             if (temp_array[ii + 3] == "ubox") {
-                ret_array.push(temp_array[ii]);
-                ret_array.push(temp_array[ii + 1]);
-                ret_array.push(temp_array[ii + 2]);
+                ret_array.push(Number(temp_array[ii]));
+                ret_array.push(Number(temp_array[ii + 1]));
+                ret_array.push(Number(temp_array[ii + 2]));
             } else {
-                ret_array.push(temp_array[ii + 1]);
-                ret_array.push(temp_array[ii]);
-                ret_array.push(temp_array[ii + 2]);
+                ret_array.push(Number(temp_array[ii + 1]));
+                ret_array.push(Number(temp_array[ii]));
+                ret_array.push(Number(temp_array[ii + 2]));
             }
         }
 
@@ -63,14 +85,19 @@ export class Vienna extends Folder {
     }
 
     /*override*/
+    public is_functional(): boolean {
+        return true;
+    }
+
+    /*override*/
     public can_score_structures(): boolean {
         return true;
     }
 
     /*override*/
     public score_structures(seq: number[], pairs: number[], temp: number = 37, nodes: any[] = null): number {
-        let key: Object = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
-        let result: Object = this.get_cache(key);
+        let key: object = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
+        let result: FullEvalResult = this.get_cache(key);
         let ii: number;
 
         if (result != null) {
@@ -78,25 +105,27 @@ export class Vienna extends Folder {
             if (nodes != null) {
                 for (ii = 0; ii < result.nodes.length; ii++) nodes.push(result.nodes[ii]);
             }
-            return result.ret[0] * 100;
+            return result.energy * 100;
         }
 
-        let ret: any[] = this._lib.fullAlchEval(temp, EPars.sequence_array_to_string(seq), EPars.pairs_array_to_parenthesis(pairs), nodes);
+        let ret: FullEvalResult = this._lib.FullEval(temp,
+            EPars.sequence_array_to_string(seq),
+            EPars.pairs_array_to_parenthesis(pairs));
 
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut >= 0 && nodes != null && nodes[0] != -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
-            let seqA: any[] = seq.slice(0, cut);
-            let pairsA: any[] = pairs.slice(0, cut);
-            let nodesA: any[] = [];
+            let seqA: number[] = seq.slice(0, cut);
+            let pairsA: number[] = pairs.slice(0, cut);
+            let nodesA: number[] = [];
             let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
 
-            let seqB: any[] = seq.slice(cut + 1);
-            let pairsB: any[] = pairs.slice(cut + 1);
+            let seqB: number[] = seq.slice(cut + 1);
+            let pairsB: number[] = pairs.slice(cut + 1);
             for (ii = 0; ii < pairsB.length; ii++) {
                 if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
             }
-            let nodesB: any[] = [];
+            let nodesB: number[] = [];
             let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
             if (nodesA[0] != -1 || nodesB[0] != -1) {
@@ -111,15 +140,18 @@ export class Vienna extends Folder {
                 nodes.push(nodesB[ii + 1]);
             }
 
-            ret[0] = (retA + retB) / 100;
+            ret.energy = (retA + retB) / 100;
         }
 
+        let energy: number = ret.energy * 100;
         if (nodes != null) {
-            result = {ret: ret.slice(), nodes: nodes.slice()};
-            this.put_cache(key, result);
+            // TODO: do not store this deletable object in the cache!
+            this.put_cache(key, ret);
+        } else {
+            ret.delete();
         }
 
-        return ret[0] * 100;
+        return energy;
     }
 
     /*override*/
@@ -297,7 +329,7 @@ export class Vienna extends Folder {
         let pairsA: any[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
         let nodesA: any[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
-        if (this.binding_site_formed(pairsA, site_groups)) feA += bonus;
+        if (Vienna.binding_site_formed(pairsA, site_groups)) feA += bonus;
 
         let seqB: any[] = seq.slice(cut + 1);
         let pairsB: any[] = this.fold_sequence(seqB, null, null, temp);
@@ -307,7 +339,7 @@ export class Vienna extends Folder {
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: any[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
-        if (this.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
+        if (Vienna.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
 
         if (co_fe + malus >= feA + feB) {
             let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
@@ -526,14 +558,12 @@ export class Vienna extends Folder {
 
     /*override*/
     public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: any[], i: number, j: number): number {
-
         let hairpin_score: number = 0;
 
         if (size <= 30) {
             hairpin_score = EPars.hairpin37[size];
         } else {
             hairpin_score = EPars.hairpin37[30] + Number(EPars.LXC * Math.log((size) / 30.));
-
         }
 
         if (size == 4) {
@@ -566,20 +596,10 @@ export class Vienna extends Folder {
 
     }
 
-    private fold_sequence_alch(seq: number[], str: string = null, temp: number = 37): any[] {
-        let leng: number = seq.length;
-        let seqRet: any[];
-        let seqStr: string = "";
-        let structStr: string = "";
-
-        if (str == null)
-            structStr = "";
-        else
-            structStr = str;
-
-        seqStr = "";
-        for (let x = 0; x < leng; x++) {
-            switch (seq[x]) {
+    private static getSequenceString(seq: number[], allowCut: boolean): string {
+        let seqStr = "";
+        for (let value of seq) {
+            switch (value) {
                 case EPars.RNABASE_ADENINE:
                     seqStr += "A";
                     break;
@@ -592,132 +612,96 @@ export class Vienna extends Folder {
                 case EPars.RNABASE_URACIL:
                     seqStr += "U";
                     break;
+                case EPars.RNABASE_CUT:
+                    if (allowCut) {
+                        seqStr += "&";
+                    } else {
+                        throw new Error(`Bad nucleotide '${value}`);
+                    }
+                    break;
                 default:
-                    console.log("bad nucleotide");
+                    throw new Error(`Bad nucleotide '${value}`);
             }
         }
 
-        seqRet = this._lib.fullAlchFold(1, new Array(temp.toString()), seqStr, structStr);
-        console.log("done folding");
-        return EPars.parenthesis_to_pair_array(seqRet[1]);
+        return seqStr;
+    }
+
+    private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): any[] {
+        const seqStr = Vienna.getSequenceString(seq, false);
+        let result: FullFoldResult;
+
+        try {
+            result = this._lib.FullFoldTemperature(temp, seqStr, structStr);
+            return EPars.parenthesis_to_pair_array(result.structure);
+        } catch (e) {
+            console.error(`FullFoldTemperature error: ${e}`);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
+            }
+        }
     }
 
     private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
-        let leng: number = seq.length;
-        let x: number;
-        let seqRet: any[];
-        let seqStr: string = "";
-        let structStr: string = "";
+        const seqStr = Vienna.getSequenceString(seq, false);
+        const structStr: string = "";
+        let result: FullFoldResult;
 
-        seqStr = "";
-        for (x = 0; x < leng; x++) {
-            switch (seq[x]) {
-                case EPars.RNABASE_ADENINE:
-                    seqStr += "A";
-                    break;
-                case EPars.RNABASE_CYTOSINE:
-                    seqStr += "C";
-                    break;
-                case EPars.RNABASE_GUANINE:
-                    seqStr += "G";
-                    break;
-                case EPars.RNABASE_URACIL:
-                    seqStr += "U";
-                    break;
-                default:
-                    console.log("bad nucleotide");
+        try {
+            result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
+            return EPars.parenthesis_to_pair_array(result.structure);
+        } catch (e) {
+            console.error(`FullFoldWithBindingSite error: ${e}`);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
             }
         }
-        /// type "3" for switch fold
-        seqRet = this._lib.fullAlchFold(3, new Array(i + 1, p + 1, j + 1, q + 1, -bonus), seqStr, structStr);
-
-        return EPars.parenthesis_to_pair_array(seqRet[1]);
     }
 
     private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): any[] {
+        const seqStr = Vienna.getSequenceString(seq, true);
+        const structStr: string = str || "";
+        let result: FullFoldResult;
 
-        let leng: number = seq.length;
-        let x: number;
-        let seqRet: any[];
-        let seqStr: string = "";
-        let structStr: string = "";
-
-
-        if (str == null)
-            structStr = "";
-        else
-            structStr = str;
-
-        seqStr = "";
-        for (x = 0; x < leng; x++) {
-            switch (seq[x]) {
-                case EPars.RNABASE_CUT:
-                    seqStr += "&";
-                    break;
-                case EPars.RNABASE_ADENINE:
-                    seqStr += "A";
-                    break;
-                case EPars.RNABASE_CYTOSINE:
-                    seqStr += "C";
-                    break;
-                case EPars.RNABASE_GUANINE:
-                    seqStr += "G";
-                    break;
-                case EPars.RNABASE_URACIL:
-                    seqStr += "U";
-                    break;
-                default:
-                    console.log("bad nucleotide");
+        try {
+            result = this._lib.CoFoldSequence(seqStr, structStr);
+            console.log("done cofolding");
+            return EPars.parenthesis_to_pair_array(result.structure);
+        } catch (e) {
+            console.error(`CoFoldSequence error: ${e}`);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
             }
         }
-
-        seqRet = this._lib.fullAlchFold(4, new Array(temp.toString()), seqStr, structStr);
-        console.log("done cofolding");
-        return EPars.parenthesis_to_pair_array(seqRet[1]);
-
     }
 
     private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
+        const seqStr = Vienna.getSequenceString(seq, true);
+        const structStr: string = str || "";
+        let result: FullFoldResult;
 
-        let leng: number = seq.length;
-        let x: number;
-        let seqRet: any[];
-        let seqStr: string = "";
-        let structStr: string = "";
-
-
-        if (str == null)
-            structStr = "";
-        else
-            structStr = str;
-
-        seqStr = "";
-        for (x = 0; x < leng; x++) {
-            switch (seq[x]) {
-                case EPars.RNABASE_CUT:
-                    seqStr += "&";
-                    break;
-                case EPars.RNABASE_ADENINE:
-                    seqStr += "A";
-                    break;
-                case EPars.RNABASE_CYTOSINE:
-                    seqStr += "C";
-                    break;
-                case EPars.RNABASE_GUANINE:
-                    seqStr += "G";
-                    break;
-                case EPars.RNABASE_URACIL:
-                    seqStr += "U";
-                    break;
-                default:
-                    console.log("bad nucleotide");
+        try {
+            result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
+            console.log("done cofolding");
+            return EPars.parenthesis_to_pair_array(result.structure);
+        } catch (e) {
+            console.error(`CoFoldSequenceWithBindingSite error: ${e}`);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
             }
         }
-
-        seqRet = this._lib.fullAlchFold(5, new Array(i + 1, p + 1, j + 1, q + 1, -bonus), seqStr, structStr);
-        console.log("done cofolding_wbs");
-        return EPars.parenthesis_to_pair_array(seqRet[1]);
-
     }
 
     private fold_sequence_alch_with_binding_site_old(seq: number[], target_pairs: number[], binding_site: any[], bonus: number, temp: number = 37): any[] {
@@ -767,7 +751,7 @@ export class Vienna extends Folder {
         return best_pairs;
     }
 
-    private binding_site_formed(pairs: number[], groups: any[]): boolean {
+    private static binding_site_formed(pairs: number[], groups: any[]): boolean {
         if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
         if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
         let ii: number;
@@ -779,5 +763,5 @@ export class Vienna extends Folder {
         return true;
     }
 
-    private _lib: Object;
+    private readonly _lib: vienna_lib;
 }
