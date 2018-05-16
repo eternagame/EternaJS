@@ -22,8 +22,13 @@ class FoldingTester {
         this._engineName = name;
         console.log(`[${this._engineName}] initializing...`);
 
-        engineFactory({noInitialRun: true}).then((instance: any) => {
-            this._engine = instance;
+        engineFactory({noInitialRun: true}).then((engine: any) => {
+            this._engine = engine;
+
+            if (engine.hasOwnProperty('callMain')) {
+                console.log(`[${this._engineName}] main()`);
+                engine.callMain();
+            }
 
             console.log(`[${this._engineName}] initialized`);
 
