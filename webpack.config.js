@@ -39,4 +39,10 @@ module.exports = {
         // "react": "React",
         // "react-dom": "ReactDOM"
     },
+
+    // 5/15/18 - Cargo-culting this line in to fix 'Module not found: Error: Can't resolve 'fs''
+    // https://github.com/webpack-contrib/css-loader/issues/447
+    node: {
+        fs: "empty"
+    }
 };
