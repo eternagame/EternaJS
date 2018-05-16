@@ -71,7 +71,7 @@ export class EPars {
     }
 
     public static get_barcode_hairpin(seq: string): string {
-        let hairpin_match: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/ii).exec(seq);
+        let hairpin_match: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
         if (hairpin_match == null) {
             return null;
         }
