@@ -1,14 +1,11 @@
-import {Application, Sprite} from "pixi.js";
-import {Background} from "./Background";
+import {Application} from "pixi.js";
 import {AppMode} from "../flashbang/core/AppMode";
-import {Flashbang} from "../flashbang/core/Flashbang";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
-import {ObjectTask} from "../flashbang/core/ObjectTask";
-import {SpriteObject} from "../flashbang/objects/SpriteObject";
-import {RepeatingTask} from "../flashbang/tasks/RepeatingTask";
-import {RotationTask} from "../flashbang/tasks/RotationTask";
-import {SerialTask} from "../flashbang/tasks/SerialTask";
-import {Easing} from "../flashbang/util/Easing";
+import {Background} from "./Background";
+
+let vienna = require("./folding/engines/vienna");
+let vrna2 = require("./folding/engines/vrna2");
+let nupack = require("./folding/engines/nupack");
 
 export class EternaApp extends FlashbangApp {
     protected createPixi (): Application {
@@ -20,26 +17,56 @@ export class EternaApp extends FlashbangApp {
     }
 }
 
+class FoldingTester {
+    public constructor (name: string, engineFactory: any) {
+        this._engineName = name;
+        console.log(`[${this._engineName}] initializing...`);
+
+        engineFactory({noInitialRun: true}).then((instance: any) => {
+            this._engine = instance;
+
+            console.log(`[${this._engineName}] initialized`);
+
+            // http://www.eternagame.org/web/puzzle/8284172/
+            const MINILOOP_SEQ = 'UAAAAAAG';
+            const MINILOOP_STRUCT = '((....))';
+
+            // http://www.eternagame.org/web/puzzle/13833/
+            const SNOWFLAKE_SEQ = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
+
+            const SNOWFLAKE_STRUCT = '((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
+
+            this.FullFold('Miniloop', MINILOOP_SEQ, MINILOOP_STRUCT);
+            this.FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+            this.FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+            console.log('Done!');
+        });
+    }
+
+    private FullFold (name: string, seq: string, struct: string) {
+        console.log(`[${this._engineName}] folding ${name}...`);
+
+        let t0 = performance.now();
+        let fullFoldResult = this._engine.FullFoldDefault(seq, struct);
+        let t1 = performance.now();
+
+        console.log(`[${this._engineName}] completed ${name}! (${t1 - t0}ms)`);
+
+        fullFoldResult.delete();
+    }
+
+    private readonly _engineName: string;
+    private _engine: any;
+}
+
 class TestMode extends AppMode {
     protected setup (): void {
         this.addObject(new Background(20, false), this.modeSprite);
-
-        // let clock: SpriteObject = new SpriteObject(Sprite.fromImage('assets/clock.png'));
-        //
-        // // center the sprite's anchor point
-        // clock.sprite.anchor.set(0.5);
-        //
-        // // move the sprite to the center of the screen
-        // clock.sprite.x = Flashbang.stageWidth * 0.5;
-        // clock.sprite.y = Flashbang.stageHeight * 0.5;
-        //
-        // this.addObject(clock, this._modeSprite);
-        //
-        // clock.addObject(new RepeatingTask((): ObjectTask => {
-        //     return new SerialTask(
-        //         new RotationTask(Math.PI * 2, 1, Easing.linear),
-        //         new RotationTask(0, 0)
-        //     );
-        // }));
+        this._testers.push(
+            new FoldingTester("vienna", vienna),
+            new FoldingTester("vrna2", vrna2),
+            new FoldingTester("nupack", nupack));
     }
+
+    private _testers: FoldingTester[] = [];
 }
