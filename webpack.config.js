@@ -11,7 +11,11 @@ module.exports = {
     entry: ['babel-polyfill', "./src/eterna/index.ts"],
     output: {
         filename: "bundle.js",
-        path: __dirname + "/dist"
+        chunkFilename: '[name].bundle.js',
+        path: __dirname + "/dist",
+
+        // TODO: We're not going to serve assets from 'dist' in production; fix this
+        publicPath: "dist/"
     },
 
     // Enable sourcemaps for debugging webpack's output.
