@@ -1,16 +1,9 @@
 ﻿export abstract class Folder {
-    protected constructor(loaded_cb: () => void = null) {
-        this._on_loaded_cb = loaded_cb;
-        this._functional = false;
+    protected constructor() {
     }
 
-    public is_functional(): boolean {
-        return this._functional;
-    }
-
-    public get_folder_name(): string {
-        return "";
-    }
+    public abstract get_folder_name(): string;
+    public abstract is_functional(): boolean;
 
     public get_cache(key: Object): any {
         let key_str = JSON.stringify(key);
@@ -137,14 +130,5 @@
         this._cache.clear();
     }
 
-    protected on_loaded(): void {
-        if (this._on_loaded_cb != null) {
-            this._on_loaded_cb();
-        }
-    }
-
-    protected _functional: boolean;
-
     private readonly _cache: Map<string, any> = new Map<string, any>();
-    private readonly _on_loaded_cb: Function;
 }
