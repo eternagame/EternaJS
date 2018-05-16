@@ -60,7 +60,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     # -s WASM=1: wasm enabled
     # -s SINGLE_FILE=1: merge all outputs into a single file
     # -s LEGACY_VM_SUPPORT=1: support IE11 (incompatible with WASM=1)
-    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -std=c++11 -s WASM=1 -s SINGLE_FILE=1 --preload-file assets@/")
+    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -std=c++11 -s WASM=1 -s SINGLE_FILE=1 --embed-file assets@/")
     set_target_properties(nupack PROPERTIES LINK_FLAGS_DEBUG "-O0")
     set_target_properties(nupack PROPERTIES LINK_FLAGS_RELEASE "-O3")
 endif ()
