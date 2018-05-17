@@ -18,6 +18,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.47",
     "@babel/preset-env": "^7.0.0-beta.47",
     "@babel/preset-typescript": "^7.0.0-beta.47",
+    "@types/js-cookie": "^2.1.0",
     "@types/pixi.js": "^4.7.3",
     "awesome-typescript-loader": "^5.0.0",
     "babel-loader": "^8.0.0-beta.2",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@types/node": "^9.6.16",
+    "js-cookie": "^2.2.0",
     "pixi.js": "^4.7.3",
     "typed-signals": "^1.0.2"
   }
