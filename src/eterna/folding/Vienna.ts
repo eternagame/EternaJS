@@ -5,6 +5,7 @@ import {Emscripten} from "../util/Emscripten";
 import * as vienna_lib from "./engines/vienna_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vienna_lib/index";
 import {Folder} from "./Folder";
+import * as log from "loglevel";
 
 export class Vienna extends Folder {
     public static readonly NAME: string = "Vienna";
@@ -34,7 +35,7 @@ export class Vienna extends Folder {
         let key: Object = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
         let ret_array: number[] = this.get_cache(key);
         if (ret_array != null) {
-            // console.log("dotplot cache hit");
+            // log.debug("dotplot cache hit");
             return ret_array.slice();
         }
 
@@ -47,7 +48,7 @@ export class Vienna extends Folder {
             result = this._lib.GetDotPlot(temp, seq_str, secstruct_str);
             probabilitiesString = result.probabilitiesString;
         } catch (e) {
-            console.error(`GetDotPlot error: ${e}`);
+            log.error('GetDotPlot error', e);
             return [];
         } finally {
             if (result != null) {
@@ -101,7 +102,7 @@ export class Vienna extends Folder {
         let ii: number;
 
         if (result != null) {
-            // console.log("score cache hit");
+            // log.debug("score cache hit");
             if (nodes != null) {
                 for (ii = 0; ii < result.nodes.length; ii++) nodes.push(result.nodes[ii]);
             }
@@ -165,7 +166,7 @@ export class Vienna extends Folder {
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
-            // console.log("fold cache hit");
+            // log.debug("fold cache hit");
             return pairs.slice();
         }
 
@@ -188,7 +189,7 @@ export class Vienna extends Folder {
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
-            // console.log("fold_aptamer cache hit");
+            // log.debug("fold_aptamer cache hit");
             return pairs.slice();
         }
 
@@ -248,7 +249,7 @@ export class Vienna extends Folder {
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
-            // console.log("cofold cache hit");
+            // log.debug("cofold cache hit");
             return co_pairs.slice();
         }
 
@@ -299,7 +300,7 @@ export class Vienna extends Folder {
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
-            // console.log("cofold_aptamer cache hit");
+            // log.debug("cofold_aptamer cache hit");
             return co_pairs.slice();
         }
 
@@ -635,7 +636,7 @@ export class Vienna extends Folder {
             result = this._lib.FullFoldTemperature(temp, seqStr, structStr);
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            console.error(`FullFoldTemperature error: ${e}`);
+            log.error('FullFoldTemperature error', e);
             return [];
         } finally {
             if (result != null) {
@@ -654,7 +655,7 @@ export class Vienna extends Folder {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            console.error(`FullFoldWithBindingSite error: ${e}`);
+            log.error('FullFoldWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
@@ -671,10 +672,10 @@ export class Vienna extends Folder {
 
         try {
             result = this._lib.CoFoldSequence(seqStr, structStr);
-            console.log("done cofolding");
+            log.debug("done cofolding");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            console.error(`CoFoldSequence error: ${e}`);
+            log.error('CoFoldSequence error', e);
             return [];
         } finally {
             if (result != null) {
@@ -691,10 +692,10 @@ export class Vienna extends Folder {
 
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
-            console.log("done cofolding");
+            log.debug("done cofolding");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            console.error(`CoFoldSequenceWithBindingSite error: ${e}`);
+            log.error('CoFoldSequenceWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
