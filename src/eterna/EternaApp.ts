@@ -41,12 +41,12 @@ class TestMode extends AppMode {
         //
         // Vienna.create().then((vienna: Folder) => {
         //     let result = vienna.fold_sequence(EPars.string_to_sequence_array(SNOWFLAKE_SEQ), null, SNOWFLAKE_STRUCT);
-        //     console.log(result);
+        //     log.info(result);
         //
         //     AutosaveManager.saveObjects([vienna.get_folder_name()], "folder-" + Eterna.player_id);
         //     let pref: any[] = AutosaveManager.loadObjects("folder-" + Eterna.player_id);
         //     let name: string = pref === null ? Vienna.NAME : pref[0];
-        //     console.log(name);
+        //     log.info(name);
         //     AutosaveManager.clear();
         // });
     }
