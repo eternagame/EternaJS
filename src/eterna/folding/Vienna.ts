@@ -13,7 +13,7 @@ export class Vienna extends Folder {
      * Asynchronously creates a new instance of the Vienna folder.
      * @returns {Promise<Vienna>}
      */
-    public static Create(): Promise<Vienna> {
+    public static create(): Promise<Vienna> {
         return import('./engines/vienna')
             .then((module: any) => Emscripten.loadProgram(module))
             .then((program: any) => new Vienna(program));
