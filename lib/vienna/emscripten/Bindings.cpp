@@ -12,7 +12,7 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     class_<FullEvalResult>("FullEvalResult")
         .constructor()
-        .property("energyContributions", &FullEvalResult::energyContributions)
+        .property("nodes", &FullEvalResult::nodes)
         .property("energy", &FullEvalResult::energy);
 
     function("FullEval", &FullEval, allow_raw_pointers());

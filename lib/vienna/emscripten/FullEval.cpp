@@ -18,11 +18,11 @@ void _eos_cb(int index, int fe) {
     if (gEvalResult != NULL) {
         if (index < 0) {
             int to_insert[] = { index-1, fe }; // shift indices from 1-based to 0-based
-            gEvalResult->energyContributions.insert(gEvalResult->energyContributions.begin(), to_insert, to_insert + 2);
+            gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
         } else {
             if (cut_point >= 0 && index >= cut_point) index++;
-            gEvalResult->energyContributions.push_back(index - 1); // shift indices from 1-based to 0-based
-            gEvalResult->energyContributions.push_back(fe);
+            gEvalResult->nodes.push_back(index - 1); // shift indices from 1-based to 0-based
+            gEvalResult->nodes.push_back(fe);
         }
     }
 }
