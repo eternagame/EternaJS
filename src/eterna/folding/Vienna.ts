@@ -1,5 +1,5 @@
 import {EPars} from "../EPars";
-import {RNALayout} from "../Pose2D/RNALayout";
+import {RNALayout} from "../pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
 import {Emscripten} from "../util/Emscripten";
 import * as vienna_lib from "./engines/vienna_lib/index";
