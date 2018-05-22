@@ -1,19 +1,23 @@
-import {Application} from "pixi.js";
+import * as log from 'loglevel';
+import {Application, Sprite} from "pixi.js";
 import {AppMode} from "../flashbang/core/AppMode";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
-import {Background} from "./Background";
+import {HLayoutContainer} from "../flashbang/layout/HLayoutContainer";
+import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
 import {Vienna} from "./folding/Vienna";
-import * as log from 'loglevel';
+import {BaseAssets} from "./pose2D/BaseAssets";
+import {BitmapManager} from "./util/BitmapManager";
+import {ColorUtil} from "./util/ColorUtil";
 
 export class EternaApp extends FlashbangApp {
-    protected createPixi (): Application {
+    protected createPixi(): Application {
         return new Application(1024, 768, {backgroundColor: 0x1099bb});
     }
 
     /*override*/
-    protected setup (): void {
+    protected setup(): void {
         this._modeStack.pushMode(new TestMode());
 
         this.loadFoldingEngines().catch((e) => {
@@ -21,7 +25,7 @@ export class EternaApp extends FlashbangApp {
         });
     }
 
-    private loadFoldingEngines (): Promise<void> {
+    private loadFoldingEngines(): Promise<void> {
         log.info("Initializing folding engines...");
         return Promise.all([Vienna.create()]).then((folders: Folder[]) => {
             for (let folder of folders) {
@@ -32,22 +36,20 @@ export class EternaApp extends FlashbangApp {
 }
 
 class TestMode extends AppMode {
-    protected setup (): void {
-        this.addObject(new Background(20, false), this.modeSprite);
+    protected setup(): void {
+        // this.addObject(new Background(20, false), this.modeSprite);
 
-        // const SNOWFLAKE_SEQ = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
-        //
-        // const SNOWFLAKE_STRUCT = '((((((..(((.....))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
-        //
-        // Vienna.create().then((vienna: Folder) => {
-        //     let result = vienna.fold_sequence(EPars.string_to_sequence_array(SNOWFLAKE_SEQ), null, SNOWFLAKE_STRUCT);
-        //     log.info(result);
-        //
-        //     AutosaveManager.saveObjects([vienna.get_folder_name()], "folder-" + Eterna.player_id);
-        //     let pref: any[] = AutosaveManager.loadObjects("folder-" + Eterna.player_id);
-        //     let name: string = pref === null ? Vienna.NAME : pref[0];
-        //     log.info(name);
-        //     AutosaveManager.clear();
-        // });
+        TextureUtil.loadTextureSource(BitmapManager.Satellite).then(() => {
+            let s1 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0))[0];
+            let s2 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 0.5, 0, 0, 0, 0))[0];
+            let s3 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(2, 2, 2, 2, 0, 0, 0, 0))[0];
+
+            let container: HLayoutContainer = new HLayoutContainer();
+            for (let tex of [s1, s2, s3]) {
+                container.addChild(new Sprite(tex));
+            }
+            container.layout();
+            this.modeSprite.addChild(container);
+        });
     }
 }
