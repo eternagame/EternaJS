@@ -1,4 +1,4 @@
-export class Images {
+export class BitmapManager {
     public static readonly NovaAMissionReq: string = "assets/NOVA/Mission/a-box.png";
     public static readonly NovaAReq: string = "assets/NOVA/Constraints/a-requirement-box.png";
     public static readonly NovaARowMissionReq: string = "assets/NOVA/Mission/a-row-box.png";

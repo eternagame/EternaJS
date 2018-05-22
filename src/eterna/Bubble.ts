@@ -6,7 +6,7 @@ import {AlphaTask} from "../flashbang/tasks/AlphaTask";
 import {ParallelTask} from "../flashbang/tasks/ParallelTask";
 import {ScaleTask} from "../flashbang/tasks/ScaleTask";
 import {Easing} from "../flashbang/util/Easing";
-import {Images} from "./Images";
+import {BitmapManager} from "./util/BitmapManager";
 
 export class Bubble extends SpriteObject implements Updatable {
     public is_paused: boolean;
@@ -150,14 +150,14 @@ export class Bubble extends SpriteObject implements Updatable {
     private _accY:number;
 
     private static BUBBLE_NAMES: string[] = [
-        Images.Bubble00,
-        Images.Bubble01,
-        Images.Bubble02,
-        Images.Bubble03,
-        Images.Bubble10,
-        Images.Bubble11,
-        Images.Bubble12,
-        Images.Bubble13
+        BitmapManager.Bubble00,
+        BitmapManager.Bubble01,
+        BitmapManager.Bubble02,
+        BitmapManager.Bubble03,
+        BitmapManager.Bubble10,
+        BitmapManager.Bubble11,
+        BitmapManager.Bubble12,
+        BitmapManager.Bubble13
     ];
 
     private static readonly P: Point = new Point();
