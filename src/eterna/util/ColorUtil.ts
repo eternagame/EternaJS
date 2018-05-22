@@ -6,7 +6,7 @@ export class ColorUtil {
      * @param blendFactor the percent contribution that c1 makes to the blended color (a value between [0, 1]).
      * (c2's contribution will be (1-blendFactor)).
      */
-    public static blend (c1: number, c2: number, blendFactor: number): number {
+    public static blend(c1: number, c2: number, blendFactor: number): number {
         const r1: number = (c1 >> 16) & 0xff;
         const g1: number = (c1 >> 8) & 0xff;
         const b1: number = (c1 & 0xff);
@@ -25,17 +25,39 @@ export class ColorUtil {
     }
 
     /** Returns the 8-bit red component of a 24-bit color. The value will be in [0,255] */
-    public static getRed (color :number) :number {
+    public static getRed(color: number): number {
         return (color >> 16) & 0xff;
     }
 
     /** Returns the 8-bit green component of a 24-bit color. */
-    public static getGreen (color :number) :number {
+    public static getGreen(color: number): number {
         return (color >> 8) & 0xff;
     }
 
     /** Returns the 8-bit blue component of a 24-bit color. */
-    public static getBlue (color :number) :number {
+    public static getBlue(color: number): number {
         return color & 0xff;
+    }
+
+    /** Creates a ColorMatrixFilter using the params for the flash ColorTransform class */
+    public static colorTransform(
+        redMultiplier: number = 1.0,
+        greenMultiplier: number = 1.0,
+        blueMultiplier: number = 1.0,
+        alphaMultiplier: number = 1.0,
+        redOffset: number = 0,
+        greenOffset: number = 0,
+        blueOffset: number = 0,
+        alphaOffset: number = 0): PIXI.filters.ColorMatrixFilter {
+
+        const filter = new PIXI.filters.ColorMatrixFilter();
+        filter.matrix = [
+            redMultiplier, 0, 0, 0, redOffset,
+            0, greenMultiplier, 0, 0, greenOffset,
+            0, 0, blueMultiplier, 0, blueOffset,
+            0, 0, 0, alphaMultiplier, alphaOffset
+        ];
+
+        return filter;
     }
 }

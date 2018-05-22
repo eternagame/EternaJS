@@ -1,3 +1,5 @@
+import {Texture} from "pixi.js";
+
 export class BitmapManager {
     public static readonly NovaAMissionReq: string = "assets/NOVA/Mission/a-box.png";
     public static readonly NovaAReq: string = "assets/NOVA/Constraints/a-requirement-box.png";
@@ -262,7 +264,7 @@ export class BitmapManager {
     public static readonly NovaPuzThumbLargeFail: string = "assets/NOVA/Puzzle Thumbnail/thumbnail-large.png";
     public static readonly NovaPuzThumbSmallMet: string = "assets/NOVA/Puzzle Thumbnail/thumbnail-small-met.png";
     public static readonly NovaPuzThumbSmallFail: string = "assets/NOVA/Puzzle Thumbnail/thumbnail-small.png";
-    public static readonly Satelite: string = "assets/RNABase/triangle.png";
+    public static readonly Satellite: string = "assets/RNABase/triangle.png";
     public static readonly TrophyImg: string = "assets/trophy_big.png";
     public static readonly NovaUMissionReq: string = "assets/NOVA/Mission/u-box.png";
     public static readonly NovaUReq: string = "assets/NOVA/Constraints/u-requirement-box.png";
@@ -283,4 +285,9 @@ export class BitmapManager {
     public static readonly BaseAMid: string = "assets/RNABase/yellow_middle.png";
     public static readonly BaseAPattern: string = "assets/RNABase/yellow_pattern.png";
     public static readonly BaseAMin: string = "assets/RNABase/yellow_small.png";
+
+    /// TODO: remove me!
+    public static get_bitmap(source: string): Texture {
+        return Texture.fromImage(source);
+    }
 }
