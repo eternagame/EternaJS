@@ -1,0 +1,126 @@
+/** Keycode constants */
+export class KeyCode {
+    public static readonly KEY_CANCEL: number = 3;
+    public static readonly KEY_HELP: number = 6;
+    public static readonly KEY_BACK_SPACE: number = 8;
+    public static readonly KEY_TAB: number = 9;
+    public static readonly KEY_CLEAR: number = 12;
+    public static readonly KEY_RETURN: number = 13;
+    public static readonly KEY_ENTER: number = 14;
+    public static readonly KEY_SHIFT: number = 16;
+    public static readonly KEY_CONTROL: number = 17;
+    public static readonly KEY_ALT: number = 18;
+    public static readonly KEY_PAUSE: number = 19;
+    public static readonly KEY_CAPS_LOCK: number = 20;
+    public static readonly KEY_ESCAPE: number = 27;
+    public static readonly KEY_SPACE: number = 32;
+    public static readonly KEY_PAGE_UP: number = 33;
+    public static readonly KEY_PAGE_DOWN: number = 34;
+    public static readonly KEY_END: number = 35;
+    public static readonly KEY_HOME: number = 36;
+    public static readonly KEY_LEFT: number = 37;
+    public static readonly KEY_UP: number = 38;
+    public static readonly KEY_RIGHT: number = 39;
+    public static readonly KEY_DOWN: number = 40;
+    public static readonly KEY_PRINTSCREEN: number = 44;
+    public static readonly KEY_INSERT: number = 45;
+    public static readonly KEY_DELETE: number = 46;
+
+    public static readonly KEY_0: number = 48;
+    public static readonly KEY_1: number = 49;
+    public static readonly KEY_2: number = 50;
+    public static readonly KEY_3: number = 51;
+    public static readonly KEY_4: number = 52;
+    public static readonly KEY_5: number = 53;
+    public static readonly KEY_6: number = 54;
+    public static readonly KEY_7: number = 55;
+    public static readonly KEY_8: number = 56;
+    public static readonly KEY_9: number = 57;
+
+    public static readonly KEY_SEMICOLON: number = 59;
+    public static readonly KEY_EQUALS: number = 61;
+
+    public static readonly KEY_A: number = 65;
+    public static readonly KEY_B: number = 66;
+    public static readonly KEY_C: number = 67;
+    public static readonly KEY_D: number = 68;
+    public static readonly KEY_E: number = 69;
+    public static readonly KEY_F: number = 70;
+    public static readonly KEY_G: number = 71;
+    public static readonly KEY_H: number = 72;
+    public static readonly KEY_I: number = 73;
+    public static readonly KEY_J: number = 74;
+    public static readonly KEY_K: number = 75;
+    public static readonly KEY_L: number = 76;
+    public static readonly KEY_M: number = 77;
+    public static readonly KEY_N: number = 78;
+    public static readonly KEY_O: number = 79;
+    public static readonly KEY_P: number = 80;
+    public static readonly KEY_Q: number = 81;
+    public static readonly KEY_R: number = 82;
+    public static readonly KEY_S: number = 83;
+    public static readonly KEY_T: number = 84;
+    public static readonly KEY_U: number = 85;
+    public static readonly KEY_V: number = 86;
+    public static readonly KEY_W: number = 87;
+    public static readonly KEY_X: number = 88;
+    public static readonly KEY_Y: number = 89;
+    public static readonly KEY_Z: number = 90;
+
+    public static readonly KEY_CONTEXT_MENU: number = 93;
+
+    public static readonly KEY_NUMPAD0: number = 96;
+    public static readonly KEY_NUMPAD1: number = 97;
+    public static readonly KEY_NUMPAD2: number = 98;
+    public static readonly KEY_NUMPAD3: number = 99;
+    public static readonly KEY_NUMPAD4: number = 100;
+    public static readonly KEY_NUMPAD5: number = 101;
+    public static readonly KEY_NUMPAD6: number = 102;
+    public static readonly KEY_NUMPAD7: number = 103;
+    public static readonly KEY_NUMPAD8: number = 104;
+    public static readonly KEY_NUMPAD9: number = 105;
+
+    public static readonly KEY_MULTIPLY: number = 106;
+    public static readonly KEY_ADD: number = 107;
+    public static readonly KEY_SEPARATOR: number = 108;
+    public static readonly KEY_SUBTRACT: number = 109;
+    public static readonly KEY_DECIMAL: number = 110;
+    public static readonly KEY_DIVIDE: number = 111;
+
+    public static readonly KEY_F1: number = 112;
+    public static readonly KEY_F2: number = 113;
+    public static readonly KEY_F3: number = 114;
+    public static readonly KEY_F4: number = 115;
+    public static readonly KEY_F5: number = 116;
+    public static readonly KEY_F6: number = 117;
+    public static readonly KEY_F7: number = 118;
+    public static readonly KEY_F8: number = 119;
+    public static readonly KEY_F9: number = 120;
+    public static readonly KEY_F10: number = 121;
+    public static readonly KEY_F11: number = 122;
+    public static readonly KEY_F12: number = 123;
+    public static readonly KEY_F13: number = 124;
+    public static readonly KEY_F14: number = 125;
+    public static readonly KEY_F15: number = 126;
+    public static readonly KEY_F16: number = 127;
+    public static readonly KEY_F17: number = 128;
+    public static readonly KEY_F18: number = 129;
+    public static readonly KEY_F19: number = 130;
+    public static readonly KEY_F20: number = 131;
+    public static readonly KEY_F21: number = 132;
+    public static readonly KEY_F22: number = 133;
+    public static readonly KEY_F23: number = 134;
+    public static readonly KEY_F24: number = 135;
+
+    public static readonly KEY_NUM_LOCK: number = 144;
+    public static readonly KEY_SCROLL_LOCK: number = 145;
+    public static readonly KEY_COMMA: number = 188;
+    public static readonly KEY_PERIOD: number = 190;
+    public static readonly KEY_SLASH: number = 191;
+    public static readonly KEY_BACK_QUOTE: number = 192;
+    public static readonly KEY_OPEN_BRACKET: number = 219;
+    public static readonly KEY_BACK_SLASH: number = 220;
+    public static readonly KEY_CLOSE_BRACKET: number = 221;
+    public static readonly KEY_QUOTE: number = 222;
+    public static readonly KEY_META: number = 224;
+}
