@@ -8,10 +8,15 @@
     "module": "esnext",
     "target": "es2015",
     "allowJs": true,
-    "moduleResolution": "node"
-//    "strict": true
+    "moduleResolution": "node",
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": false
   },
   "include": [
     "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules"
   ]
 }
