@@ -3,18 +3,19 @@ import {EasingFunc} from "../util/Easing";
 import {DisplayObjectTask} from "./DisplayObjectTask";
 
 export class AlphaTask extends DisplayObjectTask {
-    constructor (alpha :number, time :number = 0, easingFn :EasingFunc = null, target :DisplayObject = null) {
+    constructor(alpha: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {
         super(time, easingFn, target);
         this._to = alpha;
     }
 
-    /*override*/ protected updateValues () :void {
+    /*override*/
+    protected updateValues(): void {
         if (this._from === undefined) {
             this._from = this._target.alpha;
         }
         this._target.alpha = this.interpolate(this._from, this._to);
     }
 
-    private readonly _to :number;
-    private _from :number = undefined;
+    private readonly _to: number;
+    private _from: number = undefined;
 }

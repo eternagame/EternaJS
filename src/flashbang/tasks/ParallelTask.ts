@@ -2,35 +2,39 @@ import {ObjectTask} from "../core/ObjectTask";
 import {Assert} from "../util/Assert";
 
 export class ParallelTask extends ObjectTask {
-    constructor (...tasks: ObjectTask[]) {
+    constructor(...tasks: ObjectTask[]) {
         super();
         this._subtasks = tasks.concat();
     }
 
-    public get numSubtasks () :number {
+    public get numSubtasks(): number {
         return this._subtasks.length;
     }
 
-    public addTask (task :ObjectTask) :void {
+    public addTask(task: ObjectTask): void {
         Assert.isTrue(this.parent == null, "Can't modify a running ParallelTask");
         this._subtasks.push(task);
     }
 
-    /*override*/ protected added () :void {
+    /*override*/
+    protected added(): void {
         this._numActive = this._subtasks.length;
         for (let task of this._subtasks) {
-            this.regs.add(task.destroyed.connect(() => { this.onTaskComplete(); }));
+            this.regs.add(task.destroyed.connect(() => {
+                this.onTaskComplete();
+            }));
             this.parent.addObject(task);
         }
     }
 
-    private onTaskComplete (): void {
+    private onTaskComplete(): void {
         if (--this._numActive == 0) {
             this.destroySelf();
         }
     }
 
-    /*override*/ protected removed () :void {
+    /*override*/
+    protected removed(): void {
         for (let task of this._subtasks) {
             task.destroySelf();
         }

@@ -5,12 +5,12 @@ import {DisplayObject, Sprite} from "pixi.js";
 export class SpriteObject extends GameObject {
     public readonly sprite: Sprite;
 
-    public constructor (sprite?: Sprite) {
+    public constructor(sprite?: Sprite) {
         super();
         this.sprite = sprite || new Sprite();
     }
 
-    public get display (): DisplayObject {
+    public get display(): DisplayObject {
         return this.sprite;
     }
 }

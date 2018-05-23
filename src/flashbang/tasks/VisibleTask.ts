@@ -3,13 +3,14 @@ import {ObjectTask} from "../core/ObjectTask";
 import {Assert} from "../util/Assert";
 
 export class VisibleTask extends ObjectTask {
-    constructor (visible :boolean, target :DisplayObject = null) {
+    constructor(visible: boolean, target: DisplayObject = null) {
         super();
         this._visible = visible;
         this._target = target;
     }
 
-    /*override*/ protected added () :void {
+    /*override*/
+    protected added(): void {
         // If we weren't given a target, operate on our parent object
         let target = this._target;
         if (target == null) {
@@ -21,6 +22,6 @@ export class VisibleTask extends ObjectTask {
         this.destroySelf();
     }
 
-    private readonly _target :DisplayObject;
-    private readonly _visible :boolean;
+    private readonly _target: DisplayObject;
+    private readonly _visible: boolean;
 }

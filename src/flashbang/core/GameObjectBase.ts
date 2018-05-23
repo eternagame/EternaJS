@@ -7,7 +7,7 @@ import {GameObjectRef} from "./GameObjectRef";
 import {ModeStack} from "./ModeStack";
 
 export class GameObjectBase {
-    public get destroyed (): UnitSignal {
+    public get destroyed(): UnitSignal {
         if (this._destroyed == null) {
             this._destroyed = new UnitSignal();
         }
@@ -25,32 +25,32 @@ export class GameObjectBase {
      * }
      * </code>
      */
-    public get ids () :any[] {
+    public get ids(): any[] {
         return GameObjectBase.EMPTY_ARRAY;
     }
 
     /**
      * Returns the unique GameObjectRef that stores a reference to this GameObject.
      */
-    public /*final*/ get ref () :GameObjectRef {
+    public /*final*/ get ref(): GameObjectRef {
         return this._ref;
     }
 
-    public /*final*/ get parent () :GameObject {
+    public /*final*/ get parent(): GameObject {
         return this._parent;
     }
 
     /**
      * Returns the AppMode that this object is contained in.
      */
-    public /*final*/ get mode () :AppMode {
+    public /*final*/ get mode(): AppMode {
         return this._mode;
     }
 
     /**
      * Returns the ModeStack that this object is a part of
      */
-    public /*final*/ get modeStack () :ModeStack {
+    public /*final*/ get modeStack(): ModeStack {
         return this._mode.modeStack;
     }
 
@@ -58,7 +58,7 @@ export class GameObjectBase {
      * Returns true if the object is in an AppMode and is "live"
      * (not pending removal from the database)
      */
-    public /*final*/ get isLiveObject () :boolean {
+    public /*final*/ get isLiveObject(): boolean {
         return (this._ref != null && this._ref._obj != null);
     }
 
@@ -67,13 +67,13 @@ export class GameObjectBase {
      * If a subclass needs to cleanup after itself after being destroyed, it should do
      * so either in removedFromDb or dispose.
      */
-    public /*final*/ destroySelf () :void {
+    public /*final*/ destroySelf(): void {
         if (this._parent != null) {
             this._parent.removeObject(this);
         }
     }
 
-    public get regs () :SignalConnections {
+    public get regs(): SignalConnections {
         if (this._regs == null) {
             this._regs = new SignalConnections();
         }
@@ -88,7 +88,7 @@ export class GameObjectBase {
      * Called immediately after the GameObject has been added to an AppMode.
      * (Subclasses can override this to do something useful.)
      */
-    protected added () :void {
+    protected added(): void {
     }
 
     /**
@@ -99,7 +99,7 @@ export class GameObjectBase {
      *
      * (Subclasses can override this to do something useful.)
      */
-    protected removed () :void {
+    protected removed(): void {
     }
 
     /**
@@ -114,18 +114,21 @@ export class GameObjectBase {
      *
      * (Subclasses can override this to do something useful.)
      */
-    protected dispose () :void {
+    protected dispose(): void {
     }
 
-    /*internal*/ _attachToDisplayList (displayParent :Container, displayIdx :number) :void {
+    /*internal*/
+    _attachToDisplayList(displayParent: Container, displayIdx: number): void {
         // implemented by subclasses
     }
 
-    /*internal*/ _addedInternal () :void {
+    /*internal*/
+    _addedInternal(): void {
         this.added();
     }
 
-    /*internal*/ _removedInternal () :void {
+    /*internal*/
+    _removedInternal(): void {
         this._ref._obj = null;
         this._parent = null;
         this._mode = null;
@@ -137,7 +140,8 @@ export class GameObjectBase {
         this._disposeInternal();
     }
 
-    /*internal*/ _disposeInternal () :void {
+    /*internal*/
+    _disposeInternal(): void {
         this._ref._obj = null;
         this.dispose();
         if (this._regs != null) {
@@ -146,18 +150,23 @@ export class GameObjectBase {
         }
     }
 
-    /*internal*/ get _wasRemoved () :boolean {
+    /*internal*/
+    get _wasRemoved(): boolean {
         return (this._ref != null && this._ref._obj == null);
     }
 
     // lazily instantiated
-    private _regs :SignalConnections;
-    private _destroyed :UnitSignal;
+    private _regs: SignalConnections;
+    private _destroyed: UnitSignal;
 
-    /*internal*/ _name :string;
-    /*internal*/ _ref :GameObjectRef;
-    /*internal*/ _parent :GameObject;
-    /*internal*/ _mode :AppMode;
+    /*internal*/
+    _name: string;
+    /*internal*/
+    _ref: GameObjectRef;
+    /*internal*/
+    _parent: GameObject;
+    /*internal*/
+    _mode: AppMode;
 
-    protected static EMPTY_ARRAY :any[] = [];
+    protected static EMPTY_ARRAY: any[] = [];
 }

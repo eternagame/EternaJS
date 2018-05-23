@@ -16,11 +16,11 @@ export class AppMode {
      * The resultant Array will not have any null objects, so it may be smaller than the Array
      * that was passed in.
      */
-    public static getObjects (objectRefs :GameObjectRef[]) :GameObject[] {
+    public static getObjects(objectRefs: GameObjectRef[]): GameObject[] {
         // Array.map would be appropriate here, except that the resultant
         // Array might contain fewer entries than the source.
 
-        let objs :GameObject[] = [];
+        let objs: GameObject[] = [];
         for (let ref of objectRefs) {
             if (!ref.isNull) {
                 objs.push(ref.object);
@@ -30,106 +30,108 @@ export class AppMode {
         return objs;
     }
 
-    public constructor () {
+    public constructor() {
         this._rootObject = new RootObject(this);
     }
 
-    public get regs () :SignalConnections {
+    public get regs(): SignalConnections {
         return this._regs;
     }
 
-    public /*final*/ get modeSprite () :Container {
+    public /*final*/ get modeSprite(): Container {
         return this._modeSprite;
     }
 
     /** Returns the ModeStack that this AppMode lives in */
-    public /*final*/ get modeStack () :ModeStack {
+    public /*final*/ get modeStack(): ModeStack {
         return this._modeStack;
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId (id :Object) :void {
-        let obj :GameObject = this.getObjectWithId(id);
+    public destroyObjectWithId(id: Object): void {
+        let obj: GameObject = this.getObjectWithId(id);
         if (null != obj) {
             obj.destroySelf();
         }
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId (id :Object) :any {
+    public getObjectWithId(id: Object): any {
         return this._idObjects.get(id);
     }
 
     /** @return total time the mode has been running, as measured by calls to update(). */
-    public get time () :number {
+    public get time(): number {
         return this._runningTime;
     }
 
-    public addObject (obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
+    public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
-    public addNamedObject (name :string, obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
+    public addNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public replaceNamedObject (name :string, obj :GameObjectBase, displayParent :Container = null, displayIdx :number = -1) :GameObjectRef {
+    public replaceNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public getNamedObject (name :string) :GameObjectBase {
+    public getNamedObject(name: string): GameObjectBase {
         return this._rootObject.getNamedObject(name);
     }
 
-    public hasNamedObject (name :string) :boolean {
+    public hasNamedObject(name: string): boolean {
         return this._rootObject.hasNamedObject(name);
     }
 
-    public removeObject (obj :GameObjectBase) :void {
+    public removeObject(obj: GameObjectBase): void {
         this._rootObject.removeObject(obj);
     }
 
-    public removeNamedObjects (name :string) :void {
+    public removeNamedObjects(name: string): void {
         this._rootObject.removeNamedObjects(name);
     }
 
-    public get isLiveObject () :boolean {
+    public get isLiveObject(): boolean {
         return !this._disposed;
     }
 
     /** Called once per update tick. Updates all objects in the mode. */
-    protected update (dt :number) :void {
+    protected update(dt: number): void {
         this._runningTime += dt;
         // update all Updatable objects
         this.updateBegan.emit(dt);
     }
 
     /** Called when the mode is added to the mode stack */
-    protected setup () :void {
+    protected setup(): void {
     }
 
     /** Called when the mode is removed from the mode stack */
-    protected dispose () :void {
+    protected dispose(): void {
     }
 
     /** Called when the mode becomes active on the mode stack */
-    protected enter () :void {
+    protected enter(): void {
     }
 
     /** Called when the mode becomes inactive on the mode stack */
-    protected exit () :void {
+    protected exit(): void {
     }
 
     /** Called when an object is registered with the mode */
-    protected registerObject (obj :GameObjectBase) :void {
+    protected registerObject(obj: GameObjectBase): void {
     }
 
-    /*internal*/ setupInternal (modeStack :ModeStack) :void {
+    /*internal*/
+    setupInternal(modeStack: ModeStack): void {
         this._modeStack = modeStack;
         this.setup();
     }
 
-    /*internal*/ disposeInternal () :void {
+    /*internal*/
+    disposeInternal(): void {
         Assert.isTrue(!this._disposed, "already disposed");
         this._disposed = true;
 
@@ -149,25 +151,29 @@ export class AppMode {
         this._modeSprite = null;
     }
 
-    /*internal*/ enterInternal () :void {
+    /*internal*/
+    enterInternal(): void {
         this._active = true;
         this.enter();
         this._entered.emit();
     }
 
-    /*internal*/ exitInternal () :void {
+    /*internal*/
+    exitInternal(): void {
         this._active = false;
         this.exit();
     }
 
-    /*internal*/ updateInternal (dt :number) :void {
+    /*internal*/
+    updateInternal(dt: number): void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
-    /*internal*/ registerObjectInternal (obj :GameObjectBase) :void {
+    /*internal*/
+    registerObjectInternal(obj: GameObjectBase): void {
         // Handle IDs
-        let ids :any[] = obj.ids;
+        let ids: any[] = obj.ids;
         if (ids.length > 0) {
             this._regs.add(obj.destroyed.connect(() => {
                 for (let id of ids) {
@@ -190,26 +196,26 @@ export class AppMode {
         this.registerObject(obj);
     }
 
-    protected _updateComplete :UnitSignal = new UnitSignal();
-    protected _entered :UnitSignal = new UnitSignal();
+    protected _updateComplete: UnitSignal = new UnitSignal();
+    protected _entered: UnitSignal = new UnitSignal();
 
-    protected _modeSprite :Container = new Container();
-    protected _modeStack :ModeStack;
+    protected _modeSprite: Container = new Container();
+    protected _modeStack: ModeStack;
 
-    protected _runningTime :number = 0;
+    protected _runningTime: number = 0;
 
-    protected _rootObject :RootObject;
+    protected _rootObject: RootObject;
 
     protected _idObjects: Map<any, GameObjectBase> = new Map();
 
-    protected _regs :SignalConnections = new SignalConnections();
+    protected _regs: SignalConnections = new SignalConnections();
 
-    protected _active :boolean;
-    protected _disposed :boolean;
+    protected _active: boolean;
+    protected _disposed: boolean;
 }
 
 class RootObject extends GameObject {
-    constructor (mode :AppMode) {
+    constructor(mode: AppMode) {
         super();
         this._mode = mode;
         this._ref = new GameObjectRef();

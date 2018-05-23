@@ -4,15 +4,15 @@ import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 
 export class FlashbangApp {
-    public get pixi (): PIXI.Application {
+    public get pixi(): PIXI.Application {
         return this._pixi;
     }
 
-    public get modeStack () :ModeStack {
+    public get modeStack(): ModeStack {
         return this._modeStack;
     }
 
-    public run () :void {
+    public run(): void {
         this._pixi = this.createPixi();
         document.body.appendChild(this._pixi.view);
 
@@ -26,12 +26,12 @@ export class FlashbangApp {
         this._pixi.ticker.add(delta => this.update(delta));
     }
 
-    public addUpdatable (obj :Updatable) :void {
+    public addUpdatable(obj: Updatable): void {
         this._updatables.push(obj);
     }
 
-    public removeUpdatable (obj :Updatable) :void {
-        let idx :number = this._updatables.indexOf(obj);
+    public removeUpdatable(obj: Updatable): void {
+        let idx: number = this._updatables.indexOf(obj);
         if (idx >= 0) {
             this._updatables.splice(idx, 1);
         }
@@ -41,19 +41,19 @@ export class FlashbangApp {
      * Called at the end of the initialization process.
      * Subclasses should override this to push their initial AppMode to the mode stack
      */
-    protected setup () :void {
+    protected setup(): void {
     }
 
     /**
      * Creates and returns a PIXI.Application instance.
      * Subclasses can override to do custom initialization.
      */
-    protected createPixi () :PIXI.Application {
+    protected createPixi(): PIXI.Application {
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         return new PIXI.Application(800, 600, {backgroundColor: 0x1099bb});
     }
 
-    protected update (tickerDelta: number) :void {
+    protected update(tickerDelta: number): void {
         this._isUpdating = true;
 
         try {
@@ -79,7 +79,7 @@ export class FlashbangApp {
         }
     }
 
-    protected disposeNow () :void {
+    protected disposeNow(): void {
         this._modeStack.dispose();
 
         this._updatables = null;
@@ -92,10 +92,10 @@ export class FlashbangApp {
     }
 
     protected _pixi: PIXI.Application;
-    protected _regs :SignalConnections = new SignalConnections();
+    protected _regs: SignalConnections = new SignalConnections();
 
-    protected _isUpdating :boolean;
-    protected _disposePending :boolean;
-    protected _updatables :Updatable[] = [];
-    protected _modeStack :ModeStack;
+    protected _isUpdating: boolean;
+    protected _disposePending: boolean;
+    protected _updatables: Updatable[] = [];
+    protected _modeStack: ModeStack;
 }

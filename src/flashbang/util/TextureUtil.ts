@@ -3,7 +3,7 @@ import {Flashbang} from "../core/Flashbang";
 
 export class TextureUtil {
     /** Creates a promise that will resolve when the texture is loaded */
-    public static loadTexture (tex: Texture): Promise<Texture> {
+    public static loadTexture(tex: Texture): Promise<Texture> {
         return this.whenBaseTexLoaded(tex.baseTexture).then(() => Promise.resolve(tex));
     }
 
@@ -11,7 +11,7 @@ export class TextureUtil {
      * Creates a promise that will resolve when the given texture source is ready to be used.
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
-    public static loadTextureSource (textureSource: string): Promise<void> {
+    public static loadTextureSource(textureSource: string): Promise<void> {
         return this.whenBaseTexLoaded(BaseTexture.fromImage(textureSource));
     }
 
@@ -19,7 +19,7 @@ export class TextureUtil {
      * Renders the given DisplayObject to a new texture.
      * All textures in the DisplayObject's hierarchy should be loaded before calling this.
      */
-    public static renderToTexture (disp: DisplayObject): Texture {
+    public static renderToTexture(disp: DisplayObject): Texture {
         disp.setTransform();
         disp.getLocalBounds(TextureUtil.R);
         let tex: RenderTexture = new RenderTexture(new BaseRenderTexture(TextureUtil.R.width, TextureUtil.R.height));
@@ -27,7 +27,7 @@ export class TextureUtil {
         return tex;
     }
 
-    private static whenBaseTexLoaded (base: BaseTexture): Promise<void> {
+    private static whenBaseTexLoaded(base: BaseTexture): Promise<void> {
         if (!base.isLoading) {
             return base.hasLoaded ?
                 Promise.resolve() :

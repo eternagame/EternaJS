@@ -4,12 +4,13 @@ import {InterpolatingTask} from "./InterpolatingTask";
 import {DisplayObject} from "pixi.js";
 
 export class DisplayObjectTask extends InterpolatingTask {
-    constructor (time :number, easing :EasingFunc, target :DisplayObject) {
+    constructor(time: number, easing: EasingFunc, target: DisplayObject) {
         super(time, easing);
         this._target = target;
     }
 
-    /*override*/ protected added () :void {
+    /*override*/
+    protected added(): void {
         super.added();
         // If we weren't given a target, operate on our parent object
         if (this._target == null) {
@@ -18,5 +19,5 @@ export class DisplayObjectTask extends InterpolatingTask {
         }
     }
 
-    protected _target :DisplayObject;
+    protected _target: DisplayObject;
 }
