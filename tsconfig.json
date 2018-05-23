@@ -3,12 +3,15 @@
     "outDir": "./dist/",
     "sourceMap": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
     "module": "esnext",
     "target": "es2015",
-    "allowJs": true
+    "allowJs": true,
+    "moduleResolution": "node"
+//    "strict": true
   },
   "include": [
-    "node_modules/@types/**/*.d.ts",
     "./src/**/*.ts"
   ]
 }
