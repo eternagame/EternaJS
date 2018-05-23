@@ -290,4 +290,9 @@ export class BitmapManager {
     public static get_bitmap(source: string): Texture {
         return Texture.fromImage(source);
     }
+
+    /// TODO: remove me!
+    public static get_bitmap_named(source: string): Texture {
+        return Texture.fromImage(source);
+    }
 }
