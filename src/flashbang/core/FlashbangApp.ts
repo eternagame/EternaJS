@@ -49,6 +49,7 @@ export class FlashbangApp {
      * Subclasses can override to do custom initialization.
      */
     protected createPixi () :PIXI.Application {
+        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         return new PIXI.Application(800, 600, {backgroundColor: 0x1099bb});
     }
 
