@@ -4,6 +4,8 @@
   "description": "TypeScript port of the Eterna ActionScript game",
   "main": "./dist/main.js",
   "scripts": {
+    "clean": "rm -rf dist",
+    "typecheck": "tsc",
     "webpack": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,14 +26,14 @@
     "@babel/preset-typescript": "^7.0.0-beta.47",
     "@types/js-cookie": "^2.1.0",
     "@types/loglevel": "^1.5.3",
-    "@types/node": "^10.1.1",
+    "@types/node": "^10.1.2",
     "@types/pixi.js": "^4.7.3",
-    "babel-loader": "^8.0.0-beta.2",
+    "babel-loader": "^8.0.0-beta.3",
     "babel-polyfill": "^6.26.0",
     "source-map-loader": "^0.2.3",
     "typescript": "^2.8.3",
     "webpack": "^4.8.3",
-    "webpack-cli": "^2.1.3"
+    "webpack-cli": "^2.1.4"
   },
   "dependencies": {
     "js-cookie": "^2.2.0",
