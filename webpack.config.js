@@ -1,18 +1,21 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
 'use strict';
 
-var path = require('path');
-var webpack = require('webpack');
+let path = require('path');
 
-var packageJson = require('./package.json');
-var vendorDependencies = Object.keys(packageJson['dependencies']);
+let packageJson = require('./package.json');
+let vendorDependencies = Object.keys(packageJson['dependencies']);
 
 module.exports = {
-    entry: ['babel-polyfill', "./src/eterna/index.ts"],
+    entry: {
+        main: ['babel-polyfill', "./src/eterna/index.ts"],
+        vendor: vendorDependencies
+    },
+
     output: {
-        filename: "bundle.js",
-        chunkFilename: '[name].bundle.js',
-        path: __dirname + "/dist",
+        filename: '[name].js',
+        chunkFilename: '[chunkhash].js',
+        path: path.resolve(__dirname + "/dist"),
 
         // TODO: We're not going to serve assets from 'dist' in production; fix this
         publicPath: "dist/"
