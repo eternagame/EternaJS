@@ -9,15 +9,15 @@ import {Easing} from "../flashbang/util/Easing";
 import {BitmapManager} from "./util/BitmapManager";
 
 export class Bubble extends SpriteObject implements Updatable {
-    public is_paused: boolean;
+    public is_paused: boolean = false;
 
-    constructor(foreground:boolean) {
+    constructor(foreground: boolean) {
         super();
 
         this._foreground = foreground;
 
         // TSC: clean up this badness
-        let useBlueBubble :boolean;
+        let useBlueBubble: boolean;
         let bubbleType: number = 0;
         if (this._foreground) {
             this._bubbleSize = 3;
@@ -25,14 +25,14 @@ export class Bubble extends SpriteObject implements Updatable {
         } else {
             useBlueBubble = (Math.random() < 0.5);
 
-            let size_number:number = Math.random();
+            let size_number: number = Math.random();
             if (size_number < 0.33) this._bubbleSize = 0;
             else if (size_number < 0.66) this._bubbleSize = 1;
             else this._bubbleSize = 2;
         }
 
-        if(useBlueBubble) {
-            if( this._bubbleSize == 0) bubbleType = 0;
+        if (useBlueBubble) {
+            if (this._bubbleSize == 0) bubbleType = 0;
             else if (this._bubbleSize == 1) bubbleType = 1;
             else if (this._bubbleSize == 2) bubbleType = 2;
             else bubbleType = 3;
@@ -75,35 +75,40 @@ export class Bubble extends SpriteObject implements Updatable {
         this._lastTime = -1;
     }
 
-    public set_force(force_x:number, force_y:number):void {
+    public set_force(force_x: number, force_y: number): void {
         this._accX = force_x;
         this._accY = force_y;
     }
 
-    public set_auto_hide(active:boolean):void {
+    public set_auto_hide(active: boolean): void {
         this._hideTime = active ? this._lastTime + Math.random() * 6 * 1000.0 : -1;
     }
 
-    /*override*/ public update(dt: number):void {
+    /*override*/
+    public update(dt: number): void {
+        if (this._bitmap == null) {
+            return;
+        }
+
         const current_time = this._lastTime + dt;
         const tex = this._bitmap.texture;
 
-        if (this.is_paused || (this.sprite.y < - tex.height)) {
+        if (this.is_paused || (this.sprite.y < -tex.height)) {
             this._lastTime = current_time;
             return;
         }
 
-        let mouseLoc = this.sprite.toLocal(Flashbang.mouse, null, Bubble.P);
+        let mouseLoc = this.sprite.toLocal(Flashbang.mouse, undefined, Bubble.P);
         let m_x = mouseLoc.x - tex.width / 2.0;
         let m_y = mouseLoc.y - tex.height / 2.0;
-        let dist = Math.max(m_x*m_x + m_y*m_y, 0.01);
+        let dist = Math.max(m_x * m_x + m_y * m_y, 0.01);
         if (dist < 10000) {
             if (this._foreground) {
                 this._accX += -500 * m_x * 2 / (dist);
                 this._accY += -500 * m_y * 2 / (dist);
             } else {
-                this._accX += -500 * m_x * (3-this._bubbleSize) / (dist);
-                this._accY += -500 * m_y * (3-this._bubbleSize) / (dist);
+                this._accX += -500 * m_x * (3 - this._bubbleSize) / (dist);
+                this._accY += -500 * m_y * (3 - this._bubbleSize) / (dist);
             }
         }
 
@@ -114,7 +119,7 @@ export class Bubble extends SpriteObject implements Updatable {
                 this._accY += -30;
             } else if (this._bubbleSize == 1) {
                 this._accY += -20;
-            } else if( this._bubbleSize == 2) {
+            } else if (this._bubbleSize == 2) {
                 this._accY += -10;
             } else {
                 this._accY += -110;
@@ -123,15 +128,15 @@ export class Bubble extends SpriteObject implements Updatable {
             this._accX += NormalDistPRNG.random() * 5;
         }
 
-        let dvx:number = dt * this._accX;
-        let dvy:number = dt * this._accY;
+        let dvx: number = dt * this._accX;
+        let dvy: number = dt * this._accY;
 
         this.sprite.y += dvy;
         this.sprite.x += dvx;
 
         this._lastTime = current_time;
 
-        if (this.sprite.y < - tex.height && (this._hideTime < 0 || this._hideTime >= current_time)) {
+        if (this.sprite.y < -tex.height && (this._hideTime < 0 || this._hideTime >= current_time)) {
             this.init();
         }
 
@@ -139,15 +144,15 @@ export class Bubble extends SpriteObject implements Updatable {
         this._accY *= 0.5;
     }
 
-    private readonly _bitmap: Sprite;
+    private readonly _bitmap: Sprite = null;
     private readonly _bubbleSize: number;
     private readonly _foreground: boolean;
 
     private _lastTime: number = 0;
-    private _hideTime: number;
+    private _hideTime: number = 0;
 
-    private _accX:number;
-    private _accY:number;
+    private _accX: number = 0;
+    private _accY: number = 0;
 
     private static BUBBLE_NAMES: string[] = [
         BitmapManager.Bubble00,
@@ -165,15 +170,15 @@ export class Bubble extends SpriteObject implements Updatable {
 
 
 class NormalDistPRNG {
-    private static s:number = 0;
-    private static cached:boolean = false;
-    private static cache:number;
+    private static s: number = 0;
+    private static cached: boolean = false;
+    private static cache: number;
 
-    public static seed(_seed:number):void {
+    public static seed(_seed: number): void {
         NormalDistPRNG.s = _seed > 1 ? _seed % 2147483647 : 1;
     }
 
-    public static random():number {
+    public static random(): number {
         if (NormalDistPRNG.s == 0) {
             NormalDistPRNG.seed(Date.now());
         }
@@ -183,17 +188,17 @@ class NormalDistPRNG {
             return NormalDistPRNG.cache;
         }
 
-        let	x:number,
-            y:number,
-            w:number;
+        let x: number,
+            y: number,
+            w: number;
         do {
-            NormalDistPRNG.s = ( NormalDistPRNG.s * 16807 ) % 2147483647;
+            NormalDistPRNG.s = (NormalDistPRNG.s * 16807) % 2147483647;
             x = NormalDistPRNG.s / 1073741823.5 - 1;
-            NormalDistPRNG.s = ( NormalDistPRNG.s * 16807 ) % 2147483647;
+            NormalDistPRNG.s = (NormalDistPRNG.s * 16807) % 2147483647;
             y = NormalDistPRNG.s / 1073741823.5 - 1;
-            w = x*x + y*y;
+            w = x * x + y * y;
         }
-        while ( w >= 1 || !w );
+        while (w >= 1 || !w);
 
         w = Math.sqrt(-2 * Math.log(w) / w);
 

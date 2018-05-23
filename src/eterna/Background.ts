@@ -108,7 +108,7 @@ export class Background extends SpriteObject {
         }
     }
 
-    private _bgImage: Graphics;
+    private _bgImage: Graphics = null;
 
     private _foreground: boolean;
     private _isFrozen: boolean;

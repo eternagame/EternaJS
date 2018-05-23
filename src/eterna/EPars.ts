@@ -205,7 +205,7 @@ export class EPars {
         return res;
     }
 
-    public static count_consecutive(sequence: number[], letter: number, locks: boolean[] = null): number {
+    public static count_consecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
         let max_consecutive: number = 0;
 
         let ii: number = 0;
@@ -248,7 +248,7 @@ export class EPars {
         return max_consecutive;
     }
 
-    public static get_restricted_consecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] = null): number[] {
+    public static get_restricted_consecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] | null = null): number[] {
         let restricted: number[] = [];
 
         let ii: number = 0;
@@ -357,7 +357,7 @@ export class EPars {
         return str;
     }
 
-    public static is_internal(index: number, pairs: number[]): number[] {
+    public static is_internal(index: number, pairs: number[]): number[] | null {
         let pair_start_here: number = -1;
         let pair_end_here: number = -1;
         let pair_start_there: number = -1;
@@ -413,7 +413,7 @@ export class EPars {
         return bases;
     }
 
-    public static validate_parenthesis(parenthesis: string, letteronly: boolean = true, length_limit: number = -1): string {
+    public static validate_parenthesis(parenthesis: string, letteronly: boolean = true, length_limit: number = -1): string | null {
         let pair_stack: number[] = [];
 
         if (length_limit >= 0 && parenthesis.length > length_limit) {
@@ -422,8 +422,6 @@ export class EPars {
 
 
         for (let jj: number = 0; jj < parenthesis.length; jj++) {
-
-
             if (parenthesis.charAt(jj) == '(') {
                 pair_stack.push(jj);
             } else if (parenthesis.charAt(jj) == ')') {
@@ -512,7 +510,7 @@ export class EPars {
         return ret_pairs;
     }
 
-    public static pairs_array_to_parenthesis(pairs: number[], seq: number[] = null): string {
+    public static pairs_array_to_parenthesis(pairs: number[], seq: number[] | null = null): string {
         let bi_pairs: number[] = new Array(pairs.length);
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -682,7 +680,7 @@ export class EPars {
     }
 
 
-    public static are_pairs_same(a_pairs: number[], b_pairs: number[], constraints: any[] = null): boolean {
+    public static are_pairs_same(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
         if (a_pairs.length != b_pairs.length) {
             return false;
         }
