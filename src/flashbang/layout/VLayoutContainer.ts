@@ -7,51 +7,51 @@ import {LayoutContainer} from "./LayoutContainer";
  * Call layout() after adding or removing children to update the sprite's layout.
  */
 export class VLayoutContainer extends LayoutContainer {
-    public constructor (vOffset: number = 0, hAlign: Align = Align.CENTER) {
+    public constructor(vOffset: number = 0, hAlign: Align = Align.CENTER) {
         super();
         this._vOffset = vOffset;
         this._hAlign = hAlign;
     }
 
-    public get reversed (): boolean {
+    public get reversed(): boolean {
         return this._reversed;
     }
 
     /** If true, then children are laid out bottom-to-top instead of top-to-bottom */
-    public set reversed (val: boolean) {
+    public set reversed(val: boolean) {
         if (this._reversed != val) {
             this._reversed = val;
             this._needsLayout = true;
         }
     }
 
-    public get vOffset (): number {
+    public get vOffset(): number {
         return this._vOffset;
     }
 
-    public set vOffset (val: number) {
+    public set vOffset(val: number) {
         if (this._vOffset != val) {
             this._vOffset = val;
             this._needsLayout = true;
         }
     }
 
-    public get hAlign (): Align {
+    public get hAlign(): Align {
         return this._hAlign;
     }
 
-    public set hAlign (val: Align) {
+    public set hAlign(val: Align) {
         if (this._hAlign != val) {
             this._hAlign = val;
             this._needsLayout = true;
         }
     }
 
-    public addVSpacer (size: number): void {
+    public addVSpacer(size: number): void {
         this.addVSpacerAt(size, this.children.length);
     }
 
-    public addVSpacerAt (size: number, index: number): void {
+    public addVSpacerAt(size: number, index: number): void {
         let spacer = new Sprite();
         spacer.width = 1;
         spacer.height = size;
@@ -60,7 +60,7 @@ export class VLayoutContainer extends LayoutContainer {
     }
 
     /*override*/
-    protected doLayout (): void {
+    protected doLayout(): void {
         let maxWidth: number = 0;
         if (this._hAlign != Align.LEFT) {
             for (let child of this.children) {

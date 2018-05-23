@@ -1,5 +1,5 @@
 export class PowerEaser {
-    constructor (pow: number) {
+    constructor(pow: number) {
         this._pow = pow;
     }
 
@@ -22,7 +22,7 @@ export class PowerEaser {
             return to;
         }
 
-        let mid :number = from + (to - from) * 0.5;
+        let mid: number = from + (to - from) * 0.5;
         t *= 0.5;
         return (dt <= t ? this.easeIn(from, mid, dt, t) : this.easeOut(mid, to, dt - t, t));
     };

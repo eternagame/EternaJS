@@ -8,10 +8,10 @@ import {AppMode} from "./AppMode";
  * and other events - all other modes are inactive.
  */
 export class ModeStack {
-    public readonly topModeChanged :UnitSignal = new UnitSignal();
-    public readonly disposed :UnitSignal = new UnitSignal();
+    public readonly topModeChanged: UnitSignal = new UnitSignal();
+    public readonly disposed: UnitSignal = new UnitSignal();
 
-    constructor (parentSprite :Container) {
+    constructor(parentSprite: Container) {
         parentSprite.addChild(this._topSprite);
     }
 
@@ -19,7 +19,7 @@ export class ModeStack {
      * Returns the number of modes currently on the mode stack. Be aware that this value might be
      * about to change if mode transitions have been queued that have not yet been processed.
      */
-    public get length () :number {
+    public get length(): number {
         return this._modeStack.length;
     }
 
@@ -27,7 +27,7 @@ export class ModeStack {
      * Returns the top mode on the mode stack, or null
      * if the stack is empty.
      */
-    public /*final*/ get topMode () :AppMode {
+    public /*final*/ get topMode(): AppMode {
         return (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null);
     }
 
@@ -35,8 +35,8 @@ export class ModeStack {
      * Applies the specify mode transition to the mode stack.
      * (Mode changes take effect between game updates.)
      */
-    public doModeTransition (type :ModeTransition, mode :AppMode = null, index :number = 0) :void {
-        let transition :PendingTransition = new PendingTransition();
+    public doModeTransition(type: ModeTransition, mode: AppMode = null, index: number = 0): void {
+        let transition: PendingTransition = new PendingTransition();
         transition.type = type;
         transition.mode = mode;
         transition.index = index;
@@ -53,7 +53,7 @@ export class ModeStack {
      * You can use a negative integer to specify a position relative
      * to the top of the stack (for example, -1 is the top of the stack).
      */
-    public insertMode (mode :AppMode, index :number) :void {
+    public insertMode(mode: AppMode, index: number): void {
         this.doModeTransition(ModeTransition.INSERT, mode, index);
     }
 
@@ -66,7 +66,7 @@ export class ModeStack {
      * You can use a negative integer to specify a position relative
      * to the top of the stack (for example, -1 is the top of the stack).
      */
-    public removeMode (index :number) :void {
+    public removeMode(index: number): void {
         this.doModeTransition(ModeTransition.REMOVE, null, index);
     }
 
@@ -75,7 +75,7 @@ export class ModeStack {
      * a new mode in its place.
      * (Mode changes take effect between game updates.)
      */
-    public changeMode (mode :AppMode) :void {
+    public changeMode(mode: AppMode): void {
         this.doModeTransition(ModeTransition.CHANGE, mode);
     }
 
@@ -83,7 +83,7 @@ export class ModeStack {
      * Pushes a mode to the mode stack.
      * (Mode changes take effect between game updates.)
      */
-    public pushMode (mode :AppMode) :void {
+    public pushMode(mode: AppMode): void {
         this.doModeTransition(ModeTransition.PUSH, mode);
     }
 
@@ -91,7 +91,7 @@ export class ModeStack {
      * Pops the top mode from the mode stack.
      * (Mode changes take effect between game updates.)
      */
-    public popMode () :void {
+    public popMode(): void {
         this.doModeTransition(ModeTransition.REMOVE, null, -1);
     }
 
@@ -99,7 +99,7 @@ export class ModeStack {
      * Pops all modes from the mode stack.
      * Mode changes take effect before game updates.
      */
-    public popAllModes () :void {
+    public popAllModes(): void {
         this.doModeTransition(ModeTransition.UNWIND);
     }
 
@@ -109,11 +109,11 @@ export class ModeStack {
      * of the mode stack.
      * Mode changes take effect before game updates.
      */
-    public unwindToMode (mode :AppMode) :void {
+    public unwindToMode(mode: AppMode): void {
         this.doModeTransition(ModeTransition.UNWIND, mode);
     }
 
-    public update (dt :number) :void {
+    public update(dt: number): void {
         if (this._pendingModeTransitionQueue.length > 0) {
             // handleModeTransition generates a lot of garbage in memory, avoid calling it on
             // updates where it will NOOP anyway.
@@ -126,13 +126,14 @@ export class ModeStack {
         }
     }
 
-    /*internal*/ handleModeTransitions () :void {
+    /*internal*/
+    handleModeTransitions(): void {
         if (this._pendingModeTransitionQueue.length <= 0) {
             return;
         }
 
-        let initialTopMode :AppMode = this.topMode;
-        let self :ModeStack = this;
+        let initialTopMode: AppMode = this.topMode;
+        let self: ModeStack = this;
 
         const doPushMode = (newMode: AppMode): void => {
             if (null == newMode) {
@@ -162,7 +163,7 @@ export class ModeStack {
             newMode.setupInternal(self);
         };
 
-        const doRemoveMode = (index :number) :void => {
+        const doRemoveMode = (index: number): void => {
             if (this._modeStack.length == 0) {
                 throw new Error("Can't remove a mode from an empty stack");
             }
@@ -175,7 +176,7 @@ export class ModeStack {
             index = Math.min(index, this._modeStack.length - 1);
 
             // if the top mode is removed, make sure it's exited first
-            let mode :AppMode = this._modeStack[index];
+            let mode: AppMode = this._modeStack[index];
             if (mode == initialTopMode) {
                 initialTopMode.exitInternal();
                 initialTopMode = null;
@@ -188,48 +189,48 @@ export class ModeStack {
         // create a new _pendingModeTransitionQueue right now
         // so that we can properly handle mode transition requests
         // that occur during the processing of the current queue
-        let transitionQueue :PendingTransition[] = this._pendingModeTransitionQueue;
+        let transitionQueue: PendingTransition[] = this._pendingModeTransitionQueue;
         this._pendingModeTransitionQueue = [];
 
         for (let transition of transitionQueue) {
-            let mode :AppMode = transition.mode;
+            let mode: AppMode = transition.mode;
             switch (transition.type) {
-                case ModeTransition.PUSH:
+            case ModeTransition.PUSH:
+                doPushMode(mode);
+                break;
+
+            case ModeTransition.INSERT:
+                doInsertMode(mode, transition.index);
+                break;
+
+            case ModeTransition.REMOVE:
+                doRemoveMode(transition.index);
+                break;
+
+            case ModeTransition.CHANGE:
+                // a pop followed by a push
+                if (null != this.topMode) {
+                    doRemoveMode(-1);
+                }
+                doPushMode(mode);
+                break;
+
+            case ModeTransition.UNWIND:
+                // pop modes until we find the one we're looking for
+                while (this._modeStack.length > 0 && this.topMode != mode) {
+                    doRemoveMode(-1);
+                }
+
+                Assert.isTrue(this.topMode == mode || this._modeStack.length == 0);
+
+                if (this._modeStack.length == 0 && null != mode) {
                     doPushMode(mode);
-                    break;
-
-                case ModeTransition.INSERT:
-                    doInsertMode(mode, transition.index);
-                    break;
-
-                case ModeTransition.REMOVE:
-                    doRemoveMode(transition.index);
-                    break;
-
-                case ModeTransition.CHANGE:
-                    // a pop followed by a push
-                    if (null != this.topMode) {
-                        doRemoveMode(-1);
-                    }
-                    doPushMode(mode);
-                    break;
-
-                case ModeTransition.UNWIND:
-                    // pop modes until we find the one we're looking for
-                    while (this._modeStack.length > 0 && this.topMode != mode) {
-                        doRemoveMode(-1);
-                    }
-
-                    Assert.isTrue(this.topMode == mode || this._modeStack.length == 0);
-
-                    if (this._modeStack.length == 0 && null != mode) {
-                        doPushMode(mode);
-                    }
-                    break;
+                }
+                break;
             }
         }
 
-        let topMode :AppMode = this.topMode;
+        let topMode: AppMode = this.topMode;
         if (topMode != initialTopMode) {
             if (null != initialTopMode) {
                 initialTopMode.exitInternal();
@@ -242,7 +243,8 @@ export class ModeStack {
         }
     }
 
-    /*internal*/ clearModeStackNow () :void {
+    /*internal*/
+    clearModeStackNow(): void {
         this._pendingModeTransitionQueue.length = 0;
         if (this._modeStack.length > 0) {
             this.popAllModes();
@@ -250,7 +252,8 @@ export class ModeStack {
         }
     }
 
-    /*internal*/ dispose () :void {
+    /*internal*/
+    dispose(): void {
         this.clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
@@ -258,9 +261,9 @@ export class ModeStack {
         this._topSprite = null;
     }
 
-    protected _topSprite :Container = new Container();
-    protected _modeStack :AppMode[] = [];
-    protected _pendingModeTransitionQueue :PendingTransition[] = [];
+    protected _topSprite: Container = new Container();
+    protected _modeStack: AppMode[] = [];
+    protected _pendingModeTransitionQueue: PendingTransition[] = [];
 }
 
 export enum ModeTransition {
@@ -268,7 +271,7 @@ export enum ModeTransition {
 }
 
 class PendingTransition {
-    public mode :AppMode;
-    public type :ModeTransition;
-    public index :number;
+    public mode: AppMode;
+    public type: ModeTransition;
+    public index: number;
 }
