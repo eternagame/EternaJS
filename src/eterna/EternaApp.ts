@@ -40,12 +40,15 @@ class TestMode extends AppMode {
         // this.addObject(new Background(20, false), this.modeSprite);
 
         TextureUtil.loadTextureSource(BitmapManager.Satellite).then(() => {
-            let s1 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0))[0];
-            let s2 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 0.5, 0, 0, 0, 0))[0];
-            let s3 = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(2, 2, 2, 2, 0, 0, 0, 0))[0];
+            let bitmaps = [
+                BaseAssets.draw_circular_barcode(16, 6, 0.5),
+                BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0))[0],
+                BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 0.5, 0, 0, 0, 0))[0],
+                BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(2, 2, 2, 2, 0, 0, 0, 0))[0],
+            ];
 
             let container: HLayoutContainer = new HLayoutContainer();
-            for (let tex of [s1, s2, s3]) {
+            for (let tex of bitmaps) {
                 container.addChild(new Sprite(tex));
             }
             container.layout();

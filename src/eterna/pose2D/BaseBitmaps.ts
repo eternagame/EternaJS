@@ -1,31 +1,32 @@
+import {Texture} from "pixi.js";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../util/BitmapManager";
+import {BitmapUtil} from "../util/BitmapUtil";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
-import Rectangle = PIXI.Rectangle;
 
 /** Encapsulates bitmaps for a Base type */
 export class BaseBitmaps {
     public baseType: number;
 
-    public letter_data: any[];  // letters
+    public letter_data: Texture[];  // letters
 
-    public body_data: any[];     // max-size
-    public f_body_data: any[];   // "dontcare"
+    public body_data: Texture[];     // max-size
+    public f_body_data: Texture[];   // "dontcare"
 
-    public l_body_data: any[];   // max-size, letter mode
-    public lf_body_data: any[];  // "dontcare"
+    public l_body_data: Texture[];   // max-size, letter mode
+    public lf_body_data: Texture[];  // "dontcare"
 
-    public lock_data: any[];     // max-size, locked
-    public f_lock_data: any[];   // "dontcare"
+    public lock_data: Texture[];     // max-size, locked
+    public f_lock_data: Texture[];   // "dontcare"
 
-    public mid_data: any[];      // mid-size
-    public f_mid_data: any[];    // "dontcare"
+    public mid_data: Texture[];      // mid-size
+    public f_mid_data: Texture[];    // "dontcare"
 
-    public mid_lock_data: any[]; // mid-size, locked
-    public f_mid_lock_data: any[]; // "dontcare"
+    public mid_lock_data: Texture[]; // mid-size, locked
+    public f_mid_lock_data: Texture[]; // "dontcare"
 
-    public min_data: BitmapData; // min-size
+    public min_data: Texture; // min-size
 
     constructor (baseType: number) {
         this.baseType = baseType;
@@ -44,7 +45,7 @@ export class BaseBitmaps {
         this.min_data = BitmapManager.get_bitmap_named(BaseBitmaps.getBitmapName("Base*Min", baseType));
     }
 
-    public getBodyBitmap (zoom_level: number, flags: number): BitmapData {
+    public getBodyBitmap (zoom_level: number, flags: number): Texture {
         const locked: boolean = (flags & BaseDrawFlags.LOCKED) != 0;
         const lettermode: boolean = (flags & BaseDrawFlags.LETTER_MODE) != 0;
         const is_dontcare: boolean = (flags & BaseDrawFlags.IS_DONTCARE) != 0;
@@ -68,7 +69,7 @@ export class BaseBitmaps {
         }
     }
 
-    public getLetterBitmap (zoom_level: number, drawFlags: number): BitmapData {
+    public getLetterBitmap (zoom_level: number, drawFlags: number): Texture {
         const lettermode: boolean = (drawFlags & BaseDrawFlags.LETTER_MODE) != 0;
         const locked: boolean = (drawFlags & BaseDrawFlags.LOCKED) != 0;
 
@@ -79,24 +80,25 @@ export class BaseBitmaps {
         return null;
     }
 
-    private static createLetterBitmaps (baseType: number, zoomScalar: number): any[] {
-        let big_letter: GameText = new GameText(FontManager.instance.get_font("Verdana", 18, true));
-        big_letter.set_text_color(0x0);
-        big_letter.set_text(BaseBitmaps.type2Letter(baseType));
-
-        let bitmap: BitmapData = new BitmapData(22, 22);
-        bitmap.fillRect(new Rectangle(0, 0, 22, 22), 0x0);
-        bitmap.draw(big_letter);
-
-        let bitmaps: any[] = [bitmap];
-        BitmapUtil.create_scaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
-
-        return bitmaps;
+    private static createLetterBitmaps (baseType: number, zoomScalar: number): Texture[] {
+        // let big_letter: GameText = new GameText(FontManager.instance.get_font("Verdana", 18, true));
+        // big_letter.set_text_color(0x0);
+        // big_letter.set_text(BaseBitmaps.type2Letter(baseType));
+        //
+        // let bitmap: Texture = new Texture(22, 22);
+        // bitmap.fillRect(new Rectangle(0, 0, 22, 22), 0x0);
+        // bitmap.draw(big_letter);
+        //
+        // let bitmaps: Texture[] = [bitmap];
+        // BitmapUtil.create_scaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
+        //
+        // return bitmaps;
+        throw new Error("TODO");
     }
 
-    private static createBodyBitmaps (nameTemplate: string, baseType: number): any[] {
+    private static createBodyBitmaps (nameTemplate: string, baseType: number): Texture[] {
         let bmName: string = BaseBitmaps.getBitmapName(nameTemplate, baseType);
-        let bitmaps: any[] = [BitmapManager.get_bitmap_named(bmName)];
+        let bitmaps: Texture[] = [BitmapManager.get_bitmap_named(bmName)];
         BitmapUtil.create_scaled(bitmaps, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
         return bitmaps;
     }
@@ -120,7 +122,7 @@ export class BaseBitmaps {
         }
     }
 
-    private static bitmap_for_size (bitmaps: any[], ii: number, size_num: number): BitmapData {
+    private static bitmap_for_size (bitmaps: Texture[], ii: number, size_num: number): Texture {
         if (bitmaps.length % Base.NUM_ZOOM_LEVELS != 0) {
             throw new Error("Invalid bitmaps array length " + bitmaps.length);
         }
