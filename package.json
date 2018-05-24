@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "main": "./dist/main.js",
+  "babel": {
+    "presets": [
+      "@babel/env",
+      "@babel/typescript"
+    ],
+    "plugins": [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-syntax-dynamic-import"
+    ]
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "typecheck": "tsc",
