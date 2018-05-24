@@ -2,6 +2,7 @@
 'use strict';
 
 let path = require('path');
+let HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 let packageJson = require('./package.json');
 let vendorDependencies = Object.keys(packageJson['dependencies']);
@@ -51,5 +52,11 @@ module.exports = {
     // https://github.com/webpack-contrib/css-loader/issues/447
     node: {
         fs: "empty"
-    }
+    },
+
+    plugins: [
+        // Caching plugin for faster builds
+        // https://github.com/mzgoddard/hard-source-webpack-plugin
+        new HardSourceWebpackPlugin()
+    ]
 };
