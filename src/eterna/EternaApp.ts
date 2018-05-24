@@ -20,18 +20,19 @@ export class EternaApp extends FlashbangApp {
     protected setup(): void {
         this._modeStack.pushMode(new TestMode());
 
-        this.loadFoldingEngines().catch((e) => {
-            log.error('Error loading folding engines', e);
-        });
+        log.info("Initializing folding engines...");
+        this.loadFoldingEngines()
+            .then(() => log.info("Folding engines intialized"))
+            .catch((e) => log.error('Error loading folding engines', e));
     }
 
     private loadFoldingEngines(): Promise<void> {
-        log.info("Initializing folding engines...");
-        return Promise.all([Vienna.create()]).then((folders: Folder[]) => {
-            for (let folder of folders) {
-                FolderManager.instance.add_folder(folder);
-            }
-        });
+        return Promise.all([Vienna.create()])
+            .then((folders: Folder[]) => {
+                for (let folder of folders) {
+                    FolderManager.instance.add_folder(folder);
+                }
+            });
     }
 }
 
