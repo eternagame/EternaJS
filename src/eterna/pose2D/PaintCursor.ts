@@ -1,4 +1,5 @@
 import {Graphics, DisplayObject} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {EPars} from "../EPars";
@@ -77,10 +78,10 @@ class PaintCursor extends GameObject implements Updatable {
         let ic: number = this._color;
         let oc: number = this._outer_color;
 
-        if (Application.instance.shift_key_pressed()) {
+        if (Flashbang.app.isShiftKeyDown) {
             ic = PaintCursor.NULL;
             oc = PaintCursor.GREY;
-        } else if (Application.instance.alt_key_pressed()) {
+        } else if (Flashbang.app.isAltKeyDown) {
             ic = PaintCursor.CYAN;
             oc = PaintCursor.NULL;
         }

@@ -9,7 +9,6 @@ import {AppMode} from "./AppMode";
  */
 export class ModeStack {
     public readonly topModeChanged: UnitSignal = new UnitSignal();
-    public readonly disposed: UnitSignal = new UnitSignal();
 
     constructor(parentSprite: Container) {
         parentSprite.addChild(this._topSprite);
@@ -23,11 +22,8 @@ export class ModeStack {
         return this._modeStack.length;
     }
 
-    /**
-     * Returns the top mode on the mode stack, or null
-     * if the stack is empty.
-     */
-    public /*final*/ get topMode(): AppMode {
+    /** Returns the top mode on the mode stack, or null if the stack is empty. */
+    public /*final*/ get topMode(): AppMode | null {
         return (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null);
     }
 
@@ -135,7 +131,7 @@ export class ModeStack {
         let initialTopMode: AppMode = this.topMode;
         let self: ModeStack = this;
 
-        const doPushMode = (newMode: AppMode): void => {
+        const doPushMode = (newMode: AppMode) => {
             if (null == newMode) {
                 throw new Error("Can't push a null mode to the mode stack");
             }
@@ -146,7 +142,7 @@ export class ModeStack {
             newMode.setupInternal(self);
         };
 
-        const doInsertMode = (newMode: AppMode, index: number): void => {
+        const doInsertMode = (newMode: AppMode, index: number) => {
             if (null == newMode) {
                 throw new Error("Can't insert a null mode in the mode stack");
             }
@@ -163,7 +159,7 @@ export class ModeStack {
             newMode.setupInternal(self);
         };
 
-        const doRemoveMode = (index: number): void => {
+        const doRemoveMode = (index: number) => {
             if (this._modeStack.length == 0) {
                 throw new Error("Can't remove a mode from an empty stack");
             }
