@@ -4,6 +4,7 @@ import {AppMode} from "../flashbang/core/AppMode";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {HLayoutContainer} from "../flashbang/layout/HLayoutContainer";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
+import {PoseTestMode} from "./debug/PoseTestMode";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
 import {Vienna} from "./folding/Vienna";
@@ -18,7 +19,8 @@ export class EternaApp extends FlashbangApp {
 
     /*override*/
     protected setup(): void {
-        this._modeStack.pushMode(new TestMode());
+        // this._modeStack.pushMode(new TestMode());
+        this._modeStack.pushMode(new PoseTestMode());
 
         log.info("Initializing folding engines...");
         this.loadFoldingEngines()
