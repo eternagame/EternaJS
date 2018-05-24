@@ -1,4 +1,5 @@
 import {SignalConnections} from "typed-signals";
+import {KeyCode} from "../input/KeyCode";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
@@ -24,6 +25,9 @@ export class FlashbangApp {
         this._modeStack.handleModeTransitions();
 
         this._pixi.ticker.add(delta => this.update(delta));
+
+        window.addEventListener("keydown", (e: KeyboardEvent) => this.onKeyboardEvent(e));
+        window.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyboardEvent(e));
     }
 
     public addUpdatable(obj: Updatable): void {
@@ -35,6 +39,21 @@ export class FlashbangApp {
         if (idx >= 0) {
             this._updatables.splice(idx, 1);
         }
+    }
+
+    /** true if the key with the given code is down. See KeyCode for a list of possible values. */
+    public isKeyDown(code: string): boolean {
+        return this._keyDown.get(code) === true;
+    }
+
+    /** true if ShiftLeft or ShiftRight is down */
+    public get isShiftKeyDown(): boolean {
+        return this.isKeyDown(KeyCode.ShiftLeft) || this.isKeyDown(KeyCode.ShiftRight);
+    }
+
+    /** true if AltLeft or AltRight is down */
+    public get isAltKeyDown(): boolean {
+        return this.isKeyDown(KeyCode.AltLeft) || this.isKeyDown(KeyCode.AltRight);
     }
 
     /**
@@ -91,6 +110,19 @@ export class FlashbangApp {
         this._pixi = null;
     }
 
+    protected onKeyboardEvent(e: KeyboardEvent): void {
+        if (e.type == "keydown") {
+            this._keyDown.set(e.code, true);
+        } else if (e.type == "keyup") {
+            this._keyDown.set(e.code, false);
+        }
+
+        let topMode = this._modeStack.topMode;
+        if (topMode != null) {
+            topMode.onKeyboardEvent(e);
+        }
+    }
+
     protected _pixi: PIXI.Application;
     protected _regs: SignalConnections = new SignalConnections();
 
@@ -98,4 +130,6 @@ export class FlashbangApp {
     protected _disposePending: boolean;
     protected _updatables: Updatable[] = [];
     protected _modeStack: ModeStack;
+
+    protected _keyDown: Map<string, boolean> = new Map<string, boolean>();
 }

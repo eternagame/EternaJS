@@ -97,6 +97,10 @@ export class AppMode {
         return !this._disposed;
     }
 
+    /** Called when the application receives a keyDown or keyUp event while this mode is active */
+    public onKeyboardEvent(e: KeyboardEvent): void {
+    }
+
     /** Called once per update tick. Updates all objects in the mode. */
     protected update(dt: number): void {
         this._runningTime += dt;
