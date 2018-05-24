@@ -742,10 +742,10 @@ export class Pose2D extends GameObject implements Updatable {
         // }
     }
 
-    public set_struct_constraints(do_care: any[]): void {
+    public set_struct_constraints(do_care: boolean[]): void {
         let ii: number;
         let len: number = this.get_full_sequence_length();
-        let dc: any[] = (do_care == null ? null : do_care.slice());
+        let dc: boolean[] = (do_care == null ? null : do_care.slice());
         if (dc != null && this._oligos_order != null) {
             let idx_map: any[] = this.get_order_map(null);
             for (ii = 0; ii < len; ii++) {
@@ -1292,7 +1292,7 @@ export class Pose2D extends GameObject implements Updatable {
         return EPars.get_satisfied_pairs(this._pairs, this.get_full_sequence());
     }
 
-    public set_sequence(sequence: any[], animation: boolean = true): void {
+    public set_sequence(sequence: number[]): void {
         if (this._sequence != null) {
             if (this._sequence.length == sequence.length) {
                 let changed: boolean = false;
@@ -1502,11 +1502,13 @@ export class Pose2D extends GameObject implements Updatable {
         return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
     }
 
-    public get_order_map(other_order: any[]): any[] {
-        if (this._oligos == null) return null;
+    public get_order_map(other_order: number[]): number[] {
+        if (this._oligos == null) {
+            return null;
+        }
 
-        let idx_map: any[] = [];
-        let ofs: any[] = [];
+        let idx_map: number[] = [];
+        let ofs: number[] = [];
         let ii: number = this._sequence.length;
         let jj: number;
         for (jj = 0; jj < this._oligos.length; jj++) {
@@ -1604,7 +1606,7 @@ export class Pose2D extends GameObject implements Updatable {
         if (changed) this.update_score_node_gui();
     }
 
-    public get_full_sequence(): any[] {
+    public get_full_sequence(): number[] {
         if (this._oligo == null && this._oligos == null) {
             return this._sequence;
         }
@@ -1661,11 +1663,11 @@ export class Pose2D extends GameObject implements Updatable {
         return null;
     }
 
-    public get_bound_sequence(): any[] {
+    public get_bound_sequence(): number[] {
         if (this._oligos == null) {
             return this._sequence;
         }
-        let seq: any[] = this._sequence.slice();
+        let seq: number[] = this._sequence.slice();
         for (let ii: number = 0; ii < this._oligos_paired; ii++) {
             seq.push(EPars.RNABASE_CUT);
             seq = seq.concat(this._oligos[this._oligos_order[ii]].sequence);
@@ -1673,8 +1675,8 @@ export class Pose2D extends GameObject implements Updatable {
         return seq;
     }
 
-    public set_pairs(pairs: any[]): void {
-        let seq: any[] = this.get_full_sequence();
+    public set_pairs(pairs: number[]): void {
+        let seq: number[] = this.get_full_sequence();
         if (pairs.length != seq.length) {
             log.debug(pairs.length, seq.length);
             throw new Error("Pair length doesn't match sequence length");
@@ -1700,7 +1702,6 @@ export class Pose2D extends GameObject implements Updatable {
     }
 
     public is_pair_satisfied(a: number, b: number): boolean {
-
         if (b < a) {
             let temp: number = a;
             a = b;
