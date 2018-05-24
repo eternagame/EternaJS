@@ -1,18 +1,34 @@
+import * as _ from "lodash";
 import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 
 export class TextureUtil {
-    /** Creates a promise that will resolve when the texture is loaded */
-    public static loadTexture(tex: Texture): Promise<Texture> {
-        return this.whenBaseTexLoaded(tex.baseTexture).then(() => Promise.resolve(tex));
+    /** Returns a promise that will resolve when the texture is loaded */
+    public static load(tex: Texture): Promise<Texture> {
+        let base: BaseTexture = tex.baseTexture;
+        if (!base.isLoading) {
+            return base.hasLoaded ?
+                Promise.resolve(tex) :
+                Promise.reject(`texture failed to load [source=${base.source}]`);
+        } else {
+            return new Promise<Texture>((resolve, reject) => {
+                base.once("loaded", () => resolve(tex));
+                base.once("error", () => reject(`texture failed to load [source=${base.source}]`));
+            });
+        }
     }
 
     /**
-     * Creates a promise that will resolve when the given texture source is ready to be used.
+     * Returns a promise that will resolve when the given texture source is ready to be used.
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
-    public static loadTextureSource(textureSource: string): Promise<void> {
-        return this.whenBaseTexLoaded(BaseTexture.fromImage(textureSource));
+    public static loadURL(texURL: string): Promise<Texture> {
+        return this.load(Texture.fromImage(texURL));
+    }
+
+    /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
+    public static loadURLs(...urls: string[]): Promise<Texture[]> {
+        return Promise.all(_.map(urls, (url) => this.loadURL(url)));
     }
 
     /**
@@ -25,19 +41,6 @@ export class TextureUtil {
         let tex: RenderTexture = new RenderTexture(new BaseRenderTexture(TextureUtil.R.width, TextureUtil.R.height));
         Flashbang.pixi.renderer.render(disp, tex, true);
         return tex;
-    }
-
-    private static whenBaseTexLoaded(base: BaseTexture): Promise<void> {
-        if (!base.isLoading) {
-            return base.hasLoaded ?
-                Promise.resolve() :
-                Promise.reject(`texture failed to load [source=${base.source}]`);
-        } else {
-            return new Promise<void>((resolve, reject) => {
-                base.once("loaded", () => resolve());
-                base.once("error", () => reject(`texture failed to load [source=${base.source}]`));
-            });
-        }
     }
 
     private static readonly R: Rectangle = new Rectangle();
