@@ -1,19 +1,31 @@
 import * as _ from "lodash";
+import * as log from "loglevel";
 import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 
 export class TextureUtil {
+    public static load (source: Texture | string | string[]): Promise<void> {
+        if (source instanceof Texture) {
+            return this.loadTexture(source as Texture).then(() => {});
+        } else if (typeof source == "string") {
+            return this.loadURL(source as string).then(() => {});
+        } else {
+            return this.loadURLs(source as string[]).then(() => {});
+        }
+    }
+
     /** Returns a promise that will resolve when the texture is loaded */
-    public static load(tex: Texture): Promise<Texture> {
+    public static loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
         if (!base.isLoading) {
             return base.hasLoaded ?
                 Promise.resolve(tex) :
-                Promise.reject(`texture failed to load [source=${base.source}]`);
+                Promise.reject(`texture failed to load [url=${base.imageUrl}]`);
         } else {
+            log.debug(`Loading image... [url=${base.imageUrl}]`);
             return new Promise<Texture>((resolve, reject) => {
                 base.once("loaded", () => resolve(tex));
-                base.once("error", () => reject(`texture failed to load [source=${base.source}]`));
+                base.once("error", () => reject(`texture failed to load [url=${base.imageUrl}]`));
             });
         }
     }
@@ -23,11 +35,11 @@ export class TextureUtil {
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
     public static loadURL(texURL: string): Promise<Texture> {
-        return this.load(Texture.fromImage(texURL));
+        return this.loadTexture(Texture.fromImage(texURL));
     }
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
-    public static loadURLs(...urls: string[]): Promise<Texture[]> {
+    public static loadURLs(urls: string[]): Promise<Texture[]> {
         return Promise.all(_.map(urls, (url) => this.loadURL(url)));
     }
 
