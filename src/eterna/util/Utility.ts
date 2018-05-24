@@ -1,4 +1,4 @@
-﻿import Point = PIXI.Point;
+﻿import {Point} from "pixi.js";
 
 export class Utility {
     public static byte2hex(byte: number): string {
@@ -23,17 +23,17 @@ export class Utility {
     }
 
     public static strip_html_tags(str: string): string {
-        let newlinereg: RegExp = /</gg;
+        let newlinereg: RegExp = /</g;
         str = str.replace(newlinereg, "&lt;");
-        newlinereg = />/gg;
+        newlinereg = />/g;
         str = str.replace(newlinereg, "&gt;");
         return str;
     }
 
     public static strip_quotations_and_newlines(str: string): string {
-        let newlinereg: RegExp = /\n/gg;
+        let newlinereg: RegExp = /\n/g;
         str = str.replace(newlinereg, " ");
-        newlinereg = /"/gg;
+        newlinereg = /"/g;
         str = str.replace(newlinereg, "'");
         return str;
     }
@@ -57,7 +57,6 @@ export class Utility {
 
         return res;
     }
-
 
     public static is_point_within(p: Point, polygon: Point[], stretch_length: number = 10000): boolean {
         let hit_count: number = 0;
