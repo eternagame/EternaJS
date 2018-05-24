@@ -240,7 +240,6 @@ export class Base extends SpriteObject implements LateUpdatable {
             drawFlags |= BaseDrawFlags.IS_DONTCARE;
         }
 
-        const is_static: boolean = (drawFlags & BaseDrawFlags.STATIC) != 0;
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) != 0;
 
         let body_data: Texture = BaseAssets.getBodyBitmap(this._base_type, this._color_level, zoom_level, drawFlags);
@@ -250,7 +249,7 @@ export class Base extends SpriteObject implements LateUpdatable {
         let random_y: number = 0;
         let angle_rand: number = 0;
 
-        if (this._animate && !is_static) {
+        if (this._animate) {
             if (this._animation_start_time < 0) {
                 this._animation_start_time = current_time;
             }
@@ -286,11 +285,6 @@ export class Base extends SpriteObject implements LateUpdatable {
                         this._pairing_complete_time = current_time;
                     }
                 }
-            }
-
-            if (is_static) {
-                pairing_prog = 1;
-                this._pairing_complete_time = current_time;
             }
         }
 

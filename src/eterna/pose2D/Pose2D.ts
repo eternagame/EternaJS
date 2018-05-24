@@ -1,4 +1,5 @@
 import {Point, Rectangle, Texture} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {EPars} from "../EPars";
@@ -6,6 +7,7 @@ import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
 import {Base} from "./Base";
+import {PoseUtil} from "./PoseUtil";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
 import {ScoreDisplayNode} from "./ScoreDisplayNode";
@@ -171,10 +173,6 @@ export class Pose2D extends GameObject implements Updatable {
     //     this._secondary_score_energy_display.set_pos(pos);
     // }
 
-    public set_static(stat: boolean): void {
-        this._static = stat;
-    }
-
     public visualize_feedback(dat: any[], mid: number, lo: number, hi: number, start_index: number): void {
         // coloring
         let newdat: any[] = ExpPainter.transform_data(dat, hi, lo);
@@ -219,7 +217,6 @@ export class Pose2D extends GameObject implements Updatable {
 
     public set_zoom_level(zoom_level: number, animate: boolean = true, center: boolean = false): void {
         // if ((this._zoom_level != zoom_level || center) && animate) {
-        //
         //     if (this._zoom_level == zoom_level && center) {
         //         if (Math.abs(this._offscreen_width / 2 - this._off_x) + Math.abs(this._offscreen_height / 2 - this._off_y) < 50) {
         //             return;
@@ -245,80 +242,73 @@ export class Pose2D extends GameObject implements Updatable {
         //         this._end_offset_y = this._offscreen_height / 2;
         //     }
         //
-        //     if (this._static) {
-        //         this._off_x = this._end_offset_x;
-        //         this._off_y = this._end_offset_y;
-        //     } else {
-        //         this._offset_translating = true;
-        //     }
+        //     this._offset_translating = true;
         //
         //     this._zoom_level = zoom_level;
         //     this.compute_layout(true);
         //     this._redraw = true;
         //
         // } else if (this._zoom_level != zoom_level) {
-        //
         //     this._zoom_level = zoom_level;
         //     this.compute_layout(true);
         //     this._redraw = true;
-        //
         // }
     }
 
     public compute_default_zoom_level(): number {
 
-        // let n: number = this.get_full_sequence_length();
-        // let xarray: any[] = new Array(n);
-        // let yarray: any[] = new Array(n);
-        //
-        // let rna_coords: RNALayout;
-        // rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-        // rna_coords.setup_tree(this._pairs);
-        // rna_coords.draw_tree();
-        // rna_coords.get_coords(xarray, yarray);
-        //
-        // let xmin: number = xarray[0];
-        // let xmax: number = xarray[0];
-        // let ymin: number = yarray[0];
-        // let ymax: number = yarray[0];
-        //
-        // for (let ii: number = 0; ii < n; ii++) {
-        //     if (xarray[ii] < xmin) {
-        //         xmin = xarray[ii];
-        //     }
-        //
-        //     if (xarray[ii] > xmax) {
-        //         xmax = xarray[ii];
-        //     }
-        //
-        //     if (yarray[ii] < ymin) {
-        //         ymin = yarray[ii];
-        //     }
-        //
-        //     if (yarray[ii] > ymax) {
-        //         ymax = yarray[ii];
-        //     }
-        // }
-        //
-        // let xdiff: number = xmax - xmin;
-        // let ydiff: number = ymax - ymin;
-        // let xscale: number, yscale: number, scale: number;
-        // xscale = xdiff / this._offscreen_width;
-        // yscale = ydiff / this._offscreen_height;
-        //
-        // scale = Math.max(xscale, yscale);
-        // if (scale < 1.0)
-        //     return 0;
-        // else if (30 / 45 * scale < 1.0)
-        //     return 1;
-        // else if (20 / 45 * scale < 1.0)
-        //     return 2;
-        // else if (14 / 45 * scale < 1.0)
-        //     return 3;
-        // else
-        //     return 4;
+        let n: number = this.get_full_sequence_length();
+        let xarray: any[] = new Array(n);
+        let yarray: any[] = new Array(n);
 
-        return 0;
+        let rna_coords: RNALayout;
+        rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
+        rna_coords.setup_tree(this._pairs);
+        rna_coords.draw_tree();
+        rna_coords.get_coords(xarray, yarray);
+
+        let xmin: number = xarray[0];
+        let xmax: number = xarray[0];
+        let ymin: number = yarray[0];
+        let ymax: number = yarray[0];
+
+        for (let ii: number = 0; ii < n; ii++) {
+            if (xarray[ii] < xmin) {
+                xmin = xarray[ii];
+            }
+
+            if (xarray[ii] > xmax) {
+                xmax = xarray[ii];
+            }
+
+            if (yarray[ii] < ymin) {
+                ymin = yarray[ii];
+            }
+
+            if (yarray[ii] > ymax) {
+                ymax = yarray[ii];
+            }
+        }
+
+        let xdiff: number = xmax - xmin;
+        let ydiff: number = ymax - ymin;
+        // let xscale: number = xdiff / this._offscreen_width;
+        // let yscale: number = ydiff / this._offscreen_height;
+        let xscale: number = xdiff / Flashbang.stageWidth;
+        let yscale: number = ydiff / Flashbang.stageHeight;
+
+        let scale: number = Math.max(xscale, yscale);
+        if (scale < 1.0) {
+            return 0;
+        } else if (30 / 45 * scale < 1.0) {
+            return 1;
+        } else if (20 / 45 * scale < 1.0) {
+            return 2;
+        } else if (14 / 45 * scale < 1.0) {
+            return 3;
+        } else {
+            return 4;
+        }
     }
 
     public set_current_color(col: number): void {
@@ -348,8 +338,10 @@ export class Pose2D extends GameObject implements Updatable {
         if (this._current_color == EPars.RNABASE_PAIR
             || this._current_color == EPars.RNABASE_GC_PAIR
             || this._current_color == EPars.RNABASE_AU_PAIR
-            || this._current_color == EPars.RNABASE_GU_PAIR)
+            || this._current_color == EPars.RNABASE_GU_PAIR) {
+
             div = 2;
+        }
 
         let ofs: number = (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
         let ii: number;
@@ -439,10 +431,10 @@ export class Pose2D extends GameObject implements Updatable {
     public parse_command(command: number, closest_index: number): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
-            return this.add_base_with_index(closest_index);
+            return PoseUtil.add_base_with_index(closest_index, this._pairs);
 
         case EPars.RNABASE_ADD_PAIR:
-            return this.add_pair_with_index(closest_index);
+            return PoseUtil.add_pair_with_index(closest_index, this._pairs);
 
         case EPars.RNABASE_DELETE:
             return this.delete_base_with_index(closest_index);
@@ -455,10 +447,7 @@ export class Pose2D extends GameObject implements Updatable {
     public parse_command_with_pairs(command: number, closest_index: number, pairs: any[]): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
-            return this.add_base_with_index_pairs(closest_index, pairs);
-
-            //case EPars.RNABASE_ADD_PAIR:
-            //return add_pair_with_index_pairs(closest_index, pairs);
+            return PoseUtil.add_base_with_index(closest_index, pairs);
 
         case EPars.RNABASE_DELETE:
             return this.delete_base_with_index_pairs(closest_index, pairs);
@@ -632,67 +621,12 @@ export class Pose2D extends GameObject implements Updatable {
         // ROPWait.NotifyEndPaint();
     }
 
-    public add_base_with_index_pairs(index: number, pairs: any[]): any[] {
-        let mutated_pairs: any[];
-        mutated_pairs = pairs.slice(0, index);
-        mutated_pairs.push(-1);
-        mutated_pairs = mutated_pairs.concat(pairs.slice(index, pairs.length));
-
-        for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-            if (mutated_pairs[ii] >= index) {
-                mutated_pairs[ii]++;
-            }
-        }
-        let parenthesis: string = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 0, mutated_pairs];
-    }
-
     public delete_base_with_index_pairs(index: number, pairs: any[]): any[] {
-        if (this.is_tracked_index(index)) this.toggle_black_mark(index);
-        return this.delete_nopair_with_index_pairs(index, pairs);
-    }
-
-    public delete_nopair_with_index_pairs(index: number, pairs: any[]): any[] {
-        let mutated_pairs: any[];
-        let parenthesis: string;
-        mutated_pairs = pairs.slice(0, index);
-        mutated_pairs = mutated_pairs.concat(pairs.slice(index + 1, pairs.length));
-        for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-            if (mutated_pairs[ii] >= index) {
-                mutated_pairs[ii] -= 1;
-            }
+        if (this.is_tracked_index(index)) {
+            this.toggle_black_mark(index);
         }
 
-        parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 4, mutated_pairs];
-    }
-
-    public delete_pair_with_index_pairs(index: number, pairs: any[]): any[] {
-        let pindex: number = pairs[index];
-        let mutated_pairs: any[];
-        let parenthesis: string;
-        if (pindex >= 0) {
-            if (index > pindex) {
-                let tmp: number = index;
-                index = pindex;
-                pindex = tmp;
-            }
-            mutated_pairs = pairs.slice(0, index);
-            mutated_pairs = mutated_pairs.concat(pairs.slice(index + 1, pindex));
-            mutated_pairs = mutated_pairs.concat(pairs.slice(pindex + 1, pairs.length));
-            for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-                if (mutated_pairs[ii] > pindex) {
-                    mutated_pairs[ii] -= 2;
-                } else if (mutated_pairs[ii] >= index) {
-                    mutated_pairs[ii] -= 1;
-                }
-            }
-
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 3];
-        } else {
-            throw new Error("base doesn't have pair");
-        }
+        return PoseUtil.delete_nopair_with_index(index, pairs);
     }
 
     public clear_tracking(): void {
@@ -738,20 +672,10 @@ export class Pose2D extends GameObject implements Updatable {
         this._barcodes = barcodes.slice();
     }
 
-    public set_puzzle_locks(puzlocks: any[]): void {
+    public set_puzzle_locks(puzlocks: boolean[]): void {
         if (puzlocks == null) {
             this._locks = null;
         } else {
-
-            // FIXME: check the calling code, something weird here...
-            //if (puzlocks.length != _sequence.length) {
-            //	throw new Error("Puzzle lock length does not match sequence length " + puzlocks.length + " " + _sequence.length + " " + _pairs.length);
-            //}
-
-            //for (let ii:int = 0; ii < _sequence.length; ii++) {
-            //	if (_locks[ii] != puzlocks[ii]) _bases[ii].setDirty();
-            //}
-
             this._locks = puzlocks.slice();
         }
 
@@ -841,15 +765,14 @@ export class Pose2D extends GameObject implements Updatable {
     }
 
     public toggle_design_struct(seqnum: number): boolean {
-        // this._design_struct[seqnum] = !(this._design_struct[seqnum] == true);
+        this._design_struct[seqnum] = !(this._design_struct[seqnum] == true);
         // ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
-        // this.update_design_highlight();
-        // let segments: any[] = this.get_design_segments();
-        // return (segments.length == 4
-        //     && segments[1] - segments[0] == segments[3] - segments[2]
-        //     && (segments[2] - segments[1] > 3
-        //         || EPars.has_cut(this.get_full_sequence(), segments[1], segments[2])));
-        throw new Error("TODO");
+        this.update_design_highlight();
+        let segments: any[] = this.get_design_segments();
+        return (segments.length == 4
+            && segments[1] - segments[0] == segments[3] - segments[2]
+            && (segments[2] - segments[1] > 3
+                || EPars.has_cut(this.get_full_sequence(), segments[1], segments[2])));
     }
 
     public get_design_segments(): any[] {
@@ -1959,7 +1882,7 @@ export class Pose2D extends GameObject implements Updatable {
         //     let need_redraw: boolean = false;
         //
         //     for (ii = 0; ii < full_seq.length && !need_redraw; ii++) {
-        //         need_redraw = need_redraw || this._bases[ii].need_redraw(this._static || this._lowperform_mode);
+        //         need_redraw = need_redraw || this._bases[ii].need_redraw(this._lowperform_mode);
         //     }
         //
         //     if (need_redraw || this._redraw) {
@@ -2000,7 +1923,6 @@ export class Pose2D extends GameObject implements Updatable {
         //             this._bases[ii].set_force_unpaired(this._forced_struct != null && this._forced_struct[ii] == EPars.FORCE_UNPAIRED);
         //
         //             let drawFlags: number = BaseDrawFlags.builder()
-        //                 .setStatic(this._static)
         //                 .locked(this.is_locked(ii))
         //                 .letterMode(this._lettermode)
         //                 .lowPerform(this._lowperform_mode)
@@ -2629,35 +2551,24 @@ export class Pose2D extends GameObject implements Updatable {
         x_mid = (xmax + xmin) / 2.0;
         y_mid = (ymax + ymin) / 2.0;
 
-        if (!this._static) {
-            this._base_from_x = new Array(n);
-            this._base_from_y = new Array(n);
-            this._base_to_x = new Array(n);
-            this._base_to_y = new Array(n);
+        this._base_from_x = new Array(n);
+        this._base_from_y = new Array(n);
+        this._base_to_x = new Array(n);
+        this._base_to_y = new Array(n);
+
+        for (let ii: number = 0; ii < n; ii++) {
+            this._base_from_x[ii] = this._bases[ii].get_x();
+            this._base_from_y[ii] = this._bases[ii].get_y();
+
+            this._base_to_x[ii] = xarray[ii] - x_mid;
+            this._base_to_y[ii] = yarray[ii] - y_mid;
         }
 
-        if (!this._static) {
-            for (let ii: number = 0; ii < n; ii++) {
-                this._base_from_x[ii] = this._bases[ii].get_x();
-                this._base_from_y[ii] = this._bases[ii].get_y();
-
-                this._base_to_x[ii] = xarray[ii] - x_mid;
-                this._base_to_y[ii] = yarray[ii] - y_mid;
-            }
-
-            this._fold_start_time = -1;
-            if (fast) {
-                this._fold_duration = 0.45;
-            } else {
-                this._fold_duration = 0.7;
-            }
-
+        this._fold_start_time = -1;
+        if (fast) {
+            this._fold_duration = 0.45;
         } else {
-            for (let ii: number = 0; ii < n; ii++) {
-                this._bases[ii].set_xy(xarray[ii] - x_mid, yarray[ii] - y_mid);
-            }
-
-            this._redraw = true;
+            this._fold_duration = 0.7;
         }
     }
 
@@ -2697,122 +2608,15 @@ export class Pose2D extends GameObject implements Updatable {
         // this.removeEventListener(MouseEvent.MOUSE_UP, this.on_shift_select_done);
     }
 
-    private add_base_with_index(index: number): any[] {
-        let mutated_pairs: any[];
-        mutated_pairs = this._pairs.slice(0, index);
-        mutated_pairs.push(-1);
-        mutated_pairs = mutated_pairs.concat(this._pairs.slice(index, this._pairs.length));
-
-        for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-            if (mutated_pairs[ii] >= index) {
-                mutated_pairs[ii]++;
-            }
-        }
-        let parenthesis: string = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 0];
-    }
-
-    private add_pair_with_index(index: number): any[] {
-        let mutated_pairs: any[];
-        let parenthesis: string;
-        let ii: number;
-
-        //if index is paired
-        //add another pair before index
-        let pindex: number = this._pairs[index];
-        if (pindex >= 0) {
-            if (index > pindex) {
-                let tmp: number = index;
-                index = pindex;
-                pindex = tmp;
-            }
-            mutated_pairs = this._pairs.slice(0, index);
-            mutated_pairs.push(-1);
-            mutated_pairs = mutated_pairs.concat(this._pairs.slice(index, pindex + 1));
-            mutated_pairs.push(-1);
-            mutated_pairs = mutated_pairs.concat(this._pairs.slice(pindex + 1, this._pairs.length));
-
-            for (ii = 0; ii < mutated_pairs.length; ii++) {
-                if (mutated_pairs[ii] > pindex) {
-                    mutated_pairs[ii] += 2;
-                } else if (mutated_pairs[ii] >= index) {
-                    mutated_pairs[ii] += 1;
-                }
-            }
-            mutated_pairs[index] = pindex + 2;
-            mutated_pairs[pindex + 2] = index;
-
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 1];
-
-        }
-        //add a cycle of length 3
-        else {
-            mutated_pairs = this._pairs.slice(0, index);
-            for (ii = 0; ii < 5; ii++) {
-                mutated_pairs.push(-1);
-            }
-            mutated_pairs = mutated_pairs.concat(this._pairs.slice(index, this._pairs.length));
-            for (ii = 0; ii < mutated_pairs.length; ii++) {
-                if (mutated_pairs[ii] >= index) {
-                    mutated_pairs[ii] += 5;
-                }
-            }
-            mutated_pairs[index] = index + 4;
-            mutated_pairs[index + 4] = index;
-
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 2];
-
-        }
-    }
-
     private delete_base_with_index(index: number): any[] {
-        if (this.is_tracked_index(index)) this.toggle_black_mark(index);
-        if (this._pairs[index] < 0 || this.is_locked(this._pairs[index])) return this.delete_nopair_with_index(index);
-        else return this.delete_pair_with_index(index);
-    }
-
-    private delete_nopair_with_index(index: number): any[] {
-        let mutated_pairs: any[];
-        let parenthesis: string;
-        mutated_pairs = this._pairs.slice(0, index);
-        mutated_pairs = mutated_pairs.concat(this._pairs.slice(index + 1, this._pairs.length));
-        for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-            if (mutated_pairs[ii] >= index) {
-                mutated_pairs[ii] -= 1;
-            }
+        if (this.is_tracked_index(index)) {
+            this.toggle_black_mark(index);
         }
 
-        parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 4];
-    }
-
-    private delete_pair_with_index(index: number): any[] {
-        let pindex: number = this._pairs[index];
-        let mutated_pairs: any[];
-        let parenthesis: string;
-        if (pindex >= 0) {
-            if (index > pindex) {
-                let tmp: number = index;
-                index = pindex;
-                pindex = tmp;
-            }
-            mutated_pairs = this._pairs.slice(0, index);
-            mutated_pairs = mutated_pairs.concat(this._pairs.slice(index + 1, pindex));
-            mutated_pairs = mutated_pairs.concat(this._pairs.slice(pindex + 1, this._pairs.length));
-            for (let ii: number = 0; ii < mutated_pairs.length; ii++) {
-                if (mutated_pairs[ii] > pindex) {
-                    mutated_pairs[ii] -= 2;
-                } else if (mutated_pairs[ii] >= index) {
-                    mutated_pairs[ii] -= 1;
-                }
-            }
-
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 3];
+        if (this._pairs[index] < 0 || this.is_locked(this._pairs[index])) {
+            return PoseUtil.delete_nopair_with_index(index, this._pairs);
         } else {
-            throw new Error("base doesn't have pair");
+            return PoseUtil.delete_pair_with_index(index, this._pairs);
         }
     }
 
@@ -3478,11 +3282,9 @@ export class Pose2D extends GameObject implements Updatable {
 
                     this.generate_score_nodes_recursive(root._children[0], child_coords, nodes);
                 }
-
             }
 
         } else {
-
             for (let ii: number = 0; ii < root._children.length; ii++) {
                 this.generate_score_nodes_recursive(root._children[ii], coords, nodes);
             }
@@ -3494,7 +3296,6 @@ export class Pose2D extends GameObject implements Updatable {
                 newnode.set_type(ScoreDisplayNode.SCORENODE_LOOP, coords, root._score);
             }
         }
-
     }
 
     private is_editable(seqnum: number): boolean {
@@ -3526,17 +3327,14 @@ export class Pose2D extends GameObject implements Updatable {
     private _mol_canvas_data: Texture;
     private _empty_canvas_data: Texture;
 
-    /// Does pose do animations?
-    private _static: boolean = false;
-
     /// Array of sequence/pairs
     private _sequence: number[] = [];
-    private _mutated_sequence: any[];
+    private _mutated_sequence: number[];
     private _pairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
-    private _forced_struct: any[] = [];
-    private _design_struct: any[] = [];
+    private _forced_struct: number[] = [];
+    private _design_struct: boolean[] = [];
     private _binding_site: any[];
     private _molecular_binding_bases: any[] = null;
     private _molecular_binding_pairs: any[] = null;
