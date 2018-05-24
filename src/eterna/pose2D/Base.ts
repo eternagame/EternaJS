@@ -220,6 +220,14 @@ export class Base extends SpriteObject implements LateUpdatable {
         }
     }
 
+    private static showSprite(sprite: Sprite, tex: Texture): Sprite {
+        sprite.visible = true;
+        sprite.texture = tex;
+        sprite.pivot.x = tex.width * 0.5;
+        sprite.pivot.y = tex.height * 0.5;
+        return sprite;
+    }
+
     private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, highlight_state: Object = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
@@ -294,18 +302,10 @@ export class Base extends SpriteObject implements LateUpdatable {
             this._last_center_y = this.display.y + random_y + off_y;
 
             if (draw_body) {
-                let base_rect: Rectangle = null;
-                let base_point: Point = null;
-
                 if (barcode_data != null) {
-                    this._barcode.visible = true;
-                    this._barcode.texture = barcode_data;
-                    this._barcode.pivot.x = barcode_data.width * 0.5;
-                    this._barcode.pivot.y = barcode_data.height * 0.5;
+                    Base.showSprite(this._barcode, barcode_data);
                 }
 
-                base_rect = new Rectangle(0, 0, body_data.width, body_data.height);
-                base_point = new Point(this.display.x + random_x + off_x - body_data.width / 2, this.display.y + random_y + off_y - body_data.height / 2);
                 if (this._is_forced) {
                     // TODO
                     // let temp_bd: Texture = body_data.clone();
@@ -317,17 +317,12 @@ export class Base extends SpriteObject implements LateUpdatable {
                     throw new Error("TODO");
                     // this.bit_blit_highlight(canvas, base_rect, base_point, body_data, highlight_state);
                 } else {
-                    this._body.texture = body_data;
-                    this._body.pivot.x = body_data.width * 0.5;
-                    this._body.pivot.y = body_data.height * 0.5;
+                    Base.showSprite(this._body, body_data);
                 }
 
                 let letterdata: Texture = BaseAssets.getLetterBitmap(this._base_type, zoom_level, drawFlags);
                 if (letterdata != null) {
-                    this._letter.visible = true;
-                    this._letter.texture = letterdata;
-                    this._letter.pivot.x = letterdata.width * 0.5;
-                    this._letter.pivot.y = letterdata.height * 0.5;
+                    Base.showSprite(this._letter, letterdata);
                 }
             }
         }
@@ -341,10 +336,7 @@ export class Base extends SpriteObject implements LateUpdatable {
                 let draw_backbone: boolean = true;
 
                 if (draw_backbone) {
-                    this._backbone.visible = true;
-                    this._backbone.texture = backbone_data;
-                    this._backbone.pivot.x = backbone_data.width * 0.5;
-                    this._backbone.pivot.y = backbone_data.height * 0.5;
+                    Base.showSprite(this._backbone, backbone_data);
                 }
             }
 
@@ -385,9 +377,10 @@ export class Base extends SpriteObject implements LateUpdatable {
                     let st0_rect: Rectangle = new Rectangle(0, 0, satelite_body_data.width, satelite_body_data.height);
                     let st0_point: Point = new Point(st0_x - satelite_body_data.width / 2, st0_y - satelite_body_data.height / 2);
                     if (highlight_state) {
-                        this.bit_blit_highlight(canvas, st0_rect, st0_point, satelite_body_data, highlight_state);
+                        // this.bit_blit_highlight(canvas, st0_rect, st0_point, satelite_body_data, highlight_state);
+                        throw new Error("TODO");
                     } else {
-                        canvas.copyPixels(satelite_body_data, st0_rect, st0_point, null, null, true);
+                        Base.showSprite(this._sat0, satelite_body_data);
                     }
                 }
 
@@ -469,9 +462,10 @@ export class Base extends SpriteObject implements LateUpdatable {
                     let st1_point: Point = new Point(st1_x - satelite_body_data.width / 2, st1_y - satelite_body_data.height / 2);
 
                     if (highlight_state) {
-                        this.bit_blit_highlight(canvas, st1_rect, st1_point, satelite_body_data, highlight_state);
+                        // this.bit_blit_highlight(canvas, st1_rect, st1_point, satelite_body_data, highlight_state);
+                        throw new Error("TODO");
                     } else {
-                        canvas.copyPixels(satelite_body_data, st1_rect, st1_point, null, null, true);
+                        Base.showSprite(this._sat1, satelite_body_data);
                     }
                 }
             }

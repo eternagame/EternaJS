@@ -1393,7 +1393,7 @@ export class Pose2D extends GameObject implements Updatable {
 
             let diff: number = (this._sequence.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
-                this._bases.push(new Base(EPars.RNABASE_GUANINE));
+                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
                 this._locks.push(false);
             }
         } else if (this._sequence.length < this._bases.length) {
@@ -1549,7 +1549,7 @@ export class Pose2D extends GameObject implements Updatable {
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (k = 0; k < diff; k++) {
-                this._bases.push(new Base(EPars.RNABASE_GUANINE));
+                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
             }
         }
 
@@ -1652,7 +1652,7 @@ export class Pose2D extends GameObject implements Updatable {
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
-                this._bases.push(new Base(EPars.RNABASE_GUANINE));
+                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
             }
         }
 
