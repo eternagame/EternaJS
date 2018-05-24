@@ -12,6 +12,9 @@
       "@babel/proposal-class-properties",
       "@babel/proposal-object-rest-spread",
       "@babel/plugin-syntax-dynamic-import"
+    ],
+    "ignore": [
+      "src/eterna/folding/engines/*.js"
     ]
   },
   "scripts": {
