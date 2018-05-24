@@ -40,7 +40,7 @@ class TestMode extends AppMode {
     protected setup(): void {
         // this.addObject(new Background(20, false), this.modeSprite);
 
-        TextureUtil.loadURL(BitmapManager.Satellite).then(() => {
+        TextureUtil.load(BitmapManager.pose2DURLs).then(() => {
             let bitmaps = [
                 BaseAssets.draw_circular_barcode(16, 6, 0.5),
                 BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0))[0],
@@ -54,6 +54,6 @@ class TestMode extends AppMode {
             }
             container.layout();
             this.modeSprite.addChild(container);
-        });
+        }).catch((e: any) => log.error(e));
     }
 }

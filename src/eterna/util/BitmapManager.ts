@@ -1,3 +1,4 @@
+import * as _ from "lodash"
 import {Texture} from "pixi.js";
 
 export class BitmapManager {
@@ -286,6 +287,13 @@ export class BitmapManager {
     public static readonly BaseAPattern: string = "assets/RNABase/yellow_pattern.png";
     public static readonly BaseAMin: string = "assets/RNABase/yellow_small.png";
 
+    public static get pose2DURLs (): string[] {
+        if (BitmapManager.POSE2D_URLS == null) {
+            BitmapManager.POSE2D_URLS = BitmapManager.urlsWithPrefix("assets/RNABase");
+        }
+        return BitmapManager.POSE2D_URLS;
+    }
+
     /// TODO: remove me!
     public static get_bitmap(source: string): Texture {
         return Texture.fromImage(source);
@@ -295,4 +303,16 @@ export class BitmapManager {
     public static get_bitmap_named(source: string): Texture {
         return Texture.fromImage(source);
     }
+
+    public static urlsWithPrefix(prefix: string): string[] {
+        let strings: string[] = [];
+        for (let value of _.values(BitmapManager)) {
+            if (typeof(value) === "string" && (value as string).startsWith(prefix)) {
+                strings.push(value);
+            }
+        }
+        return strings;
+    }
+
+    private static POSE2D_URLS: string[];
 }
