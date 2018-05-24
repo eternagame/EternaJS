@@ -11,6 +11,7 @@ import {Vienna} from "./folding/Vienna";
 import {BaseAssets} from "./pose2D/BaseAssets";
 import {BitmapManager} from "./util/BitmapManager";
 import {ColorUtil} from "./util/ColorUtil";
+import {Fonts} from "./util/Fonts";
 
 export class EternaApp extends FlashbangApp {
     protected createPixi(): Application {
@@ -19,22 +20,22 @@ export class EternaApp extends FlashbangApp {
 
     /*override*/
     protected setup(): void {
-        // this._modeStack.pushMode(new TestMode());
-        this._modeStack.pushMode(new PoseTestMode());
-
-        log.info("Initializing folding engines...");
-        this.loadFoldingEngines()
-            .then(() => log.info("Folding engines intialized"))
-            .catch((e) => log.error('Error loading folding engines', e));
+        Promise.all([this.initFoldingEngines(), Fonts.loadFonts()])
+            .then(() => {
+                // this._modeStack.pushMode(new PoseTestMode());
+            });
     }
 
-    private loadFoldingEngines(): Promise<void> {
+    private initFoldingEngines(): Promise<void> {
+        log.info("Initializing folding engines...");
         return Promise.all([Vienna.create()])
             .then((folders: Folder[]) => {
+                log.info("Folding engines intialized");
                 for (let folder of folders) {
                     FolderManager.instance.add_folder(folder);
                 }
-            });
+            })
+            .catch((e) => log.error("Error loading folding engines: ", e));
     }
 }
 
