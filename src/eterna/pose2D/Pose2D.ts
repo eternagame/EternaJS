@@ -749,7 +749,7 @@ export class Pose2D extends GameObject implements Updatable {
             //}
 
             //for (let ii:int = 0; ii < _sequence.length; ii++) {
-            //	if (_locks[ii] != puzlocks[ii]) _bases[ii].redraw();
+            //	if (_locks[ii] != puzlocks[ii]) _bases[ii].setDirty();
             //}
 
             this._locks = puzlocks.slice();
@@ -2832,7 +2832,7 @@ export class Pose2D extends GameObject implements Updatable {
         //                 this._locks.push(false);
         //         }
         //         this._locks[seqnum] = !this._locks[seqnum];
-        //         this._bases[seqnum].redraw();
+        //         this._bases[seqnum].setDirty();
         //         this._lock_updated = true;
         //
         //     } else if (this._current_color == EPars.RNABASE_BINDING_SITE) {
@@ -2958,7 +2958,7 @@ export class Pose2D extends GameObject implements Updatable {
         //             this._locks.push(false);
         //     }
         //     this._locks[seqnum] = !this._locks[seqnum];
-        //     this._bases[seqnum].redraw();
+        //     this._bases[seqnum].setDirty();
         //     this._lock_updated = true;
         //
         // } else if (this._mouse_down_altKey) {
@@ -3601,7 +3601,7 @@ export class Pose2D extends GameObject implements Updatable {
     /// Display score texts?
     private _display_score_texts: boolean;
 
-    /// Do we have to redraw pose?
+    /// Do we have to setDirty pose?
     private _redraw: boolean = true;
     private _base_dirty: Rectangle = null;
 
