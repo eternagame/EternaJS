@@ -5,11 +5,15 @@ import {UnitSignal} from "../util/Signals";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
 import {GameObjectRef} from "./GameObjectRef";
+import {LateUpdatable} from "./LateUpdatable";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 
 export class AppMode {
+    /** Emitted at the beginning of the update process */
     public readonly updateBegan: Signal<(dt: number) => void> = new Signal();
+    /** Emitted after updateBegan has completed. */
+    public readonly lateUpdate: Signal<(dt: number) => void> = new Signal();
 
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
@@ -191,10 +195,15 @@ export class AppMode {
             }
         }
 
-        // Handle Updatable and Renderable
+        // Handle Updatable and LateUpdatable
         let updatable: Updatable = <Updatable> (obj as any);
         if (updatable.update !== undefined) {
             obj.regs.add(this.updateBegan.connect(dt => updatable.update(dt)));
+        }
+
+        let lateUpdatable: LateUpdatable = <LateUpdatable> (obj as any);
+        if (lateUpdatable.lateUpdate !== undefined) {
+            obj.regs.add(this.lateUpdate.connect(dt => lateUpdatable.lateUpdate(dt)));
         }
 
         this.registerObject(obj);
