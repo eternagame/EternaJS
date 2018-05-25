@@ -22,7 +22,7 @@ export class EternaApp extends FlashbangApp {
     protected setup(): void {
         Promise.all([this.initFoldingEngines(), Fonts.loadFonts()])
             .then(() => {
-                // this._modeStack.pushMode(new PoseTestMode());
+                this._modeStack.pushMode(new PoseTestMode());
             });
     }
 
@@ -36,6 +36,12 @@ export class EternaApp extends FlashbangApp {
                 }
             })
             .catch((e) => log.error("Error loading folding engines: ", e));
+    }
+}
+
+class LoadingMode extends AppMode {
+    protected setup(): void {
+
     }
 }
 
