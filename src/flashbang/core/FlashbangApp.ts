@@ -29,6 +29,7 @@ export class FlashbangApp {
 
         window.addEventListener(KeyboardEventType.KEY_DOWN, (e: KeyboardEvent) => this.onKeyboardEvent(e));
         window.addEventListener(KeyboardEventType.KEY_UP, (e: KeyboardEvent) => this.onKeyboardEvent(e));
+        window.addEventListener("wheel", (e: WheelEvent) => this.onMouseWheelEvent(e));
     }
 
     public addUpdatable(obj: Updatable): void {
@@ -121,6 +122,13 @@ export class FlashbangApp {
         let topMode = this._modeStack.topMode;
         if (topMode != null) {
             topMode.onKeyboardEvent(e);
+        }
+    }
+
+    protected onMouseWheelEvent(e: WheelEvent): void {
+        let topMode = this._modeStack.topMode;
+        if (topMode != null) {
+            topMode.onMouseWheelEvent(e);
         }
     }
 
