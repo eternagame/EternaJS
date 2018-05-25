@@ -3,6 +3,7 @@ import {KeyCode} from "../input/KeyCode";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
+import {KeyboardEventType} from "../input/KeyboardEventType";
 
 export class FlashbangApp {
     public get pixi(): PIXI.Application {
@@ -26,8 +27,8 @@ export class FlashbangApp {
 
         this._pixi.ticker.add(delta => this.update(delta));
 
-        window.addEventListener("keydown", (e: KeyboardEvent) => this.onKeyboardEvent(e));
-        window.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyboardEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_DOWN, (e: KeyboardEvent) => this.onKeyboardEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_UP, (e: KeyboardEvent) => this.onKeyboardEvent(e));
     }
 
     public addUpdatable(obj: Updatable): void {
@@ -111,9 +112,9 @@ export class FlashbangApp {
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
-        if (e.type == "keydown") {
+        if (e.type == KeyboardEventType.KEY_DOWN) {
             this._keyDown.set(e.code, true);
-        } else if (e.type == "keyup") {
+        } else if (e.type == KeyboardEventType.KEY_UP) {
             this._keyDown.set(e.code, false);
         }
 
