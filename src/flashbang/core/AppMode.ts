@@ -105,6 +105,10 @@ export class AppMode {
     public onKeyboardEvent(e: KeyboardEvent): void {
     }
 
+    /** Called when the application receives a mouse wheel event while this mode is active */
+    public onMouseWheelEvent(e: WheelEvent): void {
+    }
+
     /** Called once per update tick. Updates all objects in the mode. */
     protected update(dt: number): void {
         this._runningTime += dt;
