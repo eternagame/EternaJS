@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import * as log from "loglevel";
 import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 
@@ -22,7 +21,7 @@ export class TextureUtil {
                 Promise.resolve(tex) :
                 Promise.reject(`texture failed to load [url=${base.imageUrl}]`);
         } else {
-            log.debug(`Loading image... [url=${base.imageUrl}]`);
+            // log.debug(`Loading image... [url=${base.imageUrl}]`);
             return new Promise<Texture>((resolve, reject) => {
                 base.once("loaded", () => resolve(tex));
                 base.once("error", () => reject(`texture failed to load [url=${base.imageUrl}]`));

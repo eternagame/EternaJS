@@ -1,7 +1,9 @@
-import {Texture} from "pixi.js";
+import {Texture, Text} from "pixi.js";
+import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../util/BitmapManager";
 import {BitmapUtil} from "../util/BitmapUtil";
+import {Fonts} from "../util/Fonts";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 
@@ -81,19 +83,10 @@ export class BaseBitmaps {
     }
 
     private static createLetterBitmaps (baseType: number, zoomScalar: number): Texture[] {
-        // let big_letter: GameText = new GameText(FontManager.instance.get_font("Verdana", 18, true));
-        // big_letter.set_text_color(0x0);
-        // big_letter.set_text(BaseBitmaps.type2Letter(baseType));
-        //
-        // let bitmap: Texture = new Texture(22, 22);
-        // bitmap.fillRect(new Rectangle(0, 0, 22, 22), 0x0);
-        // bitmap.draw(big_letter);
-        //
-        // let bitmaps: Texture[] = [bitmap];
-        // BitmapUtil.create_scaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
-        //
-        // return bitmaps;
-        throw new Error("TODO");
+        let big_letter: Text = Fonts.arial(BaseBitmaps.type2Letter(baseType)).fontSize(18).color(0x0).build();
+        let bitmaps: Texture[] = [TextureUtil.renderToTexture(big_letter)];
+        BitmapUtil.create_scaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
+        return bitmaps;
     }
 
     private static createBodyBitmaps (nameTemplate: string, baseType: number): Texture[] {
