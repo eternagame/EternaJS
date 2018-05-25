@@ -1,6 +1,9 @@
 import * as _ from "lodash"
-import {Texture} from "pixi.js";
+import {Text, Texture} from "pixi.js";
 import {Assert} from "../../flashbang/util/Assert";
+import {TextBuilder} from "../../flashbang/util/TextBuilder";
+import {TextureUtil} from "../../flashbang/util/TextureUtil";
+import {Fonts} from "./Fonts";
 
 export class BitmapManager {
     public static readonly NovaAMissionReq: string = "assets/NOVA/Mission/a-box.png";
@@ -317,5 +320,25 @@ export class BitmapManager {
         return strings;
     }
 
+    public static get_number_bitmap(ii: number): Texture {
+        return BitmapManager.get_text_bitmap_impl(ii.toString(), Fonts.ARIAL, 14, false);
+    }
+
+    public static get_text_bitmap(txt: string): Texture {
+        return BitmapManager.get_text_bitmap_impl(txt, Fonts.ARIAL, 12, true);
+    }
+
+    private static get_text_bitmap_impl(text: string, fontName: string, fontSize: number, bold: boolean): Texture {
+        let bitmap: Texture = BitmapManager._textBitmaps.get(text);
+        if (bitmap == null) {
+            let tf: Text = new TextBuilder(text).font(fontName).fontSize(fontSize).build();
+            bitmap = TextureUtil.renderToTexture(tf);
+            BitmapManager._textBitmaps.set(text, bitmap);
+        }
+
+        return bitmap;
+    }
+
     private static POSE2D_URLS: string[];
+    private static readonly _textBitmaps: Map<string, Texture> = new Map();
 }
