@@ -1,23 +1,26 @@
-import {Point, Rectangle, Texture} from "pixi.js";
+import * as log from "loglevel";
+import {Point, Rectangle, Texture, Graphics} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
+import {SpriteObject} from "../../flashbang/objects/SpriteObject";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {EPars} from "../EPars";
-import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
+import {BitmapManager} from "../util/BitmapManager";
 import {Base} from "./Base";
+import {BaseDrawFlags} from "./BaseDrawFlags";
 import {PoseUtil} from "./PoseUtil";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
 import {ScoreDisplayNode} from "./ScoreDisplayNode";
-import * as log from "loglevel";
 
-export class Pose2D extends GameObject implements Updatable {
+export class Pose2D extends SpriteObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
-    public static readonly ZOOM_SPACINGS: any[] = [45, 30, 20, 14, 7];
-    public static readonly BASE_TRACK_THICKNESS: any[] = [5, 4, 3, 2, 2];
-    public static readonly BASE_TRACK_RADIUS: any[] = [15, 10, 7, 5, 3];
+    public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
+    public static readonly BASE_TRACK_THICKNESS: number[] = [5, 4, 3, 2, 2];
+    public static readonly BASE_TRACK_RADIUS: number[] = [15, 10, 7, 5, 3];
 
     public static readonly OLIGO_MODE_DIMER: number = 1;
     public static readonly OLIGO_MODE_EXT3P: number = 2;
@@ -25,14 +28,18 @@ export class Pose2D extends GameObject implements Updatable {
 
     constructor(editable: boolean) {
         super();
+        this._editable = editable;
+    }
+
+    protected added() {
+        super.added();
+
         if (!Pose2D._sound_initialized) {
             Pose2D._sound_initialized = true;
             // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_RG, "SoundRG");
             // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_RB, "SoundRB");
             // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_YB, "SoundYB");
         }
-
-        this._editable = editable;
 
         this._score_node_highlight = new GameObject;
         this.addObject(this._score_node_highlight);
@@ -159,11 +166,6 @@ export class Pose2D extends GameObject implements Updatable {
     //     this._user_defined_highlight_box.set_queue(user_defined);
     //     this._redraw = true;
     // }
-
-    public get_canvas(): Texture {
-        // FIXME: merge _mol_canvas_data and return the result
-        return this._canvas_data;
-    }
 
     // public set_primary_energy_score_location(pos: UDim): void {
     //     this._primary_score_energy_display.set_pos(pos);
@@ -356,7 +358,6 @@ export class Pose2D extends GameObject implements Updatable {
         if (need_update)
             this.call_track_moves_callback(num_mut / div, muts);
 
-
         if (need_update || this._lock_updated || this._binding_site_updated || this._design_struct_updated) {
             this.check_pairs();
             this.set_molecule();
@@ -382,7 +383,7 @@ export class Pose2D extends GameObject implements Updatable {
         }
     }
 
-    public paste_sequence(sequence: any[]): void {
+    public paste_sequence(sequence: number[]): void {
         if (sequence == null)
             return;
 
@@ -525,18 +526,18 @@ export class Pose2D extends GameObject implements Updatable {
             this._tracked_indices.push(closest_index);
             // ROPWait.NotifyBlackMark(closest_index, true);
 
-            let base_box: GameObject = new GameObject;
+            let base_box: Graphics = new Graphics();
             this._base_boxes.push(base_box);
-            this.addObject(this._base_boxes[this._base_boxes.length - 1]);
+            this.sprite.addChild(base_box);
 
             let n: number = this._tracked_indices.length;
             let center: Point = this.get_base_xy(this._tracked_indices[n - 1]);
             this._base_boxes[n - 1].x = center.x;
             this._base_boxes[n - 1].y = center.y;
             this._base_boxes[n - 1].visible = true;
-            this._base_boxes[n - 1].graphics.clear();
-            this._base_boxes[n - 1].graphics.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
-            this._base_boxes[n - 1].graphics.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+            this._base_boxes[n - 1].clear();
+            this._base_boxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
+            this._base_boxes[n - 1].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
         }
     }
 
@@ -634,7 +635,7 @@ export class Pose2D extends GameObject implements Updatable {
             this._tracked_indices.pop();
         }
         while (this._base_boxes.length > 0) {
-            this.removeObject(this._base_boxes.pop());
+            DisplayUtil.removeFromParent(this._base_boxes.pop());
         }
     }
 
@@ -1316,7 +1317,7 @@ export class Pose2D extends GameObject implements Updatable {
 
             let diff: number = (this._sequence.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
-                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
+                this.createBase();
                 this._locks.push(false);
             }
         } else if (this._sequence.length < this._bases.length) {
@@ -1385,7 +1386,6 @@ export class Pose2D extends GameObject implements Updatable {
         if (this._binding_site) {
             return this._binding_site.slice();
         }
-
 
         let temp: any[] = [];
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
@@ -1472,7 +1472,7 @@ export class Pose2D extends GameObject implements Updatable {
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (k = 0; k < diff; k++) {
-                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
+                this.createBase();
             }
         }
 
@@ -1577,7 +1577,7 @@ export class Pose2D extends GameObject implements Updatable {
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
-                this._bases.push(new Base(this, EPars.RNABASE_GUANINE));
+                this.createBase();
             }
         }
 
@@ -1784,31 +1784,31 @@ export class Pose2D extends GameObject implements Updatable {
     }
 
     /*override*/
-    public update(current_time: number): void {
+    public update(dt: number): void {
+        let current_time: number = this.mode.time;
         // for (let i: number = 0; i < this._anchored_objects.length; ++i) {
         //     let anchor: RNAAnchorObject = this._anchored_objects[i];
         //     let p: Point = this.get_base_xy(anchor.base);
         //     anchor.object.set_pos(new UDim(0, 0, p.x + anchor.offset.x, p.y + anchor.offset.y));
         // }
-        //
-        // let ii: number;
-        // let full_seq: any[] = this.get_full_sequence();
-        // let center: Point;
-        // let prog: number;
-        // let locked: boolean;
-        //
-        // if (this._tracked_indices.length == this._base_boxes.length && this._tracked_indices.length != 0) {
-        //     let n: number = this._tracked_indices.length;
-        //     for (ii = 0; ii < n; ii++) {
-        //         center = this.get_base_xy(this._tracked_indices[ii]);
-        //         this._base_boxes[ii].x = center.x;
-        //         this._base_boxes[ii].y = center.y;
-        //         this._base_boxes[ii].graphics.clear();
-        //         this._base_boxes[ii].graphics.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
-        //         this._base_boxes[ii].graphics.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
-        //     }
-        // }
-        //
+
+        let full_seq: any[] = this.get_full_sequence();
+        let center: Point;
+        let prog: number;
+        let locked: boolean;
+
+        if (this._tracked_indices.length == this._base_boxes.length && this._tracked_indices.length != 0) {
+            let n: number = this._tracked_indices.length;
+            for (let ii = 0; ii < n; ii++) {
+                center = this.get_base_xy(this._tracked_indices[ii]);
+                this._base_boxes[ii].x = center.x;
+                this._base_boxes[ii].y = center.y;
+                this._base_boxes[ii].clear();
+                this._base_boxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
+                this._base_boxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+            }
+        }
+
         // if (this.cursor_index > 0) {
         //     center = this.get_base_xy(this.cursor_index - 1);
         //     this.cursor_box.x = center.x;
@@ -1818,149 +1818,138 @@ export class Pose2D extends GameObject implements Updatable {
         //     this.cursor_box.graphics.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
         //     this.cursor_box.graphics.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
         // }
-        //
-        // if (this._base_to_x && !paused) {
-        //
-        //     if (this._fold_start_time < 0)
-        //         this._fold_start_time = current_time;
-        //
-        //     prog = (current_time - this._fold_start_time) / (this._fold_duration * 1000.0);
-        //     let done: boolean = false;
-        //
-        //     if (prog >= 1) {
-        //         prog = 1;
-        //         done = true;
-        //         this._offset_translating = false;
-        //     }
-        //
-        //     if (this._offset_translating) {
-        //         this._redraw = true;
-        //         this._off_x = prog * this._end_offset_x + (1 - prog) * this._start_offset_x;
-        //         this._off_y = prog * this._end_offset_y + (1 - prog) * this._start_offset_y;
-        //     }
-        //
-        //     for (ii = 0; ii < full_seq.length; ii++) {
-        //
-        //         let vx: number = this._base_to_x[ii] - this._base_from_x[ii];
-        //         let vy: number = this._base_to_y[ii] - this._base_from_y[ii];
-        //
-        //         let current_x: number = this._base_from_x[ii] + (vx + (vx * prog)) / 2 * prog;
-        //         let current_y: number = this._base_from_y[ii] + (vy + (vy * prog)) / 2 * prog;
-        //
-        //         this._bases[ii].set_xy(current_x, current_y);
-        //     }
-        //
-        //     if (done) {
-        //         this._base_to_x = null;
-        //         this._base_to_y = null;
-        //         this._base_from_x = null;
-        //         this._base_from_y = null;
-        //
-        //         this.update_score_node_gui();
-        //     }
-        //
-        // } else {
-        //
-        //     if (current_time - this._last_sampled_time > 2000 && !this._is_exploding) {
-        //
-        //         this._last_sampled_time = current_time;
-        //
-        //         for (ii = 0; ii < full_seq.length; ii++) {
-        //             if (this._pairs[ii] < 0 && !this._lowperform_mode && Math.random() > 0.7) {
-        //                 this._bases[ii].animate();
-        //             }
-        //         }
-        //     }
-        // }
-        //
-        // /// Update score node
-        // this.update_score_node_visualization();
-        //
-        //
-        // /// Bitblt rendering
-        // if (this._canvas_data) {
-        //
-        //     let need_redraw: boolean = false;
-        //
-        //     for (ii = 0; ii < full_seq.length && !need_redraw; ii++) {
-        //         need_redraw = need_redraw || this._bases[ii].need_redraw(this._lowperform_mode);
-        //     }
-        //
-        //     if (need_redraw || this._redraw) {
-        //
-        //         if (this._base_dirty == null || this._redraw) {
-        //             this._canvas_data.fillRect(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height), 0x0);
-        //         } else {
-        //             this._base_dirty = this._base_dirty.intersection(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height));
-        //             this._canvas_data.copyPixels(this._empty_canvas_data, this._base_dirty, this._base_dirty.topLeft, this._empty_canvas_data);
-        //         }
-        //         this._base_dirty = null;
-        //
-        //         let number_manager: NumberManager = NumberManager.instance;
-        //         let r: Rectangle;
-        //
-        //         // Create highlight state to pass to bases.
-        //         let hl_state: Object = null;
-        //         if (this._all_new_highlights.length > 0) {
-        //             hl_state = {};
-        //             hl_state.nuc = [];
-        //             hl_state.isOn = true;
-        //             for (i = 0; i < this._all_new_highlights.length; ++i) {
-        //                 hl_state.nuc = hl_state.nuc.concat(this._all_new_highlights[i].nuc);
-        //             }
-        //         }
-        //
-        //         for (ii = 0; ii < full_seq.length; ii++) {
-        //             // skip the oligo separator
-        //             if (full_seq[ii] == EPars.RNABASE_CUT) {
-        //                 continue;
-        //             }
-        //
-        //             let use_barcode: boolean = false;
-        //             if (this._barcodes != null && this._barcodes.indexOf(ii) >= 0) {
-        //                 use_barcode = true;
-        //             }
-        //
-        //             this._bases[ii].set_force_unpaired(this._forced_struct != null && this._forced_struct[ii] == EPars.FORCE_UNPAIRED);
-        //
-        //             let drawFlags: number = BaseDrawFlags.builder()
-        //                 .locked(this.is_locked(ii))
-        //                 .letterMode(this._lettermode)
-        //                 .lowPerform(this._lowperform_mode)
-        //                 .useBarcode(use_barcode)
-        //                 .result();
-        //
-        //             let numberBitmap: Texture = null;
-        //             if (this._numbering_mode && (ii == 0 || (ii + 1) % 5 == 0 || ii == full_seq.length - 1)) {
-        //                 numberBitmap = number_manager.get_number_bitmap(ii + 1);
-        //             }
-        //
-        //             r = this._bases[ii].bit_blit(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time, drawFlags, numberBitmap, hl_state);
-        //             if (r != null) {
-        //                 this._base_dirty = this._base_dirty == null ? r.clone() : this._base_dirty.union(r);
-        //             }
-        //         }
-        //
-        //         for (ii = 0; ii < full_seq.length; ii++) {
-        //             locked = this.is_locked(ii);
-        //             r = this._bases[ii].bit_blit_after_effect(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time);
-        //             if (r != null) {
-        //                 this._base_dirty = this._base_dirty == null ? r.clone() : this._base_dirty.union(r);
-        //             }
-        //         }
-        //
-        //         if (this._display_aux_info) {
-        //             this.render_aux_info();
-        //         }
-        //
-        //         this._redraw = false;
-        //
-        //         if (this._feedback_objs.length > 0)
-        //             this.update_print_feedback(false);
-        //
-        //     }
-        // }
-        //
+
+        if (this._base_to_x) {
+            // Update base locations
+
+            if (this._fold_start_time < 0) {
+                this._fold_start_time = current_time;
+            }
+
+            prog = (current_time - this._fold_start_time) / (this._fold_duration);
+            let done: boolean = false;
+
+            if (prog >= 1) {
+                prog = 1;
+                done = true;
+                this._offset_translating = false;
+            }
+
+            if (this._offset_translating) {
+                this._redraw = true;
+                this._off_x = prog * this._end_offset_x + (1 - prog) * this._start_offset_x;
+                this._off_y = prog * this._end_offset_y + (1 - prog) * this._start_offset_y;
+            }
+
+            for (let ii = 0; ii < full_seq.length; ii++) {
+                let vx: number = this._base_to_x[ii] - this._base_from_x[ii];
+                let vy: number = this._base_to_y[ii] - this._base_from_y[ii];
+
+                let current_x: number = this._base_from_x[ii] + (vx + (vx * prog)) / 2 * prog;
+                let current_y: number = this._base_from_y[ii] + (vy + (vy * prog)) / 2 * prog;
+
+                this._bases[ii].set_xy(current_x, current_y);
+            }
+
+            if (done) {
+                this._base_to_x = null;
+                this._base_to_y = null;
+                this._base_from_x = null;
+                this._base_from_y = null;
+
+                this.update_score_node_gui();
+            }
+
+        } else {
+            if (current_time - this._last_sampled_time > 2 && !this._is_exploding) {
+                this._last_sampled_time = current_time;
+
+                for (let ii = 0; ii < full_seq.length; ii++) {
+                    if (this._pairs[ii] < 0 && !this._lowperform_mode && Math.random() > 0.7) {
+                        this._bases[ii].animate();
+                    }
+                }
+            }
+        }
+
+        /// Update score node
+        this.update_score_node_visualization();
+
+        /// Bitblt rendering
+        let need_redraw: boolean = false;
+
+        for (let ii = 0; ii < full_seq.length && !need_redraw; ii++) {
+            need_redraw = need_redraw || this._bases[ii].need_redraw(this._lowperform_mode);
+        }
+
+        if (need_redraw || this._redraw) {
+            // if (this._base_dirty == null || this._redraw) {
+            //     this._canvas_data.fillRect(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height), 0x0);
+            // } else {
+            //     this._base_dirty = this._base_dirty.intersection(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height));
+            //     this._canvas_data.copyPixels(this._empty_canvas_data, this._base_dirty, this._base_dirty.topLeft, this._empty_canvas_data);
+            // }
+            this._base_dirty = null;
+
+            let r: Rectangle;
+
+            // Create highlight state to pass to bases.
+            let hl_state: Object = null;
+            // if (this._all_new_highlights.length > 0) {
+            //     hl_state = {};
+            //     hl_state.nuc = [];
+            //     hl_state.isOn = true;
+            //     for (i = 0; i < this._all_new_highlights.length; ++i) {
+            //         hl_state.nuc = hl_state.nuc.concat(this._all_new_highlights[i].nuc);
+            //     }
+            // }
+
+            for (let ii = 0; ii < full_seq.length; ii++) {
+                // skip the oligo separator
+                if (full_seq[ii] == EPars.RNABASE_CUT) {
+                    continue;
+                }
+
+                let use_barcode: boolean = false;
+                if (this._barcodes != null && this._barcodes.indexOf(ii) >= 0) {
+                    use_barcode = true;
+                }
+
+                this._bases[ii].set_force_unpaired(this._forced_struct != null && this._forced_struct[ii] == EPars.FORCE_UNPAIRED);
+
+                let drawFlags: number = BaseDrawFlags.builder()
+                    .locked(this.is_locked(ii))
+                    .letterMode(this._lettermode)
+                    .lowPerform(this._lowperform_mode)
+                    .useBarcode(use_barcode)
+                    .result();
+
+                let numberBitmap: Texture = null;
+                if (this._numbering_mode && (ii == 0 || (ii + 1) % 5 == 0 || ii == full_seq.length - 1)) {
+                    numberBitmap = BitmapManager.get_number_bitmap(ii + 1);
+                }
+
+                this._bases[ii].bit_blit(this._zoom_level, this._off_x, this._off_y, current_time, drawFlags, numberBitmap, hl_state);
+            }
+
+            // for (ii = 0; ii < full_seq.length; ii++) {
+            //     locked = this.is_locked(ii);
+            //     r = this._bases[ii].bit_blit_after_effect(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time);
+            //     if (r != null) {
+            //         this._base_dirty = this._base_dirty == null ? r.clone() : this._base_dirty.union(r);
+            //     }
+            // }
+
+            if (this._display_aux_info) {
+                this.render_aux_info();
+            }
+
+            this._redraw = false;
+
+            if (this._feedback_objs.length > 0)
+                this.update_print_feedback(false);
+        }
+
         // if (this._mol_canvas.visible) {
         //     while (this._mol_dirty.length > 0) {
         //         r = this._mol_dirty.pop();
@@ -2019,47 +2008,46 @@ export class Pose2D extends GameObject implements Updatable {
         //     this._mol_canvas.Texture = this._mol_canvas_data;
         //     this._mol_canvas.visible = false;
         // }
-        //
-        // let go_x: number = 0;
-        // let go_y: number = 0;
-        //
-        // for (ii = 0; ii < full_seq.length - 1; ii++) {
-        //
-        //     let out_x: number = go_x;
-        //     let out_y: number = go_y;
-        //
-        //     if (this._sequence.length < full_seq.length && ii == this._sequence.length - 1) {
-        //         this._bases[ii].set_go_dir(go_x, go_y);
-        //         this._bases[ii].set_out_dir(-go_y, go_x);
-        //         this._bases[ii].set_last(true);
-        //         continue;
-        //     }
-        //
-        //     go_x = this._bases[ii + 1].get_x() - this._bases[ii].get_x();
-        //     go_y = this._bases[ii + 1].get_y() - this._bases[ii].get_y();
-        //
-        //     out_x += go_x;
-        //     out_y += go_y;
-        //
-        //     if (ii > 0) {
-        //         out_x /= 2.0;
-        //         out_y /= 2.0;
-        //     }
-        //
-        //     this._bases[ii].set_go_dir(go_x, go_y);
-        //     this._bases[ii].set_out_dir(-out_y, out_x);
-        //     this._bases[ii].set_last(false);
-        // }
-        //
-        // if (full_seq.length >= 1) {
-        //
-        //     this._bases[full_seq.length - 1].set_go_dir(go_x, go_y);
-        //     this._bases[full_seq.length - 1].set_out_dir(-go_y, go_x);
-        //     this._bases[full_seq.length - 1].set_last(true);
-        //
-        // }
-        //
-        // // highlights
+
+        let go_x: number = 0;
+        let go_y: number = 0;
+
+        for (let ii = 0; ii < full_seq.length - 1; ii++) {
+            let out_x: number = go_x;
+            let out_y: number = go_y;
+
+            if (this._sequence.length < full_seq.length && ii == this._sequence.length - 1) {
+                this._bases[ii].set_go_dir(go_x, go_y);
+                this._bases[ii].set_out_dir(-go_y, go_x);
+                this._bases[ii].set_last(true);
+                continue;
+            }
+
+            go_x = this._bases[ii + 1].get_x() - this._bases[ii].get_x();
+            go_y = this._bases[ii + 1].get_y() - this._bases[ii].get_y();
+
+            out_x += go_x;
+            out_y += go_y;
+
+            if (ii > 0) {
+                out_x /= 2.0;
+                out_y /= 2.0;
+            }
+
+            this._bases[ii].set_go_dir(go_x, go_y);
+            this._bases[ii].set_out_dir(-out_y, out_x);
+            this._bases[ii].set_last(false);
+        }
+
+        if (full_seq.length >= 1) {
+
+            this._bases[full_seq.length - 1].set_go_dir(go_x, go_y);
+            this._bases[full_seq.length - 1].set_out_dir(-go_y, go_x);
+            this._bases[full_seq.length - 1].set_last(true);
+
+        }
+
+        // highlights
         // this.check_render_highlight(this._selection_highlight_box);
         // this.check_render_highlight(this._forced_highlight_box);
         // this.check_render_highlight(this._shift_highlight_box);
@@ -2163,23 +2151,25 @@ export class Pose2D extends GameObject implements Updatable {
         //         this.draw_highlight_user_defined_sequence();
         //     }
         // }
-        //
-        //
-        // /// Praise stacks when RNA is not moving
-        // if (!this._offset_translating && this._base_to_x == null) {
-        //     if (this._praise_queue.length > 0) {
-        //         for (ii = 0; ii < this._praise_queue.length; ii += 2) {
-        //             this.on_praise_stack(this._praise_queue[ii], this._praise_queue[ii + 1], (ii + 1) == (this._praise_queue.length - 1));
-        //         }
-        //         this._praise_queue = [];
-        //     } else if (this._praise_seq.length > 0) {
-        //         for (ii = 0; ii < this._praise_seq.length; ii += 2) {
-        //             this.on_praise_seq(this._praise_seq[ii], this._praise_seq[ii + 1]);
-        //         }
-        //         this._praise_seq = [];
-        //     }
-        // }
-        //
+
+        /// Praise stacks when RNA is not moving
+        if (!this._offset_translating && this._base_to_x == null) {
+            if (this._praise_queue.length > 0) {
+                for (let ii = 0; ii < this._praise_queue.length; ii += 2) {
+                    this.on_praise_stack(
+                        this._praise_queue[ii],
+                        this._praise_queue[ii + 1],
+                        (ii + 1) == (this._praise_queue.length - 1));
+                }
+                this._praise_queue = [];
+            } else if (this._praise_seq.length > 0) {
+                for (let ii = 0; ii < this._praise_seq.length; ii += 2) {
+                    this.on_praise_seq(this._praise_seq[ii], this._praise_seq[ii + 1]);
+                }
+                this._praise_seq = [];
+            }
+        }
+
         // if (this._is_exploding && !this._offset_translating && this._base_to_x == null) {
         //     if (this._explosion_start_time < 0) {
         //         this._explosion_start_time = current_time;
@@ -2357,7 +2347,6 @@ export class Pose2D extends GameObject implements Updatable {
                 }
 
             }
-
 
         } else if (mode == 2) {
             // Add a cycle of length 3
@@ -3226,7 +3215,7 @@ export class Pose2D extends GameObject implements Updatable {
         //     this._score_texts = [];
         //     for (let ii: number = 0; ii < this._score_nodes.length; ii++) {
         //         this._score_texts.push(new GameBitmap(null));
-        //         this._score_texts[ii].set_bitmap(NumberManager.instance.get_text_bitmap(this._score_nodes[ii].get_colored_number()));
+        //         this._score_texts[ii].set_bitmap(BitmapManager.get_text_bitmap(this._score_nodes[ii].get_colored_number()));
         //         this._score_texts[ii].visible = false;
         //         this.addObject(this._score_texts[ii]);
         //     }
@@ -3308,6 +3297,13 @@ export class Pose2D extends GameObject implements Updatable {
         }
     }
 
+    private createBase(): Base {
+        let base: Base = new Base(this, EPars.RNABASE_GUANINE);
+        this.addObject(base, this.sprite);
+        this._bases.push(base);
+        return base;
+    }
+
     private static get_pair_strength(s1: number, s2: number): number {
         if (Pose2D.isPair(s1, s2, EPars.RNABASE_ADENINE, EPars.RNABASE_URACIL)) {
             return 2;
@@ -3324,7 +3320,6 @@ export class Pose2D extends GameObject implements Updatable {
         return (s1 == type1 && s2 == type2) || (s1 == type2 && s2 == type1);
     }
 
-    private _canvas_data: Texture;
     private _mol_canvas_data: Texture;
     private _empty_canvas_data: Texture;
 
@@ -3417,10 +3412,10 @@ export class Pose2D extends GameObject implements Updatable {
     private _end_offset_y: number;
 
     /// For base moving animation
-    private _base_from_x: any[];
-    private _base_from_y: any[];
-    private _base_to_x: any[];
-    private _base_to_y: any[];
+    private _base_from_x: number[];
+    private _base_from_y: number[];
+    private _base_to_x: number[];
+    private _base_to_y: number[];
     private _fold_start_time: number;
     private _fold_duration: number;
     // private _paint_cursor: PaintCursor;
@@ -3432,12 +3427,12 @@ export class Pose2D extends GameObject implements Updatable {
     private _desired_angle: number = 0;
 
     /// Is explosion animation on going?
-    // private _is_exploding: boolean = false;
-    // private _explosion_start_time: number = -1;
-    // private _explosion_rays: any[];
-    // private _orig_offset_x: number;
-    // private _orig_offset_y: number;
-    // private _explosion_cb: Function;
+    private _is_exploding: boolean = false;
+    private _explosion_start_time: number = -1;
+    private _explosion_rays: any[];
+    private _orig_offset_x: number;
+    private _orig_offset_y: number;
+    private _explosion_cb: Function;
 
     /// Selection box
     // private _selection_highlight_box: HighlightBox;
@@ -3452,8 +3447,8 @@ export class Pose2D extends GameObject implements Updatable {
 
     /// For praising stacks
     private _praise_objects: any[] = [];
-    private _praise_queue: any[] = [];
-    private _praise_seq: any[] = [];
+    private _praise_queue: number[] = [];
+    private _praise_seq: number[] = [];
 
     /// Score display nodes
     private _score_nodes: any[];
@@ -3469,8 +3464,8 @@ export class Pose2D extends GameObject implements Updatable {
     // private _show_total_energy: boolean = true;
 
     /// For tracking a base
-    private _tracked_indices: any[] = [];
-    private _base_boxes: any[] = [];
+    private _tracked_indices: number[] = [];
+    private _base_boxes: Graphics[] = [];
     private cursor_index: number = 0;
     private cursor_box: GameObject = null;
     private _last_shifted_index: number = -1;

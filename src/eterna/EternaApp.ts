@@ -15,7 +15,7 @@ import {Fonts} from "./util/Fonts";
 
 export class EternaApp extends FlashbangApp {
     protected createPixi(): Application {
-        return new Application(1024, 768, {backgroundColor: 0x1099bb});
+        return new Application(1024, 768, {backgroundColor: 0x061A34});
     }
 
     /*override*/

@@ -321,17 +321,17 @@ export class BitmapManager {
     }
 
     public static get_number_bitmap(ii: number): Texture {
-        return BitmapManager.get_text_bitmap_impl(ii.toString(), Fonts.ARIAL, 14, false);
+        return BitmapManager.get_text_bitmap_impl(ii.toString(), Fonts.ARIAL, 14, false, 0xffffff);
     }
 
     public static get_text_bitmap(txt: string): Texture {
-        return BitmapManager.get_text_bitmap_impl(txt, Fonts.ARIAL, 12, true);
+        return BitmapManager.get_text_bitmap_impl(txt, Fonts.ARIAL, 12, true, 0xffffff);
     }
 
-    private static get_text_bitmap_impl(text: string, fontName: string, fontSize: number, bold: boolean): Texture {
+    private static get_text_bitmap_impl(text: string, fontName: string, fontSize: number, bold: boolean, color: number): Texture {
         let bitmap: Texture = BitmapManager._textBitmaps.get(text);
         if (bitmap == null) {
-            let tf: Text = new TextBuilder(text).font(fontName).fontSize(fontSize).build();
+            let tf: Text = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color).build();
             bitmap = TextureUtil.renderToTexture(tf);
             BitmapManager._textBitmaps.set(text, bitmap);
         }
