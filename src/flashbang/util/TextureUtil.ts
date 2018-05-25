@@ -1,6 +1,7 @@
 import * as _ from "lodash";
-import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
+import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture, Container} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
+import {Assert} from "./Assert";
 
 export class TextureUtil {
     public static load (source: Texture | string | string[]): Promise<void> {
@@ -47,10 +48,16 @@ export class TextureUtil {
      * All textures in the DisplayObject's hierarchy should be loaded before calling this.
      */
     public static renderToTexture(disp: DisplayObject): Texture {
-        disp.setTransform();
-        disp.getLocalBounds(TextureUtil.R);
+        Assert.isTrue(disp.parent == null, "TODO");
+
+        let wrap: Container = new Container();
+        wrap.addChild(disp);
+
+        wrap.getLocalBounds(TextureUtil.R);
+        wrap.x = -TextureUtil.R.x;
+        wrap.y = -TextureUtil.R.y;
         let tex: RenderTexture = new RenderTexture(new BaseRenderTexture(TextureUtil.R.width, TextureUtil.R.height));
-        Flashbang.pixi.renderer.render(disp, tex, true);
+        Flashbang.pixi.renderer.render(wrap, tex, true);
         return tex;
     }
 
