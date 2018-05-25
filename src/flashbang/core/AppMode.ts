@@ -110,6 +110,7 @@ export class AppMode {
         this._runningTime += dt;
         // update all Updatable objects
         this.updateBegan.emit(dt);
+        this.lateUpdate.emit(dt);
     }
 
     /** Called when the mode is added to the mode stack */
