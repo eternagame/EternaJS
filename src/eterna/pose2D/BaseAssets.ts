@@ -81,16 +81,16 @@ export class BaseAssets {
     }
 
     public static getSatellite0Bitmap(zoom_level: number, st0_diff_degree: number): Texture {
-        return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Number(st0_diff_degree / 5), zoom_level);
+        return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Math.trunc(st0_diff_degree / 5), zoom_level);
     }
 
     public static getSatellite1Bitmap(zoom_level: number, st1_diff_degree: number, pair_type: number): Texture {
         if (pair_type == -1 || pair_type == 2) {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Number(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Math.trunc(st1_diff_degree / 5), zoom_level);
         } else if (pair_type == 1) {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_weaker_data, Number(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmap_for_size(BaseAssets._satellite_weaker_data, Math.trunc(st1_diff_degree / 5), zoom_level);
         } else {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_stronger_data, Number(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmap_for_size(BaseAssets._satellite_stronger_data, Math.trunc(st1_diff_degree / 5), zoom_level);
         }
     }
 
@@ -98,7 +98,7 @@ export class BaseAssets {
         progress = (1 - progress) * (1 - progress);
         progress = 1 - progress;
 
-        let prog_index: number = Number(progress * 10);
+        let prog_index: number = Math.trunc(progress * 10);
 
         if (prog_index >= 10)
             prog_index = 9;
@@ -271,8 +271,8 @@ export class BaseAssets {
             }
 
             scratch.lineStyle(lineThickness, color, lineAlpha);
-            xx = centerX + Math.cos(Number(i) / steps * twoPI) * radius;
-            yy = centerY + Math.sin(Number(i) / steps * twoPI) * radius;
+            xx = centerX + Math.cos(i / steps * twoPI) * radius;
+            yy = centerY + Math.sin(i / steps * twoPI) * radius;
             scratch.lineTo(xx, yy);
         }
 

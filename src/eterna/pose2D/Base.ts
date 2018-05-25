@@ -25,6 +25,7 @@ export class Base extends SpriteObject implements LateUpdatable {
         this.sprite.addChild(this._letter);
         this.sprite.addChild(this._sat0);
         this.sprite.addChild(this._sat1);
+        this.sprite.addChild(this._number);
     }
 
     public set_base_index(i: number): void {
@@ -180,9 +181,9 @@ export class Base extends SpriteObject implements LateUpdatable {
         this._pairing_start_time = -1;
         this._pairing_complete_time = -1;
         this._pairing_duration = duration;
-        this._pairing_start_degree = this._last_satelite1_abs_degree;
+        this._pairing_start_degree = this._last_satellite1_abs_degree;
         this._pairing_target_degree = target_angle;
-        this._pairing_start_radius = this._last_satelite1_radius;
+        this._pairing_start_radius = this._last_satellite1_radius;
         this._pair_type = pair_type;
 
         if (Math.abs(this._pairing_target_degree - this._pairing_start_degree) > 180) {
@@ -213,9 +214,27 @@ export class Base extends SpriteObject implements LateUpdatable {
         return -1;
     }
 
+    private _zoom_level: number;
+    private _off_x: number;
+    private _off_y: number;
+    private _current_time: number;
+    private _drawFlags: number;
+    private _highlight_state: any;
+    private _numberBitmap: Texture;
+    public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null) {
+        this._zoom_level = zoom_level;
+        this._off_x = off_x;
+        this._off_y = off_y;
+        this._current_time = current_time;
+        this._drawFlags = drawFlags;
+        this._highlight_state = highlight_state;
+        this._numberBitmap = numberBitmap;
+        this._needsRedraw = true;
+    }
+
     public lateUpdate(dt: number): void {
         if (this._needsRedraw && this.display.visible) {
-            this.redraw(this._pose.get_zoom_level(), 0, 0, this.mode.time, 0);
+            this.redraw(this._zoom_level, this._off_x, this._off_y, this._current_time, this._drawFlags, this._numberBitmap, this._highlight_state);
             this._needsRedraw = false;
         }
     }
@@ -228,13 +247,14 @@ export class Base extends SpriteObject implements LateUpdatable {
         return sprite;
     }
 
-    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, highlight_state: Object = null): void {
+    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
         this._letter.visible = false;
         this._sat0.visible = false;
         this._sat1.visible = false;
+        this._number.visible = false;
 
         if (this._is_dontcare) {
             drawFlags |= BaseDrawFlags.IS_DONTCARE;
@@ -254,7 +274,7 @@ export class Base extends SpriteObject implements LateUpdatable {
                 this._animation_start_time = current_time;
             }
 
-            let prog: number = (current_time - this._animation_start_time) / 300.0;
+            let prog: number = (current_time - this._animation_start_time) / 0.3;
             if (prog > 2 * Math.PI) {
                 this._animate = false;
                 prog = 2 * Math.PI;
@@ -278,7 +298,7 @@ export class Base extends SpriteObject implements LateUpdatable {
                 pairing_prog = 1;
                 this._pairing_complete_time = current_time;
             } else {
-                pairing_prog = (current_time - this._pairing_start_time) / (this._pairing_duration * 1000);
+                pairing_prog = (current_time - this._pairing_start_time) / (this._pairing_duration);
                 if (pairing_prog >= 1) {
                     pairing_prog = 1;
                     if (this._pairing_complete_time < 0) {
@@ -298,6 +318,8 @@ export class Base extends SpriteObject implements LateUpdatable {
             if (draw_body) {
                 if (barcode_data != null) {
                     Base.showSprite(this._barcode, barcode_data);
+                    this._barcode.x = random_x + off_x;
+                    this._barcode.y = random_y + off_y;
                 }
 
                 if (this._is_forced) {
@@ -312,49 +334,41 @@ export class Base extends SpriteObject implements LateUpdatable {
                     // this.bit_blit_highlight(canvas, base_rect, base_point, body_data, highlight_state);
                 } else {
                     Base.showSprite(this._body, body_data);
+                    this._body.x = random_x + off_x;
+                    this._body.y = random_y + off_y;
                 }
 
                 let letterdata: Texture = BaseAssets.getLetterBitmap(this._base_type, zoom_level, drawFlags);
                 if (letterdata != null) {
                     Base.showSprite(this._letter, letterdata);
+                    this._letter.x = random_x + off_x;
+                    this._letter.y = random_y + off_y;
                 }
             }
         }
 
         if (Math.abs(this._go_x) > 0 || Math.abs(this._go_y) > 0) {
             if (zoom_level < 2 * Base.NUM_ZOOM_LEVELS && !this._is_last && !lowperform) {
-                let bb_x: number = this.display.x + random_x + off_x + this._go_x / 2;
-                let bb_y: number = this.display.y + random_y + off_y + this._go_y / 2;
-
                 const backbone_data: Texture = BaseAssets.getBackboneBitmap(zoom_level, drawFlags);
-                let draw_backbone: boolean = true;
-
-                if (draw_backbone) {
-                    Base.showSprite(this._backbone, backbone_data);
-                }
+                Base.showSprite(this._backbone, backbone_data);
+                this._backbone.x = random_x + off_x + this._go_x / 2;
+                this._backbone.y = random_y + off_y + this._go_y / 2;
             }
 
             let go_radian: number = Math.atan2(this._go_y, this._go_x);
-            let satelite_body_data: Texture;
+            let satellite_body_data: Texture;
 
             if (zoom_level < Base.NUM_ZOOM_LEVELS && !lowperform) {
                 const reference_base_size: number = BaseAssets.getSatelliteReferenceBaseSize(zoom_level);
 
                 let st0_diff_degree: number;
-                let st0_x: number;
-                let st0_y: number;
-
                 let st0_angle: number = Math.PI / 5.2 + angle_rand;
                 st0_diff_degree = (go_radian + st0_angle) * 180 / Math.PI - 90.0;
                 st0_diff_degree = Base.to_canonical_range(st0_diff_degree);
-                let st0_cos: number = Math.cos(st0_angle);
-                let st0_sin: number = Math.sin(st0_angle);
-                st0_x = this._go_x / 2.5 * st0_cos - this._go_y / 2.5 * st0_sin + this.display.x + off_x + random_x;
-                st0_y = this._go_x / 2.5 * st0_sin + this._go_y / 2.5 * st0_cos + this.display.y + off_y + random_y;
 
 
-                if (Number(st0_diff_degree / 5) < 0 || Number(st0_diff_degree / 5) > 71) {
-                    if (Number(st0_diff_degree / 5) < -1 || Number(st0_diff_degree / 5) > 72) {
+                if (Math.trunc(st0_diff_degree / 5) < 0 || Math.trunc(st0_diff_degree / 5) > 71) {
+                    if (Math.trunc(st0_diff_degree / 5) < -1 || Math.trunc(st0_diff_degree / 5) > 72) {
                         log.debug(st0_diff_degree);
                         throw new Error("WHAT0");
                     }
@@ -362,19 +376,25 @@ export class Base extends SpriteObject implements LateUpdatable {
                     st0_diff_degree = 0;
                 }
 
-
-                satelite_body_data = BaseAssets.getSatellite0Bitmap(zoom_level, st0_diff_degree);
+                satellite_body_data = BaseAssets.getSatellite0Bitmap(zoom_level, st0_diff_degree);
+                if (satellite_body_data == null) {
+                    satellite_body_data = BaseAssets.getSatellite0Bitmap(zoom_level, st0_diff_degree);
+                }
 
                 let draw_st0: boolean = !this._force_unpaired;
 
                 if (draw_st0) {
-                    let st0_rect: Rectangle = new Rectangle(0, 0, satelite_body_data.width, satelite_body_data.height);
-                    let st0_point: Point = new Point(st0_x - satelite_body_data.width / 2, st0_y - satelite_body_data.height / 2);
+                    let st0_cos: number = Math.cos(st0_angle);
+                    let st0_sin: number = Math.sin(st0_angle);
+                    let st0_x: number = this._go_x / 2.5 * st0_cos - this._go_y / 2.5 * st0_sin + off_x + random_x;
+                    let st0_y: number = this._go_x / 2.5 * st0_sin + this._go_y / 2.5 * st0_cos + off_y + random_y;
                     if (highlight_state) {
-                        // this.bit_blit_highlight(canvas, st0_rect, st0_point, satelite_body_data, highlight_state);
+                        // this.bit_blit_highlight(canvas, st0_rect, st0_point, satellite_body_data, highlight_state);
                         throw new Error("TODO");
                     } else {
-                        Base.showSprite(this._sat0, satelite_body_data);
+                        Base.showSprite(this._sat0, satellite_body_data);
+                        this._sat0.x = st0_x;
+                        this._sat0.y = st0_y;
                     }
                 }
 
@@ -392,10 +412,10 @@ export class Base extends SpriteObject implements LateUpdatable {
                         st1_diff_degree = Base.to_canonical_range(st1_diff_degree);
                         let st1_cos: number = Math.cos(st1_angle);
                         let st1_sin: number = Math.sin(st1_angle);
-                        st1_x = this._go_x / 2.5 * st1_cos - this._go_y / 2.5 * st1_sin + this.display.x + off_x + random_x;
-                        st1_y = this._go_x / 2.5 * st1_sin + this._go_y / 2.5 * st1_cos + this.display.y + off_y + random_y;
+                        st1_x = this._go_x / 2.5 * st1_cos - this._go_y / 2.5 * st1_sin + off_x + random_x;
+                        st1_y = this._go_x / 2.5 * st1_sin + this._go_y / 2.5 * st1_cos + off_y + random_y;
 
-                        this._last_satelite1_radius = reference_base_size * 0.45;
+                        this._last_satellite1_radius = reference_base_size * 0.45;
                     } else {
                         let target_angle: number = (go_radian - Math.PI / 5.2) * 180 / Math.PI;
 
@@ -411,9 +431,9 @@ export class Base extends SpriteObject implements LateUpdatable {
                         current_radian = current_angle * Math.PI / 180.0;
                         st1_diff_degree = Base.to_canonical_range(current_angle - 90.0);
                         let current_radius: number = this._pairing_start_radius * (1 - pairing_prog) + (reference_base_size * 0.45) * pairing_prog;
-                        st1_x = Math.cos(current_radian) * current_radius + this.display.x + off_x;
-                        st1_y = Math.sin(current_radian) * current_radius + this.display.y + off_y;
-                        this._last_satelite1_radius = current_radius;
+                        st1_x = Math.cos(current_radian) * current_radius + off_x;
+                        st1_y = Math.sin(current_radian) * current_radius + off_y;
+                        this._last_satellite1_radius = current_radius;
                     }
 
                 } else {
@@ -431,14 +451,14 @@ export class Base extends SpriteObject implements LateUpdatable {
                         pair_r = pairing_prog * (reference_base_size * 0.45) + (1 - pairing_prog) * this._pairing_start_radius;
                     }
 
-                    st1_x = Math.cos(current_radian) * pair_r + this.display.x + off_x;
-                    st1_y = Math.sin(current_radian) * pair_r + this.display.y + off_y;
+                    st1_x = Math.cos(current_radian) * pair_r + off_x;
+                    st1_y = Math.sin(current_radian) * pair_r + off_y;
 
-                    this._last_satelite1_radius = pair_r;
+                    this._last_satellite1_radius = pair_r;
                 }
 
-                if (Number(st1_diff_degree / 5) < 0 || Number(st1_diff_degree / 5) > 71) {
-                    if (Number(st1_diff_degree / 5) < -1 || Number(st1_diff_degree / 5) > 72) {
+                if (Math.trunc(st1_diff_degree / 5) < 0 || Math.trunc(st1_diff_degree / 5) > 71) {
+                    if (Math.trunc(st1_diff_degree / 5) < -1 || Math.trunc(st1_diff_degree / 5) > 72) {
                         log.debug(st1_diff_degree);
                         throw new Error("WHAT1");
                     }
@@ -446,20 +466,18 @@ export class Base extends SpriteObject implements LateUpdatable {
                     st1_diff_degree = 0;
                 }
 
+                satellite_body_data = BaseAssets.getSatellite1Bitmap(zoom_level, st1_diff_degree, this._pair_type);
 
-                satelite_body_data = BaseAssets.getSatellite1Bitmap(zoom_level, st1_diff_degree, this._pair_type);
-
-                this._last_satelite1_abs_degree = st1_diff_degree + 90.0;
+                this._last_satellite1_abs_degree = st1_diff_degree + 90.0;
 
                 if (draw_st1) {
-                    let st1_rect: Rectangle = new Rectangle(0, 0, satelite_body_data.width, satelite_body_data.height);
-                    let st1_point: Point = new Point(st1_x - satelite_body_data.width / 2, st1_y - satelite_body_data.height / 2);
-
                     if (highlight_state) {
-                        // this.bit_blit_highlight(canvas, st1_rect, st1_point, satelite_body_data, highlight_state);
+                        // this.bit_blit_highlight(canvas, st1_rect, st1_point, satellite_body_data, highlight_state);
                         throw new Error("TODO");
                     } else {
-                        Base.showSprite(this._sat1, satelite_body_data);
+                        Base.showSprite(this._sat1, satellite_body_data);
+                        this._sat1.x = st1_x;
+                        this._sat1.y = st1_y;
                     }
                 }
             }
@@ -469,34 +487,19 @@ export class Base extends SpriteObject implements LateUpdatable {
             this._unpairing = false;
         }
 
-        // if (metabd != null && body_data != null && draw_body) {
-        //     let desired_dist: number = Math.sqrt((metabd.width / 2) * (metabd.width / 2) + (metabd.height / 2) * (metabd.height / 2));
-        //     desired_dist += Math.sqrt((this._out_x / 2) * (this._out_x / 2) + (this._out_y / 2) * (this._out_y / 2));
-        //     desired_dist *= 0.8;
-        //
-        //     let out_dist: number = Math.sqrt(this._out_x * this._out_x + this._out_y * this._out_y);
-        //     if (out_dist < Constants.EPSILON)
-        //         return dirty;
-        //
-        //     let meta_pos: Point = new Point(off_x + this.display.x + this._out_x * desired_dist / out_dist, off_y + this.display.y + this._out_y * desired_dist / out_dist);
-        //
-        //     let draw_meta: boolean = true;
-        //
-        //     if (meta_pos.x + metabd.width / 2 < 0 || meta_pos.x - metabd.width / 2 > canvas.width)
-        //         draw_meta = false;
-        //
-        //     if (meta_pos.y + metabd.height / 2 < 0 || meta_pos.y - metabd.height / 2 > canvas.height)
-        //         draw_meta = false;
-        //
-        //     if (draw_meta) {
-        //         let meta_rect: Rectangle = new Rectangle(0, 0, metabd.width, metabd.height);
-        //         meta_pos.x -= metabd.width / 2;
-        //         meta_pos.y -= metabd.height / 2;
-        //         canvas.copyPixels(metabd, meta_rect, meta_pos, null, null, true);
-        //         r = meta_rect.clone();
-        //         r.offsetPoint(meta_pos);
-        //     }
-        // }
+        if (numberBitmap != null && body_data != null && draw_body) {
+            let desired_dist: number = Math.sqrt((numberBitmap.width / 2) * (numberBitmap.width / 2) + (numberBitmap.height / 2) * (numberBitmap.height / 2));
+            desired_dist += Math.sqrt((this._out_x / 2) * (this._out_x / 2) + (this._out_y / 2) * (this._out_y / 2));
+            desired_dist *= 0.8;
+
+            let out_dist: number = Math.sqrt(this._out_x * this._out_x + this._out_y * this._out_y);
+            if (out_dist > Constants.EPSILON) {
+                let numberPos: Point = new Point(off_x + this._out_x * desired_dist / out_dist, off_y + this._out_y * desired_dist / out_dist);
+                Base.showSprite(this._number, numberBitmap);
+                this._number.x = numberPos.x;
+                this._number.y = numberPos.y;
+            }
+        }
     }
 
     // public bit_blit_after_effect (zoom_level: number, canvas: Texture, off_x: number, off_y: number, current_time: number): Rectangle {
@@ -572,13 +575,13 @@ export class Base extends SpriteObject implements LateUpdatable {
 
     private static to_canonical_range(deg: number): number {
         if (deg > 0) {
-            deg = deg - (Number(deg / 360.0) * 360);
+            deg = deg - (Math.trunc(deg / 360.0) * 360);
             if (deg >= 360) {
                 deg = 359;
             }
             return deg;
         } else if (deg < 0) {
-            let deg2: number = deg + (Number(-deg / 360.0) * 360);
+            let deg2: number = deg + (Math.trunc(-deg / 360.0) * 360);
             if (deg2 < 0) {
                 return deg2 + 360;
             } else {
@@ -597,6 +600,7 @@ export class Base extends SpriteObject implements LateUpdatable {
     private readonly _letter: Sprite = new Sprite();
     private readonly _sat0: Sprite = new Sprite();
     private readonly _sat1: Sprite = new Sprite();
+    private readonly _number: Sprite = new Sprite();
 
     private _base_type: number = -1;
     // The index of the base in the base array.
@@ -619,8 +623,8 @@ export class Base extends SpriteObject implements LateUpdatable {
     private _pairing_start_degree: number;
     private _pairing_start_radius: number = 0;
     private _pair_type: number = -1;
-    private _last_satelite1_abs_degree: number = -Math.PI / 5.2;
-    private _last_satelite1_radius: number = 0;
+    private _last_satellite1_abs_degree: number = -Math.PI / 5.2;
+    private _last_satellite1_radius: number = 0;
     private _is_last: boolean;
     private _color_level: number = -1;
     private _is_forced: boolean;

@@ -1,6 +1,7 @@
 import {Matrix, Sprite, Texture} from "pixi.js";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {ColorUtil} from "./ColorUtil";
+import {MathUtil} from "./MathUtil";
 
 export class BitmapUtil {
     /**
@@ -36,7 +37,7 @@ export class BitmapUtil {
 
         for (let ii: number = 1; ii < end_index; ii++) {
             let sprite: Sprite = new Sprite(bitmap);
-            sprite.rotation = step_size * ii * (Math.PI / 180);
+            sprite.rotation = step_size * ii * MathUtil.deg2Rad;
             rotated.push(TextureUtil.renderToTexture(sprite));
         }
 
