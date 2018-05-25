@@ -1,5 +1,6 @@
 import * as _ from "lodash"
 import {Texture} from "pixi.js";
+import {Assert} from "../../flashbang/util/Assert";
 
 export class BitmapManager {
     public static readonly NovaAMissionReq: string = "assets/NOVA/Mission/a-box.png";
@@ -300,8 +301,10 @@ export class BitmapManager {
     }
 
     /// TODO: remove me!
-    public static get_bitmap_named(source: string): Texture {
-        return Texture.fromImage(source);
+    public static get_bitmap_named(name: string): Texture {
+        let source: string = (BitmapManager as any)[name];
+        Assert.notNull(source, `No such bitmap: ${name}`);
+        return this.get_bitmap(source);
     }
 
     public static urlsWithPrefix(prefix: string): string[] {
