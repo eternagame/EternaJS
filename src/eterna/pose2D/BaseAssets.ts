@@ -227,9 +227,9 @@ export class BaseAssets {
         BitmapUtil.create_scaled(BaseAssets._backbone_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BARCODE BITMAPS
-        BaseAssets._barcode_data = [BaseAssets.draw_circular_barcode(16, 6, 0.5)];
-        BaseAssets._barcode_mid_data = [BaseAssets.draw_circular_barcode(12, 3, 0.5)];
-        BaseAssets._barcode_min_data = [BaseAssets.draw_circular_barcode(6, 2, 0.5)];
+        BaseAssets._barcode_data = [BaseAssets.draw_circular_barcode(16, 6, /*0.5*/ 1)];
+        BaseAssets._barcode_mid_data = [BaseAssets.draw_circular_barcode(12, 3, /*0.5*/ 1)];
+        BaseAssets._barcode_min_data = [BaseAssets.draw_circular_barcode(6, 2, /*0.5*/ 1)];
 
         BitmapUtil.create_scaled(BaseAssets._barcode_data, 0.75, Base.NUM_ZOOM_LEVELS);
         BitmapUtil.create_scaled(BaseAssets._barcode_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
