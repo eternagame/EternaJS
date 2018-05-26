@@ -1,4 +1,4 @@
-import DisplayObject = PIXI.DisplayObject;
+import {DisplayObject} from "pixi.js";
 
 export class DisplayUtil {
     /** Removes the given DisplayObject from its parent, if it has one */
