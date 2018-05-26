@@ -669,7 +669,7 @@ export class Pose2D extends SpriteObject implements Updatable {
         this._shift_limit = limit + this._sequence.length;
     }
 
-    public set_barcodes(barcodes: any[]): void {
+    public set_barcodes(barcodes: number[]): void {
         this._barcodes = barcodes.slice();
     }
 
@@ -3359,7 +3359,7 @@ export class Pose2D extends SpriteObject implements Updatable {
     // private _strand_label: TextBalloon;
 
     /// barcode
-    private _barcodes: any[];
+    private _barcodes: number[];
 
     /// Canvas for bit blitting
     // private _canvas: Bitmap;

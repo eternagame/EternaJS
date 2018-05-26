@@ -23,7 +23,7 @@ export class PoseTestMode extends AppMode {
     }
 
     protected onResourcesLoaded(): void {
-        this._pose = this.createPose(PoseTestMode.PUZZLE_4350940);
+        this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
     }
@@ -61,6 +61,9 @@ export class PoseTestMode extends AppMode {
         this.addObject(pose, this.modeSprite);
 
         pose.set_sequence(desc.seq);
+        if (desc.barcodes != null) {
+            pose.set_barcodes(desc.barcodes);
+        }
         pose.set_oligos(desc.oligos);
         pose.set_oligo(desc.oligo);
         pose.set_pairs(desc.pairs);
@@ -85,10 +88,18 @@ export class PoseTestMode extends AppMode {
         puzlocks: [false, false, false, false, false, false, false, false, false, false, false, false, false, false],
         shiftLimit: 5
     };
+
+    private static readonly NANDOS_ZIPPERS: PoseDesc = {
+        seq: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        barcodes: [21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39],
+        pairs: [-1,-1,-1,-1,-1,21,20,19,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,7,6,5,-1,36,35,34,33,-1,-1,-1,-1,-1,-1,26,25,24,23,-1,-1,-1],
+        puzlocks: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+    }
 }
 
 interface PoseDesc {
     seq: number[];
+    barcodes?: number[];
     oligos?: number[];
     oligo?: number[];
     pairs: number[];
