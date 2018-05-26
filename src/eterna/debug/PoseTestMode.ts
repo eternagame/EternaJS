@@ -44,6 +44,18 @@ export class PoseTestMode extends AppMode {
         }
     }
 
+    public onMouseWheelEvent(e :WheelEvent): void {
+        let prev_zoom: number = this._pose.get_zoom_level();
+
+        if (e.deltaY < 0 && prev_zoom > 0) {
+            // zoom in
+            this._pose.set_zoom_level(prev_zoom - 1);
+        } else if (e.deltaY > 0 && prev_zoom < Pose2D.ZOOM_SPACINGS.length - 1) {
+            // zoom out
+            this._pose.set_zoom_level(prev_zoom + 1);
+        }
+    }
+
     private createPose(desc: PoseDesc): Pose2D {
         let pose: Pose2D = new Pose2D(true);
         this.addObject(pose, this.modeSprite);
