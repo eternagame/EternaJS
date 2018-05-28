@@ -1,7 +1,6 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
 'use strict';
 
-let path = require('path');
 let HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 let packageJson = require('./package.json');
@@ -15,11 +14,7 @@ module.exports = {
 
     output: {
         filename: '[name].js',
-        chunkFilename: '[chunkhash].js',
-        path: path.resolve(__dirname + "/dist"),
-
-        // TODO: We're not going to serve assets from 'dist' in production; fix this
-        publicPath: "dist/"
+        chunkFilename: '[chunkhash].js'
     },
 
     resolve: {
