@@ -11,6 +11,7 @@ import {Folder} from "../folding/Folder";
 import {BitmapManager} from "../util/BitmapManager";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
+import {HighlightBox, HighlightType} from "./HighlightBox";
 import {PoseUtil} from "./PoseUtil";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
@@ -72,23 +73,23 @@ export class Pose2D extends SpriteObject implements Updatable {
         //     this.addObject(this._explosion_rays[ii]);
         // }
         //
-        // this._selection_highlight_box = new HighlightBox();
-        // this.addObject(this._selection_highlight_box);
-        //
-        // this._restricted_highlight_box = new HighlightBox();
-        // this.addObject(this._restricted_highlight_box);
-        //
-        // this._unstable_highlight_box = new HighlightBox();
-        // this.addObject(this._unstable_highlight_box);
-        //
-        // this._user_defined_highlight_box = new HighlightBox();
-        // this.addObject(this._user_defined_highlight_box);
-        //
-        // this._forced_highlight_box = new HighlightBox();
-        // this.addObject(this._forced_highlight_box);
-        //
-        // this._shift_highlight_box = new HighlightBox();
-        // this.addObject(this._shift_highlight_box);
+        this._selection_highlight_box = new HighlightBox(this);
+        this.addObject(this._selection_highlight_box, this.sprite);
+
+        this._restricted_highlight_box = new HighlightBox(this);
+        this.addObject(this._restricted_highlight_box, this.sprite);
+
+        this._unstable_highlight_box = new HighlightBox(this);
+        this.addObject(this._unstable_highlight_box, this.sprite);
+
+        this._user_defined_highlight_box = new HighlightBox(this);
+        this.addObject(this._user_defined_highlight_box, this.sprite);
+
+        this._forced_highlight_box = new HighlightBox(this);
+        this.addObject(this._forced_highlight_box, this.sprite);
+
+        this._shift_highlight_box = new HighlightBox(this);
+        this.addObject(this._shift_highlight_box, this.sprite);
         //
         // this.addEventListener(MouseEvent.MOUSE_MOVE, this.on_pose_mouse_move);
         // this.addEventListener(MouseEvent.MOUSE_DOWN, this.call_start_mousedown_callback);
@@ -132,40 +133,13 @@ export class Pose2D extends SpriteObject implements Updatable {
     //     }
     // }
 
+    public get isAnimating(): boolean {
+        return this._base_to_x != null;
+    }
+
     public is_folding(): boolean {
         return (this._last_sampled_time - this._fold_start_time < this._fold_duration);
     }
-
-    // public get_highlight_queue(): any[] {
-    //     return this._selection_highlight_box.get_queue();
-    // }
-    //
-    // public get_restricted_highlight_queue(): any[] {
-    //     return this._restricted_highlight_box.get_queue();
-    // }
-    //
-    // public set_restricted_highlight_queue(restricted: any[]): void {
-    //     this._restricted_highlight_box.set_queue(restricted);
-    //     this._redraw = true;
-    // }
-    //
-    // public get_unstable_highlight_queue(): any[] {
-    //     return this._unstable_highlight_box.get_queue();
-    // }
-    //
-    // public set_unstable_highlight_queue(unstable: any[]): void {
-    //     this._unstable_highlight_box.set_queue(unstable);
-    //     this._redraw = true;
-    // }
-    //
-    // public get_user_defined_highlight_queue(): any[] {
-    //     return this._user_defined_highlight_box.get_queue();
-    // }
-    //
-    // public set_user_defined_highlight_queue(user_defined: any[]): void {
-    //     this._user_defined_highlight_box.set_queue(user_defined);
-    //     this._redraw = true;
-    // }
 
     // public set_primary_energy_score_location(pos: UDim): void {
     //     this._primary_score_energy_display.set_pos(pos);
@@ -371,7 +345,7 @@ export class Pose2D extends SpriteObject implements Updatable {
         this._design_struct_updated = false;
     }
 
-    public set_mutated(seq_arr: any[]): void {
+    public set_mutated(seq_arr: number[]): void {
         let n: number = Math.min(this._mutated_sequence.length, seq_arr.length);
         let ofs: number = (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
@@ -735,12 +709,12 @@ export class Pose2D extends SpriteObject implements Updatable {
         return temp;
     }
 
-    public set_forced_highlights(elems: any[]): void {
-        // if (elems == null) {
-        //     this._forced_highlight_box.clear();
-        // } else {
-        //     this._forced_highlight_box.set_highlight(3, elems);
-        // }
+    public set_forced_highlights(elems: number[]): void {
+        if (elems == null) {
+            this._forced_highlight_box.clear();
+        } else {
+            this._forced_highlight_box.set_highlight(HighlightType.FORCED, elems);
+        }
     }
 
     public set_struct_constraints(do_care: boolean[]): void {
@@ -776,7 +750,7 @@ export class Pose2D extends SpriteObject implements Updatable {
                 || EPars.has_cut(this.get_full_sequence(), segments[1], segments[2])));
     }
 
-    public get_design_segments(): any[] {
+    public get_design_segments(): number[] {
         let elems: any[] = [];
         let curr: number = 0;
         for (let jj: number = 0; jj < this.get_full_sequence_length(); jj++) {
@@ -793,94 +767,116 @@ export class Pose2D extends SpriteObject implements Updatable {
     }
 
     public shift_3prime(): void {
-        // let q: any[] = this._shift_highlight_box.get_queue();
-        // if (q == null) return;
-        // let first: number = q[1];
-        // let last: number = q[2];
-        // let ii: number;
-        // // can't shift locked bases
-        // for (ii = first; ii <= last; ii++) {
-        //     if (this._locks[ii]) return;
-        // }
-        // // find the next acceptable spot
-        // let ofs: number = 1;
-        // let len: number = this.get_sequence_length();
-        // while (last + ofs < len) {
-        //     for (ii = first + ofs; ii <= last + ofs; ii++) {
-        //         if (this._locks[ii]) break;
-        //     }
-        //     if (ii > last + ofs) break;
-        //     ofs++;
-        // }
-        // // if not found, give up
-        // if (last + ofs >= len) return;
-        //
-        // let mutated: any[];
-        // let segment: any[];
-        // if (ofs == 1) {
-        //     segment = this._sequence.slice(first, last + 1 + 1);
-        //     segment.unshift(segment.pop());
-        //     mutated = this._sequence.slice(0, first)
-        //         .concat(segment)
-        //         .concat(this._sequence.slice(last + 1 + 1));
-        // } else {
-        //     mutated = this._sequence.slice();
-        //     for (ii = first; ii <= last; ii++) {
-        //         let xx: number = mutated[ii + ofs];
-        //         mutated[ii + ofs] = mutated[ii];
-        //         mutated[ii] = xx;
-        //     }
-        // }
-        //
-        // this._mutated_sequence = this.get_full_sequence().slice();
-        // this.set_mutated(mutated);
-        // this.done_coloring();
-        // this._shift_highlight_box.set_highlight(6, [first + ofs, last + ofs]);
+        let q: number[] = this._shift_highlight_box.get_queue();
+        if (q == null) {
+            return;
+        }
+
+        let first: number = q[1];
+        let last: number = q[2];
+        let ii: number;
+        // can't shift locked bases
+        for (ii = first; ii <= last; ii++) {
+            if (this._locks[ii]) {
+                return;
+            }
+        }
+        // find the next acceptable spot
+        let ofs: number = 1;
+        let len: number = this.get_sequence_length();
+        while (last + ofs < len) {
+            for (ii = first + ofs; ii <= last + ofs; ii++) {
+                if (this._locks[ii]) {
+                    break;
+                }
+            }
+            if (ii > last + ofs) {
+                break;
+            }
+            ofs++;
+        }
+        // if not found, give up
+        if (last + ofs >= len) {
+            return;
+        }
+
+        let mutated: number[];
+        let segment: number[];
+        if (ofs == 1) {
+            segment = this._sequence.slice(first, last + 1 + 1);
+            segment.unshift(segment.pop());
+            mutated = this._sequence.slice(0, first)
+                .concat(segment)
+                .concat(this._sequence.slice(last + 1 + 1));
+        } else {
+            mutated = this._sequence.slice();
+            for (ii = first; ii <= last; ii++) {
+                let xx: number = mutated[ii + ofs];
+                mutated[ii + ofs] = mutated[ii];
+                mutated[ii] = xx;
+            }
+        }
+
+        this._mutated_sequence = this.get_full_sequence().slice();
+        this.set_mutated(mutated);
+        this.done_coloring();
+        this._shift_highlight_box.set_highlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
     public shift_5prime(): void {
-        // let q: any[] = this._shift_highlight_box.get_queue();
-        // if (q == null) return;
-        // let first: number = q[1];
-        // let last: number = q[2];
-        // let ii: number;
-        // // can't shift locked bases
-        // for (ii = first; ii <= last; ii++) {
-        //     if (this._locks[ii]) return;
-        // }
-        // // find the next acceptable spot
-        // let ofs: number = -1;
-        // while (first + ofs >= 0) {
-        //     for (ii = first + ofs; ii <= last + ofs; ii++) {
-        //         if (this._locks[ii]) break;
-        //     }
-        //     if (ii > last + ofs) break;
-        //     ofs--;
-        // }
-        // // if not found, give up
-        // if (first + ofs < 0) return;
-        //
-        // let mutated: any[];
-        // let segment: any[];
-        // if (ofs == -1) {
-        //     segment = this._sequence.slice(first - 1, last + 1);
-        //     segment.push(segment.shift());
-        //     mutated = this._sequence.slice(0, first - 1)
-        //         .concat(segment)
-        //         .concat(this._sequence.slice(last + 1));
-        // } else {
-        //     mutated = this._sequence.slice();
-        //     for (ii = first; ii <= last; ii++) {
-        //         let xx: number = mutated[ii + ofs];
-        //         mutated[ii + ofs] = mutated[ii];
-        //         mutated[ii] = xx;
-        //     }
-        // }
-        //
-        // this._mutated_sequence = this.get_full_sequence().slice();
-        // this.set_mutated(mutated);
-        // this.done_coloring();
-        // this._shift_highlight_box.set_highlight(6, [first + ofs, last + ofs]);
+        let q: number[] = this._shift_highlight_box.get_queue();
+        if (q == null) {
+            return;
+        }
+
+        let first: number = q[1];
+        let last: number = q[2];
+        let ii: number;
+        // can't shift locked bases
+        for (ii = first; ii <= last; ii++) {
+            if (this._locks[ii]) {
+                return;
+            }
+        }
+        // find the next acceptable spot
+        let ofs: number = -1;
+        while (first + ofs >= 0) {
+            for (ii = first + ofs; ii <= last + ofs; ii++) {
+                if (this._locks[ii]) {
+                    break;
+                }
+            }
+            if (ii > last + ofs) {
+                break;
+            }
+            ofs--;
+        }
+        // if not found, give up
+        if (first + ofs < 0) {
+            return;
+        }
+
+        let mutated: number[];
+        let segment: number[];
+        if (ofs == -1) {
+            segment = this._sequence.slice(first - 1, last + 1);
+            segment.push(segment.shift());
+            mutated = this._sequence.slice(0, first - 1)
+                .concat(segment)
+                .concat(this._sequence.slice(last + 1));
+        } else {
+            mutated = this._sequence.slice();
+            for (ii = first; ii <= last; ii++) {
+                let xx: number = mutated[ii + ofs];
+                mutated[ii + ofs] = mutated[ii];
+                mutated[ii] = xx;
+            }
+        }
+
+        this._mutated_sequence = this.get_full_sequence().slice();
+        this.set_mutated(mutated);
+        this.done_coloring();
+        this._shift_highlight_box.set_highlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
     public is_design_structure_highlighted(index: number): boolean {
@@ -919,14 +915,14 @@ export class Pose2D extends SpriteObject implements Updatable {
         return this._lowperform_mode;
     }
 
-    // public set_highlight_restricted(highlight_restricted: boolean): void {
-    //     this._highlight_restricted = highlight_restricted;
-    //     this._redraw = true;
-    // }
-    //
-    // public is_highlighting_restricted(): boolean {
-    //     return this._highlight_restricted;
-    // }
+    public set_highlight_restricted(highlight_restricted: boolean): void {
+        this._highlight_restricted = highlight_restricted;
+        this._restricted_highlight_box.enabled = highlight_restricted;
+    }
+
+    public is_highlighting_restricted(): boolean {
+        return this._highlight_restricted;
+    }
 
     public set_use_continuous_exp_colors(cont: boolean): void {
         this._exp_continuous = cont;
@@ -982,44 +978,44 @@ export class Pose2D extends SpriteObject implements Updatable {
     }
 
     public clear_highlight(): void {
-        // this._selection_highlight_box.clear();
+        this._selection_highlight_box.clear();
     }
 
-    public highlight_stack(action: any[]): void {
-        // this._selection_highlight_box.set_highlight(0, action.slice(1));
+    public highlight_stack(action: number[]): void {
+        this._selection_highlight_box.set_highlight(HighlightType.STACK, action.slice(1));
     }
 
-    public highlight_loop(action: any[]): void {
-        // this._selection_highlight_box.set_highlight(1, action.slice(1));
+    public highlight_loop(action: number[]): void {
+        this._selection_highlight_box.set_highlight(HighlightType.LOOP, action.slice(1));
     }
 
     /// For restricted queue
     public clear_restricted_highlight(): void {
-        // this._restricted_highlight_box.clear();
+        this._restricted_highlight_box.clear();
     }
 
-    public highlight_restricted_sequence(restricted: any[]): void {
-        // this._restricted_highlight_box.set_highlight(2, restricted);
+    public highlight_restricted_sequence(restricted: number[]): void {
+        this._restricted_highlight_box.set_highlight(HighlightType.RESTRICTED, restricted);
     }
 
     public clear_unstable_highlight(): void {
-        // this._unstable_highlight_box.clear();
+        this._unstable_highlight_box.clear();
     }
 
-    public highlight_unstable_sequence(unstable: any[]): void {
-        // this._unstable_highlight_box.set_highlight(5, unstable);
+    public highlight_unstable_sequence(unstable: number[]): void {
+        this._unstable_highlight_box.set_highlight(HighlightType.UNSTABLE, unstable);
     }
 
     public clear_user_defined_highlight(): void {
-        // this._user_defined_highlight_box.clear();
+        this._user_defined_highlight_box.clear();
     }
 
-    public highlight_user_defined_sequence(user_defined: any[]): void {
-        // this._user_defined_highlight_box.set_highlight(7, user_defined);
+    public highlight_user_defined_sequence(user_defined: number[]): void {
+        this._user_defined_highlight_box.set_highlight(HighlightType.USER_DEFINED, user_defined);
     }
 
     public clear_shift_highlight(): void {
-        // this._shift_highlight_box.clear();
+        this._shift_highlight_box.clear();
     }
 
     public praise_stack(stack_start: number, stack_end: number): void {
@@ -1732,7 +1728,7 @@ export class Pose2D extends SpriteObject implements Updatable {
         return this._bases[seq];
     }
 
-    public get_pairs(): any[] {
+    public get_pairs(): number[] {
         return this._pairs.slice();
     }
 
@@ -2048,109 +2044,59 @@ export class Pose2D extends SpriteObject implements Updatable {
         }
 
         // highlights
-        // this.check_render_highlight(this._selection_highlight_box);
-        // this.check_render_highlight(this._forced_highlight_box);
-        // this.check_render_highlight(this._shift_highlight_box);
-        //
-        // if (this._restricted_highlight_box.get_queue() == null)
-        //     this.clear_restricted_highlight();
-        //
-        // if (!this._highlight_restricted && this._restricted_highlight_box.is_on()) {
-        //     this._restricted_highlight_box.visible = false;
-        //     this._restricted_highlight_box.set_animator(null);
-        //     this._restricted_highlight_box.set_on(false);
-        // }
-        //
-        // // For restricted highlight. Works only when _highlight_restricted is true
-        // if (this._highlight_restricted && !this._offset_translating && this._base_to_x == null && this._restricted_highlight_box.get_queue() != null) {
-        //     if (this._restricted_highlight_box.is_on() == true) {
-        //
-        //         if (this._restricted_highlight_box.same_queue()) {
-        //             // Check if there was a change in position. Redraw if the position had changed.
-        //             if (this._restricted_highlight_box.get_last_known_position() != null) {
-        //
-        //                 if (this._restricted_highlight_box.position_changed(this)) {
-        //                     this._restricted_highlight_box.visible = false;
-        //                     this._restricted_highlight_box.set_animator(null);
-        //
-        //                     this.draw_highlight_restricted_sequence();
-        //                 }
-        //             }
-        //
-        //         } else {
-        //             this._restricted_highlight_box.visible = false;
-        //             this._restricted_highlight_box.set_animator(null);
-        //
-        //             this.draw_highlight_restricted_sequence();
-        //         }
-        //
-        //     } else {
-        //         this._restricted_highlight_box.visible = false;
-        //         this._restricted_highlight_box.set_animator(null);
-        //
-        //         this.draw_highlight_restricted_sequence();
-        //     }
-        // }
-        //
-        // if (this._unstable_highlight_box.get_queue() == null)
-        //     this.clear_unstable_highlight();
-        //
-        // if (!this._offset_translating && this._base_to_x == null && this._unstable_highlight_box.get_queue() != null) {
-        //     if (this._unstable_highlight_box.is_on() == true) {
-        //
-        //         if (this._unstable_highlight_box.same_queue()) {
-        //             // Check if there was a change in position. Redraw if the position had changed.
-        //             if (this._unstable_highlight_box.get_last_known_position() != null) {
-        //
-        //                 if (this._unstable_highlight_box.position_changed(this)) {
-        //                     this._unstable_highlight_box.visible = false;
-        //                     this._unstable_highlight_box.set_animator(null);
-        //                     this.draw_highlight_unstable_sequence();
-        //                 }
-        //             }
-        //
-        //         } else {
-        //             this._unstable_highlight_box.visible = false;
-        //             this._unstable_highlight_box.set_animator(null);
-        //             this.draw_highlight_unstable_sequence();
-        //         }
-        //
-        //     } else {
-        //         this._unstable_highlight_box.visible = false;
-        //         this._unstable_highlight_box.set_animator(null);
-        //         this.draw_highlight_unstable_sequence();
-        //     }
-        // }
-        //
-        // if (this._user_defined_highlight_box.get_queue() == null)
-        //     this.clear_user_defined_highlight();
-        //
-        // if (!this._offset_translating && this._base_to_x == null && this._user_defined_highlight_box.get_queue() != null) {
-        //     if (this._user_defined_highlight_box.is_on() == true) {
-        //
-        //         if (this._user_defined_highlight_box.same_queue()) {
-        //             // Check if there was a change in position. Redraw if the position had changed.
-        //             if (this._user_defined_highlight_box.get_last_known_position() != null) {
-        //
-        //                 if (this._user_defined_highlight_box.position_changed(this)) {
-        //                     this._user_defined_highlight_box.visible = false;
-        //                     this._user_defined_highlight_box.set_animator(null);
-        //                     this.draw_highlight_user_defined_sequence();
-        //                 }
-        //             }
-        //
-        //         } else {
-        //             this._user_defined_highlight_box.visible = false;
-        //             this._user_defined_highlight_box.set_animator(null);
-        //             this.draw_highlight_user_defined_sequence();
-        //         }
-        //
-        //     } else {
-        //         this._user_defined_highlight_box.visible = false;
-        //         this._user_defined_highlight_box.set_animator(null);
-        //         this.draw_highlight_user_defined_sequence();
-        //     }
-        // }
+        if (this._unstable_highlight_box.get_queue() == null)
+            this.clear_unstable_highlight();
+
+        if (!this._offset_translating && this._base_to_x == null && this._unstable_highlight_box.get_queue() != null) {
+            if (this._unstable_highlight_box.is_on() == true) {
+
+                if (this._unstable_highlight_box.same_queue()) {
+                    // Check if there was a change in position. Redraw if the position had changed.
+                    if (this._unstable_highlight_box.get_last_known_position() != null) {
+
+                        if (this._unstable_highlight_box.position_changed(this)) {
+                            this._unstable_highlight_box.enabled = false;
+                            this.draw_highlight_unstable_sequence();
+                        }
+                    }
+
+                } else {
+                    this._unstable_highlight_box.enabled = false;
+                    this.draw_highlight_unstable_sequence();
+                }
+
+            } else {
+                this._unstable_highlight_box.enabled = false;
+                this.draw_highlight_unstable_sequence();
+            }
+        }
+
+        if (this._user_defined_highlight_box.get_queue() == null)
+            this.clear_user_defined_highlight();
+
+        if (!this._offset_translating && this._base_to_x == null && this._user_defined_highlight_box.get_queue() != null) {
+            if (this._user_defined_highlight_box.is_on() == true) {
+
+                if (this._user_defined_highlight_box.same_queue()) {
+                    // Check if there was a change in position. Redraw if the position had changed.
+                    if (this._user_defined_highlight_box.get_last_known_position() != null) {
+
+                        if (this._user_defined_highlight_box.position_changed(this)) {
+                            this._user_defined_highlight_box.enabled = false;
+                            this.draw_highlight_user_defined_sequence();
+                        }
+                    }
+
+                } else {
+                    this._user_defined_highlight_box.enabled = false;
+                    this.draw_highlight_user_defined_sequence();
+                }
+
+            } else {
+                this._user_defined_highlight_box.enabled = false;
+                this.draw_highlight_user_defined_sequence();
+            }
+        }
 
         /// Praise stacks when RNA is not moving
         if (!this._offset_translating && this._base_to_x == null) {
@@ -2842,22 +2788,22 @@ export class Pose2D extends SpriteObject implements Updatable {
     }
 
     private update_design_highlight(): void {
-        // let elems: any[] = this.get_design_segments();
-        // if (elems.length == 0)
-        //     this._selection_highlight_box.clear();
-        // else {
-        //     this._selection_highlight_box.set_highlight(4, elems);
-        //     this._selection_highlight_box.set_on(false);
-        // }
+        let elems: number[] = this.get_design_segments();
+        if (elems.length == 0)
+            this._selection_highlight_box.clear();
+        else {
+            this._selection_highlight_box.set_highlight(HighlightType.DESIGN, elems);
+            this._selection_highlight_box.set_on(false);
+        }
     }
 
     private update_shift_highlight(): void {
-        // if (this._shift_start < 0)
-        //     this._shift_highlight_box.clear();
-        // else {
-        //     this._shift_highlight_box.set_highlight(6, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
-        //     this._shift_highlight_box.set_on(false);
-        // }
+        if (this._shift_start < 0)
+            this._shift_highlight_box.clear();
+        else {
+            this._shift_highlight_box.set_highlight(HighlightType.SHIFT, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
+            this._shift_highlight_box.set_on(false);
+        }
     }
 
     private draw_energy_highlight(energy: GameObject): void {
@@ -2915,16 +2861,12 @@ export class Pose2D extends SpriteObject implements Updatable {
         this._energy_highlights.splice(0);
     }
 
-    private draw_highlight_restricted_sequence(): void {
-        // this._restricted_highlight_box.render(this);
-    }
-
     private draw_highlight_unstable_sequence(): void {
-        // this._unstable_highlight_box.render(this);
+        this._unstable_highlight_box.enabled = true;
     }
 
     private draw_highlight_user_defined_sequence(): void {
-        // this._user_defined_highlight_box.render(this);
+        this._user_defined_highlight_box.enabled = true;
     }
 
     private render_aux_info(): void {
@@ -2985,25 +2927,6 @@ export class Pose2D extends SpriteObject implements Updatable {
             }
         }
     }
-
-    // private check_render_highlight(hlbox: HighlightBox): void {
-    //     // If highlight is already on, check if it needs redrawing
-    //     if (!this._offset_translating && this._base_to_x == null && hlbox.get_queue() != null) {
-    //         if (hlbox.is_on() == true) {
-    //             // Check if there was a change in position. Redraw if the position had changed.
-    //             if (hlbox.get_last_known_position() != null) {
-    //                 if (hlbox.position_changed(this)) {
-    //                     hlbox.visible = false;
-    //                     hlbox.set_animator(null);
-    //                     hlbox.render(this);
-    //                 }
-    //             }
-    //         } else {
-    //             /// Draw highlight boxes when RNA is not moving
-    //             hlbox.render(this);
-    //         }
-    //     }
-    // }
 
     private update_score_node_visualization(): void {
         // if (this._score_nodes == null) {
@@ -3320,9 +3243,6 @@ export class Pose2D extends SpriteObject implements Updatable {
         return (s1 == type1 && s2 == type2) || (s1 == type2 && s2 == type1);
     }
 
-    private _mol_canvas_data: Texture;
-    private _empty_canvas_data: Texture;
-
     /// Array of sequence/pairs
     private _sequence: number[] = [];
     private _mutated_sequence: number[];
@@ -3435,13 +3355,13 @@ export class Pose2D extends SpriteObject implements Updatable {
     private _explosion_cb: Function;
 
     /// Selection box
-    // private _selection_highlight_box: HighlightBox;
-    // private _restricted_highlight_box: HighlightBox;
-    // private _highlight_restricted: boolean;
-    // private _unstable_highlight_box: HighlightBox;
-    // private _forced_highlight_box: HighlightBox;
-    // private _user_defined_highlight_box: HighlightBox;
-    // private _shift_highlight_box: HighlightBox;
+    private _selection_highlight_box: HighlightBox;
+    private _restricted_highlight_box: HighlightBox;
+    private _highlight_restricted: boolean = false;
+    private _unstable_highlight_box: HighlightBox;
+    private _forced_highlight_box: HighlightBox;
+    private _user_defined_highlight_box: HighlightBox;
+    private _shift_highlight_box: HighlightBox;
     private _shift_start: number = -1;
     private _shift_end: number = -1;
 
