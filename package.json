@@ -3,24 +3,11 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "main": "./dist/main.js",
-  "babel": {
-    "presets": [
-      "@babel/env",
-      "@babel/typescript"
-    ],
-    "plugins": [
-      "@babel/proposal-class-properties",
-      "@babel/proposal-object-rest-spread",
-      "@babel/plugin-syntax-dynamic-import"
-    ],
-    "ignore": [
-      "src/eterna/folding/engines/*.js"
-    ]
-  },
   "scripts": {
     "clean": "rm -rf dist",
     "typecheck": "tsc",
-    "webpack": "webpack",
+    "build-dev": "webpack --config webpack.dev.js",
+    "build-prod": "webpack --config webpack.prod.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -46,11 +33,13 @@
     "@types/webfontloader": "^1.6.29",
     "babel-loader": "^8.0.0-beta.3",
     "babel-polyfill": "^6.26.0",
+    "babel-preset-minify": "^0.4.3",
     "hard-source-webpack-plugin": "^0.6.12",
     "source-map-loader": "^0.2.3",
     "typescript": "^2.8.3",
     "webpack": "^4.9.1",
-    "webpack-cli": "^2.1.4"
+    "webpack-cli": "^2.1.4",
+    "webpack-merge": "^4.1.2"
   },
   "dependencies": {
     "js-cookie": "^2.2.0",
