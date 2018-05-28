@@ -41,10 +41,14 @@ export class PoseTestMode extends AppMode {
         case KeyCode.KeyN:
             this._pose.set_show_numbering(!this._pose.is_showing_numbering());
             break;
+
+        case KeyCode.KeyH:
+            this._pose.set_highlight_restricted(!this._pose.is_highlighting_restricted());
+            break;
         }
     }
 
-    public onMouseWheelEvent(e :WheelEvent): void {
+    public onMouseWheelEvent(e: WheelEvent): void {
         let prev_zoom: number = this._pose.get_zoom_level();
 
         if (e.deltaY < 0 && prev_zoom > 0) {
@@ -70,6 +74,9 @@ export class PoseTestMode extends AppMode {
         pose.set_struct_constraints(desc.structConstraints);
         pose.set_puzzle_locks(desc.puzlocks);
         pose.set_shift_limit(desc.shiftLimit || 0);
+        if (desc.restrictedSequence != null) {
+            pose.highlight_restricted_sequence(desc.restrictedSequence);
+        }
 
         return pose;
     }
@@ -90,10 +97,11 @@ export class PoseTestMode extends AppMode {
     };
 
     private static readonly NANDOS_ZIPPERS: PoseDesc = {
-        seq: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        barcodes: [21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39],
-        pairs: [-1,-1,-1,-1,-1,21,20,19,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,7,6,5,-1,36,35,34,33,-1,-1,-1,-1,-1,-1,26,25,24,23,-1,-1,-1],
-        puzlocks: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false],
+        seq: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        barcodes: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+        pairs: [-1, -1, -1, -1, -1, 21, 20, 19, 18, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 7, 6, 5, -1, 36, 35, 34, 33, -1, -1, -1, -1, -1, -1, 26, 25, 24, 23, -1, -1, -1],
+        puzlocks: [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+        restrictedSequence: [0, 39],
     }
 }
 
@@ -106,4 +114,5 @@ interface PoseDesc {
     structConstraints?: boolean[];
     puzlocks: boolean[];
     shiftLimit?: number;
+    restrictedSequence?: number[];
 }
