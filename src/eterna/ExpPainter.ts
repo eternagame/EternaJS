@@ -1,6 +1,6 @@
 import {Constants} from "./Constants";
 import {ColorUtil} from "./util/ColorUtil";
-import {MathUtil} from "./util/MathUtil";
+import {MathUtil} from "../flashbang/util/MathUtil";
 
 export class ExpPainter {
     public static NUM_COLORS: number = 5;
