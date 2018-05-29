@@ -37,7 +37,7 @@ export abstract class Reactor {
         if (this._listeners == null) {
             // Bail early if we have no listeners
             return;
-        } else if (this._listeners == Reactor.DISPATCHING) {
+        } else if (this._listeners === Reactor.DISPATCHING) {
             throw new Error("Initiated notify while notifying");
         }
 

@@ -1,6 +1,5 @@
 import {Connection} from "./Connection";
 import {Cons} from "./Cons";
-import {MappedValue} from "./MappedValue";
 import {Reactor} from "./Reactor";
 import {RListener} from "./RListener";
 import {ValueView} from "./ValueView";
@@ -19,9 +18,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
         return this.updateAndNotifyIf;
     }
 
-    public map<U>(func: (value: T) => U): ValueView<U> {
-        return MappedValue.create(this, func);
-    }
+    public abstract map<U>(func: (value: T) => U): ValueView<U>;
 
     public connect(listener: (value: T, ovalue: T) => void): Connection {
         return this.addConnection(listener);

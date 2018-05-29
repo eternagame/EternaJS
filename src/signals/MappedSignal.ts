@@ -1,4 +1,5 @@
 import {AbstractSignal} from "./AbstractSignal";
+import {FilteredSignal} from "./FilteredSignal";
 import {SignalView} from "./SignalView";
 import {Connection} from "./Connection";
 
@@ -20,6 +21,14 @@ export abstract class MappedSignal<T> extends AbstractSignal<T> {
      * @return the newly established connection.
      */
     protected abstract connectToSource(): Connection;
+
+    public map<U>(func: (value: T) => U): SignalView<U> {
+        return MappedSignal.create(this, func);
+    }
+
+    public filter(pred: (value: T) => boolean): SignalView<T> {
+        return new FilteredSignal(this, pred);
+    }
 
     /*override*/
     protected connectionAdded(): void {
@@ -49,11 +58,7 @@ class MappedSignalImpl<TMapped, TSource> extends MappedSignal<TMapped> {
     }
 
     /*override*/ protected connectToSource(): Connection {
-        return this._source.connect(this.onSourceEmit);
-    }
-
-    protected onSourceEmit(value: TSource): void {
-        this.notifyEmit(this._f(value));
+        return this._source.connect((value) => { this.notifyEmit(this._f(value)); });
     }
 
     protected _source: SignalView<TSource>;
