@@ -1,6 +1,6 @@
 import {Container} from "pixi.js";
+import {UnitSignal} from "../../signals/UnitSignal";
 import {Assert} from "../util/Assert";
-import {UnitSignal} from "../util/Signals";
 import {AppMode} from "./AppMode";
 
 /**

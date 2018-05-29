@@ -62,7 +62,6 @@
     "lodash": "^4.17.10",
     "loglevel": "^1.6.1",
     "pixi.js": "^4.8.0",
-    "typed-signals": "^1.0.2",
     "webfontloader": "^1.6.28"
   }
 }

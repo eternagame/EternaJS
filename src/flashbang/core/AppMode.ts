@@ -1,7 +1,8 @@
 import {Container} from "pixi.js";
-import {Signal, SignalConnections} from "typed-signals";
+import {RegistrationGroup} from "../../signals/RegistrationGroup";
+import {Signal} from "../../signals/Signal";
+import {UnitSignal} from "../../signals/UnitSignal";
 import {Assert} from "../util/Assert";
-import {UnitSignal} from "../util/Signals";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
 import {GameObjectRef} from "./GameObjectRef";
@@ -11,9 +12,9 @@ import {Updatable} from "./Updatable";
 
 export class AppMode {
     /** Emitted at the beginning of the update process */
-    public readonly updateBegan: Signal<(dt: number) => void> = new Signal();
+    public readonly updateBegan: Signal<number> = new Signal();
     /** Emitted after updateBegan has completed. */
-    public readonly lateUpdate: Signal<(dt: number) => void> = new Signal();
+    public readonly lateUpdate: Signal<number> = new Signal();
 
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
@@ -38,7 +39,7 @@ export class AppMode {
         this._rootObject = new RootObject(this);
     }
 
-    public get regs(): SignalConnections {
+    public get regs(): RegistrationGroup {
         return this._regs;
     }
 
@@ -155,7 +156,7 @@ export class AppMode {
 
         this._idObjects = null;
 
-        this._regs.disconnectAll();
+        this._regs.close();
         this._regs = null;
 
         this._modeStack = null;
@@ -208,7 +209,7 @@ export class AppMode {
 
         let lateUpdatable: LateUpdatable = <LateUpdatable> (obj as any);
         if (lateUpdatable.lateUpdate !== undefined) {
-            obj.regs.add(this.lateUpdate.connect(dt => lateUpdatable.lateUpdate(dt)));
+            obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
         }
 
         this.registerObject(obj);
@@ -226,7 +227,7 @@ export class AppMode {
 
     protected _idObjects: Map<any, GameObjectBase> = new Map();
 
-    protected _regs: SignalConnections = new SignalConnections();
+    protected _regs: RegistrationGroup = new RegistrationGroup();
 
     protected _active: boolean;
     protected _disposed: boolean;
