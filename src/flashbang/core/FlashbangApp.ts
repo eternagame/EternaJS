@@ -1,4 +1,4 @@
-import {SignalConnections} from "typed-signals";
+import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {KeyCode} from "../input/KeyCode";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
@@ -94,7 +94,7 @@ export class FlashbangApp {
 
             // should the MainLoop be stopped?
             if (this._disposePending) {
-                this._regs.disconnectAll();
+                this._regs.close();
                 this.disposeNow();
             }
         }
@@ -105,7 +105,7 @@ export class FlashbangApp {
 
         this._updatables = null;
 
-        this._regs.disconnectAll();
+        this._regs.close();
         this._regs = null;
 
         this._pixi.destroy();
@@ -133,7 +133,7 @@ export class FlashbangApp {
     }
 
     protected _pixi: PIXI.Application;
-    protected _regs: SignalConnections = new SignalConnections();
+    protected _regs: RegistrationGroup = new RegistrationGroup();
 
     protected _isUpdating: boolean;
     protected _disposePending: boolean;

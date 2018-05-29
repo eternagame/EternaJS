@@ -1,6 +1,6 @@
 import {Container} from "pixi.js";
-import {SignalConnections} from "typed-signals";
-import {UnitSignal} from "../util/Signals";
+import {RegistrationGroup} from "../../signals/RegistrationGroup";
+import {UnitSignal} from "../../signals/UnitSignal";
 import {AppMode} from "./AppMode";
 import {GameObject} from "./GameObject";
 import {GameObjectRef} from "./GameObjectRef";
@@ -73,9 +73,9 @@ export class GameObjectBase {
         }
     }
 
-    public get regs(): SignalConnections {
+    public get regs(): RegistrationGroup {
         if (this._regs == null) {
-            this._regs = new SignalConnections();
+            this._regs = new RegistrationGroup();
         }
         return this._regs;
     }
@@ -145,7 +145,7 @@ export class GameObjectBase {
         this._ref._obj = null;
         this.dispose();
         if (this._regs != null) {
-            this._regs.disconnectAll();
+            this._regs.close();
             this._regs = null;
         }
     }
@@ -156,7 +156,7 @@ export class GameObjectBase {
     }
 
     // lazily instantiated
-    private _regs: SignalConnections;
+    private _regs: RegistrationGroup;
     private _destroyed: UnitSignal;
 
     /*internal*/
