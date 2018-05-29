@@ -1,7 +1,6 @@
 import {Connection} from "./Connection";
 import {Cons} from "./Cons";
 import {Reactor} from "./Reactor";
-import {RListener} from "./RListener";
 import {ValueView} from "./ValueView";
 
 /**
@@ -31,7 +30,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
         // instance will never reach the caller
         let cons: Cons = this.addConnection(listener);
         try {
-            cons.listener.onChange(this.value, null);
+            cons.listener(this.value, null);
         } catch (e) {
             cons.close();
             throw e;
@@ -75,7 +74,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
      * Notifies our listeners of a value change.
      */
     protected notifyChange(value: any, oldValue: any): void {
-        this.notify(AbstractValue.CHANGE, value, oldValue, null);
+        this.notify(value, oldValue, undefined);
     }
 
     /**
@@ -92,9 +91,5 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
      */
     protected valuesAreEqual(value1: T, value2: T): boolean {
         return value1 == value2;
-    }
-
-    protected static readonly CHANGE = (l: RListener, value: any, oldValue: any, _: any) => {
-        l.onChange(value, oldValue);
     }
 }
