@@ -9,7 +9,19 @@
     "build-prod": "webpack --config webpack.prod.js",
     "postbuild-dev": "rsync -tr --delete assets index.html fonts.css dist/dev",
     "postbuild-prod": "rsync -tr --delete assets index.html fonts.css dist/prod",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "rootDir": "src",
+    "transform": {
+      "\\.(ts|tsx)$": "<rootDir>/../node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$"
   },
   "repository": {
     "type": "git",
@@ -26,6 +38,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.49",
     "@babel/preset-env": "^7.0.0-beta.49",
     "@babel/preset-typescript": "^7.0.0-beta.49",
+    "@types/jest": "^22.2.3",
     "@types/js-cookie": "^2.1.0",
     "@types/lodash": "^4.14.109",
     "@types/loglevel": "^1.5.3",
@@ -36,7 +49,9 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-minify": "^0.4.3",
     "hard-source-webpack-plugin": "^0.7.2",
+    "jest": "^23.0.1",
     "source-map-loader": "^0.2.3",
+    "ts-jest": "^22.4.6",
     "typescript": "^2.8.3",
     "webpack": "^4.9.2",
     "webpack-cli": "^2.1.4",
