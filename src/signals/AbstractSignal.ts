@@ -1,5 +1,3 @@
-import {FilteredSignal} from "./FilteredSignal";
-import {MappedSignal} from "./MappedSignal";
 import {Reactor} from "./Reactor";
 import {SignalView} from "./SignalView";
 import {Connection} from "./Connection";
@@ -10,14 +8,10 @@ import {RListener} from "./RListener";
  * exposing a public interface for emitting events. This can be used by entities which wish to
  * expose a signal-like interface for listening, without allowing external callers to emit signals.
  */
-export class AbstractSignal<T> extends Reactor implements SignalView<T> {
-    public map<U>(func: (value: T) => U): SignalView<U> {
-        return MappedSignal.create(this, func);
-    }
+export abstract class AbstractSignal<T> extends Reactor implements SignalView<T> {
+    public abstract map<U>(func: (value: T) => U): SignalView<U>;
 
-    public filter(pred: (value: T) => boolean): SignalView<T> {
-        return new FilteredSignal(this, pred);
-    }
+    public abstract filter(pred: (value: T) => boolean): SignalView<T>;
 
     public connect(slot: (value: T) => void): Connection {
         return this.addConnection(slot);

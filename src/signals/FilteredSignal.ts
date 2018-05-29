@@ -11,13 +11,11 @@ export class FilteredSignal<T> extends MappedSignal<T> {
 
     /*override*/
     protected connectToSource(): Connection {
-        return this._source.connect(this.onSourceEmit);
-    }
-
-    protected onSourceEmit(value: T): void {
-        if (this._pred(value)) {
-            this.notifyEmit(value);
-        }
+        return this._source.connect((value) => {
+            if (this._pred(value)) {
+                this.notifyEmit(value);
+            }
+        });
     }
 
     protected _source: SignalView<T>;

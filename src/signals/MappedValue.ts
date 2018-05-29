@@ -13,6 +13,10 @@ export abstract class MappedValue<T> extends AbstractValue<T> {
         return new MappedValueImpl(source, map);
     }
 
+    public map<U>(func: (value: T) => U): ValueView<U> {
+        return MappedValue.create(this, func);
+    }
+
     /**
      * Establishes a connection to our source value. Called when we go from zero to one listeners.
      * When we go from one to zero listeners, the connection will automatically be cleared.

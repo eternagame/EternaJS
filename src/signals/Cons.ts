@@ -89,5 +89,5 @@ export class Cons implements Connection {
     private _owner: Reactor;
     private _listener: RListener;
     private _oneShot: boolean;
-    private _priority: number;
+    private _priority: number = 0;
 }

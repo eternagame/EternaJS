@@ -11,6 +11,10 @@ The project uses NPM for dependency management, webpack for packaging, and babel
     - (or just use `homebrew` to install node)
 * `$ npm install` in root directory
 
+## Running tests
+
+`$ npm run test`
+
 ## Building
 
 `$ npm run build-dev` or
