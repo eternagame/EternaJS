@@ -1,7 +1,6 @@
 import {Reactor} from "./Reactor";
 import {SignalView} from "./SignalView";
 import {Connection} from "./Connection";
-import {RListener} from "./RListener";
 
 /**
  * Handles the machinery of connecting slots to a signal and emitting events to them, without
@@ -25,10 +24,6 @@ export abstract class AbstractSignal<T> extends Reactor implements SignalView<T>
      * Emits the supplied event to all connected slots.
      */
     protected notifyEmit(event: T): void {
-        this.notify(AbstractSignal.EMIT, event, null, null);
+        this.notify(event, undefined, undefined);
     }
-
-    protected static EMIT = (slot: RListener, event: Object, _1: Object, _2: Object) => {
-        slot.onEmit(event);
-    };
 }
