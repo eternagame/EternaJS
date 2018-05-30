@@ -1,16 +1,13 @@
-import {GameObject} from "../core/GameObject";
-import {DisplayObject, Sprite} from "pixi.js";
+import {Sprite} from "pixi.js";
+import {SceneObject} from "./SceneObject";
 
 /** A GameObject that manages a Sprite */
-export class SpriteObject extends GameObject {
+export class SpriteObject extends SceneObject {
     public readonly sprite: Sprite;
 
     public constructor(sprite?: Sprite) {
-        super();
-        this.sprite = sprite || new Sprite();
-    }
-
-    public get display(): DisplayObject {
-        return this.sprite;
+        let ourSprite = sprite || new Sprite();
+        super(ourSprite);
+        this.sprite = ourSprite;
     }
 }
