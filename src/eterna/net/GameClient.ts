@@ -1,4 +1,6 @@
-﻿export class GameClient {
+﻿type JSONData = any;
+
+export class GameClient {
     public constructor(baseURL: string) {
 	    this._baseURL = baseURL;
     }
@@ -23,8 +25,9 @@
 
     /// PUZZLES
 
-    public get_puzzle(puznid: number, scriptid: number): Promise<Response> {
-        return this.get(GameClient.GET_URI, {"type": "puzzle", "nid": puznid, "script": scriptid});
+    public get_puzzle(puznid: number, scriptid: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {"type": "puzzle", "nid": puznid, "script": scriptid})
+            .then((rsp: Response) => rsp.json());
     }
 
     public get_puzzle_votes(puznid: number, round: number): Promise<Response> {
@@ -43,12 +46,14 @@
         return this.post(GameClient.POST_URI, params);
     }
 
-    public get_solutions(puznid: number): Promise<Response> {
-        return this.get(GameClient.GET_URI, {"type": "solutions", "puznid": puznid});
+    public get_solutions(puznid: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {"type": "solutions", "puznid": puznid})
+            .then(rsp => rsp.json());
     }
 
-    public get_solution_info(solutionid: number): Promise<Response> {
-        return this.get(GameClient.GET_URI, {"type": "solution_info", "solid": solutionid, "round": "1"});
+    public get_solution_info(solutionid: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {"type": "solution_info", "solid": solutionid, "round": "1"})
+            .then(rsp => rsp.json());
     }
 
     public get_solution_comments(solution_nid: number): Promise<Response> {
