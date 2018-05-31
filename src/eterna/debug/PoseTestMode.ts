@@ -5,6 +5,7 @@ import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {Background} from "../Background";
+import {Eterna} from "../Eterna";
 import {Pose2D} from "../pose2D/Pose2D";
 import {BitmapManager} from "../util/BitmapManager";
 
@@ -19,7 +20,8 @@ export class PoseTestMode extends AppMode {
             .then(() => {
                 log.info("Pose2D resources loaded");
                 this.onResourcesLoaded();
-            });
+            })
+            .catch((err) => Eterna.onFatalError(err));
     }
 
     protected onResourcesLoaded(): void {
