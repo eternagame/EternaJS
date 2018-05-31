@@ -293,7 +293,9 @@ export class BitmapManager {
 
     public static get pose2DURLs (): string[] {
         if (BitmapManager.POSE2D_URLS == null) {
-            BitmapManager.POSE2D_URLS = BitmapManager.urlsWithPrefix("assets/RNABase");
+            BitmapManager.POSE2D_URLS =
+                BitmapManager.urlsWithPrefix("assets/RNABase")
+                .concat(BitmapManager.urlsWithPrefix("assets/NOVA"));
         }
         return BitmapManager.POSE2D_URLS;
     }
