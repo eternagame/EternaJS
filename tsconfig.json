@@ -10,7 +10,7 @@
     "allowJs": true,
     "moduleResolution": "node",
     "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
+    "strictPropertyInitialization": false,
     "strictNullChecks": false
   },
   "include": [
