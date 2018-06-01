@@ -1,4 +1,4 @@
-import {Sprite, Point} from "pixi.js";
+import {Sprite, Point, Texture} from "pixi.js";
 import {Flashbang} from "../flashbang/core/Flashbang";
 import {Updatable} from "../flashbang/core/Updatable";
 import {SpriteObject} from "../flashbang/objects/SpriteObject";
@@ -44,8 +44,7 @@ export class Bubble extends SpriteObject implements Updatable {
         }
 
         if (!this._foreground) {
-            this._bitmap = Sprite.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
-            this.sprite.addChild(this._bitmap);
+            this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
         }
 
         this.set_auto_hide(false);
@@ -86,12 +85,12 @@ export class Bubble extends SpriteObject implements Updatable {
 
     /*override*/
     public update(dt: number): void {
-        if (this._bitmap == null) {
+        if (this.sprite.texture == null) {
             return;
         }
 
         const current_time = this._lastTime + dt;
-        const tex = this._bitmap.texture;
+        const tex = this.sprite.texture;
 
         if (this.is_paused || (this.sprite.y < -tex.height)) {
             this._lastTime = current_time;
@@ -144,7 +143,6 @@ export class Bubble extends SpriteObject implements Updatable {
         this._accY *= 0.5;
     }
 
-    private readonly _bitmap: Sprite = null;
     private readonly _bubbleSize: number;
     private readonly _foreground: boolean;
 

@@ -1,14 +1,14 @@
 ﻿import * as log from "loglevel";
 import {Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
-import {SpriteObject} from "../../flashbang/objects/SpriteObject";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Constants} from "../Constants";
 import {EPars} from "../EPars";
 import {BaseAssets} from "./BaseAssets";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {Pose2D} from "./Pose2D";
 
-export class Base extends SpriteObject implements LateUpdatable {
+export class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS: number = 2;
     public static ZOOM_SCALE_FACTOR: number = 0.75;
 
@@ -19,13 +19,13 @@ export class Base extends SpriteObject implements LateUpdatable {
         this.set_type(type);
 
         // build our display hierarchy
-        this.sprite.addChild(this._barcode);
-        this.sprite.addChild(this._body);
-        this.sprite.addChild(this._backbone);
-        this.sprite.addChild(this._letter);
-        this.sprite.addChild(this._sat0);
-        this.sprite.addChild(this._sat1);
-        this.sprite.addChild(this._number);
+        this.container.addChild(this._barcode);
+        this.container.addChild(this._body);
+        this.container.addChild(this._backbone);
+        this.container.addChild(this._letter);
+        this.container.addChild(this._sat0);
+        this.container.addChild(this._sat1);
+        this.container.addChild(this._number);
     }
 
     public set_base_index(i: number): void {

@@ -1,9 +1,9 @@
 import * as log from "loglevel";
-import {Point, Rectangle, Texture, Graphics} from "pixi.js";
+import {Graphics, Point, Rectangle, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
-import {SpriteObject} from "../../flashbang/objects/SpriteObject";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
@@ -17,7 +17,7 @@ import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
 import {ScoreDisplayNode} from "./ScoreDisplayNode";
 
-export class Pose2D extends SpriteObject implements Updatable {
+export class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
     public static readonly BASE_TRACK_THICKNESS: number[] = [5, 4, 3, 2, 2];
@@ -74,22 +74,22 @@ export class Pose2D extends SpriteObject implements Updatable {
         // }
         //
         this._selection_highlight_box = new HighlightBox(this);
-        this.addObject(this._selection_highlight_box, this.sprite);
+        this.addObject(this._selection_highlight_box, this.container);
 
         this._restricted_highlight_box = new HighlightBox(this);
-        this.addObject(this._restricted_highlight_box, this.sprite);
+        this.addObject(this._restricted_highlight_box, this.container);
 
         this._unstable_highlight_box = new HighlightBox(this);
-        this.addObject(this._unstable_highlight_box, this.sprite);
+        this.addObject(this._unstable_highlight_box, this.container);
 
         this._user_defined_highlight_box = new HighlightBox(this);
-        this.addObject(this._user_defined_highlight_box, this.sprite);
+        this.addObject(this._user_defined_highlight_box, this.container);
 
         this._forced_highlight_box = new HighlightBox(this);
-        this.addObject(this._forced_highlight_box, this.sprite);
+        this.addObject(this._forced_highlight_box, this.container);
 
         this._shift_highlight_box = new HighlightBox(this);
-        this.addObject(this._shift_highlight_box, this.sprite);
+        this.addObject(this._shift_highlight_box, this.container);
         //
         // this.addEventListener(MouseEvent.MOUSE_MOVE, this.on_pose_mouse_move);
         // this.addEventListener(MouseEvent.MOUSE_DOWN, this.call_start_mousedown_callback);
@@ -502,7 +502,7 @@ export class Pose2D extends SpriteObject implements Updatable {
 
             let base_box: Graphics = new Graphics();
             this._base_boxes.push(base_box);
-            this.sprite.addChild(base_box);
+            this.container.addChild(base_box);
 
             let n: number = this._tracked_indices.length;
             let center: Point = this.get_base_xy(this._tracked_indices[n - 1]);
@@ -3222,7 +3222,7 @@ export class Pose2D extends SpriteObject implements Updatable {
 
     private createBase(): Base {
         let base: Base = new Base(this, EPars.RNABASE_GUANINE);
-        this.addObject(base, this.sprite);
+        this.addObject(base, this.container);
         this._bases.push(base);
         return base;
     }

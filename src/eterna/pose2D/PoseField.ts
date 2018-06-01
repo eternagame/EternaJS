@@ -1,13 +1,13 @@
-import {SpriteObject} from "../../flashbang/objects/SpriteObject";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Pose2D} from "./Pose2D";
 
 /// TODO: remove this class? It can just be merged into Pose2D
-export class PoseField extends SpriteObject {
+export class PoseField extends ContainerObject {
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(edit);
 
-        this.addObject(this._pose, this.sprite);
+        this.addObject(this._pose, this.container);
 
         // this.addEventListener(MouseEvent.MOUSE_DOWN, this.mouse_on_bg_down);
         // this.addEventListener(MouseEvent.MOUSE_WHEEL, this.mouse_on_wheel);
