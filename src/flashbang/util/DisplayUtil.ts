@@ -1,4 +1,4 @@
-import {DisplayObject, Point, Rectangle} from "pixi.js";
+import {DisplayObject, Point, Rectangle, Graphics} from "pixi.js";
 
 export class DisplayUtil {
     /** Removes the given DisplayObject from its parent, if it has one */
@@ -27,6 +27,23 @@ export class DisplayUtil {
         return (disp.hitArea != null ?
             disp.hitArea.contains(DisplayUtil.P.x, DisplayUtil.P.y) :
             disp.getLocalBounds(DisplayUtil.R).contains(DisplayUtil.P.x, DisplayUtil.P.y));
+    }
+
+    /** Returns a rectangle filled with the given color */
+    public static fillRect(width: number, height: number, color: number, alpha: number = 1): Graphics {
+        let r: Graphics = new Graphics();
+        r.beginFill(color, alpha);
+        r.drawRect(0, 0, width, height);
+        r.endFill();
+        return r;
+    }
+
+    public static width(disp: DisplayObject): number {
+        return disp.getLocalBounds(DisplayUtil.R).width;
+    }
+
+    public static height(disp: DisplayObject): number {
+        return disp.getLocalBounds(DisplayUtil.R).height;
     }
 
     private static readonly P: Point = new Point();
