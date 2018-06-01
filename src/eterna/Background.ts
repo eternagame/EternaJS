@@ -1,9 +1,9 @@
 import {Graphics} from "pixi.js";
-import {Bubble} from "./Bubble";
 import {Flashbang} from "../flashbang/core/Flashbang";
-import {SpriteObject} from "../flashbang/objects/SpriteObject";
+import {ContainerObject} from "../flashbang/objects/ContainerObject";
+import {Bubble} from "./Bubble";
 
-export class Background extends SpriteObject {
+export class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {
         super();
 
@@ -17,7 +17,7 @@ export class Background extends SpriteObject {
             let bub: Bubble = new Bubble(foreground);
             // bub.sprite.visible = false;
             bub.init();
-            this.addObject(bub, this.sprite);
+            this.addObject(bub, this.container);
             this._bubbles.push(bub);
         }
 
@@ -53,7 +53,7 @@ export class Background extends SpriteObject {
             .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
             .endFill();
 
-        this.sprite.addChildAt(this._bgImage, 0);
+        this.container.addChildAt(this._bgImage, 0);
 
         // let bg_sprite:Sprite = new Sprite;
         // bg_sprite.graphics.clear();

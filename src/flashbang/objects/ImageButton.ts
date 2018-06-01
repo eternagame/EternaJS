@@ -1,9 +1,13 @@
 import {Button, ButtonState} from "./Button";
-import {Texture} from "pixi.js";
+import {Texture, Sprite} from "pixi.js";
 
 export class ImageButton extends Button {
     public constructor(textures: Texture[]) {
         super();
+
+        this._sprite = new Sprite();
+        this.container.addChild(this._sprite);
+
         this._textures = textures.concat();
         this._textures.length = 4;
 
@@ -24,12 +28,13 @@ export class ImageButton extends Button {
     }
 
     protected showState(state: ButtonState): void {
-        this.sprite.texture = this.getTexture(state);
+        this._sprite.texture = this.getTexture(state);
     }
 
     private getTexture(state: ButtonState): Texture {
         return this._textures[state];
     }
 
+    private readonly _sprite: Sprite = new Sprite();
     private readonly _textures: Texture[];
 }

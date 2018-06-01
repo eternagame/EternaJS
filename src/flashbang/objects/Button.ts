@@ -5,12 +5,12 @@ import {CallbackTask} from "../tasks/CallbackTask";
 import {DelayTask} from "../tasks/DelayTask";
 import {SerialTask} from "../tasks/SerialTask";
 import {DisplayUtil} from "../util/DisplayUtil";
-import {SpriteObject} from "./SpriteObject";
+import {ContainerObject} from "./ContainerObject";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** A button base class. */
-export abstract class Button extends SpriteObject {
+export abstract class Button extends ContainerObject {
     // public static DEFAULT_DOWN_SOUND: string = "sfx_button_down";
 
     /** Fired when the button is clicked */
@@ -27,7 +27,7 @@ export abstract class Button extends SpriteObject {
 
     protected constructor() {
         super();
-        this.sprite.interactive = true;
+        this.container.interactive = true;
     }
 
     /*override*/
