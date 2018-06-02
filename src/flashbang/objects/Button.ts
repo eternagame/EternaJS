@@ -219,5 +219,5 @@ export abstract class Button extends ContainerObject {
 }
 
 export enum ButtonState {
-    UP = 0, DOWN, OVER, DISABLED
+    UP = 0, OVER, DOWN, DISABLED
 }

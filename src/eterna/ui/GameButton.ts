@@ -1,3 +1,13 @@
+import {ImageButton} from "../../flashbang/objects/ImageButton";
+import {Texture} from "pixi.js";
+
+export class GameButton extends ImageButton {
+    public constructor(idle_img: Texture = null, hover_img: Texture = null, mouse_down_img: Texture = null,
+                       selected_img: Texture = null, disabled_img: Texture = null) {
+        super([idle_img, hover_img, mouse_down_img, disabled_img]);
+    }
+}
+
 // import {Graphics, Sprite, Text, Texture} from "pixi.js";
 // import {SpriteObject} from "../../flashbang/objects/SpriteObject";
 //
