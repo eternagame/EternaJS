@@ -3,7 +3,7 @@ import {Folder} from "../folding/Folder";
 import {RNATreeNode} from "./RNATreeNode";
 
 export class RNALayout {
-    public constructor(prim_space: number = 45, pair_space: number = 45, exception_indices: any[] = null) {
+    public constructor(prim_space: number = 45, pair_space: number = 45, exception_indices: number[] = null) {
         this._primarySpace = prim_space;
         this._pairSpace = pair_space;
         if (exception_indices != null) {
@@ -15,11 +15,11 @@ export class RNALayout {
         return this._root;
     }
 
-    public setup_tree(pairs: any[]): void {
+    public setup_tree(pairs: number[]): void {
         let dangling_start: number = 0;
         let dangling_end: number = 0;
         let ii: number;
-        let bi_pairs: any[] = new Array(pairs.length);
+        let bi_pairs: number[] = new Array(pairs.length);
 
         /// Delete old tree
         this._root = null;
@@ -80,7 +80,7 @@ export class RNALayout {
         }
     }
 
-    public get_coords(xarray: any[], yarray: any[]): void {
+    public get_coords(xarray: number[], yarray: number[]): void {
 
         let ii: number;
 
@@ -145,7 +145,7 @@ export class RNALayout {
     }
 
     /// DO NOT remove these _old methods until the new ones (below) are fully validated
-    public score_tree_old(seq: any[], folder: Folder): void {
+    public score_tree_old(seq: number[], folder: Folder): void {
 
         if (this._bi_pairs == null || seq.length != (this._bi_pairs.length - 1)) {
             throw new Error("Layout tree is not properly setup for scoring " + this._bi_pairs.length + " " + seq.length);
@@ -166,7 +166,7 @@ export class RNALayout {
         this.score_tree_recursive_old(S, folder, this._root, null)
     }
 
-    public score_tree(seq: any[], folder: Folder): void {
+    public score_tree(seq: number[], folder: Folder): void {
 
         if (this._bi_pairs == null) {
             throw new Error("Layout tree is not properly setup for scoring");
@@ -175,13 +175,13 @@ export class RNALayout {
         if (this._root == null)
             return;
 
-        let nnfe: any[] = [];
+        let nnfe: number[] = [];
 
         folder.score_structures(seq, this._orig_pairs, EPars.DEFAULT_TEMPERATURE, nnfe);
         this.score_tree_recursive(nnfe, this._root, null);
     }
 
-    private add_nodes_recursive(bi_pairs: any[], rootnode: RNATreeNode, start_index: number, end_index: number): void {
+    private add_nodes_recursive(bi_pairs: number[], rootnode: RNATreeNode, start_index: number, end_index: number): void {
 
         if (start_index > end_index) {
             throw new Error("Error occured while drawing RNA");
@@ -219,7 +219,7 @@ export class RNALayout {
 
     }
 
-    private get_coords_recursive(rootnode: RNATreeNode, xarray: any[], yarray: any[]): void {
+    private get_coords_recursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode._is_pair) {
             let cross_x: number = -rootnode._go_y;
             let cross_y: number = rootnode._go_x;
@@ -329,7 +329,7 @@ export class RNALayout {
         return score;
     }
 
-    private score_tree_recursive_old(S: any[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
+    private score_tree_recursive_old(S: number[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
 
         let type1: number, type2: number;
 
@@ -418,7 +418,7 @@ export class RNALayout {
 
     }
 
-    private score_tree_recursive(nnfe: any[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
+    private score_tree_recursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
 
         if (rootnode._is_pair) {
             /// Pair node
@@ -494,12 +494,12 @@ export class RNALayout {
     private readonly _pairSpace: number;
 
     private _root: RNATreeNode;
-    private _orig_pairs: any[];
+    private _orig_pairs: number[];
 
     /// "New" method to gather NN free energies, just use the folding engine
-    private _bi_pairs: any[];
+    private _bi_pairs: number[];
     //indices that need to be streched (e.g., connectors for oligos)
-    private _exception_indices: any[];
+    private _exception_indices: number[];
 
     private static readonly NODE_R: number = 10;
 }
