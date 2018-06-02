@@ -6,6 +6,7 @@ import {KeyCode} from "../../flashbang/input/KeyCode";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {Background} from "../Background";
 import {Eterna} from "../Eterna";
+import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
 import {BitmapManager} from "../util/BitmapManager";
 
@@ -25,6 +26,8 @@ export class PoseTestMode extends AppMode {
     }
 
     protected onResourcesLoaded(): void {
+        this.modeStack.pushMode(new MissionScreen("A puzzle!", "Do the puzzle!", [[-1,-1,-1,-1,-1,21,20,19,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,7,6,5,-1,36,35,34,33,-1,-1,-1,-1,-1,-1,26,25,24,23,-1,-1,-1]]));
+
         this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
