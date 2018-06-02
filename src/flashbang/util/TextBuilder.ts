@@ -25,11 +25,7 @@ export class TextBuilder {
         return this;
     }
 
-    /**
-     * The size of the font. For bitmap fonts, use <code>BitmapFont.NATIVE_SIZE</code> for
-     * the original size.
-     * @default 12
-     */
+    /** The size of the font. @default 12 */
     public fontSize(val: number): TextBuilder {
         this._style.fontSize = val;
         return this;
@@ -66,6 +62,18 @@ export class TextBuilder {
     public wordWrap(wrap: boolean, wordWrapWidth: number = 100): TextBuilder {
         this._style.wordWrap = wrap;
         this._style.wordWrapWidth = wordWrapWidth;
+        return this;
+    }
+
+    /** Manually controls the spacing between lines */
+    public leading(value: number): TextBuilder {
+        this._style.leading = value;
+        return this;
+    }
+
+    /** The amount of spacing between letters. Default is 0 */
+    public letterSpacing(value: number): TextBuilder {
+        this._style.letterSpacing = value;
         return this;
     }
 
