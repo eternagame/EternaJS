@@ -23,24 +23,24 @@ export class Fonts {
             .catch((e) => log.error("Error loading fonts: ", e));
     }
 
-    public static arial(text: string = "") :TextBuilder {
-        return new TextBuilder(text).font(this.ARIAL);
+    public static arial(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.ARIAL).fontSize(fontSize);
     }
 
-    public static std_light(text: string = "") :TextBuilder {
-        return new TextBuilder(text).font(this.STDFONT_LIGHT);
+    public static std_light(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.STDFONT_LIGHT).fontSize(fontSize);
     }
 
-    public static std_regular(text: string = "") :TextBuilder {
-        return new TextBuilder(text).font(this.STDFONT_REGULAR);
+    public static std_regular(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.STDFONT_REGULAR).fontSize(fontSize);
     }
 
-    public static std_medium(text: string = "") :TextBuilder {
-        return new TextBuilder(text).font(this.STDFONT_MEDIUM);
+    public static std_medium(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.STDFONT_MEDIUM).fontSize(fontSize);
     }
 
-    public static std_bold(text: string = "") :TextBuilder {
-        return new TextBuilder(text).font(this.STDFONT_BOLD);
+    public static std_bold(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.STDFONT_BOLD).fontSize(fontSize);
     }
 
     public static get_font(name: string, size: number, color: number = 0x0): TextStyle {
