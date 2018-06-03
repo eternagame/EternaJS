@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+require() {
+    if [ -z "$(command -v "$1")" ]; then
+        echo "'$1' must be in your \$PATH ($2)"
+        exit 1
+    fi
+}
+
+require "devd" "https://github.com/cortesi/devd"
+
+PORT=$1
+if [ -z "$PORT" ]; then
+    PORT=9001
+fi
+
+devd --port="$PORT" --crossdomain           \
+    /get/=http://www.eternagame.org/get/    \
+    /post/=http://www.eternagame.org/post/
