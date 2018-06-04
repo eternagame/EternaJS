@@ -47,9 +47,9 @@ export class Solution {
         this._desc = desc;
 
         if (this._desc) {
-            let newlinereg: RegExp = /\n/gg;
+            let newlinereg: RegExp = /\n/g;
             this._short_desc = this._desc.replace(newlinereg, " ");
-            newlinereg = /\r/gg;
+            newlinereg = /\r/g;
             this._short_desc = this._short_desc.replace(newlinereg, " ");
         } else {
             this._short_desc = "No descrption available";
