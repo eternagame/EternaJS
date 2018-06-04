@@ -16,7 +16,7 @@ export class EternaApp extends FlashbangApp {
 
     /*override*/
     protected setup(): void {
-        Eterna.client = new GameClient("http://www.eternagame.org");
+        Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
 
         Promise.all([this.initFoldingEngines(), Fonts.loadFonts()])
             .then(() => {

@@ -1,7 +1,10 @@
-﻿type JSONData = any;
+﻿import * as log from "loglevel";
+
+type JSONData = any;
 
 export class GameClient {
     public constructor(baseURL: string) {
+        log.debug(`GameClient baseURL=${baseURL}`);
 	    this._baseURL = baseURL;
     }
 
@@ -106,7 +109,17 @@ export class GameClient {
             Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
         }
 
-        return fetch(url.toString());
+        return fetch(url.toString(), {
+            headers: new Headers({'Content-Type': 'text/plain'}),
+        }).then((rsp) => {
+            if (!rsp.ok) {
+                // create error object and reject if not a 2xx response code
+                throw new Error("HTTP status code: " + rsp.status);
+            }
+            return rsp;
+        }).catch((err) => {
+            throw new Error(url.toString() + ": " + err);
+        });
     }
 
     private post(urlString: string, params?: any): Promise<Response> {

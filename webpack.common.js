@@ -2,6 +2,7 @@
 'use strict';
 
 let HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+let Dotenv = require('dotenv-webpack');
 
 let packageJson = require('./package.json');
 let vendorDependencies = Object.keys(packageJson['dependencies']);
@@ -52,6 +53,13 @@ module.exports = {
     plugins: [
         // Caching plugin for faster builds
         // https://github.com/mzgoddard/hard-source-webpack-plugin
-        new HardSourceWebpackPlugin()
+        new HardSourceWebpackPlugin(),
+
+        // Access .env values
+        // https://github.com/mrsteele/dotenv-webpack
+        new Dotenv({
+            safe: true, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
+            systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
+        })
     ]
 };
