@@ -5,10 +5,10 @@
   "scripts": {
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "build-dev": "webpack --config webpack.dev.js",
-    "build-prod": "webpack --config webpack.prod.js",
-    "postbuild-dev": "rsync -tr --delete assets index.html fonts.css dist/dev",
-    "postbuild-prod": "rsync -tr --delete assets index.html fonts.css dist/prod",
+    "build:dev": "webpack --config webpack.dev.js",
+    "build:prod": "webpack --config webpack.prod.js",
+    "postbuild:dev": "rsync -tr --delete assets index.html fonts.css dist/dev",
+    "postbuild:prod": "rsync -tr --delete assets index.html fonts.css dist/prod",
     "test": "jest"
   },
   "jest": {
@@ -48,6 +48,7 @@
     "babel-loader": "^8.0.0-beta.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-minify": "^0.4.3",
+    "dotenv-webpack": "^1.5.5",
     "hard-source-webpack-plugin": "^0.7.4",
     "jest": "^23.1.0",
     "source-map-loader": "^0.2.3",
