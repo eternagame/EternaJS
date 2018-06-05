@@ -10,6 +10,7 @@ import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PuzzleManager} from "../puzzle/PuzzleManager";
+import {NucleotidePalette} from "../ui/NucleotidePalette";
 import {BitmapManager} from "../util/BitmapManager";
 
 export class PoseTestMode extends AppMode {
@@ -39,6 +40,8 @@ export class PoseTestMode extends AppMode {
         this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
+
+        this.addObject(new NucleotidePalette(), this.modeSprite);
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
