@@ -31,6 +31,15 @@ export class TextBuilder {
         return this;
     }
 
+    public fontWeight(val: string): TextBuilder {
+        this._style.fontWeight = val;
+        return this;
+    }
+
+    public bold(): TextBuilder {
+        return this.fontWeight("bold");
+    }
+
     /** The text color @default 0x0 (black) */
     public color(val: number): TextBuilder {
         this._style.fill = val;
