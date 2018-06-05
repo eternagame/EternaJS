@@ -113,7 +113,6 @@ export class GameClient {
             headers: new Headers({'Content-Type': 'text/plain'}),
         }).then((rsp) => {
             if (!rsp.ok) {
-                // create error object and reject if not a 2xx response code
                 throw new Error("HTTP status code: " + rsp.status);
             }
             return rsp;
@@ -134,6 +133,13 @@ export class GameClient {
         return fetch(url.toString(), {
             method: "POST",
             body: form
+        }).then((rsp) => {
+            if (!rsp.ok) {
+                throw new Error("HTTP status code: " + rsp.status);
+            }
+            return rsp;
+        }).catch((err) => {
+            throw new Error(url.toString() + ": " + err);
         });
     }
 
