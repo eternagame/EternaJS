@@ -60,7 +60,7 @@
         return false;
     }
 
-    public multifold(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): Object {
+    public multifold(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): any {
         return null;
     }
 
