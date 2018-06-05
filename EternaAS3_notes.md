@@ -20,6 +20,7 @@ Notes
 * PIP; 'paint_tools' booster:
     - Tryptophan A Same State (MGA)
     - PUZZLE_ID = 8787266
+* "The real XOR challenge" 6096060
     
 ## Refactoring requests
 
