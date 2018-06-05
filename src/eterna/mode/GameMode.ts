@@ -1,6 +1,7 @@
 import {AppMode} from "../../flashbang/core/AppMode";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Pose2D} from "../pose2D/Pose2D";
+import {PoseField} from "../pose2D/PoseField";
 
 export abstract class GameMode extends AppMode {
     protected constructor() {
@@ -162,7 +163,7 @@ export abstract class GameMode extends AppMode {
 
     protected _is_screenshot_supported: boolean = false;
     protected _pose_fields_container: GameObject;
-    protected _pose_fields: any[] = [];
+    protected _pose_fields: PoseField[] = [];
     protected _poses: Pose2D[] = [];
     protected _is_pip_mode: boolean = false;
     protected _force_synch: boolean = false;
