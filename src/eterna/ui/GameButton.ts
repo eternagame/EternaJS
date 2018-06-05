@@ -1,11 +1,49 @@
-import {ImageButton} from "../../flashbang/objects/ImageButton";
 import {Texture} from "pixi.js";
+import {ButtonState} from "../../flashbang/objects/Button";
+import {ImageButton} from "../../flashbang/objects/ImageButton";
 
 export class GameButton extends ImageButton {
-    public constructor(idle_img: Texture = null, hover_img: Texture = null, mouse_down_img: Texture = null,
-                       selected_img: Texture = null, disabled_img: Texture = null) {
-        super([idle_img, hover_img, mouse_down_img, disabled_img]);
+    public constructor() {
+        super([]);
     }
+
+    public setTexture(state: ButtonState, tex: Texture | string) :GameButton {
+        this._textures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
+        return this;
+    }
+
+    public up(tex: Texture | string): GameButton {
+        return this.setTexture(ButtonState.UP, tex);
+    }
+
+    public over(tex: Texture | string): GameButton {
+        return this.setTexture(ButtonState.OVER, tex);
+    }
+
+    public down(tex: Texture | string): GameButton {
+        return this.setTexture(ButtonState.DOWN, tex);
+    }
+
+    public disabled(tex: Texture | string): GameButton {
+        return this.setTexture(ButtonState.DISABLED, tex);
+    }
+
+    public tooltip(text: string): GameButton {
+        // TODO
+        this._tooltip = text;
+        return this;
+    }
+
+    public hotkey(keycode: string, ctrl: boolean = false): GameButton {
+        // TODO
+        this._hotkey = keycode;
+        this._hotkeyCtrl = ctrl;
+        return this;
+    }
+
+    private _tooltip: string;
+    private _hotkey: string;
+    private _hotkeyCtrl: boolean;
 }
 
 // import {Graphics, Sprite, Text, Texture} from "pixi.js";
