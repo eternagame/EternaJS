@@ -8,6 +8,8 @@ import {Background} from "../Background";
 import {Eterna} from "../Eterna";
 import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
+import {Puzzle} from "../puzzle/Puzzle";
+import {PuzzleManager} from "../puzzle/PuzzleManager";
 import {BitmapManager} from "../util/BitmapManager";
 
 export class PoseTestMode extends AppMode {
@@ -16,17 +18,23 @@ export class PoseTestMode extends AppMode {
 
         this.addObject(new Background(), this.modeSprite);
 
-        log.info("Loading Pose2D resources...");
-        TextureUtil.load(BitmapManager.pose2DURLs)
-            .then(() => {
-                log.info("Pose2D resources loaded");
-                this.onResourcesLoaded();
+        let ppuz: Promise<Puzzle> = PuzzleManager.instance.get_puzzle_by_nid(3562529);
+        let pbitmaps: Promise<void> = TextureUtil.load(BitmapManager.pose2DURLs);
+
+        Promise.all([ppuz, pbitmaps])
+            .then(([puzzle, _]) => {
+                this.onResourcesLoaded(puzzle);
             })
-            .catch((err) => Eterna.onFatalError(err));
+            .catch((err: any) => {
+                Eterna.onFatalError(err);
+            });
     }
 
-    protected onResourcesLoaded(): void {
-        this.modeStack.pushMode(new MissionScreen("A puzzle!", "Do the puzzle!", [[-1,-1,-1,-1,-1,21,20,19,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,7,6,5,-1,36,35,34,33,-1,-1,-1,-1,-1,-1,26,25,24,23,-1,-1,-1]]));
+    protected onResourcesLoaded(puzzle: Puzzle): void {
+        this.modeStack.pushMode(new MissionScreen(
+            puzzle.get_puzzle_name(),
+            puzzle.get_mission_text(),
+            [[-1,-1,-1,-1,-1,21,20,19,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,8,7,6,5,-1,36,35,34,33,-1,-1,-1,-1,-1,-1,26,25,24,23,-1,-1,-1]]));
 
         this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
         this._pose.display.x = Flashbang.stageWidth * 0.5;

@@ -57,8 +57,8 @@ export class Puzzle {
         }
     }
 
-    public get_secstructs(index: number = 0): any[] {
-        let secstructs: any[] = [];
+    public get_secstructs(index: number = 0): string[] {
+        let secstructs: string[] = [];
         for (let ii: number = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.get_secstruct(ii));
         }
@@ -106,6 +106,10 @@ export class Puzzle {
 
     public get_mission_text(): string {
         return this._mission_text;
+    }
+
+    public set_mission_text(text: string) {
+        this._mission_text = text;
     }
 
     public get_folder(): string {
@@ -182,7 +186,7 @@ export class Puzzle {
         this._shift_limit = limit;
     }
 
-    public set_secstructs(secstructs: any[]): void {
+    public set_secstructs(secstructs: string[]): void {
         this._secstructs = secstructs.slice();
     }
 
@@ -255,22 +259,6 @@ export class Puzzle {
         }
     }
 
-    public set_puzzle_desc(desc: string): void {
-        // Convention: mission texts are encapsulated by
-        // <span id="mission"> ... </span>
-        // This allows to reuse existing descriptions, just insert the span element where appropriate
-        // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
-
-        // const RE_MISSION_TEXT: RegExp = /<span id="mission">(?P<mission>.*?)<\/span>/s;
-        // let res: RegExpExecArray = RE_MISSION_TEXT.exec(desc);
-        // this._mission_text = (res && res.mission != null) ? res.mission : Puzzle.DEFAULT_MISSION_TEXT;
-
-        const RE_MISSION_TEXT: RegExp = /<span id="mission">(.*?)<\/span>/s;
-        let res: RegExpExecArray = RE_MISSION_TEXT.exec(desc);
-        this._mission_text = (res != null && res.length >= 2) ? res[1] : Puzzle.DEFAULT_MISSION_TEXT;
-        throw new Error("TODO: Tim, double-check this result");
-    }
-
     public set_reward(reward: number): void {
         this._reward = reward;
     }
@@ -283,7 +271,7 @@ export class Puzzle {
         this._next_puzzle = nex;
     }
 
-    public set_puzzle_locks(locks: any[]): void {
+    public set_puzzle_locks(locks: boolean[]): void {
         this._puzzle_locks = locks.slice();
     }
 
@@ -408,13 +396,12 @@ export class Puzzle {
         this._use_barcode = use_barcode;
     }
 
-    public set_constraints(constraints: any[]): void {
+    public set_constraints(constraints: string[]): void {
         this._constraints = [];
-        let shapes: any[] = [];
-        let antishapes: any[] = [];
-        let ii: number;
+        let shapes: boolean[] = [];
+        let antishapes: boolean[] = [];
 
-        for (ii = 0; ii < constraints.length; ii += 2) {
+        for (let ii = 0; ii < constraints.length; ii += 2) {
             if (constraints[ii] == "SHAPE") {
                 shapes[Number(constraints[ii + 1])] = true;
             } else if (constraints[ii] == "ANTISHAPE") {
@@ -422,19 +409,19 @@ export class Puzzle {
             }
         }
 
-        for (ii = shapes.length - 1; ii >= 0; ii--) {
+        for (let ii = shapes.length - 1; ii >= 0; ii--) {
             if (antishapes[ii]) {
                 this._constraints.push("ANTISHAPE");
-                this._constraints.push(ii);
+                this._constraints.push("" + ii);
             }
 
             if (shapes[ii]) {
                 this._constraints.push("SHAPE");
-                this._constraints.push(ii);
+                this._constraints.push("" + ii);
             }
         }
 
-        for (ii = 0; ii < constraints.length; ii += 2) {
+        for (let ii = 0; ii < constraints.length; ii += 2) {
             if (constraints[ii] != "SHAPE" && constraints[ii] != "SOFT" && constraints[ii] != "ANTISHAPE") {
                 this._constraints.push(constraints[ii]);
                 this._constraints.push(constraints[ii + 1]);
@@ -575,9 +562,9 @@ export class Puzzle {
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzle_type: string;
-    private _secstructs: any[] = [];
+    private _secstructs: string[] = [];
     private _mission_text: string = Puzzle.DEFAULT_MISSION_TEXT;
-    private _puzzle_locks: any[];
+    private _puzzle_locks: boolean[];
     private _shift_limit: number;
     private _beginning_sequence: any[];
     private _saved_sequence: any[];
@@ -585,7 +572,7 @@ export class Puzzle {
     private _use_short_tails: boolean = false;
     private _use_barcode: boolean = false;
     private _target_conditions: any[] = null;
-    private _constraints: any[] = null;
+    private _constraints: string[] = null;
     private _temp_constraints: any[];
     private _round: number = -1;
     private _num_submissions: number = 3;

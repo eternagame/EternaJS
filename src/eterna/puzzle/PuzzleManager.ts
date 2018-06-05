@@ -15,19 +15,23 @@ export class PuzzleManager {
         let newpuz: Puzzle = new Puzzle(json["id"], json["title"], json["type"]);
 
         if (json["body"]) {
-            newpuz.set_puzzle_desc(json["body"]);
+            // Convention: mission texts are encapsulated by
+            // <span id="mission"> ... </span>
+            // This allows to reuse existing descriptions, just insert the span element where appropriate
+            // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
+
+            let res: RegExpExecArray = PuzzleManager.RE_MISSION_TEXT.exec(json["body"]);
+            if (res != null && res.length >= 2) {
+                newpuz.set_mission_text(res[1]);
+            }
         }
 
         if (json["locks"] && json["locks"].length > 0) {
             let lock_str: string = json["locks"];
-            let locks: any[] = [];
+            let locks: boolean[] = [];
 
             for (let kk = 0; kk < lock_str.length; kk++) {
-                if (lock_str.charAt(kk) == "x") {
-                    locks.push(true);
-                } else {
-                    locks.push(false);
-                }
+                locks.push(lock_str.charAt(kk) == "x");
             }
             newpuz.set_puzzle_locks(locks);
         }
@@ -153,14 +157,14 @@ export class PuzzleManager {
         }
 
         if (json["constraints"] && json["constraints"].length > 0) {
-            let constraints: any[] = CSVParser.parse_into_array(json["constraints"]);
+            let constraints: string[] = CSVParser.parse_into_array(json["constraints"]);
             if (json["check_hairpin"] && Number(json["check_hairpin"])) {
                 constraints.push("BARCODE");
-                constraints.push(0);
+                constraints.push("0");
             }
             newpuz.set_constraints(constraints);
         } else if (json["check_hairpin"] && Number(json["check_hairpin"])) {
-            newpuz.set_constraints(["BARCODE", 0]);
+            newpuz.set_constraints(["BARCODE", "0"]);
         }
 
         let replace: boolean = false;
@@ -205,4 +209,6 @@ export class PuzzleManager {
     private static readonly OBJECTIVE_877668: string = '[{"type":"single","secstruct":".....................(((((............)))))"},{"type":"aptamer","site":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],"concentration":100,"secstruct":"(((......(((....))).....)))................"}]';
     private static readonly OBJECTIVE_885046: string = '[{"type":"single","secstruct":".....................(((((((............)))))))"},{"type":"aptamer","site":[8,9,10,11,12,13,14,15,26,27,28,29,30,31,32],"concentration":10000,"secstruct":"((((......((((....)))).....))))................"}]';
     private static readonly OBJECTIVE_1420804: string = '[{"type":"single","secstruct":".....................(((((((............)))))))........"},{"type":"aptamer","site":[12,13,14,15,16,17,18,19,33,34,35,36,37,38,39],"concentration":10000,"secstruct":"..(((.((......(((((....)).))).....)))))................"}]';
+
+    private static readonly RE_MISSION_TEXT: RegExp = /<span id="mission">(.*?)<\/span>/s;
 }
