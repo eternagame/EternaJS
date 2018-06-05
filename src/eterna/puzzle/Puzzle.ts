@@ -128,7 +128,7 @@ export class Puzzle {
         }
     }
 
-    public get_constraints(): any[] {
+    public get_constraints(): string[] {
         return this._constraints;
     }
 
@@ -431,8 +431,7 @@ export class Puzzle {
         }
     }
 
-    public set_temporary_constraints(constraints: any[]): void {
-
+    public set_temporary_constraints(constraints: string[]): void {
         if (constraints != null)
             this._temp_constraints = constraints.slice();
         else
@@ -573,7 +572,7 @@ export class Puzzle {
     private _use_barcode: boolean = false;
     private _target_conditions: any[] = null;
     private _constraints: string[] = null;
-    private _temp_constraints: any[];
+    private _temp_constraints: string[];
     private _round: number = -1;
     private _num_submissions: number = 3;
     private _folder: string;
@@ -588,8 +587,8 @@ export class Puzzle {
     private _is_soft_constraint: boolean = false;
     private _booster_defs: Object = null;
 
-    private static readonly T_APTAMER: any[] = ["aptamer", "aptamer+oligo"];
-    private static readonly T_OLIGO: any[] = ["oligo", "aptamer+oligo"];
+    private static readonly T_APTAMER: string[] = ["aptamer", "aptamer+oligo"];
+    private static readonly T_OLIGO: string[] = ["oligo", "aptamer+oligo"];
 
     private static readonly BOOL_TRUE: number = 1;
     private static readonly BOOL_FALSE: number = 2;

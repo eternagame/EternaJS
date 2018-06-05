@@ -1716,7 +1716,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._sequence.length;
     }
 
-    public get_sequence(): any[] {
+    public get_sequence(): number[] {
         return this._sequence.slice();
     }
 
