@@ -34,10 +34,10 @@ export class MissionScreen extends AppMode {
         this.modeSprite.addChild(description_label);
         new UDim(0.5, 0, -420.5, 123 + mission_text.height + 25).setPos(description_label);
 
-        let play_button: GameButton = new GameButton(
-            BitmapManager.get_bitmap(BitmapManager.PlayImage),
-            BitmapManager.get_bitmap(BitmapManager.PlayImageOver),
-            BitmapManager.get_bitmap(BitmapManager.PlayImageHit));
+        let play_button: GameButton = new GameButton()
+            .up(BitmapManager.PlayImage)
+            .over(BitmapManager.PlayImageOver)
+            .down(BitmapManager.PlayImageHit);
         this.addObject(play_button, this.modeSprite);
         new UDim(1, 1, -DisplayUtil.width(play_button.display)- 91.5, -30 - DisplayUtil.height(play_button.display)).setPos(play_button.display);
         this.regs.add(play_button.clicked.connect(() => this.play()));

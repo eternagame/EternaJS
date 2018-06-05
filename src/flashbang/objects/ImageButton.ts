@@ -35,6 +35,6 @@ export class ImageButton extends Button {
         return this._textures[state];
     }
 
-    private readonly _sprite: Sprite = new Sprite();
-    private readonly _textures: Texture[];
+    protected readonly _sprite: Sprite = new Sprite();
+    protected readonly _textures: Texture[];
 }
