@@ -13,6 +13,7 @@ import {Puzzle} from "../puzzle/Puzzle";
 import {PuzzleManager} from "../puzzle/PuzzleManager";
 import {GameButton} from "../ui/GameButton";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
+import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
 
 export class PoseTestMode extends AppMode {
@@ -45,7 +46,7 @@ export class PoseTestMode extends AppMode {
 
         this.addObject(new NucleotidePalette(), this.modeSprite);
 
-        let button = new GameButton().text("Hello!", 30);
+        let button = new TextBalloon("Hello (Z)", 0x0, 0.8);
         button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
         button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
         this.addObject(button, this.modeSprite);
