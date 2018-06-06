@@ -1,8 +1,7 @@
-import {Point, Text} from "pixi.js";
+import {Point, Text, Graphics} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Fonts} from "../util/Fonts";
 import {UDim} from "../util/UDim";
-import Graphics = PIXI.Graphics;
 
 export enum GamePanelType {
     NORMAL, INVISIBLE
@@ -23,18 +22,18 @@ export class GamePanel extends ContainerObject {
         this._color = color;
         this._border_alpha = border_alpha;
         this._border_color = border_color;
-        this.on_resize();
+        this.updateView();
     }
 
     public set_size(width: number, height: number): void {
         this._width = width;
         this._height = height;
-        this.on_resize();
+        this.updateView();
     }
 
     public set_panel_title(title: string): void {
         this._title = title;
-        this.on_resize();
+        this.updateView();
     }
 
     public set_auto_collapse(enabled: boolean, normal: UDim = null, hidden: UDim = null): void {
@@ -72,7 +71,7 @@ export class GamePanel extends ContainerObject {
     }
 
     /*override*/
-    private on_resize(): void {
+    private updateView(): void {
         this._background.clear();
 
         if (this._width <= 0 || this._height <= 0) {
