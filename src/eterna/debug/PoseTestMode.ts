@@ -3,6 +3,7 @@ import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {Background} from "../Background";
 import {Eterna} from "../Eterna";
@@ -10,6 +11,7 @@ import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PuzzleManager} from "../puzzle/PuzzleManager";
+import {GameButton} from "../ui/GameButton";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
 import {BitmapManager} from "../util/BitmapManager";
 
@@ -42,6 +44,11 @@ export class PoseTestMode extends AppMode {
         this._pose.display.y = Flashbang.stageHeight * 0.5;
 
         this.addObject(new NucleotidePalette(), this.modeSprite);
+
+        let button = new GameButton().text("Hello!", 30);
+        button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
+        button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
+        this.addObject(button, this.modeSprite);
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {

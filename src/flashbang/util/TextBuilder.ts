@@ -13,6 +13,11 @@ export class TextBuilder {
         return text;
     }
 
+    /** @return the current TextStyle */
+    public get style(): TextStyle {
+        return new TextStyle(this._style);
+    }
+
     /** The text to display. @default "" */
     public text(val: string): TextBuilder {
         this._text = val;
@@ -83,6 +88,12 @@ export class TextBuilder {
     /** The amount of spacing between letters. Default is 0 */
     public letterSpacing(value: number): TextBuilder {
         this._style.letterSpacing = value;
+        return this;
+    }
+
+    /** Replaces all current TextStyle settings */
+    public setStyle(style: TextStyle): TextBuilder {
+        this._style = style;
         return this;
     }
 
