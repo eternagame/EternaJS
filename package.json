@@ -42,27 +42,27 @@
     "@types/js-cookie": "^2.1.0",
     "@types/lodash": "^4.14.109",
     "@types/loglevel": "^1.5.3",
-    "@types/node": "^10.3.0",
+    "@types/node": "^10.3.2",
     "@types/pixi.js": "^4.7.5",
     "@types/webfontloader": "^1.6.29",
     "babel-loader": "^8.0.0-beta.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-minify": "^0.4.3",
-    "dotenv-webpack": "^1.5.6",
-    "hard-source-webpack-plugin": "^0.7.4",
+    "dotenv-webpack": "^1.5.7",
+    "hard-source-webpack-plugin": "^0.7.5",
     "jest": "^23.1.0",
     "source-map-loader": "^0.2.3",
     "ts-jest": "^22.4.6",
     "typescript": "^2.9.1",
-    "webpack": "^4.10.2",
-    "webpack-cli": "^3.0.1",
+    "webpack": "^4.11.1",
+    "webpack-cli": "^3.0.3",
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.10",
     "loglevel": "^1.6.1",
-    "pixi.js": "^4.8.0",
+    "pixi.js": "^4.8.1",
     "webfontloader": "^1.6.28"
   }
 }
