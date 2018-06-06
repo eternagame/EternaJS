@@ -1,15 +1,15 @@
-import {Texture} from "pixi.js";
-import {ButtonState} from "../../flashbang/objects/Button";
-import {ImageButton} from "../../flashbang/objects/ImageButton";
+import {Sprite, Text, Texture, Graphics} from "pixi.js";
+import {Button, ButtonState} from "../../flashbang/objects/Button";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {TextBuilder} from "../../flashbang/util/TextBuilder";
+import {Fonts} from "../util/Fonts";
 
-export class GameButton extends ImageButton {
+export class GameButton extends Button {
     public constructor() {
-        super([]);
-    }
+        super();
 
-    public setTexture(state: ButtonState, tex: Texture | string) :GameButton {
-        this._textures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
-        return this;
+        this._sprite = new Sprite();
+        this.container.addChild(this._sprite);
     }
 
     public up(tex: Texture | string): GameButton {
@@ -28,6 +28,16 @@ export class GameButton extends ImageButton {
         return this.setTexture(ButtonState.DISABLED, tex);
     }
 
+    public text(text: string | TextBuilder, fontSize?: number): GameButton {
+        if (typeof(text) === "string") {
+            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize ? fontSize : 22).color(0xFFFFFF);
+        } else {
+            this._labelBuilder = text as TextBuilder;
+        }
+        this.needsRedraw();
+        return this;
+    }
+
     public tooltip(text: string): GameButton {
         // TODO
         this._tooltip = text;
@@ -41,9 +51,94 @@ export class GameButton extends ImageButton {
         return this;
     }
 
+    protected showState(state: ButtonState): void {
+        let tex: Texture = this.getTexture(state);
+        this._sprite.texture = tex || Texture.EMPTY;
+
+        // Create label
+        if (this._label != null) {
+            DisplayUtil.removeFromParent(this._label);
+            this._label = null;
+        }
+
+        if (this._labelBuilder != null) {
+            this._label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
+        }
+
+        // Stylebox (shown when we have text and no background image)
+        const drawStyleBox: boolean = tex == null && this._label != null;
+        if (drawStyleBox) {
+            if (this._styleBox == null) {
+                this._styleBox = new Graphics();
+                this.container.addChildAt(this._styleBox, 1);
+            }
+
+            this._styleBox.clear();
+            this._styleBox.beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0);
+            this._styleBox.drawRoundedRect(0, 0,
+                this._label.width + (GameButton.WMARGIN * 2),
+                this._label.height + (GameButton.HMARGIN * 2),
+                5);
+            this._styleBox.endFill();
+
+        } else if (this._styleBox != null) {
+            DisplayUtil.removeFromParent(this._styleBox);
+            this._styleBox = null;
+        }
+
+        // Position label
+        if (this._label != null) {
+            this._label.x = (this.container.width - this._label.width) * 0.5;
+            this._label.y = (this.container.height - this._label.height) * 0.5;
+            this.container.addChild(this._label);
+        }
+    }
+
+    private setTexture(state: ButtonState, tex: Texture | string) :GameButton {
+        if (this._textures == null) {
+            this._textures = [];
+        }
+        this._textures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
+
+        this.needsRedraw();
+
+        return this;
+    }
+
+    private needsRedraw() {
+        if (this.isLiveObject) {
+            this.showState(this._state);
+        }
+    }
+
+    private getTexture(state: ButtonState): Texture {
+        return this._textures != null && this._textures.length > state ? this._textures[state] : null;
+    }
+
+    private readonly _sprite: Sprite;
+    private _label: Text;
+    private _styleBox: Graphics;
+
+    private _labelBuilder: TextBuilder;
     private _tooltip: string;
     private _hotkey: string;
     private _hotkeyCtrl: boolean;
+    private _textures: Texture[];
+
+    private static TEXT_COLORS: Map<ButtonState, number> = new Map([
+        [ButtonState.UP, 0xC0DCE7],
+        [ButtonState.OVER, 0xFFFFFF],
+        [ButtonState.DOWN, 0x333333]
+    ]);
+
+    private static STYLEBOX_COLORS: Map<ButtonState, number> = new Map([
+        [ButtonState.UP, 0x2D4159],
+        [ButtonState.OVER, 0x2D4159],
+        [ButtonState.DOWN, 0xFFCC00]
+    ]);
+
+    private static readonly WMARGIN: number = 4;
+    private static readonly HMARGIN: number = 3;
 }
 
 // import {Graphics, Sprite, Text, Texture} from "pixi.js";
