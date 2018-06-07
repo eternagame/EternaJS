@@ -5,6 +5,7 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
+import {ROPWait} from "../rscript/ROPWait";
 import {BitmapManager} from "../util/BitmapManager";
 import {Fonts} from "../util/Fonts";
 
@@ -178,7 +179,7 @@ export class NucleotidePalette extends ContainerObject {
             return;
         }
         this.show_selection(target.hitboxes[0], target.isPair, true);
-        // ROPWait.NotifyClickUI(target.name);
+        ROPWait.NotifyClickUI(target.name);
 
         this.targetClicked.emit(type);
     }
