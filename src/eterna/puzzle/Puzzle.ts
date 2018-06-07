@@ -48,10 +48,11 @@ export class Puzzle {
 
     public get_secstruct(index: number = 0): string {
         if (this._use_tails) {
-            if (this._use_short_tails)
+            if (this._use_short_tails) {
                 return ".." + this._secstructs[index] + "....................";
-            else
+            } else {
                 return "....." + this._secstructs[index] + "....................";
+            }
         } else {
             return this._secstructs[index];
         }
@@ -132,12 +133,12 @@ export class Puzzle {
         return this._constraints;
     }
 
-    public get_temporary_constraints(): any[] {
+    public get_temporary_constraints(): string[] {
         return this._temp_constraints;
     }
 
-    public get_puzzle_locks(): any[] {
-        let puzlocks: any[];
+    public get_puzzle_locks(): boolean[] {
+        let puzlocks: boolean[];
         let ii: number;
 
         if (this._puzzle_locks == null && !this._use_tails) {
@@ -162,14 +163,16 @@ export class Puzzle {
                 puzlocks.push(true);
             }
             for (ii = 0; ii < this._secstructs[0].length; ii++) {
-                if (this._puzzle_locks != null)
+                if (this._puzzle_locks != null) {
                     puzlocks.push(this._puzzle_locks[ii]);
-                else
+                } else {
                     puzlocks.push(false);
+                }
             }
 
-            for (ii = 0; ii < 20; ii++)
+            for (ii = 0; ii < 20; ii++) {
                 puzlocks.push(true);
+            }
             return puzlocks;
 
         } else {
@@ -193,8 +196,9 @@ export class Puzzle {
     public has_target_type(tc_type: string): boolean {
         if (this._target_conditions == null) return false;
         for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]['type'] == tc_type)
+            if (this._target_conditions[ii]['type'] == tc_type) {
                 return true;
+            }
         }
         return false;
     }
@@ -216,7 +220,7 @@ export class Puzzle {
             if (Puzzle.is_aptamer_type(tc_type) && this._target_conditions[ii]['site'] != null) {
                 let binding_pairs: any[] = [];
                 let binding_site: any[] = this._target_conditions[ii]['site'];
-                let target_pairs: any[] = EPars.parenthesis_to_pair_array(this.get_secstruct(ii));
+                let target_pairs: number[] = EPars.parenthesis_to_pair_array(this.get_secstruct(ii));
 
                 for (let jj = 0; jj < binding_site.length; jj++) {
                     binding_pairs.push(target_pairs[binding_site[jj]]);
@@ -283,8 +287,7 @@ export class Puzzle {
         this._saved_sequence = EPars.string_to_sequence_array(seq);
     }
 
-    public set_ui_specs(ui_spec: any[]): void {
-
+    public set_ui_specs(ui_spec: string[]): void {
         this._default_mode = "";
         this._use_modes = 0;
 
@@ -300,7 +303,6 @@ export class Puzzle {
                 this._use_pallete = Puzzle.BOOL_FALSE;
             }
         }
-
     }
 
     public set_boosters(obj: Object): void {
@@ -311,8 +313,8 @@ export class Puzzle {
         return this._booster_defs;
     }
 
-    public get_beginning_sequence(index: number = 0): any[] {
-        let seq: any[] = [];
+    public get_beginning_sequence(index: number = 0): number[] {
+        let seq: number[] = [];
         if (this._use_tails) {
             if (this._use_short_tails) {
                 seq.push(EPars.RNABASE_GUANINE);
@@ -329,10 +331,11 @@ export class Puzzle {
         // FIXME: This needs revision, see PoseEdit:2163
         let len: number = this._beginning_sequence != null ? this._beginning_sequence.length : this._secstructs[index].length;
         for (let ii: number = 0; ii < len; ii++) {
-            if (this._beginning_sequence != null)
+            if (this._beginning_sequence != null) {
                 seq.push(this._beginning_sequence[ii]);
-            else
+            } else {
                 seq.push(EPars.RNABASE_ADENINE);
+            }
         }
 
         if (this._use_tails) {
@@ -344,21 +347,20 @@ export class Puzzle {
         return seq;
     }
 
-    public get_saved_sequence(): any[] {
+    public get_saved_sequence(): number[] {
         return this._saved_sequence;
     }
 
-    public get_barcode_indices(): any[] {
+    public get_barcode_indices(): number[] {
         if (!this._use_barcode) {
             return null;
         }
 
         let ii: number;
 
-        let barcodes: any[] = [];
+        let barcodes: number[] = [];
         let secstruct: string = this.get_secstruct();
         if (this._use_tails) {
-
             for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
             }
@@ -432,10 +434,11 @@ export class Puzzle {
     }
 
     public set_temporary_constraints(constraints: string[]): void {
-        if (constraints != null)
+        if (constraints != null) {
             this._temp_constraints = constraints.slice();
-        else
+        } else {
             this._temp_constraints = null;
+        }
     }
 
     public set_round(round: number): void {
@@ -470,8 +473,9 @@ export class Puzzle {
         let is_basic: boolean = (this._puzzle_type != "Basic");
         let has_target: boolean = false;
         for (let ii: number = 0; ii < this._constraints.length; ii++) {
-            if (this._constraints[ii] == "SHAPE")
+            if (this._constraints[ii] == "SHAPE") {
                 has_target = true;
+            }
         }
 
         return is_basic || has_target;
@@ -493,13 +497,15 @@ export class Puzzle {
 
     public default_mode(): string {
 
-        if (this._default_mode.length > 0)
+        if (this._default_mode.length > 0) {
             return this._default_mode;
+        }
 
-        if (this._puzzle_type != "Basic")
+        if (this._puzzle_type != "Basic") {
             return "TARGET";
-        else
+        } else {
             return "FROZEN";
+        }
     }
 
     public set_default_mode(default_mode: string): void {
@@ -510,11 +516,11 @@ export class Puzzle {
         return this._use_tails;
     }
 
-    public transform_sequence(seq: any[], target_index: number): any[] {
+    public transform_sequence(seq: number[], target_index: number): number[] {
         if (this._target_conditions != null) {
             if (this._target_conditions[target_index]['sequence'] != null) {
-                let target_seq_temp: any[] = EPars.string_to_sequence_array(this._target_conditions[target_index]['sequence']);
-                let target_seq: any[] = [];
+                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._target_conditions[target_index]['sequence']);
+                let target_seq: number[] = [];
 
                 if (this._use_tails) {
                     if (this._use_short_tails) {
@@ -540,7 +546,7 @@ export class Puzzle {
                     }
                 }
 
-                let locks: any[] = this.get_puzzle_locks();
+                let locks: boolean[] = this.get_puzzle_locks();
 
                 if (locks.length != target_seq.length || target_seq.length != seq.length) {
                     throw new Error("lock length doesn't match object sequence");
@@ -565,8 +571,8 @@ export class Puzzle {
     private _mission_text: string = Puzzle.DEFAULT_MISSION_TEXT;
     private _puzzle_locks: boolean[];
     private _shift_limit: number;
-    private _beginning_sequence: any[];
-    private _saved_sequence: any[];
+    private _beginning_sequence: number[];
+    private _saved_sequence: number[];
     private _use_tails: boolean = false;
     private _use_short_tails: boolean = false;
     private _use_barcode: boolean = false;
