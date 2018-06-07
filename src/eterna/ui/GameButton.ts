@@ -1,15 +1,22 @@
-import {Sprite, Text, Texture, Graphics} from "pixi.js";
-import {Button, ButtonState} from "../../flashbang/objects/Button";
+import {Graphics, Sprite, Text, Texture} from "pixi.js";
+import {ButtonState} from "../../flashbang/objects/Button";
+import {ToggleButton} from "../../flashbang/objects/ToggleButton";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {Fonts} from "../util/Fonts";
 
-export class GameButton extends Button {
+export class GameButton extends ToggleButton {
     public constructor() {
         super();
 
         this._sprite = new Sprite();
         this.container.addChild(this._sprite);
+
+        this.clicked.connect(() => {
+            if (this._selectedTexture != null) {
+                this.toggle();
+            }
+        });
     }
 
     public up(tex: Texture | string): GameButton {
@@ -26,6 +33,20 @@ export class GameButton extends Button {
 
     public disabled(tex: Texture | string): GameButton {
         return this.setTexture(ButtonState.DISABLED, tex);
+    }
+
+    /** Sets a single texture for all states */
+    public allStates(tex: Texture | string): GameButton {
+        return this.up(tex).over(tex).down(tex).disabled(tex);
+    }
+
+    public selected(tex: Texture | string): GameButton {
+        this._selectedTexture = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
+        return this;
+    }
+
+    public get isSelected(): boolean {
+        return this.toggled.value;
     }
 
     public text(text: string | TextBuilder, fontSize?: number): GameButton {
@@ -52,7 +73,7 @@ export class GameButton extends Button {
     }
 
     protected showState(state: ButtonState): void {
-        let tex: Texture = this.getTexture(state);
+        let tex: Texture = this.getTexture(state, this.isSelected);
         this._sprite.texture = tex || Texture.EMPTY;
 
         // Create label
@@ -95,10 +116,10 @@ export class GameButton extends Button {
     }
 
     private setTexture(state: ButtonState, tex: Texture | string) :GameButton {
-        if (this._textures == null) {
-            this._textures = [];
+        if (this._buttonStateTextures == null) {
+            this._buttonStateTextures = [];
         }
-        this._textures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
+        this._buttonStateTextures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
 
         this.needsRedraw();
 
@@ -111,8 +132,14 @@ export class GameButton extends Button {
         }
     }
 
-    private getTexture(state: ButtonState): Texture {
-        return this._textures != null && this._textures.length > state ? this._textures[state] : null;
+    private getTexture(state: ButtonState, selected: boolean): Texture {
+        if (selected && this._selectedTexture != null) {
+            return this._selectedTexture;
+        } else {
+            return this._buttonStateTextures != null && this._buttonStateTextures.length > state ?
+                this._buttonStateTextures[state] :
+                null;
+        }
     }
 
     private readonly _sprite: Sprite;
@@ -123,7 +150,8 @@ export class GameButton extends Button {
     private _tooltip: string;
     private _hotkey: string;
     private _hotkeyCtrl: boolean;
-    private _textures: Texture[];
+    private _buttonStateTextures: Texture[];
+    private _selectedTexture: Texture;
 
     private static TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],
