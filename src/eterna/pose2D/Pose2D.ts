@@ -8,6 +8,7 @@ import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
+import {ROPWait} from "../rscript/ROPWait";
 import {BitmapManager} from "../util/BitmapManager";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
@@ -498,7 +499,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let index: number = this._tracked_indices.indexOf(closest_index);
         if (index == -1) {
             this._tracked_indices.push(closest_index);
-            // ROPWait.NotifyBlackMark(closest_index, true);
+            ROPWait.NotifyBlackMark(closest_index, true);
 
             let base_box: Graphics = new Graphics();
             this._base_boxes.push(base_box);
@@ -521,7 +522,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._base_boxes[index].visible = false;
             this._tracked_indices.splice(index, 1);
             this._base_boxes.splice(index, 1);
-            // ROPWait.NotifyBlackMark(closest_index, false);
+            ROPWait.NotifyBlackMark(closest_index, false);
         }
     }
 
@@ -593,7 +594,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public on_pose_mouse_up(e: Event): void {
         this.done_coloring();
         this._mouse_down_altKey = false;
-        // ROPWait.NotifyEndPaint();
+        ROPWait.NotifyEndPaint();
     }
 
     public delete_base_with_index_pairs(index: number, pairs: any[]): any[] {
@@ -741,7 +742,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public toggle_design_struct(seqnum: number): boolean {
         this._design_struct[seqnum] = !(this._design_struct[seqnum] == true);
-        // ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
+        ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
         this.update_design_highlight();
         let segments: any[] = this.get_design_segments();
         return (segments.length == 4
