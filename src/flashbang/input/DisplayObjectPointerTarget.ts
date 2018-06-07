@@ -47,10 +47,18 @@ export class DisplayObjectPointerTarget implements PointerTarget {
         return this._pointerUp;
     }
 
+    public get pointerTap(): SignalView<InteractionEvent> {
+        if (this._pointerTap == null) {
+            this._pointerTap = new EventSignal(this.target, "pointertap");
+        }
+        return this._pointerTap;
+    }
+
     // lazily instantiated
     private _pointerOver: EventSignal;
     private _pointerOut: EventSignal;
     private _pointerDown: EventSignal;
     private _pointerMoved: EventSignal;
     private _pointerUp: EventSignal;
+    private _pointerTap: EventSignal;
 }
