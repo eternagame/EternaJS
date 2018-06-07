@@ -41,6 +41,10 @@ export class SceneObject extends GameObject implements PointerTarget {
         return this.getPointerTarget().pointerMove;
     }
 
+    public get pointerTap(): SignalView<InteractionEvent> {
+        return this.getPointerTarget().pointerTap;
+    }
+
     protected getPointerTarget(): PointerTarget {
         if (this._pointerTarget == null) {
             this._pointerTarget = new DisplayObjectPointerTarget(this._displayObject);
