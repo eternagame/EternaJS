@@ -10,6 +10,10 @@ export abstract class ToggleButton extends Button {
         this.toggled.connect((toggled: boolean) => this.onToggledChanged(toggled));
     }
 
+    public toggle(): void {
+        this.toggled.value = !this.toggled.value;
+    }
+
     protected onToggledChanged(toggled: boolean): void {
         this.showState(this._state);
     }
