@@ -11,6 +11,7 @@ import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PuzzleManager} from "../puzzle/PuzzleManager";
+import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
 import {GameButton} from "../ui/GameButton";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
 import {TextBalloon} from "../ui/TextBalloon";
@@ -46,10 +47,22 @@ export class PoseTestMode extends AppMode {
 
         this.addObject(new NucleotidePalette(), this.modeSprite);
 
-        let button = new TextBalloon("Hello (Z)", 0x0, 0.8);
-        button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
-        button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
-        this.addObject(button, this.modeSprite);
+        // let button = new TextBalloon("Hello (Z)", 0x0, 0.8);
+        // button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
+        // button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
+        // this.addObject(button, this.modeSprite);
+
+        let _view_options_button = new GameButton()
+            .allStates(BitmapManager.ImgSettings)
+            .text("Settings", 16)
+            .scaleBitmapToLabel();
+
+        let menu = new EternaMenu(EternaMenuStyle.PULLUP);
+        menu.add_menu_button(new GameButton().allStates(BitmapManager.NovaMenu));
+        menu.add_sub_menu_button(0, _view_options_button);
+        menu.display.x = (Flashbang.stageWidth - DisplayUtil.width(menu.display)) * 0.5;
+        menu.display.y = (Flashbang.stageHeight - DisplayUtil.height(menu.display)) * 0.5;
+        this.addObject(menu, this.modeSprite);
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {

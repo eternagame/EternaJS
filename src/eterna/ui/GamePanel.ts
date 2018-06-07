@@ -16,7 +16,7 @@ export class GamePanel extends ContainerObject {
         this.setup(panel_type, alpha_val, color, border_alpha, border_color);
     }
 
-    public setup(panel_type: number, alpha_val: number, color: number, border_alpha: number, border_color: number): void {
+    public setup(panel_type: GamePanelType, alpha_val: number, color: number, border_alpha: number, border_color: number): void {
         this._panel_type = panel_type;
         this._alpha = alpha_val;
         this._color = color;
