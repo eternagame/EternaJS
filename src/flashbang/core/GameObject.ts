@@ -66,6 +66,10 @@ export class GameObject extends GameObjectBase {
         obj._removedInternal();
     }
 
+    public removeAllObjects(): void {
+        this.removeObjects(() => true);
+    }
+
     public removeNamedObjects(name: string): void {
         this.removeObjects((obj: GameObjectBase): boolean => {
             return obj._name == name;
