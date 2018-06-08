@@ -328,7 +328,7 @@ export class Puzzle {
             }
         }
 
-        // FIXME: This needs revision, see PoseEdit:2163
+        // FIXME: This needs revision, see PoseEditMode:2163
         let len: number = this._beginning_sequence != null ? this._beginning_sequence.length : this._secstructs[index].length;
         for (let ii: number = 0; ii < len; ii++) {
             if (this._beginning_sequence != null) {
