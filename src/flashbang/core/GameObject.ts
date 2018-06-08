@@ -161,13 +161,15 @@ export class GameObject extends GameObjectBase {
 
     /*internal*/
     _addedInternal(): void {
-        super._addedInternal();
+        // Add pending children first
         if (this._pendingChildren != null) {
             for (let ref of this._pendingChildren) {
                 this._registerObject(ref._obj);
             }
         }
         this._pendingChildren = null;
+
+        super._addedInternal();
     }
 
     /*override*/
