@@ -1286,7 +1286,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     this.on_pose_mouse_down(e, closest_index);
     }
 
-    public get_satisfied_pairs(): any[] {
+    public get_satisfied_pairs(): number[] {
         return EPars.get_satisfied_pairs(this._pairs, this.get_full_sequence());
     }
 
@@ -1465,7 +1465,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
         this._oligos_paired = num_paired;
 
-        let seq: any[] = this.get_full_sequence();
+        let seq: number[] = this.get_full_sequence();
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (k = 0; k < diff; k++) {
@@ -1482,9 +1482,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         // if possible, maintain visual consistency
         // (strands "fly" from their previous location in the previous oligo order)
         if (same && JSON.stringify(prev_order) != JSON.stringify(this._oligos_order)) {
-            let old_x: any[] = [];
-            let old_y: any[] = [];
-            let idx_map: any[] = this.get_order_map(prev_order);
+            let old_x: number[] = [];
+            let old_y: number[] = [];
+            let idx_map: number[] = this.get_order_map(prev_order);
             for (k = 0; k < seq.length; k++) {
                 old_x[k] = this._bases[k].get_x();
                 old_y[k] = this._bases[k].get_y();
