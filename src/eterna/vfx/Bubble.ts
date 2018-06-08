@@ -43,9 +43,7 @@ export class Bubble extends SpriteObject implements Updatable {
             else bubbleType = 7;
         }
 
-        if (!this._foreground) {
-            this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
-        }
+        this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
 
         this.set_auto_hide(false);
     }

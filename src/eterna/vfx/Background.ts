@@ -26,17 +26,17 @@ export class Background extends ContainerObject {
     }
 
     public disable_bubbles(disable:boolean):void {
-        for (let ii:number = 0; ii < this._bubbles.length; ii++) {
-            if (!disable && !this._bubbles[ii].sprite.visible) {
-                this._bubbles[ii].init();
+        for (let bubble of this._bubbles) {
+            if (!disable && !bubble.sprite.visible) {
+                bubble.init();
             }
-            this._bubbles[ii].sprite.visible = !disable;
+            bubble.sprite.visible = !disable;
         }
     }
 
     private freeze_bubbles(freeze:boolean):void {
-        for (let ii:number = 0; ii < this._bubbles.length; ii++) {
-            this._bubbles[ii].is_paused = freeze;
+        for (let bubble of this._bubbles) {
+            bubble.is_paused = freeze;
         }
     }
 
@@ -103,8 +103,8 @@ export class Background extends ContainerObject {
     /*override*/ protected on_resize():void {
         this.render_background();
 
-        for (let ii:number = 0; ii < this._bubbles.length; ii++) {
-            this._bubbles[ii].init();
+        for (let bubble of this._bubbles) {
+            bubble.init();
         }
     }
 
@@ -112,5 +112,5 @@ export class Background extends ContainerObject {
 
     private _foreground: boolean;
     private _isFrozen: boolean;
-    private _bubbles: Bubble[];
+    private readonly _bubbles: Bubble[];
 }
