@@ -1,6 +1,6 @@
 import {Graphics} from "pixi.js";
-import {Flashbang} from "../flashbang/core/Flashbang";
-import {ContainerObject} from "../flashbang/objects/ContainerObject";
+import {Flashbang} from "../../flashbang/core/Flashbang";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Bubble} from "./Bubble";
 
 export class Background extends ContainerObject {
