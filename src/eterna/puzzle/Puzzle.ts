@@ -305,11 +305,11 @@ export class Puzzle {
         }
     }
 
-    public set_boosters(obj: Object): void {
+    public set_boosters(obj: any): void {
         this._booster_defs = obj;
     }
 
-    public get_boosters(): Object {
+    public get_boosters(): any {
         return this._booster_defs;
     }
 
