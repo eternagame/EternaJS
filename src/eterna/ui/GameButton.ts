@@ -49,7 +49,7 @@ export class GameButton extends ToggleButton {
         return this.toggled.value;
     }
 
-    public text(text: string | TextBuilder, fontSize?: number): GameButton {
+    public label(text: string | TextBuilder, fontSize?: number): GameButton {
         if (typeof(text) === "string") {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize ? fontSize : 22).color(0xFFFFFF);
         } else {

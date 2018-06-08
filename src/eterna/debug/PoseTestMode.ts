@@ -54,7 +54,7 @@ export class PoseTestMode extends AppMode {
 
         let _view_options_button = new GameButton()
             .allStates(BitmapManager.ImgSettings)
-            .text("Settings", 16)
+            .label("Settings", 16)
             .scaleBitmapToLabel();
 
         let menu = new EternaMenu(EternaMenuStyle.PULLUP);

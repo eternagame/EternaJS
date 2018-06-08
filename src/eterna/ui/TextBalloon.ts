@@ -18,7 +18,7 @@ export class TextBalloon extends ContainerObject {
         this._hasTitle = false;
         this.container.addChild(this._text);
 
-        this._button = new GameButton().text("Next", 12);
+        this._button = new GameButton().label("Next", 12);
         this.addObject(this._button, this.container);
         this._button.display.visible = false;
 
