@@ -4,21 +4,21 @@ import {Plot, PlotType} from "./Plot";
 import {Pose2D} from "./pose2D/Pose2D";
 
 export enum UndoBlockParam {
-    PARAM_GU = 0,
-    PARAM_GC = 1,
-    PARAM_AU = 2,
-    PARAM_MFE = 3,
-    PARAM_REPETITION = 4,
-    PARAM_STACK = 5,
-    PARAM_FE = 6,
-    PARAM_DOTPLOT = 7,
-    PARAM_DOTPLOT_BITMAP = 8,
-    PARAM_MELTPLOT_BITMAP = 9,
-    PARAM_PROB_SCORE = 10,
-    PARAM_MELTING_POINT = 11,
-    PARAM_PAIR_SCORE = 12,
-    PARAM_NNFE_ARRAY = 13,
-    PARAM_MAX = 14,
+    GU = 0,
+    GC = 1,
+    AU = 2,
+    MFE = 3,
+    REPETITION = 4,
+    STACK = 5,
+    FE = 6,
+    DOTPLOT = 7,
+    DOTPLOT_BITMAP = 8,
+    MELTPLOT_BITMAP = 9,
+    PROB_SCORE = 10,
+    MELTING_POINT = 11,
+    PAIR_SCORE = 12,
+    NNFE_ARRAY = 13,
+    MAX = 14,
 }
 
 export class UndoBlock {
@@ -191,11 +191,11 @@ export class UndoBlock {
         let best_pairs: any[] = this.get_pairs(temp);
         let seq: any[] = this._sequence;
 
-        this.set_param(UndoBlockParam.PARAM_GU, EPars.num_gu_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.PARAM_GC, EPars.num_gc_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.PARAM_AU, EPars.num_ua_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.PARAM_STACK, EPars.get_longest_stack_length(best_pairs), temp);
-        this.set_param(UndoBlockParam.PARAM_REPETITION, EPars.get_sequence_repetition(EPars.sequence_array_to_string(seq), 5), temp);
+        this.set_param(UndoBlockParam.GU, EPars.num_gu_pairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.GC, EPars.num_gc_pairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.AU, EPars.num_ua_pairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.STACK, EPars.get_longest_stack_length(best_pairs), temp);
+        this.set_param(UndoBlockParam.REPETITION, EPars.get_sequence_repetition(EPars.sequence_array_to_string(seq), 5), temp);
         let full_seq: any[] = seq.slice();
         if (this._target_oligo) {
             if (this.get_oligo_mode() == Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
@@ -212,8 +212,8 @@ export class UndoBlock {
         }
         let nnfe: number[] = [];
         let total_fe: number = folder.score_structures(full_seq, best_pairs, temp, nnfe);
-        this.set_param(UndoBlockParam.PARAM_FE, total_fe, temp);
-        this.set_param(UndoBlockParam.PARAM_NNFE_ARRAY, nnfe, temp);
+        this.set_param(UndoBlockParam.FE, total_fe, temp);
+        this.set_param(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
 
     public set_meltingpoint_and_dotplot(folder: Folder): void {
@@ -221,9 +221,9 @@ export class UndoBlock {
 
         let datablock: UndoBlock = this;
 
-        if (datablock.get_param(UndoBlockParam.PARAM_DOTPLOT, 37) == null) {
+        if (datablock.get_param(UndoBlockParam.DOTPLOT, 37) == null) {
             let dot_array: any[] = folder.get_dot_plot(datablock.get_sequence(), datablock.get_pairs(37), 37);
-            datablock.set_param(UndoBlockParam.PARAM_DOTPLOT, dot_array, 37);
+            datablock.set_param(UndoBlockParam.DOTPLOT, dot_array, 37);
             this._dotplot.set_type(PlotType.SCATTER);
             this._dotplot.set_2d_data(dot_array, pose_seq.length);
         }
@@ -233,9 +233,9 @@ export class UndoBlock {
                 datablock.set_pairs(folder.fold_sequence(datablock.get_sequence(), null, null, ii), ii);
             }
 
-            if (datablock.get_param(UndoBlockParam.PARAM_DOTPLOT, ii) == null) {
+            if (datablock.get_param(UndoBlockParam.DOTPLOT, ii) == null) {
                 let dot_temp_array: any[] = folder.get_dot_plot(datablock.get_sequence(), datablock.get_pairs(ii), ii);
-                datablock.set_param(UndoBlockParam.PARAM_DOTPLOT, dot_temp_array, ii);
+                datablock.set_param(UndoBlockParam.DOTPLOT, dot_temp_array, ii);
             }
         }
 
@@ -245,12 +245,12 @@ export class UndoBlock {
         let max_pair_scores: number[] = [];
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, ii)) {
-                pair_scores.push(1 - datablock.get_param(UndoBlockParam.PARAM_PAIR_SCORE, ii));
+            if (datablock.get_param(UndoBlockParam.PROB_SCORE, ii)) {
+                pair_scores.push(1 - datablock.get_param(UndoBlockParam.PAIR_SCORE, ii));
                 max_pair_scores.push(1.0);
                 continue;
             }
-            let cur_dat: number[] = datablock.get_param(UndoBlockParam.PARAM_DOTPLOT, ii);
+            let cur_dat: number[] = datablock.get_param(UndoBlockParam.DOTPLOT, ii);
             let cur_pairs: number[] = datablock.get_pairs(ii);
             let prob_score: number = 0;
             let score_count: number = 0;
@@ -287,25 +287,25 @@ export class UndoBlock {
             pair_scores.push(1 - pair_score);
             max_pair_scores.push(1.0);
 
-            datablock.set_param(UndoBlockParam.PARAM_PROB_SCORE, prob_score, ii);
-            datablock.set_param(UndoBlockParam.PARAM_PAIR_SCORE, pair_score, ii);
+            datablock.set_param(UndoBlockParam.PROB_SCORE, prob_score, ii);
+            datablock.set_param(UndoBlockParam.PAIR_SCORE, pair_score, ii);
         }
 
         this._meltplot.set_type(PlotType.LINE);
         this._meltplot.set_data(pair_scores, max_pair_scores);
 
-        let init_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, 37);
+        let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
 
         let meltpoint: number = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let current_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, ii);
+            let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
             if (current_score < init_score * 0.5) {
                 meltpoint = ii;
                 break;
             }
         }
 
-        datablock.set_param(UndoBlockParam.PARAM_MELTING_POINT, meltpoint, 37);
+        datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
     }
 
     public get_dotplot(): Plot {
