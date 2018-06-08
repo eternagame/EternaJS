@@ -84,13 +84,13 @@ export class GameClient {
         return this.post(GameClient.POST_URI, post_params);
     }
 
-    public update_solution_fold_data(solution_nid: number, fold_data: any): Promise<Response> {
+    public update_solution_fold_data(solution_nid: number, fold_data: any): Promise<string> {
         let dataString: string = JSON.stringify(fold_data);
         return this.post(GameClient.POST_URI, {
             "type": "update_solution_fold_data",
             "nid": solution_nid,
             "fold-data": dataString
-        });
+        }).then((rsp) => rsp.text());
     }
 
     /// OTHER
