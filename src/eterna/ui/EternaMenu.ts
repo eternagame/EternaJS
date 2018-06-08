@@ -23,7 +23,7 @@ export class EternaMenu extends GamePanel {
         let button: GameButton = new GameButton();
 
         if (url != null && url.length > 0) {
-            button.text("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
+            button.label("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
             button.clicked.connect(() => {
                 log.debug(`TODO: navigateToURL '${url}'`);
                 // let req: URLRequest = new URLRequest;
@@ -31,7 +31,7 @@ export class EternaMenu extends GamePanel {
                 // this.navigateToURL(req, "_self");
             });
         } else {
-            button.text(label, 12);
+            button.label(label, 12);
         }
         this.addObject(button, this.container);
         this._buttons.push(button);
