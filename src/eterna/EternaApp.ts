@@ -7,6 +7,7 @@ import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
 import {Vienna} from "./folding/Vienna";
 import {LoadingMode} from "./mode/LoadingMode";
+import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {BitmapManager} from "./util/BitmapManager";
 import {Fonts} from "./util/Fonts";
@@ -26,7 +27,8 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                this._modeStack.unwindToMode(new PoseTestMode());
+                this._modeStack.unwindToMode(new PoseEditMode());
+                // this._modeStack.unwindToMode(new PoseTestMode());
             })
             .catch((err) => Eterna.onFatalError(err));
     }
