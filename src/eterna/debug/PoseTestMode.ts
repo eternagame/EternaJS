@@ -3,8 +3,6 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Eterna} from "../Eterna";
 import {Pose2D} from "../pose2D/Pose2D";
 import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
 import {GameButton} from "../ui/GameButton";
@@ -18,16 +16,6 @@ export class PoseTestMode extends AppMode {
 
         this.addObject(new Background(), this.modeSprite);
 
-        TextureUtil.load(BitmapManager.pose2DURLs)
-            .then(() => {
-                this.onResourcesLoaded();
-            })
-            .catch((err: any) => {
-                Eterna.onFatalError(err);
-            });
-    }
-
-    protected onResourcesLoaded(): void {
         this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
