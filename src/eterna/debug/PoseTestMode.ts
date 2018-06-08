@@ -5,7 +5,7 @@ import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Background} from "../Background";
+import {Background} from "../vfx/Background";
 import {Eterna} from "../Eterna";
 import {MissionScreen} from "../mode/PoseEdit/MissionScreen";
 import {Pose2D} from "../pose2D/Pose2D";
