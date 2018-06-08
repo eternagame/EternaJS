@@ -138,12 +138,11 @@ export class EternaMenu extends GamePanel {
     }
 
     /*override*/
-    // public set_disabled(dis: boolean): void {
-    //     super.set_disabled(dis);
-    //     for (let ii: number = 0; ii < this._buttons.length; ii++) {
-    //         this._buttons[ii].set_disabled(dis);
-    //     }
-    // }
+    public set_disabled(disabled: boolean): void {
+        for (let ii: number = 0; ii < this._buttons.length; ii++) {
+            this._buttons[ii].enabled = !disabled;
+        }
+    }
 
     private needsLayout() {
         if (this.isLiveObject) {
