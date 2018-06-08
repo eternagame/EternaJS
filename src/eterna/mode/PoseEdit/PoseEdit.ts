@@ -1121,7 +1121,7 @@
 //     //     });
 //     //     ExternalInterface.addCallback("get_free_energy", function (indx: number): number {
 //     //         if (indx < 0 || indx >= that._poses.length) return Number.NaN;
-//     //         return that.get_current_undo_block(indx).get_param(UndoBlockParam.PARAM_FE);
+//     //         return that.get_current_undo_block(indx).get_param(UndoBlockParam.FE);
 //     //     });
 //     //     ExternalInterface.addCallback("get_constraints", function (): any[] {
 //     //         // that.trace_js("get_constraints() called");
@@ -2052,22 +2052,22 @@
 //
 //                             /// Generate dot and melting plot data
 //                             let datablock: UndoBlock = this.get_current_undo_block();
-//                             if (datablock.get_param(UndoBlockParam.PARAM_DOTPLOT_BITMAP) == null) {
+//                             if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
 //                                 this.update_current_block_with_dot_and_melting_plot();
 //                             }
 //
-//                             let init_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, 37);
+//                             let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
 //
 //                             let meltpoint: number = 107;
 //                             for (let ii: number = 47; ii < 100; ii += 10) {
-//                                 let current_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, ii);
+//                                 let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
 //                                 if (current_score < init_score * 0.5) {
 //                                     meltpoint = ii;
 //                                     break;
 //                                 }
 //                             }
 //
-//                             datablock.set_param(UndoBlockParam.PARAM_MELTING_POINT, meltpoint, 37);
+//                             datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 //
 //                             Application.instance.add_lock("LOCK_SUBMIT");
 //                             Application.instance.get_modal_container().addObject(this._submit_field);
@@ -2084,22 +2084,22 @@
 //
 //             /// Generate dot and melting plot data
 //             let datablock: UndoBlock = this.get_current_undo_block();
-//             if (datablock.get_param(UndoBlockParam.PARAM_DOTPLOT_BITMAP) == null) {
+//             if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
 //                 this.update_current_block_with_dot_and_melting_plot();
 //             }
 //
-//             let init_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, 37);
+//             let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
 //
 //             let meltpoint: number = 107;
 //             for (let ii: number = 47; ii < 100; ii += 10) {
-//                 let current_score: number = datablock.get_param(UndoBlockParam.PARAM_PROB_SCORE, ii);
+//                 let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
 //                 if (current_score < init_score * 0.5) {
 //                     meltpoint = ii;
 //                     break;
 //                 }
 //             }
 //
-//             datablock.set_param(UndoBlockParam.PARAM_MELTING_POINT, meltpoint, 37);
+//             datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 //
 //             Application.instance.add_lock("LOCK_SUBMIT");
 //             Application.instance.get_modal_container().addObject(this._submit_field);
@@ -2164,17 +2164,17 @@
 //     //     let seq_string: string = EPars.sequence_array_to_string(this._puzzle.transform_sequence(undoblock.get_sequence(), 0));
 //     //
 //     //     post_data["title"] = (dict["Title"]);
-//     //     post_data["energy"] = (undoblock.get_param(UndoBlockParam.PARAM_FE) / 100.0);
+//     //     post_data["energy"] = (undoblock.get_param(UndoBlockParam.FE) / 100.0);
 //     //     post_data["puznid"] = (this._puzzle.get_node_id());
 //     //     post_data["sequence"] = (seq_string);
-//     //     post_data["repetition"] = (undoblock.get_param(UndoBlockParam.PARAM_REPETITION));
-//     //     post_data["gu"] = (undoblock.get_param(UndoBlockParam.PARAM_GU));
-//     //     post_data["gc"] = (undoblock.get_param(UndoBlockParam.PARAM_GC));
-//     //     post_data["ua"] = (undoblock.get_param(UndoBlockParam.PARAM_AU));
+//     //     post_data["repetition"] = (undoblock.get_param(UndoBlockParam.REPETITION));
+//     //     post_data["gu"] = (undoblock.get_param(UndoBlockParam.GU));
+//     //     post_data["gc"] = (undoblock.get_param(UndoBlockParam.GC));
+//     //     post_data["ua"] = (undoblock.get_param(UndoBlockParam.AU));
 //     //     post_data["body"] = (dict["Comment"]);
 //     //
 //     //     if (this._puzzle.get_puzzle_type() == "Experimental") {
-//     //         post_data["melt"] = (undoblock.get_param(UndoBlockParam.PARAM_MELTING_POINT));
+//     //         post_data["melt"] = (undoblock.get_param(UndoBlockParam.MELTING_POINT));
 //     //
 //     //         if (this._fold_total_time >= 1000.0) {
 //     //             let fd: any[] = [];
@@ -3251,10 +3251,10 @@
 //
 //         let sequence: any[] = undo_block.get_sequence();
 //         let locks: any[] = undo_block.get_puzzle_locks();
-//         let num_gu: number = undo_block.get_param(UndoBlockParam.PARAM_GU);
-//         let num_gc: number = undo_block.get_param(UndoBlockParam.PARAM_GC);
-//         let num_ua: number = undo_block.get_param(UndoBlockParam.PARAM_AU);
-//         let stack_len: number = undo_block.get_param(UndoBlockParam.PARAM_STACK);
+//         let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
+//         let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
+//         let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
+//         let stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
 //
 //         let set_callback: Function = function (pose: PoseEdit, cb: ConstraintBox, kk: number): void {
 //             cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
@@ -3723,7 +3723,7 @@
 //
 //             } else if (constraints[ii] == "OLIGO_BOUND") {
 //                 target_index = Number(constraints[ii + 1]);
-//                 let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.PARAM_NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+//                 let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 //                 res = (nnfe != null && nnfe[0] == -2);
 //
 //                 if (this._target_conditions == null) {
@@ -3760,7 +3760,7 @@
 //
 //             } else if (constraints[ii] == "OLIGO_UNBOUND") {
 //                 target_index = Number(constraints[ii + 1]);
-//                 nnfe = this.get_current_undo_block(target_index).get_param(UndoBlockParam.PARAM_NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+//                 nnfe = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 //                 res = (nnfe == null || nnfe[0] != -2);
 //
 //                 if (this._target_conditions == null) {
@@ -4018,7 +4018,7 @@
 //             }
 //             if (Puzzle.is_oligo_type(this._target_conditions[jj]['type'])) {
 //                 this._poses[ii].set_oligo_malus(this._target_conditions[jj]['malus']);
-//                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.PARAM_NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+//                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 //                 if (nnfe != null && nnfe[0] == -2) {
 //                     this._poses[ii].set_oligo_paired(true);
 //                     this._poses[ii].set_duplex_cost(nnfe[1] * 0.01);
@@ -4027,16 +4027,16 @@
 //                 }
 //             }
 //             if (this._target_conditions[jj]['type'] == "multistrand") {
-//                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.PARAM_NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+//                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 //                 if (nnfe != null && nnfe[0] == -2) {
 //                     this._poses[ii].set_duplex_cost(nnfe[1] * 0.01);
 //                 }
 //             }
 //         }
 //
-//         let num_AU: number = undo_block.get_param(UndoBlockParam.PARAM_AU);
-//         let num_GU: number = undo_block.get_param(UndoBlockParam.PARAM_GU);
-//         let num_GC: number = undo_block.get_param(UndoBlockParam.PARAM_GC);
+//         let num_AU: number = undo_block.get_param(UndoBlockParam.AU);
+//         let num_GU: number = undo_block.get_param(UndoBlockParam.GU);
+//         let num_GC: number = undo_block.get_param(UndoBlockParam.GC);
 //         this._palette.set_pair_counts(num_AU, num_GU, num_GC);
 //
 //         if (!this._is_frozen) {
