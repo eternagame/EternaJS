@@ -1,16 +1,15 @@
-﻿import {Graphics, Text} from "pixi.js";
-import {ContainerObject} from "../flashbang/objects/ContainerObject";
+﻿import {Graphics, Text, Container} from "pixi.js";
 import {Fonts} from "./util/Fonts";
 
 export enum PlotType {
     LINE, BAR, SCATTER
 }
 
-export class Plot extends ContainerObject {
+export class Plot extends Container {
     public constructor() {
         super();
         this._graphics = new Graphics();
-        this.container.addChild(this._graphics);
+        this.addChild(this._graphics);
         this._type = PlotType.BAR;
     }
 
@@ -173,7 +172,7 @@ export class Plot extends ContainerObject {
 
         if (this._label_fields != null) {
             for (let label of this._label_fields) {
-                this.container.removeChild(label);
+                this.removeChild(label);
             }
             this._label_fields = null;
         }
@@ -188,7 +187,7 @@ export class Plot extends ContainerObject {
                     label.width = horizontal_space;
                     label.x = Plot.W_MARGIN + (ii + 0.5) * horizontal_space;
                     label.y = Plot.H_MARGIN + this._height;
-                    this.container.addChild(label);
+                    this.addChild(label);
                     this._label_fields.push(label);
                 }
             }
