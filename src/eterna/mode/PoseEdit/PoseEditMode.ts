@@ -35,20 +35,23 @@ import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
 import {PuzzleEvent} from "./PuzzleEvent";
 
+export enum PuzzleState {
+    SETUP = -1,
+    COUNTDOWN = 0,
+    GAME = 1,
+    CLEARED = 2,
+}
+
+export enum PoseState {
+    NATIVE = 0,
+    FROZEN = 1,
+    TARGET = 2,
+    PIP = 3,
+    NONPIP = 4,
+    SECOND = 5,
+}
+
 export class PoseEditMode extends GameMode {
-    public static PUZSTATE_SETUP: number = -1;
-    public static PUZSTATE_COUNTDOWN: number = 0;
-    public static PUZSTATE_GAME: number = 1;
-    public static PUZSTATE_CLEARED: number = 2;
-
-    public static POSESTATE_NATIVE: number = 0;
-    public static POSESTATE_FROZEN: number = 1;
-    public static POSESTATE_TARGET: number = 2;
-
-    public static POSESTATE_PIP: number = 3;
-    public static POSESTATE_NONPIP: number = 4;
-    public static POSESTATE_SECOND: number = 5;
-
     public constructor() {
         super();
     }
@@ -187,7 +190,7 @@ export class PoseEditMode extends GameMode {
             this.toggle_pip();
             if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
                 let state_dict: Map<any, any> = new Map();
-                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseEditMode.POSESTATE_PIP);
+                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.PIP);
                 this._puzzle_events.process_events(state_dict);
             }
         }));
@@ -476,7 +479,7 @@ export class PoseEditMode extends GameMode {
         this._prev_design_cb = cb;
     }
 
-    public set_puzzle_state(newstate: number): void {
+    public set_puzzle_state(newstate: PuzzleState): void {
         this._puz_state = newstate;
 
         if (this._puzzle.get_puzzle_type() == "Basic" || this._puzzle.get_puzzle_type() == "Challenge") {
@@ -743,13 +746,13 @@ export class PoseEditMode extends GameMode {
         let default_mode: string = this._puzzle.default_mode();
 
         if (this._is_databrowser_mode) {
-            this._pose_state = (PoseEditMode.POSESTATE_NATIVE);
+            this._pose_state = (PoseState.NATIVE);
         } else if (default_mode == "TARGET") {
-            this._pose_state = (PoseEditMode.POSESTATE_TARGET);
+            this._pose_state = (PoseState.TARGET);
         } else if (default_mode == "FROZEN") {
-            this._pose_state = (PoseEditMode.POSESTATE_FROZEN);
+            this._pose_state = (PoseState.FROZEN);
         } else {
-            this._pose_state = (PoseEditMode.POSESTATE_NATIVE);
+            this._pose_state = (PoseState.NATIVE);
         }
 
         for (let ii = 0; ii < target_secstructs.length; ii++) {
@@ -1049,7 +1052,7 @@ export class PoseEditMode extends GameMode {
         /// Setup Puzzle events
         // this._puzzle_events.set_events(TutorialManager.get_events(this._puzzle.get_node_id()), this.get_ui_pos, this.run_action);
 
-        this.set_puzzle_state(PoseEditMode.PUZSTATE_SETUP);
+        this.set_puzzle_state(PuzzleState.SETUP);
         this.disable_tools(true);
 
         // reset lineage for experimental targets
@@ -1488,9 +1491,9 @@ export class PoseEditMode extends GameMode {
 
             this.display_constraint_boxes(false, true);
 
-            if (this._pose_state == PoseEditMode.POSESTATE_NATIVE) {
+            if (this._pose_state == PoseState.NATIVE) {
                 this.set_to_native_mode();
-            } else if (this._pose_state == PoseEditMode.POSESTATE_TARGET) {
+            } else if (this._pose_state == PoseState.TARGET) {
                 this.set_to_target_mode();
             } else {
                 this.set_to_frozen_mode();
@@ -1721,7 +1724,7 @@ export class PoseEditMode extends GameMode {
         if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
             let state_dict: Map<any, any> = new Map();
             if (target_index == 1) {
-                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseEditMode.POSESTATE_SECOND);
+                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.SECOND);
             }
             this._puzzle_events.process_events(state_dict);
         }
@@ -1734,7 +1737,7 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        if (this._pose_state == PoseEditMode.POSESTATE_NATIVE) {
+        if (this._pose_state == PoseState.NATIVE) {
             this.set_to_native_mode();
         } else {
             this.set_pose_target(0, this._current_target_index);
@@ -1848,11 +1851,11 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_to_native_mode(trigger_modechange_event: boolean = true): void {
-        this._pose_state = PoseEditMode.POSESTATE_NATIVE;
+        this._pose_state = PoseState.NATIVE;
 
         if (this._puzzle.get_puzzle_type() == "Basic" && this._waiting_for_input && trigger_modechange_event) {
             let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseEditMode.POSESTATE_NATIVE);
+            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.NATIVE);
             this._puzzle_events.process_events(state_dict);
         }
 
@@ -1868,11 +1871,11 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_to_target_mode(trigger_modechange_event: boolean = true): void {
-        this._pose_state = PoseEditMode.POSESTATE_TARGET;
+        this._pose_state = PoseState.TARGET;
 
         if (this._puzzle.get_puzzle_type() == "Basic" && this._waiting_for_input && trigger_modechange_event) {
             let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseEditMode.POSESTATE_TARGET);
+            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.TARGET);
             this._puzzle_events.process_events(state_dict);
         }
 
@@ -1907,9 +1910,9 @@ export class PoseEditMode extends GameMode {
     }
 
     private toggle_posestate(): void {
-        if (this._pose_state == PoseEditMode.POSESTATE_TARGET) {
+        if (this._pose_state == PoseState.TARGET) {
             this.set_to_native_mode();
-        } else if (this._pose_state == PoseEditMode.POSESTATE_NATIVE) {
+        } else if (this._pose_state == PoseState.NATIVE) {
             this.set_to_target_mode();
         } else {
             throw new Error("Invalid pose state");
@@ -1935,7 +1938,7 @@ export class PoseEditMode extends GameMode {
 
     /// This mode is strictly for internal use, not to be used by users
     private set_to_frozen_mode(): void {
-        this._pose_state = PoseEditMode.POSESTATE_FROZEN;
+        this._pose_state = PoseState.FROZEN;
         this._paused = true;
         this.update_score();
     }
@@ -2578,7 +2581,7 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        this.set_puzzle_state(PoseEditMode.PUZSTATE_COUNTDOWN);
+        this.set_puzzle_state(PuzzleState.COUNTDOWN);
         this.set_start_curtain(true);
 
         // let num_constraints: number = constraints.length;
@@ -2621,7 +2624,7 @@ export class PoseEditMode extends GameMode {
         this._is_playing = true;
         this.disable_tools(false);
 
-        this.set_puzzle_state(PoseEditMode.PUZSTATE_GAME);
+        this.set_puzzle_state(PuzzleState.GAME);
 
         // if (this._mission_screen.visible) {
         //     this.set_start_curtain(false);
@@ -2764,12 +2767,12 @@ export class PoseEditMode extends GameMode {
     }
 
     private done_playing(cleared: boolean): void {
-        if (this._puz_state == PoseEditMode.PUZSTATE_CLEARED) {
+        if (this._puz_state == PuzzleState.CLEARED) {
             return;
         }
 
         this.disable_tools(true);
-        this.set_puzzle_state(PoseEditMode.PUZSTATE_CLEARED);
+        this.set_puzzle_state(PuzzleState.CLEARED);
 
         if (cleared) {
             for (let ii: number = 0; ii < this._poses.length; ii++) {
@@ -3404,7 +3407,7 @@ export class PoseEditMode extends GameMode {
         //         if (this._is_pip_mode && target_index > 0) {
         //             box.visible = false;
         //         } else {
-        //             if (this._puz_state == PoseEditMode.PUZSTATE_GAME || this._puz_state == PoseEditMode.PUZSTATE_CLEARED) {
+        //             if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
         //                 box.visible = true;
         //             }
         //         }
@@ -3492,7 +3495,7 @@ export class PoseEditMode extends GameMode {
         //         if (this._is_pip_mode && target_index > 0) {
         //             box.visible = false;
         //         } else {
-        //             if (this._puz_state == PoseEditMode.PUZSTATE_GAME || this._puz_state == PoseEditMode.PUZSTATE_CLEARED) {
+        //             if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
         //                 box.visible = true;
         //             }
         //         }
@@ -3932,7 +3935,7 @@ export class PoseEditMode extends GameMode {
         // if (check_res && !old_check_res) {
         //     if (this._puzzle.get_puzzle_type() == "Experimental") {
         //         SoundManager.instance.play_se(SoundManager.SoundAllConditions);
-        //     } else if (this._puz_state != PoseEditMode.PUZSTATE_GAME) {
+        //     } else if (this._puz_state != PuzzleState.GAME) {
         //         SoundManager.instance.play_se(SoundManager.SoundCondition);
         //     }
         // } else if (play_condition_music) {
@@ -3956,7 +3959,7 @@ export class PoseEditMode extends GameMode {
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
-                if (ii == 0 && this._pose_state == PoseEditMode.POSESTATE_NATIVE && !this._is_pip_mode) {
+                if (ii == 0 && this._pose_state == PoseState.NATIVE && !this._is_pip_mode) {
                     this._poses[0].set_oligos(this.get_current_undo_block().get_target_oligos(),
                         this.get_current_undo_block().get_oligo_order(),
                         this.get_current_undo_block().get_oligos_paired());
@@ -3983,7 +3986,7 @@ export class PoseEditMode extends GameMode {
 
         } else {
             for (let ii = 0; ii < this._poses.length; ++ii) {
-                if (ii == 0 && this._pose_state == PoseEditMode.POSESTATE_TARGET && !this._is_pip_mode) {
+                if (ii == 0 && this._pose_state == PoseState.TARGET && !this._is_pip_mode) {
                     this._poses[0].set_oligos(this.get_current_undo_block().get_target_oligos(),
                         this.get_current_undo_block().get_target_oligo_order(),
                         this.get_current_undo_block().get_oligos_paired());
@@ -4091,7 +4094,7 @@ export class PoseEditMode extends GameMode {
         this._puzzle_events.process_events(state_dict);
 
         if (constraints_satisfied && !is_there_temp_constraints) {
-            if (this._puzzle.get_puzzle_type() != "Experimental" && this._puz_state == PoseEditMode.PUZSTATE_GAME) {
+            if (this._puzzle.get_puzzle_type() != "Experimental" && this._puz_state == PuzzleState.GAME) {
                 this.submit_current_pose();
             }
         }
@@ -4581,7 +4584,7 @@ export class PoseEditMode extends GameMode {
                 let stack_start: number = -1;
                 let last_other_stack: number = -1;
                 for (let ii = 0; ii < best_pairs.length; ii++) {
-                    if (pairs_diff[ii] > 0 && ((!is_shape_constrained && this._pose_state == PoseEditMode.POSESTATE_NATIVE) || (best_pairs[ii] == this._target_pairs[target_index][ii]))) {
+                    if (pairs_diff[ii] > 0 && ((!is_shape_constrained && this._pose_state == PoseState.NATIVE) || (best_pairs[ii] == this._target_pairs[target_index][ii]))) {
                         if (stack_start < 0) {
                             stack_start = ii;
                             last_other_stack = best_pairs[ii];
@@ -4940,7 +4943,7 @@ export class PoseEditMode extends GameMode {
     private _stack_level: number;
     private _stack_size: number;
     private _puzzle: Puzzle;
-    private _puz_state: number;
+    private _puz_state: PuzzleState;
     private _waiting_for_input: boolean;
     private _paused: boolean;
     private _start_solving_time: number;
@@ -4948,7 +4951,7 @@ export class PoseEditMode extends GameMode {
     private _move_count: number;
     private _moves: any[];
     private _current_target_index: number;
-    private _pose_state: number;
+    private _pose_state: PoseState;
     private _target_pairs: any[];
     private _target_conditions: any[];
     private _target_oligo: any[];
