@@ -52,8 +52,11 @@ export enum PoseState {
 }
 
 export class PoseEditMode extends GameMode {
-    public constructor() {
+    public constructor(puz: Puzzle, init_seq?: number[], is_reset?: boolean) {
         super();
+        this._initialPuzzle = puz;
+        this._initialInitSeq = init_seq;
+        this._initialPuzzleIsReset = is_reset;
     }
 
     protected setup(): void {
@@ -334,7 +337,8 @@ export class PoseEditMode extends GameMode {
         this.addObject(this._constraints_container, this.modeSprite);
 
         /// Puzzle event must be at the top
-        // this._puzzle_events = new PuzzleEvent;
+        this._puzzle_events = new PuzzleEvent();
+        this.addObject(this._puzzle_events, this.modeSprite);
         // Application.instance.get_front_object_container().addObject(this._puzzle_events);
 
         // this._game_stamp = new GameBitmap(null);
@@ -398,6 +402,9 @@ export class PoseEditMode extends GameMode {
 
         this._asynch_text = Fonts.arial("eterna.folding...", 12).build();
         this._asynch_text.position = new Point(16, 200);
+
+
+        this.set_puzzle(this._initialPuzzle, this._initialInitSeq, this._initialPuzzleIsReset);
     }
 
     public get_native_button(): GameButton {
@@ -705,12 +712,12 @@ export class PoseEditMode extends GameMode {
 
         let options: any[] = AutosaveManager.loadObjects("poseview-" + Eterna.player_id);
 
-        if (options[12] == true) {
+        if (options != null && options[12] == true) {
             this._tools_container.addObject(this._freeze_button);
         }
 
         this.addObject(this._tools_container);
-        this.set_toolbar_autohide(options[11] == true);
+        this.set_toolbar_autohide(options != null && options[11] == true);
 
         if (this._toggle_bar != null) {
             this._tools_container.removeObject(this._toggle_bar);
@@ -880,7 +887,7 @@ export class PoseEditMode extends GameMode {
             this._tools_container.addObject(this._submit_button);
             this._ll_menu.add_sub_menu_button(0, this._spec_button);
 
-            if (options[8] == true) {
+            if (options != null && options[8] == true) {
                 this._folder_button.label(this._puzzle.get_folder()); // set the actual one
                 this.addObject(this._folder_button);
             }
@@ -4722,6 +4729,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_start_curtain(show_curtain: boolean): void {
+        log.debug("TODO: set_start_curtain");
         // // Make sure the mission screen is ON TOP.
         // if (this._mission_container.contains(this._mission_screen)) {
         //     this._mission_container.removeObject(this._mission_screen);
@@ -4739,6 +4747,7 @@ export class PoseEditMode extends GameMode {
 		Prompt feed when celebrating about cleared puzzle
 	*/
     private facebook_prompt_feed(): void {
+        log.debug("TODO: facebook_prompt_feed");
         // let req: URLRequest = new URLRequest;
         //
         // req.url = Application.instance.get_url_base()
@@ -4751,6 +4760,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private go_to_strategy_guide(): void {
+        log.debug("TODO: go_to_strategy_guide");
         // let req: URLRequest = new URLRequest;
         // req.url = "http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles";
         //
@@ -4758,19 +4768,20 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_show_menu(show_menu: boolean): void {
+        log.debug("TODO: set_show_menu");
         // let m: GameObject = (<GameObject>Application.instance.get_application_gui("Menu"));
         // if (m) m.visible = show_menu;
     }
 
     private show_end_curtain(): void {
-        // this.set_show_menu(false);
-        // this.disable_tools(true);
-        // this._bubble_curtain.decay_sweep();
-        // for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //     this._poses[ii].set_show_total_energy(false);
-        //     this._poses[ii].clear_explosion();
-        // }
-        //
+        this.set_show_menu(false);
+        this.disable_tools(true);
+        this._bubble_curtain.decay_sweep();
+        for (let pose of this._poses) {
+            pose.set_show_total_energy(false);
+            pose.clear_explosion();
+        }
+
         // this.removeObject(this._mission_cleared);
         // this._mission_cleared.alpha = 0;
         // this._mission_cleared.visible = true;
@@ -4782,14 +4793,14 @@ export class PoseEditMode extends GameMode {
     }
 
     private hide_end_curtain(): void {
-        // for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //     this._poses[ii].set_show_total_energy(true);
-        //     this._poses[ii].clear_explosion();
-        // }
-        // this._bubble_curtain.stop_sweep();
+        for (let pose of this._poses) {
+            pose.set_show_total_energy(true);
+            pose.clear_explosion();
+        }
+        this._bubble_curtain.stop_sweep();
         // this._mission_cleared.set_animator(new GameAnimatorFader(1, 0, 0.3, true));
-        // this.disable_tools(false);
-        // this.set_show_menu(true);
+        this.disable_tools(false);
+        this.set_show_menu(true);
     }
 
     private trigger_ending(): void {
@@ -4928,6 +4939,10 @@ export class PoseEditMode extends GameMode {
     //         _this.transfer_to_puzzlemaker();
     //     }
     // }
+
+    private readonly _initialPuzzle: Puzzle;
+    private readonly _initialInitSeq: number[];
+    private readonly _initialPuzzleIsReset: boolean;
 
     private _background: Background;
 

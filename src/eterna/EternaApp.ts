@@ -9,6 +9,7 @@ import {Vienna} from "./folding/Vienna";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
+import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {BitmapManager} from "./util/BitmapManager";
 import {Fonts} from "./util/Fonts";
 
@@ -23,12 +24,16 @@ export class EternaApp extends FlashbangApp {
 
         Fonts.loadFonts()
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode());
+                this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                this._modeStack.unwindToMode(new PoseEditMode());
-                // this._modeStack.unwindToMode(new PoseTestMode());
+                const puzid = 4350940;
+                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
+                return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+            })
+            .then((puzzle) => {
+                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
             })
             .catch((err) => Eterna.onFatalError(err));
     }
