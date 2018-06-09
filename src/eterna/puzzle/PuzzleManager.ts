@@ -1,4 +1,5 @@
-﻿import {Eterna} from "../Eterna";
+﻿import * as log from "loglevel";
+import {Eterna} from "../Eterna";
 import {CSVParser} from "../util/CSVParser";
 import {Puzzle} from "./Puzzle";
 import {SolutionManager} from "./SolutionManager";
@@ -191,6 +192,7 @@ export class PuzzleManager {
             }
         }
 
+        log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
         return Eterna.client.get_puzzle(puznid, scriptid)
             .then((json: any) => {
                 let data: any = json['data'];
