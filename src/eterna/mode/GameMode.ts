@@ -1,16 +1,20 @@
+import {Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
-import {GameObject} from "../../flashbang/core/GameObject";
+import {Flashbang} from "../../flashbang/core/Flashbang";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Assert} from "../../flashbang/util/Assert";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 
 export abstract class GameMode extends AppMode {
-    protected constructor() {
-        super();
-        this._pose_fields_container = new GameObject();
-        this.addObject(this._pose_fields_container);
+    protected setup(): void {
+        super.setup();
+
+        this._pose_fields_container = new ContainerObject();
+        this.addObject(this._pose_fields_container, this.modeSprite);
     }
 
-    public get_pose(i: number): GameObject {
+    public get_pose(i: number): Pose2D {
         return this._poses[i];
     }
 
@@ -73,26 +77,23 @@ export abstract class GameMode extends AppMode {
     public register_setter_callbacks(): void {
     }
 
-    protected set_pose_fields(pose_fields: any[]): void {
-        throw new Error("TODO");
-        // let ii: number;
-        //
-        // if (this._pose_fields != null) {
-        //     for (ii = 0; ii < this._pose_fields.length; ii++) {
-        //         this._pose_fields_container.remove_object(this._pose_fields[ii]);
-        //     }
-        // }
-        //
-        // this._pose_fields = [];
-        // let poses: any[] = [];
-        //
-        // for (ii = 0; ii < pose_fields.length; ii++) {
-        //     this._pose_fields_container.add_object(pose_fields[ii]);
-        //     this._pose_fields.push(pose_fields[ii]);
-        //     poses.push(pose_fields[ii].get_pose());
-        // }
-        // this._poses = poses;
-        //
+    protected set_pose_fields(newPoseFields: PoseField[]): void {
+        if (this._pose_fields != null) {
+            for (let poseField of this._pose_fields) {
+                poseField.destroySelf();
+            }
+        }
+
+        this._pose_fields = [];
+        let poses: Pose2D[] = [];
+
+        for (let newPoseField of newPoseFields) {
+            this._pose_fields_container.addObject(newPoseField, this._pose_fields_container.container);
+            this._pose_fields.push(newPoseField);
+            poses.push(newPoseField.get_pose());
+        }
+        this._poses = poses;
+
         // let opt: GameObject = (<GameObject>Application.instance.get_application_gui("View options"));
         // if (opt != null) opt.load_options(this._poses, this);
     }
@@ -103,37 +104,38 @@ export abstract class GameMode extends AppMode {
     }
 
     protected set_pip(pip_mode: boolean): void {
-        throw new Error("TODO");
-        // this._is_pip_mode = pip_mode;
-        //
-        // if (pip_mode) {
-        //     let N: number = this._pose_fields.length;
-        //     for (let ii = 0; ii < N; ii++) {
-        //         this._pose_fields[ii].set_pos(new UDim(1.0 / N * ii, 0, 0, 0));
-        //         this._pose_fields[ii].set_size(new UDim(1.0 / N, 1, 0, 0));
-        //         this._pose_fields[ii].visible = true;
-        //     }
-        // } else {
-        //     for (let ii = 0; ii < this._pose_fields.length; ii++) {
-        //         if (ii == 0) {
-        //             this._pose_fields[ii].set_pos(new UDim(0, 0, 0, 0));
-        //             this._pose_fields[ii].set_size(new UDim(1, 1, 0, 0));
-        //             this._pose_fields[ii].visible = true;
-        //         } else {
-        //             this._pose_fields[ii].visible = false;
-        //         }
-        //
-        //     }
-        // }
-        //
-        // this.on_set_pip(pip_mode);
+        this._is_pip_mode = pip_mode;
+
+        if (pip_mode) {
+            let N: number = this._pose_fields.length;
+            for (let ii = 0; ii < N; ii++) {
+                let poseField = this._pose_fields[ii];
+                poseField.display.position = new Point(Flashbang.stageWidth / N * ii, 0);
+                // poseField.set_size(new UDim(1.0 / N, 1, 0, 0));
+                poseField.display.visible = true;
+            }
+        } else {
+            for (let ii = 0; ii < this._pose_fields.length; ii++) {
+                let poseField = this._pose_fields[ii];
+                if (ii == 0) {
+                    poseField.display.position = new Point(0, 0);
+                    // poseField.set_size(new UDim(1, 1, 0, 0));
+                    poseField.display.visible = true;
+                } else {
+                    poseField.display.visible = false;
+                }
+
+            }
+        }
+
+        this.on_set_pip(pip_mode);
     }
 
     protected on_set_pip(pip_mode: boolean): void {
     }
 
     protected take_picture(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._pic_button.set_click_callback(null);
         // this._pic_button.alpha = 1.0;
         // //This could take awhile, any way to redraw here?
@@ -162,7 +164,7 @@ export abstract class GameMode extends AppMode {
     }
 
     protected _is_screenshot_supported: boolean = false;
-    protected _pose_fields_container: GameObject;
+    protected _pose_fields_container: ContainerObject;
     protected _pose_fields: PoseField[] = [];
     protected _poses: Pose2D[] = [];
     protected _is_pip_mode: boolean = false;
