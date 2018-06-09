@@ -109,50 +109,63 @@ export class Vienna extends Folder {
             return result.energy * 100;
         }
 
-        let ret: FullEvalResult = this._lib.FullEval(temp,
-            EPars.sequence_array_to_string(seq),
-            EPars.pairs_array_to_parenthesis(pairs));
+        let ret: FullEvalResult = null;
 
-        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
-        if (cut >= 0 && nodes != null && nodes[0] != -2) {
-            // we just scored a duplex that wasn't one, so we have to redo it properly
-            let seqA: number[] = seq.slice(0, cut);
-            let pairsA: number[] = pairs.slice(0, cut);
-            let nodesA: number[] = [];
-            let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
+        try {
+            ret = this._lib.FullEval(temp,
+                EPars.sequence_array_to_string(seq),
+                EPars.pairs_array_to_parenthesis(pairs));
 
-            let seqB: number[] = seq.slice(cut + 1);
-            let pairsB: number[] = pairs.slice(cut + 1);
-            for (ii = 0; ii < pairsB.length; ii++) {
-                if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+            let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+            if (cut >= 0 && nodes != null && nodes[0] != -2) {
+                // we just scored a duplex that wasn't one, so we have to redo it properly
+                let seqA: number[] = seq.slice(0, cut);
+                let pairsA: number[] = pairs.slice(0, cut);
+                let nodesA: number[] = [];
+                let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
+
+                let seqB: number[] = seq.slice(cut + 1);
+                let pairsB: number[] = pairs.slice(cut + 1);
+                for (ii = 0; ii < pairsB.length; ii++) {
+                    if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+                }
+                let nodesB: number[] = [];
+                let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
+
+                if (nodesA[0] != -1 || nodesB[0] != -1) {
+                    throw new Error("Something went terribly wrong in score_structures()");
+                }
+
+                nodes.splice(0); // make empty
+                for (ii = 0; ii < nodesA.length; ii++) nodes[ii] = nodesA[ii];
+                nodes[1] += nodesB[1]; // combine the free energies of the external loops
+                for (ii = 2; ii < nodesB.length; ii += 2) {
+                    nodes.push(nodesB[ii] + cut + 1);
+                    nodes.push(nodesB[ii + 1]);
+                }
+
+                ret.energy = (retA + retB) / 100;
             }
-            let nodesB: number[] = [];
-            let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
-            if (nodesA[0] != -1 || nodesB[0] != -1) {
-                throw new Error("Something went terribly wrong in score_structures()");
+            let energy: number = ret.energy * 100;
+            if (nodes != null) {
+                // TODO: do not store this deletable object in the cache!
+                this.put_cache(key, ret);
+            } else {
+                ret.delete();
             }
 
-            nodes.splice(0); // make empty
-            for (ii = 0; ii < nodesA.length; ii++) nodes[ii] = nodesA[ii];
-            nodes[1] += nodesB[1]; // combine the free energies of the external loops
-            for (ii = 2; ii < nodesB.length; ii += 2) {
-                nodes.push(nodesB[ii] + cut + 1);
-                nodes.push(nodesB[ii + 1]);
-            }
+            return energy;
 
-            ret.energy = (retA + retB) / 100;
+        } catch (e) {
+            log.error("FullEval error", e);
+            return 0;
+
+        } finally {
+            if (ret != null) {
+                ret.delete();
+            }
         }
-
-        let energy: number = ret.energy * 100;
-        if (nodes != null) {
-            // TODO: do not store this deletable object in the cache!
-            this.put_cache(key, ret);
-        } else {
-            ret.delete();
-        }
-
-        return energy;
     }
 
     /*override*/
@@ -633,7 +646,7 @@ export class Vienna extends Folder {
         let result: FullFoldResult;
 
         try {
-            result = this._lib.FullFoldTemperature(temp, seqStr, structStr);
+            result = this._lib.FullFoldTemperature(temp, seqStr, structStr || "");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
