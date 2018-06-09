@@ -231,10 +231,11 @@ export class Vienna extends Folder {
             site_groups.push(current_group);
         }
 
-        if (site_groups.length == 2)
+        if (site_groups.length == 2) {
             pairs = this.fold_sequence_alch_with_binding_site(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
-        else
+        } else {
             pairs = this.fold_sequence_alch_with_binding_site_old(seq, target_pairs, binding_site, bonus);
+        }
 
         this.put_cache(key, pairs.slice());
         return pairs;
@@ -449,14 +450,14 @@ export class Vienna extends Folder {
                     }
 
                     switch (p - i1 - 1) {
-                        case 0: /* adjacent helices *this./* adjacent helices */
-                        case 1: /* 1 unpaired base between helices *this./* 1 unpaired base between helices */
-                            dang = (dangles == 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
-                            energy += dang;
-                            break;
+                    case 0: /* adjacent helices */
+                    case 1: /* 1 unpaired base between helices */
+                        dang = (dangles == 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
+                        energy += dang;
+                        break;
 
-                        default: /* many unpaired base between helices *this./* many unpaired base between helices */
-                            energy += dang5 + dang3;
+                    default: /* many unpaired base between helices */
+                        energy += dang5 + dang3;
 
                     }
                     type = tt;
@@ -537,18 +538,23 @@ export class Vienna extends Folder {
 
             if (ns == 1) {
                 if (nl == 1)                     // 1x1 loop
+                {
                     return EPars.get_int11(type, type_2, si1, sj1);
+                }
 
                 if (nl == 2) {                   // 2x1 loop
-                    if (n1 == 1)
+                    if (n1 == 1) {
                         loop_score = EPars.get_int21(type, type_2, si1, sq1, sj1);
-                    else
+                    } else {
                         loop_score = EPars.get_int21(type_2, type, sq1, si1, sp1);
+                    }
 
                     return loop_score;
                 }
             } else if (n1 == 2 && n2 == 2)         // 2x2 loop
+            {
                 return EPars.get_int22(type, type_2, si1, sp1, sq1, sj1);
+            }
 
             {
                 /* generic interior loop (no else here!)*/
@@ -564,9 +570,7 @@ export class Vienna extends Folder {
             }
         }
 
-
         return loop_score;
-
 
     }
 
@@ -599,8 +603,9 @@ export class Vienna extends Folder {
         }
 
         if (size == 3) {
-            if (type > 2)
+            if (type > 2) {
                 hairpin_score += EPars.TERM_AU;
+            }
 
         } else {
             hairpin_score += EPars.hairpin_mismatch(type, si1, sj1);
@@ -614,27 +619,27 @@ export class Vienna extends Folder {
         let seqStr = "";
         for (let value of seq) {
             switch (value) {
-                case EPars.RNABASE_ADENINE:
-                    seqStr += "A";
-                    break;
-                case EPars.RNABASE_CYTOSINE:
-                    seqStr += "C";
-                    break;
-                case EPars.RNABASE_GUANINE:
-                    seqStr += "G";
-                    break;
-                case EPars.RNABASE_URACIL:
-                    seqStr += "U";
-                    break;
-                case EPars.RNABASE_CUT:
-                    if (allowCut) {
-                        seqStr += "&";
-                    } else {
-                        throw new Error(`Bad nucleotide '${value}`);
-                    }
-                    break;
-                default:
+            case EPars.RNABASE_ADENINE:
+                seqStr += "A";
+                break;
+            case EPars.RNABASE_CYTOSINE:
+                seqStr += "C";
+                break;
+            case EPars.RNABASE_GUANINE:
+                seqStr += "G";
+                break;
+            case EPars.RNABASE_URACIL:
+                seqStr += "U";
+                break;
+            case EPars.RNABASE_CUT:
+                if (allowCut) {
+                    seqStr += "&";
+                } else {
                     throw new Error(`Bad nucleotide '${value}`);
+                }
+                break;
+            default:
+                throw new Error(`Bad nucleotide '${value}`);
             }
         }
 
@@ -733,7 +738,6 @@ export class Vienna extends Folder {
         target_tree.score_tree(seq, this);
         let target_score: number = target_tree.get_total_score();
 
-
         let native_bound: boolean = true;
         let target_bound: boolean = true;
 
@@ -769,10 +773,12 @@ export class Vienna extends Folder {
         if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
         if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
         let ii: number;
-        for (ii = 1; ii < groups[0].length - 1; ii++)
+        for (ii = 1; ii < groups[0].length - 1; ii++) {
             if (pairs[groups[0][ii]] != -1) return false;
-        for (ii = 1; ii < groups[1].length - 1; ii++)
+        }
+        for (ii = 1; ii < groups[1].length - 1; ii++) {
             if (pairs[groups[1][ii]] != -1) return false;
+        }
 
         return true;
     }
