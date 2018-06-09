@@ -16,7 +16,7 @@ export class PoseTestMode extends AppMode {
 
         this.addObject(new Background(), this.modeSprite);
 
-        this._pose = this.createPose(PoseTestMode.NANDOS_ZIPPERS);
+        this._pose = this.createPose(PoseTestMode.PUZZLE_4350940);
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
 
