@@ -331,7 +331,7 @@ export class PoseEditMode extends GameMode {
             (Flashbang.stageWidth - this._submitting_text.width) * 0.5,
             (Flashbang.stageHeight - this._submitting_text.height) * 0.5);
 
-        this._constraint_boxes = [];
+        // this._constraint_boxes = [];
         this._constraints_container = new ContainerObject();
         /// Constraints should be on top of curtain
         this.addObject(this._constraints_container, this.modeSprite);
@@ -819,7 +819,7 @@ export class PoseEditMode extends GameMode {
         }
 
         this._constraints_container.removeAllObjects();
-        this._constraint_boxes = [];
+        // this._constraint_boxes = [];
         this._unstable_index = -1;
 
         // if (num_constraints > 0) {
@@ -4079,9 +4079,9 @@ export class PoseEditMode extends GameMode {
         }
 
         let was_satisfied: boolean = true;
-        for (let ii = 0; ii < this._puzzle.get_constraints().length; ii += 2) {
-            was_satisfied = was_satisfied && this._constraint_boxes[ii / 2].is_satisfied();
-        }
+        // for (let ii = 0; ii < this._puzzle.get_constraints().length; ii += 2) {
+        //     was_satisfied = was_satisfied && this._constraint_boxes[ii / 2].is_satisfied();
+        // }
 
         let constraints_satisfied: boolean = this.check_constraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -5013,9 +5013,9 @@ export class PoseEditMode extends GameMode {
     // private _paste_field: InputField;
     /// constraints && scoring display
     private _constraints_container: ContainerObject;
-    private _constraint_boxes: any[];
-    private _constraint_shape_boxes: any[];
-    private _constraint_antishape_boxes: any[];
+    // private _constraint_boxes: ConstraintBox[];
+    // private _constraint_shape_boxes: ConstraintBox[];
+    // private _constraint_antishape_boxes: ConstraintBox[];
     private _unstable_index: number;
     private _constraints_offset: number;
     /// Spec related
