@@ -137,13 +137,14 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string
     char* constraints = InitConstraints(string, structure);
 
     double energy = fold(string, constraints);
-    strcpy(structure, constraints);
-    free_arrays();
-    free(constraints);
 
     FullFoldResult* result = new FullFoldResult();
     result->mfe = energy;
-    result->structure = structure;
+    result->structure = constraints;
+
+    free_arrays();
+    free(constraints);
+
     return result;
 }
 
@@ -158,13 +159,14 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
 
     temperature = temperature_in;
     double energy = fold(string, constraints);
-    strcpy(structure, constraints);
-    free_arrays();
-    free(constraints);
 
     FullFoldResult* result = new FullFoldResult();
     result->mfe = energy;
-    result->structure = structure;
+    result->structure = constraints;
+
+    free_arrays();
+    free(constraints);
+
     return result;
 }
 
@@ -244,11 +246,10 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, const std
     char* constraints = InitConstraints(string, structure);
 
     double energy = fold_with_binding_site(string, constraints,switch_bp_i, switch_bp_p, switch_bp_j, switch_bp_q, switch_bp_bonus);
-    strcpy(structure, constraints);
 
     FullFoldResult* result = new FullFoldResult();
     result->mfe = energy;
-    result->structure = structure;
+    result->structure = constraints;
 
     free_arrays();
     free(constraints);
@@ -265,7 +266,6 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
 
     char* constraints = InitConstraints(string, structure);
 
-    if(0) fprintf(stderr,"ViennaRNA : string: %s", string);
     char* cut = strchr(string, '&');
     if (cut) {
         *cut = '\0';
@@ -287,6 +287,8 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
 
     double energy = cofold(string, constraints);
     cut_point--; // back to 0-based
+
+    fprintf(stderr, "Tim: double-check suspicious string manipulation (%s:%d)\n", __FILE__, __LINE__);
     strcpy(structure, constraints);
     structure[cut_point] = 0;
     strcat(structure, "&");
@@ -313,7 +315,6 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
 
     char* constraints = InitConstraints(string, structure);
 
-    if(0) fprintf(stderr,"ViennaRNA : string: %s", string);
     char* cut = strchr(string, '&');
     if (cut) {
         *cut = '\0';
@@ -334,6 +335,8 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
 
     double energy = cofold_with_binding_site(string, constraints,switch_bp_i,  switch_bp_p, switch_bp_j, switch_bp_q, switch_bp_bonus);
     cut_point--; // back to 0-based
+
+    fprintf(stderr, "Tim: double-check suspicious string manipulation (%s:%d)\n", __FILE__, __LINE__);
     strcpy(structure, constraints);
     structure[cut_point] = 0;
     strcat(structure, "&");

@@ -21,6 +21,18 @@
         fullFoldResult.delete();
     }
 
+    function FullFoldTemperature (name, seq, struct, temp) {
+        console.log(`FullFoldTemperature ${name}...`);
+
+        let t0 = performance.now();
+        let result = vienna.FullFoldTemperature(temp, seq, struct);
+        let t1 = performance.now();
+
+        console.log(`${name} complete! (${t1 - t0}ms)`);
+
+        result.delete();
+    }
+
     // If noInitialRun is _false_, main() will be automatically called after
     // our promise resolves. Instead, we call it manually as the first statement
     // in the callback.
@@ -40,8 +52,7 @@
 
         FullFold('Miniloop', MINILOOP_SEQ, MINILOOP_STRUCT);
         FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
-        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
-        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+        FullFold('EmptyStructure', "AAAAAAAAAAAAAA", "", 37);
         console.log('Done!');
     });
 </script>
