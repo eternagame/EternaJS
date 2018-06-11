@@ -1,3 +1,5 @@
+#ifdef __EMSCRIPTEN__
+
 #include <emscripten.h>
 #include <emscripten/bind.h>
 
@@ -34,3 +36,19 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 }
+
+#else
+
+#include <iostream>
+#include "FullFold.h"
+
+int main () {
+    std::cout << "Hello World!";
+    const std::string SEQ = "AAAAAAAAAAAAAA";
+    const std::string STRUCT = "";
+    FullFoldResult* result = FullFoldDefault(SEQ, "");
+
+    delete result;
+}
+
+#endif
