@@ -83,7 +83,7 @@ static char* InitConstraints (const char* string, const char* structure) {
         if(strlen(structure) != strlen(string) * 2) {
             estimate_mode = 0;
             if(strlen(structure) != strlen(string)) {
-                fprintf(stderr,"ViennaRNA : Wrong constraint length %d %d", strlen(structure), strlen(string));
+                fprintf(stderr,"ViennaRNA : Wrong constraint length %d %d\n", strlen(structure), strlen(string));
                 fold_constrained = 0;
             } else {
                 strcpy(constraints, structure);
@@ -102,7 +102,7 @@ static char* InitConstraints (const char* string, const char* structure) {
 
                 if(num < 0 || num > 9) {
                     fold_constrained = 0;
-                    fprintf(stderr,"ViennaRNA : Wrong constraint weight");
+                    fprintf(stderr,"ViennaRNA : Wrong constraint weight\n");
                     break;
                 }
 
@@ -113,7 +113,7 @@ static char* InitConstraints (const char* string, const char* structure) {
                 } else if(structure[2*ii] == 'U') {
                     multiplier = 1;
                 } else {
-                    fprintf(stderr,"ViennaRNA : unrecognized constraint");
+                    fprintf(stderr,"ViennaRNA : unrecognized constraint\n");
                     fold_constrained = 0;
                     break;
                 }
