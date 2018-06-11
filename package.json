@@ -38,7 +38,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.0.0-beta.49",
     "@babel/preset-env": "^7.0.0-beta.49",
     "@babel/preset-typescript": "^7.0.0-beta.49",
-    "@types/jest": "^23.0.0",
+    "@types/jest": "^23.0.1",
     "@types/js-cookie": "^2.1.0",
     "@types/lodash": "^4.14.109",
     "@types/loglevel": "^1.5.3",
