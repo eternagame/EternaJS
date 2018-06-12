@@ -36,13 +36,6 @@ export class Pose2D extends ContainerObject implements Updatable {
     protected added() {
         super.added();
 
-        if (!Pose2D._sound_initialized) {
-            Pose2D._sound_initialized = true;
-            // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_RG, "SoundRG");
-            // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_RB, "SoundRB");
-            // SoundManager.instance.add_sound_by_name(Pose2D.GAMESOUND_YB, "SoundYB");
-        }
-
         this._score_node_highlight = new GameObject;
         this.addObject(this._score_node_highlight);
 
@@ -3442,12 +3435,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 	 *	- Highlight Nucleotides: Brighten glow around the nucleotide.
 	 */
     private _all_new_highlights: any[] = [];
-
-    private static _sound_initialized: boolean;
-
-    private static readonly GAMESOUND_RG: string = "RG";
-    private static readonly GAMESOUND_RB: string = "RB";
-    private static readonly GAMESOUND_YB: string = "YB";
 
 }
 
