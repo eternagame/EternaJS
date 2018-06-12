@@ -159,8 +159,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.paint_feedback();
 
         // print feedback score
-        for (let ii: number = 0; ii < this._feedback_objs.length; ii++)
+        for (let ii: number = 0; ii < this._feedback_objs.length; ii++) {
             this.removeObject(this._feedback_objs[ii]);
+        }
 
         this._feedback_objs_num = dat.length;
         this._feedback_objs_start_ind = start_index;
@@ -169,8 +170,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public paint_feedback(): void {
-        if (!this._exp_painter)
+        if (!this._exp_painter) {
             return;
+        }
 
         this._exp_painter.set_continuous(this._exp_continuous);
         this._exp_painter.set_extended_scale(this._exp_extended_scale);
@@ -330,8 +332,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                 need_update = true;
             }
         }
-        if (need_update)
+        if (need_update) {
             this.call_track_moves_callback(num_mut / div, muts);
+        }
 
         if (need_update || this._lock_updated || this._binding_site_updated || this._design_struct_updated) {
             this.check_pairs();
@@ -359,8 +362,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public paste_sequence(sequence: number[]): void {
-        if (sequence == null)
+        if (sequence == null) {
             return;
+        }
 
         let num_mut: number = 0;
         let muts: any[] = [];
@@ -491,8 +495,11 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public toggle_black_mark(closest_index: number): void {
         let index: number = this._tracked_indices.indexOf(closest_index);
-        if (index == -1) this.black_mark(closest_index);
-        else this.remove_black_mark(closest_index);
+        if (index == -1) {
+            this.black_mark(closest_index);
+        } else {
+            this.remove_black_mark(closest_index);
+        }
     }
 
     public black_mark(closest_index: number): void {
@@ -659,8 +666,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get_puzzle_locks(): any[] {
-        if (this._locks != null)
+        if (this._locks != null) {
             return this._locks.slice();
+        }
 
         let temp: any[] = [];
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
@@ -699,8 +707,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get_forced_struct(): any[] {
-        if (this._forced_struct != null)
+        if (this._forced_struct != null) {
             return this._forced_struct.slice();
+        }
 
         let temp: any[] = [];
         for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
@@ -761,8 +770,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                 curr = _stat;
             }
         }
-        if ((elems.length % 2) == 1)
+        if ((elems.length % 2) == 1) {
             elems.push(this.get_full_sequence_length() - 1);
+        }
 
         return elems;
     }
@@ -1117,8 +1127,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         // If any of the nucleotides are part of a stack, highlight its pair as well.
         let addition: any[] = [];
         for (let i: number = 0; i < nucleotides.length; ++i) {
-            if (this._pairs[nucleotides[i]] != -1)
+            if (this._pairs[nucleotides[i]] != -1) {
                 addition.push(this._pairs[nucleotides[i]]);
+            }
         }
         nucleotides = nucleotides.concat(addition);
 
@@ -1137,8 +1148,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public on_praise_seq(seq_start: number, seq_end: number): void {
         for (let ii: number = seq_start; ii <= seq_end; ii++) {
-            if (ii >= 0 && ii < this.get_full_sequence_length())
+            if (ii >= 0 && ii < this.get_full_sequence_length()) {
                 this._bases[ii].start_sparking();
+            }
         }
     }
 
@@ -1241,8 +1253,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public call_pose_edit_callback(): void {
-        if (this._pose_edit_callback != null)
+        if (this._pose_edit_callback != null) {
             this._pose_edit_callback();
+        }
     }
 
     public set_track_moves_callback(cb: Function): void {
@@ -1250,8 +1263,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public call_track_moves_callback(count: number, moves: any[]): void {
-        if (this._track_moves_callback != null)
+        if (this._track_moves_callback != null) {
             this._track_moves_callback(count, moves);
+        }
     }
 
     public set_add_base_callback(cb: Function): void {
@@ -1259,8 +1273,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public call_add_base_callback(parenthesis: string = null, mode: number = -1, index: number = -1): void {
-        if (this._add_base_callback != null)
+        if (this._add_base_callback != null) {
             this._add_base_callback(parenthesis, mode, index);
+        }
     }
 
     public set_start_mousedown_callback(cb: Function): void {
@@ -1343,10 +1358,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_molecular_structure(pairs: any[]): void {
-        if (pairs != null)
+        if (pairs != null) {
             this._molecule_target_pairs = pairs.slice();
-        else
+        } else {
             this._molecule_target_pairs = null;
+        }
     }
 
     public get_molecular_structure(): any[] {
@@ -1943,8 +1959,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             this._redraw = false;
 
-            if (this._feedback_objs.length > 0)
+            if (this._feedback_objs.length > 0) {
                 this.update_print_feedback(false);
+            }
         }
 
         // if (this._mol_canvas.visible) {
@@ -2045,8 +2062,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         // highlights
-        if (this._unstable_highlight_box.get_queue() == null)
+        if (this._unstable_highlight_box.get_queue() == null) {
             this.clear_unstable_highlight();
+        }
 
         if (!this._offset_translating && this._base_to_x == null && this._unstable_highlight_box.get_queue() != null) {
             if (this._unstable_highlight_box.is_on() == true) {
@@ -2072,8 +2090,9 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (this._user_defined_highlight_box.get_queue() == null)
+        if (this._user_defined_highlight_box.get_queue() == null) {
             this.clear_user_defined_highlight();
+        }
 
         if (!this._offset_translating && this._base_to_x == null && this._user_defined_highlight_box.get_queue() != null) {
             if (this._user_defined_highlight_box.is_on() == true) {
@@ -2790,18 +2809,18 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private update_design_highlight(): void {
         let elems: number[] = this.get_design_segments();
-        if (elems.length == 0)
+        if (elems.length == 0) {
             this._selection_highlight_box.clear();
-        else {
+        } else {
             this._selection_highlight_box.set_highlight(HighlightType.DESIGN, elems);
             this._selection_highlight_box.set_on(false);
         }
     }
 
     private update_shift_highlight(): void {
-        if (this._shift_start < 0)
+        if (this._shift_start < 0) {
             this._shift_highlight_box.clear();
-        else {
+        } else {
             this._shift_highlight_box.set_highlight(HighlightType.SHIFT, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
             this._shift_highlight_box.set_on(false);
         }
