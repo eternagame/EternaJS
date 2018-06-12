@@ -60,10 +60,10 @@ export class PoseEditMode extends GameMode {
     }
 
     protected setup(): void {
-        super.setup();
-
         this._background = new Background();
         this.addObject(this._background, this.modeSprite);
+
+        super.setup();
 
         // this._mission_container = Application.instance.get_front_object_container();
         // if (this._mission_container == null) this._mission_container = this;
@@ -77,6 +77,7 @@ export class PoseEditMode extends GameMode {
         this._current_target_index = 0;
 
         this._tools_container = new GamePanel(GamePanelType.INVISIBLE);
+        this.addObject(this._tools_container, this.modeSprite);
         new UDim(0, 1, 0, -104).setPos(this._tools_container.display);
 
         this._undo_button = new GameButton()
@@ -320,6 +321,7 @@ export class PoseEditMode extends GameMode {
         this._constraints_bottom = 0.0;
 
         this._bubble_curtain = new BubbleSweep(800);
+        this._bubble_curtain.display.visible = false;
         this.addObject(this._bubble_curtain, this.modeSprite);
 
         // this._mission_cleared = new MissionCleared();
@@ -716,7 +718,6 @@ export class PoseEditMode extends GameMode {
             this._tools_container.addObject(this._freeze_button);
         }
 
-        this.addObject(this._tools_container);
         this.set_toolbar_autohide(options != null && options[11] == true);
 
         if (this._toggle_bar != null) {
@@ -4738,6 +4739,10 @@ export class PoseEditMode extends GameMode {
         // this._constraints_container.mouseEnabled = !show_curtain;
         // this._constraints_container.mouseChildren = !show_curtain;
         // this._mission_screen.visible = show_curtain;
+
+        if (show_curtain) {
+            this.on_click_start_curtain();
+        }
     }
 
     private setup_end_curtain(cleared: boolean): void {
