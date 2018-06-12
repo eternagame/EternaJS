@@ -9,7 +9,7 @@ export class Fonts {
 
     public static readonly STDFONT_LIGHT: string = "OpenSans-Light";
     public static readonly STDFONT_REGULAR: string = "OpenSans-Regular";
-    public static readonly STDFONT_MEDIUM: string = "OpenSans-Semibold";
+    public static readonly STDFONT_MEDIUM: string = "OpenSans-SemiBold";
     public static readonly STDFONT_BOLD: string = "OpenSans-Bold";
 
     public static loadFonts(): Promise<any> {
