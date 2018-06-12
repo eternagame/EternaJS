@@ -49,11 +49,11 @@ export class NucleotidePalette extends ContainerObject {
         this._palette_display = new Sprite(this._palette_image);
         this.container.addChild(this._palette_display);
 
-        this._num_au = Fonts.arial("", 12).bold().build();
+        this._num_au = Fonts.arial("", 12).color(0xffffff).bold().build();
         this.container.addChild(this._num_au);
-        this._num_ug = Fonts.arial("", 12).bold().build();
+        this._num_ug = Fonts.arial("", 12).color(0xffffff).bold().build();
         this.container.addChild(this._num_ug);
-        this._num_gc = Fonts.arial("", 12).bold().build();
+        this._num_gc = Fonts.arial("", 12).color(0xffffff).bold().build();
         this.container.addChild(this._num_gc);
 
         this._targets = new Array(7);
