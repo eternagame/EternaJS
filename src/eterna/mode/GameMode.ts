@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
@@ -107,6 +108,7 @@ export abstract class GameMode extends AppMode {
         this._is_pip_mode = pip_mode;
 
         if (pip_mode) {
+            log.debug("TODO: set_pip");
             let N: number = this._pose_fields.length;
             for (let ii = 0; ii < N; ii++) {
                 let poseField = this._pose_fields[ii];
@@ -118,8 +120,7 @@ export abstract class GameMode extends AppMode {
             for (let ii = 0; ii < this._pose_fields.length; ii++) {
                 let poseField = this._pose_fields[ii];
                 if (ii == 0) {
-                    poseField.display.position = new Point(0, 0);
-                    // poseField.set_size(new UDim(1, 1, 0, 0));
+                    poseField.display.position = new Point(Flashbang.stageWidth * 0.5, Flashbang.stageHeight * 0.5);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;
