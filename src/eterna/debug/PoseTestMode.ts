@@ -31,7 +31,7 @@ export class PoseTestMode extends AppMode {
         // button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
         // this.addObject(button, this.modeSprite);
 
-        let scoreDisplay = new EnergyScoreDisplay();
+        let scoreDisplay = new EnergyScoreDisplay(111, 40);
         scoreDisplay.set_energy_text("Total", "5.2 kcal");
         scoreDisplay.position = new Point(17, 118);
         this.modeSprite.addChild(scoreDisplay);

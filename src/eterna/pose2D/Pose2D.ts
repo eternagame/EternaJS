@@ -1,22 +1,26 @@
 import * as log from "loglevel";
-import {Graphics, Point, Rectangle, Texture} from "pixi.js";
+import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {Application} from "../Application";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
+import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
+import {Utility} from "../util/Utility";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
+import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
 import {PoseUtil} from "./PoseUtil";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
-import {ScoreDisplayNode} from "./ScoreDisplayNode";
+import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
 
 export class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -39,17 +43,14 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._score_node_highlight = new GameObject;
         this.addObject(this._score_node_highlight);
 
-        // this._primary_score_energy_display = new EnergyScoreDisplay;
-        // // TODO FINALIZE POSITION
-        // this._primary_score_energy_display.set_pos(new UDim(0, 0, 17, 118));
-        // this._primary_score_energy_display.set_size(new UDim(0, 0, 111, 40));
-        // this.addObject(this._primary_score_energy_display);
-        //
-        // this._secondary_score_energy_display = new EnergyScoreDisplay;
-        // this._secondary_score_energy_display.set_pos(new UDim(0, 0, 17 + 119, 118));
-        // this._secondary_score_energy_display.set_size(new UDim(0, 0, 111, 40));
-        // this._secondary_score_energy_display.visible = false;
-        // this.addObject(this._secondary_score_energy_display);
+        this._primary_score_energy_display = new EnergyScoreDisplay(111, 40);
+        this._primary_score_energy_display.position = new Point(17, 118);
+        this.container.addChild(this._primary_score_energy_display);
+
+        this._secondary_score_energy_display = new EnergyScoreDisplay(111, 40);
+        this._secondary_score_energy_display.position = new Point(17 + 119, 118);
+        this._secondary_score_energy_display.visible = false;
+        this.container.addChild(this._secondary_score_energy_display);
 
         // this._canvas = new Bitmap;
         // this.addChild(this._canvas);
@@ -89,31 +90,31 @@ export class Pose2D extends ContainerObject implements Updatable {
         // this.addEventListener(MouseEvent.MOUSE_DOWN, this.call_start_mousedown_callback);
         // this.addEventListener(MouseEvent.ROLL_OUT, this.on_pose_mouse_out);
         //
-        // if (!this._editable) {
-        //     this._current_color = -1;
-        // }
-        //
-        // this._aux_info_canvas = new GameObject();
-        // this._aux_info_canvas.visible = false;
-        // this.addObject(this._aux_info_canvas);
-        //
-        // this._aux_textballoon = new TextBalloon("", 0x0, 0.9);
-        // this._aux_textballoon.visible = false;
-        // this._aux_info_canvas.addObject(this._aux_textballoon);
-        //
-        // this._strand_label = new TextBalloon("", 0x0, 0.8);
-        // this._strand_label.visible = false;
-        // this.addObject(this._strand_label);
+        if (!this._editable) {
+            this._current_color = -1;
+        }
+
+        this._aux_info_canvas = new Container();
+        this._aux_info_canvas.visible = false;
+        this.container.addChild(this._aux_info_canvas);
+
+        this._aux_textballoon = new TextBalloon("", 0x0, 0.9);
+        this._aux_textballoon.display.visible = false;
+        this.addObject(this._aux_textballoon, this._aux_info_canvas);
+
+        this._strand_label = new TextBalloon("", 0x0, 0.8);
+        this._strand_label.display.visible = false;
+        this.addObject(this._strand_label, this._aux_info_canvas);
     }
 
-    // public get_primary_score_display(): EnergyScoreDisplay {
-    //     return this._primary_score_energy_display;
-    // }
-    //
-    // public get_secondary_score_display(): EnergyScoreDisplay {
-    //     return this._secondary_score_energy_display;
-    // }
-    //
+    public get_primary_score_display(): EnergyScoreDisplay {
+        return this._primary_score_energy_display;
+    }
+
+    public get_secondary_score_display(): EnergyScoreDisplay {
+        return this._secondary_score_energy_display;
+    }
+
     // public add_anchored_object(obj: RNAAnchorObject): void {
     //     this._anchored_objects.push(obj);
     // }
@@ -134,14 +135,6 @@ export class Pose2D extends ContainerObject implements Updatable {
     public is_folding(): boolean {
         return (this._last_sampled_time - this._fold_start_time < this._fold_duration);
     }
-
-    // public set_primary_energy_score_location(pos: UDim): void {
-    //     this._primary_score_energy_display.set_pos(pos);
-    // }
-    //
-    // public set_secondary_energy_score_location(pos: UDim): void {
-    //     this._secondary_score_energy_display.set_pos(pos);
-    // }
 
     public visualize_feedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
         // coloring
@@ -228,10 +221,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public compute_default_zoom_level(): number {
-
         let n: number = this.get_full_sequence_length();
-        let xarray: any[] = new Array(n);
-        let yarray: any[] = new Array(n);
+        let xarray: number[] = new Array(n);
+        let yarray: number[] = new Array(n);
 
         let rna_coords: RNALayout;
         rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
@@ -2225,14 +2217,14 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_show_total_energy(show: boolean): void {
-        // this._show_total_energy = show;
-        // this._primary_score_energy_display.visible = (show && this._score_folder != null);
-        // this._secondary_score_energy_display.visible = (show && this._score_folder != null);
+        this._show_total_energy = show;
+        this._primary_score_energy_display.visible = (show && this._score_folder != null);
+        this._secondary_score_energy_display.visible = (show && this._score_folder != null);
     }
 
     public set_score_visualization(folder: Folder): void {
-        // this._score_folder = folder;
-        // this.set_show_total_energy(this._show_total_energy);
+        this._score_folder = folder;
+        this.set_show_total_energy(this._show_total_energy);
     }
 
     public base_shift_with_command(command: number, index: number): void {
@@ -2446,8 +2438,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         let x_mid: number = 0;
         let y_mid: number = 0;
 
-        let xarray: any[] = new Array(n);
-        let yarray: any[] = new Array(n);
+        let xarray: number[] = new Array(n);
+        let yarray: number[] = new Array(n);
 
         let rna_drawer: RNALayout;
 
@@ -2469,7 +2461,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         rna_drawer.get_coords(xarray, yarray);
 
         if (this._desired_angle == 90) {
-            let tmp: any[] = xarray;
+            let tmp = xarray;
             xarray = yarray;
             yarray = tmp;
         }
@@ -2819,7 +2811,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private draw_energy_highlight(energy: GameObject): void {
+    private draw_energy_highlight(energy: Sprite): void {
+        log.debug("TODO: draw_energy_highlight");
         // if (!this._highlight_energy_text)
         //     return;
         //
@@ -2846,7 +2839,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         // this._energy_highlights.push(hl);
     }
 
-    private update_energy_highlight(energy: GameObject, idx: number, vis: boolean): void {
+    private update_energy_highlight(energy: Sprite, idx: number, vis: boolean): void {
+        log.debug("TODO: update_energy_highlight");
         // if (idx >= this._energy_highlights.length) {
         //     this.draw_energy_highlight(energy);
         //     return;
@@ -2883,6 +2877,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private render_aux_info(): void {
+        log.debug("TODO: render_aux_info");
         // this._aux_info_canvas.graphics.clear();
         //
         // if (!this._display_aux_info)
@@ -2917,7 +2912,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private check_pairs(): void {
-        let full_seq: any[] = this.get_full_sequence();
+        let full_seq: number[] = this.get_full_sequence();
 
         for (let ii: number = 0; ii < this._pairs.length; ii++) {
             if (this._pairs[ii] >= 0 && this.is_pair_satisfied(ii, this._pairs[ii])) {
@@ -2942,6 +2937,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private update_score_node_visualization(): void {
+        log.debug("TODO: update_score_node_visualization");
         // if (this._score_nodes == null) {
         //     return;
         // }
@@ -2956,7 +2952,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     if (this._score_node_index >= 0 && this._score_nodes[this._score_node_index] != null) {
         //         this._score_node_highlight.graphics.lineStyle(0, 0, 0);
         //         this._score_node_highlight.graphics.beginFill(0xFFFFFF, 0.22);
-        //         let indices: any[] = this._score_nodes[this._score_node_index].get_base_indices();
+        //         let indices: number[] = this._score_nodes[this._score_node_index].get_base_indices();
         //
         //         for (let ii: number = 0; ii < indices.length; ii++) {
         //             let p: Point = this.get_base_xy(indices[ii]);
@@ -2973,13 +2969,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
         //
         // if (this._score_texts != null) {
-        //     for (ii = 0; ii < this._score_nodes.length; ii++) {
-        //         indices = this._score_nodes[ii].get_base_indices();
+        //     for (let ii = 0; ii < this._score_nodes.length; ii++) {
+        //         let indices: number[] = this._score_nodes[ii].get_base_indices();
         //         let x_avg: number = 0;
         //         let y_avg: number = 0;
         //
         //         for (let jj: number = 0; jj < indices.length; jj++) {
-        //             p = this.get_base_xy(indices[jj]);
+        //             let p: Point = this.get_base_xy(indices[jj]);
         //             x_avg += p.x;
         //             y_avg += p.y;
         //         }
@@ -2992,7 +2988,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         //         x_avg -= this._score_texts[ii].width / 2;
         //         y_avg -= this._score_texts[ii].height / 2;
         //
-        //         this._score_texts[ii].set_pos(new UDim(0, 0, x_avg, y_avg));
+        //         this._score_texts[ii].position = new Point(x_avg, y_avg);
         //         this._score_texts[ii].visible = (this._zoom_level < 4);
         //         this.update_energy_highlight(this._score_texts[ii], ii, this._score_texts[ii].visible);
         //     }
@@ -3000,10 +2996,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private update_score_node_gui(): void {
+        log.debug("TODO: update_score_node_gui");
         // this._score_node_index = -1;
         //
         // if (this._score_nodes != null) {
-        //     let base_xys: any[] = [];
+        //     let base_xys: Point[] = [];
         //     let mouse_p: Point = new Point(this.mouseX, this.mouseY);
         //
         //     for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
@@ -3016,8 +3013,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     let node_label: string = "";
         //     let node_score: string = "";
         //
-        //     for (ii = 0; ii < this._score_nodes.length; ii++) {
-        //         let base_indices: any[] = this._score_nodes[ii].get_base_indices();
+        //     for (let ii = 0; ii < this._score_nodes.length; ii++) {
+        //         let base_indices: number[] = this._score_nodes[ii].get_base_indices();
         //         let node_points: any[] = [];
         //
         //         for (let jj: number = 0; jj < base_indices.length; jj++) {
@@ -3041,8 +3038,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     let score_score: string = "";
         //     let factor: number = 0;
         //     if ((this._molecular_binding_bases != null) || (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) || (this._oligos != null)) {
-        //         let label_elems: any[] = [];
-        //         let score_elems: any[] = [];
+        //         let label_elems: string[] = [];
+        //         let score_elems: string[] = [];
         //
         //         if (this._molecular_binding_bases != null) {
         //             factor++;
@@ -3076,8 +3073,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         //                 }
         //                 score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
         //             } else {
-        //                 malus = this._duplex_cost;
-        //                 for (ii = 0; ii < this._oligos_paired; ii++)
+        //                 let malus = this._duplex_cost;
+        //                 for (let ii = 0; ii < this._oligos_paired; ii++)
         //                     malus += Number(this._oligos[this._oligos_order[ii]].malus * 100) / 100.0;
         //                 if (this._oligos_paired > 1) {
         //                     label_elems.push("<FONT COLOR='#33AA33'>Oligos Bound</FONT>");
@@ -3103,64 +3100,64 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private update_energy_display_size_location(factor: number): void {
-        // this._primary_score_energy_display.set_pos(new UDim(0, 0, 17, 118));
-        // this._primary_score_energy_display.set_size(new UDim(0, 0, 111 + factor * 59, 40));
-        //
-        // this._secondary_score_energy_display.set_pos(new UDim(0, 0, 17 + 119 + factor * 59, 118));
-        // this._secondary_score_energy_display.set_size(new UDim(0, 0, 111, 40));
+        this._primary_score_energy_display.position = new Point(17, 118);
+        this._primary_score_energy_display.set_size(111 + factor * 59, 40);
+
+        this._secondary_score_energy_display.position = new Point(17 + 119 + factor * 59, 118);
+        this._secondary_score_energy_display.set_size(111, 40);
     }
 
     private clear_score_texts(): void {
-        // if (this._score_texts != null) {
-        //     for (let ii: number = 0; ii < this._score_texts.length; ii++) {
-        //         this.removeObject(this._score_texts[ii]);
-        //     }
-        // }
-        // this._score_texts = null;
+        if (this._score_texts != null) {
+            for (let score_text of this._score_texts) {
+                DisplayUtil.removeFromParent(score_text);
+            }
+            this._score_texts = null;
+        }
     }
 
     private generate_score_nodes(): void {
-        // this._score_nodes = null;
-        // this.clear_energy_highlights();
-        //
-        // if (this._score_folder == null ||
-        //     this._sequence == null ||
-        //     this._sequence.length == 0 ||
-        //     this._pairs == null ||
-        //     this._pairs.length != this.get_full_sequence_length()) {
-        //
-        //     this.clear_score_texts();
-        //     return;
-        // }
-        //
-        // /// JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
-        // /// But this is cheap, so it shouldn't matter too much
-        // let score_tree: RNALayout = new RNALayout;
-        // score_tree.setup_tree(this.get_satisfied_pairs());
-        //
-        // let treeroot: RNATreeNode = score_tree.get_root();
-        // score_tree.score_tree(this.get_full_sequence(), this._score_folder);
-        //
-        // let score_nodes: any[] = [];
-        // let root_coords: any[] = [];
-        // this.generate_score_nodes_recursive(treeroot, root_coords, score_nodes);
-        // this._score_nodes = score_nodes;
-        //
-        // this.clear_score_texts();
-        // if (this._display_score_texts) {
-        //     this._score_texts = [];
-        //     for (let ii: number = 0; ii < this._score_nodes.length; ii++) {
-        //         this._score_texts.push(new GameBitmap(null));
-        //         this._score_texts[ii].set_bitmap(BitmapManager.get_text_bitmap(this._score_nodes[ii].get_colored_number()));
-        //         this._score_texts[ii].visible = false;
-        //         this.addObject(this._score_texts[ii]);
-        //     }
-        // }
-        //
-        // this.update_score_node_gui();
+        this._score_nodes = null;
+        this.clear_energy_highlights();
+
+        if (this._score_folder == null ||
+            this._sequence == null ||
+            this._sequence.length == 0 ||
+            this._pairs == null ||
+            this._pairs.length != this.get_full_sequence_length()) {
+
+            this.clear_score_texts();
+            return;
+        }
+
+        /// JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
+        /// But this is cheap, so it shouldn't matter too much
+        let score_tree: RNALayout = new RNALayout;
+        score_tree.setup_tree(this.get_satisfied_pairs());
+
+        let treeroot: RNATreeNode = score_tree.get_root();
+        score_tree.score_tree(this.get_full_sequence(), this._score_folder);
+
+        let score_nodes: ScoreDisplayNode[] = [];
+        let root_coords: number[] = [];
+        this.generate_score_nodes_recursive(treeroot, root_coords, score_nodes);
+        this._score_nodes = score_nodes;
+
+        this.clear_score_texts();
+        if (this._display_score_texts) {
+            this._score_texts = [];
+            for (let scoreNode of this._score_nodes) {
+                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.get_colored_number()));
+                scoreText.visible = false;
+                this._score_texts.push(scoreText);
+                this.container.addChild(scoreText);
+            }
+        }
+
+        this.update_score_node_gui();
     }
 
-    private generate_score_nodes_recursive(root: RNATreeNode, coords: any[], nodes: any[]): void {
+    private generate_score_nodes_recursive(root: RNATreeNode, coords: number[], nodes: ScoreDisplayNode[]): void {
         if (root == null) {
             return;
         }
@@ -3175,17 +3172,14 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let child_coords: any[];
-        let newnode: ScoreDisplayNode;
+        let child_coords: number[];
 
         if (root._is_pair) {
-
             if (root._children.length > 1) {
                 throw new Error("Something's wrong with score tree");
             }
 
             if (root._children.length != 0) {
-
                 if (root._children[0]._is_pair) {
                     child_coords = [];
 
@@ -3195,9 +3189,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                     child_coords.push(root._children[0]._index_b);
                     child_coords.push(root._children[0]._index_a);
 
-                    newnode = new ScoreDisplayNode;
+                    let newnode = new ScoreDisplayNode();
                     nodes.push(newnode);
-                    newnode.set_type(ScoreDisplayNode.SCORENODE_STACK, child_coords, root._score);
+                    newnode.set_type(ScoreDisplayNodeType.STACK, child_coords, root._score);
 
                     this.generate_score_nodes_recursive(root._children[0], null, nodes);
                 } else {
@@ -3211,15 +3205,15 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
 
         } else {
-            for (let ii: number = 0; ii < root._children.length; ii++) {
-                this.generate_score_nodes_recursive(root._children[ii], coords, nodes);
+            for (let child of root._children) {
+                this.generate_score_nodes_recursive(child, coords, nodes);
             }
 
             if (coords != null) {
-                newnode = new ScoreDisplayNode;
+                let newnode = new ScoreDisplayNode();
                 nodes.push(newnode);
 
-                newnode.set_type(ScoreDisplayNode.SCORENODE_LOOP, coords, root._score);
+                newnode.set_type(ScoreDisplayNodeType.LOOP, coords, root._score);
             }
         }
     }
@@ -3289,7 +3283,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _oligos_order: any[] = null;
     private _prev_oligos_order: any[];
     private _oligos_paired: number = 0;
-    // private _strand_label: TextBalloon;
+    private _strand_label: TextBalloon;
 
     /// barcode
     private _barcodes: number[];
@@ -3384,17 +3378,17 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _praise_seq: number[] = [];
 
     /// Score display nodes
-    private _score_nodes: any[];
-    private _score_texts: any[];
+    private _score_nodes: ScoreDisplayNode[];
+    private _score_texts: Sprite[];
     private _score_folder: Folder;
     private _score_node_index: number = -1;
     private _last_score_node_index: number = -1;
     private _score_node_highlight: GameObject;
 
     // New Score Display panels
-    // private _primary_score_energy_display: EnergyScoreDisplay;
-    // private _secondary_score_energy_display: EnergyScoreDisplay;
-    // private _show_total_energy: boolean = true;
+    private _primary_score_energy_display: EnergyScoreDisplay;
+    private _secondary_score_energy_display: EnergyScoreDisplay;
+    private _show_total_energy: boolean = true;
 
     /// For tracking a base
     private _tracked_indices: number[] = [];
@@ -3416,8 +3410,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _exp_extended_scale: boolean = false;
     private _display_aux_info: boolean;
     private _aux_info: Object;
-    private _aux_info_canvas: GameObject;
-    // private _aux_textballoon: TextBalloon;
+    private _aux_info_canvas: Container;
+    private _aux_textballoon: TextBalloon;
 
     /// Feedback
     private _feedback_objs: any[] = [];
