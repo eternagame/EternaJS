@@ -58,6 +58,14 @@ export class FlashbangApp {
         return this.isKeyDown(KeyCode.AltLeft) || this.isKeyDown(KeyCode.AltRight);
     }
 
+    public get isControlKeyDown(): boolean {
+        return this.isKeyDown(KeyCode.ControlLeft) || this.isKeyDown(KeyCode.ControlRight);
+    }
+
+    public get isMetaKeyDown(): boolean {
+        return this.isKeyDown(KeyCode.MetaLeft) || this.isKeyDown(KeyCode.MetaRight);
+    }
+
     /**
      * Called at the end of the initialization process.
      * Subclasses should override this to push their initial AppMode to the mode stack
