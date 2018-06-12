@@ -3,6 +3,7 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {EnergyScoreDisplay} from "../pose2D/EnergyScoreDisplay";
 import {Pose2D} from "../pose2D/Pose2D";
 import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
 import {GameButton} from "../ui/GameButton";
@@ -29,6 +30,11 @@ export class PoseTestMode extends AppMode {
         // button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
         // button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
         // this.addObject(button, this.modeSprite);
+
+        let scoreDisplay = new EnergyScoreDisplay();
+        scoreDisplay.set_energy_text("Total", "5.2 kcal");
+        scoreDisplay.position = new Point(17, 118);
+        this.modeSprite.addChild(scoreDisplay);
 
         let _view_options_button = new GameButton()
             .allStates(BitmapManager.ImgSettings)
