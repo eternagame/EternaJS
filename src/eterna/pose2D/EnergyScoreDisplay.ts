@@ -4,16 +4,15 @@ import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Fonts} from "../util/Fonts";
 
 export class EnergyScoreDisplay extends Container {
-    public constructor() {
+    public constructor(width: number, height: number) {
         super();
 
+        this._width = width;
+        this._height = height;
+
         this._bg = new Graphics();
-        this._bg.clear();
-        this._bg.beginFill(0x33465F);
-        this._bg.drawRoundedRect(0, 0, EnergyScoreDisplay.WIDTH, EnergyScoreDisplay.HEIGHT, 15);
-        this._bg.endFill();
-        this._bg.alpha = 0.5;
         this.addChild(this._bg);
+        this.updateBG();
 
         let textLayout: VLayoutContainer = new VLayoutContainer(2, Align.LEFT);
 
@@ -35,9 +34,28 @@ export class EnergyScoreDisplay extends Container {
         this._energyText.text = energy;
     }
 
+    public set_size(width: number, height: number): void {
+        if (width != this._width || height != this._height) {
+            this._width = width;
+            this._height = height;
+            this.updateBG();
+        }
+    }
+
+    private updateBG(): void {
+        this._bg.clear();
+        this._bg.beginFill(0x33465F);
+        this._bg.drawRoundedRect(0, 0, this._width, this._height, 15);
+        this._bg.endFill();
+        this._bg.alpha = 0.5;
+    }
+
     private readonly _labelText: Text;
     private readonly _energyText: Text;
     private readonly _bg: Graphics;
+
+    private _width: number;
+    private _height :number;
 
     private static readonly WIDTH: number = 111;
     private static readonly HEIGHT: number = 40;
