@@ -204,7 +204,9 @@ export class NucleotidePalette extends ContainerObject {
     }
 
     private show_selection(selected_box: Rectangle, is_pair: boolean, do_show: boolean): void {
-        if (!selected_box) return;
+        if (selected_box == null) {
+            return;
+        }
 
         if (is_pair) {
             this._selection.texture = this._select_pair_data;

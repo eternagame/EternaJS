@@ -34,6 +34,7 @@ export class EternaApp extends FlashbangApp {
             })
             .then((puzzle) => {
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
+                // this._modeStack.unwindToMode(new PoseTestMode());
             })
             .catch((err) => Eterna.onFatalError(err));
     }
