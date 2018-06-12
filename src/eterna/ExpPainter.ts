@@ -5,8 +5,8 @@ import {MathUtil} from "../flashbang/util/MathUtil";
 export class ExpPainter {
     public static NUM_COLORS: number = 5;
 
-    public static transform_data(data: any[], data_max: number, data_min: number): any[] {
-        let data_ret: any[] = data.slice();
+    public static transform_data(data: number[], data_max: number, data_min: number): number[] {
+        let data_ret: number[] = data.slice();
         let abs_max: number = 2 * data_max - data_min;
 
         for (let ii: number = 0; ii < data_ret.length; ii++) {
@@ -32,7 +32,7 @@ export class ExpPainter {
         }
     }
 
-    constructor(data: any[], start_index: number) {
+    constructor(data: number[], start_index: number) {
         if (data == null || data.length == 0) {
             throw new Error("ExpPainter got empty array");
         }
@@ -239,7 +239,7 @@ export class ExpPainter {
         this._extended = extended;
     }
 
-    private readonly _data: any[];
+    private readonly _data: number[];
     private readonly _data_min: number;
     private readonly _data_max: number;
     private readonly _data_avg: number;
