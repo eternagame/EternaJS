@@ -9,6 +9,7 @@ import {GameButton} from "../ui/GameButton";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
 import {BitmapManager} from "../util/BitmapManager";
 import {Background} from "../vfx/Background";
+import {Point} from "pixi.js";
 
 export class PoseTestMode extends AppMode {
     protected setup(): void {
@@ -20,7 +21,9 @@ export class PoseTestMode extends AppMode {
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
 
-        this.addObject(new NucleotidePalette(), this.modeSprite);
+        let palette = new NucleotidePalette();
+        palette.display.position = new Point(500, 700);
+        this.addObject(palette, this.modeSprite);
 
         // let button = new TextBalloon("Hello (Z)", 0x0, 0.8);
         // button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;

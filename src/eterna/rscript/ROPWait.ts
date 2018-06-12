@@ -22,7 +22,7 @@ export class ROPWait {
     }
 
     public static NotifyClickUI(key: string): void {
-        log.debug("ROPWait.NotifyClickUI");
+        log.debug(`ROPWait.NotifyClickUI: ${key}`);
     }
 
     public static NotifyNucleotideChange(i: number, inColor: number): void {
