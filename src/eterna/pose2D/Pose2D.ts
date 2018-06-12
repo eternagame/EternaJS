@@ -5,6 +5,7 @@ import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {Registration} from "../../signals/Registration";
 import {Application} from "../Application";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
@@ -12,7 +13,6 @@ import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
-import {Utility} from "../util/Utility";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
@@ -21,6 +21,10 @@ import {PoseUtil} from "./PoseUtil";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
 import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
+
+type InteractionEvent = PIXI.interaction.InteractionEvent;
+
+export type PoseMouseDownCallback = (e: InteractionEvent, closest_dist: number, closest_index: number) => void;
 
 export class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -85,11 +89,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._shift_highlight_box = new HighlightBox(this);
         this.addObject(this._shift_highlight_box, this.container);
-        //
-        // this.addEventListener(MouseEvent.MOUSE_MOVE, this.on_pose_mouse_move);
-        // this.addEventListener(MouseEvent.MOUSE_DOWN, this.call_start_mousedown_callback);
-        // this.addEventListener(MouseEvent.ROLL_OUT, this.on_pose_mouse_out);
-        //
+
         if (!this._editable) {
             this._current_color = -1;
         }
@@ -105,6 +105,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._strand_label = new TextBalloon("", 0x0, 0.8);
         this._strand_label.display.visible = false;
         this.addObject(this._strand_label, this._aux_info_canvas);
+
+        this.display.interactive = true;
+        this.pointerMove.connect(() => this.pose_mouse_moved());
+        this.pointerDown.connect((e) => this.call_start_mousedown_callback(e));
+        this.pointerOut.connect((e) => this.on_pose_mouse_out(e));
     }
 
     public get_primary_score_display(): EnergyScoreDisplay {
@@ -422,60 +427,67 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public on_pose_mouse_down_propagate(e: MouseEvent, closest_index: number): void {
-        if ((this._coloring && !e.altKey) || e.ctrlKey) {
-            if (e.ctrlKey && closest_index >= this.get_sequence().length) {
+    public on_pose_mouse_down_propagate(e: InteractionEvent, closest_index: number): void {
+        let altDown: boolean = Flashbang.app.isAltKeyDown;
+        let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+
+        if ((this._coloring && !altDown) || ctrlDown) {
+            if (ctrlDown && closest_index >= this.get_sequence().length) {
                 return;
             }
             this.on_pose_mouse_down(e, closest_index);
         }
     }
 
-    public on_pose_mouse_down(e: MouseEvent, closest_index: number): void {
-        // let altDown: boolean = Application.instance.alt_key_pressed();
-        // let shiftDown: boolean = Application.instance.shift_key_pressed();
-        // let ctrlDown: boolean =
-        //     Application.instance.is_key_pressed(Keyboard.CONTROL) ||
-        //     Application.instance.is_key_pressed(Keyboard.COMMAND);
-        //
-        // if (closest_index >= 0) {
-        //     this._mouse_down_altKey = altDown;
-        //     if (ctrlDown && closest_index < this.get_full_sequence_length()) {
-        //         this.toggle_black_mark(closest_index);
-        //         return;
-        //     }
-        //     if (shiftDown) {
-        //         if (closest_index < this.get_sequence_length()) {
-        //             this._shift_start = closest_index;
-        //             this._shift_end = closest_index;
-        //             this.update_shift_highlight();
-        //             this.addEventListener(MouseEvent.MOUSE_UP, this.on_shift_select_done);
-        //         }
-        //         e.stopPropagation();
-        //         return;
-        //     }
-        //     this._last_shifted_command = -1;
-        //     this._last_shifted_index = -1;
-        //     let cmd: any[] = this.parse_command(this._current_color, closest_index);
-        //     if (cmd == null) {
-        //         Application.instance.set_dragger(this.on_pose_mouse_move, this.on_pose_mouse_up);
-        //         this.on_base_mouse_down(closest_index, ctrlDown);
-        //         //this.call_pose_edit_callback();
-        //     } else {
-        //         this._last_shifted_command = this._current_color;
-        //         this._last_shifted_index = closest_index;
-        //
-        //         this.call_add_base_callback(cmd[0], cmd[1], closest_index);
-        //     }
-        //
-        //     e.stopPropagation();
-        // } else {
-        //     if (shiftDown) {
-        //         this._shift_start = -1;
-        //         this._shift_end = -1;
-        //         this.update_shift_highlight();
-        //     }
-        // }
+    public on_pose_mouse_down(e: InteractionEvent, closest_index: number): void {
+        let altDown: boolean = Flashbang.app.isAltKeyDown;
+        let shiftDown: boolean = Flashbang.app.isShiftKeyDown;
+        let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+
+        if (closest_index >= 0) {
+            this._mouse_down_altKey = altDown;
+            if (ctrlDown && closest_index < this.get_full_sequence_length()) {
+                this.toggle_black_mark(closest_index);
+                return;
+            }
+            if (shiftDown) {
+                if (closest_index < this.get_sequence_length()) {
+                    this._shift_start = closest_index;
+                    this._shift_end = closest_index;
+                    this.update_shift_highlight();
+
+                    let reg: Registration = null;
+                    reg = this.pointerUp.connect(() => {
+                        this._shift_start = -1;
+                        this._shift_end = -1;
+                        reg.close();
+                    });
+                }
+                e.stopPropagation();
+                return;
+            }
+            this._last_shifted_command = -1;
+            this._last_shifted_index = -1;
+            let cmd: any[] = this.parse_command(this._current_color, closest_index);
+            if (cmd == null) {
+                log.debug("TODO: set_dragger");
+                // Application.instance.set_dragger(() => this.pose_mouse_moved(), () => this.on_pose_mouse_up());
+                this.on_base_mouse_down(closest_index, ctrlDown);
+            } else {
+                this._last_shifted_command = this._current_color;
+                this._last_shifted_index = closest_index;
+
+                this.call_add_base_callback(cmd[0], cmd[1], closest_index);
+            }
+
+            e.stopPropagation();
+        } else {
+            if (shiftDown) {
+                this._shift_start = -1;
+                this._shift_end = -1;
+                this.update_shift_highlight();
+            }
+        }
     }
 
     public toggle_black_mark(closest_index: number): void {
@@ -520,10 +532,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public is_tracked_index(index: number): boolean {
         return this._tracked_indices.indexOf(index) >= 0;
-    }
-
-    public on_pose_mouse_move(e: Event): void {
-        this.pose_mouse_moved();
     }
 
     public pose_mouse_moved(): void {
@@ -583,7 +591,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    public on_pose_mouse_up(e: Event): void {
+    public on_pose_mouse_up(): void {
         this.done_coloring();
         this._mouse_down_altKey = false;
         ROPWait.NotifyEndPaint();
@@ -1263,27 +1271,32 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_start_mousedown_callback(cb: Function): void {
+    public set_start_mousedown_callback(cb: PoseMouseDownCallback): void {
         this._start_mousedown_callback = cb;
     }
 
-    public call_start_mousedown_callback(e: MouseEvent): void {
-        // let closest_dist: number = -1;
-        // let closest_index: number = -1;
-        //
-        // if (this._start_mousedown_callback != null) {
-        //     for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
-        //         let mouseDist: number = this._bases[ii].is_clicked(this.mouseX - this._off_x, this.mouseY - this._off_y, this._zoom_level, false);
-        //         if (mouseDist >= 0) {
-        //             if (closest_index < 0 || mouseDist < closest_dist) {
-        //                 closest_index = ii;
-        //                 closest_dist = mouseDist;
-        //             }
-        //         }
-        //     }
-        //     this._start_mousedown_callback(e, closest_dist, closest_index);
-        // } else
-        //     this.on_pose_mouse_down(e, closest_index);
+    public call_start_mousedown_callback(e: InteractionEvent): void {
+        e.data.getLocalPosition(this.display, Pose2D.P);
+        let mouseX: number = Pose2D.P.x;
+        let mouseY: number = Pose2D.P.y;
+
+        let closest_dist: number = -1;
+        let closest_index: number = -1;
+
+        if (this._start_mousedown_callback != null) {
+            for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
+                let mouseDist: number = this._bases[ii].is_clicked(mouseX - this._off_x, mouseY - this._off_y, this._zoom_level, false);
+                if (mouseDist >= 0) {
+                    if (closest_index < 0 || mouseDist < closest_dist) {
+                        closest_index = ii;
+                        closest_dist = mouseDist;
+                    }
+                }
+            }
+            this._start_mousedown_callback(e, closest_dist, closest_index);
+        } else {
+            this.on_pose_mouse_down(e, closest_index);
+        }
     }
 
     public get_satisfied_pairs(): number[] {
@@ -1291,46 +1304,47 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_sequence(sequence: number[]): void {
-        if (this._sequence != null) {
-            if (this._sequence.length == sequence.length) {
-                let changed: boolean = false;
-
-                for (let jj: number = 0; jj < this._sequence.length; jj++) {
-
-                    if (this._sequence[jj] != sequence[jj]) {
-                        changed = true;
-                        break;
-                    }
-                }
-
-                if (!changed) {
-                    return;
+        if (this._sequence != null && this._sequence.length == sequence.length) {
+            let changed: boolean = false;
+            for (let ii: number = 0; ii < this._sequence.length; ii++) {
+                if (this._sequence[ii] != sequence[ii]) {
+                    changed = true;
+                    break;
                 }
             }
+
+            if (!changed) {
+                return;
+            }
         }
-        if (this._locks == null) this._locks = [];
+
+        if (this._locks == null) {
+            this._locks = [];
+        }
+
         this._sequence = sequence.slice();
         if (this._sequence.length > this._bases.length) {
-
             let diff: number = (this._sequence.length - this._bases.length);
-            for (let i: number = 0; i < diff; i++) {
+            for (let ii: number = 0; ii < diff; ii++) {
                 this.createBase();
                 this._locks.push(false);
             }
-        } else if (this._sequence.length < this._bases.length) {
 
-            for (let j: number = this._sequence.length; j < this._bases.length; j++) {
-                this._locks[j] = false;
-                if (this.is_tracked_index(j)) this.remove_black_mark(j);
+        } else if (this._sequence.length < this._bases.length) {
+            for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
+                this._locks[ii] = false;
+                if (this.is_tracked_index(ii)) {
+                    this.remove_black_mark(ii);
+                }
             }
         }
 
         let n: number = this.get_full_sequence_length();
-        for (let k: number = 0; k < n; k++) {
-            if (k < this._sequence.length) {
-                this._bases[k].set_type(this._sequence[k]);
+        for (let ii: number = 0; ii < n; ii++) {
+            if (ii < this._sequence.length) {
+                this._bases[ii].set_type(this._sequence[ii]);
             }
-            this._bases[k].set_base_index(k);
+            this._bases[ii].set_base_index(ii);
         }
 
         this.check_pairs();
@@ -2537,16 +2551,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    private on_pose_mouse_out(e: Event): void {
+    private on_pose_mouse_out(e: InteractionEvent): void {
         this.clear_mouse();
         this.update_score_node_gui();
         e.stopPropagation();
-    }
-
-    private on_shift_select_done(e: Event): void {
-        // this._shift_start = -1;
-        // this._shift_end = -1;
-        // this.removeEventListener(MouseEvent.MOUSE_UP, this.on_shift_select_done);
     }
 
     private delete_base_with_index(index: number): any[] {
@@ -2562,234 +2570,244 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private on_base_mouse_down(seqnum: number, togglelock: boolean): void {
-        // this._last_colored_index = seqnum;
-        // let ii: number;
-        // let pi: number;
-        //
-        // if (!togglelock && this.is_editable(seqnum)) {
-        //     this._coloring = true;
-        //     this._mutated_sequence = this.get_full_sequence().slice();
-        //
-        //     if (this._current_color == EPars.RNABASE_LOCK) {
-        //         if (!this._locks) {
-        //             this._locks = [];
-        //             for (ii = 0; ii < this._sequence.length; ii++)
-        //                 this._locks.push(false);
-        //         }
-        //         this._locks[seqnum] = !this._locks[seqnum];
-        //         this._bases[seqnum].setDirty();
-        //         this._lock_updated = true;
-        //
-        //     } else if (this._current_color == EPars.RNABASE_BINDING_SITE) {
-        //         if (this._binding_site != null && this._binding_site[seqnum]) {
-        //             this._binding_site = [];
-        //             for (ii = 0; ii < this._sequence.length; ii++)
-        //                 this._binding_site.push(false);
-        //             this.set_molecular_binding_site(this._binding_site);
-        //             this._binding_site_updated = true;
-        //         } else {
-        //             let binding_bases: any[] = EPars.is_internal(seqnum, this._pairs);
-        //             if (binding_bases != null && binding_bases.length > 4) {
-        //                 this._binding_site = [];
-        //                 for (ii = 0; ii < this._sequence.length; ii++)
-        //                     this._binding_site.push(false);
-        //
-        //                 for (ii = 0; ii < binding_bases.length; ii++) {
-        //                     this._binding_site[binding_bases[ii]] = true;
-        //                 }
-        //                 this.set_molecular_binding_site(this._binding_site);
-        //                 this._binding_site_updated = true;
-        //             } else {
-        //                 Application.instance.setup_msg_box("Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
-        //             }
-        //         }
-        //
-        //     } else if (this._mouse_down_altKey) {
-        //         if (this.toggle_design_struct(seqnum)) {
-        //             this._design_struct_updated = true;
-        //         }
-        //     } else {
-        //
-        //         if (!this.is_locked(seqnum)) {
-        //
-        //             if (this._current_color >= 1 && this._current_color <= 4) {
-        //                 this._mutated_sequence[seqnum] = this._current_color;
-        //                 ROPWait.NotifyPaint(seqnum, this._bases[seqnum].get_type(), this._current_color);
-        //                 this._bases[seqnum].set_type(this._current_color, true);
-        //             } else if (this._current_color == EPars.RNABASE_RANDOM) {
-        //                 let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
-        //                 this._mutated_sequence[seqnum] = randbase;
-        //                 this._bases[seqnum].set_type(randbase, true)
-        //             } else if (this._current_color == EPars.RNABASE_PAIR) {
-        //                 if (this._pairs[seqnum] >= 0) {
-        //                     pi = this._pairs[seqnum];
-        //
-        //                     if (this.is_locked(pi))
-        //                         return;
-        //
-        //                     let click_base: number = this._mutated_sequence[seqnum];
-        //
-        //                     this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
-        //                     this._mutated_sequence[pi] = click_base;
-        //
-        //                     this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                     this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //                 }
-        //             } else if (this._current_color == EPars.RNABASE_MAGIC) {
-        //                 this._mutated_sequence[seqnum] = this._current_color;
-        //                 this._bases[seqnum].set_type(this._current_color);
-        //             } else if (this._current_color == EPars.RNABASE_AU_PAIR) {
-        //                 if (this._pairs[seqnum] >= 0) {
-        //                     pi = this._pairs[seqnum];
-        //
-        //                     if (this.is_locked(pi))
-        //                         return;
-        //
-        //                     this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
-        //                     this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
-        //
-        //                     this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                     this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //                 }
-        //             } else if (this._current_color == EPars.RNABASE_GC_PAIR) {
-        //                 if (this._pairs[seqnum] >= 0) {
-        //                     pi = this._pairs[seqnum];
-        //
-        //                     if (this.is_locked(pi))
-        //                         return;
-        //
-        //                     this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
-        //                     this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
-        //
-        //                     this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                     this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //                 }
-        //             } else if (this._current_color == EPars.RNABASE_GU_PAIR) {
-        //                 if (this._pairs[seqnum] >= 0) {
-        //                     pi = this._pairs[seqnum];
-        //
-        //                     if (this.is_locked(pi))
-        //                         return;
-        //
-        //                     this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
-        //                     this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
-        //
-        //                     this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                     this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //                 }
-        //             } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
-        //                 let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-        //                 this._dyn_paint_tools[index].on_paint(this, seqnum);
-        //             }
-        //         }
-        //     }
-        // }
+        this._last_colored_index = seqnum;
+
+        if (!togglelock && this.is_editable(seqnum)) {
+            this._coloring = true;
+            this._mutated_sequence = this.get_full_sequence().slice();
+
+            if (this._current_color == EPars.RNABASE_LOCK) {
+                if (!this._locks) {
+                    this._locks = [];
+                    for (let ii = 0; ii < this._sequence.length; ii++) {
+                        this._locks.push(false);
+                    }
+                }
+                this._locks[seqnum] = !this._locks[seqnum];
+                this._bases[seqnum].setDirty();
+                this._lock_updated = true;
+
+            } else if (this._current_color == EPars.RNABASE_BINDING_SITE) {
+                if (this._binding_site != null && this._binding_site[seqnum]) {
+                    this._binding_site = [];
+                    for (let ii = 0; ii < this._sequence.length; ii++) {
+                        this._binding_site.push(false);
+                    }
+                    this.set_molecular_binding_site(this._binding_site);
+                    this._binding_site_updated = true;
+                } else {
+                    let binding_bases: any[] = EPars.is_internal(seqnum, this._pairs);
+                    if (binding_bases != null && binding_bases.length > 4) {
+                        this._binding_site = [];
+                        for (let ii = 0; ii < this._sequence.length; ii++) {
+                            this._binding_site.push(false);
+                        }
+
+                        for (let ii = 0; ii < binding_bases.length; ii++) {
+                            this._binding_site[binding_bases[ii]] = true;
+                        }
+                        this.set_molecular_binding_site(this._binding_site);
+                        this._binding_site_updated = true;
+                    } else {
+                        Application.instance.setup_msg_box("Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
+                    }
+                }
+
+            } else if (this._mouse_down_altKey) {
+                if (this.toggle_design_struct(seqnum)) {
+                    this._design_struct_updated = true;
+                }
+            } else {
+
+                if (!this.is_locked(seqnum)) {
+
+                    if (this._current_color >= 1 && this._current_color <= 4) {
+                        this._mutated_sequence[seqnum] = this._current_color;
+                        ROPWait.NotifyPaint(seqnum, this._bases[seqnum].get_type(), this._current_color);
+                        this._bases[seqnum].set_type(this._current_color, true);
+                    } else if (this._current_color == EPars.RNABASE_RANDOM) {
+                        let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
+                        this._mutated_sequence[seqnum] = randbase;
+                        this._bases[seqnum].set_type(randbase, true)
+                    } else if (this._current_color == EPars.RNABASE_PAIR) {
+                        if (this._pairs[seqnum] >= 0) {
+                            let pi = this._pairs[seqnum];
+
+                            if (this.is_locked(pi)) {
+                                return;
+                            }
+
+                            let click_base: number = this._mutated_sequence[seqnum];
+
+                            this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
+                            this._mutated_sequence[pi] = click_base;
+
+                            this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                            this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                        }
+                    } else if (this._current_color == EPars.RNABASE_MAGIC) {
+                        this._mutated_sequence[seqnum] = this._current_color;
+                        this._bases[seqnum].set_type(this._current_color);
+                    } else if (this._current_color == EPars.RNABASE_AU_PAIR) {
+                        if (this._pairs[seqnum] >= 0) {
+                            let pi = this._pairs[seqnum];
+
+                            if (this.is_locked(pi)) {
+                                return;
+                            }
+
+                            this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
+                            this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
+
+                            this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                            this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                        }
+                    } else if (this._current_color == EPars.RNABASE_GC_PAIR) {
+                        if (this._pairs[seqnum] >= 0) {
+                            let pi = this._pairs[seqnum];
+
+                            if (this.is_locked(pi)) {
+                                return;
+                            }
+
+                            this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
+                            this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
+
+                            this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                            this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                        }
+                    } else if (this._current_color == EPars.RNABASE_GU_PAIR) {
+                        if (this._pairs[seqnum] >= 0) {
+                            let pi = this._pairs[seqnum];
+
+                            if (this.is_locked(pi)) {
+                                return;
+                            }
+
+                            this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
+                            this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
+
+                            this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                            this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                        }
+                    } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
+                        let index: number = this._dyn_paint_colors.indexOf(this._current_color);
+                        this._dyn_paint_tools[index].on_paint(this, seqnum);
+                    }
+                }
+            }
+        }
     }
 
     private on_base_mouse_move(seqnum: number): void {
-        // let pi: number;
-        //
-        // if (!this._coloring && this._shift_start >= 0 && seqnum < this.get_sequence_length()) {
-        //     this._shift_end = seqnum;
-        //     this.update_shift_highlight();
-        // }
-        // if (!this._coloring || (seqnum == this._last_colored_index))
-        //     return;
-        //
-        // if (this._current_color == EPars.RNABASE_LOCK) {
-        //     if (!this._locks) {
-        //         this._locks = [];
-        //         for (let ii: number = 0; ii < this._sequence.length; ii++)
-        //             this._locks.push(false);
-        //     }
-        //     this._locks[seqnum] = !this._locks[seqnum];
-        //     this._bases[seqnum].setDirty();
-        //     this._lock_updated = true;
-        //
-        // } else if (this._mouse_down_altKey) {
-        //     if (this.toggle_design_struct(seqnum)) {
-        //         this._design_struct_updated = true;
-        //     }
-        //
-        // } else {
-        //     if (!this.is_locked(seqnum)) {
-        //
-        //         if (this._current_color >= 1 && this._current_color <= 4) {
-        //             this._mutated_sequence[seqnum] = this._current_color;
-        //             ROPWait.NotifyPaint(seqnum, this._bases[seqnum].get_type(), this._current_color);
-        //             this._bases[seqnum].set_type(this._current_color, true);
-        //         } else if (this._current_color == EPars.RNABASE_RANDOM) {
-        //             let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
-        //             this._mutated_sequence[seqnum] = randbase;
-        //             this._bases[seqnum].set_type(randbase, true)
-        //         } else if (this._current_color == EPars.RNABASE_PAIR) {
-        //             if (this._pairs[seqnum] >= 0) {
-        //                 pi = this._pairs[seqnum];
-        //                 if (this._pairs[seqnum] >= 0) {
-        //                     pi = this._pairs[seqnum];
-        //
-        //                     if (this.is_locked(pi))
-        //                         return;
-        //
-        //                     let click_base: number = this._mutated_sequence[seqnum];
-        //
-        //                     this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
-        //                     this._mutated_sequence[pi] = click_base;
-        //
-        //                     this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                     this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //                 }
-        //             }
-        //         } else if (this._current_color == EPars.RNABASE_MAGIC) {
-        //             this._mutated_sequence[seqnum] = this._current_color;
-        //             this._bases[seqnum].set_type(this._current_color);
-        //         } else if (this._current_color == EPars.RNABASE_AU_PAIR) {
-        //             if (this._pairs[seqnum] >= 0) {
-        //                 pi = this._pairs[seqnum];
-        //
-        //                 if (this.is_locked(pi))
-        //                     return;
-        //
-        //                 this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
-        //                 this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
-        //
-        //                 this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                 this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //             }
-        //         } else if (this._current_color == EPars.RNABASE_GC_PAIR) {
-        //             if (this._pairs[seqnum] >= 0) {
-        //                 pi = this._pairs[seqnum];
-        //
-        //                 if (this.is_locked(pi))
-        //                     return;
-        //
-        //                 this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
-        //                 this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
-        //
-        //                 this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                 this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //             }
-        //         } else if (this._current_color == EPars.RNABASE_GU_PAIR) {
-        //             if (this._pairs[seqnum] >= 0) {
-        //                 pi = this._pairs[seqnum];
-        //
-        //                 if (this.is_locked(pi))
-        //                     return;
-        //
-        //                 this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
-        //                 this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
-        //
-        //                 this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
-        //                 this._bases[pi].set_type(this._mutated_sequence[pi], true);
-        //             }
-        //         } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
-        //             let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-        //             this._dyn_paint_tools[index].on_painting(this, seqnum);
-        //         }
-        //     }
-        // }
-        // this._last_colored_index = seqnum;
-        // this._bases[seqnum].animate();
+        if (!this._coloring && this._shift_start >= 0 && seqnum < this.get_sequence_length()) {
+            this._shift_end = seqnum;
+            this.update_shift_highlight();
+        }
+
+        if (!this._coloring || (seqnum == this._last_colored_index)) {
+            return;
+        }
+
+        if (this._current_color == EPars.RNABASE_LOCK) {
+            if (!this._locks) {
+                this._locks = [];
+                for (let ii: number = 0; ii < this._sequence.length; ii++) {
+                    this._locks.push(false);
+                }
+            }
+            this._locks[seqnum] = !this._locks[seqnum];
+            this._bases[seqnum].setDirty();
+            this._lock_updated = true;
+
+        } else if (this._mouse_down_altKey) {
+            if (this.toggle_design_struct(seqnum)) {
+                this._design_struct_updated = true;
+            }
+
+        } else {
+            if (!this.is_locked(seqnum)) {
+                if (this._current_color >= 1 && this._current_color <= 4) {
+                    this._mutated_sequence[seqnum] = this._current_color;
+                    ROPWait.NotifyPaint(seqnum, this._bases[seqnum].get_type(), this._current_color);
+                    this._bases[seqnum].set_type(this._current_color, true);
+
+                } else if (this._current_color == EPars.RNABASE_RANDOM) {
+                    let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
+                    this._mutated_sequence[seqnum] = randbase;
+                    this._bases[seqnum].set_type(randbase, true)
+                } else if (this._current_color == EPars.RNABASE_PAIR) {
+                    if (this._pairs[seqnum] >= 0) {
+                        let pi = this._pairs[seqnum];
+                        if (this._pairs[seqnum] >= 0) {
+                            pi = this._pairs[seqnum];
+
+                            if (this.is_locked(pi)) {
+                                return;
+                            }
+
+                            let click_base: number = this._mutated_sequence[seqnum];
+
+                            this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
+                            this._mutated_sequence[pi] = click_base;
+
+                            this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                            this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                        }
+                    }
+                } else if (this._current_color == EPars.RNABASE_MAGIC) {
+                    this._mutated_sequence[seqnum] = this._current_color;
+                    this._bases[seqnum].set_type(this._current_color);
+                } else if (this._current_color == EPars.RNABASE_AU_PAIR) {
+                    if (this._pairs[seqnum] >= 0) {
+                        let pi = this._pairs[seqnum];
+
+                        if (this.is_locked(pi)) {
+                            return;
+                        }
+
+                        this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
+                        this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
+
+                        this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                        this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                    }
+                } else if (this._current_color == EPars.RNABASE_GC_PAIR) {
+                    if (this._pairs[seqnum] >= 0) {
+                        let pi = this._pairs[seqnum];
+
+                        if (this.is_locked(pi)) {
+                            return;
+                        }
+
+                        this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
+                        this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
+
+                        this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                        this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                    }
+                } else if (this._current_color == EPars.RNABASE_GU_PAIR) {
+                    if (this._pairs[seqnum] >= 0) {
+                        let pi = this._pairs[seqnum];
+
+                        if (this.is_locked(pi)) {
+                            return;
+                        }
+
+                        this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
+                        this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
+
+                        this._bases[seqnum].set_type(this._mutated_sequence[seqnum], true);
+                        this._bases[pi].set_type(this._mutated_sequence[pi], true);
+                    }
+                } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
+                    let index: number = this._dyn_paint_colors.indexOf(this._current_color);
+                    this._dyn_paint_tools[index].on_painting(this, seqnum);
+                }
+            }
+        }
+        this._last_colored_index = seqnum;
+        this._bases[seqnum].animate();
     }
 
     private update_design_highlight(): void {
@@ -3313,7 +3331,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _pose_edit_callback: Function = null;
     private _track_moves_callback: Function = null;
     private _add_base_callback: Function;
-    private _start_mousedown_callback: Function;
+    private _start_mousedown_callback: PoseMouseDownCallback;
     private _mouse_down_altKey: boolean = false;
 
     /// Display bases as letters?
@@ -3430,5 +3448,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 	 */
     private _all_new_highlights: any[] = [];
 
+    private static readonly P: Point = new Point();
 }
 

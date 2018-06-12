@@ -6,6 +6,7 @@ import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
+import {Assert} from "../../../flashbang/util/Assert";
 import {Application} from "../../Application";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
@@ -34,6 +35,8 @@ import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
 import {PuzzleEvent} from "./PuzzleEvent";
+
+type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export enum PuzzleState {
     SETUP = -1,
@@ -687,7 +690,7 @@ export class PoseEditMode extends GameMode {
         };
 
         let bind_mousedown_event: Function = function (pose: Pose2D, index: number): void {
-            pose.set_start_mousedown_callback(function (e: MouseEvent, closest_dist: number, closest_index: number): void {
+            pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number) => {
                 for (let ii: number = 0; ii < pose_fields.length; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
                     let pose: Pose2D = pose_field.get_pose();
@@ -1079,11 +1082,9 @@ export class PoseEditMode extends GameMode {
             if (this._force_synch) {
                 this.set_puzzle_epilog(init_seq, is_reset);
             } else {
-                this._op_queue.push({
-                    sn: this._target_pairs.length,
-                    fn: this.set_puzzle_epilog,
-                    arg: [init_seq, is_reset]
-                });
+                this._op_queue.push(new AsyncOp(
+                    this._target_pairs.length,
+                    () => this.set_puzzle_epilog(init_seq, is_reset)));
             }
             this._pose_edit_by_target_cb = null;
         };
@@ -1425,19 +1426,16 @@ export class PoseEditMode extends GameMode {
 
         let startTime: number = new Date().getTime();
         let elapsed: number = 0;
-        while (elapsed < 50) { // FIXME: arbitrary
-            if (this._op_queue.length > 0) {
-                let op: any = this._op_queue.shift();
-                op.fn.apply((op.objref ? op.objref : this), op.arg);
-                if (op.sn) {
-                    this._asynch_text.text =
-                        "eterna.folding " + op.sn +
-                        " of " + this._target_pairs.length +
-                        " (" + this._op_queue.length + ")";
-                }
-            } else {
-                break;
+        while (this._op_queue.length > 0 && elapsed < 50) { // FIXME: arbitrary
+            let op: AsyncOp = this._op_queue.shift();
+            op.fn();
+            if (op.sn) {
+                this._asynch_text.text =
+                    "eterna.folding " + op.sn +
+                    " of " + this._target_pairs.length +
+                    " (" + this._op_queue.length + ")";
             }
+
             elapsed = new Date().getTime() - startTime;
         }
 
@@ -4395,11 +4393,11 @@ export class PoseEditMode extends GameMode {
             this.pose_edit_by_target_epilog(target_index);
 
         } else {
-            let ii;
-            for (ii = 0; ii < this._target_pairs.length; ii++) {
-                this._op_queue.push({sn: ii + 1, fn: this.pose_edit_by_target_fold_target, arg: [ii]});
+            for (let ii = 0; ii < this._target_pairs.length; ii++) {
+                this._op_queue.push(new AsyncOp(ii + 1, () => this.pose_edit_by_target_fold_target(ii)));
             }
-            this._op_queue.push({sn: ii + 1, fn: this.pose_edit_by_target_epilog, arg: [target_index]});
+
+            this._op_queue.push(new AsyncOp(this._target_pairs.length + 1, () => this.pose_edit_by_target_epilog(target_index)));
 
         }
 
@@ -4497,14 +4495,13 @@ export class PoseEditMode extends GameMode {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 let ops: any[] = this._folder.multifold_unroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
-                this._op_queue.unshift({
-                    sn: ii + 1,
-                    fn: this.pose_edit_by_target_fold_target,
-                    arg: [ii + this._target_pairs.length]
-                });
+                Assert.isTrue(false, "Tim, double check the output of multifold_unroll");
+                this._op_queue.unshift(new AsyncOp(
+                    ii + 1,
+                    () => this.pose_edit_by_target_fold_target(ii + this._target_pairs.length)));
                 while (ops.length > 0) {
-                    let o: any = ops.pop();
-                    o['sn'] = ii + 1;
+                    let o: AsyncOp = ops.pop();
+                    o.sn = ii + 1;
                     this._op_queue.unshift(o);
                 }
                 return;
@@ -4953,13 +4950,13 @@ export class PoseEditMode extends GameMode {
 
     private _folder: Folder;	/// ViennaRNA folder
     /// Asynch folding
-    private _op_queue: any[] = [];
+    private _op_queue: AsyncOp[] = [];
     private _pose_edit_by_target_cb: Function = null;
     private _asynch_text: Text;
     private _fold_start_time: number;
     private _fold_total_time: number;
     /// Undo stack
-    private _seq_stacks: any[];
+    private _seq_stacks: UndoBlock[][];
     private _stack_level: number;
     private _stack_size: number;
     private _puzzle: Puzzle;
@@ -5075,6 +5072,16 @@ export class PoseEditMode extends GameMode {
     private _show_mission_screen: boolean = true;
     private _override_show_constraints: boolean = true;
     private _ancestor_id: number;
+}
+
+class AsyncOp {
+    public sn?: number;
+    public fn: () => void;
+
+    public constructor(sn: number | null, fn: () => void) {
+        this.sn = sn;
+        this.fn = fn;
+    }
 }
 
 

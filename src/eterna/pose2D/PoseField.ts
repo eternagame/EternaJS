@@ -1,5 +1,11 @@
+import * as log from "loglevel";
+import {Point} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {ROPWait} from "../rscript/ROPWait";
 import {Pose2D} from "./Pose2D";
+
+type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /// TODO: remove this class? It can just be merged into Pose2D
 export class PoseField extends ContainerObject {
@@ -9,7 +15,9 @@ export class PoseField extends ContainerObject {
 
         this.addObject(this._pose, this.container);
 
-        // this.addEventListener(MouseEvent.MOUSE_DOWN, this.mouse_on_bg_down);
+        this.container.interactive = true;
+        this.pointerDown.connect((e) => this.mouse_on_bg_down(e));
+        this.pointerUp.connect(() => this.mouse_on_bg_up());
         // this.addEventListener(MouseEvent.MOUSE_WHEEL, this.mouse_on_wheel);
     }
 
@@ -39,29 +47,38 @@ export class PoseField extends ContainerObject {
         return this._pose;
     }
 
-    private mouse_on_bg_down(e: MouseEvent): void {
-        // this._drag_mouse_begin_x = this.mouseX;
-        // this._drag_mouse_begin_y = this.mouseY;
-        // if (!e.ctrlKey) {
-        //     this._is_dragging_pose = true;
-        //     this._drag_pose_begin_x = this._pose.get_x_offset();
-        //     this._drag_pose_begin_y = this._pose.get_y_offset();
-        //
-        // }
+    private mouse_on_bg_down(e: InteractionEvent): void {
+        e.data.getLocalPosition(this.display, PoseField.P);
+        this._drag_mouse_begin_x = PoseField.P.x;
+        this._drag_mouse_begin_y = PoseField.P.y;
+
+        if (!Flashbang.app.isControlKeyDown) {
+            this._is_dragging_pose = true;
+            this._drag_pose_begin_x = this._pose.get_x_offset();
+            this._drag_pose_begin_y = this._pose.get_y_offset();
+
+        }
+        log.debug("TODO: set_dragger");
         // Application.instance.set_dragger(this.mouse_on_bg_move, this.mouse_on_bg_up);
+        // TSC temp
+
     }
 
-    private mouse_on_bg_move(e: MouseEvent): void {
-        // if (this._is_dragging_pose) {
-        //     let x_mov: number = this.mouseX - this._drag_mouse_begin_x;
-        //     let y_mov: number = this.mouseY - this._drag_mouse_begin_y;
-        //     this._pose.set_offset(this._drag_pose_begin_x + x_mov, this._drag_pose_begin_y + y_mov);
-        // }
-        //
-        // ROPWait.NotifyMoveCamera();
+    private mouse_on_bg_move(e: InteractionEvent): void {
+        e.data.getLocalPosition(this.display, PoseField.P);
+        let mouseX = PoseField.P.x;
+        let mouseY = PoseField.P.y;
+
+        if (this._is_dragging_pose) {
+            let x_mov: number = mouseX - this._drag_mouse_begin_x;
+            let y_mov: number = mouseY - this._drag_mouse_begin_y;
+            this._pose.set_offset(this._drag_pose_begin_x + x_mov, this._drag_pose_begin_y + y_mov);
+        }
+
+        ROPWait.NotifyMoveCamera();
     }
 
-    private mouse_on_bg_up(e: Event): void {
+    private mouse_on_bg_up(): void {
         this._is_dragging_pose = false;
 
         this._pose.done_coloring();
@@ -127,4 +144,6 @@ export class PoseField extends ContainerObject {
     private _drag_mouse_begin_y: number = 0;
     private _drag_pose_begin_x: number = 0;
     private _drag_pose_begin_y: number = 0;
+
+    private static readonly P: Point = new Point();
 }

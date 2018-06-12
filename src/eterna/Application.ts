@@ -1,5 +1,6 @@
 import {Sprite} from "pixi.js";
 import {GameObject} from "../flashbang/core/GameObject";
+import {Assert} from "../flashbang/util/Assert";
 import {Puzzle} from "./puzzle/Puzzle";
 
 /// TODO: remove this entire class
@@ -109,7 +110,7 @@ export class Application {
     // }
 
     public set_mouse_over_position(mouse_over_object: GameObject): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // /// Mouse over container is always the same size & pos with the application
         // /// So it's fine to use Application mouse coordinate
         //
@@ -128,7 +129,7 @@ export class Application {
     }
 
     public set_dragger(mouse_move_cb: Function, mouse_up_cb: Function): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._transparent_dragger.visible = true;
         // this._mouse_move_cb = mouse_move_cb;
         // this._mouse_up_cb = mouse_up_cb;
@@ -142,7 +143,7 @@ export class Application {
     }
 
     public setup_yesno(question: string, yes_cb: Function, no_cb: Function): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._yes_cb = yes_cb;
         // this._no_cb = no_cb;
         //
@@ -158,7 +159,7 @@ export class Application {
     }
 
     public setup_msg_box(msg: string, use_ok: boolean = true, extra_button_name: string = null, extra_button_cb: Function = null): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._msg_box.set_title("Notice");
         //
         // if (use_ok) {
@@ -211,7 +212,7 @@ export class Application {
     }
 
     public close_msg_box(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this.remove_lock("MSG_BOX");
         // this._modal_container.remove_object(this._msg_box);
         // this._msg_box.remove_all_animators();
@@ -237,7 +238,7 @@ export class Application {
     }
 
     public set_blocker_opacity(n: number): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._blocker_opacity = n;
         // this._screen_blocker.graphics.clear();
         // this._screen_blocker.graphics.beginFill(0x0, this._blocker_opacity);
@@ -266,7 +267,7 @@ export class Application {
     }
 
     public copy_url(url: string): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // System.setClipboard(url);
         // this.setup_msg_box("Copied URL\n" + url, false, "Dismiss", this.close_msg_box);
         // let effect: GameAnimatorFader = new GameAnimatorFader(1, 0, 0.5, true, false, 3);
@@ -275,7 +276,7 @@ export class Application {
     }
 
     public copy_to_clipboard(data: string, text: string): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // System.setClipboard(data);
         // this.setup_msg_box(text, false, "Dismiss", this.close_msg_box);
         // let effect: GameAnimatorFader = new GameAnimatorFader(1, 0, 0.5, true, false, 3);
@@ -329,7 +330,7 @@ export class Application {
     }
 
     private move_dragger(e: Event): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // if (this._mouse_move_cb != null) {
         //     this._mouse_move_cb(e);
         // }
@@ -338,7 +339,7 @@ export class Application {
     }
 
     private remove_dragger(e: Event): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._transparent_dragger.removeEventListener(MouseEvent.MOUSE_MOVE, this.move_dragger);
         // this._transparent_dragger.removeEventListener(MouseEvent.MOUSE_UP, this.remove_dragger);
         // this.stage.removeEventListener(Event.MOUSE_LEAVE, this.remove_dragger);
@@ -355,7 +356,7 @@ export class Application {
     }
 
     private on_yes(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // if (this._yes_cb != null) {
         //     this._yes_cb();
         // }
@@ -370,7 +371,7 @@ export class Application {
     }
 
     private on_no(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // if (this._no_cb != null) {
         //     this._no_cb();
         // }
@@ -385,7 +386,7 @@ export class Application {
     }
 
     private block_screen(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // if (this._screen_blocker.visible) {
         //     return;
         // }
@@ -398,7 +399,7 @@ export class Application {
     }
 
     private unblock_screen(): void {
-        throw new Error("TODO");
+        Assert.isTrue(false, "TODO");
         // this._screen_blocker.visible = false;
         // this._modal_container.visible = false;
         //
