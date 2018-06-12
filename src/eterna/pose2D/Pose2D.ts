@@ -150,9 +150,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     //     this._secondary_score_energy_display.set_pos(pos);
     // }
 
-    public visualize_feedback(dat: any[], mid: number, lo: number, hi: number, start_index: number): void {
+    public visualize_feedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
         // coloring
-        let newdat: any[] = ExpPainter.transform_data(dat, hi, lo);
+        let newdat: number[] = ExpPainter.transform_data(dat, hi, lo);
         this._exp_painter = new ExpPainter(newdat, start_index);
         this._exp_mid = mid;
         this._exp_hi = hi;
@@ -424,7 +424,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public parse_command_with_pairs(command: number, closest_index: number, pairs: any[]): any[] {
+    public parse_command_with_pairs(command: number, closest_index: number, pairs: number[]): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
             return PoseUtil.add_base_with_index(closest_index, pairs);
@@ -604,7 +604,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         ROPWait.NotifyEndPaint();
     }
 
-    public delete_base_with_index_pairs(index: number, pairs: any[]): any[] {
+    public delete_base_with_index_pairs(index: number, pairs: number[]): any[] {
         if (this.is_tracked_index(index)) {
             this.toggle_black_mark(index);
         }
@@ -621,7 +621,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get_tracked_indices(): any[] {
+    public get_tracked_indices(): number[] {
         return this._tracked_indices.slice();
     }
 
@@ -665,12 +665,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
-    public get_puzzle_locks(): any[] {
+    public get_puzzle_locks(): boolean[] {
         if (this._locks != null) {
             return this._locks.slice();
         }
 
-        let temp: any[] = [];
+        let temp: boolean[] = [];
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
             temp.push(false);
         }
@@ -689,7 +689,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return lock;
     }
 
-    public set_forced_struct(forced: any[]): void {
+    public set_forced_struct(forced: number[]): void {
         let len: number = this.get_full_sequence_length();
         if (forced == null) {
             this._forced_struct = null;
@@ -706,12 +706,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get_forced_struct(): any[] {
+    public get_forced_struct(): number[] {
         if (this._forced_struct != null) {
             return this._forced_struct.slice();
         }
 
-        let temp: any[] = [];
+        let temp: number[] = [];
         for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
             temp.push(EPars.FORCE_IGNORE);
         }
@@ -732,7 +732,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let len: number = this.get_full_sequence_length();
         let dc: boolean[] = (do_care == null ? null : do_care.slice());
         if (dc != null && this._oligos_order != null) {
-            let idx_map: any[] = this.get_order_map(null);
+            let idx_map: number[] = this.get_order_map(null);
             for (ii = 0; ii < len; ii++) {
                 dc[ii] = do_care[idx_map.indexOf(ii)];
             }
@@ -753,7 +753,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._design_struct[seqnum] = !(this._design_struct[seqnum] == true);
         ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
         this.update_design_highlight();
-        let segments: any[] = this.get_design_segments();
+        let segments: number[] = this.get_design_segments();
         return (segments.length == 4
             && segments[1] - segments[0] == segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
@@ -761,7 +761,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get_design_segments(): number[] {
-        let elems: any[] = [];
+        let elems: number[] = [];
         let curr: number = 0;
         for (let jj: number = 0; jj < this.get_full_sequence_length(); jj++) {
             let _stat: number = (this._design_struct[jj] == true ? 1 : 0);
@@ -1121,11 +1121,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    public create_new_highlight(nucleotides: any[]): Object {
+    public create_new_highlight(nucleotides: number[]): any {
         let hl: any = {};
 
         // If any of the nucleotides are part of a stack, highlight its pair as well.
-        let addition: any[] = [];
+        let addition: number[] = [];
         for (let i: number = 0; i < nucleotides.length; ++i) {
             if (this._pairs[nucleotides[i]] != -1) {
                 addition.push(this._pairs[nucleotides[i]]);
@@ -1140,7 +1140,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return hl;
     }
 
-    public remove_new_highlight(hl: Object): void {
+    public remove_new_highlight(hl: any): void {
         let i: number = this._all_new_highlights.indexOf(hl);
         this._all_new_highlights.splice(i, 1);
         this._redraw = true;
