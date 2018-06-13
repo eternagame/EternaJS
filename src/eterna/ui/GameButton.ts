@@ -105,7 +105,7 @@ export class GameButton extends ToggleButton {
             this._styleBox.drawRoundedRect(0, 0,
                 this._label.width + (GameButton.WMARGIN * 2),
                 this._label.height + (GameButton.HMARGIN * 2),
-                5);
+                3);
             this._styleBox.endFill();
 
         } else if (this._styleBox != null) {
@@ -122,7 +122,7 @@ export class GameButton extends ToggleButton {
             }
 
             this._label.position = tex == null ?
-                new Point(0, 0) :
+                new Point(GameButton.WMARGIN, GameButton.HMARGIN) :
                 new Point(this._img.width + 5, (this._img.height - this._label.height) * 0.5);
             this.container.addChild(this._label);
         }
@@ -179,6 +179,6 @@ export class GameButton extends ToggleButton {
         [ButtonState.DOWN, 0xFFCC00]
     ]);
 
-    private static readonly WMARGIN: number = 4;
-    private static readonly HMARGIN: number = 3;
+    private static readonly WMARGIN: number = 5;
+    private static readonly HMARGIN: number = 4;
 }

@@ -1,4 +1,5 @@
 import {DisplayObject, Point, Rectangle, Graphics} from "pixi.js";
+import {Flashbang} from "../core/Flashbang";
 
 export class DisplayUtil {
     /** Removes the given DisplayObject from its parent, if it has one */
@@ -36,6 +37,10 @@ export class DisplayUtil {
         r.drawRect(0, 0, width, height);
         r.endFill();
         return r;
+    }
+
+    public static fillStageRect(color: number, alpha: number = 1): Graphics {
+        return this.fillRect(Flashbang.stageWidth, Flashbang.stageHeight, color, alpha);
     }
 
     public static width(disp: DisplayObject): number {
