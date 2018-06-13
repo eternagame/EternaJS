@@ -84,7 +84,7 @@ export class GameButton extends ToggleButton {
 
         // Create label
         if (this._label != null) {
-            DisplayUtil.removeFromParent(this._label);
+            this._label.destroy({children: true});
             this._label = null;
         }
 
@@ -109,7 +109,7 @@ export class GameButton extends ToggleButton {
             this._styleBox.endFill();
 
         } else if (this._styleBox != null) {
-            DisplayUtil.removeFromParent(this._styleBox);
+            this._styleBox.destroy({children: true});
             this._styleBox = null;
         }
 

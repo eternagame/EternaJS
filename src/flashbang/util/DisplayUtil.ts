@@ -2,7 +2,11 @@ import {DisplayObject, Point, Rectangle, Graphics} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 
 export class DisplayUtil {
-    /** Removes the given DisplayObject from its parent, if it has one */
+    /**
+     * Removes the given DisplayObject from its parent, if it has one.
+     * Use DisplayObject.destroy() if you want to dispose of the object (destroy() also removes the object
+     * from its parent.)
+     */
     public static removeFromParent(disp: DisplayObject): void {
         if (disp.parent != null) {
             disp.parent.removeChild(disp);
