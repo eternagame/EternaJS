@@ -3,6 +3,7 @@ import {Point} from "pixi.js";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
+import * as _ from "lodash";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
@@ -20,109 +21,75 @@ export class EternaMenu extends GamePanel {
     }
 
     public add_item(label: string, url: string): void {
-        let button: GameButton = new GameButton();
+        let menuButton: GameButton = new GameButton();
 
         if (url != null && url.length > 0) {
-            button.label("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
-            button.clicked.connect(() => {
+            menuButton.label("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
+            menuButton.clicked.connect(() => {
                 log.debug(`TODO: navigateToURL '${url}'`);
                 // let req: URLRequest = new URLRequest;
                 // req.url = url;
                 // this.navigateToURL(req, "_self");
             });
         } else {
-            button.label(label, 12);
+            menuButton.label(label, 12);
         }
-        this.addObject(button, this.container);
-        this._buttons.push(button);
 
-        let panel: GamePanel = new GamePanel(0, 0.85);
-        if (this._menu_style == EternaMenuStyle.PULLUP) {
-            panel.setup(0, 1.0, 0x152843, 1.0, 0xffffff);
-        }
-        panel.display.visible = false;
-        this._panels.push(panel);
-        this._panel_buttons.push(null);
-        button.addObject(panel);
-
-        button.pointerOver.connect(() => panel.display.visible = true);
-        button.pointerOut.connect(() => panel.display.visible = false);
-
+        this.createMenu(menuButton);
         this.needsLayout();
     }
 
-    public add_menu_button(button: GameButton): number {
-        if (this._buttons.indexOf(button) >= 0) {
-            return this._buttons.indexOf(button);
+    public add_menu_button(menuButton: GameButton): number {
+        let existingIdx = _.findIndex(this._menus, (menu): boolean => menu.menuButton == menuButton);
+        if (existingIdx >= 0) {
+            return existingIdx;
         }
 
-        this.addObject(button, this.container);
-        this._buttons.push(button);
-
-        let panel: GamePanel = new GamePanel(0, 0.85);
-        if (this._menu_style == EternaMenuStyle.PULLUP) {
-            panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
-        }
-        panel.display.visible = false;
-        this._panels.push(panel);
-        this._panel_buttons.push(null);
-        button.addObject(panel, button.container);
-
-        button.pointerOver.connect(() => {
-            panel.display.visible = true
-        });
-        button.pointerOut.connect(() => {
-            panel.display.visible = false
-        });
-
+        this.createMenu(menuButton);
         this.needsLayout();
-        return this._buttons.length - 1;
+        return this._menus.length - 1;
     }
 
-    public add_sub_menu_button(index: number, button: GameButton, at_top: boolean = false): void {
-        if (this._panel_buttons[index] == null) {
-            this._panel_buttons[index] = [];
-        }
-
-        if (this._panel_buttons[index].indexOf(button) >= 0) {
+    public add_sub_menu_button(menuIdx: number, itemButton: GameButton, at_top: boolean = false): void {
+        let menu: Menu = this._menus[menuIdx];
+        if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
         }
 
-        let panel: GamePanel = this._panels[index];
-        panel.addObject(button, panel.container);
-
+        menu.panel.addObject(itemButton, menu.panel.container);
         if (at_top) {
-            this._panel_buttons[index].unshift(button);
+            menu.itemButtons.unshift(itemButton);
         } else {
-            this._panel_buttons[index].push(button);
+            menu.itemButtons.push(itemButton);
         }
+
+        // clicking a submenu item hides the panel
+        itemButton.clicked.connect(() => menu.panel.display.visible = false);
 
         this.needsLayout();
     }
 
-    public add_sub_menu_button_at(index: number, button: GameButton, pos: number): void {
-        if (this._panel_buttons[index] == null) {
-            this._panel_buttons[index] = [];
-        }
-
-        if (this._panel_buttons[index].indexOf(button) >= 0) {
+    public add_sub_menu_button_at(menuIdx: number, itemButton: GameButton, pos: number): void {
+        let menu: Menu = this._menus[menuIdx];
+        if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
         }
 
-        let panel: GamePanel = this._panels[index];
-        panel.addObject(button, panel.container);
-        this._panel_buttons[index][pos] = button;
+        menu.panel.addObject(itemButton, menu.panel.container);
+        menu.itemButtons.splice(pos, 0, itemButton);
+
+        // clicking a submenu item hides the panel
+        itemButton.clicked.connect(() => menu.panel.display.visible = false);
+
         this.needsLayout();
     }
 
-    public remove_button(button: GameButton): void {
-        for (let ii = 0; ii < this._panels.length; ii++) {
-            let jj: number = this._panel_buttons[ii].indexOf(button);
-            if (jj >= 0) {
-                let button: GameButton = this._panel_buttons[ii][jj];
-                button.destroySelf();
-
-                this._panel_buttons[ii].splice(jj, 1);
+    public remove_button(itemButton: GameButton): void {
+        for (let menu of this._menus) {
+            let idx = menu.itemButtons.indexOf(itemButton);
+            if (idx >= 0) {
+                itemButton.destroySelf();
+                menu.itemButtons.splice(idx, 1);
                 this.needsLayout();
                 return;
             }
@@ -139,9 +106,28 @@ export class EternaMenu extends GamePanel {
 
     /*override*/
     public set_disabled(disabled: boolean): void {
-        for (let ii: number = 0; ii < this._buttons.length; ii++) {
-            this._buttons[ii].enabled = !disabled;
+        for (let menu of this._menus) {
+            menu.menuButton.enabled = !disabled;
         }
+    }
+
+    private createMenu(menuButton: GameButton): Menu {
+        let menu: Menu = new Menu();
+        menu.menuButton = menuButton;
+        this.addObject(menuButton, this.container);
+        this._menus.push(menu);
+
+        menu.panel = new GamePanel(0, 0.85);
+        if (this._menu_style == EternaMenuStyle.PULLUP) {
+            menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
+        }
+        menu.panel.display.visible = false;
+        menuButton.addObject(menu.panel, menuButton.container);
+
+        menuButton.pointerOver.connect(() => menu.panel.display.visible = true);
+        menuButton.pointerOut.connect(() => menu.panel.display.visible = false);
+
+        return menu;
     }
 
     private needsLayout() {
@@ -151,17 +137,16 @@ export class EternaMenu extends GamePanel {
     }
 
     private do_layout(): void {
-        for (let ii = 0; ii < this._panels.length; ii++) {
-            if (this._panel_buttons[ii] == null) {
-                this._panels[ii].set_size(0, 0);
+        for (let menu of this._menus) {
+            if (menu.itemButtons.length == 0) {
+                menu.panel.set_size(0, 0);
                 continue;
             }
 
-            let buttons: GameButton[] = this._panel_buttons[ii];
             let height_walker: number = 7;
             let width_walker: number = 0;
 
-            for (let button of buttons) {
+            for (let button of menu.itemButtons) {
                 if (button == null) {
                     continue;
                 }
@@ -171,43 +156,47 @@ export class EternaMenu extends GamePanel {
                 width_walker = Math.max(width_walker, DisplayUtil.width(button.display) + 14);
             }
 
-            this._panels[ii].set_size(width_walker, height_walker);
+            menu.panel.set_size(width_walker, height_walker);
         }
 
         let space: number = (this._menu_style == EternaMenuStyle.PULLUP ? 1 : 10);
         let width_offset: number = space;
-        this._menu_height = 0.;
-        for (let ii = 0; ii < this._buttons.length; ii++) {
-            let button: GameButton = this._buttons[ii];
-            let panel: GamePanel = this._panels[ii];
-            let buttonWidth: number = DisplayUtil.width(button.display);
-            let buttonHeight: number = DisplayUtil.height(button.display);
+        this._menu_height = 0;
 
-            button.display.position = new Point(width_offset, 0);
+        for (let menu of this._menus) {
+            let buttonWidth: number = menu.menuButton.container.width;
+            let buttonHeight: number = menu.menuButton.container.height;
+
+            menu.menuButton.display.position = new Point(width_offset, 0);
             if (this._menu_style == EternaMenuStyle.DEFAULT) {
-                panel.display.position = new Point(0, buttonHeight - 1);
+                menu.panel.display.position = new Point(0, buttonHeight - 1);
             } else if (this._menu_style == EternaMenuStyle.PULLUP) {
-                panel.display.position = new Point(0, -panel.get_panel_height() - 1);
+                menu.panel.display.position = new Point(0, -menu.panel.get_panel_height() - 1);
             }
             width_offset += buttonWidth + space;
             this._menu_height = Math.max(this._menu_height, buttonHeight);
         }
 
-        let lastIdx = this._panels.length - 1;
-        let lastButtonWidth = DisplayUtil.width(this._buttons[lastIdx].display);
+        let lastIdx = this._menus.length - 1;
+        let lastButtonWidth = this._menus[lastIdx].menuButton.container.width;
         this._menu_width = (width_offset + space);
         this._right_margin = Math.max(
             lastButtonWidth,
-            this._panels[lastIdx].get_panel_width()) - lastButtonWidth;
+            this._menus[lastIdx].panel.get_panel_width()) - lastButtonWidth;
 
         this.set_size(width_offset, this._menu_height + 1);
     }
 
     private readonly _menu_style: EternaMenuStyle;
-    private _buttons: GameButton[] = [];
-    private _panels: GamePanel[] = [];
-    private _panel_buttons: GameButton[][] = [];
+
+    private _menus: Menu[] = [];
     private _menu_width: number = 0;
     private _right_margin: number = 0;
     private _menu_height: number = 0;
+}
+
+class Menu {
+    public menuButton: GameButton;
+    public panel: GamePanel;
+    public itemButtons: GameButton[] = [];
 }
