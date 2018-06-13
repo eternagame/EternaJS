@@ -212,6 +212,10 @@ export class GameObject extends GameObjectBase {
             cur = next;
         }
 
+        if (this.display != null && this.display.parent != null) {
+            this.display.parent.removeChild(this.display);
+        }
+
         super._disposeInternal();
     }
 
