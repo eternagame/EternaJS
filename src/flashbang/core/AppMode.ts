@@ -161,7 +161,7 @@ export class AppMode {
 
         this._modeStack = null;
 
-        this._modeSprite.destroy();
+        this._modeSprite.destroy({children: true});
         this._modeSprite = null;
     }
 

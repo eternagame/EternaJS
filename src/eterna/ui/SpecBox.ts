@@ -2,7 +2,6 @@ import * as log from "loglevel";
 import {Point, Sprite, Text} from "pixi.js";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
@@ -107,15 +106,15 @@ export class SpecBox extends GamePanel {
         this._stattext.text = statstring;
 
         for (let disp of this._hvec) {
-            DisplayUtil.removeFromParent(disp);
+            disp.destroy({children: true});
         }
+        this._hvec = [];
 
         for (let disp of this._vvec) {
-            DisplayUtil.removeFromParent(disp);
+            disp.destroy({children: true});
         }
-
-        this._hvec = [];
         this._vvec = [];
+
         // initialize h1 ~ hn-1, v1 ~ vn-1
         for (let ii = SpecBox.OFFSET; ii <= (this._datasize / SpecBox.OFFSET) * SpecBox.OFFSET; ii += SpecBox.OFFSET) {
             let hnew: Text = Fonts.arial(String.fromCharCode(65 + (ii / SpecBox.OFFSET)), 12).color(0xffffff).build();

@@ -3128,7 +3128,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private clear_score_texts(): void {
         if (this._score_texts != null) {
             for (let score_text of this._score_texts) {
-                DisplayUtil.removeFromParent(score_text);
+                score_text.destroy({children: true});
             }
             this._score_texts = null;
         }

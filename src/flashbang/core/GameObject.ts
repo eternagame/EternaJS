@@ -212,8 +212,12 @@ export class GameObject extends GameObjectBase {
             cur = next;
         }
 
-        if (this.display != null && this.display.parent != null) {
-            this.display.parent.removeChild(this.display);
+        if (this.display != null) {
+            if (this.display instanceof Container) {
+                (this.display as Container).destroy({children: true});
+            } else {
+                this.display.destroy();
+            }
         }
 
         super._disposeInternal();
