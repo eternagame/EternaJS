@@ -104,7 +104,9 @@ export class Vienna extends Folder {
         if (result != null) {
             // log.debug("score cache hit");
             if (nodes != null) {
-                for (ii = 0; ii < result.nodes.length; ii++) nodes.push(result.nodes[ii]);
+                for (ii = 0; ii < result.nodes.length; ii++) {
+                    nodes.push(result.nodes[ii]);
+                }
             }
             return result.energy * 100;
         }
@@ -151,8 +153,7 @@ export class Vienna extends Folder {
             if (nodes != null) {
                 // TODO: do not store this deletable object in the cache!
                 this.put_cache(key, ret);
-            } else {
-                ret.delete();
+                ret = null;
             }
 
             return energy;
