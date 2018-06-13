@@ -55,9 +55,11 @@ export abstract class LayoutContainer extends Container {
 
         // If our parent is a layout sprite, force it to re-layout, since our size has
         // likely changed.
-        let layoutParent: LayoutContainer = (<LayoutContainer>this.parent);
-        if (layoutParent != null && !layoutParent._isLayingOut) {
-            layoutParent.layout(true);
+        if (this.parent instanceof LayoutContainer) {
+            let layoutParent: LayoutContainer = (<LayoutContainer>this.parent);
+            if (!layoutParent._isLayingOut) {
+                layoutParent.layout(true);
+            }
         }
 
         this._isLayingOut = false;
