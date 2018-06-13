@@ -1,11 +1,14 @@
 import * as log from "loglevel";
-import {Point} from "pixi.js";
+import {Container, Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
+import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Assert} from "../../flashbang/util/Assert";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
+import {ConfirmDialog} from "../ui/ConfirmDialog";
 
 export abstract class GameMode extends AppMode {
     protected setup(): void {
@@ -13,6 +16,12 @@ export abstract class GameMode extends AppMode {
 
         this._pose_fields_container = new ContainerObject();
         this.addObject(this._pose_fields_container, this.modeSprite);
+
+        this._uiLayer = new Container();
+        this.modeSprite.addChild(this._uiLayer);
+
+        this._dialogLayer = new Container();
+        this.modeSprite.addChild(this._dialogLayer);
     }
 
     public get_pose(i: number): Pose2D {
@@ -47,6 +56,20 @@ export abstract class GameMode extends AppMode {
         // }
 
         super.exit();
+    }
+
+    protected showConfirmDialog(prompt: string): ConfirmDialog {
+        return this.showDialog(new ConfirmDialog(prompt));
+    }
+
+    protected showDialog<T extends SceneObject>(dialog: T): T {
+        if (this._dialogRef.isLive) {
+            log.warn("Dialog already showing");
+            this._dialogRef.destroyObject();
+        }
+
+        this._dialogRef = this.addObject(dialog, this._dialogLayer);
+        return dialog;
     }
 
     public number_of_pose_fields(): number {
@@ -163,6 +186,10 @@ export abstract class GameMode extends AppMode {
     protected get_screenshot(): any {
         return null;
     }
+
+    protected _uiLayer: Container;
+    protected _dialogLayer: Container;
+    protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _is_screenshot_supported: boolean = false;
     protected _pose_fields_container: ContainerObject;

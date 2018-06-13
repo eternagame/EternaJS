@@ -36,9 +36,9 @@ export abstract class Button extends ContainerObject {
 
         this.showState(this._state);
 
-        this.pointerOver.connect(() => this.onPointerOver());
-        this.pointerOut.connect(() => this.onPointerOut());
-        this.pointerDown.connect(() => this.onPointerDown());
+        this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
+        this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
+        this.regs.add(this.pointerDown.connect(() => this.onPointerDown()));
     }
 
     /*override*/

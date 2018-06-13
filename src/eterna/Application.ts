@@ -250,7 +250,8 @@ export class Application {
     }
 
     public get_modal_container(): GameObject {
-        return this._modal_container;
+        throw new Error("Remove me");
+        // return this._modal_container;
     }
 
     // public get_front_object_container(): GameObject {
@@ -414,27 +415,18 @@ export class Application {
     protected _pointsrank_url: string;
     protected _url_base: string;
 
-    private _modal_container: GameObject;
+    // private _modal_container: GameObject;
     private _screen_blocker: GameObject;
     private _blocker_opacity: number;
     private _locks: any[];
     private _transparent_dragger: Sprite;
     private _mouse_move_cb: Function;
 
-    /// Temporary functions for debugging
-    // private _mouse_up_cb: Function;
-    // private _yesno_box: TextBalloon;
-
-    /// Override these in subclass if ncessary;
-    private _yes_cb: Function;
-    private _no_cb: Function;
-    // private _msg_box: TextBalloon;
-    // private _ok_button: GameButton;
-    // private _extra_button: GameButton;
     private _is_debug_mode: boolean;
     private _is_dev_mode: boolean;
     private _key_states: Map<any, any>;
     /// Temporary variables for debugging
     private _ui_count: number;
+
     private static _instance: Application;
 }

@@ -80,8 +80,8 @@ export class PoseEditMode extends GameMode {
         this._current_target_index = 0;
 
         this._tools_container = new GamePanel(GamePanelType.INVISIBLE);
-        this.addObject(this._tools_container, this.modeSprite);
-        new UDim(0, 1, 0, -104).setPos(this._tools_container.display);
+        this._tools_container.display.position = new Point(0, Flashbang.stageHeight - 104);
+        this.addObject(this._tools_container, this._uiLayer);
 
         this._undo_button = new GameButton()
             .up(BitmapManager.ImgUndo)
@@ -237,7 +237,7 @@ export class PoseEditMode extends GameMode {
 
         this._hint_box = new GamePanel();
         this._hint_box.display.visible = false;
-        this.addObject(this._hint_box, this.modeSprite);
+        this.addObject(this._hint_box, this._uiLayer);
 
         this._hint_text = Fonts.arial("", 14).build();
         this._hint_box.container.addChild(this._hint_text);
@@ -261,7 +261,7 @@ export class PoseEditMode extends GameMode {
         this._docked_spec_box.display.position = new Point(15, 190);
         this._docked_spec_box.set_size(155, 251);
         this._docked_spec_box.display.visible = false;
-        this.addObject(this._docked_spec_box, this.modeSprite);
+        this.addObject(this._docked_spec_box, this._uiLayer);
 
         let x_button: GameButton = new GameButton()
             .allStates(BitmapManager.ImgMaximize)
@@ -316,7 +316,7 @@ export class PoseEditMode extends GameMode {
         // this._submit_field.set_pos(new UDim(0.5, 0.5, -150, -100));
 
         this._ui_highlight = new SpriteObject();
-        this.addObject(this._ui_highlight, this.modeSprite);
+        this.addObject(this._ui_highlight, this._uiLayer);
 
         this._constraints_head = 0.0;
         this._constraints_foot = 0.0;
@@ -339,11 +339,11 @@ export class PoseEditMode extends GameMode {
         // this._constraint_boxes = [];
         this._constraints_container = new ContainerObject();
         /// Constraints should be on top of curtain
-        this.addObject(this._constraints_container, this.modeSprite);
+        this.addObject(this._constraints_container, this._uiLayer);
 
         /// Puzzle event must be at the top
         this._puzzle_events = new PuzzleEvent();
-        this.addObject(this._puzzle_events, this.modeSprite);
+        this.addObject(this._puzzle_events, this._uiLayer);
         // Application.instance.get_front_object_container().addObject(this._puzzle_events);
 
         // this._game_stamp = new GameBitmap(null);
@@ -387,7 +387,7 @@ export class PoseEditMode extends GameMode {
         this._tools_container.addObject(this._ll_menu, this._tools_container.container);
 
         this._scriptbar = new ActionBar(50);
-        this.addObject(this._scriptbar, this.modeSprite);
+        this.addObject(this._scriptbar, this._uiLayer);
 
         this._nid_field = Fonts.arial("", 16).color(0xffffff).build();
         this._nid_field.width = 100;
@@ -401,7 +401,7 @@ export class PoseEditMode extends GameMode {
 
         this._target_name = Fonts.std_regular("", 18).build();
         this._target_name.visible = false;
-        this.modeSprite.addChild(this._target_name);
+        this._uiLayer.addChild(this._target_name);
 
         // _force_synch = false;
 
@@ -663,10 +663,11 @@ export class PoseEditMode extends GameMode {
         let target_secstructs: string[] = puz.get_secstructs();
         let target_conditions: any[] = puz.get_target_conditions();
 
-        let before_reset: number[] = null;
-        if (is_reset) {
-            before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
-        }
+        // TSC: this crashes, and doesn't seem to accomplish anything
+        // let before_reset: number[] = null;
+        // if (is_reset) {
+        //     before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        // }
 
         let bind_addbase_cb: Function = (pose: Pose2D, kk: number) => {
             pose.set_add_base_callback((parenthesis: string, mode: number, index: number) => {
@@ -1026,7 +1027,7 @@ export class PoseEditMode extends GameMode {
 
             if (seq == null) {
                 seq = puz.get_beginning_sequence(ii);
-                if (this._puzzle.get_puzzle_type() == "Challenge" && is_reset == false) {
+                if (this._puzzle.get_puzzle_type() == "Challenge" && !is_reset) {
                     let saved_seq: number[] = this._puzzle.get_saved_sequence();
                     if (saved_seq != null) {
                         if (saved_seq.length == seq.length) {
@@ -1715,15 +1716,19 @@ export class PoseEditMode extends GameMode {
     }
 
     private ask_retry(): void {
-        Application.instance.setup_yesno("Do you really want to reset?\nReseting will clear your undo stack.", this.retry, null);
+        const PROMPT: string = "Do you really want to reset?\nResetting will clear your undo stack.";
+        this.showConfirmDialog(PROMPT).closed.connect((confirmed) => {
+            if (confirmed) {
+                this.retry();
+            }
+        });
     }
 
     private retry(): void {
-        log.debug("TODO: retry()");
         // Application.instance.get_application_gui("Design Name").set_text("");
-        // this.reset_autosave_data();
-        // this._puzzle.set_temporary_constraints(null);
-        // this.set_puzzle(this._puzzle, null, true);
+        this.reset_autosave_data();
+        this._puzzle.set_temporary_constraints(null);
+        this.modeStack.changeMode(new PoseEditMode(this._puzzle, null, false));
     }
 
     private change_target(target_index: number): void {
