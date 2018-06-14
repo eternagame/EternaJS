@@ -314,44 +314,60 @@ export class EPars {
         return num_repeats++;
     }
 
-    public static string_to_sequence_array(seq: string): number[] {
+    public static string_to_sequence_array(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqarray: number[] = [];
 
         for (let ii: number = 0; ii < seq.length; ii++) {
-            if (seq.charAt(ii) == 'A' || seq.charAt(ii) == 'a') {
+            let char = seq.charAt(ii);
+            if (char == 'A' || char == 'a') {
                 seqarray.push(EPars.RNABASE_ADENINE);
-            } else if (seq.charAt(ii) == 'G' || seq.charAt(ii) == 'g') {
+            } else if (char == 'G' || char == 'g') {
                 seqarray.push(EPars.RNABASE_GUANINE);
-            } else if (seq.charAt(ii) == 'U' || seq.charAt(ii) == 'u') {
+            } else if (char == 'U' || char == 'u') {
                 seqarray.push(EPars.RNABASE_URACIL);
-            } else if (seq.charAt(ii) == 'C' || seq.charAt(ii) == 'c') {
+            } else if (char == 'C' || char == 'c') {
                 seqarray.push(EPars.RNABASE_CYTOSINE);
-            } else if (seq.charAt(ii) == '&' || seq.charAt(ii) == '-') {
-                seqarray.push(EPars.RNABASE_CUT);
+            } else if (char == '&' || char == '-') {
+                if (allowCut) {
+                    seqarray.push(EPars.RNABASE_CUT);
+                } else {
+                    throw new Error(`Bad nucleotide '${char}`);
+                }
             } else {
-                seqarray.push(EPars.RNABASE_UNDEFINED);
+                if (allowUnknown) {
+                    seqarray.push(EPars.RNABASE_UNDEFINED);
+                } else {
+                    throw new Error(`Bad nucleotide '${char}`);
+                }
             }
         }
 
         return seqarray;
     }
 
-    public static sequence_array_to_string(sequence: number[]): string {
-
+    public static sequence_array_to_string(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
         let str: string = "";
-        for (let ii: number = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] == EPars.RNABASE_ADENINE) {
+        for (let value of sequence) {
+            if (value == EPars.RNABASE_ADENINE) {
                 str += "A";
-            } else if (sequence[ii] == EPars.RNABASE_URACIL) {
+            } else if (value == EPars.RNABASE_URACIL) {
                 str += "U";
-            } else if (sequence[ii] == EPars.RNABASE_GUANINE) {
+            } else if (value == EPars.RNABASE_GUANINE) {
                 str += "G";
-            } else if (sequence[ii] == EPars.RNABASE_CYTOSINE) {
+            } else if (value == EPars.RNABASE_CYTOSINE) {
                 str += "C";
-            } else if (sequence[ii] == EPars.RNABASE_CUT) {
-                str += "&";
+            } else if (value == EPars.RNABASE_CUT) {
+                if (allowCut) {
+                    str += "&";
+                } else {
+                    throw new Error(`Bad nucleotide '${value}`);
+                }
             } else {
-                str += "?";
+                if (allowUnknown) {
+                    str += "?";
+                } else {
+                    throw new Error(`Bad nucleotide '${value}`);
+                }
             }
         }
         return str;
