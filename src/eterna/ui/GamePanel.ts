@@ -85,7 +85,7 @@ export class GamePanel extends ContainerObject {
             return;
         }
 
-        this._background.lineStyle(1, this._border_color, this._border_alpha);
+        this._background.lineStyle(2, this._border_color, this._border_alpha);
         this._background.beginFill(this._color, this._alpha);
         this._background.drawRoundedRect(0, 0, this._width, this._height, 5);
         this._background.endFill();
