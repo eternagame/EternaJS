@@ -14,15 +14,15 @@
         return false;
     }
 
-    public score_structures(seq: number[], pairs: number[], temp: number = 37, nodes: any[] = null): number {
+    public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         return 0;
     }
 
-    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): any[] {
+    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         return null;
     }
 
-    public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: any[], bonus: number, version: number = 2.0, temp: number = 37): any[] {
+    public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 2.0, temp: number = 37): number[] {
         return null;
     }
 
@@ -30,7 +30,7 @@
         return false;
     }
 
-    public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): any[] {
+    public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         return null;
     }
 
@@ -40,7 +40,7 @@
 
     /// Overridables
 
-    public cofold_sequence_with_binding_site(seq: number[], binding_site: any[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): any[] {
+    public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         return null;
     }
 
@@ -48,7 +48,7 @@
         return false;
     }
 
-    public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): any[] {
+    public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): number[] {
         return null;
     }
 
@@ -103,7 +103,7 @@
     //     if (done_cb != null) done_cb(false);
     // }
 
-    public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: any[], i: number, j: number): number {
+    public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
         return 0;
     }
 
@@ -115,7 +115,7 @@
         return 0;
     }
 
-    public ml_energy(pairs: number[], S: any[], i: number, is_extloop: boolean): number {
+    public ml_energy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
         return 0;
     }
 
