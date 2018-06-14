@@ -9,7 +9,7 @@
     "build:prod": "webpack --config webpack.prod.js",
     "postbuild:dev": "rsync -tr --delete assets index.html fonts.css dist/dev",
     "postbuild:prod": "rsync -tr --delete assets index.html fonts.css dist/prod",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "jest": {
     "moduleFileExtensions": [
