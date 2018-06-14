@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {EPars} from "../EPars";
 import {RNALayout} from "../pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
@@ -5,7 +6,6 @@ import {Emscripten} from "../util/Emscripten";
 import * as vienna_lib from "./engines/vienna_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vienna_lib/index";
 import {Folder} from "./Folder";
-import * as log from "loglevel";
 
 export class Vienna extends Folder {
     public static readonly NAME: string = "Vienna";
@@ -32,7 +32,7 @@ export class Vienna extends Folder {
 
     /*override*/
     public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: Object = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
         let ret_array: number[] = this.get_cache(key);
         if (ret_array != null) {
             // log.debug("dotplot cache hit");
@@ -97,7 +97,7 @@ export class Vienna extends Folder {
 
     /*override*/
     public score_structures(seq: number[], pairs: number[], temp: number = 37, nodes: any[] = null): number {
-        let key: object = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
         let result: FullEvalResult = this.get_cache(key);
         let ii: number;
 
@@ -171,7 +171,7 @@ export class Vienna extends Folder {
 
     /*override*/
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): any[] {
-        let key: Object = {
+        let key: any = {
             primitive: "eterna.folding",
             seq: seq,
             second_best_pairs: second_best_pairs,
@@ -191,8 +191,7 @@ export class Vienna extends Folder {
 
     /*override*/
     public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: any[], bonus: number, version: number = 1.0, temp: number = 37): any[] {
-
-        let key: Object = {
+        let key: any = {
             primitive: "fold_aptamer",
             seq: seq,
             target_pairs: target_pairs,
@@ -254,7 +253,7 @@ export class Vienna extends Folder {
             throw new Error("Missing cutting point");
         }
 
-        let key: Object = {
+        let key: any = {
             primitive: "cofold",
             seq: seq,
             second_best_pairs: second_best_pairs,
@@ -304,7 +303,7 @@ export class Vienna extends Folder {
             throw new Error("Missing cutting point");
         }
 
-        let key: Object = {
+        let key: any = {
             primitive: "cofold_aptamer",
             seq: seq,
             malus: malus,
