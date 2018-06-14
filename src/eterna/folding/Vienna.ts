@@ -96,16 +96,15 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public score_structures(seq: number[], pairs: number[], temp: number = 37, nodes: any[] = null): number {
+    public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
         let result: FullEvalResult = this.get_cache(key);
-        let ii: number;
 
         if (result != null) {
             // log.debug("score cache hit");
-            if (nodes != null) {
-                for (ii = 0; ii < result.nodes.length; ii++) {
-                    nodes.push(result.nodes[ii]);
+            if (outNodes != null) {
+                for (let ii = 0; ii < result.nodes.length; ii++) {
+                    outNodes.push(result.nodes[ii]);
                 }
             }
             return result.energy * 100;
@@ -119,7 +118,7 @@ export class Vienna extends Folder {
                 EPars.pairs_array_to_parenthesis(pairs));
 
             let cut: number = seq.indexOf(EPars.RNABASE_CUT);
-            if (cut >= 0 && nodes != null && nodes[0] != -2) {
+            if (cut >= 0 && outNodes != null && outNodes[0] != -2) {
                 // we just scored a duplex that wasn't one, so we have to redo it properly
                 let seqA: number[] = seq.slice(0, cut);
                 let pairsA: number[] = pairs.slice(0, cut);
@@ -128,7 +127,7 @@ export class Vienna extends Folder {
 
                 let seqB: number[] = seq.slice(cut + 1);
                 let pairsB: number[] = pairs.slice(cut + 1);
-                for (ii = 0; ii < pairsB.length; ii++) {
+                for (let ii = 0; ii < pairsB.length; ii++) {
                     if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
                 }
                 let nodesB: number[] = [];
@@ -138,19 +137,21 @@ export class Vienna extends Folder {
                     throw new Error("Something went terribly wrong in score_structures()");
                 }
 
-                nodes.splice(0); // make empty
-                for (ii = 0; ii < nodesA.length; ii++) nodes[ii] = nodesA[ii];
-                nodes[1] += nodesB[1]; // combine the free energies of the external loops
-                for (ii = 2; ii < nodesB.length; ii += 2) {
-                    nodes.push(nodesB[ii] + cut + 1);
-                    nodes.push(nodesB[ii + 1]);
+                outNodes.splice(0); // make empty
+                for (let ii = 0; ii < nodesA.length; ii++) {
+                    outNodes[ii] = nodesA[ii];
+                }
+                outNodes[1] += nodesB[1]; // combine the free energies of the external loops
+                for (let ii = 2; ii < nodesB.length; ii += 2) {
+                    outNodes.push(nodesB[ii] + cut + 1);
+                    outNodes.push(nodesB[ii + 1]);
                 }
 
                 ret.energy = (retA + retB) / 100;
             }
 
             let energy: number = ret.energy * 100;
-            if (nodes != null) {
+            if (outNodes != null) {
                 // TODO: do not store this deletable object in the cache!
                 this.put_cache(key, ret);
                 ret = null;
@@ -165,12 +166,13 @@ export class Vienna extends Folder {
         } finally {
             if (ret != null) {
                 ret.delete();
+                ret = null;
             }
         }
     }
 
     /*override*/
-    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): any[] {
+    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
             primitive: "eterna.folding",
             seq: seq,
@@ -190,7 +192,7 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: any[], bonus: number, version: number = 1.0, temp: number = 37): any[] {
+    public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold_aptamer",
             seq: seq,
@@ -212,9 +214,9 @@ export class Vienna extends Folder {
             return pairs;
         }
 
-        let site_groups: any[] = [];
+        let site_groups: number[][] = [];
         let last_index: number = -1;
-        let current_group: any[] = [];
+        let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index == 1) {
@@ -247,7 +249,7 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): any[] {
+    public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
             throw new Error("Missing cutting point");
@@ -268,18 +270,18 @@ export class Vienna extends Folder {
         }
 
         // FIXME: what about desired_pairs? (forced structure)
-        let seqA: any[] = seq.slice(0, cut);
-        let pairsA: any[] = this.fold_sequence(seqA, null, null, temp);
-        let nodesA: any[] = [];
+        let seqA: number[] = seq.slice(0, cut);
+        let pairsA: number[] = this.fold_sequence(seqA, null, null, temp);
+        let nodesA: number[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
 
-        let seqB: any[] = seq.slice(cut + 1);
-        let pairsB: any[] = this.fold_sequence(seqB, null, null, temp);
-        let nodesB: any[] = [];
+        let seqB: number[] = seq.slice(cut + 1);
+        let pairsB: number[] = this.fold_sequence(seqB, null, null, temp);
+        let nodesB: number[] = [];
         let feB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
         co_pairs = this.cofold_sequence_alch(seq, desired_pairs, temp);
-        let co_nodes: any[] = [];
+        let co_nodes: number[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
@@ -297,7 +299,7 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public cofold_sequence_with_binding_site(seq: number[], binding_site: any[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): any[] {
+    public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
             throw new Error("Missing cutting point");
@@ -321,9 +323,9 @@ export class Vienna extends Folder {
         // IMPORTANT: assumption is that the binding site is in segment A
         // FIXME: what about desired_pairs? (forced structure)
 
-        let site_groups: any[] = [];
+        let site_groups: number[][] = [];
         let last_index: number = -1;
-        let current_group: any[] = [];
+        let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index == 1) {
@@ -340,19 +342,19 @@ export class Vienna extends Folder {
             site_groups.push(current_group);
         }
 
-        let seqA: any[] = seq.slice(0, cut);
-        let pairsA: any[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
-        let nodesA: any[] = [];
+        let seqA: number[] = seq.slice(0, cut);
+        let pairsA: number[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
+        let nodesA: number[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
         if (Vienna.binding_site_formed(pairsA, site_groups)) feA += bonus;
 
-        let seqB: any[] = seq.slice(cut + 1);
-        let pairsB: any[] = this.fold_sequence(seqB, null, null, temp);
-        let nodesB: any[] = [];
+        let seqB: number[] = seq.slice(cut + 1);
+        let pairsB: number[] = this.fold_sequence(seqB, null, null, temp);
+        let nodesB: number[] = [];
         let feB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
-        let co_nodes: any[] = [];
+        let co_nodes: number[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
         if (Vienna.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
 
@@ -366,12 +368,12 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public ml_energy(pairs: number[], S: any[], i: number, is_extloop: boolean): number {
+    public ml_energy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
 
         let energy: number, cx_energy: number, best_energy: number;
         best_energy = EPars.INF;
         let i1: number, j: number, p: number, q: number, u: number, x: number, type: number, count: number;
-        let mlintern: any[] = new Array(EPars.NBPAIRS + 1);
+        let mlintern: number[] = new Array(EPars.NBPAIRS + 1);
         let mlclosing: number, mlbase: number;
 
         let dangles: number = EPars.DANGLES;
@@ -575,7 +577,7 @@ export class Vienna extends Folder {
     }
 
     /*override*/
-    public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: any[], i: number, j: number): number {
+    public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
         let hairpin_score: number = 0;
 
         if (size <= 30) {
@@ -615,7 +617,7 @@ export class Vienna extends Folder {
 
     }
 
-    private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): any[] {
+    private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
         let result: FullFoldResult;
 
@@ -633,7 +635,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
+    private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
         const structStr: string = "";
         let result: FullFoldResult;
@@ -652,7 +654,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): any[] {
+    private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
@@ -672,7 +674,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
+    private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
@@ -692,7 +694,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private fold_sequence_alch_with_binding_site_old(seq: number[], target_pairs: number[], binding_site: any[], bonus: number, temp: number = 37): any[] {
+    private fold_sequence_alch_with_binding_site_old(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, temp: number = 37): number[] {
         let best_pairs: number[];
         let native_pairs: number[] = this.fold_sequence(seq, null, null);
 
@@ -701,7 +703,7 @@ export class Vienna extends Folder {
         native_tree.score_tree(seq, this);
         let native_score: number = native_tree.get_total_score();
 
-        let target_satisfied: any[] = EPars.get_satisfied_pairs(target_pairs, seq);
+        let target_satisfied: number[] = EPars.get_satisfied_pairs(target_pairs, seq);
         let target_tree: RNALayout = new RNALayout();
         target_tree.setup_tree(target_satisfied);
         target_tree.score_tree(seq, this);
@@ -738,7 +740,7 @@ export class Vienna extends Folder {
         return best_pairs;
     }
 
-    private static binding_site_formed(pairs: number[], groups: any[]): boolean {
+    private static binding_site_formed(pairs: number[], groups: number[][]): boolean {
         if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
         if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
         let ii: number;
