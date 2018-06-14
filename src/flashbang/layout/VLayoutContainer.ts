@@ -1,4 +1,4 @@
-import {Rectangle, Sprite} from "pixi.js";
+import {Rectangle} from "pixi.js";
 import {Align} from "../core/Align";
 import {LayoutContainer} from "./LayoutContainer";
 
@@ -52,11 +52,7 @@ export class VLayoutContainer extends LayoutContainer {
     }
 
     public addVSpacerAt(size: number, index: number): void {
-        let spacer = new Sprite();
-        spacer.width = 1;
-        spacer.height = size;
-        spacer.alpha = 0;
-        this.addChildAt(spacer, index);
+        this.addChildAt(LayoutContainer.createSpacer(1, size), index);
     }
 
     /*override*/

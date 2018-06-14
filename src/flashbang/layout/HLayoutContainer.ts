@@ -1,4 +1,4 @@
-import {Rectangle, Sprite} from "pixi.js";
+import {Rectangle} from "pixi.js";
 import {Align} from "../core/Align";
 import {LayoutContainer} from "./LayoutContainer";
 
@@ -52,11 +52,7 @@ export class HLayoutContainer extends LayoutContainer {
     }
 
     public addHSpacerAt(size: number, index: number): void {
-        let spacer = new Sprite();
-        spacer.width = size;
-        spacer.height = 1;
-        spacer.alpha = 0;
-        this.addChildAt(spacer, index);
+        this.addChildAt(LayoutContainer.createSpacer(size, 1), index);
     }
 
     /*override*/
