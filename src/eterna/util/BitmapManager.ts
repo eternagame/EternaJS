@@ -279,7 +279,7 @@ export class BitmapManager {
     public static readonly NovaGUMissionReq: string = "assets/NOVA/Mission/ug-requirement.png";
     public static readonly MingFold: string = "assets/MingModes/ui_fold.png";
     public static readonly MingFreeze: string = "assets/MingModes/ui_freeze.png";
-    public static readonly ImgUndoHit: string = "assets/MingPallete/ui_magicbrush.png";
+    public static readonly ImgUndoHit: string = "assets/NOVA/Undo/undo-hit.png";
     public static readonly ImgUndoOver: string = "assets/NOVA/Undo/undo-over.png";
     public static readonly ImgUndo: string = "assets/NOVA/Undo/undo.png";
     public static readonly ImgUpArrow: string = "assets/up_arrow.png";
