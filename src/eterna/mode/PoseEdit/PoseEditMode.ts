@@ -18,12 +18,10 @@ import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {ActionBar} from "../../ui/ActionBar";
-import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {GetPaletteTargetBaseType, NucleotidePalette, PaletteTargetType} from "../../ui/NucleotidePalette";
+import {GamePanel} from "../../ui/GamePanel";
+import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {SpecBox} from "../../ui/SpecBox";
-import {ToggleBar} from "../../ui/ToggleBar";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {AutosaveManager} from "../../util/AutosaveManager";
 import {BitmapManager} from "../../util/BitmapManager";
@@ -34,6 +32,7 @@ import {Utility} from "../../util/Utility";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
+import {PoseEditToolbar} from "./PoseEditToolbar";
 import {PuzzleEvent} from "./PuzzleEvent";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -57,9 +56,9 @@ export enum PoseState {
 export class PoseEditMode extends GameMode {
     public constructor(puz: Puzzle, init_seq?: number[], is_reset?: boolean) {
         super();
-        this._initialPuzzle = puz;
-        this._initialInitSeq = init_seq;
-        this._initialPuzzleIsReset = is_reset;
+        this._puzzle = puz;
+        this._initSeq = init_seq;
+        this._isReset = is_reset;
     }
 
     protected setup(): void {
@@ -72,58 +71,60 @@ export class PoseEditMode extends GameMode {
         // if (this._mission_container == null) this._mission_container = this;
 
         this._is_screenshot_supported = true;
-        this._waiting_for_input = false;
 
-        this._move_count = 0;
-        this._moves = [];
+        let options: any[] = AutosaveManager.loadObjects("poseview-" + Eterna.player_id);
+        this._toolbar = new PoseEditToolbar(this._puzzle, options);
+        this.addObject(this._toolbar, this._uiLayer);
+        this._toolbar.display.position = new Point(
+            (Flashbang.stageWidth - this._toolbar.container.width) * 0.5,
+            Flashbang.stageHeight - 104);
 
-        this._current_target_index = 0;
-
-        this._tools_container = new GamePanel(GamePanelType.INVISIBLE);
-        this._tools_container.display.position = new Point(0, Flashbang.stageHeight - 104);
-        this.addObject(this._tools_container, this._uiLayer);
-
-        this._undo_button = new GameButton()
-            .up(BitmapManager.ImgUndo)
-            .over(BitmapManager.ImgUndoOver)
-            .down(BitmapManager.ImgUndoHit)
-            .tooltip("Undo")
-            .hotkey(KeyCode.KeyZ);
-        this.regs.add(this._undo_button.clicked.connect(() => this.move_undo_stack_backward()));
-
-        this._redo_button = new GameButton()
-            .up(BitmapManager.ImgRedo)
-            .over(BitmapManager.ImgRedoOver)
-            .down(BitmapManager.ImgRedoHit)
-            .tooltip("Redo")
-            .hotkey(KeyCode.KeyY);
-        this.regs.add(this._redo_button.clicked.connect(() => this.move_undo_stack_forward()));
-
-        this._zoom_out_button = new GameButton()
-            .up(BitmapManager.ImgZoomOut)
-            .over(BitmapManager.ImgZoomOutOver)
-            .down(BitmapManager.ImgZoomOutHit)
-            .disabled(BitmapManager.ImgZoomOutDisable)
-            .tooltip("Zoom out")
-            .hotkey(KeyCode.Minus);
-        this.regs.add(this._zoom_out_button.clicked.connect(() => {
-            for (let ii: number = 0; ii < this._pose_fields.length; ii++) {
-                this._pose_fields[ii].zoom_out();
+        this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
+        this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
+        this._toolbar.zoom_out_button.clicked.connect(() => {
+            for (let poseField of this._pose_fields) {
+                poseField.zoom_out();
             }
-        }));
-
-        this._zoom_in_button = new GameButton()
-            .up(BitmapManager.ImgZoomIn)
-            .over(BitmapManager.ImgZoomInOver)
-            .down(BitmapManager.ImgZoomInHit)
-            .disabled(BitmapManager.ImgZoomInDisable)
-            .tooltip("Zoom in")
-            .hotkey(KeyCode.Equal);
-        this.regs.add(this._zoom_in_button.clicked.connect(() => {
-            for (let ii: number = 0; ii < this._pose_fields.length; ii++) {
-                this._pose_fields[ii].zoom_in();
+        });
+        this._toolbar.zoom_in_button.clicked.connect(() => {
+            for (let poseField of this._pose_fields) {
+                poseField.zoom_in();
             }
-        }));
+        });
+        this._toolbar.submit_button.clicked.connect(() => this.submit_current_pose());
+        this._toolbar.view_solutions_button.clicked.connect(() => {
+            log.debug("TODO: viewSolutions");
+            // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this.puzzle.get_node_id()]);
+        });
+        this._toolbar.retry_button.clicked.connect(() => this.ask_retry());
+        this._toolbar.native_button.clicked.connect(() => this.toggle_posestate());
+        this._toolbar.target_button.clicked.connect(() => this.toggle_posestate());
+        this._toolbar.spec_button.clicked.connect(() => this.show_spec());
+        this._toolbar.paste_button.clicked.connect(() => {
+            log.debug("TODO: paste_button_clicked");
+            // Application.instance.add_lock("PASTESEQUENCE");
+            // this._paste_field.set_hotkeys(KeyCode.KEY_NONE, "", KeyCode.KEY_ESC, "Esc");
+            // Application.instance.get_modal_container().addObject(this._paste_field);
+        });
+
+        this._toolbar.copy_button.clicked.connect(() => {
+            Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
+        });
+
+        this._toolbar.pip_button.clicked.connect(() => {
+            this.toggle_pip();
+            if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
+                let state_dict: Map<any, any> = new Map();
+                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.PIP);
+                this._puzzle_events.process_events(state_dict);
+            }
+        });
+
+        this._toolbar.freeze_button.clicked.connect(() => this.toggle_freeze());
+        this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
+        this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
+        this._toolbar.hint_button.clicked.connect(() => this.on_click_hint());
+        this._toolbar.spec_button.clicked.connect(() => this.show_spec());
 
         // this._paste_field = new InputField;
         // this._paste_field.add_field("Sequence", 200);
@@ -153,87 +154,11 @@ export class PoseEditMode extends GameMode {
         //     });
         // this._paste_field.set_pos(new UDim(0.5, 0.5, -150, -100));
 
-        // this._paste_button = new GameButton(14, BitmapManager.get_bitmap(BitmapManager.ImgPaste), 0, 0, true);
-        this._paste_button = new GameButton()
-            .allStates(BitmapManager.ImgPaste)
-            .label("Paste", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Type in a sequence");
 
-        this._paste_button.clicked.connect(() => {
-            log.debug("TODO: paste_button_clicked");
-            // Application.instance.add_lock("PASTESEQUENCE");
-            // this._paste_field.set_hotkeys(KeyCode.KEY_NONE, "", KeyCode.KEY_ESC, "Esc");
-            // Application.instance.get_modal_container().addObject(this._paste_field);
-        });
-
-        this._copy_button = new GameButton()
-            .allStates(BitmapManager.ImgCopy)
-            .label("Copy", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Copy the current sequence");
-
-        this._copy_button.clicked.connect(() => {
-            Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
-        });
-
-        this._view_options_button = new GameButton()
-            .allStates(BitmapManager.ImgSettings)
-            .label("Settings", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Game options");
         // let opt: GameObject = (<GameObject>Application.instance.get_application_gui("View options"));
         // if (opt != null) {
-        //     this._view_options_button.set_click_callback(opt.open_view_options);
+        //     this._toolbar.viewOptionsClicked.connect(opt.open_view_options);
         // }
-
-        this._pip_button = new GameButton()
-            .up(BitmapManager.ImgPip)
-            .over(BitmapManager.ImgPipOver)
-            .down(BitmapManager.ImgPipHit)
-            .tooltip("Set PiP mode")
-            .hotkey(KeyCode.KeyP);
-        this.regs.add(this._pip_button.clicked.connect(() => {
-            this.toggle_pip();
-            if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
-                let state_dict: Map<any, any> = new Map();
-                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.PIP);
-                this._puzzle_events.process_events(state_dict);
-            }
-        }));
-
-        this._freeze_button = new GameButton()
-            .up(BitmapManager.ImgFreeze)
-            .over(BitmapManager.ImgFreezeOver)
-            .selected(BitmapManager.ImgFreezeSelected)
-            .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
-            .hotkey(KeyCode.KeyF);
-        this._freeze_button.clicked.connect(() => this.toggle_freeze());
-        this._is_frozen = false;
-
-        this._palette = new NucleotidePalette();
-        this._palette.display.visible = true;
-        this._tools_container.addObject(this._palette, this._tools_container.container);
-        this.regs.add(this._palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType)));
-
-        this._pair_swap_button = new GameButton()
-            .up(BitmapManager.ImgSwap)
-            .over(BitmapManager.ImgSwapOver)
-            .down(BitmapManager.ImgSwapOver)
-            .selected(BitmapManager.ImgSwapSelect)
-            .hotkey(KeyCode.Digit5)
-            .tooltip("Swap paired bases.");
-        this._pair_swap_button.clicked.connect(() => this.on_click_P());
-        this._tools_container.addObject(this._pair_swap_button);
-
-        this._hint_button = new GameButton()
-            .up(BitmapManager.ImgHint)
-            .over(BitmapManager.ImgHintOver)
-            .down(BitmapManager.ImgHintHit)
-            .hotkey(KeyCode.KeyH)
-            .tooltip("Hint");
-        this._tools_container.addObject(this._hint_button, this._tools_container.container);
-        this.regs.add(this._hint_button.clicked.connect(() => this.on_click_hint()));
 
         this._hint_box = new GamePanel();
         this._hint_box.display.visible = false;
@@ -241,17 +166,6 @@ export class PoseEditMode extends GameMode {
 
         this._hint_text = Fonts.arial("", 14).build();
         this._hint_box.container.addChild(this._hint_text);
-
-        this._dyn_paint_tools = [];
-        this._dyn_action_tools = [];
-
-        this._spec_button = new GameButton()
-            .allStates(BitmapManager.ImgSpec)
-            .label("Specs", 14)
-            .scaleBitmapToLabel()
-            .tooltip("View RNA's melting point, dotplot and other specs")
-            .hotkey(KeyCode.KeyS);
-        this._spec_button.clicked.connect(() => this.show_spec());
 
         this._spec_box = new SpecBox();
         this._spec_box.display.position = new Point(Flashbang.stageWidth * 0.15, Flashbang.stageHeight * 0.15);
@@ -274,23 +188,6 @@ export class PoseEditMode extends GameMode {
         });
         this._docked_spec_box.addObject(x_button, this._docked_spec_box.container);
 
-        this._submit_button = new GameButton()
-            .up(BitmapManager.ImgSubmit)
-            .over(BitmapManager.ImgSubmitOver)
-            .down(BitmapManager.ImgSubmitHit)
-            .tooltip("Publish your solution!");
-        this.regs.add(this._submit_button.clicked.connect(() => this.submit_current_pose()));
-
-        this._view_solutions_button = new GameButton()
-            .allStates(BitmapManager.ImgFile)
-            .label("Designs", 14)
-            .scaleBitmapToLabel()
-            .tooltip("View all submitted designs for this puzzle.");
-        this._view_solutions_button.clicked.connect(() => {
-            log.debug("TODO: viewSolutions");
-            // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this._puzzle.get_node_id()]);
-        });
-
         this._folder_button = new GameButton()
             .allStates(BitmapManager.ShapeImg)
             .label("-", 22)
@@ -299,14 +196,6 @@ export class PoseEditMode extends GameMode {
         this._folder_button.display.scale = new Point(0.5, 0.5);
         // this._folder_button.set_size(new UDim(0, 0, 111, 40));
         this._folder_button.clicked.connect(() => this.change_folder());
-
-        // this._retry_button = new GameButton(14, BitmapManager.get_bitmap(BitmapManager.ImgReset));
-        this._retry_button = new GameButton()
-            .allStates(BitmapManager.ImgReset)
-            .label("Reset", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Reset and try this puzzle again.");
-        this._retry_button.clicked.connect(() => this.ask_retry());
 
         // this._submit_field = new InputField;
         // this._submit_field.set_title("Submit your design");
@@ -317,11 +206,6 @@ export class PoseEditMode extends GameMode {
 
         this._ui_highlight = new SpriteObject();
         this.addObject(this._ui_highlight, this._uiLayer);
-
-        this._constraints_head = 0.0;
-        this._constraints_foot = 0.0;
-        this._constraints_top = 0.0;
-        this._constraints_bottom = 0.0;
 
         this._bubble_curtain = new BubbleSweep(800);
         this._bubble_curtain.display.visible = false;
@@ -356,36 +240,6 @@ export class PoseEditMode extends GameMode {
         this._exit_button.display.visible = false;
         this.regs.add(this._exit_button.clicked.connect(() => this.exit_puzzle()));
 
-        this._native_button = new GameButton()
-            .up(BitmapManager.ImgNative)
-            .over(BitmapManager.ImgNativeOver)
-            .down(BitmapManager.ImgNativeSelected)
-            .selected(BitmapManager.ImgNativeSelected)
-            .tooltip("Natural Mode. RNA folds into the most stable shape.");
-        this._native_button.display.position = new Point(13, 15);
-        this._tools_container.addObject(this._native_button, this._tools_container.container);
-
-        this._target_button = new GameButton()
-            .up(BitmapManager.ImgTarget)
-            .over(BitmapManager.ImgTargetOver)
-            .down(BitmapManager.ImgTargetSelected)
-            .selected(BitmapManager.ImgTargetSelected)
-            .tooltip("Target Mode. RNA freezes into the desired shape.");
-        this._tools_container.addObject(this._target_button, this._tools_container.container);
-
-        this.regs.add(this._native_button.clicked.connect(() => this.toggle_posestate()));
-        this.regs.add(this._target_button.clicked.connect(() => this.toggle_posestate()));
-
-        this._boosters_button = new GameButton()
-            .up(BitmapManager.NovaBoosters)
-            .over(BitmapManager.NovaBoosters)
-            .down(BitmapManager.NovaBoosters);
-
-        this._ll_menu = new EternaMenu(EternaMenuStyle.PULLUP);
-        let bn: GameButton = new GameButton().allStates(BitmapManager.NovaMenu);
-        this._ll_menu.add_menu_button(bn);
-        this._tools_container.addObject(this._ll_menu, this._tools_container.container);
-
         this._scriptbar = new ActionBar(50);
         this.addObject(this._scriptbar, this._uiLayer);
 
@@ -408,60 +262,7 @@ export class PoseEditMode extends GameMode {
         this._asynch_text = Fonts.arial("eterna.folding...", 12).build();
         this._asynch_text.position = new Point(16, 200);
 
-
-        this.set_puzzle(this._initialPuzzle, this._initialInitSeq, this._initialPuzzleIsReset);
-    }
-
-    public get_native_button(): GameButton {
-        return this._native_button;
-    }
-
-    public get_target_button(): GameButton {
-        return this._target_button;
-    }
-
-    public get_pip_button(): GameButton {
-        return this._pip_button;
-    }
-
-    public get_freeze_button(): GameButton {
-        return this._freeze_button;
-    }
-
-    public get_action_menu(): EternaMenu {
-        return this._ll_menu;
-    }
-
-    public get_undo_button(): GameButton {
-        return this._undo_button;
-    }
-
-    public get_redo_button(): GameButton {
-        return this._redo_button;
-    }
-
-    public get_zoom_in_button(): GameButton {
-        return this._zoom_in_button;
-    }
-
-    public get_zoom_out_button(): GameButton {
-        return this._zoom_out_button;
-    }
-
-    public get_retry_button(): GameButton {
-        return this._retry_button;
-    }
-
-    public get_palette(): NucleotidePalette {
-        return this._palette;
-    }
-
-    public get_swap_button(): GameButton {
-        return this._pair_swap_button;
-    }
-
-    public get_hint_button(): GameButton {
-        return this._hint_button;
+        this.set_puzzle();
     }
 
     /*override*/
@@ -507,7 +308,9 @@ export class PoseEditMode extends GameMode {
 
     public rop_change_target(target_index: number): void {
         this.change_target(target_index);
-        if (this._toggle_bar != null) this._toggle_bar.set_state(target_index);
+        if (this._toolbar.toggle_bar != null) {
+            this._toolbar.toggle_bar.set_state(target_index);
+        }
     }
 
     public rop_set_to_native_mode(): void {
@@ -587,7 +390,7 @@ export class PoseEditMode extends GameMode {
     public on_click_P(): void {
         this.set_poses_color(EPars.RNABASE_PAIR);
         this.deselect_all_colorings();
-        this._pair_swap_button.toggled.value = true;
+        this._toolbar.pair_swap_button.toggled.value = true;
     }
 
     public on_click_hint(): void {
@@ -655,13 +458,11 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    public set_puzzle(puz: Puzzle, init_seq: number[], is_reset: boolean = false): void {
-        this._puzzle = puz;
-
+    private set_puzzle(): void {
         let pose_fields: PoseField[] = [];
 
-        let target_secstructs: string[] = puz.get_secstructs();
-        let target_conditions: any[] = puz.get_target_conditions();
+        let target_secstructs: string[] = this._puzzle.get_secstructs();
+        let target_conditions: any[] = this._puzzle.get_target_conditions();
 
         // TSC: this crashes, and doesn't seem to accomplish anything
         // let before_reset: number[] = null;
@@ -716,44 +517,11 @@ export class PoseEditMode extends GameMode {
 
         this.set_pose_fields(pose_fields);
 
-        let options: any[] = AutosaveManager.loadObjects("poseview-" + Eterna.player_id);
-
-        if (options != null && options[12] == true) {
-            this._tools_container.addObject(this._freeze_button);
-        }
-
-        this.set_toolbar_autohide(options != null && options[11] == true);
-
-        if (this._toggle_bar != null) {
-            this._tools_container.removeObject(this._toggle_bar);
-            this._toggle_bar = null;
-        }
-
-        if (target_secstructs.length > 1) {
-            this._target_name.visible = true;
-
-            this._toggle_bar = new ToggleBar(target_secstructs.length);
-            this._tools_container.addObject(this._toggle_bar, this._tools_container.container);
-            this.regs.add(this._toggle_bar.stateChanged.connect((newState) => {
-                this.change_target(newState);
-            }));
-        }
-
         this._is_databrowser_mode = false;
         // if (this.root.loaderInfo.parameters.databrowser
         //     && this.root.loaderInfo.parameters.databrowser == "true") {
         //     this._is_databrowser_mode = true;
         // }
-
-        this._pose_state = 0;
-        this._target_pairs = [];
-        this._target_conditions = [];
-        this._target_oligo = [];
-        this._oligo_mode = [];
-        this._oligo_name = [];
-
-        this._target_oligos = [];
-        this._target_oligos_order = [];
 
         let default_mode: string = this._puzzle.default_mode();
 
@@ -813,14 +581,14 @@ export class PoseEditMode extends GameMode {
                 this._poses[ii].set_current_color(-1);
             }
         } else {
-            this._palette.clickTarget(PaletteTargetType.A);
+            this._toolbar.palette.clickTarget(PaletteTargetType.A);
         }
 
         let num_constraints: number = 0;
         let constraints: any[] = [];
-        if (puz.get_constraints() != null) {
-            num_constraints = puz.get_constraints().length;
-            constraints = puz.get_constraints();
+        if (this._puzzle.get_constraints() != null) {
+            num_constraints = this._puzzle.get_constraints().length;
+            constraints = this._puzzle.get_constraints();
         }
 
         this._constraints_container.removeAllObjects();
@@ -873,30 +641,10 @@ export class PoseEditMode extends GameMode {
         //     ConstraintBox(this._constraint_boxes[ii]).visible = false;
         // }
 
-        let pairs: number[] = EPars.parenthesis_to_pair_array(puz.get_secstruct());
+        let pairs: number[] = EPars.parenthesis_to_pair_array(this._puzzle.get_secstruct());
 
         /// Setup Action bar
         this._scriptbar.clear_items(false);
-
-        if (puz.is_undo_zoom_allowed()) {
-            this._tools_container.addObject(this._undo_button);
-            this._tools_container.addObject(this._redo_button);
-            this._tools_container.addObject(this._zoom_out_button);
-            this._tools_container.addObject(this._zoom_in_button);
-        }
-
-        this._ll_menu.add_sub_menu_button(0, this._view_options_button);
-
-        if (puz.get_puzzle_type() == "Experimental") {
-            this._ll_menu.add_sub_menu_button(0, this._view_solutions_button);
-            this._tools_container.addObject(this._submit_button);
-            this._ll_menu.add_sub_menu_button(0, this._spec_button);
-
-            if (options != null && options[8] == true) {
-                this._folder_button.label(this._puzzle.get_folder()); // set the actual one
-                this.addObject(this._folder_button);
-            }
-        }
 
         // this._scriptbar.visible = false;
         // if (this.root.loaderInfo.parameters.scriptbar
@@ -915,88 +663,7 @@ export class PoseEditMode extends GameMode {
         //     }
         // }
 
-        this._ll_menu.add_sub_menu_button(0, this._retry_button);
-
-        if (puz.get_puzzle_type() != "Basic") {
-            this._ll_menu.add_sub_menu_button(0, this._copy_button);
-            this._ll_menu.add_sub_menu_button(0, this._paste_button);
-        }
-
-        if (puz.get_secstructs().length > 1) {
-            this._tools_container.addObject(this._pip_button);
-        }
-
-        if (puz.is_pallete_allowed()) {
-            if (puz.is_pair_brush_allowed()) {
-                this._palette.change_default_mode();
-                this._pair_swap_button.display.visible = true;
-            } else {
-                this._palette.change_no_pair_mode();
-                this._pair_swap_button.display.visible = false;
-            }
-        } else {
-            this._palette.set_disabled(true);
-        }
-
-        this._hint_button.display.visible = puz.get_hint() != null;
-
-        for (let k = 0; k < this._dyn_paint_tools.length; k++) {
-            this._tools_container.removeObject(this._dyn_paint_tools[k]);
-        }
-        this._dyn_paint_tools = [];
-        for (let k = 0; k < this._dyn_action_tools.length; k++) {
-            this._ll_menu.remove_button(this._dyn_action_tools[k]);
-        }
-        this._dyn_action_tools = [];
-
         this._yt_id = null;
-
-        let obj: any = puz.get_boosters();
-        let missionDescriptionOverride: string = null;
-        if (obj) {
-            log.debug("TODO: paint_tools");
-            // if (obj['paint_tools'] != null) {
-            //     for (let k = 0; k < obj.paint_tools.length; k++) {
-            //         let booster = new Booster(this, obj.paint_tools[k], (me: Booster, dummy: number) => {
-            //             me.on_load();
-            //             let button: GameButton = me.create_button();
-            //             button.set_click_callback(() => {
-            //                 this.set_poses_color(me.get_tool_color());
-            //                 this.deselect_all_colorings();
-            //                 button.set_selected(true);
-            //             });
-            //             this._dyn_paint_tools.push(button);
-            //             this._tools_container.addObject(button);
-            //             this.layout_bars();
-            //         });
-            //     }
-            // }
-            // if (obj['actions'] != null) {
-            //     let idx: number = this._ll_menu.add_menu_button(this._boosters_button);
-            //     for (let k = 0; k < obj.actions.length; k++) {
-            //         obj.actions[k]['menu_index'] = k;
-            //         let booster = new Booster(this, obj.actions[k], (me: Booster, midx: number = 0) => {
-            //             let button: GameButton = me.create_button(14);
-            //             button.set_click_callback(() => {
-            //                 me.on_run();
-            //             });
-            //             this._ll_menu.add_sub_menu_button_at(idx, button, midx);
-            //             this._dyn_action_tools.push(button);
-            //             this.layout_bars();
-            //         });
-            //     }
-            // }
-            // let infotxt: string;
-            // if (obj['mission'] != null) {
-            //     missionDescriptionOverride = obj.mission['text'];
-            // }
-            // if (obj['mission_cleared'] != null) {
-            //     infotxt = obj.mission_cleared['info'];
-            //     let moretxt: string = obj.mission_cleared['more'];
-            //     this._mission_cleared.setup_screen(infotxt, moretxt);
-            //     this._yt_id = obj.mission_cleared['yt'];
-            // }
-        }
 
         // this._mission_screen = new MissionScreen(
         //     puz.get_puzzle_name(true),
@@ -1023,11 +690,11 @@ export class PoseEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let seq: number[] = init_seq;
+            let seq: number[] = this._initSeq;
 
             if (seq == null) {
-                seq = puz.get_beginning_sequence(ii);
-                if (this._puzzle.get_puzzle_type() == "Challenge" && !is_reset) {
+                seq = this._puzzle.get_beginning_sequence(ii);
+                if (this._puzzle.get_puzzle_type() == "Challenge" && !this._isReset) {
                     let saved_seq: number[] = this._puzzle.get_saved_sequence();
                     if (saved_seq != null) {
                         if (saved_seq.length == seq.length) {
@@ -1072,7 +739,7 @@ export class PoseEditMode extends GameMode {
 
         let autoloaded: boolean = false;
 
-        if (!is_reset) {
+        if (!this._isReset) {
             this.autoload_data(); //Does nothing if no data saved, no need to load timer
             // re-register script APIs
             this._script_hooks = false;
@@ -1081,11 +748,11 @@ export class PoseEditMode extends GameMode {
 
         this._pose_edit_by_target_cb = () => {
             if (this._force_synch) {
-                this.set_puzzle_epilog(init_seq, is_reset);
+                this.set_puzzle_epilog(this._initSeq, this._isReset);
             } else {
                 this._op_queue.push(new AsyncOp(
                     this._target_pairs.length,
-                    () => this.set_puzzle_epilog(init_seq, is_reset)));
+                    () => this.set_puzzle_epilog(this._initSeq, this._isReset)));
             }
             this._pose_edit_by_target_cb = null;
         };
@@ -1414,11 +1081,7 @@ export class PoseEditMode extends GameMode {
 
     /*override*/
     public set_toolbar_autohide(auto: boolean): void {
-        if (auto) {
-            this._tools_container.set_auto_collapse(true, new UDim(0, 1, 0, -104), new UDim(0, 1, 0, -32));
-        } else {
-            this._tools_container.set_auto_collapse(false, new UDim(0, 1, 0, -104));
-        }
+        this._toolbar.set_toolbar_autohide(auto);
     }
 
     /*override*/
@@ -1487,9 +1150,7 @@ export class PoseEditMode extends GameMode {
         AutosaveManager.saveObjects([pip_mode], "PIP-pref-" + Application.instance.get_player_id());
 
         if (pip_mode) {
-            if (this._toggle_bar != null) {
-                this._toggle_bar.display.visible = false;
-            }
+            this._toolbar.toggle_bar.display.visible = false;
             this._target_name.visible = false;
 
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -1516,10 +1177,8 @@ export class PoseEditMode extends GameMode {
             }
 
         } else {
-            if (this._toggle_bar != null) {
-                this._toggle_bar.display.visible = true;
-                this._target_name.visible = true;
-            }
+            this._toolbar.toggle_bar.display.visible = true;
+            this._target_name.visible = true;
 
             this.change_target(this._current_target_index);
             this._poses[0].set_zoom_level(this._poses[0].compute_default_zoom_level(), true, true);
@@ -1870,10 +1529,10 @@ export class PoseEditMode extends GameMode {
             this._puzzle_events.process_events(state_dict);
         }
 
-        this._target_button.toggled.value = false;
-        this._native_button.toggled.value = true;
-        this._target_button.hotkey(KeyCode.Space);
-        this._native_button.hotkey(null);
+        this._toolbar.target_button.toggled.value = false;
+        this._toolbar.native_button.toggled.value = true;
+        this._toolbar.target_button.hotkey(KeyCode.Space);
+        this._toolbar.native_button.hotkey(null);
 
         this.save_poses_markers_contexts();
         this._paused = false;
@@ -1890,10 +1549,10 @@ export class PoseEditMode extends GameMode {
             this._puzzle_events.process_events(state_dict);
         }
 
-        this._target_button.toggled.value = true;
-        this._native_button.toggled.value = false;
-        this._native_button.hotkey(KeyCode.Space);
-        this._target_button.hotkey(null);
+        this._toolbar.target_button.toggled.value = true;
+        this._toolbar.native_button.toggled.value = false;
+        this._toolbar.native_button.hotkey(KeyCode.Space);
+        this._toolbar.target_button.hotkey(null);
 
         this.save_poses_markers_contexts();
 
@@ -1936,9 +1595,9 @@ export class PoseEditMode extends GameMode {
         this._constraints_container.display.alpha = (this._is_frozen ? 0.25 : 1.0);
         this.set_show_total_energy(!this._is_frozen);
 
-        this._undo_button.enabled = !this._is_frozen;
-        this._redo_button.enabled = !this._is_frozen;
-        this._freeze_button.toggled.value = this._is_frozen;
+        this._toolbar.undo_button.enabled = !this._is_frozen;
+        this._toolbar.redo_button.enabled = !this._is_frozen;
+        this._toolbar.freeze_button.toggled.value = this._is_frozen;
 
         if (!this._is_frozen) { // we just "thawed", update
             this.pose_edit_by_target(this._current_target_index);
@@ -2009,9 +1668,9 @@ export class PoseEditMode extends GameMode {
         cancel_button.clicked.connect(() => {
             Application.instance.get_modal_container().removeObject(this._spec_box);
             Application.instance.remove_lock("SPEC");
-            this._spec_button.hotkey(KeyCode.KeyS);
+            this._toolbar.spec_button.hotkey(KeyCode.KeyS);
         });
-        this._spec_button.hotkey(null);
+        this._toolbar.spec_button.hotkey(null);
         cancel_button.hotkey(KeyCode.KeyS);
         cancel_button.tooltip("");
 
@@ -2420,10 +2079,10 @@ export class PoseEditMode extends GameMode {
     }
 
     private deselect_all_colorings(): void {
-        this._palette.clear_selection();
-        this._pair_swap_button.toggled.value = false;
-        for (let k: number = 0; k < this._dyn_paint_tools.length; k++) {
-            this._dyn_paint_tools[k].toggled.value = false;
+        this._toolbar.palette.clear_selection();
+        this._toolbar.pair_swap_button.toggled.value = false;
+        for (let k: number = 0; k < this._toolbar.dyn_paint_tools.length; k++) {
+            this._toolbar.dyn_paint_tools[k].toggled.value = false;
         }
     }
 
@@ -2434,47 +2093,19 @@ export class PoseEditMode extends GameMode {
     }
 
     private disable_tools(disable: boolean): void {
-        this._palette.set_disabled(disable);
-        this._pair_swap_button.enabled = !disable;
-        for (let k: number = 0; k < this._dyn_paint_tools.length; k++) {
-            this._dyn_paint_tools[k].enabled = !disable;
-        }
+        this._toolbar.disable_tools(disable);
         // this._scriptbar.enabled = !disable;
-
-        this._target_button.enabled = !disable;
-        this._native_button.enabled = !disable;
-
-        this._zoom_in_button.enabled = !disable;
-        this._zoom_out_button.enabled = !disable;
-
-        this._native_button.enabled = !disable;
-        this._target_button.enabled = !disable;
-
-        this._view_options_button.enabled = !disable;
         // if (this._pic_button) {
         //     this._pic_button.enabled = !disable;
         // }
         this._is_pic_disabled = disable;
-        this._retry_button.enabled = !disable;
-        this._copy_button.enabled = !disable;
-        this._paste_button.enabled = !disable;
-        this._spec_button.enabled = !disable;
-
-        this._undo_button.enabled = !disable;
-        this._redo_button.enabled = !disable;
-
-        this._submit_button.enabled = !disable;
-        this._view_solutions_button.enabled = !disable;
 
         if (this._hint_box.display.visible) {
             this._hint_box.display.visible = false;
         }
-        this._hint_button.enabled = !disable;
 
         this._folder_button.enabled = !disable;
-        this._freeze_button.enabled = !disable;
 
-        this._pip_button.enabled = !disable;
         for (let ii = 0; ii < this._pose_fields.length; ii++) {
             // this._pose_fields[ii].mouseEnabled = !disable;
             // this._pose_fields[ii].mouseChildren = !disable;
@@ -2486,10 +2117,6 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        if (this._toggle_bar != null) {
-            this._toggle_bar.set_disabled(disable);
-        }
-
         // if (this._view_options_cmi) this._view_options_cmi.enabled = !disable;
         // if (this._view_solutions_cmi) this._view_solutions_cmi.enabled = !disable;
         // if (this._submit_cmi) this._submit_cmi.enabled = !disable;
@@ -2498,8 +2125,6 @@ export class PoseEditMode extends GameMode {
         // if (this._copy_cmi) this._copy_cmi.enabled = !disable;
         // if (this._paste_cmi) this._paste_cmi.enabled = !disable;
         // if (this._beam_cmi) this._beam_cmi.enabled = !disable;
-
-        this._ll_menu.set_disabled(disable);
     }
 
     private display_constraint_boxes(animate: boolean, display: boolean): void {
@@ -2799,30 +2424,13 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_default_visibilities(): void {
-        this._undo_button.display.visible = true;
-        this._redo_button.display.visible = true;
-        this._zoom_out_button.display.visible = true;
-        this._zoom_out_button.display.visible = true;
-        this._zoom_in_button.display.visible = true;
-        this._paste_button.display.visible = true;
-        this._copy_button.display.visible = true;
-        this._view_options_button.display.visible = true;
-        this._pip_button.display.visible = true;
-        this._freeze_button.display.visible = true;
-        this._palette.display.visible = true;
-        this._pair_swap_button.display.visible = true;
-        this._retry_button.display.visible = true;
         this._exit_button.display.visible = false;
-        this._native_button.display.visible = true;
-        this._target_button.display.visible = true;
-        this._hint_button.display.visible = false;
-        this._ll_menu.display.visible = true;
 
         this._show_mission_screen = true;
         this.set_show_constraints(true);
 
-        this._palette.reset_overrides();
-        this._palette.change_default_mode();
+        this._toolbar.palette.reset_overrides();
+        this._toolbar.palette.change_default_mode();
     }
 
     private update_next_puzzle_widget(puzzle: Puzzle): void {
@@ -4071,14 +3679,14 @@ export class PoseEditMode extends GameMode {
         let num_AU: number = undo_block.get_param(UndoBlockParam.AU);
         let num_GU: number = undo_block.get_param(UndoBlockParam.GU);
         let num_GC: number = undo_block.get_param(UndoBlockParam.GC);
-        this._palette.set_pair_counts(num_AU, num_GU, num_GC);
+        this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
 
         if (!this._is_frozen) {
-            if (this._undo_button.display.visible) {
-                this._undo_button.enabled = !(this._stack_level < 1);
+            if (this._toolbar.undo_button.display.visible) {
+                this._toolbar.undo_button.enabled = !(this._stack_level < 1);
             }
-            if (this._redo_button.display.visible) {
-                this._redo_button.enabled = !(this._stack_level + 1 > this._stack_size - 1);
+            if (this._toolbar.redo_button.display.visible) {
+                this._toolbar.redo_button.enabled = !(this._stack_level + 1 > this._stack_size - 1);
             }
         }
 
@@ -4822,106 +4430,9 @@ export class PoseEditMode extends GameMode {
     }
 
     private layout_bars(): void {
-        let rel_x: number = 0;
-
-        // FIXME: needs revision...
-        let pallete_width: number = this._palette.get_bar_width() - 250;
-        let modebar_width: number = 0;
-        let use_modes: boolean = true;
-        let use_palette: boolean = true;
-
-        if (this._puzzle != null) {
-            use_modes = this._puzzle.are_modes_available();
-            use_palette = this._puzzle.is_pallete_allowed();
-        }
-
-        let whole_width: number = 20 + modebar_width + 50 + pallete_width + 20;
-
-        if (Flashbang.stageWidth > whole_width) {
-            let margin: number = (Flashbang.stageWidth - whole_width) / 2.0;
-            rel_x = margin / Flashbang.stageWidth;
-        }
-
         this._scriptbar.display.position = new Point(
             Flashbang.stageWidth - 20 - this._scriptbar.get_bar_width(),
             Flashbang.stageHeight - 129);
-
-        // Adjust positions of NOVA-Port UI
-        let right_x_idx: number = 0;
-        let left_x_idx: number = 0;
-
-        this._tools_container.set_size(Flashbang.stageWidth, 104);
-
-        if (this._palette && use_palette) {
-            new UDim(0.5,1,-this._palette.container.width/2,-21-this._palette.container.height).setPos(this._palette.display);
-        }
-
-        if (this._pair_swap_button && this._pair_swap_button.isLiveObject /*this._tools_container.contains(this._pair_swap_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 4, -21 - this._pair_swap_button.container.height).setPos(this._pair_swap_button.display);
-            right_x_idx += (4 + this._pair_swap_button.container.width);
-        }
-
-        for (let paintTool of this._dyn_paint_tools) {
-            if (paintTool && paintTool.isLiveObject /*this.contains(paintTool)*/) {
-                new UDim(0.5, 1, right_x_idx + 4, -21 - paintTool.container.height).setPos(paintTool.display);
-                right_x_idx += (4 + paintTool.container.width);
-            }
-        }
-
-        right_x_idx += 20;
-        if (this._zoom_in_button && this._zoom_in_button.isLiveObject /*this._tools_container.contains(this._zoom_in_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 4, -21 - this._zoom_in_button.container.height).setPos(this._zoom_in_button.display);
-            right_x_idx += (4 + this._zoom_in_button.container.width);
-        }
-        if (this._zoom_out_button && this._zoom_out_button.isLiveObject /*this._tools_container.contains(this._zoom_out_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 1, -21 - this._zoom_out_button.container.height).setPos(this._zoom_out_button.display);
-            right_x_idx += (1 + this._zoom_out_button.container.width);
-        }
-        if (this._undo_button && this._undo_button.isLiveObject /* this._tools_container.contains(this._undo_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 4, -21 - this._undo_button.container.height).setPos(this._undo_button.display);
-            right_x_idx += (4 + this._undo_button.container.width);
-        }
-        if (this._redo_button && this._redo_button.isLiveObject /*this._tools_container.contains(this._redo_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 1, -21 - this._redo_button.container.height).setPos(this._redo_button.display);
-            right_x_idx += (1 + this._redo_button.container.width);
-        }
-        if (this._hint_button && this._hint_button.isLiveObject /*this._tools_container.contains(this._hint_button)*/) {
-            new UDim(0.5, 1, right_x_idx + 4, -21 - this._hint_button.container.height).setPos(this._hint_button.display);
-            right_x_idx += (4 + this._hint_button.container.width);
-        }
-
-        left_x_idx -= 20;
-        if (this._target_button && this._target_button.isLiveObject) {//this._tools_container.contains(this._target_button)) {
-            new UDim(0.5, 1, left_x_idx - 4 - this._target_button.container.width, -21 - this._target_button.container.height).setPos(this._target_button.display);
-            left_x_idx -= (4 + this._target_button.container.width);
-        }
-        if (this._native_button && this._native_button.isLiveObject) {//this._tools_container.contains(this._native_button)) {
-            new UDim(0.5, 1, left_x_idx - 1 - this._native_button.container.width, -21 - this._native_button.container.height).setPos(this._native_button.display);
-            left_x_idx -= (1 + this._native_button.container.width);
-        }
-        if (this._pip_button && this._toggle_bar) {
-            new UDim(0.5, 1, left_x_idx - 4 - this._pip_button.container.width, -21 - this._pip_button.container.height).setPos(this._pip_button.display);
-            left_x_idx -= (4 + this._pip_button.container.width);
-        }
-        if (this._freeze_button && this._freeze_button.isLiveObject) {//this._tools_container.contains(this._freeze_button)) {
-            new UDim(0.5, 1, left_x_idx - 4 - this._freeze_button.container.width, -21 - this._freeze_button.container.height).setPos(this._freeze_button.display);
-            left_x_idx -= (4 + this._freeze_button.container.width);
-        }
-
-        left_x_idx -= 20;
-        if (this._submit_button && this._submit_button.isLiveObject) {//this._tools_container.contains(this._submit_button)) {
-            new UDim(0.5, 1, left_x_idx - 4 - this._submit_button.container.width, -21 - this._submit_button.container.height).setPos(this._submit_button.display);
-            left_x_idx -= (4 + this._submit_button.container.width);
-        }
-        if (this._ll_menu && this._ll_menu.isLiveObject) {//this._tools_container.contains(this._ll_menu)) {
-            new UDim(0.5, 1, left_x_idx - 4 - this._ll_menu.get_width(false), -21 - this._ll_menu.get_height()).setPos(this._ll_menu.display);
-            left_x_idx -= (4 + this._ll_menu.container.width);
-        }
-
-        if (this._toggle_bar && this._zoom_in_button) {
-            new UDim(0.5, 1, -this._toggle_bar.container.width / 2, -21 - this._zoom_in_button.container.height - 5 - this._toggle_bar.container.height).setPos(this._toggle_bar.display);
-            new UDim(0.5, 1, 5 + this._toggle_bar.container.width / 2, -21 - this._zoom_in_button.container.height - 5 - this._toggle_bar.container.height + 1).setPos(this._target_name);
-        }
     }
 
     // private on_ctx_menu_item(event: ContextMenuEvent): void {
@@ -4947,11 +4458,13 @@ export class PoseEditMode extends GameMode {
     //     }
     // }
 
-    private readonly _initialPuzzle: Puzzle;
-    private readonly _initialInitSeq: number[];
-    private readonly _initialPuzzleIsReset: boolean;
+    private readonly _puzzle: Puzzle;
+    private readonly _initSeq: number[];
+    private readonly _isReset: boolean;
 
     private _background: Background;
+
+    private _toolbar: PoseEditToolbar;
 
     private _folder: Folder;	/// ViennaRNA folder
     /// Asynch folding
@@ -4964,58 +4477,35 @@ export class PoseEditMode extends GameMode {
     private _seq_stacks: UndoBlock[][];
     private _stack_level: number;
     private _stack_size: number;
-    private _puzzle: Puzzle;
     private _puz_state: PuzzleState;
-    private _waiting_for_input: boolean;
+    private _waiting_for_input: boolean = false;
     private _paused: boolean;
     private _start_solving_time: number;
     private _starting_point: string;
-    private _move_count: number;
-    private _moves: any[];
-    private _current_target_index: number;
-    private _pose_state: PoseState;
-    private _target_pairs: any[];
-    private _target_conditions: any[];
-    private _target_oligo: any[];
-    private _oligo_mode: any[];
-    private _oligo_name: any[];
-    private _target_oligos: any[];
-    private _target_oligos_order: any[];
+    private _move_count: number = 0;
+    private _moves: any[] = [];
+    private _current_target_index: number = 0;
+    private _pose_state: PoseState = PoseState.NATIVE;
+    private _target_pairs: any[] = [];
+    private _target_conditions: any[] = [];
+    private _target_oligo: any[] = [];
+    private _oligo_mode: any[] = [];
+    private _oligo_name: any[] = [];
+    private _target_oligos: any[] = [];
+    private _target_oligos_order: any[] = [];
     /// Lab related
-    private _submit_button: GameButton;
-    private _view_solutions_button: GameButton;
     // private _submit_field: InputField;
     private _folder_button: GameButton;
     private _is_databrowser_mode: boolean;
     /// Modes
-    private _native_button: GameButton;
-    private _target_button: GameButton;
-    private _pip_button: GameButton;
-    private _freeze_button: GameButton;
-    private _is_frozen: boolean;
+    private _is_frozen: boolean = false;
     // Nova-syle switches
-    private _toggle_bar: ToggleBar;
     private _target_name: Text;
-    private _tools_container: GamePanel;
-    /// Lower-left menu
-    private _ll_menu: EternaMenu;
-    private _boosters_button: GameButton;
-    private _undo_button: GameButton;
-    private _redo_button: GameButton;
-    private _zoom_in_button: GameButton;
-    private _zoom_out_button: GameButton;
-    private _copy_button: GameButton;
-    private _paste_button: GameButton;
-    private _view_options_button: GameButton;
-    private _retry_button: GameButton;
-    /// Palette
-    private _palette: NucleotidePalette;
-    private _pair_swap_button: GameButton;
-    private _hint_button: GameButton;
+
     private _hint_box: GamePanel;
     private _hint_text: Text;
-    private _dyn_paint_tools: GameButton[];
-    private _dyn_action_tools: GameButton[];
+
+    /// Palette
     /// Paste sequence widget
     // private _paste_field: InputField;
     /// constraints && scoring display
@@ -5026,17 +4516,16 @@ export class PoseEditMode extends GameMode {
     private _unstable_index: number;
     private _constraints_offset: number;
     /// Spec related
-    private _spec_button: GameButton;
     private _spec_box: SpecBox;
     private _docked_spec_box: SpecBox;
     /// Exit button
     private _exit_button: GameButton;
     /// Puzzle Event
     private _puzzle_events: PuzzleEvent;
-    private _constraints_head: number;
-    private _constraints_foot: number;
-    private _constraints_top: number;
-    private _constraints_bottom: number;
+    private _constraints_head: number = 0;
+    private _constraints_foot: number = 0;
+    private _constraints_top: number = 0;
+    private _constraints_bottom: number = 0;
     private _bubble_curtain: BubbleSweep;
     /// Text indicating solution submission
     private _submitting_text: Text;
