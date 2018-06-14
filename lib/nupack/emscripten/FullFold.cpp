@@ -4,81 +4,66 @@
 #include "../pfuncUtilsHeader.h"
 #include "../DNAExternals.h"
 
-FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string& structString) {
+FullFoldResult* FullFoldDefault (const std::string& seqString) {
     auto autoSeqString = MakeCString(seqString);
-    auto autoStructure = MakeCString(structString);
-
     char* string = autoSeqString.get();
-    char* structure = autoStructure.get();
 
     int seqNum[MAXSEQLENGTH+1];
-    int tmpLength;
+    int tmpLength = strlen(string);
     dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
-    DBL_TYPE mfe;
 
-    tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
                    DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = mfeStructs.validStructs[0].correctedEnergy;
+
     for (int j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
-            structure[j] = '(';
+            result->structure.push_back('(');
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
-            structure[j] = '.';
+            result->structure.push_back('.');
         } else {
-            structure[j] = ')';
+            result->structure.push_back(')');
         }
     }
-    structure[mfeStructs.seqlength] = 0;
-    mfe = mfeStructs.validStructs[0].correctedEnergy;
-    clearDnaStructures(&mfeStructs);
 
-    FullFoldResult* result = new FullFoldResult();
-    result->mfe = mfe;
-    result->structure = structure;
+    clearDnaStructures(&mfeStructs);
 
     return result;
 }
 
-FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, const std::string& structString) {
+FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString) {
     auto autoSeqString = MakeCString(seqString);
-    auto autoStructure = MakeCString(structString);
-
     char* string = autoSeqString.get();
-    char* structure = autoStructure.get();
 
     int seqNum[MAXSEQLENGTH+1];
-    int tmpLength;
+    int tmpLength = strlen(string);
     dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
-    DBL_TYPE mfe;
-    int j;
 
-    tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
                    DANGLETYPE, temperature_in, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
-    for (j = 0; j < mfeStructs.seqlength; j++) {
+    FullFoldResult* result = new FullFoldResult();
+    result->mfe = mfeStructs.validStructs[0].correctedEnergy;
+
+    for (int j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
-            structure[j] = '(';
+            result->structure.push_back('(');
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
-            structure[j] = '.';
+            result->structure.push_back('.');
         } else {
-            structure[j] = ')';
+            result->structure.push_back(')');
         }
     }
-    structure[mfeStructs.seqlength] = 0;
-    mfe = mfeStructs.validStructs[0].correctedEnergy;
-    clearDnaStructures(&mfeStructs);
 
-    FullFoldResult* result = new FullFoldResult();
-    result->mfe = mfe;
-    result->structure = structure;
+    clearDnaStructures(&mfeStructs);
 
     return result;
 }
@@ -191,17 +176,12 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, int site_
     return result;
 }
 
-FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString) {
+FullFoldResult* CoFoldSequence (const std::string& seqString) {
     auto autoSeqString = MakeCString(seqString);
-    auto autoStructure = MakeCString(structString);
-
     char* string = autoSeqString.get();
-    char* structure = autoStructure.get();
 
     int seqNum[MAXSEQLENGTH+1];
-    int tmpLength;
     dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
-    DBL_TYPE mfe;
     int i, j;
     char* pc;
 
@@ -209,67 +189,58 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
         pc = strchr(string, '&');
         if (pc) (*pc) = '+';
     } while(pc);
-    if (0) TraceJS(string);
 
-    tmpLength = strlen(string);
+    int tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
                    DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
+    std::string outStructure;
     for (j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
-            structure[j] = '(';
+            outStructure.push_back('(');
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
-            structure[j] = '.';
+            outStructure.push_back('.');
         } else {
-            structure[j] = ')';
+            outStructure.push_back(')');
         }
     }
-    structure[mfeStructs.seqlength] = 0;
 
-    std::unique_ptr<char[]> structureCopy(new char[strlen(structure) + 1]);
-    strcpy(structureCopy.get(), structure);
+    std::string structureCopy = outStructure;
     for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
         if ((*pc) == '+') {
-            structure[j++] = '&';
+            outStructure[j++] = '&';
         } else {
-            structure[j++] = structureCopy.get()[i++];
+            outStructure[j++] = structureCopy[i++];
         }
     }
-    structure[j] = 0;
-
-    mfe = mfeStructs.validStructs[0].correctedEnergy;
-    clearDnaStructures(&mfeStructs);
 
     FullFoldResult* result = new FullFoldResult();
-    result->mfe = mfe;
-    result->structure = structure;
+    result->mfe = mfeStructs.validStructs[0].correctedEnergy;
+    result->structure = outStructure;
+
+    clearDnaStructures(&mfeStructs);
+
     return result;
 }
 
-FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int site_i, int site_p, int site_j, int site_q, int site_bonus) {
+FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int site_i, int site_p, int site_j, int site_q, int site_bonus) {
     auto autoSeqString = MakeCString(seqString);
-    auto autoStructure = MakeCString(structString);
-
     char* string = autoSeqString.get();
-    char* structure = autoStructure.get();
 
     int seqNum[MAXSEQLENGTH+1];
-    int tmpLength;
     dnaStructures mfeStructs = {NULL, 0, 0, 0, 0};
-    DBL_TYPE mfe;
     int i, j;
-    char* pc;
 
+    char* pc;
     do {
         pc = strchr(string, '&');
         if (pc) (*pc) = '+';
     } while(pc);
-    if (0) TraceJS(string);
 
-    tmpLength = strlen(string);
+    int tmpLength = strlen(string);
     convertSeq(string, seqNum, tmpLength);
 
     // activate binding site callbacks
@@ -287,33 +258,31 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, con
     binding_site_cb = NULL;
     binding_cb = NULL;
 
+    std::string outStructure;
     for (j = 0; j < mfeStructs.seqlength; j++) {
         if (mfeStructs.validStructs[0].theStruct[j] > j) {
-            structure[j] = '(';
+            outStructure.push_back('(');
         } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
-            structure[j] = '.';
+            outStructure.push_back('.');
         } else {
-            structure[j] = ')';
+            outStructure.push_back(')');
         }
     }
-    structure[mfeStructs.seqlength] = 0;
 
-    std::unique_ptr<char[]> structureCopy(new char[strlen(structure) + 1]);
-    strcpy(structureCopy.get(), structure);
+    std::string structureCopy = outStructure;
     for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
         if ((*pc) == '+') {
-            structure[j++] = '&';
+            outStructure[j++] = '&';
         } else {
-            structure[j++] = structureCopy.get()[i++];
+            outStructure[j++] = structureCopy[i++];
         }
     }
-    structure[j] = 0;
-
-    mfe = mfeStructs.validStructs[0].correctedEnergy;
-    clearDnaStructures(&mfeStructs);
 
     FullFoldResult* result = new FullFoldResult();
-    result->mfe = mfe;
-    result->structure = structure;
+    result->mfe = mfeStructs.validStructs[0].correctedEnergy;
+    result->structure = outStructure;
+
+    clearDnaStructures(&mfeStructs);
+
     return result;
 }

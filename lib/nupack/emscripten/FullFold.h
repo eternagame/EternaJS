@@ -14,11 +14,11 @@ struct DotPlotResult {
     std::vector<double> plot;
 };
 
-FullFoldResult* FullFoldDefault (const std::string& seqString, const std::string& structString);
-FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, const std::string& structString);
+FullFoldResult* FullFoldDefault (const std::string& seqString);
+FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString);
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString);
 FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus);
-FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString);
-FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int site_i, int site_p, int site_j, int site_q, int site_bonus);
+FullFoldResult* CoFoldSequence (const std::string& seqString);
+FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int site_i, int site_p, int site_j, int site_q, int site_bonus);
 
 #endif //NUPACK_FULLFOLD_H

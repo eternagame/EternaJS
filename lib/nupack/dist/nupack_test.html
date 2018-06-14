@@ -9,11 +9,11 @@
 <script>
     console.log('Nupack initializing...');
 
-    function FullFold (name, seq, struct) {
+    function FullFold (name, seq) {
         console.log(`Folding ${name}...`);
 
         let t0 = performance.now();
-        let fullFoldResult = nupack.FullFoldDefault(seq, struct);
+        let fullFoldResult = nupack.FullFoldDefault(seq);
         let t1 = performance.now();
 
         console.log(`${name} complete! (${t1 - t0}ms)`);
@@ -39,10 +39,9 @@
 
         const SNOWFLAKE_STRUCT = '((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
 
-        FullFold('Miniloop', MINILOOP_SEQ, MINILOOP_STRUCT);
-        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
-        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
-        FullFold('Snowflake', SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT);
+        FullFold('Miniloop', MINILOOP_SEQ);
+        FullFold('Snowflake', SNOWFLAKE_SEQ);
+        FullFold('EmptyStructure', "AAAAAAAAAAAAAA");
         console.log('Done!');
     });
 </script>
