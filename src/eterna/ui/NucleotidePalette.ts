@@ -2,7 +2,6 @@ import * as log from "loglevel";
 import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
 import {ROPWait} from "../rscript/ROPWait";
@@ -45,9 +44,11 @@ export class NucleotidePalette extends ContainerObject {
         this._select_pair_data = BitmapManager.get_bitmap(BitmapManager.ImgSelectPair);
         this._select_base_data = BitmapManager.get_bitmap(BitmapManager.ImgSelectBase);
 
-        this._selection = new Sprite(this._select_base_data);
         this._palette_display = new Sprite(this._palette_image);
         this.container.addChild(this._palette_display);
+
+        this._selection = new Sprite();
+        this.container.addChild(this._selection);
 
         this._num_au = Fonts.arial("", 12).color(0xffffff).bold().build();
         this.container.addChild(this._num_au);
@@ -178,14 +179,14 @@ export class NucleotidePalette extends ContainerObject {
         if (!target.enabled) {
             return;
         }
-        this.show_selection(target.hitboxes[0], target.isPair, true);
-        ROPWait.NotifyClickUI(target.name);
 
         this.targetClicked.emit(type);
+        this.show_selection(target.hitboxes[0], target.isPair, true);
+        ROPWait.NotifyClickUI(target.name);
     }
 
     public clear_selection(): void {
-        DisplayUtil.removeFromParent(this._selection);
+        this._selection.visible = false;
     }
 
     public set_pair_counts(au: number, ug: number, gc: number): void {
@@ -208,17 +209,12 @@ export class NucleotidePalette extends ContainerObject {
             return;
         }
 
-        if (is_pair) {
-            this._selection.texture = this._select_pair_data;
-        } else {
-            this._selection.texture = this._select_base_data;
-        }
-
-        this._selection.position = new Point(selected_box.x, selected_box.y);
-        if (do_show) {
-            this.container.addChild(this._selection);
-        } else {
+        if (!do_show) {
             this.clear_selection();
+        } else {
+            this._selection.texture = is_pair ? this._select_pair_data : this._select_base_data;
+            this._selection.position = new Point(selected_box.x, selected_box.y);
+            this._selection.visible = true;
         }
     }
 
