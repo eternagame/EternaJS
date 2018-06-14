@@ -21,7 +21,13 @@
     "transform": {
       "\\.(ts|tsx)$": "<rootDir>/../node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$"
+    "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
+    "globals": {
+      "ts-jest": {
+        "skipBabel": true,
+        "tsConfigFile": "../tsconfig.jest.json"
+      }
+    }
   },
   "repository": {
     "type": "git",
