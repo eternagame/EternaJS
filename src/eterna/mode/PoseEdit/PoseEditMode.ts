@@ -12,6 +12,7 @@ import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
+import {FoldUtil} from "../../folding/FoldUtil";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {Puzzle} from "../../puzzle/Puzzle";
@@ -28,7 +29,6 @@ import {BitmapManager} from "../../util/BitmapManager";
 import {Fonts} from "../../util/Fonts";
 import {SoundManager} from "../../util/SoundManager";
 import {UDim} from "../../util/UDim";
-import {Utility} from "../../util/Utility";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
@@ -3850,7 +3850,7 @@ export class PoseEditMode extends GameMode {
                                     this._poses[target_index].clear_design_struct();
                                     more = false;
                                 } else {
-                                    more = Utility.next_perm(new_order);
+                                    more = FoldUtil.next_perm(new_order);
                                 }
                             } while (more);
                         }
