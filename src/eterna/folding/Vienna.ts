@@ -616,39 +616,8 @@ export class Vienna extends Folder {
 
     }
 
-    private static getSequenceString(seq: number[], allowCut: boolean): string {
-        let seqStr = "";
-        for (let value of seq) {
-            switch (value) {
-            case EPars.RNABASE_ADENINE:
-                seqStr += "A";
-                break;
-            case EPars.RNABASE_CYTOSINE:
-                seqStr += "C";
-                break;
-            case EPars.RNABASE_GUANINE:
-                seqStr += "G";
-                break;
-            case EPars.RNABASE_URACIL:
-                seqStr += "U";
-                break;
-            case EPars.RNABASE_CUT:
-                if (allowCut) {
-                    seqStr += "&";
-                } else {
-                    throw new Error(`Bad nucleotide '${value}`);
-                }
-                break;
-            default:
-                throw new Error(`Bad nucleotide '${value}`);
-            }
-        }
-
-        return seqStr;
-    }
-
     private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): any[] {
-        const seqStr = Vienna.getSequenceString(seq, false);
+        const seqStr = EPars.sequence_array_to_string(seq, false, false);
         let result: FullFoldResult;
 
         try {
@@ -666,7 +635,7 @@ export class Vienna extends Folder {
     }
 
     private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
-        const seqStr = Vienna.getSequenceString(seq, false);
+        const seqStr = EPars.sequence_array_to_string(seq, false, false);
         const structStr: string = "";
         let result: FullFoldResult;
 
@@ -685,7 +654,7 @@ export class Vienna extends Folder {
     }
 
     private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): any[] {
-        const seqStr = Vienna.getSequenceString(seq, true);
+        const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
 
@@ -705,7 +674,7 @@ export class Vienna extends Folder {
     }
 
     private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): any[] {
-        const seqStr = Vienna.getSequenceString(seq, true);
+        const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
 
