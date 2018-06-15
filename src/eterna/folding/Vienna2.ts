@@ -2,7 +2,8 @@ import * as log from "loglevel";
 import {EPars} from "../EPars";
 import {RNALayout} from "../pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
-import {Emscripten} from "../util/Emscripten";
+import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
+import {Utility} from "../util/Utility";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
 import {Folder} from "./Folder";
@@ -17,7 +18,7 @@ export class Vienna2 extends Folder {
      */
     public static create(): Promise<Vienna2> {
         return import('./engines/vrna2')
-            .then((module: any) => Emscripten.loadProgram(module))
+            .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna2(program));
     }
 
@@ -98,74 +99,75 @@ export class Vienna2 extends Folder {
     /*override*/
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
-        let result: FullEvalResult = this.get_cache(key);
+        let cache: FullEvalCache = this.get_cache(key);
 
-        if (result != null) {
+        if (cache != null) {
             // trace("score cache hit");
             if (outNodes != null) {
-                for (let ii = 0; ii < result.nodes.length; ii++) {
-                    outNodes.push(result.nodes[ii]);
-                }
+                Utility.arrayCopy(outNodes, cache.nodes);
             }
-
-            return result.energy * 100;
+            return cache.energy * 100;
         }
 
-        let ret: FullEvalResult = null;
-        try {
-            ret = this._lib.FullEval(temp,
-                EPars.sequence_array_to_string(seq),
-                EPars.pairs_array_to_parenthesis(pairs));
+        do {
+            let result: FullEvalResult = null;
+            try {
+                result = this._lib.FullEval(temp,
+                    EPars.sequence_array_to_string(seq),
+                    EPars.pairs_array_to_parenthesis(pairs));
+                cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
 
-            let cut: number = seq.indexOf(EPars.RNABASE_CUT);
-            if (cut >= 0 && outNodes != null && outNodes[0] != -2) {
-                // we just scored a duplex that wasn't one, so we have to redo it properly
-                let seqA: any[] = seq.slice(0, cut);
-                let pairsA: any[] = pairs.slice(0, cut);
-                let nodesA: any[] = [];
-                let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
-
-                let seqB: any[] = seq.slice(cut + 1);
-                let pairsB: any[] = pairs.slice(cut + 1);
-                for (let ii = 0; ii < pairsB.length; ii++) {
-                    if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+            } catch (e) {
+                log.error("FullEval error", e);
+                return 0;
+            } finally {
+                if (result != null) {
+                    result.delete();
                 }
-                let nodesB: any[] = [];
-                let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
+            }
+        } while(0);
 
-                if (nodesA[0] != -1 || nodesB[0] != -1) {
-                    throw new Error("Something went terribly wrong in score_structures()");
-                }
+        let cut: number = seq.indexOf(EPars.RNABASE_CUT);
+        if (cut >= 0 && cache.nodes[0] != -2) {
+            // we just scored a duplex that wasn't one, so we have to redo it properly
+            let seqA: number[] = seq.slice(0, cut);
+            let pairsA: number[] = pairs.slice(0, cut);
+            let nodesA: number[] = [];
+            let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
 
-                outNodes.splice(0); // make empty
-                for (let ii = 0; ii < nodesA.length; ii++) {
-                    outNodes[ii] = nodesA[ii];
-                }
-                outNodes[1] += nodesB[1]; // combine the free energies of the external loops
-                for (let ii = 2; ii < nodesB.length; ii += 2) {
-                    outNodes.push(nodesB[ii] + cut + 1);
-                    outNodes.push(nodesB[ii + 1]);
-                }
+            let seqB: number[] = seq.slice(cut + 1);
+            let pairsB: number[] = pairs.slice(cut + 1);
+            for (let ii = 0; ii < pairsB.length; ii++) {
+                if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+            }
+            let nodesB: number[] = [];
+            let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
-                ret.energy = (retA + retB) / 100;
+            if (nodesA[0] != -1 || nodesB[0] != -1) {
+                throw new Error("Something went terribly wrong in score_structures()");
             }
 
-            let energy = ret.energy * 100;
-            if (outNodes != null) {
-                this.put_cache(key, ret);
+            cache.nodes.splice(0); // make empty
+            for (let ii = 0; ii < nodesA.length; ii++) {
+                cache.nodes[ii] = nodesA[ii];
+            }
+            cache.nodes[1] += nodesB[1]; // combine the free energies of the external loops
+            for (let ii = 2; ii < nodesB.length; ii += 2) {
+                cache.nodes.push(nodesB[ii] + cut + 1);
+                cache.nodes.push(nodesB[ii + 1]);
             }
 
-            return energy;
-
-        } catch (e) {
-            log.error("FullEval error", e);
-            return 0;
-        } finally {
-            if (ret != null) {
-                ret.delete();
-                ret = null;
-            }
+            cache.energy = (retA + retB) / 100;
         }
+
+        this.put_cache(key, cache);
+
+        let energy = cache.energy * 100;
+        if (outNodes != null) {
+            Utility.arrayCopy(outNodes, cache.nodes);
+        }
+
+        return energy;
     }
 
     /*override*/
@@ -260,7 +262,7 @@ export class Vienna2 extends Folder {
             desired_pairs: desired_pairs,
             temp: temp
         };
-        let co_pairs: any[] = this.get_cache(key);
+        let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
             // trace("cofold cache hit");
             return co_pairs.slice();
@@ -745,4 +747,9 @@ export class Vienna2 extends Folder {
     }
 
     private readonly _lib: vrna2_lib;
+}
+
+interface FullEvalCache {
+    nodes: number[];
+    energy: number;
 }

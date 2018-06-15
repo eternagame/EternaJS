@@ -18,6 +18,8 @@
 /*~ This declaration specifies that the class constructor function
  *~ is the exported object from the file
  */
+import * as stdcpp from "../../../emscripten/stdcpp";
+
 export = vienna_lib;
 
 /*~ Write your module's methods and properties in this class */
@@ -37,7 +39,7 @@ declare class vienna_lib {
  */
 declare namespace vienna_lib {
     export interface FullEvalResult {
-        nodes: number[];
+        nodes: stdcpp.vector<number>;
         energy: number;
 
         delete (): void;

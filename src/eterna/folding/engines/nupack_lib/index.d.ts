@@ -18,6 +18,8 @@
 /*~ This declaration specifies that the class constructor function
  *~ is the exported object from the file
  */
+import * as stdcpp from "../../../emscripten/stdcpp";
+
 export = nupack_lib;
 
 /*~ Write your module's methods and properties in this class */
@@ -37,7 +39,7 @@ declare class nupack_lib {
  */
 declare namespace nupack_lib {
     export interface FullEvalResult {
-        nodes: number[];
+        nodes: stdcpp.vector<number>;
         energy: number;
 
         delete (): void;
@@ -52,7 +54,7 @@ declare namespace nupack_lib {
 
     export interface DotPlotResult {
         energy: number;
-        plot: number[];
+        nodes: stdcpp.vector<number>;
 
         delete (): void;
     }
