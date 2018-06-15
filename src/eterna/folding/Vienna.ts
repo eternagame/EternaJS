@@ -175,7 +175,7 @@ export class Vienna extends Folder {
     /*override*/
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
-            primitive: "eterna.folding",
+            primitive: "fold",
             seq: seq,
             second_best_pairs: second_best_pairs,
             desired_pairs: desired_pairs,

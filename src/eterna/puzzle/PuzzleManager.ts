@@ -13,7 +13,7 @@ export class PuzzleManager {
     }
 
     public parse_puzzle(json: any): Puzzle {
-        let newpuz: Puzzle = new Puzzle(json["id"], json["title"], json["type"]);
+        let newpuz: Puzzle = new Puzzle(Number(json["id"]), json["title"], json["type"]);
 
         if (json["body"]) {
             // Convention: mission texts are encapsulated by
@@ -61,8 +61,8 @@ export class PuzzleManager {
 
         newpuz.set_use_tails(Boolean(json["usetails"]), Number(json["usetails"]) == 2);
 
-        if (json["eterna.folding"] && json["eterna.folding"].length > 0) {
-            newpuz.set_folder(json["eterna.folding"]);
+        if (json["folder"] && json["folder"].length > 0) {
+            newpuz.set_folder(json["folder"]);
         }
 
         if (json["reward"] && json["reward"].length > 0) {
@@ -200,7 +200,9 @@ export class PuzzleManager {
                     SolutionManager.instance.add_hairpins(data['hairpins']);
                 }
 
-                return this.parse_puzzle(data["puzzle"]);
+                let puzzle = this.parse_puzzle(data["puzzle"]);
+                log.info(`Loaded puzzle [name=${puzzle.get_puzzle_name()}]`);
+                return puzzle;
             });
     }
 
