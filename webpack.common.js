@@ -53,7 +53,16 @@ module.exports = {
     plugins: [
         // Caching plugin for faster builds
         // https://github.com/mzgoddard/hard-source-webpack-plugin
-        new HardSourceWebpackPlugin(),
+        new HardSourceWebpackPlugin({
+            environmentHash: {
+                root: process.cwd(),
+                directories: [],
+                // Rebuild the cache when .env is updated; dotenv-webpack
+                // uses this file to replace process.env['xyz'] usage
+                // in code with their .env values
+                files: ['package-lock.json', 'yarn.lock', '.env']
+            }
+        }),
 
         // Access .env values
         // https://github.com/mrsteele/dotenv-webpack
