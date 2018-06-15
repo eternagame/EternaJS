@@ -81,7 +81,7 @@ export class NuPACK extends Folder {
         if (cache != null) {
             // trace("score cache hit");
             if (outNodes != null) {
-                Utility.arrayCopy(outNodes, cache.nodes);
+                FoldUtil.arrayCopy(outNodes, cache.nodes);
             }
             return cache.energy * 100;
         }
@@ -154,7 +154,7 @@ export class NuPACK extends Folder {
 
         let energy: number = cache.energy * 100;
         if (outNodes != null) {
-            Utility.arrayCopy(outNodes, cache.nodes);
+            FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
 
         return energy;
