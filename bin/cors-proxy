@@ -15,5 +15,5 @@ if [ -z "$PORT" ]; then
 fi
 
 devd --port="$PORT" --crossdomain           \
-    /get/=http://www.eternagame.org/get/    \
-    /post/=http://www.eternagame.org/post/
+    /get/=https://www.eternagame.org/get/    \
+    /post/=https://www.eternagame.org/post/
