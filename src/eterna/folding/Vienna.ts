@@ -6,6 +6,7 @@ import {Emscripten} from "../util/Emscripten";
 import * as vienna_lib from "./engines/vienna_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vienna_lib/index";
 import {Folder} from "./Folder";
+import {FoldUtil} from "./FoldUtil";
 
 export class Vienna extends Folder {
     public static readonly NAME: string = "Vienna";
@@ -346,7 +347,7 @@ export class Vienna extends Folder {
         let pairsA: number[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
-        if (Vienna.binding_site_formed(pairsA, site_groups)) feA += bonus;
+        if (FoldUtil.binding_site_formed(pairsA, site_groups)) feA += bonus;
 
         let seqB: number[] = seq.slice(cut + 1);
         let pairsB: number[] = this.fold_sequence(seqB, null, null, temp);
@@ -356,7 +357,7 @@ export class Vienna extends Folder {
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
-        if (Vienna.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
+        if (FoldUtil.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
 
         if (co_fe + malus >= feA + feB) {
             let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
@@ -369,7 +370,6 @@ export class Vienna extends Folder {
 
     /*override*/
     public ml_energy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
-
         let energy: number, cx_energy: number, best_energy: number;
         best_energy = EPars.INF;
         let i1: number, j: number, p: number, q: number, u: number, x: number, type: number, count: number;
@@ -738,20 +738,6 @@ export class Vienna extends Folder {
         }
 
         return best_pairs;
-    }
-
-    private static binding_site_formed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
-        let ii: number;
-        for (ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] != -1) return false;
-        }
-        for (ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] != -1) return false;
-        }
-
-        return true;
     }
 
     private readonly _lib: vienna_lib;

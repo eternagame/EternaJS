@@ -321,7 +321,7 @@ export class NuPACK extends Folder {
         let pairsA: number[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
-        if (NuPACK.binding_site_formed(pairsA, site_groups)) {
+        if (FoldUtil.binding_site_formed(pairsA, site_groups)) {
             feA += bonus;
         }
 
@@ -333,7 +333,7 @@ export class NuPACK extends Folder {
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
-        if (NuPACK.binding_site_formed(co_pairs, site_groups)) {
+        if (FoldUtil.binding_site_formed(co_pairs, site_groups)) {
             co_fe += bonus;
         }
 
@@ -554,20 +554,6 @@ export class NuPACK extends Folder {
 
         this.put_cache(key, co_pairs.slice());
         return co_pairs;
-    }
-
-    private static binding_site_formed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
-        let ii: number;
-        for (ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] != -1) return false;
-        }
-        for (ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] != -1) return false;
-        }
-
-        return true;
     }
 
     private readonly _lib: nupack_lib;
