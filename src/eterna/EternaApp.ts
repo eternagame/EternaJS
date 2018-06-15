@@ -15,6 +15,13 @@ import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {BitmapManager} from "./util/BitmapManager";
 import {Fonts} from "./util/Fonts";
 
+enum PuzzleID {
+    FunAndEasy = 4350940,
+    TryptophanASameState = 8787266,
+    NandosZippers = 3562529,
+    TheRealXORChallenge = 6096060,  // multi-state
+}
+
 export class EternaApp extends FlashbangApp {
     protected createPixi(): PIXI.Application {
         return new PIXI.Application(1024, 768, {backgroundColor: 0x061A34});
@@ -30,7 +37,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                const puzid = 4350940;
+                const puzid = PuzzleID.TheRealXORChallenge;
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
                 return PuzzleManager.instance.get_puzzle_by_nid(puzid);
             })
