@@ -25,10 +25,10 @@ static void _eos_cb(int index, int fe) {
             if (index == -2) fe += water_mod;
 #endif
             int to_insert[] = { index, fe };
-            gEvalResult->energyContributions.insert(gEvalResult->energyContributions.begin(), to_insert, to_insert + 2);
+            gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
         } else {
-            gEvalResult->energyContributions.push_back(index);
-            gEvalResult->energyContributions.push_back(fe);
+            gEvalResult->nodes.push_back(index);
+            gEvalResult->nodes.push_back(fe);
         }
     }
 }
@@ -60,8 +60,6 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
             structure[pc - string] = '+';
         }
     } while(pc);
-    if(0) TraceJS(string);
-    if(0) TraceJS(structure);
 
 #ifdef WATER_MOD
     water_mod = 0;
