@@ -7,7 +7,7 @@ import {Folder} from "./Folder";
 import {FoldUtil} from "./FoldUtil";
 
 export class NuPACK extends Folder {
-    public static NAME: string = "eterna.folding.NuPACK";
+    public static NAME: string = "NuPACK";
 
     /**
      * Asynchronously creates a new instance of the NuPACK folder.
@@ -164,7 +164,7 @@ export class NuPACK extends Folder {
     /*override*/
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
-            primitive: "eterna.folding",
+            primitive: "fold",
             seq: seq,
             second_best_pairs: second_best_pairs,
             desired_pairs: desired_pairs,

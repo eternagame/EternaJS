@@ -259,7 +259,7 @@ export class PoseEditMode extends GameMode {
 
         // _force_synch = false;
 
-        this._asynch_text = Fonts.arial("eterna.folding...", 12).build();
+        this._asynch_text = Fonts.arial("folding...", 12).build();
         this._asynch_text.position = new Point(16, 200);
 
         this.set_puzzle();
@@ -853,7 +853,7 @@ export class PoseEditMode extends GameMode {
     //         return that._folder.get_folder_name();
     //     });
     //
-    //     ExternalInterface.addCallback("eterna.folding", function (seq: string, constraint: string = null): string {
+    //     ExternalInterface.addCallback("fold", function (seq: string, constraint: string = null): string {
     //         // that.trace_js("fold() called");
     //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
     //         let folded: any[] = folder.fold_sequence(seq_arr, null, constraint);
@@ -1095,7 +1095,7 @@ export class PoseEditMode extends GameMode {
             op.fn();
             if (op.sn) {
                 this._asynch_text.text =
-                    "eterna.folding " + op.sn +
+                    "folding " + op.sn +
                     " of " + this._target_pairs.length +
                     " (" + this._op_queue.length + ")";
             }
@@ -3993,7 +3993,7 @@ export class PoseEditMode extends GameMode {
     private pose_edit_by_target_do_fold(target_index: number): void {
         this._fold_start_time = new Date().getTime();
 
-        this._asynch_text.text = "eterna.folding...";
+        this._asynch_text.text = "folding...";
 
         // Application.instance.set_blocker_opacity(0.2);
         // Application.instance.add_lock("FOLDING");
@@ -4044,7 +4044,7 @@ export class PoseEditMode extends GameMode {
         if (this._target_conditions[ii]) force_struct = this._target_conditions[ii]['force_struct'];
 
         if (this._target_conditions[ii] == null || this._target_conditions[ii]['type'] == "single") {
-            log.debug("eterna.folding");
+            log.debug("folding");
             best_pairs = this._folder.fold_sequence(this._puzzle.transform_sequence(seq, ii), null, force_struct);
 
         } else if (this._target_conditions[ii]['type'] == "aptamer") {
