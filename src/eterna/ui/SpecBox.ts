@@ -105,13 +105,17 @@ export class SpecBox extends GamePanel {
         statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
         this._stattext.text = statstring;
 
-        for (let disp of this._hvec) {
-            disp.destroy({children: true});
+        if (this._hvec != null) {
+            for (let disp of this._hvec) {
+                disp.destroy({children: true});
+            }
         }
         this._hvec = [];
 
-        for (let disp of this._vvec) {
-            disp.destroy({children: true});
+        if (this._vvec != null) {
+            for (let disp of this._vvec) {
+                disp.destroy({children: true});
+            }
         }
         this._vvec = [];
 
