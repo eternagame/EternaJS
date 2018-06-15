@@ -6,6 +6,7 @@ import {Emscripten} from "../util/Emscripten";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
 import {Folder} from "./Folder";
+import {FoldUtil} from "./FoldUtil";
 
 export class Vienna2 extends Folder {
     public static NAME: string = "Vienna2";
@@ -342,7 +343,7 @@ export class Vienna2 extends Folder {
         let pairsA: number[] = this.fold_sequence_with_binding_site(seqA, null, binding_site, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.score_structures(seqA, pairsA, temp, nodesA);
-        if (Vienna2.binding_site_formed(pairsA, site_groups)) feA += bonus;
+        if (FoldUtil.binding_site_formed(pairsA, site_groups)) feA += bonus;
 
         let seqB: number[] = seq.slice(cut + 1);
         let pairsB: number[] = this.fold_sequence(seqB, null, null, temp);
@@ -352,7 +353,7 @@ export class Vienna2 extends Folder {
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
-        if (Vienna2.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
+        if (FoldUtil.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
 
         if (co_fe + malus >= feA + feB) {
             let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
@@ -741,19 +742,6 @@ export class Vienna2 extends Folder {
         }
 
         return best_pairs;
-    }
-
-    private static binding_site_formed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
-        for (let ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] != -1) return false;
-        }
-        for (let ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] != -1) return false;
-        }
-
-        return true;
     }
 
     private readonly _lib: vrna2_lib;
