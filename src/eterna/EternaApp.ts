@@ -7,6 +7,7 @@ import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
 import {NuPACK} from "./folding/NuPACK";
 import {Vienna} from "./folding/Vienna";
+import {Vienna2} from "./folding/Vienna2";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
@@ -42,7 +43,7 @@ export class EternaApp extends FlashbangApp {
 
     private initFoldingEngines(): Promise<void> {
         log.info("Initializing folding engines...");
-        return Promise.all([Vienna.create(), NuPACK.create()])
+        return Promise.all([Vienna.create(), Vienna2.create(), NuPACK.create()])
             .then((folders: Folder[]) => {
                 log.info("Folding engines intialized");
                 for (let folder of folders) {
