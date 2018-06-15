@@ -104,7 +104,7 @@ export class Vienna2 extends Folder {
         if (cache != null) {
             // trace("score cache hit");
             if (outNodes != null) {
-                Utility.arrayCopy(outNodes, cache.nodes);
+                FoldUtil.arrayCopy(outNodes, cache.nodes);
             }
             return cache.energy * 100;
         }
@@ -164,7 +164,7 @@ export class Vienna2 extends Folder {
 
         let energy = cache.energy * 100;
         if (outNodes != null) {
-            Utility.arrayCopy(outNodes, cache.nodes);
+            FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
 
         return energy;
