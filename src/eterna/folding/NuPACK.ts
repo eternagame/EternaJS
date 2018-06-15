@@ -1,6 +1,7 @@
 import * as log from "loglevel";
 import {EPars} from "../EPars";
-import {Emscripten} from "../util/Emscripten";
+import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
+import {Utility} from "../util/Utility";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
 import {Folder} from "./Folder";
@@ -15,7 +16,7 @@ export class NuPACK extends Folder {
      */
     public static create(): Promise<NuPACK> {
         return import('./engines/nupack')
-            .then((module: any) => Emscripten.loadProgram(module))
+            .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new NuPACK(program));
     }
 
@@ -43,7 +44,7 @@ export class NuPACK extends Folder {
         let result: DotPlotResult = null;
         try {
             result = this._lib.GetDotPlot(temp, seq_str);
-            ret_array = result.plot.slice();
+            ret_array = EmscriptenUtil.stdVectorToArray(result.nodes);
         } catch (e) {
             log.error("GetDotPlot error", e);
             return [];
@@ -76,89 +77,87 @@ export class NuPACK extends Folder {
     /*override*/
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
-        let result: any = this.get_cache(key);
-        if (result != null) {
+        let cache: FullEvalCache = this.get_cache(key);
+        if (cache != null) {
             // trace("score cache hit");
             if (outNodes != null) {
-                for (let ii = 0; ii < result.nodes.length; ii++) {
-                    outNodes.push(result.nodes[ii]);
-                }
+                Utility.arrayCopy(outNodes, cache.nodes);
             }
-            return result.ret[0] * 100;
+            return cache.energy * 100;
         }
 
-        let ret: FullEvalResult = null;
-        try {
-            ret = this._lib.FullEval(temp,
-                EPars.sequence_array_to_string(seq),
-                EPars.pairs_array_to_parenthesis(pairs));
+        do {
+            let result: FullEvalResult = null;
+            try {
+                result = this._lib.FullEval(temp,
+                    EPars.sequence_array_to_string(seq),
+                    EPars.pairs_array_to_parenthesis(pairs));
+                cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
 
-            let cut: number = seq.lastIndexOf(EPars.RNABASE_CUT);
-            if (cut >= 0 && outNodes != null) {
-                if (outNodes[0] != -2 || outNodes.length == 2 || (outNodes[0] == -2 && outNodes[2] != -1)) {
-                    // we just scored a duplex that wasn't one, so we have to redo it properly
-                    let seqA: number[] = seq.slice(0, cut);
-                    let pairsA: number[] = pairs.slice(0, cut);
-                    let nodesA: number[] = [];
-                    let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
+            } catch (e) {
+                log.error("FullEval error", e);
+                return 0;
+            } finally {
+                if (result != null) {
+                    result.delete();
+                }
+            }
+        } while(0);
 
-                    let seqB: number[] = seq.slice(cut + 1);
-                    let pairsB: number[] = pairs.slice(cut + 1);
-                    for (let ii = 0; ii < pairsB.length; ii++) {
-                        if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
-                    }
-                    let nodesB: number[] = [];
-                    let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
+        let cut: number = seq.lastIndexOf(EPars.RNABASE_CUT);
+        if (cut >= 0 && cache.nodes[0] != -2 || cache.nodes.length == 2 || (cache.nodes[0] == -2 && cache.nodes[2] != -1)) {
+            // we just scored a duplex that wasn't one, so we have to redo it properly
+            let seqA: number[] = seq.slice(0, cut);
+            let pairsA: number[] = pairs.slice(0, cut);
+            let nodesA: number[] = [];
+            let retA: number = this.score_structures(seqA, pairsA, temp, nodesA);
 
-                    if (nodesA[0] >= 0 || nodesB[0] != -1) {
-                        throw new Error("Something went terribly wrong in score_structures()");
-                    }
+            let seqB: number[] = seq.slice(cut + 1);
+            let pairsB: number[] = pairs.slice(cut + 1);
+            for (let ii = 0; ii < pairsB.length; ii++) {
+                if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
+            }
+            let nodesB: number[] = [];
+            let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
-                    outNodes.splice(0); // make empty
-                    for (let ii = 0; ii < nodesA.length; ii++) {
-                        outNodes[ii] = nodesA[ii];
-                    }
-                    if (outNodes[0] == -2) {
-                        outNodes[3] += nodesB[1]; // combine the free energies of the external loops
-                    } else {
-                        outNodes[1] += nodesB[1]; // combine the free energies of the external loops
-                    }
-                    for (let ii = 2; ii < nodesB.length; ii += 2) {
-                        outNodes.push(nodesB[ii] + cut + 1);
-                        outNodes.push(nodesB[ii + 1]);
-                    }
+            if (nodesA[0] >= 0 || nodesB[0] != -1) {
+                throw new Error("Something went terribly wrong in score_structures()");
+            }
 
-                    ret.energy = (retA + retB) / 100;
+            cache.nodes.splice(0); // make empty
+            for (let ii = 0; ii < nodesA.length; ii++) {
+                cache.nodes[ii] = nodesA[ii];
+            }
+            if (cache.nodes[0] == -2) {
+                cache.nodes[3] += nodesB[1]; // combine the free energies of the external loops
+            } else {
+                cache.nodes[1] += nodesB[1]; // combine the free energies of the external loops
+            }
+            for (let ii = 2; ii < nodesB.length; ii += 2) {
+                cache.nodes.push(nodesB[ii] + cut + 1);
+                cache.nodes.push(nodesB[ii + 1]);
+            }
+
+            cache.energy = (retA + retB) / 100;
+        } else {
+            cut = 0;
+            for (let ii = 0; ii < cache.nodes.length; ii += 2) {
+                if (seq[ii / 2] == EPars.RNABASE_CUT) {
+                    cut++;
                 } else {
-                    cut = 0;
-                    for (let ii = 0; ii < outNodes.length; ii += 2) {
-                        if (seq[ii / 2] == EPars.RNABASE_CUT) {
-                            cut++;
-                        } else {
-                            outNodes[ii] += cut;
-                        }
-                    }
+                    cache.nodes[ii] += cut;
                 }
             }
-
-            let energy: number = ret.energy * 100;
-            if (outNodes != null) {
-                // TODO: do not store this deletable object in the cache!
-                this.put_cache(key, ret);
-                ret = null;
-            }
-
-            return energy;
-
-        } catch (e) {
-            log.error("FullEval error", e);
-            return 0;
-        } finally {
-            if (ret != null) {
-                ret.delete();
-                ret = null;
-            }
         }
+
+        this.put_cache(key, cache);
+
+        let energy: number = cache.energy * 100;
+        if (outNodes != null) {
+            Utility.arrayCopy(outNodes, cache.nodes);
+        }
+
+        return energy;
     }
 
     /*override*/
@@ -557,5 +556,9 @@ export class NuPACK extends Folder {
     }
 
     private readonly _lib: nupack_lib;
+}
 
+interface FullEvalCache {
+    nodes: number[];
+    energy: number;
 }

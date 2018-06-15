@@ -1,9 +1,11 @@
-export class Emscripten {
+import * as stdcpp from "./stdcpp";
+
+export class EmscriptenUtil {
     /**
      * Instantiates a program from an Emscripten module and calls its main() function if it has one.
      * @returns {Promise<any>} a promise that will resolve with the instantiated module.
      */
-    public static loadProgram (module: any): Promise<any> {
+    public static loadProgram(module: any): Promise<any> {
         return new Promise<any>((resolve, _) => {
             module.default({noInitialRun: true}).then((program: any) => {
                 if (program.hasOwnProperty("callMain")) {
@@ -22,5 +24,15 @@ export class Emscripten {
                 resolve(program);
             });
         });
+    }
+
+    /** Converts a C++ std::vector<T> to a T[] */
+    public static stdVectorToArray<T>(vector: stdcpp.vector<T>): T[] {
+        let n = vector.size();
+        let array: T[] = new Array(n);
+        for (let ii = 0; ii < n; ++ii) {
+            array[ii] = vector.get(ii);
+        }
+        return array;
     }
 }

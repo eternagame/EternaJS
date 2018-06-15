@@ -1,6 +1,20 @@
 ﻿import {Point} from "pixi.js";
 
 export class Utility {
+    /**
+     * Copies the contents of src into dst.
+     *
+     * Generally when you need a copy of an array, you'll want to simply make a new array
+     * (with e.g. src.slice()). This function is for those times when you need to preserve
+     * the existence of dst.
+     */
+    public static arrayCopy<T>(dst: T[], src: T[]) {
+        dst.length = 0;
+        for (let value of src) {
+            dst.push(value);
+        }
+    }
+
     public static byte2hex(byte: number): string {
         let hex: string = '';
         let arr: string = 'FEDCBA';
