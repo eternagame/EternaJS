@@ -2,6 +2,7 @@ import {EPars} from "../../EPars";
 import {Folder} from "../Folder";
 import {NuPACK} from "../NuPACK";
 import {Vienna} from "../Vienna";
+import {Vienna2} from "../Vienna2";
 
 const SNOWFLAKE_SEQ: string = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
 const SNOWFLAKE_STRUCT: string = '((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
@@ -17,7 +18,7 @@ function CreateFolder(type: any): Promise<Folder> {
     return type.create();
 }
 
-for (let folderType of [Vienna, NuPACK]) {
+for (let folderType of [Vienna, Vienna2, NuPACK]) {
     test(`${folderType.NAME}:snowflake`, () => {
         // expect.assertions: the async code should result in X assertions being called
         // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
