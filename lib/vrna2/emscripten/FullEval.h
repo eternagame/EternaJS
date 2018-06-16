@@ -5,7 +5,7 @@
 #include <string>
 
 struct FullEvalResult {
-    std::vector<int> energyContributions;
+    std::vector<int> nodes;
     float energy;
 };
 
