@@ -13,8 +13,8 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
     public abstract get value(): T;
 
     /** Returns a "slot" Function which simply calls through to the Value's setter function. */
-    public get slot(): Function {
-        return this.updateAndNotifyIf;
+    public get slot(): (value: T) => T {
+        return (value: T) => this.updateAndNotifyIf(value);
     }
 
     public abstract map<U>(func: (value: T) => U): ValueView<U>;
@@ -46,7 +46,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
      * Updates the value contained in this instance and notifies registered listeners iff said
      * value is not equal to the value already contained in this instance.
      */
-    protected updateAndNotifyIf(value: T): Object {
+    protected updateAndNotifyIf(value: T): T {
         return this.updateAndNotify(value, false);
     }
 
@@ -66,7 +66,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
     /**
      * Emits a change notification. Default implementation immediately notifies listeners.
      */
-    protected emitChange(value: Object, oldValue: Object): void {
+    protected emitChange(value: T, oldValue: T): void {
         this.notifyChange(value, oldValue);
     }
 
