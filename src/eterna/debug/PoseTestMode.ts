@@ -7,6 +7,7 @@ import {EnergyScoreDisplay} from "../pose2D/EnergyScoreDisplay";
 import {Pose2D} from "../pose2D/Pose2D";
 import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
 import {GameButton} from "../ui/GameButton";
+import {GameCheckbox} from "../ui/GameCheckbox";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
 import {BitmapManager} from "../util/BitmapManager";
 import {Background} from "../vfx/Background";
@@ -30,6 +31,10 @@ export class PoseTestMode extends AppMode {
         // button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
         // button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
         // this.addObject(button, this.modeSprite);
+
+        let checkbox: GameCheckbox = new GameCheckbox(18, "I'm a little checkbox");
+        checkbox.display.position = new Point(20, 400);
+        this.addObject(checkbox, this.modeSprite);
 
         let scoreDisplay = new EnergyScoreDisplay(111, 40);
         scoreDisplay.set_energy_text("Total", "5.2 kcal");
