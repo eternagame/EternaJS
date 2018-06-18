@@ -1,17 +1,19 @@
-import {Graphics, Sprite, Text, Texture, Point} from "pixi.js";
-import {ButtonState} from "../../flashbang/objects/Button";
-import {ToggleButton} from "../../flashbang/objects/ToggleButton";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {Button, ButtonState} from "../../flashbang/objects/Button";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
+import {Value} from "../../signals/Value";
 import {Fonts} from "../util/Fonts";
 
-export class GameButton extends ToggleButton {
+export class GameButton extends Button {
+    public readonly toggled: Value<boolean> = new Value(false);
+
     public constructor() {
         super();
 
         this._img = new Sprite();
         this.container.addChild(this._img);
 
+        this.toggled.connect((toggled: boolean) => this.onToggledChanged(toggled));
         this.clicked.connect(() => {
             if (this._selectedTexture != null) {
                 this.toggle();
@@ -76,6 +78,14 @@ export class GameButton extends ToggleButton {
         this._hotkey = keycode;
         this._hotkeyCtrl = ctrl;
         return this;
+    }
+
+    public toggle(): void {
+        this.toggled.value = !this.toggled.value;
+    }
+
+    protected onToggledChanged(toggled: boolean): void {
+        this.showState(this._state);
     }
 
     protected showState(state: ButtonState): void {
