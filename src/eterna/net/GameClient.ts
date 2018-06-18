@@ -4,7 +4,7 @@ type JSONData = any;
 
 export class GameClient {
     public constructor(baseURL: string) {
-        log.debug(`GameClient baseURL=${baseURL}`);
+        log.info(`GameClient baseURL=${baseURL}`);
 	    this._baseURL = baseURL;
     }
 
