@@ -111,7 +111,7 @@ export class PoseEditToolbar extends ContainerObject {
             .selected(BitmapManager.ImgFreezeSelected)
             .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
             .hotkey(KeyCode.KeyF);
-        if (Eterna.settings.viewSettings.freezeButtonAlwaysVisible.value) {
+        if (Eterna.settings.freezeButtonAlwaysVisible.value) {
             this.addObject(this.freeze_button, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
