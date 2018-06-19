@@ -92,11 +92,11 @@ export class UndoBlock {
         this._target_oligo = target_oligo == null ? null : target_oligo.slice();
     }
 
-    public get_oligo_order(): any[] {
+    public get_oligo_order(): number[] {
         return this._oligo_order;
     }
 
-    public set_oligo_order(oligo_order: any[]): void {
+    public set_oligo_order(oligo_order: number[]): void {
         this._oligo_order = oligo_order == null ? null : oligo_order.slice();
     }
 
@@ -316,11 +316,11 @@ export class UndoBlock {
         return this._meltplot;
     }
 
-    public get_order_map(other_order: any[]): any[] {
+    public get_order_map(other_order: number[]): number[] {
         if (this._target_oligos == null) return null;
 
-        let idx_map: any[] = [];
-        let ofs: any[] = [];
+        let idx_map: number[] = [];
+        let ofs: number[] = [];
         let ii: number = this._sequence.length;
         for (let jj = 0; jj < this._target_oligos.length; jj++) {
             let kk = (other_order == null ? jj : other_order[jj]);
@@ -345,7 +345,7 @@ export class UndoBlock {
     private _stable: boolean = false;
     private _target_oligo: any[] = null;
     private _target_oligos: any[] = null;
-    private _oligo_order: any[] = null;
+    private _oligo_order: number[] = null;
     private _oligos_paired: number = 0;
     private _target_pairs: number[] = [];
     private _target_oligo_order: any[] = null;
