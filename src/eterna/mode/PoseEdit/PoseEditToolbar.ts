@@ -1,55 +1,78 @@
 import * as log from "loglevel";
+import {Container, Point, Graphics} from "pixi.js";
+import {Align} from "../../../flashbang/core/Align";
+import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
+import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
+import {LocationTask} from "../../../flashbang/tasks/LocationTask";
+import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
+import {Easing} from "../../../flashbang/util/Easing";
+import {RegistrationGroup} from "../../../signals/RegistrationGroup";
+import {Eterna} from "../../Eterna";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
 import {BitmapManager} from "../../util/BitmapManager";
-import {UDim} from "../../util/UDim";
 
-export class PoseEditToolbar extends GamePanel {
-    public readonly palette: NucleotidePalette;
+export class PoseEditToolbar extends ContainerObject {
+    public palette: NucleotidePalette;
 
-    public readonly native_button: GameButton;
-    public readonly target_button: GameButton;
-    public readonly pip_button: GameButton;
-    public readonly freeze_button: GameButton;
+    public native_button: GameButton;
+    public target_button: GameButton;
+    public pip_button: GameButton;
+    public freeze_button: GameButton;
 
-    public readonly toggle_bar: ToggleBar;
+    public toggle_bar: ToggleBar;
 
-    public readonly ll_menu: EternaMenu;
-    public readonly boosters_button: GameButton;
-    public readonly undo_button: GameButton;
-    public readonly redo_button: GameButton;
-    public readonly zoom_in_button: GameButton;
-    public readonly zoom_out_button: GameButton;
-    public readonly copy_button: GameButton;
-    public readonly paste_button: GameButton;
-    public readonly view_options_button: GameButton;
-    public readonly retry_button: GameButton;
-    public readonly spec_button: GameButton;
+    public ll_menu: EternaMenu;
+    public boosters_button: GameButton;
+    public undo_button: GameButton;
+    public redo_button: GameButton;
+    public zoom_in_button: GameButton;
+    public zoom_out_button: GameButton;
+    public copy_button: GameButton;
+    public paste_button: GameButton;
+    public view_options_button: GameButton;
+    public retry_button: GameButton;
+    public spec_button: GameButton;
 
-    public readonly pair_swap_button: GameButton;
-    public readonly hint_button: GameButton;
-    public readonly dyn_paint_tools: GameButton[] = [];
-    public readonly dyn_action_tools: GameButton[] = [];
+    public pair_swap_button: GameButton;
+    public hint_button: GameButton;
+    public dyn_paint_tools: GameButton[] = [];
+    public dyn_action_tools: GameButton[] = [];
 
-    public readonly submit_button: GameButton;
-    public readonly view_solutions_button: GameButton;
+    public submit_button: GameButton;
+    public view_solutions_button: GameButton;
 
-    public constructor(puz: Puzzle, options: any[]) {
-        super(GamePanelType.INVISIBLE);
+    public constructor(puz: Puzzle) {
+        super();
+        this._puzzle = puz;
+    }
+
+    protected added(): void {
+        super.added();
 
         const SPACE_NARROW: number = 7;
         const SPACE_WIDE: number = 28;
 
-        this._toolbarLayout = new HLayoutContainer();
-        this.container.addChild(this._toolbarLayout);
+        this._invisibleBackground = new Graphics();
+        this._invisibleBackground
+            .beginFill(0, 0)
+            .drawRect(0, 0, Flashbang.stageWidth, 100)
+            .endFill();
+        this._invisibleBackground.y = -this._invisibleBackground.height;
+        this.container.addChild(this._invisibleBackground);
 
-        const isExperimental = puz.get_puzzle_type() == "Experimental";
+        this._content = new Container();
+        this.container.addChild(this._content);
+
+        this._toolbarLayout = new HLayoutContainer();
+        this._content.addChild(this._toolbarLayout);
+
+        const isExperimental = this._puzzle.get_puzzle_type() == "Experimental";
 
         // MENU
         this.ll_menu = new EternaMenu(EternaMenuStyle.PULLUP);
@@ -76,7 +99,7 @@ export class PoseEditToolbar extends GamePanel {
             .down(BitmapManager.ImgPipHit)
             .tooltip("Set PiP mode")
             .hotkey(KeyCode.KeyP);
-        if (puz.get_secstructs().length > 1) {
+        if (this._puzzle.get_secstructs().length > 1) {
             this.addObject(this.pip_button, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
@@ -88,7 +111,7 @@ export class PoseEditToolbar extends GamePanel {
             .selected(BitmapManager.ImgFreezeSelected)
             .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
             .hotkey(KeyCode.KeyF);
-        if (options != null && options[12] == true) {
+        if (Eterna.settings.viewSettings.freezeButtonAlwaysVisible.value) {
             this.addObject(this.freeze_button, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
@@ -116,8 +139,8 @@ export class PoseEditToolbar extends GamePanel {
         // PALETTE
         this.palette = new NucleotidePalette();
         this.addObject(this.palette, this._toolbarLayout);
-        if (puz.is_pallete_allowed()) {
-            if (puz.is_pair_brush_allowed()) {
+        if (this._puzzle.is_pallete_allowed()) {
+            if (this._puzzle.is_pair_brush_allowed()) {
                 this.palette.change_default_mode();
 
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -171,7 +194,7 @@ export class PoseEditToolbar extends GamePanel {
             .tooltip("Redo")
             .hotkey(KeyCode.KeyY);
 
-        if (puz.is_undo_zoom_allowed()) {
+        if (this._puzzle.is_undo_zoom_allowed()) {
             this._toolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.zoom_in_button, this._toolbarLayout);
             this.addObject(this.zoom_out_button, this._toolbarLayout);
@@ -226,7 +249,7 @@ export class PoseEditToolbar extends GamePanel {
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
 
-        if (puz.get_puzzle_type() != "Basic") {
+        if (this._puzzle.get_puzzle_type() != "Basic") {
             this.ll_menu.add_sub_menu_button(0, this.copy_button);
             this.ll_menu.add_sub_menu_button(0, this.paste_button);
         }
@@ -237,11 +260,11 @@ export class PoseEditToolbar extends GamePanel {
             .down(BitmapManager.ImgHintHit)
             .hotkey(KeyCode.KeyH)
             .tooltip("Hint");
-        if (puz.get_hint() != null) {
+        if (this._puzzle.get_hint() != null) {
             this.addObject(this.hint_button, this._toolbarLayout);
         }
 
-        let obj: any = puz.get_boosters();
+        let obj: any = this._puzzle.get_boosters();
         if (obj) {
             log.debug("TODO: paint_tools");
             // if (obj['paint_tools'] != null) {
@@ -291,28 +314,78 @@ export class PoseEditToolbar extends GamePanel {
             // }
         }
 
-        this.container.addChild(this._toolbarLayout);
+        this._toolbarLayout.layout();
+        this._content.addChild(this._toolbarLayout);
 
         // TOGGLE_BAR
-        let target_secstructs: string[] = puz.get_secstructs();
+        let target_secstructs: string[] = this._puzzle.get_secstructs();
         this.toggle_bar = new ToggleBar(target_secstructs.length);
         if (target_secstructs.length > 1) {
-            this.addObject(this.toggle_bar, this.container);
+            this.addObject(this.toggle_bar, this._content);
         }
 
-        this.set_toolbar_autohide(options != null && options[11] == true);
+        DisplayUtil.positionRelative(
+            this._content, Align.CENTER, Align.BOTTOM,
+            this._invisibleBackground, Align.CENTER, Align.BOTTOM);
+
+        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
     }
 
-    protected added(): void {
-        super.added();
-        this._toolbarLayout.layout();
-    }
+    public set_toolbar_autohide(enabled: boolean): void {
+        const COLLAPSE_ANIM: string = "CollapseAnim";
 
-    public set_toolbar_autohide(auto: boolean): void {
-        if (auto) {
-            this.set_auto_collapse(true, new UDim(0, 1, 0, -104), new UDim(0, 1, 0, -32));
+        if (this._auto_collapse == enabled) {
+            return;
+        }
+
+        this._auto_collapse = enabled;
+
+        if (this._auto_collapse) {
+            this.display.interactive = true;
+
+            let collapsed: boolean = false;
+
+            const uncollapse = () => {
+                if (collapsed) {
+                    collapsed = false;
+                    this.removeNamedObjects(COLLAPSE_ANIM);
+                    this.addNamedObject(
+                        COLLAPSE_ANIM,
+                        new LocationTask(
+                            this._uncollapsedContentLoc.x,
+                            this._uncollapsedContentLoc.y,
+                            0.25, Easing.easeOut, this._content));
+                }
+            };
+
+            const collapse = () => {
+                if (!collapsed) {
+                    collapsed = true;
+                    this.removeNamedObjects(COLLAPSE_ANIM);
+                    this.addNamedObject(
+                        COLLAPSE_ANIM,
+                        new LocationTask(
+                            this._uncollapsedContentLoc.x,
+                            this._uncollapsedContentLoc.y + 72,
+                            0.25, Easing.easeOut, this._content));
+                }
+            };
+
+            this._autoCollapseRegs = new RegistrationGroup();
+            this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
+            this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
+
+            collapse();
+
         } else {
-            this.set_auto_collapse(false, new UDim(0, 1, 0, -104));
+            if (this._autoCollapseRegs != null) {
+                this._autoCollapseRegs.close();
+                this._autoCollapseRegs = null;
+            }
+
+            this.removeNamedObjects(COLLAPSE_ANIM);
+            this._content.position = this._uncollapsedContentLoc;
+            this.display.interactive = false;
         }
     }
 
@@ -358,5 +431,13 @@ export class PoseEditToolbar extends GamePanel {
         this.ll_menu.set_disabled(disable);
     }
 
+    private readonly _puzzle: Puzzle;
+
+    private _invisibleBackground: Graphics;
+    private _content: Container;
     private _toolbarLayout: HLayoutContainer;
+
+    private _uncollapsedContentLoc: Point;
+    private _auto_collapse: boolean;
+    private _autoCollapseRegs: RegistrationGroup;
 }
