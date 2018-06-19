@@ -295,7 +295,8 @@ export class BitmapManager {
         if (BitmapManager.POSE2D_URLS == null) {
             BitmapManager.POSE2D_URLS =
                 BitmapManager.urlsWithPrefix("assets/RNABase")
-                .concat(BitmapManager.urlsWithPrefix("assets/NOVA"));
+                .concat(BitmapManager.urlsWithPrefix("assets/NOVA")
+                .concat([BitmapManager.ShapeImg]));
         }
         return BitmapManager.POSE2D_URLS;
     }

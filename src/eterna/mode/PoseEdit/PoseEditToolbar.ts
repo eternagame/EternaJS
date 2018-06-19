@@ -10,7 +10,7 @@ import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Eterna} from "../../Eterna";
-import {Puzzle} from "../../puzzle/Puzzle";
+import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
@@ -72,7 +72,7 @@ export class PoseEditToolbar extends ContainerObject {
         this._toolbarLayout = new HLayoutContainer();
         this._content.addChild(this._toolbarLayout);
 
-        const isExperimental = this._puzzle.get_puzzle_type() == "Experimental";
+        const isExperimental = this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL;
 
         // MENU
         this.ll_menu = new EternaMenu(EternaMenuStyle.PULLUP);
@@ -249,7 +249,7 @@ export class PoseEditToolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
 
-        if (this._puzzle.get_puzzle_type() != "Basic") {
+        if (this._puzzle.get_puzzle_type() != PuzzleType.BASIC) {
             this.ll_menu.add_sub_menu_button(0, this.copy_button);
             this.ll_menu.add_sub_menu_button(0, this.paste_button);
         }

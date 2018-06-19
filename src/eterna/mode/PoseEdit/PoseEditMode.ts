@@ -15,7 +15,7 @@ import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
-import {Puzzle} from "../../puzzle/Puzzle";
+import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {ActionBar} from "../../ui/ActionBar";
@@ -107,7 +107,7 @@ export class PoseEditMode extends GameMode {
             // Application.instance.get_modal_container().addObject(this._paste_field);
         });
         this._toolbar.view_options_button.clicked.connect(() => {
-            let mode = this._puzzle.get_puzzle_type() == "Experimental" ?
+            let mode = this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL ?
                 EternaViewOptionsMode.LAB :
                 EternaViewOptionsMode.PUZZLE;
             this.showDialog(new EternaViewOptionsDialog(mode));
@@ -119,7 +119,7 @@ export class PoseEditMode extends GameMode {
 
         this._toolbar.pip_button.clicked.connect(() => {
             this.toggle_pip();
-            if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
+            if (this._puzzle.get_puzzle_type() == PuzzleType.SWITCH_BASIC && this._waiting_for_input) {
                 let state_dict: Map<any, any> = new Map();
                 state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.PIP);
                 this._puzzle_events.process_events(state_dict);
@@ -197,15 +197,6 @@ export class PoseEditMode extends GameMode {
             this.show_spec();
         });
         this._docked_spec_box.addObject(x_button, this._docked_spec_box.container);
-
-        this._folder_button = new GameButton()
-            .allStates(BitmapManager.ShapeImg)
-            .label("-", 22)
-            .tooltip("Select the folding engine.");
-        this._folder_button.display.position = new Point(17, 160);
-        this._folder_button.display.scale = new Point(0.5, 0.5);
-        // this._folder_button.set_size(new UDim(0, 0, 111, 40));
-        this._folder_button.clicked.connect(() => this.change_folder());
 
         // this._submit_field = new InputField;
         // this._submit_field.set_title("Submit your design");
@@ -305,7 +296,7 @@ export class PoseEditMode extends GameMode {
     public set_puzzle_state(newstate: PuzzleState): void {
         this._puz_state = newstate;
 
-        if (this._puzzle.get_puzzle_type() == "Basic" || this._puzzle.get_puzzle_type() == "Challenge") {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC || this._puzzle.get_puzzle_type() == PuzzleType.CHALLENGE) {
             let state_dict: Map<any, any> = new Map();
             state_dict.set(PuzzleEvent.PUZEVENT_TRANSIT_TO, newstate);
             this._puzzle_events.process_events(state_dict);
@@ -387,7 +378,7 @@ export class PoseEditMode extends GameMode {
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
         let baseType: number = GetPaletteTargetBaseType(type);
-        if (this._puzzle.get_puzzle_type() == "Basic") {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
             let states: Map<any, any> = new Map();
             states.set(PuzzleEvent.PUZEVENT_SET_PALLETE, baseType);
             this._puzzle_events.process_events(states);
@@ -689,6 +680,22 @@ export class PoseEditMode extends GameMode {
 
         this._folder = FolderManager.instance.get_folder(this._puzzle.get_folder());
 
+        this._folder_button = new GameButton()
+            .allStates(BitmapManager.ShapeImg)
+            .label(this._folder.get_folder_name(), 22)
+            .tooltip("Select the folding engine.");
+        this._folder_button.display.position = new Point(17, 160);
+        this._folder_button.display.scale = new Point(0.5, 0.5);
+        this.addObject(this._folder_button, this._uiLayer);
+        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            this._folder_button.clicked.connect(() => this.change_folder());
+            this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
+                this._folder_button.display.visible = multiEngine;
+            }));
+        } else {
+            this._folder_button.display.visible = false;
+        }
+
         if (this._folder.can_score_structures()) {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this._poses[ii].set_score_visualization(this._folder);
@@ -704,7 +711,7 @@ export class PoseEditMode extends GameMode {
 
             if (seq == null) {
                 seq = this._puzzle.get_beginning_sequence(ii);
-                if (this._puzzle.get_puzzle_type() == "Challenge" && !this._isReset) {
+                if (this._puzzle.get_puzzle_type() == PuzzleType.CHALLENGE && !this._isReset) {
                     let saved_seq: number[] = this._puzzle.get_saved_sequence();
                     if (saved_seq != null) {
                         if (saved_seq.length == seq.length) {
@@ -713,7 +720,7 @@ export class PoseEditMode extends GameMode {
                     }
                 }
             } else {
-                if (this._puzzle.get_puzzle_type() == "Experimental" && this._puzzle.is_using_tails()) {
+                if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL && this._puzzle.is_using_tails()) {
                     seq = Puzzle.probe_tail(seq);
                 }
             }
@@ -903,7 +910,7 @@ export class PoseEditMode extends GameMode {
     //         return EPars.pairs_array_to_parenthesis(folded.slice(0, len))
     //             + "&" + EPars.pairs_array_to_parenthesis(folded.slice(len));
     //     });
-    //     if (this._puzzle.get_puzzle_type() == "Experimental") {
+    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
     //         ExternalInterface.addCallback("select_folder", function (folder_name: string): boolean {
     //             // that.trace_js("select_folder() called");
     //             let ok: boolean = that.select_folder(folder_name);
@@ -1081,11 +1088,10 @@ export class PoseEditMode extends GameMode {
     /*override*/
     public set_multi_engines(multi: boolean): void {
         if (multi) {
-            this._folder_button.label(this._puzzle.get_folder()); // set the actual one
-            this.addObject(this._folder_button, this.modeSprite);
+            this._folder_button.label(this._puzzle.get_folder());
+            this._folder_button.display.visible = true;
         } else {
-            this._folder_button.destroySelf();
-            this._folder_button = null;
+            this._folder_button.display.visible = false;
         }
     }
 
@@ -1208,7 +1214,7 @@ export class PoseEditMode extends GameMode {
     /*override*/
     protected enter(): void {
         log.debug("TODO: enter()");
-        // if (this._puzzle.get_puzzle_type() != "Experimental") {
+        // if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
         //     Application.instance.get_application_gui("View options").set_advanced(0);
         // }
         // //let _this:PoseEditMode = this;
@@ -1226,7 +1232,7 @@ export class PoseEditMode extends GameMode {
         // my_menu.customItems.push(this._view_options_cmi);
         // this._view_options_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.on_ctx_menu_item);
         //
-        // if (this._puzzle.get_puzzle_type() == "Experimental") {
+        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
         //     this._view_solutions_cmi = new ContextMenuItem("Design browser");
         //     my_menu.customItems.push(this._view_solutions_cmi);
         //     this._view_solutions_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.on_ctx_menu_item);
@@ -1401,7 +1407,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private change_target(target_index: number): void {
-        if (this._puzzle.get_puzzle_type() == "SwitchBasic" && this._waiting_for_input) {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.SWITCH_BASIC && this._waiting_for_input) {
             let state_dict: Map<any, any> = new Map();
             if (target_index == 1) {
                 state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.SECOND);
@@ -1533,7 +1539,7 @@ export class PoseEditMode extends GameMode {
     private set_to_native_mode(trigger_modechange_event: boolean = true): void {
         this._pose_state = PoseState.NATIVE;
 
-        if (this._puzzle.get_puzzle_type() == "Basic" && this._waiting_for_input && trigger_modechange_event) {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC && this._waiting_for_input && trigger_modechange_event) {
             let state_dict: Map<any, any> = new Map();
             state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.NATIVE);
             this._puzzle_events.process_events(state_dict);
@@ -1553,7 +1559,7 @@ export class PoseEditMode extends GameMode {
     private set_to_target_mode(trigger_modechange_event: boolean = true): void {
         this._pose_state = PoseState.TARGET;
 
-        if (this._puzzle.get_puzzle_type() == "Basic" && this._waiting_for_input && trigger_modechange_event) {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC && this._waiting_for_input && trigger_modechange_event) {
             let state_dict: Map<any, any> = new Map();
             state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.TARGET);
             this._puzzle_events.process_events(state_dict);
@@ -1717,9 +1723,9 @@ export class PoseEditMode extends GameMode {
         log.debug("TODO: navigate_to_puzzle");
         // let req: URLRequest = new URLRequest;
         // req.url = "/puzzle/";
-        // if (this._puzzle.get_puzzle_type() == "Basic") {
+        // if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
         //     req.url += "Basic/";
-        // } else if (this._puzzle.get_puzzle_type() == "Experimental") {
+        // } else if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
         //     req.url += "Experimental/";
         // } else {
         //     req.url += "Challenge/";
@@ -1748,7 +1754,7 @@ export class PoseEditMode extends GameMode {
 
     private submit_current_pose(): void {
         log.debug("TODO: submit_current_pose");
-        // if (this._puzzle.get_puzzle_type() == "Experimental") {
+        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
         //     if (!this.check_constraints(false) && (!Application.instance.is_dev_mode())) {
         //         if (this._puzzle.is_soft_constraint()) {
         //             Application.instance.setup_yesno("Puzzle constraints are not satisfied.\nYou can still submit the sequence, but please note that there is a risk of not getting\nsynthesized properly",
@@ -1840,7 +1846,7 @@ export class PoseEditMode extends GameMode {
     //
     //     let post_data: Object = {};
     //
-    //     if (this._puzzle.get_puzzle_type() != "Experimental") {
+    //     if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
     //         let next_puzzle: number = this._puzzle.get_next_puzzle();
     //
     //         if (next_puzzle > 0)
@@ -1880,7 +1886,7 @@ export class PoseEditMode extends GameMode {
     //     post_data["ua"] = (undoblock.get_param(UndoBlockParam.AU));
     //     post_data["body"] = (dict["Comment"]);
     //
-    //     if (this._puzzle.get_puzzle_type() == "Experimental") {
+    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
     //         post_data["melt"] = (undoblock.get_param(UndoBlockParam.MELTING_POINT));
     //
     //         if (this._fold_total_time >= 1000.0) {
@@ -1923,7 +1929,7 @@ export class PoseEditMode extends GameMode {
     //             let player: PlayerRank;
     //             let playername: string;
     //
-    //             if (this._puzzle.get_puzzle_type() == "Experimental") {
+    //             if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
     //                 if (this._puzzle.get_use_barcode()) {
     //                     let hairpin: string = EPars.get_barcode_hairpin(seq_string);
     //                     if (hairpin != null) {
@@ -2067,7 +2073,7 @@ export class PoseEditMode extends GameMode {
     //     });
     //
     //     Application.instance.get_modal_container().removeObject(this._submit_field);
-    //     if (this._puzzle.get_puzzle_type() == "Experimental") {
+    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
     //         this._submitting_text.set_animator(new GameAnimatorFader(1, 0, 0.3, false, true));
     //         Application.instance.get_modal_container().addObject(this._submitting_text);
     //     }
@@ -2287,7 +2293,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private autosave_data(e: Event): void {
-        if (this._puzzle.get_puzzle_type() == "Basic") {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
             return;
         }
 
@@ -2325,7 +2331,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private autoload_data(): boolean {
-        if (this._puzzle.get_puzzle_type() == "Basic") {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
             return false;
         }
 
@@ -2511,7 +2517,7 @@ export class PoseEditMode extends GameMode {
             this.start_countdown();
         } else {
             /// Given init sequence (solution) in the lab, don't show mission animation - go straight to game
-            if (this._puzzle.get_puzzle_type() == "Experimental") {
+            if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
                 this.start_playing(false);
             } else {
                 this.start_countdown();
@@ -3562,7 +3568,7 @@ export class PoseEditMode extends GameMode {
         // }
         //
         // if (check_res && !old_check_res) {
-        //     if (this._puzzle.get_puzzle_type() == "Experimental") {
+        //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
         //         SoundManager.instance.play_se(SoundManager.SoundAllConditions);
         //     } else if (this._puz_state != PuzzleState.GAME) {
         //         SoundManager.instance.play_se(SoundManager.SoundCondition);
@@ -3723,13 +3729,13 @@ export class PoseEditMode extends GameMode {
         this._puzzle_events.process_events(state_dict);
 
         if (constraints_satisfied && !is_there_temp_constraints) {
-            if (this._puzzle.get_puzzle_type() != "Experimental" && this._puz_state == PuzzleState.GAME) {
+            if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL && this._puz_state == PuzzleState.GAME) {
                 this.submit_current_pose();
             }
         }
 
         //when constaints are satisfied, trigger publish hint animation
-        if (constraints_satisfied && !was_satisfied && this._puzzle.get_puzzle_type() == "Experimental") {
+        if (constraints_satisfied && !was_satisfied && this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
             log.debug("TODO: submit_button.respond()")
             // this._submit_button.respond(150, 160);
         }
