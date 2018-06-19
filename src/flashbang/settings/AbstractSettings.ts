@@ -1,5 +1,5 @@
 import {Setting} from "./Setting";
-import * as store from "store";
+import * as storejs from "store";
 
 export abstract class AbstractSettings {
     protected constructor(namespace: string) {
@@ -8,11 +8,15 @@ export abstract class AbstractSettings {
         }
         AbstractSettings.ALL_NAMESPACES.add(namespace);
 
-        this._namespace = store.namespace(namespace);
+        this._namespace = storejs.namespace(namespace);
     }
 
     protected setting<T>(name: string, defaultVal: T): Setting<T> {
         return new Setting<T>(this._namespace, name, defaultVal);
+    }
+
+    protected clear(): void {
+        this._namespace.clearAll();
     }
 
     protected readonly _namespace: StoreJsAPI;
