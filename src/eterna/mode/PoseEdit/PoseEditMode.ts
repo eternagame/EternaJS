@@ -620,13 +620,13 @@ export class PoseEditMode extends GameMode {
         //             this._constraint_shape_boxes[ii] = null;
         //             this._constraint_antishape_boxes[ii] = null;
         //             for (let jj = 0; jj < num_constraints; jj += 2) {
-        //                 if (constraints[jj] == "SHAPE") {
+        //                 if (constraints[jj] == ConstraintType.SHAPE) {
         //                     if (Number(constraints[jj + 1]) == ii) {
         //                         newbox = new ConstraintBox();
         //                         this._constraint_shape_boxes[ii] = newbox;
         //                         this._constraints_container.addObject(newbox);
         //                     }
-        //                 } else if (constraints[jj] == "ANTISHAPE") {
+        //                 } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
         //                     if (Number(constraints[jj + 1]) == ii) {
         //                         newbox = new ConstraintBox();
         //                         this._constraint_antishape_boxes[ii] = newbox;
@@ -4482,7 +4482,7 @@ export class PoseEditMode extends GameMode {
 
     private _toolbar: PoseEditToolbar;
 
-    private _folder: Folder;	/// ViennaRNA folder
+    private _folder: Folder;
     /// Asynch folding
     private _op_queue: AsyncOp[] = [];
     private _pose_edit_by_target_cb: Function = null;
