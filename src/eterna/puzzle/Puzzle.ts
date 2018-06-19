@@ -12,6 +12,12 @@ export enum PuzzleType {
     EXPERIMENTAL = "Experimental"
 }
 
+export enum ConstraintType {
+    SHAPE = "SHAPE",
+    ANTISHAPE = "ANTISHAPE",
+    SOFT = "SOFT",
+}
+
 export class Puzzle {
     public static is_aptamer_type(tc_type: string): boolean {
         return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
@@ -411,30 +417,33 @@ export class Puzzle {
         let antishapes: boolean[] = [];
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] == "SHAPE") {
+            if (constraints[ii] == ConstraintType.SHAPE) {
                 shapes[Number(constraints[ii + 1])] = true;
-            } else if (constraints[ii] == "ANTISHAPE") {
+            } else if (constraints[ii] == ConstraintType.ANTISHAPE) {
                 antishapes[Number(constraints[ii + 1])] = true;
             }
         }
 
         for (let ii = shapes.length - 1; ii >= 0; ii--) {
             if (antishapes[ii]) {
-                this._constraints.push("ANTISHAPE");
+                this._constraints.push(ConstraintType.ANTISHAPE);
                 this._constraints.push("" + ii);
             }
 
             if (shapes[ii]) {
-                this._constraints.push("SHAPE");
+                this._constraints.push(ConstraintType.SHAPE);
                 this._constraints.push("" + ii);
             }
         }
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] != "SHAPE" && constraints[ii] != "SOFT" && constraints[ii] != "ANTISHAPE") {
+            if (constraints[ii] != ConstraintType.SHAPE &&
+                constraints[ii] != ConstraintType.SOFT &&
+                constraints[ii] != ConstraintType.ANTISHAPE) {
                 this._constraints.push(constraints[ii]);
                 this._constraints.push(constraints[ii + 1]);
-            } else if (constraints[ii] == "SOFT") {
+
+            } else if (constraints[ii] == ConstraintType.SOFT) {
                 this._is_soft_constraint = true;
             }
         }
@@ -480,7 +489,7 @@ export class Puzzle {
         let is_basic: boolean = (this._puzzle_type != PuzzleType.BASIC);
         let has_target: boolean = false;
         for (let ii: number = 0; ii < this._constraints.length; ii++) {
-            if (this._constraints[ii] == "SHAPE") {
+            if (this._constraints[ii] == ConstraintType.SHAPE) {
                 has_target = true;
             }
         }
@@ -503,7 +512,6 @@ export class Puzzle {
     }
 
     public default_mode(): string {
-
         if (this._default_mode.length > 0) {
             return this._default_mode;
         }
