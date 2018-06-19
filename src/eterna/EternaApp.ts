@@ -12,6 +12,7 @@ import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
+import {EternaSettings} from "./settings/EternaSettings";
 import {BitmapManager} from "./util/BitmapManager";
 import {Fonts} from "./util/Fonts";
 
@@ -29,6 +30,7 @@ export class EternaApp extends FlashbangApp {
 
     /*override*/
     protected setup(): void {
+        Eterna.settings = new EternaSettings(Eterna.player_id);
         Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
 
         Fonts.loadFonts()
@@ -37,7 +39,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                const puzid = PuzzleID.TheRealXORChallenge;
+                const puzid = PuzzleID.FunAndEasy;
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
                 return PuzzleManager.instance.get_puzzle_by_nid(puzid);
             })
