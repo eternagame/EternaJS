@@ -13,7 +13,7 @@ export class Background extends ContainerObject {
         this.render_background();
 
         this._bubbles = [];
-        for (let ii:number = 0; ii < bubbleCount; ii++) {
+        for (let ii: number = 0; ii < bubbleCount; ii++) {
             let bub: Bubble = new Bubble(foreground);
             // bub.sprite.visible = false;
             bub.init();
@@ -25,7 +25,7 @@ export class Background extends ContainerObject {
         this._isFrozen = false;
     }
 
-    public disable_bubbles(disable:boolean):void {
+    public disable_bubbles(disable: boolean): void {
         for (let bubble of this._bubbles) {
             if (!disable && !bubble.sprite.visible) {
                 bubble.init();
@@ -34,15 +34,15 @@ export class Background extends ContainerObject {
         }
     }
 
-    private freeze_bubbles(freeze:boolean):void {
+    private freeze_bubbles(freeze: boolean): void {
         for (let bubble of this._bubbles) {
             bubble.is_paused = freeze;
         }
     }
 
     private render_background(): void {
-        let light_blue:number = this._isFrozen ? 0x435d92: 0x32456d;
-        let dark_blue:number  = this._isFrozen ? 0x0a2b57: 0x061A34;
+        let light_blue: number = this._isFrozen ? 0x435d92 : 0x32456d;
+        let dark_blue: number = this._isFrozen ? 0x0a2b57 : 0x061A34;
 
         if (this._bgImage != null) {
             this._bgImage.destroy();
@@ -94,13 +94,14 @@ export class Background extends ContainerObject {
         // this._bgGradientBitmap.bitmapData = this.BitmapManager.draw_as_bitmap(bg_sprite,this.offscreen_width_,this.offscreen_height_);
     }
 
-    public freeze_background(freeze:boolean):void {
+    public freeze_background(freeze: boolean): void {
         this._isFrozen = freeze;
         this.freeze_bubbles(freeze);
         this.render_background();
     }
 
-    /*override*/ protected on_resize():void {
+    /*override*/
+    protected on_resize(): void {
         this.render_background();
 
         for (let bubble of this._bubbles) {
