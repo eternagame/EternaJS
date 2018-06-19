@@ -113,31 +113,31 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.pointerOut.connect((e) => this.on_pose_mouse_out(e));
 
         // handle view settings
-        this.regs.add(Eterna.settings.viewSettings.showNumbers.connectNotify((value) => {
+        this.regs.add(Eterna.settings.showNumbers.connectNotify((value) => {
             this.set_show_numbering(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.showLetters.connectNotify((value) => {
+        this.regs.add(Eterna.settings.showLetters.connectNotify((value) => {
             this.set_lettermode(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.useContinuousColors.connectNotify((value) => {
+        this.regs.add(Eterna.settings.useContinuousColors.connectNotify((value) => {
             this.set_use_continuous_exp_colors(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.useExtendedColors.connectNotify((value) => {
+        this.regs.add(Eterna.settings.useExtendedColors.connectNotify((value) => {
             this.set_use_extended_scale(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.displayFreeEnergies.connectNotify((value) => {
+        this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify((value) => {
             this.set_display_score_texts(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.highlightRestricted.connectNotify((value) => {
+        this.regs.add(Eterna.settings.highlightRestricted.connectNotify((value) => {
             this.set_highlight_restricted(value);
         }));
 
-        this.regs.add(Eterna.settings.viewSettings.displayAuxInfo.connectNotify((value) => {
+        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => {
             this.set_display_aux_info(value);
         }));
     }

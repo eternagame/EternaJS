@@ -132,7 +132,7 @@ export class PoseEditMode extends GameMode {
         this._toolbar.hint_button.clicked.connect(() => this.on_click_hint());
         this._toolbar.spec_button.clicked.connect(() => this.show_spec());
 
-        this.regs.add(Eterna.settings.viewSettings.autohideToolbar.connectNotify((value) => {
+        this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
             this._toolbar.set_toolbar_autohide(value);
         }));
 

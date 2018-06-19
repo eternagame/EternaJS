@@ -40,21 +40,21 @@ export class EternaViewOptionsDialog extends ContainerObject {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
-        bind(Eterna.settings.viewSettings.showNumbers, "Show nucleotides numbers (N)");
-        bind(Eterna.settings.viewSettings.showLetters, "Show nucleotides letters");
-        bind(Eterna.settings.viewSettings.displayFreeEnergies, "Display free energies for all structures (G)");
-        bind(Eterna.settings.viewSettings.highlightRestricted, "Highlight restricted sequences");
-        bind(Eterna.settings.viewSettings.autohideToolbar, "Autohide toolbar");
-        bind(Eterna.settings.viewSettings.freezeButtonAlwaysVisible, "Freeze button always visible");
+        bind(Eterna.settings.showNumbers, "Show nucleotides numbers (N)");
+        bind(Eterna.settings.showLetters, "Show nucleotides letters");
+        bind(Eterna.settings.displayFreeEnergies, "Display free energies for all structures (G)");
+        bind(Eterna.settings.highlightRestricted, "Highlight restricted sequences");
+        bind(Eterna.settings.autohideToolbar, "Autohide toolbar");
+        bind(Eterna.settings.freezeButtonAlwaysVisible, "Freeze button always visible");
 
         if (this._optionsMode > EternaViewOptionsMode.PUZZLE) {
-            bind(Eterna.settings.viewSettings.multipleFoldingEngines, "Multiple folding engines");
+            bind(Eterna.settings.multipleFoldingEngines, "Multiple folding engines");
         }
 
         if (this._optionsMode >= EternaViewOptionsMode.LAB) {
-            bind(Eterna.settings.viewSettings.useContinuousColors, "Use continuous colors for the exp. data (advanced)");
-            bind(Eterna.settings.viewSettings.useExtendedColors, "Use extended 4-color scale for the exp. data (advanced)");
-            bind(Eterna.settings.viewSettings.displayAuxInfo, "Display auxiliary information about RNAs");
+            bind(Eterna.settings.useContinuousColors, "Use continuous colors for the exp. data (advanced)");
+            bind(Eterna.settings.useExtendedColors, "Use extended 4-color scale for the exp. data (advanced)");
+            bind(Eterna.settings.displayAuxInfo, "Display auxiliary information about RNAs");
         }
 
         let viewLayout: VLayoutContainer = new VLayoutContainer(22, Align.CENTER);
@@ -78,76 +78,6 @@ export class EternaViewOptionsDialog extends ContainerObject {
         DisplayUtil.positionRelative(
             viewLayout, Align.CENTER, Align.CENTER,
             panel.display, Align.CENTER, Align.CENTER, 0, panel.get_title_space() * 0.5);
-
-        // this._numbermode_checkbox = new GameCheckbox(18, "Show nucleotides numbers (N)", options[0]);
-        // this._numbermode_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._numbermode_checkbox.set_check_callback(function (check: boolean): void {
-        //     for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //         Pose2D(this._poses[ii]).set_show_numbering(check);
-        //     }
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-        //
-        // this._lettermode_checkbox = new GameCheckbox(18, "Show nucleotides letters", options[1]);
-        // this._lettermode_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._lettermode_checkbox.set_check_callback(function (check: boolean): void {
-        //     for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //         Pose2D(this._poses[ii]).set_lettermode(check);
-        //     }
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-        //
-        // this._energy_display_checkbox = new GameCheckbox(18, "Display free energies for all structures (G)", options[4]);
-        // this._energy_display_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._energy_display_checkbox.set_check_callback(function (check: boolean): void {
-        //     for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //         Pose2D(this._poses[ii]).set_display_score_texts(check);
-        //     }
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-
-        // this._highlight_restricted_checkbox = new GameCheckbox(18, "Highlight restricted sequences", options[5]);
-        // this._highlight_restricted_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._highlight_restricted_checkbox.set_check_callback(function (check: boolean): void {
-        //     for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //         Pose2D(this._poses[ii]).set_highlight_restricted(check);
-        //     }
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-
-        // this._autohide_toolboar_checkbox = new GameCheckbox(18, "Autohide toolbar", options[11]);
-        // this._autohide_toolboar_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._autohide_toolboar_checkbox.set_check_callback(function (check: boolean): void {
-        //     this._view.set_toolbar_autohide(check);
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-
-        // this._freeze_visible_checkbox = new GameCheckbox(18, "Freeze button always visible", options[12]);
-        // this._freeze_visible_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._freeze_visible_checkbox.set_check_callback(function (check: boolean): void {
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
-        //
-        // this._multi_engines_checkbox = new GameCheckbox(18, "Multiple folding engines", options[8]);
-        // this._multi_engines_checkbox.set_pos(new UDim(0, 0, 20, height_walker));
-        // this._multi_engines_checkbox.set_check_callback(function (check: boolean): void {
-        //     this._view.set_multi_engines(check);
-        //     this.save_view_options();
-        // });
-        //
-        // height_walker += 40;
 
         // SoundManager.instance.get_mute_button().set_pos(new UDim(0, 1, 20, -85));
         // SoundManager.instance.get_volume_button(1).set_pos(new UDim(0, 1, 45, -82));
