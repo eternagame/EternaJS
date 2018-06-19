@@ -28,7 +28,7 @@ export class SoundManager {
     public static readonly SoundScriptExec: string = "/assets/Sounds/8-RewardSound-B.mp3";
     public static readonly SoundScriptDone: string = "/assets/Sounds/8-RewardSound.mp3";
 
-    constructor() {
+    public constructor() {
         this._sounds = new Map<any, any>();
 
         // this._mute = false;
@@ -99,30 +99,12 @@ export class SoundManager {
         }
     }
 
-    public load_chat_mute_setting(): void {
-        let chat_mute_token: string = "_chat_mute" + Eterna.player_id;
-        let objs: any[] = AutosaveManager.loadObjects(chat_mute_token);
-        if (objs != null) {
-            if (objs[0] != this._chat_mute) {
-                this.toggle_chat_mute();
-            }
-        }
-    }
-
     public get_mute_button(): GameButton {
         return this._game_mute;
     }
 
     public get_volume_button(a: number): GameButton {
         return this._volumeButtons[MathUtil.clamp(a, 1, SoundManager.NUM_VOLUME_BUTTONS) - 1];
-    }
-
-    public get_chat_mute_bt(): GameButton {
-        return this._chat_mute_bt;
-    }
-
-    public get_chat_mute(): boolean {
-        return this._chat_mute;
     }
 
     public play_bg(sound: Object, loop: number, vol: number = 1): void {
@@ -204,26 +186,6 @@ export class SoundManager {
         // }
     }
 
-    private toggle_chat_mute(): void {
-        // this._chat_mute = !this._chat_mute;
-        //
-        // let img1: BitmapData = this._chat_unmuted_bitmap;
-        // let img2: BitmapData = this._chat_muted_bitmap;
-        //
-        // if (this._chat_mute) {
-        //     this._chat_mute_bt.set_icon(img2);
-        // }
-        // else {
-        //     this._chat_mute_bt.set_icon(img1);
-        // }
-        // this._chat_mute_bt.visible = true;
-        // //trace(_chat_mute);
-        //
-        // let objs: any[] = [this._chat_mute];
-        // let chat_mute_token: string = "_chat_mute" + Eterna.player_id;
-        // AutosaveManager.saveObjects(objs, chat_mute_token);
-    }
-
     // private get_sound(clazz: Object): Sound {
     //     let sound: Sound = this._sounds[clazz];
     //     if (sound == null) {
@@ -243,10 +205,6 @@ export class SoundManager {
     private _volumeButtons: GameButton[] = []; // Array<GameButton>
     // private _on_bitmap: BitmapData;
     // private _off_bitmap: BitmapData;
-    private _chat_mute_bt: GameButton;
-    private _chat_mute: boolean;
-    // private _chat_muted_bitmap: BitmapData;
-    // private _chat_unmuted_bitmap: BitmapData;
 
     private static _instance: SoundManager;
 
