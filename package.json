@@ -50,6 +50,7 @@
     "@types/loglevel": "^1.5.3",
     "@types/node": "^10.3.3",
     "@types/pixi.js": "^4.7.5",
+    "@types/storejs": "^2.0.2",
     "@types/webfontloader": "^1.6.29",
     "babel-loader": "^8.0.0-beta.3",
     "babel-polyfill": "^6.26.0",
@@ -69,6 +70,7 @@
     "lodash": "^4.17.10",
     "loglevel": "^1.6.1",
     "pixi.js": "^4.8.1",
+    "store": "^2.0.12",
     "webfontloader": "^1.6.28"
   }
 }
