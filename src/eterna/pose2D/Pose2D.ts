@@ -8,6 +8,7 @@ import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Registration} from "../../signals/Registration";
 import {Application} from "../Application";
 import {EPars} from "../EPars";
+import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
@@ -110,6 +111,35 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.pointerMove.connect(() => this.pose_mouse_moved());
         this.pointerDown.connect((e) => this.call_start_mousedown_callback(e));
         this.pointerOut.connect((e) => this.on_pose_mouse_out(e));
+
+        // handle view settings
+        this.regs.add(Eterna.settings.viewSettings.showNumbers.connectNotify((value) => {
+            this.set_show_numbering(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.showLetters.connectNotify((value) => {
+            this.set_lettermode(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.useContinuousColors.connectNotify((value) => {
+            this.set_use_continuous_exp_colors(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.useExtendedColors.connectNotify((value) => {
+            this.set_use_extended_scale(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.displayFreeEnergies.connectNotify((value) => {
+            this.set_display_score_texts(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.highlightRestricted.connectNotify((value) => {
+            this.set_highlight_restricted(value);
+        }));
+
+        this.regs.add(Eterna.settings.viewSettings.displayAuxInfo.connectNotify((value) => {
+            this.set_display_aux_info(value);
+        }));
     }
 
     public get_primary_score_display(): EnergyScoreDisplay {
@@ -959,26 +989,6 @@ export class Pose2D extends ContainerObject implements Updatable {
     public show_energy_highlight(display: boolean): void {
         this._highlight_energy_text = display;
         this.generate_score_nodes();
-    }
-
-    public load_view_options(): void {
-        // let options: any[] = AutosaveManager.loadObjects("poseview-" + Eterna.player_id);
-        //
-        // if (options != null) {
-        //     this._numbering_mode = options[0];
-        //     this._lettermode = options[1];
-        //     this._lowperform_mode = options[2];
-        //     this._exp_continuous = options[3];
-        //     this._exp_extended_scale = options[9];
-        //     if (this._exp_painter)
-        //         this.paint_feedback();
-        //
-        //     this._display_score_texts = options[4];
-        //     this.generate_score_nodes();
-        //
-        //     this._highlight_restricted = options[5];
-        //     this.set_display_aux_info(options[6] == true);
-        // }
     }
 
     public clear_highlight(): void {

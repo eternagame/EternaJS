@@ -19,6 +19,7 @@ import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {ActionBar} from "../../ui/ActionBar";
+import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
@@ -106,6 +107,12 @@ export class PoseEditMode extends GameMode {
             // this._paste_field.set_hotkeys(KeyCode.KEY_NONE, "", KeyCode.KEY_ESC, "Esc");
             // Application.instance.get_modal_container().addObject(this._paste_field);
         });
+        this._toolbar.view_options_button.clicked.connect(() => {
+            let mode = this._puzzle.get_puzzle_type() == "Experimental" ?
+                EternaViewOptionsMode.LAB :
+                EternaViewOptionsMode.PUZZLE;
+            this.showDialog(new EternaViewOptionsDialog(mode));
+        });
 
         this._toolbar.copy_button.clicked.connect(() => {
             Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
@@ -125,6 +132,10 @@ export class PoseEditMode extends GameMode {
         this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
         this._toolbar.hint_button.clicked.connect(() => this.on_click_hint());
         this._toolbar.spec_button.clicked.connect(() => this.show_spec());
+
+        this.regs.add(Eterna.settings.viewSettings.autohideToolbar.connectNotify((value) => {
+            this._toolbar.set_toolbar_autohide(value);
+        }));
 
         // this._paste_field = new InputField;
         // this._paste_field.add_field("Sequence", 200);

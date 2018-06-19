@@ -92,9 +92,6 @@ export abstract class GameMode extends AppMode {
     public set_multi_engines(multi: boolean): void {
     }
 
-    public set_toolbar_autohide(auto: boolean): void {
-    }
-
     public register_script_callbacks(): void {
     }
 
