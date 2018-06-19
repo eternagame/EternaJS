@@ -1,7 +1,6 @@
-import {Point, Text, Graphics} from "pixi.js";
+import {Graphics, Point, Text} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Fonts} from "../util/Fonts";
-import {UDim} from "../util/UDim";
 
 export enum GamePanelType {
     NORMAL, INVISIBLE
@@ -10,6 +9,7 @@ export enum GamePanelType {
 export class GamePanel extends ContainerObject {
     public constructor(panel_type: GamePanelType = GamePanelType.NORMAL, alpha_val: number = 0.07, color: number = 0xffffff, border_alpha: number = 0.0, border_color: number = 0) {
         super();
+
         this._background = new Graphics();
         this.container.addChild(this._background);
 
@@ -34,28 +34,6 @@ export class GamePanel extends ContainerObject {
     public set_panel_title(title: string): void {
         this._title = title;
         this.updateView();
-    }
-
-    public set_auto_collapse(enabled: boolean, normal: UDim = null, hidden: UDim = null): void {
-        this._auto_collapse = enabled;
-        this._normal_pos = normal;
-        this._hidden_pos = hidden;
-
-        // if (this._auto_collapse) {
-        //     this.display.interactive = true;
-        //     this.addEventListener(MouseEvent.MOUSE_OVER, this.panel_mouse_over);
-        //     this.addEventListener(MouseEvent.MOUSE_OUT, this.panel_mouse_out);
-        //     this._is_mouse_over = true;
-        //     this.panel_mouse_out(null);
-        // } else {
-        //     if (this._normal_pos) {
-        //         this.remove_all_animators();
-        //         this.set_pos(this._normal_pos);
-        //     }
-        //     this.removeEventListener(MouseEvent.MOUSE_OVER, this.panel_mouse_over);
-        //     this.removeEventListener(MouseEvent.MOUSE_OUT, this.panel_mouse_out);
-        //     this.display.interactive = false;
-        // }
     }
 
     public get_title_space(): number {
@@ -104,24 +82,9 @@ export class GamePanel extends ContainerObject {
         }
     }
 
-    // private panel_mouse_over(): void {
-    //     if (!this._is_mouse_over) {
-    //         this._is_mouse_over = true;
-    //         this.remove_all_animators();
-    //         if (this._normal_pos) this.set_animator(new GameAnimatorMover(this._normal_pos, 0.5, false));
-    //     }
-    // }
-    //
-    // private panel_mouse_out(): void {
-    //     if (this._is_mouse_over) {
-    //         this._is_mouse_over = false;
-    //         this.remove_all_animators();
-    //         if (this._hidden_pos) this.set_animator(new GameAnimatorMover(this._hidden_pos, 0.5, false));
-    //     }
-    // }
+    private readonly _background: Graphics;
 
     private _panel_type: GamePanelType;
-    private _background: Graphics;
 
     private _alpha: number = 0;
     private _color: number = 0;
@@ -129,9 +92,6 @@ export class GamePanel extends ContainerObject {
     private _border_color: number = 0;
     private _title: string = null;
     private _title_text: Text = null;
-    private _auto_collapse: boolean;
-    private _normal_pos: UDim;
-    private _hidden_pos: UDim;
 
     private _width: number = 0;
     private _height :number = 0;

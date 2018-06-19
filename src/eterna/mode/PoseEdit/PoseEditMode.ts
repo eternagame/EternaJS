@@ -73,12 +73,11 @@ export class PoseEditMode extends GameMode {
 
         this._is_screenshot_supported = true;
 
-        let options: any[] = AutosaveManager.loadObjects("poseview-" + Eterna.player_id);
-        this._toolbar = new PoseEditToolbar(this._puzzle, options);
+        this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this._uiLayer);
         this._toolbar.display.position = new Point(
             (Flashbang.stageWidth - this._toolbar.container.width) * 0.5,
-            Flashbang.stageHeight - 104);
+            Flashbang.stageHeight - 20);
 
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
