@@ -5,6 +5,13 @@ import {Vienna} from "../folding/Vienna";
 import {EternaURL} from "../net/EternaURL";
 import {Pose2D} from "../pose2D/Pose2D";
 
+export enum PuzzleType {
+    BASIC = "Basic",
+    SWITCH_BASIC = "SwitchBasic",
+    CHALLENGE = "Challenge",
+    EXPERIMENTAL = "Experimental"
+}
+
 export class Puzzle {
     public static is_aptamer_type(tc_type: string): boolean {
         return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
@@ -30,12 +37,12 @@ export class Puzzle {
         return seq;
     }
 
-    public constructor(nid: number, puzname: string, puzzle_type: string) {
+    public constructor(nid: number, puzname: string, puzzle_type: PuzzleType) {
         this._nid = nid;
         this._name = puzname;
         this._puzzle_type = puzzle_type;
 
-        if (puzzle_type == "Experimental") {
+        if (puzzle_type == PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.get_last_used_folder();
         } else {
             this._folder = Vienna.NAME;
@@ -92,7 +99,7 @@ export class Puzzle {
 
     public get_puzzle_name(linked: boolean = false): string {
         if (linked) {
-            if (this._puzzle_type != "Experimental") {
+            if (this._puzzle_type != PuzzleType.EXPERIMENTAL) {
                 let url: string = EternaURL.generate_url({page: "puzzle", nid: this._nid});
                 return "<u><A HREF=\"" + url + "\" TARGET=\"_blank\">" + this._name + "</a></u>";
             }
@@ -101,7 +108,7 @@ export class Puzzle {
         return this._name;
     }
 
-    public get_puzzle_type(): string {
+    public get_puzzle_type(): PuzzleType {
         return this._puzzle_type;
     }
 
@@ -470,7 +477,7 @@ export class Puzzle {
     }
 
     public is_pair_brush_allowed(): boolean {
-        let is_basic: boolean = (this._puzzle_type != "Basic");
+        let is_basic: boolean = (this._puzzle_type != PuzzleType.BASIC);
         let has_target: boolean = false;
         for (let ii: number = 0; ii < this._constraints.length; ii++) {
             if (this._constraints[ii] == "SHAPE") {
@@ -501,7 +508,7 @@ export class Puzzle {
             return this._default_mode;
         }
 
-        if (this._puzzle_type != "Basic") {
+        if (this._puzzle_type != PuzzleType.BASIC) {
             return "TARGET";
         } else {
             return "FROZEN";
@@ -566,7 +573,7 @@ export class Puzzle {
 
     private readonly _nid: number;
     private readonly _name: string;
-    private readonly _puzzle_type: string;
+    private readonly _puzzle_type: PuzzleType;
     private _secstructs: string[] = [];
     private _mission_text: string = Puzzle.DEFAULT_MISSION_TEXT;
     private _puzzle_locks: boolean[];

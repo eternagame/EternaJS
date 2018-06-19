@@ -39,7 +39,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                const puzid = PuzzleID.FunAndEasy;
+                const puzid = PuzzleID.NandosZippers;
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
                 return PuzzleManager.instance.get_puzzle_by_nid(puzid);
             })
