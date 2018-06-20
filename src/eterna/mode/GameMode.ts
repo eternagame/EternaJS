@@ -129,18 +129,19 @@ export abstract class GameMode extends AppMode {
 
         if (pip_mode) {
             log.debug("TODO: set_pip");
-            let N: number = this._pose_fields.length;
-            for (let ii = 0; ii < N; ii++) {
+            let numFields: number = this._pose_fields.length;
+            for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._pose_fields[ii];
-                poseField.display.position = new Point(Flashbang.stageWidth / N * ii, 0);
-                // poseField.set_size(new UDim(1.0 / N, 1, 0, 0));
+                poseField.display.position = new Point(Flashbang.stageWidth / numFields * ii, 0);
+                poseField.set_size(Flashbang.stageWidth / numFields, Flashbang.stageHeight);
                 poseField.display.visible = true;
             }
         } else {
             for (let ii = 0; ii < this._pose_fields.length; ii++) {
                 let poseField = this._pose_fields[ii];
                 if (ii == 0) {
-                    poseField.display.position = new Point(Flashbang.stageWidth * 0.5, Flashbang.stageHeight * 0.5);
+                    poseField.display.position = new Point(0, 0);
+                    poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;
