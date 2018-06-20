@@ -2,6 +2,7 @@ import * as log from "loglevel";
 import {Point, Text} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObject} from "../../../flashbang/core/GameObject";
+import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
@@ -1054,28 +1055,31 @@ export class PoseEditMode extends GameMode {
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
-        let key = e.key;
-        let ctrl = e.ctrlKey;
-        let handled: boolean = false;
+        let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
-        if (!ctrl && key == KeyCode.KeyN) {
-            // Application.instance.get_application_gui("View options").toggle_numbering();
-            handled = true;
-        } else if (!ctrl && key == KeyCode.KeyG) {
-            // Application.instance.get_application_gui("View options").toggle_energy_display();
-            handled = true;
-        } else if (!ctrl && key == KeyCode.KeyS) {
-            this.show_spec();
-            handled = true;
-        } else if (ctrl && key == KeyCode.KeyZ) {
-            this.move_undo_stack_to_last_stable();
-            handled = true;
-        } else if (this._stack_level == 0 && key == KeyCode.KeyD && this._next_design_cb != null) {
-            this._next_design_cb();
-            handled = true;
-        } else if (this._stack_level == 0 && key == KeyCode.KeyU && this._prev_design_cb != null) {
-            this._prev_design_cb();
-            handled = true;
+        if (!handled && e.type == KeyboardEventType.KEY_DOWN) {
+            let key = e.code;
+            let ctrl = e.ctrlKey;
+
+            if (!ctrl && key == KeyCode.KeyN) {
+                // Application.instance.get_application_gui("View options").toggle_numbering();
+                handled = true;
+            } else if (!ctrl && key == KeyCode.KeyG) {
+                // Application.instance.get_application_gui("View options").toggle_energy_display();
+                handled = true;
+            } else if (!ctrl && key == KeyCode.KeyS) {
+                this.show_spec();
+                handled = true;
+            } else if (ctrl && key == KeyCode.KeyZ) {
+                this.move_undo_stack_to_last_stable();
+                handled = true;
+            } else if (this._stack_level == 0 && key == KeyCode.KeyD && this._next_design_cb != null) {
+                this._next_design_cb();
+                handled = true;
+            } else if (this._stack_level == 0 && key == KeyCode.KeyU && this._prev_design_cb != null) {
+                this._prev_design_cb();
+                handled = true;
+            }
         }
 
         if (handled) {
