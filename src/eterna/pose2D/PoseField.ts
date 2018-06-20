@@ -3,6 +3,7 @@ import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
+import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {ROPWait} from "../rscript/ROPWait";
 import {Pose2D} from "./Pose2D";
@@ -10,7 +11,7 @@ import {Pose2D} from "./Pose2D";
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /// TODO: remove this class? It can just be merged into Pose2D
-export class PoseField extends ContainerObject implements KeyboardListener {
+export class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(edit);
@@ -24,8 +25,9 @@ export class PoseField extends ContainerObject implements KeyboardListener {
         this.container.interactive = true;
         this.pointerDown.connect((e) => this.mouse_on_bg_down(e));
         this.pointerUp.connect(() => this.mouse_on_bg_up());
+
         this.regs.add(this.mode.keyboardInput.pushListener(this));
-        // this.addEventListener(MouseEvent.MOUSE_WHEEL, this.mouse_on_wheel);
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
 
     public set_zoom(zoom: number): void {
@@ -92,12 +94,16 @@ export class PoseField extends ContainerObject implements KeyboardListener {
         this._pose.pose_mouse_moved();
     }
 
-    private mouse_on_wheel(e: MouseEvent): void {
-        // if (e.delta > 0) {
-        //     this.zoom_in();
-        // } else if (e.delta < 0) {
-        //     this.zoom_out();
-        // }
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        if (e.deltaY < 0) {
+            this.zoom_in();
+            return true;
+        } else if (e.deltaY > 0) {
+            this.zoom_out();
+            return true;
+        }
+
+        return false;
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
