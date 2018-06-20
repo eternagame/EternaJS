@@ -1,6 +1,8 @@
 import * as log from "loglevel";
 import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
+import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
+import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {ROPWait} from "../rscript/ROPWait";
 import {Pose2D} from "./Pose2D";
@@ -8,16 +10,21 @@ import {Pose2D} from "./Pose2D";
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /// TODO: remove this class? It can just be merged into Pose2D
-export class PoseField extends ContainerObject {
+export class PoseField extends ContainerObject implements KeyboardListener {
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(edit);
+    }
+
+    protected added(): void {
+        super.added();
 
         this.addObject(this._pose, this.container);
 
         this.container.interactive = true;
         this.pointerDown.connect((e) => this.mouse_on_bg_down(e));
         this.pointerUp.connect(() => this.mouse_on_bg_up());
+        this.regs.add(this.mode.keyboardInput.pushListener(this));
         // this.addEventListener(MouseEvent.MOUSE_WHEEL, this.mouse_on_wheel);
     }
 
@@ -93,49 +100,42 @@ export class PoseField extends ContainerObject {
         // }
     }
 
-    /*override*/
-    // public on_key_down(key: number, ctrl: boolean, shift: boolean): boolean {
-    //     let x_mov: number = 5;
-    //     let y_mov: number = 5;
-    //
-    //     if (!ctrl && key == Keyboard.DOWN) {
-    //         if (shift) {
-    //             this._pose.shift_5prime();
-    //         } else {
-    //             this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() + y_mov);
-    //         }
-    //         return true;
-    //     }
-    //
-    //     if (!ctrl && key == Keyboard.UP) {
-    //         if (shift) {
-    //             this._pose.shift_3prime();
-    //         } else {
-    //             this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() - y_mov);
-    //         }
-    //         return true;
-    //     }
-    //
-    //     if (!ctrl && key == Keyboard.RIGHT) {
-    //         if (shift) {
-    //             this._pose.shift_3prime();
-    //         } else {
-    //             this._pose.set_offset(this._pose.get_x_offset() + x_mov, this._pose.get_y_offset());
-    //         }
-    //         return true;
-    //     }
-    //
-    //     if (!ctrl && key == Keyboard.LEFT) {
-    //         if (shift) {
-    //             this._pose.shift_5prime();
-    //         } else {
-    //             this._pose.set_offset(this._pose.get_x_offset() - x_mov, this._pose.get_y_offset());
-    //         }
-    //         return true;
-    //     }
-    //
-    //     return this._pose.on_key_down(key, ctrl, shift);
-    // }
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        const X_OFFSET: number = 5;
+        const Y_OFFSET: number = 5;
+
+        if (!e.ctrlKey && e.code == KeyCode.ArrowDown) {
+            if (e.shiftKey) {
+                this._pose.shift_5prime();
+            } else {
+                this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() + Y_OFFSET);
+            }
+            return true;
+        } else if (!e.ctrlKey && e.code == KeyCode.ArrowUp) {
+            if (e.shiftKey) {
+                this._pose.shift_3prime();
+            } else {
+                this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() - Y_OFFSET);
+            }
+            return true;
+        } else if (!e.ctrlKey && e.code == KeyCode.ArrowRight) {
+            if (e.shiftKey) {
+                this._pose.shift_3prime();
+            } else {
+                this._pose.set_offset(this._pose.get_x_offset() + X_OFFSET, this._pose.get_y_offset());
+            }
+            return true;
+        } else if (!e.ctrlKey && e.code == KeyCode.ArrowLeft) {
+            if (e.shiftKey) {
+                this._pose.shift_5prime();
+            } else {
+                this._pose.set_offset(this._pose.get_x_offset() - X_OFFSET, this._pose.get_y_offset());
+            }
+            return true;
+        }
+
+        return false;
+    }
 
     private readonly _pose: Pose2D;
 
