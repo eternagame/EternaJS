@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+trap "{ cleanup; exit 1; }" ERR
+trap "{ cleanup; exit 0; }" EXIT
+
+cleanup() {
+    mv .env.cur .env
+}
+
+cp .env .env.cur
+cp .env.prod .env
+
+npm run clean
+npm run build:prod
+
+surge dist/prod --domain eterna.surge.sh
