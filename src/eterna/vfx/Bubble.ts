@@ -95,7 +95,7 @@ export class Bubble extends SpriteObject implements Updatable {
             return;
         }
 
-        let mouseLoc = this.sprite.toLocal(Flashbang.mouse, undefined, Bubble.P);
+        let mouseLoc = this.sprite.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
         let m_x = mouseLoc.x - tex.width / 2.0;
         let m_y = mouseLoc.y - tex.height / 2.0;
         let dist = Math.max(m_x * m_x + m_y * m_y, 0.01);

@@ -22,7 +22,8 @@ export class Flashbang {
         return Flashbang._app.pixi.screen.height;
     }
 
-    public static get mouse(): Point {
+    /** Global mouse location */
+    public static get globalMouse(): Point {
         return this._interaction.mouse.global;
     }
 
