@@ -3,6 +3,7 @@ import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Signal} from "../../signals/Signal";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {KeyboardInput} from "../input/KeyboardInput";
+import {MouseWheelInput} from "../input/MouseWheelInput";
 import {Assert} from "../util/Assert";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
@@ -18,6 +19,8 @@ export class AppMode {
     public readonly lateUpdate: Signal<number> = new Signal();
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
+    /** Default mouse wheel input processor */
+    public readonly mouseWheelInput: MouseWheelInput = new MouseWheelInput();
 
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
@@ -115,6 +118,7 @@ export class AppMode {
 
     /** Called when the application receives a mouse wheel event while this mode is active */
     public onMouseWheelEvent(e: WheelEvent): void {
+        this.mouseWheelInput.handleMouseWheelEvent(e);
     }
 
     /** Called once per update tick. Updates all objects in the mode. */
@@ -160,6 +164,9 @@ export class AppMode {
 
         this._rootObject._disposeInternal();
         this._rootObject = null;
+
+        this.keyboardInput.dispose();
+        this.mouseWheelInput.dispose();
 
         this._idObjects = null;
 
