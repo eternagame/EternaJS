@@ -10,7 +10,7 @@ import {Pose2D} from "./Pose2D";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-/// TODO: remove this class? It can just be merged into Pose2D
+/** Wraps a Pose2D and handles resizing, masking, and input events */
 export class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     constructor(edit: boolean) {
         super();
@@ -28,6 +28,14 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+    }
+
+    public set_size(width: number, height: number): void {
+        if (this._width != width && this._height != height) {
+            this._width = width;
+            this._height = height;
+            this._pose.set_offset(this._width * 0.5, this._height * 0.5);
+        }
     }
 
     public set_zoom(zoom: number): void {
@@ -144,6 +152,9 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     private readonly _pose: Pose2D;
+
+    private _width: number = 0;
+    private _height: number = 0;
 
     private _is_dragging_pose: boolean = false;
     private _drag_mouse_begin_x: number = 0;
