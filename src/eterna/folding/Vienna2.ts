@@ -1,9 +1,8 @@
 import * as log from "loglevel";
+import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
 import {EPars} from "../EPars";
 import {RNALayout} from "../pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {Utility} from "../util/Utility";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
 import {Folder} from "./Folder";

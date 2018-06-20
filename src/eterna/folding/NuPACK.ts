@@ -1,7 +1,6 @@
 import * as log from "loglevel";
-import {EPars} from "../EPars";
 import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {Utility} from "../util/Utility";
+import {EPars} from "../EPars";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
 import {Folder} from "./Folder";

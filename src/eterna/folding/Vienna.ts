@@ -1,9 +1,8 @@
 import * as log from "loglevel";
+import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
 import {EPars} from "../EPars";
 import {RNALayout} from "../pose2D/RNALayout";
 import {CSVParser} from "../util/CSVParser";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {Utility} from "../util/Utility";
 import * as vienna_lib from "./engines/vienna_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vienna_lib/index";
 import {Folder} from "./Folder";
