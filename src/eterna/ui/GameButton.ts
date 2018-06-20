@@ -1,10 +1,13 @@
 import {Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
+import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
+import {Registration} from "../../signals/Registration";
 import {Value} from "../../signals/Value";
 import {Fonts} from "../util/Fonts";
 
-export class GameButton extends Button {
+export class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value(false);
 
     public constructor() {
@@ -12,6 +15,10 @@ export class GameButton extends Button {
 
         this._img = new Sprite();
         this.container.addChild(this._img);
+    }
+
+    protected added(): void {
+        super.added();
 
         this.toggled.connect((toggled: boolean) => this.onToggledChanged(toggled));
         this.clicked.connect(() => {
@@ -19,6 +26,8 @@ export class GameButton extends Button {
                 this.toggle();
             }
         });
+
+        this.installHotkeyListener();
     }
 
     public up(tex: Texture | string): GameButton {
@@ -74,10 +83,28 @@ export class GameButton extends Button {
     }
 
     public hotkey(keycode: string, ctrl: boolean = false): GameButton {
-        // TODO
-        this._hotkey = keycode;
-        this._hotkeyCtrl = ctrl;
+        if (keycode != this._hotkey || ctrl != this._hotkeyCtrl) {
+            this._hotkey = keycode;
+            this._hotkeyCtrl = ctrl;
+            if (this.isLiveObject) {
+                this.installHotkeyListener();
+            }
+        }
+
         return this;
+    }
+
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        if (this.enabled &&
+            e.type == KeyboardEventType.KEY_DOWN &&
+            e.code == this._hotkey &&
+            e.ctrlKey == this._hotkeyCtrl) {
+
+            this.click();
+            return true;
+        }
+
+        return false;
     }
 
     public toggle(): void {
@@ -138,6 +165,17 @@ export class GameButton extends Button {
         }
     }
 
+    private installHotkeyListener(): void {
+        if (this._hotkeyReg != null) {
+            this._hotkeyReg.close();
+            this._hotkeyReg = null;
+        }
+
+        if (this._hotkey != null) {
+            this._hotkeyReg = this.regs.add(this.mode.keyboardInput.pushListener(this));
+        }
+    }
+
     private setTexture(state: ButtonState, tex: Texture | string) :GameButton {
         if (this._buttonStateTextures == null) {
             this._buttonStateTextures = [];
@@ -176,6 +214,8 @@ export class GameButton extends Button {
     private _hotkeyCtrl: boolean;
     private _buttonStateTextures: Texture[];
     private _selectedTexture: Texture;
+
+    private _hotkeyReg: Registration;
 
     private static TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],
