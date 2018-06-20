@@ -74,7 +74,7 @@ export class SoundManager {
 
     //DO NOT call this function in the constructor, as the player id has not been initialized yet!
     public load_mute_setting(): void {
-        let mute_save_token: string = "_mute" + Eterna.player_id;
+        let mute_save_token: string = "mute_" + Eterna.player_id;
         let objs: any[] = AutosaveManager.loadObjects(mute_save_token);
         if (objs != null) {
 
@@ -86,7 +86,7 @@ export class SoundManager {
     }
 
     public load_volume_setting(): void {
-        let volume_save_token: string = "_volume" + Eterna.player_id;
+        let volume_save_token: string = "volume_" + Eterna.player_id;
         let objs: any[] = AutosaveManager.loadObjects(volume_save_token);
 
         if (objs != null) {
@@ -152,7 +152,7 @@ export class SoundManager {
         //
         // //Save mute setting
         // let objs: any[] = [this._mute];
-        // let mute_save_token: string = "_mute" + Eterna.player_id;
+        // let mute_save_token: string = "mute_" + Eterna.player_id;
         // AutosaveManager.saveObjects(objs, mute_save_token);
     }
 
@@ -167,7 +167,7 @@ export class SoundManager {
 
         //Save mute setting
         let objs: any[] = [this._volume];
-        let volume_save_token: string = "_volume" + Eterna.player_id;
+        let volume_save_token: string = "volume_" + Eterna.player_id;
         AutosaveManager.saveObjects(objs, volume_save_token);
     }
 

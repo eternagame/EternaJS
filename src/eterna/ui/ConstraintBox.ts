@@ -772,7 +772,7 @@ export class ConstraintBox extends ContainerObject {
             this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
             this._big_text.text = txt;
 
-        } else if (keyword.lastIndexOf("_CONSECUTIVE") >= 0) {
+        } else if (keyword.lastIndexOf("CONSECUTIVE_") >= 0) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -884,7 +884,7 @@ export class ConstraintBox extends ContainerObject {
             this._req.visible = true;
             this._outline.visible = true;
 
-        } else if (keyword.lastIndexOf("_OLIGO") >= 0) {
+        } else if (keyword.lastIndexOf("OLIGO_") >= 0) {
             this._req_clarify_text.visible = true;
 
             let binder: boolean = (keyword.lastIndexOf("UNBOUND") < 0);
