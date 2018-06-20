@@ -4474,7 +4474,7 @@ export class PoseEditMode extends GameMode {
     private _moves: any[] = [];
     private _current_target_index: number = 0;
     private _pose_state: PoseState = PoseState.NATIVE;
-    private _target_pairs: any[] = [];
+    private _target_pairs: number[][] = [];
     private _target_conditions: any[] = [];
     private _target_oligo: any[] = [];
     private _oligo_mode: any[] = [];
