@@ -1062,10 +1062,10 @@ export class PoseEditMode extends GameMode {
             let ctrl = e.ctrlKey;
 
             if (!ctrl && key == KeyCode.KeyN) {
-                // Application.instance.get_application_gui("View options").toggle_numbering();
+                Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
                 handled = true;
             } else if (!ctrl && key == KeyCode.KeyG) {
-                // Application.instance.get_application_gui("View options").toggle_energy_display();
+                Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
                 handled = true;
             } else if (!ctrl && key == KeyCode.KeyS) {
                 this.show_spec();
