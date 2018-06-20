@@ -14,6 +14,7 @@ import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
+import {Utility} from "../util/Utility";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
@@ -45,8 +46,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     protected added() {
         super.added();
 
-        this._score_node_highlight = new GameObject;
-        this.addObject(this._score_node_highlight);
+        this._score_node_highlight = new Graphics();
+        this.container.addChild(this._score_node_highlight);
 
         this._primary_score_energy_display = new EnergyScoreDisplay(111, 40);
         this._primary_score_energy_display.position = new Point(17, 118);
@@ -2955,166 +2956,164 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private update_score_node_visualization(): void {
-        log.debug("TODO: update_score_node_visualization");
-        // if (this._score_nodes == null) {
-        //     return;
-        // }
-        //
-        // if ((this._base_to_x != null) || Application.instance.is_dragging()) {
-        //     this._score_node_index = -1;
-        // }
-        //
-        // if (this._score_node_index != this._last_score_node_index) {
-        //     this._score_node_highlight.graphics.clear();
-        //
-        //     if (this._score_node_index >= 0 && this._score_nodes[this._score_node_index] != null) {
-        //         this._score_node_highlight.graphics.lineStyle(0, 0, 0);
-        //         this._score_node_highlight.graphics.beginFill(0xFFFFFF, 0.22);
-        //         let indices: number[] = this._score_nodes[this._score_node_index].get_base_indices();
-        //
-        //         for (let ii: number = 0; ii < indices.length; ii++) {
-        //             let p: Point = this.get_base_xy(indices[ii]);
-        //
-        //             if (ii == 0) {
-        //                 this._score_node_highlight.graphics.moveTo(p.x, p.y);
-        //             } else {
-        //                 this._score_node_highlight.graphics.lineTo(p.x, p.y);
-        //             }
-        //         }
-        //         this._score_node_highlight.graphics.endFill();
-        //     }
-        //     this._last_score_node_index = this._score_node_index;
-        // }
-        //
-        // if (this._score_texts != null) {
-        //     for (let ii = 0; ii < this._score_nodes.length; ii++) {
-        //         let indices: number[] = this._score_nodes[ii].get_base_indices();
-        //         let x_avg: number = 0;
-        //         let y_avg: number = 0;
-        //
-        //         for (let jj: number = 0; jj < indices.length; jj++) {
-        //             let p: Point = this.get_base_xy(indices[jj]);
-        //             x_avg += p.x;
-        //             y_avg += p.y;
-        //         }
-        //
-        //         if (indices.length > 0) {
-        //             x_avg /= indices.length;
-        //             y_avg /= indices.length;
-        //         }
-        //
-        //         x_avg -= this._score_texts[ii].width / 2;
-        //         y_avg -= this._score_texts[ii].height / 2;
-        //
-        //         this._score_texts[ii].position = new Point(x_avg, y_avg);
-        //         this._score_texts[ii].visible = (this._zoom_level < 4);
-        //         this.update_energy_highlight(this._score_texts[ii], ii, this._score_texts[ii].visible);
-        //     }
-        // }
+        if (this._score_nodes == null) {
+            return;
+        }
+
+        if ((this._base_to_x != null) || Application.instance.is_dragging()) {
+            this._score_node_index = -1;
+        }
+
+        if (this._score_node_index != this._last_score_node_index) {
+            this._score_node_highlight.clear();
+
+            if (this._score_node_index >= 0 && this._score_nodes[this._score_node_index] != null) {
+                this._score_node_highlight.lineStyle(0, 0, 0);
+                this._score_node_highlight.beginFill(0xFFFFFF, 0.22);
+                let indices: number[] = this._score_nodes[this._score_node_index].get_base_indices();
+
+                for (let ii: number = 0; ii < indices.length; ii++) {
+                    let p: Point = this.get_base_xy(indices[ii]);
+
+                    if (ii == 0) {
+                        this._score_node_highlight.moveTo(p.x, p.y);
+                    } else {
+                        this._score_node_highlight.lineTo(p.x, p.y);
+                    }
+                }
+                this._score_node_highlight.endFill();
+            }
+            this._last_score_node_index = this._score_node_index;
+        }
+
+        if (this._score_texts != null) {
+            for (let ii = 0; ii < this._score_nodes.length; ii++) {
+                let indices: number[] = this._score_nodes[ii].get_base_indices();
+                let x_avg: number = 0;
+                let y_avg: number = 0;
+
+                for (let jj: number = 0; jj < indices.length; jj++) {
+                    let p: Point = this.get_base_xy(indices[jj]);
+                    x_avg += p.x;
+                    y_avg += p.y;
+                }
+
+                if (indices.length > 0) {
+                    x_avg /= indices.length;
+                    y_avg /= indices.length;
+                }
+
+                x_avg -= this._score_texts[ii].width / 2;
+                y_avg -= this._score_texts[ii].height / 2;
+
+                this._score_texts[ii].position = new Point(x_avg, y_avg);
+                this._score_texts[ii].visible = (this._zoom_level < 4);
+                this.update_energy_highlight(this._score_texts[ii], ii, this._score_texts[ii].visible);
+            }
+        }
     }
 
+    private static readonly MOUSE_LOC: Point = new Point();
     private update_score_node_gui(): void {
-        log.debug("TODO: update_score_node_gui");
-        // this._score_node_index = -1;
-        //
-        // if (this._score_nodes != null) {
-        //     let base_xys: Point[] = [];
-        //     let mouse_p: Point = new Point(this.mouseX, this.mouseY);
-        //
-        //     for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
-        //         base_xys.push(this.get_base_xy(ii));
-        //     }
-        //
-        //     let total_score: number = 0;
-        //     let node_found: boolean = false;
-        //     let node_txt: string = "";
-        //     let node_label: string = "";
-        //     let node_score: string = "";
-        //
-        //     for (let ii = 0; ii < this._score_nodes.length; ii++) {
-        //         let base_indices: number[] = this._score_nodes[ii].get_base_indices();
-        //         let node_points: any[] = [];
-        //
-        //         for (let jj: number = 0; jj < base_indices.length; jj++) {
-        //             node_points.push(base_xys[base_indices[jj]]);
-        //         }
-        //
-        //         total_score += this._score_nodes[ii].get_score();
-        //
-        //         if (!node_found) {
-        //             if (Utility.is_point_within(mouse_p, node_points)) {
-        //                 node_txt = this._score_nodes[ii].get_text();
-        //                 node_label = this._score_nodes[ii].get_text_label();
-        //                 node_score = this._score_nodes[ii].get_text_score();
-        //                 node_found = true;
-        //                 this._score_node_index = ii;
-        //             }
-        //         }
-        //     }
-        //
-        //     let score_label: string = "Total";
-        //     let score_score: string = "";
-        //     let factor: number = 0;
-        //     if ((this._molecular_binding_bases != null) || (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) || (this._oligos != null)) {
-        //         let label_elems: string[] = [];
-        //         let score_elems: string[] = [];
-        //
-        //         if (this._molecular_binding_bases != null) {
-        //             factor++;
-        //             if (this._molecule_is_bound_real) {
-        //                 label_elems.push("<FONT COLOR='#33AA33'>Molecule Bound</FONT>");
-        //                 let molecule_bonus: number = Number(this._molecular_binding_bonus * 100) / 100.0;
-        //                 score_elems.push(" <FONT COLOR='#33AA33'>" + molecule_bonus.toString() + " kcal</FONT>");
-        //             } else {
-        //                 label_elems.push("<FONT COLOR='#777777'>Molecule Not Bound</FONT>");
-        //                 score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
-        //             }
-        //         }
-        //         if (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) {
-        //             factor++;
-        //             let malus: number = this._duplex_cost + Number(this._oligo_malus * 100) / 100.0;
-        //             if (this._oligo_paired) {
-        //                 label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
-        //                 score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
-        //             } else {
-        //                 label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
-        //                 score_elems.push(" <FONT COLOR='#777777'>(" + malus.toFixed(2) + " kcal)</FONT>");
-        //             }
-        //         }
-        //         if (this._oligos != null) {
-        //             factor++;
-        //             if (this._oligos_paired == 0) {
-        //                 if (this._oligos.length > 1) {
-        //                     label_elems.push("<FONT COLOR='#777777'>No Oligo Bound</FONT>");
-        //                 } else {
-        //                     label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
-        //                 }
-        //                 score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
-        //             } else {
-        //                 let malus = this._duplex_cost;
-        //                 for (let ii = 0; ii < this._oligos_paired; ii++)
-        //                     malus += Number(this._oligos[this._oligos_order[ii]].malus * 100) / 100.0;
-        //                 if (this._oligos_paired > 1) {
-        //                     label_elems.push("<FONT COLOR='#33AA33'>Oligos Bound</FONT>");
-        //                 } else {
-        //                     label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
-        //                 }
-        //                 score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
-        //             }
-        //         }
-        //
-        //         score_label += " <FONT COLOR='#777777'>(</FONT>" + label_elems.join(", ") + "<FONT COLOR='#777777'>)</FONT>";
-        //         score_score = (total_score / 100).toString() + score_elems.join("");
-        //
-        //     } else {
-        //         score_score = (total_score / 100).toString() + " kcal";
-        //     }
-        //     this.update_energy_display_size_location(factor);
-        //
-        //     this._primary_score_energy_display.set_energy_text(score_label, score_score);
-        //     this._secondary_score_energy_display.set_energy_text(node_label, node_score);
-        //     this._secondary_score_energy_display.visible = (this._show_total_energy && node_found);
-        // }
+        this._score_node_index = -1;
+
+        if (this._score_nodes != null) {
+            let base_xys: Point[] = [];
+            let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+
+            for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
+                base_xys.push(this.get_base_xy(ii));
+            }
+
+            let total_score: number = 0;
+            let node_found: boolean = false;
+            let node_txt: string = "";
+            let node_label: string = "";
+            let node_score: string = "";
+
+            for (let ii = 0; ii < this._score_nodes.length; ii++) {
+                let base_indices: number[] = this._score_nodes[ii].get_base_indices();
+                let node_points: Point[] = [];
+
+                for (let jj: number = 0; jj < base_indices.length; jj++) {
+                    node_points.push(base_xys[base_indices[jj]]);
+                }
+
+                total_score += this._score_nodes[ii].get_score();
+
+                if (!node_found && Utility.is_point_within(mouse_p, node_points)) {
+                    node_txt = this._score_nodes[ii].get_text();
+                    node_label = this._score_nodes[ii].get_text_label();
+                    node_score = this._score_nodes[ii].get_text_score();
+                    node_found = true;
+                    this._score_node_index = ii;
+                }
+            }
+
+            let score_label: string = "Total";
+            let score_score: string = "";
+            let factor: number = 0;
+            if ((this._molecular_binding_bases != null) || (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) || (this._oligos != null)) {
+                let label_elems: string[] = [];
+                let score_elems: string[] = [];
+
+                if (this._molecular_binding_bases != null) {
+                    factor++;
+                    if (this._molecule_is_bound_real) {
+                        label_elems.push("<FONT COLOR='#33AA33'>Molecule Bound</FONT>");
+                        let molecule_bonus: number = Number(this._molecular_binding_bonus * 100) / 100.0;
+                        score_elems.push(" <FONT COLOR='#33AA33'>" + molecule_bonus.toString() + " kcal</FONT>");
+                    } else {
+                        label_elems.push("<FONT COLOR='#777777'>Molecule Not Bound</FONT>");
+                        score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
+                    }
+                }
+                if (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) {
+                    factor++;
+                    let malus: number = this._duplex_cost + Number(this._oligo_malus * 100) / 100.0;
+                    if (this._oligo_paired) {
+                        label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
+                        score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
+                    } else {
+                        label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
+                        score_elems.push(" <FONT COLOR='#777777'>(" + malus.toFixed(2) + " kcal)</FONT>");
+                    }
+                }
+                if (this._oligos != null) {
+                    factor++;
+                    if (this._oligos_paired == 0) {
+                        if (this._oligos.length > 1) {
+                            label_elems.push("<FONT COLOR='#777777'>No Oligo Bound</FONT>");
+                        } else {
+                            label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
+                        }
+                        score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
+                    } else {
+                        let malus = this._duplex_cost;
+                        for (let ii = 0; ii < this._oligos_paired; ii++) {
+                            malus += Number(this._oligos[this._oligos_order[ii]].malus * 100) / 100.0;
+                        }
+                        if (this._oligos_paired > 1) {
+                            label_elems.push("<FONT COLOR='#33AA33'>Oligos Bound</FONT>");
+                        } else {
+                            label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
+                        }
+                        score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
+                    }
+                }
+
+                score_label += " <FONT COLOR='#777777'>(</FONT>" + label_elems.join(", ") + "<FONT COLOR='#777777'>)</FONT>";
+                score_score = (total_score / 100).toString() + score_elems.join("");
+
+            } else {
+                score_score = (total_score / 100).toString() + " kcal";
+            }
+            this.update_energy_display_size_location(factor);
+
+            this._primary_score_energy_display.set_energy_text(score_label, score_score);
+            this._secondary_score_energy_display.set_energy_text(node_label, node_score);
+            this._secondary_score_energy_display.visible = (this._show_total_energy && node_found);
+        }
     }
 
     private update_energy_display_size_location(factor: number): void {
@@ -3401,7 +3400,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _score_folder: Folder;
     private _score_node_index: number = -1;
     private _last_score_node_index: number = -1;
-    private _score_node_highlight: GameObject;
+    private _score_node_highlight: Graphics;
 
     // New Score Display panels
     private _primary_score_energy_display: EnergyScoreDisplay;
