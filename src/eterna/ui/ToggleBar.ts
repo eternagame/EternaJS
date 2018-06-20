@@ -1,4 +1,6 @@
 import {Graphics, Point, Text} from "pixi.js";
+import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
+import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {LocationTask} from "../../flashbang/tasks/LocationTask";
 import {Easing} from "../../flashbang/util/Easing";
@@ -9,7 +11,7 @@ import {SoundManager} from "../util/SoundManager";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class ToggleBar extends ContainerObject {
+export class ToggleBar extends ContainerObject implements KeyboardListener {
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
 
@@ -57,6 +59,11 @@ export class ToggleBar extends ContainerObject {
         this.pointerMove.connect((event) => this.on_mouse_move(event));
     }
 
+    protected added(): void {
+        super.added();
+        this.regs.add(this.mode.keyboardInput.pushListener(this));
+    }
+
     public register_ui_for_rscript(id: string): void {
         this._rscript_name = id;
     }
@@ -77,20 +84,15 @@ export class ToggleBar extends ContainerObject {
         }
     }
 
-    /*override*/
-    // public on_key_down(key: number, ctrl: boolean, shift: boolean): boolean {
-    //     if (key == KeyCode.Tab && !ctrl) {
-    //         this.set_state((this._current_state + 1) % this._num_states);
-    //         if (this._change_state_cb != null) {
-    //             this._change_state_cb(this._current_state);
-    //         }
-    //         return true;
-    //     }
-    //
-    //     return super.on_key_down(key, ctrl, shift);
-    // }
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        if (e.code == KeyCode.Tab && !e.ctrlKey) {
+            this.set_state((this._current_state + 1) % this._num_states);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    /*override*/
     public set_disabled(disabled: boolean): void {
         this.display.alpha = disabled ? 0.3 : 1.0;
     }
