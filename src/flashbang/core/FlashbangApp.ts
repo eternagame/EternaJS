@@ -1,4 +1,5 @@
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
+import {Value} from "../../signals/Value";
 import {KeyCode} from "../input/KeyCode";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
@@ -6,6 +7,9 @@ import {Updatable} from "./Updatable";
 import {KeyboardEventType} from "../input/KeyboardEventType";
 
 export class FlashbangApp {
+    /** True if the app is foregrounded */
+    public readonly isActive: Value<boolean> = new Value(true);
+
     public get pixi(): PIXI.Application {
         return this._pixi;
     }
@@ -30,6 +34,10 @@ export class FlashbangApp {
         window.addEventListener(KeyboardEventType.KEY_DOWN, (e: KeyboardEvent) => this.onKeyboardEvent(e));
         window.addEventListener(KeyboardEventType.KEY_UP, (e: KeyboardEvent) => this.onKeyboardEvent(e));
         window.addEventListener("wheel", (e: WheelEvent) => this.onMouseWheelEvent(e));
+        window.addEventListener("focus", () => this.isActive.value = true);
+        window.addEventListener("blur", () => this.isActive.value = false);
+
+        this.isActive.connect((value) => this.onIsActiveChanged(value));
     }
 
     public addUpdatable(obj: Updatable): void {
@@ -137,6 +145,15 @@ export class FlashbangApp {
         let topMode = this._modeStack.topMode;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
+        }
+    }
+
+    /** Called when the app activates or deactivates */
+    protected onIsActiveChanged(isActive: boolean): void {
+        if (isActive) {
+            // Clear our keydown state when the app is foregrounded, since
+            // we don't know what happened to the keyboard state in the interim.
+            this._keyDown.clear();
         }
     }
 
