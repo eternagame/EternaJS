@@ -1006,8 +1006,8 @@ export class PoseEditMode extends GameMode {
         // });
         //
         // let set_end_callback: Function = function (pose: PoseEditMode, sid: string): void {
-        //     ExternalInterface.addCallback("_end" + sid, function (ret: Object): void {
-        //         pose.trace_js("_end" + sid + "() called");
+        //     ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
+        //         pose.trace_js("end_" + sid + "() called");
         //         pose.trace_js(ret);
         //         if (ret['cause'] instanceof String) {
         //             this._run_status.set_text_color(ret['result'] ? 0x00FF00 : 0xFF0000);
@@ -2280,7 +2280,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private reset_autosave_data(): void {
-        let token: string = "_puz" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
         AutosaveManager.saveObjects(null, token);
     }
 
@@ -2293,7 +2293,7 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        let token: string = "_puz" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
         let objs: any[] = [];
         let msecs: number = 0;
 
@@ -2308,7 +2308,7 @@ export class PoseEditMode extends GameMode {
 
     private transfer_to_puzzlemaker(): void {
         log.debug("TODO: transfer_to_puzzlemaker");
-        // let cookie: string = "_puzedit" + this._poses.length + "_" + Application.instance.get_player_id();
+        // let cookie: string = "puzedit_" + this._poses.length + "_" + Application.instance.get_player_id();
         // let objs: any[] = [];
         // for (let ii: number = 0; ii < this._poses.length; ++ii) {
         //     let obj: any = {};
@@ -2345,7 +2345,7 @@ export class PoseEditMode extends GameMode {
                 oligo_len += (oligos[ii]['sequence'].length + 1);
             }
         }
-        let token: string = "_puz" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
 
         if (beginning_sequence.length != locks.length || (beginning_sequence.length + oligo_len) != this._target_pairs[0].length) {
             return false;
@@ -3434,14 +3434,14 @@ export class PoseEditMode extends GameMode {
 
                 // if (ExternalInterface.available) {
                 //     let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
-                //         ExternalInterface.addCallback("_end" + sid, function (ret: Object): void {
+                //         ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
                 //             let goal: string = "";
                 //             let name: string = "...";
                 //             let value: string = "";
                 //             let index: string = null;
                 //             let data_png: string = "";
                 //             let satisfied: boolean = false;
-                //             pose.trace_js("_end" + sid + "() called");
+                //             pose.trace_js("end_" + sid + "() called");
                 //             //pose.trace_js(ret);
                 //             if (ret && ret.cause) {
                 //                 if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
