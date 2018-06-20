@@ -168,12 +168,6 @@ export class PoseEditMode extends GameMode {
         //     });
         // this._paste_field.set_pos(new UDim(0.5, 0.5, -150, -100));
 
-
-        // let opt: GameObject = (<GameObject>Application.instance.get_application_gui("View options"));
-        // if (opt != null) {
-        //     this._toolbar.viewOptionsClicked.connect(opt.open_view_options);
-        // }
-
         this._hint_box = new GamePanel();
         this._hint_box.display.visible = false;
         this.addObject(this._hint_box, this._uiLayer);
