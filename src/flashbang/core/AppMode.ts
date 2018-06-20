@@ -2,6 +2,7 @@ import {Container} from "pixi.js";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Signal} from "../../signals/Signal";
 import {UnitSignal} from "../../signals/UnitSignal";
+import {KeyboardInput} from "../input/KeyboardInput";
 import {Assert} from "../util/Assert";
 import {GameObject} from "./GameObject";
 import {GameObjectBase} from "./GameObjectBase";
@@ -15,6 +16,8 @@ export class AppMode {
     public readonly updateBegan: Signal<number> = new Signal();
     /** Emitted after updateBegan has completed. */
     public readonly lateUpdate: Signal<number> = new Signal();
+    /** Default keyboard input processor */
+    public readonly keyboardInput: KeyboardInput = new KeyboardInput();
 
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
@@ -102,8 +105,12 @@ export class AppMode {
         return !this._disposed;
     }
 
-    /** Called when the application receives a keyDown or keyUp event while this mode is active */
+    /**
+     * Called when the application receives a keyDown or keyUp event while this mode is active.
+     * By default, we just pass this off to the KeyboardInput handler.
+     */
     public onKeyboardEvent(e: KeyboardEvent): void {
+        this.keyboardInput.handleKeyboardEvent(e);
     }
 
     /** Called when the application receives a mouse wheel event while this mode is active */
