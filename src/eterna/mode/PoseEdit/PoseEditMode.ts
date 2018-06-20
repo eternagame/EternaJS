@@ -6,7 +6,9 @@ import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
+import {LocationTask} from "../../../flashbang/tasks/LocationTask";
 import {Assert} from "../../../flashbang/util/Assert";
+import {Easing} from "../../../flashbang/util/Easing";
 import {Application} from "../../Application";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
@@ -15,10 +17,11 @@ import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
-import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {ConstraintType, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {ActionBar} from "../../ui/ActionBar";
+import {ConstraintBox} from "../../ui/ConstraintBox";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
@@ -221,7 +224,7 @@ export class PoseEditMode extends GameMode {
             (Flashbang.stageWidth - this._submitting_text.width) * 0.5,
             (Flashbang.stageHeight - this._submitting_text.height) * 0.5);
 
-        // this._constraint_boxes = [];
+        this._constraint_boxes = [];
         this._constraints_container = new ContainerObject();
         /// Constraints should be on top of curtain
         this.addObject(this._constraints_container, this._uiLayer);
@@ -527,13 +530,13 @@ export class PoseEditMode extends GameMode {
         let default_mode: string = this._puzzle.default_mode();
 
         if (this._is_databrowser_mode) {
-            this._pose_state = (PoseState.NATIVE);
+            this._pose_state = PoseState.NATIVE;
         } else if (default_mode == "TARGET") {
-            this._pose_state = (PoseState.TARGET);
+            this._pose_state = PoseState.TARGET;
         } else if (default_mode == "FROZEN") {
-            this._pose_state = (PoseState.FROZEN);
+            this._pose_state = PoseState.FROZEN;
         } else {
-            this._pose_state = (PoseState.NATIVE);
+            this._pose_state = PoseState.NATIVE;
         }
 
         for (let ii = 0; ii < target_secstructs.length; ii++) {
@@ -586,61 +589,57 @@ export class PoseEditMode extends GameMode {
         }
 
         let num_constraints: number = 0;
-        let constraints: any[] = [];
+        let constraints: string[] = [];
         if (this._puzzle.get_constraints() != null) {
             num_constraints = this._puzzle.get_constraints().length;
             constraints = this._puzzle.get_constraints();
         }
 
-        this._constraints_container.removeAllObjects();
-        // this._constraint_boxes = [];
+        this._constraint_boxes = [];
         this._unstable_index = -1;
 
-        // if (num_constraints > 0) {
-        //     if (num_constraints % 2 != 0) {
-        //         throw new Error("Wrong constraints length");
-        //     }
-        //
-        //     if (this._constraint_boxes.length < num_constraints / 2) {
-        //         let orig_boxes: number = this._constraint_boxes.length;
-        //         for (let ii = orig_boxes; ii < num_constraints / 2; ii++) {
-        //             let newbox: ConstraintBox = new ConstraintBox;
-        //             this._constraint_boxes.push(newbox);
-        //             this._constraints_container.addObject(newbox);
-        //         }
-        //     }
-        //
-        //     this._constraint_shape_boxes = [];
-        //     this._constraint_shape_boxes.push(null);
-        //
-        //     this._constraint_antishape_boxes = [];
-        //     this._constraint_antishape_boxes.push(null);
-        //     if (this._target_pairs.length > 1) {
-        //         for (let ii = 1; ii < this._target_pairs.length; ii++) {
-        //             this._constraint_shape_boxes[ii] = null;
-        //             this._constraint_antishape_boxes[ii] = null;
-        //             for (let jj = 0; jj < num_constraints; jj += 2) {
-        //                 if (constraints[jj] == ConstraintType.SHAPE) {
-        //                     if (Number(constraints[jj + 1]) == ii) {
-        //                         newbox = new ConstraintBox();
-        //                         this._constraint_shape_boxes[ii] = newbox;
-        //                         this._constraints_container.addObject(newbox);
-        //                     }
-        //                 } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
-        //                     if (Number(constraints[jj + 1]) == ii) {
-        //                         newbox = new ConstraintBox();
-        //                         this._constraint_antishape_boxes[ii] = newbox;
-        //                         this._constraints_container.addObject(newbox);
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        //
-        // for (let ii = 0; ii < this._constraint_boxes.length; ii++) {
-        //     ConstraintBox(this._constraint_boxes[ii]).visible = false;
-        // }
+        if (num_constraints > 0) {
+            if (num_constraints % 2 != 0) {
+                throw new Error("Wrong constraints length");
+            }
+
+            for (let ii = 0; ii < num_constraints / 2; ii++) {
+                let newbox: ConstraintBox = new ConstraintBox();
+                this._constraint_boxes.push(newbox);
+                this._constraints_container.addObject(newbox, this._constraints_container.container);
+            }
+
+            this._constraint_shape_boxes = [];
+            this._constraint_shape_boxes.push(null);
+
+            this._constraint_antishape_boxes = [];
+            this._constraint_antishape_boxes.push(null);
+            if (this._target_pairs.length > 1) {
+                for (let ii = 1; ii < this._target_pairs.length; ii++) {
+                    this._constraint_shape_boxes[ii] = null;
+                    this._constraint_antishape_boxes[ii] = null;
+                    for (let jj = 0; jj < num_constraints; jj += 2) {
+                        if (constraints[jj] == ConstraintType.SHAPE) {
+                            if (Number(constraints[jj + 1]) == ii) {
+                                let newbox = new ConstraintBox();
+                                this._constraint_shape_boxes[ii] = newbox;
+                                this._constraints_container.addObject(newbox, this._constraints_container.container);
+                            }
+                        } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
+                            if (Number(constraints[jj + 1]) == ii) {
+                                let newbox = new ConstraintBox();
+                                this._constraint_antishape_boxes[ii] = newbox;
+                                this._constraints_container.addObject(newbox, this._constraints_container.container);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let box of this._constraint_boxes) {
+            box.display.visible = false;
+        }
 
         let pairs: number[] = EPars.parenthesis_to_pair_array(this._puzzle.get_secstruct());
 
@@ -1035,24 +1034,23 @@ export class PoseEditMode extends GameMode {
     }
 
     public layout_constraints(): void {
-        log.debug("TODO: layout_constraints");
-        // let min_x: number = this._constraints_offset + 17;
-        // let rel_x: number;
-        // if (this._target_pairs == null) return;
-        // let n: number = this._target_pairs.length;
-        // if (n < 2) return;
-        // for (let ii: number = 1; ii < n; ii++) {
-        //     rel_x = (ii / n) * Flashbang.stageWidth + 17;
-        //     if (rel_x < min_x) rel_x = min_x;
-        //     if (this._constraint_shape_boxes[ii]) {
-        //         this._constraint_shape_boxes[ii].set_pos(new UDim(0, 0, rel_x, 35));
-        //         min_x = rel_x + 77;
-        //     }
-        //     if (this._constraint_antishape_boxes[ii]) {
-        //         this._constraint_antishape_boxes[ii].set_pos(new UDim(0, 0, rel_x + 77, 35));
-        //         min_x = rel_x + 2 * 77;
-        //     }
-        // }
+        let min_x: number = this._constraints_offset + 17;
+        let rel_x: number;
+        if (this._target_pairs == null) return;
+        let n: number = this._target_pairs.length;
+        if (n < 2) return;
+        for (let ii: number = 1; ii < n; ii++) {
+            rel_x = (ii / n) * Flashbang.stageWidth + 17;
+            if (rel_x < min_x) rel_x = min_x;
+            if (this._constraint_shape_boxes[ii]) {
+                this._constraint_shape_boxes[ii].display.position = new Point(rel_x, 35);
+                min_x = rel_x + 77;
+            }
+            if (this._constraint_antishape_boxes[ii]) {
+                this._constraint_antishape_boxes[ii].display.position = new Point(rel_x + 77, 35);
+                min_x = rel_x + 2 * 77;
+            }
+        }
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
@@ -1137,22 +1135,22 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    // public get_constraint_count(): number {
-    //     return this._constraint_boxes.length;
-    // }
-    //
-    // public get_constraint_container(): GameObject {
-    //     return this._constraints_container;
-    // }
-    //
-    // public get_constraint(i: number): GameObject {
-    //     return ConstraintBox(this._constraint_boxes[this._constraint_boxes.length - i - 1]);
-    // }
-    //
-    // public get_shape_box(i: number): GameObject {
-    //     return ConstraintBox(this._constraint_boxes[i]);
-    // }
-    //
+    public get_constraint_count(): number {
+        return this._constraint_boxes.length;
+    }
+
+    public get_constraint_container(): GameObject {
+        return this._constraints_container;
+    }
+
+    public get_constraint(i: number): ConstraintBox {
+        return this._constraint_boxes[this._constraint_boxes.length - i - 1];
+    }
+
+    public get_shape_box(i: number): ConstraintBox {
+        return this._constraint_boxes[i];
+    }
+
     // public get_switch_bar(): ToggleBar {
     //     return this._toggle_bar;
     // }
@@ -2144,75 +2142,66 @@ export class PoseEditMode extends GameMode {
     }
 
     private display_constraint_boxes(animate: boolean, display: boolean): void {
-        log.debug("TODO: display_constraint_boxes");
-    //     let num_constraints: number = 0;
-    //     let constraints: any[] = this._puzzle.get_constraints();
-    //
-    //     if (this._puzzle.get_temporary_constraints() != null)
-    //         constraints = this._puzzle.get_temporary_constraints();
-    //
-    //     if (constraints != null)
-    //         num_constraints = constraints.length;
-    //
-    //     let ii: number;
-    //     let xx: number;
-    //     let w_walker: number = 17;
-    //
-    //     for (xx = 0; xx < this._target_pairs.length; xx++) {
-    //         let cpos: UDim;
-    //         if (xx == 0) {
-    //             // scan for non-(ANTI)SHAPE
-    //             for (ii = 0; ii < num_constraints / 2; ii++) {
-    //                 if (ConstraintBox(this._constraint_boxes[ii]).GetKeyword().substr(-5) == "SHAPE")
-    //                     continue;
-    //                 cpos = new UDim(0, 0, w_walker, 35);
-    //                 w_walker += 119;
-    //                 if (animate) {
-    //                     ConstraintBox(this._constraint_boxes[ii]).set_animator(new GameAnimatorMover(cpos, 0.5, false));
-    //                 } else {
-    //                     ConstraintBox(this._constraint_boxes[ii]).set_pos(cpos);
-    //                 }
-    //                 ConstraintBox(this._constraint_boxes[ii]).show_big_text(false);
-    //                 ConstraintBox(this._constraint_boxes[ii]).visible = display;
-    //             }
-    //             if (w_walker > 17) w_walker += 25;
-    //         } else if (xx == 1) {
-    //             // save the offset for later use (avoid overlaps in PIP mode)
-    //             this._constraints_offset = w_walker;
-    //         }
-    //
-    //         // scan for SHAPE
-    //         for (ii = 0; ii < num_constraints / 2; ii++) {
-    //             if (ConstraintBox(this._constraint_boxes[ii]).GetKeyword() != "SHAPE" || Number(constraints[2 * ii + 1]) != xx)
-    //                 continue;
-    //             cpos = new UDim(0, 0, w_walker, 35);
-    //             w_walker += 77;
-    //             if (animate) {
-    //                 ConstraintBox(this._constraint_boxes[ii]).set_animator(new GameAnimatorMover(cpos, 0.5, false));
-    //             } else {
-    //                 ConstraintBox(this._constraint_boxes[ii]).set_pos(cpos);
-    //             }
-    //             ConstraintBox(this._constraint_boxes[ii]).show_big_text(false);
-    //             ConstraintBox(this._constraint_boxes[ii]).visible = (xx == 0 || !this._is_pip_mode) ? display : false;
-    //         }
-    //
-    //         // scan for ANTISHAPE
-    //         for (ii = 0; ii < num_constraints / 2; ii++) {
-    //             if (ConstraintBox(this._constraint_boxes[ii]).GetKeyword() != "ANTISHAPE" || Number(constraints[2 * ii + 1]) != xx)
-    //                 continue;
-    //             cpos = new UDim(0, 0, w_walker, 35);
-    //             w_walker += 77;
-    //             if (animate) {
-    //                 ConstraintBox(this._constraint_boxes[ii]).set_animator(new GameAnimatorMover(cpos, 0.5, false));
-    //             } else {
-    //                 ConstraintBox(this._constraint_boxes[ii]).set_pos(cpos);
-    //             }
-    //             ConstraintBox(this._constraint_boxes[ii]).show_big_text(false);
-    //             ConstraintBox(this._constraint_boxes[ii]).visible = (xx == 0 || !this._is_pip_mode) ? display : false;
-    //         }
-    //     }
-    //
-    //     this.layout_constraints();
+        let num_constraints: number = 0;
+        let constraints: string[] = this._puzzle.get_constraints();
+
+        if (this._puzzle.get_temporary_constraints() != null) {
+            constraints = this._puzzle.get_temporary_constraints();
+        }
+
+        if (constraints != null) {
+            num_constraints = constraints.length;
+        }
+
+        let w_walker: number = 17;
+
+        for (let xx = 0; xx < this._target_pairs.length; xx++) {
+            if (xx == 0) {
+                // scan for non-(ANTI)SHAPE
+                for (let ii = 0; ii < num_constraints / 2; ii++) {
+                    if (this._constraint_boxes[ii].GetKeyword().substr(-5) == "SHAPE") {
+                        continue;
+                    }
+                    let cpos = new Point(w_walker, 35);
+                    w_walker += 119;
+                    this._constraint_boxes[ii].setLocation(cpos, animate);
+                    this._constraint_boxes[ii].show_big_text(false);
+                    this._constraint_boxes[ii].display.visible = display;
+                }
+                if (w_walker > 17) {
+                    w_walker += 25;
+                }
+            } else if (xx == 1) {
+                // save the offset for later use (avoid overlaps in PIP mode)
+                this._constraints_offset = w_walker;
+            }
+
+            // scan for SHAPE
+            for (let ii = 0; ii < num_constraints / 2; ii++) {
+                if (this._constraint_boxes[ii].GetKeyword() != "SHAPE" || Number(constraints[2 * ii + 1]) != xx) {
+                    continue;
+                }
+                let cpos = new Point(w_walker, 35);
+                w_walker += 77;
+                this._constraint_boxes[ii].setLocation(cpos, animate);
+                this._constraint_boxes[ii].show_big_text(false);
+                this._constraint_boxes[ii].display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+            }
+
+            // scan for ANTISHAPE
+            for (let ii = 0; ii < num_constraints / 2; ii++) {
+                if (this._constraint_boxes[ii].GetKeyword() != "ANTISHAPE" || Number(constraints[2 * ii + 1]) != xx) {
+                    continue;
+                }
+                let cpos = new Point(w_walker, 35);
+                w_walker += 77;
+                this._constraint_boxes[ii].setLocation(cpos, animate);
+                this._constraint_boxes[ii].show_big_text(false);
+                this._constraint_boxes[ii].display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+            }
+        }
+
+        this.layout_constraints();
     }
 
     private start_countdown(): void {
@@ -2234,17 +2223,19 @@ export class PoseEditMode extends GameMode {
         }
 
         this.set_puzzle_state(PuzzleState.COUNTDOWN);
+
+        let num_constraints: number = constraints.length;
+        for (let ii = 0; ii < num_constraints / 2; ii++) {
+            let box: ConstraintBox = this._constraint_boxes[ii];
+            box.display.visible = true;
+            box.show_big_text(true);
+            box.setLocation(new Point(Flashbang.stageWidth, (Flashbang.stageHeight * 0.4) + (ii * 77)), false);
+            box.setLocation(
+                new Point(Flashbang.stageWidth * 0.3, (Flashbang.stageHeight * 0.4) + (ii * 77)),
+                true, 0.75 + ii);
+        }
         this.set_start_curtain(true);
 
-        // let num_constraints: number = constraints.length;
-        // for (let ii = 0; ii < num_constraints / 2; ii++) {
-        //     let box: ConstraintBox = this._constraint_boxes[ii];
-        //     box.visible = true;
-        //     box.show_big_text(true);
-        //     box.set_pos(new UDim(1, 0.4, 0, ii * 77));
-        //     box.set_animator(new GameAnimatorMover(new UDim(0.3, 0.4, 0, ii * 77), 0.5 + 0.25 * ii, false, true));
-        // }
-        //
         // for (let ii = 0; ii < num_constraints / 2; ++ii) {
         //     this._constraints_container.removeObject(ConstraintBox(this._constraint_boxes[ii]));
         // }
@@ -2252,21 +2243,22 @@ export class PoseEditMode extends GameMode {
     }
 
     private on_click_start_curtain(): void {
-        // let offset: number = this._constraints_head - this._constraints_top;
-        // let constraints: string[] = this._puzzle.get_constraints();
-        // let num_constraints: number = constraints.length;
-        //
+        let offset: number = this._constraints_head - this._constraints_top;
+
         // this._mission_screen.transfer_constraints();
-        // this._constraints_head = this._constraints_top;
-        // this._constraints_foot = this._constraints_bottom;
-        // this._constraints_container.mask = null;
-        // this._constraints_container.set_pos(new UDim(0, 0, 0, 0));
-        // for (let ii: number = 0; ii < num_constraints / 2; ii++) {
-        //     let cpos: UDim = ConstraintBox(this._constraint_boxes[ii]).get_pos();
-        //     ConstraintBox(this._constraint_boxes[ii]).set_pos(new UDim(0.3, 0.4, cpos.get_x(0), cpos.get_y(0) + offset));
-        //     ConstraintBox(this._constraint_boxes[ii]).remove_all_animators();
-        //     this._constraints_container.addObject(ConstraintBox(this._constraint_boxes[ii]));
-        // }
+        this._constraints_head = this._constraints_top;
+        this._constraints_foot = this._constraints_bottom;
+        this._constraints_container.display.mask = null;
+        this._constraints_container.display.position = new Point(0, 0);
+
+        for (let box of this._constraint_boxes) {
+            let cpos: Point = new Point();
+            box.display.position.copy(cpos);
+            box.setLocation(new Point(
+                (Flashbang.stageWidth * 0.3) + cpos.x,
+                (Flashbang.stageHeight * 0.4) + cpos.y + offset));
+            // this._constraints_container.addObject(this._constraint_boxes[ii]);
+        }
 
         this._start_solving_time = new Date().getTime();
         this.start_playing(true);
@@ -2881,705 +2873,687 @@ export class PoseEditMode extends GameMode {
     }
 
     private check_constraints(render: boolean = true): boolean {
-        log.debug("TODO: check_constraints");
-        return true;
-        // let check_res: boolean = true;
-        // let old_check_res: boolean = true;
-        // let undo_block: UndoBlock = this.get_current_undo_block();
-        // let constraints: string[] = this._puzzle.get_constraints();
-        //
-        // let play_condition_music: boolean = false;
-        // let play_decondition_music: boolean = false;
-        //
-        // let restricted_global: any[];
-        // let restricted_local: any[];
-        // let restricted_guanine: any[];
-        // let restricted_cytosine: any[];
-        // let restricted_adenine: any[];
-        // let max_allowed_guanine: number = -1;
-        // let max_allowed_cytosine: number = -1;
-        // let max_allowed_adenine: number = -1;
-        //
-        // let wrong_pairs: any[] = null;
-        //
-        // if (this._puzzle.get_temporary_constraints() != null) {
-        //     constraints = this._puzzle.get_temporary_constraints();
-        // }
-        //
-        // if (constraints == null || constraints.length == 0) {
-        //     return false;
-        // }
-        //
-        // let sequence: any[] = undo_block.get_sequence();
-        // let locks: any[] = undo_block.get_puzzle_locks();
-        // let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
-        // let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
-        // let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
-        // let stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
-        //
+        let check_res: boolean = true;
+        let old_check_res: boolean = true;
+        let undo_block: UndoBlock = this.get_current_undo_block();
+        let constraints: string[] = this._puzzle.get_constraints();
+
+        let play_condition_music: boolean = false;
+        let play_decondition_music: boolean = false;
+
+        let restricted_global: number[];
+        let restricted_local: number[][];
+        let restricted_guanine: number[];
+        let restricted_cytosine: number[];
+        let restricted_adenine: number[];
+        let max_allowed_guanine: number = -1;
+        let max_allowed_cytosine: number = -1;
+        let max_allowed_adenine: number = -1;
+
+        let wrong_pairs: any[] = null;
+
+        if (this._puzzle.get_temporary_constraints() != null) {
+            constraints = this._puzzle.get_temporary_constraints();
+        }
+
+        if (constraints == null || constraints.length == 0) {
+            return false;
+        }
+
+        let sequence: number[] = undo_block.get_sequence();
+        let locks: boolean[] = undo_block.get_puzzle_locks();
+        let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
+        let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
+        let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
+        let stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
+
         // let set_callback: Function = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
         //     cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
         //         pose._unstable_index = (pose._unstable_index == kk) ? -1 : kk;
         //         pose.check_constraints();
         //     });
         // };
-        //
-        // let target_index: number;
-        // let input_index: number;
-        // let native_pairs: any[];
-        //
-        // for (let ii = 0; ii < constraints.length; ii += 2) {
-        //     let res: boolean = true;
-        //     let box: ConstraintBox = this._constraint_boxes[ii / 2];
-        //     let old_res: boolean = box.is_satisfied();
-        //     if (constraints[ii] == "GU") {
-        //         res = (num_gu >= Number(constraints[ii + 1]));
-        //         if (render) {
-        //             box.set_content("GU", constraints[ii + 1], res, num_gu);
-        //         }
-        //     } else if (constraints[ii] == "AU") {
-        //         res = (num_ua >= Number(constraints[ii + 1]));
-        //         if (render) {
-        //             box.set_content("AU", constraints[ii + 1], res, num_ua)
-        //         }
-        //     } else if (constraints[ii] == "GC") {
-        //         res = (num_gc <= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("GC", constraints[ii + 1], res, num_gc);
-        //         }
-        //     } else if (constraints[ii] == "MUTATION") {
-        //         let sequence_diff: number = EPars.sequence_diff(this._puzzle.get_subsequence_without_barcode(sequence), this._puzzle.get_subsequence_without_barcode(this._puzzle.get_beginning_sequence()));
-        //         res = sequence_diff <= Number(constraints[ii + 1]);
-        //
-        //         if (render) {
-        //             box.set_content("MUTATION", constraints[ii + 1], res, sequence_diff);
-        //         }
-        //
-        //     } else if (constraints[ii] == "SHAPE") {
-        //         target_index = Number(constraints[ii + 1]);
-        //         let ublk: UndoBlock = this.get_current_undo_block(target_index);
-        //         native_pairs = ublk.get_pairs();
-        //         let structure_constraints: any[] = null;
-        //         if (this._target_conditions != null && this._target_conditions[target_index] != null) {
-        //             structure_constraints = this._target_conditions[target_index]['structure_constraints'];
-        //
-        //             if (ublk.get_oligo_order() != null) {
-        //                 let np_map: any[] = ublk.get_order_map(ublk.get_oligo_order());
-        //                 let tp_map: any[] = ublk.get_order_map(ublk.get_target_oligo_order());
-        //                 if (np_map != null) {
-        //                     let new_pairs: any[] = [];
-        //                     let new_sc: any[] = [];
-        //                     for (let jj = 0; jj < native_pairs.length; jj++) {
-        //                         let kk: number = tp_map.indexOf(jj);
-        //                         new_sc[jj] = structure_constraints[kk];
-        //                         let pp: number = native_pairs[np_map[kk]];
-        //                         new_pairs[jj] = pp < 0 ? pp : tp_map[np_map.indexOf(pp)];
-        //                     }
-        //                     native_pairs = new_pairs;
-        //                     structure_constraints = new_sc;
-        //                 }
-        //             }
-        //         }
-        //
-        //         res = EPars.are_pairs_same(native_pairs, this._target_pairs[target_index], structure_constraints);
-        //
-        //         input_index = 0;
-        //         if (this._target_pairs.length > 1) {
-        //             input_index = target_index;
-        //         }
-        //
-        //         if (render) {
-        //             box.set_content("SHAPE", {
-        //                 target: this._target_pairs[target_index],
-        //                 index: input_index,
-        //                 native: native_pairs,
-        //                 structure_constraints: structure_constraints
-        //             }, res, 0);
-        //             box.set_flagged(this._unstable_index == ii);
-        //             if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-        //                 set_callback(this, box, ii);
-        //             }
-        //
-        //             if (this._unstable_index == ii) {
-        //                 wrong_pairs = box.get_wrong_pairs(native_pairs, this._target_pairs[target_index], structure_constraints, res);
-        //             }
-        //         }
-        //
-        //         if (target_index > 0) {
-        //             if (this._constraint_shape_boxes != null) {
-        //                 if (this._constraint_shape_boxes[target_index] != null) {
-        //                     this._constraint_shape_boxes[target_index].set_content("SHAPE", {
-        //                         target: this._target_pairs[target_index],
-        //                         index: input_index,
-        //                         native: native_pairs,
-        //                         structure_constraints: structure_constraints
-        //                     }, res, 0);
-        //                     this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index == ii);
-        //                     if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-        //                         set_callback(this, this._constraint_shape_boxes[target_index], ii);
-        //                     }
-        //
-        //                     if (this._is_pip_mode) {
-        //                         this._constraint_shape_boxes[target_index].visible = true;
-        //                     } else {
-        //                         this._constraint_shape_boxes[target_index].visible = false;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //
-        //         if (!this._is_pip_mode) {
-        //             if (target_index == this._current_target_index) {
-        //                 box.alpha = 1.0;
-        //             } else {
-        //                 box.alpha = 0.3;
-        //             }
-        //         } else {
-        //             box.alpha = 1.0;
-        //         }
-        //
-        //         if (this._is_pip_mode && target_index > 0) {
-        //             box.visible = false;
-        //         } else {
-        //             if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
-        //                 box.visible = true;
-        //             }
-        //         }
-        //
-        //     } else if (constraints[ii] == "ANTISHAPE") {
-        //         target_index = Number(constraints[ii + 1]);
-        //         native_pairs = this.get_current_undo_block(target_index).get_pairs();
-        //         if (this._target_conditions == null) {
-        //             Application.instance.throw_error("Target object not available for ANTISHAPE constraint");
-        //             continue;
-        //         }
-        //
-        //         if (this._target_conditions[target_index] == null) {
-        //             Application.instance.throw_error("Target condition not available for ANTISHAPE constraint");
-        //             continue;
-        //         }
-        //
-        //         let anti_structure_string: string = this._target_conditions[target_index]['anti_secstruct'];
-        //
-        //         if (anti_structure_string == null) {
-        //             Application.instance.throw_error("Target structure not available for ANTISHAPE constraint");
-        //             continue;
-        //         }
-        //
-        //         let anti_structure_constraints: any[] = this._target_conditions[target_index]['anti_structure_constraints'];
-        //         let anti_pairs: any[] = EPars.parenthesis_to_pair_array(anti_structure_string);
-        //         res = !EPars.are_pairs_same(native_pairs, anti_pairs, anti_structure_constraints);
-        //
-        //         input_index = 0;
-        //         if (this._target_pairs.length > 1) {
-        //             input_index = target_index;
-        //         }
-        //
-        //         if (render) {
-        //             box.set_content("ANTISHAPE", {
-        //                 target: anti_pairs,
-        //                 native: native_pairs,
-        //                 index: input_index,
-        //                 structure_constraints: anti_structure_constraints
-        //             }, res, 0);
-        //             box.set_flagged(this._unstable_index == ii);
-        //             if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-        //                 set_callback(this, box, ii);
-        //             }
-        //
-        //             if (this._unstable_index == ii) {
-        //                 wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, res);
-        //             }
-        //         }
-        //
-        //         if (target_index > 0) {
-        //             if (this._constraint_antishape_boxes != null) {
-        //                 if (this._constraint_antishape_boxes[target_index] != null) {
-        //                     this._constraint_antishape_boxes[target_index].set_content("ANTISHAPE", {
-        //                         target: anti_pairs,
-        //                         native: native_pairs,
-        //                         index: input_index,
-        //                         structure_constraints: anti_structure_constraints
-        //                     }, res, 0);
-        //                     this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index == ii);
-        //                     if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-        //                         set_callback(this, this._constraint_antishape_boxes[target_index], ii);
-        //                     }
-        //
-        //                     if (this._is_pip_mode) {
-        //                         this._constraint_antishape_boxes[target_index].visible = true;
-        //                     } else {
-        //                         this._constraint_antishape_boxes[target_index].visible = false;
-        //                     }
-        //
-        //                 }
-        //             }
-        //         }
-        //
-        //         if (!this._is_pip_mode) {
-        //             if (target_index == this._current_target_index) {
-        //                 box.alpha = 1.0;
-        //             } else {
-        //                 box.alpha = 0.3;
-        //             }
-        //         } else {
-        //             box.alpha = 1.0;
-        //         }
-        //
-        //         if (this._is_pip_mode && target_index > 0) {
-        //             box.visible = false;
-        //         } else {
-        //             if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
-        //                 box.visible = true;
-        //             }
-        //         }
-        //
-        //     } else if (constraints[ii] == "BINDINGS") {
-        //         target_index = Number(constraints[ii + 1]);
-        //         let undoblk: UndoBlock = this.get_current_undo_block(target_index);
-        //
-        //         if (this._target_conditions == null) {
-        //             Application.instance.throw_error("Target object not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         if (this._target_conditions[target_index] == null) {
-        //             Application.instance.throw_error("Target condition not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         let oligos: any[] = this._target_conditions[target_index]['oligos'];
-        //         if (oligos == null) {
-        //             Application.instance.throw_error("Target condition not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         let o_names: any[] = [];
-        //         let bind: any[] = [];
-        //         let label: any[] = [];
-        //         let jj: number;
-        //         let bmap: any[] = [];
-        //         let offsets: any[] = [];
-        //         let ofs: number = sequence.length;
-        //         let o: any[] = undoblk.get_oligo_order();
-        //         let count: number = undoblk.get_oligos_paired();
-        //         for (jj = 0; jj < o.length; jj++) {
-        //             bmap[o[jj]] = (jj < count);
-        //             offsets[o[jj]] = ofs + 1;
-        //             ofs += oligos[o[jj]]['sequence'].length + 1;
-        //         }
-        //
-        //         res = true;
-        //         for (jj = 0; jj < oligos.length; jj++) {
-        //             if (oligos[jj]['bind'] == null) continue;
-        //             let o_name: string = oligos[jj]['name'];
-        //             if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-        //             o_names.push(o_name);
-        //             let expected: boolean = Boolean(oligos[jj]['bind']);
-        //             bind.push(expected);
-        //             let lbl: string = oligos[jj]['label'] != null ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
-        //             label.push(lbl);
-        //
-        //             if (bmap[jj] != expected) {
-        //                 res = false;
-        //                 if (restricted_local == null) restricted_local = [];
-        //                 if (restricted_local[target_index] == null) restricted_local[target_index] = [];
-        //                 restricted_local[target_index].push(offsets[jj]);
-        //                 restricted_local[target_index].push(offsets[jj] + oligos[jj]['sequence'].length - 1);
-        //             }
-        //         }
-        //
-        //         if (render) {
-        //             box.set_content("BINDINGS", {
-        //                 index: target_index,
-        //                 bind: bind,
-        //                 label: label,
-        //                 oligo_name: o_names
-        //             }, res, 0);
-        //         }
-        //
-        //     } else if (constraints[ii] == "G") {
-        //         let g_count: number = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_GUANINE) {
-        //                 g_count++;
-        //             }
-        //         }
-        //
-        //         res = (g_count >= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("G", constraints[ii + 1], res, g_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "GMAX") {
-        //         let g_count = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_GUANINE) {
-        //                 g_count++;
-        //             }
-        //         }
-        //
-        //         res = (g_count <= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("GMAX", constraints[ii + 1], res, g_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "A") {
-        //         let a_count: number = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_ADENINE) {
-        //                 a_count++;
-        //             }
-        //         }
-        //
-        //         res = (a_count >= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("A", constraints[ii + 1], res, a_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "AMAX") {
-        //         let a_count = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_ADENINE) {
-        //                 a_count++;
-        //             }
-        //         }
-        //
-        //         res = (a_count <= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("AMAX", constraints[ii + 1], res, a_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "U") {
-        //         let u_count: number = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_URACIL) {
-        //                 u_count++;
-        //             }
-        //         }
-        //
-        //         res = (u_count >= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("U", constraints[ii + 1], res, u_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "UMAX") {
-        //         let u_count = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_URACIL) {
-        //                 u_count++;
-        //             }
-        //         }
-        //
-        //         res = (u_count <= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("UMAX", constraints[ii + 1], res, u_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "C") {
-        //         let c_count: number = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
-        //                 c_count++;
-        //             }
-        //         }
-        //
-        //         res = (c_count >= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("C", constraints[ii + 1], res, c_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "CMAX") {
-        //         let c_count = 0;
-        //
-        //         for (let jj = 0; jj < sequence.length; jj++) {
-        //             if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
-        //                 c_count++;
-        //             }
-        //         }
-        //
-        //         res = (c_count <= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("CMAX", constraints[ii + 1], res, c_count);
-        //         }
-        //
-        //     } else if (constraints[ii] == "PAIRS") {
-        //         res = (num_gc + num_gu + num_ua >= Number(constraints[ii + 1]));
-        //         box.set_content("PAIRS", constraints[ii + 1], res, num_gc + num_gu + num_ua);
-        //     } else if (constraints[ii] == "STACK") {
-        //         res = (stack_len >= Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("STACK", constraints[ii + 1], res, stack_len);
-        //         }
-        //     } else if (constraints[ii] == "CONSECUTIVE_G") {
-        //         let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
-        //         res = (consecutive_g_count < Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("CONSECUTIVE_G", constraints[ii + 1], res, consecutive_g_count);
-        //         }
-        //
-        //         max_allowed_guanine = Number(constraints[ii + 1]);
-        //
-        //     } else if (constraints[ii] == "CONSECUTIVE_C") {
-        //         let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE);
-        //         res = (consecutive_c_count < Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("CONSECUTIVE_C", constraints[ii + 1], res, consecutive_c_count);
-        //         }
-        //
-        //         max_allowed_cytosine = Number(constraints[ii + 1]);
-        //     } else if (constraints[ii] == "CONSECUTIVE_A") {
-        //         let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE);
-        //         res = (consecutive_a_count < Number(constraints[ii + 1]));
-        //
-        //         if (render) {
-        //             box.set_content("CONSECUTIVE_A", constraints[ii + 1], res, consecutive_a_count);
-        //         }
-        //
-        //         max_allowed_adenine = Number(constraints[ii + 1]);
-        //     } else if (constraints[ii] == "LAB_REQUIREMENTS") {
-        //         consecutive_g_count = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
-        //         consecutive_c_count = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
-        //         consecutive_a_count = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE, locks);
-        //         max_allowed_guanine = 4;
-        //         max_allowed_cytosine = 4;
-        //         max_allowed_adenine = 5;
-        //         res = (consecutive_g_count < max_allowed_guanine);
-        //         res && this. = (consecutive_c_count < max_allowed_cytosine);
-        //         res && this. = (consecutive_a_count < max_allowed_adenine);
-        //
-        //         if (render) {
-        //             box.set_content("LAB_REQUIREMENTS", {
-        //                 "g_count": consecutive_g_count, "g_max": max_allowed_guanine,
-        //                 "c_count": consecutive_c_count, "c_max": max_allowed_cytosine,
-        //                 "a_count": consecutive_a_count, "a_max": max_allowed_adenine
-        //             }, res, 0);
-        //         }
-        //
-        //     } else if (constraints[ii] == "BARCODE") {
-        //         res = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
-        //         if (render) {
-        //             box.set_content("BARCODE", 0, res, 0);
-        //         }
-        //
-        //     } else if (constraints[ii] == "OLIGO_BOUND") {
-        //         target_index = Number(constraints[ii + 1]);
-        //         let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-        //         res = (nnfe != null && nnfe[0] == -2);
-        //
-        //         if (this._target_conditions == null) {
-        //             Application.instance.throw_error("Target object not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         if (this._target_conditions[target_index] == null) {
-        //             Application.instance.throw_error("Target condition not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         o_names = [];
-        //         o_name = this._target_conditions[target_index]['oligo_name'];
-        //         if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-        //         o_names.push(o_name);
-        //
-        //         bind = [];
-        //         bind.push(true);
-        //
-        //         label = [];
-        //         lbl = this._target_conditions[target_index]['oligo_label'];
-        //         if (lbl == null) lbl = String.fromCharCode(65 + jj);
-        //         label.push(lbl);
-        //
-        //         if (render) {
-        //             box.set_content("BINDINGS", {
-        //                 index: target_index,
-        //                 bind: bind,
-        //                 label: label,
-        //                 oligo_name: o_names
-        //             }, res, 0);
-        //         }
-        //
-        //     } else if (constraints[ii] == "OLIGO_UNBOUND") {
-        //         target_index = Number(constraints[ii + 1]);
-        //         nnfe = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-        //         res = (nnfe == null || nnfe[0] != -2);
-        //
-        //         if (this._target_conditions == null) {
-        //             Application.instance.throw_error("Target object not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         if (this._target_conditions[target_index] == null) {
-        //             Application.instance.throw_error("Target condition not available for BINDINGS constraint");
-        //             continue;
-        //         }
-        //
-        //         o_names = [];
-        //         o_name = this._target_conditions[target_index]['oligo_name'];
-        //         if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-        //         o_names.push(o_name);
-        //
-        //         bind = [];
-        //         bind.push(false);
-        //
-        //         label = [];
-        //         lbl = this._target_conditions[target_index]['oligo_label'];
-        //         if (lbl == null) lbl = String.fromCharCode(65 + jj);
-        //         label.push(lbl);
-        //
-        //         if (render) {
-        //             box.set_content("BINDINGS", {
-        //                 index: target_index,
-        //                 bind: bind,
-        //                 label: label,
-        //                 oligo_name: o_names
-        //             }, res, 0);
-        //         }
-        //
-        //     } else if (constraints[ii] == "SCRIPT") {
-        //         let nid: string = constraints[ii + 1];
-        //
-        //         if (ExternalInterface.available) {
-        //
-        //             let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
-        //                 ExternalInterface.addCallback("_end" + sid, function (ret: Object): void {
-        //                     let goal: string = "";
-        //                     let name: string = "...";
-        //                     let value: string = "";
-        //                     let index: string = null;
-        //                     let data_png: string = "";
-        //                     let satisfied: boolean = false;
-        //                     pose.trace_js("_end" + sid + "() called");
-        //                     //pose.trace_js(ret);
-        //                     if (ret && ret.cause) {
-        //                         if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-        //                         if (ret.cause.goal != null) goal = ret.cause.goal;
-        //                         if (ret.cause.name != null) name = ret.cause.name;
-        //                         if (ret.cause.value != null) value = ret.cause.value;
-        //                         if (ret.cause.index != null) {
-        //                             index = (ret.cause.index + 1).toString();
-        //                             let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index == this._current_target_index ? 0 : -1);
-        //                             if (ll >= 0) {
-        //                                 if (ret.cause.highlight != null) {
-        //                                     Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
-        //                                 } else {
-        //                                     Pose2D(this._poses[ll]).clear_user_defined_highlight();
-        //                                 }
-        //                             }
-        //                         }
-        //                         if (ret.cause.icon_b64) data_png = ret.cause.icon_b64;
-        //                     }
-        //
-        //                     if (render) {
-        //                         ConstraintBox(this._constraint_boxes[jj]).set_content("SCRIPT", {
-        //                             "nid": sid,
-        //                             "goal": goal,
-        //                             "name": name,
-        //                             "value": value,
-        //                             "index": index,
-        //                             "data_png": data_png
-        //                         }, satisfied, 0);
-        //                     }
-        //
-        //                     res = satisfied;
-        //                 });
-        //             };
-        //
-        //             this.register_script_callbacks();
-        //             set_end_callback(this, nid, ii / 2);
-        //
-        //             // run
-        //             res = false;
-        //             this.trace_js("running script " + nid);
-        //             ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
-        //             this.trace_js("launched");
-        //         } else {
-        //
-        //             if (render) {
-        //                 box.set_content("SCRIPT", {"nid": nid, "goal": "", "name": "..."}, res, 0);
-        //             }
-        //         }
-        //     }
-        //
-        //     if (render) {
-        //         if (old_res != res && res) {
-        //             play_condition_music = true;
-        //             box.flare(res);
-        //         } else if (old_res != res && old_res) {
-        //             play_decondition_music = true;
-        //             box.flare(res);
-        //         }
-        //     }
-        //
-        //     check_res = check_res && res;
-        //     old_check_res && this. = old_res;
-        // }
-        //
-        // restricted_guanine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_GUANINE, max_allowed_guanine - 1, locks);
-        // restricted_cytosine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_CYTOSINE, max_allowed_cytosine - 1, locks);
-        // restricted_adenine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_ADENINE, max_allowed_adenine - 1, locks);
-        //
-        // restricted_global = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
-        //
-        // let unstable: any[] = [];
-        // if (wrong_pairs) {
-        //     let curr: number = 0;
-        //     for (let jj = 0; jj < wrong_pairs.length; jj++) {
-        //         let stat: number = (wrong_pairs[jj] == 1 ? 1 : 0);
-        //         if ((curr ^ stat) != 0) {
-        //             unstable.push(jj - curr);
-        //             curr = stat;
-        //         }
-        //     }
-        //     if ((unstable.length % 2) == 1) {
-        //         unstable.push(jj - 1);
-        //     }
-        // }
-        //
-        // for (let ii = 0; ii < this._poses.length; ii++) {
-        //     let jj = this._is_pip_mode ? ii : (ii == 0 ? this._current_target_index : ii);
-        //     let restricted: any[];
-        //     if (restricted_local && restricted_local[jj]) {
-        //         restricted = restricted_global.concat(restricted_local[jj]);
-        //     } else {
-        //         restricted = restricted_global;
-        //     }
-        //     this._poses[ii].highlight_restricted_sequence(restricted);
-        //     this._poses[ii].highlight_unstable_sequence(unstable);
-        // }
-        //
-        // if (check_res && !old_check_res) {
-        //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-        //         SoundManager.instance.play_se(SoundManager.SoundAllConditions);
-        //     } else if (this._puz_state != PuzzleState.GAME) {
-        //         SoundManager.instance.play_se(SoundManager.SoundCondition);
-        //     }
-        // } else if (play_condition_music) {
-        //     SoundManager.instance.play_se(SoundManager.SoundCondition);
-        // } else if (play_decondition_music) {
-        //     SoundManager.instance.play_se(SoundManager.SoundDecondition);
-        // }
-        //
-        // return check_res;
+
+        let target_index: number;
+        let input_index: number;
+        let native_pairs: number[];
+
+        for (let ii = 0; ii < constraints.length; ii += 2) {
+            let res: boolean = true;
+            let box: ConstraintBox = this._constraint_boxes[ii / 2];
+            let old_res: boolean = box.is_satisfied();
+            if (constraints[ii] == "GU") {
+                res = (num_gu >= Number(constraints[ii + 1]));
+                if (render) {
+                    box.set_content("GU", constraints[ii + 1], res, num_gu);
+                }
+            } else if (constraints[ii] == "AU") {
+                res = (num_ua >= Number(constraints[ii + 1]));
+                if (render) {
+                    box.set_content("AU", constraints[ii + 1], res, num_ua)
+                }
+            } else if (constraints[ii] == "GC") {
+                res = (num_gc <= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("GC", constraints[ii + 1], res, num_gc);
+                }
+            } else if (constraints[ii] == "MUTATION") {
+                let sequence_diff: number = EPars.sequence_diff(this._puzzle.get_subsequence_without_barcode(sequence), this._puzzle.get_subsequence_without_barcode(this._puzzle.get_beginning_sequence()));
+                res = sequence_diff <= Number(constraints[ii + 1]);
+
+                if (render) {
+                    box.set_content("MUTATION", constraints[ii + 1], res, sequence_diff);
+                }
+
+            } else if (constraints[ii] == "SHAPE") {
+                target_index = Number(constraints[ii + 1]);
+                let ublk: UndoBlock = this.get_current_undo_block(target_index);
+                native_pairs = ublk.get_pairs();
+                let structure_constraints: any[] = null;
+                if (this._target_conditions != null && this._target_conditions[target_index] != null) {
+                    structure_constraints = this._target_conditions[target_index]['structure_constraints'];
+
+                    if (ublk.get_oligo_order() != null) {
+                        let np_map: number[] = ublk.get_order_map(ublk.get_oligo_order());
+                        let tp_map: number[] = ublk.get_order_map(ublk.get_target_oligo_order());
+                        if (np_map != null) {
+                            let new_pairs: number[] = [];
+                            let new_sc: number[] = [];
+                            for (let jj = 0; jj < native_pairs.length; jj++) {
+                                let kk: number = tp_map.indexOf(jj);
+                                new_sc[jj] = structure_constraints[kk];
+                                let pp: number = native_pairs[np_map[kk]];
+                                new_pairs[jj] = pp < 0 ? pp : tp_map[np_map.indexOf(pp)];
+                            }
+                            native_pairs = new_pairs;
+                            structure_constraints = new_sc;
+                        }
+                    }
+                }
+
+                res = EPars.are_pairs_same(native_pairs, this._target_pairs[target_index], structure_constraints);
+
+                input_index = 0;
+                if (this._target_pairs.length > 1) {
+                    input_index = target_index;
+                }
+
+                if (render) {
+                    box.set_content("SHAPE", {
+                        target: this._target_pairs[target_index],
+                        index: input_index,
+                        native: native_pairs,
+                        structure_constraints: structure_constraints
+                    }, res, 0);
+                    box.set_flagged(this._unstable_index == ii);
+                    // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                    //     set_callback(this, box, ii);
+                    // }
+
+                    if (this._unstable_index == ii) {
+                        wrong_pairs = box.get_wrong_pairs(native_pairs, this._target_pairs[target_index], structure_constraints, res);
+                    }
+                }
+
+                if (target_index > 0) {
+                    if (this._constraint_shape_boxes != null) {
+                        if (this._constraint_shape_boxes[target_index] != null) {
+                            this._constraint_shape_boxes[target_index].set_content("SHAPE", {
+                                target: this._target_pairs[target_index],
+                                index: input_index,
+                                native: native_pairs,
+                                structure_constraints: structure_constraints
+                            }, res, 0);
+                            this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                            // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                            //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
+                            // }
+
+                            this._constraint_shape_boxes[target_index].display.visible = this._is_pip_mode;
+                        }
+                    }
+                }
+
+                if (!this._is_pip_mode) {
+                    if (target_index == this._current_target_index) {
+                        box.display.alpha = 1.0;
+                    } else {
+                        box.display.alpha = 0.3;
+                    }
+                } else {
+                    box.display.alpha = 1.0;
+                }
+
+                if (this._is_pip_mode && target_index > 0) {
+                    box.display.visible = false;
+                } else if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
+                    box.display.visible = true;
+                }
+
+            } else if (constraints[ii] == "ANTISHAPE") {
+                target_index = Number(constraints[ii + 1]);
+                native_pairs = this.get_current_undo_block(target_index).get_pairs();
+                if (this._target_conditions == null) {
+                    throw new Error("Target object not available for ANTISHAPE constraint");
+                }
+
+                if (this._target_conditions[target_index] == null) {
+                    throw new Error("Target condition not available for ANTISHAPE constraint");
+                }
+
+                let anti_structure_string: string = this._target_conditions[target_index]['anti_secstruct'];
+
+                if (anti_structure_string == null) {
+                    throw new Error("Target structure not available for ANTISHAPE constraint");
+                }
+
+                let anti_structure_constraints: any[] = this._target_conditions[target_index]['anti_structure_constraints'];
+                let anti_pairs: any[] = EPars.parenthesis_to_pair_array(anti_structure_string);
+                res = !EPars.are_pairs_same(native_pairs, anti_pairs, anti_structure_constraints);
+
+                input_index = 0;
+                if (this._target_pairs.length > 1) {
+                    input_index = target_index;
+                }
+
+                if (render) {
+                    box.set_content("ANTISHAPE", {
+                        target: anti_pairs,
+                        native: native_pairs,
+                        index: input_index,
+                        structure_constraints: anti_structure_constraints
+                    }, res, 0);
+                    box.set_flagged(this._unstable_index == ii);
+                    // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                    //     set_callback(this, box, ii);
+                    // }
+
+                    if (this._unstable_index == ii) {
+                        wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, res);
+                    }
+                }
+
+                if (target_index > 0) {
+                    if (this._constraint_antishape_boxes != null) {
+                        if (this._constraint_antishape_boxes[target_index] != null) {
+                            this._constraint_antishape_boxes[target_index].set_content("ANTISHAPE", {
+                                target: anti_pairs,
+                                native: native_pairs,
+                                index: input_index,
+                                structure_constraints: anti_structure_constraints
+                            }, res, 0);
+                            this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                            // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                            //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
+                            // }
+
+                            this._constraint_antishape_boxes[target_index].display.visible = this._is_pip_mode;
+                        }
+                    }
+                }
+
+                if (!this._is_pip_mode) {
+                    if (target_index == this._current_target_index) {
+                        box.display.alpha = 1.0;
+                    } else {
+                        box.display.alpha = 0.3;
+                    }
+                } else {
+                    box.display.alpha = 1.0;
+                }
+
+                if (this._is_pip_mode && target_index > 0) {
+                    box.display.visible = false;
+                } else if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
+                    box.display.visible = true;
+                }
+
+            } else if (constraints[ii] == "BINDINGS") {
+                target_index = Number(constraints[ii + 1]);
+                let undoblk: UndoBlock = this.get_current_undo_block(target_index);
+
+                if (this._target_conditions == null) {
+                    throw new Error("Target object not available for BINDINGS constraint");
+                }
+
+                if (this._target_conditions[target_index] == null) {
+                    throw new Error("Target condition not available for BINDINGS constraint");
+                }
+
+                let oligos: any[] = this._target_conditions[target_index]['oligos'];
+                if (oligos == null) {
+                    throw new Error("Target condition not available for BINDINGS constraint");
+                }
+
+                let o_names: string[] = [];
+                let bind: boolean[] = [];
+                let label: string[] = [];
+                let bmap: boolean[] = [];
+                let offsets: any[] = [];
+                let ofs: number = sequence.length;
+                let o: number[] = undoblk.get_oligo_order();
+                let count: number = undoblk.get_oligos_paired();
+                for (let jj = 0; jj < o.length; jj++) {
+                    bmap[o[jj]] = (jj < count);
+                    offsets[o[jj]] = ofs + 1;
+                    ofs += oligos[o[jj]]['sequence'].length + 1;
+                }
+
+                res = true;
+                for (let jj = 0; jj < oligos.length; jj++) {
+                    if (oligos[jj]['bind'] == null) continue;
+                    let o_name: string = oligos[jj]['name'];
+                    if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+                    o_names.push(o_name);
+                    let expected: boolean = Boolean(oligos[jj]['bind']);
+                    bind.push(expected);
+                    let lbl: string = oligos[jj]['label'] != null ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
+                    label.push(lbl);
+
+                    if (bmap[jj] != expected) {
+                        res = false;
+                        if (restricted_local == null) restricted_local = [];
+                        if (restricted_local[target_index] == null) restricted_local[target_index] = [];
+                        restricted_local[target_index].push(offsets[jj]);
+                        restricted_local[target_index].push(offsets[jj] + oligos[jj]['sequence'].length - 1);
+                    }
+                }
+
+                if (render) {
+                    box.set_content("BINDINGS", {
+                        index: target_index,
+                        bind: bind,
+                        label: label,
+                        oligo_name: o_names
+                    }, res, 0);
+                }
+
+            } else if (constraints[ii] == "G") {
+                let g_count: number = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_GUANINE) {
+                        g_count++;
+                    }
+                }
+
+                res = (g_count >= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("G", constraints[ii + 1], res, g_count);
+                }
+
+            } else if (constraints[ii] == "GMAX") {
+                let g_count = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_GUANINE) {
+                        g_count++;
+                    }
+                }
+
+                res = (g_count <= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("GMAX", constraints[ii + 1], res, g_count);
+                }
+
+            } else if (constraints[ii] == "A") {
+                let a_count: number = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_ADENINE) {
+                        a_count++;
+                    }
+                }
+
+                res = (a_count >= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("A", constraints[ii + 1], res, a_count);
+                }
+
+            } else if (constraints[ii] == "AMAX") {
+                let a_count = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_ADENINE) {
+                        a_count++;
+                    }
+                }
+
+                res = (a_count <= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("AMAX", constraints[ii + 1], res, a_count);
+                }
+
+            } else if (constraints[ii] == "U") {
+                let u_count: number = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_URACIL) {
+                        u_count++;
+                    }
+                }
+
+                res = (u_count >= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("U", constraints[ii + 1], res, u_count);
+                }
+
+            } else if (constraints[ii] == "UMAX") {
+                let u_count = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_URACIL) {
+                        u_count++;
+                    }
+                }
+
+                res = (u_count <= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("UMAX", constraints[ii + 1], res, u_count);
+                }
+
+            } else if (constraints[ii] == "C") {
+                let c_count: number = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
+                        c_count++;
+                    }
+                }
+
+                res = (c_count >= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("C", constraints[ii + 1], res, c_count);
+                }
+
+            } else if (constraints[ii] == "CMAX") {
+                let c_count = 0;
+
+                for (let jj = 0; jj < sequence.length; jj++) {
+                    if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
+                        c_count++;
+                    }
+                }
+
+                res = (c_count <= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("CMAX", constraints[ii + 1], res, c_count);
+                }
+
+            } else if (constraints[ii] == "PAIRS") {
+                res = (num_gc + num_gu + num_ua >= Number(constraints[ii + 1]));
+                box.set_content("PAIRS", constraints[ii + 1], res, num_gc + num_gu + num_ua);
+            } else if (constraints[ii] == "STACK") {
+                res = (stack_len >= Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("STACK", constraints[ii + 1], res, stack_len);
+                }
+            } else if (constraints[ii] == "CONSECUTIVE_G") {
+                let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
+                res = (consecutive_g_count < Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("CONSECUTIVE_G", constraints[ii + 1], res, consecutive_g_count);
+                }
+
+                max_allowed_guanine = Number(constraints[ii + 1]);
+
+            } else if (constraints[ii] == "CONSECUTIVE_C") {
+                let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE);
+                res = (consecutive_c_count < Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("CONSECUTIVE_C", constraints[ii + 1], res, consecutive_c_count);
+                }
+
+                max_allowed_cytosine = Number(constraints[ii + 1]);
+            } else if (constraints[ii] == "CONSECUTIVE_A") {
+                let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE);
+                res = (consecutive_a_count < Number(constraints[ii + 1]));
+
+                if (render) {
+                    box.set_content("CONSECUTIVE_A", constraints[ii + 1], res, consecutive_a_count);
+                }
+
+                max_allowed_adenine = Number(constraints[ii + 1]);
+            } else if (constraints[ii] == "LAB_REQUIREMENTS") {
+                let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
+                let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
+                let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE, locks);
+                max_allowed_guanine = 4;
+                max_allowed_cytosine = 4;
+                max_allowed_adenine = 5;
+                res = (consecutive_g_count < max_allowed_guanine);
+                res = res && (consecutive_c_count < max_allowed_cytosine);
+                res = res && (consecutive_a_count < max_allowed_adenine);
+
+                if (render) {
+                    box.set_content("LAB_REQUIREMENTS", {
+                        "g_count": consecutive_g_count, "g_max": max_allowed_guanine,
+                        "c_count": consecutive_c_count, "c_max": max_allowed_cytosine,
+                        "a_count": consecutive_a_count, "a_max": max_allowed_adenine
+                    }, res, 0);
+                }
+
+            } else if (constraints[ii] == "BARCODE") {
+                res = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
+                if (render) {
+                    box.set_content("BARCODE", 0, res, 0);
+                }
+
+            } else if (constraints[ii] == "OLIGO_BOUND") {
+                target_index = Number(constraints[ii + 1]);
+                let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                res = (nnfe != null && nnfe[0] == -2);
+
+                if (this._target_conditions == null) {
+                    throw new Error("Target object not available for BINDINGS constraint");
+                }
+
+                if (this._target_conditions[target_index] == null) {
+                    throw new Error("Target condition not available for BINDINGS constraint");
+                }
+
+                let o_names: string[] = [];
+                let o_name: string = this._target_conditions[target_index]['oligo_name'];
+
+                // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
+                let jj = 0;
+                if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+                o_names.push(o_name);
+
+                let bind: boolean[] = [];
+                bind.push(true);
+
+                let label: string[] = [];
+                let lbl: string = this._target_conditions[target_index]['oligo_label'];
+                if (lbl == null) lbl = String.fromCharCode(65 + jj);
+                label.push(lbl);
+
+                if (render) {
+                    box.set_content("BINDINGS", {
+                        index: target_index,
+                        bind: bind,
+                        label: label,
+                        oligo_name: o_names
+                    }, res, 0);
+                }
+
+            } else if (constraints[ii] == "OLIGO_UNBOUND") {
+                target_index = Number(constraints[ii + 1]);
+                let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                res = (nnfe == null || nnfe[0] != -2);
+
+                if (this._target_conditions == null) {
+                    throw new Error("Target object not available for BINDINGS constraint");
+                }
+
+                if (this._target_conditions[target_index] == null) {
+                    throw new Error("Target condition not available for BINDINGS constraint");
+                }
+
+                // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
+                let jj = 0;
+
+                let o_names: string[] = [];
+                let o_name: string = this._target_conditions[target_index]['oligo_name'];
+                if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+                o_names.push(o_name);
+
+                let bind: boolean[] = [];
+                bind.push(false);
+
+                let label: string[] = [];
+                let lbl: string = this._target_conditions[target_index]['oligo_label'];
+                if (lbl == null) lbl = String.fromCharCode(65 + jj);
+                label.push(lbl);
+
+                if (render) {
+                    box.set_content("BINDINGS", {
+                        index: target_index,
+                        bind: bind,
+                        label: label,
+                        oligo_name: o_names
+                    }, res, 0);
+                }
+
+            } else if (constraints[ii] == "SCRIPT") {
+                let nid: string = constraints[ii + 1];
+
+                log.debug("TODO: SCRIPT constraint");
+
+                // if (ExternalInterface.available) {
+                //     let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
+                //         ExternalInterface.addCallback("_end" + sid, function (ret: Object): void {
+                //             let goal: string = "";
+                //             let name: string = "...";
+                //             let value: string = "";
+                //             let index: string = null;
+                //             let data_png: string = "";
+                //             let satisfied: boolean = false;
+                //             pose.trace_js("_end" + sid + "() called");
+                //             //pose.trace_js(ret);
+                //             if (ret && ret.cause) {
+                //                 if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
+                //                 if (ret.cause.goal != null) goal = ret.cause.goal;
+                //                 if (ret.cause.name != null) name = ret.cause.name;
+                //                 if (ret.cause.value != null) value = ret.cause.value;
+                //                 if (ret.cause.index != null) {
+                //                     index = (ret.cause.index + 1).toString();
+                //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index == this._current_target_index ? 0 : -1);
+                //                     if (ll >= 0) {
+                //                         if (ret.cause.highlight != null) {
+                //                             Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
+                //                         } else {
+                //                             Pose2D(this._poses[ll]).clear_user_defined_highlight();
+                //                         }
+                //                     }
+                //                 }
+                //                 if (ret.cause.icon_b64) data_png = ret.cause.icon_b64;
+                //             }
+                //
+                //             if (render) {
+                //                 this._constraint_boxes[jj].set_content("SCRIPT", {
+                //                     "nid": sid,
+                //                     "goal": goal,
+                //                     "name": name,
+                //                     "value": value,
+                //                     "index": index,
+                //                     "data_png": data_png
+                //                 }, satisfied, 0);
+                //             }
+                //
+                //             res = satisfied;
+                //         });
+                //     };
+                //
+                //     this.register_script_callbacks();
+                //     set_end_callback(this, nid, ii / 2);
+                //
+                //     // run
+                //     res = false;
+                //     this.trace_js("running script " + nid);
+                //     ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
+                //     this.trace_js("launched");
+                // } else {
+                //
+                //     if (render) {
+                //         box.set_content("SCRIPT", {"nid": nid, "goal": "", "name": "..."}, res, 0);
+                //     }
+                // }
+            }
+
+            if (render) {
+                if (old_res != res && res) {
+                    play_condition_music = true;
+                    box.flare(res);
+                } else if (old_res != res && old_res) {
+                    play_decondition_music = true;
+                    box.flare(res);
+                }
+            }
+
+            check_res = check_res && res;
+            old_check_res = old_check_res && old_res;
+        }
+
+        restricted_guanine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_GUANINE, max_allowed_guanine - 1, locks);
+        restricted_cytosine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_CYTOSINE, max_allowed_cytosine - 1, locks);
+        restricted_adenine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_ADENINE, max_allowed_adenine - 1, locks);
+
+        restricted_global = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
+
+        let unstable: number[] = [];
+        if (wrong_pairs) {
+            let curr: number = 0;
+            let jj: number;
+            for (jj = 0; jj < wrong_pairs.length; jj++) {
+                let stat: number = (wrong_pairs[jj] == 1 ? 1 : 0);
+                if ((curr ^ stat) != 0) {
+                    unstable.push(jj - curr);
+                    curr = stat;
+                }
+            }
+            if ((unstable.length % 2) == 1) {
+                unstable.push(jj - 1);
+            }
+        }
+
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            let jj = this._is_pip_mode ? ii : (ii == 0 ? this._current_target_index : ii);
+            let restricted: any[];
+            if (restricted_local && restricted_local[jj]) {
+                restricted = restricted_global.concat(restricted_local[jj]);
+            } else {
+                restricted = restricted_global;
+            }
+            this._poses[ii].highlight_restricted_sequence(restricted);
+            this._poses[ii].highlight_unstable_sequence(unstable);
+        }
+
+        if (check_res && !old_check_res) {
+            if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+                SoundManager.instance.play_se(SoundManager.SoundAllConditions);
+            } else if (this._puz_state != PuzzleState.GAME) {
+                SoundManager.instance.play_se(SoundManager.SoundCondition);
+            }
+        } else if (play_condition_music) {
+            SoundManager.instance.play_se(SoundManager.SoundCondition);
+        } else if (play_decondition_music) {
+            SoundManager.instance.play_se(SoundManager.SoundDecondition);
+        }
+
+        return check_res;
     }
 
     private update_score(): void {
@@ -3707,9 +3681,9 @@ export class PoseEditMode extends GameMode {
         }
 
         let was_satisfied: boolean = true;
-        // for (let ii = 0; ii < this._puzzle.get_constraints().length; ii += 2) {
-        //     was_satisfied = was_satisfied && this._constraint_boxes[ii / 2].is_satisfied();
-        // }
+        for (let ii = 0; ii < this._puzzle.get_constraints().length; ii += 2) {
+            was_satisfied = was_satisfied && this._constraint_boxes[ii / 2].is_satisfied();
+        }
 
         let constraints_satisfied: boolean = this.check_constraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -3743,20 +3717,22 @@ export class PoseEditMode extends GameMode {
     }
 
     private flash_constraint_for_target(target_index: number): void {
-        log.debug("TODO: flash_constraint_for_target");
-        // let box: ConstraintBox = null;
-        // if (target_index == 0 || !this._is_pip_mode) {
-        //     let constraints: any[] = this._puzzle.get_constraints();
-        //     for (let ii: number = 0; ii < constraints.length; ii += 2) {
-        //         if (constraints[ii] == "SHAPE" && Number(constraints[ii + 1]) == target_index) {
-        //             box = this._constraint_boxes[ii / 2];
-        //             break;
-        //         }
-        //     }
-        // } else {
-        //     box = this._constraint_shape_boxes[target_index];
-        // }
-        // if (box != null) box.flash(0x00FFFF); // (0xC080FF);
+        let box: ConstraintBox = null;
+        if (target_index == 0 || !this._is_pip_mode) {
+            let constraints: string[] = this._puzzle.get_constraints();
+            for (let ii: number = 0; ii < constraints.length; ii += 2) {
+                if (constraints[ii] == "SHAPE" && Number(constraints[ii + 1]) == target_index) {
+                    box = this._constraint_boxes[ii / 2];
+                    break;
+                }
+            }
+        } else {
+            box = this._constraint_shape_boxes[target_index];
+        }
+
+        if (box != null) {
+            box.flash(0x00FFFF);
+        }
     }
 
     private pose_edit_by_target(target_index: number): void {
@@ -4526,9 +4502,9 @@ export class PoseEditMode extends GameMode {
     // private _paste_field: InputField;
     /// constraints && scoring display
     private _constraints_container: ContainerObject;
-    // private _constraint_boxes: ConstraintBox[];
-    // private _constraint_shape_boxes: ConstraintBox[];
-    // private _constraint_antishape_boxes: ConstraintBox[];
+    private _constraint_boxes: ConstraintBox[];
+    private _constraint_shape_boxes: ConstraintBox[];
+    private _constraint_antishape_boxes: ConstraintBox[];
     private _unstable_index: number;
     private _constraints_offset: number;
     /// Spec related
