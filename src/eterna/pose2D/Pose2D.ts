@@ -2230,16 +2230,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._lettermode;
     }
 
-    /*override*/
-    public on_key_down(key: number, ctrl: boolean, shift: boolean): boolean {
-        // if (!ctrl && key == KeyCode.KEY_F2 && Eterna.is_dev_mode) {
-        //     this._lettermode = !this._lettermode;
-        // }
-        //
-        // return false;
-        throw new Error("TODO");
-    }
-
     public set_show_total_energy(show: boolean): void {
         this._show_total_energy = show;
         this._primary_score_energy_display.visible = (show && this._score_folder != null);
