@@ -139,7 +139,9 @@ export class Application {
     }
 
     public is_dragging(): boolean {
-        return this._transparent_dragger.visible;
+        return false;
+        // TODO
+        // return this._transparent_dragger.visible;
     }
 
     public setup_yesno(question: string, yes_cb: Function, no_cb: Function): void {
