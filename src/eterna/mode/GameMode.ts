@@ -9,6 +9,7 @@ import {Assert} from "../../flashbang/util/Assert";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
+import {Dialog} from "../ui/Dialog";
 
 export abstract class GameMode extends AppMode {
     protected setup(): void {

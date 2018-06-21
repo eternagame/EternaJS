@@ -26,6 +26,7 @@ import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {SpecBox} from "../../ui/SpecBox";
+import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {AutosaveManager} from "../../util/AutosaveManager";
 import {BitmapManager} from "../../util/BitmapManager";
@@ -172,10 +173,6 @@ export class PoseEditMode extends GameMode {
 
         this._hint_text = Fonts.arial("", 14).build();
         this._hint_box.container.addChild(this._hint_text);
-
-        this._spec_box = new SpecBox();
-        this._spec_box.display.position = new Point(Flashbang.stageWidth * 0.15, Flashbang.stageHeight * 0.15);
-        this._spec_box.set_size(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
 
         this._docked_spec_box = new SpecBox(true);
         this._docked_spec_box.display.position = new Point(15, 190);
@@ -1667,42 +1664,14 @@ export class PoseEditMode extends GameMode {
     private show_spec(): void {
         this.update_current_block_with_dot_and_melting_plot();
         let datablock: UndoBlock = this.get_current_undo_block();
-        this._spec_box.set_spec(datablock);
 
-        let cancel_button: GameButton = new GameButton().label("Ok", 12);
-        cancel_button.display.position = new Point(
-            this._spec_box.get_panel_width() -cancel_button.container.width - 20,
-            this._spec_box.get_panel_height() -cancel_button.container.height - 20);
-        this._spec_box.addObject(cancel_button, this._spec_box.container);
-
-        cancel_button.clicked.connect(() => {
-            Application.instance.get_modal_container().removeObject(this._spec_box);
-            Application.instance.remove_lock("SPEC");
-            this._toolbar.spec_button.hotkey(KeyCode.KeyS);
+        let dialog = this.showDialog(new SpecBoxDialog(datablock));
+        dialog.closed.connect((showDocked) => {
+            if (showDocked) {
+                this._docked_spec_box.set_spec(datablock);
+                this._docked_spec_box.display.visible = true;
+            }
         });
-        this._toolbar.spec_button.hotkey(null);
-        cancel_button.hotkey(KeyCode.KeyS);
-        cancel_button.tooltip("");
-
-        let add_thumbnail_button: GameButton = new GameButton()
-            .label("Minimize Window", 12)
-            .tooltip("Minimize")
-            .hotkey(KeyCode.KeyM);
-        add_thumbnail_button.display.position = new Point(
-            this._spec_box.get_panel_width() - cancel_button.container.width - 20 - add_thumbnail_button.container.width - 20,
-            this._spec_box.get_panel_height() -add_thumbnail_button.container.height - 20);
-        this._spec_box.addObject(add_thumbnail_button);
-
-        add_thumbnail_button.clicked.connect(() => {
-            this._docked_spec_box.set_spec(datablock);
-            this._docked_spec_box.display.visible = true;
-
-            Application.instance.get_modal_container().removeObject(this._spec_box);
-            Application.instance.remove_lock("SPEC");
-        });
-
-        Application.instance.add_lock("SPEC");
-        Application.instance.get_modal_container().addObject(this._spec_box);
     }
 
     private update_docked_spec_box(): void {
@@ -4503,8 +4472,7 @@ export class PoseEditMode extends GameMode {
     private _constraint_antishape_boxes: ConstraintBox[];
     private _unstable_index: number;
     private _constraints_offset: number;
-    /// Spec related
-    private _spec_box: SpecBox;
+
     private _docked_spec_box: SpecBox;
     /// Exit button
     private _exit_button: GameButton;
