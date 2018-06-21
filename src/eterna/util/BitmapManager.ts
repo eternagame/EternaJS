@@ -19,7 +19,7 @@ export class BitmapManager {
     public static readonly ImgAddPairOver: string = "assets/NOVA/Edit/add_pair_active.png";
     public static readonly ImgAddPair: string = "assets/NOVA/Edit/add_pair_normal.png";
     public static readonly ImgAddPairSelect: string = "assets/NOVA/Edit/add_pair_selected.png";
-    public static readonly NovaAUReq: string = "assets/TangoIcons/applications-other.png";
+    public static readonly NovaAUReq: string = "assets/NOVA/Constraints/au-requirement-carrier.png";
     public static readonly NovaAUMissionReq: string = "assets/NOVA/Mission/au-requirement.png";
     public static readonly Backbone: string = "assets/RNABase/backbone_new.png";
     public static readonly NovaBarcodeMissionReq: string = "assets/NOVA/Mission/barcode-req-mission.png";
