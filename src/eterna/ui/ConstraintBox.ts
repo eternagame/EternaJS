@@ -88,30 +88,30 @@ export class ConstraintBox extends ContainerObject {
 
         this._enlarged = false;
 
-        this._val_text = Fonts.arial("", 18).color(0xffffff).bold().build();
+        this._val_text = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._val_text.visible = false;
         this.container.addChild(this._val_text);
 
-        this._big_text = Fonts.arial("", 23).color(0xffffff).bold().build();
+        this._big_text = Fonts.arial("", 23).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._big_text.visible = false;
         this.container.addChild(this._big_text);
 
-        this._no_text = Fonts.arial("NO", 16).color(0xffffff).bold().build();
+        this._no_text = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._no_text.position = new Point(35, 0);
         this._no_text.visible = false;
         this.container.addChild(this._no_text);
 
-        this._state_text = Fonts.arial("", 18).color(0xffffff).bold().build();
+        this._state_text = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._state_text.position = new Point(3, 45);
         this._state_text.visible = false;
         this.container.addChild(this._state_text);
 
-        this._req_clarify_text = Fonts.arial("", 11).color(0xC0DCE7).build();
+        this._req_clarify_text = Fonts.arial("", 11).color(0xC0DCE7).letterSpacing(-0.5).build();
         this._req_clarify_text.position = new Point(50, 30);
         this._req_clarify_text.visible = false;
         this.container.addChild(this._req_clarify_text);
 
-        this._req_stat_txt = Fonts.arial("", 11).color(0xC0DCE7).build();
+        this._req_stat_txt = Fonts.arial("", 11).color(0xC0DCE7).letterSpacing(-0.5).build();
         this._req_stat_txt.position = new Point(50, 50);
         this._req_stat_txt.visible = false;
         this.container.addChild(this._req_stat_txt);
@@ -133,7 +133,7 @@ export class ConstraintBox extends ContainerObject {
         this._flag.position = new Point(4, 4);
         this.container.addChild(this._flag);
 
-        this._side_txt = Fonts.std_regular("", 16).color(0xffffff).build();
+        this._side_txt = Fonts.std_regular("", 16).color(0xffffff).letterSpacing(-0.5).build();
         this._side_txt.visible = this._min_version;
         this.container.addChild(this._side_txt);
 
