@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# The original Eterna sounds frequently had tons of extra
+# silence at their ends ("1-TextBubble-Click-A" was a < 0.5s
+# sound with 19s of silence after it). This script uses the
+# sox to trim the silence from the sounds. It'd be nice
+# to do this on the uncompressed audio sources, if they're
+# available somewhere.
+
+set -e
+
+mkdir -p assets/Sounds/trimmed
+for filename in assets/Sounds/*.mp3; do
+    echo "Processing ${filename}..."
+    sox "${filename}" "assets/Sounds/trimmed/$(basename "${filename}")" silence -l 0 -1 0.1 1%
+done
