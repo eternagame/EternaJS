@@ -1,18 +1,12 @@
 import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
-import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Signal} from "../../signals/Signal";
+import {Dialog} from "./Dialog";
 import {GameButton} from "./GameButton";
 import {TextBalloon} from "./TextBalloon";
 
-export class ConfirmDialog extends ContainerObject {
-    /** Emitted when the user closes the dialog. The emitted value will be true if the user clicked Yes. */
-    public readonly closed: Signal<boolean> = new Signal();
-
+export class ConfirmDialog extends Dialog<boolean> {
     public constructor(prompt: string) {
         super();
         this._prompt = prompt;
@@ -20,12 +14,6 @@ export class ConfirmDialog extends ContainerObject {
 
     protected added() {
         super.added();
-
-        let bg = DisplayUtil.fillStageRect(0x0, 0.7);
-        this.container.addChild(bg);
-        // eat clicks on our BG
-        let capture = new PointerCapture(bg);
-        capture.beginCapture((e) => e.stopPropagation());
 
         let box = new TextBalloon("", 0x152843, 1.0, 0xC0DCE7, 0.27);
         box.set_title("Are you sure?");
@@ -55,15 +43,5 @@ export class ConfirmDialog extends ContainerObject {
         no_button.clicked.connect(() => this.close(false));
     }
 
-    private close(value: boolean) {
-        if (this._closed) {
-            return;
-        }
-        this._closed = true;
-        this.closed.emit(value);
-        this.destroySelf();
-    }
-
     private readonly _prompt: string;
-    private _closed: boolean;
 }
