@@ -1,38 +1,25 @@
 import {Align} from "../../flashbang/core/Align";
-import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Setting} from "../../flashbang/settings/Setting";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Eterna} from "../Eterna";
+import {Dialog} from "./Dialog";
 import {GameButton} from "./GameButton";
 import {GameCheckbox} from "./GameCheckbox";
 import {GamePanel, GamePanelType} from "./GamePanel";
-
-type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export class EternaViewOptionsDialog extends ContainerObject {
+export class EternaViewOptionsDialog extends Dialog<void> {
     public constructor(mode: EternaViewOptionsMode) {
         super();
         this._optionsMode = mode;
     }
 
     protected added(): void {
-        let bg = DisplayUtil.fillStageRect(0x0, 0.3);
-        this.container.addChild(bg);
-
-        // Click on background => close dialog
-        let capture = new PointerCapture(bg);
-        capture.beginCapture((e: InteractionEvent) => {
-            e.stopPropagation();
-            if (e.type == "pointerdown") {
-                this.destroySelf();
-            }
-        });
+        super.added();
 
         let settingsLayout: VLayoutContainer = new VLayoutContainer(18, Align.LEFT);
 
@@ -62,7 +49,7 @@ export class EternaViewOptionsDialog extends ContainerObject {
 
         let ok_button: GameButton = new GameButton().label("Done", 14);
         this.addObject(ok_button, viewLayout);
-        ok_button.clicked.connect(() => this.destroySelf());
+        ok_button.clicked.connect(() => this.close(null));
 
         viewLayout.layout();
 
@@ -92,6 +79,14 @@ export class EternaViewOptionsDialog extends ContainerObject {
         // this.add_object(SoundManager.instance.get_volume_button(3));
         // this.add_object(SoundManager.instance.get_volume_button(4));
         // this.add_object(SoundManager.instance.get_volume_button(5));
+    }
+
+    protected onBGClicked(): void {
+        this.close(null);
+    }
+
+    protected get bgAlpha(): number {
+        return 0.3;
     }
 
     private static createCheckbox(title: string, setting: Setting<boolean>): GameCheckbox {
