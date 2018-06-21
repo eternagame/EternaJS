@@ -54,7 +54,6 @@ declare namespace vienna_lib {
 
     export interface DotPlotResult {
         energy: number;
-        structure: string;
         probabilitiesString: string;
 
         delete (): void;
