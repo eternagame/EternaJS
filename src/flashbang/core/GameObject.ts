@@ -153,7 +153,6 @@ export class GameObject extends GameObjectBase {
     /*internal*/
     _registerObject(obj: GameObjectBase): void {
         this._mode.registerObjectInternal(obj);
-        obj._mode = this._mode;
         obj._addedInternal();
     }
 
@@ -224,6 +223,6 @@ export class GameObject extends GameObjectBase {
     }
 
     // our child list head
-    protected _children: GameObjectRef;
-    protected _pendingChildren: GameObjectRef[];
+    private _children: GameObjectRef;
+    private _pendingChildren: GameObjectRef[];
 }

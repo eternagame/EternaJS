@@ -54,18 +54,15 @@ export class GameObjectBase {
         return this._mode.modeStack;
     }
 
-    /**
-     * Returns true if the object is in an AppMode and is "live"
-     * (not pending removal from the database)
-     */
+    /** Returns true if the object belongs to an AppMode and is not pending removal */
     public /*final*/ get isLiveObject(): boolean {
-        return (this._ref != null && this._ref._obj != null);
+        return (this._mode != null && this._ref != null && this._ref._obj != null);
     }
 
     /**
      * Removes the GameObject from its parent.
-     * If a subclass needs to cleanup after itself after being destroyed, it should do
-     * so either in removedFromDb or dispose.
+     * (If a subclass needs to cleanup after itself after being destroyed, it should do
+     * so either in removed() or dispose()).
      */
     public /*final*/ destroySelf(): void {
         if (this._parent != null) {
@@ -159,14 +156,10 @@ export class GameObjectBase {
     private _regs: RegistrationGroup;
     private _destroyed: UnitSignal;
 
-    /*internal*/
-    _name: string;
-    /*internal*/
-    _ref: GameObjectRef;
-    /*internal*/
-    _parent: GameObject;
-    /*internal*/
-    _mode: AppMode;
+    /*internal*/ _name: string;
+    /*internal*/ _ref: GameObjectRef;
+    /*internal*/ _parent: GameObject;
+    /*internal*/ _mode: AppMode;
 
-    protected static EMPTY_ARRAY: any[] = [];
+    private static readonly EMPTY_ARRAY: any[] = [];
 }

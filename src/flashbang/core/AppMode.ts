@@ -200,6 +200,8 @@ export class AppMode {
 
     /*internal*/
     registerObjectInternal(obj: GameObjectBase): void {
+        obj._mode = this;
+
         // Handle IDs
         let ids: any[] = obj.ids;
         if (ids.length > 0) {
