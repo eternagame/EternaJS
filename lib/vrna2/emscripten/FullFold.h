@@ -11,7 +11,6 @@ struct FullFoldResult {
 
 struct DotPlotResult {
     double energy;
-    std::string structure;
     std::string probabilitiesString;
 };
 

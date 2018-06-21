@@ -187,7 +187,7 @@ DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, 
     length = (int) strlen(string);
 
     temperature = temperature_in;
-    probabilities = (char *) malloc(sizeof(char) * length * length * 30);
+    probabilities = (char *) calloc(sizeof(char), length * length * 30);
     probIndex = probabilities;
 
     kT = (temperature+273.15)*1.98717/1000.; /* in Kcal */
@@ -218,7 +218,6 @@ DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, 
 
     DotPlotResult* result = new DotPlotResult();
     result->energy = energy;
-    result->structure = dotplot_structure;
     result->probabilitiesString = probabilities;
 
     free_pf_arrays();

@@ -31,7 +31,6 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     class_<DotPlotResult>("DotPlotResult")
         .property("energy", &DotPlotResult::energy)
-        .property("structure", &DotPlotResult::structure)
         .property("probabilitiesString", &DotPlotResult::probabilitiesString);
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
