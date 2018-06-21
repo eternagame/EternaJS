@@ -43,7 +43,7 @@ export class NuPACK extends Folder {
         let result: DotPlotResult = null;
         try {
             result = this._lib.GetDotPlot(temp, seq_str);
-            ret_array = EmscriptenUtil.stdVectorToArray(result.nodes);
+            ret_array = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error("GetDotPlot error", e);
             return [];

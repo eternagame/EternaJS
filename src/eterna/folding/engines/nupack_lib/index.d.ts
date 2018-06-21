@@ -54,7 +54,7 @@ declare namespace nupack_lib {
 
     export interface DotPlotResult {
         energy: number;
-        nodes: stdcpp.vector<number>;
+        plot: stdcpp.vector<number>;
 
         delete (): void;
     }
