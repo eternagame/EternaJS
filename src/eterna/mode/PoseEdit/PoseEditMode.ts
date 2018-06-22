@@ -1916,8 +1916,8 @@ export class PoseEditMode extends GameMode {
     //
     //                 if (pointsrank_before && pointsrank_after) {
     //                     let ranks: any[] = [];
-    //                     let rank_before: number = pointsrank_before['eterna.rank'];
-    //                     let rank_after: number = pointsrank_after['eterna.rank'];
+    //                     let rank_before: number = pointsrank_before['rank'];
+    //                     let rank_after: number = pointsrank_after['rank'];
     //                     let points_before: number = pointsrank_before['points'];
     //                     let points_after: number = pointsrank_after['points'];
     //                     let richer_before: any[] = pointsrank_before['richer'];
@@ -1930,13 +1930,13 @@ export class PoseEditMode extends GameMode {
     //
     //                         for (ii = 0; ii < richer_after.length; ii++) {
     //                             pl = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-    //                             pl.set_rank(richer_after[ii]['eterna.rank']);
+    //                             pl.set_rank(richer_after[ii]['rank']);
     //                             ranks.push(pl);
     //                         }
     //
     //                         for (ii = 0; ii < poorer_after.length; ii++) {
     //                             pl = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-    //                             pl.set_rank(poorer_after[ii]['eterna.rank']);
+    //                             pl.set_rank(poorer_after[ii]['rank']);
     //                             ranks.push(pl);
     //                         }
     //
@@ -1953,14 +1953,14 @@ export class PoseEditMode extends GameMode {
     //                         let last_after_entry_uid: number = -1;
     //                         for (ii = 0; ii < richer_after.length; ii++) {
     //                             pl = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-    //                             pl.set_rank(richer_after[ii]['eterna.rank']);
+    //                             pl.set_rank(richer_after[ii]['rank']);
     //                             ranks.push(pl);
     //                             last_after_entry_uid = richer_after[ii]['uid'];
     //                         }
     //
     //                         for (ii = 0; ii < poorer_after.length; ii++) {
     //                             pl = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-    //                             pl.set_rank(poorer_after[ii]['eterna.rank']);
+    //                             pl.set_rank(poorer_after[ii]['rank']);
     //                             ranks.push(pl);
     //                             last_after_entry_uid = poorer_after[ii]['uid'];
     //                         }
@@ -1988,7 +1988,7 @@ export class PoseEditMode extends GameMode {
     //                         if (!common_entry || common_index >= 0) {
     //                             for (ii = common_index; ii < richer_before.length; ii++) {
     //                                 pl = new PlayerRank(richer_before[ii]['name'], richer_before[ii]['points']);
-    //                                 pl.set_rank(richer_before[ii]['eterna.rank']);
+    //                                 pl.set_rank(richer_before[ii]['rank']);
     //                                 ranks.push(pl);
     //                             }
     //                         }
@@ -1999,7 +1999,7 @@ export class PoseEditMode extends GameMode {
     //
     //                         for (ii = -common_index; ii < poorer_before.length; ii++) {
     //                             pl = new PlayerRank(poorer_before[ii]['name'], poorer_before[ii]['points']);
-    //                             pl.set_rank(poorer_before[ii]['eterna.rank']);
+    //                             pl.set_rank(poorer_before[ii]['rank']);
     //                             ranks.push(pl);
     //                         }
     //
