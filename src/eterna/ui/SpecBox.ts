@@ -1,11 +1,12 @@
 import * as log from "loglevel";
-import {Point, Sprite, Text} from "pixi.js";
+import {Point, Sprite, Text, Graphics} from "pixi.js";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
-import {UndoBlock} from "../UndoBlock";
+import {UndoBlock, UndoBlockParam} from "../UndoBlock";
 import {BitmapManager} from "../util/BitmapManager";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
@@ -114,7 +115,7 @@ export class SpecBox extends ContainerObject {
     }
 
     public set_spec(datablock: UndoBlock): void {
-        let temperature: number = 37;
+        const temperature: number = 37;
 
         this._datasize = datablock.get_sequence().length;
 
@@ -122,11 +123,11 @@ export class SpecBox extends ContainerObject {
         this._meltplot = datablock.create_meltplot();
 
         let statstring: string = "";
-        // statstring += "<B>" + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.AU, temperature) + "   ";
-        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GC, temperature) + "   ";
-        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GU, temperature) + "\n";
-        // statstring += "<B>Melting point : </B>" + datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n";
-        // statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
+        statstring += "<B>" + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.AU, temperature) + "   ";
+        statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GC, temperature) + "   ";
+        statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GU, temperature) + "\n";
+        statstring += "<B>Melting point : </B>" + datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n";
+        statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
         this._stattext.text = statstring;
 
         if (this._hvec != null) {
@@ -208,7 +209,18 @@ export class SpecBox extends ContainerObject {
             this._dotplotOriginY += (-this._dotplotOriginY) / level;
             this._dotplot.setSize(plot_size_level, plot_size_level);
             this._dotplot.replotWithBase(this._dotplotOriginX, this._dotplotOriginY);
-            this._dotplot.cacheAsBitmap = true;
+
+            if (this._dotplot_canvas.mask != null) {
+                this._dotplot_canvas.mask.destroy();
+                this._dotplot_canvas.mask = null;
+            }
+
+            if (plot_size_level > plot_size) {
+                let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plot_size, plot_size).endFill();
+                this._dotplot_canvas.addChild(mask);
+                this._dotplot_canvas.mask = mask;
+            }
+
             this._dotplot_canvas.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotOriginX, this._dotplotOriginY);
         }
@@ -264,7 +276,7 @@ export class SpecBox extends ContainerObject {
         if (this._meltplot != null && plot_size > 0) {
             this._meltplot.setSize(plot_size, plot_size);
             this._meltplot.replot();
-            this._meltplot.cacheAsBitmap = true;
+            // this._meltplot.cacheAsBitmap = true;
             this._meltplot_canvas.addChild(this._meltplot);
 
             if (this._docked) {
@@ -335,7 +347,7 @@ export class SpecBox extends ContainerObject {
             if (this._dotplotY + plot_size_level <= plot_size) this._dotplotY = plot_size - plot_size_level;
 
             this._dotplot.replotWithBase(this._dotplotX, this._dotplotY);
-            this._dotplot.cacheAsBitmap = true;
+            // this._dotplot.cacheAsBitmap = true;
             this._dotplot_canvas.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotX, this._dotplotY);
 
