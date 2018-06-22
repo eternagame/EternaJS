@@ -34,13 +34,19 @@ export class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings(Eterna.player_id);
         Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
 
+        // Handle ?puzzle=[puzzle_id] URL param
+        let puzid = PuzzleID.AAMismatchPilotRun;
+        let params: URLSearchParams = new URLSearchParams(window.location.search);
+        if (params.has("puzzle")) {
+            puzid = Number(params.get("puzzle"));
+        }
+
         Fonts.loadFonts()
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                const puzid = PuzzleID.AAMismatchPilotRun;
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
                 return PuzzleManager.instance.get_puzzle_by_nid(puzid);
             })
