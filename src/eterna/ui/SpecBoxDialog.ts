@@ -31,8 +31,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
 
         let cancel_button: GameButton = new GameButton().label("Ok", 12).hotkey(KeyCode.KeyS);
         cancel_button.display.position = new Point(
-            spec_box.get_panel_width() -cancel_button.container.width - 20,
-            spec_box.get_panel_height() -cancel_button.container.height - 20);
+            spec_box.width - cancel_button.container.width - 20,
+            spec_box.height - cancel_button.container.height - 20);
         spec_box.addObject(cancel_button, spec_box.container);
 
         cancel_button.clicked.connect(() => this.close(false));
@@ -42,8 +42,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
             .tooltip("Minimize")
             .hotkey(KeyCode.KeyM);
         add_thumbnail_button.display.position = new Point(
-            spec_box.get_panel_width() - cancel_button.container.width - 20 - add_thumbnail_button.container.width - 20,
-            spec_box.get_panel_height() -add_thumbnail_button.container.height - 20);
+            spec_box.width - cancel_button.container.width - 20 - add_thumbnail_button.container.width - 20,
+            spec_box.height - add_thumbnail_button.container.height - 20);
         spec_box.addObject(add_thumbnail_button, spec_box.container);
 
         add_thumbnail_button.clicked.connect(() => this.close(true));

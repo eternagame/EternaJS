@@ -217,13 +217,10 @@ export class UndoBlock {
     }
 
     public set_meltingpoint_and_dotplot(folder: Folder): void {
-        let pose_seq: string = EPars.sequence_array_to_string(this._sequence);
-
         if (this.get_param(UndoBlockParam.DOTPLOT, 37) == null) {
             let dot_array: number[] = folder.get_dot_plot(this.get_sequence(), this.get_pairs(37), 37);
             this.set_param(UndoBlockParam.DOTPLOT, dot_array, 37);
-            this._dotplot.set_type(PlotType.SCATTER);
-            this._dotplot.set_2d_data(dot_array, pose_seq.length);
+            this._dotplot_data = dot_array.slice();
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
@@ -289,8 +286,8 @@ export class UndoBlock {
             this.set_param(UndoBlockParam.PAIR_SCORE, pair_score, ii);
         }
 
-        this._meltplot.set_type(PlotType.LINE);
-        this._meltplot.set_data(pair_scores, max_pair_scores);
+        this._meltplot_pairscores = pair_scores;
+        this._meltplot_maxpairscores = max_pair_scores;
 
         let init_score: number = this.get_param(UndoBlockParam.PROB_SCORE, 37);
 
@@ -306,12 +303,18 @@ export class UndoBlock {
         this.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
     }
 
-    public get_dotplot(): Plot {
-        return this._dotplot;
+    public create_dotplot(): Plot {
+        let plot = new Plot();
+        plot.set_type(PlotType.SCATTER);
+        plot.set_2d_data(this._dotplot_data, this._sequence.length);
+        return plot;
     }
 
-    public get_meltplot(): Plot {
-        return this._meltplot;
+    public create_meltplot(): Plot {
+        let plot = new Plot();
+        plot.set_type(PlotType.LINE);
+        plot.set_data(this._meltplot_pairscores, this._meltplot_maxpairscores);
+        return plot;
     }
 
     public get_order_map(other_order: number[]): number[] {
@@ -350,6 +353,8 @@ export class UndoBlock {
     private _puzzle_locks: boolean[] = [];
     private _forced_struct: any[] = [];
     private _target_conditions: string = null;
-    private _dotplot: Plot = new Plot();
-    private _meltplot: Plot = new Plot();
+
+    private _dotplot_data: number[];
+    private _meltplot_pairscores: number[];
+    private _meltplot_maxpairscores: number[];
 }
