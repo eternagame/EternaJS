@@ -1,4 +1,5 @@
 import * as log from "loglevel";
+import {ErrorUtil} from "../flashbang/util/ErrorUtil";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
 
@@ -12,6 +13,14 @@ export class Eterna {
     public static client: GameClient;
 
     public static onFatalError(err: any): void {
-        log.error("Uncaught error", err);
+        log.error("Uncaught error", ErrorUtil.getErrString(err));
+
+        if (process.env.NODE_ENV !== "production") {
+            try {
+                alert(ErrorUtil.getErrString(err));
+            } catch (e) {
+                log.error("An error occurred while trying to display an error", e);
+            }
+        }
     }
 }
