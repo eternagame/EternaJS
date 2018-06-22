@@ -6,6 +6,7 @@ import {TextBuilder} from "../../flashbang/util/TextBuilder";
 
 export class Fonts {
     public static readonly ARIAL: string = "Arial";
+    public static readonly MONOSPACE: string = "monospace";
 
     public static readonly STDFONT_LIGHT: string = "OpenSans-Light";
     public static readonly STDFONT_REGULAR: string = "OpenSans-Regular";
@@ -21,6 +22,10 @@ export class Fonts {
         return Promise.all(loaders)
             .then(() => log.info("Fonts loaded"))
             .catch((e) => log.error("Error loading fonts: ", e));
+    }
+
+    public static monospace(text: string = "", fontSize: number = 12) :TextBuilder {
+        return new TextBuilder(text).font(this.MONOSPACE).fontSize(fontSize);
     }
 
     public static arial(text: string = "", fontSize: number = 12) :TextBuilder {

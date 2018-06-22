@@ -1,10 +1,12 @@
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Value} from "../../signals/Value";
 import {KeyCode} from "../input/KeyCode";
+import {ErrorUtil} from "../util/ErrorUtil";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 import {KeyboardEventType} from "../input/KeyboardEventType";
+import * as log from "loglevel";
 
 export class FlashbangApp {
     /** True if the app is foregrounded */
@@ -19,6 +21,8 @@ export class FlashbangApp {
     }
 
     public run(): void {
+        window.addEventListener("error", (e: ErrorEvent) => this.onUncaughtError(e));
+
         this._pixi = this.createPixi();
         document.body.appendChild(this._pixi.view);
 
@@ -155,6 +159,14 @@ export class FlashbangApp {
             // we don't know what happened to the keyboard state in the interim.
             this._keyDown.clear();
         }
+    }
+
+    /**
+     * Called when an uncaught error is thrown. No assumptions should be made about the state
+     * of the application when this is called!
+     */
+    protected onUncaughtError(e: ErrorEvent): void {
+        log.error(ErrorUtil.getErrString(e));
     }
 
     protected _pixi: PIXI.Application;
