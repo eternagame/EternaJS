@@ -25,6 +25,12 @@ enum PuzzleID {
 
 export class EternaApp extends FlashbangApp {
     protected createPixi(): PIXI.Application {
+        // When roundPixels is true, the renderer floor()s pixel locations
+        // to avoid pixel interpolation. This makes our text looks much better,
+        // though slow movement animation will end up looking a bit worse.
+        // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
+        PIXI.settings.RENDER_OPTIONS.roundPixels = true;
+
         return new PIXI.Application(1024, 768, {backgroundColor: 0x061A34});
     }
 
