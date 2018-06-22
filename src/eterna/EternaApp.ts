@@ -21,6 +21,7 @@ enum PuzzleID {
     TryptophanASameState = 8787266,
     NandosZippers = 3562529,
     TheRealXORChallenge = 6096060,  // multi-state
+    AAMismatchPilotRun = 3263276,   // locks, tails
 }
 
 export class EternaApp extends FlashbangApp {
@@ -39,7 +40,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                const puzid = PuzzleID.NandosZippers;
+                const puzid = PuzzleID.AAMismatchPilotRun;
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
                 return PuzzleManager.instance.get_puzzle_by_nid(puzid);
             })
