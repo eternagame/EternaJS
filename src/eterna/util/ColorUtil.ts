@@ -1,3 +1,5 @@
+import {MathUtil} from "../../flashbang/util/MathUtil";
+
 export class ColorUtil {
     /**
      * Blends two colors to create a new one.
@@ -22,6 +24,16 @@ export class ColorUtil {
         const bOut: number = (b1 * blendFactor) + (b2 * blendInv);
 
         return ((rOut & 0xff) << 16) | ((gOut & 0xff) << 8) | (bOut & 0xff);
+    }
+
+    /** Composes a 32-bit color from separate rgba components. Each component should be between [0, 1] */
+    public static compose(r: number, g: number, b: number, a: number = 0): number {
+        r = MathUtil.clamp(r, 0, 1) * 255;
+        g = MathUtil.clamp(g, 0, 1) * 255;
+        b = MathUtil.clamp(b, 0, 1) * 255;
+        a = MathUtil.clamp(a, 0, 1) * 255;
+
+        return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
     }
 
     /** Returns the 8-bit red component of a 24-bit color. The value will be in [0,255] */

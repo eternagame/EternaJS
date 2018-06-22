@@ -1,4 +1,5 @@
 ﻿import {Graphics, Text, Container} from "pixi.js";
+import {ColorUtil} from "./util/ColorUtil";
 import {Fonts} from "./util/Fonts";
 
 export enum PlotType {
@@ -63,10 +64,8 @@ export class Plot extends Container {
             this._num_bases = this._data.length;
         }
 
-        let horizontal_space: number = this._width / this._num_bases;
-        let vertical_space: number = this._height / this._num_bases;
-        let x_coord: number;
-        let y_coord: number;
+        const horizontal_space: number = this._width / this._num_bases;
+        const vertical_space: number = this._height / this._num_bases;
 
         this._graphics.clear();
         this._graphics.lineStyle(1, 0);
@@ -94,13 +93,13 @@ export class Plot extends Container {
 
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 0; ii < this._data.length; ii++) {
-                x_coord = Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0 + x;
+                let x_coord = Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0 + x;
                 this._graphics.moveTo(x_coord, 0);
                 this._graphics.lineTo(x_coord, this._height);
             }
 
             for (let ii = 0; ii < 10; ii++) {
-                y_coord = ii / 10 * (this._height - Plot.H_MARGIN) + y;
+                let y_coord = ii / 10 * (this._height - Plot.H_MARGIN) + y;
                 this._graphics.moveTo(0, y_coord + Plot.H_MARGIN);
                 this._graphics.lineTo(this._width, y_coord + Plot.H_MARGIN);
             }
@@ -129,13 +128,10 @@ export class Plot extends Container {
             }
 
         } else if (this._type == PlotType.SCATTER) {
-
-            let high_prob_count: number = 0;
-
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 10; ii < this._num_bases; ii += 10) {
-                x_coord = (ii / this._num_bases) * this._width + x;
-                y_coord = (ii / this._num_bases) * this._height + y;
+                let x_coord = (ii / this._num_bases) * this._width + x;
+                let y_coord = (ii / this._num_bases) * this._height + y;
 
                 this._graphics.moveTo(x_coord, 0);
                 this._graphics.lineTo(x_coord, this._height);
@@ -145,16 +141,15 @@ export class Plot extends Container {
             }
 
             for (let ii = 0; ii < this._data_2d.length; ii += 3) {
-                x_coord = ((this._data_2d[ii + 1])) * horizontal_space + x;
-                y_coord = ((this._data_2d[ii])) * vertical_space - 1 + y;
-                //graphics.drawRect(W_MARGIN + (ii+1) * horizontal_space - horizontal_space/2.0, H_MARGIN + _height - len,horizontal_space/2.0, len);
+                let x_coord = ((this._data_2d[ii + 1])) * horizontal_space + x;
+                let y_coord = ((this._data_2d[ii])) * vertical_space - 1 + y;
 
                 let min_col: number = 0.1;
-                let prob_r: number = 255 * (1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col));
-                let prob_g: number = 255 * (1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col));
-                let prob_b: number = 255 * (1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col));
+                let prob_r: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
+                let prob_g: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
+                let prob_b: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
 
-                let prob_color: number = prob_r * 256 * 256 + prob_g * 256 + prob_b;
+                let prob_color: number = ColorUtil.compose(prob_r, prob_g, prob_b);
 
                 this._graphics.lineStyle(0, 0, 0);
                 this._graphics.beginFill(prob_color);
@@ -198,7 +193,7 @@ export class Plot extends Container {
     private _type: PlotType = PlotType.BAR;
     private _data: number[];
     private _data_2d: number[];
-    private _num_bases: number;
+    private _num_bases: number = 0;
     private _ghost_data: number[];
     private _labels: string[];
     private _upper_bounds: number[];
