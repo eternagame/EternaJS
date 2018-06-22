@@ -1,11 +1,13 @@
-import * as log from "loglevel";
 import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {DelayTask} from "../../flashbang/tasks/DelayTask";
 import {LocationTask} from "../../flashbang/tasks/LocationTask";
+import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
+import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
 import {Assert} from "../../flashbang/util/Assert";
 import {Easing} from "../../flashbang/util/Easing";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
@@ -42,7 +44,7 @@ export class ConstraintBox extends ContainerObject {
         this._bgGraphics = new Graphics();
         this.container.addChild(this._bgGraphics);
 
-        this._backlight = new Sprite(null);
+        this._backlight = new Graphics();
         this._backlight.visible = false;
         this.container.addChild(this._backlight);
 
@@ -146,7 +148,7 @@ export class ConstraintBox extends ContainerObject {
         this._outline.visible = false;
         this.container.addChild(this._outline);
 
-        this._fglow = new Sprite(null);
+        this._fglow = new Graphics();
         this._fglow.visible = false;
         this.container.addChild(this._fglow);
     }
@@ -1049,66 +1051,70 @@ export class ConstraintBox extends ContainerObject {
     }
 
     public flash(color: number): void {
-        log.debug("TODO: flash");
-        // let sx: number = (this._outline.visible ? 111 : 75);
-        // let sy: number = 75;
-        //
-        // this._backlight.set_bitmap(new Texture(sx, sy, true, 0));
-        // this._backlight.graphics.clear();
-        // this._backlight.graphics.beginFill(color, 0.9);
-        // this._backlight.graphics.drawRoundRect(0, 0, sx, sy, 20);
-        // this._backlight.graphics.endFill();
-        // this._backlight.alpha = 0;
-        // this._backlight.visible = true;
-        // this._backlight.set_pos(new UDim(0, 0, 0, 0));
-        // this._backlight.remove_all_animators();
-        // this._backlight.push_animator(new GameAnimatorFader(0, 1, 0.15, false, false));
-        // this._backlight.push_animator(new GameAnimatorFader(1, 0, 0.15, true, false, 0.15));
-        // this._backlight.push_animator(new GameAnimatorFader(0, 1, 0.1, true, false, 0.3));
-        // this._backlight.push_animator(new GameAnimatorFader(1, 0, 0.5, true, false, 0.4));
+        let sx: number = (this._outline.visible ? 111 : 75);
+        let sy: number = 75;
+
+        this._backlight.clear();
+        this._backlight.beginFill(color, 0.9);
+        this._backlight.drawRoundedRect(0, 0, sx, sy, 10);
+        this._backlight.endFill();
+        this._backlight.alpha = 0;
+        this._backlight.visible = true;
+        this._backlight.position = new Point(0, 0);
+
+        this.replaceNamedObject(ConstraintBox.BACKLIGHT_ANIM, new SerialTask(
+            new AlphaTask(1, 0.15, Easing.easeInOut, this._backlight),
+            new AlphaTask(0, 0.15, Easing.easeInOut, this._backlight),
+            new AlphaTask(1, 0.3, Easing.easeInOut, this._backlight),
+            new AlphaTask(0, 0.4, Easing.easeInOut, this._backlight),
+            new VisibleTask(false, this._backlight),
+        ));
     }
 
     public flare(res: boolean): void {
-        log.debug("TODO: flare");
-        // if (this._min_version) {
-        //     this._backlight.visible = false;
-        //     this._backlight.remove_all_animators();
-        //     this._fglow.visible = false;
-        //     this._fglow.remove_all_animators();
-        //
-        //     return;
-        // }
-        //
-        // let lw: number = 6;
-        // let sx: number = (this._outline.visible ? 111 : 75);
-        // let sy: number = 75;
-        //
-        // this._fglow.set_bitmap(new Texture(sx, sy, true, 0));
-        // this._fglow.graphics.clear();
-        // this._fglow.graphics.lineStyle(lw, res ? 0x00FF00 : 0xFF0000, 1.0);
-        // this._fglow.graphics.drawRoundRect(2 + lw / 2, 2 + lw / 2, sx - lw - 4, sy - lw - 4, 20);
-        // this._fglow.scaleX = 1;
-        // this._fglow.scaleY = 1;
-        // this._fglow.alpha = 0;
-        // this._fglow.visible = true;
-        // this._fglow.set_pos(new UDim(0, 0, 0, 0));
-        // this._fglow.remove_all_animators();
-        // this._fglow.push_animator(new GameAnimatorMover(new UDim(0, 0, -lw, -lw), 1.6, false, false, false));
-        // this._fglow.push_animator(new GameAnimatorFader(0, 1, 0.8, false, false));
-        // this._fglow.push_animator(new GameAnimatorFader(1, 0, 0.8, true, false, 0.8));
-        // this._fglow.push_animator(new GameAnimatorScaler(1.0, 1.0 + 2 * (lw + 1) / sx, 1.6));
-        //
-        // this._backlight.set_bitmap(new Texture(sx, sy, true, 0));
-        // this._backlight.graphics.clear();
-        // this._backlight.graphics.beginFill(res ? 0x00FF00 : 0xFF0000, 0.7);
-        // this._backlight.graphics.drawRoundRect(0, 0, sx, sy, 20);
-        // this._backlight.graphics.endFill();
-        // this._backlight.alpha = 0;
-        // this._backlight.visible = true;
-        // this._backlight.set_pos(new UDim(0, 0, 0, 0));
-        // this._backlight.remove_all_animators();
-        // this._backlight.push_animator(new GameAnimatorFader(0, 1, 0.8, false, false));
-        // this._backlight.push_animator(new GameAnimatorFader(1, 0, 0.8, true, false, 0.8));
+        if (this._min_version) {
+            this.removeNamedObjects(ConstraintBox.BACKLIGHT_ANIM);
+            this.removeNamedObjects(ConstraintBox.FGLOW_ANIM);
+            this._backlight.visible = false;
+            this._fglow.visible = false;
+
+            return;
+        }
+
+        let lineWidth: number = 6;
+        let sizeX: number = (this._outline.visible ? 111 : 75);
+        let sizeY: number = 75;
+
+        this._fglow.clear();
+        this._fglow.lineStyle(lineWidth, res ? 0x00FF00 : 0xFF0000, 1.0);
+        this._fglow.drawRoundedRect(lineWidth / 2, lineWidth / 2, sizeX - lineWidth, sizeY - lineWidth, 10);
+        this._fglow.scale.x = 1;
+        this._fglow.scale.y = 1;
+        this._fglow.alpha = 0;
+        this._fglow.visible = true;
+        this._fglow.position = new Point(0, 0);
+        this.replaceNamedObject(ConstraintBox.FGLOW_ANIM, new ParallelTask(
+            new LocationTask(0, -lineWidth, 1.6, Easing.easeIn, this._fglow),
+            new ScaleTask(1.0, 1.0 + 2 * (lineWidth + 1) / sizeX, 1.6, Easing.easeIn, this._fglow),
+            new SerialTask(
+                new AlphaTask(1, 0.8, Easing.linear, this._fglow),
+                new AlphaTask(0, 0.8, Easing.linear, this._fglow),
+                new VisibleTask(false, this._fglow)
+            ),
+        ));
+
+        this._backlight.clear();
+        this._backlight.beginFill(res ? 0x00FF00 : 0xFF0000, 0.7);
+        this._backlight.drawRoundedRect(0, 0, sizeX, sizeY, 10);
+        this._backlight.endFill();
+        this._backlight.alpha = 0;
+        this._backlight.visible = true;
+        this._backlight.position = new Point(0, 0);
+        this.replaceNamedObject(ConstraintBox.BACKLIGHT_ANIM, new SerialTask(
+            new AlphaTask(1, 0.8, Easing.easeInOut, this._backlight),
+            new AlphaTask(0, 0.8, Easing.easeInOut, this._backlight),
+            new VisibleTask(false, this._backlight),
+        ));
     }
 
     private changeShapeThumbnailBG(): void {
@@ -1187,8 +1193,8 @@ export class ConstraintBox extends ContainerObject {
     private readonly _puz_small_fail_bg: Texture;
     private readonly _puz_large_clear_bg: Texture;
     private readonly _puz_large_fail_bg: Texture;
-    private readonly _fglow: Sprite;
-    private readonly _backlight: Sprite;
+    private readonly _fglow: Graphics;
+    private readonly _backlight: Graphics;
     private readonly _check: Sprite;
     private readonly _req: Sprite;
     private readonly _outline: Sprite;
@@ -1216,4 +1222,6 @@ export class ConstraintBox extends ContainerObject {
 
     private static readonly LOCATION_ANIM: string = "AnimateLocation";
     private static readonly BIG_TEXT_FADE_ANIM: string = "BigTextFadeAnim";
+    private static readonly BACKLIGHT_ANIM: string = "BacklightAnim";
+    private static readonly FGLOW_ANIM: string = "FGlowAnim";
 }
