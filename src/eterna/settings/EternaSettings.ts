@@ -13,6 +13,9 @@ export class EternaSettings extends AbstractSettings {
     public readonly useExtendedColors: Setting<boolean>;
     public readonly displayAuxInfo: Setting<boolean>;
 
+    public readonly soundMute: Setting<boolean>;
+    public readonly soundVolume: Setting<number>;
+
     // TODO: recreate settings when playerID changes?
     public constructor(playerID: number) {
         super(`EternaSettings-${playerID}`);
@@ -27,5 +30,7 @@ export class EternaSettings extends AbstractSettings {
         this.useContinuousColors = this.setting("useContinuousColors", false);
         this.useExtendedColors = this.setting("useExtendedColors", false);
         this.displayAuxInfo = this.setting("displayAuxInfo", false);
+        this.soundMute = this.setting("soundMute", false);
+        this.soundVolume = this.setting("soundVolume", 0.6);
     }
 }

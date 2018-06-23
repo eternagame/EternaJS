@@ -6,6 +6,8 @@ import {ExpPainter} from "../ExpPainter";
 import {BitmapManager} from "../util/BitmapManager";
 import {BitmapUtil} from "../util/BitmapUtil";
 import {ColorUtil} from "../util/ColorUtil";
+import {SoundManager} from "../util/SoundManager";
+import {Sounds} from "../util/Sounds";
 import {Base} from "./Base";
 import {BaseBitmaps} from "./BaseBitmaps";
 import {BaseDrawFlags} from "./BaseDrawFlags";
@@ -114,14 +116,10 @@ export class BaseAssets {
 
     public static getBaseTypeSound(type: number): string | null {
         switch (type) {
-        case EPars.RNABASE_ADENINE:
-            return BaseAssets.GAMESOUND_Y;
-        case EPars.RNABASE_URACIL:
-            return BaseAssets.GAMESOUND_B;
-        case EPars.RNABASE_GUANINE:
-            return BaseAssets.GAMESOUND_R;
-        case EPars.RNABASE_CYTOSINE:
-            return BaseAssets.GAMESOUND_G;
+        case EPars.RNABASE_ADENINE:		return Sounds.SoundY;
+        case EPars.RNABASE_URACIL: 		return Sounds.SoundB;
+        case EPars.RNABASE_GUANINE: 	return Sounds.SoundR;
+        case EPars.RNABASE_CYTOSINE:	return Sounds.SoundG;
         }
 
         return null;
@@ -244,10 +242,10 @@ export class BaseAssets {
 
         // SOUNDS
         // log.debug("INIT SOUND");
-        // SoundManager.instance.add_sound_by_name(BaseAssets.GAMESOUND_R, "SoundR");
-        // SoundManager.instance.add_sound_by_name(BaseAssets.GAMESOUND_G, "SoundG");
-        // SoundManager.instance.add_sound_by_name(BaseAssets.GAMESOUND_Y, "SoundY");
-        // SoundManager.instance.add_sound_by_name(BaseAssets.GAMESOUND_B, "SoundB");
+        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_R, "SoundR");
+        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_G, "SoundG");
+        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_Y, "SoundY");
+        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_B, "SoundB");
     }
 
     public static draw_circular_barcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
@@ -327,9 +325,4 @@ export class BaseAssets {
     private static _sphere_min_data: Texture[];
 
     private static _spark_bitmaps: Texture[];
-
-    private static readonly GAMESOUND_R: string = "R";
-    private static readonly GAMESOUND_G: string = "G";
-    private static readonly GAMESOUND_Y: string = "Y";
-    private static readonly GAMESOUND_B: string = "B";
 }

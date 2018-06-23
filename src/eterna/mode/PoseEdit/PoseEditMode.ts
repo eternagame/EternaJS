@@ -31,7 +31,7 @@ import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {AutosaveManager} from "../../util/AutosaveManager";
 import {BitmapManager} from "../../util/BitmapManager";
 import {Fonts} from "../../util/Fonts";
-import {SoundManager} from "../../util/SoundManager";
+import {Sounds} from "../../util/Sounds";
 import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
@@ -2389,7 +2389,7 @@ export class PoseEditMode extends GameMode {
             }
             this._bubble_curtain.start_sweep();
 
-            SoundManager.instance.play_bg(SoundManager.SoundPuzzleClear, 0);
+            Eterna.sound.play_se(Sounds.SoundPuzzleClear);
         } else {
             this.show_end_curtain();
         }
@@ -3507,14 +3507,14 @@ export class PoseEditMode extends GameMode {
 
         if (check_res && !old_check_res) {
             if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-                SoundManager.instance.play_se(SoundManager.SoundAllConditions);
+                Eterna.sound.play_se(Sounds.SoundAllConditions);
             } else if (this._puz_state != PuzzleState.GAME) {
-                SoundManager.instance.play_se(SoundManager.SoundCondition);
+                Eterna.sound.play_se(Sounds.SoundCondition);
             }
         } else if (play_condition_music) {
-            SoundManager.instance.play_se(SoundManager.SoundCondition);
+            Eterna.sound.play_se(Sounds.SoundCondition);
         } else if (play_decondition_music) {
-            SoundManager.instance.play_se(SoundManager.SoundDecondition);
+            Eterna.sound.play_se(Sounds.SoundDecondition);
         }
 
         return check_res;
@@ -3761,7 +3761,7 @@ export class PoseEditMode extends GameMode {
                         for (let jj = segments[2]; jj <= segments[3]; jj++) {
                             this._target_pairs[xx][jj] = -1;
                         }
-                        SoundManager.instance.play_se(SoundManager.SoundRY);
+                        Eterna.sound.play_se(Sounds.SoundRY);
                         this.flash_constraint_for_target(xx);
                         this._poses[target_index].clear_design_struct();
                     } else if (num_unpaired == segments[1] - segments[0] + segments[3] - segments[2] + 2) {
@@ -3769,7 +3769,7 @@ export class PoseEditMode extends GameMode {
                         if (EPars.validate_parenthesis(EPars.pairs_array_to_parenthesis(this._target_pairs[xx]).slice(segments[1] + 1, segments[2]), false) == null) {
                             for (let jj = segments[0]; jj <= segments[1]; jj++) this._target_pairs[xx][jj] = segments[3] - (jj - segments[0]);
                             for (let jj = segments[2]; jj <= segments[3]; jj++) this._target_pairs[xx][jj] = segments[1] - (jj - segments[2]);
-                            SoundManager.instance.play_se(SoundManager.SoundGB);
+                            Eterna.sound.play_se(Sounds.SoundGB);
                             this.flash_constraint_for_target(xx);
                             this._poses[target_index].clear_design_struct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
@@ -3801,7 +3801,7 @@ export class PoseEditMode extends GameMode {
                                     for (let jj = segments[2]; jj <= segments[3]; jj++) {
                                         this._target_pairs[xx][jj] = segments[1] - (jj - segments[2]);
                                     }
-                                    SoundManager.instance.play_se(SoundManager.SoundGB);
+                                    Eterna.sound.play_se(Sounds.SoundGB);
                                     this.flash_constraint_for_target(xx);
                                     this._poses[target_index].clear_design_struct();
                                     more = false;
