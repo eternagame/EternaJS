@@ -4,7 +4,15 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {SceneObject} from "../../flashbang/objects/SceneObject";
+import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
+import {DelayTask} from "../../flashbang/tasks/DelayTask";
+import {LocationTask} from "../../flashbang/tasks/LocationTask";
+import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
+import {SelfDestructTask} from "../../flashbang/tasks/SelfDestructTask";
+import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {Easing} from "../../flashbang/util/Easing";
 import {Registration} from "../../signals/Registration";
 import {Application} from "../Application";
 import {EPars} from "../EPars";
@@ -14,6 +22,7 @@ import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
+import {Fonts} from "../util/Fonts";
 import {Sounds} from "../util/Sounds";
 import {Utility} from "../util/Utility";
 import {Base} from "./Base";
@@ -1091,29 +1100,24 @@ export class Pose2D extends ContainerObject implements Updatable {
         x_pos /= stack_len * 2;
         y_pos /= stack_len * 2;
 
-        // let praise_obj: GameText = null;
-        //
-        // for (let ii = 0; ii < this._praise_objects.length; ii++) {
-        //     if (this._praise_objects[ii].visible == false) {
-        //         praise_obj = this._praise_objects[ii];
-        //         break;
-        //     }
-        // }
-        //
-        // if (praise_obj == null) {
-        //     praise_obj = new GameText(Fonts.arial(20, true));
-        //     this.addObject(praise_obj);
-        // }
-        //
-        // praise_obj.visible = true;
-        // if (stack_len > 1) {
-        //     praise_obj.set_text("Great Pairings!");
-        // } else {
-        //     praise_obj.set_text("Great Pairing!");
-        // }
-        //
-        // praise_obj.set_pos(new UDim(0, 0, x_pos - praise_obj.text_width() / 2, y_pos));
-        // praise_obj.set_animator(new GameAnimatorMover(new UDim(0, 0, x_pos - praise_obj.text_width() / 2, y_pos - 30), 0.9, true, false, true));
+        let praiseText = stack_len > 1 ? "Great Pairings!" : "Great Pairing!";
+        let praise_obj = new SceneObject(Fonts.arial(praiseText, 20).bold().color(0xffffff).build());
+        praise_obj.display.position = new Point(x_pos - DisplayUtil.width(praise_obj.display) * 0.5, y_pos);
+        this.addObject(praise_obj, this.container);
+
+        praise_obj.display.alpha = 0;
+        praise_obj.addObject(new SerialTask(
+            new ParallelTask(
+                new AlphaTask(1, 0.2, Easing.easeOut),
+                new LocationTask(praise_obj.display.x, praise_obj.display.y - 60, 0.2, Easing.easeOut)
+            ),
+            new DelayTask(1),
+            new ParallelTask(
+                new AlphaTask(0, 0.1, Easing.easeOut),
+                new LocationTask(praise_obj.display.x, praise_obj.display.y - 80, 0.1, Easing.easeOut)
+            ),
+            new SelfDestructTask()
+        ));
 
         if (play_sound) {
             if (play_gc) {
@@ -3391,7 +3395,6 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _shift_end: number = -1;
 
     /// For praising stacks
-    private _praise_objects: any[] = [];
     private _praise_queue: number[] = [];
     private _praise_seq: number[] = [];
 
