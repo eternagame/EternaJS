@@ -1108,13 +1108,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         praise_obj.display.alpha = 0;
         praise_obj.addObject(new SerialTask(
             new ParallelTask(
-                new AlphaTask(1, 0.2, Easing.easeOut),
-                new LocationTask(praise_obj.display.x, praise_obj.display.y - 60, 0.2, Easing.easeOut)
+                new AlphaTask(0.85, 0.33, Easing.easeOut),
+                new LocationTask(praise_obj.display.x, praise_obj.display.y - 80, 0.33, Easing.easeOut)
             ),
             new DelayTask(1),
             new ParallelTask(
-                new AlphaTask(0, 0.1, Easing.easeOut),
-                new LocationTask(praise_obj.display.x, praise_obj.display.y - 80, 0.1, Easing.easeOut)
+                new AlphaTask(0, 0.33, Easing.easeOut),
+                new LocationTask(praise_obj.display.x, praise_obj.display.y - 120, 0.33, Easing.easeOut)
             ),
             new SelfDestructTask()
         ));
