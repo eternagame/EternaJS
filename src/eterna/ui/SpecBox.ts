@@ -54,7 +54,7 @@ export class SpecBox extends ContainerObject {
         this._stattext = Fonts.arial("", 14).color(0xffffff).build();
 
         let url: string = EternaURL.generate_url({page: "manual"});
-        let helpText: string = "<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
+        let helpText: string = "";//"<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
         this._helptext = Fonts.arial(helpText, 14).color(0xffffff).build();
 
         this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
@@ -123,11 +123,11 @@ export class SpecBox extends ContainerObject {
         this._meltplot = datablock.create_meltplot();
 
         let statstring: string = "";
-        statstring += "<B>" + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.AU, temperature) + "   ";
-        statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GC, temperature) + "   ";
-        statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GU, temperature) + "\n";
-        statstring += "<B>Melting point : </B>" + datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n";
-        statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
+        // statstring += "<B>" + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.AU, temperature) + "   ";
+        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GC, temperature) + "   ";
+        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GU, temperature) + "\n";
+        // statstring += "<B>Melting point : </B>" + datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n";
+        // statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
         this._stattext.text = statstring;
 
         if (this._hvec != null) {
