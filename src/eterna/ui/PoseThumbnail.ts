@@ -5,7 +5,7 @@ import {Constants} from "../Constants";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {RNALayout} from "../pose2D/RNALayout";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 
 export class PoseThumbnail {
     public static THUMBNAIL_BASE_COLORED: number = 0;

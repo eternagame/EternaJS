@@ -12,9 +12,9 @@ import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {EternaSettings} from "./settings/EternaSettings";
-import {BitmapManager} from "./util/BitmapManager";
+import {BitmapManager} from "./resources/BitmapManager";
 import {Fonts} from "./util/Fonts";
-import {SoundManager} from "./util/SoundManager";
+import {SoundManager} from "./resources/SoundManager";
 
 enum PuzzleID {
     FunAndEasy = 4350940,

@@ -3,7 +3,7 @@ import {Text, Texture} from "pixi.js";
 import {Assert} from "../../flashbang/util/Assert";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Fonts} from "./Fonts";
+import {Fonts} from "../util/Fonts";
 
 export class BitmapManager {
     public static readonly NovaAMissionReq: string = "assets/NOVA/Mission/a-box.png";

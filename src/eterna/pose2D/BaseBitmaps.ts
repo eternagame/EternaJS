@@ -1,7 +1,7 @@
 import {Texture, Text} from "pixi.js";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {EPars} from "../EPars";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 import {BitmapUtil} from "../util/BitmapUtil";
 import {Fonts} from "../util/Fonts";
 import {Base} from "./Base";

@@ -15,7 +15,7 @@ import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
-import {BitmapManager} from "../../util/BitmapManager";
+import {BitmapManager} from "../../resources/BitmapManager";
 
 export class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;

@@ -7,7 +7,7 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
 import {ROPWait} from "../rscript/ROPWait";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;

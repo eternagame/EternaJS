@@ -2,7 +2,7 @@ import * as log from "loglevel";
 import {ErrorUtil} from "../flashbang/util/ErrorUtil";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
-import {SoundManager} from "./util/SoundManager";
+import {SoundManager} from "./resources/SoundManager";
 
 /** Constants and managers */
 export class Eterna {
