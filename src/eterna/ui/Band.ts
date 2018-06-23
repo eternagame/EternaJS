@@ -3,7 +3,7 @@ import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {MathUtil} from "../../flashbang/util/MathUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 import {ColorUtil} from "../util/ColorUtil";
 import {Fonts} from "../util/Fonts";
 

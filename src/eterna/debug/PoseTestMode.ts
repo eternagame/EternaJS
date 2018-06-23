@@ -1,3 +1,4 @@
+import {Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
@@ -5,13 +6,12 @@ import {KeyCode} from "../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {EnergyScoreDisplay} from "../pose2D/EnergyScoreDisplay";
 import {Pose2D} from "../pose2D/Pose2D";
+import {BitmapManager} from "../resources/BitmapManager";
 import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
 import {GameButton} from "../ui/GameButton";
 import {GameCheckbox} from "../ui/GameCheckbox";
 import {NucleotidePalette} from "../ui/NucleotidePalette";
-import {BitmapManager} from "../util/BitmapManager";
 import {Background} from "../vfx/Background";
-import {Point} from "pixi.js";
 
 export class PoseTestMode extends AppMode {
     protected setup(): void {

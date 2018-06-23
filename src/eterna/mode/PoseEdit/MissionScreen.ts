@@ -5,9 +5,9 @@ import {GameObject} from "../../../flashbang/core/GameObject";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {EPars} from "../../EPars";
+import {BitmapManager} from "../../resources/BitmapManager";
 import {GameButton} from "../../ui/GameButton";
 import {PoseThumbnail} from "../../ui/PoseThumbnail";
-import {BitmapManager} from "../../util/BitmapManager";
 import {Fonts} from "../../util/Fonts";
 import {UDim} from "../../util/UDim";
 

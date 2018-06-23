@@ -12,7 +12,7 @@ import {Assert} from "../../flashbang/util/Assert";
 import {Easing} from "../../flashbang/util/Easing";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EPars} from "../EPars";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 import {Fonts} from "../util/Fonts";
 import {Band} from "./Band";
 import {PoseThumbnail} from "./PoseThumbnail";

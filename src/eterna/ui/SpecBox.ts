@@ -7,7 +7,7 @@ import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
 import {UndoBlock, UndoBlockParam} from "../UndoBlock";
-import {BitmapManager} from "../util/BitmapManager";
+import {BitmapManager} from "../resources/BitmapManager";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";

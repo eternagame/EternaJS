@@ -6,9 +6,9 @@ import {LocationTask} from "../../flashbang/tasks/LocationTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
+import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
 import {Fonts} from "../util/Fonts";
-import {Sounds} from "../util/Sounds";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

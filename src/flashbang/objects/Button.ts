@@ -1,6 +1,6 @@
 import {Point} from "pixi.js";
 import {Eterna} from "../../eterna/Eterna";
-import {Sounds} from "../../eterna/util/Sounds";
+import {Sounds} from "../../eterna/resources/Sounds";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {PointerCapture} from "../input/PointerCapture";
 import {CallbackTask} from "../tasks/CallbackTask";
