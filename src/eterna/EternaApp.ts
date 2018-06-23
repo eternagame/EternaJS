@@ -14,6 +14,7 @@ import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {EternaSettings} from "./settings/EternaSettings";
 import {BitmapManager} from "./util/BitmapManager";
 import {Fonts} from "./util/Fonts";
+import {SoundManager} from "./util/SoundManager";
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -38,6 +39,7 @@ export class EternaApp extends FlashbangApp {
     protected setup(): void {
         Eterna.settings = new EternaSettings(Eterna.player_id);
         Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
+        Eterna.sound = new SoundManager(Eterna.settings);
 
         // Handle ?puzzle=[puzzle_id] URL param
         let puzid = PuzzleID.AAMismatchPilotRun;

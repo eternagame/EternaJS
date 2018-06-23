@@ -4,6 +4,7 @@ import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Constants} from "../Constants";
 import {EPars} from "../EPars";
+import {Eterna} from "../Eterna";
 import {ROPWait} from "../rscript/ROPWait";
 import {BaseAssets} from "./BaseAssets";
 import {BaseDrawFlags} from "./BaseDrawFlags";
@@ -96,7 +97,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         if (playsound) {
             const soundName: string = BaseAssets.getBaseTypeSound(type);
             if (soundName != null) {
-                // SoundManager.instance.play_se(soundName);
+                Eterna.sound.play_se(soundName);
             }
         }
         ROPWait.NotifyNucleotideChange(this._base_idx, type);

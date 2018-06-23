@@ -1,4 +1,6 @@
 import {Point} from "pixi.js";
+import {Eterna} from "../../eterna/Eterna";
+import {Sounds} from "../../eterna/util/Sounds";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {PointerCapture} from "../input/PointerCapture";
 import {CallbackTask} from "../tasks/CallbackTask";
@@ -11,7 +13,7 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** A button base class. */
 export abstract class Button extends ContainerObject {
-    // public static DEFAULT_DOWN_SOUND: string = "sfx_button_down";
+    public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
 
     /** Fired when the button is clicked */
     public readonly clicked: UnitSignal = new UnitSignal();
@@ -19,11 +21,11 @@ export abstract class Button extends ContainerObject {
     /** Fired when the button is down and the mouse is released outside the hitbounds */
     public readonly clickCanceled: UnitSignal = new UnitSignal();
 
-    // /** Sound played when the button is pressed (null for no sound) */
-    // public downSound: string = Button.DEFAULT_DOWN_SOUND;
-    //
-    // /** Sound played when the button is pressed while disabled (null for no sound) */
-    // public disabledSound: string = null;
+    /** Sound played when the button is pressed (null for no sound) */
+    public downSound: string = Button.DEFAULT_DOWN_SOUND;
+
+    /** Sound played when the button is pressed while disabled (null for no sound) */
+    public disabledSound: string = null;
 
     protected constructor() {
         super();
@@ -98,9 +100,9 @@ export abstract class Button extends ContainerObject {
             this._isPointerDown = true;
             this._isPointerOver = true;
             this.updateEnabledState();
-        } /*else if (!this.enabled && this.disabledSound != null) {
+        } else if (!this.enabled && this.disabledSound != null) {
             this.playDisabledSound();
-        }*/
+        }
     }
 
     protected beginCapture(): void {
@@ -197,19 +199,16 @@ export abstract class Button extends ContainerObject {
      * to the DOWN state. Subclasses can override to customize the behavior.
      */
     protected playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
-        // if (toState == ButtonState.DOWN && this.downSound != null) {
-        //     let sound: SoundResource = SoundResource.get(this.downSound);
-        //     if (sound != null) {
-        //         Flashbang.audio.playSound(sound);
-        //     }
-        // }
+        // TODO: make SoundManager part of Flashbang
+        if (toState == ButtonState.DOWN && this.downSound != null) {
+            Eterna.sound.play_se(this.downSound);
+        }
     }
 
     protected playDisabledSound(): void {
-        // let sound: SoundResource = SoundResource.get(this.disabledSound);
-        // if (sound != null) {
-        //     Flashbang.audio.playSound(sound);
-        // }
+        if (this.disabledSound != null) {
+            Eterna.sound.play_se(this.disabledSound);
+        }
     }
 
     protected _state: ButtonState = ButtonState.UP;

@@ -5,9 +5,10 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {LocationTask} from "../../flashbang/tasks/LocationTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {Signal} from "../../signals/Signal";
+import {Eterna} from "../Eterna";
 import {ROPWait} from "../rscript/ROPWait";
 import {Fonts} from "../util/Fonts";
-import {SoundManager} from "../util/SoundManager";
+import {Sounds} from "../util/Sounds";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -79,7 +80,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
                 new LocationTask(this._current_state * ToggleBar.BUTTON_SIZE, 0, 0.5, Easing.easeInOut, this._bg_selected));
             this._labels[this._current_state].style.fill = ToggleBar.COLOR_HIGH;
 
-            SoundManager.instance.play_se(SoundManager.SoundSwitch);
+            Eterna.sound.play_se(Sounds.SoundSwitch);
             this.stateChanged.emit(new_state);
         }
     }

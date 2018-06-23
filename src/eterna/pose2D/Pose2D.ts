@@ -14,6 +14,7 @@ import {Folder} from "../folding/Folder";
 import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
 import {BitmapManager} from "../util/BitmapManager";
+import {Sounds} from "../util/Sounds";
 import {Utility} from "../util/Utility";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
@@ -1044,55 +1045,55 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public on_praise_stack(stack_start: number, stack_end: number, play_sound: boolean): void {
-        // let x_pos: number = 0;
-        // let y_pos: number = 0;
-        //
-        // let play_ua: boolean = false;
-        // let play_gc: boolean = false;
-        // let play_gu: boolean = false;
-        //
-        // for (let kk: number = stack_start; kk <= stack_end; kk++) {
-        //     if (this._pairs[kk] < 0) {
-        //         return;
-        //     }
-        // }
-        //
-        // for (let ii: number = stack_start; ii <= stack_end; ii++) {
-        //
-        //     let aa: number = ii;
-        //     let bb: number = this._pairs[ii];
-        //
-        //     if ((this._sequence[aa] == EPars.RNABASE_ADENINE && this._sequence[bb] == EPars.RNABASE_URACIL) ||
-        //         (this._sequence[bb] == EPars.RNABASE_ADENINE && this._sequence[aa] == EPars.RNABASE_URACIL)) {
-        //         play_ua = true;
-        //     } else if ((this._sequence[aa] == EPars.RNABASE_GUANINE && this._sequence[bb] == EPars.RNABASE_CYTOSINE) ||
-        //         (this._sequence[bb] == EPars.RNABASE_GUANINE && this._sequence[aa] == EPars.RNABASE_CYTOSINE)) {
-        //         play_gc = true;
-        //     } else if ((this._sequence[aa] == EPars.RNABASE_GUANINE && this._sequence[bb] == EPars.RNABASE_URACIL) ||
-        //         (this._sequence[bb] == EPars.RNABASE_GUANINE && this._sequence[aa] == EPars.RNABASE_URACIL)) {
-        //         play_gu = true;
-        //     }
-        //
-        //     this._bases[ii].start_sparking();
-        //     this._bases[this._pairs[ii]].start_sparking();
-        //     let p: Point = this.get_base_xy(ii);
-        //     let p2: Point = this.get_base_xy(this._pairs[ii]);
-        //
-        //     x_pos += p.x;
-        //     y_pos += p.y;
-        //
-        //     x_pos += p2.x;
-        //     y_pos += p2.y;
-        // }
-        //
-        // let stack_len: number = (stack_end - stack_start) + 1;
-        //
-        // x_pos /= stack_len * 2;
-        // y_pos /= stack_len * 2;
-        //
+        let x_pos: number = 0;
+        let y_pos: number = 0;
+
+        let play_ua: boolean = false;
+        let play_gc: boolean = false;
+        let play_gu: boolean = false;
+
+        for (let kk: number = stack_start; kk <= stack_end; kk++) {
+            if (this._pairs[kk] < 0) {
+                return;
+            }
+        }
+
+        for (let ii: number = stack_start; ii <= stack_end; ii++) {
+
+            let aa: number = ii;
+            let bb: number = this._pairs[ii];
+
+            if ((this._sequence[aa] == EPars.RNABASE_ADENINE && this._sequence[bb] == EPars.RNABASE_URACIL) ||
+                (this._sequence[bb] == EPars.RNABASE_ADENINE && this._sequence[aa] == EPars.RNABASE_URACIL)) {
+                play_ua = true;
+            } else if ((this._sequence[aa] == EPars.RNABASE_GUANINE && this._sequence[bb] == EPars.RNABASE_CYTOSINE) ||
+                (this._sequence[bb] == EPars.RNABASE_GUANINE && this._sequence[aa] == EPars.RNABASE_CYTOSINE)) {
+                play_gc = true;
+            } else if ((this._sequence[aa] == EPars.RNABASE_GUANINE && this._sequence[bb] == EPars.RNABASE_URACIL) ||
+                (this._sequence[bb] == EPars.RNABASE_GUANINE && this._sequence[aa] == EPars.RNABASE_URACIL)) {
+                play_gu = true;
+            }
+
+            this._bases[ii].start_sparking();
+            this._bases[this._pairs[ii]].start_sparking();
+            let p: Point = this.get_base_xy(ii);
+            let p2: Point = this.get_base_xy(this._pairs[ii]);
+
+            x_pos += p.x;
+            y_pos += p.y;
+
+            x_pos += p2.x;
+            y_pos += p2.y;
+        }
+
+        let stack_len: number = (stack_end - stack_start) + 1;
+
+        x_pos /= stack_len * 2;
+        y_pos /= stack_len * 2;
+
         // let praise_obj: GameText = null;
         //
-        // for (ii = 0; ii < this._praise_objects.length; ii++) {
+        // for (let ii = 0; ii < this._praise_objects.length; ii++) {
         //     if (this._praise_objects[ii].visible == false) {
         //         praise_obj = this._praise_objects[ii];
         //         break;
@@ -1113,16 +1114,16 @@ export class Pose2D extends ContainerObject implements Updatable {
         //
         // praise_obj.set_pos(new UDim(0, 0, x_pos - praise_obj.text_width() / 2, y_pos));
         // praise_obj.set_animator(new GameAnimatorMover(new UDim(0, 0, x_pos - praise_obj.text_width() / 2, y_pos - 30), 0.9, true, false, true));
-        //
-        // if (play_sound) {
-        //     if (play_gc) {
-        //         SoundManager.instance.play_se(Pose2D.GAMESOUND_RG);
-        //     } else if (play_ua) {
-        //         SoundManager.instance.play_se(Pose2D.GAMESOUND_YB);
-        //     } else if (play_gu) {
-        //         SoundManager.instance.play_se(Pose2D.GAMESOUND_RB);
-        //     }
-        // }
+
+        if (play_sound) {
+            if (play_gc) {
+                Eterna.sound.play_se(Sounds.SoundRG);
+            } else if (play_ua) {
+                Eterna.sound.play_se(Sounds.SoundYB);
+            } else if (play_gu) {
+                Eterna.sound.play_se(Sounds.SoundRB);
+            }
+        }
     }
 
     public create_new_highlight(nucleotides: number[]): any {
