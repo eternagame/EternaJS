@@ -1,6 +1,8 @@
+import MultiStyleText, {TextStyleSet} from "pixi-multistyle-text";
 import {Point, Text} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";
@@ -11,12 +13,6 @@ export class TextBalloon extends ContainerObject {
 
         this._panel = new GamePanel(0, balloon_alpha, balloon_color, border_alpha, border_color);
         this.addObject(this._panel, this.container);
-
-        this._text = Fonts.arial("", 15).bold().build();
-
-        this._centered = false;
-        this._hasTitle = false;
-        this.container.addChild(this._text);
 
         this._button = new GameButton().label("Next", 12);
         this.addObject(this._button, this.container);
@@ -46,10 +42,24 @@ export class TextBalloon extends ContainerObject {
         this._hasTitle = title != null;
     }
 
-    public set_text(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
-        this._text.text = text;
-        this._text.style = Fonts.arial("", fontsize).color(font_color).style;
+    public set_styled_text(builder: StyledTextBuilder): void {
+        if (this._text != null) {
+            this._text.destroy({children: true});
+        }
+
+        this._text = builder.build();
+        this.container.addChildAt(this._text, 1);
         this.updateView();
+    }
+
+    public set_text(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
+        let styled = new StyledTextBuilder({
+            fontFamily: Fonts.ARIAL,
+            fontSize: fontsize,
+            fill: font_color
+        }).append(text);
+
+        this.set_styled_text(styled);
     }
 
     public showButton(): GameButton {
@@ -61,7 +71,7 @@ export class TextBalloon extends ContainerObject {
     }
 
     public balloon_width(): number {
-        let whole_width: number = this._text.width;
+        let whole_width: number = this._text != null ? this._text.width : 0;
         if (this._button.display.visible) {
             whole_width += TextBalloon.W_MARGIN;
             whole_width += DisplayUtil.width(this._button.display);
@@ -72,7 +82,7 @@ export class TextBalloon extends ContainerObject {
 
     public balloon_height(): number {
         let whole_height: number = 0;
-        whole_height += this._text.height;
+        whole_height += this._text != null ? this._text.height : 0;
 
         if (this._button.display.visible) {
             whole_height = Math.max(whole_height, DisplayUtil.height(this._button.display));
@@ -94,7 +104,10 @@ export class TextBalloon extends ContainerObject {
         let title_space: number = this._panel.get_title_space();
 
         if (!this._centered) {
-            this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + title_space);
+            if (this._text != null) {
+                this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + title_space);
+            }
+
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
                     TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
@@ -104,7 +117,10 @@ export class TextBalloon extends ContainerObject {
             this._panel.display.position = new Point(0, 0);
 
         } else {
-            this._text.position = new Point(-whole_width / 2, TextBalloon.H_MARGIN + title_space);
+            if (this._text != null) {
+                this._text.position = new Point(-whole_width / 2, TextBalloon.H_MARGIN + title_space);
+            }
+
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
                     -whole_width / 2 + this._text.width + TextBalloon.W_MARGIN,
@@ -119,9 +135,9 @@ export class TextBalloon extends ContainerObject {
     protected _height: number = 0;
 
     protected _panel: GamePanel;
-    protected _text: Text;
-    protected _centered: boolean;
-    protected _hasTitle: boolean;
+    protected _text: MultiStyleText;
+    protected _centered: boolean = false;
+    protected _hasTitle: boolean = false;
 
     protected static readonly W_MARGIN: number = 10;
     protected static readonly H_MARGIN: number = 10;
