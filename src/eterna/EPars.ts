@@ -1,4 +1,6 @@
-﻿import {IntLoopPars} from "./IntLoopPars";
+﻿import MultiStyleText, {TextStyleSet} from "pixi-multistyle-text";
+import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
+import {IntLoopPars} from "./IntLoopPars";
 
 export class EPars {
 
@@ -146,15 +148,22 @@ export class EPars {
         return 0;
     }
 
+    public static addLetterStyles(builder: StyledTextBuilder): void {
+        builder.addStyle("G", { fill: this.get_letter_color("G") });
+        builder.addStyle("A", { fill: this.get_letter_color("A") });
+        builder.addStyle("U", { fill: this.get_letter_color("U") });
+        builder.addStyle("C", { fill: this.get_letter_color("C") });
+    }
+
     public static get_colored_letter(letter: string): string {
         if (letter == "G") {
-            return "<FONT COLOR='#FF3333'>G</FONT>"
+            return "<G>G</G>"
         } else if (letter == "A") {
-            return "<FONT COLOR='#FFFF33'>A</FONT>"
+            return "<A>A</A>"
         } else if (letter == "U") {
-            return "<FONT COLOR='#7777FF'>U</FONT>";
+            return "<U>U</U>";
         } else if (letter == "C") {
-            return "<FONT COLOR='#33FF33'>C</FONT>";
+            return "<C>C</C>";
         }
 
         return "";
