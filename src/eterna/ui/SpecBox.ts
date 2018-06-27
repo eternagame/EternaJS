@@ -1,8 +1,10 @@
 import * as log from "loglevel";
+import MultiStyleText from "pixi-multistyle-text";
 import {Point, Sprite, Text, Graphics} from "pixi.js";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
@@ -51,7 +53,13 @@ export class SpecBox extends ContainerObject {
         this._dotplot_canvas = new Sprite();
         this._meltplot_canvas = new Sprite();
 
-        this._stattext = Fonts.arial("", 14).color(0xffffff).build();
+        this._stattext = new MultiStyleText("", {
+            "default": {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 14,
+                fill: 0xffffff
+            }
+        });
 
         let url: string = EternaURL.generate_url({page: "manual"});
         let helpText: string = "";//"<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
@@ -122,13 +130,28 @@ export class SpecBox extends ContainerObject {
         this._dotplot = datablock.create_dotplot();
         this._meltplot = datablock.create_meltplot();
 
-        let statstring: string = "";
-        // statstring += "<B>" + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.AU, temperature) + "   ";
-        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GC, temperature) + "   ";
-        // statstring += "<B>" + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : </B>" + datablock.get_param(UndoBlockParam.GU, temperature) + "\n";
-        // statstring += "<B>Melting point : </B>" + datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n";
-        // statstring += "<B>Free energy : </B>" + (datablock.get_param(UndoBlockParam.FE, temperature) / 100) + "kcal\n";
-        this._stattext.text = statstring;
+        let statstring: StyledTextBuilder = new StyledTextBuilder({
+            fontFamily: Fonts.ARIAL,
+            fontSize: 14,
+            fill: 0xffffff
+        }).addStyle("bold", {
+            fontStyle: "bold"
+        });
+        EPars.addLetterStyles(statstring);
+
+        statstring
+            .append(EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : ", "bold")
+            .append(datablock.get_param(UndoBlockParam.AU, temperature) + "   ")
+            .append(EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : ", "bold")
+            .append(datablock.get_param(UndoBlockParam.GC, temperature) + "   ")
+            .append(EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : ", "bold")
+            .append(datablock.get_param(UndoBlockParam.GU, temperature) + "\n")
+            .append("Melting point : ", "bold")
+            .append(datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n")
+            .append("Free energy : ", "bold")
+            .append(Number(datablock.get_param(UndoBlockParam.FE, temperature) / 100).toFixed(1) + "kcal\n");
+
+        statstring.apply(this._stattext);
 
         if (this._hvec != null) {
             for (let disp of this._hvec) {
@@ -171,7 +194,6 @@ export class SpecBox extends ContainerObject {
     }
 
     public dotPlotZoomOut(): void {
-
         this._dotplotScaleLevel -= SpecBox.DOTPLOT_SCALE_STEP;
         if (this._dotplotScaleLevel <= 1) {
             this._dotplotScaleLevel = 1;
@@ -254,7 +276,7 @@ export class SpecBox extends ContainerObject {
 
             this._stattext.visible = true;
             this._stattext.position = new Point(20, this._height - 100);
-            this._stattext.position = new Point(200, 200);
+            // this._stattext.size= new Point(200, 200);
 
             this._helptext.visible = true;
             this._helptext.position = new Point(20, this._height - 35);
@@ -453,7 +475,7 @@ export class SpecBox extends ContainerObject {
     private readonly _v0: Text;
     private readonly _v0_melt: Text;
     private readonly _vn_melt: Text;
-    private readonly _stattext: Text;
+    private readonly _stattext: MultiStyleText;
     private readonly _helptext: Text;
     private readonly _dotplottext: Text;
     private readonly _meltplottext: Text;
@@ -479,7 +501,6 @@ export class SpecBox extends ContainerObject {
     private _height: number = 0;
 
     private static readonly HORIZONTAL: number = 0;
-    // this recalculate position of gametext at index th gametext
     private static readonly VERTICAL: number = 1;
     private static readonly DOTPLOT_SCALE_STEP: number = 0.2;
     private static readonly H0_DEFAULT_X: number = 42;
