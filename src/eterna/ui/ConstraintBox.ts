@@ -1,3 +1,4 @@
+import MultiStyleText from "pixi-multistyle-text";
 import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
@@ -10,6 +11,7 @@ import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
 import {Assert} from "../../flashbang/util/Assert";
 import {Easing} from "../../flashbang/util/Easing";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
@@ -18,10 +20,16 @@ import {Band} from "./Band";
 import {PoseThumbnail} from "./PoseThumbnail";
 import {TextBalloon} from "./TextBalloon";
 
+export enum ConstraintBoxType {
+    DEFAULT,
+    MISSION_SCREEN  // slightly minimized, requirements text on the right
+}
+
 export class ConstraintBox extends ContainerObject {
-    public constructor(minVersion: boolean = false) {
+    public constructor(type: ConstraintBoxType) {
         super();
 
+        this._type = type;
         this.container.interactive = true;
 
         this._puz_small_clear_bg = BitmapManager.get_bitmap(BitmapManager.NovaPuzThumbSmallMet);
@@ -31,7 +39,6 @@ export class ConstraintBox extends ContainerObject {
 
         this._success_outline = BitmapManager.get_bitmap(BitmapManager.NovaPassOutline);
         this._fail_outline = BitmapManager.get_bitmap(BitmapManager.NovaFailOutline);
-        this._min_version = minVersion;
 
         if (ConstraintBox._A == null) {
             ConstraintBox._A = BitmapManager.get_bitmap(BitmapManager.BaseAMid);
@@ -90,11 +97,27 @@ export class ConstraintBox extends ContainerObject {
 
         this._enlarged = false;
 
-        this._val_text = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5).build();
+        this._val_text = new MultiStyleText("", {
+            "default": {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 18,
+                fill: 0xffffff,
+                fontStyle: "bold",
+                letterSpacing: -0.5
+            }
+        });
         this._val_text.visible = false;
         this.container.addChild(this._val_text);
 
-        this._big_text = Fonts.arial("", 23).color(0xffffff).bold().letterSpacing(-0.5).build();
+        this._big_text = new MultiStyleText("", {
+            "default": {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 23,
+                fill: 0xffffff,
+                fontStyle: "bold",
+                letterSpacing: -0.5
+            }
+        });
         this._big_text.visible = false;
         this.container.addChild(this._big_text);
 
@@ -135,9 +158,17 @@ export class ConstraintBox extends ContainerObject {
         this._flag.position = new Point(4, 4);
         this.container.addChild(this._flag);
 
-        this._side_txt = Fonts.std_regular("", 16).color(0xffffff).letterSpacing(-0.5).build();
-        this._side_txt.visible = this._min_version;
-        this.container.addChild(this._side_txt);
+        if (this._type == ConstraintBoxType.MISSION_SCREEN) {
+            this._side_txt = new MultiStyleText("", {
+                "default": {
+                    fontFamily: Fonts.STDFONT_REGULAR,
+                    fontSize: 16,
+                    fill: 0xffffff,
+                    letterSpacing: -0.5
+                }
+            });
+            this.container.addChild(this._side_txt);
+        }
 
         this._check = new Sprite(BitmapManager.get_bitmap(BitmapManager.NovaGreenCheck));
         this._check.position = new Point(80, 50);
@@ -167,11 +198,6 @@ export class ConstraintBox extends ContainerObject {
 
     public set_disabled(dis: boolean): void {
         this.display.visible = !dis;
-    }
-
-    public set_min_version(min: boolean): void {
-        this._min_version = min;
-        this._side_txt.visible = this._min_version;
     }
 
     public show_big_text(show_txt: boolean): void {
@@ -249,18 +275,6 @@ export class ConstraintBox extends ContainerObject {
         this._satisfied = satisfied;
         this._stat = stat;
 
-        // let style: StyleSheet = new StyleSheet;
-        // style.setStyle(".altText", {
-        //     fontFamily: Fonts.STDFONT_MEDIUM,
-        //     leading: 10
-        // });
-        // style.setStyle(".altTextMain", {
-        //     fontFamily: Fonts.STDFONT_REGULAR,
-        //     leading: 5
-        // });
-        // this._side_txt.GetTextBox().styleSheet = style;
-        // this._side_txt.GetTextBox().embedFonts = true;
-
         this._big_text.position = new Point(85, 17);
 
         this._bases.visible = false;
@@ -277,7 +291,7 @@ export class ConstraintBox extends ContainerObject {
         this._small_thumbnail.visible = false;
         this._big_thumbnail.visible = false;
         this._flag.visible = false;
-        this._check.visible = satisfied && !this._min_version;
+        this._check.visible = satisfied && this._type == ConstraintBoxType.DEFAULT;
         if (keyword.toUpperCase().substr(-5) == "SHAPE") {
             if (this._enlarged) {
                 this._check.position = new Point(144, 144);
@@ -290,49 +304,43 @@ export class ConstraintBox extends ContainerObject {
             }
         }
 
-        let txt: string = "";
-        let txt_prefix: string = "";
-        let new_txt: string = "";
-        let useDescribe: string;
+        let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
-        if (!satisfied) {
-            txt_prefix = "\n<FONT COLOR='#FF0000'>Unsatisfied</FONT>";
-            this._outline.texture = this._fail_outline;
-        } else {
-            this._outline.texture = this._success_outline;
-        }
+        let new_txt: string = "";
+
+        this._outline.texture = satisfied ? this._success_outline : this._fail_outline;
+        const isMissionScreen: boolean = this._type == ConstraintBoxType.MISSION_SCREEN;
 
         if (keyword == "BOOST") {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+            tooltip.append("You must have " + val.toString() + " or ");
+
+            if (isMissionScreen) {
+                tooltip.append("more", "altText");
             } else {
-                txt = "You ";
+                tooltip.append("more");
             }
 
-            txt += "must have " + val.toString() + " or ";
+            tooltip.append("boosted loops.");
 
-            if (this._min_version) {
-                txt += "<span class='altText'>more</span> ";
-            } else {
-                txt += "more ";
+            if (isMissionScreen) {
+                tooltip.popStyle();
             }
-            txt += "boosted loops.";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
 
             new_txt += (Number(val)).toString() + " OR MORE";
 
             this._req_clarify_text.text = new_txt;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaBoostReq);
-            if (this._min_version) {
-                txt += "</span>";
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaBoostMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaBoostMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaBoostReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -342,32 +350,31 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+            tooltip.append("You must have");
+
+            if (isMissionScreen) {
+                tooltip.append(" no ", "altText");
             } else {
-                txt = "You ";
+                tooltip.append(" no ");
             }
 
-            txt += "must have";
+            tooltip.append(EPars.get_colored_letter("U") + "-" + EPars.get_colored_letter("G") + " pairs.");
 
-            if (this._min_version) {
-                txt += " <span class='altText'>no</span> ";
-            } else {
-                txt += " no ";
+            if (isMissionScreen) {
+                tooltip.popStyle();
             }
-            txt += EPars.get_colored_letter("U") + "-" + EPars.get_colored_letter("G") + " pairs.";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
 
             new_txt += "NO UG PAIRS";
 
             this._req_clarify_text.text = new_txt;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaNoGUReq);
-            if (this._min_version) {
-                txt += "</span>";
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaNoGUMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaNoGUMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaNoGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -377,32 +384,30 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+            tooltip.append("You must have " + val.toString() + " or ");
+
+            if (isMissionScreen) {
+                tooltip.append("more ", "altText");
             } else {
-                txt = "You ";
+                tooltip.append("more ");
             }
 
-            txt += "must have " + val.toString() + " or ";
-
-            if (this._min_version) {
-                txt += "<span class='altText'>more</span> ";
-            } else {
-                txt += "more ";
+            tooltip.append(EPars.get_colored_letter("U") + "-" + EPars.get_colored_letter("G") + " pairs.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
             }
-            txt += EPars.get_colored_letter("U") + "-" + EPars.get_colored_letter("G") + " pairs.";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
 
             new_txt += (Number(val)).toString() + " OR MORE";
 
             this._req_clarify_text.text = new_txt;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGUReq);
-            if (this._min_version) {
-                txt += "</span>";
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGUMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaGUMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -412,45 +417,40 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
+            tooltip.append("You must have ");
 
-            txt += "must have ";
-
-            useDescribe = "";
             if (keyword == "GCMIN") {
-                useDescribe = val.toString() + " or more";
+                tooltip.append(val.toString() + " or more");
                 new_txt += (Number(val)).toString() + " OR MORE";
 
             } else if (keyword == "GC") {
-                useDescribe = "<span class='altText'>at most</span> " + (Number(val)).toString();
+                tooltip.append("at most", "altText").append(" " + (Number(val)).toString());
                 new_txt += (Number(val)).toString() + " OR FEWER";
 
             } else if (keyword == "NOGC") {
-                useDescribe = "no";
+                tooltip.append("no");
                 new_txt += "NO GC PAIRS";
             }
 
-            txt += useDescribe + " ";
-            txt += EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs.</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append(" " + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             this._req_clarify_text.text = new_txt;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCReq);
             if (keyword == "NOGC") {
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaNoGCReq);
-                if (this._min_version) {
-                    this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaNoGCMissionReq);
-                }
-            } else {
-                if (this._min_version) {
-                    this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCMissionReq);
-                }
+                this._req.texture = isMissionScreen ?
+                    BitmapManager.get_bitmap(BitmapManager.NovaNoGCMissionReq) :
+                    BitmapManager.get_bitmap(BitmapManager.NovaNoGCReq);
+
+            } else if (isMissionScreen) {
+                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCMissionReq);
             }
 
             this._req.visible = true;
@@ -461,45 +461,43 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
-            txt += "must have ";
+            tooltip.append("You must have ");
 
-            useDescribe = "";
             if (keyword == "AU") {
-                useDescribe = val.toString() + " or more";
+                tooltip.append(val.toString() + " or more");
                 new_txt += (Number(val)).toString() + " OR MORE";
             } else if (keyword == "AUMAX") {
-                useDescribe = "<span class='altText'>at most</span> " + (Number(val)).toString();
+                tooltip.append("at most", "altText").append((Number(val)).toString());
                 new_txt += (Number(val)).toString() + " OR FEWER";
             }
-            txt += useDescribe + " ";
-            txt += EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs.</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append(" " + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             this._req_clarify_text.text = new_txt;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaAUReq);
-            if (this._min_version) {
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaAUMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaAUMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaAUReq);
+
             this._req.visible = true;
             this._outline.visible = true;
 
         } else if (keyword == "SHAPE") {
-            txt = "Your RNA must fold into the outlined structure.";
-
             this.changeShapeThumbnailBG();
             this._bg.visible = true;
 
             if (val.index != null) {
-                txt = "In state " + (val.index + 1) + ", your RNA must fold into the outlined structure.";
+                tooltip.append("In state " + (val.index + 1) + ", your RNA must fold into the outlined structure.");
                 this._state_text.visible = true;
                 this._state_text.text = val.index + 1;
+            } else {
+                tooltip.append("Your RNA must fold into the outlined structure.");
             }
 
             let target_pairs: number[] = val.target;
@@ -523,19 +521,18 @@ export class ConstraintBox extends ContainerObject {
                 this._big_thumbnail.visible = false;
             }
 
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
-            this._big_text.text = txt;
+            tooltip.apply(this._big_text);
 
         } else if (keyword == "ANTISHAPE") {
-            txt = "Your RNA must NOT have the structure in white outline.";
-
             this.changeShapeThumbnailBG();
             this._bg.visible = true;
 
             if (val.index != null) {
-                txt = "In state " + (val.index + 1) + ", your RNA must NOT have the structure in white outline.";
+                tooltip.append("In state " + (val.index + 1) + ", your RNA must NOT have the structure in white outline.");
                 this._state_text.visible = true;
                 this._state_text.text = val.index + 1;
+            } else {
+                tooltip.append("Your RNA must NOT have the structure in white outline.");
             }
 
             let target_pairs: number[] = val.target;
@@ -561,22 +558,28 @@ export class ConstraintBox extends ContainerObject {
 
             this._no_text.visible = true;
 
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
-            this._big_text.text = txt;
+            tooltip.apply(this._big_text);
 
         } else if (keyword == "BINDINGS") {
             this._req_clarify_text.visible = true;
 
-            if (this._min_version) txt += "<span class='altTextMain'>";
-            txt += "In state " + (Number(val.index) + 1).toString() + ", your RNA must:\n";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+
+            tooltip.append("In state " + (Number(val.index) + 1).toString() + ", your RNA must:\n");
             new_txt = "";
 
             for (let ii = 0; ii < val.bind.length; ii++) {
-                txt += "- ";
-                if (this._min_version) txt += "<span class='altText'>";
-                txt += val.bind[ii] ? "bind" : "NOT bind";
-                if (this._min_version) txt += "</span>";
-                txt += " with " + val.oligo_name[ii] + "\n";
+                tooltip.append("- ");
+                if (isMissionScreen) {
+                    tooltip.pushStyle("altText");
+                }
+                tooltip.append(val.bind[ii] ? "bind" : "NOT bind");
+                if (isMissionScreen) {
+                    tooltip.popStyle();
+                }
+                tooltip.append(" with " + val.oligo_name[ii] + "\n");
 
                 if (ii > 0) new_txt += "&#x2003;";
                 if (val.bind[ii]) {
@@ -586,8 +589,9 @@ export class ConstraintBox extends ContainerObject {
                 }
             }
 
-            if (this._min_version) txt += "</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             this._req_clarify_text.text = new_txt;
 
@@ -598,7 +602,7 @@ export class ConstraintBox extends ContainerObject {
 
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, this._min_version ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
             this._bgGraphics.endFill();
 
             this._bgGraphics.lineStyle(2.5, 0xFFFFFF, 0.9);
@@ -621,23 +625,22 @@ export class ConstraintBox extends ContainerObject {
             || keyword == "C" || keyword == "CMAX"
             || keyword == "G" || keyword == "GMAX"
             || keyword == "U" || keyword == "UMAX") {
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
-            txt += "must have ";
+            tooltip.append("You must have ");
 
             let letter: string = keyword.substr(0, 1);
-            useDescribe = "";
             if (keyword == letter) {
-                useDescribe = val.toString() + " or more";
+                tooltip.append(val.toString() + " or more");
             } else {
-                useDescribe = "<span class='altText'>at most</span> " + (Number(val)).toString();
+                tooltip.append("at most", "altText").append(" " + (Number(val)).toString());
             }
-            txt += useDescribe + " ";
-            txt += EPars.get_colored_letter(letter) + "s.</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append(" " + EPars.get_colored_letter(letter) + "s.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             if (keyword == letter) {
                 new_txt += (Number(val)).toString() + " OR MORE";
@@ -652,7 +655,7 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
+            if (isMissionScreen) {
                 this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "MissionReq");
             } else {
                 this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "Req");
@@ -665,16 +668,13 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
-            txt += "must have ";
-
-            useDescribe = val.toString() + " or more";
-            txt += useDescribe + " pairs.</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append("You must have " + val.toString() + " or more pairs");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             new_txt += (Number(val)).toString() + " OR MORE";
             this._req_clarify_text.text = new_txt;
@@ -682,7 +682,7 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaPairsReq);
-            if (this._min_version) {
+            if (isMissionScreen) {
                 this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaPairsMissionReq);
             }
             this._req.visible = true;
@@ -712,20 +712,13 @@ export class ConstraintBox extends ContainerObject {
 
             this._val_text.visible = true;
 
-            if (satisfied) {
-                txt += "<FONT COLOR='#00AA00'>";
-            } else {
-                txt += "<FONT COLOR='#AA0000'>";
-            }
+            ConstraintBox.createTextStyle()
+                .append(stat.toString(), {fill: (satisfied ? 0x00aa00 : 0xaa0000)})
+                .append(val.toString())
+                .apply(this._val_text);
 
-            txt += stat.toString();
-            txt += "</FONT>/";
-            txt += val.toString();
-            this._val_text.text = txt;
-
-            txt = "You can only mutate up to " + val.toString() + " bases";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
-            this._big_text.text = txt;
+            tooltip.append("You can only mutate up to " + val.toString() + " bases");
+            tooltip.apply(this._big_text);
 
         } else if (keyword == "STACK") {
             this._base1.texture = ConstraintBox._W;
@@ -759,37 +752,30 @@ export class ConstraintBox extends ContainerObject {
 
             this._val_text.visible = true;
 
-            if (satisfied) {
-                txt += "<FONT COLOR='#00AA00'>";
-            } else {
-                txt += "<FONT COLOR='#AA0000'>";
-            }
+            ConstraintBox.createTextStyle()
+                .append("" + stat, { fill: satisfied ? 0x00aa00 : 0xaa0000})
+                .append("" + val)
+                .apply(this._val_text);
 
-            txt += stat.toString();
-            txt += "</FONT>/";
-            txt += val.toString();
-            this._val_text.text = txt;
-
-            txt = "You must have a stack with " + val.toString() + " or more pairs.";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
-            this._big_text.text = txt;
+            tooltip.append("You must have a stack with " + val.toString() + " or more pairs.");
+            tooltip.apply(this._big_text);
 
         } else if (keyword.lastIndexOf("CONSECUTIVE_") >= 0) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
-            txt += "must have ";
+            tooltip.append("You must have ");
 
             let letter: string = keyword.substr(12, 1);
-            txt += "<span class='altText'>at most</span> " + (Number(val) - 1).toString() + " ";
-            txt += EPars.get_colored_letter(letter) + "s in a row.</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append("at most", "altText")
+                .append(" " + (Number(val) - 1).toString() + " " + EPars.get_colored_letter(letter) + "s in a row.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             new_txt += "AT MOST " + (Number(val) - 1).toString() + " IN A ROW";
 
@@ -797,7 +783,7 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "RowReq");
-            if (this._min_version) {
+            if (isMissionScreen) {
                 this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "RowMissionReq");
             }
             this._req.visible = true;
@@ -807,14 +793,14 @@ export class ConstraintBox extends ContainerObject {
             this._bg.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, this._min_version ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
             this._bgGraphics.endFill();
 
             this._icon.visible = true;
             this._icon.texture = BitmapManager.get_bitmap(BitmapManager.ImgLabReq);
             this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
 
-            if (!this._min_version) {
+            if (!isMissionScreen) {
                 let no_good: string[] = [];
                 let value = "";
 
@@ -839,49 +825,48 @@ export class ConstraintBox extends ContainerObject {
                 this._req_stat_txt.visible = false;
             }
 
-            if (this._min_version) txt += "<span class='altTextMain'>";
-            txt += "You must have:\n";
-            txt += "- <span class='altText'>at most</span> " + (val.g_max - 1).toString() + " ";
-            txt += EPars.get_colored_letter("G") + "s in a row\n</span>";
-            txt += "- <span class='altText'>at most</span> " + (val.c_max - 1).toString() + " ";
-            txt += EPars.get_colored_letter("C") + "s in a row\n</span>";
-            txt += "- <span class='altText'>at most</span> " + (val.a_max - 1).toString() + " ";
-            txt += EPars.get_colored_letter("A") + "s in a row\n</span>";
-            if (this._min_version) txt += "</span>";
-
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+            tooltip.append("You must have:\n")
+                .append("- ").append("at most", "altText").append(" " + (val.g_max - 1) + " ")
+                .append(EPars.get_colored_letter("G") + "s in a row\n")
+                .append("- ").append("at most", "altText").append(" " + (val.c_max - 1) + " ")
+                .append(EPars.get_colored_letter("C") + "s in a row\n")
+                .append("- ").append("at most", "altText").append(" " + (val.a_max - 1) + " ")
+                .append(EPars.get_colored_letter("A") + "s in a row\n");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             this._outline.visible = true;
 
         } else if (keyword == "BARCODE") {
-
             this._req_clarify_text.visible = true;
 
-            if (this._min_version) {
-                txt = "<span class='altTextMain'>You ";
-            } else {
-                txt = "You ";
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
             }
+            tooltip.append("You must have a ");
 
-            txt += "must have a ";
-
-            if (this._min_version) {
-                txt += "<span class='altText'>unique</span> ";
+            if (isMissionScreen) {
+                tooltip.append("unique ", "altText");
             } else {
-                txt += "unique ";
+                tooltip.append("unique ");
             }
-            txt += "barcode.";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            tooltip.append("barcode.");
+
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             new_txt = "MUST BE UNIQUE";
 
             this._req_clarify_text.text = new_txt;
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaBarcodeReq);
-            if (this._min_version) {
-                txt += "</span>";
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaBarcodeMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaBarcodeMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaBarcodeReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -891,21 +876,28 @@ export class ConstraintBox extends ContainerObject {
 
             let binder: boolean = (keyword.lastIndexOf("UNBOUND") < 0);
 
-            if (this._min_version) txt += "<span class='altTextMain'>";
-            txt += "In state " + (Number(val) + 1).toString() + ", the oligo must ";
-            if (this._min_version) txt += "<span class='altText'>";
-            txt += binder ? "bind" : "NOT bind";
-            if (this._min_version) txt += "</span>";
-            txt += " with your RNA.";
-            if (this._min_version) txt += "</span>";
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
+            if (isMissionScreen) {
+                tooltip.pushStyle("altTextMain");
+            }
+            tooltip.append("In state " + (Number(val) + 1).toString() + ", the oligo must ");
+            if (isMissionScreen) {
+                tooltip.pushStyle("altText");
+            }
+            tooltip.append(binder ? "bind" : "NOT bind");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
+            tooltip.append(" with your RNA.");
+            if (isMissionScreen) {
+                tooltip.popStyle();
+            }
 
             new_txt = binder ? "MUST BIND" : "MAY NOT BIND";
 
             this._req_clarify_text.text = new_txt;
 
             let ico: string = binder ? "Bound" : "Unbound";
-            if (this._min_version) {
+            if (isMissionScreen) {
                 this._req.texture = BitmapManager.get_bitmap_named("Nova" + ico + "OligoMissionReq");
             } else {
                 this._req.texture = BitmapManager.get_bitmap_named("Nova" + ico + "OligoReq");
@@ -924,7 +916,7 @@ export class ConstraintBox extends ContainerObject {
             this._bg.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, this._min_version ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
             this._bgGraphics.endFill();
 
             let data_png: string = val.data_png;
@@ -952,30 +944,28 @@ export class ConstraintBox extends ContainerObject {
                 this._state_text.text = val.index;
             }
 
-            if (!this._min_version && value != null && value.length > 0) {
+            if (!isMissionScreen && value != null && value.length > 0) {
                 this._req_stat_txt.visible = true;
                 this._req_stat_txt.text = value;
             } else {
                 this._req_stat_txt.visible = false;
             }
 
-            txt = "Your puzzle must satisfy script " + nid;
+            tooltip.append("Your puzzle must satisfy script " + nid);
             if (goal != null && goal.length > 0) {
-                txt = goal;
+                tooltip.append(goal);
             }
 
-            this.set_mouse_over_object(new TextBalloon(txt + txt_prefix, 0x0, 0.8));
-
             this._outline.visible = true;
-
         }
 
+        this.setTooltip(tooltip, satisfied);
+
         this._val_text.position = new Point(30 - this._val_text.width * 0.5, 37);
-        this._req_stat_txt.visible = !this._min_version;
-        if (this._min_version) {
+        this._req_stat_txt.visible = !isMissionScreen;
+        if (isMissionScreen) {
             this._outline.visible = false;
-            // this._side_txt.set_use_style(true);
-            this._side_txt.text = txt;
+            tooltip.apply(this._side_txt);
             // this._side_txt.set_autosize(false, false, 250);
             if (this._req.width > 0) {
                 this._side_txt.position = new Point(this._req.width + 18, this._req.height / 2 - this._side_txt.height / 2);
@@ -1072,7 +1062,7 @@ export class ConstraintBox extends ContainerObject {
     }
 
     public flare(res: boolean): void {
-        if (this._min_version) {
+        if (this._type == ConstraintBoxType.MISSION_SCREEN) {
             this.removeNamedObjects(ConstraintBox.BACKLIGHT_ANIM);
             this.removeNamedObjects(ConstraintBox.FGLOW_ANIM);
             this._backlight.visible = false;
@@ -1129,6 +1119,16 @@ export class ConstraintBox extends ContainerObject {
         }
     }
 
+    private setTooltip(styledText: StyledTextBuilder, satisfied: boolean): void {
+        if (!satisfied) {
+            styledText = styledText.clone().append("\n").append("Unsatisfied", {fill: 0xff0000});
+        }
+
+        let balloon = new TextBalloon("", 0x0, 0.8);
+        balloon.set_styled_text(styledText);
+        this.set_mouse_over_object(balloon);
+    }
+
     private set_mouse_over_object(obj: SceneObject): void {
         const FADE_IN_DELAY: number = 1.0;
 
@@ -1172,6 +1172,27 @@ export class ConstraintBox extends ContainerObject {
         }
     }
 
+    /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
+    private static createTextStyle(): StyledTextBuilder {
+        let style: StyledTextBuilder = new StyledTextBuilder({
+            fontFamily: Fonts.STDFONT_REGULAR,
+            fontSize: 16,
+            fill: 0xffffff,
+            letterSpacing: -0.5
+        }).addStyle("altText", {
+            fontFamily: Fonts.STDFONT_MEDIUM,
+            leading: 10
+        }).addStyle("altTextMain", {
+            fontFamily: Fonts.STDFONT_REGULAR,
+            leading: 5
+        });
+
+        EPars.addLetterStyles(style);
+
+        return style;
+    }
+
+    private readonly _type: ConstraintBoxType;
     private readonly _icon: Sprite;
     private readonly _bases: Container;
     private readonly _base1: Sprite;
@@ -1180,8 +1201,8 @@ export class ConstraintBox extends ContainerObject {
     private readonly _base3: Sprite;
     private readonly _base4: Sprite;
     private readonly _bond2: Band;
-    private readonly _val_text: Text;
-    private readonly _big_text: Text;
+    private readonly _val_text: MultiStyleText;
+    private readonly _big_text: MultiStyleText;
     private readonly _small_thumbnail: Sprite;
     private readonly _big_thumbnail: Sprite;
     private readonly _flag: Graphics;
@@ -1202,11 +1223,10 @@ export class ConstraintBox extends ContainerObject {
     private readonly _success_outline: Texture;
     private readonly _req_clarify_text: Text;
     private readonly _req_stat_txt: Text;
-    private readonly _side_txt: Text;
+    private readonly _side_txt: MultiStyleText;
 
     private _enlarged: boolean = false;
     private _satisfied: boolean = false;
-    private _min_version: boolean = true;
     private _keyword: string = "";
     private _val: any = null;
     private _stat: number = 0;

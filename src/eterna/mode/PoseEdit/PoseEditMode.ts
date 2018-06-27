@@ -22,7 +22,7 @@ import {SolutionManager} from "../../puzzle/SolutionManager";
 import {BitmapManager} from "../../resources/BitmapManager";
 import {Sounds} from "../../resources/Sounds";
 import {ActionBar} from "../../ui/ActionBar";
-import {ConstraintBox} from "../../ui/ConstraintBox";
+import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
@@ -593,7 +593,7 @@ export class PoseEditMode extends GameMode {
             }
 
             for (let ii = 0; ii < num_constraints / 2; ii++) {
-                let newbox: ConstraintBox = new ConstraintBox();
+                let newbox: ConstraintBox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                 this._constraint_boxes.push(newbox);
                 this._constraints_container.addObject(newbox, this._constraints_container.container);
             }
@@ -610,13 +610,13 @@ export class PoseEditMode extends GameMode {
                     for (let jj = 0; jj < num_constraints; jj += 2) {
                         if (constraints[jj] == ConstraintType.SHAPE) {
                             if (Number(constraints[jj + 1]) == ii) {
-                                let newbox = new ConstraintBox();
+                                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_shape_boxes[ii] = newbox;
                                 this._constraints_container.addObject(newbox, this._constraints_container.container);
                             }
                         } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
                             if (Number(constraints[jj + 1]) == ii) {
-                                let newbox = new ConstraintBox();
+                                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_antishape_boxes[ii] = newbox;
                                 this._constraints_container.addObject(newbox, this._constraints_container.container);
                             }
