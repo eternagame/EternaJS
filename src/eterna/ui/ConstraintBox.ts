@@ -306,7 +306,7 @@ export class ConstraintBox extends ContainerObject {
 
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
-        let new_txt: string = "";
+        let newClarifyText: string = "";
 
         this._outline.texture = satisfied ? this._success_outline : this._fail_outline;
         const isMissionScreen: boolean = this._type == ConstraintBoxType.MISSION_SCREEN;
@@ -333,9 +333,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt += (Number(val)).toString() + " OR MORE";
+            newClarifyText = (Number(val)).toString() + " OR MORE";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -367,9 +367,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt += "NO UG PAIRS";
+            newClarifyText += "NO UG PAIRS";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -400,9 +400,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt += (Number(val)).toString() + " OR MORE";
+            newClarifyText = (Number(val)).toString() + " OR MORE";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -424,15 +424,15 @@ export class ConstraintBox extends ContainerObject {
 
             if (keyword == "GCMIN") {
                 tooltip.append(val.toString() + " or more");
-                new_txt += (Number(val)).toString() + " OR MORE";
+                newClarifyText += (Number(val)).toString() + " OR MORE";
 
             } else if (keyword == "GC") {
                 tooltip.append("at most", "altText").append(" " + (Number(val)).toString());
-                new_txt += (Number(val)).toString() + " OR FEWER";
+                newClarifyText += (Number(val)).toString() + " OR FEWER";
 
             } else if (keyword == "NOGC") {
                 tooltip.append("no");
-                new_txt += "NO GC PAIRS";
+                newClarifyText += "NO GC PAIRS";
             }
 
             tooltip.append(" " + EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs.");
@@ -440,7 +440,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCReq);
@@ -468,17 +468,17 @@ export class ConstraintBox extends ContainerObject {
 
             if (keyword == "AU") {
                 tooltip.append(val.toString() + " or more");
-                new_txt += (Number(val)).toString() + " OR MORE";
+                newClarifyText += (Number(val)).toString() + " OR MORE";
             } else if (keyword == "AUMAX") {
                 tooltip.append("at most", "altText").append((Number(val)).toString());
-                new_txt += (Number(val)).toString() + " OR FEWER";
+                newClarifyText += (Number(val)).toString() + " OR FEWER";
             }
             tooltip.append(" " + EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs.");
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -568,7 +568,6 @@ export class ConstraintBox extends ContainerObject {
             }
 
             tooltip.append("In state " + (Number(val.index) + 1).toString() + ", your RNA must:\n");
-            new_txt = "";
 
             for (let ii = 0; ii < val.bind.length; ii++) {
                 tooltip.append("- ");
@@ -581,11 +580,11 @@ export class ConstraintBox extends ContainerObject {
                 }
                 tooltip.append(" with " + val.oligo_name[ii] + "\n");
 
-                if (ii > 0) new_txt += "&#x2003;";
+                if (ii > 0) newClarifyText += "&#x2003;";
                 if (val.bind[ii]) {
-                    new_txt += " <FONT COLOR='#FFFFFF'>" + val.label[ii] + "</FONT>";
+                    newClarifyText += " <FONT COLOR='#FFFFFF'>" + val.label[ii] + "</FONT>";
                 } else {
-                    new_txt += " <FONT COLOR='#808080'>" + val.label[ii] + "</FONT>";
+                    newClarifyText += " <FONT COLOR='#808080'>" + val.label[ii] + "</FONT>";
                 }
             }
 
@@ -593,7 +592,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
 
             let tw: number = Math.min(101, 15 * (2 * val.bind.length - 1));
             let step: number = tw / (2 * val.bind.length - 1);
@@ -643,23 +642,21 @@ export class ConstraintBox extends ContainerObject {
             }
 
             if (keyword == letter) {
-                new_txt += (Number(val)).toString() + " OR MORE";
+                newClarifyText += (Number(val)).toString() + " OR MORE";
             } else {
-                new_txt += (Number(val)).toString() + " OR FEWER";
+                newClarifyText += (Number(val)).toString() + " OR FEWER";
             }
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
-            if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "MissionReq");
-            } else {
-                this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "Req");
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap_named("Nova" + letter + "MissionReq") :
+                BitmapManager.get_bitmap_named("Nova" + letter + "Req");
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -676,15 +673,15 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt += (Number(val)).toString() + " OR MORE";
-            this._req_clarify_text.text = new_txt;
+            newClarifyText += (Number(val)).toString() + " OR MORE";
+            this._req_clarify_text.text = newClarifyText;
 
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaPairsReq);
-            if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaPairsMissionReq);
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap(BitmapManager.NovaPairsMissionReq) :
+                BitmapManager.get_bitmap(BitmapManager.NovaPairsReq);
+
             this._req.visible = true;
             this._outline.visible = true;
 
@@ -777,15 +774,15 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt += "AT MOST " + (Number(val) - 1).toString() + " IN A ROW";
+            newClarifyText += "AT MOST " + (Number(val) - 1).toString() + " IN A ROW";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "RowReq");
-            if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap_named("Nova" + letter + "RowMissionReq");
-            }
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap_named("Nova" + letter + "RowMissionReq") :
+                BitmapManager.get_bitmap_named("Nova" + letter + "RowReq");
+
             this._req.visible = true;
             this._outline.visible = true;
 
@@ -860,9 +857,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt = "MUST BE UNIQUE";
+            newClarifyText = "MUST BE UNIQUE";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
 
             this._req.texture = isMissionScreen ?
                 BitmapManager.get_bitmap(BitmapManager.NovaBarcodeMissionReq) :
@@ -892,9 +889,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            new_txt = binder ? "MUST BIND" : "MAY NOT BIND";
+            newClarifyText = binder ? "MUST BIND" : "MAY NOT BIND";
 
-            this._req_clarify_text.text = new_txt;
+            this._req_clarify_text.text = newClarifyText;
 
             let ico: string = binder ? "Bound" : "Unbound";
             if (isMissionScreen) {
@@ -974,8 +971,8 @@ export class ConstraintBox extends ContainerObject {
             }
         }
 
-        let more: number = new_txt.indexOf("MORE");
-        let less: number = new_txt.indexOf("FEWER");
+        let more: number = newClarifyText.indexOf("MORE");
+        let less: number = newClarifyText.indexOf("FEWER");
         let idx: number = (more == -1) ? less : more;
         // let bf: TextFormat = Fonts.arial(11, true);
         // if (idx != -1) {
