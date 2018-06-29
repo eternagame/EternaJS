@@ -35,6 +35,10 @@ export class EternaApp extends FlashbangApp {
         return new PIXI.Application(1024, 768, {backgroundColor: 0x061A34});
     }
 
+    protected get pixiParent(): HTMLElement {
+        return document.getElementById("eternaContainer");
+    }
+
     /*override*/
     protected setup(): void {
         Eterna.settings = new EternaSettings(Eterna.player_id);

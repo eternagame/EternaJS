@@ -24,7 +24,7 @@ export class FlashbangApp {
         window.addEventListener("error", (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
-        document.body.appendChild(this._pixi.view);
+        this.pixiParent.appendChild(this._pixi.view);
 
         this._modeStack = new ModeStack(this._pixi.stage);
 
@@ -86,12 +86,17 @@ export class FlashbangApp {
     }
 
     /**
-     * Creates and returns a PIXI.Application instance.
+     * Creates a PIXI.Application instance.
      * Subclasses can override to do custom initialization.
      */
     protected createPixi(): PIXI.Application {
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
         return new PIXI.Application(800, 600, {backgroundColor: 0x1099bb});
+    }
+
+    /** The HTMLElement that the PIXI application will be added to. */
+    protected get pixiParent(): HTMLElement {
+        return document.body;
     }
 
     protected update(tickerDelta: number): void {

@@ -1,0 +1,21 @@
+.container {
+    position: relative;
+}
+
+#overlay {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#eternaContainer {
+    position: relative;
+    z-index: 0;
+}
+
+.floating-div {
+    position: absolute;
+    z-index: 1;
+    overflow: visible;
+    margin: 0px;
+}
