@@ -1,6 +1,7 @@
 import * as log from 'loglevel';
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
+import {PoseTestMode} from "./debug/PoseTestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
@@ -63,8 +64,10 @@ export class EternaApp extends FlashbangApp {
             })
             .then((puzzle) => {
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
-                // this._modeStack.unwindToMode(new PoseTestMode());
             })
+            // .then(() => {
+            //     this._modeStack.unwindToMode(new PoseTestMode());
+            // })
             .catch((err) => Eterna.onFatalError(err));
     }
 
