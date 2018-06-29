@@ -12,6 +12,10 @@ import {Matrix, Point} from "pixi.js";
 
 /** A utility class containing methods related to the Matrix class. */
 export class MatrixUtil {
+    public static equals(a: Matrix, b: Matrix): boolean {
+        return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d && a.tx == b.tx && a.ty == b.ty;
+    }
+
     /** Determines if the matrix is an identity matrix. */
     public static isIdentity(matrix: Matrix): boolean {
         return matrix.a == 1.0 && matrix.b == 0.0 && matrix.c == 0.0 && matrix.d == 1.0 &&

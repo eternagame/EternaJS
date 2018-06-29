@@ -6,6 +6,8 @@ import {SoundManager} from "./resources/SoundManager";
 
 /** Constants and managers */
 export class Eterna {
+    public static readonly OVERLAY_DIV_ID: string = "overlay";
+
     public static settings: EternaSettings;
 
     public static player_id: number = 1;

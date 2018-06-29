@@ -3,14 +3,12 @@ import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {EnergyScoreDisplay} from "../pose2D/EnergyScoreDisplay";
+import {DelayTask} from "../../flashbang/tasks/DelayTask";
+import {LocationTask} from "../../flashbang/tasks/LocationTask";
+import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {Easing} from "../../flashbang/util/Easing";
 import {Pose2D} from "../pose2D/Pose2D";
-import {BitmapManager} from "../resources/BitmapManager";
-import {EternaMenu, EternaMenuStyle} from "../ui/EternaMenu";
-import {GameButton} from "../ui/GameButton";
-import {GameCheckbox} from "../ui/GameCheckbox";
-import {NucleotidePalette} from "../ui/NucleotidePalette";
+import {TextInputObject} from "../ui/TextInputObject";
 import {Background} from "../vfx/Background";
 
 export class PoseTestMode extends AppMode {
@@ -23,35 +21,17 @@ export class PoseTestMode extends AppMode {
         this._pose.display.x = Flashbang.stageWidth * 0.5;
         this._pose.display.y = Flashbang.stageHeight * 0.5;
 
-        let palette = new NucleotidePalette();
-        palette.display.position = new Point(500, 700);
-        this.addObject(palette, this.modeSprite);
+        let input = new TextInputObject(20, Flashbang.stageWidth - 200);
+        this.addObject(input, this.modeSprite);
+        input.width = Flashbang.stageWidth - 200;
+        input.display.position = new Point(
+            (Flashbang.stageWidth - input.width) * 0.5,
+            10);
 
-        // let button = new TextBalloon("Hello (Z)", 0x0, 0.8);
-        // button.display.x = (Flashbang.stageWidth - DisplayUtil.width(button.display)) * 0.5;
-        // button.display.y = (Flashbang.stageHeight - DisplayUtil.height(button.display)) * 0.5;
-        // this.addObject(button, this.modeSprite);
-
-        let checkbox: GameCheckbox = new GameCheckbox(18, "I'm a little checkbox");
-        checkbox.display.position = new Point(20, 400);
-        this.addObject(checkbox, this.modeSprite);
-
-        let scoreDisplay = new EnergyScoreDisplay(111, 40);
-        scoreDisplay.set_energy_text("Total", "5.2 kcal");
-        scoreDisplay.position = new Point(17, 118);
-        this.modeSprite.addChild(scoreDisplay);
-
-        let _view_options_button = new GameButton()
-            .allStates(BitmapManager.ImgSettings)
-            .label("Settings", 16)
-            .scaleBitmapToLabel();
-
-        let menu = new EternaMenu(EternaMenuStyle.PULLUP);
-        menu.add_menu_button(new GameButton().allStates(BitmapManager.NovaMenu));
-        menu.add_sub_menu_button(0, _view_options_button);
-        menu.display.x = (Flashbang.stageWidth - DisplayUtil.width(menu.display)) * 0.5;
-        menu.display.y = (Flashbang.stageHeight - DisplayUtil.height(menu.display)) * 0.5;
-        this.addObject(menu, this.modeSprite);
+        input.addObject(new SerialTask(
+            new DelayTask(1),
+            new LocationTask(input.display.x, Flashbang.stageHeight - input.height - 10, 5, Easing.easeInOut)
+        ));
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
