@@ -32,40 +32,14 @@ export class TextInputPanel extends GamePanel {
 
     protected added(): void {
         super.added();
-        this.updateLayout();
-    }
 
-    public set_title(title_txt: string): void {
-        this.set_panel_title(title_txt);
-    }
-
-    public add_field(name: string, width: number, multiline: boolean = false): void {
-        let input = new TextInputObject(14, width);
-        if (multiline) {
-            throw new Error("TODO - TextArea support");
-            // field.height = 60;
-            // field.multiline = true;
-        }
-        this.addObject(input, this.container);
-
-        let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();
-        this.container.addChild(label);
-
-        this._fields.push({input: input, label: label, name: name});
-
-        if (this.isLiveObject) {
-            this.updateLayout();
-        }
-    }
-
-    private updateLayout(): void {
         let field_start: number = 0;
         let max_w: number = 0;
         let height_walker: number = 0;
 
         if (this._fields.length > 0) {
             for (let field of this._fields) {
-                field_start = Math.min(field_start, field.label.width);
+                field_start = Math.max(field_start, field.label.width);
                 max_w = Math.max(max_w, field.input.width);
             }
 
@@ -89,6 +63,29 @@ export class TextInputPanel extends GamePanel {
             (width * 0.5) - 30 - this._okButton.container.width,
             height_walker);
         this._cancelButton.display.position = new Point((width * 0.5) + 30, height_walker);
+    }
+
+    public set_title(title_txt: string): void {
+        this.set_panel_title(title_txt);
+    }
+
+    public add_field(name: string, width: number, multiline: boolean = false): void {
+        if (this.isLiveObject) {
+            throw new Error("Add all fields before adding object to mode");
+        }
+
+        let input = new TextInputObject(14, width);
+        if (multiline) {
+            throw new Error("TODO - TextArea support");
+            // field.height = 60;
+            // field.multiline = true;
+        }
+        this.addObject(input, this.container);
+
+        let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();
+        this.container.addChild(label);
+
+        this._fields.push({input: input, label: label, name: name});
     }
 
     public set_hotkeys(ok_key: string = null, ok_txt: string = "", cancel_key: string = null, cancel_txt: string = ""): void {
