@@ -1,10 +1,11 @@
+import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Signal} from "../../signals/Signal";
 
 /** Convenience base class for dialog objects. */
-export abstract class Dialog<T> extends ContainerObject {
+export abstract class Dialog<T> extends ContainerObject implements KeyboardListener {
     /** Emitted when the user closes the dialog with the return value of dialog, if any. */
     public readonly closed: Signal<T> = new Signal();
 
@@ -21,6 +22,8 @@ export abstract class Dialog<T> extends ContainerObject {
                 this.onBGClicked();
             }
         });
+
+        this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
     /**
@@ -41,6 +44,11 @@ export abstract class Dialog<T> extends ContainerObject {
 
     protected get bgAlpha() :number {
         return 0.7;
+    }
+
+    public onKeyboardEvent(e: KeyboardEvent): boolean {
+        // By default, dialogs eat all keyboard input
+        return true;
     }
 
     private _closed: boolean;
