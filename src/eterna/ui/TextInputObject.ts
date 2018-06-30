@@ -18,6 +18,17 @@ export class TextInputObject extends DOMObject<HTMLInputElement> {
         this._obj.oninput = () => this.valueChanged.emit(this._obj.value);
     }
 
+    public set readOnly(value: boolean) {
+        this._obj.readOnly = value;
+    }
+
+    public setFocus(select: boolean = false): void {
+        this._obj.focus();
+        if (select) {
+            this._obj.setSelectionRange(0, this._obj.value.length);
+        }
+    }
+
     public get width(): number {
         return this._obj.getBoundingClientRect().width;
     }

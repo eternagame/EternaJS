@@ -69,7 +69,7 @@ export class TextInputPanel extends GamePanel {
         this.set_panel_title(title_txt);
     }
 
-    public add_field(name: string, width: number, multiline: boolean = false): void {
+    public add_field(name: string, width: number, multiline: boolean = false): TextInputObject {
         if (this.isLiveObject) {
             throw new Error("Add all fields before adding object to mode");
         }
@@ -86,6 +86,8 @@ export class TextInputPanel extends GamePanel {
         this.container.addChild(label);
 
         this._fields.push({input: input, label: label, name: name});
+
+        return input;
     }
 
     public set_hotkeys(ok_key: string = null, ok_txt: string = "", cancel_key: string = null, cancel_txt: string = ""): void {
