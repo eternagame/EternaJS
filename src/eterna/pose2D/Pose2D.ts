@@ -3169,7 +3169,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._display_score_texts) {
             this._score_texts = [];
             for (let scoreNode of this._score_nodes) {
-                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.get_colored_number()));
+                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.getScoreString(), scoreNode.getScoreColor()));
                 scoreText.visible = false;
                 this._score_texts.push(scoreText);
                 this.container.addChild(scoreText);
