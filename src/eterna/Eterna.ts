@@ -17,11 +17,17 @@ export class Eterna {
     public static sound: SoundManager;
 
     public static onFatalError(err: any): void {
-        log.error("Uncaught error", ErrorUtil.getErrString(err));
+        let errstring = ErrorUtil.getErrString(err);
 
+        if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
+            log.debug("TODO: Tim, fix this audio bug");
+            return;
+        }
+
+        log.error("Uncaught error", errstring);
         if (process.env.NODE_ENV !== "production") {
             try {
-                alert(ErrorUtil.getErrString(err));
+                alert(errstring);
             } catch (e) {
                 log.error("An error occurred while trying to display an error", e);
             }
