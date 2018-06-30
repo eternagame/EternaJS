@@ -36,6 +36,7 @@ import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
+import {PasteSequenceDialog} from "./PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {PuzzleEvent} from "./PuzzleEvent";
 
@@ -103,12 +104,7 @@ export class PoseEditMode extends GameMode {
         this._toolbar.native_button.clicked.connect(() => this.toggle_posestate());
         this._toolbar.target_button.clicked.connect(() => this.toggle_posestate());
         this._toolbar.spec_button.clicked.connect(() => this.show_spec());
-        this._toolbar.paste_button.clicked.connect(() => {
-            log.debug("TODO: paste_button_clicked");
-            // Application.instance.add_lock("PASTESEQUENCE");
-            // this._paste_field.set_hotkeys(KeyCode.KEY_NONE, "", KeyCode.KEY_ESC, "Esc");
-            // Application.instance.get_modal_container().addObject(this._paste_field);
-        });
+        this._toolbar.paste_button.clicked.connect(() =>  this.showPasteSequenceDialog());
         this._toolbar.view_options_button.clicked.connect(() => {
             let mode = this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL ?
                 EternaViewOptionsMode.LAB :
@@ -137,34 +133,6 @@ export class PoseEditMode extends GameMode {
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
             this._toolbar.set_toolbar_autohide(value);
         }));
-
-        // this._paste_field = new InputField;
-        // this._paste_field.add_field("Sequence", 200);
-        // this._paste_field.set_title("Write down a sequence");
-        // this._paste_field.set_callbacks((dic: Map<any, any>) => {
-        //         let sequence: string = dic["Sequence"];
-        //         let char: string = "";
-        //         for (ii = 0; ii < sequence.length; ii++) {
-        //             char = sequence.substr(ii, 1);
-        //             if (char != "A" && char != "U" && char != "G" && char != "C") {
-        //                 Application.instance.setup_msg_box("You can only use characters A,U,G and C");
-        //                 return;
-        //             }
-        //         }
-        //         for (ii = 0; ii < this._poses.length; ii++) {
-        //             this._poses[ii].paste_sequence(EPars.string_to_sequence_array(sequence));
-        //         }
-        //         this.move_history_add_sequence("paste", sequence);
-        //         this._paste_field.clear_fields();
-        //         Application.instance.remove_lock("PASTESEQUENCE");
-        //         Application.instance.get_modal_container().removeObject(this._paste_field);
-        //     },
-        //     () => {
-        //         this._paste_field.clear_fields();
-        //         Application.instance.remove_lock("PASTESEQUENCE");
-        //         Application.instance.get_modal_container().removeObject(this._paste_field);
-        //     });
-        // this._paste_field.set_pos(new UDim(0.5, 0.5, -150, -100));
 
         this._hint_box = new GamePanel();
         this._hint_box.display.visible = false;
@@ -256,6 +224,16 @@ export class PoseEditMode extends GameMode {
         this._asynch_text.position = new Point(16, 200);
 
         this.set_puzzle();
+    }
+
+    protected showPasteSequenceDialog(): void {
+        this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
+            if (sequence != null) {
+                for (let pose of this._poses) {
+                    pose.paste_sequence(EPars.string_to_sequence_array(sequence));
+                }
+            }
+        });
     }
 
     /*override*/
@@ -4405,9 +4383,7 @@ export class PoseEditMode extends GameMode {
     //     } else if (event.target == this._copy_cmi) {
     //         Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
     //     } else if (event.target == this._paste_cmi) {
-    //         Application.instance.add_lock("PASTESEQUENCE");
-    //         this._paste_field.set_hotkeys(KeyCode.KEY_NONE, "", KeyCode.KEY_ESC, "Esc");
-    //         Application.instance.get_modal_container().addObject(this._paste_field);
+    //          this.showPasteSequenceDialog();
     //     } else if (event.target == this._beam_cmi) {
     //         let _this: PoseEditMode = this;
     //         _this.transfer_to_puzzlemaker();
@@ -4461,9 +4437,6 @@ export class PoseEditMode extends GameMode {
     private _hint_box: GamePanel;
     private _hint_text: Text;
 
-    /// Palette
-    /// Paste sequence widget
-    // private _paste_field: InputField;
     /// constraints && scoring display
     private _constraints_container: ContainerObject;
     private _constraint_boxes: ConstraintBox[];
