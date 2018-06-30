@@ -1,4 +1,4 @@
-﻿import {Utility} from "../util/Utility";
+﻿import {ColorUtil} from "../util/ColorUtil";
 
 export enum ScoreDisplayNodeType {
     STACK = 0, LOOP
@@ -35,7 +35,7 @@ export class ScoreDisplayNode {
         return this.get_text_label() + "\n" + (this._score / 100).toString() + " kcal";
     }
 
-    public get_colored_number(): string {
+    public getScoreColor(): number {
         let r: number = 0;
         let g: number = 0;
         let b: number = 0;
@@ -52,9 +52,9 @@ export class ScoreDisplayNode {
                 prog = 0;
             }
 
-            r = 255;
-            g = 255 * (1 - prog) + 30 * prog;
-            b = 255 * (1 - prog) + 30 * prog;
+            r = 1;
+            g = (1 - prog) + (30 / 255) * prog;
+            b = (1 - prog) + (30 / 255) * prog;
         } else {
             prog = score / -5.0;
             if (prog > 1) {
@@ -64,14 +64,16 @@ export class ScoreDisplayNode {
                 prog = 0;
             }
 
-            g = 255;
-            r = 255 * (1 - prog) + 30 * prog;
-            b = 255 * (1 - prog) + 30 * prog;
+            g = 1;
+            r = (1 - prog) + (30 / 255) * prog;
+            b = (1 - prog) + (30 / 255) * prog;
         }
 
-        let color: string = Utility.byte2hex(r) + Utility.byte2hex(g) + Utility.byte2hex(b);
+        return ColorUtil.compose(r, g, b);
+    }
 
-        return "<FONT COLOR=\"#" + color + "\">" + (score).toString() + "</FONT>";
+    public getScoreString(): string {
+        return (this._score / 100.0).toString();
 
     }
 
