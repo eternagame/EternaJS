@@ -36,6 +36,7 @@ import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
+import {CopySequenceDialog} from "./CopySequenceDialog";
 import {PasteSequenceDialog} from "./PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {PuzzleEvent} from "./PuzzleEvent";
@@ -113,7 +114,8 @@ export class PoseEditMode extends GameMode {
         });
 
         this._toolbar.copy_button.clicked.connect(() => {
-            Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
+            let sequenceString = EPars.sequence_array_to_string(this._poses[0].get_sequence());
+            this.showDialog(new CopySequenceDialog(sequenceString));
         });
 
         this._toolbar.pip_button.clicked.connect(() => {
