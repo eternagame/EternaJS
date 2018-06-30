@@ -1,4 +1,5 @@
-﻿import "pixi-sound";
+﻿import * as log from "loglevel";
+import "pixi-sound";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EternaSettings} from "../settings/EternaSettings";
 
@@ -22,7 +23,11 @@ export class SoundManager {
             return;
         }
 
-        this.getSound(name).play({volume: this._settings.soundVolume.value, start: start_time});
+        try {
+            this.getSound(name).play({volume: this._settings.soundVolume.value, start: start_time});
+        } catch (e) {
+            log.error(`Failed to play sound ${name}`, e);
+        }
     }
 
     private getSound(name: string): Sound {
