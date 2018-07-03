@@ -9,6 +9,7 @@ import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {DelayTask} from "../../flashbang/tasks/DelayTask";
 import {LocationTask} from "../../flashbang/tasks/LocationTask";
 import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
+import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SelfDestructTask} from "../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -2835,61 +2836,48 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private draw_energy_highlight(energy: Sprite): void {
-        log.debug("TODO: draw_energy_highlight");
-        // if (!this._highlight_energy_text)
-        //     return;
-        //
-        // let hl: GameObject = new GameObject;
-        //
-        // hl.alpha = 0;
-        // hl.visible = true;
-        // hl.graphics.clear();
-        // hl.graphics.lineStyle(1, 0xFFFFFF, 0.7);
-        //
-        // // Draw highlight around the energy reading.
-        // // Give it a bit of padding so the highlight isn't so tight.
-        // let padding: Point = new Point(2, 2);
-        // let offset: Point = new Point(0, 0);
-        // let realWidth: Point = new Point(energy.width + 2, energy.height + 2);
-        //
-        // let new_x: number = energy.x - padding.x + offset.x;
-        // let new_y: number = energy.y - padding.y + offset.y;
-        //
-        // hl.graphics.drawRoundRect(new_x, new_y,
-        //     realWidth.x, realWidth.y, 10);
-        // hl.set_animator(new GameAnimatorFader(0, 1, 0.5, false, true));
-        // this.addObject(hl);
-        // this._energy_highlights.push(hl);
+    private static drawEnergyHighlight(hilite: Graphics, energy: Sprite): Graphics {
+        // Draw highlight around the energy reading.
+        // Give it a bit of padding so the highlight isn't so tight.
+        const PADDING: number = 2;
+        return hilite.clear()
+            .lineStyle(1, 0xFFFFFF, 0.7)
+            .drawRoundedRect(
+                energy.x - PADDING, energy.y - PADDING,
+                energy.width + PADDING, energy.height + PADDING, 10);
     }
 
     private update_energy_highlight(energy: Sprite, idx: number, vis: boolean): void {
-        log.debug("TODO: update_energy_highlight");
-        // if (idx >= this._energy_highlights.length) {
-        //     this.draw_energy_highlight(energy);
-        //     return;
-        // }
-        //
-        // this._energy_highlights[idx].visible = vis;
-        // this._energy_highlights[idx].graphics.clear();
-        // this._energy_highlights[idx].graphics.lineStyle(1, 0xFFFFFF, 0.7);
-        //
-        // let padding: Point = new Point(2, 2);
-        // let offset: Point = new Point(0, 0);
-        // let realWidth: Point = new Point(energy.width + 2, energy.height + 2);
-        //
-        // let new_x: number = energy.x - padding.x + offset.x;
-        // let new_y: number = energy.y - padding.y + offset.y;
-        //
-        // this._energy_highlights[idx].graphics.drawRoundRect(new_x, new_y,
-        //     realWidth.x, realWidth.y, 10);
+        if (idx >= this._energy_highlights.length) {
+            if (!this._highlight_energy_text) {
+                return;
+            }
+
+            let obj = new SceneObject(Pose2D.drawEnergyHighlight(new Graphics(), energy));
+            obj.display.alpha = 0;
+            obj.addObject(new RepeatingTask((): SerialTask => {
+                return new SerialTask(
+                    new AlphaTask(1, 0.5),
+                    new AlphaTask(0, 0.5)
+                )
+            }));
+
+            this.addObject(obj, this.container);
+            this._energy_highlights.push(obj);
+
+        } else {
+            let obj = this._energy_highlights[idx];
+            obj.display.visible = vis;
+            Pose2D.drawEnergyHighlight(obj.display as Graphics, energy);
+        }
     }
 
     private clear_energy_highlights(): void {
-        for (let i: number = 0; i < this._energy_highlights.length; ++i) {
-            this.removeObject(this._energy_highlights[i]);
+        for (let obj of this._energy_highlights) {
+            obj.destroySelf();
         }
-        this._energy_highlights.splice(0);
+
+        this._energy_highlights = [];
     }
 
     private draw_highlight_unstable_sequence(): void {
@@ -3442,7 +3430,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     // Anchoring
     private _anchored_objects: any[] = [];
     private _highlight_energy_text: boolean = false;
-    private _energy_highlights: any[] = [];
+    private _energy_highlights: SceneObject[] = [];
     /*
 	 * NEW HIGHLIGHT.
 	 * 	- Input: List of nucleotides that we wish to highlight.
