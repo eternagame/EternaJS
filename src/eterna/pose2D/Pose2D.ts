@@ -31,6 +31,7 @@ import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
 import {PoseUtil} from "./PoseUtil";
+import {RNAAnchorObject} from "./RNAAnchorObject";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
 import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
@@ -107,7 +108,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._current_color = -1;
         }
 
-        this._aux_info_canvas = new Container();
+        this._aux_info_canvas = new Graphics();
         this._aux_info_canvas.visible = false;
         this.container.addChild(this._aux_info_canvas);
 
@@ -2889,38 +2890,32 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private render_aux_info(): void {
-        log.debug("TODO: render_aux_info");
-        // this._aux_info_canvas.graphics.clear();
-        //
-        // if (!this._display_aux_info)
-        //     return;
-        //
-        // if (this._aux_info == null)
-        //     return;
-        //
-        // if (this._aux_info['cleaving_site']) {
-        //     let cleaving_site: number = this._aux_info['cleaving_site'];
-        //     if (cleaving_site < this._bases.length - 1) {
-        //
-        //         let b_x: number = this._bases[cleaving_site].get_x() + this._off_x;
-        //         let b_y: number = this._bases[cleaving_site].get_y() + this._off_y;
-        //
-        //         let b_next_x: number = this._bases[cleaving_site + 1].get_x() + this._off_x;
-        //         let b_next_y: number = this._bases[cleaving_site + 1].get_y() + this._off_y;
-        //
-        //         let c_x: number = (b_x + b_next_x) / 2.0;
-        //         let c_y: number = (b_y + b_next_y) / 2.0;
-        //
-        //         let go_x: number = b_next_y - b_y;
-        //         let go_y: number = -(b_next_x - b_x);
-        //
-        //         this._aux_info_canvas.graphics.lineStyle(3, 0xFF0000, 0.9);
-        //         this._aux_info_canvas.graphics.moveTo(c_x + go_x / 2.0, c_y + go_y / 2.0);
-        //         this._aux_info_canvas.graphics.lineTo(c_x - go_x / 2.0, c_y - go_y / 2.0);
-        //
-        //         this._aux_textballoon.set_pos(new UDim(0, 0, c_x + go_x / 2.0, c_y + go_y / 2.0));
-        //     }
-        // }
+        this._aux_info_canvas.clear();
+
+        if (!this._display_aux_info || this._aux_info == null || !this._aux_info['cleaving_site']) {
+            return;
+        }
+
+        let cleaving_site: number = this._aux_info['cleaving_site'];
+        if (cleaving_site < this._bases.length - 1) {
+            let b_x: number = this._bases[cleaving_site].get_x() + this._off_x;
+            let b_y: number = this._bases[cleaving_site].get_y() + this._off_y;
+
+            let b_next_x: number = this._bases[cleaving_site + 1].get_x() + this._off_x;
+            let b_next_y: number = this._bases[cleaving_site + 1].get_y() + this._off_y;
+
+            let c_x: number = (b_x + b_next_x) / 2.0;
+            let c_y: number = (b_y + b_next_y) / 2.0;
+
+            let go_x: number = b_next_y - b_y;
+            let go_y: number = -(b_next_x - b_x);
+
+            this._aux_info_canvas.lineStyle(3, 0xFF0000, 0.9);
+            this._aux_info_canvas.moveTo(c_x + go_x / 2.0, c_y + go_y / 2.0);
+            this._aux_info_canvas.lineTo(c_x - go_x / 2.0, c_y - go_y / 2.0);
+
+            this._aux_textballoon.display.position = new Point(c_x + go_x / 2.0, c_y + go_y / 2.0);
+        }
     }
 
     private check_pairs(): void {
@@ -3418,17 +3413,15 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _exp_continuous: boolean = false;
     private _exp_extended_scale: boolean = false;
     private _display_aux_info: boolean;
-    private _aux_info: Object;
-    private _aux_info_canvas: Container;
+    private _aux_info: any;
+    private _aux_info_canvas: Graphics;
     private _aux_textballoon: TextBalloon;
 
-    /// Feedback
     private _feedback_objs: any[] = [];
     private _feedback_objs_num: number;
     private _feedback_objs_start_ind: number;
 
-    // Anchoring
-    private _anchored_objects: any[] = [];
+    private _anchored_objects: RNAAnchorObject[] = [];
     private _highlight_energy_text: boolean = false;
     private _energy_highlights: SceneObject[] = [];
     /*
