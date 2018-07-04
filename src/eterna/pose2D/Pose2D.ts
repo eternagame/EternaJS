@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
+import {Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
@@ -20,11 +20,11 @@ import {EPars} from "../EPars";
 import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
+import {BitmapManager} from "../resources/BitmapManager";
+import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
-import {BitmapManager} from "../resources/BitmapManager";
 import {Fonts} from "../util/Fonts";
-import {Sounds} from "../resources/Sounds";
 import {Utility} from "../util/Utility";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
@@ -1166,20 +1166,21 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_display_aux_info(display: boolean): void {
-        // this._display_aux_info = display;
-        // this._aux_info_canvas.visible = display;
+        this._display_aux_info = display;
+        this._aux_info_canvas.visible = display;
     }
 
-    public set_aux_info(aux_info: Object): void {
-        // this._aux_info = aux_info;
-        //
-        // if (this._aux_info != null && this._aux_info['cleaving_site'] != null) {
-        //     this._aux_textballoon.visible = true;
-        //     this._aux_textballoon.set_text("Ribozyme cleaving site");
-        // }
+    public set_aux_info(aux_info: any): void {
+        this._aux_info = aux_info;
+
+        if (this._aux_info != null && this._aux_info[Pose2D.CLEAVING_SITE] != null) {
+            this._aux_textballoon.display.visible = true;
+            this._aux_textballoon.set_text("Ribozyme cleaving site");
+        }
     }
 
     public start_explosion(cb: Function): void {
+        log.debug("TODO: start_explosion");
         // this._is_exploding = true;
         // this._explosion_start_time = -1;
         // this._explosion_cb = cb;
@@ -1248,6 +1249,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public clear_explosion(): void {
+        log.debug("TODO: clear_explosion");
         // if (!this._is_exploding) return;
         //
         // this._is_exploding = false;
@@ -1387,29 +1389,28 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_molecular_binding_site(binding_site: any[]): void {
-        // if (binding_site != null) {
-        //     this._binding_site = binding_site.slice();
-        // } else {
-        //     this._binding_site = null;
-        //     this.set_molecular_binding(null, null, this._molecular_binding_bonus);
-        //     return;
-        // }
-        //
-        // let target_pairs: any[] = this._molecule_target_pairs.slice();
-        // if (!target_pairs) {
-        //     Application.instance.throw_error("Can't find molecular target structure");
-        //     return;
-        // }
-        //
-        // let binding_bases: any[] = [];
-        // let binding_pairs: any[] = [];
-        // for (let ii: number = 0; ii < binding_site.length; ii++) {
-        //     if (binding_site[ii]) {
-        //         binding_bases.push(ii);
-        //         binding_pairs.push(target_pairs[ii]);
-        //     }
-        // }
-        // this.set_molecular_binding(binding_bases, binding_pairs, this._molecular_binding_bonus);
+        if (binding_site != null) {
+            this._binding_site = binding_site.slice();
+        } else {
+            this._binding_site = null;
+            this.set_molecular_binding(null, null, this._molecular_binding_bonus);
+            return;
+        }
+
+        let target_pairs: any[] = this._molecule_target_pairs.slice();
+        if (!target_pairs) {
+            throw new Error("Can't find molecular target structure");
+        }
+
+        let binding_bases: any[] = [];
+        let binding_pairs: any[] = [];
+        for (let ii: number = 0; ii < binding_site.length; ii++) {
+            if (binding_site[ii]) {
+                binding_bases.push(ii);
+                binding_pairs.push(target_pairs[ii]);
+            }
+        }
+        this.set_molecular_binding(binding_bases, binding_pairs, this._molecular_binding_bonus);
     }
 
     public get_molecular_binding_site(): any[] {
@@ -1425,6 +1426,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_molecular_binding(binding_sites: any[], binding_pairs: any[], binding_bonus: number): void {
+        log.debug("TODO: set_molecular_binding");
         // if (binding_sites == null || binding_sites.length == 0) {
         //     this._molecular_binding_bases = null;
         //     this._molecular_binding_pairs = null;
@@ -1447,6 +1449,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_molecule(): void {
+        log.debug("TODO: set_molecule");
         // if (this._molecular_binding_bases == null || this._molecule == null)
         //     return;
         //
@@ -1792,6 +1795,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     //highlight the base before the cursor
     public track_cursor(index: number): void {
+        // TODO: track_cursor
         // this.cursor_index = index;
         // if (this.cursor_index > 0) {
         //     let center: Point = this.get_base_xy(this.cursor_index - 1);
@@ -1839,6 +1843,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        // TODO: cursor_index
         // if (this.cursor_index > 0) {
         //     center = this.get_base_xy(this.cursor_index - 1);
         //     this.cursor_box.x = center.x;
@@ -1924,7 +1929,8 @@ export class Pose2D extends ContainerObject implements Updatable {
             let r: Rectangle;
 
             // Create highlight state to pass to bases.
-            let hl_state: Object = null;
+            let hl_state: any = null;
+            // TODO: all_new_highlights
             // if (this._all_new_highlights.length > 0) {
             //     hl_state = {};
             //     hl_state.nuc = [];
@@ -1962,6 +1968,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this._bases[ii].bit_blit(this._zoom_level, this._off_x, this._off_y, current_time, drawFlags, numberBitmap, hl_state);
             }
 
+            // TODO: bit_blit_after_effect
             // for (ii = 0; ii < full_seq.length; ii++) {
             //     locked = this.is_locked(ii);
             //     r = this._bases[ii].bit_blit_after_effect(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time);
@@ -1981,6 +1988,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        // TODO: mol_canvas
         // if (this._mol_canvas.visible) {
         //     while (this._mol_dirty.length > 0) {
         //         r = this._mol_dirty.pop();
@@ -2153,6 +2161,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        // TODO: is_exploding
         // if (this._is_exploding && !this._offset_translating && this._base_to_x == null) {
         //     if (this._explosion_start_time < 0) {
         //         this._explosion_start_time = current_time;
@@ -2892,11 +2901,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     private render_aux_info(): void {
         this._aux_info_canvas.clear();
 
-        if (!this._display_aux_info || this._aux_info == null || !this._aux_info['cleaving_site']) {
+        if (!this._display_aux_info || this._aux_info == null || !this._aux_info[Pose2D.CLEAVING_SITE]) {
             return;
         }
 
-        let cleaving_site: number = this._aux_info['cleaving_site'];
+        let cleaving_site: number = this._aux_info[Pose2D.CLEAVING_SITE];
         if (cleaving_site < this._bases.length - 1) {
             let b_x: number = this._bases[cleaving_site].get_x() + this._off_x;
             let b_y: number = this._bases[cleaving_site].get_y() + this._off_y;
@@ -3431,6 +3440,8 @@ export class Pose2D extends ContainerObject implements Updatable {
 	 *	- Highlight Nucleotides: Brighten glow around the nucleotide.
 	 */
     private _all_new_highlights: any[] = [];
+
+    private static readonly CLEAVING_SITE = "cleaving_site";
 
     private static readonly P: Point = new Point();
 }
