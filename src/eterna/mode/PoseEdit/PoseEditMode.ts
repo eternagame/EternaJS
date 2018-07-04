@@ -127,6 +127,8 @@ export class PoseEditMode extends GameMode {
             }
         });
 
+        this._toolbar.puzzleStateToggle.stateChanged.connect((targetIdx) => this.change_target(targetIdx));
+
         this._toolbar.freeze_button.clicked.connect(() => this.toggle_freeze());
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
@@ -281,8 +283,8 @@ export class PoseEditMode extends GameMode {
 
     public rop_change_target(target_index: number): void {
         this.change_target(target_index);
-        if (this._toolbar.toggle_bar != null) {
-            this._toolbar.toggle_bar.set_state(target_index);
+        if (this._toolbar.puzzleStateToggle != null) {
+            this._toolbar.puzzleStateToggle.set_state(target_index);
         }
     }
 
@@ -1136,7 +1138,7 @@ export class PoseEditMode extends GameMode {
         AutosaveManager.saveObjects([pip_mode], "PIP-pref-" + Application.instance.get_player_id());
 
         if (pip_mode) {
-            this._toolbar.toggle_bar.display.visible = false;
+            this._toolbar.puzzleStateToggle.display.visible = false;
             this._target_name.visible = false;
 
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -1163,7 +1165,7 @@ export class PoseEditMode extends GameMode {
             }
 
         } else {
-            this._toolbar.toggle_bar.display.visible = true;
+            this._toolbar.puzzleStateToggle.display.visible = true;
             this._target_name.visible = true;
 
             this.change_target(this._current_target_index);

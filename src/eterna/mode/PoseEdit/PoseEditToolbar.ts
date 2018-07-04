@@ -25,7 +25,7 @@ export class PoseEditToolbar extends ContainerObject {
     public pip_button: GameButton;
     public freeze_button: GameButton;
 
-    public toggle_bar: ToggleBar;
+    public puzzleStateToggle: ToggleBar;
 
     public ll_menu: EternaMenu;
     public boosters_button: GameButton;
@@ -319,9 +319,9 @@ export class PoseEditToolbar extends ContainerObject {
 
         // TOGGLE_BAR
         let target_secstructs: string[] = this._puzzle.get_secstructs();
-        this.toggle_bar = new ToggleBar(target_secstructs.length);
+        this.puzzleStateToggle = new ToggleBar(target_secstructs.length);
         if (target_secstructs.length > 1) {
-            this.addObject(this.toggle_bar, this._content);
+            this.addObject(this.puzzleStateToggle, this._content);
         }
 
         DisplayUtil.positionRelative(
@@ -424,8 +424,8 @@ export class PoseEditToolbar extends ContainerObject {
 
         this.pip_button.enabled = !disable;
 
-        if (this.toggle_bar != null) {
-            this.toggle_bar.set_disabled(disable);
+        if (this.puzzleStateToggle != null) {
+            this.puzzleStateToggle.set_disabled(disable);
         }
 
         this.ll_menu.set_disabled(disable);
