@@ -1,4 +1,5 @@
 import {Graphics, Point, Text} from "pixi.js";
+import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
@@ -86,8 +87,9 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (e.code == KeyCode.Tab && !e.ctrlKey) {
+        if (e.type == KeyboardEventType.KEY_DOWN && e.code == KeyCode.Tab && !e.ctrlKey) {
             this.set_state((this._current_state + 1) % this._num_states);
+            e.preventDefault(); // prevent Tab from changing focus in the browser
             return true;
         } else {
             return false;
