@@ -1,9 +1,22 @@
-import {Container, Graphics, Point, Text} from "pixi.js";
+import MultiStyleText from "pixi-multistyle-text";
+import {Container, Graphics, Point} from "pixi.js";
 import {Align} from "../../flashbang/core/Align";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Fonts} from "../util/Fonts";
 
 export class EnergyScoreDisplay extends Container {
+    public static grey(text: string): string {
+        return `<grey>${text}</grey>`;
+    }
+
+    public static green(text: string): string {
+        return `<green>${text}</green>`;
+    }
+
+    public static red(text: string): string {
+        return `<red>${text}</red>`;
+    }
+
     public constructor(width: number, height: number) {
         super();
 
@@ -16,10 +29,28 @@ export class EnergyScoreDisplay extends Container {
 
         let textLayout: VLayoutContainer = new VLayoutContainer(2, Align.LEFT);
 
-        this._labelText = Fonts.std_regular("Total", 11).color(0xffffff).build();
+        this._labelText = new MultiStyleText("Total", {
+            "default": {
+                fontFamily: Fonts.STDFONT_REGULAR,
+                fontSize: 11,
+                fill: 0xffffff,
+            },
+            "grey": { fill: 0x777777 },
+            "green": { fill: 0x33AA33 },
+            "red": { fill: 0xFF4747 }
+        });
         textLayout.addChild(this._labelText);
 
-        this._energyText = Fonts.std_medium("5.2 kcal", 13).color(0xffffff).build();
+        this._energyText = new MultiStyleText("5.2 kcal", {
+            "default": {
+                fontFamily: Fonts.STDFONT_MEDIUM,
+                fontSize: 13,
+                fill: 0xffffff,
+            },
+            "grey": { fill: 0x777777 },
+            "green": { fill: 0x33AA33 },
+            "red": { fill: 0xFF4747 }
+        });
         textLayout.addChild(this._energyText);
 
         textLayout.layout();
@@ -50,8 +81,8 @@ export class EnergyScoreDisplay extends Container {
         this._bg.alpha = 0.5;
     }
 
-    private readonly _labelText: Text;
-    private readonly _energyText: Text;
+    private readonly _labelText: MultiStyleText;
+    private readonly _energyText: MultiStyleText;
     private readonly _bg: Graphics;
 
     private _width: number;

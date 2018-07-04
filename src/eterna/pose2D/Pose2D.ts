@@ -3066,49 +3066,49 @@ export class Pose2D extends ContainerObject implements Updatable {
                 if (this._molecular_binding_bases != null) {
                     factor++;
                     if (this._molecule_is_bound_real) {
-                        label_elems.push("<FONT COLOR='#33AA33'>Molecule Bound</FONT>");
+                        label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
                         let molecule_bonus: number = Number(this._molecular_binding_bonus * 100) / 100.0;
-                        score_elems.push(" <FONT COLOR='#33AA33'>" + molecule_bonus.toString() + " kcal</FONT>");
+                        score_elems.push(EnergyScoreDisplay.green(` ${molecule_bonus} kcal`));
                     } else {
-                        label_elems.push("<FONT COLOR='#777777'>Molecule Not Bound</FONT>");
-                        score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
+                        label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
+                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
                     }
                 }
                 if (this._oligo != null && this._oligo_mode == Pose2D.OLIGO_MODE_DIMER) {
                     factor++;
                     let malus: number = this._duplex_cost + Number(this._oligo_malus * 100) / 100.0;
                     if (this._oligo_paired) {
-                        label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
-                        score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
+                        label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
+                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     } else {
-                        label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
-                        score_elems.push(" <FONT COLOR='#777777'>(" + malus.toFixed(2) + " kcal)</FONT>");
+                        label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
+                        score_elems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
                     }
                 }
                 if (this._oligos != null) {
                     factor++;
                     if (this._oligos_paired == 0) {
                         if (this._oligos.length > 1) {
-                            label_elems.push("<FONT COLOR='#777777'>No Oligo Bound</FONT>");
+                            label_elems.push(EnergyScoreDisplay.grey("No Oligo Bound"));
                         } else {
-                            label_elems.push("<FONT COLOR='#777777'>Oligo Not Bound</FONT>");
+                            label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
                         }
-                        score_elems.push(" <FONT COLOR='#777777'>(0 kcal)</FONT>");
+                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
                     } else {
                         let malus = this._duplex_cost;
                         for (let ii = 0; ii < this._oligos_paired; ii++) {
                             malus += Number(this._oligos[this._oligos_order[ii]].malus * 100) / 100.0;
                         }
                         if (this._oligos_paired > 1) {
-                            label_elems.push("<FONT COLOR='#33AA33'>Oligos Bound</FONT>");
+                            label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
                         } else {
-                            label_elems.push("<FONT COLOR='#33AA33'>Oligo Bound</FONT>");
+                            label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
                         }
-                        score_elems.push(" <FONT COLOR='#FF4747'>" + malus.toFixed(2) + " kcal</FONT>");
+                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     }
                 }
 
-                score_label += " <FONT COLOR='#777777'>(</FONT>" + label_elems.join(", ") + "<FONT COLOR='#777777'>)</FONT>";
+                score_label += EnergyScoreDisplay.grey(" (") + label_elems.join(", ") + EnergyScoreDisplay.grey(")");
                 score_score = (total_score / 100).toString() + score_elems.join("");
 
             } else {
