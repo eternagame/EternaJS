@@ -964,7 +964,7 @@ export class PoseEditMode extends GameMode {
         this._run_status.style.fill = 0xC0C0C0;
         this._run_status.text = "running...";
 
-        Application.instance.add_lock("LOCK_SCRIPT");
+        // Application.instance.add_lock("LOCK_SCRIPT");
 
         // register callbacks
         this.register_script_callbacks();
@@ -1698,10 +1698,15 @@ export class PoseEditMode extends GameMode {
 
     private submit_current_pose(): void {
         log.debug("TODO: submit_current_pose");
+        // const NOT_SATISFIED_PROMPT =
+        //     "Puzzle constraints are not satisfied.\n" +
+        //     "You can still submit the sequence, but please note that there is a risk of not getting\n" +
+        //     "synthesized properly";
+        //
         // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
         //     if (!this.check_constraints(false) && (!Application.instance.is_dev_mode())) {
         //         if (this._puzzle.is_soft_constraint()) {
-        //             Application.instance.setup_yesno("Puzzle constraints are not satisfied.\nYou can still submit the sequence, but please note that there is a risk of not getting\nsynthesized properly",
+        //             Application.instance.setup_yesno(NOT_SATISFIED_PROMPT,
         //                 () => {
         //                     /// Generate dot and melting plot data
         //                     this.update_current_block_with_dot_and_melting_plot();
