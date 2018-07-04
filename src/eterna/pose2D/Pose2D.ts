@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
+import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
@@ -57,6 +57,8 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     protected added() {
         super.added();
+
+        this.container.addChild(this._baseLayer);
 
         this._score_node_highlight = new Graphics();
         this.container.addChild(this._score_node_highlight);
@@ -3243,7 +3245,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private createBase(): Base {
         let base: Base = new Base(this, EPars.RNABASE_GUANINE);
-        this.addObject(base, this.container);
+        this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
     }
@@ -3263,6 +3265,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
         return (s1 == type1 && s2 == type2) || (s1 == type2 && s2 == type1);
     }
+
+    private readonly _baseLayer: Container = new Container();
 
     /// Array of sequence/pairs
     private _sequence: number[] = [];
