@@ -1413,19 +1413,19 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.set_molecular_binding(binding_bases, binding_pairs, this._molecular_binding_bonus);
     }
 
-    public get_molecular_binding_site(): any[] {
+    public get_molecular_binding_site(): boolean[] {
         if (this._binding_site) {
             return this._binding_site.slice();
         }
 
-        let temp: any[] = [];
+        let temp: boolean[] = [];
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
             temp.push(false);
         }
         return temp;
     }
 
-    public set_molecular_binding(binding_sites: any[], binding_pairs: any[], binding_bonus: number): void {
+    public set_molecular_binding(binding_sites: boolean[], binding_pairs: any[], binding_bonus: number): void {
         log.debug("TODO: set_molecular_binding");
         // if (binding_sites == null || binding_sites.length == 0) {
         //     this._molecular_binding_bases = null;
@@ -2268,12 +2268,12 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public base_shift(parenthesis: string, mode: number, index: number): void {
-        let sequence: any[] = this.get_sequence();
-        let locks: any[] = this.get_puzzle_locks();
-        let binding_site: any[] = this.get_molecular_binding_site();
-        let sequence_backup: any[] = this.get_sequence();
-        let locks_backup: any[] = this.get_puzzle_locks();
-        let binding_site_backup: any[] = this.get_molecular_binding_site();
+        let sequence: number[] = this.get_sequence();
+        let locks: boolean[] = this.get_puzzle_locks();
+        let binding_site: boolean[] = this.get_molecular_binding_site();
+        let sequence_backup: number[] = this.get_sequence();
+        let locks_backup: boolean[] = this.get_puzzle_locks();
+        let binding_site_backup: boolean[] = this.get_molecular_binding_site();
         let pindex: number;
 
         if (sequence.length > parenthesis.length) {
@@ -2290,9 +2290,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         // BASE SHIFTING MODIFIED HERE. Delete comments to apply the changes
         if (mode == 0) {
             // Add a base
-            let after_index: any[] = sequence.slice(index);
-            let after_lock_index: any[] = locks.slice(index);
-            let after_binding_site_index: any[] = binding_site.slice(index);
+            let after_index: number[] = sequence.slice(index);
+            let after_lock_index: boolean[] = locks.slice(index);
+            let after_binding_site_index: boolean[] = binding_site.slice(index);
 
             sequence[index] = EPars.RNABASE_ADENINE;
             locks[index] = false;
@@ -2430,7 +2430,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.done_coloring();
     }
 
-    public force_editable(b: boolean, edit_list: any[] = null): void {
+    public force_editable(b: boolean, edit_list: number[] = null): void {
         this._editable = b;
         this._editable_indices = edit_list;
     }
@@ -2458,7 +2458,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private compute_layout(fast: boolean = false): void {
-        let full_seq: any[] = this.get_full_sequence();
+        let full_seq: number[] = this.get_full_sequence();
 
         if (full_seq.length > this._bases.length) {
             log.debug(full_seq.length, this._bases.length);
@@ -2474,7 +2474,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let rna_drawer: RNALayout;
 
-        let exception_indices: any[] = null;
+        let exception_indices: number[] = null;
         if (full_seq.indexOf(EPars.RNABASE_CUT) >= 0) {
             exception_indices = [];
             exception_indices.push(0);
@@ -2613,7 +2613,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     this.set_molecular_binding_site(this._binding_site);
                     this._binding_site_updated = true;
                 } else {
-                    let binding_bases: any[] = EPars.is_internal(seqnum, this._pairs);
+                    let binding_bases: number[] = EPars.is_internal(seqnum, this._pairs);
                     if (binding_bases != null && binding_bases.length > 4) {
                         this._binding_site = [];
                         for (let ii = 0; ii < this._sequence.length; ii++) {
@@ -3272,7 +3272,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _locks: boolean[] = [];
     private _forced_struct: number[] = [];
     private _design_struct: boolean[] = [];
-    private _binding_site: any[];
+    private _binding_site: boolean[];
     private _molecular_binding_bases: any[] = null;
     private _molecular_binding_pairs: any[] = null;
     // private _molecule: Molecule = null;
@@ -3321,7 +3321,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Is this pose editable?
     private _editable: boolean;
-    private _editable_indices: any[] = null;
+    private _editable_indices: number[] = null;
 
     /// Pointer to callback function to be called after change in pose
     private _pose_edit_callback: Function = null;
