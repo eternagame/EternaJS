@@ -1,4 +1,4 @@
-﻿import {Point, Rectangle, Texture, Sprite} from "pixi.js";
+﻿import {Point, Sprite, Texture} from "pixi.js";
 import {BitmapManager} from "../resources/BitmapManager";
 import {BitmapUtil} from "../util/BitmapUtil";
 
@@ -16,29 +16,24 @@ export class BaseGlow extends Sprite {
         this._backward = backward;
     }
 
-    public bit_blit(zoom_level: number, x: number, y: number, current_time: number): void {
+    public updateView(zoom_level: number, x: number, y: number, current_time: number): void {
         if (this._animation_start_time < 0) {
             this._animation_start_time = current_time;
         }
 
         let diff: number = current_time - this._animation_start_time;
-        diff = diff - Math.floor(diff / (BaseGlow.ANIMATION_SPAN * 1000)) * (BaseGlow.ANIMATION_SPAN * 1000);
+        diff -= Math.floor(diff / BaseGlow.ANIMATION_SPAN) * BaseGlow.ANIMATION_SPAN;
 
-        let prog: number = diff / (BaseGlow.ANIMATION_SPAN * 1000);
+        let prog: number = diff / BaseGlow.ANIMATION_SPAN;
         let prog_ind: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
         if (this._backward) prog_ind = BaseGlow.NUM_ANIMATION_STEPS - 1 - prog_ind;
 
-        let body_data: Texture = null;
-        if (this._is_wrong) {
-            body_data = BaseGlow._bitmap_wrong_data[zoom_level][prog_ind];
-        } else {
-            body_data = BaseGlow._bitmap_data[zoom_level][prog_ind];
-        }
-        let base_rect: Rectangle = new Rectangle(0, 0, body_data.width, body_data.height);
-        let base_point: Point = new Point(x - body_data.width / 2, y - body_data.height / 2);
+        let body_data: Texture = this._is_wrong ?
+            BaseGlow._bitmap_wrong_data[zoom_level][prog_ind] :
+            BaseGlow._bitmap_data[zoom_level][prog_ind];
 
         this.texture = body_data;
-        this.position = base_point;
+        this.position = new Point(x - body_data.width / 2, y - body_data.height / 2);
     }
 
     private static initBitmapData(): void {

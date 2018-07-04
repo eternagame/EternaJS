@@ -296,6 +296,7 @@ export class BitmapManager {
             BitmapManager.POSE2D_URLS =
                 BitmapManager.urlsWithPrefix("assets/RNABase")
                 .concat(BitmapManager.urlsWithPrefix("assets/NOVA")
+                .concat(BitmapManager.urlsWithPrefix("assets/Aptamer"))
                 .concat([BitmapManager.ShapeImg]));
         }
         return BitmapManager.POSE2D_URLS;
