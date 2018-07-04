@@ -26,10 +26,12 @@ import {ROPWait} from "../rscript/ROPWait";
 import {TextBalloon} from "../ui/TextBalloon";
 import {Fonts} from "../util/Fonts";
 import {Utility} from "../util/Utility";
+import {BaseGlow} from "../vfx/BaseGlow";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
+import {Molecule} from "./Molecule";
 import {PoseUtil} from "./PoseUtil";
 import {RNAAnchorObject} from "./RNAAnchorObject";
 import {RNALayout} from "./RNALayout";
@@ -72,11 +74,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._secondary_score_energy_display.visible = false;
         this.container.addChild(this._secondary_score_energy_display);
 
-        // this._canvas = new Bitmap;
-        // this.addChild(this._canvas);
-        // this._mol_canvas = new Bitmap;
-        // this.addChild(this._mol_canvas);
-        // this._mol_canvas.visible = false;
+        this._moleculeLayer = new Container();
+        this.container.addChild(this._moleculeLayer);
+        this._moleculeLayer.visible = false;
         //
         // this._paint_cursor = new PaintCursor;
         // this._paint_cursor.display.visible = false;
@@ -373,7 +373,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (need_update || this._lock_updated || this._binding_site_updated || this._design_struct_updated) {
             this.check_pairs();
-            this.set_molecule();
+            this.updateMolecule();
             this.generate_score_nodes();
             this.call_pose_edit_callback();
         }
@@ -422,7 +422,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this.call_track_moves_callback(num_mut, muts);
 
             this.check_pairs();
-            this.set_molecule();
+            this.updateMolecule();
             this.generate_score_nodes();
             this.call_pose_edit_callback();
         }
@@ -1370,7 +1370,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         this.check_pairs();
-        this.set_molecule();
+        this.updateMolecule();
         this.generate_score_nodes();
     }
 
@@ -1427,54 +1427,73 @@ export class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public set_molecular_binding(binding_sites: boolean[], binding_pairs: any[], binding_bonus: number): void {
-        log.debug("TODO: set_molecular_binding");
-        // if (binding_sites == null || binding_sites.length == 0) {
-        //     this._molecular_binding_bases = null;
-        //     this._molecular_binding_pairs = null;
-        //     this._molecule = null;
-        //     return;
-        // }
-        //
-        // this._molecular_binding_bases = new Array(this._sequence.length);
-        // this._molecular_binding_pairs = new Array(this._sequence.length);
-        // this._molecular_binding_bonus = binding_bonus;
-        //
-        // this._molecule = new Molecule();
-        //
-        // for (let ii: number = 0; ii < binding_sites.length; ii++) {
-        //     this._molecular_binding_bases[binding_sites[ii]] = new BaseGlow();
-        //     this._molecular_binding_pairs[binding_sites[ii]] = binding_pairs[ii];
-        // }
-        //
-        // this.set_molecule();
+    public set_molecular_binding(binding_sites: number[], binding_pairs: any[], binding_bonus: number): void {
+        if (this._molecule != null) {
+            this._molecule.destroy({children: true});
+            this._molecule = null;
+        }
+
+        if (this._molecular_binding_bases != null) {
+            for (let glow of this._molecular_binding_bases) {
+                if (glow != null) {
+                    glow.destroy({children: true});
+                }
+            }
+            this._molecular_binding_bases = null;
+        }
+
+        this._molecular_binding_pairs = null;
+
+        if (binding_sites == null || binding_sites.length == 0) {
+            return;
+        }
+
+        this._molecular_binding_bases = new Array(this._sequence.length);
+        this._molecular_binding_pairs = new Array(this._sequence.length);
+        this._molecular_binding_bonus = binding_bonus;
+
+        this._molecule = new Molecule();
+        this._moleculeLayer.addChild(this._molecule);
+
+        for (let ii: number = 0; ii < binding_sites.length; ii++) {
+            let idx = binding_sites[ii];
+            let baseGlow = new BaseGlow();
+            this._moleculeLayer.addChild(baseGlow);
+
+            this._molecular_binding_bases[idx] = baseGlow;
+            this._molecular_binding_pairs[idx] = binding_pairs[ii];
+        }
+
+        this.updateMolecule();
     }
 
-    public set_molecule(): void {
-        log.debug("TODO: set_molecule");
-        // if (this._molecular_binding_bases == null || this._molecule == null)
-        //     return;
-        //
-        // let bound_render: boolean = true;
-        // let bound_real: boolean = true;
-        // let satisfied_pairs: any[] = this.get_satisfied_pairs();
-        //
-        // for (let ii: number = 0; ii < this._molecular_binding_pairs.length; ii++) {
-        //     if (this._molecular_binding_bases[ii] == null)
-        //         continue;
-        //     if (this._molecular_binding_pairs[ii] != this._pairs[ii])
-        //         bound_render = false;
-        //
-        //     if (this._molecular_binding_pairs[ii] != satisfied_pairs[ii]) {
-        //         bound_real = false;
-        //         this._molecular_binding_bases[ii].set_wrong(true);
-        //     } else {
-        //         this._molecular_binding_bases[ii].set_wrong(false);
-        //     }
-        // }
-        // this._molecule.set_wrong(!bound_real);
-        // this._molecule_is_bound = bound_render;
-        // this._molecule_is_bound_real = bound_real;
+    private updateMolecule(): void {
+        if (this._molecular_binding_bases == null || this._molecule == null) {
+            return;
+        }
+
+        let bound_render: boolean = true;
+        let bound_real: boolean = true;
+        let satisfied_pairs: number[] = this.get_satisfied_pairs();
+
+        for (let ii: number = 0; ii < this._molecular_binding_pairs.length; ii++) {
+            if (this._molecular_binding_bases[ii] == null) {
+                continue;
+            }
+            if (this._molecular_binding_pairs[ii] != this._pairs[ii]) {
+                bound_render = false;
+            }
+
+            if (this._molecular_binding_pairs[ii] != satisfied_pairs[ii]) {
+                bound_real = false;
+                this._molecular_binding_bases[ii].set_wrong(true);
+            } else {
+                this._molecular_binding_bases[ii].set_wrong(false);
+            }
+        }
+        this._molecule.set_wrong(!bound_real);
+        this._molecule_is_bound = bound_render;
+        this._molecule_is_bound_real = bound_real;
     }
 
     public set_oligos(oligos: any[], order: any[] = null, num_paired: number = 0): void {
@@ -1732,7 +1751,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         /// Recompute sequence layout
         this.compute_layout(false);
         this.check_pairs();
-        this.set_molecule();
+        this.updateMolecule();
         this.generate_score_nodes();
     }
 
@@ -1822,11 +1841,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     /*override*/
     public update(dt: number): void {
         let current_time: number = this.mode.time;
-        // for (let i: number = 0; i < this._anchored_objects.length; ++i) {
-        //     let anchor: RNAAnchorObject = this._anchored_objects[i];
-        //     let p: Point = this.get_base_xy(anchor.base);
-        //     anchor.object.set_pos(new UDim(0, 0, p.x + anchor.offset.x, p.y + anchor.offset.y));
-        // }
+        for (let anchor of this._anchored_objects) {
+            let p: Point = this.get_base_xy(anchor.base);
+            anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
+        }
 
         let full_seq: any[] = this.get_full_sequence();
         let center: Point;
@@ -1990,64 +2008,53 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // TODO: mol_canvas
-        // if (this._mol_canvas.visible) {
-        //     while (this._mol_dirty.length > 0) {
-        //         r = this._mol_dirty.pop();
-        //         this._mol_canvas_data.copyPixels(this._empty_canvas_data, r, r.topLeft, this._empty_canvas_data);
-        //     }
-        //     this._mol_dirty = [];
-        // }
-        // if (this._mol_canvas_data && this._molecular_binding_bases != null && this._molecule != null) {
-        //     let mol_x: number = 0;
-        //     let mol_y: number = 0;
-        //     let nbases: number = 0;
-        //     for (ii = 0; ii < full_seq.length; ii++) {
-        //         let baseglow: BaseGlow = this._molecular_binding_bases[ii];
-        //         if (baseglow != null) {
-        //             let pos: Point = this._bases[ii].get_last_drawn_pos();
-        //             this._mol_dirty.push(baseglow.bit_blit(this._zoom_level, this._mol_canvas_data, pos.x, pos.y, current_time));
-        //             mol_x += pos.x;
-        //             mol_y += pos.y;
-        //             nbases += 1;
-        //         }
-        //     }
-        //
-        //     if (nbases > 0) {
-        //         mol_x /= nbases;
-        //         mol_y /= nbases;
-        //     }
-        //
-        //     if (!this._molecule_is_bound) {
-        //         mol_x = 30;
-        //         mol_y = 200;
-        //     }
-        //
-        //     this._mol_dirty.push(this._molecule.bit_blit(this._zoom_level, this._mol_canvas_data, mol_x, mol_y, current_time));
-        //     this._mol_canvas.visible = true;
-        // }
+        this._moleculeLayer.visible = false;
+        if (this._molecular_binding_bases != null && this._molecule != null) {
+            let mol_x: number = 0;
+            let mol_y: number = 0;
+            let nbases: number = 0;
+            for (let ii = 0; ii < full_seq.length; ii++) {
+                let baseglow: BaseGlow = this._molecular_binding_bases[ii];
+                if (baseglow != null) {
+                    let pos: Point = this._bases[ii].get_last_drawn_pos();
+                    baseglow.updateView(this._zoom_level, pos.x, pos.y, current_time);
+                    mol_x += pos.x;
+                    mol_y += pos.y;
+                    nbases += 1;
+                }
+            }
+
+            if (nbases > 0) {
+                mol_x /= nbases;
+                mol_y /= nbases;
+            }
+
+            if (!this._molecule_is_bound) {
+                mol_x = 30;
+                mol_y = 200;
+            }
+
+            this._molecule.updateView(this._zoom_level, mol_x, mol_y, current_time);
+            this._moleculeLayer.visible = true;
+        }
+
+        // TODO: oligo bases
         // if (this._mol_canvas_data != null && full_seq.indexOf(EPars.RNABASE_CUT) >= 0) {
         //     if (this._oligo_bases == null) this._oligo_bases = new Array(full_seq.length);
         //     let bound_len: number = this.get_bound_sequence().length;
-        //     for (ii = full_seq.indexOf(EPars.RNABASE_CUT) + 1; ii < full_seq.length; ii++) {
-        //         baseglow = this._oligo_bases[ii];
+        //     for (let ii = full_seq.indexOf(EPars.RNABASE_CUT) + 1; ii < full_seq.length; ii++) {
+        //         let baseglow = this._oligo_bases[ii];
         //         if (baseglow == null) {
         //             baseglow = new BaseGlow();
         //             this._oligo_bases[ii] = baseglow;
         //         }
         //         if ((this._oligo_paired || (this._oligos_paired > 0 && ii < bound_len)) && this._pairs[ii] >= 0) {
         //             baseglow.set_wrong(this._restricted_highlight_box.is_in_queue(ii));
-        //             pos = this._bases[ii].get_last_drawn_pos();
-        //             this._mol_dirty.push(baseglow.bit_blit(this._zoom_level, this._mol_canvas_data, pos.x, pos.y, current_time));
-        //             this._mol_canvas.visible = true;
+        //             let pos = this._bases[ii].get_last_drawn_pos();
+        //             this._mol_dirty.push(baseglow.bit_blit(this._zoom_level, pos.x, pos.y, current_time));
+        //             this._moleculeLayer.visible = true;
         //         }
         //     }
-        // }
-        //
-        // if (this._mol_dirty.length == 0 && this._mol_canvas.visible) {
-        //     this._mol_canvas_data = new Texture(this._offscreen_width, this._offscreen_height, true, 0x0);
-        //     this._mol_canvas.Texture = this._mol_canvas_data;
-        //     this._mol_canvas.visible = false;
         // }
 
         let go_x: number = 0;
@@ -3277,9 +3284,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _forced_struct: number[] = [];
     private _design_struct: boolean[] = [];
     private _binding_site: boolean[];
-    private _molecular_binding_bases: any[] = null;
-    private _molecular_binding_pairs: any[] = null;
-    // private _molecule: Molecule = null;
+    private _molecular_binding_bases: BaseGlow[] = null;
+    private _molecular_binding_pairs: number[] = null;
+    private _molecule: Molecule = null;
     private _molecule_is_bound: boolean = false;
     private _molecule_is_bound_real: boolean = false;
     private _molecular_binding_bonus: number = 0;
@@ -3293,7 +3300,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _oligo_name: string = null;
     private _duplex_cost: number = EPars.DUPLEX_INIT; // total for all strands
     private _oligo_malus: number = 0; // concentration related penalty
-    private _oligo_bases: any[] = null; // for glows
+    private _oligo_bases: BaseGlow[] = null; // for glows
     private _oligo_paired: boolean = false;
 
     /// Multistrands
@@ -3303,13 +3310,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _oligos_paired: number = 0;
     private _strand_label: TextBalloon;
 
-    /// barcode
     private _barcodes: number[];
-
-    /// Canvas for bit blitting
-    // private _canvas: Bitmap;
-    // private _mol_canvas: Bitmap;
-    private _mol_dirty: any[] = [];
+    private _moleculeLayer: Container;
 
     /// Are we coloring?
     private _coloring: boolean = false;
