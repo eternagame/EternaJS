@@ -165,18 +165,22 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._secondary_score_energy_display;
     }
 
-    // public add_anchored_object(obj: RNAAnchorObject): void {
-    //     this._anchored_objects.push(obj);
-    // }
-    //
-    // public remove_anchored_object(obj: RNAAnchorObject): void {
-    //     for (let i: number = 0; i < this._anchored_objects.length; ++i) {
-    //         if (obj == this._anchored_objects[i]) {
-    //             this._anchored_objects.splice(i, 1);
-    //             break;
-    //         }
-    //     }
-    // }
+    public add_anchored_object(obj: RNAAnchorObject): void {
+        throw new Error("TODO: add_anchored_object");
+        // attach SceneObject to Pose2D?
+        this._anchored_objects.push(obj);
+    }
+
+    public remove_anchored_object(obj: RNAAnchorObject): void {
+        throw new Error("TODO: remove_anchored_object");
+        // detach SceneObject from Pose2D?
+        for (let ii: number = 0; ii < this._anchored_objects.length; ++ii) {
+            if (obj == this._anchored_objects[ii]) {
+                this._anchored_objects.splice(ii, 1);
+                break;
+            }
+        }
+    }
 
     public get isAnimating(): boolean {
         return this._base_to_x != null;
