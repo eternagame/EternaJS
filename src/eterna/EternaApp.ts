@@ -21,8 +21,9 @@ enum PuzzleID {
     FunAndEasy = 4350940,
     TryptophanASameState = 8787266,
     NandosZippers = 3562529,
-    TheRealXORChallenge = 6096060,  // multi-state
-    AAMismatchPilotRun = 3263276,   // locks, tails
+    TheRealXORChallenge = 6096060,          // multi-state
+    AAMismatchPilotRun = 3263276,           // locks, tails
+    TheophyllineRibozymeSwitch = 2390140,   // aux info
 }
 
 export class EternaApp extends FlashbangApp {
