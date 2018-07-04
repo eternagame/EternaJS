@@ -15,7 +15,7 @@ export class CopySequenceDialog extends Dialog<void> {
 
         let inputPanel = new TextInputPanel();
         inputPanel.set_title("Current sequence");
-        let sequenceField = inputPanel.add_field("Sequence", 200);
+        let sequenceField = inputPanel.add_field("Sequence", 200, true);
         sequenceField.text = this._sequence;
         sequenceField.readOnly = true;
         this.addObject(inputPanel, this.container);

@@ -74,12 +74,7 @@ export class TextInputPanel extends GamePanel {
             throw new Error("Add all fields before adding object to mode");
         }
 
-        let input = new TextInputObject(14, width);
-        if (multiline) {
-            throw new Error("TODO - TextArea support");
-            // field.height = 60;
-            // field.multiline = true;
-        }
+        let input = new TextInputObject(14, width, multiline ? 3 : 1);
         this.addObject(input, this.container);
 
         let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();

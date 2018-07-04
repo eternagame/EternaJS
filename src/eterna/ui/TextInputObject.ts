@@ -2,14 +2,12 @@ import {DOMObject} from "../../flashbang/objects/DOMObject";
 import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
 
-/**
- * A text input object in the DOM. Floats on top of the PIXI canvas.
- */
-export class TextInputObject extends DOMObject<HTMLInputElement> {
+/** A text input object in the DOM. Floats on top of the PIXI canvas. */
+export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
 
-    public constructor(fontSize: number, width: number = 100) {
-        super(Eterna.OVERLAY_DIV_ID, TextInputObject.createTextInput());
+    public constructor(fontSize: number, width: number = 100, rows: number = 1) {
+        super(Eterna.OVERLAY_DIV_ID, rows == 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
 
         this.width = width;
         this._dummyDisp.height = this._obj.getBoundingClientRect().height;
@@ -50,7 +48,16 @@ export class TextInputObject extends DOMObject<HTMLInputElement> {
         this._obj.value = value;
     }
 
-    protected static createTextInput(): HTMLInputElement {
+    private static createTextArea(rows: number): HTMLTextAreaElement {
+        let element = document.createElement("textarea");
+        element.rows = rows;
+        element.title = "";
+        element.style.resize = "none";
+        element.style.overflow = "scroll";
+        return element;
+    }
+
+    private static createTextInput(): HTMLInputElement {
         let element = document.createElement("input");
         element.type = "text";
         element.title = "";
