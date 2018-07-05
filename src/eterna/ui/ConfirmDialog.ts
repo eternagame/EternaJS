@@ -12,6 +12,22 @@ export class ConfirmDialog extends Dialog<boolean> {
         this._prompt = prompt;
     }
 
+    /**
+     * Returns a new Promise that will resolve if the dialog is confirmed, and fail otherwise.
+     * If the Dialog has already been closed, the Promise will never resolve.
+     */
+    public get promise(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.closed.connect((value) => {
+                if (value) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            });
+        });
+    }
+
     protected added() {
         super.added();
 
