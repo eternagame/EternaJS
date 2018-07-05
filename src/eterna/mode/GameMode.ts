@@ -9,7 +9,7 @@ import {Assert} from "../../flashbang/util/Assert";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
-import {Dialog} from "../ui/Dialog";
+import {NotificationDialog} from "../ui/NotificationDialog";
 
 export abstract class GameMode extends AppMode {
     protected setup(): void {
@@ -61,6 +61,10 @@ export abstract class GameMode extends AppMode {
 
     protected showConfirmDialog(prompt: string): ConfirmDialog {
         return this.showDialog(new ConfirmDialog(prompt));
+    }
+
+    protected showNotificationDialog(message: string): NotificationDialog {
+        return this.showDialog(new NotificationDialog(message));
     }
 
     protected showDialog<T extends SceneObject>(dialog: T): T {
