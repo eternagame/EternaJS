@@ -2,6 +2,7 @@ import * as log from "loglevel";
 import {Point, Text} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObject} from "../../../flashbang/core/GameObject";
+import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
 import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
@@ -14,11 +15,14 @@ import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
+import {GameClient} from "../../net/GameClient";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {ConstraintType, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
+import {PlayerRank} from "../../rank/PlayerRank";
 import {BitmapManager} from "../../resources/BitmapManager";
 import {Sounds} from "../../resources/Sounds";
 import {ActionBar} from "../../ui/ActionBar";
@@ -40,6 +44,9 @@ import {CopySequenceDialog} from "./CopySequenceDialog";
 import {PasteSequenceDialog} from "./PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {PuzzleEvent} from "./PuzzleEvent";
+import {SubmitPoseDetails} from "./SubmitPoseDetails";
+import {SubmitPoseDialog} from "./SubmitPoseDialog";
+import {SubmittingDialog} from "./SubmittingDialog";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -162,13 +169,6 @@ export class PoseEditMode extends GameMode {
         });
         this._docked_spec_box.addObject(x_button, this._docked_spec_box.container);
 
-        // this._submit_field = new InputField;
-        // this._submit_field.set_title("Submit your design");
-        // this._submit_field.add_field("Title", 200);
-        // this._submit_field.add_field("Comment", 200, true);
-        // this._submit_field.set_callbacks(this.on_submit, this.on_cancel_submit);
-        // this._submit_field.set_pos(new UDim(0.5, 0.5, -150, -100));
-
         this._ui_highlight = new SpriteObject();
         this.addObject(this._ui_highlight, this._uiLayer);
 
@@ -179,11 +179,6 @@ export class PoseEditMode extends GameMode {
         // this._mission_cleared = new MissionCleared();
         // this._mission_cleared.visible = false;
         // this.addObject(this._mission_cleared);
-
-        this._submitting_text = Fonts.arial("Submitting...", 20).bold().build();
-        this._submitting_text.position = new Point(
-            (Flashbang.stageWidth - this._submitting_text.width) * 0.5,
-            (Flashbang.stageHeight - this._submitting_text.height) * 0.5);
 
         this._constraint_boxes = [];
         this._constraints_container = new ContainerObject();
@@ -1689,358 +1684,308 @@ export class PoseEditMode extends GameMode {
 
     private update_current_block_with_dot_and_melting_plot(index: number = -1): void {
         let datablock: UndoBlock = this.get_current_undo_block(index);
-        if (this._folder.can_dot_plot() == false) {
-            return;
+        if (this._folder.can_dot_plot()) {
+            datablock.set_meltingpoint_and_dotplot(this._folder);
         }
-
-        datablock.set_meltingpoint_and_dotplot(this._folder);
     }
 
     private submit_current_pose(): void {
-        log.debug("TODO: submit_current_pose");
-        // const NOT_SATISFIED_PROMPT =
-        //     "Puzzle constraints are not satisfied.\n" +
-        //     "You can still submit the sequence, but please note that there is a risk of not getting\n" +
-        //     "synthesized properly";
+        if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+            this.done_playing(true);
+            /// Always submit the sequence in the first state
+            let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
+            this.submit_solution({title: "Cleared Solution", comment: "No comment"}, sol_to_submit);
+
+        } else {
+            const NOT_SATISFIED_PROMPT =
+                "Puzzle constraints are not satisfied.\n" +
+                "You can still submit the sequence, but please note that there is a risk of not getting\n" +
+                "synthesized properly";
+
+            if (!this.check_constraints(false) && (!Application.instance.is_dev_mode())) {
+                if (this._puzzle.is_soft_constraint()) {
+                    this.showConfirmDialog(NOT_SATISFIED_PROMPT).promise
+                        .then(() => this.promptForExperimentalPuzzleSubmission());
+
+                } else {
+                    this.showNotificationDialog("You didn't satisfy all requirements!");
+                }
+            } else {
+                this.promptForExperimentalPuzzleSubmission();
+            }
+        }
+    }
+
+    private promptForExperimentalPuzzleSubmission(): void {
+        /// Generate dot and melting plot data
+        this.update_current_block_with_dot_and_melting_plot();
+
+        /// Generate dot and melting plot data
+        let datablock: UndoBlock = this.get_current_undo_block();
+        if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
+            this.update_current_block_with_dot_and_melting_plot();
+        }
+
+        let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
+
+        let meltpoint: number = 107;
+        for (let ii: number = 47; ii < 100; ii += 10) {
+            let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
+            if (current_score < init_score * 0.5) {
+                meltpoint = ii;
+                break;
+            }
+        }
+
+        datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
+
+        this.showDialog(new SubmitPoseDialog()).promise.then((submitDetails) => {
+            /// Always submit the sequence in the first state
+            this.update_current_block_with_dot_and_melting_plot(0);
+            let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
+            this.submit_solution(submitDetails, sol_to_submit);
+        });
+    }
+
+    private submit_solution(details: SubmitPoseDetails, undoblock: UndoBlock): void {
+        log.debug("TODO: submit_solution");
+        // Application.instance.CompleteLevel();
+        //
+        // if (this._puzzle.get_node_id() < 0) {
+        //     return;
+        // }
+        //
+        // if (details.title.length == 0) {
+        //     details.title = "Default title";
+        // }
+        //
+        // if (details.comment.length == 0) {
+        //     details.comment = "No comment";
+        // }
+        //
+        // let post_data: any = {};
+        //
+        // if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+        //     let next_puzzle: number = this._puzzle.get_next_puzzle();
+        //
+        //     if (next_puzzle > 0)
+        //         post_data["next-puzzle"] = next_puzzle;
+        //     else
+        //         post_data["recommend-puzzle"] = true;
+        //
+        //     post_data["pointsrank"] = true;
+        // } else { // is experimental
+        //     if (this._ancestor_id > 0) {
+        //         post_data["ancestor-id"] = this._ancestor_id;
+        //     }
+        // }
+        //
+        // let elapsed: number = (new Date().getTime() - this._start_solving_time) / 1000.;
+        // let move_history: any = {
+        //     begin_from: this._starting_point,
+        //     num_moves: this._move_count,
+        //     moves: this._moves.slice(),
+        //     elapsed: elapsed.toFixed(0)
+        // };
+        // post_data["move-history"] = JSON.stringify(move_history);
+        //
+        // let newlinereg: RegExp = new RegExp("/\"/g");
+        // details.comment = details.comment.replace(newlinereg, "'");
+        // details.title = details.title.replace(newlinereg, "'");
+        //
+        // let seq_string: string = EPars.sequence_array_to_string(this._puzzle.transform_sequence(undoblock.get_sequence(), 0));
+        //
+        // post_data["title"] = details.title;
+        // post_data["energy"] = undoblock.get_param(UndoBlockParam.FE) / 100.0;
+        // post_data["puznid"] = this._puzzle.get_node_id();
+        // post_data["sequence"] = seq_string;
+        // post_data["repetition"] = undoblock.get_param(UndoBlockParam.REPETITION);
+        // post_data["gu"] = undoblock.get_param(UndoBlockParam.GU);
+        // post_data["gc"] = undoblock.get_param(UndoBlockParam.GC);
+        // post_data["ua"] = undoblock.get_param(UndoBlockParam.AU);
+        // post_data["body"] = details.comment;
         //
         // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-        //     if (!this.check_constraints(false) && (!Application.instance.is_dev_mode())) {
-        //         if (this._puzzle.is_soft_constraint()) {
-        //             Application.instance.setup_yesno(NOT_SATISFIED_PROMPT,
-        //                 () => {
-        //                     /// Generate dot and melting plot data
-        //                     this.update_current_block_with_dot_and_melting_plot();
+        //     post_data["melt"] = undoblock.get_param(UndoBlockParam.MELTING_POINT);
         //
-        //                     /// Generate dot and melting plot data
-        //                     let datablock: UndoBlock = this.get_current_undo_block();
-        //                     if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
-        //                         this.update_current_block_with_dot_and_melting_plot();
-        //                     }
+        //     if (this._fold_total_time >= 1000.0) {
+        //         let fd: any[] = [];
+        //         for (let ii: number = 0; ii < this._poses.length; ii++) {
+        //             fd.push(this.get_current_undo_block(ii).toJson());
+        //         }
+        //         post_data["fold-data"] = JSON.stringify(fd);
+        //     }
+        // }
         //
-        //                     let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
+        // let submittingRef: GameObjectRef = GameObjectRef.NULL;
+        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        //     submittingRef = this.showDialog(new SubmittingDialog()).ref;
+        // }
         //
-        //                     let meltpoint: number = 107;
-        //                     for (let ii: number = 47; ii < 100; ii += 10) {
-        //                         let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
-        //                         if (current_score < init_score * 0.5) {
-        //                             meltpoint = ii;
-        //                             break;
-        //                         }
-        //                     }
+        // Eterna.client.submit_solution(post_data).then((res) => {
+        //     let data: any = res['data'];
         //
-        //                     datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
-        //
-        //                     Application.instance.add_lock("LOCK_SUBMIT");
-        //                     Application.instance.get_modal_container().addObject(this._submit_field);
-        //                 }, () => {
-        //                 });
+        //     if (data['error'] != null) {
+        //         if (data['error'].indexOf('barcode') >= 0) {
+        //             Application.instance.setup_msg_box(data['error'], true, "<A HREF='/web/lab/manual/#barcode' TARGET='_blank'>More Information</A>", null);
+        //             let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+        //             if (hairpin != null) {
+        //                 SolutionManager.instance.add_hairpins([hairpin]);
+        //                 this.check_constraints();
+        //             }
         //         } else {
-        //             Application.instance.setup_msg_box("You didn't satisfy all requirements!");
+        //             this.showNotificationDialog(data['error']);
         //         }
         //         return;
         //     }
         //
-        //     /// Generate dot and melting plot data
-        //     this.update_current_block_with_dot_and_melting_plot();
-        //
-        //     /// Generate dot and melting plot data
-        //     let datablock: UndoBlock = this.get_current_undo_block();
-        //     if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
-        //         this.update_current_block_with_dot_and_melting_plot();
+        //     if (data['solution-id'] != null) {
+        //         this.set_ancestor_id(data['solution-id']);
         //     }
         //
-        //     let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
+        //     let after_achievements = () => {
+        //         if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        //             if (this._puzzle.get_use_barcode()) {
+        //                 let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+        //                 if (hairpin != null) {
+        //                     SolutionManager.instance.add_hairpins([hairpin]);
+        //                     this.check_constraints();
+        //                 }
+        //             }
         //
-        //     let meltpoint: number = 107;
-        //     for (let ii: number = 47; ii < 100; ii += 10) {
-        //         let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
-        //         if (current_score < init_score * 0.5) {
-        //             meltpoint = ii;
-        //             break;
+        //         } else {
+        //             let puzzledata: any = data['next-puzzle'];
+        //             let puzzle: Puzzle = null;
+        //             if (puzzledata) {
+        //                 puzzle = PuzzleManager.instance.parse_puzzle(puzzledata);
+        //             }
+        //
+        //             this.update_next_puzzle_widget(puzzle);
+        //             this.trigger_ending();
+        //
+        //             let pointsrank_before: any = data['pointsrank-before'];
+        //             let pointsrank_after: any = data['pointsrank-after'];
+        //
+        //             if (pointsrank_before && pointsrank_after) {
+        //                 let ranks: any[] = [];
+        //                 let rank_before: number = pointsrank_before['rank'];
+        //                 let rank_after: number = pointsrank_after['rank'];
+        //                 let points_before: number = pointsrank_before['points'];
+        //                 let points_after: number = pointsrank_after['points'];
+        //                 let richer_before: any[] = pointsrank_before['richer'];
+        //                 let poorer_before: any[] = pointsrank_before['poorer'];
+        //                 let richer_after: any[] = pointsrank_after['richer'];
+        //                 let poorer_after: any[] = pointsrank_after['poorer'];
+        //
+        //                 /// Don't even need to move
+        //                 if (points_before >= points_after || rank_before <= rank_after) {
+        //                     for (let ii = 0; ii < richer_after.length; ii++) {
+        //                         let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
+        //                         rank.rank = richer_after[ii]['rank'];
+        //                         ranks.push(rank);
+        //                     }
+        //
+        //                     for (let ii = 0; ii < poorer_after.length; ii++) {
+        //                         let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
+        //                         rank.rank = poorer_after[ii]['rank'];
+        //                         ranks.push(rank);
+        //                     }
+        //
+        //                     let playername = Application.instance.get_player_name();
+        //                     if (playername == null) {
+        //                         playername = "You";
+        //                     }
+        //
+        //                     let rank = new PlayerRank(playername, points_before);
+        //                     rank.rank = rank_after;
+        //
+        //                     this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
+        //
+        //                 } else {
+        //                     let last_after_entry_uid: number = -1;
+        //                     for (let ii = 0; ii < richer_after.length; ii++) {
+        //                         let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
+        //                         rank.rank = richer_after[ii]['rank'];
+        //                         ranks.push(rank);
+        //                         last_after_entry_uid = richer_after[ii]['uid'];
+        //                     }
+        //
+        //                     for (let ii = 0; ii < poorer_after.length; ii++) {
+        //                         let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
+        //                         rank.rank = poorer_after[ii]['rank'];
+        //                         ranks.push(rank);
+        //                         last_after_entry_uid = poorer_after[ii]['uid'];
+        //                     }
+        //
+        //                     let common_entry: boolean = false;
+        //                     let common_index: number = 0;
+        //                     for (let ii = 0; ii < richer_before.length; ii++) {
+        //                         if (richer_before[ii]['uid'] == last_after_entry_uid) {
+        //                             common_entry = true;
+        //                             common_index = ii;
+        //                             break;
+        //                         }
+        //                     }
+        //
+        //                     if (!common_entry) {
+        //                         for (let ii = 0; ii < poorer_before.length; ii++) {
+        //                             if (poorer_before[ii]['uid'] == last_after_entry_uid) {
+        //                                 common_entry = true;
+        //                                 common_index = -ii;
+        //                                 break;
+        //                             }
+        //                         }
+        //                     }
+        //
+        //                     if (!common_entry || common_index >= 0) {
+        //                         for (let ii = common_index; ii < richer_before.length; ii++) {
+        //                             let rank = new PlayerRank(richer_before[ii]['name'], richer_before[ii]['points']);
+        //                             rank.rank = richer_before[ii]['rank'];
+        //                             ranks.push(rank);
+        //                         }
+        //                     }
+        //
+        //                     if (!common_entry || common_index >= 0) {
+        //                         common_index = 0;
+        //                     }
+        //
+        //                     for (let ii = -common_index; ii < poorer_before.length; ii++) {
+        //                         let rank = new PlayerRank(poorer_before[ii]['name'], poorer_before[ii]['points']);
+        //                         rank.rank = poorer_before[ii]['rank'];
+        //                         ranks.push(rank);
+        //                     }
+        //
+        //                     let playername = Application.instance.get_player_name();
+        //                     if (playername == null) {
+        //                         playername = "You";
+        //                     }
+        //
+        //                     let rank = new PlayerRank(playername, points_before);
+        //                     rank.rank = rank_before;
+        //                     this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
+        //                 }
+        //             }
         //         }
+        //     };
+        //
+        //     /* for debugging purposes, please don't remove
+        // let achievements:Object = {
+    		// "Nucleotide Mixer": {
+    		// 	"past": "Earned a Nucleotide Mixer",
+    		// 	"image": "https://s3.amazonaws.com/eterna/badges/ten_tools_1.png",
+    		// 	"level": 1,
+    		// 	"desc": "Clear 10 puzzles!"
+    		// }
+        // };
+        // */
+        //     let cheevs: any = res['new_achievements'];
+        //     if (cheevs != null) {
+        //         AchievementManager.award_achievement(cheevs, after_achievements);
+        //     } else {
+        //         after_achievements();
         //     }
         //
-        //     datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
-        //
-        //     Application.instance.add_lock("LOCK_SUBMIT");
-        //     Application.instance.get_modal_container().addObject(this._submit_field);
-        //
-        // } else {
-        //     this.done_playing(true);
-        //     /// Always submit the sequence in the first state
-        //     let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
-        //
-        //     let dict: Map<any, any> = new Map();
-        //     dict["Title"] = "Cleared Solution";
-        //     dict["Comment"] = "No comment";
-        //     this.submit_solution(dict, sol_to_submit);
-        // }
-    }
-
-    private submit_solution(dict: Map<any, any>, undoblock: UndoBlock): void {
-        log.debug("TODO: submit_solution");
-    //     Eterna(Application.instance).CompleteLevel();
-    //
-    //     if (this._puzzle.get_node_id() < 0) {
-    //         return;
-    //     }
-    //
-    //     if (dict["Title"].length == 0) {
-    //         dict["Title"] = "Default title";
-    //     }
-    //
-    //     if (dict["Comment"].length == 0) {
-    //         dict["Comment"] = "No comment";
-    //     }
-    //
-    //     let post_data: Object = {};
-    //
-    //     if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
-    //         let next_puzzle: number = this._puzzle.get_next_puzzle();
-    //
-    //         if (next_puzzle > 0)
-    //             post_data["next-puzzle"] = next_puzzle;
-    //         else
-    //             post_data["recommend-puzzle"] = true;
-    //
-    //         post_data["pointsrank"] = true;
-    //     } else { // is experimental
-    //         if (this._ancestor_id > 0) {
-    //             post_data["ancestor-id"] = this._ancestor_id;
-    //         }
-    //     }
-    //
-    //     let elapsed: number = (new Date().getTime() - this._start_solving_time) / 1000.;
-    //     let move_history: Object = {
-    //         begin_from: this._starting_point,
-    //         num_moves: this._move_count,
-    //         moves: this._moves.slice(),
-    //         elapsed: elapsed.toFixed(0)
-    //     };
-    //     post_data["move-history"] = JSON.stringify(move_history);
-    //
-    //     let newlinereg: RegExp = new RegExp("/\"/g");
-    //     dict["Comment"] = dict["Comment"].replace(newlinereg, "'");
-    //     dict["Title"] = dict["Title"].replace(newlinereg, "'");
-    //
-    //     let seq_string: string = EPars.sequence_array_to_string(this._puzzle.transform_sequence(undoblock.get_sequence(), 0));
-    //
-    //     post_data["title"] = (dict["Title"]);
-    //     post_data["energy"] = (undoblock.get_param(UndoBlockParam.FE) / 100.0);
-    //     post_data["puznid"] = (this._puzzle.get_node_id());
-    //     post_data["sequence"] = (seq_string);
-    //     post_data["repetition"] = (undoblock.get_param(UndoBlockParam.REPETITION));
-    //     post_data["gu"] = (undoblock.get_param(UndoBlockParam.GU));
-    //     post_data["gc"] = (undoblock.get_param(UndoBlockParam.GC));
-    //     post_data["ua"] = (undoblock.get_param(UndoBlockParam.AU));
-    //     post_data["body"] = (dict["Comment"]);
-    //
-    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-    //         post_data["melt"] = (undoblock.get_param(UndoBlockParam.MELTING_POINT));
-    //
-    //         if (this._fold_total_time >= 1000.0) {
-    //             let fd: any[] = [];
-    //             for (let ii: number = 0; ii < this._poses.length; ii++) {
-    //                 fd.push(this.get_current_undo_block(ii).toJson());
-    //             }
-    //             post_data["fold-data"] = JSON.stringify(fd);
-    //         }
-    //     }
-    //
-    //     GameClient.instance.submit_solution(post_data, function (datastring: string): void {
-    //         let res: any = JSON.parse(datastring);
-    //         let data: any = res['data'];
-    //         this._submitting_text.set_animator(null);
-    //         Application.instance.get_modal_container().removeObject(this._submitting_text);
-    //
-    //         if (data['error'] != null) {
-    //             if (data['error'].indexOf('barcode') >= 0) {
-    //                 Application.instance.setup_msg_box(data['error'], true, "<A HREF='/web/lab/manual/#barcode' TARGET='_blank'>More Information</A>", null);
-    //                 let hairpin: string = EPars.get_barcode_hairpin(seq_string);
-    //                 if (hairpin != null) {
-    //                     SolutionManager.instance.add_hairpins([hairpin]);
-    //                     this.check_constraints();
-    //                 }
-    //             } else {
-    //                 Application.instance.setup_msg_box(data['error']);
-    //             }
-    //             Application.instance.remove_lock("LOCK_SUBMIT");
-    //             return;
-    //         }
-    //
-    //         if (data['solution-id'] != null) {
-    //             this.set_ancestor_id(data['solution-id']);
-    //         }
-    //
-    //         let after_achievements: Function = () => {
-    //             let ii: number;
-    //             let pl: PlayerRank;
-    //             let player: PlayerRank;
-    //             let playername: string;
-    //
-    //             if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-    //                 if (this._puzzle.get_use_barcode()) {
-    //                     let hairpin: string = EPars.get_barcode_hairpin(seq_string);
-    //                     if (hairpin != null) {
-    //                         SolutionManager.instance.add_hairpins([hairpin]);
-    //                         this.check_constraints();
-    //                     }
-    //                 }
-    //                 Application.instance.remove_lock("LOCK_SUBMIT");
-    //                 this._submitting_text.set_animator(null);
-    //             } else {
-    //                 let puzzledata: Object = data['next-puzzle'];
-    //                 let puzzle: Puzzle = null;
-    //                 if (puzzledata) {
-    //                     puzzle = PuzzleManager.instance.parse_puzzle(puzzledata);
-    //                 }
-    //
-    //                 this.update_next_puzzle_widget(puzzle);
-    //                 this.trigger_ending();
-    //
-    //                 let pointsrank_before: any = data['pointsrank-before'];
-    //                 let pointsrank_after: any = data['pointsrank-after'];
-    //
-    //                 if (pointsrank_before && pointsrank_after) {
-    //                     let ranks: any[] = [];
-    //                     let rank_before: number = pointsrank_before['rank'];
-    //                     let rank_after: number = pointsrank_after['rank'];
-    //                     let points_before: number = pointsrank_before['points'];
-    //                     let points_after: number = pointsrank_after['points'];
-    //                     let richer_before: any[] = pointsrank_before['richer'];
-    //                     let poorer_before: any[] = pointsrank_before['poorer'];
-    //                     let richer_after: any[] = pointsrank_after['richer'];
-    //                     let poorer_after: any[] = pointsrank_after['poorer'];
-    //
-    //                     /// Don't even need to move
-    //                     if (points_before >= points_after || rank_before <= rank_after) {
-    //
-    //                         for (ii = 0; ii < richer_after.length; ii++) {
-    //                             pl = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-    //                             pl.set_rank(richer_after[ii]['rank']);
-    //                             ranks.push(pl);
-    //                         }
-    //
-    //                         for (ii = 0; ii < poorer_after.length; ii++) {
-    //                             pl = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-    //                             pl.set_rank(poorer_after[ii]['rank']);
-    //                             ranks.push(pl);
-    //                         }
-    //
-    //                         playername = Application.instance.get_player_name();
-    //                         if (playername == null)
-    //                             playername = "You";
-    //
-    //                         player = new PlayerRank(playername, points_before);
-    //                         player.set_rank(rank_after);
-    //
-    //                         this._mission_cleared.create_rankscroll(ranks, player, points_after, rank_after);
-    //
-    //                     } else {
-    //                         let last_after_entry_uid: number = -1;
-    //                         for (ii = 0; ii < richer_after.length; ii++) {
-    //                             pl = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-    //                             pl.set_rank(richer_after[ii]['rank']);
-    //                             ranks.push(pl);
-    //                             last_after_entry_uid = richer_after[ii]['uid'];
-    //                         }
-    //
-    //                         for (ii = 0; ii < poorer_after.length; ii++) {
-    //                             pl = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-    //                             pl.set_rank(poorer_after[ii]['rank']);
-    //                             ranks.push(pl);
-    //                             last_after_entry_uid = poorer_after[ii]['uid'];
-    //                         }
-    //
-    //                         let common_entry: boolean = false;
-    //                         let common_index: number = 0;
-    //                         for (ii = 0; ii < richer_before.length; ii++) {
-    //                             if (richer_before[ii]['uid'] == last_after_entry_uid) {
-    //                                 common_entry = true;
-    //                                 common_index = ii;
-    //                                 break;
-    //                             }
-    //                         }
-    //
-    //                         if (!common_entry) {
-    //                             for (ii = 0; ii < poorer_before.length; ii++) {
-    //                                 if (poorer_before[ii]['uid'] == last_after_entry_uid) {
-    //                                     common_entry = true;
-    //                                     common_index = -ii;
-    //                                     break;
-    //                                 }
-    //                             }
-    //                         }
-    //
-    //                         if (!common_entry || common_index >= 0) {
-    //                             for (ii = common_index; ii < richer_before.length; ii++) {
-    //                                 pl = new PlayerRank(richer_before[ii]['name'], richer_before[ii]['points']);
-    //                                 pl.set_rank(richer_before[ii]['rank']);
-    //                                 ranks.push(pl);
-    //                             }
-    //                         }
-    //
-    //                         if (!common_entry || common_index >= 0) {
-    //                             common_index = 0;
-    //                         }
-    //
-    //                         for (ii = -common_index; ii < poorer_before.length; ii++) {
-    //                             pl = new PlayerRank(poorer_before[ii]['name'], poorer_before[ii]['points']);
-    //                             pl.set_rank(poorer_before[ii]['rank']);
-    //                             ranks.push(pl);
-    //                         }
-    //
-    //                         playername = Application.instance.get_player_name();
-    //                         if (playername == null)
-    //                             playername = "You";
-    //
-    //                         player = new PlayerRank(playername, points_before);
-    //                         player.set_rank(rank_before);
-    //                         this._mission_cleared.create_rankscroll(ranks, player, points_after, rank_after);
-    //                     }
-    //                 }
-    //             }
-    //         };
-    //
-    //         /* for debugging purposes, please don't remove
-    // 	let achievements:Object = {
-    // 		"Nucleotide Mixer": {
-    // 			"past": "Earned a Nucleotide Mixer",
-    // 			"image": "https://s3.amazonaws.com/eterna/badges/ten_tools_1.png",
-    // 			"level": 1,
-    // 			"desc": "Clear 10 puzzles!"
-    // 		}
-    // 	};
-    // 	*/
-    //         let cheevs: Object = res['new_achievements'];
-    //         if (cheevs != null) {
-    //             AchievementManager.award_achievement(cheevs, after_achievements);
-    //         } else {
-    //             after_achievements();
-    //         }
-    //
-    //     });
-    //
-    //     Application.instance.get_modal_container().removeObject(this._submit_field);
-    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-    //         this._submitting_text.set_animator(new GameAnimatorFader(1, 0, 0.3, false, true));
-    //         Application.instance.get_modal_container().addObject(this._submitting_text);
-    //     }
-    }
-
-    private on_submit(dict: Map<any, any>): void {
-        log.debug("TODO: on_submit");
-        // /// Always submit the sequence in the first state
-        // this.update_current_block_with_dot_and_melting_plot(0);
-        // let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
-        // Application.instance.get_modal_container().removeObject(this._submit_field);
-        // this.submit_solution(this._submit_field.get_dictionary(), sol_to_submit);
-    }
-
-    private on_cancel_submit(): void {
-        log.debug("TODO: on_cancel_submit");
-        // Application.instance.remove_lock("LOCK_SUBMIT");
-        // Application.instance.get_modal_container().removeObject(this._submit_field);
+        // });
     }
 
     private deselect_all_colorings(): void {
@@ -4434,8 +4379,7 @@ export class PoseEditMode extends GameMode {
     private _oligo_name: any[] = [];
     private _target_oligos: any[] = [];
     private _target_oligos_order: any[] = [];
-    /// Lab related
-    // private _submit_field: InputField;
+
     private _folder_button: GameButton;
     private _is_databrowser_mode: boolean;
     /// Modes
@@ -4464,8 +4408,6 @@ export class PoseEditMode extends GameMode {
     private _constraints_top: number = 0;
     private _constraints_bottom: number = 0;
     private _bubble_curtain: BubbleSweep;
-    /// Text indicating solution submission
-    private _submitting_text: Text;
     /// UI highlight box
     private _ui_highlight: SpriteObject;
     /// Game Stamp
