@@ -37,10 +37,10 @@ export class GameClient {
         return this.get(GameClient.GET_URI, {"type": "votes", "puznid": puznid, "round": round});
     }
 
-    public submit_solution(params: any): Promise<Response> {
+    public submit_solution(params: any): Promise<JSONData> {
         // TODO: split out these params!
         params["type"] = "post_solution";
-        return this.post(GameClient.POST_URI, params);
+        return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
     public submit_puzzle(params: any): Promise<Response> {
