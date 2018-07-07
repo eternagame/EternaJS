@@ -1,13 +1,13 @@
 import {Container, DisplayObject, Matrix} from "pixi.js";
+import {Flashbang} from "../core/Flashbang";
 import {GameObject} from "../core/GameObject";
-import {LateUpdatable} from "../core/LateUpdatable";
 import {MatrixUtil} from "../util/MatrixUtil";
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
  * Contains a "dummy" Container DisplayObject that mirrors the element's transform.
  */
-export abstract class DOMObject<T extends HTMLElement> extends GameObject implements LateUpdatable {
+export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     protected constructor(domParentID: string, obj: T) {
         super();
 
@@ -25,21 +25,21 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject implem
         super.added();
         this._domParent.appendChild(this._obj);
 
-        this.updateElementProperties();
+        // Update the HTML element's transform during the PIXI postrender event -
+        // this is the point where the dummy display object's transform will be up to date.
+        Flashbang.pixi.renderer.addListener("postrender", this.updateElementProperties, this);
     }
 
     protected dispose(): void {
         this._domParent.removeChild(this._obj);
-        super.dispose();
-    }
+        Flashbang.pixi.renderer.removeListener("postrender", this.updateElementProperties, this);
 
-    public lateUpdate(dt: number): void {
-        this.updateElementProperties();
+        super.dispose();
     }
 
     protected updateElementProperties(): void {
         let m = this.display.worldTransform;
-        if (this._lastTransform == null || !MatrixUtil.equals(this._lastTransform, m)) {
+        if (!MatrixUtil.equals(this._lastTransform, m)) {
             this._obj.style.transform = `matrix(${m.a}, ${m.b}, ${m.c}, ${m.d}, ${m.tx}, ${m.ty})`;
             m.copy(this._lastTransform);
         }
@@ -62,5 +62,5 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject implem
     protected readonly _domParent: HTMLElement;
     protected readonly _obj: T;
 
-    private _lastTransform: Matrix = new Matrix();
+    private readonly _lastTransform: Matrix = new Matrix();
 }
