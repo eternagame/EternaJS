@@ -1,6 +1,8 @@
 ﻿import {Utility} from "../util/Utility";
 
 export class EternaURL {
+    public static readonly BARCODE_HELP: string = "/web/lab/manual/#barcode";
+
     public static generate_url(params: any): string {
         if (params == null) {
             params = {};

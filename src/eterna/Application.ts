@@ -20,12 +20,7 @@ export class Application {
         }
         Application._instance = this;
 
-        this._is_dev_mode = false;
-
         this._url_base = "";
-
-        this._player_name = "Anonymous";
-        this._player_id = 0;
 
         if (minimal) {
             return;
@@ -43,22 +38,6 @@ export class Application {
 
     public get_url_base(): string {
         return this._url_base;
-    }
-
-    public set_dev_mode(devmode: boolean): void {
-        this._is_dev_mode = devmode;
-    }
-
-    public is_dev_mode(): boolean {
-        return this._is_dev_mode;
-    }
-
-    public get_player_name(): string {
-        return this._player_name;
-    }
-
-    public get_player_id(): number {
-        return this._player_id;
     }
 
     // public get_mouse_over_container(): GameObject {
@@ -226,11 +205,6 @@ export class Application {
     public NotifyClickUI(key: string): void {
     }
 
-    protected set_player(namestr: string, uid: number): void {
-        this._player_name = namestr;
-        this._player_id = uid;
-    }
-
     protected configure_debug_mode(): void {
     }
 
@@ -260,8 +234,6 @@ export class Application {
         // this._mouse_up_cb = null;
     }
 
-    protected _player_name: string;
-    protected _player_id: number;
     protected _player_points: number;
     protected _player_rank: number;
     protected _pointsrank_url: string;
@@ -271,7 +243,6 @@ export class Application {
     private _mouse_move_cb: Function;
 
     private _is_debug_mode: boolean;
-    private _is_dev_mode: boolean;
     /// Temporary variables for debugging
     private _ui_count: number;
 
