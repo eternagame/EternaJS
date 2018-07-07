@@ -1,5 +1,6 @@
 import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
+import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {Dialog} from "./Dialog";
@@ -7,10 +8,14 @@ import {GameButton} from "./GameButton";
 import {TextBalloon} from "./TextBalloon";
 
 export class NotificationDialog extends Dialog<void> {
-    public constructor(message: string, okButtonTitle: string = "Ok") {
+    /** Non-null if extraButtonTitle is specified */
+    public extraButton: GameButton;
+
+    public constructor(message: string, okButtonTitle: string = "Ok", extraButtonTitle?: string) {
         super();
         this._message = message;
         this._okButtonTitle = okButtonTitle;
+        this._extraButtonTitle = extraButtonTitle;
     }
 
     /**
@@ -37,15 +42,27 @@ export class NotificationDialog extends Dialog<void> {
         box.display.alpha = 0;
         box.addObject(new AlphaTask(1, 0.3, Easing.easeIn));
 
-        let okButton = new GameButton().label(this._okButtonTitle, 14);
-        okButton.display.position = new Point(
-            (box.balloon_width() - okButton.container.width) * 0.5 - 10,
-            (box.balloon_height() - 33));
-        box.addObject(okButton, box.container);
+        let buttonLayout: HLayoutContainer = new HLayoutContainer(2);
 
+        let okButton = new GameButton().label(this._okButtonTitle, 14);
+        box.addObject(okButton, buttonLayout);
         okButton.clicked.connect(() => this.close(null));
+
+        if (this._extraButtonTitle != null) {
+            this.extraButton = new GameButton().label(this._extraButtonTitle, 14);
+            box.addObject(this.extraButton, buttonLayout);
+
+        }
+
+        buttonLayout.layout();
+        buttonLayout.position = new Point(
+            (box.balloon_width() - buttonLayout.width) * 0.5,
+            (box.balloon_height() - buttonLayout.height - 10));
+
+        box.container.addChild(buttonLayout);
     }
 
     private readonly _message: string;
     private readonly _okButtonTitle: string;
+    private readonly _extraButtonTitle: string;
 }

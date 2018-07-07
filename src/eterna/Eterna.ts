@@ -10,11 +10,18 @@ export class Eterna {
 
     public static settings: EternaSettings;
 
-    public static player_id: number = 1;
+    public static player_id: number = 0;
+    public static player_name: string = "Anonymous";
     public static is_dev_mode: boolean = true;
+    public static is_debug_mode: boolean = false;
 
     public static client: GameClient;
     public static sound: SoundManager;
+
+    public static set_player(player_name: string, uid: number): void {
+        this.player_name = player_name;
+        this.player_id = uid;
+    }
 
     public static onFatalError(err: any): void {
         let errstring = ErrorUtil.getErrString(err);

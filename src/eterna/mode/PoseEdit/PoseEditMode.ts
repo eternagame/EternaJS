@@ -9,12 +9,14 @@ import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {Assert} from "../../../flashbang/util/Assert";
+import {AchievementManager} from "../../achievements/AchievementManager";
 import {Application} from "../../Application";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
+import {EternaURL} from "../../net/EternaURL";
 import {GameClient} from "../../net/GameClient";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
@@ -1130,7 +1132,7 @@ export class PoseEditMode extends GameMode {
 
     /*override*/
     protected on_set_pip(pip_mode: boolean): void {
-        AutosaveManager.saveObjects([pip_mode], "PIP-pref-" + Application.instance.get_player_id());
+        AutosaveManager.saveObjects([pip_mode], "PIP-pref-" + Eterna.player_id);
 
         if (pip_mode) {
             this._toolbar.puzzleStateToggle.display.visible = false;
@@ -1702,8 +1704,8 @@ export class PoseEditMode extends GameMode {
                 "You can still submit the sequence, but please note that there is a risk of not getting\n" +
                 "synthesized properly";
 
-            if (!this.check_constraints(false) && (!Application.instance.is_dev_mode())) {
-                if (this._puzzle.is_soft_constraint()) {
+            if (!this.check_constraints(false)) {
+                if (this._puzzle.is_soft_constraint() || Eterna.is_dev_mode) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).promise
                         .then(() => this.promptForExperimentalPuzzleSubmission());
 
@@ -1748,244 +1750,230 @@ export class PoseEditMode extends GameMode {
     }
 
     private submit_solution(details: SubmitPoseDetails, undoblock: UndoBlock): void {
-        log.debug("TODO: submit_solution");
-        // Application.instance.CompleteLevel();
-        //
-        // if (this._puzzle.get_node_id() < 0) {
-        //     return;
-        // }
-        //
-        // if (details.title.length == 0) {
-        //     details.title = "Default title";
-        // }
-        //
-        // if (details.comment.length == 0) {
-        //     details.comment = "No comment";
-        // }
-        //
-        // let post_data: any = {};
-        //
-        // if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
-        //     let next_puzzle: number = this._puzzle.get_next_puzzle();
-        //
-        //     if (next_puzzle > 0)
-        //         post_data["next-puzzle"] = next_puzzle;
-        //     else
-        //         post_data["recommend-puzzle"] = true;
-        //
-        //     post_data["pointsrank"] = true;
-        // } else { // is experimental
-        //     if (this._ancestor_id > 0) {
-        //         post_data["ancestor-id"] = this._ancestor_id;
-        //     }
-        // }
-        //
-        // let elapsed: number = (new Date().getTime() - this._start_solving_time) / 1000.;
-        // let move_history: any = {
-        //     begin_from: this._starting_point,
-        //     num_moves: this._move_count,
-        //     moves: this._moves.slice(),
-        //     elapsed: elapsed.toFixed(0)
-        // };
-        // post_data["move-history"] = JSON.stringify(move_history);
-        //
-        // let newlinereg: RegExp = new RegExp("/\"/g");
-        // details.comment = details.comment.replace(newlinereg, "'");
-        // details.title = details.title.replace(newlinereg, "'");
-        //
-        // let seq_string: string = EPars.sequence_array_to_string(this._puzzle.transform_sequence(undoblock.get_sequence(), 0));
-        //
-        // post_data["title"] = details.title;
-        // post_data["energy"] = undoblock.get_param(UndoBlockParam.FE) / 100.0;
-        // post_data["puznid"] = this._puzzle.get_node_id();
-        // post_data["sequence"] = seq_string;
-        // post_data["repetition"] = undoblock.get_param(UndoBlockParam.REPETITION);
-        // post_data["gu"] = undoblock.get_param(UndoBlockParam.GU);
-        // post_data["gc"] = undoblock.get_param(UndoBlockParam.GC);
-        // post_data["ua"] = undoblock.get_param(UndoBlockParam.AU);
-        // post_data["body"] = details.comment;
-        //
-        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-        //     post_data["melt"] = undoblock.get_param(UndoBlockParam.MELTING_POINT);
-        //
-        //     if (this._fold_total_time >= 1000.0) {
-        //         let fd: any[] = [];
-        //         for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //             fd.push(this.get_current_undo_block(ii).toJson());
-        //         }
-        //         post_data["fold-data"] = JSON.stringify(fd);
-        //     }
-        // }
-        //
-        // let submittingRef: GameObjectRef = GameObjectRef.NULL;
-        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-        //     submittingRef = this.showDialog(new SubmittingDialog()).ref;
-        // }
-        //
-        // Eterna.client.submit_solution(post_data).then((res) => {
-        //     let data: any = res['data'];
-        //
-        //     if (data['error'] != null) {
-        //         if (data['error'].indexOf('barcode') >= 0) {
-        //             Application.instance.setup_msg_box(data['error'], true, "<A HREF='/web/lab/manual/#barcode' TARGET='_blank'>More Information</A>", null);
-        //             let hairpin: string = EPars.get_barcode_hairpin(seq_string);
-        //             if (hairpin != null) {
-        //                 SolutionManager.instance.add_hairpins([hairpin]);
-        //                 this.check_constraints();
-        //             }
-        //         } else {
-        //             this.showNotificationDialog(data['error']);
-        //         }
-        //         return;
-        //     }
-        //
-        //     if (data['solution-id'] != null) {
-        //         this.set_ancestor_id(data['solution-id']);
-        //     }
-        //
-        //     let after_achievements = () => {
-        //         if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-        //             if (this._puzzle.get_use_barcode()) {
-        //                 let hairpin: string = EPars.get_barcode_hairpin(seq_string);
-        //                 if (hairpin != null) {
-        //                     SolutionManager.instance.add_hairpins([hairpin]);
-        //                     this.check_constraints();
-        //                 }
-        //             }
-        //
-        //         } else {
-        //             let puzzledata: any = data['next-puzzle'];
-        //             let puzzle: Puzzle = null;
-        //             if (puzzledata) {
-        //                 puzzle = PuzzleManager.instance.parse_puzzle(puzzledata);
-        //             }
-        //
-        //             this.update_next_puzzle_widget(puzzle);
-        //             this.trigger_ending();
-        //
-        //             let pointsrank_before: any = data['pointsrank-before'];
-        //             let pointsrank_after: any = data['pointsrank-after'];
-        //
-        //             if (pointsrank_before && pointsrank_after) {
-        //                 let ranks: any[] = [];
-        //                 let rank_before: number = pointsrank_before['rank'];
-        //                 let rank_after: number = pointsrank_after['rank'];
-        //                 let points_before: number = pointsrank_before['points'];
-        //                 let points_after: number = pointsrank_after['points'];
-        //                 let richer_before: any[] = pointsrank_before['richer'];
-        //                 let poorer_before: any[] = pointsrank_before['poorer'];
-        //                 let richer_after: any[] = pointsrank_after['richer'];
-        //                 let poorer_after: any[] = pointsrank_after['poorer'];
-        //
-        //                 /// Don't even need to move
-        //                 if (points_before >= points_after || rank_before <= rank_after) {
-        //                     for (let ii = 0; ii < richer_after.length; ii++) {
-        //                         let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-        //                         rank.rank = richer_after[ii]['rank'];
-        //                         ranks.push(rank);
-        //                     }
-        //
-        //                     for (let ii = 0; ii < poorer_after.length; ii++) {
-        //                         let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-        //                         rank.rank = poorer_after[ii]['rank'];
-        //                         ranks.push(rank);
-        //                     }
-        //
-        //                     let playername = Application.instance.get_player_name();
-        //                     if (playername == null) {
-        //                         playername = "You";
-        //                     }
-        //
-        //                     let rank = new PlayerRank(playername, points_before);
-        //                     rank.rank = rank_after;
-        //
-        //                     this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
-        //
-        //                 } else {
-        //                     let last_after_entry_uid: number = -1;
-        //                     for (let ii = 0; ii < richer_after.length; ii++) {
-        //                         let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
-        //                         rank.rank = richer_after[ii]['rank'];
-        //                         ranks.push(rank);
-        //                         last_after_entry_uid = richer_after[ii]['uid'];
-        //                     }
-        //
-        //                     for (let ii = 0; ii < poorer_after.length; ii++) {
-        //                         let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
-        //                         rank.rank = poorer_after[ii]['rank'];
-        //                         ranks.push(rank);
-        //                         last_after_entry_uid = poorer_after[ii]['uid'];
-        //                     }
-        //
-        //                     let common_entry: boolean = false;
-        //                     let common_index: number = 0;
-        //                     for (let ii = 0; ii < richer_before.length; ii++) {
-        //                         if (richer_before[ii]['uid'] == last_after_entry_uid) {
-        //                             common_entry = true;
-        //                             common_index = ii;
-        //                             break;
-        //                         }
-        //                     }
-        //
-        //                     if (!common_entry) {
-        //                         for (let ii = 0; ii < poorer_before.length; ii++) {
-        //                             if (poorer_before[ii]['uid'] == last_after_entry_uid) {
-        //                                 common_entry = true;
-        //                                 common_index = -ii;
-        //                                 break;
-        //                             }
-        //                         }
-        //                     }
-        //
-        //                     if (!common_entry || common_index >= 0) {
-        //                         for (let ii = common_index; ii < richer_before.length; ii++) {
-        //                             let rank = new PlayerRank(richer_before[ii]['name'], richer_before[ii]['points']);
-        //                             rank.rank = richer_before[ii]['rank'];
-        //                             ranks.push(rank);
-        //                         }
-        //                     }
-        //
-        //                     if (!common_entry || common_index >= 0) {
-        //                         common_index = 0;
-        //                     }
-        //
-        //                     for (let ii = -common_index; ii < poorer_before.length; ii++) {
-        //                         let rank = new PlayerRank(poorer_before[ii]['name'], poorer_before[ii]['points']);
-        //                         rank.rank = poorer_before[ii]['rank'];
-        //                         ranks.push(rank);
-        //                     }
-        //
-        //                     let playername = Application.instance.get_player_name();
-        //                     if (playername == null) {
-        //                         playername = "You";
-        //                     }
-        //
-        //                     let rank = new PlayerRank(playername, points_before);
-        //                     rank.rank = rank_before;
-        //                     this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
-        //                 }
-        //             }
-        //         }
-        //     };
-        //
-        //     /* for debugging purposes, please don't remove
-        // let achievements:Object = {
-    		// "Nucleotide Mixer": {
-    		// 	"past": "Earned a Nucleotide Mixer",
-    		// 	"image": "https://s3.amazonaws.com/eterna/badges/ten_tools_1.png",
-    		// 	"level": 1,
-    		// 	"desc": "Clear 10 puzzles!"
-    		// }
-        // };
-        // */
-        //     let cheevs: any = res['new_achievements'];
-        //     if (cheevs != null) {
-        //         AchievementManager.award_achievement(cheevs, after_achievements);
-        //     } else {
-        //         after_achievements();
-        //     }
-        //
-        // });
+        Application.instance.CompleteLevel();
+
+        if (this._puzzle.get_node_id() < 0) {
+            return;
+        }
+
+        if (details.title.length == 0) {
+            details.title = "Default title";
+        }
+
+        if (details.comment.length == 0) {
+            details.comment = "No comment";
+        }
+
+        let post_data: any = {};
+
+        if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+            let next_puzzle: number = this._puzzle.get_next_puzzle();
+
+            if (next_puzzle > 0) {
+                post_data["next-puzzle"] = next_puzzle;
+            } else {
+                post_data["recommend-puzzle"] = true;
+            }
+
+            post_data["pointsrank"] = true;
+        } else { // is experimental
+            if (this._ancestor_id > 0) {
+                post_data["ancestor-id"] = this._ancestor_id;
+            }
+        }
+
+        let elapsed: number = (new Date().getTime() - this._start_solving_time) / 1000.;
+        let move_history: any = {
+            begin_from: this._starting_point,
+            num_moves: this._move_count,
+            moves: this._moves.slice(),
+            elapsed: elapsed.toFixed(0)
+        };
+        post_data["move-history"] = JSON.stringify(move_history);
+
+        let newlinereg: RegExp = new RegExp("/\"/g");
+        details.comment = details.comment.replace(newlinereg, "'");
+        details.title = details.title.replace(newlinereg, "'");
+
+        let seq_string: string = EPars.sequence_array_to_string(this._puzzle.transform_sequence(undoblock.get_sequence(), 0));
+
+        post_data["title"] = details.title;
+        post_data["energy"] = undoblock.get_param(UndoBlockParam.FE) / 100.0;
+        post_data["puznid"] = this._puzzle.get_node_id();
+        post_data["sequence"] = seq_string;
+        post_data["repetition"] = undoblock.get_param(UndoBlockParam.REPETITION);
+        post_data["gu"] = undoblock.get_param(UndoBlockParam.GU);
+        post_data["gc"] = undoblock.get_param(UndoBlockParam.GC);
+        post_data["ua"] = undoblock.get_param(UndoBlockParam.AU);
+        post_data["body"] = details.comment;
+
+        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            post_data["melt"] = undoblock.get_param(UndoBlockParam.MELTING_POINT);
+
+            if (this._fold_total_time >= 1000.0) {
+                let fd: any[] = [];
+                for (let ii: number = 0; ii < this._poses.length; ii++) {
+                    fd.push(this.get_current_undo_block(ii).toJson());
+                }
+                post_data["fold-data"] = JSON.stringify(fd);
+            }
+        }
+
+        let submittingRef: GameObjectRef = GameObjectRef.NULL;
+        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            submittingRef = this.showDialog(new SubmittingDialog()).ref;
+        }
+
+        Eterna.client.submit_solution(post_data).then((res) => {
+            submittingRef.destroyObject();
+
+            let data: any = res['data'];
+
+            if (data['error'] != null) {
+                if (data['error'].indexOf('barcode') >= 0) {
+                    let dialog = this.showNotificationDialog(data['error'], "More Information");
+                    dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
+                    let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+                    if (hairpin != null) {
+                        SolutionManager.instance.add_hairpins([hairpin]);
+                        this.check_constraints();
+                    }
+                } else {
+                    this.showNotificationDialog(data['error']);
+                }
+
+            } else {
+                if (data['solution-id'] != null) {
+                    this.set_ancestor_id(data['solution-id']);
+                }
+
+                let cheevs: any = res['new_achievements'];
+                if (cheevs != null) {
+                    AchievementManager.award_achievement(cheevs).then(() => this.after_achievements(data, seq_string));
+                } else {
+                    this.after_achievements(data, seq_string);
+                }
+            }
+        });
+    }
+
+    private after_achievements(data: any, seq_string: string): void {
+        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            if (this._puzzle.get_use_barcode()) {
+                let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+                if (hairpin != null) {
+                    SolutionManager.instance.add_hairpins([hairpin]);
+                    this.check_constraints();
+                }
+            }
+
+        } else {
+            let puzzledata: any = data['next-puzzle'];
+            let puzzle: Puzzle = null;
+            if (puzzledata) {
+                puzzle = PuzzleManager.instance.parse_puzzle(puzzledata);
+            }
+
+            this.update_next_puzzle_widget(puzzle);
+            this.trigger_ending();
+
+            let pointsrank_before: any = data['pointsrank-before'];
+            let pointsrank_after: any = data['pointsrank-after'];
+
+            if (pointsrank_before && pointsrank_after) {
+                let ranks: any[] = [];
+                let rank_before: number = pointsrank_before['rank'];
+                let rank_after: number = pointsrank_after['rank'];
+                let points_before: number = pointsrank_before['points'];
+                let points_after: number = pointsrank_after['points'];
+                let richer_before: any[] = pointsrank_before['richer'];
+                let poorer_before: any[] = pointsrank_before['poorer'];
+                let richer_after: any[] = pointsrank_after['richer'];
+                let poorer_after: any[] = pointsrank_after['poorer'];
+
+                /// Don't even need to move
+                if (points_before >= points_after || rank_before <= rank_after) {
+                    for (let ii = 0; ii < richer_after.length; ii++) {
+                        let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
+                        rank.rank = richer_after[ii]['rank'];
+                        ranks.push(rank);
+                    }
+
+                    for (let ii = 0; ii < poorer_after.length; ii++) {
+                        let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
+                        rank.rank = poorer_after[ii]['rank'];
+                        ranks.push(rank);
+                    }
+
+                    let playername = Eterna.player_name || "You";
+                    let rank = new PlayerRank(playername, points_before);
+                    rank.rank = rank_after;
+
+                    log.debug("TODO: create_rankscroll");
+                    // this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
+
+                } else {
+                    let last_after_entry_uid: number = -1;
+                    for (let ii = 0; ii < richer_after.length; ii++) {
+                        let rank = new PlayerRank(richer_after[ii]['name'], richer_after[ii]['points']);
+                        rank.rank = richer_after[ii]['rank'];
+                        ranks.push(rank);
+                        last_after_entry_uid = richer_after[ii]['uid'];
+                    }
+
+                    for (let ii = 0; ii < poorer_after.length; ii++) {
+                        let rank = new PlayerRank(poorer_after[ii]['name'], poorer_after[ii]['points']);
+                        rank.rank = poorer_after[ii]['rank'];
+                        ranks.push(rank);
+                        last_after_entry_uid = poorer_after[ii]['uid'];
+                    }
+
+                    let common_entry: boolean = false;
+                    let common_index: number = 0;
+                    for (let ii = 0; ii < richer_before.length; ii++) {
+                        if (richer_before[ii]['uid'] == last_after_entry_uid) {
+                            common_entry = true;
+                            common_index = ii;
+                            break;
+                        }
+                    }
+
+                    if (!common_entry) {
+                        for (let ii = 0; ii < poorer_before.length; ii++) {
+                            if (poorer_before[ii]['uid'] == last_after_entry_uid) {
+                                common_entry = true;
+                                common_index = -ii;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!common_entry || common_index >= 0) {
+                        for (let ii = common_index; ii < richer_before.length; ii++) {
+                            let rank = new PlayerRank(richer_before[ii]['name'], richer_before[ii]['points']);
+                            rank.rank = richer_before[ii]['rank'];
+                            ranks.push(rank);
+                        }
+                    }
+
+                    if (!common_entry || common_index >= 0) {
+                        common_index = 0;
+                    }
+
+                    for (let ii = -common_index; ii < poorer_before.length; ii++) {
+                        let rank = new PlayerRank(poorer_before[ii]['name'], poorer_before[ii]['points']);
+                        rank.rank = poorer_before[ii]['rank'];
+                        ranks.push(rank);
+                    }
+
+                    let playername = Eterna.player_name || "You";
+                    let rank = new PlayerRank(playername, points_before);
+                    rank.rank = rank_before;
+                    log.debug("TODO: create_rankscroll");
+                    // this._mission_cleared.create_rankscroll(ranks, rank, points_after, rank_after);
+                }
+            }
+        }
     }
 
     private deselect_all_colorings(): void {
@@ -2176,7 +2164,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private reset_autosave_data(): void {
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
         AutosaveManager.saveObjects(null, token);
     }
 
@@ -2189,7 +2177,7 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
         let objs: any[] = [];
         let msecs: number = 0;
 
@@ -2204,7 +2192,7 @@ export class PoseEditMode extends GameMode {
 
     private transfer_to_puzzlemaker(): void {
         log.debug("TODO: transfer_to_puzzlemaker");
-        // let cookie: string = "puzedit_" + this._poses.length + "_" + Application.instance.get_player_id();
+        // let cookie: string = "puzedit_" + this._poses.length + "_" + Eterna.player_id;
         // let objs: any[] = [];
         // for (let ii: number = 0; ii < this._poses.length; ++ii) {
         //     let obj: any = {};
@@ -2241,7 +2229,7 @@ export class PoseEditMode extends GameMode {
                 oligo_len += (oligos[ii]['sequence'].length + 1);
             }
         }
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Application.instance.get_player_id();
+        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
 
         if (beginning_sequence.length != locks.length || (beginning_sequence.length + oligo_len) != this._target_pairs[0].length) {
             return false;
@@ -2412,7 +2400,7 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        let pref: any[] = AutosaveManager.loadObjects("PIP-pref-" + Application.instance.get_player_id());
+        let pref: any[] = AutosaveManager.loadObjects("PIP-pref-" + Eterna.player_id);
         if (pref == null) {
             this.set_pip(false);
         } else {

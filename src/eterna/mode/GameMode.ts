@@ -63,8 +63,8 @@ export abstract class GameMode extends AppMode {
         return this.showDialog(new ConfirmDialog(prompt));
     }
 
-    protected showNotificationDialog(message: string): NotificationDialog {
-        return this.showDialog(new NotificationDialog(message));
+    protected showNotificationDialog(message: string, extraButtonTitle?: string): NotificationDialog {
+        return this.showDialog(new NotificationDialog(message, "Ok", extraButtonTitle));
     }
 
     protected showDialog<T extends SceneObject>(dialog: T): T {
