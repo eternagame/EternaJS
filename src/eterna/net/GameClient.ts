@@ -126,8 +126,8 @@ export class GameClient {
         let form: FormData = new FormData();
 
         if (params) {
-            // POST requests put their params in the body
-            Object.keys(params).forEach(key => form.append(key, JSON.stringify(params[key])));
+            // POST requests pass params via FormData, in the body
+            Object.keys(params).forEach(key => form.append(key, params[key]));
         }
 
         return fetch(url.toString(), {
