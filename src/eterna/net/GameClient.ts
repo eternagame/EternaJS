@@ -18,7 +18,7 @@ export class GameClient {
         return this.post("/eterna_login.php", {"name": name, "pass": password, "type": "login"});
     }
 
-    public logout(on_done: Function): Promise<Response> {
+    public logout(): Promise<Response> {
         return this.get("/eterna_logout.php", {"noredirect": true});
     }
 
