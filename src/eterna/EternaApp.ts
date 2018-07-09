@@ -78,9 +78,17 @@ export class EternaApp extends FlashbangApp {
     }
 
     private maybeDoDebugLogin(): Promise<void> {
+        if (!Eterna.is_debug_mode) {
+            return Promise.resolve();
+        }
+
         let playerID = process.env['DEBUG_PLAYER_ID'];
         if (playerID.length == 0) {
-            return Promise.resolve();
+            return Eterna.client.logout()
+                .then(() => {})
+                .catch(err => {
+                    log.debug(`Logout error: ${err}`);
+                })
         }
 
         let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
