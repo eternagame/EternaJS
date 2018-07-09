@@ -10,8 +10,9 @@ export class GameClient {
 
     /// ACCOUNT
 
-    public authenticate(): Promise<Response> {
-        return this.get("/eterna_authenticate.php");
+    /** Authenticates the logged-in player. */
+    public authenticate(): Promise<JSONData> {
+        return this.get("/eterna_authenticate.php").then(rsp => rsp.json());
     }
 
     /** Logs the player in. Resolves with the player's UID if successful. */
@@ -29,12 +30,13 @@ export class GameClient {
             });
     }
 
-    public logout(): Promise<Response> {
-        return this.get("/eterna_logout.php", {"noredirect": true});
+    public logout(): Promise<void> {
+        return this.get("/eterna_logout.php", {"noredirect": true})
+            .then(rsp => rsp.text()).then(() => {});
     }
 
-    public get_banned_list(): Promise<Response> {
-        return this.get("/banned.list");
+    public get_banned_list(): Promise<JSONData> {
+        return this.get("/banned.list").then(rsp => rsp.json());
     }
 
     /// PUZZLES
@@ -44,8 +46,9 @@ export class GameClient {
             .then((rsp: Response) => rsp.json());
     }
 
-    public get_puzzle_votes(puznid: number, round: number): Promise<Response> {
-        return this.get(GameClient.GET_URI, {"type": "votes", "puznid": puznid, "round": round});
+    public get_puzzle_votes(puznid: number, round: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {"type": "votes", "puznid": puznid, "round": round})
+            .then(rsp => rsp.json());
     }
 
     public submit_solution(params: any): Promise<JSONData> {
@@ -54,10 +57,10 @@ export class GameClient {
         return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
-    public submit_puzzle(params: any): Promise<Response> {
+    public submit_puzzle(params: any): Promise<JSONData> {
         // TODO: split out these params!
         params["type"] = "puzzle";
-        return this.post(GameClient.POST_URI, params);
+        return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
     public get_solutions(puznid: number): Promise<JSONData> {
@@ -70,19 +73,22 @@ export class GameClient {
             .then(rsp => rsp.json());
     }
 
-    public get_solution_comments(solution_nid: number): Promise<Response> {
-        return this.get(GameClient.GET_URI, {"nid": solution_nid, "type": "comments"});
+    public get_solution_comments(solution_nid: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {"nid": solution_nid, "type": "comments"})
+            .then(rsp => rsp.json());
     }
 
-    public submit_solution_comment(solution_nid: number, body: string): Promise<Response> {
-        return this.post(GameClient.POST_URI, {"type": "post_comment", "nid": solution_nid, "body": body});
+    public submit_solution_comment(solution_nid: number, body: string): Promise<JSONData> {
+        return this.post(GameClient.POST_URI, {"type": "post_comment", "nid": solution_nid, "body": body})
+            .then(rsp => rsp.json());
     }
 
-    public delete_solution(solution_nid: number): Promise<Response> {
-        return this.post(GameClient.POST_URI, {'type': "delete_solution", "nid": solution_nid});
+    public delete_solution(solution_nid: number): Promise<JSONData> {
+        return this.post(GameClient.POST_URI, {'type': "delete_solution", "nid": solution_nid})
+            .then(rsp => rsp.json());
     }
 
-    public toggle_solution_vote(solution_nid: number, puznid: number, myVotes: number): Promise<Response> {
+    public toggle_solution_vote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
         let post_params: any = {'solnid': solution_nid, "puznid": puznid};
         if (myVotes == 1) {
             post_params['type'] = "unvote";
@@ -92,7 +98,7 @@ export class GameClient {
             throw new Error("Wrong vote value - can't submit");
         }
 
-        return this.post(GameClient.POST_URI, post_params);
+        return this.post(GameClient.POST_URI, post_params).then(rsp => rsp.json());
     }
 
     public update_solution_fold_data(solution_nid: number, fold_data: any): Promise<string> {
@@ -106,7 +112,7 @@ export class GameClient {
 
     /// OTHER
 
-    public post_screenshot(imgBytes: any): Promise<Response> {
+    public post_screenshot(imgBytes: any): Promise<JSONData> {
         throw new Error("TODO");
         // let imageString: string = Base64.encodeByteArray(imgBytes);
         // return this.post(GameClient.POST_URI, {"data": imageString, "type": "screenshot"});
