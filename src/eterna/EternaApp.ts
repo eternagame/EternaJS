@@ -43,7 +43,7 @@ export class EternaApp extends FlashbangApp {
 
     /*override*/
     protected setup(): void {
-        Eterna.settings = new EternaSettings(Eterna.player_id);
+        Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
         Eterna.sound = new SoundManager(Eterna.settings);
 
