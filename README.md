@@ -16,13 +16,9 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 
 ## Building and running
 
-* If running locally, you'll need to proxy requests to the eternagame.org server, to add CORS headers:
-    - Install `devd` (https://github.com/cortesi/devd)
-    - `$ bin/cors-proxy`
-    - `cors-proxy` is a local server that just proxies requests to eterngame.org and adds CORS headers to the responses
+* When running locally, run your local web server at http://localhost:63342 or http://localhost:63343 - the eterna server currently allows CORS requests from these two localhost addresses.
 * Create a .env file:
-    - `$ cp .env.example .env`
-    - If you're using `cors-proxy`, you'll want to set APP_SERVER_URL to "http://localhost:9001" (or whatever port you run cors-proxy on - it defaults to 9001).
+    - `$ cp .env.example .env` and fill in the values
 * Compile:
     - `$ npm run build:dev` or
     - `$ npm run build:prod`
