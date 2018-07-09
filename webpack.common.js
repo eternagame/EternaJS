@@ -67,7 +67,8 @@ module.exports = {
         // Access .env values
         // https://github.com/mrsteele/dotenv-webpack
         new Dotenv({
-            safe: true, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
+            // TODO: set safe=true when "allowEmptyValues" support is added: https://github.com/mrsteele/dotenv-webpack/pull/134
+            safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
             systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
         })
     ]

@@ -55,6 +55,7 @@ export class EternaApp extends FlashbangApp {
         }
 
         Fonts.loadFonts()
+            .then(() => this.maybeDoDebugLogin())
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
@@ -74,6 +75,20 @@ export class EternaApp extends FlashbangApp {
 
     protected onUncaughtError(err: any): void {
         Eterna.onFatalError(err);
+    }
+
+    private maybeDoDebugLogin(): Promise<void> {
+        let playerID = process.env['DEBUG_PLAYER_ID'];
+        if (playerID.length == 0) {
+            return Promise.resolve();
+        }
+
+        let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+        log.debug(`Logging in ${playerID}...`);
+        return Eterna.client.login(playerID, playerPassword).then((uid) => {
+            log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
+            Eterna.set_player(playerID, uid);
+        });
     }
 
     private initFoldingEngines(): Promise<void> {

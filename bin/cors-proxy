@@ -14,6 +14,10 @@ if [ -z "$PORT" ]; then
     PORT=9001
 fi
 
-devd --port="$PORT" --crossdomain           \
-    /get/=https://www.eternagame.org/get/    \
-    /post/=https://www.eternagame.org/post/
+devd --port="$PORT" --crossdomain               \
+    /get/=https://www.eternagame.org/get/       \
+    /post/=https://www.eternagame.org/post/     \
+    /eterna_authenticate.php=https://www.eternagame.org/eterna_authenticate.php     \
+    /login/=https://www.eternagame.org/login/     \
+    /eterna_logout.php=https://www.eternagame.org/eterna_logout.php     \
+    /banned.list=https://www.eternagame.org/banned.list
