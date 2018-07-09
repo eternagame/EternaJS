@@ -128,6 +128,7 @@ export class GameClient {
 
         return fetch(url.toString(), {
             headers: new Headers({'Content-Type': 'text/plain'}),
+            credentials: "include"
         }).then((rsp) => {
             if (!rsp.ok) {
                 throw new Error("HTTP status code: " + rsp.status);
@@ -151,6 +152,7 @@ export class GameClient {
             method: "POST",
             body: postParams.toString(),
             headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
+            credentials: "include"
         }).then((rsp) => {
             if (!rsp.ok) {
                 throw new Error("HTTP status code: " + rsp.status);
