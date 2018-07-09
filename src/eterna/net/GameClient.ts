@@ -14,8 +14,19 @@ export class GameClient {
         return this.get("/eterna_authenticate.php");
     }
 
-    public login(name: string, password: string): Promise<Response> {
-        return this.post("/eterna_login.php", {"name": name, "pass": password, "type": "login"});
+    /** Logs the player in. Resolves with the player's UID if successful. */
+    public login(name: string, password: string): Promise<number> {
+        return this.post("/login/", {"name": name, "pass": password, "type": "login"})
+            .then(rsp => rsp.json())
+            .then(json => {
+                if (json["error"] != null) {
+                    throw new Error(`Failed to log in as ${name}: ${json["error"]}`);
+                } else if (json["data"] == null || json["data"]["uid"] == null) {
+                    throw new Error(`Failed to log in (bad response data)`);
+                }
+
+                return Number(json["data"]["uid"]);
+            });
     }
 
     public logout(): Promise<Response> {
