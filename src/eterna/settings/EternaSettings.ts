@@ -17,8 +17,8 @@ export class EternaSettings extends AbstractSettings {
     public readonly soundVolume: Setting<number>;
 
     // TODO: recreate settings when playerID changes?
-    public constructor(playerID: number) {
-        super(`EternaSettings-${playerID}`);
+    public constructor() {
+        super(`EternaSettings`);
 
         this.showNumbers = this.setting("showNumbers", true);
         this.showLetters = this.setting("showLetters", false);
