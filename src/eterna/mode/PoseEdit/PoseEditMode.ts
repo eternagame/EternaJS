@@ -17,10 +17,10 @@ import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
 import {EternaURL} from "../../net/EternaURL";
-import {GameClient} from "../../net/GameClient";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
-import {ConstraintType, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {Constraints, ConstraintType} from "../../puzzle/Constraints";
+import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
@@ -1704,7 +1704,7 @@ export class PoseEditMode extends GameMode {
                 "You can still submit the sequence, but please note that there is a risk of not getting\n" +
                 "synthesized properly";
 
-            if (!this.check_constraints(false)) {
+            if (!this.checkConstraints(false)) {
                 if (this._puzzle.is_soft_constraint() || Eterna.is_dev_mode) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).promise
                         .then(() => this.promptForExperimentalPuzzleSubmission());
@@ -1836,7 +1836,7 @@ export class PoseEditMode extends GameMode {
                     let hairpin: string = EPars.get_barcode_hairpin(seq_string);
                     if (hairpin != null) {
                         SolutionManager.instance.add_hairpins([hairpin]);
-                        this.check_constraints();
+                        this.checkConstraints();
                     }
                 } else {
                     this.showNotificationDialog(data['error']);
@@ -1863,7 +1863,7 @@ export class PoseEditMode extends GameMode {
                 let hairpin: string = EPars.get_barcode_hairpin(seq_string);
                 if (hairpin != null) {
                     SolutionManager.instance.add_hairpins([hairpin]);
-                    this.check_constraints();
+                    this.checkConstraints();
                 }
             }
 
@@ -2756,155 +2756,548 @@ export class PoseEditMode extends GameMode {
         // }
     }
 
-    private check_constraints(render: boolean = true): boolean {
-        let check_res: boolean = true;
-        let old_check_res: boolean = true;
-        let undo_block: UndoBlock = this.get_current_undo_block();
-        let constraints: string[] = this._puzzle.get_constraints();
+    private check1Constraint(type: ConstraintType, value: string, ii: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
+        let isSatisfied: boolean = true;
 
-        let play_condition_music: boolean = false;
-        let play_decondition_music: boolean = false;
+        const undo_block: UndoBlock = this.get_current_undo_block();
+        const sequence = undo_block.get_sequence();
 
-        let restricted_global: number[];
-        let restricted_local: number[][];
-        let restricted_guanine: number[];
-        let restricted_cytosine: number[];
-        let restricted_adenine: number[];
-        let max_allowed_guanine: number = -1;
-        let max_allowed_cytosine: number = -1;
-        let max_allowed_adenine: number = -1;
+        if (type == ConstraintType.GU) {
+            const count: number = undo_block.get_param(UndoBlockParam.GU);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.GU, value, isSatisfied, count);
+            }
+        } else if (type == ConstraintType.AU) {
+            const count: number = undo_block.get_param(UndoBlockParam.AU);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.AU, value, isSatisfied, count)
+            }
+        } else if (type == ConstraintType.GC) {
+            const count: number = undo_block.get_param(UndoBlockParam.GC);
+            isSatisfied = (count <= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.GC, value, isSatisfied, count);
+            }
+        } else if (type == ConstraintType.MUTATION) {
+            const sequence_diff: number = EPars.sequence_diff(this._puzzle.get_subsequence_without_barcode(sequence), this._puzzle.get_subsequence_without_barcode(this._puzzle.get_beginning_sequence()));
+            isSatisfied = sequence_diff <= Number(value);
+            if (render) {
+                box.set_content(ConstraintType.MUTATION, value, isSatisfied, sequence_diff);
+            }
 
-        let wrong_pairs: any[] = null;
+        } else if (type == ConstraintType.SHAPE) {
+            const target_index = Number(value);
+            const ublk: UndoBlock = this.get_current_undo_block(target_index);
+            let native_pairs = ublk.get_pairs();
+            let structure_constraints: any[] = null;
+            if (this._target_conditions != null && this._target_conditions[target_index] != null) {
+                structure_constraints = this._target_conditions[target_index]['structure_constraints'];
 
-        if (this._puzzle.get_temporary_constraints() != null) {
-            constraints = this._puzzle.get_temporary_constraints();
+                if (ublk.get_oligo_order() != null) {
+                    let np_map: number[] = ublk.get_order_map(ublk.get_oligo_order());
+                    let tp_map: number[] = ublk.get_order_map(ublk.get_target_oligo_order());
+                    if (np_map != null) {
+                        let new_pairs: number[] = [];
+                        let new_sc: number[] = [];
+                        for (let jj = 0; jj < native_pairs.length; jj++) {
+                            let kk: number = tp_map.indexOf(jj);
+                            new_sc[jj] = structure_constraints[kk];
+                            let pp: number = native_pairs[np_map[kk]];
+                            new_pairs[jj] = pp < 0 ? pp : tp_map[np_map.indexOf(pp)];
+                        }
+                        native_pairs = new_pairs;
+                        structure_constraints = new_sc;
+                    }
+                }
+            }
+
+            isSatisfied = EPars.are_pairs_same(native_pairs, this._target_pairs[target_index], structure_constraints);
+
+            let input_index = 0;
+            if (this._target_pairs.length > 1) {
+                input_index = target_index;
+            }
+
+            if (render) {
+                box.set_content(ConstraintType.SHAPE, {
+                    target: this._target_pairs[target_index],
+                    index: input_index,
+                    native: native_pairs,
+                    structure_constraints: structure_constraints
+                }, isSatisfied, 0);
+                box.set_flagged(this._unstable_index == ii);
+                // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                //     set_callback(this, box, ii);
+                // }
+
+                if (this._unstable_index == ii) {
+                    outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, this._target_pairs[target_index], structure_constraints, isSatisfied);
+                }
+            }
+
+            if (target_index > 0) {
+                if (this._constraint_shape_boxes != null) {
+                    if (this._constraint_shape_boxes[target_index] != null) {
+                        this._constraint_shape_boxes[target_index].set_content(ConstraintType.SHAPE, {
+                            target: this._target_pairs[target_index],
+                            index: input_index,
+                            native: native_pairs,
+                            structure_constraints: structure_constraints
+                        }, isSatisfied, 0);
+                        this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                        // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                        //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
+                        // }
+
+                        this._constraint_shape_boxes[target_index].display.visible = this._is_pip_mode;
+                    }
+                }
+            }
+
+        } else if (type == ConstraintType.ANTISHAPE) {
+            let target_index = Number(value);
+            let native_pairs = this.get_current_undo_block(target_index).get_pairs();
+            if (this._target_conditions == null) {
+                throw new Error("Target object not available for ANTISHAPE constraint");
+            }
+
+            if (this._target_conditions[target_index] == null) {
+                throw new Error("Target condition not available for ANTISHAPE constraint");
+            }
+
+            let anti_structure_string: string = this._target_conditions[target_index]['anti_secstruct'];
+
+            if (anti_structure_string == null) {
+                throw new Error("Target structure not available for ANTISHAPE constraint");
+            }
+
+            let anti_structure_constraints: any[] = this._target_conditions[target_index]['anti_structure_constraints'];
+            let anti_pairs: any[] = EPars.parenthesis_to_pair_array(anti_structure_string);
+            isSatisfied = !EPars.are_pairs_same(native_pairs, anti_pairs, anti_structure_constraints);
+
+            let input_index = 0;
+            if (this._target_pairs.length > 1) {
+                input_index = target_index;
+            }
+
+            if (render) {
+                box.set_content(ConstraintType.ANTISHAPE, {
+                    target: anti_pairs,
+                    native: native_pairs,
+                    index: input_index,
+                    structure_constraints: anti_structure_constraints
+                }, isSatisfied, 0);
+                box.set_flagged(this._unstable_index == ii);
+                // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                //     set_callback(this, box, ii);
+                // }
+
+                if (this._unstable_index == ii) {
+                    outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, isSatisfied);
+                }
+            }
+
+            if (target_index > 0) {
+                if (this._constraint_antishape_boxes != null) {
+                    if (this._constraint_antishape_boxes[target_index] != null) {
+                        this._constraint_antishape_boxes[target_index].set_content(ConstraintType.ANTISHAPE, {
+                            target: anti_pairs,
+                            native: native_pairs,
+                            index: input_index,
+                            structure_constraints: anti_structure_constraints
+                        }, isSatisfied, 0);
+                        this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                        // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
+                        //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
+                        // }
+
+                        this._constraint_antishape_boxes[target_index].display.visible = this._is_pip_mode;
+                    }
+                }
+            }
+
+        } else if (type == ConstraintType.BINDINGS) {
+            const target_index = Number(value);
+            const undoblk: UndoBlock = this.get_current_undo_block(target_index);
+
+            if (this._target_conditions == null) {
+                throw new Error("Target object not available for BINDINGS constraint");
+            }
+
+            if (this._target_conditions[target_index] == null) {
+                throw new Error("Target condition not available for BINDINGS constraint");
+            }
+
+            const oligos: any[] = this._target_conditions[target_index]['oligos'];
+            if (oligos == null) {
+                throw new Error("Target condition not available for BINDINGS constraint");
+            }
+
+            let o_names: string[] = [];
+            let bind: boolean[] = [];
+            let label: string[] = [];
+            let bmap: boolean[] = [];
+            let offsets: any[] = [];
+            let ofs: number = sequence.length;
+            let o: number[] = undoblk.get_oligo_order();
+            let count: number = undoblk.get_oligos_paired();
+            for (let jj = 0; jj < o.length; jj++) {
+                bmap[o[jj]] = (jj < count);
+                offsets[o[jj]] = ofs + 1;
+                ofs += oligos[o[jj]]['sequence'].length + 1;
+            }
+
+            isSatisfied = true;
+            for (let jj = 0; jj < oligos.length; jj++) {
+                if (oligos[jj]['bind'] == null) continue;
+                let o_name: string = oligos[jj]['name'];
+                if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+                o_names.push(o_name);
+                let expected: boolean = Boolean(oligos[jj]['bind']);
+                bind.push(expected);
+                let lbl: string = oligos[jj]['label'] != null ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
+                label.push(lbl);
+
+                if (bmap[jj] != expected) {
+                    isSatisfied = false;
+                    if (outInfo.restricted_local == null) {
+                        outInfo.restricted_local = [];
+                    }
+                    if (outInfo.restricted_local[target_index] == null) {
+                        outInfo.restricted_local[target_index] = [];
+                    }
+                    outInfo.restricted_local[target_index].push(offsets[jj]);
+                    outInfo.restricted_local[target_index].push(offsets[jj] + oligos[jj]['sequence'].length - 1);
+                }
+            }
+
+            if (render) {
+                box.set_content(ConstraintType.BINDINGS, {
+                    index: target_index,
+                    bind: bind,
+                    label: label,
+                    oligo_name: o_names
+                }, isSatisfied, 0);
+            }
+
+        } else if (type == ConstraintType.G) {
+            const count: number = Constraints.count(sequence, EPars.RNABASE_GUANINE);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.G, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.GMAX) {
+            const count = Constraints.count(sequence, EPars.RNABASE_GUANINE);
+            isSatisfied = (count <= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.GMAX, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.A) {
+            const count: number = Constraints.count(sequence, EPars.RNABASE_ADENINE);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.A, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.AMAX) {
+            const count = Constraints.count(sequence, EPars.RNABASE_ADENINE);
+            isSatisfied = (count <= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.AMAX, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.U) {
+            const count: number = Constraints.count(sequence, EPars.RNABASE_URACIL);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.U, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.UMAX) {
+            const count = Constraints.count(sequence, EPars.RNABASE_URACIL);
+            isSatisfied = (count <= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.UMAX, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.C) {
+            const count: number = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
+            isSatisfied = (count >= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.C, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.CMAX) {
+            const count = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
+            isSatisfied = (count <= Number(value));
+            if (render) {
+                box.set_content(ConstraintType.CMAX, value, isSatisfied, count);
+            }
+
+        } else if (type == ConstraintType.PAIRS) {
+            let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
+            let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
+            let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
+            isSatisfied = (num_gc + num_gu + num_ua >= Number(value));
+
+            if (render) {
+                box.set_content(ConstraintType.PAIRS, value, isSatisfied, num_gc + num_gu + num_ua);
+            }
+
+        } else if (type == ConstraintType.STACK) {
+            const stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
+            isSatisfied = (stack_len >= Number(value));
+
+            if (render) {
+                box.set_content(ConstraintType.STACK, value, isSatisfied, stack_len);
+            }
+        } else if (type == ConstraintType.CONSECUTIVE_G) {
+            let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
+            isSatisfied = (consecutive_g_count < Number(value));
+
+            if (render) {
+                box.set_content(ConstraintType.CONSECUTIVE_G, value, isSatisfied, consecutive_g_count);
+            }
+
+            outInfo.max_allowed_guanine = Number(value);
+
+        } else if (type == ConstraintType.CONSECUTIVE_C) {
+            let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE);
+            isSatisfied = (consecutive_c_count < Number(value));
+
+            if (render) {
+                box.set_content(ConstraintType.CONSECUTIVE_C, value, isSatisfied, consecutive_c_count);
+            }
+
+            outInfo.max_allowed_cytosine = Number(value);
+
+        } else if (type == ConstraintType.CONSECUTIVE_A) {
+            let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE);
+            isSatisfied = (consecutive_a_count < Number(value));
+
+            if (render) {
+                box.set_content(ConstraintType.CONSECUTIVE_A, value, isSatisfied, consecutive_a_count);
+            }
+
+            outInfo.max_allowed_adenine = Number(value);
+
+        } else if (type == ConstraintType.LAB_REQUIREMENTS) {
+            let locks: boolean[] = undo_block.get_puzzle_locks();
+            let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
+            let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
+            let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE, locks);
+            outInfo.max_allowed_guanine = 4;
+            outInfo.max_allowed_cytosine = 4;
+            outInfo.max_allowed_adenine = 5;
+            isSatisfied = (consecutive_g_count < outInfo.max_allowed_guanine);
+            isSatisfied = isSatisfied && (consecutive_c_count < outInfo.max_allowed_cytosine);
+            isSatisfied = isSatisfied && (consecutive_a_count < outInfo.max_allowed_adenine);
+
+            if (render) {
+                box.set_content(ConstraintType.LAB_REQUIREMENTS, {
+                    "g_count": consecutive_g_count, "g_max": outInfo.max_allowed_guanine,
+                    "c_count": consecutive_c_count, "c_max": outInfo.max_allowed_cytosine,
+                    "a_count": consecutive_a_count, "a_max": outInfo.max_allowed_adenine
+                }, isSatisfied, 0);
+            }
+
+        } else if (type == ConstraintType.BARCODE) {
+            isSatisfied = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
+            if (render) {
+                box.set_content(ConstraintType.BARCODE, 0, isSatisfied, 0);
+            }
+
+        } else if (type == ConstraintType.OLIGO_BOUND) {
+            let target_index = Number(value);
+            let nnfe: number[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            isSatisfied = (nnfe != null && nnfe[0] == -2);
+
+            if (this._target_conditions == null) {
+                throw new Error("Target object not available for BINDINGS constraint");
+            }
+
+            if (this._target_conditions[target_index] == null) {
+                throw new Error("Target condition not available for BINDINGS constraint");
+            }
+
+            let o_names: string[] = [];
+            let o_name: string = this._target_conditions[target_index]['oligo_name'];
+
+            // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
+            let jj = 0;
+            if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+            o_names.push(o_name);
+
+            let bind: boolean[] = [];
+            bind.push(true);
+
+            let label: string[] = [];
+            let lbl: string = this._target_conditions[target_index]['oligo_label'];
+            if (lbl == null) lbl = String.fromCharCode(65 + jj);
+            label.push(lbl);
+
+            if (render) {
+                box.set_content(ConstraintType.BINDINGS, {
+                    index: target_index,
+                    bind: bind,
+                    label: label,
+                    oligo_name: o_names
+                }, isSatisfied, 0);
+            }
+
+        } else if (type == ConstraintType.OLIGO_UNBOUND) {
+            let target_index = Number(value);
+            let nnfe: number[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            isSatisfied = (nnfe == null || nnfe[0] != -2);
+
+            if (this._target_conditions == null) {
+                throw new Error("Target object not available for BINDINGS constraint");
+            }
+
+            if (this._target_conditions[target_index] == null) {
+                throw new Error("Target condition not available for BINDINGS constraint");
+            }
+
+            // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
+            let jj = 0;
+
+            let o_names: string[] = [];
+            let o_name: string = this._target_conditions[target_index]['oligo_name'];
+            if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
+            o_names.push(o_name);
+
+            let bind: boolean[] = [];
+            bind.push(false);
+
+            let label: string[] = [];
+            let lbl: string = this._target_conditions[target_index]['oligo_label'];
+            if (lbl == null) lbl = String.fromCharCode(65 + jj);
+            label.push(lbl);
+
+            if (render) {
+                box.set_content(ConstraintType.BINDINGS, {
+                    index: target_index,
+                    bind: bind,
+                    label: label,
+                    oligo_name: o_names
+                }, isSatisfied, 0);
+            }
+
+        } else if (type == ConstraintType.SCRIPT) {
+            let nid: string = value;
+
+            log.debug("TODO: SCRIPT constraint");
+
+            // if (ExternalInterface.available) {
+            //     let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
+            //         ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
+            //             let goal: string = "";
+            //             let name: string = "...";
+            //             let value: string = "";
+            //             let index: string = null;
+            //             let data_png: string = "";
+            //             let satisfied: boolean = false;
+            //             pose.trace_js("end_" + sid + "() called");
+            //             //pose.trace_js(ret);
+            //             if (ret && ret.cause) {
+            //                 if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
+            //                 if (ret.cause.goal != null) goal = ret.cause.goal;
+            //                 if (ret.cause.name != null) name = ret.cause.name;
+            //                 if (ret.cause.value != null) value = ret.cause.value;
+            //                 if (ret.cause.index != null) {
+            //                     index = (ret.cause.index + 1).toString();
+            //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index == this._current_target_index ? 0 : -1);
+            //                     if (ll >= 0) {
+            //                         if (ret.cause.highlight != null) {
+            //                             Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
+            //                         } else {
+            //                             Pose2D(this._poses[ll]).clear_user_defined_highlight();
+            //                         }
+            //                     }
+            //                 }
+            //                 if (ret.cause.icon_b64) data_png = ret.cause.icon_b64;
+            //             }
+            //
+            //             if (render) {
+            //                 this._constraint_boxes[jj].set_content("SCRIPT", {
+            //                     "nid": sid,
+            //                     "goal": goal,
+            //                     "name": name,
+            //                     "value": value,
+            //                     "index": index,
+            //                     "data_png": data_png
+            //                 }, satisfied, 0);
+            //             }
+            //
+            //             isSatisfied = satisfied;
+            //         });
+            //     };
+            //
+            //     this.register_script_callbacks();
+            //     set_end_callback(this, nid, ii / 2);
+            //
+            //     // run
+            //     isSatisfied = false;
+            //     this.trace_js("running script " + nid);
+            //     ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
+            //     this.trace_js("launched");
+            // } else {
+            //
+            //     if (render) {
+            //         box.set_content(ConstraintType.SCRIPT, {"nid": nid, "goal": "", "name": "..."}, isSatisfied, 0);
+            //     }
+            // }
         }
 
+        return isSatisfied;
+    }
+
+    private checkConstraints(render: boolean = true): boolean {
+        const constraints: string[] = this._puzzle.get_temporary_constraints() || this._puzzle.get_constraints();
         if (constraints == null || constraints.length == 0) {
             return false;
         }
 
-        let sequence: number[] = undo_block.get_sequence();
-        let locks: boolean[] = undo_block.get_puzzle_locks();
-        let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
-        let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
-        let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
-        let stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
-
         // let set_callback: Function = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
         //     cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
         //         pose._unstable_index = (pose._unstable_index == kk) ? -1 : kk;
-        //         pose.check_constraints();
+        //         pose.checkConstraints();
         //     });
         // };
 
-        let target_index: number;
-        let input_index: number;
-        let native_pairs: number[];
+        let constraintsInfo: ConstraintInfo = {
+            wrong_pairs: null,
+            restricted_local: null,
+            max_allowed_adenine: -1,
+            max_allowed_cytosine: -1,
+            max_allowed_guanine: -1,
+        };
+
+        let allAreSatisfied: boolean = true;
+        let allWereSatisfied: boolean = true;
+
+        let play_condition_music: boolean = false;
+        let play_decondition_music: boolean = false;
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            let res: boolean = true;
-            let box: ConstraintBox = this._constraint_boxes[ii / 2];
-            let old_res: boolean = box.is_satisfied();
-            if (constraints[ii] == "GU") {
-                res = (num_gu >= Number(constraints[ii + 1]));
-                if (render) {
-                    box.set_content("GU", constraints[ii + 1], res, num_gu);
-                }
-            } else if (constraints[ii] == "AU") {
-                res = (num_ua >= Number(constraints[ii + 1]));
-                if (render) {
-                    box.set_content("AU", constraints[ii + 1], res, num_ua)
-                }
-            } else if (constraints[ii] == "GC") {
-                res = (num_gc <= Number(constraints[ii + 1]));
+            const type: ConstraintType = constraints[ii] as ConstraintType;
+            const value = constraints[ii + 1];
+            const box: ConstraintBox = this._constraint_boxes[ii / 2];
 
-                if (render) {
-                    box.set_content("GC", constraints[ii + 1], res, num_gc);
-                }
-            } else if (constraints[ii] == "MUTATION") {
-                let sequence_diff: number = EPars.sequence_diff(this._puzzle.get_subsequence_without_barcode(sequence), this._puzzle.get_subsequence_without_barcode(this._puzzle.get_beginning_sequence()));
-                res = sequence_diff <= Number(constraints[ii + 1]);
+            const wasSatisfied: boolean = box.is_satisfied();
+            const isSatisfied: boolean = this.check1Constraint(type, value, ii, box, render, constraintsInfo);
 
-                if (render) {
-                    box.set_content("MUTATION", constraints[ii + 1], res, sequence_diff);
-                }
+            allAreSatisfied = allAreSatisfied && isSatisfied;
+            allWereSatisfied = allWereSatisfied && wasSatisfied;
 
-            } else if (constraints[ii] == "SHAPE") {
-                target_index = Number(constraints[ii + 1]);
-                let ublk: UndoBlock = this.get_current_undo_block(target_index);
-                native_pairs = ublk.get_pairs();
-                let structure_constraints: any[] = null;
-                if (this._target_conditions != null && this._target_conditions[target_index] != null) {
-                    structure_constraints = this._target_conditions[target_index]['structure_constraints'];
-
-                    if (ublk.get_oligo_order() != null) {
-                        let np_map: number[] = ublk.get_order_map(ublk.get_oligo_order());
-                        let tp_map: number[] = ublk.get_order_map(ublk.get_target_oligo_order());
-                        if (np_map != null) {
-                            let new_pairs: number[] = [];
-                            let new_sc: number[] = [];
-                            for (let jj = 0; jj < native_pairs.length; jj++) {
-                                let kk: number = tp_map.indexOf(jj);
-                                new_sc[jj] = structure_constraints[kk];
-                                let pp: number = native_pairs[np_map[kk]];
-                                new_pairs[jj] = pp < 0 ? pp : tp_map[np_map.indexOf(pp)];
-                            }
-                            native_pairs = new_pairs;
-                            structure_constraints = new_sc;
-                        }
-                    }
-                }
-
-                res = EPars.are_pairs_same(native_pairs, this._target_pairs[target_index], structure_constraints);
-
-                input_index = 0;
-                if (this._target_pairs.length > 1) {
-                    input_index = target_index;
-                }
-
-                if (render) {
-                    box.set_content("SHAPE", {
-                        target: this._target_pairs[target_index],
-                        index: input_index,
-                        native: native_pairs,
-                        structure_constraints: structure_constraints
-                    }, res, 0);
-                    box.set_flagged(this._unstable_index == ii);
-                    // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                    //     set_callback(this, box, ii);
-                    // }
-
-                    if (this._unstable_index == ii) {
-                        wrong_pairs = box.get_wrong_pairs(native_pairs, this._target_pairs[target_index], structure_constraints, res);
-                    }
-                }
-
-                if (target_index > 0) {
-                    if (this._constraint_shape_boxes != null) {
-                        if (this._constraint_shape_boxes[target_index] != null) {
-                            this._constraint_shape_boxes[target_index].set_content("SHAPE", {
-                                target: this._target_pairs[target_index],
-                                index: input_index,
-                                native: native_pairs,
-                                structure_constraints: structure_constraints
-                            }, res, 0);
-                            this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index == ii);
-                            // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                            //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
-                            // }
-
-                            this._constraint_shape_boxes[target_index].display.visible = this._is_pip_mode;
-                        }
-                    }
-                }
-
+            if (type == ConstraintType.SHAPE || type == ConstraintType.ANTISHAPE) {
+                const target_index = Number(value);
                 if (!this._is_pip_mode) {
-                    if (target_index == this._current_target_index) {
-                        box.display.alpha = 1.0;
-                    } else {
-                        box.display.alpha = 0.3;
-                    }
+                    box.display.alpha = (target_index == this._current_target_index) ? 1.0 : 0.3;
                 } else {
                     box.display.alpha = 1.0;
                 }
@@ -2914,495 +3307,25 @@ export class PoseEditMode extends GameMode {
                 } else if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
                     box.display.visible = true;
                 }
-
-            } else if (constraints[ii] == "ANTISHAPE") {
-                target_index = Number(constraints[ii + 1]);
-                native_pairs = this.get_current_undo_block(target_index).get_pairs();
-                if (this._target_conditions == null) {
-                    throw new Error("Target object not available for ANTISHAPE constraint");
-                }
-
-                if (this._target_conditions[target_index] == null) {
-                    throw new Error("Target condition not available for ANTISHAPE constraint");
-                }
-
-                let anti_structure_string: string = this._target_conditions[target_index]['anti_secstruct'];
-
-                if (anti_structure_string == null) {
-                    throw new Error("Target structure not available for ANTISHAPE constraint");
-                }
-
-                let anti_structure_constraints: any[] = this._target_conditions[target_index]['anti_structure_constraints'];
-                let anti_pairs: any[] = EPars.parenthesis_to_pair_array(anti_structure_string);
-                res = !EPars.are_pairs_same(native_pairs, anti_pairs, anti_structure_constraints);
-
-                input_index = 0;
-                if (this._target_pairs.length > 1) {
-                    input_index = target_index;
-                }
-
-                if (render) {
-                    box.set_content("ANTISHAPE", {
-                        target: anti_pairs,
-                        native: native_pairs,
-                        index: input_index,
-                        structure_constraints: anti_structure_constraints
-                    }, res, 0);
-                    box.set_flagged(this._unstable_index == ii);
-                    // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                    //     set_callback(this, box, ii);
-                    // }
-
-                    if (this._unstable_index == ii) {
-                        wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, res);
-                    }
-                }
-
-                if (target_index > 0) {
-                    if (this._constraint_antishape_boxes != null) {
-                        if (this._constraint_antishape_boxes[target_index] != null) {
-                            this._constraint_antishape_boxes[target_index].set_content("ANTISHAPE", {
-                                target: anti_pairs,
-                                native: native_pairs,
-                                index: input_index,
-                                structure_constraints: anti_structure_constraints
-                            }, res, 0);
-                            this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index == ii);
-                            // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                            //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
-                            // }
-
-                            this._constraint_antishape_boxes[target_index].display.visible = this._is_pip_mode;
-                        }
-                    }
-                }
-
-                if (!this._is_pip_mode) {
-                    if (target_index == this._current_target_index) {
-                        box.display.alpha = 1.0;
-                    } else {
-                        box.display.alpha = 0.3;
-                    }
-                } else {
-                    box.display.alpha = 1.0;
-                }
-
-                if (this._is_pip_mode && target_index > 0) {
-                    box.display.visible = false;
-                } else if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
-                    box.display.visible = true;
-                }
-
-            } else if (constraints[ii] == "BINDINGS") {
-                target_index = Number(constraints[ii + 1]);
-                let undoblk: UndoBlock = this.get_current_undo_block(target_index);
-
-                if (this._target_conditions == null) {
-                    throw new Error("Target object not available for BINDINGS constraint");
-                }
-
-                if (this._target_conditions[target_index] == null) {
-                    throw new Error("Target condition not available for BINDINGS constraint");
-                }
-
-                let oligos: any[] = this._target_conditions[target_index]['oligos'];
-                if (oligos == null) {
-                    throw new Error("Target condition not available for BINDINGS constraint");
-                }
-
-                let o_names: string[] = [];
-                let bind: boolean[] = [];
-                let label: string[] = [];
-                let bmap: boolean[] = [];
-                let offsets: any[] = [];
-                let ofs: number = sequence.length;
-                let o: number[] = undoblk.get_oligo_order();
-                let count: number = undoblk.get_oligos_paired();
-                for (let jj = 0; jj < o.length; jj++) {
-                    bmap[o[jj]] = (jj < count);
-                    offsets[o[jj]] = ofs + 1;
-                    ofs += oligos[o[jj]]['sequence'].length + 1;
-                }
-
-                res = true;
-                for (let jj = 0; jj < oligos.length; jj++) {
-                    if (oligos[jj]['bind'] == null) continue;
-                    let o_name: string = oligos[jj]['name'];
-                    if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-                    o_names.push(o_name);
-                    let expected: boolean = Boolean(oligos[jj]['bind']);
-                    bind.push(expected);
-                    let lbl: string = oligos[jj]['label'] != null ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
-                    label.push(lbl);
-
-                    if (bmap[jj] != expected) {
-                        res = false;
-                        if (restricted_local == null) restricted_local = [];
-                        if (restricted_local[target_index] == null) restricted_local[target_index] = [];
-                        restricted_local[target_index].push(offsets[jj]);
-                        restricted_local[target_index].push(offsets[jj] + oligos[jj]['sequence'].length - 1);
-                    }
-                }
-
-                if (render) {
-                    box.set_content("BINDINGS", {
-                        index: target_index,
-                        bind: bind,
-                        label: label,
-                        oligo_name: o_names
-                    }, res, 0);
-                }
-
-            } else if (constraints[ii] == "G") {
-                let g_count: number = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_GUANINE) {
-                        g_count++;
-                    }
-                }
-
-                res = (g_count >= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("G", constraints[ii + 1], res, g_count);
-                }
-
-            } else if (constraints[ii] == "GMAX") {
-                let g_count = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_GUANINE) {
-                        g_count++;
-                    }
-                }
-
-                res = (g_count <= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("GMAX", constraints[ii + 1], res, g_count);
-                }
-
-            } else if (constraints[ii] == "A") {
-                let a_count: number = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_ADENINE) {
-                        a_count++;
-                    }
-                }
-
-                res = (a_count >= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("A", constraints[ii + 1], res, a_count);
-                }
-
-            } else if (constraints[ii] == "AMAX") {
-                let a_count = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_ADENINE) {
-                        a_count++;
-                    }
-                }
-
-                res = (a_count <= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("AMAX", constraints[ii + 1], res, a_count);
-                }
-
-            } else if (constraints[ii] == "U") {
-                let u_count: number = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_URACIL) {
-                        u_count++;
-                    }
-                }
-
-                res = (u_count >= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("U", constraints[ii + 1], res, u_count);
-                }
-
-            } else if (constraints[ii] == "UMAX") {
-                let u_count = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_URACIL) {
-                        u_count++;
-                    }
-                }
-
-                res = (u_count <= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("UMAX", constraints[ii + 1], res, u_count);
-                }
-
-            } else if (constraints[ii] == "C") {
-                let c_count: number = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
-                        c_count++;
-                    }
-                }
-
-                res = (c_count >= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("C", constraints[ii + 1], res, c_count);
-                }
-
-            } else if (constraints[ii] == "CMAX") {
-                let c_count = 0;
-
-                for (let jj = 0; jj < sequence.length; jj++) {
-                    if (sequence[jj] == EPars.RNABASE_CYTOSINE) {
-                        c_count++;
-                    }
-                }
-
-                res = (c_count <= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("CMAX", constraints[ii + 1], res, c_count);
-                }
-
-            } else if (constraints[ii] == "PAIRS") {
-                res = (num_gc + num_gu + num_ua >= Number(constraints[ii + 1]));
-                box.set_content("PAIRS", constraints[ii + 1], res, num_gc + num_gu + num_ua);
-            } else if (constraints[ii] == "STACK") {
-                res = (stack_len >= Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("STACK", constraints[ii + 1], res, stack_len);
-                }
-            } else if (constraints[ii] == "CONSECUTIVE_G") {
-                let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
-                res = (consecutive_g_count < Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("CONSECUTIVE_G", constraints[ii + 1], res, consecutive_g_count);
-                }
-
-                max_allowed_guanine = Number(constraints[ii + 1]);
-
-            } else if (constraints[ii] == "CONSECUTIVE_C") {
-                let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE);
-                res = (consecutive_c_count < Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("CONSECUTIVE_C", constraints[ii + 1], res, consecutive_c_count);
-                }
-
-                max_allowed_cytosine = Number(constraints[ii + 1]);
-            } else if (constraints[ii] == "CONSECUTIVE_A") {
-                let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE);
-                res = (consecutive_a_count < Number(constraints[ii + 1]));
-
-                if (render) {
-                    box.set_content("CONSECUTIVE_A", constraints[ii + 1], res, consecutive_a_count);
-                }
-
-                max_allowed_adenine = Number(constraints[ii + 1]);
-            } else if (constraints[ii] == "LAB_REQUIREMENTS") {
-                let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
-                let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
-                let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE, locks);
-                max_allowed_guanine = 4;
-                max_allowed_cytosine = 4;
-                max_allowed_adenine = 5;
-                res = (consecutive_g_count < max_allowed_guanine);
-                res = res && (consecutive_c_count < max_allowed_cytosine);
-                res = res && (consecutive_a_count < max_allowed_adenine);
-
-                if (render) {
-                    box.set_content("LAB_REQUIREMENTS", {
-                        "g_count": consecutive_g_count, "g_max": max_allowed_guanine,
-                        "c_count": consecutive_c_count, "c_max": max_allowed_cytosine,
-                        "a_count": consecutive_a_count, "a_max": max_allowed_adenine
-                    }, res, 0);
-                }
-
-            } else if (constraints[ii] == "BARCODE") {
-                res = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
-                if (render) {
-                    box.set_content("BARCODE", 0, res, 0);
-                }
-
-            } else if (constraints[ii] == "OLIGO_BOUND") {
-                target_index = Number(constraints[ii + 1]);
-                let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-                res = (nnfe != null && nnfe[0] == -2);
-
-                if (this._target_conditions == null) {
-                    throw new Error("Target object not available for BINDINGS constraint");
-                }
-
-                if (this._target_conditions[target_index] == null) {
-                    throw new Error("Target condition not available for BINDINGS constraint");
-                }
-
-                let o_names: string[] = [];
-                let o_name: string = this._target_conditions[target_index]['oligo_name'];
-
-                // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
-                let jj = 0;
-                if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-                o_names.push(o_name);
-
-                let bind: boolean[] = [];
-                bind.push(true);
-
-                let label: string[] = [];
-                let lbl: string = this._target_conditions[target_index]['oligo_label'];
-                if (lbl == null) lbl = String.fromCharCode(65 + jj);
-                label.push(lbl);
-
-                if (render) {
-                    box.set_content("BINDINGS", {
-                        index: target_index,
-                        bind: bind,
-                        label: label,
-                        oligo_name: o_names
-                    }, res, 0);
-                }
-
-            } else if (constraints[ii] == "OLIGO_UNBOUND") {
-                target_index = Number(constraints[ii + 1]);
-                let nnfe: any[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-                res = (nnfe == null || nnfe[0] != -2);
-
-                if (this._target_conditions == null) {
-                    throw new Error("Target object not available for BINDINGS constraint");
-                }
-
-                if (this._target_conditions[target_index] == null) {
-                    throw new Error("Target condition not available for BINDINGS constraint");
-                }
-
-                // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
-                let jj = 0;
-
-                let o_names: string[] = [];
-                let o_name: string = this._target_conditions[target_index]['oligo_name'];
-                if (o_name == null) o_name = "Oligo " + (jj + 1).toString();
-                o_names.push(o_name);
-
-                let bind: boolean[] = [];
-                bind.push(false);
-
-                let label: string[] = [];
-                let lbl: string = this._target_conditions[target_index]['oligo_label'];
-                if (lbl == null) lbl = String.fromCharCode(65 + jj);
-                label.push(lbl);
-
-                if (render) {
-                    box.set_content("BINDINGS", {
-                        index: target_index,
-                        bind: bind,
-                        label: label,
-                        oligo_name: o_names
-                    }, res, 0);
-                }
-
-            } else if (constraints[ii] == "SCRIPT") {
-                let nid: string = constraints[ii + 1];
-
-                log.debug("TODO: SCRIPT constraint");
-
-                // if (ExternalInterface.available) {
-                //     let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
-                //         ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
-                //             let goal: string = "";
-                //             let name: string = "...";
-                //             let value: string = "";
-                //             let index: string = null;
-                //             let data_png: string = "";
-                //             let satisfied: boolean = false;
-                //             pose.trace_js("end_" + sid + "() called");
-                //             //pose.trace_js(ret);
-                //             if (ret && ret.cause) {
-                //                 if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-                //                 if (ret.cause.goal != null) goal = ret.cause.goal;
-                //                 if (ret.cause.name != null) name = ret.cause.name;
-                //                 if (ret.cause.value != null) value = ret.cause.value;
-                //                 if (ret.cause.index != null) {
-                //                     index = (ret.cause.index + 1).toString();
-                //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index == this._current_target_index ? 0 : -1);
-                //                     if (ll >= 0) {
-                //                         if (ret.cause.highlight != null) {
-                //                             Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
-                //                         } else {
-                //                             Pose2D(this._poses[ll]).clear_user_defined_highlight();
-                //                         }
-                //                     }
-                //                 }
-                //                 if (ret.cause.icon_b64) data_png = ret.cause.icon_b64;
-                //             }
-                //
-                //             if (render) {
-                //                 this._constraint_boxes[jj].set_content("SCRIPT", {
-                //                     "nid": sid,
-                //                     "goal": goal,
-                //                     "name": name,
-                //                     "value": value,
-                //                     "index": index,
-                //                     "data_png": data_png
-                //                 }, satisfied, 0);
-                //             }
-                //
-                //             res = satisfied;
-                //         });
-                //     };
-                //
-                //     this.register_script_callbacks();
-                //     set_end_callback(this, nid, ii / 2);
-                //
-                //     // run
-                //     res = false;
-                //     this.trace_js("running script " + nid);
-                //     ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
-                //     this.trace_js("launched");
-                // } else {
-                //
-                //     if (render) {
-                //         box.set_content("SCRIPT", {"nid": nid, "goal": "", "name": "..."}, res, 0);
-                //     }
-                // }
             }
 
             if (render) {
-                if (old_res != res && res) {
+                if (isSatisfied && !wasSatisfied) {
                     play_condition_music = true;
-                    box.flare(res);
-                } else if (old_res != res && old_res) {
+                    box.flare(isSatisfied);
+                } else if (!isSatisfied && wasSatisfied) {
                     play_decondition_music = true;
-                    box.flare(res);
+                    box.flare(isSatisfied);
                 }
             }
-
-            check_res = check_res && res;
-            old_check_res = old_check_res && old_res;
         }
 
-        restricted_guanine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_GUANINE, max_allowed_guanine - 1, locks);
-        restricted_cytosine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_CYTOSINE, max_allowed_cytosine - 1, locks);
-        restricted_adenine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_ADENINE, max_allowed_adenine - 1, locks);
-
-        restricted_global = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
-
         let unstable: number[] = [];
-        if (wrong_pairs) {
+        if (constraintsInfo.wrong_pairs) {
             let curr: number = 0;
             let jj: number;
-            for (jj = 0; jj < wrong_pairs.length; jj++) {
-                let stat: number = (wrong_pairs[jj] == 1 ? 1 : 0);
+            for (jj = 0; jj < constraintsInfo.wrong_pairs.length; jj++) {
+                let stat: number = (constraintsInfo.wrong_pairs[jj] == 1 ? 1 : 0);
                 if ((curr ^ stat) != 0) {
                     unstable.push(jj - curr);
                     curr = stat;
@@ -3413,11 +3336,21 @@ export class PoseEditMode extends GameMode {
             }
         }
 
+        const undo_block: UndoBlock = this.get_current_undo_block();
+        const sequence: number[] = undo_block.get_sequence();
+        const locks: boolean[] = undo_block.get_puzzle_locks();
+
+        const restricted_guanine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_GUANINE, constraintsInfo.max_allowed_guanine - 1, locks);
+        const restricted_cytosine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_CYTOSINE, constraintsInfo.max_allowed_cytosine - 1, locks);
+        const restricted_adenine = EPars.get_restricted_consecutive(sequence, EPars.RNABASE_ADENINE, constraintsInfo.max_allowed_adenine - 1, locks);
+
+        const restricted_global: number[] = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
+
         for (let ii = 0; ii < this._poses.length; ii++) {
             let jj = this._is_pip_mode ? ii : (ii == 0 ? this._current_target_index : ii);
-            let restricted: any[];
-            if (restricted_local && restricted_local[jj]) {
-                restricted = restricted_global.concat(restricted_local[jj]);
+            let restricted: number[];
+            if (constraintsInfo.restricted_local && constraintsInfo.restricted_local[jj]) {
+                restricted = restricted_global.concat(constraintsInfo.restricted_local[jj]);
             } else {
                 restricted = restricted_global;
             }
@@ -3425,7 +3358,7 @@ export class PoseEditMode extends GameMode {
             this._poses[ii].highlight_unstable_sequence(unstable);
         }
 
-        if (check_res && !old_check_res) {
+        if (allAreSatisfied && !allWereSatisfied) {
             if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
                 Eterna.sound.play_se(Sounds.SoundAllConditions);
             } else if (this._puz_state != PuzzleState.GAME) {
@@ -3437,7 +3370,7 @@ export class PoseEditMode extends GameMode {
             Eterna.sound.play_se(Sounds.SoundDecondition);
         }
 
-        return check_res;
+        return allAreSatisfied;
     }
 
     private update_score(): void {
@@ -3569,7 +3502,7 @@ export class PoseEditMode extends GameMode {
             was_satisfied = was_satisfied && this._constraint_boxes[ii / 2].is_satisfied();
         }
 
-        let constraints_satisfied: boolean = this.check_constraints();
+        let constraints_satisfied: boolean = this.checkConstraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
             this.get_current_undo_block(ii).set_stable(constraints_satisfied);
         }
@@ -3605,7 +3538,7 @@ export class PoseEditMode extends GameMode {
         if (target_index == 0 || !this._is_pip_mode) {
             let constraints: string[] = this._puzzle.get_constraints();
             for (let ii: number = 0; ii < constraints.length; ii += 2) {
-                if (constraints[ii] == "SHAPE" && Number(constraints[ii + 1]) == target_index) {
+                if (constraints[ii] == ConstraintType.SHAPE && Number(constraints[ii + 1]) == target_index) {
                     box = this._constraint_boxes[ii / 2];
                     break;
                 }
@@ -4050,7 +3983,7 @@ export class PoseEditMode extends GameMode {
 
             if (constraints != null) {
                 for (let ii = 0; ii < constraints.length; ii += 2) {
-                    if (constraints[ii] == "SHAPE") {
+                    if (constraints[ii] == ConstraintType.SHAPE) {
                         is_shape_constrained = true;
                     }
                 }
@@ -4445,5 +4378,12 @@ class AsyncOp {
     }
 }
 
+interface ConstraintInfo {
+    wrong_pairs: number[];
+    restricted_local: number[][];
+    max_allowed_guanine: number;
+    max_allowed_cytosine: number;
+    max_allowed_adenine: number;
+}
 
 

@@ -4,18 +4,13 @@ import {FolderManager} from "../folding/FolderManager";
 import {Vienna} from "../folding/Vienna";
 import {EternaURL} from "../net/EternaURL";
 import {Pose2D} from "../pose2D/Pose2D";
+import {ConstraintType} from "./Constraints";
 
 export enum PuzzleType {
     BASIC = "Basic",
     SWITCH_BASIC = "SwitchBasic",
     CHALLENGE = "Challenge",
     EXPERIMENTAL = "Experimental"
-}
-
-export enum ConstraintType {
-    SHAPE = "SHAPE",
-    ANTISHAPE = "ANTISHAPE",
-    SOFT = "SOFT",
 }
 
 export class Puzzle {
