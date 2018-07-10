@@ -2080,12 +2080,7 @@ export class PoseEditMode extends GameMode {
 
         this._is_playing = false;
 
-        let constraints: string[] = this._puzzle.get_constraints();
-
-        if (this._puzzle.get_temporary_constraints() != null) {
-            constraints = this._puzzle.get_temporary_constraints();
-        }
-
+        const constraints: string[] = this._puzzle.get_temporary_constraints() || this._puzzle.get_constraints();
         if (constraints == null || constraints.length == 0 || !this._show_mission_screen) {
             this.start_playing(false);
             return;
@@ -2094,30 +2089,20 @@ export class PoseEditMode extends GameMode {
         this.set_puzzle_state(PuzzleState.COUNTDOWN);
 
         let num_constraints: number = constraints.length;
+        this._constraints_head = this._constraints_top;
+        this._constraints_foot = this._constraints_bottom;
+
         for (let ii = 0; ii < num_constraints / 2; ii++) {
             let box: ConstraintBox = this._constraint_boxes[ii];
             box.display.visible = true;
             box.show_big_text(true);
-            box.setLocation(new Point(Flashbang.stageWidth, (Flashbang.stageHeight * 0.4) + (ii * 77)), false);
-            box.setLocation(
-                new Point(Flashbang.stageWidth * 0.3, (Flashbang.stageHeight * 0.4) + (ii * 77)),
-                true, 0.75 + ii);
-        }
 
-        let offset: number = this._constraints_head - this._constraints_top;
-        this._constraints_head = this._constraints_top;
-        this._constraints_foot = this._constraints_bottom;
-
-        for (let box of this._constraint_boxes) {
-            let cpos: Point = new Point();
-            box.display.position.copy(cpos);
             box.setLocation(new Point(
-                (Flashbang.stageWidth * 0.3) + cpos.x,
-                (Flashbang.stageHeight * 0.4) + cpos.y + offset));
+                (Flashbang.stageWidth * 0.3),
+                (Flashbang.stageHeight * 0.4) + (ii * 77)));
         }
 
         this._start_solving_time = new Date().getTime();
-
         this.start_playing(true);
 
         this.showIntroScreen();
