@@ -1,4 +1,4 @@
-import {Graphics, Point, Sprite} from "pixi.js";
+import {Container, Graphics, Point, Sprite} from "pixi.js";
 import {AppMode} from "../../../flashbang/core/AppMode";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
@@ -8,7 +8,6 @@ import {BitmapManager} from "../../resources/BitmapManager";
 import {GameButton} from "../../ui/GameButton";
 import {PoseThumbnail} from "../../ui/PoseThumbnail";
 import {Fonts} from "../../util/Fonts";
-import Container = PIXI.Container;
 
 export class MissionIntroMode extends AppMode {
     public constructor(puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][]) {

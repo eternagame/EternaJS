@@ -43,6 +43,7 @@ import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
 import {CopySequenceDialog} from "./CopySequenceDialog";
+import {MissionIntroMode} from "./MissionIntroMode";
 import {PasteSequenceDialog} from "./PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {PuzzleEvent} from "./PuzzleEvent";
@@ -632,15 +633,6 @@ export class PoseEditMode extends GameMode {
         // }
 
         this._yt_id = null;
-
-        // this._mission_screen = new MissionScreen(
-        //     puz.get_puzzle_name(true),
-        //     missionDescriptionOverride || puz.get_mission_text(),
-        //     this._target_pairs,
-        //     this.on_click_start_curtain);
-        //
-        // this._mission_screen.visible = false;
-        // this._mission_container.addObject(this._mission_screen);
 
         this.layout_bars();
         this.layout_constraints();
@@ -2118,18 +2110,8 @@ export class PoseEditMode extends GameMode {
                 new Point(Flashbang.stageWidth * 0.3, (Flashbang.stageHeight * 0.4) + (ii * 77)),
                 true, 0.75 + ii);
         }
-        this.set_start_curtain(true);
 
-        // for (let ii = 0; ii < num_constraints / 2; ++ii) {
-        //     this._constraints_container.removeObject(ConstraintBox(this._constraint_boxes[ii]));
-        // }
-        // this._mission_screen.set_constraints(this._constraint_boxes);
-    }
-
-    private on_click_start_curtain(): void {
         let offset: number = this._constraints_head - this._constraints_top;
-
-        // this._mission_screen.transfer_constraints();
         this._constraints_head = this._constraints_top;
         this._constraints_foot = this._constraints_bottom;
         this._constraints_container.display.mask = null;
@@ -2141,11 +2123,28 @@ export class PoseEditMode extends GameMode {
             box.setLocation(new Point(
                 (Flashbang.stageWidth * 0.3) + cpos.x,
                 (Flashbang.stageHeight * 0.4) + cpos.y + offset));
-            // this._constraints_container.addObject(this._constraint_boxes[ii]);
         }
 
         this._start_solving_time = new Date().getTime();
+
         this.start_playing(true);
+
+        this.showIntroScreen();
+    }
+
+    private showIntroScreen() {
+        let missionText = this._puzzle.get_mission_text();
+        let boosters: any = this._puzzle.get_boosters();
+        if (boosters && boosters['mission'] != null) {
+            missionText = boosters.mission['text'];
+        }
+
+        let introMode = new MissionIntroMode(
+            this._puzzle.get_puzzle_name(true),
+            missionText,
+            this._target_pairs);
+
+        this.modeStack.pushMode(introMode);
     }
 
     private start_playing(animate_constraints: boolean): void {
@@ -2153,14 +2152,7 @@ export class PoseEditMode extends GameMode {
         this.disable_tools(false);
 
         this.set_puzzle_state(PuzzleState.GAME);
-
-        // if (this._mission_screen.visible) {
-        //     this.set_start_curtain(false);
-        // }
-
         this.display_constraint_boxes(true, true);
-
-        // this._mission_cleared.reset();
     }
 
     private reset_autosave_data(): void {
@@ -4148,22 +4140,6 @@ export class PoseEditMode extends GameMode {
         this._stack_level = stack_level;
     }
 
-    private set_start_curtain(show_curtain: boolean): void {
-        log.debug("TODO: set_start_curtain");
-        // // Make sure the mission screen is ON TOP.
-        // if (this._mission_container.contains(this._mission_screen)) {
-        //     this._mission_container.removeObject(this._mission_screen);
-        // }
-        // this._mission_container.addObject(this._mission_screen);
-        // this._constraints_container.mouseEnabled = !show_curtain;
-        // this._constraints_container.mouseChildren = !show_curtain;
-        // this._mission_screen.visible = show_curtain;
-
-        if (show_curtain) {
-            this.on_click_start_curtain();
-        }
-    }
-
     private setup_end_curtain(cleared: boolean): void {
     }
 
@@ -4333,8 +4309,6 @@ export class PoseEditMode extends GameMode {
     private _ui_highlight: SpriteObject;
     /// Game Stamp
     // private _game_stamp: Texture;
-    // Mission Screens
-    private _mission_container: GameObject;
     // private _mission_cleared: MissionCleared;
     private _yt_id: string;
     /// Additional menu item
