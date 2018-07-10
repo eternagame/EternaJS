@@ -1,11 +1,9 @@
 import * as log from "loglevel";
-import {Point, Text} from "pixi.js";
+import {Container, Point, Text} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {GameObject} from "../../../flashbang/core/GameObject";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
 import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {Assert} from "../../../flashbang/util/Assert";
@@ -184,9 +182,8 @@ export class PoseEditMode extends GameMode {
         // this.addObject(this._mission_cleared);
 
         this._constraint_boxes = [];
-        this._constraints_container = new ContainerObject();
-        /// Constraints should be on top of curtain
-        this.addObject(this._constraints_container, this._uiLayer);
+        this._constraintsLayer = new Container();
+        this._uiLayer.addChild(this._constraintsLayer);
 
         /// Puzzle event must be at the top
         this._puzzle_events = new PuzzleEvent();
@@ -547,7 +544,7 @@ export class PoseEditMode extends GameMode {
         // this._mission_cleared.visible = false;
         // this._mission_cleared.reset();
 
-        this._constraints_container.display.visible = true;
+        this._constraintsLayer.visible = true;
 
         if (!this._puzzle.is_pallete_allowed()) {
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -575,7 +572,7 @@ export class PoseEditMode extends GameMode {
             for (let ii = 0; ii < num_constraints / 2; ii++) {
                 let newbox: ConstraintBox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                 this._constraint_boxes.push(newbox);
-                this._constraints_container.addObject(newbox, this._constraints_container.container);
+                this.addObject(newbox, this._constraintsLayer);
             }
 
             this._constraint_shape_boxes = [];
@@ -592,13 +589,13 @@ export class PoseEditMode extends GameMode {
                             if (Number(constraints[jj + 1]) == ii) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_shape_boxes[ii] = newbox;
-                                this._constraints_container.addObject(newbox, this._constraints_container.container);
+                                this.addObject(newbox, this._constraintsLayer);
                             }
                         } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
                             if (Number(constraints[jj + 1]) == ii) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_antishape_boxes[ii] = newbox;
-                                this._constraints_container.addObject(newbox, this._constraints_container.container);
+                                this.addObject(newbox, this._constraintsLayer);
                             }
                         }
                     }
@@ -1093,17 +1090,13 @@ export class PoseEditMode extends GameMode {
 
     public set_show_constraints(do_show: boolean): void {
         this._override_show_constraints = do_show;
-        if (this._constraints_container != null) {
-            this._constraints_container.display.visible = this._constraints_container.display.visible && this._override_show_constraints;
+        if (this._constraintsLayer != null) {
+            this._constraintsLayer.visible = this._constraintsLayer.visible && this._override_show_constraints;
         }
     }
 
     public get_constraint_count(): number {
         return this._constraint_boxes.length;
-    }
-
-    public get_constraint_container(): GameObject {
-        return this._constraints_container;
     }
 
     public get_constraint(i: number): ConstraintBox {
@@ -1343,7 +1336,7 @@ export class PoseEditMode extends GameMode {
         this._exit_button.display.visible = true;
         this._exit_button.addObject(new AlphaTask(1, 0.3));
 
-        this._constraints_container.display.visible = true;
+        this._constraintsLayer.visible = true;
     }
 
     private exit_puzzle(): void {
@@ -1569,7 +1562,7 @@ export class PoseEditMode extends GameMode {
     private toggle_freeze(): void {
         this._is_frozen = !this._is_frozen;
 
-        this._constraints_container.display.alpha = (this._is_frozen ? 0.25 : 1.0);
+        this._constraintsLayer.alpha = (this._is_frozen ? 0.25 : 1.0);
         this.set_show_total_energy(!this._is_frozen);
 
         this._toolbar.undo_button.enabled = !this._is_frozen;
@@ -2114,8 +2107,6 @@ export class PoseEditMode extends GameMode {
         let offset: number = this._constraints_head - this._constraints_top;
         this._constraints_head = this._constraints_top;
         this._constraints_foot = this._constraints_bottom;
-        this._constraints_container.display.mask = null;
-        this._constraints_container.display.position = new Point(0, 0);
 
         for (let box of this._constraint_boxes) {
             let cpos: Point = new Point();
@@ -4288,7 +4279,7 @@ export class PoseEditMode extends GameMode {
     private _hint_text: Text;
 
     /// constraints && scoring display
-    private _constraints_container: ContainerObject;
+    private _constraintsLayer: Container;
     private _constraint_boxes: ConstraintBox[];
     private _constraint_shape_boxes: ConstraintBox[];
     private _constraint_antishape_boxes: ConstraintBox[];
