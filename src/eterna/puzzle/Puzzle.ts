@@ -143,6 +143,11 @@ export class Puzzle {
         return this._temp_constraints;
     }
 
+    /** Returns temporary_constraints, if they're set, else constraints */
+    public get curConstraints(): string[] {
+        return this.get_temporary_constraints() || this.get_constraints();
+    }
+
     public get_puzzle_locks(): boolean[] {
         let puzlocks: boolean[];
         let ii: number;
