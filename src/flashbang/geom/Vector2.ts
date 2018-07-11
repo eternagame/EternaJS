@@ -5,7 +5,7 @@ export class Vector2 {
     public x: number = 0;
     public y: number = 0;
 
-    /** Returns the angle of a vector */
+    /** Returns the angle of a vector, in radians */
     public static angleOf(x: number, y: number): number {
         const val: number = Math.atan2(y, x);
         return (val >= 0 ? val : val + (2 * Math.PI));

@@ -27,6 +27,7 @@ import {TextBalloon} from "../ui/TextBalloon";
 import {Fonts} from "../util/Fonts";
 import {Utility} from "../util/Utility";
 import {BaseGlow} from "../vfx/BaseGlow";
+import {LightRay} from "../vfx/LightRay";
 import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
@@ -60,6 +61,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     protected added() {
         super.added();
 
+        this.setSize(Flashbang.stageWidth, Flashbang.stageHeight);
+
         this.container.addChild(this._baseLayer);
 
         this._score_node_highlight = new Graphics();
@@ -77,17 +80,18 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._moleculeLayer = new Container();
         this.container.addChild(this._moleculeLayer);
         this._moleculeLayer.visible = false;
-        //
+
         // this._paint_cursor = new PaintCursor;
         // this._paint_cursor.display.visible = false;
         // this.addObject(this._paint_cursor);
-        //
-        // this._explosion_rays = [];
-        // for (let ii: number = 0; ii < 10; ii++) {
-        //     this._explosion_rays.push(new LightRay);
-        //     this.addObject(this._explosion_rays[ii]);
-        // }
-        //
+
+        this._explosion_rays = [];
+        for (let ii: number = 0; ii < 10; ii++) {
+            let ray = new LightRay();
+            this._explosion_rays.push(ray);
+            this.addObject(ray, this.container);
+        }
+
         this._selection_highlight_box = new HighlightBox(this);
         this.addObject(this._selection_highlight_box, this.container);
 
@@ -155,6 +159,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => {
             this.set_display_aux_info(value);
         }));
+    }
+
+    public setSize(width: number, height: number): void {
+        this._width = width;
+        this._height = height;
     }
 
     public get_primary_score_display(): EnergyScoreDisplay {
@@ -237,7 +246,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public set_zoom_level(zoom_level: number, animate: boolean = true, center: boolean = false): void {
         if ((this._zoom_level != zoom_level || center) && animate) {
             // if (this._zoom_level == zoom_level && center) {
-            //     if (Math.abs(this._offscreen_width / 2 - this._off_x) + Math.abs(this._offscreen_height / 2 - this._off_y) < 50) {
+            //     if (Math.abs(this._width / 2 - this._off_x) + Math.abs(this._height / 2 - this._off_y) < 50) {
             //         return;
             //     }
             // }
@@ -251,14 +260,14 @@ export class Pose2D extends ContainerObject implements Updatable {
             // }
 
             // if (!this._offset_translating && !center) {
-            //     this._end_offset_x = scaler * (this._off_x - this._offscreen_width / 2) + this._offscreen_width / 2;
-            //     this._end_offset_y = scaler * (this._off_y - this._offscreen_height / 2) + this._offscreen_height / 2;
+            //     this._end_offset_x = scaler * (this._off_x - this._width / 2) + this._width / 2;
+            //     this._end_offset_y = scaler * (this._off_y - this._height / 2) + this._height / 2;
             // } else if (this._offset_translating) {
-            //     this._end_offset_x = scaler * (this._end_offset_x - this._offscreen_width / 2) + this._offscreen_width / 2;
-            //     this._end_offset_y = scaler * (this._end_offset_y - this._offscreen_height / 2) + this._offscreen_height / 2;
+            //     this._end_offset_x = scaler * (this._end_offset_x - this._width / 2) + this._width / 2;
+            //     this._end_offset_y = scaler * (this._end_offset_y - this._height / 2) + this._height / 2;
             // } else {
-            //     this._end_offset_x = this._offscreen_width / 2;
-            //     this._end_offset_y = this._offscreen_height / 2;
+            //     this._end_offset_x = this._width / 2;
+            //     this._end_offset_y = this._height / 2;
             // }
 
             // this._offset_translating = true;
@@ -310,10 +319,8 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let xdiff: number = xmax - xmin;
         let ydiff: number = ymax - ymin;
-        // let xscale: number = xdiff / this._offscreen_width;
-        // let yscale: number = ydiff / this._offscreen_height;
-        let xscale: number = xdiff / Flashbang.stageWidth;
-        let yscale: number = ydiff / Flashbang.stageHeight;
+        let xscale: number = xdiff / this._width;
+        let yscale: number = ydiff / this._height;
 
         let scale: number = Math.max(xscale, yscale);
         if (scale < 1.0) {
@@ -614,7 +621,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     let s_name: string = this.get_strand_name(closest_index);
         //     if (s_name != null) {
         //         this._strand_label.set_text(s_name);
-        //         if (this.mouseX + 16 + this._strand_label.balloon_width() > this._offscreen_width) {
+        //         if (this.mouseX + 16 + this._strand_label.balloon_width() > this._width) {
         //             this._strand_label.set_pos(new UDim(0, 0, this.mouseX - 16 - this._strand_label.balloon_width(), this.mouseY + 16));
         //         } else {
         //             this._strand_label.set_pos(new UDim(0, 0, this.mouseX + 16, this.mouseY + 16));
@@ -1185,86 +1192,67 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public start_explosion(cb: Function): void {
-        log.debug("TODO: start_explosion");
-        // this._is_exploding = true;
-        // this._explosion_start_time = -1;
-        // this._explosion_cb = cb;
-        // let rand_angle: number;
-        //
-        // if (this._explosion_rays.length >= this._sequence.length) {
-        //     for (let ii: number = 0; ii < this._sequence.length; ii++) {
-        //         rand_angle = Math.random() * 2 * Math.PI;
-        //         this._explosion_rays[ii].visible = false;
-        //
-        //         if (this._sequence[ii] == EPars.RNABASE_ADENINE) {
-        //             this._explosion_rays[ii].set_color(0xFFFF00);
-        //         } else if (this._sequence[ii] == EPars.RNABASE_URACIL) {
-        //             this._explosion_rays[ii].set_color(0x0000FF);
-        //         } else if (this._sequence[ii] == EPars.RNABASE_GUANINE) {
-        //             this._explosion_rays[ii].set_color(0xFF0000);
-        //         } else if (this._sequence[ii] == EPars.RNABASE_CYTOSINE) {
-        //             this._explosion_rays[ii].set_color(0x00FF00);
-        //         } else {
-        //             this._explosion_rays[ii].set_color(0xFFFFFF);
-        //         }
-        //
-        //         this._explosion_rays[ii].draw_ray(new Point(Math.cos(rand_angle) * this._offscreen_width / 1.5, Math.sin(rand_angle) * this._offscreen_height / 1.5));
-        //
-        //     }
-        // } else {
-        //     let diff: number = (this._sequence.length - this._explosion_rays.length) / this._explosion_rays.length;
-        //     let diff_walker: number = 0;
-        //     let ray_walker: number = 0;
-        //
-        //     for (ii = 0; ii < this._sequence.length; ii++) {
-        //
-        //         if (diff_walker < 1) {
-        //
-        //             if (ray_walker >= this._explosion_rays.length)
-        //                 continue;
-        //
-        //             rand_angle = Math.random() * 2 * Math.PI;
-        //
-        //             if (this._sequence[ii] == EPars.RNABASE_ADENINE) {
-        //                 this._explosion_rays[ray_walker].set_color(0xFFFF00);
-        //             } else if (this._sequence[ii] == EPars.RNABASE_URACIL) {
-        //                 this._explosion_rays[ray_walker].set_color(0x0000FF);
-        //             } else if (this._sequence[ii] == EPars.RNABASE_GUANINE) {
-        //                 this._explosion_rays[ray_walker].set_color(0xFF0000);
-        //             } else if (this._sequence[ii] == EPars.RNABASE_CYTOSINE) {
-        //                 this._explosion_rays[ray_walker].set_color(0x00FF00);
-        //             } else {
-        //                 this._explosion_rays[ray_walker].set_color(0xFFFFFF);
-        //             }
-        //
-        //
-        //             this._explosion_rays[ray_walker].visible = false;
-        //             this._explosion_rays[ray_walker].draw_ray(new Point(Math.cos(rand_angle) * this._offscreen_width / 1.5, Math.sin(rand_angle) * this._offscreen_height / 1.5));
-        //
-        //             ray_walker++;
-        //
-        //             diff_walker += diff;
-        //
-        //         } else {
-        //             diff_walker -= 1;
-        //         }
-        //
-        //     }
-        // }
+    public start_explosion(cb: () => void): void {
+        this._is_exploding = true;
+        this._explosion_start_time = -1;
+        this._explosion_cb = cb;
+
+        if (this._explosion_rays.length >= this._sequence.length) {
+            for (let ii: number = 0; ii < this._sequence.length; ii++) {
+                const ray = this._explosion_rays[ii];
+
+                ray.display.visible = false;
+                ray.setColorFromBase(this._sequence[ii]);
+
+                let rand_angle = Math.random() * 2 * Math.PI;
+                ray.draw_ray(new Point(
+                    Math.cos(rand_angle) * this._width / 1.5,
+                    Math.sin(rand_angle) * this._height / 1.5));
+
+            }
+        } else {
+            let diff: number = (this._sequence.length - this._explosion_rays.length) / this._explosion_rays.length;
+            let diff_walker: number = 0;
+            let ray_walker: number = 0;
+
+            for (let ii = 0; ii < this._sequence.length; ii++) {
+                if (diff_walker < 1) {
+                    if (ray_walker >= this._explosion_rays.length) {
+                        continue;
+                    }
+
+                    const ray = this._explosion_rays[ray_walker];
+                    ray.setColorFromBase(this._sequence[ii]);
+
+                    ray.display.visible = false;
+
+                    let rand_angle = Math.random() * 2 * Math.PI;
+                    ray.draw_ray(new Point(
+                        Math.cos(rand_angle) * this._width / 1.5,
+                        Math.sin(rand_angle) * this._height / 1.5));
+
+                    ray_walker++;
+                    diff_walker += diff;
+
+                } else {
+                    diff_walker -= 1;
+                }
+            }
+        }
     }
 
     public clear_explosion(): void {
-        log.debug("TODO: clear_explosion");
-        // if (!this._is_exploding) return;
-        //
-        // this._is_exploding = false;
-        // this._explosion_start_time = -1;
-        // this._explosion_cb = null;
-        //
-        // for (let ii: number = 0; ii < this._explosion_rays.length; ii++) {
-        //     this._explosion_rays[ii].set_animator(new GameAnimatorFader(1, 0, 1.5, true));
-        // }
+        if (!this._is_exploding) {
+            return;
+        }
+
+        this._is_exploding = false;
+        this._explosion_start_time = -1;
+        this._explosion_cb = null;
+
+        for (let ray of this._explosion_rays) {
+            ray.fadeOutAndHide();
+        }
     }
 
     public set_pose_edit_callback(cb: Function): void {
@@ -1943,9 +1931,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (need_redraw || this._redraw) {
             // if (this._base_dirty == null || this._redraw) {
-            //     this._canvas_data.fillRect(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height), 0x0);
+            //     this._canvas_data.fillRect(new Rectangle(0, 0, this._width, this._height), 0x0);
             // } else {
-            //     this._base_dirty = this._base_dirty.intersection(new Rectangle(0, 0, this._offscreen_width, this._offscreen_height));
+            //     this._base_dirty = this._base_dirty.intersection(new Rectangle(0, 0, this._width, this._height));
             //     this._canvas_data.copyPixels(this._empty_canvas_data, this._base_dirty, this._base_dirty.topLeft, this._empty_canvas_data);
             // }
             this._base_dirty = null;
@@ -2174,71 +2162,69 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // TODO: is_exploding
-        // if (this._is_exploding && !this._offset_translating && this._base_to_x == null) {
-        //     if (this._explosion_start_time < 0) {
-        //         this._explosion_start_time = current_time;
-        //         this._orig_offset_x = this._off_x;
-        //         this._orig_offset_y = this._off_y;
-        //     }
-        //
-        //     this._off_x = this._orig_offset_x + (Math.random() * 2 - 1) * 5;
-        //     this._off_y = this._orig_offset_y + (Math.random() * 2 - 1) * 5;
-        //     this._redraw = true;
-        //
-        //     prog = (current_time - this._explosion_start_time) / 200;
-        //
-        //     if (this._explosion_rays.length >= full_seq.length) {
-        //         for (ii = 0; ii < Math.min(prog, full_seq.length); ii++) {
-        //             if (this._explosion_rays[ii].visible == false) {
-        //                 this._explosion_rays[ii].alpha = 0;
-        //                 this._explosion_rays[ii].visible = true;
-        //                 this._explosion_rays[ii].set_animator(new GameAnimatorFader(0, 1, 0.5, false));
-        //             }
-        //
-        //             let seq_p: Point = this.get_base_xy(ii);
-        //             this._explosion_rays[ii].set_pos(new UDim(0, 0, seq_p.x, seq_p.y));
-        //         }
-        //     } else {
-        //         let diff: number = (full_seq.length - this._explosion_rays.length) / this._explosion_rays.length;
-        //         let diff_walker: number = 0;
-        //         let ray_walker: number = 0;
-        //
-        //         for (ii = 0; ii < full_seq.length; ii++) {
-        //             if (diff_walker < 1) {
-        //                 if (ray_walker >= this._explosion_rays.length || ray_walker >= prog)
-        //                     continue;
-        //
-        //
-        //                 if (this._explosion_rays[ray_walker].visible == false) {
-        //                     this._explosion_rays[ray_walker].alpha = 0;
-        //                     this._explosion_rays[ray_walker].visible = true;
-        //                     this._explosion_rays[ray_walker].set_animator(new GameAnimatorFader(0, 1, 0.5, false));
-        //                 }
-        //
-        //                 seq_p = this.get_base_xy(ii);
-        //                 this._explosion_rays[ray_walker].set_pos(new UDim(0, 0, seq_p.x, seq_p.y));
-        //
-        //                 ray_walker++;
-        //
-        //                 diff_walker += diff;
-        //             } else {
-        //                 diff_walker -= 1;
-        //             }
-        //         }
-        //     }
-        //
-        //     if (prog >= Math.min(full_seq.length, this._explosion_rays.length) + 10) {
-        //
-        //         if (this._explosion_cb != null)
-        //             this._explosion_cb();
-        //
-        //         this._is_exploding = false;
-        //         this._explosion_start_time = -1;
-        //         this._explosion_cb = null;
-        //
-        //     }
-        // }
+        if (this._is_exploding && !this._offset_translating && this._base_to_x == null) {
+            if (this._explosion_start_time < 0) {
+                this._explosion_start_time = current_time;
+                this._orig_offset_x = this._off_x;
+                this._orig_offset_y = this._off_y;
+            }
+
+            this._off_x = this._orig_offset_x + (Math.random() * 2 - 1) * 5;
+            this._off_y = this._orig_offset_y + (Math.random() * 2 - 1) * 5;
+            this._redraw = true;
+
+            prog = (current_time - this._explosion_start_time) * 5;
+
+            if (this._explosion_rays.length >= full_seq.length) {
+                for (let ii = 0; ii < Math.min(prog, full_seq.length); ii++) {
+                    const ray = this._explosion_rays[ii];
+
+                    if (!ray.display.visible) {
+                        ray.display.alpha = 0;
+                        ray.display.visible = true;
+                        ray.fadeIn();
+                    }
+
+                    ray.display.position = this.get_base_xy(ii);
+                }
+            } else {
+                let diff: number = (full_seq.length - this._explosion_rays.length) / this._explosion_rays.length;
+                let diff_walker: number = 0;
+                let ray_walker: number = 0;
+
+                for (let ii = 0; ii < full_seq.length; ii++) {
+                    if (diff_walker < 1) {
+                        if (ray_walker >= this._explosion_rays.length || ray_walker >= prog) {
+                            continue;
+                        }
+
+                        const ray = this._explosion_rays[ray_walker];
+                        if (!ray.display.visible) {
+                            ray.display.alpha = 0;
+                            ray.display.visible = true;
+                            ray.fadeIn();
+                        }
+
+                        ray.display.position = this.get_base_xy(ii);
+                        ray_walker++;
+                        diff_walker += diff;
+
+                    } else {
+                        diff_walker -= 1;
+                    }
+                }
+            }
+
+            if (prog >= Math.min(full_seq.length, this._explosion_rays.length) + 10) {
+                if (this._explosion_cb != null) {
+                    this._explosion_cb();
+                }
+
+                this._is_exploding = false;
+                this._explosion_start_time = -1;
+                this._explosion_cb = null;
+            }
+        }
     }
 
     public num_pairs(satisfied: boolean): number {
@@ -2459,11 +2445,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         //     this._mol_dirty = [];
         // }
         //
-        // if (this._offscreen_width > 0 && this._offscreen_height > 0) {
-        //     this._canvas_data = new Texture(this._offscreen_width, this._offscreen_height);
+        // if (this._width > 0 && this._height > 0) {
+        //     this._canvas_data = new Texture(this._width, this._height);
         //     this._canvas.Texture = this._canvas_data;
-        //     this._mol_canvas_data = new Texture(this._offscreen_width, this._offscreen_height, true, 0x0);
-        //     this._empty_canvas_data = new Texture(this._offscreen_width, this._offscreen_height, true, 0x0);
+        //     this._mol_canvas_data = new Texture(this._width, this._height, true, 0x0);
+        //     this._empty_canvas_data = new Texture(this._width, this._height, true, 0x0);
         //     this._mol_canvas.Texture = this._mol_canvas_data;
         // }
         //
@@ -3279,6 +3265,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private readonly _baseLayer: Container = new Container();
 
+    private _width: number = 0;
+    private _height: number = 0;
+
     /// Array of sequence/pairs
     private _sequence: number[] = [];
     private _mutated_sequence: number[];
@@ -3380,10 +3369,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     /// Is explosion animation on going?
     private _is_exploding: boolean = false;
     private _explosion_start_time: number = -1;
-    private _explosion_rays: any[];
+    private _explosion_rays: LightRay[];
     private _orig_offset_x: number;
     private _orig_offset_y: number;
-    private _explosion_cb: Function;
+    private _explosion_cb: () => void;
 
     /// Selection box
     private _selection_highlight_box: HighlightBox;
