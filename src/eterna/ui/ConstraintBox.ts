@@ -218,7 +218,7 @@ export class ConstraintBox extends ContainerObject {
         return this._satisfied;
     }
 
-    public GetKeyword(): string {
+    public get constraintType(): ConstraintType {
         return this._constraintType;
     }
 
@@ -293,7 +293,7 @@ export class ConstraintBox extends ContainerObject {
         this._big_thumbnail.visible = false;
         this._flag.visible = false;
         this._check.visible = satisfied && this._boxType == ConstraintBoxType.DEFAULT;
-        if (constraintType.toUpperCase().substr(-5) == "SHAPE") {
+        if (constraintType == ConstraintType.SHAPE || constraintType == ConstraintType.ANTISHAPE) {
             if (this._enlarged) {
                 this._check.position = new Point(144, 144);
                 this._no_text.position = new Point(124, 1);

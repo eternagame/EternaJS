@@ -2028,14 +2028,15 @@ export class PoseEditMode extends GameMode {
             if (xx == 0) {
                 // scan for non-(ANTI)SHAPE
                 for (let ii = 0; ii < num_constraints / 2; ii++) {
-                    if (this._constraint_boxes[ii].GetKeyword().substr(-5) == "SHAPE") {
+                    const box = this._constraint_boxes[ii];
+                    if (box.constraintType == ConstraintType.SHAPE || box.constraintType == ConstraintType.ANTISHAPE) {
                         continue;
                     }
                     let cpos = new Point(w_walker, 35);
                     w_walker += 119;
-                    this._constraint_boxes[ii].setLocation(cpos, animate);
-                    this._constraint_boxes[ii].show_big_text(false);
-                    this._constraint_boxes[ii].display.visible = display;
+                    box.setLocation(cpos, animate);
+                    box.show_big_text(false);
+                    box.display.visible = display;
                 }
                 if (w_walker > 17) {
                     w_walker += 25;
@@ -2047,26 +2048,28 @@ export class PoseEditMode extends GameMode {
 
             // scan for SHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
-                if (this._constraint_boxes[ii].GetKeyword() != "SHAPE" || Number(constraints[2 * ii + 1]) != xx) {
+                const box = this._constraint_boxes[ii];
+                if (box.constraintType != ConstraintType.SHAPE || Number(constraints[2 * ii + 1]) != xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
-                this._constraint_boxes[ii].setLocation(cpos, animate);
-                this._constraint_boxes[ii].show_big_text(false);
-                this._constraint_boxes[ii].display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+                box.setLocation(cpos, animate);
+                box.show_big_text(false);
+                box.display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
             }
 
             // scan for ANTISHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
-                if (this._constraint_boxes[ii].GetKeyword() != "ANTISHAPE" || Number(constraints[2 * ii + 1]) != xx) {
+                const box = this._constraint_boxes[ii];
+                if (box.constraintType != ConstraintType.ANTISHAPE || Number(constraints[2 * ii + 1]) != xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
-                this._constraint_boxes[ii].setLocation(cpos, animate);
-                this._constraint_boxes[ii].show_big_text(false);
-                this._constraint_boxes[ii].display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+                box.setLocation(cpos, animate);
+                box.show_big_text(false);
+                box.display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
             }
         }
 
@@ -2080,7 +2083,7 @@ export class PoseEditMode extends GameMode {
 
         this._is_playing = false;
 
-        const constraints: string[] = this._puzzle.get_temporary_constraints() || this._puzzle.get_constraints();
+        const constraints: string[] = this._puzzle.curConstraints;
         if (constraints == null || constraints.length == 0 || !this._show_mission_screen) {
             this.start_playing(false);
             return;
@@ -2088,11 +2091,10 @@ export class PoseEditMode extends GameMode {
 
         this.set_puzzle_state(PuzzleState.COUNTDOWN);
 
-        let num_constraints: number = constraints.length;
         this._constraints_head = this._constraints_top;
         this._constraints_foot = this._constraints_bottom;
 
-        for (let ii = 0; ii < num_constraints / 2; ii++) {
+        for (let ii = 0; ii < constraints.length / 2; ii++) {
             let box: ConstraintBox = this._constraint_boxes[ii];
             box.display.visible = true;
             box.show_big_text(true);
@@ -2115,10 +2117,37 @@ export class PoseEditMode extends GameMode {
             missionText = boosters.mission['text'];
         }
 
+        // Create constraint boxes and pass them to the MissionIntroMode.
+        // The ConstraintBox creation logic is so tied to PoseEditMode that it's just much easier -
+        // though uglier - to do things this way.
+
+        let dummyInfo: ConstraintInfo = {
+            wrong_pairs: null,
+            restricted_local: null,
+            max_allowed_adenine: -1,
+            max_allowed_cytosine: -1,
+            max_allowed_guanine: -1,
+        };
+        let introConstraintBoxes: ConstraintBox[] = [];
+        let constraints = this._puzzle.get_constraints();
+        for (let ii = 0; ii < constraints.length; ii += 2) {
+            const type: ConstraintType = constraints[ii] as ConstraintType;
+            if (type == ConstraintType.SHAPE || type == ConstraintType.ANTISHAPE) {
+                continue;
+            }
+
+            const value = constraints[ii + 1];
+            const box = new ConstraintBox(ConstraintBoxType.MISSION_SCREEN);
+            this.updateConstraint(type, value, ii, box, true, dummyInfo);
+
+            introConstraintBoxes.push(box);
+        }
+
         let introMode = new MissionIntroMode(
             this._puzzle.get_puzzle_name(true),
             missionText,
-            this._target_pairs);
+            this._target_pairs,
+            introConstraintBoxes);
 
         this.modeStack.pushMode(introMode);
     }
@@ -2724,26 +2753,26 @@ export class PoseEditMode extends GameMode {
         // }
     }
 
-    private check1Constraint(type: ConstraintType, value: string, ii: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
+    private updateConstraint(type: ConstraintType, value: string, ii: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
         let isSatisfied: boolean = true;
 
-        const undo_block: UndoBlock = this.get_current_undo_block();
-        const sequence = undo_block.get_sequence();
+        const undoBlock: UndoBlock = this.get_current_undo_block();
+        const sequence = undoBlock.get_sequence();
 
         if (type == ConstraintType.GU) {
-            const count: number = undo_block.get_param(UndoBlockParam.GU);
+            const count: number = undoBlock.get_param(UndoBlockParam.GU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.GU, value, isSatisfied, count);
             }
         } else if (type == ConstraintType.AU) {
-            const count: number = undo_block.get_param(UndoBlockParam.AU);
+            const count: number = undoBlock.get_param(UndoBlockParam.AU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.AU, value, isSatisfied, count)
             }
         } else if (type == ConstraintType.GC) {
-            const count: number = undo_block.get_param(UndoBlockParam.GC);
+            const count: number = undoBlock.get_param(UndoBlockParam.GC);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.GC, value, isSatisfied, count);
@@ -3007,9 +3036,9 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type == ConstraintType.PAIRS) {
-            let num_gu: number = undo_block.get_param(UndoBlockParam.GU);
-            let num_gc: number = undo_block.get_param(UndoBlockParam.GC);
-            let num_ua: number = undo_block.get_param(UndoBlockParam.AU);
+            let num_gu: number = undoBlock.get_param(UndoBlockParam.GU);
+            let num_gc: number = undoBlock.get_param(UndoBlockParam.GC);
+            let num_ua: number = undoBlock.get_param(UndoBlockParam.AU);
             isSatisfied = (num_gc + num_gu + num_ua >= Number(value));
 
             if (render) {
@@ -3017,7 +3046,7 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type == ConstraintType.STACK) {
-            const stack_len: number = undo_block.get_param(UndoBlockParam.STACK);
+            const stack_len: number = undoBlock.get_param(UndoBlockParam.STACK);
             isSatisfied = (stack_len >= Number(value));
 
             if (render) {
@@ -3054,7 +3083,7 @@ export class PoseEditMode extends GameMode {
             outInfo.max_allowed_adenine = Number(value);
 
         } else if (type == ConstraintType.LAB_REQUIREMENTS) {
-            let locks: boolean[] = undo_block.get_puzzle_locks();
+            let locks: boolean[] = undoBlock.get_puzzle_locks();
             let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
             let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
             let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE, locks);
@@ -3225,7 +3254,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private checkConstraints(render: boolean = true): boolean {
-        const constraints: string[] = this._puzzle.get_temporary_constraints() || this._puzzle.get_constraints();
+        const constraints: string[] = this._puzzle.curConstraints;
         if (constraints == null || constraints.length == 0) {
             return false;
         }
@@ -3257,7 +3286,7 @@ export class PoseEditMode extends GameMode {
             const box: ConstraintBox = this._constraint_boxes[ii / 2];
 
             const wasSatisfied: boolean = box.is_satisfied();
-            const isSatisfied: boolean = this.check1Constraint(type, value, ii, box, render, constraintsInfo);
+            const isSatisfied: boolean = this.updateConstraint(type, value, ii, box, render, constraintsInfo);
 
             allAreSatisfied = allAreSatisfied && isSatisfied;
             allWereSatisfied = allWereSatisfied && wasSatisfied;
