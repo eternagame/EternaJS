@@ -2300,9 +2300,9 @@ export class PoseEditMode extends GameMode {
         this.set_puzzle_state(PuzzleState.CLEARED);
 
         if (cleared) {
-            for (let ii: number = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_zoom_level(0, true, true);
-                this._poses[ii].start_explosion(this.show_end_curtain);
+            for (let pose of this._poses) {
+                pose.set_zoom_level(0, true, true);
+                pose.start_explosion(() => this.show_end_curtain());
             }
             this._bubble_curtain.start_sweep();
 

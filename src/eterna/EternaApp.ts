@@ -48,7 +48,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.sound = new SoundManager(Eterna.settings);
 
         // Handle ?puzzle=[puzzle_id] URL param
-        let puzid = PuzzleID.NandosZippers;
+        let puzid = PuzzleID.FunAndEasy;
         let params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("puzzle")) {
             puzid = Number(params.get("puzzle"));
