@@ -22,9 +22,9 @@ export class RankBoard extends ContainerObject implements Updatable {
         this._rows = [];
         for (let ii: number = 0; ii < num_rows + 1; ii++) {
             let row: RankRowLayout = new RankRowLayout(ii + starting_rank, rank_data[ii], offset_btw_rank_coin, 15, 100);
-            row.height = RankBoard.ROW_HEIGHT;
-            row.position = new Point(0, RankBoard.ROW_HEIGHT * ii);
-            this.container.addChild(row);
+            row.container.height = RankBoard.ROW_HEIGHT;
+            row.display.position = new Point(0, RankBoard.ROW_HEIGHT * ii);
+            this.addObject(row, this.container);
             this._rows.push(row);
         }
     }
@@ -42,15 +42,15 @@ export class RankBoard extends ContainerObject implements Updatable {
             let rankIdx: number = loopNum * this._rows.length + ii; // this row's player index in the data array
             if (rankIdx < this._rankData.length) { // Catch if entry doesn't exist (ie. rank 1)
                 const row = this._rows[ii];
-                row.position.y =
+                row.display.position.y =
                     RankBoard.ROW_HEIGHT * (this._rankData.length - ii - 1) // Starting position
                     - this._rows.length * RankBoard.ROW_HEIGHT // Height of all entries combined, allows looping
                     * loopNum; // Multiplied by how many loops this row has gone through
 
                 const rank: PlayerRank = this._rankData[rankIdx];
-                row.set_rank(rank.rank);
-                row.set_player_name(rank.name, 100);
-                row.set_coin(rank.score);
+                row.setRank(rank.rank);
+                row.setPlayerName(rank.name, 100);
+                row.setScore(rank.score);
             }
         }
     }

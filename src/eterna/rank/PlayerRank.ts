@@ -3,10 +3,16 @@
     public score: number;
     public rank: number;
 
-    constructor(name: string, score: number) {
+    public constructor(name: string, score: number) {
         this.name = name;
         this.score = score;
         this.rank = 0;
+    }
+
+    public clone(): PlayerRank {
+        let theClone = new PlayerRank(this.name, this.score);
+        theClone.rank = this.rank;
+        return theClone;
     }
 
     public toString(): string {
