@@ -629,8 +629,6 @@ export class PoseEditMode extends GameMode {
         //     }
         // }
 
-        this._yt_id = null;
-
         this.layout_bars();
         this.layout_constraints();
 
@@ -4187,7 +4185,6 @@ export class PoseEditMode extends GameMode {
         // this._mission_cleared.alpha = 0;
         // this._mission_cleared.visible = true;
         // this.addObject(this._mission_cleared);
-        // this._mission_cleared.set_youtube_video(this._yt_id);
         // this._mission_cleared.set_animator(new GameAnimatorFader(0, 1, 0.3, false));
         //
         // this._constraints_container.visible = false;
@@ -4311,7 +4308,6 @@ export class PoseEditMode extends GameMode {
     /// Game Stamp
     // private _game_stamp: Texture;
     // private _mission_cleared: MissionCleared;
-    private _yt_id: string;
     /// Additional menu item
     private _menuitem: GameButton = null;
     /// Context menu items
