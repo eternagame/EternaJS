@@ -5,7 +5,7 @@ import {PlayerRank} from "./PlayerRank";
 
 export class RankRowLayout extends Container {
     public constructor(rank: number, data: PlayerRank, offset_btw_rank_coin: number,
-                       fontSize: number = 18, maxTextWidth: number = -1, textColor: number = 0xFFFFFF) {
+                       fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
         super();
 
         this._tfName = Fonts.std_regular("", fontSize).color(textColor).build();
@@ -19,11 +19,8 @@ export class RankRowLayout extends Container {
         this._tfCoin.position = new Point(130 + offset_btw_rank_coin, 0);
         this.addChild(this._tfCoin);
 
-        this.set_player_name(data.name);
+        this.set_player_name(data.name, maxNameWidth);
         this.set_rank(rank);
-        if (maxTextWidth != -1) {
-            this.trim_name_to_pixel(maxTextWidth);
-        }
         this.set_coin(data.score);
     }
 
@@ -36,13 +33,11 @@ export class RankRowLayout extends Container {
         return this._rank;
     }
 
-    public set_player_name(player_name: string): void {
-        this._player_name = player_name;
-        this._tfName.text = player_name;
-    }
-
-    public trim_name_to_pixel(maxTextWidth: number): void {
-        TextUtil.trimTextToWidth(this._tfName, maxTextWidth, "...");
+    public set_player_name(name: string, maxTextWidth: number = -1): void {
+        this._tfName.text = name;
+        if (maxTextWidth >= 0) {
+            TextUtil.trimTextToWidth(this._tfName, maxTextWidth, "...");
+        }
         this._player_name = this._tfName.text;
     }
 
