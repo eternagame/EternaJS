@@ -3,6 +3,7 @@ import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
+import {Vector2} from "../../flashbang/geom/Vector2";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
@@ -1200,14 +1201,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._explosion_rays.length >= this._sequence.length) {
             for (let ii: number = 0; ii < this._sequence.length; ii++) {
                 const ray = this._explosion_rays[ii];
-
                 ray.display.visible = false;
-                ray.setColorFromBase(this._sequence[ii]);
-
-                let rand_angle = Math.random() * 2 * Math.PI;
-                ray.draw_ray(new Point(
-                    Math.cos(rand_angle) * this._width / 1.5,
-                    Math.sin(rand_angle) * this._height / 1.5));
+                ray.draw_ray(
+                    Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
+                    this._sequence[ii]);
 
             }
         } else {
@@ -1222,14 +1219,10 @@ export class Pose2D extends ContainerObject implements Updatable {
                     }
 
                     const ray = this._explosion_rays[ray_walker];
-                    ray.setColorFromBase(this._sequence[ii]);
-
                     ray.display.visible = false;
-
-                    let rand_angle = Math.random() * 2 * Math.PI;
-                    ray.draw_ray(new Point(
-                        Math.cos(rand_angle) * this._width / 1.5,
-                        Math.sin(rand_angle) * this._height / 1.5));
+                    ray.draw_ray(
+                        Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
+                        this._sequence[ii]);
 
                     ray_walker++;
                     diff_walker += diff;

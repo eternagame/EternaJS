@@ -1,5 +1,5 @@
 ﻿import {GlowFilter} from "pixi-filters";
-import {Graphics, Point} from "pixi.js";
+import {Graphics} from "pixi.js";
 import {Vector2} from "../../flashbang/geom/Vector2";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
@@ -8,12 +8,10 @@ import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
 import {EPars} from "../EPars";
 
 export class LightRay extends SceneObject {
-    constructor(color: number = 0xFFFF00) {
+    constructor() {
         let graphics = new Graphics();
         super(graphics);
         this._graphics = graphics;
-
-        this.set_color(color);
     }
 
     public fadeIn(): void {
@@ -28,8 +26,9 @@ export class LightRay extends SceneObject {
         ));
     }
 
-    public draw_ray(from_to: Point): void {
-        const v: Vector2 = Vector2.fromPoint(from_to);
+    public draw_ray(v: Vector2, baseType: number): void {
+        const color = LightRay.getColor(baseType);
+
         const len: number = v.length;
 
         this._graphics.clear();
@@ -39,7 +38,7 @@ export class LightRay extends SceneObject {
         // matrix.createGradientBox(len + 37, 40);
         // this.beginGradientFill("linear", [0xFFFFFF, 0xFFFFFF], [1, 0], [0, 255], matrix);
 
-        this._graphics.beginFill(0xffffff, 0.8);
+        this._graphics.beginFill(color, 0.4);
         this._graphics.moveTo(0, 2);
         this._graphics.lineTo(len, 30);
         for (let ii: number = 1; ii <= 7; ii++) {
@@ -52,34 +51,28 @@ export class LightRay extends SceneObject {
         this._graphics.endFill();
 
         this._graphics.rotation = v.angle;
-    }
 
-    public setColorFromBase(baseType: number): void {
-        if (baseType == EPars.RNABASE_ADENINE) {
-            this.set_color(0xFFFF00);
-        } else if (baseType == EPars.RNABASE_URACIL) {
-            this.set_color(0x0000FF);
-        } else if (baseType == EPars.RNABASE_GUANINE) {
-            this.set_color(0xFF0000);
-        } else if (baseType == EPars.RNABASE_CYTOSINE) {
-            this.set_color(0x00FF00);
-        } else {
-            this.set_color(0xFFFFFF);
-        }
-    }
-
-    public set_color(color: number): void {
-        let color1 = color | 0x88000000;
-        let color2 = 0x88ffffff;
-        let strength = 3;
-        let distance = 3;
-        let quality = 1;
+        const distance = 5;
+        const outerStrength = 3;
+        const innerStrength = 0;
+        const quality = 1;
         this._graphics.filters = [
-            new GlowFilter(distance, strength, 0, color1, quality),
-            // new GlowFilter(distance, 0, strength, color2, quality),
+            new GlowFilter(distance, outerStrength, innerStrength, 0xffffff, quality),
         ];
+    }
 
-        // filters = [ new GlowFilter(raycol,0.5,6,6,3), new GlowFilter(0xFFFFFF,0.5,6,6,3,1,true) ];
+    private static getColor(baseType: number): number {
+        if (baseType == EPars.RNABASE_ADENINE) {
+            return 0xFFFF00;
+        } else if (baseType == EPars.RNABASE_URACIL) {
+            return 0x0000FF;
+        } else if (baseType == EPars.RNABASE_GUANINE) {
+            return 0xFF0000;
+        } else if (baseType == EPars.RNABASE_CYTOSINE) {
+            return 0x00FF00;
+        } else {
+            return 0xFFFFFF;
+        }
     }
 
     private readonly _graphics: Graphics;
