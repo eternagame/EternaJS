@@ -1292,39 +1292,39 @@ export class PoseEditMode extends GameMode {
     }
 
     private on_click_addbase(): void {
-        for (let ii: number = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].set_current_color(EPars.RNABASE_ADD_BASE);
+        for (let pose of this._poses) {
+            pose.set_current_color(EPars.RNABASE_ADD_BASE);
         }
         this.deselect_all_colorings();
     }
 
     private on_click_addpair(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_ADD_PAIR);
+        for (let pose of this._poses) {
+            pose.set_current_color(EPars.RNABASE_ADD_PAIR);
         }
 
         this.deselect_all_colorings();
     }
 
     private on_click_delete(): void {
-        for (let ii: number = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].set_current_color(EPars.RNABASE_DELETE);
+        for (let pose of this._poses) {
+            pose.set_current_color(EPars.RNABASE_DELETE);
         }
 
         this.deselect_all_colorings();
     }
 
     private on_click_lock(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_LOCK);
+        for (let pose of this._poses) {
+            pose.set_current_color(EPars.RNABASE_LOCK);
         }
 
         this.deselect_all_colorings();
     }
 
     private on_click_binding_site(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_BINDING_SITE);
+        for (let pose of this._poses) {
+            pose.set_current_color(EPars.RNABASE_BINDING_SITE);
         }
 
         this.deselect_all_colorings();
@@ -1586,8 +1586,8 @@ export class PoseEditMode extends GameMode {
     private on_change_folder(): void {
         this.clear_undo_stack();
         this.pose_edit_by_target(0);
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_display_score_texts(this._poses[ii].is_displaying_score_texts());
+        for (let pose of this._poses) {
+            pose.set_display_score_texts(pose.is_displaying_score_texts());
         }
     }
 
@@ -1970,8 +1970,8 @@ export class PoseEditMode extends GameMode {
     }
 
     private set_poses_color(paint_color: number): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(paint_color);
+        for (let pose of this._poses) {
+            pose.set_current_color(paint_color);
         }
     }
 
