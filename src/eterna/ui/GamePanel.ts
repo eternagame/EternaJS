@@ -60,25 +60,25 @@ export class GamePanel extends ContainerObject {
             this._background.beginFill(0x000000, 0);
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();
-            return;
-        }
 
-        this._background.lineStyle(2, this._border_color, this._border_alpha);
-        this._background.beginFill(this._color, this._alpha);
-        this._background.drawRoundedRect(0, 0, this._width, this._height, 5);
-        this._background.endFill();
+        } else {
+            this._background.lineStyle(2, this._border_color, this._border_alpha);
+            this._background.beginFill(this._color, this._alpha);
+            this._background.drawRoundedRect(0, 0, this._width, this._height, 5);
+            this._background.endFill();
 
-        if (this._title != null) {
-            if (this._title_text == null) {
-                this._title_text = Fonts.std_medium().fontSize(16).color(0xffffff).build();
-                this._title_text.position = new Point(7, 6);
-                this.container.addChild(this._title_text);
+            if (this._title != null) {
+                if (this._title_text == null) {
+                    this._title_text = Fonts.std_medium().fontSize(16).color(0xffffff).build();
+                    this._title_text.position = new Point(7, 6);
+                    this.container.addChild(this._title_text);
+                }
+
+                this._title_text.text = this._title;
+                this._background.lineStyle(2, 0xC0DCE7, 0.27); // 0xFEC942);
+                this._background.moveTo(0, 35);
+                this._background.lineTo(this._width, 35);
             }
-
-            this._title_text.text = this._title;
-            this._background.lineStyle(2, 0xC0DCE7, 0.27); // 0xFEC942);
-            this._background.moveTo(0, 35);
-            this._background.lineTo(this._width, 35);
         }
     }
 
