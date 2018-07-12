@@ -1,64 +1,65 @@
-import {Container, Point, Text} from "pixi.js";
+import {Point, Text} from "pixi.js";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {TextUtil} from "../../flashbang/util/TextUtil";
 import {Fonts} from "../util/Fonts";
 import {PlayerRank} from "./PlayerRank";
 
-export class RankRowLayout extends Container {
-    public constructor(rank: number, data: PlayerRank, offset_btw_rank_coin: number,
+export class RankRowLayout extends ContainerObject {
+    public constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
                        fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
         super();
 
         this._tfName = Fonts.std_regular("", fontSize).color(textColor).build();
-        this.addChild(this._tfName);
+        this.container.addChild(this._tfName);
 
         this._tfRank = Fonts.std_regular("", fontSize).color(textColor).build();
         this._tfRank.position = new Point(130, 0);
-        this.addChild(this._tfRank);
+        this.container.addChild(this._tfRank);
 
-        this._tfCoin = Fonts.std_regular("", fontSize).color(textColor).build();
-        this._tfCoin.position = new Point(130 + offset_btw_rank_coin, 0);
-        this.addChild(this._tfCoin);
+        this._tfScore = Fonts.std_regular("", fontSize).color(textColor).build();
+        this._tfScore.position = new Point(130 + rankScoreOffset, 0);
+        this.container.addChild(this._tfScore);
 
-        this.set_player_name(data.name, maxNameWidth);
-        this.set_rank(rank);
-        this.set_coin(data.score);
+        this.setPlayerName(data.name, maxNameWidth);
+        this.setRank(rank);
+        this.setScore(data.score);
     }
 
-    public set_rank(rank: number): void {
+    public setRank(rank: number): void {
         this._tfRank.text = rank < 0 ? "" : "" + rank;
         this._rank = rank;
     }
 
-    public get_rank(): number {
+    public get rank(): number {
         return this._rank;
     }
 
-    public set_player_name(name: string, maxTextWidth: number = -1): void {
+    public setPlayerName(name: string, maxTextWidth: number = -1): void {
         this._tfName.text = name;
         if (maxTextWidth >= 0) {
             TextUtil.trimTextToWidth(this._tfName, maxTextWidth, "...");
         }
-        this._player_name = this._tfName.text;
+        this._playerName = this._tfName.text;
     }
 
-    public get_player_name(): string {
-        return this._player_name;
+    public get playerName(): string {
+        return this._playerName;
     }
 
-    public set_coin(coin: number): void {
-        this._tfCoin.text = (coin < 0) ? "" : coin.toString();
-        this._coin = coin;
+    public setScore(score: number): void {
+        this._tfScore.text = (score < 0) ? "" : score.toString();
+        this._score = score;
     }
 
-    public get_coin(): number {
-        return this._coin;
+    public get score(): number {
+        return this._score;
     }
 
     private readonly _tfRank: Text;
     private readonly _tfName: Text;
-    private readonly _tfCoin: Text;
+    private readonly _tfScore: Text;
 
     private _rank: number;
-    private _player_name: string;
-    private _coin: number;
+    private _playerName: string;
+    private _score: number;
 }
