@@ -4164,12 +4164,8 @@ export class PoseEditMode extends GameMode {
         // this.navigateToURL(req, "facebook");
     }
 
-    private go_to_strategy_guide(): void {
-        log.debug("TODO: go_to_strategy_guide");
-        // let req: URLRequest = new URLRequest;
-        // req.url = "http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles";
-        //
-        // this.navigateToURL(req, "Strategy Guide");
+    private static go_to_strategy_guide(): void {
+        window.open(EternaURL.STRATEGY_GUIDE, "_blank");
     }
 
     private set_show_menu(show_menu: boolean): void {
