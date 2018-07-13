@@ -1193,10 +1193,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public start_explosion(cb: () => void): void {
+    public start_explosion(): Promise<void> {
         this._is_exploding = true;
         this._explosion_start_time = -1;
-        this._explosion_cb = cb;
 
         if (this._explosion_rays.length >= this._sequence.length) {
             for (let ii: number = 0; ii < this._sequence.length; ii++) {
@@ -1232,6 +1231,21 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         }
+
+        // If there was an explosion in progress, ensure its promise gets resolved
+        if (this._onExplosionComplete != null) {
+            this.callExplosionCompleteCallback();
+        }
+
+        return new Promise((resolve) => this._onExplosionComplete = resolve);
+    }
+
+    private callExplosionCompleteCallback(): void {
+        if (this._onExplosionComplete != null) {
+            let onComplete = this._onExplosionComplete;
+            this._onExplosionComplete = null;
+            onComplete();
+        }
     }
 
     public clear_explosion(): void {
@@ -1241,11 +1255,12 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._is_exploding = false;
         this._explosion_start_time = -1;
-        this._explosion_cb = null;
 
         for (let ray of this._explosion_rays) {
             ray.fadeOutAndHide();
         }
+
+        this.callExplosionCompleteCallback();
     }
 
     public set_pose_edit_callback(cb: Function): void {
@@ -2209,13 +2224,9 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
 
             if (prog >= Math.min(full_seq.length, this._explosion_rays.length) + 10) {
-                if (this._explosion_cb != null) {
-                    this._explosion_cb();
-                }
-
                 this._is_exploding = false;
                 this._explosion_start_time = -1;
-                this._explosion_cb = null;
+                this.callExplosionCompleteCallback();
             }
         }
     }
@@ -3365,7 +3376,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _explosion_rays: LightRay[];
     private _orig_offset_x: number;
     private _orig_offset_y: number;
-    private _explosion_cb: () => void;
+
+    private _onExplosionComplete: () => void;
 
     /// Selection box
     private _selection_highlight_box: HighlightBox;

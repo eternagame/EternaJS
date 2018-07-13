@@ -6,6 +6,13 @@ import {EternaURL} from "../net/EternaURL";
 import {Pose2D} from "../pose2D/Pose2D";
 import {ConstraintType} from "./Constraints";
 
+export interface BoostersData {
+    mission?: any;
+    paint_tools?: any;
+    actions?: any;
+    mission_cleared?: any;
+}
+
 export enum PuzzleType {
     BASIC = "Basic",
     SWITCH_BASIC = "SwitchBasic",
@@ -320,7 +327,7 @@ export class Puzzle {
         this._booster_defs = obj;
     }
 
-    public get_boosters(): any {
+    public get_boosters(): BoostersData {
         return this._booster_defs;
     }
 
@@ -604,7 +611,7 @@ export class Puzzle {
     private _next_puzzle: number = -1;
     private _hint: string = null;
     private _is_soft_constraint: boolean = false;
-    private _booster_defs: Object = null;
+    private _booster_defs: BoostersData = null;
 
     private static readonly T_APTAMER: string[] = ["aptamer", "aptamer+oligo"];
     private static readonly T_OLIGO: string[] = ["oligo", "aptamer+oligo"];
