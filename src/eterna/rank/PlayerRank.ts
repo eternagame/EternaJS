@@ -3,9 +3,9 @@
     public score: number;
     public rank: number;
 
-    public constructor(name: string, score: number) {
+    public constructor(name: string, score: number | string) {
         this.name = name;
-        this.score = score;
+        this.score = Number(score);
         this.rank = 0;
     }
 
