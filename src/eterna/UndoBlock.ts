@@ -1,3 +1,4 @@
+import {JSONUtil} from "../flashbang/util/JSONUtil";
 import {EPars} from "./EPars";
 import {Folder} from "./folding/Folder";
 import {Plot, PlotType} from "./Plot";
@@ -46,19 +47,19 @@ export class UndoBlock {
 
     public fromJson(json: any): void {
         try {
-            this._sequence = json['sequence_'];
-            this._pairs_array = json['pairs_array_'];
-            this._params_array = json['params_array_'];
-            this._stable = json['stable_'];
-            this._target_oligo = json['target_oligo_'];
-            this._target_oligos = json['target_oligos_'];
-            this._oligo_order = json['oligo_order_'];
-            this._oligos_paired = json['oligos_paired_'];
-            this._target_pairs = json['target_pairs_'];
-            this._target_oligo_order = json['target_oligo_order_'];
-            this._puzzle_locks = json['puzzle_locks_'];
-            this._forced_struct = json['forced_struct_'];
-            this._target_conditions = json['target_conditions_'];
+            this._sequence = JSONUtil.require(json, 'sequence_');
+            this._pairs_array = JSONUtil.require(json, 'pairs_array_');
+            this._params_array = JSONUtil.require(json, 'params_array_');
+            this._stable = JSONUtil.require(json, 'stable_');
+            this._target_oligo = JSONUtil.require(json, 'target_oligo_');
+            this._target_oligos = JSONUtil.require(json, 'target_oligos_');
+            this._oligo_order = JSONUtil.require(json, 'oligo_order_');
+            this._oligos_paired = JSONUtil.require(json, 'oligos_paired_');
+            this._target_pairs = JSONUtil.require(json, 'target_pairs_');
+            this._target_oligo_order = JSONUtil.require(json, 'target_oligo_order_');
+            this._puzzle_locks = JSONUtil.require(json, 'puzzle_locks_');
+            this._forced_struct = JSONUtil.require(json, 'forced_struct_');
+            this._target_conditions = JSONUtil.require(json, 'target_conditions_');
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
