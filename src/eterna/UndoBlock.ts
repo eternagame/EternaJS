@@ -28,37 +28,37 @@ export class UndoBlock {
 
     public toJson(): any {
         return {
-            _sequence: this._sequence,
-            _pairs_array: this._pairs_array,
-            _params_array: this._params_array,
-            _stable: this._stable,
-            _target_oligo: this._target_oligo,
-            _target_oligos: this._target_oligos,
-            _oligo_order: this._oligo_order,
-            _oligos_paired: this._oligos_paired,
-            _target_pairs: this._target_pairs,
-            _target_oligo_order: this._target_oligo_order,
-            _puzzle_locks: this._puzzle_locks,
-            _forced_struct: this._forced_struct,
-            _target_conditions: this._target_conditions
+            sequence_: this._sequence,
+            pairs_array_: this._pairs_array,
+            params_array_: this._params_array,
+            stable_: this._stable,
+            target_oligo_: this._target_oligo,
+            target_oligos_: this._target_oligos,
+            oligo_order_: this._oligo_order,
+            oligos_paired_: this._oligos_paired,
+            target_pairs_: this._target_pairs,
+            target_oligo_order_: this._target_oligo_order,
+            puzzle_locks_: this._puzzle_locks,
+            forced_struct_: this._forced_struct,
+            target_conditions_: this._target_conditions
         };
     }
 
     public fromJson(json: any): void {
         try {
-            this._sequence = json['_sequence'];
-            this._pairs_array = json['_pairs_array'];
-            this._params_array = json['_params_array'];
-            this._stable = json['_stable'];
-            this._target_oligo = json['_target_oligo'];
-            this._target_oligos = json['_target_oligos'];
-            this._oligo_order = json['_oligo_order'];
-            this._oligos_paired = json['_oligos_paired'];
-            this._target_pairs = json['_target_pairs'];
-            this._target_oligo_order = json['_target_oligo_order'];
-            this._puzzle_locks = json['_puzzle_locks'];
-            this._forced_struct = json['_forced_struct'];
-            this._target_conditions = json['_target_conditions'];
+            this._sequence = json['sequence_'];
+            this._pairs_array = json['pairs_array_'];
+            this._params_array = json['params_array_'];
+            this._stable = json['stable_'];
+            this._target_oligo = json['target_oligo_'];
+            this._target_oligos = json['target_oligos_'];
+            this._oligo_order = json['oligo_order_'];
+            this._oligos_paired = json['oligos_paired_'];
+            this._target_pairs = json['target_pairs_'];
+            this._target_oligo_order = json['target_oligo_order_'];
+            this._puzzle_locks = json['puzzle_locks_'];
+            this._forced_struct = json['forced_struct_'];
+            this._target_conditions = json['target_conditions_'];
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
