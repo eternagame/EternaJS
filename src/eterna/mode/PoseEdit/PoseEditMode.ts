@@ -2230,37 +2230,40 @@ export class PoseEditMode extends GameMode {
             return false;
         }
         this.clear_undo_stack();
-        let msecs: number = 0;
-        let a: any[];
-        let objs: any[] = AutosaveManager.loadObjects(token);
+
+        let json: any[] = AutosaveManager.loadObjects(token);
         // no saved data
-        if (objs == null) {
+        if (json == null) {
             // if (this.root.loaderInfo.parameters.inputsequence != null) {
             //     a = EPars.string_to_sequence_array(this.root.loaderInfo.parameters.inputsequence);
             // } else {
             //     return false;
             // }
             return false;
-        } else {
-            a = objs[1];
-            msecs = objs[0];
-            for (let ii = 0; ii < this._poses.length; ++ii) {
-                if (objs[ii + 2] != null) {
-                    let undo_block: UndoBlock = new UndoBlock([]);
-                    undo_block.fromJson(JSON.parse(objs[ii + 2]));
+        }
 
-                    /// JEEFIX : Don't override secstruct from autoload without checking whther the puzzle can vary length.
-                    /// KWSFIX : Only allow when shiftable mode (=> shift_limit = 0)
-
-                    if (this._puzzle.get_shift_limit() == 0 && undo_block.get_target_pairs().length != this._target_pairs[ii].length) {
-                        return false;
-                    }
-
-                    this._target_pairs[ii] = undo_block.get_target_pairs();
-                    this._target_oligos_order[ii] = undo_block.get_target_oligo_order();
-
-                    this.set_poses_with_undo_block(ii, undo_block);
+        let a: any[] = json[1];
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            if (json[ii + 2] != null) {
+                let undo_block: UndoBlock = new UndoBlock([]);
+                try {
+                    undo_block.fromJson(JSON.parse(json[ii + 2]));
+                } catch (e) {
+                    log.error("Error loading saved puzzle data", e);
+                    return false;
                 }
+
+                /// JEEFIX : Don't override secstruct from autoload without checking whther the puzzle can vary length.
+                /// KWSFIX : Only allow when shiftable mode (=> shift_limit = 0)
+
+                if (this._puzzle.get_shift_limit() == 0 && undo_block.get_target_pairs().length != this._target_pairs[ii].length) {
+                    return false;
+                }
+
+                this._target_pairs[ii] = undo_block.get_target_pairs();
+                this._target_oligos_order[ii] = undo_block.get_target_oligo_order();
+
+                this.set_poses_with_undo_block(ii, undo_block);
             }
         }
 
