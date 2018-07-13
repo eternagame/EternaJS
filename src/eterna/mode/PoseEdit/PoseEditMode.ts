@@ -1807,40 +1807,45 @@ export class PoseEditMode extends GameMode {
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
         }
 
-        Eterna.client.submit_solution(post_data).then((res) => {
-            submittingRef.destroyObject();
+        let submissionResponse: any;
+        Eterna.client.submit_solution(post_data)
+            .then(response => {
+                submissionResponse = response;
+                return this.waitTillActive();
+            })
+            .then(() => {
+                submittingRef.destroyObject();
 
-            let data: any = res['data'];
-
-            if (data['error'] != null) {
-                if (data['error'].indexOf('barcode') >= 0) {
-                    let dialog = this.showNotificationDialog(data['error'], "More Information");
-                    dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
-                    let hairpin: string = EPars.get_barcode_hairpin(seq_string);
-                    if (hairpin != null) {
-                        SolutionManager.instance.add_hairpins([hairpin]);
-                        this.checkConstraints();
+                let data: any = submissionResponse['data'];
+                if (data['error'] != null) {
+                    if (data['error'].indexOf('barcode') >= 0) {
+                        let dialog = this.showNotificationDialog(data['error'], "More Information");
+                        dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
+                        let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+                        if (hairpin != null) {
+                            SolutionManager.instance.add_hairpins([hairpin]);
+                            this.checkConstraints();
+                        }
+                    } else {
+                        this.showNotificationDialog(data['error']);
                     }
-                } else {
-                    this.showNotificationDialog(data['error']);
-                }
 
-            } else {
-                if (data['solution-id'] != null) {
-                    this.set_ancestor_id(data['solution-id']);
-                }
-
-                let cheevs: any = res['new_achievements'];
-                if (cheevs != null) {
-                    AchievementManager.award_achievement(cheevs).then(() => this.after_achievements(data, seq_string));
                 } else {
-                    this.after_achievements(data, seq_string);
+                    if (data['solution-id'] != null) {
+                        this.set_ancestor_id(data['solution-id']);
+                    }
+
+                    let cheevs: any = submissionResponse['new_achievements'];
+                    if (cheevs != null) {
+                        AchievementManager.award_achievement(cheevs).then(() => this.onAchievementsAwarded(data, seq_string));
+                    } else {
+                        this.onAchievementsAwarded(data, seq_string);
+                    }
                 }
-            }
-        });
+            });
     }
 
-    private after_achievements(data: any, seq_string: string): void {
+    private onAchievementsAwarded(data: any, seq_string: string): void {
         if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
             if (this._puzzle.get_use_barcode()) {
                 let hairpin: string = EPars.get_barcode_hairpin(seq_string);

@@ -76,6 +76,40 @@ export class AppMode {
         return this._runningTime;
     }
 
+    /**
+     * Returns a Promise that will succeed when the mode is active.
+     * If the mode is currently active, the Promise will immediately resolve.
+     * Otherwise, it will resolve when the mode is next entered.
+     * If the mode is disposed before being re-entered, the Promise will fail.
+     */
+    public waitTillActive(): Promise<void> {
+        if (this._isDiposed) {
+            return Promise.reject("Mode is already disposed");
+        } else if (this._isActive) {
+            return Promise.resolve();
+        } else {
+            return new Promise((resolve, reject) => {
+                this._entered.connect(() => {
+                    if (resolve != null) {
+                        let fn = resolve;
+                        resolve = null;
+                        reject = null;
+                        fn();
+                    }
+                });
+
+                this._disposed.connect(() => {
+                    if (reject != null) {
+                        let fn = reject;
+                        resolve = null;
+                        reject = null;
+                        fn("Mode was disposed");
+                    }
+                });
+            });
+        }
+    }
+
     public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
@@ -105,7 +139,7 @@ export class AppMode {
     }
 
     public get isLiveObject(): boolean {
-        return !this._disposed;
+        return !this._isDiposed;
     }
 
     /**
@@ -157,8 +191,8 @@ export class AppMode {
 
     /*internal*/
     disposeInternal(): void {
-        Assert.isTrue(!this._disposed, "already disposed");
-        this._disposed = true;
+        Assert.isTrue(!this._isDiposed, "already disposed");
+        this._isDiposed = true;
 
         this.dispose();
 
@@ -177,18 +211,20 @@ export class AppMode {
 
         this._modeSprite.destroy({children: true});
         this._modeSprite = null;
+
+        this._disposed.emit();
     }
 
     /*internal*/
     enterInternal(): void {
-        this._active = true;
+        this._isActive = true;
         this.enter();
         this._entered.emit();
     }
 
     /*internal*/
     exitInternal(): void {
-        this._active = false;
+        this._isActive = false;
         this.exit();
     }
 
@@ -233,6 +269,7 @@ export class AppMode {
 
     protected _updateComplete: UnitSignal = new UnitSignal();
     protected _entered: UnitSignal = new UnitSignal();
+    protected _disposed: UnitSignal = new UnitSignal();
 
     protected _modeSprite: Container = new Container();
     protected _modeStack: ModeStack;
@@ -245,8 +282,8 @@ export class AppMode {
 
     protected _regs: RegistrationGroup = new RegistrationGroup();
 
-    protected _active: boolean;
-    protected _disposed: boolean;
+    protected _isActive: boolean;
+    protected _isDiposed: boolean;
 }
 
 class RootObject extends GameObject {
