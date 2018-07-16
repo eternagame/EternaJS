@@ -6,7 +6,10 @@ import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
+import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
+import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {Assert} from "../../../flashbang/util/Assert";
+import {Easing} from "../../../flashbang/util/Easing";
 import {AchievementManager} from "../../achievements/AchievementManager";
 import {Application} from "../../Application";
 import {EPars} from "../../EPars";
@@ -77,10 +80,10 @@ export class PoseEditMode extends GameMode {
     }
 
     protected setup(): void {
-        this._background = new Background();
-        this.addObject(this._background, this.modeSprite);
-
         super.setup();
+
+        this._background = new Background();
+        this.addObject(this._background, this._bgLayer);
 
         // this._mission_container = Application.instance.get_front_object_container();
         // if (this._mission_container == null) this._mission_container = this;
@@ -187,7 +190,7 @@ export class PoseEditMode extends GameMode {
         // this._game_stamp.visible = false;
         // this.addObject(this._game_stamp);
 
-        this._exit_button = new GameButton().up(Bitmaps.ImgNextInside);
+        this._exit_button = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exit_button.display.scale = new Point(0.3, 0.3);
         this._exit_button.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._exit_button.display.visible = false;
@@ -1315,19 +1318,11 @@ export class PoseEditMode extends GameMode {
         this.deselect_all_colorings();
     }
 
-    private keep_playing(): void {
-        this.hide_end_curtain();
-        this._exit_button.display.alpha = 0;
-        this._exit_button.display.visible = true;
-        this._exit_button.addObject(new AlphaTask(1, 0.3));
-
-        this._constraintsLayer.visible = true;
-    }
-
     private exit_puzzle(): void {
-        log.debug("TODO: exit_puzzle. We should not show missionCleared here.");
-        // this.showMissionCleared();
-        this._exit_button.display.visible = false;
+        if (this._submitSolutionRspData == null) {
+            throw new Error("exit_puzzle was called before we submitted a solution");
+        }
+        this.showMissionClearedPanel(this._submitSolutionRspData);
     }
 
     private ask_retry(): void {
@@ -1802,7 +1797,7 @@ export class PoseEditMode extends GameMode {
 
         // Kick off a BubbleSweep animation
         let bubbles = new BubbleSweep(800);
-        this.addObject(bubbles, this.modeSprite);
+        this.addObject(bubbles, this._bgLayer);
         bubbles.start_sweep();
 
         // Show an explosion animation
@@ -1819,57 +1814,61 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        let submissionResponse: any = null;
-        let missionClearedPanel: MissionClearedPanel = null;
+        // submit our solution to the server
+        log.debug("Submitting solution...");
+        let submissionPromise = Eterna.client.submit_solution(this.createSubmitData(details, undoBlock));
 
         // Wait for explosion completion
         explosionCompletePromise.then(() => {
             bubbles.decay_sweep();
+            bubbles.addObject(new SerialTask(
+                new AlphaTask(0, 5, Easing.easeIn),
+                new SelfDestructTask()
+            ));
 
             this.set_show_menu(false);
-            this.disable_tools(true);
             for (let pose of this._poses) {
                 pose.set_show_total_energy(false);
                 pose.clear_explosion();
             }
 
-            // Show the MissionCleared panel
-            let infoText: string = null;
-            let moreText: string = null;
-            let boostersData = this._puzzle.get_boosters();
-            if (boostersData != null && boostersData.mission_cleared != null) {
-                infoText = boostersData.mission_cleared["info"];
-                moreText = boostersData.mission_cleared["more"];
-            }
-
-            missionClearedPanel = new MissionClearedPanel(false, infoText, moreText);
-            missionClearedPanel.display.alpha = 0;
-            missionClearedPanel.addObject(new AlphaTask(1, 0.3));
-            this.addObject(missionClearedPanel, this._dialogLayer);
-
             this._constraintsLayer.visible = false;
 
-            // submit our solution to the server
-            log.debug("Submitting solution...");
-            return Eterna.client.submit_solution(this.createSubmitData(details, undoBlock));
+        }).then(() => {
+            // Wait for the submission to the server, and for the mode to be active.
+            // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
+            // during submission, we want to wait till we're the top-most mode before executing more view logic.
+            return Promise.all([submissionPromise, this.waitTillActive()]);
         })
-        .then(response => {
-            // Ensure the mode is active
-            submissionResponse = response;
-            return this.waitTillActive();
+        .then(allResults => {
+            // 'allResults' contains the results of our submission, and the "waitTillActive" void promise
+            let submissionResponse = allResults[0];
+
+            // show achievements, if we were awarded any
+            let cheevs: any = submissionResponse['new_achievements'];
+            if (cheevs != null) {
+                return AchievementManager.award_achievement(cheevs).then(() => submissionResponse);
+            } else {
+                return Promise.resolve(submissionResponse);
+            }
         })
-        .then(() => {
+        .then(submissionResponse => {
             submittingRef.destroyObject();
 
-            const seq_string = EPars.sequence_array_to_string(
-                this._puzzle.transform_sequence(undoBlock.get_sequence(), 0));
+            this.trigger_ending();
 
             let data: any = submissionResponse['data'];
+
+            this.showMissionClearedPanel(data);
+
+            const seqString = EPars.sequence_array_to_string(
+                this._puzzle.transform_sequence(undoBlock.get_sequence(), 0));
+
             if (data['error'] != null) {
                 if (data['error'].indexOf('barcode') >= 0) {
                     let dialog = this.showNotificationDialog(data['error'], "More Information");
                     dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
-                    let hairpin: string = EPars.get_barcode_hairpin(seq_string);
+                    let hairpin: string = EPars.get_barcode_hairpin(seqString);
                     if (hairpin != null) {
                         SolutionManager.instance.add_hairpins([hairpin]);
                         this.checkConstraints();
@@ -1883,40 +1882,72 @@ export class PoseEditMode extends GameMode {
                     this.set_ancestor_id(data['solution-id']);
                 }
 
-                let cheevs: any = submissionResponse['new_achievements'];
-                if (cheevs != null) {
-                    AchievementManager.award_achievement(cheevs).then(() => {
-                        this.onAchievementsAwarded(data, seq_string, missionClearedPanel);
-                    });
-                } else {
-                    this.onAchievementsAwarded(data, seq_string, missionClearedPanel);
+                if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+                    if (this._puzzle.get_use_barcode()) {
+                        let hairpin: string = EPars.get_barcode_hairpin(seqString);
+                        if (hairpin != null) {
+                            SolutionManager.instance.add_hairpins([hairpin]);
+                            this.checkConstraints();
+                        }
+                    }
                 }
             }
         });
     }
 
-    private onAchievementsAwarded(submissionRsp: any, seqString: string, missionCleared: MissionClearedPanel): void {
-        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
-            if (this._puzzle.get_use_barcode()) {
-                let hairpin: string = EPars.get_barcode_hairpin(seqString);
-                if (hairpin != null) {
-                    SolutionManager.instance.add_hairpins([hairpin]);
-                    this.checkConstraints();
-                }
-            }
+    private showMissionClearedPanel(submitSolutionRspData: any): void {
+        this._submitSolutionRspData = submitSolutionRspData;
 
-        } else {
-            let nextPuzzleData: any = submissionRsp['next-puzzle'];
-            let nextPuzzle: Puzzle = null;
-            if (nextPuzzleData) {
-                nextPuzzle = PuzzleManager.instance.parse_puzzle(nextPuzzleData);
-            }
+        this.disable_tools(true);
+        this._constraintsLayer.visible = false;
+        this._exit_button.display.visible = false;
 
-            this.update_next_puzzle_widget(nextPuzzle);
-            this.trigger_ending();
-
-            missionCleared.createRankScroll(submissionRsp);
+        let infoText: string = null;
+        let moreText: string = null;
+        let boostersData = this._puzzle.get_boosters();
+        if (boostersData != null && boostersData.mission_cleared != null) {
+            infoText = boostersData.mission_cleared["info"];
+            moreText = boostersData.mission_cleared["more"];
         }
+
+        let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
+        let nextPuzzle: Puzzle = null;
+        if (nextPuzzleData) {
+            nextPuzzle = PuzzleManager.instance.parse_puzzle(nextPuzzleData);
+        }
+
+        let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
+        missionClearedPanel.display.alpha = 0;
+        missionClearedPanel.addObject(new AlphaTask(1, 0.3));
+        this.addObject(missionClearedPanel, this._dialogLayer);
+        missionClearedPanel.createRankScroll(submitSolutionRspData);
+
+        const keepPlaying = () => {
+            if (missionClearedPanel != null) {
+                missionClearedPanel.destroySelf();
+                missionClearedPanel = null;
+
+                this._constraintsLayer.visible = true;
+                this.disable_tools(false);
+
+                this._exit_button.display.alpha = 0;
+                this._exit_button.display.visible = true;
+                this._exit_button.addObject(new AlphaTask(1, 0.3));
+            }
+        };
+
+        if (nextPuzzle != null) {
+            missionClearedPanel.nextButton.clicked.connect(() => {
+                this.modeStack.changeMode(new PoseEditMode(nextPuzzle));
+            });
+        } else {
+            missionClearedPanel.nextButton.clicked.connect(() => {
+                keepPlaying();
+                window.open(EternaURL.getFeedURL(), "_self");
+            });
+        }
+
+        missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
     }
 
     private deselect_all_colorings(): void {
@@ -2260,34 +2291,6 @@ export class PoseEditMode extends GameMode {
 
         this._toolbar.palette.reset_overrides();
         this._toolbar.palette.change_default_mode();
-    }
-
-    private update_next_puzzle_widget(puzzle: Puzzle): void {
-        log.debug("TODO: update_next_puzzle_widget");
-        // if (puzzle == null) {
-        //     this._mission_cleared.set_callbacks(null, this.keep_playing);
-        //     return;
-        // }
-        //
-        // let pairs: any[] = EPars.parenthesis_to_pair_array(puzzle.get_secstruct());
-        // let seq: any[] = [];
-        //
-        // for (let i: number = 0; i < pairs.length; i++) {
-        //     seq.push(EPars.RNABASE_ADENINE);
-        // }
-        //
-        // this._mission_cleared.set_callbacks(() => {
-        //     // if tutorial script ran, we need to reset visibilities for the next puzzle
-        //     this.set_default_visibilities();
-        //
-        //     this._move_count = 0;
-        //     this._moves = [];
-        //
-        //     Application.instance.StopRScript();
-        //     Application.instance.InitializeRScript(puzzle);
-        //     this.set_puzzle(puzzle, null);
-        //     Application.instance.StartRScript();
-        // }, this.keep_playing);
     }
 
     private move_history_add_mutations(before: any[], after: any[]): void {
@@ -4122,6 +4125,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private trigger_ending(): void {
+        log.debug("TODO: trigger_ending");
         // let state_dict: Map<any, any> = new Map();
         // this._puzzle_events.process_events(state_dict);
     }
@@ -4162,6 +4166,8 @@ export class PoseEditMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private readonly _initSeq: number[];
     private readonly _isReset: boolean;
+
+    private _constraintsLayer: Container;
 
     private _background: Background;
 
@@ -4206,7 +4212,6 @@ export class PoseEditMode extends GameMode {
     private _hint_text: Text;
 
     /// constraints && scoring display
-    private _constraintsLayer: Container;
     private _constraint_boxes: ConstraintBox[];
     private _constraint_shape_boxes: ConstraintBox[];
     private _constraint_antishape_boxes: ConstraintBox[];
@@ -4255,6 +4260,9 @@ export class PoseEditMode extends GameMode {
     private _show_mission_screen: boolean = true;
     private _override_show_constraints: boolean = true;
     private _ancestor_id: number;
+
+    // Will be non-null after we submit our solution to the server
+    private _submitSolutionRspData: any;
 }
 
 class AsyncOp {

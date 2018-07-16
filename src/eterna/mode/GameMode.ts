@@ -15,6 +15,9 @@ export abstract class GameMode extends AppMode {
     protected setup(): void {
         super.setup();
 
+        this._bgLayer = new Container();
+        this.modeSprite.addChild(this._bgLayer);
+
         this._pose_fields_container = new ContainerObject();
         this.addObject(this._pose_fields_container, this.modeSprite);
 
@@ -190,6 +193,7 @@ export abstract class GameMode extends AppMode {
         return null;
     }
 
+    protected _bgLayer: Container;
     protected _uiLayer: Container;
     protected _dialogLayer: Container;
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;

@@ -1,11 +1,10 @@
-import {Graphics, Point, Text} from "pixi.js";
+import {Container, Graphics, Point, Text} from "pixi.js";
 import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
+import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Eterna} from "../../Eterna";
-import {EternaURL} from "../../net/EternaURL";
 import {RankScroll} from "../../rank/RankScroll";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
@@ -41,37 +40,36 @@ export class MissionClearedPanel extends ContainerObject {
             .tooltip("Stay in this puzzle and review your design");
         this.addObject(this.closeButton, this.container);
 
-        this._panel = new GamePanel(GamePanelType.INVISIBLE);
-        this._panel.display.visible = false;
-        this.addObject(this._panel, this.container);
+        this._contentLayout = new VLayoutContainer(25, Align.CENTER);
+        this.container.addChild(this._contentLayout);
 
-        this._title = Fonts.std_light("Mission Accomplished!", 36).color(0xFFCC00).build();
-        this.container.addChild(this._title);
+        this._contentLayout.addChild(Fonts.std_light("Mission Accomplished!", 36).color(0xFFCC00).build());
 
         const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
-        this._tfInfo = Fonts.std_regular(infoText, 20).color(0xffffff).hAlignCenter().build();
+        this._contentLayout.addChild(Fonts.std_regular(infoText, 20).color(0xffffff).hAlignCenter().build());
 
-        this.container.addChild(this._tfInfo);
+        if (this._moreText != null) {
+            this._contentLayout.addChild(Fonts.std_regular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
+        }
 
-        this._heading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
-        this._panel.addObject(this._heading, this._panel.container);
+        this._rankScrollContainer = new Container();
+        this._rankScrollContainer.visible = false;
+        this._contentLayout.addChild(this._rankScrollContainer);
+
+        this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
+        this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
         this._tfPlayer = Fonts.std_bold("PLAYER", 14).bold().color(0xffffff).build();
         this._tfPlayer.position = new Point(10, 0);
-        this._heading.container.addChild(this._tfPlayer);
+        this._rankScrollHeading.container.addChild(this._tfPlayer);
 
         let tfRank: Text = Fonts.std_bold("RANK", 14).bold().color(0xffffff).build();
         tfRank.position = new Point(10 + 130, 0);
-        this._heading.container.addChild(tfRank);
+        this._rankScrollHeading.container.addChild(tfRank);
 
         let tfCoin: Text = Fonts.std_bold("POINTS", 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 0);
-        this._heading.container.addChild(tfCoin);
-
-        if (this._moreText != null) {
-            this._tfScience = Fonts.std_regular(this._moreText, 16).color(0xffffff).hAlignCenter().build();
-            this._panel.container.addChild(this._tfScience);
-        }
+        this._rankScrollHeading.container.addChild(tfCoin);
 
         this.nextButton = new GameButton().label(this._hasNextPuzzle ? "NEXT PUZZLE" : "WHAT'S NEXT?");
         this.nextButton.display.position = new Point(
@@ -94,7 +92,7 @@ export class MissionClearedPanel extends ContainerObject {
         this._rankScroll = RankScroll.fromSubmissionResponse(submissionRsp);
         this._rankScroll.display.alpha = 0;
         this._rankScroll.addObject(new AlphaTask(1, 0.5));
-        this._panel.addObject(this._rankScroll, this._panel.container);
+        this.addObject(this._rankScroll, this._rankScrollContainer);
         this.onResize();
 
         // Execute animation
@@ -116,77 +114,37 @@ export class MissionClearedPanel extends ContainerObject {
     }
 
     private doLayout(): void {
-        let margin: number = 25;
-        let h_walker: number = 0;
-
-        this._panel.display.visible = (this._rankScroll != null);
-        this.closeButton.display.visible = this._panel.display.visible;
-        this.nextButton.display.visible = this._panel.display.visible;
-        // this._tfLoading.visible = !this._panel.display.visible;
-
-        this._title.position = new Point(
-            (MissionClearedPanel.WIDTH - this._title.width) * 0.5,
-            h_walker);
-        h_walker += this._title.height + margin;
-
-        // if (this._rankscroll != null) {
-        //     this._tfInfo.set_autosize(false, false, this._rankscroll.width - 2 * margin);
-        // }
-        this._tfInfo.position = new Point(margin, h_walker);
-        h_walker += this._tfInfo.height + margin;
-
-        if (this._tfScience != null) {
-            // if (this._rankscroll != null) {
-            //     let w: number = this._rankscroll.container.width - 2 * margin;
-            //     this._tfScience.set_autosize(false, false, w);
-            // }
-            this._tfScience.position = new Point(margin, h_walker);
-            h_walker += this._tfScience.height + margin;
-        }
-
-        if (this._rankScroll != null) {
-            h_walker += margin - 15;
-
-            this._heading.set_size(310, this._tfPlayer.height);
-            this._heading.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
-                h_walker);
-            h_walker += 10 + this._tfPlayer.height;
-
-            this._rankScroll.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
-                h_walker);
-        }
-
-        if (this._rankScroll != null) {
-            this.nextButton.display.position = new Point(
-                MissionClearedPanel.WIDTH - (this._rankScroll.container.width * 0.5) - this.nextButton.container.width * 0.5,
-                Flashbang.stageHeight - margin - this.nextButton.container.height);
-        } else {
-            this.nextButton.display.position = new Point(
-                MissionClearedPanel.WIDTH - 40 - this.nextButton.container.width * 0.5,
-                Flashbang.stageHeight - margin - this.nextButton.container.height);
-        }
-        h_walker += this.nextButton.container.height;
-
-        if (this._rankScroll != null) {
-            this._panel.set_size(this._rankScroll.container.width, h_walker);
-            this._panel.display.position = new Point(
-                MissionClearedPanel.WIDTH - this._rankScroll.container.width,
-                (Flashbang.stageHeight - h_walker) * 0.5);
-        }
+        this._rankScrollContainer.visible = (this._rankScroll != null);
+        this.closeButton.display.visible = this._rankScrollContainer.visible;
+        this.nextButton.display.visible = this._rankScrollContainer.visible;
 
         DisplayUtil.positionRelative(
             this.closeButton.display, Align.RIGHT, Align.TOP,
             this._bg, Align.RIGHT, Align.TOP,
             -10, 10);
-    }
 
-    private static go_to_feed(): void {
-        let url: string = Eterna.player_id == 0 ?
-            EternaURL.generate_url({"page": "register"}) :
-            EternaURL.generate_url({"page": "me"});
-        window.open(url, "_self");
+        DisplayUtil.positionRelative(
+            this.nextButton.display, Align.CENTER, Align.BOTTOM,
+            this._bg, Align.CENTER, Align.BOTTOM,
+            0, -25);
+
+        // this._tfLoading.visible = !this._panel.display.visible;
+
+        if (this._rankScroll != null) {
+            this._rankScrollHeading.set_size(310, this._tfPlayer.height);
+            this._rankScrollHeading.display.position = new Point(
+                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
+                0);
+
+            this._rankScroll.display.position = new Point(
+                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
+                10 + this._tfPlayer.height);
+        }
+
+        this._contentLayout.layout(true);
+        this._contentLayout.position = new Point(
+            (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
+            (Flashbang.stageHeight - this._contentLayout.height) * 0.5);
     }
 
     private readonly _infoText: string;
@@ -195,15 +153,13 @@ export class MissionClearedPanel extends ContainerObject {
 
     private readonly _bg: Graphics;
 
-    private _panel: GamePanel;
+    private _contentLayout: VLayoutContainer;
 
     // private _tfLoading: Text;
-    private _title: Text;
-    private _tfInfo: Text;
-    private _tfScience: Text;
 
-    private _heading: GamePanel;
+    private _rankScrollHeading: GamePanel;
     private _tfPlayer: Text;
+    private _rankScrollContainer: Container;
     private _rankScroll: RankScroll = null;
 
     private static readonly WIDTH: number = 470;
