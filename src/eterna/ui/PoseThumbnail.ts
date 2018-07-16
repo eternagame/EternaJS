@@ -5,7 +5,7 @@ import {Constants} from "../Constants";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {RNALayout} from "../pose2D/RNALayout";
-import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 
 export class PoseThumbnail {
     public static THUMBNAIL_BASE_COLORED: number = 0;
@@ -29,9 +29,9 @@ export class PoseThumbnail {
         let frame: DisplayObject;
 
         if (size == 1) {
-            frame = Sprite.fromImage(BitmapManager.SolutionSmallFrame);
+            frame = Sprite.fromImage(Bitmaps.SolutionSmallFrame);
         } else if (size == 2) {
-            frame = Sprite.fromImage(BitmapManager.SolutionBigFrame);
+            frame = Sprite.fromImage(Bitmaps.SolutionBigFrame);
         } else if (size == 3) {
             frame = DisplayUtil.fillRect(62, 62, 0x0);
         } else if (size == 4) {

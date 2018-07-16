@@ -9,7 +9,7 @@ import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
 import {UndoBlock, UndoBlockParam} from "../UndoBlock";
-import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";
@@ -77,14 +77,14 @@ export class SpecBox extends ContainerObject {
         this.container.addChild(this._helptext);
 
         this._zoom_in = new GameButton()
-            .allStates(BitmapManager.PlusImg)
+            .allStates(Bitmaps.PlusImg)
             .tooltip("Zoom In")
             .hotkey(KeyCode.KeyI);
         this._zoom_in.clicked.connect(() => this.dotPlotZoomIn());
         this.addObject(this._zoom_in, this.container);
 
         this._zoom_out = new GameButton()
-            .allStates(BitmapManager.MinusImg)
+            .allStates(Bitmaps.MinusImg)
             .tooltip("Zoom out")
             .hotkey(KeyCode.KeyO);
         this._zoom_out.clicked.connect(() => this.dotPlotZoomOut());

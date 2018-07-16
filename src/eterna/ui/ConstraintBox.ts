@@ -16,6 +16,7 @@ import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EPars} from "../EPars";
 import {ConstraintType} from "../puzzle/Constraints";
 import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {Fonts} from "../util/Fonts";
 import {Band} from "./Band";
 import {PoseThumbnail} from "./PoseThumbnail";
@@ -33,20 +34,20 @@ export class ConstraintBox extends ContainerObject {
         this._boxType = type;
         this.container.interactive = true;
 
-        this._puz_small_clear_bg = BitmapManager.get_bitmap(BitmapManager.NovaPuzThumbSmallMet);
-        this._puz_small_fail_bg = BitmapManager.get_bitmap(BitmapManager.NovaPuzThumbSmallFail);
-        this._puz_large_clear_bg = BitmapManager.get_bitmap(BitmapManager.NovaPuzThumbLargeMet);
-        this._puz_large_fail_bg = BitmapManager.get_bitmap(BitmapManager.NovaPuzThumbLargeFail);
+        this._puz_small_clear_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbSmallMet);
+        this._puz_small_fail_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbSmallFail);
+        this._puz_large_clear_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbLargeMet);
+        this._puz_large_fail_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbLargeFail);
 
-        this._success_outline = BitmapManager.get_bitmap(BitmapManager.NovaPassOutline);
-        this._fail_outline = BitmapManager.get_bitmap(BitmapManager.NovaFailOutline);
+        this._success_outline = BitmapManager.get_bitmap(Bitmaps.NovaPassOutline);
+        this._fail_outline = BitmapManager.get_bitmap(Bitmaps.NovaFailOutline);
 
         if (ConstraintBox._A == null) {
-            ConstraintBox._A = BitmapManager.get_bitmap(BitmapManager.BaseAMid);
-            ConstraintBox._G = BitmapManager.get_bitmap(BitmapManager.BaseGMid);
-            ConstraintBox._U = BitmapManager.get_bitmap(BitmapManager.BaseUMid);
-            ConstraintBox._C = BitmapManager.get_bitmap(BitmapManager.BaseCMid);
-            ConstraintBox._W = BitmapManager.get_bitmap(BitmapManager.BaseWMidPattern);
+            ConstraintBox._A = BitmapManager.get_bitmap(Bitmaps.BaseAMid);
+            ConstraintBox._G = BitmapManager.get_bitmap(Bitmaps.BaseGMid);
+            ConstraintBox._U = BitmapManager.get_bitmap(Bitmaps.BaseUMid);
+            ConstraintBox._C = BitmapManager.get_bitmap(Bitmaps.BaseCMid);
+            ConstraintBox._W = BitmapManager.get_bitmap(Bitmaps.BaseWMidPattern);
         }
 
         this._bgGraphics = new Graphics();
@@ -171,7 +172,7 @@ export class ConstraintBox extends ContainerObject {
             this.container.addChild(this._side_txt);
         }
 
-        this._check = new Sprite(BitmapManager.get_bitmap(BitmapManager.NovaGreenCheck));
+        this._check = new Sprite(BitmapManager.get_bitmap(Bitmaps.NovaGreenCheck));
         this._check.position = new Point(80, 50);
         this._check.visible = false;
         this.container.addChild(this._check);
@@ -340,8 +341,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaBoostMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaBoostReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaBoostMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaBoostReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -374,8 +375,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaNoGUMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaNoGUReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaNoGUMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaNoGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -407,8 +408,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaGUMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaGUReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaGUMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -444,14 +445,14 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCReq);
+            this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCReq);
             if (constraintType == ConstraintType.NOGC) {
                 this._req.texture = isMissionScreen ?
-                    BitmapManager.get_bitmap(BitmapManager.NovaNoGCMissionReq) :
-                    BitmapManager.get_bitmap(BitmapManager.NovaNoGCReq);
+                    BitmapManager.get_bitmap(Bitmaps.NovaNoGCMissionReq) :
+                    BitmapManager.get_bitmap(Bitmaps.NovaNoGCReq);
 
             } else if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap(BitmapManager.NovaGCMissionReq);
+                this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCMissionReq);
             }
 
             this._req.visible = true;
@@ -483,8 +484,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaAUMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaAUReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaAUMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaAUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -680,8 +681,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaPairsMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaPairsReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaPairsMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaPairsReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -795,7 +796,7 @@ export class ConstraintBox extends ContainerObject {
             this._bgGraphics.endFill();
 
             this._icon.visible = true;
-            this._icon.texture = BitmapManager.get_bitmap(BitmapManager.ImgLabReq);
+            this._icon.texture = BitmapManager.get_bitmap(Bitmaps.ImgLabReq);
             this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
 
             if (!isMissionScreen) {
@@ -863,8 +864,8 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.text = newClarifyText;
 
             this._req.texture = isMissionScreen ?
-                BitmapManager.get_bitmap(BitmapManager.NovaBarcodeMissionReq) :
-                BitmapManager.get_bitmap(BitmapManager.NovaBarcodeReq);
+                BitmapManager.get_bitmap(Bitmaps.NovaBarcodeMissionReq) :
+                BitmapManager.get_bitmap(Bitmaps.NovaBarcodeReq);
 
             this._req.visible = true;
             this._outline.visible = true;

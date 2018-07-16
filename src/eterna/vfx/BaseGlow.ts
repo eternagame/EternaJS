@@ -1,5 +1,6 @@
 ﻿import {Point, Sprite, Texture} from "pixi.js";
 import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {BitmapUtil} from "../util/BitmapUtil";
 
 export class BaseGlow extends Sprite {
@@ -43,7 +44,7 @@ export class BaseGlow extends Sprite {
 
         BaseGlow._bitmap_data = [];
         BaseGlow._bitmap_wrong_data = [];
-        let original_data: Texture = BitmapManager.get_bitmap(BitmapManager.ImgBindingBaseGlow);
+        let original_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz: number = 0; zz < 5; zz++) {
             let bitmaps_in_zoom: Texture[] = [];

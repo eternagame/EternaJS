@@ -4,6 +4,7 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {MathUtil} from "../../flashbang/util/MathUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {ColorUtil} from "../util/ColorUtil";
 import {Fonts} from "../util/Fonts";
 
@@ -73,7 +74,7 @@ export class Band extends ContainerObject implements Updatable {
             return;
         }
 
-        const satTex: Texture = BitmapManager.get_bitmap(BitmapManager.Satellite);
+        const satTex: Texture = BitmapManager.get_bitmap(Bitmaps.Satellite);
         const render = (rotation: number, colorTransform: ColorMatrixFilter = null): Texture => {
             let disp = new Graphics();
             disp.beginFill(0).drawRect(0, 0, 20, 20).endFill();

@@ -6,8 +6,9 @@ import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
-import {ROPWait} from "../rscript/ROPWait";
 import {BitmapManager} from "../resources/BitmapManager";
+import {ROPWait} from "../rscript/ROPWait";
+import {Bitmaps} from "../resources/Bitmaps";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -41,10 +42,10 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this.display.interactive = true;
 
-        this._palette_image = BitmapManager.get_bitmap(BitmapManager.ImgPalette);
-        this._palette_image_nopairs = BitmapManager.get_bitmap(BitmapManager.ImgPaletteNoPairs);
-        this._select_pair_data = BitmapManager.get_bitmap(BitmapManager.ImgSelectPair);
-        this._select_base_data = BitmapManager.get_bitmap(BitmapManager.ImgSelectBase);
+        this._palette_image = BitmapManager.get_bitmap(Bitmaps.ImgPalette);
+        this._palette_image_nopairs = BitmapManager.get_bitmap(Bitmaps.ImgPaletteNoPairs);
+        this._select_pair_data = BitmapManager.get_bitmap(Bitmaps.ImgSelectPair);
+        this._select_base_data = BitmapManager.get_bitmap(Bitmaps.ImgSelectBase);
 
         this._palette_display = new Sprite(this._palette_image);
         this.container.addChild(this._palette_display);

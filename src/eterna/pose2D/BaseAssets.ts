@@ -4,6 +4,7 @@ import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {BitmapUtil} from "../util/BitmapUtil";
 import {ColorUtil} from "../util/ColorUtil";
 import {SoundManager} from "../resources/SoundManager";
@@ -167,11 +168,11 @@ export class BaseAssets {
         BaseAssets._sphere_mid_data = [];
         BaseAssets._sphere_min_data = [];
 
-        const baseW_outline: Texture = BitmapManager.get_bitmap(BitmapManager.BaseWOutline);
-        const baseW_pattern: Texture = BitmapManager.get_bitmap(BitmapManager.BaseWPattern);
-        const baseW_mid_pattern: Texture = BitmapManager.get_bitmap(BitmapManager.BaseWMidPattern);
-        const baseW_mid_outline: Texture = BitmapManager.get_bitmap(BitmapManager.BaseWMidOutline);
-        const baseW_min: Texture = BitmapManager.get_bitmap(BitmapManager.BaseWMin);
+        const baseW_outline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWOutline);
+        const baseW_pattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWPattern);
+        const baseW_mid_pattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidPattern);
+        const baseW_mid_outline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidOutline);
+        const baseW_min: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMin);
 
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             const color: number = ExpPainter.get_color_by_level(ii);
@@ -218,8 +219,8 @@ export class BaseAssets {
         BaseAssets._baseG_bitmaps = new BaseBitmaps(EPars.RNABASE_GUANINE);
         BaseAssets._baseC_bitmaps = new BaseBitmaps(EPars.RNABASE_CYTOSINE);
 
-        BaseAssets._backbone_body_data = [BitmapManager.get_bitmap(BitmapManager.Backbone)];
-        BaseAssets._backbone_mid_data = [BitmapManager.get_bitmap(BitmapManager.BackboneMid)];
+        BaseAssets._backbone_body_data = [BitmapManager.get_bitmap(Bitmaps.Backbone)];
+        BaseAssets._backbone_mid_data = [BitmapManager.get_bitmap(Bitmaps.BackboneMid)];
 
         BitmapUtil.create_scaled(BaseAssets._backbone_body_data, 0.75, Base.NUM_ZOOM_LEVELS);
         BitmapUtil.create_scaled(BaseAssets._backbone_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
@@ -238,7 +239,7 @@ export class BaseAssets {
         BaseAssets._satellite_stronger_data = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
 
         // SPARK BITMAPS
-        BaseAssets._spark_bitmaps = BitmapUtil.create_transparent(BitmapManager.get_bitmap(BitmapManager.BonusSymbol), 10);
+        BaseAssets._spark_bitmaps = BitmapUtil.create_transparent(BitmapManager.get_bitmap(Bitmaps.BonusSymbol), 10);
 
         // SOUNDS
         // log.debug("INIT SOUND");
@@ -278,7 +279,7 @@ export class BaseAssets {
     }
 
     public static createSatelliteBitmaps(colorTransform: PIXI.filters.ColorMatrixFilter): Texture[] {
-        let baseImage: Texture = BitmapManager.get_bitmap(BitmapManager.Satellite);
+        let baseImage: Texture = BitmapManager.get_bitmap(Bitmaps.Satellite);
         let sprite = new Sprite(baseImage);
         sprite.filters = [colorTransform];
         let bitmap: Texture = TextureUtil.renderToTexture(sprite);

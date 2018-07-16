@@ -15,7 +15,7 @@ import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
-import {BitmapManager} from "../../resources/BitmapManager";
+import {Bitmaps} from "../../resources/Bitmaps";
 
 export class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
@@ -76,14 +76,14 @@ export class PoseEditToolbar extends ContainerObject {
 
         // MENU
         this.ll_menu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.ll_menu.add_menu_button(new GameButton().allStates(BitmapManager.NovaMenu));
+        this.ll_menu.add_menu_button(new GameButton().allStates(Bitmaps.NovaMenu));
         this.addObject(this.ll_menu, this._toolbarLayout);
 
         // SUBMIT BUTTON
         this.submit_button = new GameButton()
-            .up(BitmapManager.ImgSubmit)
-            .over(BitmapManager.ImgSubmitOver)
-            .down(BitmapManager.ImgSubmitHit)
+            .up(Bitmaps.ImgSubmit)
+            .over(Bitmaps.ImgSubmitOver)
+            .down(Bitmaps.ImgSubmitHit)
             .tooltip("Publish your solution!");
         if (isExperimental) {
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -94,9 +94,9 @@ export class PoseEditToolbar extends ContainerObject {
 
         // PIP BUTTON
         this.pip_button = new GameButton()
-            .up(BitmapManager.ImgPip)
-            .over(BitmapManager.ImgPipOver)
-            .down(BitmapManager.ImgPipHit)
+            .up(Bitmaps.ImgPip)
+            .over(Bitmaps.ImgPipOver)
+            .down(Bitmaps.ImgPipHit)
             .tooltip("Set PiP mode")
             .hotkey(KeyCode.KeyP);
         if (this._puzzle.get_secstructs().length > 1) {
@@ -106,9 +106,9 @@ export class PoseEditToolbar extends ContainerObject {
 
         // FREEZE
         this.freeze_button = new GameButton()
-            .up(BitmapManager.ImgFreeze)
-            .over(BitmapManager.ImgFreezeOver)
-            .selected(BitmapManager.ImgFreezeSelected)
+            .up(Bitmaps.ImgFreeze)
+            .over(Bitmaps.ImgFreezeOver)
+            .selected(Bitmaps.ImgFreezeSelected)
             .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
             .hotkey(KeyCode.KeyF);
         if (Eterna.settings.freezeButtonAlwaysVisible.value) {
@@ -118,19 +118,19 @@ export class PoseEditToolbar extends ContainerObject {
 
         // NATIVE
         this.native_button = new GameButton()
-            .up(BitmapManager.ImgNative)
-            .over(BitmapManager.ImgNativeOver)
-            .down(BitmapManager.ImgNativeSelected)
-            .selected(BitmapManager.ImgNativeSelected)
+            .up(Bitmaps.ImgNative)
+            .over(Bitmaps.ImgNativeOver)
+            .down(Bitmaps.ImgNativeSelected)
+            .selected(Bitmaps.ImgNativeSelected)
             .tooltip("Natural Mode. RNA folds into the most stable shape.");
         this.addObject(this.native_button, this._toolbarLayout);
 
         // TARGET
         this.target_button = new GameButton()
-            .up(BitmapManager.ImgTarget)
-            .over(BitmapManager.ImgTargetOver)
-            .down(BitmapManager.ImgTargetSelected)
-            .selected(BitmapManager.ImgTargetSelected)
+            .up(Bitmaps.ImgTarget)
+            .over(Bitmaps.ImgTargetOver)
+            .down(Bitmaps.ImgTargetSelected)
+            .selected(Bitmaps.ImgTargetSelected)
             .tooltip("Target Mode. RNA freezes into the desired shape.");
         this.addObject(this.target_button, this._toolbarLayout);
 
@@ -146,10 +146,10 @@ export class PoseEditToolbar extends ContainerObject {
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
 
                 this.pair_swap_button = new GameButton()
-                    .up(BitmapManager.ImgSwap)
-                    .over(BitmapManager.ImgSwapOver)
-                    .down(BitmapManager.ImgSwapOver)
-                    .selected(BitmapManager.ImgSwapSelect)
+                    .up(Bitmaps.ImgSwap)
+                    .over(Bitmaps.ImgSwapOver)
+                    .down(Bitmaps.ImgSwapOver)
+                    .selected(Bitmaps.ImgSwapSelect)
                     .hotkey(KeyCode.Digit5)
                     .tooltip("Swap paired bases.");
                 this.addObject(this.pair_swap_button, this._toolbarLayout);
@@ -163,34 +163,34 @@ export class PoseEditToolbar extends ContainerObject {
 
         // ZOOM IN, ZOOM OUT, UNDO, REDO
         this.zoom_in_button = new GameButton()
-            .up(BitmapManager.ImgZoomIn)
-            .over(BitmapManager.ImgZoomInOver)
-            .down(BitmapManager.ImgZoomInHit)
-            .disabled(BitmapManager.ImgZoomInDisable)
+            .up(Bitmaps.ImgZoomIn)
+            .over(Bitmaps.ImgZoomInOver)
+            .down(Bitmaps.ImgZoomInHit)
+            .disabled(Bitmaps.ImgZoomInDisable)
             .tooltip("Zoom in")
             .hotkey(KeyCode.Equal);
 
         this.zoom_out_button = new GameButton()
-            .up(BitmapManager.ImgZoomOut)
-            .over(BitmapManager.ImgZoomOutOver)
-            .down(BitmapManager.ImgZoomOutHit)
-            .disabled(BitmapManager.ImgZoomOutDisable)
+            .up(Bitmaps.ImgZoomOut)
+            .over(Bitmaps.ImgZoomOutOver)
+            .down(Bitmaps.ImgZoomOutHit)
+            .disabled(Bitmaps.ImgZoomOutDisable)
             .tooltip("Zoom out")
             .hotkey(KeyCode.Minus);
 
         this.undo_button = new GameButton()
-            .up(BitmapManager.ImgUndo)
-            .over(BitmapManager.ImgUndoOver)
-            .down(BitmapManager.ImgUndoHit)
-            .disabled(BitmapManager.ImgUndo)
+            .up(Bitmaps.ImgUndo)
+            .over(Bitmaps.ImgUndoOver)
+            .down(Bitmaps.ImgUndoHit)
+            .disabled(Bitmaps.ImgUndo)
             .tooltip("Undo")
             .hotkey(KeyCode.KeyZ);
 
         this.redo_button = new GameButton()
-            .up(BitmapManager.ImgRedo)
-            .over(BitmapManager.ImgRedoOver)
-            .down(BitmapManager.ImgRedoHit)
-            .disabled(BitmapManager.ImgRedo)
+            .up(Bitmaps.ImgRedo)
+            .over(Bitmaps.ImgRedoOver)
+            .down(Bitmaps.ImgRedoHit)
+            .disabled(Bitmaps.ImgRedo)
             .tooltip("Redo")
             .hotkey(KeyCode.KeyY);
 
@@ -206,20 +206,20 @@ export class PoseEditToolbar extends ContainerObject {
 
         // MENU BUTTONS
         this.view_options_button = new GameButton()
-            .allStates(BitmapManager.ImgSettings)
+            .allStates(Bitmaps.ImgSettings)
             .label("Settings", 14)
             .scaleBitmapToLabel()
             .tooltip("Game options");
         this.ll_menu.add_sub_menu_button(0, this.view_options_button);
 
         this.view_solutions_button = new GameButton()
-            .allStates(BitmapManager.ImgFile)
+            .allStates(Bitmaps.ImgFile)
             .label("Designs", 14)
             .scaleBitmapToLabel()
             .tooltip("View all submitted designs for this puzzle.");
 
         this.spec_button = new GameButton()
-            .allStates(BitmapManager.ImgSpec)
+            .allStates(Bitmaps.ImgSpec)
             .label("Specs", 14)
             .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
@@ -231,20 +231,20 @@ export class PoseEditToolbar extends ContainerObject {
         }
 
         this.retry_button = new GameButton()
-            .allStates(BitmapManager.ImgReset)
+            .allStates(Bitmaps.ImgReset)
             .label("Reset", 14)
             .scaleBitmapToLabel()
             .tooltip("Reset and try this puzzle again.");
         this.ll_menu.add_sub_menu_button(0, this.retry_button);
 
         this.copy_button = new GameButton()
-            .allStates(BitmapManager.ImgCopy)
+            .allStates(Bitmaps.ImgCopy)
             .label("Copy", 14)
             .scaleBitmapToLabel()
             .tooltip("Copy the current sequence");
 
         this.paste_button = new GameButton()
-            .allStates(BitmapManager.ImgPaste)
+            .allStates(Bitmaps.ImgPaste)
             .label("Paste", 14)
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
@@ -255,9 +255,9 @@ export class PoseEditToolbar extends ContainerObject {
         }
 
         this.hint_button = new GameButton()
-            .up(BitmapManager.ImgHint)
-            .over(BitmapManager.ImgHintOver)
-            .down(BitmapManager.ImgHintHit)
+            .up(Bitmaps.ImgHint)
+            .over(Bitmaps.ImgHintOver)
+            .down(Bitmaps.ImgHintHit)
             .hotkey(KeyCode.KeyH)
             .tooltip("Hint");
         if (this._puzzle.get_hint() != null) {

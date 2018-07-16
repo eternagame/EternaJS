@@ -23,7 +23,7 @@ import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {PlayerRank} from "../../rank/PlayerRank";
-import {BitmapManager} from "../../resources/BitmapManager";
+import {Bitmaps} from "../../resources/Bitmaps";
 import {Sounds} from "../../resources/Sounds";
 import {ActionBar} from "../../ui/ActionBar";
 import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
@@ -161,7 +161,7 @@ export class PoseEditMode extends GameMode {
         this.addObject(this._docked_spec_box, this._uiLayer);
 
         let x_button: GameButton = new GameButton()
-            .allStates(BitmapManager.ImgMaximize)
+            .allStates(Bitmaps.ImgMaximize)
             .tooltip("Re-maximize")
             .hotkey(KeyCode.KeyM);
         x_button.display.position = new Point(Flashbang.stageWidth - 22, 5);
@@ -187,7 +187,7 @@ export class PoseEditMode extends GameMode {
         // this._game_stamp.visible = false;
         // this.addObject(this._game_stamp);
 
-        this._exit_button = new GameButton().up(BitmapManager.ImgNextInside);
+        this._exit_button = new GameButton().up(Bitmaps.ImgNextInside);
         this._exit_button.display.scale = new Point(0.3, 0.3);
         this._exit_button.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._exit_button.display.visible = false;
@@ -200,7 +200,7 @@ export class PoseEditMode extends GameMode {
         this._nid_field.width = 100;
         this._nid_field.height = 20;
 
-        this._run_button = new GameButton().allStates(BitmapManager.MingFold);
+        this._run_button = new GameButton().allStates(Bitmaps.MingFold);
 
         this._run_status = Fonts.arial("idle", 16).bold().color(0xC0C0C0).build();
         this._run_status.width = 200;
@@ -625,7 +625,7 @@ export class PoseEditMode extends GameMode {
         this._folder = FolderManager.instance.get_folder(this._puzzle.get_folder());
 
         this._folder_button = new GameButton()
-            .allStates(BitmapManager.ShapeImg)
+            .allStates(Bitmaps.ShapeImg)
             .label(this._folder.get_folder_name(), 22)
             .tooltip("Select the folding engine.");
         this._folder_button.display.position = new Point(17, 160);
