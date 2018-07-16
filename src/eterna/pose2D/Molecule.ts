@@ -1,5 +1,6 @@
 ﻿import {Container, Point, Sprite, Texture} from "pixi.js";
 import {BitmapManager} from "../resources/BitmapManager";
+import {Bitmaps} from "../resources/Bitmaps";
 import {BitmapUtil} from "../util/BitmapUtil";
 
 export class Molecule extends Container {
@@ -60,8 +61,8 @@ export class Molecule extends Container {
         Molecule._glow_wrong_data = [];
         Molecule._body_data = [];
 
-        let original_glow_data: Texture = BitmapManager.get_bitmap(BitmapManager.ImgMoleculeOuter);
-        let original_body_data: Texture = BitmapManager.get_bitmap(BitmapManager.ImgMoleculeInner);
+        let original_glow_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgMoleculeOuter);
+        let original_body_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgMoleculeInner);
 
         for (let zz: number = 0; zz < 5; zz++) {
             let bitmaps_in_zoom: Texture[] = [];

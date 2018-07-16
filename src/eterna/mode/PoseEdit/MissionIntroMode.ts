@@ -4,7 +4,7 @@ import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {EPars} from "../../EPars";
-import {BitmapManager} from "../../resources/BitmapManager";
+import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
 import {PoseThumbnail} from "../../ui/PoseThumbnail";
@@ -29,7 +29,7 @@ export class MissionIntroMode extends AppMode {
         this._background.interactive = true;
         new DisplayObjectPointerTarget(this._background).pointerDown.connect(() => this.play());
 
-        let moleculeImg: Sprite = Sprite.fromImage(BitmapManager.MissionBackgroundImage);
+        let moleculeImg: Sprite = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.modeSprite.addChild(moleculeImg);
         moleculeImg.position = new Point((Flashbang.stageWidth - moleculeImg.width) * 0.5, 0);
 
@@ -46,16 +46,16 @@ export class MissionIntroMode extends AppMode {
             123 + missionText.height + 25);
 
         let playButton: GameButton = new GameButton()
-            .up(BitmapManager.PlayImage)
-            .over(BitmapManager.PlayImageOver)
-            .down(BitmapManager.PlayImageHit);
+            .up(Bitmaps.PlayImage)
+            .over(Bitmaps.PlayImageOver)
+            .down(Bitmaps.PlayImageHit);
         this.addObject(playButton, this.modeSprite);
         playButton.display.position = new Point(
             Flashbang.stageWidth - playButton.container.width - 91.5,
             Flashbang.stageHeight - 30 - playButton.container.height);
         this.regs.add(playButton.clicked.connect(() => this.play()));
 
-        let bgImage: Sprite = Sprite.fromImage(BitmapManager.MissionPuzzleIdImage);
+        let bgImage: Sprite = Sprite.fromImage(Bitmaps.MissionPuzzleIdImage);
         this.modeSprite.addChild(bgImage);
         bgImage.position = new Point((Flashbang.stageWidth * 0.5) - 420.5, 0);
 
@@ -75,7 +75,7 @@ export class MissionIntroMode extends AppMode {
             (Flashbang.stageWidth * 0.5) - 420.5,
             367 + 15);
 
-        this._goalsBG = Sprite.fromImage(BitmapManager.MissionPuzzleThumbnailImage);
+        this._goalsBG = Sprite.fromImage(Bitmaps.MissionPuzzleThumbnailImage);
         this.modeSprite.addChild(this._goalsBG);
         this._goalsBG.position = new Point(
             (Flashbang.stageWidth * 0.5) - 420.5,
@@ -87,7 +87,7 @@ export class MissionIntroMode extends AppMode {
             (Flashbang.stageWidth * 0.5) - 420.5 + 22.5,
             367 + 60 + 22.5);
 
-        this._scrollUpButton = new GameButton().allStates(BitmapManager.ImgUpArrow).hotkey(KeyCode.ArrowUp);
+        this._scrollUpButton = new GameButton().allStates(Bitmaps.ImgUpArrow).hotkey(KeyCode.ArrowUp);
         this._scrollUpButton.display.scale = new Point(0.15, 0.15);
         this._scrollUpButton.display.visible = false;
         this._scrollUpButton.display.position = new Point(
@@ -96,7 +96,7 @@ export class MissionIntroMode extends AppMode {
         this._scrollUpButton.clicked.connect(() => this.scrollUp());
         this.addObject(this._scrollUpButton, this.modeSprite);
 
-        this._scrollDownButton = new GameButton().allStates(BitmapManager.ImgDownArrow).hotkey(KeyCode.ArrowDown);
+        this._scrollDownButton = new GameButton().allStates(Bitmaps.ImgDownArrow).hotkey(KeyCode.ArrowDown);
         this._scrollDownButton.display.scale = new Point(0.15, 0.15);
         this._scrollDownButton.display.visible = false;
         this._scrollDownButton.display.position = new Point(

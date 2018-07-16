@@ -12,8 +12,8 @@ import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
-import {EternaSettings} from "./settings/EternaSettings";
 import {BitmapManager} from "./resources/BitmapManager";
+import {EternaSettings} from "./settings/EternaSettings";
 import {Fonts} from "./util/Fonts";
 import {SoundManager} from "./resources/SoundManager";
 
@@ -61,14 +61,14 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
             })
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
-                return PuzzleManager.instance.get_puzzle_by_nid(puzid);
-            })
-            .then((puzzle) => {
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
+                this._modeStack.unwindToMode(new PoseTestMode());
             })
             // .then(() => {
-            //     this._modeStack.unwindToMode(new PoseTestMode());
+            //     this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
+            //     return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+            // })
+            // .then((puzzle) => {
+            //     this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
             // })
             .catch((err) => Eterna.onFatalError(err));
     }

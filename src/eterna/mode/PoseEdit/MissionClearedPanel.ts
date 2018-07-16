@@ -7,7 +7,7 @@ import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Eterna} from "../../Eterna";
 import {EternaURL} from "../../net/EternaURL";
 import {RankScroll} from "../../rank/RankScroll";
-import {BitmapManager} from "../../resources/BitmapManager";
+import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
 import {Fonts} from "../../util/Fonts";
@@ -37,7 +37,7 @@ export class MissionClearedPanel extends ContainerObject {
         // this.add_object(this._tfLoading);
 
         this.closeButton = new GameButton()
-            .allStates(BitmapManager.ImgCross)
+            .allStates(Bitmaps.ImgCross)
             .tooltip("Stay in this puzzle and review your design");
         this.addObject(this.closeButton, this.container);
 
