@@ -13,6 +13,7 @@ import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {BitmapManager} from "./resources/BitmapManager";
+import {Bitmaps} from "./resources/Bitmaps";
 import {EternaSettings} from "./settings/EternaSettings";
 import {Fonts} from "./util/Fonts";
 import {SoundManager} from "./resources/SoundManager";
@@ -29,7 +30,7 @@ enum PuzzleID {
 export class EternaApp extends FlashbangApp {
     protected createPixi(): PIXI.Application {
         // When roundPixels is true, the renderer floor()s pixel locations
-        // to avoid pixel interpolation. This makes our text looks much better,
+        // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
         PIXI.settings.RENDER_OPTIONS.roundPixels = true;
@@ -58,18 +59,18 @@ export class EternaApp extends FlashbangApp {
             .then(() => this.maybeDoDebugLogin())
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
-                return Promise.all([this.initFoldingEngines(), TextureUtil.load(BitmapManager.pose2DURLs)])
-            })
-            .then(() => {
-                this._modeStack.unwindToMode(new PoseTestMode());
+                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)])
             })
             // .then(() => {
-            //     this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
-            //     return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+            //     this._modeStack.unwindToMode(new PoseTestMode());
             // })
-            // .then((puzzle) => {
-            //     this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
-            // })
+            .then(() => {
+                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
+                return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+            })
+            .then((puzzle) => {
+                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
+            })
             .catch((err) => Eterna.onFatalError(err));
     }
 

@@ -1,8 +1,15 @@
-﻿import {Utility} from "../util/Utility";
+﻿import {Eterna} from "../Eterna";
+import {Utility} from "../util/Utility";
 
 export class EternaURL {
     public static readonly BARCODE_HELP: string = "/web/lab/manual/#barcode";
     public static readonly STRATEGY_GUIDE: string = "http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles";
+
+    public static getFeedURL(): string {
+        return Eterna.player_id == 0 ?
+            EternaURL.generate_url({"page": "register"}) :
+            EternaURL.generate_url({"page": "me"});
+    }
 
     public static generate_url(params: any): string {
         if (params == null) {

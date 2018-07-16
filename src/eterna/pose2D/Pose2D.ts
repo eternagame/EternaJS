@@ -2224,9 +2224,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
 
             if (prog >= Math.min(full_seq.length, this._explosion_rays.length) + 10) {
-                this._is_exploding = false;
-                this._explosion_start_time = -1;
-                this.callExplosionCompleteCallback();
+                this.clear_explosion();
             }
         }
     }
