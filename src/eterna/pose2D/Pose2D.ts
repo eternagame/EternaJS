@@ -1345,14 +1345,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         } else if (this._sequence.length < this._bases.length) {
             for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
-                this._bases[ii].destroySelf();
                 if (this.is_tracked_index(ii)) {
                     this.remove_black_mark(ii);
                 }
             }
-
-            this._bases = this._bases.slice(0, this._sequence.length - 1);
-            this._locks = this._locks.slice(0, this._sequence.length - 1);
         }
 
         let n: number = this.get_full_sequence_length();
@@ -1621,7 +1617,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._oligo_mode = mode;
         this._oligo_name = o_name;
 
-        let seq: any[] = this.get_full_sequence();
+        let seq: number[] = this.get_full_sequence();
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
@@ -1849,6 +1845,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         let center: Point;
         let prog: number;
         let locked: boolean;
+
+        // Hide bases that aren't part of our current sequence
+        for (let ii = 0; ii < this._bases.length; ++ii) {
+            this._bases[ii].display.visible = ii < full_seq.length;
+        }
 
         if (this._tracked_indices.length == this._base_boxes.length && this._tracked_indices.length != 0) {
             let n: number = this._tracked_indices.length;
