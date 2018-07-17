@@ -216,13 +216,6 @@ export class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    private _zoom_level: number;
-    private _off_x: number;
-    private _off_y: number;
-    private _current_time: number;
-    private _drawFlags: number;
-    private _highlight_state: any;
-    private _numberBitmap: Texture;
     public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null) {
         this._zoom_level = zoom_level;
         this._off_x = off_x;
@@ -235,7 +228,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     }
 
     public lateUpdate(dt: number): void {
-        if (this._needsRedraw && this.display.visible) {
+        if (this._needsRedraw && this.display.visible && this._base_type != EPars.RNABASE_CUT) {
             this.redraw(this._zoom_level, this._off_x, this._off_y, this._current_time, this._drawFlags, this._numberBitmap, this._highlight_state);
             this._needsRedraw = false;
         }
@@ -611,7 +604,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     private _go_y: number = 0;
     private _out_x: number = 0;
     private _out_y: number = 0;
-    private _needsRedraw: boolean = true;
+    private _needsRedraw: boolean = false;
     private _last_center_x: number;
     private _last_center_y: number;
     private _animation_start_time: number;
@@ -635,4 +628,12 @@ export class Base extends ContainerObject implements LateUpdatable {
     private _sparking: boolean = false;
     private _spark_start_time: number = -1;
     private _spark_dir: Point;
+
+    private _zoom_level: number = 0;
+    private _off_x: number = 0;
+    private _off_y: number = 0;
+    private _current_time: number = 0;
+    private _drawFlags: number = 0;
+    private _highlight_state: any;
+    private _numberBitmap: Texture;
 }
