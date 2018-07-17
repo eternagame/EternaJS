@@ -5,14 +5,12 @@ import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
+import {Sounds} from "../resources/Sounds";
 import {BitmapUtil} from "../util/BitmapUtil";
 import {ColorUtil} from "../util/ColorUtil";
-import {SoundManager} from "../resources/SoundManager";
-import {Sounds} from "../resources/Sounds";
 import {Base} from "./Base";
 import {BaseBitmaps} from "./BaseBitmaps";
 import {BaseDrawFlags} from "./BaseDrawFlags";
-
 
 /** Handles initialization and management of Base-related assets */
 export class BaseAssets {
