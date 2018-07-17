@@ -1,4 +1,5 @@
-﻿import {ColorUtil} from "../util/ColorUtil";
+﻿import {MathUtil} from "../../flashbang/util/MathUtil";
+import {ColorUtil} from "../util/ColorUtil";
 
 export enum ScoreDisplayNodeType {
     STACK = 0, LOOP
@@ -44,26 +45,13 @@ export class ScoreDisplayNode {
         let prog: number = 0;
 
         if (score > 0) {
-            prog = score / 5.0;
-            if (prog > 1) {
-                prog = 1;
-            }
-            if (prog < 0) {
-                prog = 0;
-            }
-
+            prog = MathUtil.clamp(score / 5.0, 0, 1);
             r = 1;
             g = (1 - prog) + (30 / 255) * prog;
             b = (1 - prog) + (30 / 255) * prog;
-        } else {
-            prog = score / -5.0;
-            if (prog > 1) {
-                prog = 1;
-            }
-            if (prog < 0) {
-                prog = 0;
-            }
 
+        } else {
+            prog = MathUtil.clamp(score / -5.0, 0, 1);
             g = 1;
             r = (1 - prog) + (30 / 255) * prog;
             b = (1 - prog) + (30 / 255) * prog;
