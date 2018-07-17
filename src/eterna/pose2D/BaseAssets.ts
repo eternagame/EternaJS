@@ -69,8 +69,10 @@ export class BaseAssets {
         return null;
     }
 
-    public static getLetterBitmap(base_type: number, zoom_level: number, drawFlags: number): Texture {
-        return BaseAssets.getBaseBitmaps(base_type).getLetterBitmap(zoom_level, drawFlags);
+    public static getLetterBitmap(base_type: number, zoom_level: number, drawFlags: number): Texture | null {
+        return BaseAssets.isBaseType(base_type) ?
+            BaseAssets.getBaseBitmaps(base_type).getLetterBitmap(zoom_level, drawFlags) :
+            null;
     }
 
     public static getBackboneBitmap(zoom_level: number, drawFlags: number): Texture {
