@@ -103,6 +103,10 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
+        if (!this.display.visible) {
+            return false;
+        }
+
         if (e.deltaY < 0) {
             this.zoom_in();
             return true;
@@ -115,6 +119,10 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
+        if (!this.display.visible) {
+            return false;
+        }
+
         const X_OFFSET: number = 5;
         const Y_OFFSET: number = 5;
 
