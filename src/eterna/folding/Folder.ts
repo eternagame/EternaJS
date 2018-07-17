@@ -1,4 +1,6 @@
-﻿export abstract class Folder {
+﻿import {PoseOp} from "../pose2D/PoseOp";
+
+export abstract class Folder {
     protected constructor() {
     }
 
@@ -64,7 +66,7 @@
         return null;
     }
 
-    public multifold_unroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): any[] {
+    public multifold_unroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): PoseOp[] {
         return null;
     }
 

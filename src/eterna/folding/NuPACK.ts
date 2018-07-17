@@ -1,6 +1,7 @@
 import * as log from "loglevel";
 import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
 import {EPars} from "../EPars";
+import {PoseOp} from "../pose2D/PoseOp";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
 import {Folder} from "./Folder";
@@ -426,9 +427,8 @@ export class NuPACK extends Folder {
         return mfold;
     }
 
-    /*override*/
-    public multifold_unroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): number[] {
-        let ops: any[] = [];
+    public multifold_unroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): PoseOp[] {
+        let ops: PoseOp[] = [];
 
         let order: number[] = [];
         let num_oligo: number = oligos.length;
@@ -438,7 +438,7 @@ export class NuPACK extends Folder {
         }
 
         for (let ii = 0; ii < num_oligo; ii++) {
-            ops.push({objref: this, fn: this.fold_sequence, arg: [oligos[ii].seq, null, null, temp]});
+            ops.push(new PoseOp(null, () => this.fold_sequence(oligos[ii].seq, null, null, temp)));
         }
 
         let more: boolean;
@@ -451,16 +451,16 @@ export class NuPACK extends Folder {
                 }
 
                 if (ii == 0) {
-                    ops.push({objref: this, fn: this.fold_sequence, arg: [ms_seq, null, null, temp]});
+                    ops.push(new PoseOp(null, () => this.fold_sequence(ms_seq, null, null, temp)));
                 } else {
-                    ops.push({objref: this, fn: this.cofold_seq2, arg: [ms_seq, null, null, temp]});
+                    ops.push(new PoseOp(null, () => this.cofold_seq2(ms_seq, null, null, temp)));
                 }
             }
 
             more = FoldUtil.next_perm(order);
         } while (more);
 
-        ops.push({objref: this, fn: this.multifold, arg: [seq, second_best_pairs, oligos, desired_pairs, temp]});
+        ops.push(new PoseOp(null, () => this.multifold(seq, second_best_pairs, oligos, desired_pairs, temp)));
         return ops;
     }
 
