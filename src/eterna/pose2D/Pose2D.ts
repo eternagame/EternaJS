@@ -13,6 +13,7 @@ import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SelfDestructTask} from "../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {Arrays} from "../../flashbang/util/Arrays";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Easing} from "../../flashbang/util/Easing";
 import {Registration} from "../../signals/Registration";
@@ -1326,18 +1327,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set_sequence(sequence: number[]): void {
-        if (this._sequence != null && this._sequence.length == sequence.length) {
-            let changed: boolean = false;
-            for (let ii: number = 0; ii < this._sequence.length; ii++) {
-                if (this._sequence[ii] != sequence[ii]) {
-                    changed = true;
-                    break;
-                }
-            }
-
-            if (!changed) {
-                return;
-            }
+        if (Arrays.shallowEqual(this._sequence, sequence)) {
+            return;
         }
 
         if (this._locks == null) {
@@ -1354,11 +1345,14 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         } else if (this._sequence.length < this._bases.length) {
             for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
-                this._locks[ii] = false;
+                this._bases[ii].destroySelf();
                 if (this.is_tracked_index(ii)) {
                     this.remove_black_mark(ii);
                 }
             }
+
+            this._bases = this._bases.slice(0, this._sequence.length - 1);
+            this._locks = this._locks.slice(0, this._sequence.length - 1);
         }
 
         let n: number = this.get_full_sequence_length();
