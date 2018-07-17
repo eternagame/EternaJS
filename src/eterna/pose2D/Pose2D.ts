@@ -1834,13 +1834,18 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /*override*/
     public update(dt: number): void {
+        if (!this.display.worldVisible) {
+            // update is expensive, so don't bother doing it if we're not visible
+            return;
+        }
+
         let current_time: number = this.mode.time;
         for (let anchor of this._anchored_objects) {
             let p: Point = this.get_base_xy(anchor.base);
             anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
         }
 
-        let full_seq: any[] = this.get_full_sequence();
+        let full_seq: number[] = this.get_full_sequence();
         let center: Point;
         let prog: number;
         let locked: boolean;
