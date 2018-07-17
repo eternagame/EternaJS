@@ -8,7 +8,6 @@ import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Assert} from "../../../flashbang/util/Assert";
 import {Easing} from "../../../flashbang/util/Easing";
 import {AchievementManager} from "../../achievements/AchievementManager";
 import {Application} from "../../Application";
@@ -20,12 +19,12 @@ import {FoldUtil} from "../../folding/FoldUtil";
 import {EternaURL} from "../../net/EternaURL";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
+import {PoseOp} from "../../pose2D/PoseOp";
 import {Constraints, ConstraintType} from "../../puzzle/Constraints";
 import {BoostersData, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
-import {PlayerRank} from "../../rank/PlayerRank";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {Sounds} from "../../resources/Sounds";
 import {ActionBar} from "../../ui/ActionBar";
@@ -711,7 +710,7 @@ export class PoseEditMode extends GameMode {
             if (this._force_synch) {
                 this.set_puzzle_epilog(this._initSeq, this._isReset);
             } else {
-                this._op_queue.push(new AsyncOp(
+                this._op_queue.push(new PoseOp(
                     this._target_pairs.length,
                     () => this.set_puzzle_epilog(this._initSeq, this._isReset)));
             }
@@ -1053,7 +1052,7 @@ export class PoseEditMode extends GameMode {
         let startTime: number = new Date().getTime();
         let elapsed: number = 0;
         while (this._op_queue.length > 0 && elapsed < 50) { // FIXME: arbitrary
-            let op: AsyncOp = this._op_queue.shift();
+            let op: PoseOp = this._op_queue.shift();
             op.fn();
             if (op.sn) {
                 this._asynch_text.text =
@@ -3756,10 +3755,10 @@ export class PoseEditMode extends GameMode {
 
         } else {
             for (let ii = 0; ii < this._target_pairs.length; ii++) {
-                this._op_queue.push(new AsyncOp(ii + 1, () => this.pose_edit_by_target_fold_target(ii)));
+                this._op_queue.push(new PoseOp(ii + 1, () => this.pose_edit_by_target_fold_target(ii)));
             }
 
-            this._op_queue.push(new AsyncOp(this._target_pairs.length + 1, () => this.pose_edit_by_target_epilog(target_index)));
+            this._op_queue.push(new PoseOp(this._target_pairs.length + 1, () => this.pose_edit_by_target_epilog(target_index)));
 
         }
 
@@ -3856,13 +3855,12 @@ export class PoseEditMode extends GameMode {
             if (mfold == null && this._force_synch == false) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                let ops: any[] = this._folder.multifold_unroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
-                Assert.isTrue(false, "Tim, double check the output of multifold_unroll");
-                this._op_queue.unshift(new AsyncOp(
+                let ops: PoseOp[] = this._folder.multifold_unroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
+                this._op_queue.unshift(new PoseOp(
                     ii + 1,
                     () => this.pose_edit_by_target_fold_target(ii + this._target_pairs.length)));
                 while (ops.length > 0) {
-                    let o: AsyncOp = ops.pop();
+                    let o: PoseOp = ops.pop();
                     o.sn = ii + 1;
                     this._op_queue.unshift(o);
                 }
@@ -4175,7 +4173,7 @@ export class PoseEditMode extends GameMode {
 
     private _folder: Folder;
     /// Asynch folding
-    private _op_queue: AsyncOp[] = [];
+    private _op_queue: PoseOp[] = [];
     private _pose_edit_by_target_cb: Function = null;
     private _asynch_text: Text;
     private _fold_start_time: number;
@@ -4263,16 +4261,6 @@ export class PoseEditMode extends GameMode {
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: any;
-}
-
-class AsyncOp {
-    public sn?: number;
-    public fn: () => void;
-
-    public constructor(sn: number | null, fn: () => void) {
-        this.sn = sn;
-        this.fn = fn;
-    }
 }
 
 interface ConstraintInfo {

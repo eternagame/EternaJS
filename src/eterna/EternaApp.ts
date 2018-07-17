@@ -12,7 +12,6 @@ import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
-import {BitmapManager} from "./resources/BitmapManager";
 import {Bitmaps} from "./resources/Bitmaps";
 import {EternaSettings} from "./settings/EternaSettings";
 import {Fonts} from "./util/Fonts";
@@ -49,7 +48,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.sound = new SoundManager(Eterna.settings);
 
         // Handle ?puzzle=[puzzle_id] URL param
-        let puzid = PuzzleID.FunAndEasy;
+        let puzid = PuzzleID.TheRealXORChallenge;
         let params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("puzzle")) {
             puzid = Number(params.get("puzzle"));
