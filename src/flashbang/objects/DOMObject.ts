@@ -14,6 +14,12 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         this._obj = obj;
         this._obj.style.position = "absolute";
         this._obj.style.transformOrigin = "0 0";
+
+        // Set the initial opacity to 0 so that the object will be hidden
+        // until the first postrender event. This prevents it from flickering
+        // briefly on the frame it's added.
+        this._obj.style.opacity = "0";
+
         this._domParent = document.getElementById(domParentID);
     }
 
