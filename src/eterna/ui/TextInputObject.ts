@@ -10,8 +10,6 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         super(Eterna.OVERLAY_DIV_ID, rows == 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
 
         this.width = width;
-        this._dummyDisp.height = this._obj.getBoundingClientRect().height;
-
         this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
         this._obj.oninput = () => this.valueChanged.emit(this._obj.value);
     }
@@ -33,7 +31,7 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
 
     public set width(value: number) {
         this._obj.style.width = DOMObject.sizeToString(value);
-        this._dummyDisp.width = value;
+        this.onSizeChanged();
     }
 
     public get height(): number {
