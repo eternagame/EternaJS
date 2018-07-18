@@ -1,10 +1,11 @@
-import * as log from "loglevel";
-import {Point} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
+import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Dragger} from "../../flashbang/util/Dragger";
 import {ROPWait} from "../rscript/ROPWait";
 import {Pose2D} from "./Pose2D";
 
@@ -15,6 +16,10 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(edit);
+
+        // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
+        this._clickTargetDisp = new Graphics();
+        this.container.addChild(this._clickTargetDisp);
     }
 
     protected added(): void {
@@ -23,8 +28,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this.addObject(this._pose, this.container);
 
         this.container.interactive = true;
-        this.pointerDown.connect((e) => this.mouse_on_bg_down(e));
-        this.pointerUp.connect(() => this.mouse_on_bg_up());
+        this.pointerDown.connect((e) => this.onMouseDown(e));
+        this.pointerUp.connect(() => this.onMouseUp());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -35,6 +40,11 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
             this._width = width;
             this._height = height;
             this._pose.set_offset(this._width * 0.5, this._height * 0.5);
+
+            this._clickTargetDisp.clear()
+                .beginFill(0x0, 0)
+                .drawRect(0, 0, width, height)
+                .endFill();
         }
     }
 
@@ -64,42 +74,33 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         return this._pose;
     }
 
-    private mouse_on_bg_down(e: InteractionEvent): void {
-        e.data.getLocalPosition(this.display, PoseField.P);
-        this._drag_mouse_begin_x = PoseField.P.x;
-        this._drag_mouse_begin_y = PoseField.P.y;
-
+    private onMouseDown(e: InteractionEvent): void {
         if (!Flashbang.app.isControlKeyDown) {
-            this._is_dragging_pose = true;
-            this._drag_pose_begin_x = this._pose.get_x_offset();
-            this._drag_pose_begin_y = this._pose.get_y_offset();
+            this.cancelDrag();
 
+            let dragger = new Dragger();
+            this._poseDraggerRef = this.addObject(dragger);
+
+            let dragPoseStart = new Point(this._pose.get_x_offset(), this._pose.get_y_offset());
+            dragger.dragged.connect(() => {
+                ROPWait.NotifyMoveCamera();
+                this._pose.set_offset(dragPoseStart.x + dragger.offsetX, dragPoseStart.y + dragger.offsetY);
+            });
+
+            e.stopPropagation();
         }
-        log.debug("TODO: set_dragger");
-        // Application.instance.set_dragger(this.mouse_on_bg_move, this.mouse_on_bg_up);
-        // TSC temp
-
     }
 
-    private mouse_on_bg_move(e: InteractionEvent): void {
-        e.data.getLocalPosition(this.display, PoseField.P);
-        let mouseX = PoseField.P.x;
-        let mouseY = PoseField.P.y;
-
-        if (this._is_dragging_pose) {
-            let x_mov: number = mouseX - this._drag_mouse_begin_x;
-            let y_mov: number = mouseY - this._drag_mouse_begin_y;
-            this._pose.set_offset(this._drag_pose_begin_x + x_mov, this._drag_pose_begin_y + y_mov);
-        }
-
-        ROPWait.NotifyMoveCamera();
-    }
-
-    private mouse_on_bg_up(): void {
-        this._is_dragging_pose = false;
-
+    private onMouseUp(): void {
+        this.cancelDrag();
         this._pose.done_coloring();
         this._pose.pose_mouse_moved();
+    }
+
+    private cancelDrag(): void {
+        if (this._poseDraggerRef.isLive) {
+            this._poseDraggerRef.destroyObject();
+        }
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
@@ -160,15 +161,12 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     private readonly _pose: Pose2D;
+    private readonly _clickTargetDisp: Graphics;
 
     private _width: number = 0;
     private _height: number = 0;
 
-    private _is_dragging_pose: boolean = false;
-    private _drag_mouse_begin_x: number = 0;
-    private _drag_mouse_begin_y: number = 0;
-    private _drag_pose_begin_x: number = 0;
-    private _drag_pose_begin_y: number = 0;
+    private _poseDraggerRef: GameObjectRef = GameObjectRef.NULL;
 
     private static readonly P: Point = new Point();
 }
