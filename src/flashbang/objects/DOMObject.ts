@@ -1,4 +1,4 @@
-import {Container, DisplayObject, Matrix} from "pixi.js";
+import {DisplayObject, Graphics, Matrix} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 import {GameObject} from "../core/GameObject";
 import {MatrixUtil} from "../util/MatrixUtil";
@@ -24,6 +24,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     protected added(): void {
         super.added();
         this._domParent.appendChild(this._obj);
+        this.onSizeChanged();
 
         // Update the HTML element's transform during the PIXI postrender event -
         // this is the point where the dummy display object's transform will be up to date.
@@ -45,6 +46,25 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         }
     }
 
+    /**
+     * Updates the dummy display object's bounds to match that of the DOM object.
+     * Subclasses should call this when the DOM object's size has changed.
+     */
+    protected onSizeChanged(): void {
+        if (this.isLiveObject) {
+            let transfom: string = this._obj.style.transform;
+            this._obj.style.transform = null;
+
+            let r = this._obj.getBoundingClientRect();
+            this._dummyDisp.clear()
+                .beginFill(0x0, 0)
+                .drawRect(0, 0, r.width, r.height)
+                .endFill();
+
+            this._obj.style.transform = transfom;
+        }
+    }
+
     protected static sizeToString(size: number): string {
         return "" + size + "px";
     }
@@ -58,7 +78,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         return !isNaN(size) ? size : 0;
     }
 
-    protected readonly _dummyDisp: Container = new Container();
+    protected readonly _dummyDisp: Graphics = new Graphics();
     protected readonly _domParent: HTMLElement;
     protected readonly _obj: T;
 
