@@ -68,6 +68,24 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         }
     }
 
+    /**
+     * Applies the given style to the DOM object and all children who do not already have the given style property set.
+     * This will not overrwrite existing properties, unless replaceIfExists is true.
+     */
+    protected static applyStyleRecursive(element: HTMLElement, name: string, value: string, replaceIfExists: boolean = false): void {
+        let cur = element.style.getPropertyValue(name);
+        if (cur == null || cur.length == 0 || replaceIfExists) {
+            element.style.setProperty(name, value);
+        }
+
+        for (let ii = 0; ii < element.children.length; ++ii) {
+            let child = <HTMLElement> (element.children[ii] as any);
+            if (child.accessKey !== undefined) {
+                this.applyStyleRecursive(child, name, value);
+            }
+        }
+    }
+
     protected static sizeToString(size: number): string {
         return "" + size + "px";
     }
