@@ -1,5 +1,4 @@
 ﻿import {Eterna} from "../Eterna";
-import {AutosaveManager} from "../util/AutosaveManager";
 import {Folder} from "./Folder";
 import {RNAFoldBasic} from "./RNAFoldBasic";
 import {Vienna} from "./Vienna";
@@ -56,7 +55,7 @@ export class FolderManager {
                 continue;
             }
 
-            AutosaveManager.saveObjects([folder.get_folder_name()], "folder-" + Eterna.player_id);
+            Eterna.settings.lastUsedFolder.value = folder.get_folder_name();
             return folder;
         }
 
@@ -64,11 +63,7 @@ export class FolderManager {
     }
 
     public get_last_used_folder(): string {
-        let pref: any[] = AutosaveManager.loadObjects("folder-" + Eterna.player_id);
-        if (pref == null) {
-            return Vienna.NAME;
-        }
-        return pref[0];
+        return Eterna.settings.lastUsedFolder.value || Vienna.NAME;
     }
 
     private _folders: Folder[] = [];

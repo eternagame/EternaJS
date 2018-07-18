@@ -36,7 +36,6 @@ import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePa
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {AutosaveManager} from "../../util/AutosaveManager";
 import {Fonts} from "../../util/Fonts";
 import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
@@ -1101,7 +1100,7 @@ export class PoseEditMode extends GameMode {
 
     /*override*/
     protected on_set_pip(pip_mode: boolean): void {
-        AutosaveManager.saveObjects([pip_mode], "PIP-pref-" + Eterna.player_id);
+        Eterna.settings.pipEnabled.value = pip_mode;
 
         if (pip_mode) {
             this._toolbar.puzzleStateToggle.display.visible = false;
@@ -2144,8 +2143,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private reset_autosave_data(): void {
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
-        AutosaveManager.saveObjects(null, token);
+        Eterna.settings.removeObject(this.savedDataTokenName);
     }
 
     private autosave_data(e: Event): void {
@@ -2157,7 +2155,6 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
         let objs: any[] = [];
         let msecs: number = 0;
 
@@ -2167,7 +2164,11 @@ export class PoseEditMode extends GameMode {
             objs.push(JSON.stringify(this._seq_stacks[this._stack_level][ii].toJson()));
         }
 
-        AutosaveManager.saveObjects(objs, token);
+        Eterna.settings.saveObject(this.savedDataTokenName, objs);
+    }
+
+    private get savedDataTokenName(): string {
+        return "puz_" + this._puzzle.get_node_id();
     }
 
     private transfer_to_puzzlemaker(): void {
@@ -2209,14 +2210,13 @@ export class PoseEditMode extends GameMode {
                 oligo_len += (oligos[ii]['sequence'].length + 1);
             }
         }
-        let token: string = "puz_" + this._puzzle.get_node_id() + "_" + Eterna.player_id;
 
         if (beginning_sequence.length != locks.length || (beginning_sequence.length + oligo_len) != this._target_pairs[0].length) {
             return false;
         }
         this.clear_undo_stack();
 
-        let json: any[] = AutosaveManager.loadObjects(token);
+        let json: any[] = Eterna.settings.loadObject(this.savedDataTokenName);
         // no saved data
         if (json == null) {
             // if (this.root.loaderInfo.parameters.inputsequence != null) {
@@ -2334,12 +2334,7 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        let pref: any[] = AutosaveManager.loadObjects("PIP-pref-" + Eterna.player_id);
-        if (pref == null) {
-            this.set_pip(false);
-        } else {
-            this.set_pip(pref[0]);
-        }
+        this.set_pip(Eterna.settings.pipEnabled.value);
 
         this.rop_presets();
 

@@ -12,6 +12,8 @@ export class EternaSettings extends AbstractSettings {
     public readonly useContinuousColors: Setting<boolean>;
     public readonly useExtendedColors: Setting<boolean>;
     public readonly displayAuxInfo: Setting<boolean>;
+    public readonly lastUsedFolder: Setting<string>;
+    public readonly pipEnabled: Setting<boolean>;
 
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
@@ -32,5 +34,7 @@ export class EternaSettings extends AbstractSettings {
         this.displayAuxInfo = this.setting("displayAuxInfo", false);
         this.soundMute = this.setting("soundMute", false);
         this.soundVolume = this.setting("soundVolume", 0.6);
+        this.lastUsedFolder = this.setting("lastUsedFolder", null);
+        this.pipEnabled = this.setting("pipEnabled", false);
     }
 }
