@@ -104,9 +104,15 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         } else  {
             // Redraw when we're dirty or the zoom level has changed
             this.display.visible = true;
-            if (this._dirty || this._pose.get_zoom_level() != this._prevZoomLevel) {
+            if (this._dirty ||
+                this._pose.get_zoom_level() != this._prevZoomLevel ||
+                this._pose.get_x_offset() != this._prevOffsetX ||
+                this._pose.get_y_offset() != this._prevOffsetY) {
+
                 this.redraw();
                 this._prevZoomLevel = this._pose.get_zoom_level();
+                this._prevOffsetX = this._pose.get_x_offset();
+                this._prevOffsetY = this._pose.get_y_offset();
                 this._dirty = false;
             }
         }
@@ -326,6 +332,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private _on: boolean;
     private _last_known_position: Point;
     private _prevZoomLevel: number = -1;
+    private _prevOffsetX: number = Number.MAX_VALUE;
+    private _prevOffsetY: number = Number.MAX_VALUE;
 
     private static readonly ANIM: string = "anim";
 }
