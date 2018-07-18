@@ -149,13 +149,6 @@ export class PoseEditMode extends GameMode {
             this._toolbar.set_toolbar_autohide(value);
         }));
 
-        this._hint_box = new GamePanel();
-        this._hint_box.display.visible = false;
-        this.addObject(this._hint_box, this._uiLayer);
-
-        this._hint_text = Fonts.arial("", 14).build();
-        this._hint_box.container.addChild(this._hint_text);
-
         this._docked_spec_box = new SpecBox(true);
         this._docked_spec_box.display.position = new Point(15, 190);
         this._docked_spec_box.set_size(155, 251);
@@ -359,17 +352,21 @@ export class PoseEditMode extends GameMode {
     }
 
     public on_click_hint(): void {
-        if (this._hint_box.display.visible) {
-            this._hint_box.display.visible = false;
+        if (this._hintBoxRef.isLive) {
+            this._hintBoxRef.destroyObject();
         } else {
-            this._hint_box.set_panel_title("Hint"); // by " + _puzzle.get_coauthor());
-            this._hint_text.text = this._puzzle.get_hint();
-            // this._hint_text.set_autosize(false, false, 400);
-            this._hint_text.position = new Point(10, 38);
-            let h: number = this._hint_text.height;
-            this._hint_box.set_size(420, h + 46);
-            this._hint_box.display.position = new Point(Flashbang.stageWidth - 440, Flashbang.stageHeight - 140 - h);
-            this._hint_box.display.visible = true;
+            let hintBox = new GamePanel();
+            hintBox.set_panel_title("Hint"); // by " + _puzzle.get_coauthor());
+
+            let hintText = Fonts.arial(this._puzzle.get_hint(), 14).color(0xffffff).wordWrap(true, 400).build();
+            hintText.position = new Point(10, 38);
+            hintBox.container.addChild(hintText);
+            hintBox.set_size(420, hintText.height + 46);
+
+            this._hintBoxRef = this.addObject(hintBox, this._uiLayer);
+            hintBox.display.position = new Point(
+                Flashbang.stageWidth - 440,
+                Flashbang.stageHeight - hintBox.container.height - 90);
         }
     }
 
@@ -1971,9 +1968,7 @@ export class PoseEditMode extends GameMode {
         // }
         this._is_pic_disabled = disable;
 
-        if (this._hint_box.display.visible) {
-            this._hint_box.display.visible = false;
-        }
+        this._hintBoxRef.destroyObject();
 
         this._folder_button.enabled = !disable;
 
@@ -4206,8 +4201,7 @@ export class PoseEditMode extends GameMode {
     // Nova-syle switches
     private _target_name: Text;
 
-    private _hint_box: GamePanel;
-    private _hint_text: Text;
+    private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     /// constraints && scoring display
     private _constraint_boxes: ConstraintBox[];
