@@ -44,6 +44,9 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
             this._obj.style.transform = `matrix(${m.a}, ${m.b}, ${m.c}, ${m.d}, ${m.tx}, ${m.ty})`;
             m.copy(this._lastTransform);
         }
+
+        this._obj.style.visibility = this.display.worldVisible ? "visible" : "hidden";
+        this._obj.style.opacity = this.display.worldAlpha.toString();
     }
 
     /**
