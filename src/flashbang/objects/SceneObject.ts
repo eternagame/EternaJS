@@ -38,7 +38,7 @@ export class SceneObject extends GameObject implements PointerTarget {
     }
 
     public get pointerUp(): SignalView<InteractionEvent> {
-        return this.getPointerTarget().pointerMove;
+        return this.getPointerTarget().pointerUp;
     }
 
     public get pointerTap(): SignalView<InteractionEvent> {
