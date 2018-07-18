@@ -441,13 +441,20 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get_base_xy(seq: number): Point {
-        return new Point(this._bases[seq].get_x() + this._off_x, this._bases[seq].get_y() + this._off_y);
+    public get_base_xy(seq: number, out: Point = null): Point {
+        if (out == null) {
+            out = new Point();
+        }
+        out.x = this._bases[seq].get_x() + this._off_x;
+        out.y = this._bases[seq].get_y() + this._off_y;
+        return out;
     }
 
-    public get_base_out_xy(seq: number): Point {
-        let p: Point = this._bases[seq].get_out_xy();
-        return new Point(p.x + this._off_x, p.y + this._off_y);
+    public get_base_out_xy(seq: number, out: Point = null): Point {
+        out = this._bases[seq].get_out_xy(out);
+        out.x += this._off_x;
+        out.y += this._off_y;
+        return out;
     }
 
     public clear_mouse(): void {

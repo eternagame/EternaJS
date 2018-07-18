@@ -69,8 +69,13 @@ export class Base extends ContainerObject implements LateUpdatable {
         }
     }
 
-    public get_out_xy(): Point {
-        return new Point(this._out_x, this._out_y);
+    public get_out_xy(out: Point = null): Point {
+        if (out == null) {
+            out = new Point();
+        }
+        out.x = this._out_x;
+        out.y = this._out_y;
+        return out;
     }
 
     public get_x(): number {
