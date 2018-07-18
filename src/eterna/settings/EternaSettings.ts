@@ -1,7 +1,7 @@
-import {AbstractSettings} from "../../flashbang/settings/AbstractSettings";
 import {Setting} from "../../flashbang/settings/Setting";
+import {Settings} from "../../flashbang/settings/Settings";
 
-export class EternaSettings extends AbstractSettings {
+export class EternaSettings extends Settings {
     public readonly showNumbers: Setting<boolean>;
     public readonly showLetters: Setting<boolean>;
     public readonly displayFreeEnergies: Setting<boolean>;

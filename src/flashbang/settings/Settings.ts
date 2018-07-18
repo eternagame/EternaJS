@@ -1,12 +1,12 @@
 import {Setting} from "./Setting";
 import * as storejs from "store";
 
-export abstract class AbstractSettings {
+export abstract class Settings {
     protected constructor(namespace: string) {
-        if (AbstractSettings.ALL_NAMESPACES.has(namespace)) {
+        if (Settings.ALL_NAMESPACES.has(namespace)) {
             throw new Error(`Settings namespace '${namespace}' already taken`);
         }
-        AbstractSettings.ALL_NAMESPACES.add(namespace);
+        Settings.ALL_NAMESPACES.add(namespace);
 
         this._namespace = storejs.namespace(namespace);
     }
