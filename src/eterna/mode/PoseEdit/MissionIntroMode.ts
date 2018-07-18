@@ -7,6 +7,7 @@ import {EPars} from "../../EPars";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
+import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {PoseThumbnail} from "../../ui/PoseThumbnail";
 import {Fonts} from "../../util/Fonts";
 
@@ -59,14 +60,20 @@ export class MissionIntroMode extends AppMode {
         this.modeSprite.addChild(bgImage);
         bgImage.position = new Point((Flashbang.stageWidth * 0.5) - 420.5, 0);
 
-        let nameLabel = Fonts.std_light(this._puzzleName, 18).color(0xFFFFFF).letterSpacing(0).build();
-        this.modeSprite.addChild(nameLabel);
-        nameLabel.position = new Point(
-            (Flashbang.stageWidth * 0.5) - 420.5 + MissionIntroMode.PUZZLE_LABEL_X_MARGIN,
-            MissionIntroMode.PUZZLE_LABEL_Y_MARGIN);
+        let nameLabel = new HTMLTextObject(this._puzzleName)
+            .font(Fonts.STDFONT_LIGHT)
+            .fontSize(14)
+            .color(0xffffff)
+            .maxWidth(Flashbang.stageWidth);
+        this.addObject(nameLabel, this.modeSprite);
+
+        const nameLabelXOffset = 15;
+        nameLabel.display.position = new Point(
+            (Flashbang.stageWidth * 0.5) - 420.5 + nameLabelXOffset,
+            12);
         let real_width: number = nameLabel.width;
         if (bgImage) {
-            bgImage.width = real_width + MissionIntroMode.PUZZLE_LABEL_X_MARGIN * 2;
+            bgImage.width = real_width + nameLabelXOffset * 2;
         }
 
         let goalsLabel = Fonts.std_light("GOAL", 24).color(0xffcc00).build();
@@ -242,7 +249,4 @@ export class MissionIntroMode extends AppMode {
     private _scrollDownButton: GameButton;
 
     private _constraintMask: Graphics;
-
-    private static readonly PUZZLE_LABEL_X_MARGIN: number = 15;
-    private static readonly PUZZLE_LABEL_Y_MARGIN: number = 12;
 }
