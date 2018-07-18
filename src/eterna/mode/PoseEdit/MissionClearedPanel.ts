@@ -9,6 +9,7 @@ import {RankScroll} from "../../rank/RankScroll";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
+import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {Fonts} from "../../util/Fonts";
 
 export class MissionClearedPanel extends ContainerObject {
@@ -35,18 +36,15 @@ export class MissionClearedPanel extends ContainerObject {
         // this._tfLoading.set_pos(new UDim(0.5, 0.5, -150, 220));
         // this.add_object(this._tfLoading);
 
-        this.closeButton = new GameButton()
-            .allStates(Bitmaps.ImgCross)
-            .tooltip("Stay in this puzzle and review your design");
-        this.addObject(this.closeButton, this.container);
-
         this._contentLayout = new VLayoutContainer(25, Align.CENTER);
         this.container.addChild(this._contentLayout);
 
         this._contentLayout.addChild(Fonts.std_light("Mission Accomplished!", 36).color(0xFFCC00).build());
 
         const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
-        this._contentLayout.addChild(Fonts.std_regular(infoText, 20).color(0xffffff).hAlignCenter().build());
+        const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
+            .color(0xffffff).font(Fonts.STDFONT_REGULAR).fontSize(15).hAlign("left").lineHeight(1.2);
+        this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
             this._contentLayout.addChild(Fonts.std_regular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
@@ -70,6 +68,11 @@ export class MissionClearedPanel extends ContainerObject {
         let tfCoin: Text = Fonts.std_bold("POINTS", 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 0);
         this._rankScrollHeading.container.addChild(tfCoin);
+
+        this.closeButton = new GameButton()
+            .allStates(Bitmaps.ImgCross)
+            .tooltip("Stay in this puzzle and review your design");
+        this.addObject(this.closeButton, this.container);
 
         this.nextButton = new GameButton().label(this._hasNextPuzzle ? "NEXT PUZZLE" : "WHAT'S NEXT?");
         this.nextButton.display.position = new Point(
@@ -141,7 +144,15 @@ export class MissionClearedPanel extends ContainerObject {
                 10 + this._tfPlayer.height);
         }
 
+        this._contentLayout.scale = new Point(1, 1);
         this._contentLayout.layout(true);
+
+        const maxHeight = Flashbang.stageHeight - 150;
+        if (this._contentLayout.height > maxHeight) {
+            const contentScale = maxHeight / this._contentLayout.height;
+            this._contentLayout.scale = new Point(contentScale, contentScale);
+        }
+
         this._contentLayout.position = new Point(
             (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
             (Flashbang.stageHeight - this._contentLayout.height) * 0.5);
@@ -162,5 +173,5 @@ export class MissionClearedPanel extends ContainerObject {
     private _rankScrollContainer: Container;
     private _rankScroll: RankScroll = null;
 
-    private static readonly WIDTH: number = 470;
+    private static readonly WIDTH: number = 480;
 }

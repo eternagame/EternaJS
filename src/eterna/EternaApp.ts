@@ -24,6 +24,7 @@ enum PuzzleID {
     TheRealXORChallenge = 6096060,          // multi-state
     AAMismatchPilotRun = 3263276,           // locks, tails
     TheophyllineRibozymeSwitch = 2390140,   // aux info
+    MicrofluidicChip = 6502997,             // level 4/7 - MissionCleared info
 }
 
 export class EternaApp extends FlashbangApp {
@@ -48,7 +49,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.sound = new SoundManager(Eterna.settings);
 
         // Handle ?puzzle=[puzzle_id] URL param
-        let puzid = PuzzleID.TheRealXORChallenge;
+        let puzid = PuzzleID.MicrofluidicChip;
         let params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("puzzle")) {
             puzid = Number(params.get("puzzle"));
