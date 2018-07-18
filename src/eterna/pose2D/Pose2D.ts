@@ -247,32 +247,32 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public set_zoom_level(zoom_level: number, animate: boolean = true, center: boolean = false): void {
         if ((this._zoom_level != zoom_level || center) && animate) {
-            // if (this._zoom_level == zoom_level && center) {
-            //     if (Math.abs(this._width / 2 - this._off_x) + Math.abs(this._height / 2 - this._off_y) < 50) {
-            //         return;
-            //     }
-            // }
+            if (this._zoom_level == zoom_level && center) {
+                if (Math.abs(this._width / 2 - this._off_x) + Math.abs(this._height / 2 - this._off_y) < 50) {
+                    return;
+                }
+            }
 
-            // this._start_offset_x = this._off_x;
-            // this._start_offset_y = this._off_y;
+            this._start_offset_x = this._off_x;
+            this._start_offset_y = this._off_y;
 
-            // let scaler: number = 1;
-            // if (zoom_level > this._zoom_level) {
-            //     scaler = Pose2D.ZOOM_SPACINGS[zoom_level] / Pose2D.ZOOM_SPACINGS[this._zoom_level];
-            // }
+            let scaler: number = 1;
+            if (zoom_level > this._zoom_level) {
+                scaler = Pose2D.ZOOM_SPACINGS[zoom_level] / Pose2D.ZOOM_SPACINGS[this._zoom_level];
+            }
 
-            // if (!this._offset_translating && !center) {
-            //     this._end_offset_x = scaler * (this._off_x - this._width / 2) + this._width / 2;
-            //     this._end_offset_y = scaler * (this._off_y - this._height / 2) + this._height / 2;
-            // } else if (this._offset_translating) {
-            //     this._end_offset_x = scaler * (this._end_offset_x - this._width / 2) + this._width / 2;
-            //     this._end_offset_y = scaler * (this._end_offset_y - this._height / 2) + this._height / 2;
-            // } else {
-            //     this._end_offset_x = this._width / 2;
-            //     this._end_offset_y = this._height / 2;
-            // }
+            if (!this._offset_translating && !center) {
+                this._end_offset_x = scaler * (this._off_x - this._width / 2) + this._width / 2;
+                this._end_offset_y = scaler * (this._off_y - this._height / 2) + this._height / 2;
+            } else if (this._offset_translating) {
+                this._end_offset_x = scaler * (this._end_offset_x - this._width / 2) + this._width / 2;
+                this._end_offset_y = scaler * (this._end_offset_y - this._height / 2) + this._height / 2;
+            } else {
+                this._end_offset_x = this._width / 2;
+                this._end_offset_y = this._height / 2;
+            }
 
-            // this._offset_translating = true;
+            this._offset_translating = true;
 
             this._zoom_level = zoom_level;
             this.compute_layout(true);
