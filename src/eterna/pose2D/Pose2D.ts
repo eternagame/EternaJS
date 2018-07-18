@@ -2106,63 +2106,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         }
 
-        // highlights
-        if (this._unstable_highlight_box.get_queue() == null) {
-            this.clear_unstable_highlight();
-        }
-
-        if (!this._offset_translating && this._base_to_x == null && this._unstable_highlight_box.get_queue() != null) {
-            if (this._unstable_highlight_box.is_on() == true) {
-
-                if (this._unstable_highlight_box.same_queue()) {
-                    // Check if there was a change in position. Redraw if the position had changed.
-                    if (this._unstable_highlight_box.get_last_known_position() != null) {
-
-                        if (this._unstable_highlight_box.position_changed()) {
-                            this._unstable_highlight_box.enabled = false;
-                            this.draw_highlight_unstable_sequence();
-                        }
-                    }
-
-                } else {
-                    this._unstable_highlight_box.enabled = false;
-                    this.draw_highlight_unstable_sequence();
-                }
-
-            } else {
-                this._unstable_highlight_box.enabled = false;
-                this.draw_highlight_unstable_sequence();
-            }
-        }
-
-        if (this._user_defined_highlight_box.get_queue() == null) {
-            this.clear_user_defined_highlight();
-        }
-
-        if (!this._offset_translating && this._base_to_x == null && this._user_defined_highlight_box.get_queue() != null) {
-            if (this._user_defined_highlight_box.is_on() == true) {
-
-                if (this._user_defined_highlight_box.same_queue()) {
-                    // Check if there was a change in position. Redraw if the position had changed.
-                    if (this._user_defined_highlight_box.get_last_known_position() != null) {
-
-                        if (this._user_defined_highlight_box.position_changed()) {
-                            this._user_defined_highlight_box.enabled = false;
-                            this.draw_highlight_user_defined_sequence();
-                        }
-                    }
-
-                } else {
-                    this._user_defined_highlight_box.enabled = false;
-                    this.draw_highlight_user_defined_sequence();
-                }
-
-            } else {
-                this._user_defined_highlight_box.enabled = false;
-                this.draw_highlight_user_defined_sequence();
-            }
-        }
-
         /// Praise stacks when RNA is not moving
         if (!this._offset_translating && this._base_to_x == null) {
             if (this._praise_queue.length > 0) {
@@ -2903,14 +2846,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._energy_highlights = [];
-    }
-
-    private draw_highlight_unstable_sequence(): void {
-        this._unstable_highlight_box.enabled = true;
-    }
-
-    private draw_highlight_user_defined_sequence(): void {
-        this._user_defined_highlight_box.enabled = true;
     }
 
     private render_aux_info(): void {
