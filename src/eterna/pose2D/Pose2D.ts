@@ -808,7 +808,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggle_design_struct(seqnum: number): boolean {
-        this._design_struct[seqnum] = !(this._design_struct[seqnum] == true);
+        if (this._design_struct.length != this._sequence.length) {
+            this._design_struct = new Array(this._sequence.length);
+        }
+
+        this._design_struct[seqnum] = !this._design_struct[seqnum];
         ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
         this.update_design_highlight();
         let segments: number[] = this.get_design_segments();
@@ -822,10 +826,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         let elems: number[] = [];
         let curr: number = 0;
         for (let jj: number = 0; jj < this.get_full_sequence_length(); jj++) {
-            let _stat: number = (this._design_struct[jj] == true ? 1 : 0);
-            if ((curr ^ _stat) != 0) {
+            let stat: number = this._design_struct[jj] ? 1 : 0;
+            if ((curr ^ stat) != 0) {
                 elems.push(jj - curr);
-                curr = _stat;
+                curr = stat;
             }
         }
         if ((elems.length % 2) == 1) {
@@ -1606,7 +1610,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         // blue highlights ("magic glue")
-        let new_design: any[] = [];
+        let new_design: boolean[] = [];
         for (ii = 0; ii < this.get_full_sequence_length(); ii++) {
             new_design[idx_map[ii]] = this._design_struct[ii];
         }
@@ -2114,7 +2118,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     // Check if there was a change in position. Redraw if the position had changed.
                     if (this._unstable_highlight_box.get_last_known_position() != null) {
 
-                        if (this._unstable_highlight_box.position_changed(this)) {
+                        if (this._unstable_highlight_box.position_changed()) {
                             this._unstable_highlight_box.enabled = false;
                             this.draw_highlight_unstable_sequence();
                         }
@@ -2142,7 +2146,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     // Check if there was a change in position. Redraw if the position had changed.
                     if (this._user_defined_highlight_box.get_last_known_position() != null) {
 
-                        if (this._user_defined_highlight_box.position_changed(this)) {
+                        if (this._user_defined_highlight_box.position_changed()) {
                             this._user_defined_highlight_box.enabled = false;
                             this.draw_highlight_user_defined_sequence();
                         }

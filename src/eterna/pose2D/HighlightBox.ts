@@ -54,22 +54,26 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     public get_last_known_position(): Point {
-        return this._last_known_position;
+        return this._prevPosition;
     }
 
-    public position_changed(pose: Pose2D): boolean {
-        let _pos: Point = pose.get_base_xy(this._queue[1]);
-        return this._last_known_position.x != _pos.x || this._last_known_position.y != _pos.y;
+    private static readonly P: Point = new Point();
+    public position_changed(): boolean {
+        if (this._queue == null) {
+            return false;
+        }
+
+        let pos: Point = this._pose.get_base_xy(this._queue[1], HighlightBox.P);
+        return this._prevPosition.x != pos.x || this._prevPosition.y != pos.y;
     }
 
     public clear(): void {
-        this.enabled = false;
-
+        this.removeNamedObjects(HighlightBox.ANIM);
         this._graphics.clear();
         this._queue = null;
         this._last_known_queue = null;
         this._on = false;
-        this._last_known_position = null;
+        this._prevPosition = null;
         this._dirty = false;
     }
 
@@ -104,15 +108,9 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         } else  {
             // Redraw when we're dirty or the zoom level has changed
             this.display.visible = true;
-            if (this._dirty ||
-                this._pose.get_zoom_level() != this._prevZoomLevel ||
-                this._pose.get_x_offset() != this._prevOffsetX ||
-                this._pose.get_y_offset() != this._prevOffsetY) {
-
+            if (this._dirty || this._pose.get_zoom_level() != this._prevZoomLevel || this.position_changed()) {
                 this.redraw();
                 this._prevZoomLevel = this._pose.get_zoom_level();
-                this._prevOffsetX = this._pose.get_x_offset();
-                this._prevOffsetY = this._pose.get_y_offset();
                 this._dirty = false;
             }
         }
@@ -132,7 +130,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             return;
         }
 
-        this._last_known_position = this._pose.get_base_xy(this._queue[1]);
+        this._prevPosition = this._pose.get_base_xy(this._queue[1], this._prevPosition);
         this._last_known_queue = this._queue;
 
         let type: HighlightType = this._queue[0];
@@ -330,10 +328,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private _queue: number[];
     private _last_known_queue: number[];
     private _on: boolean;
-    private _last_known_position: Point;
+    private _prevPosition: Point;
     private _prevZoomLevel: number = -1;
-    private _prevOffsetX: number = Number.MAX_VALUE;
-    private _prevOffsetY: number = Number.MAX_VALUE;
 
     private static readonly ANIM: string = "anim";
 }
