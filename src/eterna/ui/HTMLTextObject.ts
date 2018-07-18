@@ -18,31 +18,31 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         let lineHeight: string = (typeof(percentOrString) === "number") ?
             `${Math.floor(percentOrString * 100)}%` :
             percentOrString;
-        DOMObject.applyStyleRecursive(this._obj, "line-height", lineHeight);
+        DOMObject.applyStyleRecursive(this._obj, "line-height", lineHeight, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public color(color: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "color", `#${color.toString(16)}`);
+        DOMObject.applyStyleRecursive(this._obj, "color", `#${color.toString(16)}`, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public font(fontFamily: string): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-family", fontFamily);
+        DOMObject.applyStyleRecursive(this._obj, "font-family", fontFamily, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public fontSize(size: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-size", `${size}pt`);
+        DOMObject.applyStyleRecursive(this._obj, "font-size", `${size}pt`, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public hAlign(align: "left" | "center" | "right" | "justify"): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "text-align", align);
+        DOMObject.applyStyleRecursive(this._obj, "text-align", align, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
@@ -65,4 +65,8 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         this._obj.style.width = DOMObject.sizeToString(value);
         this.onSizeChanged();
     }
+
+    private static readonly STYLE_NODE_NAMES: string[] = [
+        "div", "p", "span", "a"
+    ];
 }
