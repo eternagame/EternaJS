@@ -1928,7 +1928,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         /// Update score node
-        this.update_score_node_visualization();
+        this.update_score_node_visualization(this._off_x != this._prevOffsetX || this._off_y != this._prevOffsetY);
 
         /// Bitblt rendering
         let need_redraw: boolean = false;
@@ -2227,6 +2227,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this.clear_explosion();
             }
         }
+
+        this._prevOffsetX = this._off_x;
+        this._prevOffsetY = this._off_y;
     }
 
     public num_pairs(satisfied: boolean): number {
@@ -2953,16 +2956,16 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private update_score_node_visualization(): void {
+    private update_score_node_visualization(offsetChanged: boolean): void {
         if (this._score_nodes == null) {
             return;
         }
 
-        if ((this._base_to_x != null) || Application.instance.is_dragging()) {
+        if (this._base_to_x != null) {
             this._score_node_index = -1;
         }
 
-        if (this._score_node_index != this._last_score_node_index) {
+        if (this._score_node_index != this._last_score_node_index || offsetChanged) {
             this._score_node_highlight.clear();
 
             if (this._score_node_index >= 0 && this._score_nodes[this._score_node_index] != null) {
@@ -3347,6 +3350,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     /// Pose position offset
     private _off_x: number = 0;
     private _off_y: number = 0;
+    private _prevOffsetX: number = 0;
+    private _prevOffsetY: number = 0;
     private _offset_translating: boolean;
     private _start_offset_x: number;
     private _start_offset_y: number;
