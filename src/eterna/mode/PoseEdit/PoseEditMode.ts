@@ -64,6 +64,9 @@ export enum PoseState {
     NATIVE = 0,
     FROZEN = 1,
     TARGET = 2,
+
+    // TODO: move these to another enum;
+    // they are only used to communicate events to rscript
     PIP = 3,
     NONPIP = 4,
     SECOND = 5,
