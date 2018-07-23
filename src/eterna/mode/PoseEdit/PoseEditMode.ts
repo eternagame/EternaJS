@@ -1,5 +1,6 @@
 import * as log from "loglevel";
 import {Container, Point, Text} from "pixi.js";
+import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
 import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
@@ -8,6 +9,7 @@ import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
+import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {AchievementManager} from "../../achievements/AchievementManager";
 import {Application} from "../../Application";
@@ -93,9 +95,9 @@ export class PoseEditMode extends GameMode {
 
         this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this._uiLayer);
-        this._toolbar.display.position = new Point(
-            (Flashbang.stageWidth - this._toolbar.container.width) * 0.5,
-            Flashbang.stageHeight - 20);
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.display, Align.CENTER, Align.BOTTOM,
+            Align.CENTER, Align.BOTTOM, 0, -20);
 
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
