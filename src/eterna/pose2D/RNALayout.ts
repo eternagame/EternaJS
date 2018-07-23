@@ -81,16 +81,13 @@ export class RNALayout {
     }
 
     public get_coords(xarray: number[], yarray: number[]): void {
-
-        let ii: number;
-
         if (this._root != null) {
             this.get_coords_recursive(this._root, xarray, yarray);
         } else {
             // there is no structure (no pairs)
             if (xarray.length < 3) {
                 // really short, just place them in a vertical line
-                for (ii = 0; ii < xarray.length; ii++) {
+                for (let ii = 0; ii < xarray.length; ii++) {
                     xarray[ii] = 0;
                     yarray[ii] = ii * this._primarySpace;
                 }
@@ -108,14 +105,14 @@ export class RNALayout {
                 let cross_y: number = go_x;
                 let oligo_displacement: number = 0;
 
-                for (ii = 0; ii < xarray.length; ii++) {
+                for (let ii = 0; ii < xarray.length; ii++) {
                     if (this._exception_indices != null && this._exception_indices.indexOf(ii) >= 0) {
                         oligo_displacement += 2 * this._primarySpace;
                     }
                 }
                 circle_length += oligo_displacement;
 
-                for (ii = 0; ii < xarray.length; ii++) {
+                for (let ii = 0; ii < xarray.length; ii++) {
                     length_walker += this._primarySpace;
                     if (this._exception_indices != null && this._exception_indices.indexOf(ii) >= 0) {
                         length_walker += 2 * this._primarySpace;
