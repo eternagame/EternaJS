@@ -1,4 +1,4 @@
-import {Point} from "pixi.js";
+import {Container, Graphics} from "pixi.js";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {Flashbang} from "../core/Flashbang";
 import {GameObject} from "../core/GameObject";
@@ -15,6 +15,11 @@ export class Dragger extends GameObject {
     public curX: number = 0;
     public curY: number = 0;
 
+    public constructor(displayParent: Container = null) {
+        super();
+        this._displayParent = displayParent;
+    }
+
     public get offsetX(): number {
         return this.curX - this.startX;
     }
@@ -26,10 +31,16 @@ export class Dragger extends GameObject {
     protected added(): void {
         super.added();
 
+        this._disp.interactive = true;
+
+        let parent = this._displayParent || this.mode.modeSprite;
+        parent.addChild(this._disp);
+        this.updateSize();
+
         this.startX = this.curX = Flashbang.globalMouse.x;
         this.startY = this.curY = Flashbang.globalMouse.y;
 
-        let touchable = new DisplayObjectPointerTarget(this.mode.modeSprite);
+        let touchable = new DisplayObjectPointerTarget(this._disp);
         this.regs.add(touchable.pointerMove.connect(e => {
             this.updateMouseLoc();
             this.dragged.emit();
@@ -38,12 +49,23 @@ export class Dragger extends GameObject {
         }));
 
         this.regs.add(touchable.pointerUp.connect(e => {
-            this.updateMouseLoc();
-            this.dragComplete.emit();
+            this.complete();
             this.destroySelf();
 
             e.stopPropagation();
         }))
+    }
+
+    protected removed(): void {
+        // Ensure we complete even if we were interrupted
+        this.complete();
+        super.removed();
+    }
+
+    protected dispose(): void {
+        this._disp.destroy({children: true});
+        this._disp = null;
+        super.dispose();
     }
 
     private updateMouseLoc(): void {
@@ -51,5 +73,19 @@ export class Dragger extends GameObject {
         this.curY = Flashbang.globalMouse.y;
     }
 
-    private static readonly P: Point = new Point();
+    private updateSize(): void {
+        this._disp.clear().beginFill(0x0, 0).drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight).endFill();
+    }
+
+    private complete(): void {
+        if (!this._complete) {
+            this._complete = true;
+            this.updateMouseLoc();
+            this.dragComplete.emit();
+        }
+    }
+
+    private readonly _displayParent: Container;
+    private _disp: Graphics = new Graphics();
+    private _complete: boolean;
 }

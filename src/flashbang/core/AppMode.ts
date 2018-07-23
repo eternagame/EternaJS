@@ -44,7 +44,6 @@ export class AppMode {
     public constructor() {
         this._rootObject = new RootObject(this);
         this.modeSprite.interactiveChildren = false;
-        this.modeSprite.interactive = false;
     }
 
     public get regs(): RegistrationGroup {
@@ -221,7 +220,6 @@ export class AppMode {
     enterInternal(): void {
         this._isActive = true;
         this.modeSprite.interactiveChildren = true;
-        this.modeSprite.interactive = true;
         this.enter();
         this._entered.emit();
     }
@@ -230,7 +228,6 @@ export class AppMode {
     exitInternal(): void {
         this._isActive = false;
         this.modeSprite.interactiveChildren = false;
-        this.modeSprite.interactive = false;
         this.exit();
     }
 
