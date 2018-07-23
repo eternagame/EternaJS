@@ -1385,7 +1385,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._molecular_binding_bonus = bonus;
     }
 
-    public set_molecular_structure(pairs: any[]): void {
+    public set_molecular_structure(pairs: number[]): void {
         if (pairs != null) {
             this._molecule_target_pairs = pairs.slice();
         } else {
@@ -1397,7 +1397,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._molecule_target_pairs;
     }
 
-    public set_molecular_binding_site(binding_site: any[]): void {
+    public set_molecular_binding_site(binding_site: boolean[]): void {
         if (binding_site != null) {
             this._binding_site = binding_site.slice();
         } else {
@@ -1406,13 +1406,13 @@ export class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let target_pairs: any[] = this._molecule_target_pairs.slice();
+        let target_pairs: number[] = this._molecule_target_pairs.slice();
         if (!target_pairs) {
             throw new Error("Can't find molecular target structure");
         }
 
-        let binding_bases: any[] = [];
-        let binding_pairs: any[] = [];
+        let binding_bases: number[] = [];
+        let binding_pairs: number[] = [];
         for (let ii: number = 0; ii < binding_site.length; ii++) {
             if (binding_site[ii]) {
                 binding_bases.push(ii);
@@ -1434,7 +1434,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public set_molecular_binding(binding_sites: number[], binding_pairs: any[], binding_bonus: number): void {
+    public set_molecular_binding(binding_sites: number[], binding_pairs: number[], binding_bonus: number): void {
         if (this._molecule != null) {
             this._molecule.destroy({children: true});
             this._molecule = null;
@@ -1503,7 +1503,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._molecule_is_bound_real = bound_real;
     }
 
-    public set_oligos(oligos: any[], order: any[] = null, num_paired: number = 0): void {
+    public set_oligos(oligos: Oligo[], order: number[] = null, num_paired: number = 0): void {
         if (oligos == null) {
             this._oligos = null;
             this._oligos_order = null;
@@ -1511,19 +1511,23 @@ export class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let k: number;
         let same: boolean = (this._oligos != null && oligos.length == this._oligos.length);
         if (same) {
-            for (k = 0; k < oligos.length && same; k++) {
-                same = same && (this._oligos[k].sequence == this._oligos[k].sequence);
+            for (let k = 0; k < oligos.length && same; k++) {
+                if (!Arrays.shallowEqual(this._oligos[k].sequence, oligos[k].sequence)) {
+                    same = false;
+                    break;
+                }
             }
         }
 
-        let prev_order: any[] = this._oligos_order;
+        let prev_order: number[] = this._oligos_order;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
             this._oligos_order = [];
-            for (k = 0; k < this._oligos.length; k++) this._oligos_order[k] = k;
+            for (let k = 0; k < this._oligos.length; k++) {
+                this._oligos_order[k] = k;
+            }
         } else {
             this._oligos_order = order.slice();
         }
@@ -1532,13 +1536,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         let seq: number[] = this.get_full_sequence();
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
-            for (k = 0; k < diff; k++) {
+            for (let k = 0; k < diff; k++) {
                 this.createBase();
             }
         }
 
         let n: number = seq.length;
-        for (k = 0; k < n; k++) {
+        for (let k = 0; k < n; k++) {
             this._bases[k].set_type(seq[k]);
             this._bases[k].set_base_index(k);
         }
@@ -1549,17 +1553,17 @@ export class Pose2D extends ContainerObject implements Updatable {
             let old_x: number[] = [];
             let old_y: number[] = [];
             let idx_map: number[] = this.get_order_map(prev_order);
-            for (k = 0; k < seq.length; k++) {
+            for (let k = 0; k < seq.length; k++) {
                 old_x[k] = this._bases[k].get_x();
                 old_y[k] = this._bases[k].get_y();
             }
-            for (k = 0; k < seq.length; k++) {
+            for (let k = 0; k < seq.length; k++) {
                 this._bases[idx_map[k]].set_xy(old_x[k], old_y[k]);
             }
         }
     }
 
-    public get_oligos(): any[] {
+    public get_oligos(): Oligo[] {
         return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
     }
 
@@ -1624,7 +1628,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.update_design_highlight();
     }
 
-    public set_oligo(oligo: any[], mode: number = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
+    public set_oligo(oligo: number[], mode: number = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
         if (oligo == null) {
             this._oligo = null;
             return;
@@ -1649,10 +1653,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get_oligo(): any[] {
-        return (this._oligo != null ? this._oligo.slice() : null);
-    }
-
     public set_oligo_malus(malus: number): void {
         this._oligo_malus = malus;
     }
@@ -1671,7 +1671,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._oligo == null && this._oligos == null) {
             return this._sequence;
         }
-        let seq: any[] = this._sequence.slice();
+        let seq: number[] = this._sequence.slice();
         if (this._oligos == null) {
             if (this._oligo_mode == Pose2D.OLIGO_MODE_EXT5P) {
                 seq = this._oligo.concat(seq);
@@ -1707,7 +1707,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public get_strand_name(seqnum: number): string {
         if (this._oligos != null && seqnum >= this._sequence.length) {
-            let seq: any[] = this._sequence.slice();
+            let seq: number[] = this._sequence.slice();
             for (let ii: number = 0; ii < this._oligos.length; ii++) {
                 seq.push(EPars.RNABASE_CUT);
                 seq = seq.concat(this._oligos[this._oligos_order[ii]].sequence);
@@ -1773,8 +1773,8 @@ export class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        let _full_seq: any[] = this.get_full_sequence();
-        return (EPars.pair_type(_full_seq[a], _full_seq[b]) != 0);
+        let fullSeq: number[] = this.get_full_sequence();
+        return (EPars.pair_type(fullSeq[a], fullSeq[b]) != 0);
     }
 
     public get_sequence_length(): number {
@@ -1802,8 +1802,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         let rna_drawer: RNALayout = new RNALayout(radius, radius);
         rna_drawer.setup_tree(this._pairs);
         rna_drawer.draw_tree();
-        let xarray: any[] = new Array(this._bases.length);
-        let yarray: any[] = new Array(this._bases.length);
+        let xarray: number[] = new Array(this._bases.length);
+        let yarray: number[] = new Array(this._bases.length);
         rna_drawer.get_coords(xarray, yarray);
         for (let ii: number = 0; ii < this._bases.length; ii++) {
             let ax: number = xarray[ii];
@@ -3240,12 +3240,12 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _molecule_is_bound: boolean = false;
     private _molecule_is_bound_real: boolean = false;
     private _molecular_binding_bonus: number = 0;
-    private _molecule_target_pairs: any[];
+    private _molecule_target_pairs: number[];
     private parenthesis: string;
     private _shift_limit: number;
 
     /// Oligos
-    private _oligo: any[] = null;
+    private _oligo: number[] = null;
     private _oligo_mode: number = Pose2D.OLIGO_MODE_DIMER;
     private _oligo_name: string = null;
     private _duplex_cost: number = EPars.DUPLEX_INIT; // total for all strands
@@ -3254,9 +3254,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _oligo_paired: boolean = false;
 
     /// Multistrands
-    private _oligos: any[] = null;
-    private _oligos_order: any[] = null;
-    private _prev_oligos_order: any[];
+    private _oligos: Oligo[] = null;
+    private _oligos_order: number[] = null;
+    private _prev_oligos_order: number[];
     private _oligos_paired: number = 0;
     private _strand_label: TextBalloon;
 
@@ -3405,3 +3405,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private static readonly P: Point = new Point();
 }
 
+export interface Oligo {
+    malus: number;
+    name: string;
+    sequence: number[];
+}
