@@ -69,6 +69,7 @@ export class PuzzleManager {
         if (json["reward"] && json["reward"].length > 0) {
             newpuz.set_reward(Number(json["reward"]));
         }
+
         if (json["ui-specs"]) {
             // New style UI elements (scripted) are identified as JSON objects
             if (json["ui-specs"].substr(0, 1) == "{")
@@ -91,15 +92,17 @@ export class PuzzleManager {
         } else {
             newpuz.set_secstructs([json["secstruct"]]);
         }
+
         if (json["check_hairpin"] && Number(json["check_hairpin"])) {
             newpuz.set_use_barcode(true);
         }
+
         if (json["num-submissions"] != null) {
             newpuz.set_num_submissions(Number(json["num-submissions"]));
         }
 
-        if (json["eterna.rscript"]) {
-            newpuz.set_rscript(json["eterna.rscript"]);
+        if (json["rscript"]) {
+            newpuz.set_rscript(json["rscript"]);
         }
 
         if (json["events"]) {
