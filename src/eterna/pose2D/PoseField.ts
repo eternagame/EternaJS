@@ -117,7 +117,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        if (!this.display.visible) {
+        let mouse = Flashbang.globalMouse;
+        if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
 
@@ -173,6 +174,15 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         return false;
     }
 
+    /** true if our bounds contains the given global point */
+    private containsPoint(screenX: number, screenY: number): boolean {
+        PoseField.P.set(screenX, screenY);
+        this.container.toLocal(PoseField.P, null, PoseField.P);
+        const x = PoseField.P.x;
+        const y = PoseField.P.y;
+        return (x >= 0 && x < this._width && y >= 0 && y < this._height);
+    }
+
     private readonly _pose: Pose2D;
     private readonly _clickTargetDisp: Graphics;
 
@@ -181,4 +191,6 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     private _mask: Graphics;
 
     private _poseDraggerRef: GameObjectRef = GameObjectRef.NULL;
+
+    private static readonly P: Point = new Point();
 }
