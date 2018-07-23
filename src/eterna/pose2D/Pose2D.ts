@@ -15,6 +15,7 @@ import {SelfDestructTask} from "../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Arrays} from "../../flashbang/util/Arrays";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {Dragger} from "../../flashbang/util/Dragger";
 import {Easing} from "../../flashbang/util/Easing";
 import {Registration} from "../../signals/Registration";
 import {Application} from "../Application";
@@ -533,8 +534,11 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._last_shifted_index = -1;
             let cmd: any[] = this.parse_command(this._current_color, closest_index);
             if (cmd == null) {
-                log.debug("TODO: set_dragger");
-                // Application.instance.set_dragger(() => this.pose_mouse_moved(), () => this.on_pose_mouse_up());
+                let dragger = new Dragger();
+                this.addObject(dragger);
+                dragger.dragged.connect(() => this.pose_mouse_moved());
+                dragger.dragComplete.connect(() => this.on_pose_mouse_up());
+
                 this.on_base_mouse_down(closest_index, ctrlDown);
             } else {
                 this._last_shifted_command = this._current_color;
@@ -598,60 +602,64 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public pose_mouse_moved(): void {
-        // if (!this._coloring) {
-        //     this.clear_mouse();
-        // }
-        //
-        // let ii: number;
-        // let closest_dist: number = -1;
-        // let closest_index: number = -1;
-        //
-        // for (ii = 0; ii < this.get_full_sequence_length(); ii++) {
-        //
-        //     let mouseDist: number = this._bases[ii].is_clicked(this.mouseX - this._off_x, this.mouseY - this._off_y, this._zoom_level, this._coloring);
-        //     if (mouseDist >= 0) {
-        //
-        //         if (closest_index < 0 || mouseDist < closest_dist) {
-        //             closest_index = ii;
-        //             closest_dist = mouseDist;
-        //         }
-        //     }
-        // }
-        //
-        // if (closest_index >= 0 && this._current_color >= 0) {
-        //     this.on_base_mouse_move(closest_index);
-        //     //Mouse.hide();
-        //     this._paint_cursor.visible = true;
-        //     this._paint_cursor.startDrag(true);
-        //     this._paint_cursor.set_shape(this._current_color);
-        //
-        //     let s_name: string = this.get_strand_name(closest_index);
-        //     if (s_name != null) {
-        //         this._strand_label.set_text(s_name);
-        //         if (this.mouseX + 16 + this._strand_label.balloon_width() > this._width) {
-        //             this._strand_label.set_pos(new UDim(0, 0, this.mouseX - 16 - this._strand_label.balloon_width(), this.mouseY + 16));
-        //         } else {
-        //             this._strand_label.set_pos(new UDim(0, 0, this.mouseX + 16, this.mouseY + 16));
-        //         }
-        //         this._strand_label.visible = true;
-        //     }
-        //
-        // } else {
-        //     this._last_colored_index = -1;
-        // }
-        //
-        // if (!this._coloring) {
-        //     this.update_score_node_gui();
-        //     if (this._feedback_objs.length > 0) {
-        //         for (ii = 0; ii < this._feedback_objs.length; ii++) {
-        //             if (ii == closest_index) continue;
-        //             this._feedback_objs[ii].visible = false;
-        //         }
-        //         if (closest_index >= 0) {
-        //             this._feedback_objs[closest_index].visible = true;
-        //         }
-        //     }
-        // }
+        if (!this._coloring) {
+            this.clear_mouse();
+        }
+
+        this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
+        let mouseX = Pose2D.P.x;
+        let mouseY = Pose2D.P.y;
+
+        let closest_dist: number = -1;
+        let closest_index: number = -1;
+        for (let ii = 0; ii < this.get_full_sequence_length(); ii++) {
+            let mouseDist: number = this._bases[ii].is_clicked(mouseX - this._off_x, mouseY - this._off_y, this._zoom_level, this._coloring);
+            if (mouseDist >= 0) {
+                if (closest_index < 0 || mouseDist < closest_dist) {
+                    closest_index = ii;
+                    closest_dist = mouseDist;
+                }
+            }
+        }
+
+        if (closest_index >= 0 && this._current_color >= 0) {
+            this.on_base_mouse_move(closest_index);
+            //Mouse.hide();
+            // this._paint_cursor.visible = true;
+            // this._paint_cursor.startDrag(true);
+            // this._paint_cursor.set_shape(this._current_color);
+
+            let strandName: string = this.get_strand_name(closest_index);
+            if (strandName != null) {
+                this._strand_label.set_text(strandName);
+                if (mouseX + 16 + this._strand_label.balloon_width() > this._width) {
+                    this._strand_label.display.position = new Point(
+                        mouseX - 16 - this._strand_label.balloon_width(),
+                        mouseY + 16);
+                } else {
+                    this._strand_label.display.position = new Point(mouseX + 16, mouseY + 16);
+                }
+                this._strand_label.display.visible = true;
+            }
+
+        } else {
+            this._last_colored_index = -1;
+        }
+
+        if (!this._coloring) {
+            this.update_score_node_gui();
+            if (this._feedback_objs.length > 0) {
+                for (let ii = 0; ii < this._feedback_objs.length; ii++) {
+                    if (ii == closest_index) {
+                        continue;
+                    }
+                    this._feedback_objs[ii].display.visible = false;
+                }
+                if (closest_index >= 0) {
+                    this._feedback_objs[closest_index].display.visible = true;
+                }
+            }
+        }
     }
 
     public on_pose_mouse_up(): void {
@@ -3377,7 +3385,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _aux_info_canvas: Graphics;
     private _aux_textballoon: TextBalloon;
 
-    private _feedback_objs: any[] = [];
+    private _feedback_objs: SceneObject[] = [];
     private _feedback_objs_num: number;
     private _feedback_objs_start_ind: number;
 
