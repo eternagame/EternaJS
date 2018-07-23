@@ -35,16 +35,29 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
 
-    public set_size(width: number, height: number): void {
-        if (this._width != width && this._height != height) {
-            this._width = width;
-            this._height = height;
-            this._pose.set_offset(this._width * 0.5, this._height * 0.5);
+    public set_size(width: number, height: number, useMask: boolean): void {
+        this._width = width;
+        this._height = height;
 
-            this._clickTargetDisp.clear()
-                .beginFill(0x0, 0)
-                .drawRect(0, 0, width, height)
-                .endFill();
+        this._clickTargetDisp.clear()
+            .beginFill(0x0, 0)
+            .drawRect(0, 0, width, height)
+            .endFill();
+
+        this._pose.set_offset(this._width * 0.5, this._height * 0.5);
+        this._pose.setSize(width, height);
+
+        // If we're in PIP mode, we mask our view
+        if (this._mask != null) {
+            this._mask.destroy({children: true});
+            this._mask = null;
+        }
+        this.container.mask = null;
+
+        if (useMask) {
+            this._mask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, width, height).endFill();
+            this.container.addChild(this._mask);
+            this.container.mask = this._mask;
         }
     }
 
@@ -165,8 +178,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
     private _width: number = 0;
     private _height: number = 0;
+    private _mask: Graphics;
 
     private _poseDraggerRef: GameObjectRef = GameObjectRef.NULL;
-
-    private static readonly P: Point = new Point();
 }

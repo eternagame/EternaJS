@@ -63,8 +63,6 @@ export class Pose2D extends ContainerObject implements Updatable {
     protected added() {
         super.added();
 
-        this.setSize(Flashbang.stageWidth, Flashbang.stageHeight);
-
         this._score_node_highlight = new Graphics();
         this.container.addChild(this._score_node_highlight);
 
