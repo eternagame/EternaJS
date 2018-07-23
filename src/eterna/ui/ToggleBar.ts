@@ -28,7 +28,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
         this._bg.clear();
         this._bg.beginFill(ToggleBar.COLOR_DARK, 0.6);
         this._bg.lineStyle(2, ToggleBar.COLOR_LIGHT, 0.85);
-        this._bg.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE * this._num_states, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE / 2);
+        this._bg.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE * this._num_states, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
         this._bg.endFill();
 
         this._bg_active = new Graphics();
@@ -36,7 +36,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
 
         this._bg_active.clear();
         this._bg_active.beginFill(ToggleBar.COLOR_MEDIUM, 0.45);
-        this._bg_active.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE / 2);
+        this._bg_active.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
         this._bg_active.endFill();
         this._bg_active.visible = false;
 
@@ -45,12 +45,12 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
 
         this._bg_selected.clear();
         this._bg_selected.beginFill(ToggleBar.COLOR_LIGHT, 0.85);
-        this._bg_selected.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE / 2);
+        this._bg_selected.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
         this._bg_selected.endFill();
 
         for (let ii = 0; ii < this._num_states; ii++) {
             this._labels[ii] = Fonts.arial("" + (ii + 1), 12).color(ToggleBar.COLOR_TEXT).build();
-            this._labels[ii].position = new Point(ii * ToggleBar.BUTTON_SIZE, 4);
+            this._labels[ii].position = new Point((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
             this.container.addChild(this._labels[ii]);
         }
 
@@ -162,6 +162,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
     private _rscript_name: string = "";
 
     private static readonly BUTTON_SIZE: number = 25;
+    private static readonly ROUND_RECT_RADIUS = 10;
     private static readonly COLOR_DARK: number = 0x1C304C;
     private static readonly COLOR_MEDIUM: number = 0x3E566A;
     private static readonly COLOR_LIGHT: number = 0x88A1B1;

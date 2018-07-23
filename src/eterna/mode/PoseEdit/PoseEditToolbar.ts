@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Point, Graphics} from "pixi.js";
+import {Container, Graphics, Point} from "pixi.js";
 import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
@@ -11,11 +11,11 @@ import {Easing} from "../../../flashbang/util/Easing";
 import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Eterna} from "../../Eterna";
 import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {Bitmaps} from "../../resources/Bitmaps";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
-import {Bitmaps} from "../../resources/Bitmaps";
 
 export class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
@@ -322,6 +322,9 @@ export class PoseEditToolbar extends ContainerObject {
         this.puzzleStateToggle = new ToggleBar(target_secstructs.length);
         if (target_secstructs.length > 1) {
             this.addObject(this.puzzleStateToggle, this._content);
+            DisplayUtil.positionRelative(
+                this.puzzleStateToggle.display, Align.CENTER, Align.BOTTOM,
+                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5);
         }
 
         DisplayUtil.positionRelative(
