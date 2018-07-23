@@ -122,26 +122,21 @@ export abstract class GameMode extends AppMode {
             poses.push(newPoseField.get_pose());
         }
         this._poses = poses;
-
-        // let opt: GameObject = (<GameObject>Application.instance.get_application_gui("View options"));
-        // if (opt != null) opt.load_options(this._poses, this);
     }
 
     protected toggle_pip(): void {
-        this._is_pip_mode = !this._is_pip_mode;
-        this.set_pip(this._is_pip_mode);
+        this.set_pip(!this._is_pip_mode);
     }
 
     protected set_pip(pip_mode: boolean): void {
         this._is_pip_mode = pip_mode;
 
         if (pip_mode) {
-            log.debug("TODO: set_pip");
             let numFields: number = this._pose_fields.length;
             for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._pose_fields[ii];
                 poseField.display.position = new Point(Flashbang.stageWidth / numFields * ii, 0);
-                poseField.set_size(Flashbang.stageWidth / numFields, Flashbang.stageHeight);
+                poseField.set_size(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
@@ -149,7 +144,7 @@ export abstract class GameMode extends AppMode {
                 let poseField = this._pose_fields[ii];
                 if (ii == 0) {
                     poseField.display.position = new Point(0, 0);
-                    poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight);
+                    poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;
