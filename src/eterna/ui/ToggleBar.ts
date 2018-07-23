@@ -87,6 +87,10 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
+        if (this._disabled || !this.display.visible) {
+            return false;
+        }
+
         if (e.type == KeyboardEventType.KEY_DOWN && e.code == KeyCode.Tab && !e.ctrlKey) {
             this.set_state((this._current_state + 1) % this._num_states);
             e.preventDefault(); // prevent Tab from changing focus in the browser
@@ -97,6 +101,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
     }
 
     public set_disabled(disabled: boolean): void {
+        this._disabled = disabled;
         this.display.alpha = disabled ? 0.3 : 1.0;
     }
 
@@ -150,6 +155,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
 
     private readonly _num_states: number;
 
+    private _disabled: boolean = false;
     private _current_state: number = -1;
     private _current_over: number = -1;
     private _labels: Text[] = [];
