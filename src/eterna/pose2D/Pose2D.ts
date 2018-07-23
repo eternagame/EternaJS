@@ -1590,16 +1590,16 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public transform_markers(): void {
-        if (this._prev_oligos_order == null
-            || this._prev_oligos_order.length != this._oligos_order.length) {
+        if (this._prev_oligos_order == null || this._prev_oligos_order.length != this._oligos_order.length) {
             this._prev_oligos_order = null;
             return;
         }
-        let idx_map: any[] = this.get_order_map(this._prev_oligos_order);
+
+        let idx_map: number[] = this.get_order_map(this._prev_oligos_order);
         this._prev_oligos_order = null;
 
         // black marks
-        let indices: any[] = this.get_tracked_indices();
+        let indices: number[] = this.get_tracked_indices();
         this.clear_tracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
