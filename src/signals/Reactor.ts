@@ -10,14 +10,14 @@ export abstract class Reactor {
         return this._listeners != null;
     }
 
-    protected addConnection(listener: Function): Cons {
+    protected addConnection(listener: (arg1: any, arg2: any, arg3: any) => void): Cons {
         if (listener == null) {
             throw new Error("Null listener");
         }
         return this._addCons(new Cons(this, listener));
     }
 
-    protected removeConnection(listener: Function): void {
+    protected removeConnection(listener: (arg1: any, arg2: any, arg3: any) => void): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons.removeAll(this._listeners, listener);

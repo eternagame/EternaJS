@@ -8,7 +8,7 @@ export class Cons implements Connection {
     /** The next connection in our chain. */
     public next: Cons;
 
-    constructor(owner: Reactor, listener: Function) {
+    constructor(owner: Reactor, listener: (arg1: any, arg2: any, arg3: any) => void) {
         this._owner = owner;
         this._listener = listener;
     }
@@ -19,7 +19,7 @@ export class Cons implements Connection {
     }
 
     /** Returns the listener for this cons cell. */
-    public get listener(): Function {
+    public get listener(): (arg1: any, arg2: any, arg3: any) => void {
         return this._listener;
     }
 
@@ -74,7 +74,7 @@ export class Cons implements Connection {
     }
 
     /*internal*/
-    static removeAll(head: Cons, listener: Function): Cons {
+    static removeAll(head: Cons, listener: (arg1: any, arg2: any, arg3: any) => void): Cons {
         if (head == null) {
             return null;
         } else if (head.listener == listener) {
@@ -86,7 +86,7 @@ export class Cons implements Connection {
     }
 
     private _owner: Reactor;
-    private _listener: Function;
+    private _listener: (arg1: any, arg2: any, arg3: any) => void;
     private _oneShot: boolean;
     private _priority: number = 0;
 }
