@@ -1,5 +1,5 @@
 import {Connection} from "./Connection";
-import {Reactor} from "./Reactor";
+import {Reactor, RListener} from "./Reactor";
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.
@@ -8,7 +8,7 @@ export class Cons implements Connection {
     /** The next connection in our chain. */
     public next: Cons;
 
-    constructor(owner: Reactor, listener: (arg1: any, arg2: any, arg3: any) => void) {
+    constructor(owner: Reactor, listener: RListener) {
         this._owner = owner;
         this._listener = listener;
     }
@@ -19,7 +19,7 @@ export class Cons implements Connection {
     }
 
     /** Returns the listener for this cons cell. */
-    public get listener(): (arg1: any, arg2: any, arg3: any) => void {
+    public get listener(): RListener {
         return this._listener;
     }
 
@@ -74,7 +74,7 @@ export class Cons implements Connection {
     }
 
     /*internal*/
-    static removeAll(head: Cons, listener: (arg1: any, arg2: any, arg3: any) => void): Cons {
+    static removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;
         } else if (head.listener == listener) {
@@ -86,7 +86,7 @@ export class Cons implements Connection {
     }
 
     private _owner: Reactor;
-    private _listener: (arg1: any, arg2: any, arg3: any) => void;
+    private _listener: RListener;
     private _oneShot: boolean;
     private _priority: number = 0;
 }

@@ -24,6 +24,6 @@ export abstract class AbstractSignal<T> extends Reactor implements SignalView<T>
      * Emits the supplied event to all connected slots.
      */
     protected notifyEmit(event: T): void {
-        this.notify(event, undefined, undefined);
+        this.notify(event);
     }
 }
