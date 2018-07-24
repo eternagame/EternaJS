@@ -59,8 +59,8 @@ export class PuzzleManager {
             }
         }
 
-        let usetails: any = json["usetails"];
-        newpuz.set_use_tails(usetails != null, usetails != null && Number(usetails) == 2);
+        let usetails: number = Number(json["usetails"]);
+        newpuz.set_use_tails(usetails > 0, usetails == 2);
 
         if (json["folder"] && json["folder"].length > 0) {
             newpuz.set_folder(json["folder"]);
