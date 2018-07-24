@@ -402,8 +402,8 @@ export class PoseEditMode extends GameMode {
 
             } else {
                 let seq_arr: number[] = EPars.string_to_sequence_array(seq);
-                for (let ii = 0; ii < this._poses.length; ii++) {
-                    this._poses[ii].paste_sequence(seq_arr);
+                for (let pose of this._poses) {
+                    pose.paste_sequence(seq_arr);
                 }
             }
             this.clear_move_tracking(seq);
@@ -542,8 +542,8 @@ export class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = true;
 
         if (!this._puzzle.is_pallete_allowed()) {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_current_color(-1);
+            for (let pose of this._poses) {
+                pose.set_current_color(-1);
             }
         } else {
             this._toolbar.palette.clickTarget(PaletteTargetType.A);
@@ -646,12 +646,12 @@ export class PoseEditMode extends GameMode {
         }
 
         if (this._folder.can_score_structures()) {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_score_visualization(this._folder);
+            for (let pose of this._poses) {
+                pose.set_score_visualization(this._folder);
             }
         } else {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_score_visualization(null);
+            for (let pose of this._poses) {
+                pose.set_score_visualization(null);
             }
         }
 
@@ -1585,12 +1585,12 @@ export class PoseEditMode extends GameMode {
         this._folder_button.label(this._folder.get_folder_name());
 
         if (this._folder.can_score_structures()) {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_score_visualization(this._folder);
+            for (let pose of this._poses) {
+                pose.set_score_visualization(this._folder);
             }
         } else {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].set_score_visualization(null);
+            for (let pose of this._poses) {
+                pose.set_score_visualization(null);
             }
         }
 
@@ -1984,8 +1984,8 @@ export class PoseEditMode extends GameMode {
         }
 
         if (disable) {
-            for (let ii = 0; ii < this._poses.length; ii++) {
-                this._poses[ii].clear_mouse();
+            for (let pose of this._poses) {
+                pose.clear_mouse();
             }
         }
 
