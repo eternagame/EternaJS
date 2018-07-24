@@ -1,9 +1,7 @@
-﻿import MultiStyleText, {TextStyleSet} from "pixi-multistyle-text";
-import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
+﻿import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
 import {IntLoopPars} from "./IntLoopPars";
 
 export class EPars {
-
     public static INF: number = 1000000;
     public static NST: number = 0;
     public static MAXLOOP: number = 30;
@@ -63,7 +61,6 @@ export class EPars {
         EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
         EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE];
 
-
     public static ml_intern(i: number): number {
         if (i > 2) {
             return EPars.ML_INTERN37 + EPars.TERM_AU;
@@ -80,7 +77,6 @@ export class EPars {
         return hairpin_match[1];
     }
 
-
     public static get_longest_stack_length(pairs: number[]): number {
         let longlen: number = 0;
 
@@ -88,15 +84,12 @@ export class EPars {
         let last_stack_other: number = -1;
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
-
             if (pairs[ii] > ii) {
-
                 if (stack_start < 0) {
                     stack_start = ii;
                 }
 
                 let is_continued: boolean = false;
-
                 if (last_stack_other < 0) {
                     is_continued = true;
                 } else {
@@ -108,7 +101,6 @@ export class EPars {
                 if (is_continued) {
                     last_stack_other = pairs[ii];
                 } else {
-
                     if (stack_start >= 0 && ii - stack_start > longlen) {
                         longlen = ii - stack_start;
                     }
@@ -118,7 +110,6 @@ export class EPars {
                 }
 
             } else {
-
                 if (stack_start >= 0 && ii - stack_start > longlen) {
                     longlen = ii - stack_start;
                 }
@@ -129,9 +120,7 @@ export class EPars {
             }
         }
 
-
         return longlen;
-
     }
 
     public static get_letter_color(letter: string): number {
@@ -149,10 +138,10 @@ export class EPars {
     }
 
     public static addLetterStyles(builder: StyledTextBuilder): void {
-        builder.addStyle("G", { fill: this.get_letter_color("G") });
-        builder.addStyle("A", { fill: this.get_letter_color("A") });
-        builder.addStyle("U", { fill: this.get_letter_color("U") });
-        builder.addStyle("C", { fill: this.get_letter_color("C") });
+        builder.addStyle("G", {fill: this.get_letter_color("G")});
+        builder.addStyle("A", {fill: this.get_letter_color("A")});
+        builder.addStyle("U", {fill: this.get_letter_color("U")});
+        builder.addStyle("C", {fill: this.get_letter_color("C")});
     }
 
     public static get_colored_letter(letter: string): string {
@@ -219,7 +208,6 @@ export class EPars {
 
         let ii: number = 0;
         let start_index: number = -1;
-
         for (ii = 0; ii < sequence.length; ii++) {
 
             if (sequence[ii] == letter) {
@@ -263,11 +251,11 @@ export class EPars {
         let ii: number = 0;
         let start_index: number = -1;
 
-        if (max_allowed <= 0)
+        if (max_allowed <= 0) {
             return restricted;
+        }
 
         for (ii = 0; ii < sequence.length; ii++) {
-
             if (sequence[ii] == letter) {
                 if (start_index < 0) {
                     start_index = ii;
@@ -292,9 +280,9 @@ export class EPars {
                     }
                     start_index = -1;
                 }
-
             }
         }
+
         // gotta check if we found a start_index without an end...
         if (start_index >= 0) {
             if (max_allowed < ii - start_index) {
@@ -305,7 +293,6 @@ export class EPars {
 
         return restricted;
     }
-
 
     public static get_sequence_repetition(seq_str: string, n: number): number {
         let dict: Set<string> = new Set<string>();
@@ -388,8 +375,9 @@ export class EPars {
         let pair_start_there: number = -1;
         let pair_end_there: number = -1;
 
-        if (pairs[index] >= 0)
+        if (pairs[index] >= 0) {
             return null;
+        }
 
         let walker: number = index;
         while (walker >= 0) {
@@ -411,18 +399,21 @@ export class EPars {
             walker++;
         }
 
-        if (pair_start_here < 0 || pair_end_here < 0)
+        if (pair_start_here < 0 || pair_end_here < 0) {
             return null;
+        }
 
         let there_start: number = Math.min(pair_start_there, pair_end_there);
         let there_end: number = Math.max(pair_start_there, pair_end_there);
 
-        if (pair_start_here == there_start)
+        if (pair_start_here == there_start) {
             return null;
+        }
 
         for (let ii: number = there_start + 1; ii < there_end; ii++) {
-            if (pairs[ii] >= 0)
+            if (pairs[ii] >= 0) {
                 return null;
+            }
         }
 
         let bases: number[] = [];
@@ -445,7 +436,6 @@ export class EPars {
             return "Structure length limit is " + length_limit;
         }
 
-
         for (let jj: number = 0; jj < parenthesis.length; jj++) {
             if (parenthesis.charAt(jj) == '(') {
                 pair_stack.push(jj);
@@ -466,8 +456,9 @@ export class EPars {
             return "Unbalanced parenthesis notation";
         }
 
-        if (letteronly)
+        if (letteronly) {
             return null;
+        }
 
         let index: number = parenthesis.indexOf("(.)");
         if (index >= 0) {
@@ -480,13 +471,10 @@ export class EPars {
             return "There is a length 2 hairpin loop which is impossible at base " + (index + 2);
         }
 
-
         return null;
     }
 
-
     public static parenthesis_to_pair_array(parenthesis: string): number[] {
-
         let pairs: number[] = [];
         let pair_stack: number[] = [];
 
@@ -498,8 +486,9 @@ export class EPars {
             if (parenthesis.charAt(jj) == '(') {
                 pair_stack.push(jj);
             } else if (parenthesis.charAt(jj) == ')') {
-                if (pair_stack.length == 0)
+                if (pair_stack.length == 0) {
                     throw new Error("Invalid parenthesis notation");
+                }
 
                 pairs[pair_stack[pair_stack.length - 1]] = jj;
                 pair_stack.pop();
@@ -509,7 +498,6 @@ export class EPars {
         for (let jj = 0; jj < pairs.length; jj++) {
             if (pairs[jj] >= 0) pairs[pairs[jj]] = jj;
         }
-
 
         return pairs;
     }
@@ -591,8 +579,9 @@ export class EPars {
             } else if (parenthesis.charAt(jj) == '(') {
                 pair_stack.push(jj);
             } else if (parenthesis.charAt(jj) == ')') {
-                if (pair_stack.length == 0)
+                if (pair_stack.length == 0) {
                     throw new Error("Invalid parenthesis notation");
+                }
 
                 forced[pair_stack[pair_stack.length - 1]] = jj;
                 pair_stack.pop();
@@ -659,7 +648,6 @@ export class EPars {
         return ret;
     }
 
-
     public static num_gc_pairs(sequence: number[], pairs: number[]): number {
         let ret: number = 0;
 
@@ -676,7 +664,6 @@ export class EPars {
 
         return ret;
     }
-
 
     public static num_ua_pairs(sequence: number[], pairs: number[]): number {
         let ret: number = 0;
@@ -698,12 +685,12 @@ export class EPars {
     public static sequence_diff(seq1: number[], seq2: number[]): number {
         let diff: number = 0;
         for (let ii: number = 0; ii < seq1.length; ii++) {
-            if (seq1[ii] != seq2[ii])
+            if (seq1[ii] != seq2[ii]) {
                 diff++;
+            }
         }
         return diff;
     }
-
 
     public static are_pairs_same(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
         if (a_pairs.length != b_pairs.length) {
@@ -713,15 +700,17 @@ export class EPars {
         for (let ii: number = 0; ii < a_pairs.length; ii++) {
             if (b_pairs[ii] >= 0) {
                 if (b_pairs[ii] != a_pairs[ii]) {
-                    if (constraints == null || constraints[ii])
+                    if (constraints == null || constraints[ii]) {
                         return false;
+                    }
                 }
             }
 
             if (a_pairs[ii] >= 0) {
                 if (b_pairs[ii] != a_pairs[ii]) {
-                    if (constraints == null || constraints[ii])
+                    if (constraints == null || constraints[ii]) {
                         return false;
+                    }
                 }
             }
 
@@ -787,150 +776,150 @@ export class EPars {
     }
 
     public static mismatchI37: number[] = [
-        0,0,0,0,0,
-        0,0,0,0,0,
-        0,0,0,0,0,
-        0,0,0,0,0,
-        0,0,0,0,0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
 
         /* CG */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,    0,    0, -110,    0, /* A@  AA  AC  AG  AU */
-        0,    0,    0,    0,    0, /* C@  CA  CC  CG  CU */
-        0, -110,    0,    0,    0, /* G@  GA  GC  GG  GU */
-        0,    0,    0,    0,  -70,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 0, 0, -110, 0, /* A@  AA  AC  AG  AU */
+        0, 0, 0, 0, 0, /* C@  CA  CC  CG  CU */
+        0, -110, 0, 0, 0, /* G@  GA  GC  GG  GU */
+        0, 0, 0, 0, -70, /* U@  UA  UC  UG  UU */
 
 
         /* GC */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,    0,    0, -110,    0, /* A@  AA  AC  AG  AU */
-        0,    0,    0,    0,    0, /* C@  CA  CC  CG  CU */
-        0, -110,    0,    0,    0, /* G@  GA  GC  GG  GU */
-        0,    0,    0,    0,  -70,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 0, 0, -110, 0, /* A@  AA  AC  AG  AU */
+        0, 0, 0, 0, 0, /* C@  CA  CC  CG  CU */
+        0, -110, 0, 0, 0, /* G@  GA  GC  GG  GU */
+        0, 0, 0, 0, -70, /* U@  UA  UC  UG  UU */
 
         /* GU */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,   70,   70,  -40,   70, /* A@  AA  AC  AG  AU */
-        0,   70,   70,   70,   70, /* C@  CA  CC  CG  CU */
-        0,  -40,   70,   70,   70, /* G@  GA  GC  GG  GU */
-        0,   70,   70,   70,    0,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
+        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
+        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
+        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
 
         /* UG */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,   70,   70,  -40,   70, /* A@  AA  AC  AG  AU */
-        0,   70,   70,   70,   70, /* C@  CA  CC  CG  CU */
-        0,  -40,   70,   70,   70, /* G@  GA  GC  GG  GU */
-        0,   70,   70,   70,    0,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
+        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
+        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
+        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
 
         /* AU */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,   70,   70,  -40,   70, /* A@  AA  AC  AG  AU */
-        0,   70,   70,   70,   70, /* C@  CA  CC  CG  CU */
-        0,  -40,   70,   70,   70, /* G@  GA  GC  GG  GU */
-        0,   70,   70,   70,    0,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
+        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
+        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
+        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
 
         /* UA */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,   70,   70,  -40,   70, /* A@  AA  AC  AG  AU */
-        0,   70,   70,   70,   70, /* C@  CA  CC  CG  CU */
-        0,  -40,   70,   70,   70, /* G@  GA  GC  GG  GU */
-        0,   70,   70,   70,    0,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 70, 70, -40, 70, /* A@  AA  AC  AG  AU */
+        0, 70, 70, 70, 70, /* C@  CA  CC  CG  CU */
+        0, -40, 70, 70, 70, /* G@  GA  GC  GG  GU */
+        0, 70, 70, 70, 0, /* U@  UA  UC  UG  UU */
 
         /* @@ */
         90, 90, 90, 90, 90,
-        90, 90, 90, 90,-20,
+        90, 90, 90, 90, -20,
         90, 90, 90, 90, 90,
-        90,-20, 90, 90, 90,
+        90, -20, 90, 90, 90,
         90, 90, 90, 90, 20
     ];
 
     public static mismatchH37: number[] = [
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
         /* CG */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
         -90, -150, -150, -140, -180, /* A@  AA  AC  AG  AU */
-        -90, -100,  -90, -290,  -80, /* C@  CA  CC  CG  CU */
+        -90, -100, -90, -290, -80, /* C@  CA  CC  CG  CU */
         -90, -220, -200, -160, -110, /* G@  GA  GC  GG  GU */
-        -90, -170, -140, -180, -200,/* U@  UA  UC  UG  UU */
+        -90, -170, -140, -180, -200, /* U@  UA  UC  UG  UU */
         /* GC */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
         -70, -110, -150, -130, -210, /* A@  AA  AC  AG  AU */
-        -70, -110,  -70, -240,  -50, /* C@  CA  CC  CG  CU */
+        -70, -110, -70, -240, -50, /* C@  CA  CC  CG  CU */
         -70, -240, -290, -140, -120, /* G@  GA  GC  GG  GU */
-        -70, -190, -100, -220, -150,/* U@  UA  UC  UG  UU */
+        -70, -190, -100, -220, -150, /* U@  UA  UC  UG  UU */
         /* GU */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,   20,  -50,  -30,  -30, /* A@  AA  AC  AG  AU */
-        0,  -10,  -20, -150,  -20, /* C@  CA  CC  CG  CU */
-        0,  -90, -110,  -30,    0, /* G@  GA  GC  GG  GU */
-        0,  -30,  -30,  -40, -110,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, 20, -50, -30, -30, /* A@  AA  AC  AG  AU */
+        0, -10, -20, -150, -20, /* C@  CA  CC  CG  CU */
+        0, -90, -110, -30, 0, /* G@  GA  GC  GG  GU */
+        0, -30, -30, -40, -110, /* U@  UA  UC  UG  UU */
         /* UG */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,  -50,  -30,  -60,  -50, /* A@  AA  AC  AG  AU */
-        0,  -20,  -10, -170,    0, /* C@  CA  CC  CG  CU */
-        0,  -80, -120,  -30,  -70, /* G@  GA  GC  GG  GU */
-        0,  -60,  -10,  -60,  -80,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, -50, -30, -60, -50, /* A@  AA  AC  AG  AU */
+        0, -20, -10, -170, 0, /* C@  CA  CC  CG  CU */
+        0, -80, -120, -30, -70, /* G@  GA  GC  GG  GU */
+        0, -60, -10, -60, -80, /* U@  UA  UC  UG  UU */
         /* AU */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,  -30,  -50,  -30,  -30, /* A@  AA  AC  AG  AU */
-        0,  -10,  -20, -150,  -20, /* C@  CA  CC  CG  CU */
-        0, -110, -120,  -20,   20, /* G@  GA  GC  GG  GU */
-        0,  -30,  -30,  -60, -110,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, -30, -50, -30, -30, /* A@  AA  AC  AG  AU */
+        0, -10, -20, -150, -20, /* C@  CA  CC  CG  CU */
+        0, -110, -120, -20, 20, /* G@  GA  GC  GG  GU */
+        0, -30, -30, -60, -110, /* U@  UA  UC  UG  UU */
         /* UA */
-        0,    0,    0,    0,    0, /* @@  @A  @C  @G  @U */
-        0,  -50,  -30,  -60,  -50, /* A@  AA  AC  AG  AU */
-        0,  -20,  -10, -120,   -0, /* C@  CA  CC  CG  CU */
-        0, -140, -120,  -70,  -20, /* G@  GA  GC  GG  GU */
-        0,  -30,  -10,  -50,  -80,/* U@  UA  UC  UG  UU */
+        0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */
+        0, -50, -30, -60, -50, /* A@  AA  AC  AG  AU */
+        0, -20, -10, -120, -0, /* C@  CA  CC  CG  CU */
+        0, -140, -120, -70, -20, /* G@  GA  GC  GG  GU */
+        0, -30, -10, -50, -80, /* U@  UA  UC  UG  UU */
         /* @@ */
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
 
     public static stack37: number[] = [
-            /*          CG     GC     GU     UG     AU     UA  */
-            EPars.INF,   EPars.INF,   EPars.INF,   EPars.INF,   EPars.INF,   EPars.INF,   EPars.INF, EPars.INF,
-            EPars.INF,  -240,  -330,  -210,  -140,  -210,  -210, EPars.NST,
-            EPars.INF,  -330,  -340,  -250,  -150,  -220,  -240, EPars.NST,
-            EPars.INF,  -210,  -250,   130,   -50,  -140,  -130, EPars.NST,
-            EPars.INF,  -140,  -150,   -50,    30,   -60,  -100, EPars.NST,
-            EPars.INF,  -210,  -220,  -140,   -60,  -110,   -90, EPars.NST,
-            EPars.INF,  -210,  -240,  -130,  -100,   -90,  -130, EPars.NST,
-            EPars.INF,   EPars.NST,   EPars.NST,   EPars.NST,   EPars.NST,   EPars.NST,   EPars.NST, EPars.NST
-        ];
-
+        /*          CG     GC     GU     UG     AU     UA  */
+        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF,
+        EPars.INF, -240, -330, -210, -140, -210, -210, EPars.NST,
+        EPars.INF, -330, -340, -250, -150, -220, -240, EPars.NST,
+        EPars.INF, -210, -250, 130, -50, -140, -130, EPars.NST,
+        EPars.INF, -140, -150, -50, 30, -60, -100, EPars.NST,
+        EPars.INF, -210, -220, -140, -60, -110, -90, EPars.NST,
+        EPars.INF, -210, -240, -130, -100, -90, -130, EPars.NST,
+        EPars.INF, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST
+    ];
 
     public static get_stack_score(t1: number, t2: number, b1: boolean, b2: boolean): number {
-        if (b1 && b2)
+        if (b1 && b2) {
             return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2];
-        else if ((!b1) && (!b2))
+        } else if ((!b1) && (!b2)) {
             return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2] + 200;
-        else
+        } else {
             return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2] + 100;
+        }
     }
 
     public static dangle5_37: number[] = [
-        EPars.INF,  EPars.INF,  EPars.INF,  EPars.INF,  EPars.INF, /* no pair */
-        EPars.INF,  -50,  -30,  -20,  -10, /* CG  (stacks on C) */
-        EPars.INF,  -20,  -30,   -0,   -0, /* GC  (stacks on G) */
-        EPars.INF,  -30,  -30,  -40,  -20, /* GU */
-        EPars.INF,  -30,  -10,  -20,  -20, /* UG */
-        EPars.INF,  -30,  -30,  -40,  -20, /* AU */
-        EPars.INF,  -30,  -10,  -20,  -20, /* UA */
-        0,    0,     0,    0,   0  /*  @ */
+        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
+        EPars.INF, -50, -30, -20, -10, /* CG  (stacks on C) */
+        EPars.INF, -20, -30, -0, -0, /* GC  (stacks on G) */
+        EPars.INF, -30, -30, -40, -20, /* GU */
+        EPars.INF, -30, -10, -20, -20, /* UG */
+        EPars.INF, -30, -30, -40, -20, /* AU */
+        EPars.INF, -30, -10, -20, -20, /* UA */
+        0, 0, 0, 0, 0  /*  @ */
     ];
 
     public static dangle3_37: number[] = [
         /*   @     A     C     G     U   */
-        EPars.INF,  EPars.INF,  EPars.INF,  EPars.INF,  EPars.INF,  /* no pair */
-        EPars.INF, -110,  -40, -130,  -60,  /* CG  (stacks on G) */
-        EPars.INF, -170,  -80, -170, -120,  /* GC */
-        EPars.INF,  -70,  -10,  -70,  -10,  /* GU */
-        EPars.INF,  -80,  -50,  -80,  -60,  /* UG */
-        EPars.INF,  -70,  -10,  -70,  -10,  /* AU */
-        EPars.INF,  -80,  -50,  -80,  -60,  /* UA */
-        0,    0,     0,    0,   0   /*  @ */
+        EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
+        EPars.INF, -110, -40, -130, -60, /* CG  (stacks on G) */
+        EPars.INF, -170, -80, -170, -120, /* GC */
+        EPars.INF, -70, -10, -70, -10, /* GU */
+        EPars.INF, -80, -50, -80, -60, /* UG */
+        EPars.INF, -70, -10, -70, -10, /* AU */
+        EPars.INF, -80, -50, -80, -60, /* UA */
+        0, 0, 0, 0, 0   /*  @ */
     ];
 
     public static tetra_energy_37: number[] = [
@@ -942,7 +931,6 @@ export class EPars {
         "GGGGAC", "GGUGAC", "CGAAAG", "GGAGAC", "CGCAAG", "GGAAAC", "CGGAAG", "CUUCGG", "CGUGAG", "CGAAGG",
         "CUACGG", "GGCAAC", "CGCGAG", "UGAGAG", "CGAGAG", "AGAAAU", "CGUAAG", "CUAACG", "UGAAAG", "GGAAGC",
         "GGGAAC", "UGAAAA", "AGCAAU", "AGUAAU", "CGGGAG", "AGUGAU", "GGCGAC", "GGGAGC", "GUGAAC", "UGGAAA"];
-
 
     public static get_tetra_loop_bonus(loop: string): number {
         for (let ii: number = 0; ii < EPars.tetra_loops.length; ii++) {
