@@ -310,61 +310,67 @@ export class EPars {
         return num_repeats++;
     }
 
-    public static string_to_sequence_array(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
-        let seqarray: number[] = [];
-
-        for (let ii: number = 0; ii < seq.length; ii++) {
-            let char = seq.charAt(ii);
-            if (char == 'A' || char == 'a') {
-                seqarray.push(EPars.RNABASE_ADENINE);
-            } else if (char == 'G' || char == 'g') {
-                seqarray.push(EPars.RNABASE_GUANINE);
-            } else if (char == 'U' || char == 'u') {
-                seqarray.push(EPars.RNABASE_URACIL);
-            } else if (char == 'C' || char == 'c') {
-                seqarray.push(EPars.RNABASE_CYTOSINE);
-            } else if (char == '&' || char == '-') {
-                if (allowCut) {
-                    seqarray.push(EPars.RNABASE_CUT);
-                } else {
-                    throw new Error(`Bad nucleotide '${char}`);
-                }
+    public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
+        if (value == EPars.RNABASE_ADENINE) {
+            return "A";
+        } else if (value == EPars.RNABASE_URACIL) {
+            return "U";
+        } else if (value == EPars.RNABASE_GUANINE) {
+            return "G";
+        } else if (value == EPars.RNABASE_CYTOSINE) {
+            return "C";
+        } else if (value == EPars.RNABASE_CUT) {
+            if (allowCut) {
+                return "&";
             } else {
-                if (allowUnknown) {
-                    seqarray.push(EPars.RNABASE_UNDEFINED);
-                } else {
-                    throw new Error(`Bad nucleotide '${char}`);
-                }
+                throw new Error(`Bad nucleotide '${value}`);
+            }
+        } else {
+            if (allowUnknown) {
+                return "?";
+            } else {
+                throw new Error(`Bad nucleotide '${value}`);
             }
         }
+    }
 
+    public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
+        if (value == 'A' || value == 'a') {
+            return EPars.RNABASE_ADENINE;
+        } else if (value == 'G' || value == 'g') {
+            return EPars.RNABASE_GUANINE;
+        } else if (value == 'U' || value == 'u') {
+            return EPars.RNABASE_URACIL;
+        } else if (value == 'C' || value == 'c') {
+            return EPars.RNABASE_CYTOSINE;
+        } else if (value == '&' || value == '-' || value == '+') {
+            if (allowCut) {
+                return EPars.RNABASE_CUT;
+            } else {
+                throw new Error(`Bad nucleotide '${value}`);
+            }
+        } else {
+            if (allowUnknown) {
+                return EPars.RNABASE_UNDEFINED;
+            } else {
+                throw new Error(`Bad nucleotide '${value}`);
+            }
+        }
+    }
+
+    public static string_to_sequence_array(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
+        let seqarray: number[] = [];
+        for (let ii: number = 0; ii < seq.length; ii++) {
+            let char = seq.charAt(ii);
+            seqarray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
+        }
         return seqarray;
     }
 
     public static sequence_array_to_string(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
         let str: string = "";
         for (let value of sequence) {
-            if (value == EPars.RNABASE_ADENINE) {
-                str += "A";
-            } else if (value == EPars.RNABASE_URACIL) {
-                str += "U";
-            } else if (value == EPars.RNABASE_GUANINE) {
-                str += "G";
-            } else if (value == EPars.RNABASE_CYTOSINE) {
-                str += "C";
-            } else if (value == EPars.RNABASE_CUT) {
-                if (allowCut) {
-                    str += "&";
-                } else {
-                    throw new Error(`Bad nucleotide '${value}`);
-                }
-            } else {
-                if (allowUnknown) {
-                    str += "?";
-                } else {
-                    throw new Error(`Bad nucleotide '${value}`);
-                }
-            }
+            str += EPars.nucleotideToString(value, allowCut, allowUnknown);
         }
         return str;
     }
