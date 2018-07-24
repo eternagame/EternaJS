@@ -23,6 +23,13 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         return this;
     }
 
+    public selectable(value: boolean): HTMLTextObject {
+        this._obj.style.userSelect = value ? undefined : "none";
+        this._obj.style.webkitUserSelect = value ? undefined : "none";
+        this._obj.style.msUserSelect = value ? undefined : "none";
+        return this;
+    }
+
     public color(color: number): HTMLTextObject {
         DOMObject.applyStyleRecursive(this._obj, "color", `#${color.toString(16)}`, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();

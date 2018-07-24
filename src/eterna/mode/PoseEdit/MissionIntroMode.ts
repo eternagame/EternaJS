@@ -64,6 +64,7 @@ export class MissionIntroMode extends AppMode {
             .font(Fonts.STDFONT_LIGHT)
             .fontSize(14)
             .color(0xffffff)
+            .selectable(false)
             .maxWidth(Flashbang.stageWidth);
         this.addObject(nameLabel, this.modeSprite);
 

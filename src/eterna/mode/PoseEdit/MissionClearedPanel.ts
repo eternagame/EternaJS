@@ -43,7 +43,7 @@ export class MissionClearedPanel extends ContainerObject {
 
         const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
         const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
-            .color(0xffffff).font(Fonts.STDFONT_REGULAR).fontSize(15).hAlign("left").lineHeight(1.2);
+            .color(0xffffff).font(Fonts.STDFONT_REGULAR).fontSize(15).hAlign("left").lineHeight(1.2).selectable(false);
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
