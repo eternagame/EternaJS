@@ -3,7 +3,13 @@ import {default as MultiStyleText, ExtendedTextStyle, TextStyleSet} from "pixi-m
 
 export class StyledTextBuilder {
     public constructor(defaultStyle?: ExtendedTextStyle) {
-        this.defaultStyle(defaultStyle);
+        if (defaultStyle !== undefined) {
+            this.defaultStyle(defaultStyle);
+        }
+    }
+
+    public get text(): string {
+        return this._text;
     }
 
     /** Creates a new MultiStyleText */

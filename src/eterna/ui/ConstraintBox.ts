@@ -23,8 +23,8 @@ import {PoseThumbnail} from "./PoseThumbnail";
 import {TextBalloon} from "./TextBalloon";
 
 export enum ConstraintBoxType {
-    DEFAULT,
-    MISSION_SCREEN  // slightly minimized, requirements text on the right
+    DEFAULT = "DEFAULT",
+    MISSION_SCREEN = "MISSION_SCREEN"  // slightly minimized, requirements text on the right
 }
 
 export class ConstraintBox extends ContainerObject {
@@ -133,12 +133,26 @@ export class ConstraintBox extends ContainerObject {
         this._state_text.visible = false;
         this.container.addChild(this._state_text);
 
-        this._req_clarify_text = Fonts.arial("", 11).color(0xC0DCE7).letterSpacing(-0.5).build();
+        this._req_clarify_text = new MultiStyleText("", {
+            "default": {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 11,
+                fill: 0xC0DCE7,
+                letterSpacing: -0.5
+            }
+        });
         this._req_clarify_text.position = new Point(50, 30);
         this._req_clarify_text.visible = false;
         this.container.addChild(this._req_clarify_text);
 
-        this._req_stat_txt = Fonts.arial("", 11).color(0xC0DCE7).letterSpacing(-0.5).build();
+        this._req_stat_txt = new MultiStyleText("", {
+            "default": {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 11,
+                fill: 0xC0DCE7,
+                letterSpacing: -0.5
+            }
+        });
         this._req_stat_txt.position = new Point(50, 50);
         this._req_stat_txt.visible = false;
         this.container.addChild(this._req_stat_txt);
@@ -294,6 +308,8 @@ export class ConstraintBox extends ContainerObject {
         this._big_thumbnail.visible = false;
         this._flag.visible = false;
         this._check.visible = satisfied && this._boxType == ConstraintBoxType.DEFAULT;
+        this._req.visible = false;
+
         if (constraintType == ConstraintType.SHAPE || constraintType == ConstraintType.ANTISHAPE) {
             if (this._enlarged) {
                 this._check.position = new Point(144, 144);
@@ -307,8 +323,6 @@ export class ConstraintBox extends ContainerObject {
         }
 
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
-
-        let newClarifyText: string = "";
 
         this._outline.texture = satisfied ? this._success_outline : this._fail_outline;
         const isMissionScreen: boolean = this._boxType == ConstraintBoxType.MISSION_SCREEN;
@@ -335,9 +349,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText = (Number(val)).toString() + " OR MORE";
-
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = (Number(val)).toString() + " OR MORE";
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -369,9 +381,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText += "NO UG PAIRS";
-
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = "NO UG PAIRS";
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -402,9 +412,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText = (Number(val)).toString() + " OR MORE";
-
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = (Number(val)).toString() + " OR MORE";
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -414,7 +422,10 @@ export class ConstraintBox extends ContainerObject {
             this._req.visible = true;
             this._outline.visible = true;
 
-        } else if (constraintType == ConstraintType.GC || constraintType == ConstraintType.GCMIN || constraintType == ConstraintType.NOGC) {
+        } else if (constraintType == ConstraintType.GC ||
+            constraintType == ConstraintType.GCMIN ||
+            constraintType == ConstraintType.NOGC) {
+
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -423,6 +434,8 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.pushStyle("altTextMain");
             }
             tooltip.append("You must have ");
+
+            let newClarifyText = "";
 
             if (constraintType == ConstraintType.GCMIN) {
                 tooltip.append(val.toString() + " or more");
@@ -445,7 +458,6 @@ export class ConstraintBox extends ContainerObject {
             this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
-            this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCReq);
             if (constraintType == ConstraintType.NOGC) {
                 this._req.texture = isMissionScreen ?
                     BitmapManager.get_bitmap(Bitmaps.NovaNoGCMissionReq) :
@@ -453,6 +465,8 @@ export class ConstraintBox extends ContainerObject {
 
             } else if (isMissionScreen) {
                 this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCMissionReq);
+            } else {
+                this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCReq);
             }
 
             this._req.visible = true;
@@ -468,6 +482,7 @@ export class ConstraintBox extends ContainerObject {
             }
             tooltip.append("You must have ");
 
+            let newClarifyText = "";
             if (constraintType == ConstraintType.AU) {
                 tooltip.append(val.toString() + " or more");
                 newClarifyText += (Number(val)).toString() + " OR MORE";
@@ -571,6 +586,7 @@ export class ConstraintBox extends ContainerObject {
 
             tooltip.append("In state " + (Number(val.index) + 1).toString() + ", your RNA must:\n");
 
+            let clarifyTextBuilder = new StyledTextBuilder(this._req_clarify_text.style);
             for (let ii = 0; ii < val.bind.length; ii++) {
                 tooltip.append("- ");
                 if (isMissionScreen) {
@@ -582,19 +598,18 @@ export class ConstraintBox extends ContainerObject {
                 }
                 tooltip.append(" with " + val.oligo_name[ii] + "\n");
 
-                if (ii > 0) newClarifyText += "&#x2003;";
-                if (val.bind[ii]) {
-                    newClarifyText += " <FONT COLOR='#FFFFFF'>" + val.label[ii] + "</FONT>";
-                } else {
-                    newClarifyText += " <FONT COLOR='#808080'>" + val.label[ii] + "</FONT>";
+                if (ii > 0) {
+                    clarifyTextBuilder.append("\u2003");
                 }
+
+                clarifyTextBuilder.append(" " + val.label[ii], {fill: val.bind[ii] ? 0xffffff : 0x808080});
             }
 
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = newClarifyText;
+            clarifyTextBuilder.apply(this._req_clarify_text);
 
             let tw: number = Math.min(101, 15 * (2 * val.bind.length - 1));
             let step: number = tw / (2 * val.bind.length - 1);
@@ -643,11 +658,9 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            if (constraintType == letter) {
-                newClarifyText += (Number(val)).toString() + " OR MORE";
-            } else {
-                newClarifyText += (Number(val)).toString() + " OR FEWER";
-            }
+            let newClarifyText = constraintType == letter ?
+                (Number(val)).toString() + " OR MORE" :
+                (Number(val)).toString() + " OR FEWER";
 
             this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
@@ -675,8 +688,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText += (Number(val)).toString() + " OR MORE";
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = (Number(val)).toString() + " OR MORE";
 
             this._req_stat_txt.text = stat.toString();
 
@@ -776,9 +788,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText += "AT MOST " + (Number(val) - 1).toString() + " IN A ROW";
-
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = "AT MOST " + (Number(val) - 1).toString() + " IN A ROW";
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen ?
@@ -800,26 +810,33 @@ export class ConstraintBox extends ContainerObject {
             this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
 
             if (!isMissionScreen) {
-                let no_good: string[] = [];
-                let value = "";
+                let noGoodBuilder = new StyledTextBuilder({
+                    fontFamily: Fonts.ARIAL,
+                    fontSize: 11,
+                    fill: 0xC0DCE7,
+                    letterSpacing: -0.5
+                });
+                noGoodBuilder.addStyle("redText", {fill: 0xff0000});
 
-                let good: boolean = (val.g_count < val.g_max);
-                if (!good) no_good.push("<FONT COLOR='#FF0000'>" + (val.g_count).toString() + "</FONT>G");
+                if (!(val.g_count < val.g_max)) {
+                    noGoodBuilder.append((val.g_count).toString(), "redText").append("G");
+                }
 
-                good = (val.c_count < val.c_max);
-                if (!good) no_good.push("<FONT COLOR='#FF0000'>" + (val.c_count).toString() + "</FONT>C");
+                if (!(val.c_count < val.c_max)) {
+                    noGoodBuilder.append((val.c_count).toString(), "redText").append("C");
+                }
 
-                good = (val.a_count < val.a_max);
-                if (!good) no_good.push("<FONT COLOR='#FF0000'>" + (val.a_count).toString() + "</FONT>A");
-
-                if (no_good.length > 0) {
-                    value = no_good.join(" ");
-                } else {
-                    value = "OK";
+                if (!(val.a_count < val.a_max)) {
+                    noGoodBuilder.append((val.a_count).toString(), "redText").append("A");
                 }
 
                 this._req_stat_txt.visible = true;
-                this._req_stat_txt.text = value;
+                if (noGoodBuilder.text.length > 0) {
+                    noGoodBuilder.apply(this._req_stat_txt);
+                } else {
+                    this._req_stat_txt.text = "OK";
+                }
+
             } else {
                 this._req_stat_txt.visible = false;
             }
@@ -859,9 +876,7 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText = "MUST BE UNIQUE";
-
-            this._req_clarify_text.text = newClarifyText;
+            this._req_clarify_text.text = "MUST BE UNIQUE";
 
             this._req.texture = isMissionScreen ?
                 BitmapManager.get_bitmap(Bitmaps.NovaBarcodeMissionReq) :
@@ -891,16 +906,12 @@ export class ConstraintBox extends ContainerObject {
                 tooltip.popStyle();
             }
 
-            newClarifyText = binder ? "MUST BIND" : "MAY NOT BIND";
+            this._req_clarify_text.text = binder ? "MUST BIND" : "MAY NOT BIND";
 
-            this._req_clarify_text.text = newClarifyText;
-
-            let ico: string = binder ? "Bound" : "Unbound";
-            if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap_named("Nova" + ico + "OligoMissionReq");
-            } else {
-                this._req.texture = BitmapManager.get_bitmap_named("Nova" + ico + "OligoReq");
-            }
+            const ico = binder ? "Bound" : "Unbound";
+            this._req.texture = isMissionScreen ?
+                BitmapManager.get_bitmap_named("Nova" + ico + "OligoMissionReq") :
+                BitmapManager.get_bitmap_named("Nova" + ico + "OligoReq");
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -966,16 +977,16 @@ export class ConstraintBox extends ContainerObject {
             this._outline.visible = false;
             tooltip.apply(this._side_txt);
             // this._side_txt.set_autosize(false, false, 250);
-            if (this._req.width > 0) {
+            if (this._req.visible) {
                 this._side_txt.position = new Point(this._req.width + 18, this._req.height / 2 - this._side_txt.height / 2);
             } else {
                 this._side_txt.position = new Point(111 + 18, 55 / 2 - this._side_txt.height / 2);
             }
         }
 
-        let more: number = newClarifyText.indexOf("MORE");
-        let less: number = newClarifyText.indexOf("FEWER");
-        let idx: number = (more == -1) ? less : more;
+        // let more: number = newClarifyText.indexOf("MORE");
+        // let less: number = newClarifyText.indexOf("FEWER");
+        // let idx: number = (more == -1) ? less : more;
         // let bf: TextFormat = Fonts.arial(11, true);
         // if (idx != -1) {
         //     this._req_clarify_text.GetTextBox().setTextFormat(bf, idx, idx + (more == -1 ? 5 : 4));
@@ -1220,8 +1231,8 @@ export class ConstraintBox extends ContainerObject {
     private readonly _outline: Sprite;
     private readonly _fail_outline: Texture;
     private readonly _success_outline: Texture;
-    private readonly _req_clarify_text: Text;
-    private readonly _req_stat_txt: Text;
+    private readonly _req_clarify_text: MultiStyleText;
+    private readonly _req_stat_txt: MultiStyleText;
     private readonly _side_txt: MultiStyleText;
 
     private _enlarged: boolean = false;
