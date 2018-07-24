@@ -19,7 +19,7 @@ import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {FoldUtil} from "../../folding/FoldUtil";
 import {EternaURL} from "../../net/EternaURL";
-import {Pose2D} from "../../pose2D/Pose2D";
+import {Oligo, Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PoseOp} from "../../pose2D/PoseOp";
 import {Constraints, ConstraintType} from "../../puzzle/Constraints";
@@ -87,9 +87,6 @@ export class PoseEditMode extends GameMode {
 
         this._background = new Background();
         this.addObject(this._background, this._bgLayer);
-
-        // this._mission_container = Application.instance.get_front_object_container();
-        // if (this._mission_container == null) this._mission_container = this;
 
         this._is_screenshot_supported = true;
 
@@ -291,7 +288,7 @@ export class PoseEditMode extends GameMode {
 
     public rop_set_display_score_texts(dis: boolean): void {
         let that: PoseEditMode = this;
-        let pre: Function = () => {
+        let pre = () => {
             that.set_display_score_texts(dis);
         };
         this._rop_presets.push(pre);
@@ -305,7 +302,7 @@ export class PoseEditMode extends GameMode {
 
     public rop_set_show_numbering(show: boolean): void {
         let that: PoseEditMode = this;
-        let pre: Function = () => {
+        let pre = () => {
             that.set_show_numbering(show);
         };
         this._rop_presets.push(pre);
@@ -319,7 +316,7 @@ export class PoseEditMode extends GameMode {
 
     public rop_set_show_total_energy(show: boolean): void {
         let that: PoseEditMode = this;
-        let pre: Function = () => {
+        let pre = () => {
             that.set_show_total_energy(show);
         };
         this._rop_presets.push(pre);
@@ -381,7 +378,7 @@ export class PoseEditMode extends GameMode {
     public restart_from(seq: string): void {
         this.clear_undo_stack();
 
-        let restart_cb: Function = (fd: any[]) => {
+        let restart_cb = (fd: any[]) => {
             // Application.instance.get_modal_container().removeObject(this._asynch_text);
             // Application.instance.remove_lock("FOLDING");
             // Application.instance.set_blocker_opacity(0.35);
@@ -436,19 +433,19 @@ export class PoseEditMode extends GameMode {
         //     before_reset = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         // }
 
-        let bind_addbase_cb: Function = (pose: Pose2D, kk: number) => {
+        let bind_addbase_cb = (pose: Pose2D, kk: number) => {
             pose.set_add_base_callback((parenthesis: string, mode: number, index: number) => {
                 pose.base_shift(parenthesis, mode, index);
                 this.pose_edit_by_target(kk);
             });
         };
 
-        let bind_pose_edit: Function = (pose: Pose2D, index: number) => {
+        let bind_pose_edit = (pose: Pose2D, index: number) => {
             pose.set_pose_edit_callback(() => {
                 this.pose_edit_by_target(index);
             });
         };
-        let bind_track_moves: Function = (pose: Pose2D, index: number) => {
+        let bind_track_moves = (pose: Pose2D, index: number) => {
             pose.set_track_moves_callback((count: number, moves: any[]) => {
                 this._move_count += count;
                 if (moves) {
@@ -457,7 +454,7 @@ export class PoseEditMode extends GameMode {
             });
         };
 
-        let bind_mousedown_event: Function = function (pose: Pose2D, index: number): void {
+        let bind_mousedown_event = function (pose: Pose2D, index: number): void {
             pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number) => {
                 for (let ii: number = 0; ii < pose_fields.length; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
@@ -515,8 +512,8 @@ export class PoseEditMode extends GameMode {
                 this._oligo_name[ii] = target_conditions[ii]['oligo_name'];
             }
             if (target_conditions[ii] && target_conditions[ii]['oligos']) {
-                let odefs: any[] = target_conditions[ii]['oligos'];
-                let ndefs: any[] = [];
+                let odefs: OligoDef[] = target_conditions[ii]['oligos'];
+                let ndefs: Oligo[] = [];
                 for (let jj: number = 0; jj < odefs.length; jj++) {
                     ndefs.push({
                         sequence: EPars.string_to_sequence_array(odefs[jj].sequence),
@@ -950,7 +947,7 @@ export class PoseEditMode extends GameMode {
         //     this._run_status.set_text(txt);
         // });
         //
-        // let set_end_callback: Function = function (pose: PoseEditMode, sid: string): void {
+        // let set_end_callback = function (pose: PoseEditMode, sid: string): void {
         //     ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
         //         pose.trace_js("end_" + sid + "() called");
         //         pose.trace_js(ret);
@@ -1404,8 +1401,8 @@ export class PoseEditMode extends GameMode {
             let tc_type: string = this._target_conditions[target_index]['type'];
 
             if (tc_type == "multistrand") {
-                let odefs: any[] = this._target_conditions[target_index]['oligos'];
-                let ndefs: any[] = [];
+                let odefs: OligoDef[] = this._target_conditions[target_index]['oligos'];
+                let ndefs: Oligo[] = [];
                 for (let ii: number = 0; ii < odefs.length; ii++) {
                     ndefs.push({
                         sequence: EPars.string_to_sequence_array(odefs[ii].sequence),
@@ -1574,7 +1571,7 @@ export class PoseEditMode extends GameMode {
 
     private rop_presets(): void {
         while (this._rop_presets.length) {
-            let pre: Function = this._rop_presets.pop();
+            let pre = this._rop_presets.pop();
             pre();
         }
     }
@@ -2210,7 +2207,7 @@ export class PoseEditMode extends GameMode {
             oligo_len = this._target_conditions[0]['oligo_sequence'].length;
             if (this._target_conditions[0]['fold_mode'] == Pose2D.OLIGO_MODE_DIMER) oligo_len++;
         } else if (this._target_conditions[0] && this._target_conditions[0]['type'] == "multistrand") {
-            let oligos: any[] = this._target_conditions[0]['oligos'];
+            let oligos: OligoDef[] = this._target_conditions[0]['oligos'];
             for (let ii = 0; ii < oligos.length; ii++) {
                 oligo_len += (oligos[ii]['sequence'].length + 1);
             }
@@ -2232,7 +2229,7 @@ export class PoseEditMode extends GameMode {
             return false;
         }
 
-        let a: any[] = json[1];
+        let a: number[] = json[1];
         for (let ii = 0; ii < this._poses.length; ++ii) {
             if (json[ii + 2] != null) {
                 let undo_block: UndoBlock = new UndoBlock([]);
@@ -2292,7 +2289,7 @@ export class PoseEditMode extends GameMode {
         this._toolbar.palette.change_default_mode();
     }
 
-    private move_history_add_mutations(before: any[], after: any[]): void {
+    private move_history_add_mutations(before: number[], after: number[]): void {
         let muts: any[] = [];
         for (let ii: number = 0; ii < after.length; ii++) {
             if (after[ii] != before[ii]) {
@@ -2864,7 +2861,7 @@ export class PoseEditMode extends GameMode {
                 throw new Error("Target condition not available for BINDINGS constraint");
             }
 
-            const oligos: any[] = this._target_conditions[target_index]['oligos'];
+            const oligos: OligoDef[] = this._target_conditions[target_index]['oligos'];
             if (oligos == null) {
                 throw new Error("Target condition not available for BINDINGS constraint");
             }
@@ -3127,7 +3124,7 @@ export class PoseEditMode extends GameMode {
             log.debug("TODO: SCRIPT constraint");
 
             // if (ExternalInterface.available) {
-            //     let set_end_callback: Function = function (pose: PoseEditMode, sid: string, jj: number): void {
+            //     let set_end_callback = function (pose: PoseEditMode, sid: string, jj: number): void {
             //         ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
             //             let goal: string = "";
             //             let name: string = "...";
@@ -3196,7 +3193,7 @@ export class PoseEditMode extends GameMode {
             return false;
         }
 
-        // let set_callback: Function = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
+        // let set_callback = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
         //     cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
         //         pose._unstable_index = (pose._unstable_index == kk) ? -1 : kk;
         //         pose.checkConstraints();
@@ -3566,8 +3563,8 @@ export class PoseEditMode extends GameMode {
                             let more: boolean;
                             do {
                                 segments = this._poses[target_index].get_design_segments();
-                                let new_map: any[] = this._poses[target_index].get_order_map(new_order);
-                                let new_pairs: any[] = [];
+                                let new_map: number[] = this._poses[target_index].get_order_map(new_order);
+                                let new_pairs: number[] = [];
                                 if (new_map != null) {
                                     for (let jj = 0; jj < segments.length; jj++) {
                                         segments[jj] = new_map.indexOf(segments[jj]);
@@ -3651,8 +3648,8 @@ export class PoseEditMode extends GameMode {
                 }
 
                 if (this._target_conditions[ii]['type'] == "aptamer") {
-                    let binding_site: any[] = this._target_conditions[ii]['site'].slice(0);
-                    let binding_pairs: any[] = [];
+                    let binding_site: number[] = this._target_conditions[ii]['site'].slice(0);
+                    let binding_pairs: number[] = [];
                     if (last_shifted_command == EPars.RNABASE_ADD_BASE) {
                         for (let ss: number = 0; ss < binding_site.length; ss++) {
                             if (binding_site[ss] >= last_shifted_index) {
@@ -3690,7 +3687,7 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        let execfold_cb: Function = (fd: any[]) => {
+        let execfold_cb = (fd: any[]) => {
             // Application.instance.get_modal_container().removeObject(this._asynch_text);
             // Application.instance.remove_lock("FOLDING");
             // Application.instance.set_blocker_opacity(0.35);
@@ -3763,15 +3760,15 @@ export class PoseEditMode extends GameMode {
     }
 
     private pose_edit_by_target_fold_target(ii: number): void {
-        let best_pairs: any[];
-        let oligo_order: any[] = null;
+        let best_pairs: number[];
+        let oligo_order: number[] = null;
         let oligos_paired: number = 0;
         let force_struct: string = null;
         let fold_mode: number;
-        let full_seq: any[];
+        let full_seq: number[];
         let malus: number;
         let bonus: number;
-        let sites: any[];
+        let sites: number[];
 
         if (ii == 0) {
             /// Pushing undo block
@@ -3837,7 +3834,7 @@ export class PoseEditMode extends GameMode {
             }
             log.debug("multifold");
 
-            let key: Object = {
+            let key: any = {
                 primitive: "multifold",
                 seq: this._puzzle.transform_sequence(seq, ii),
                 second_best_pairs: null,
@@ -3845,7 +3842,7 @@ export class PoseEditMode extends GameMode {
                 desired_pairs: null,
                 temp: 37
             };
-            let mfold: Object = this._folder.get_cache(key);
+            let mfold: any = this._folder.get_cache(key);
 
             if (mfold == null && this._force_synch == false) {
                 // multistrand folding can be really slow
@@ -4028,12 +4025,12 @@ export class PoseEditMode extends GameMode {
         }
         this.save_poses_markers_contexts();
 
-        let before: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
 
         this._stack_level++;
         this.move_undo_stack();
 
-        let after: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        let after: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         this.move_history_add_mutations(before, after);
 
         this.update_score();
@@ -4046,12 +4043,12 @@ export class PoseEditMode extends GameMode {
         }
         this.save_poses_markers_contexts();
 
-        let before: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
 
         this._stack_level--;
         this.move_undo_stack();
 
-        let after: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        let after: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
         this.move_history_add_mutations(before, after);
 
         this.update_score();
@@ -4060,7 +4057,7 @@ export class PoseEditMode extends GameMode {
 
     private move_undo_stack_to_last_stable(): void {
         this.save_poses_markers_contexts();
-        let before: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
 
         let stack_level: number = this._stack_level;
         while (this._stack_level >= 1) {
@@ -4068,7 +4065,7 @@ export class PoseEditMode extends GameMode {
             if (this.get_current_undo_block(0).get_stable()) {
                 this.move_undo_stack();
 
-                let after: any[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
+                let after: number[] = this._puzzle.transform_sequence(this.get_current_undo_block(0).get_sequence(), 0);
                 this.move_history_add_mutations(before, after);
 
                 this.update_score();
@@ -4085,7 +4082,6 @@ export class PoseEditMode extends GameMode {
 		Prompt feed when celebrating about cleared puzzle
 	*/
     private facebook_prompt_feed(): void {
-        log.debug("TODO: facebook_prompt_feed");
         // let req: URLRequest = new URLRequest;
         //
         // req.url = Application.instance.get_url_base()
@@ -4169,7 +4165,7 @@ export class PoseEditMode extends GameMode {
     private _folder: Folder;
     /// Asynch folding
     private _op_queue: PoseOp[] = [];
-    private _pose_edit_by_target_cb: Function = null;
+    private _pose_edit_by_target_cb: () => void = null;
     private _asynch_text: Text;
     private _fold_start_time: number;
     private _fold_total_time: number;
@@ -4242,7 +4238,7 @@ export class PoseEditMode extends GameMode {
     private _script_hooks: boolean = false;
     private _setter_hooks: boolean = false;
     /// ROP presets
-    private _rop_presets: any[] = [];
+    private _rop_presets: (() => void)[] = [];
     private _is_pic_disabled: boolean = false;
     // Design browser hooks
     private _next_design_cb: () => void = null;
@@ -4265,4 +4261,12 @@ interface ConstraintInfo {
     max_allowed_adenine: number;
 }
 
+interface OligoDef {
+    sequence: string;
+    malus: number;
+    name: string;
+    bind?: boolean;
+    concentration?: string;
+    label?: string;
+}
 
