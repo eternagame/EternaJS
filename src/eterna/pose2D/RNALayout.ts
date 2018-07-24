@@ -66,7 +66,6 @@ export class RNALayout {
 
         this._root = new RNATreeNode;
 
-
         for (let jj: number = 0; jj < bi_pairs.length; jj++) {
             if (bi_pairs[jj] >= 0) {
                 this.add_nodes_recursive(bi_pairs, this._root, jj, bi_pairs[jj]);
@@ -127,7 +126,6 @@ export class RNALayout {
     }
 
     public draw_tree(): void {
-
         if (this._root != null) {
             this.draw_tree_recursive(this._root, null, 0, 0, 0, 1);
         }
@@ -143,20 +141,18 @@ export class RNALayout {
 
     /// DO NOT remove these _old methods until the new ones (below) are fully validated
     public score_tree_old(seq: number[], folder: Folder): void {
-
         if (this._bi_pairs == null || seq.length != (this._bi_pairs.length - 1)) {
             throw new Error("Layout tree is not properly setup for scoring " + this._bi_pairs.length + " " + seq.length);
         }
 
-        if (this._root == null)
+        if (this._root == null) {
             return;
+        }
 
-        let ii: number;
-
-        let S: any[] = new Array(seq.length + 2);
+        let S: number[] = new Array(seq.length + 2);
         S[0] = seq.length;
 
-        for (ii = 0; ii < seq.length; ii++) {
+        for (let ii = 0; ii < seq.length; ii++) {
             S[ii + 1] = seq[ii];
         }
 
@@ -164,13 +160,13 @@ export class RNALayout {
     }
 
     public score_tree(seq: number[], folder: Folder): void {
-
         if (this._bi_pairs == null) {
             throw new Error("Layout tree is not properly setup for scoring");
         }
 
-        if (this._root == null)
+        if (this._root == null) {
             return;
+        }
 
         let nnfe: number[] = [];
 
@@ -179,15 +175,12 @@ export class RNALayout {
     }
 
     private add_nodes_recursive(bi_pairs: number[], rootnode: RNATreeNode, start_index: number, end_index: number): void {
-
         if (start_index > end_index) {
             throw new Error("Error occured while drawing RNA");
         }
 
         let newnode: RNATreeNode;
-        let jj: number;
         if (bi_pairs[start_index] == end_index) {
-
             newnode = new RNATreeNode;
             newnode._is_pair = true;
             newnode._index_a = start_index;
@@ -196,10 +189,9 @@ export class RNALayout {
             this.add_nodes_recursive(bi_pairs, newnode, start_index + 1, end_index - 1);
 
         } else {
-
             newnode = new RNATreeNode;
 
-            for (jj = start_index; jj <= end_index; jj++) {
+            for (let jj = start_index; jj <= end_index; jj++) {
                 if (bi_pairs[jj] >= 0) {
                     this.add_nodes_recursive(bi_pairs, newnode, jj, bi_pairs[jj]);
                     jj = bi_pairs[jj];
@@ -235,11 +227,9 @@ export class RNALayout {
             this.get_coords_recursive(rootnode._children[ii], xarray, yarray);
         }
 
-
     }
 
     private draw_tree_recursive(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, go_x: number, go_y: number): void {
-
         let cross_x: number = -go_y;
         let cross_y: number = go_x;
 
@@ -253,12 +243,13 @@ export class RNALayout {
             rootnode._x = start_x;
             rootnode._y = start_y;
 
-            if (rootnode._children[0]._is_pair)
+            if (rootnode._children[0]._is_pair) {
                 this.draw_tree_recursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
-            else if (!rootnode._children[0]._is_pair && rootnode._children[0]._index_a < 0)
+            } else if (!rootnode._children[0]._is_pair && rootnode._children[0]._index_a < 0) {
                 this.draw_tree_recursive(rootnode._children[0], rootnode, start_x, start_y, go_x, go_y);
-            else
+            } else {
                 this.draw_tree_recursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
+            }
         } else if (rootnode._children.length > 1) {
 
             let ii: number;
@@ -304,7 +295,6 @@ export class RNALayout {
                 let child_go_y: number = child_y - rootnode._y;
                 let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
 
-
                 this.draw_tree_recursive(rootnode._children[ii], rootnode, child_x, child_y,
                     child_go_x / child_go_len, child_go_y / child_go_len);
 
@@ -321,8 +311,9 @@ export class RNALayout {
 
     private get_total_score_recursive(rootnode: RNATreeNode): number {
         let score: number = rootnode._score;
-        for (let ii: number = 0; ii < rootnode._children.length; ii++)
+        for (let ii: number = 0; ii < rootnode._children.length; ii++) {
             score += this.get_total_score_recursive(rootnode._children[ii]);
+        }
         return score;
     }
 
@@ -350,7 +341,6 @@ export class RNALayout {
 
             this.score_tree_recursive_old(S, folder, rootnode._children[0], rootnode);
 
-
         } else if (!rootnode._is_pair && rootnode._index_a >= 0) {
             /// Single residue node
             return;
@@ -362,8 +352,9 @@ export class RNALayout {
                 /// initial ml scoring
                 rootnode._score = folder.ml_energy(this._bi_pairs, S, 0, true);
             } else {
-                if (!parentnode._is_pair)
+                if (!parentnode._is_pair) {
                     throw new Error("Parent node must be a pair");
+                }
             }
 
             let ii: number;
@@ -410,7 +401,6 @@ export class RNALayout {
                 this.score_tree_recursive_old(S, folder, rootnode._children[ii], rootnode);
             }
 
-
         }
 
     }
@@ -445,8 +435,9 @@ export class RNALayout {
                 /// initial ml scoring
                 rootnode._score = RNALayout.lookup_fe(nnfe, -1);
             } else {
-                if (!parentnode._is_pair)
+                if (!parentnode._is_pair) {
                     throw new Error("Parent node must be a pair");
+                }
             }
 
             let ii: number;
