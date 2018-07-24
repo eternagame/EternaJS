@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Point, Text} from "pixi.js";
+import {Container, Point, Sprite, Text} from "pixi.js";
 import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
@@ -27,6 +27,7 @@ import {BoostersData, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
+import {BitmapManager} from "../../resources/BitmapManager";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {Sounds} from "../../resources/Sounds";
 import {ActionBar} from "../../ui/ActionBar";
@@ -528,11 +529,15 @@ export class PoseEditMode extends GameMode {
         this._exit_button.display.visible = false;
         this.addObject(this._exit_button, this.modeSprite);
 
-        /// Set puzzle title
-        // let title_gui: GameObject = Application.instance.get_application_gui("Puzzle Title");
-        // if (title_gui != null) {
-        //     title_gui.set_text(puz.get_puzzle_name(true));
-        // }
+        let puzzleIcon = new Sprite(BitmapManager.get_bitmap(Bitmaps.NovaPuzzleImg));
+        puzzleIcon.position = new Point(11, 8);
+        this.modeSprite.addChild(puzzleIcon);
+
+        let puzzleTitle = Fonts.arial(this._puzzle.get_puzzle_name(true), 14).bold().color(0xffffff).build();
+        this.modeSprite.addChild(puzzleTitle);
+        DisplayUtil.positionRelative(
+            puzzleTitle, Align.LEFT, Align.CENTER,
+            puzzleIcon, Align.RIGHT, Align.CENTER, 3, 0);
 
         this._constraintsLayer.visible = true;
 
