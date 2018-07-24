@@ -1,5 +1,5 @@
 export class Counter {
-    public get slot(): Function {
+    public get slot(): (value: any) => void {
         return this.onEmit;
     }
 
