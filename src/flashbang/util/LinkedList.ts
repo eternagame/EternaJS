@@ -121,9 +121,9 @@ export class LinkedList<T> {
 
 class Runs {
     public next: Runs;
-    public action: Function;
+    public action: () => void;
 
-    constructor(action: Function) {
+    constructor(action: () => void) {
         this.action = action;
     }
 }

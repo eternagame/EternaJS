@@ -2,7 +2,7 @@ import {Registration} from "./Registration";
 
 export class Registrations {
     /** Returns a Registration that will call the given function when disconnected */
-    public static createWithFunction(f: Function): Registration {
+    public static createWithFunction(f: () => void): Registration {
         return new FunctionRegistration(f);
     }
 
@@ -23,17 +23,17 @@ class NullRegistration implements Registration {
 }
 
 class FunctionRegistration implements Registration {
-    constructor(f: Function) {
+    constructor(f: () => void) {
         this._f = f;
     }
 
     public close(): void {
         if (this._f != null) {
-            let f: Function = this._f;
+            let f = this._f;
             this._f = null;
             f();
         }
     }
 
-    private _f: Function;
+    private _f: () => void;
 }
