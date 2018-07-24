@@ -62,7 +62,7 @@ export class GameButton extends Button implements KeyboardListener {
 
     public label(text: string | TextBuilder, fontSize?: number): GameButton {
         if (typeof(text) === "string") {
-            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize ? fontSize : 22).color(0xFFFFFF);
+            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize ? fontSize : 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
