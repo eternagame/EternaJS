@@ -30,7 +30,7 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
         // instance will never reach the caller
         let cons: Cons = this.addConnection(listener);
         try {
-            cons.listener(this.value, null);
+            cons.listener(this.value);
         } catch (e) {
             cons.close();
             throw e;
@@ -73,8 +73,8 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
     /**
      * Notifies our listeners of a value change.
      */
-    protected notifyChange(value: any, oldValue: any): void {
-        this.notify(value, oldValue, undefined);
+    protected notifyChange(value: T, oldValue: T): void {
+        this.notify(value, oldValue);
     }
 
     /**

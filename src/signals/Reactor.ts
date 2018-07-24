@@ -1,5 +1,7 @@
 import {Cons} from "./Cons";
 
+export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
+
 /**
  * A base class for all reactive classes. This is an implementation detail, but is public so that
  * third parties may use it to create their own reactive classes, if desired.
@@ -10,14 +12,14 @@ export abstract class Reactor {
         return this._listeners != null;
     }
 
-    protected addConnection(listener: (arg1: any, arg2: any, arg3: any) => void): Cons {
+    protected addConnection(listener: RListener): Cons {
         if (listener == null) {
             throw new Error("Null listener");
         }
         return this._addCons(new Cons(this, listener));
     }
 
-    protected removeConnection(listener: (arg1: any, arg2: any, arg3: any) => void): void {
+    protected removeConnection(listener: RListener): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons.removeAll(this._listeners, listener);
@@ -32,7 +34,7 @@ export abstract class Reactor {
     /**
      * Emits the supplied event to all connected slots.
      */
-    protected notify(a1: any, a2: any, a3: any): void {
+    protected notify(a1?: any, a2?: any, a3?: any): void {
         if (this._listeners == null) {
             // Bail early if we have no listeners
             return;
