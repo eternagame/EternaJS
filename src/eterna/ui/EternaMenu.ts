@@ -1,9 +1,8 @@
-import * as log from "loglevel";
+import * as _ from "lodash";
 import {Point} from "pixi.js";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
-import * as _ from "lodash";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
@@ -26,10 +25,7 @@ export class EternaMenu extends GamePanel {
         if (url != null && url.length > 0) {
             menuButton.label("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
             menuButton.clicked.connect(() => {
-                log.debug(`TODO: navigateToURL '${url}'`);
-                // let req: URLRequest = new URLRequest;
-                // req.url = url;
-                // this.navigateToURL(req, "_self");
+                window.open(url, "_self");
             });
         } else {
             menuButton.label(label, 12);
