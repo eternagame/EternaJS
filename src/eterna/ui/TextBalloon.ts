@@ -1,4 +1,4 @@
-import MultiStyleText, {TextStyleSet} from "pixi-multistyle-text";
+import MultiStyleText from "pixi-multistyle-text";
 import {Point, Text} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -132,7 +132,6 @@ export class TextBalloon extends ContainerObject {
     }
 
     protected _button: GameButton;
-    protected _height: number = 0;
 
     protected _panel: GamePanel;
     protected _text: MultiStyleText;
