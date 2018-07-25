@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
-import {PoseTestMode} from "./debug/PoseTestMode";
+import {TestMode} from "./debug/TestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
@@ -26,6 +26,7 @@ enum PuzzleID {
     TheophyllineRibozymeSwitch = 2390140,   // aux info
     MicrofluidicChip = 6502997,             // level 4/7 - MissionCleared info
     AandB_RO = 6892307,                     // Oligos
+    Tutorial1 = 6502927,                    // rscript
 }
 
 export class EternaApp extends FlashbangApp {
@@ -63,7 +64,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)])
             })
             // .then(() => {
-            //     this._modeStack.unwindToMode(new PoseTestMode());
+            //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
