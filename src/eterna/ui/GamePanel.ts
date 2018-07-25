@@ -48,8 +48,7 @@ export class GamePanel extends ContainerObject {
         return this._height;
     }
 
-    /*override*/
-    private updateView(): void {
+    protected updateView(): void {
         this._background.clear();
 
         if (this._width <= 0 || this._height <= 0) {
@@ -82,18 +81,18 @@ export class GamePanel extends ContainerObject {
         }
     }
 
-    private readonly _background: Graphics;
+    protected readonly _background: Graphics;
 
-    private _panel_type: GamePanelType;
+    protected _panel_type: GamePanelType;
 
-    private _alpha: number = 0;
-    private _color: number = 0;
-    private _border_alpha: number = 0;
-    private _border_color: number = 0;
-    private _title: string = null;
-    private _title_text: Text = null;
+    protected _alpha: number = 0;
+    protected _color: number = 0;
+    protected _border_alpha: number = 0;
+    protected _border_color: number = 0;
+    protected _title: string = null;
+    protected _title_text: Text = null;
 
-    private _width: number = 0;
-    private _height :number = 0;
+    protected _width: number = 0;
+    protected _height: number = 0;
 }
 
