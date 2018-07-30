@@ -1,8 +1,6 @@
 import {ObjectTask} from "../core/ObjectTask";
 
-/**
- * A Task that calls a function once and then completes.
- */
+/** A Task that calls a function once and then completes. */
 export class CallbackTask extends ObjectTask {
     constructor(callback: () => void) {
         super();
