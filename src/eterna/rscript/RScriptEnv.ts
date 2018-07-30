@@ -170,17 +170,17 @@ export class RScriptEnv extends ContainerObject {
 
         log.debug("TODO: ShowHideUI");
 
+        if (visible) {
+            if (elementID.toUpperCase() == "PALETTE") {
+                this.GetUI().toolbar.palette.set_override_default();
+                this.GetUI().toolbar.palette.change_default_mode();
+            } else if (elementID.toUpperCase() == "PALETTEALT") {
+                this.GetUI().toolbar.palette.set_override_no_pair();
+                this.GetUI().toolbar.palette.change_no_pair_mode();
+            }
+        }
+
         // let obj: GameObject = this.GetUIElementFromId(elementID)[0];
-        // if (visible) {
-        //     if (elementID.toUpperCase() == "PALETTE") {
-        //         this.GetUI().get_palette().set_override_default();
-        //         this.GetUI().get_palette().change_default_mode();
-        //     } else if (elementID.toUpperCase() == "PALETTEALT") {
-        //         this.GetUI().get_palette().set_override_no_pair();
-        //         this.GetUI().get_palette().change_no_pair_mode();
-        //     }
-        // }
-        //
         // obj.override_visible(true, visible);
         // RScriptEnv.SetUIVisible(obj, visible);
         // if (visible) {
@@ -216,7 +216,7 @@ export class RScriptEnv extends ContainerObject {
         //     return this.GetRNA().get_secondary_score_display();
         // case UIElementType.PALETTE:
         // case UIElementType.PALETTEALT:
-        //     return this.GetUI().get_palette();
+        //     return this.GetUI().toolbar.palette;
         // case UIElementType.TOGGLENATURAL:
         //     return this.GetUI().get_native_button();
         // case UIElementType.TOGGLETARGET:
@@ -242,28 +242,28 @@ export class RScriptEnv extends ContainerObject {
         // case UIElementType.PIP:
         //     return this.GetUI().get_pip_button();
         // case UIElementType.A:
-        //     return this.GetUI().get_palette().a_box;
+        //     return this.GetUI().toolbar.palette.a_box;
         // case UIElementType.U:
-        //     return this.GetUI().get_palette().u_box;
+        //     return this.GetUI().toolbar.palette.u_box;
         // case UIElementType.G:
-        //     return this.GetUI().get_palette().g_box;
+        //     return this.GetUI().toolbar.palette.g_box;
         // case UIElementType.C:
-        //     return this.GetUI().get_palette().c_box;
+        //     return this.GetUI().toolbar.palette.c_box;
         // case UIElementType.AU:
         // case UIElementType.UA:
         // case UIElementType.AUCOMPLETE:
         // case UIElementType.UACOMPLETE:
-        //     return this.GetUI().get_palette().au_box;
+        //     return this.GetUI().toolbar.palette.au_box;
         // case UIElementType.GU:
         // case UIElementType.UG:
         // case UIElementType.GUCOMPLETE:
         // case UIElementType.UGCOMPLETE:
-        //     return this.GetUI().get_palette().ug_box;
+        //     return this.GetUI().toolbar.palette.ug_box;
         // case UIElementType.GC:
         // case UIElementType.CG:
         // case UIElementType.GCCOMPLETE:
         // case UIElementType.CGCOMPLETE:
-        //     return this.GetUI().get_palette().gc_box;
+        //     return this.GetUI().toolbar.palette.gc_box;
         // default:
         //     throw new Error("Invalid UI Element: " + key);
         // }

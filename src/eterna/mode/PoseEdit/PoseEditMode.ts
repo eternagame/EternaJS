@@ -215,6 +215,10 @@ export class PoseEditMode extends GameMode {
         this.set_puzzle();
     }
 
+    public get toolbar(): PoseEditToolbar {
+        return this._toolbar;
+    }
+
     protected showPasteSequenceDialog(): void {
         this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
             if (sequence != null) {
