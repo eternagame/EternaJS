@@ -1,18 +1,21 @@
-import {Point, Graphics} from "pixi.js"
+import * as log from "loglevel";
+import {Point} from "pixi.js"
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
+import {Vector2} from "../../flashbang/geom/Vector2";
 import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
 import {FancyTextBalloon} from "../ui/FancyTextBalloon";
-import {UDim} from "../util/UDim";
+import {ColorUtil} from "../util/ColorUtil";
 import {ROPWait} from "./ROPWait";
+import {RScriptArrow} from "./RScriptArrow";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
-import * as log from "loglevel";
 
 export class ROPTextbox extends RScriptOp {
     public static readonly id_postfix: string = "_textbox_";
     public static readonly arrow_id_postfix: string = "_arrow_";
 
-    /*
+    /**
      * isVisible - True for Show. False for Hide.
      * inMode - 0 for location based. 1 for nucleotide based. 2 for just regular show.
      */
@@ -35,184 +38,155 @@ export class ROPTextbox extends RScriptOp {
 
     /*override*/
     public exec(): void {
-        log.debug("TODO: ROPTextbox.exec");
-        // let p: Point;
-        // let offset: Point;
-        //
-        // if (this._env.Exists(this._id)) {
-        //     if (this._mode <= 2) {
-        //         let prevTB: FancyTextBalloon = this._env.GetVar(this._id);
-        //         this.RemoveTextbox(prevTB);
-        //     } else {
-        //         let prevArr: GameObject = this._env.GetVar(this._id);
-        //         this.RemoveArrow(prevArr);
-        //     }
-        // }
-        //
-        // if (this._op_visible && this._mode <= 2) {
-        //     let textBox: FancyTextBalloon = new FancyTextBalloon(this._text, 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
-        //     if (this._fixedSize) {
-        //         textBox.set_fixed_width(215);
-        //         textBox.get_game_text().set_autosize(false, false, 185);
-        //     }
-        //     textBox.use_html(true);
-        //     textBox.set_fancy_text(this._text, 13, 0xC0DCE7, "Arial", false, 1.0);
-        //     if (this._title.length > 0) {
-        //         // TODO: Fix the title bar so that it does not overlap with text.
-        //         textBox.set_title(this._title);
-        //     }
-        //     if (this._mode == 0) {
-        //         textBox.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
-        //     } else if (this._mode == 1) {
-        //         // Get position of the textbox based on position of the nucleotide.
-        //         p = this._env.GetRNA().get_base_xy(this._nuc_idx);
-        //         //trace((-1.0 * textBox.height / 2) + " " + _y_offset_specified + " " + _y_offset);
-        //         offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -1.0 * textBox.height / 2 - 10);
-        //         if (this._x_offset_specified) {
-        //             offset.x = this._x_offset;
-        //         }
-        //
-        //         if (this._y_offset_specified) {
-        //             offset.y = this._y_offset;
-        //         }
-        //
-        //         textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
-        //         this._env.GetRNA().add_anchored_object(new RNAAnchorObject(textBox, this._nuc_idx, offset));
-        //     } else if (this._mode == 2) {
-        //         this._env.SetTextboxVisible(this._id, true);
-        //         return;
-        //     }
-        //
-        //     if (this._button_text != "") {
-        //         textBox.set_button_text(this._button_text);
-        //         textBox.showButton(true).clicked.connect(() => this.OnClickEvent());
-        //     } else {
-        //         textBox.showButton(false);
-        //     }
-        //     let par: Object = this._env;
-        //     if (this._initial_show) {
-        //         if (this._forceTopmost) {
-        //             par = Application.instance.get_front_object_container();
-        //             Application.instance.get_front_object_container().add_object(textBox);
-        //         } else {
-        //             this._env.add_object(textBox);
-        //         }
-        //     }
-        //     this._env.StoreVar(this._id, textBox, par);
-        // } else if (this._op_visible && this._mode <= 5) {
-        //     let parent: GameObject = null;
-        //     if (this._has_parent) {
-        //         parent = this._env.GetVar(this._parent_id);
-        //         if (!parent) {
-        //             this._has_parent = false;
-        //         }
-        //     }
-        //
-        //     // Draw Arrow.
-        //     let newArrow: Graphics = new Graphics();
-        //     let dir: Point = new Point(1, 0);
-        //
-        //     if (this._mode == 3) {
-        //         newArrow.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
-        //     } else if (this._mode == 4) {
-        //         p = this._env.GetRNA().get_base_xy(this._nuc_idx);
-        //         newArrow.position = new Point(p.x, p.y);
-        //     }
-        //
-        //     // Determine where we want to draw the tip of the arrow
-        //     let endPoint: Point = new Point(0, 0);
-        //     newArrow.endPoint = endPoint;
-        //     if (this._mode == 4) {
-        //         endPoint.x += 6;
-        //     }
-        //
-        //     if (this._has_parent) {
-        //         // Modify degree and length if textbox is present.
-        //         // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
-        //         // textbox as well.
-        //         let xdiff: number = (parent.x + parent.width / 2) - newArrow.x;
-        //         let ydiff: number = parent.y - newArrow.y;
-        //         if (ydiff < 0.0) {
-        //             ydiff += parent.height;
-        //         }
-        //
-        //         if (xdiff != 0) {
-        //             this._degree = Math.atan(ydiff / xdiff) * 180 / Math.PI;
-        //         } else {
-        //             this._degree = 0.0;
-        //         }
-        //
-        //         if (ydiff > 0.0 && xdiff < 0.0) {
-        //             this._degree += 180;
-        //         } else if (ydiff < 0.0 && xdiff < 0.0) {
-        //             this._degree += 180;
-        //         }
-        //
-        //         if (ydiff < 0.0) { // Above
-        //             this._length = Point.distance(new Point(newArrow.x, newArrow.y),
-        //                 new Point(parent.x + parent.width / 2, parent.y + parent.height));
-        //         } else {  // Below
-        //             this._length = Point.distance(new Point(newArrow.x, newArrow.y),
-        //                 new Point(parent.x + parent.width / 2, parent.y - 50));
-        //         }
-        //     }
-        //
-        //     // Draw Triangle with the tip at endPoint.
-        //     let trianglePoints: number[] = [];
-        //     trianglePoints.push(endPoint.x, endPoint.y);
-        //
-        //     newArrow._my_width = this._my_width;
-        //     newArrow._fillColor = this._fillColor;
-        //     newArrow._outlineColor = this._outlineColor;
-        //     // Create an equilaterial triangle.
-        //     // It should be just a bit wider than the width of the rectangle specified by
-        //     // 	_my_width.
-        //     let triWidth: number = this._my_width + 20; // 20 is a random number. subject to change yolo.
-        //     let triHeight: number = triWidth / 2 * Math.sqrt(2);
-        //     let perp_dir: Point = new Point(-1 * dir.y, dir.x);
-        //     perp_dir.normalize(1);
-        //     let basePoint: Point = endPoint.add(new Point(dir.x * triHeight, dir.y * triHeight));
-        //     let n1: Point = basePoint.add(new Point(perp_dir.x * triWidth / 2, perp_dir.y * triWidth / 2));
-        //     let n2: Point = basePoint.add(new Point(perp_dir.x * triWidth / -2, perp_dir.y * triWidth / -2));
-        //     trianglePoints.push(n1.x, n1.y);
-        //     trianglePoints.push(n2.x, n2.y);
-        //
-        //     newArrow.clear();
-        //     newArrow.lineStyle(1, Number("0x" + this._outlineColor));
-        //     newArrow.beginFill(Number("0x" + this._fillColor), 1.0);
-        //     newArrow.drawTriangles(trianglePoints);
-        //
-        //     // Now draw the rectangle going in the same dir.
-        //     let r_start: Point = basePoint.subtract(new Point(perp_dir.x * this._my_width / 2, perp_dir.y * this._my_width / 2));
-        //     newArrow.drawRect(r_start.x, r_start.y, this._length, this._my_width);
-        //     newArrow.endFill();
-        //
-        //     newArrow.lineStyle(NaN);
-        //     newArrow.beginFill(Number("0x" + this._fillColor), 1.0);
-        //     newArrow.drawRect(r_start.x - 5, r_start.y + 1, 20, this._my_width - 1);
-        //     newArrow.rotation = this._degree;
-        //
-        //     newArrow.endFill();
-        //
-        //     if (this._mode == 4) {
-        //         offset = new Point();
-        //         offset.x = Math.cos(this._degree * Math.PI / 180);
-        //         offset.y = Math.sin(this._degree * Math.PI / 180);
-        //         if (!this._x_offset_specified) {
-        //             offset.normalize(ROPTextbox.DEFAULT_ARROW_OFFSET);
-        //         } else {
-        //             offset.normalize(this._x_offset);
-        //         }
-        //         p = this._env.GetRNA().get_base_xy(this._nuc_idx);
-        //         newArrow.set_pos(new UDim(0, 0, p.x + offset.x, p.y + offset.y));
-        //         newArrow.set_anchor_nucleotide(this._env.GetRNA(), this._nuc_idx, offset.x, offset.y);
-        //     }
-        //     this._env.add_object(newArrow);
-        //     this._env.StoreVar(this._id, newArrow, this._env);
-        //     if (this._has_parent) {
-        //         FancyTextBalloon(parent).add_child_arrow(newArrow);
-        //     }
-        // }
+        if (this._env.Exists(this._id)) {
+            if (this._mode <= 2) {
+                let prevTB: FancyTextBalloon = this._env.GetVar(this._id);
+                this.RemoveTextbox(prevTB);
+            } else {
+                let prevArr: GameObject = this._env.GetVar(this._id);
+                this.RemoveArrow(prevArr);
+            }
+        }
+
+        if (this._op_visible && this._mode <= 2) {
+            let textBox: FancyTextBalloon = new FancyTextBalloon(this._text, 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
+            if (this._fixedSize) {
+                textBox.set_fixed_width(215);
+                textBox.get_game_text().style.wordWrap = true;
+                textBox.get_game_text().style.wordWrapWidth = 185;
+            }
+            // textBox.use_html(true);
+            textBox.set_fancy_text(this._text, 13, 0xC0DCE7, "Arial", false, 1.0);
+            if (this._title.length > 0) {
+                // TODO: Fix the title bar so that it does not overlap with text.
+                textBox.set_title(this._title);
+            }
+            if (this._mode == 0) {
+                textBox.display.position = new Point(
+                    Flashbang.stageWidth * this._x_pos + this._x_rel,
+                    Flashbang.stageHeight * this._y_pos + this._y_rel);
+                // textBox.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
+            } else if (this._mode == 1) {
+                // Get position of the textbox based on position of the nucleotide.
+                let p: Point = this._env.GetRNA().get_base_xy(this._nuc_idx);
+                //trace((-1.0 * textBox.height / 2) + " " + _y_offset_specified + " " + _y_offset);
+                let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
+                if (this._x_offset_specified) {
+                    offset.x = this._x_offset;
+                }
+
+                if (this._y_offset_specified) {
+                    offset.y = this._y_offset;
+                }
+
+                textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
+                this._env.GetRNA().add_anchored_object(new RNAAnchorObject(textBox, this._nuc_idx, offset));
+            } else if (this._mode == 2) {
+                this._env.SetTextboxVisible(this._id, true);
+                return;
+            }
+
+            if (this._button_text != "") {
+                textBox.set_button_text(this._button_text);
+                textBox.showButton(true).clicked.connect(() => this.OnClickEvent());
+            } else {
+                textBox.showButton(false);
+            }
+            let par: Object = this._env;
+            if (this._initial_show) {
+                if (this._forceTopmost && false) {
+                    // par = Application.instance.get_front_object_container();
+                    // Application.instance.get_front_object_container().add_object(textBox);
+                } else {
+                    this._env.addObject(textBox, this._env.container);
+                }
+            }
+            this._env.StoreVar(this._id, textBox, par);
+        } else if (this._op_visible && this._mode <= 5) {
+            let parent: FancyTextBalloon = null;
+            if (this._has_parent) {
+                parent = this._env.GetVar(this._parent_id);
+                if (!parent) {
+                    this._has_parent = false;
+                }
+            }
+
+            // Draw Arrow.
+            let newArrow = new RScriptArrow(this._my_width + 20, 60, this._outlineColor, this._fillColor);
+
+            if (this._mode == 3) {
+                newArrow.display.position = new Point(
+                    Flashbang.stageWidth * this._x_pos + this._x_rel,
+                    Flashbang.stageHeight * this._y_pos + this._y_rel);
+                // newArrow.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
+            } else if (this._mode == 4) {
+                newArrow.display.position = this._env.GetRNA().get_base_xy(this._nuc_idx);
+            }
+
+            // Determine where we want to draw the tip of the arrow
+            if (this._mode == 4) {
+                // endPoint.x += 6;
+                newArrow.display.position.x += 6;
+            }
+
+            if (this._has_parent) {
+                // Modify degree and length if textbox is present.
+                // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
+                // textbox as well.
+                let xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
+                let ydiff: number = parent.display.y - newArrow.display.y;
+                if (ydiff < 0.0) {
+                    ydiff += parent.container.height;
+                }
+
+                if (xdiff != 0) {
+                    this._arrowRotation = Math.atan(ydiff / xdiff) * 180 / Math.PI;
+                } else {
+                    this._arrowRotation = 0.0;
+                }
+
+                if (ydiff > 0.0 && xdiff < 0.0) {
+                    this._arrowRotation += 180;
+                } else if (ydiff < 0.0 && xdiff < 0.0) {
+                    this._arrowRotation += 180;
+                }
+
+                if (ydiff < 0.0) { // Above
+                    this._arrowLength = Vector2.distance(
+                        newArrow.display.x, newArrow.display.y,
+                        parent.display.x + parent.container.width * 0.5, parent.display.y + parent.container.height);
+                } else {  // Below
+                    this._arrowLength = Vector2.distance(
+                        newArrow.display.x, newArrow.display.y,
+                        parent.display.x + parent.container.width / 2, parent.display.y - 50);
+                }
+            }
+
+            newArrow.display.rotation = this._arrowRotation;
+            newArrow.baseLength = this._arrowLength;
+            newArrow.redrawIfDirty();
+
+            if (this._mode == 4) {
+                let offset = new Vector2();
+                offset.x = Math.cos(this._arrowRotation * Math.PI / 180);
+                offset.y = Math.sin(this._arrowRotation * Math.PI / 180);
+                if (!this._x_offset_specified) {
+                    offset.length = ROPTextbox.DEFAULT_ARROW_OFFSET;
+                } else {
+                    offset.length = this._x_offset;
+                }
+                let p = this._env.GetRNA().get_base_xy(this._nuc_idx);
+                newArrow.display.position = new Point(p.x + offset.x, p.y + offset.y);
+                log.debug("TODO: set_anchor_nucleotide?");
+                // TSC - I'm not sure if this is ever called or what it should do
+                // newArrow.set_anchor_nucleotide(this._env.GetRNA(), this._nuc_idx, offset.x, offset.y);
+            }
+            this._env.addObject(newArrow, this._env.container);
+            this._env.StoreVar(this._id, newArrow, this._env);
+            if (this._has_parent) {
+                parent.add_child_arrow(newArrow);
+            }
+        }
     }
 
     /*override*/
@@ -272,7 +246,7 @@ export class ROPTextbox extends RScriptOp {
             } else if (this._mode == 3) {
                 this._id = this._env.GetStringRef(arg);
             } else if (this._mode == 4) {
-                this._degree = Number(arg);
+                this._arrowRotation = Number(arg);
             } else {
                 this._title = this._env.GetStringRef(arg);
             }
@@ -281,9 +255,9 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == 0) {
                 this._title = this._env.GetStringRef(arg);
             } else if (this._mode == 3) {
-                this._degree = Number(arg);
+                this._arrowRotation = Number(arg);
             } else if (this._mode == 4) {
-                this._length = Number(arg);
+                this._arrowLength = Number(arg);
             } else {
                 this._id = this._env.GetStringRef(arg);
             }
@@ -292,7 +266,7 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == 0) {
                 this._id = this._env.GetStringRef(arg);
             } else if (this._mode == 3) {
-                this._length = Number(arg);
+                this._arrowLength = Number(arg);
             } else if (this._mode == 4) {
                 this._my_width = Number(arg);
             } else {
@@ -325,7 +299,7 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == 3) {
                 this._parent_id = this._env.GetStringRef(arg);
             } else if (this._mode == 4) {
-                this._fillColor = this._env.GetStringRef(arg);
+                this._fillColor = ColorUtil.fromString(this._env.GetStringRef(arg));
             } else if (this._mode == 0) {
                 this._fixedSize = ROPTextbox.parseBool(arg);
             } else if (this._mode == 1) {
@@ -334,9 +308,9 @@ export class ROPTextbox extends RScriptOp {
             break;
         case 8:
             if (this._mode == 3) {
-                this._fillColor = this._env.GetStringRef(arg);
+                this._fillColor = ColorUtil.fromString(this._env.GetStringRef(arg));
             } else if (this._mode == 4) {
-                this._outlineColor = this._env.GetStringRef(arg);
+                this._outlineColor = ColorUtil.fromString(this._env.GetStringRef(arg));
             } else if (this._mode == 0) {
                 this._forceTopmost = ROPTextbox.parseBool(arg);
             } else if (this._mode == 1) {
@@ -352,7 +326,7 @@ export class ROPTextbox extends RScriptOp {
                 this._x_offset_specified = true;
                 this._x_offset = Number(arg);
             } else {
-                this._outlineColor = this._env.GetStringRef(arg);
+                this._outlineColor = ColorUtil.fromString(this._env.GetStringRef(arg));
             }
             break;
 
@@ -370,8 +344,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     private RemoveArrow(inArr: GameObject): void {
-        log.debug("TODO: RemoveArrow");
-        // this._env.remove_object(inArr);
+        inArr.destroySelf();
     }
 
     private static ProcessId(inId: string, inMode: number): string {
@@ -412,13 +385,13 @@ export class ROPTextbox extends RScriptOp {
     private _id: string = "";
     private _button_text: string = "Next";
     private _initial_show: boolean = true;
-    private _degree: number = 0;
-    private _length: number = 100;
+    private _arrowRotation: number = 0;
+    private _arrowLength: number = 100;
     private _my_width: number = 20;
     private _has_parent: boolean = false;
     private _parent_id: string = "";
-    private _fillColor: string = "FF0000";
-    private _outlineColor: string = "000000";
+    private _fillColor: number = 0xFF0000;
+    private _outlineColor: number = 0;
     private _fixedSize: boolean = true;
     private _forceTopmost: boolean = false;
     private _x_offset_specified: boolean = false;
@@ -427,7 +400,6 @@ export class ROPTextbox extends RScriptOp {
     private _y_offset: number = 0;
 
     private static readonly DEFAULT_X_OFFSET: number = 35;
-    private static readonly DEFAULT_Y_OFFSET: number = 10;
     private static readonly DEFAULT_ARROW_OFFSET: number = 12;
     private static readonly STD_RED_COLOR: string = "F85F00";
     private static readonly STD_BLUE_COLOR: string = "00BFF9";

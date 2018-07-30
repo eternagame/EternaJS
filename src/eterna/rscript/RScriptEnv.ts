@@ -1,9 +1,11 @@
 import * as log from "loglevel";
 import {GameObject} from "../../flashbang/core/GameObject";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {EPars} from "../EPars";
 import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
+import {TextBalloon} from "../ui/TextBalloon";
 
 export enum UIElementType {
     ACTION_MENU = "ACTION_MENU",
@@ -49,7 +51,7 @@ export enum UIElementType {
  * RScript Environment.
  * Can take care of variables and scope and such.
  */
-export class RScriptEnv extends GameObject {
+export class RScriptEnv extends ContainerObject {
     public static ConvertNucleotideStringToInt(s: string): number {
         return EPars.stringToNucleotide(s, true, false);
     }
@@ -66,19 +68,12 @@ export class RScriptEnv extends GameObject {
     }
 
     public SetTextboxVisible(id: string, isVisible: boolean): void {
-        log.debug("TODO: SetTextboxVisible");
-        // if (id == "" || !this._mapping.hasOwnProperty("id")) {
-        //     return;
-        // }
-        //
-        // let textBox: TextBalloon = TextBalloon(this.GetVar(id));
-        // if (isVisible) {
-        //     if (!this.is_child(textBox)) {
-        //         this.add_object(textBox);
-        //     }
-        // } else {
-        //     this.remove_object(textBox);
-        // }
+        if (id == "" || !this._mapping.hasOwnProperty("id")) {
+            return;
+        }
+
+        let textBox: TextBalloon = this.GetVar(id);
+        textBox.display.visible = isVisible;
     }
 
     /** Generate string reference name. */
