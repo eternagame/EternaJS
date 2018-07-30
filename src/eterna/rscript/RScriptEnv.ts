@@ -146,6 +146,54 @@ export class RScriptEnv extends ContainerObject {
         return this.GetUI().get_constraint_count();
     }
 
+    public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
+        if (elementID.toUpperCase() == "ENERGY") {
+            this.GetUI().set_display_score_texts(visible);
+            return;
+        } else if (elementID.toUpperCase() == "BASENUMBERING") {
+            this.GetUI().set_show_numbering(visible);
+            return;
+        } else if (elementID.toUpperCase() == "TOTALENERGY") {
+            this.GetUI().set_show_total_energy(visible);
+            return;
+        } else if (elementID.toUpperCase() == "HINT") {
+            // no-op
+            return;
+        } else if (elementID.toUpperCase() == "TOGGLEBAR") {
+            this.ShowHideUI("TOGGLETARGET", visible, disabled);
+            this.ShowHideUI("TOGGLENATURAL", visible, disabled);
+            return;
+        } else if (elementID.toUpperCase() == "SWITCH") {
+            this.GetUIElementFromId(elementID)[0].visible = visible;
+            return;
+        }
+
+        log.debug("TODO: ShowHideUI");
+
+        // let obj: GameObject = this.GetUIElementFromId(elementID)[0];
+        // if (visible) {
+        //     if (elementID.toUpperCase() == "PALETTE") {
+        //         this.GetUI().get_palette().set_override_default();
+        //         this.GetUI().get_palette().change_default_mode();
+        //     } else if (elementID.toUpperCase() == "PALETTEALT") {
+        //         this.GetUI().get_palette().set_override_no_pair();
+        //         this.GetUI().get_palette().change_no_pair_mode();
+        //     }
+        // }
+        //
+        // obj.override_visible(true, visible);
+        // RScriptEnv.SetUIVisible(obj, visible);
+        // if (visible) {
+        //     if (obj.hasOwnProperty("set_disabled")) {
+        //         if (obj instanceof GameButton) {
+        //             GameButton(obj).override_disable(true, disabled);
+        //             GameButton(obj).set_disabled(disabled);
+        //         }
+        //         obj.set_disabled(disabled);
+        //     }
+        // }
+    }
+
     public GetUIElement(key: string, i: number = -1): any {
         log.debug("TODO: GetUIElement");
         return undefined;
