@@ -1,11 +1,11 @@
-import * as log from "loglevel";
 import {Point} from "pixi.js";
 import {Updatable} from "../../flashbang/core/Updatable";
+import {Vector2} from "../../flashbang/geom/Vector2";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Bitmaps} from "../resources/Bitmaps";
+import {RScriptArrow} from "../rscript/RScriptArrow";
 import {FancyGamePanel} from "./FancyGamePanel";
 import {TextBalloon} from "./TextBalloon";
-import Graphics = PIXI.Graphics;
 
 export class FancyTextBalloon extends TextBalloon implements Updatable {
     public constructor(text_in: string = "", text_color: number = 0xFFFFFF,
@@ -77,7 +77,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         // TODO: Somehow replace the text on the button
     }
 
-    public add_child_arrow(arrow: Graphics): void {
+    public add_child_arrow(arrow: RScriptArrow): void {
         this._children_arrows.push(arrow);
     }
 
@@ -107,81 +107,37 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     }
 
     public update(dt: number): void {
-        if (this._children_arrows.length > 0) {
-            log.debug("TODO: FancyTextBalloon.update");
-        }
+        for (let arrow of this._children_arrows) {
+            let xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
+            let ydiff: number = this.display.y - arrow.display.y;
+            if (ydiff < 0.0) {
+                ydiff += this.container.height;
+            }
 
-        // for (let arrow of this._children_arrows) {
-        //     let xdiff: number = (this.x + this.width / 2) - arrow.x;
-        //     let ydiff: number = this.y - arrow.y;
-        //     let _length: number = 0.0;
-        //     let _degree: number = 0.0;
-        //     if (ydiff < 0.0) {
-        //         ydiff += this.height;
-        //     }
-        //
-        //     if (xdiff != 0) {
-        //         _degree = Math.atan(ydiff / xdiff) * 180 / Math.PI;
-        //     } else {
-        //         _degree = 0.0;
-        //     }
-        //
-        //     if (ydiff > 0.0 && xdiff < 0.0) {
-        //         _degree += 180;
-        //     } else if (ydiff < 0.0 && xdiff < 0.0) {
-        //         _degree += 180;
-        //     }
-        //
-        //     if (ydiff < 0.0)  // Above
-        //     {
-        //         _length = Point.distance(new Point(arrow.x, arrow.y),
-        //             new Point(this.x + this.width / 2, this.y + this.height));
-        //     } else  // Below
-        //     {
-        //         _length = Point.distance(new Point(arrow.x, arrow.y),
-        //             new Point(this.x + this.width / 2, this.y - 50));
-        //     }
-        //
-        //     let dir: Point = new Point(1, 0);
-        //
-        //     // oh the laziness. LOL.
-        //     // Draw Triangle with the tip at endPoint.
-        //     let endPoint: Point = arrow.endPoint;
-        //
-        //     // Draw Triangle with the tip at endPoint.
-        //     let trianglePoints: number[] = [];
-        //     trianglePoints.push(endPoint.x, endPoint.y);
-        //
-        //     // Create an equilaterial triangle.
-        //     // It should be just a bit wider than the width of the rectangle specified by
-        //     // 	_my_width.
-        //     let triWidth: number = arrow._my_width + 20; // 20 is a random number. subject to change yolo.
-        //     let triHeight: number = triWidth / 2 * Math.sqrt(2);
-        //     let perp_dir: Point = new Point(-1 * dir.y, dir.x);
-        //     perp_dir.normalize(1);
-        //     let basePoint: Point = endPoint.add(new Point(dir.x * triHeight, dir.y * triHeight));
-        //     let n1: Point = basePoint.add(new Point(perp_dir.x * triWidth / 2, perp_dir.y * triWidth / 2));
-        //     let n2: Point = basePoint.add(new Point(perp_dir.x * triWidth / -2, perp_dir.y * triWidth / -2));
-        //     trianglePoints.push(n1.x, n1.y);
-        //     trianglePoints.push(n2.x, n2.y);
-        //
-        //     arrow.clear();
-        //     arrow.lineStyle(1, Number("0x" + arrow._outlineColor));
-        //     arrow.beginFill(Number("0x" + arrow._fillColor), 1.0);
-        //     arrow.drawTriangles(trianglePoints);
-        //
-        //     // Now draw the rectangle going in the same dir.
-        //     let r_start: Point = basePoint.subtract(new Point(perp_dir.x * arrow._my_width / 2, perp_dir.y * arrow._my_width / 2));
-        //     arrow.drawRect(r_start.x, r_start.y, _length, arrow._my_width);
-        //     arrow.endFill();
-        //
-        //     arrow.lineStyle(NaN);
-        //     arrow.beginFill(Number("0x" + arrow._fillColor), 1.0);
-        //     arrow.drawRect(r_start.x - 5, r_start.y + 1, 20, arrow._my_width - 1);
-        //     arrow.rotation = _degree;
-        //
-        //     arrow.endFill();
-        // }
+            if (xdiff != 0) {
+                arrow.display.rotation = Math.atan(ydiff / xdiff) * 180 / Math.PI;
+            } else {
+                arrow.display.rotation = 0.0;
+            }
+
+            if (ydiff > 0.0 && xdiff < 0.0) {
+                arrow.display.rotation += 180;
+            } else if (ydiff < 0.0 && xdiff < 0.0) {
+                arrow.display.rotation += 180;
+            }
+
+            if (ydiff < 0.0) {  // Above
+                arrow.baseLength = Vector2.distance(
+                    arrow.display.x, arrow.display.y,
+                    this.display.x + this.container.width / 2, this.display.y + this.container.height);
+            } else { // Below
+                arrow.baseLength = Vector2.distance(
+                    arrow.display.x, arrow.display.y,
+                    this.display.x + this.container.width / 2, this.display.y - 50);
+            }
+
+            arrow.redrawIfDirty();
+        }
     }
 
     private readonly _show_outline: boolean;
@@ -192,5 +148,5 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
     private _has_fixed_width: boolean = false;
     private _fixed_width: number;
-    private _children_arrows: Graphics[] = [];
+    private _children_arrows: RScriptArrow[] = [];
 }
