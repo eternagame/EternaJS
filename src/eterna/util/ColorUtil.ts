@@ -1,6 +1,19 @@
 import {MathUtil} from "../../flashbang/util/MathUtil";
+import {StringUtil} from "./StringUtil";
 
 export class ColorUtil {
+    public static fromString(str: string): number {
+        if (str.length == 0 || str.charAt(0) != "#") {
+            throw new Error("Invalid color string: " + str);
+        }
+
+        try {
+            return StringUtil.parseUnsignedInteger(str.substr(1), 16);
+        } catch (e) {
+            throw new Error("Invalid color string: " + str);
+        }
+    }
+
     /**
      * Blends two colors to create a new one.
      * @param c1 the first color
