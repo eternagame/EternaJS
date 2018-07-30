@@ -5,6 +5,18 @@ export class Vector2 {
     public x: number = 0;
     public y: number = 0;
 
+    /** Returns the distance between two points */
+    public static distance(x1: number, y1: number, x2: number, y2: number): number {
+        const xx = x2 - x1;
+        const yy = y2 - y1;
+        return Math.sqrt(xx * xx + yy * yy);
+    }
+
+    /** Returns the length of a vector */
+    public static lengthOf(x: number, y: number): number {
+        return Math.sqrt(x * x + y * y);
+    }
+
     /** Returns the angle of a vector, in radians */
     public static angleOf(x: number, y: number): number {
         const val: number = Math.atan2(y, x);
