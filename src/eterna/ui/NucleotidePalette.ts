@@ -29,6 +29,19 @@ export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
     }
 }
 
+export function StringToPaletteTargetType(value: string): PaletteTargetType {
+    switch (value.toUpperCase()) {
+    case "A": return PaletteTargetType.A;
+    case "U": return PaletteTargetType.U;
+    case "G": return PaletteTargetType.G;
+    case "C": return PaletteTargetType.C;
+    case "AU": case "UA": return PaletteTargetType.AU;
+    case "GC": case "CG": return PaletteTargetType.GC;
+    case "UG": case "GU": return PaletteTargetType.UG;
+    default: return null;
+    }
+}
+
 /*
  * Nucleotide palette class. Handles the AUCG nucleotides options as well as the pairs.
  * Has the option to turn into a 'no pair' mode.
