@@ -30,6 +30,7 @@ import {SolutionManager} from "../../puzzle/SolutionManager";
 import {BitmapManager} from "../../resources/BitmapManager";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {Sounds} from "../../resources/Sounds";
+import {RNAScript} from "../../rscript/RNAScript";
 import {ActionBar} from "../../ui/ActionBar";
 import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
@@ -704,6 +705,10 @@ export class PoseEditMode extends GameMode {
         if (!autoloaded) {
             this.pose_edit_by_target(0);
         }
+
+        // Setup RScript
+        this._rscript = new RNAScript(this._puzzle, this);
+        this._rscript.Tick();
     }
 
     public get_folder(): Folder {
@@ -1046,6 +1051,8 @@ export class PoseEditMode extends GameMode {
 
             elapsed = new Date().getTime() - startTime;
         }
+
+        this._rscript.Tick();
 
         super.update(dt);
     }
@@ -1745,7 +1752,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private submit_solution(details: SubmitPoseDetails, undoBlock: UndoBlock): void {
-        Application.instance.CompleteLevel();
+        this._rscript.FinishLevel();
 
         if (this._puzzle.get_node_id() < 0) {
             return;
@@ -4189,6 +4196,7 @@ export class PoseEditMode extends GameMode {
     private _show_mission_screen: boolean = true;
     private _override_show_constraints: boolean = true;
     private _ancestor_id: number;
+    private _rscript: RNAScript;
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: any;
