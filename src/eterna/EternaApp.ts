@@ -6,6 +6,7 @@ import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
 import {NuPACK} from "./folding/NuPACK";
+import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
 import {LoadingMode} from "./mode/LoadingMode";
@@ -51,7 +52,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.sound = new SoundManager(Eterna.settings);
 
         // Handle ?puzzle=[puzzle_id] URL param
-        let puzid = PuzzleID.AandB_RO;
+        let puzid = PuzzleID.Tutorial1;
         let params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("puzzle")) {
             puzid = Number(params.get("puzzle"));
@@ -104,7 +105,7 @@ export class EternaApp extends FlashbangApp {
 
     private initFoldingEngines(): Promise<void> {
         log.info("Initializing folding engines...");
-        return Promise.all([Vienna.create(), Vienna2.create(), NuPACK.create()])
+        return Promise.all([Vienna.create(), Vienna2.create(), NuPACK.create(), RNAFoldBasic.create()])
             .then((folders: Folder[]) => {
                 log.info("Folding engines intialized");
                 for (let folder of folders) {

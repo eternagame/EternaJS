@@ -2,7 +2,12 @@
 import {Folder} from "./Folder";
 
 export class RNAFoldBasic extends Folder {
-    public static NAME: string = "Basic";
+    public static readonly NAME: string = "Basic";
+
+    /** Asynchronously creates a new instance of the RNAFoldBasic folder. */
+    public static create(): Promise<RNAFoldBasic> {
+        return Promise.resolve(new RNAFoldBasic());
+    }
 
     public is_functional(): boolean {
         return true;
@@ -14,7 +19,7 @@ export class RNAFoldBasic extends Folder {
     }
 
     /*override*/
-    public score_structures(seq: any[], pairs: any[], temp: number = 37, nodes: any[] = null): number {
+    public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let score: number = 0;
 
         if (pairs.length != seq.length) {
@@ -22,19 +27,20 @@ export class RNAFoldBasic extends Folder {
         }
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
-            if (pairs[ii] > ii)
+            if (pairs[ii] > ii) {
                 score++;
+            }
         }
 
         return score;
     }
 
     /*override*/
-    public fold_sequence(seq: any[], second_best: any[], desired_pairs: string = null, temp: number = 37): any[] {
+    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let n: number = seq.length;
-        let pairs: any[] = new Array(n);
-        let dp_array: any[] = new Array(n * n);
-        let trace_array: any[] = new Array(n * n);
+        let pairs: number[] = new Array(n);
+        let dp_array: number[] = new Array(n * n);
+        let trace_array: number[] = new Array(n * n);
 
         for (let ii: number = 0; ii < n; ii++) {
             pairs[ii] = -1;
@@ -50,9 +56,7 @@ export class RNAFoldBasic extends Folder {
                     dp_array[index] = -1;
                 }
 
-
                 trace_array[index] = 0;
-
             }
         }
 
@@ -96,7 +100,6 @@ export class RNAFoldBasic extends Folder {
                     }
                 }
 
-
                 if (ii_walker < n - 1) {
 
                     current_val = dp_array[(ii_walker + 1) * n + jj_walker];
@@ -105,7 +108,6 @@ export class RNAFoldBasic extends Folder {
                         console.warn("Something is wrong with DP case 2", ii_walker, jj_walker);
                     }
 
-
                     if (current_val > max_val) {
                         max_val = current_val;
                         max_case = 2;
@@ -113,7 +115,6 @@ export class RNAFoldBasic extends Folder {
                 }
 
                 if (ii_walker + 1 < jj_walker) {
-
                     for (let kk_walker: number = ii_walker + 1; kk_walker < jj_walker; kk_walker++) {
 
                         if (dp_array[ii_walker * n + kk_walker] < 0 || dp_array[kk_walker * n + jj_walker] < 0) {
@@ -129,7 +130,6 @@ export class RNAFoldBasic extends Folder {
 
                         }
                     }
-
                 }
 
                 dp_array[ii_walker * n + jj_walker] = max_val;
@@ -145,8 +145,7 @@ export class RNAFoldBasic extends Folder {
         return pairs;
     }
 
-
-    private trace_pairs(trace_array: any[], pairs: any[], n: number, ii_start: number, jj_start: number): void {
+    private trace_pairs(trace_array: number[], pairs: number[], n: number, ii_start: number, jj_start: number): void {
         let dir: number = trace_array[ii_start * n + jj_start];
 
         if (dir == 1) {
