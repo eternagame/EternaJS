@@ -1,4 +1,3 @@
-import * as log from "loglevel";
 import {Sprite} from "pixi.js";
 import {GameObject} from "../flashbang/core/GameObject";
 import {Assert} from "../flashbang/util/Assert";
@@ -195,11 +194,6 @@ export class Application {
     }
 
     public StopRScript(): void {
-    }
-
-    public CompleteLevel(): void {
-        log.debug("TODO: Application.CompleteLevel");
-        // _rna_script.FinishLevel();
     }
 
     public NotifyClickUI(key: string): void {

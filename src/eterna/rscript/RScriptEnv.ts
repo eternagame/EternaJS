@@ -80,7 +80,7 @@ export class RScriptEnv extends ContainerObject {
     public GenerateStringRefName(): string {
         // Strings will be referenced via $$STRING_REF:ID_HERE
         ++this._string_count;
-        return "$$STRING_REF:" + this._string_count.toString();
+       return `$$STRING_REF:${this._string_count}`;
     }
 
     public GetStringRef(ref: string): string {
