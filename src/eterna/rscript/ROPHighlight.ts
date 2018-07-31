@@ -1,4 +1,4 @@
-import {Point} from "pixi.js";
+import {Point, Graphics} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
@@ -8,7 +8,6 @@ import {ConstraintBox} from "../ui/ConstraintBox";
 import {ColorUtil} from "../util/ColorUtil";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
-import Graphics = PIXI.Graphics;
 
 export enum ROPHighlightMode {
     RNA = "RNA",
