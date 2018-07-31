@@ -192,7 +192,7 @@ export class ROPTextbox extends RScriptOp {
     /*override*/
     protected ParseArgument(arg: string, i: number): void {
         let rx: RegExp = /^([^+-]*)((?:\+|-).+)$/g;
-        let regResult: any[] = null;
+        let regResult: RegExpExecArray = null;
         switch (i) {
         case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
             if (this._show && (this._mode == ROPTextboxMode.TEXTBOX_NUCLEOTIDE || this._mode == ROPTextboxMode.TEXTBOX_LOCATION)) {
@@ -295,7 +295,7 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == ROPTextboxMode.ARROW_LOCATION) {
                 this._parent_id = this._env.GetStringRef(arg);
             } else if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._fillColor = ColorUtil.fromString(this._env.GetStringRef(arg));
+                this._fillColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             } else if (this._mode == ROPTextboxMode.TEXTBOX_LOCATION) {
                 this._fixedSize = ROPTextbox.parseBool(arg);
             } else if (this._mode == ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
@@ -304,9 +304,9 @@ export class ROPTextbox extends RScriptOp {
             break;
         case 8:
             if (this._mode == ROPTextboxMode.ARROW_LOCATION) {
-                this._fillColor = ColorUtil.fromString(this._env.GetStringRef(arg));
+                this._fillColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             } else if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._outlineColor = ColorUtil.fromString(this._env.GetStringRef(arg));
+                this._outlineColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             } else if (this._mode == ROPTextboxMode.TEXTBOX_LOCATION) {
                 this._forceTopmost = ROPTextbox.parseBool(arg);
             } else if (this._mode == ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
@@ -322,7 +322,7 @@ export class ROPTextbox extends RScriptOp {
                 this._x_offset_specified = true;
                 this._x_offset = Number(arg);
             } else {
-                this._outlineColor = ColorUtil.fromString(this._env.GetStringRef(arg));
+                this._outlineColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             }
             break;
 
