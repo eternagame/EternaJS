@@ -131,7 +131,7 @@ export class Bitmaps {
     public static readonly ImgLock: string = "assets/NOVA/Lock/lock_normal.png";
     public static readonly ImgLockSelect: string = "assets/NOVA/Lock/lock_selected.png";
     public static readonly ImgEteRNALogo: string = "assets/logo.png";
-    public static readonly ImgMaximize: string = "assets/Stamps/mastered.png";
+    public static readonly ImgMaximize: string = "assets/MaximizeButton.png";
     public static readonly ImgMenuBorder: string = "assets/menu-border.png";
     public static readonly NovaMenu: string = "assets/NOVA/menu_button.png";
     public static readonly ImgMenuDot: string = "assets/menudot.png";
