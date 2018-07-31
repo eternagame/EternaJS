@@ -49,7 +49,6 @@ import {MissionClearedPanel} from "./MissionClearedPanel";
 import {MissionIntroMode} from "./MissionIntroMode";
 import {PasteSequenceDialog} from "./PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
-import {PuzzleEvent} from "./PuzzleEvent";
 import {SubmitPoseDetails} from "./SubmitPoseDetails";
 import {SubmitPoseDialog} from "./SubmitPoseDialog";
 import {SubmittingDialog} from "./SubmittingDialog";
@@ -133,11 +132,6 @@ export class PoseEditMode extends GameMode {
 
         this._toolbar.pip_button.clicked.connect(() => {
             this.toggle_pip();
-            if (this._puzzle.get_puzzle_type() == PuzzleType.SWITCH_BASIC && this._waiting_for_input) {
-                let state_dict: Map<any, any> = new Map();
-                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.PIP);
-                this._puzzle_events.process_events(state_dict);
-            }
         });
 
         this._toolbar.puzzleStateToggle.stateChanged.connect((targetIdx) => this.change_target(targetIdx));
@@ -174,11 +168,6 @@ export class PoseEditMode extends GameMode {
         this._constraint_boxes = [];
         this._constraintsLayer = new Container();
         this._uiLayer.addChild(this._constraintsLayer);
-
-        /// Puzzle event must be at the top
-        this._puzzle_events = new PuzzleEvent();
-        this.addObject(this._puzzle_events, this._uiLayer);
-        // Application.instance.get_front_object_container().addObject(this._puzzle_events);
 
         // this._game_stamp = new GameBitmap(null);
         // this._game_stamp.visible = false;
@@ -258,12 +247,6 @@ export class PoseEditMode extends GameMode {
 
     public set_puzzle_state(newstate: PuzzleState): void {
         this._puz_state = newstate;
-
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC || this._puzzle.get_puzzle_type() == PuzzleType.CHALLENGE) {
-            let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_TRANSIT_TO, newstate);
-            this._puzzle_events.process_events(state_dict);
-        }
     }
 
     public set_puzzle_default_mode(default_mode: string): void {
@@ -341,12 +324,6 @@ export class PoseEditMode extends GameMode {
 
     public onPaletteTargetSelected(type: PaletteTargetType): void {
         let baseType: number = GetPaletteTargetBaseType(type);
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
-            let states: Map<any, any> = new Map();
-            states.set(PuzzleEvent.PUZEVENT_SET_PALLETE, baseType);
-            this._puzzle_events.process_events(states);
-        }
-
         this.set_poses_color(baseType);
         this.deselect_all_colorings();
     }
@@ -1055,8 +1032,7 @@ export class PoseEditMode extends GameMode {
     /*override*/
     public update(dt: number): void {
         // process queued asynchronous operations (folding)
-
-        let startTime: number = new Date().getTime();
+        const startTime = new Date().getTime();
         let elapsed: number = 0;
         while (this._op_queue.length > 0 && elapsed < 50) { // FIXME: arbitrary
             let op: PoseOp = this._op_queue.shift();
@@ -1348,14 +1324,6 @@ export class PoseEditMode extends GameMode {
     }
 
     private change_target(target_index: number): void {
-        if (this._puzzle.get_puzzle_type() == PuzzleType.SWITCH_BASIC && this._waiting_for_input) {
-            let state_dict: Map<any, any> = new Map();
-            if (target_index == 1) {
-                state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.SECOND);
-            }
-            this._puzzle_events.process_events(state_dict);
-        }
-
         this._current_target_index = target_index;
 
         if (this._target_conditions && this._target_conditions[this._current_target_index]) {
@@ -1480,12 +1448,6 @@ export class PoseEditMode extends GameMode {
     private set_to_native_mode(trigger_modechange_event: boolean = true): void {
         this._pose_state = PoseState.NATIVE;
 
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC && this._waiting_for_input && trigger_modechange_event) {
-            let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.NATIVE);
-            this._puzzle_events.process_events(state_dict);
-        }
-
         this._toolbar.target_button.toggled.value = false;
         this._toolbar.native_button.toggled.value = true;
         this._toolbar.target_button.hotkey(KeyCode.Space);
@@ -1499,12 +1461,6 @@ export class PoseEditMode extends GameMode {
 
     private set_to_target_mode(trigger_modechange_event: boolean = true): void {
         this._pose_state = PoseState.TARGET;
-
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC && this._waiting_for_input && trigger_modechange_event) {
-            let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_MODE_CHANGE, PoseState.TARGET);
-            this._puzzle_events.process_events(state_dict);
-        }
 
         this._toolbar.target_button.toggled.value = true;
         this._toolbar.native_button.toggled.value = false;
@@ -2070,10 +2026,6 @@ export class PoseEditMode extends GameMode {
     }
 
     private start_countdown(): void {
-        if (this._puzzle_events.is_event_running()) {
-            return;
-        }
-
         this._is_playing = false;
 
         const constraints: string[] = this._puzzle.curConstraints;
@@ -3452,13 +3404,6 @@ export class PoseEditMode extends GameMode {
 
         let is_there_temp_constraints: boolean = (this._puzzle.get_temporary_constraints() != null);
 
-        let state_dict: Map<any, any> = new Map();
-        if (constraints_satisfied && is_there_temp_constraints) {
-            state_dict.set(PuzzleEvent.PUZEVENT_TEMP_CLEARED, true);
-        }
-
-        this._puzzle_events.process_events(state_dict);
-
         if (constraints_satisfied && !is_there_temp_constraints) {
             if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL && this._puz_state == PuzzleState.GAME) {
                 this.submit_current_pose();
@@ -3988,18 +3933,6 @@ export class PoseEditMode extends GameMode {
                 });
             }
         }
-
-        // FIXME: reinstantiating this horror, which I just discovered
-        //        is related to the old Tutorial 5.
-        //        Remove the code after the new tutorials are launched.
-        // JEEFIX : WHAT THE HELL IS THIS?!
-        // Need to change later
-        let seq: number[] = this._poses[0].get_sequence();
-        if (seq[4] == 3 && seq[9] != 3) {
-            let state_dict: Map<any, any> = new Map();
-            state_dict.set(PuzzleEvent.PUZEVENT_ON_POSE_CHANGE, true);
-            this._puzzle_events.process_events(state_dict);
-        }
     }
 
     private get_current_undo_block(target_index: number = -1): UndoBlock {
@@ -4218,8 +4151,7 @@ export class PoseEditMode extends GameMode {
     private _docked_spec_box: SpecBox;
     /// Exit button
     private _exit_button: GameButton;
-    /// Puzzle Event
-    private _puzzle_events: PuzzleEvent;
+
     private _constraints_head: number = 0;
     private _constraints_foot: number = 0;
     private _constraints_top: number = 0;
