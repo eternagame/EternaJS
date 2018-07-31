@@ -86,7 +86,9 @@ export abstract class RScriptOp {
             let storeStr: string = arg.slice(idx + 1, matchIdx);
             let key: string = this._env.GenerateStringRefName();
             this._env.StoreVar(key, storeStr, null);
-            arg = arg.replace(refStr, key);
+            // TSC: string.replace is dropping the first $ in the $$STRINGREF token... ???
+            // arg = arg.replace(refStr, key);
+            arg = arg.split(refStr).join(key);
         }
         return arg;
     }
