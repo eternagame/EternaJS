@@ -13,7 +13,7 @@ export class Eterna {
     public static player_id: number = 0;
     public static player_name: string = "Anonymous";
     public static readonly is_dev_mode: boolean = true; // TODO: what does this mean?
-    public static readonly is_debug_mode: boolean = Boolean(process.env['DEBUG']);
+    public static readonly is_debug_mode: boolean = process.env['DEBUG'] == "true";
 
     public static client: GameClient;
     public static sound: SoundManager;
