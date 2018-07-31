@@ -110,11 +110,11 @@ export class ROPHighlight extends RScriptOp {
             if (this._mode == ROPHighlightMode.RNA) {
                 this._id = this._env.GetStringRef(arg);
             } else if (this._mode == ROPHighlightMode.UI) {
-                this._color = ColorUtil.fromString(this._env.GetStringRef(arg));
+                this._color = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             }
             break;
         case 3:
-            this._color = ColorUtil.fromString(this._env.GetStringRef(arg));
+            this._color = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             break;
         }
     }
