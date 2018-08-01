@@ -135,7 +135,6 @@ export class DisplayUtil {
     }
 
     private static readonly GET_BOUNDS_RELATIVE_MATRIX: Matrix = new Matrix();
-    private static readonly GET_BOUNDS_RELATIVE_RECT: Rectangle = new Rectangle();
 
     /**
      * Returns the bounds the given DisplayObject transformed to another DisplayObject's coordinate system.
@@ -151,13 +150,13 @@ export class DisplayUtil {
             let scaleX: number = disp.scale.x;
             let scaleY: number = disp.scale.y;
 
-            disp.getLocalBounds(DisplayUtil.GET_BOUNDS_RELATIVE_RECT);
+            disp.getLocalBounds(out);
 
             RectangleUtil.setTo(out,
-                disp.x - disp.pivot.x * scaleX,
-                disp.y - disp.pivot.y * scaleY,
-                DisplayUtil.GET_BOUNDS_RELATIVE_RECT.width * scaleX,
-                DisplayUtil.GET_BOUNDS_RELATIVE_RECT.height * scaleY);
+                disp.x + out.x - disp.pivot.x * scaleX,
+                disp.y + out.y - disp.pivot.y * scaleY,
+                out.width * scaleX,
+                out.height * scaleY);
 
             if (scaleX < 0) {
                 out.width *= -1;
@@ -299,9 +298,9 @@ export class DisplayUtil {
 
         disp.x = 0;
         disp.y = 0;
-        // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp.parent, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
+        let dispBounds = DisplayUtil.getBoundsRelative(disp, disp.parent, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         // should this be relative to self or parent?
-        let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
+        // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         switch (dispHAlign) {
         case Align.LEFT:
             x -= dispBounds.left;
