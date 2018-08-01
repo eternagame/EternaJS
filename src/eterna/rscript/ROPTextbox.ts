@@ -1,11 +1,14 @@
 import * as log from "loglevel";
+import {ExtendedTextStyle} from "pixi-multistyle-text";
 import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Vector2} from "../../flashbang/geom/Vector2";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
 import {FancyTextBalloon} from "../ui/FancyTextBalloon";
 import {ColorUtil} from "../util/ColorUtil";
+import {Fonts} from "../util/Fonts";
 import {ROPWait} from "./ROPWait";
 import {RScriptArrow} from "./RScriptArrow";
 import {RScriptEnv} from "./RScriptEnv";
@@ -49,14 +52,27 @@ export class ROPTextbox extends RScriptOp {
         }
 
         if (this._show && ROPTextbox.isTextbox(this._mode)) {
-            let textBox: FancyTextBalloon = new FancyTextBalloon(this._text, 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
+            let textBox = new FancyTextBalloon("", 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
+
+            let textStyle: ExtendedTextStyle = {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 13,
+                fill: 0xC0DCE7,
+
+                // TSC: wordWrap + letterSpacing is currently broken:
+                // https://github.com/tleunen/pixi-multistyle-text/issues/67
+                // letterSpacing: 1.0
+            };
+
             if (this._fixedSize) {
                 textBox.set_fixed_width(215);
-                textBox.get_game_text().style.wordWrap = true;
-                textBox.get_game_text().style.wordWrapWidth = 185;
+                textStyle.wordWrap = true;
+                textStyle.wordWrapWidth = 185;
             }
+
             // textBox.use_html(true);
-            textBox.set_fancy_text(this._text, 13, 0xC0DCE7, "Arial", false, 1.0);
+            textBox.set_styled_text(new StyledTextBuilder(textStyle).append(this._text));
+
             if (this._title.length > 0) {
                 // TODO: Fix the title bar so that it does not overlap with text.
                 textBox.set_title(this._title);
