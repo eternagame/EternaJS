@@ -5,6 +5,7 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Vector2} from "../../flashbang/geom/Vector2";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {MathUtil} from "../../flashbang/util/MathUtil";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
 import {FancyTextBalloon} from "../ui/FancyTextBalloon";
@@ -179,7 +180,7 @@ export class ROPTextbox extends RScriptOp {
                 }
             }
 
-            newArrow.display.rotation = this._arrowRotation;
+            newArrow.rotation = this._arrowRotation;
             newArrow.baseLength = this._arrowLength;
             newArrow.redrawIfDirty();
 

@@ -1,5 +1,6 @@
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Graphics} from "pixi.js";
+import {MathUtil} from "../../flashbang/util/MathUtil";
 import {GraphicsUtil} from "../util/GraphicsUtil";
 
 export class RScriptArrow extends SceneObject {
@@ -20,6 +21,14 @@ export class RScriptArrow extends SceneObject {
     public get baseLength(): number { return this._baseLength; }
     public get outlineColor(): number { return this._outlineColor; }
     public get fillColor(): number { return this._fillColor; }
+
+    public get rotation(): number {
+        return MathUtil.rad2Deg * this.display.rotation;
+    }
+
+    public set rotation(degrees: number) {
+        this.display.rotation = MathUtil.deg2Rad * degrees;
+    }
 
     public redrawIfDirty(): void {
         if (this._needsRedraw) {
