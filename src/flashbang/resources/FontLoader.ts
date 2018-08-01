@@ -10,7 +10,7 @@ export class FontLoader {
             WebFont.load({
                 custom: {
                     families: [fontFamily],
-                    urls: [cssURL]
+                    urls: cssURL ? [cssURL] : undefined
                 },
                 fontactive: (familyName, fvd) => resolve(),
                 fontinactive: (familyName, fvd) => reject(`Font load failure [css=${cssURL}, family=${familyName}]`)
