@@ -11,5 +11,17 @@
     <div id="overlay"></div>
 </div>
 <script src="./main.js"></script>
+<script>
+    // Handle ?puzzle=[puzzle_id] URL param
+    let params = new URLSearchParams(window.location.search);
+    if (params.has("puzzle")) {
+        var puzid = Number(params.get("puzzle"));
+    }
+
+    window.app = new EternaApp({
+        puzzleID: puzid,
+    });
+    app.run();
+</script>
 </body>
 </html>
