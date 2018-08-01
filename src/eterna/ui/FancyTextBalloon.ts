@@ -1,7 +1,6 @@
 import {Point} from "pixi.js";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {Vector2} from "../../flashbang/geom/Vector2";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Bitmaps} from "../resources/Bitmaps";
 import {RScriptArrow} from "../rscript/RScriptArrow";
 import {FancyGamePanel} from "./FancyGamePanel";
@@ -33,6 +32,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         this._panel = this._show_outline ?
             new FancyGamePanel(2, this._balloon_alpha, this._balloon_color, this._outline_color, this._outline_alpha) :
             new FancyGamePanel(0, this._balloon_alpha, this._balloon_color);
+        this._panel.set_size(this.balloon_width(), this.balloon_height());
         this.addObject(this._panel, this.container, 0);
 
         this._button.up(Bitmaps.NovaNext)
@@ -44,6 +44,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     public set_fixed_width(in_width: number): void {
         this._fixed_width = in_width;
         this._has_fixed_width = true;
+        this._panel.set_size(this.balloon_width(), this.balloon_height());
     }
 
     /*override*/
@@ -60,17 +61,6 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     public set_title(title: string): void {
         this._panel.set_panel_title(title);
         this._hasTitle = title != null;
-    }
-
-    public set_fancy_text(text: string, fontsize: number = 15, font_color: number = 0xFFFFFF, font_name: string = null, bold: boolean = false, letter_space: Object = 0): void {
-        new StyledTextBuilder({
-            fontFamily: font_name,
-            fontSize: fontsize,
-            fill: font_color,
-            fontStyle: bold ? "bold" : undefined
-        }).append(text).apply(this._text);
-
-        this.updateView();
     }
 
     public set_button_text(text: string): void {

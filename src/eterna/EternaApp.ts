@@ -85,16 +85,16 @@ export class EternaApp extends FlashbangApp {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)])
             })
-            // .then(() => {
-            //     this._modeStack.unwindToMode(new TestMode());
-            // })
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${this._puzzleID}...`));
-                return PuzzleManager.instance.get_puzzle_by_nid(this._puzzleID);
+                this._modeStack.unwindToMode(new TestMode());
             })
-            .then((puzzle) => {
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
-            })
+            // .then(() => {
+            //     this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
+            //     return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+            // })
+            // .then((puzzle) => {
+            //     this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
+            // })
             .catch((err) => Eterna.onFatalError(err));
     }
 
