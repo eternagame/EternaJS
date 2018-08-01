@@ -1,12 +1,12 @@
 import {Graphics, Point, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Fonts} from "../util/Fonts";
+import {BaseGamePanel} from "./BaseGamePanel";
 
 export enum GamePanelType {
     NORMAL, INVISIBLE
 }
 
-export class GamePanel extends ContainerObject {
+export class GamePanel extends BaseGamePanel {
     public constructor(panel_type: GamePanelType = GamePanelType.NORMAL, alpha_val: number = 0.07, color: number = 0xffffff, border_alpha: number = 0.0, border_color: number = 0) {
         super();
 

@@ -4,14 +4,15 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Fonts} from "../util/Fonts";
+import {BaseGamePanel} from "./BaseGamePanel";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";
 
 export class TextBalloon extends ContainerObject {
-    public constructor(text: string = "", balloon_color: number = 0xFFFFFF, balloon_alpha: number = 0.07, border_color: number = 0, border_alpha: number = 0.0) {
+    public constructor(text: string = "", balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07, borderColor: number = 0, borderAlpha: number = 0) {
         super();
 
-        this._panel = new GamePanel(0, balloon_alpha, balloon_color, border_alpha, border_color);
+        this._panel = new GamePanel(0, balloonAlpha, balloonColor, borderAlpha, borderColor);
         this.addObject(this._panel, this.container);
 
         this._button = new GameButton().label("Next", 12);
@@ -25,6 +26,11 @@ export class TextBalloon extends ContainerObject {
 
     protected added(): void {
         super.added();
+
+        if (this._initialText != null) {
+            this.set_styled_text(this._initialText);
+        }
+
         this.updateView();
     }
 
@@ -43,13 +49,17 @@ export class TextBalloon extends ContainerObject {
     }
 
     public set_styled_text(builder: StyledTextBuilder): void {
-        if (this._text != null) {
-            this._text.destroy({children: true});
-        }
+        if (this.isLiveObject) {
+            if (this._text != null) {
+                this._text.destroy({children: true});
+            }
 
-        this._text = builder.build();
-        this.container.addChildAt(this._text, 1);
-        this.updateView();
+            this._text = builder.build();
+            this.container.addChildAt(this._text, 1);
+            this.updateView();
+        } else {
+            this._initialText = builder;
+        }
     }
 
     public set_text(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
@@ -72,7 +82,7 @@ export class TextBalloon extends ContainerObject {
 
     public balloon_width(): number {
         let whole_width: number = this._text != null ? this._text.width : 0;
-        if (this._button.display.visible) {
+        if (this._button != null && this._button.display.visible) {
             whole_width += TextBalloon.W_MARGIN;
             whole_width += DisplayUtil.width(this._button.display);
         }
@@ -84,7 +94,7 @@ export class TextBalloon extends ContainerObject {
         let whole_height: number = 0;
         whole_height += this._text != null ? this._text.height : 0;
 
-        if (this._button.display.visible) {
+        if (this._button != null && this._button.display.visible) {
             whole_height = Math.max(whole_height, DisplayUtil.height(this._button.display));
         }
 
@@ -131,14 +141,15 @@ export class TextBalloon extends ContainerObject {
         }
     }
 
+    protected _initialText: StyledTextBuilder;
+
     protected _button: GameButton;
 
-    protected _panel: GamePanel;
+    protected _panel: BaseGamePanel;
     protected _text: MultiStyleText;
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 
     protected static readonly W_MARGIN: number = 10;
     protected static readonly H_MARGIN: number = 10;
-
 }

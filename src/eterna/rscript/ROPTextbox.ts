@@ -4,6 +4,7 @@ import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {Vector2} from "../../flashbang/geom/Vector2";
+import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
 import {FancyTextBalloon} from "../ui/FancyTextBalloon";
@@ -52,7 +53,18 @@ export class ROPTextbox extends RScriptOp {
         }
 
         if (this._show && ROPTextbox.isTextbox(this._mode)) {
-            let textBox = new FancyTextBalloon("", 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
+            let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
+            let parent: ContainerObject = this._env;
+            if (this._initial_show) {
+                if (this._forceTopmost && false) {
+                    // parent = Application.instance.get_front_object_container();
+                    // Application.instance.get_front_object_container().add_object(textBox);
+                } else {
+                    this._env.addObject(textBox, this._env.container);
+                }
+            }
+
+            this._env.StoreVar(this._id, textBox, parent);
 
             let textStyle: ExtendedTextStyle = {
                 fontFamily: Fonts.ARIAL,
@@ -74,9 +86,9 @@ export class ROPTextbox extends RScriptOp {
             textBox.set_styled_text(new StyledTextBuilder(textStyle).append(this._text));
 
             if (this._title.length > 0) {
-                // TODO: Fix the title bar so that it does not overlap with text.
                 textBox.set_title(this._title);
             }
+
             if (this._mode == ROPTextboxMode.TEXTBOX_LOCATION) {
                 textBox.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
@@ -103,21 +115,10 @@ export class ROPTextbox extends RScriptOp {
             }
 
             if (this._button_text != "") {
-                textBox.set_button_text(this._button_text);
                 textBox.showButton(true).clicked.connect(() => this.OnClickEvent());
             } else {
                 textBox.showButton(false);
             }
-            if (this._initial_show) {
-                if (this._forceTopmost && false) {
-                    // par = Application.instance.get_front_object_container();
-                    // Application.instance.get_front_object_container().add_object(textBox);
-                } else {
-                    this._env.addObject(textBox, this._env.container);
-                }
-            }
-            let par: GameObject = this._env;
-            this._env.StoreVar(this._id, textBox, par);
         } else if (this._show) {
             let parent: FancyTextBalloon = null;
             if (this._has_parent) {
