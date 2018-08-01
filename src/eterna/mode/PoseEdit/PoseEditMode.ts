@@ -12,7 +12,6 @@ import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {AchievementManager} from "../../achievements/AchievementManager";
-import {Application} from "../../Application";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
@@ -23,7 +22,7 @@ import {Oligo, Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PoseOp} from "../../pose2D/PoseOp";
 import {Constraints, ConstraintType} from "../../puzzle/Constraints";
-import {BoostersData, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {BoostersData, PoseState, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {PuzzleManager} from "../../puzzle/PuzzleManager";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
@@ -61,18 +60,6 @@ export enum PuzzleState {
     COUNTDOWN = 0,
     GAME = 1,
     CLEARED = 2,
-}
-
-export enum PoseState {
-    NATIVE = 0,
-    FROZEN = 1,
-    TARGET = 2,
-
-    // TODO: move these to another enum;
-    // they are only used to communicate events to rscript
-    PIP = 3,
-    NONPIP = 4,
-    SECOND = 5,
 }
 
 export class PoseEditMode extends GameMode {
@@ -250,7 +237,7 @@ export class PoseEditMode extends GameMode {
         this._puz_state = newstate;
     }
 
-    public set_puzzle_default_mode(default_mode: string): void {
+    public set_puzzle_default_mode(default_mode: PoseState): void {
         this._puzzle.set_default_mode(default_mode);
     }
 
@@ -468,18 +455,6 @@ export class PoseEditMode extends GameMode {
         //     && this.root.loaderInfo.parameters.databrowser == "true") {
         //     this._is_databrowser_mode = true;
         // }
-
-        let default_mode: string = this._puzzle.default_mode();
-
-        if (this._is_databrowser_mode) {
-            this._pose_state = PoseState.NATIVE;
-        } else if (default_mode == "TARGET") {
-            this._pose_state = PoseState.TARGET;
-        } else if (default_mode == "FROZEN") {
-            this._pose_state = PoseState.FROZEN;
-        } else {
-            this._pose_state = PoseState.NATIVE;
-        }
 
         for (let ii = 0; ii < target_secstructs.length; ii++) {
             this._target_pairs.push(EPars.parenthesis_to_pair_array(target_secstructs[ii]));
@@ -706,9 +681,12 @@ export class PoseEditMode extends GameMode {
             this.pose_edit_by_target(0);
         }
 
-        // Setup RScript
+        // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
         this._rscript.Tick();
+
+        // RScript can set our initial poseState
+        this._pose_state = this._is_databrowser_mode ? PoseState.NATIVE : this._puzzle.default_mode();
     }
 
     public get_folder(): Folder {
