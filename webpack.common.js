@@ -40,13 +40,17 @@ module.exports = {
                 }
             },
             {
-                test: /\.(png|jpg|gif|css|mp3)$/,
+                test: /\.(png|jpg|gif|mp3|ttf)$/,
                 use: [
                   {
                     loader: 'file-loader',
                   }
                 ]
-              }
+            },
+            {
+                test: /\.css$/,
+                use: [ 'style-loader', 'css-loader' ]
+            }
         ],
     },
 

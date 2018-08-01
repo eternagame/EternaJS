@@ -16,11 +16,11 @@ export class GameClient {
             .then(rsp => rsp.text())
             .then(res => {
                 if (res == "NOT LOGGED IN") {
-                    return ["Anonymous", 0];
+                    return Promise.resolve<[string, number]>(["Anonymous", 0]);
                 } else {
                     try {
                         let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
-                        return [username, Number(uid)];
+                        return Promise.resolve<[string, number]>([username, Number(uid)]);
                     } catch (e) {
                         throw new Error('Authentication response malformed');
                     }

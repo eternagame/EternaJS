@@ -32,23 +32,18 @@ enum PuzzleID {
 
 interface EternaAppParameters {
     containerID?: string,
-    width?: Number,
-    height?: Number,
-    puzzleID?: Number, 
+    width?: number,
+    height?: number,
+    puzzleID?: number, 
 }
 
 export class EternaApp extends FlashbangApp {
-    private containerID:string = "eternaContainer";
-    private width:number = 1024;
-    private height:number = 768;
-    private puzzleID:number = PuzzleID.Tutorial1;
-
     public constructor({containerID, width, height, puzzleID}: EternaAppParameters) {
         super();
-        if (containerID) this.containerID = containerID;
-        if (width) this.width = width;
-        if (height) this.height = height;
-        if (puzzleID) this.puzzleID = puzzleID;
+        if (containerID) this._containerID = containerID;
+        if (width) this._width = width;
+        if (height) this._height = height;
+        if (puzzleID) this._puzzleID = puzzleID;
     }
 
     protected createPixi(): PIXI.Application {
@@ -57,11 +52,11 @@ export class EternaApp extends FlashbangApp {
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
         PIXI.settings.RENDER_OPTIONS.roundPixels = true;
-        return new PIXI.Application(this.width, this.height, {backgroundColor: 0x061A34});
+        return new PIXI.Application(this._width, this._height, {backgroundColor: 0x061A34});
     }
 
     protected get pixiParent(): HTMLElement {
-        return document.getElementById(this.containerID);
+        return document.getElementById(this._containerID);
     }
 
     /*override*/
@@ -80,8 +75,8 @@ export class EternaApp extends FlashbangApp {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${this.puzzleID}...`));
-                return PuzzleManager.instance.get_puzzle_by_nid(this.puzzleID);
+                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${this._puzzleID}...`));
+                return PuzzleManager.instance.get_puzzle_by_nid(this._puzzleID);
             })
             .then((puzzle) => {
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
@@ -131,4 +126,9 @@ export class EternaApp extends FlashbangApp {
                 }
             });
     }
+
+    private _containerID: string = "eternaContainer";
+    private _width: number = 1024;
+    private _height: number = 768;
+    private _puzzleID: number = PuzzleID.Tutorial1;
 }
