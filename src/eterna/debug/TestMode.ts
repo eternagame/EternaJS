@@ -14,9 +14,11 @@ export class TestMode extends AppMode {
 
         const text = "This is a game where you become an RNA scientist. By solving puzzles, you will build a virtual lab.  Then you will help invent new RNA molecules to combat infectious diseases like tuberculosis.  Ready?";
         const title = "Welcome to Eterna!";
-        const button_text = "Next";
 
-        let textBox: FancyTextBalloon = new FancyTextBalloon("", 0xC0DCE7, 0x122944, 1.0, true, 0xC0DCE7);
+        let textBox: FancyTextBalloon = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
+        textBox.display.position = new Point(Flashbang.stageWidth * 0.5, Flashbang.stageHeight * 0.5);
+        this.addObject(textBox, this.modeSprite);
+
         textBox.set_fixed_width(215);
 
         textBox.set_styled_text(new StyledTextBuilder({
@@ -28,13 +30,10 @@ export class TestMode extends AppMode {
         }).append(text));
 
         if (title.length > 0) {
-            // TODO: Fix the title bar so that it does not overlap with text.
             textBox.set_title(title);
         }
 
-        textBox.set_button_text(button_text);
-
-        textBox.display.position = new Point(Flashbang.stageWidth * 0.5, Flashbang.stageHeight * 0.5);
-        this.addObject(textBox, this.modeSprite);
+        // textBox.set_button_text(button_text);
+        textBox.showButton(true);
     }
 }
