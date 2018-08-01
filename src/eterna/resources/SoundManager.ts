@@ -1,4 +1,4 @@
-﻿import * as log from "loglevel";
+import * as log from "loglevel";
 import "pixi-sound";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EternaSettings} from "../settings/EternaSettings";

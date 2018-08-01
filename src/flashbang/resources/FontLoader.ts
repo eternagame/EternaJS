@@ -5,7 +5,7 @@ export class FontLoader {
      * Loads a font defined in a  @font-face element in a CSS file.
      * Return a Promise that will resolve when the given font is loaded
      */
-    public static loadFromCSS(cssURL: string, fontFamily: string): Promise<void> {
+    public static load(fontFamily: string, cssURL?: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             WebFont.load({
                 custom: {
