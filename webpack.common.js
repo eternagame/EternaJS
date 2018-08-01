@@ -1,11 +1,13 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
 'use strict';
 
-let HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
-let Dotenv = require('dotenv-webpack');
+const path = require('path');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-let packageJson = require('./package.json');
-let vendorDependencies = Object.keys(packageJson['dependencies']);
+const packageJson = require('./package.json');
+const vendorDependencies = Object.keys(packageJson['dependencies']);
 
 module.exports = {
     entry: {
@@ -20,19 +22,36 @@ module.exports = {
 
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js", ".json"],
+        alias: {
+            assets: path.resolve(__dirname, 'assets/'),
+        }
     },
 
     module: {
-        rules: [{
-            // Include ts, tsx, and js files.
-            test: /\.(tsx?)|(js)$/,
-            exclude: /node_modules/,
-            loader: 'babel-loader',
-            options: {
-                cacheDirectory: true
+        rules: [
+            {
+                // Include ts, tsx, and js files.
+                test: /\.(tsx?)|(js)$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                options: {
+                    cacheDirectory: true
+                }
+            },
+            {
+                test: /\.(png|jpg|gif|mp3|ttf)$/,
+                use: [
+                  {
+                    loader: 'file-loader',
+                  }
+                ]
+            },
+            {
+                test: /\.css$/,
+                use: [ 'style-loader', 'css-loader' ]
             }
-        }],
+        ],
     },
 
     // When importing a module whose path matches one of the following, just
@@ -70,6 +89,8 @@ module.exports = {
             // TODO: set safe=true when "allowEmptyValues" support is added: https://github.com/mrsteele/dotenv-webpack/pull/134
             safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
             systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-        })
+        }),
+
+        new CopyWebpackPlugin([ 'index.html' ])
     ]
 };

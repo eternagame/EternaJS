@@ -1,0 +1,28 @@
+#overlay {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 1;
+}
+
+#pixi-container {
+    position: relative;
+    z-index: 0;
+}
+
+@font-face {
+    font-family: OpenSans-Bold;
+    src: url(./Fonts/OpenSans-Bold.ttf);
+}
+@font-face {
+    font-family: OpenSans-Light;
+    src: url(./Fonts/OpenSans-Light.ttf);
+}
+@font-face {
+    font-family: OpenSans-Regular;
+    src: url(./Fonts/OpenSans-Regular.ttf);
+}
+@font-face {
+    font-family: OpenSans-SemiBold;
+    src: url(./Fonts/OpenSans-SemiBold.ttf);
+}

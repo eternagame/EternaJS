@@ -7,8 +7,6 @@
     "typecheck": "tsc --noEmit",
     "build:dev": "webpack --config webpack.dev.js",
     "build:prod": "webpack --config webpack.prod.js",
-    "postbuild:dev": "rsync -tr --delete assets index.html *.css dist/dev",
-    "postbuild:prod": "rsync -tr --delete assets index.html *.css dist/prod",
     "test": "jest --verbose"
   },
   "jest": {
@@ -54,10 +52,14 @@
     "babel-loader": "^8.0.0-beta.4",
     "babel-polyfill": "^6.26.0",
     "babel-preset-minify": "^0.4.3",
+    "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^1.0.0",
     "dotenv-webpack": "^1.5.7",
+    "file-loader": "^1.1.11",
     "hard-source-webpack-plugin": "0.10.2",
     "jest": "^23.4.2",
     "source-map-loader": "^0.2.3",
+    "style-loader": "^0.21.0",
     "ts-jest": "^23.0.1",
     "typescript": "^3.0.1",
     "webpack": "^4.16.3",

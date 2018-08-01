@@ -4,12 +4,24 @@
     <meta charset="utf-8">
     <title>EternaJS</title>
     <link rel="stylesheet" type="text/css" href="./styles.css" media="screen"/>
+    <style>
+        
+    </style>
 </head>
 <body>
-<div class="container">
-    <div id="eternaContainer"></div>
-    <div id="overlay"></div>
-</div>
+<div id="eterna-container"></div>
 <script src="./main.js"></script>
+<script>
+    // Handle ?puzzle=[puzzle_id] URL param
+    let params = new URLSearchParams(window.location.search);
+    if (params.has("puzzle")) {
+        var puzid = Number(params.get("puzzle"));
+    }
+
+    window.app = new EternaApp({
+        puzzleID: puzid,
+    });
+    app.run();
+</script>
 </body>
 </html>
