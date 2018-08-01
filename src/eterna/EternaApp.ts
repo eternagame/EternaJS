@@ -37,18 +37,18 @@ interface EternaAppParameters {
     containerID?: string,
     width?: number,
     height?: number,
-    puzzleID?: number, 
+    puzzleID?: number,
 }
 
 export class EternaApp extends FlashbangApp {
     public constructor({containerID = "eterna-container", width, height, puzzleID}: EternaAppParameters) {
         super();
-        
+
         let eternaContainer: HTMLElement = document.getElementById(containerID);
         eternaContainer.style.position = "relative";
-        
+
         let pixiContainer: HTMLElement = document.createElement('div');
-        pixiContainer.id = this._PIXI_CONTAINER_ID;
+        pixiContainer.id = EternaApp.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
 
         let overlay: HTMLElement = document.createElement('div');
@@ -70,7 +70,7 @@ export class EternaApp extends FlashbangApp {
     }
 
     protected get pixiParent(): HTMLElement {
-        return document.getElementById(this._PIXI_CONTAINER_ID);
+        return document.getElementById(EternaApp.PIXI_CONTAINER_ID);
     }
 
     /*override*/
@@ -141,8 +141,8 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    private readonly _PIXI_CONTAINER_ID = 'pixi-container';
-    private _width: number = 1024;
-    private _height: number = 768;
+    private static readonly PIXI_CONTAINER_ID = 'pixi-container';
+    private readonly _width: number = 1024;
+    private readonly _height: number = 768;
     private _puzzleID: number = PuzzleID.Tutorial1;
 }
