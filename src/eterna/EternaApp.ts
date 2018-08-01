@@ -30,19 +30,38 @@ enum PuzzleID {
     Tutorial1 = 6502927,                    // rscript
 }
 
+interface EternaAppParameters {
+    containerID?: string,
+    width?: Number,
+    height?: Number,
+    puzzleID?: Number, 
+}
+
 export class EternaApp extends FlashbangApp {
+    private containerID:string = "eternaContainer";
+    private width:number = 1024;
+    private height:number = 768;
+    private puzzleID:number = PuzzleID.Tutorial1;
+
+    public constructor({containerID, width, height, puzzleID}: EternaAppParameters) {
+        super();
+        if (containerID) this.containerID = containerID;
+        if (width) this.width = width;
+        if (height) this.height = height;
+        if (puzzleID) this.puzzleID = puzzleID;
+    }
+
     protected createPixi(): PIXI.Application {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
         PIXI.settings.RENDER_OPTIONS.roundPixels = true;
-
-        return new PIXI.Application(1024, 768, {backgroundColor: 0x061A34});
+        return new PIXI.Application(this.width, this.height, {backgroundColor: 0x061A34});
     }
 
     protected get pixiParent(): HTMLElement {
-        return document.getElementById("eternaContainer");
+        return document.getElementById(this.containerID);
     }
 
     /*override*/
@@ -50,13 +69,6 @@ export class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
         Eterna.sound = new SoundManager(Eterna.settings);
-
-        // Handle ?puzzle=[puzzle_id] URL param
-        let puzid = PuzzleID.Tutorial1;
-        let params: URLSearchParams = new URLSearchParams(window.location.search);
-        if (params.has("puzzle")) {
-            puzid = Number(params.get("puzzle"));
-        }
 
         Fonts.loadFonts()
             .then(() => this.authenticate())
@@ -68,8 +80,8 @@ export class EternaApp extends FlashbangApp {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${puzid}...`));
-                return PuzzleManager.instance.get_puzzle_by_nid(puzid);
+                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${this.puzzleID}...`));
+                return PuzzleManager.instance.get_puzzle_by_nid(this.puzzleID);
             })
             .then((puzzle) => {
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
