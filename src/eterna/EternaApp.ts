@@ -144,5 +144,5 @@ export class EternaApp extends FlashbangApp {
     private static readonly PIXI_CONTAINER_ID = 'pixi-container';
     private readonly _width: number = 1024;
     private readonly _height: number = 768;
-    private _puzzleID: number = PuzzleID.AandB_RO;
+    private readonly _puzzleID: number = PuzzleID.AandB_RO;
 }
