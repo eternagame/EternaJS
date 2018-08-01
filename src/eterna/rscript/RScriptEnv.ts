@@ -6,6 +6,7 @@ import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {TextBalloon} from "../ui/TextBalloon";
+import {DisplayObject, Container} from "pixi.js";
 
 export enum UIElementType {
     ACTION_MENU = "ACTION_MENU",
@@ -285,8 +286,12 @@ export class RScriptEnv extends ContainerObject {
         }
 
         // Make sure it's removed
-        if (scriptVar.par && scriptVar.val instanceof GameObject) {
-            scriptVar.par.remove_object(scriptVar.val);
+        if (scriptVar.val instanceof GameObject) {
+            scriptVar.val.destroySelf();
+        } else if (scriptVar.val instanceof Container) {
+            scriptVar.val.destroy({children: true});
+        } else if (scriptVar.val instanceof DisplayObject) {
+            scriptVar.val.destroy();
         }
 
         if (actualDelete) {
