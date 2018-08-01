@@ -1,4 +1,4 @@
-﻿import * as log from "loglevel";
+import * as log from "loglevel";
 
 type JSONData = any;
 
@@ -11,8 +11,21 @@ export class GameClient {
     /// ACCOUNT
 
     /** Authenticates the logged-in player. */
-    public authenticate(): Promise<JSONData> {
-        return this.get("/eterna_authenticate.php").then(rsp => rsp.json());
+    public authenticate(): Promise<[string, number]> {
+        return this.get("/eterna_authenticate.php")
+            .then(rsp => rsp.text())
+            .then(res => {
+                if (res == "NOT LOGGED IN") {
+                    return ["Anonymous", 0];
+                } else {
+                    try {
+                        let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
+                        return [username, Number(uid)];
+                    } catch (e) {
+                        throw new Error('Authentication response malformed');
+                    }
+                }
+            });
     }
 
     /** Logs the player in. Resolves with the player's UID if successful. */
