@@ -18,6 +18,9 @@ import {EternaSettings} from "./settings/EternaSettings";
 import {Fonts} from "./util/Fonts";
 import {SoundManager} from "./resources/SoundManager";
 
+// css-loader will pick up on this and embed our stylesheet
+import "assets/styles.css";
+
 enum PuzzleID {
     FunAndEasy = 4350940,
     TryptophanASameState = 8787266,
@@ -38,9 +41,20 @@ interface EternaAppParameters {
 }
 
 export class EternaApp extends FlashbangApp {
-    public constructor({containerID, width, height, puzzleID}: EternaAppParameters) {
+    public constructor({containerID = "eterna-container", width, height, puzzleID}: EternaAppParameters) {
         super();
-        if (containerID) this._containerID = containerID;
+        
+        let eternaContainer: HTMLElement = document.getElementById(containerID);
+        eternaContainer.style.position = "relative";
+        
+        let pixiContainer: HTMLElement = document.createElement('div');
+        pixiContainer.id = this._PIXI_CONTAINER_ID;
+        eternaContainer.appendChild(pixiContainer);
+
+        let overlay: HTMLElement = document.createElement('div');
+        overlay.id = Eterna.OVERLAY_DIV_ID;
+        eternaContainer.appendChild(overlay);
+
         if (width) this._width = width;
         if (height) this._height = height;
         if (puzzleID) this._puzzleID = puzzleID;
@@ -56,7 +70,7 @@ export class EternaApp extends FlashbangApp {
     }
 
     protected get pixiParent(): HTMLElement {
-        return document.getElementById(this._containerID);
+        return document.getElementById(this._PIXI_CONTAINER_ID);
     }
 
     /*override*/
@@ -127,7 +141,7 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    private _containerID: string = "eternaContainer";
+    private readonly _PIXI_CONTAINER_ID = 'pixi-container';
     private _width: number = 1024;
     private _height: number = 768;
     private _puzzleID: number = PuzzleID.Tutorial1;

@@ -3,7 +3,6 @@ import * as log from "loglevel";
 import {TextStyle} from "pixi.js";
 import {FontLoader} from "../../flashbang/resources/FontLoader";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
-import "assets/Fonts/fonts.css";
 
 export class Fonts {
     public static readonly ARIAL: string = "Arial";
