@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm -rf node_modules/.cache",
     "typecheck": "tsc --noEmit",
     "build:dev": "webpack --config webpack.dev.js",
     "build:prod": "webpack --config webpack.prod.js",
