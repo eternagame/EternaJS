@@ -59,7 +59,7 @@ export class EternaApp extends FlashbangApp {
         }
 
         Fonts.loadFonts()
-            .then(() => this.maybeDoDebugLogin())
+            .then(() => this.authenticate())
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)])
@@ -81,26 +81,32 @@ export class EternaApp extends FlashbangApp {
         Eterna.onFatalError(err);
     }
 
-    private maybeDoDebugLogin(): Promise<void> {
+    private authenticate(): Promise<void> {
         if (!Eterna.is_debug_mode) {
-            return Promise.resolve();
-        }
+            return Eterna.client.authenticate()
+                .then(([username, uid]) => {
+                    log.debug(`Authenticated as [name=${username}, uid=${uid}]`);
+                    Eterna.set_player(username, uid);
+                });
+        } else {
+            let playerID = process.env['DEBUG_PLAYER_ID'];
+            // If no player is specified, ensure that no user is authenticated,
+            // allowing for testing as a nonauthenticated user
+            if (playerID.length == 0) {
+                return Eterna.client.logout()
+                    .then(() => {})
+                    .catch(err => {
+                        log.debug(`Logout error: ${err}`);
+                    })
+            }
 
-        let playerID = process.env['DEBUG_PLAYER_ID'];
-        if (playerID.length == 0) {
-            return Eterna.client.logout()
-                .then(() => {})
-                .catch(err => {
-                    log.debug(`Logout error: ${err}`);
-                })
+            let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            log.debug(`Logging in ${playerID}...`);
+            return Eterna.client.login(playerID, playerPassword).then((uid) => {
+                log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
+                Eterna.set_player(playerID, uid);
+            });
         }
-
-        let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
-        log.debug(`Logging in ${playerID}...`);
-        return Eterna.client.login(playerID, playerPassword).then((uid) => {
-            log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-            Eterna.set_player(playerID, uid);
-        });
     }
 
     private initFoldingEngines(): Promise<void> {
