@@ -196,6 +196,10 @@ export class PoseEditMode extends GameMode {
         return this._toolbar;
     }
 
+    public get constraintsLayer(): Container {
+        return this._constraintsLayer;
+    }
+
     protected showPasteSequenceDialog(): void {
         this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
             if (sequence != null) {
