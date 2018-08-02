@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {Container, DisplayObject} from "pixi.js";
 import {Assert} from "../util/Assert";
 import {GameObjectBase} from "./GameObjectBase";
@@ -213,7 +214,11 @@ export class GameObject extends GameObjectBase {
 
         if (this.display != null) {
             if (this.display instanceof Container) {
-                (this.display as Container).destroy({children: true});
+                try {
+                    (this.display as Container).destroy({children: true});
+                } catch (e) {
+                    log.warn("GameObject.display.destroy blew up", e);
+                }
             } else {
                 this.display.destroy();
             }
