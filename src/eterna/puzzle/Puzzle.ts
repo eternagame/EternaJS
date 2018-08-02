@@ -20,6 +20,18 @@ export enum PuzzleType {
     EXPERIMENTAL = "Experimental"
 }
 
+export enum PoseState {
+    NATIVE = "NATIVE",
+    FROZEN = "FROZEN",
+    TARGET = "TARGET",
+
+    // TODO: move these to another enum;
+    // they are only used to communicate events to rscript
+    PIP = "PIP",
+    NONPIP = "NONPIP",
+    SECOND = "SECOND",
+}
+
 export class Puzzle {
     public static is_aptamer_type(tc_type: string): boolean {
         return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
@@ -306,14 +318,14 @@ export class Puzzle {
     }
 
     public set_ui_specs(ui_spec: string[]): void {
-        this._default_mode = "";
+        this._defaultPoseState = null;
         this._use_modes = 0;
 
         for (let ii: number = 0; ii < ui_spec.length; ii++) {
             if (ui_spec[ii] == "NOMODES") {
                 this._use_modes = Puzzle.BOOL_FALSE;
             } else if (ui_spec[ii] == "STARTSTATE") {
-                this._default_mode = ui_spec[ii + 1];
+                this._defaultPoseState = <PoseState>(ui_spec[ii + 1].toUpperCase());
                 ii++;
             } else if (ui_spec[ii] == "NOTOOLS") {
                 this._use_tools = Puzzle.BOOL_FALSE;
@@ -516,20 +528,18 @@ export class Puzzle {
         return true;
     }
 
-    public default_mode(): string {
-        if (this._default_mode.length > 0) {
-            return this._default_mode;
-        }
-
-        if (this._puzzle_type != PuzzleType.BASIC) {
-            return "TARGET";
+    public default_mode(): PoseState {
+        if (this._defaultPoseState != null) {
+            return this._defaultPoseState;
+        } else if (this._puzzle_type != PuzzleType.BASIC) {
+            return PoseState.TARGET;
         } else {
-            return "FROZEN";
+            return PoseState.FROZEN;
         }
     }
 
-    public set_default_mode(default_mode: string): void {
-        this._default_mode = default_mode;
+    public set_default_mode(default_mode: PoseState): void {
+        this._defaultPoseState = default_mode;
     }
 
     public is_using_tails(): boolean {
@@ -604,7 +614,7 @@ export class Puzzle {
     private _folder: string;
     private _reward: number = 0;
     private _rscript_ops: string = "";
-    private _default_mode: string = "";
+    private _defaultPoseState: PoseState;
     private _use_tools: number = 0;
     private _use_pallete: number = 0;
     private _use_modes: number = 0;

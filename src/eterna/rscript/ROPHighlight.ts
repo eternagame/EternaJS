@@ -1,12 +1,11 @@
-import {Point, Graphics} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Graphics, Point} from "pixi.js";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {ColorUtil} from "../util/ColorUtil";
-import {RScriptEnv} from "./RScriptEnv";
+import {RScriptEnv, UIElementType} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
 
 export enum ROPHighlightMode {
@@ -54,7 +53,7 @@ export class ROPHighlight extends RScriptOp {
 
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
             let ret: any[] = this._env.GetUIElementFromId(this._ui_element);
-            let highlightParent: ContainerObject = this.GetUIElementReference(ret[1], ret[2]);
+            let highlightParent: any = this.GetUIElementReference(ret[1], ret[2]);
             let obj: any = ret[0];
 
             // Draw highlight around the UI element.
@@ -95,7 +94,7 @@ export class ROPHighlight extends RScriptOp {
                 if (this._mode == ROPHighlightMode.RNA) {
                     this._start_idx = Number(arg) - 1;
                 } else if (this._mode == ROPHighlightMode.UI) {
-                    this._ui_element = this._env.GetStringRef(arg);
+                    this._ui_element = this._env.GetStringRef(arg).toUpperCase();
                 }
             }
             break;
@@ -120,6 +119,10 @@ export class ROPHighlight extends RScriptOp {
     }
 
     private GetUIElementSize(obj: any, padding: Point, key: string): Point {
+        if (obj == null) {
+            return new Point(0, 0);
+        }
+
         let p: Point = new Point(obj.width + 2 * padding.x, obj.height + 2 * padding.y);
         switch (key.toUpperCase()) {
         case "OBJECTIVES":
@@ -197,22 +200,22 @@ export class ROPHighlight extends RScriptOp {
         case "UGCOMPLETE":
         case "GCCOMPLETE":
         case "CGCOMPLETE":
-            return this._env.GetUIElement("PALETTE");
+            return this._env.GetUIElement(UIElementType.PALETTE);
         case "OBJECTIVES":
-            return this._env.GetUIElement("OBJECTIVE-", 0);
+            return this._env.GetUIElement(UIElementType.OBJECTIVE, 0);
         case "OBJECTIVE-":
-            return this._env.GetUIElement("OBJECTIVE-", altParam);
-        case "ACTION_MENU":
-        case "SWAP":
-        case "TOGGLENATURAL":
-        case "TOGGLETARGET":
-        case "ZOOMIN":
-        case "ZOOMOUT":
-        case "UNDO":
-        case "REDO":
-        case "PIP":
-        case "SWITCH":
-            return this._env.GetUIElement(key);
+            return this._env.GetUIElement(UIElementType.OBJECTIVE, altParam);
+        case UIElementType.ACTION_MENU:
+        case UIElementType.SWAP:
+        case UIElementType.TOGGLENATURAL:
+        case UIElementType.TOGGLETARGET:
+        case UIElementType.ZOOMIN:
+        case UIElementType.ZOOMOUT:
+        case UIElementType.UNDO:
+        case UIElementType.REDO:
+        case UIElementType.PIP:
+        case UIElementType.SWITCH:
+            return this._env.GetUIElement(key as UIElementType);
         }
         return this._env.GetUI();
     }

@@ -179,7 +179,7 @@ export class ROPTextbox extends RScriptOp {
                 }
             }
 
-            newArrow.display.rotation = this._arrowRotation;
+            newArrow.rotation = this._arrowRotation;
             newArrow.baseLength = this._arrowLength;
             newArrow.redrawIfDirty();
 
