@@ -201,6 +201,10 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         return false;
     }
 
+    public getTarget(type: PaletteTargetType): Rectangle {
+        return this._targets[type].hitboxes[0];
+    }
+
     public clickTarget(type: PaletteTargetType): void {
         let target: PaletteTarget = this._targets[type];
         if (!target.enabled) {

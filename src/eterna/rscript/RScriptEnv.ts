@@ -1,12 +1,13 @@
 import * as log from "loglevel";
+import {Container, DisplayObject} from "pixi.js";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {EPars} from "../EPars";
 import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
 import {Pose2D} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
+import {PaletteTargetType} from "../ui/NucleotidePalette";
 import {TextBalloon} from "../ui/TextBalloon";
-import {DisplayObject, Container} from "pixi.js";
 
 export enum UIElementType {
     ACTION_MENU = "ACTION_MENU",
@@ -116,7 +117,7 @@ export class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     // 	have been passed in.
-    public GetUIElementFromId(key: string): any[] {
+    public GetUIElementFromId(key: string): [any, string, number] {
         // Highlight UI.
         let obj: any;
 
@@ -136,9 +137,9 @@ export class RScriptEnv extends ContainerObject {
         let altParam: number = -1;
         if (splitId.length > 1) {
             altParam = Number(splitId[1]);
-            obj = this.GetUIElement(usable_id, altParam);
+            obj = this.GetUIElement(usable_id as UIElementType, altParam);
         } else {
-            obj = this.GetUIElement(usable_id);
+            obj = this.GetUIElement(usable_id as UIElementType);
         }
         return [obj, usable_id, altParam];
     }
@@ -195,79 +196,76 @@ export class RScriptEnv extends ContainerObject {
         // }
     }
 
-    public GetUIElement(key: string, i: number = -1): any {
-        log.debug("TODO: GetUIElement");
-        return undefined;
-        // let type: UIElementType = key.toUpperCase() as UIElementType;
-        // switch (type) {
-        // case UIElementType.ACTION_MENU:
-        //     return this.GetUI().get_action_menu();
-        // case UIElementType.OBJECTIVES:
-        //     return this.GetUI().get_constraint_container();
-        // case UIElementType.SHAPEOBJECTIVE:
-        //     return this.GetUI().get_shape_box(0);
-        // case UIElementType.OBJECTIVE:
-        //     return this.GetUI().get_constraint(i);
-        // case UIElementType.SWITCH:
-        //     return this.GetUI().get_switch_bar();
-        // case UIElementType.TOTALENERGY:
-        // case UIElementType.PRIMARY_ENERGY:
-        //     return this.GetRNA().get_primary_score_display();
-        // case UIElementType.SECONDARY_ENERGY:
-        //     return this.GetRNA().get_secondary_score_display();
-        // case UIElementType.PALETTE:
-        // case UIElementType.PALETTEALT:
-        //     return this.GetUI().toolbar.palette;
-        // case UIElementType.TOGGLENATURAL:
-        //     return this.GetUI().get_native_button();
-        // case UIElementType.TOGGLETARGET:
-        //     return this.GetUI().get_target_button();
-        // case UIElementType.TOGGLEBAR:
-        //     // NOTE: There is no longer a toggle bar...
-        //     return this.GetUI().get_native_button();
-        // case UIElementType.ZOOMIN:
-        //     return this.GetUI().get_zoom_in_button();
-        // case UIElementType.ZOOMOUT:
-        //     return this.GetUI().get_zoom_out_button();
-        // case UIElementType.ACTIONBAR:
-        //     // NOTE: There is no longer an action bar...
-        //     return this.GetUI().get_zoom_in_button();
-        // case UIElementType.RESET:
-        //     return this.GetUI().get_retry_button();
-        // case UIElementType.UNDO:
-        //     return this.GetUI().get_undo_button();
-        // case UIElementType.REDO:
-        //     return this.GetUI().get_redo_button();
-        // case UIElementType.SWAP:
-        //     return this.GetUI().get_swap_button();
-        // case UIElementType.PIP:
-        //     return this.GetUI().get_pip_button();
-        // case UIElementType.A:
-        //     return this.GetUI().toolbar.palette.a_box;
-        // case UIElementType.U:
-        //     return this.GetUI().toolbar.palette.u_box;
-        // case UIElementType.G:
-        //     return this.GetUI().toolbar.palette.g_box;
-        // case UIElementType.C:
-        //     return this.GetUI().toolbar.palette.c_box;
-        // case UIElementType.AU:
-        // case UIElementType.UA:
-        // case UIElementType.AUCOMPLETE:
-        // case UIElementType.UACOMPLETE:
-        //     return this.GetUI().toolbar.palette.au_box;
-        // case UIElementType.GU:
-        // case UIElementType.UG:
-        // case UIElementType.GUCOMPLETE:
-        // case UIElementType.UGCOMPLETE:
-        //     return this.GetUI().toolbar.palette.ug_box;
-        // case UIElementType.GC:
-        // case UIElementType.CG:
-        // case UIElementType.GCCOMPLETE:
-        // case UIElementType.CGCOMPLETE:
-        //     return this.GetUI().toolbar.palette.gc_box;
-        // default:
-        //     throw new Error("Invalid UI Element: " + key);
-        // }
+    public GetUIElement(type: UIElementType, i: number = -1): any {
+        switch (type) {
+        case UIElementType.ACTION_MENU:
+            return this.GetUI().toolbar.actionMenu;
+        case UIElementType.OBJECTIVES:
+            return this.GetUI().constraintsLayer;
+        case UIElementType.SHAPEOBJECTIVE:
+            return this.GetUI().get_shape_box(0);
+        case UIElementType.OBJECTIVE:
+            return this.GetUI().get_constraint(i);
+        case UIElementType.SWITCH:
+            return this.GetUI().toolbar.puzzleStateToggle;
+        case UIElementType.TOTALENERGY:
+        case UIElementType.PRIMARY_ENERGY:
+            return this.GetRNA().get_primary_score_display();
+        case UIElementType.SECONDARY_ENERGY:
+            return this.GetRNA().get_secondary_score_display();
+        case UIElementType.PALETTE:
+        case UIElementType.PALETTEALT:
+            return this.GetUI().toolbar.palette;
+        case UIElementType.TOGGLENATURAL:
+            return this.GetUI().toolbar.native_button;
+        case UIElementType.TOGGLETARGET:
+            return this.GetUI().toolbar.target_button;
+        case UIElementType.TOGGLEBAR:
+            // NOTE: There is no longer a toggle bar...
+            return this.GetUI().toolbar.native_button;
+        case UIElementType.ZOOMIN:
+            return this.GetUI().toolbar.zoom_in_button;
+        case UIElementType.ZOOMOUT:
+            return this.GetUI().toolbar.zoom_out_button;
+        case UIElementType.ACTIONBAR:
+            // NOTE: There is no longer an action bar...
+            return this.GetUI().toolbar.zoom_in_button;
+        case UIElementType.RESET:
+            return this.GetUI().toolbar.retry_button;
+        case UIElementType.UNDO:
+            return this.GetUI().toolbar.undo_button;
+        case UIElementType.REDO:
+            return this.GetUI().toolbar.redo_button;
+        case UIElementType.SWAP:
+            return this.GetUI().toolbar.pair_swap_button;
+        case UIElementType.PIP:
+            return this.GetUI().toolbar.pip_button;
+        case UIElementType.A:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.A);
+        case UIElementType.U:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.U);
+        case UIElementType.G:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.G);
+        case UIElementType.C:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.C);
+        case UIElementType.AU:
+        case UIElementType.UA:
+        case UIElementType.AUCOMPLETE:
+        case UIElementType.UACOMPLETE:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.AU);
+        case UIElementType.GU:
+        case UIElementType.UG:
+        case UIElementType.GUCOMPLETE:
+        case UIElementType.UGCOMPLETE:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.UG);
+        case UIElementType.GC:
+        case UIElementType.CG:
+        case UIElementType.GCCOMPLETE:
+        case UIElementType.CGCOMPLETE:
+            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.GC);
+        default:
+            throw new Error("Invalid UI Element: " + type);
+        }
     }
 
     public StoreVar(key: string, inValue: any, parent: any): void {
