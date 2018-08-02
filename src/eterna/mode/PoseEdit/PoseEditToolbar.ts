@@ -27,7 +27,7 @@ export class PoseEditToolbar extends ContainerObject {
 
     public puzzleStateToggle: ToggleBar;
 
-    public ll_menu: EternaMenu;
+    public actionMenu: EternaMenu;
     public boosters_button: GameButton;
     public undo_button: GameButton;
     public redo_button: GameButton;
@@ -75,9 +75,9 @@ export class PoseEditToolbar extends ContainerObject {
         const isExperimental = this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL;
 
         // MENU
-        this.ll_menu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.ll_menu.add_menu_button(new GameButton().allStates(Bitmaps.NovaMenu));
-        this.addObject(this.ll_menu, this._toolbarLayout);
+        this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
+        this.actionMenu.add_menu_button(new GameButton().allStates(Bitmaps.NovaMenu));
+        this.addObject(this.actionMenu, this._toolbarLayout);
 
         // SUBMIT BUTTON
         this.submit_button = new GameButton()
@@ -210,7 +210,7 @@ export class PoseEditToolbar extends ContainerObject {
             .label("Settings", 14)
             .scaleBitmapToLabel()
             .tooltip("Game options");
-        this.ll_menu.add_sub_menu_button(0, this.view_options_button);
+        this.actionMenu.add_sub_menu_button(0, this.view_options_button);
 
         this.view_solutions_button = new GameButton()
             .allStates(Bitmaps.ImgFile)
@@ -226,8 +226,8 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyS);
 
         if (isExperimental) {
-            this.ll_menu.add_sub_menu_button(0, this.view_solutions_button);
-            this.ll_menu.add_sub_menu_button(0, this.spec_button);
+            this.actionMenu.add_sub_menu_button(0, this.view_solutions_button);
+            this.actionMenu.add_sub_menu_button(0, this.spec_button);
         }
 
         this.retry_button = new GameButton()
@@ -235,7 +235,7 @@ export class PoseEditToolbar extends ContainerObject {
             .label("Reset", 14)
             .scaleBitmapToLabel()
             .tooltip("Reset and try this puzzle again.");
-        this.ll_menu.add_sub_menu_button(0, this.retry_button);
+        this.actionMenu.add_sub_menu_button(0, this.retry_button);
 
         this.copy_button = new GameButton()
             .allStates(Bitmaps.ImgCopy)
@@ -250,8 +250,8 @@ export class PoseEditToolbar extends ContainerObject {
             .tooltip("Type in a sequence");
 
         if (this._puzzle.get_puzzle_type() != PuzzleType.BASIC) {
-            this.ll_menu.add_sub_menu_button(0, this.copy_button);
-            this.ll_menu.add_sub_menu_button(0, this.paste_button);
+            this.actionMenu.add_sub_menu_button(0, this.copy_button);
+            this.actionMenu.add_sub_menu_button(0, this.paste_button);
         }
 
         this.hint_button = new GameButton()
@@ -288,7 +288,7 @@ export class PoseEditToolbar extends ContainerObject {
             //     .up(BitmapManager.NovaBoosters)
             //     .over(BitmapManager.NovaBoosters)
             //     .down(BitmapManager.NovaBoosters);
-            //     let idx: number = this.ll_menu.add_menu_button(this.boosters_button);
+            //     let idx: number = this.actionMenu.add_menu_button(this.boosters_button);
             //     for (let k = 0; k < obj.actions.length; k++) {
             //         obj.actions[k]['menu_index'] = k;
             //         let booster = new Booster(this, obj.actions[k], (me: Booster, midx: number = 0) => {
@@ -296,7 +296,7 @@ export class PoseEditToolbar extends ContainerObject {
             //             button.set_click_callback(() => {
             //                 me.on_run();
             //             });
-            //             this.ll_menu.add_sub_menu_button_at(idx, button, midx);
+            //             this.actionMenu.add_sub_menu_button_at(idx, button, midx);
             //             this.dyn_action_tools.push(button);
             //             this.layout_bars();
             //         });
@@ -431,7 +431,7 @@ export class PoseEditToolbar extends ContainerObject {
             this.puzzleStateToggle.set_disabled(disable);
         }
 
-        this.ll_menu.set_disabled(disable);
+        this.actionMenu.set_disabled(disable);
     }
 
     private readonly _puzzle: Puzzle;

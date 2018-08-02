@@ -1,3 +1,4 @@
+import {PoseState} from "../puzzle/Puzzle";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
 
@@ -31,7 +32,7 @@ export class ROPPre extends RScriptOp {
             this._type = ROPPreType.DISABLE_RNA_CHANGE;
         } else if ((regResult = modeRegex.exec(command)) != null) {
             this._type = ROPPreType.SET_DEFAULT_FOLD_MODE;
-            this._fold_mode = (regResult[1].toUpperCase() == "NATIVE" ? "NATIVE" : "TARGET");
+            this._fold_mode = (regResult[1].toUpperCase() == "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
         }
     }
 
@@ -95,7 +96,7 @@ export class ROPPre extends RScriptOp {
     private readonly _type: ROPPreType;
     private readonly _doVisible: boolean;
     private readonly _doDisable: boolean;
-    private readonly _fold_mode: string;
+    private readonly _fold_mode: PoseState;
     private _allArgs: string[];
 }
 
