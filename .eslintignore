@@ -1,0 +1,4 @@
+__tests__/
+*.d.ts
+/src/eterna/mode/PoseEdit/PoseEditMode.ts
+/src/eterna/pose2D
