@@ -277,7 +277,7 @@ export class RScriptEnv extends ContainerObject {
         return scriptVar != null ? scriptVar.val : null;
     }
 
-    public DeleteVar(key: string, actualDelete: boolean = true): void {
+    public DeleteVar(key: string): void {
         let scriptVar = this._mapping.get(key);
         if (scriptVar == null) {
             return;
@@ -292,9 +292,7 @@ export class RScriptEnv extends ContainerObject {
             scriptVar.val.destroy();
         }
 
-        if (actualDelete) {
-            this._mapping.delete(key);
-        }
+        this._mapping.delete(key);
     }
 
     public Exists(key: string): boolean {
