@@ -8,7 +8,7 @@ import {Eterna} from "../Eterna";
 import {ROPWait} from "../rscript/ROPWait";
 import {BaseAssets} from "./BaseAssets";
 import {BaseDrawFlags} from "./BaseDrawFlags";
-import {Pose2D} from "./Pose2D";
+import {Pose2D, RNAHighlightState} from "./Pose2D";
 
 export class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS: number = 2;
@@ -221,7 +221,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null) {
+    public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null) {
         this._zoom_level = zoom_level;
         this._off_x = off_x;
         this._off_y = off_y;
@@ -247,7 +247,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         return sprite;
     }
 
-    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null): void {
+    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
@@ -255,6 +255,11 @@ export class Base extends ContainerObject implements LateUpdatable {
         this._sat0.visible = false;
         this._sat1.visible = false;
         this._number.visible = false;
+
+        if (highlight_state) {
+            highlight_state = null;
+            log.warn("TODO: Base.redraw - highlight_state");
+        }
 
         if (this._is_dontcare) {
             drawFlags |= BaseDrawFlags.IS_DONTCARE;
@@ -639,6 +644,6 @@ export class Base extends ContainerObject implements LateUpdatable {
     private _off_y: number = 0;
     private _current_time: number = 0;
     private _drawFlags: number = 0;
-    private _highlight_state: any;
+    private _highlight_state: RNAHighlightState;
     private _numberBitmap: Texture;
 }
