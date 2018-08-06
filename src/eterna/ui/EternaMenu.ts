@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import {Point} from "pixi.js";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
@@ -8,7 +9,7 @@ export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
 }
 
-export class EternaMenu extends GamePanel {
+export class EternaMenu extends GamePanel implements Enableable {
     public constructor(menu_style: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
         super();
         this._menu_style = menu_style;
@@ -100,10 +101,14 @@ export class EternaMenu extends GamePanel {
         return this._menu_height;
     }
 
-    /*override*/
-    public set_disabled(disabled: boolean): void {
+    public get enabled(): boolean {
+        return this._enabled;
+    }
+
+    public set enabled(value: boolean) {
+        this._enabled = value;
         for (let menu of this._menus) {
-            menu.menuButton.enabled = !disabled;
+            menu.menuButton.enabled = this._enabled;
         }
     }
 
@@ -185,6 +190,7 @@ export class EternaMenu extends GamePanel {
 
     private readonly _menu_style: EternaMenuStyle;
 
+    private _enabled: boolean = true;
     private _menus: Menu[] = [];
     private _menu_width: number = 0;
     private _right_margin: number = 0;

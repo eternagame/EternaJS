@@ -580,7 +580,7 @@ export class PoseEditMode extends GameMode {
         //         this._scriptbar.set_disabled(false);
         //         this._run_button.set_click_callback(this.on_click_run);
         //     } else {
-        //         this._scriptbar.set_disabled(true);
+        //         this._scriptbar.enabled = false;
         //         this._run_button.set_click_callback(null);
         //     }
         // }
@@ -2568,7 +2568,7 @@ export class PoseEditMode extends GameMode {
         // } else if (action[0] == "ENABLE_TOOLS") {
         //     this.disable_tools(false);
         // } else if (action[0] == "DISABLE_PALLETE") {
-        //     this._palette.set_disabled(true);
+        //     this._palette.enabled = false;
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[ii].set_current_color(-1);
         //     }
@@ -2579,8 +2579,8 @@ export class PoseEditMode extends GameMode {
         //     this._native_button.set_disabled(false);
         //     this._target_button.set_disabled(false);
         // } else if (action[0] == "DISABLE_MODES") {
-        //     this._native_button.set_disabled(true);
-        //     this._target_button.set_disabled(true);
+        //     this._native_button.enabled = false;
+        //     this._target_button.enabled = false;
         // } else if (action[0] == "CENTER_POSE") {
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[0].set_zoom_level(0, true, true);
@@ -2588,7 +2588,7 @@ export class PoseEditMode extends GameMode {
         // } else if (action[0] == "ENABLE_PIP") {
         //     this._pip_button.set_disabled(false);
         // } else if (action[0] == "DISABLE_PIP") {
-        //     this._pip_button.set_disabled(true);
+        //     this._pip_button.enabled = false;
         // } else if (action[0] == "WAIT") {
         //     if (action[1] == "TRUE") {
         //         this._waiting_for_input = true;

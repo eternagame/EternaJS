@@ -2,6 +2,7 @@ import * as log from "loglevel";
 import {Container, DisplayObject} from "pixi.js";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {EPars} from "../EPars";
 import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
 import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
@@ -149,15 +150,15 @@ export class RScriptEnv extends ContainerObject {
             altParam = Math.floor(Number(splitId[1]));
             if (isNaN(altParam)) {
                 // If splitId[1] is malformed, altParam will be NaN.
-                // The Flash version of the game would interpret this as a 0,
+                // The Flash version of the game interprets this as a 0,
                 // and some tutorials rely on this behavior. (E.g. tutorial level 2 references "Objective-#0", rather
                 // than "Objective-0"). Ideally we'd throw an error here, but that would break puzzles in the wild.
                 log.warn(`Malformed UIElementID '${key}'`);
                 altParam = 0;
             }
-            uiElement = this.GetUIElement(usable_id as UIElementType, altParam);
+            uiElement = this.GetUIElement((usable_id.toUpperCase()) as UIElementType, altParam);
         } else {
-            uiElement = this.GetUIElement(usable_id as UIElementType);
+            uiElement = this.GetUIElement((usable_id.toUpperCase()) as UIElementType);
         }
         return [uiElement, usable_id, altParam];
     }
@@ -167,51 +168,41 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
-        if (elementID.toUpperCase() == "ENERGY") {
+        elementID = elementID.toUpperCase();
+
+        if (elementID == "ENERGY") {
             this.GetUI().set_display_score_texts(visible);
-            return;
-        } else if (elementID.toUpperCase() == "BASENUMBERING") {
+        } else if (elementID == "BASENUMBERING") {
             this.GetUI().set_show_numbering(visible);
-            return;
-        } else if (elementID.toUpperCase() == "TOTALENERGY") {
+        } else if (elementID == "TOTALENERGY") {
             this.GetUI().set_show_total_energy(visible);
-            return;
-        } else if (elementID.toUpperCase() == "HINT") {
+        } else if (elementID == "HINT") {
             // no-op
-            return;
-        } else if (elementID.toUpperCase() == "TOGGLEBAR") {
-            this.ShowHideUI("TOGGLETARGET", visible, disabled);
-            this.ShowHideUI("TOGGLENATURAL", visible, disabled);
-            return;
-        } else if (elementID.toUpperCase() == "SWITCH") {
+        } else if (elementID == "TOGGLEBAR") {
+            this.ShowHideUI(UIElementType.TOGGLETARGET, visible, disabled);
+            this.ShowHideUI(UIElementType.TOGGLENATURAL, visible, disabled);
+        } else if (elementID == "SWITCH") {
             this.GetUIElementFromId(elementID)[0].visible = visible;
-            return;
-        }
-
-        log.debug("TODO: ShowHideUI");
-
-        if (visible) {
-            if (elementID.toUpperCase() == "PALETTE") {
+        } else {
+            if (visible && elementID == "PALETTE") {
                 this.GetUI().toolbar.palette.set_override_default();
                 this.GetUI().toolbar.palette.change_default_mode();
-            } else if (elementID.toUpperCase() == "PALETTEALT") {
+            } else if (visible && elementID == "PALETTEALT") {
                 this.GetUI().toolbar.palette.set_override_no_pair();
                 this.GetUI().toolbar.palette.change_no_pair_mode();
             }
-        }
 
-        // let obj: GameObject = this.GetUIElementFromId(elementID)[0];
-        // obj.override_visible(true, visible);
-        // RScriptEnv.SetUIVisible(obj, visible);
-        // if (visible) {
-        //     if (obj.hasOwnProperty("set_disabled")) {
-        //         if (obj instanceof GameButton) {
-        //             GameButton(obj).override_disable(true, disabled);
-        //             GameButton(obj).set_disabled(disabled);
-        //         }
-        //         obj.set_disabled(disabled);
-        //     }
-        // }
+            let obj: any = this.GetUIElementFromId(elementID)[0];
+            if (obj instanceof DisplayObject) {
+                obj.visible = visible;
+            } else if (obj instanceof GameObject && obj.display != null) {
+                obj.display.visible = visible;
+            }
+
+            if ((<Enableable>(obj as any)).enabled !== undefined) {
+                (<Enableable>(obj as any)).enabled = visible && !disabled;
+            }
+        }
     }
 
     public GetUIElement(type: UIElementType, i: number = -1): any {
