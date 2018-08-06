@@ -4,7 +4,7 @@ import {GameObject} from "../../flashbang/core/GameObject";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {EPars} from "../EPars";
 import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
-import {Pose2D} from "../pose2D/Pose2D";
+import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PaletteTargetType} from "../ui/NucleotidePalette";
 import {TextBalloon} from "../ui/TextBalloon";
@@ -74,8 +74,12 @@ export class RScriptEnv extends ContainerObject {
             return;
         }
 
-        let textBox: TextBalloon = this.GetVar(id);
-        textBox.display.visible = isVisible;
+        let value = this.GetVar(id);
+        if (value instanceof TextBalloon) {
+            value.display.visible = isVisible;
+        } else {
+            log.warn(`'${id}' is not a Textbox`)
+        }
     }
 
     /** Generate string reference name. */
@@ -91,7 +95,13 @@ export class RScriptEnv extends ContainerObject {
         if (ref.indexOf("$$STRING_REF:") != 0) {
             return ref;
         } else {
-            return this.GetVar(ref);
+            let value = this.GetVar(ref);
+            if (typeof(value) === "string") {
+                return value;
+            } else {
+                log.warn(`'${ref}' is not a string`);
+                return ref;
+            }
         }
     }
 
@@ -276,11 +286,11 @@ export class RScriptEnv extends ContainerObject {
         }
     }
 
-    public StoreVar(key: string, inValue: any, parent: any): void {
+    public StoreVar(key: string, inValue: RScriptVarType, parent: any): void {
         this._mapping.set(key, {val: inValue, par: parent});
     }
 
-    public GetVar(key: string): any {
+    public GetVar(key: string): RScriptVarType {
         let scriptVar = this._mapping.get(key);
         return scriptVar != null ? scriptVar.val : null;
     }
@@ -314,7 +324,9 @@ export class RScriptEnv extends ContainerObject {
     private _string_count: number = 0;
 }
 
+export type RScriptVarType = GameObject | DisplayObject | RNAHighlightState | string;
+
 interface ScriptVar {
-    val: any;
+    val: RScriptVarType;
     par: any;
 }
