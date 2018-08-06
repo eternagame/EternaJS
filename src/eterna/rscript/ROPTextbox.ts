@@ -144,14 +144,12 @@ export class ROPTextbox extends RScriptOp {
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
                     Flashbang.stageHeight * this._y_pos + this._y_rel);
-                // newArrow.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
             } else if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 newArrow.display.position = this._env.GetRNA().get_base_xy(this._nuc_idx);
             }
 
             // Determine where we want to draw the tip of the arrow
             if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                // endPoint.x += 6;
                 newArrow.display.position.x += 6;
             }
 
