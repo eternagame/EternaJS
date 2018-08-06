@@ -357,7 +357,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     private RemoveTextbox(): void {
-        this._env.DeleteVar(this._id, false);
+        this._env.DeleteVar(this._id);
     }
 
     private RemoveArrow(inArr: GameObject): void {
