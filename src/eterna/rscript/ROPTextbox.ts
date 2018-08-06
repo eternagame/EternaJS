@@ -47,8 +47,12 @@ export class ROPTextbox extends RScriptOp {
             if (ROPTextbox.isTextbox(this._mode)) {
                 this.RemoveTextbox();
             } else {
-                let prevArr: GameObject = this._env.GetVar(this._id);
-                this.RemoveArrow(prevArr);
+                let prevArr = this._env.GetVar(this._id);
+                if (prevArr instanceof GameObject) {
+                    this.RemoveArrow(prevArr);
+                } else {
+                    log.warn(`${this._id} is not an arrow`);
+                }
             }
         }
 
@@ -122,8 +126,13 @@ export class ROPTextbox extends RScriptOp {
         } else if (this._show) {
             let parent: FancyTextBalloon = null;
             if (this._has_parent) {
-                parent = this._env.GetVar(this._parent_id);
-                if (!parent) {
+                let parentVal = this._env.GetVar(this._parent_id);
+                if (parentVal instanceof FancyTextBalloon) {
+                    parent = parentVal;
+                } else if (parentVal == null) {
+                    this._has_parent = false;
+                } else {
+                    log.warn(`${this._parent_id}: is not a FancyTextBalloon`);
                     this._has_parent = false;
                 }
             }
