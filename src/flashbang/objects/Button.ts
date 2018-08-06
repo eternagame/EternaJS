@@ -8,11 +8,12 @@ import {DelayTask} from "../tasks/DelayTask";
 import {SerialTask} from "../tasks/SerialTask";
 import {DisplayUtil} from "../util/DisplayUtil";
 import {ContainerObject} from "./ContainerObject";
+import {Enableable} from "./Enableable";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** A button base class. */
-export abstract class Button extends ContainerObject {
+export abstract class Button extends ContainerObject implements Enableable {
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
 
     /** Fired when the button is clicked */
