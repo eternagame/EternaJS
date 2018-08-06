@@ -1806,8 +1806,6 @@ export class PoseEditMode extends GameMode {
         .then(submissionResponse => {
             submittingRef.destroyObject();
 
-            this.trigger_ending();
-
             let data: any = submissionResponse['data'];
 
             this.showMissionClearedPanel(data);
@@ -1865,6 +1863,7 @@ export class PoseEditMode extends GameMode {
         let nextPuzzle: Puzzle = null;
         if (nextPuzzleData) {
             nextPuzzle = PuzzleManager.instance.parse_puzzle(nextPuzzleData);
+            log.info(`Loaded next puzzle [id=${nextPuzzle.get_node_id()}]`);
         }
 
         let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
@@ -4042,12 +4041,6 @@ export class PoseEditMode extends GameMode {
         // this._mission_cleared.set_animator(new GameAnimatorFader(1, 0, 0.3, true));
         this.disable_tools(false);
         this.set_show_menu(true);
-    }
-
-    private trigger_ending(): void {
-        log.debug("TODO: trigger_ending");
-        // let state_dict: Map<any, any> = new Map();
-        // this._puzzle_events.process_events(state_dict);
     }
 
     private clear_undo_stack(): void {
