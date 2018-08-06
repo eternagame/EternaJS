@@ -4,6 +4,7 @@ import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {ColorUtil} from "../util/ColorUtil";
 import {RScriptEnv, UIElementType} from "./RScriptEnv";
@@ -34,23 +35,23 @@ export class ROPHighlight extends RScriptOp {
     public exec(): void {
         // Remove highlight with ID.
         if (this._env.Exists(this._id)) {
-            let obj2: any = this._env.GetVar(this._id);
-            if (obj2 instanceof SceneObject) {
-                obj2.destroySelf();
-            } else {
-                this.RemoveHighlight(obj2);
+            let existing: any = this._env.GetVar(this._id);
+            if (existing instanceof SceneObject) {
+                existing.destroySelf();
+            } else if (existing instanceof RNAHighlightState) {
+                this.RemoveHighlight(existing);
             }
             this._env.DeleteVar(this._id);
         }
 
         if (this._op_visible && this._mode == ROPHighlightMode.RNA) {
             // Highlight nucleotides.
-            let res: any[] = [];
+            let res: number[] = [];
             for (let i: number = this._start_idx; i <= this._end_idx; ++i) {
                 res.push(i);
             }
-            let hl2: any = this._env.GetRNA().create_new_highlight(res);
-            this._env.StoreVar(this._id, hl2, this._env.GetRNA());
+            let rnaHighlight: RNAHighlightState = this._env.GetRNA().create_new_highlight(res);
+            this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
 
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementID);
@@ -224,7 +225,7 @@ export class ROPHighlight extends RScriptOp {
         return this._env.GetUI();
     }
 
-    private RemoveHighlight(obj: any): void {
+    private RemoveHighlight(obj: RNAHighlightState): void {
         this._env.GetRNA().remove_new_highlight(obj);
     }
 
