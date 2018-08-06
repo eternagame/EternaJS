@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {Graphics, Point} from "pixi.js";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
@@ -52,26 +53,29 @@ export class ROPHighlight extends RScriptOp {
             this._env.StoreVar(this._id, hl2, this._env.GetRNA());
 
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
-            let ret: any[] = this._env.GetUIElementFromId(this._ui_element);
-            let highlightParent: any = this.GetUIElementReference(ret[1], ret[2]);
-            let obj: any = ret[0];
+            const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementID);
+            const highlightParent: any = this.GetUIElementReference(elementID, altParam);
+            if (highlightParent == null) {
+                log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementID}']`);
+                return;
+            }
 
             // Draw highlight around the UI element.
             // Give it a bit of padding so the highlight isn't so tight.
-            let padding: Point = new Point(5, 5);
-            let offset: Point = ROPHighlight.GetUIElementOffset(ret[1]);
-            let realWidth: Point = this.GetUIElementSize(obj, padding, ret[1]);
+            const padding = new Point(5, 5);
+            const offset: Point = ROPHighlight.GetUIElementOffset(elementID);
+            const realWidth: Point = this.GetUIElementSize(uiElement, padding, elementID);
 
-            let new_x: number = (highlightParent == obj ? 0 : obj.x) - padding.x + offset.x;
-            let new_y: number = (highlightParent == obj ? 0 : obj.y) - padding.y + offset.y;
+            const new_x: number = (highlightParent == uiElement ? 0 : uiElement.x) - padding.x + offset.x;
+            const new_y: number = (highlightParent == uiElement ? 0 : uiElement.y) - padding.y + offset.y;
 
-            let highlight = new Graphics();
+            const highlight = new Graphics();
             highlight.alpha = 0;
             highlight.clear();
             highlight.lineStyle(5, this._color, 0.7);
             highlight.drawRoundedRect(new_x, new_y, realWidth.x, realWidth.y, 10);
 
-            let highlightObj = new SceneObject(highlight);
+            const highlightObj = new SceneObject(highlight);
             highlightObj.addObject(new RepeatingTask(() => {
                 return new SerialTask(
                     new AlphaTask(1, 0.5),
@@ -94,7 +98,7 @@ export class ROPHighlight extends RScriptOp {
                 if (this._mode == ROPHighlightMode.RNA) {
                     this._start_idx = Number(arg) - 1;
                 } else if (this._mode == ROPHighlightMode.UI) {
-                    this._ui_element = this._env.GetStringRef(arg).toUpperCase();
+                    this._uiElementID = this._env.GetStringRef(arg).toUpperCase();
                 }
             }
             break;
@@ -279,5 +283,5 @@ export class ROPHighlight extends RScriptOp {
     private _end_idx: number = -1;
     private _id: string = "";
     private _color: number = 0xffffff;
-    private _ui_element: string;
+    private _uiElementID: string;
 }
