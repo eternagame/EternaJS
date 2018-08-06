@@ -119,7 +119,7 @@ export class RScriptEnv extends ContainerObject {
     // 	have been passed in.
     public GetUIElementFromId(key: string): [any, string, number] {
         // Highlight UI.
-        let obj: any;
+        let uiElement: any;
 
         // Used UI Element ID.
         let splitId: string[] = key.split("-");
@@ -136,12 +136,20 @@ export class RScriptEnv extends ContainerObject {
 
         let altParam: number = -1;
         if (splitId.length > 1) {
-            altParam = Number(splitId[1]);
-            obj = this.GetUIElement(usable_id as UIElementType, altParam);
+            altParam = Math.floor(Number(splitId[1]));
+            if (isNaN(altParam)) {
+                // If splitId[1] is malformed, altParam will be NaN.
+                // The Flash version of the game would interpret this as a 0,
+                // and some tutorials rely on this behavior. (E.g. tutorial level 2 references "Objective-#0", rather
+                // than "Objective-0"). Ideally we'd throw an error here, but that would break puzzles in the wild.
+                log.warn(`Malformed UIElementID '${key}'`);
+                altParam = 0;
+            }
+            uiElement = this.GetUIElement(usable_id as UIElementType, altParam);
         } else {
-            obj = this.GetUIElement(usable_id as UIElementType);
+            uiElement = this.GetUIElement(usable_id as UIElementType);
         }
-        return [obj, usable_id, altParam];
+        return [uiElement, usable_id, altParam];
     }
 
     public GetTotalConstraints(): number {
