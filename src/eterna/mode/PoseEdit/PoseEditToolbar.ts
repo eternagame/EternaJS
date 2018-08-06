@@ -157,7 +157,7 @@ export class PoseEditToolbar extends ContainerObject {
                 this.palette.change_no_pair_mode();
             }
         } else {
-            this.palette.set_disabled(true);
+            this.palette.enabled = false;
         }
 
 
@@ -393,7 +393,7 @@ export class PoseEditToolbar extends ContainerObject {
     }
 
     public disable_tools(disable: boolean): void {
-        this.palette.set_disabled(disable);
+        this.palette.enabled = !disable;
         this.pair_swap_button.enabled = !disable;
         for (let k: number = 0; k < this.dyn_paint_tools.length; k++) {
             this.dyn_paint_tools[k].enabled = !disable;
@@ -428,10 +428,10 @@ export class PoseEditToolbar extends ContainerObject {
         this.pip_button.enabled = !disable;
 
         if (this.puzzleStateToggle != null) {
-            this.puzzleStateToggle.set_disabled(disable);
+            this.puzzleStateToggle.enabled = !disable;
         }
 
-        this.actionMenu.set_disabled(disable);
+        this.actionMenu.enabled = !disable;
     }
 
     private readonly _puzzle: Puzzle;

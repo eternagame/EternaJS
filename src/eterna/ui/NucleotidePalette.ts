@@ -4,6 +4,7 @@ import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
@@ -46,7 +47,7 @@ export function StringToPaletteTargetType(value: string): PaletteTargetType {
  * Nucleotide palette class. Handles the AUCG nucleotides options as well as the pairs.
  * Has the option to turn into a 'no pair' mode.
  */
-export class NucleotidePalette extends ContainerObject implements KeyboardListener {
+export class NucleotidePalette extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when a palette target is clicked */
     public readonly targetClicked: Signal<PaletteTargetType> = new Signal();
 
@@ -157,10 +158,13 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         this._targets[PaletteTargetType.GC].enabled = false;
     }
 
-    /*override*/
-    public set_disabled(is_disabled: boolean): void {
-        this.display.alpha = (is_disabled ? 0.5 : 1);
-        this._enabled = !is_disabled;
+    public get enabled(): boolean {
+        return this._enabled;
+    }
+
+    public set enabled(value: boolean) {
+        this.display.alpha = value ? 1 : 0.5;
+        this._enabled = value;
     }
 
     public get_bar_width(): number {
@@ -168,7 +172,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (!this._enabled) {
+        if (!this._enabled || !this.display.visible) {
             return false;
         }
 

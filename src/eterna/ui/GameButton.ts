@@ -96,6 +96,7 @@ export class GameButton extends Button implements KeyboardListener {
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
         if (this.enabled &&
+            this.display.visible &&
             e.type == KeyboardEventType.KEY_DOWN &&
             e.code == this._hotkey &&
             e.ctrlKey == this._hotkeyCtrl) {
