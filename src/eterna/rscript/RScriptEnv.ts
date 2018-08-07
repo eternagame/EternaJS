@@ -32,7 +32,7 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public SetTextboxVisible(id: string, isVisible: boolean): void {
-        if (id == "" || !this._mapping.hasOwnProperty("id")) {
+        if (id === "" || !this._mapping.hasOwnProperty("id")) {
             return;
         }
 
@@ -54,7 +54,7 @@ export class RScriptEnv extends ContainerObject {
     public GetStringRef(ref: string): string {
         // Check if it's an actual ref.
         // If it's not, return it back unchanged
-        if (ref.indexOf("$$STRING_REF:") != 0) {
+        if (ref.indexOf("$$STRING_REF:") !== 0) {
             return ref;
         } else {
             let value = this.GetVar(ref);
@@ -132,24 +132,24 @@ export class RScriptEnv extends ContainerObject {
     public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
         elementID = elementID.toUpperCase();
 
-        if (elementID == RScriptUIElementID.ENERGY) {
+        if (elementID === RScriptUIElementID.ENERGY) {
             this.GetUI().set_display_score_texts(visible);
-        } else if (elementID == RScriptUIElementID.BASENUMBERING) {
+        } else if (elementID === RScriptUIElementID.BASENUMBERING) {
             this.GetUI().set_show_numbering(visible);
-        } else if (elementID == RScriptUIElementID.TOTALENERGY) {
+        } else if (elementID === RScriptUIElementID.TOTALENERGY) {
             this.GetUI().set_show_total_energy(visible);
-        } else if (elementID == RScriptUIElementID.HINT) {
+        } else if (elementID === RScriptUIElementID.HINT) {
             // no-op
-        } else if (elementID == RScriptUIElementID.TOGGLEBAR) {
+        } else if (elementID === RScriptUIElementID.TOGGLEBAR) {
             this.ShowHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
             this.ShowHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
-        } else if (elementID == RScriptUIElementID.SWITCH) {
+        } else if (elementID === RScriptUIElementID.SWITCH) {
             this.GetUIElementFromId(elementID)[0].visible = visible;
         } else {
-            if (visible && elementID == RScriptUIElementID.PALETTE) {
+            if (visible && elementID === RScriptUIElementID.PALETTE) {
                 this.GetUI().toolbar.palette.set_override_default();
                 this.GetUI().toolbar.palette.change_default_mode();
-            } else if (visible && elementID == RScriptUIElementID.PALETTEALT) {
+            } else if (visible && elementID === RScriptUIElementID.PALETTEALT) {
                 this.GetUI().toolbar.palette.set_override_no_pair();
                 this.GetUI().toolbar.palette.change_no_pair_mode();
             }

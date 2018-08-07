@@ -26,13 +26,13 @@ export class ROPPre extends RScriptOp {
             this._type = ROPPreType.DISABLE_OBJECTIVES;
         } else if ((regResult = hideUIRegex.exec(command)) != null) {
             this._type = ROPPreType.DISABLE_UI_ELEMENT;
-            this._doVisible = (regResult[1].toUpperCase() != "HIDE");
-            this._doDisable = (regResult[1].toUpperCase() == "DISABLE");
+            this._doVisible = (regResult[1].toUpperCase() !== "HIDE");
+            this._doDisable = (regResult[1].toUpperCase() === "DISABLE");
         } else if ((regResult = disableRNAMod.exec(command))) {
             this._type = ROPPreType.DISABLE_RNA_CHANGE;
         } else if ((regResult = modeRegex.exec(command)) != null) {
             this._type = ROPPreType.SET_DEFAULT_FOLD_MODE;
-            this._fold_mode = (regResult[1].toUpperCase() == "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
+            this._fold_mode = (regResult[1].toUpperCase() === "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
         }
     }
 
@@ -62,21 +62,21 @@ export class ROPPre extends RScriptOp {
             break;
         case ROPPreType.DISABLE_UI_ELEMENT:
             for (let i: number = 0; i < this._allArgs.length; ++i) {
-                if (this._allArgs[i].toUpperCase() == "ENERGY") {
+                if (this._allArgs[i].toUpperCase() === "ENERGY") {
                     this._env.GetUI().rop_set_display_score_texts(this._doVisible);
                     continue;
                 }
-                if (this._allArgs[i].toUpperCase() == "BASENUMBERING") {
+                if (this._allArgs[i].toUpperCase() === "BASENUMBERING") {
                     this._env.GetUI().rop_set_show_numbering(this._doVisible);
                     continue;
                 }
-                if (this._allArgs[i].toUpperCase() == "TOTALENERGY") {
+                if (this._allArgs[i].toUpperCase() === "TOTALENERGY") {
                     this._env.GetUI().rop_set_show_total_energy(this._doVisible);
                     continue;
                 }
                 this._env.ShowHideUI(this._allArgs[i], this._doVisible, this._doDisable);
                 if (!this._doVisible) {
-                    if (this._allArgs[i].toUpperCase() == "OBJECTIVES") {
+                    if (this._allArgs[i].toUpperCase() === "OBJECTIVES") {
                         this._env.GetUI().set_show_constraints(false);
                     }
                 }

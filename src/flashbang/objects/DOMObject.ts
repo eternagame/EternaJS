@@ -87,7 +87,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
             apply = false;
             let thisName = element.nodeName.toUpperCase();
             for (let allowedName of elementNames) {
-                if (allowedName.toUpperCase() == thisName) {
+                if (allowedName.toUpperCase() === thisName) {
                     apply = true;
                     break;
                 }

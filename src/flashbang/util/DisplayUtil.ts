@@ -21,7 +21,7 @@ export class DisplayUtil {
     public static isAncestor(potentialAncestor: DisplayObject, potentialDescendent: DisplayObject): boolean {
         let cur = potentialDescendent.parent;
         while (cur != null) {
-            if (cur == potentialAncestor) {
+            if (cur === potentialAncestor) {
                 return true;
             }
             cur = cur.parent;
@@ -80,22 +80,22 @@ export class DisplayUtil {
             out = new Matrix();
         }
 
-        if (targetSpace == disp) {
+        if (targetSpace === disp) {
             return out;
-        } else if (targetSpace == disp.parent || (targetSpace == null && disp.parent == null)) {
+        } else if (targetSpace === disp.parent || (targetSpace == null && disp.parent == null)) {
             disp.localTransform.copy(out);
             return out;
-        } else if (targetSpace == null || targetSpace == DisplayUtil.base(disp)) {
+        } else if (targetSpace == null || targetSpace === DisplayUtil.base(disp)) {
             // targetCoordinateSpace 'null' represents the target space of the base object.
             // -> move up from this to base
             currentObject = disp;
-            while (currentObject != targetSpace) {
+            while (currentObject !== targetSpace) {
                 out.append(currentObject.localTransform);
                 currentObject = currentObject.parent;
             }
 
             return out;
-        } else if (targetSpace.parent == disp) {
+        } else if (targetSpace.parent === disp) {
             // optimization
             DisplayUtil.getTransformationMatrix(targetSpace, disp, out);
             out.invert();
@@ -110,12 +110,12 @@ export class DisplayUtil {
         // 2. move up from this to common parent
 
         currentObject = disp;
-        while (currentObject != commonParent) {
+        while (currentObject !== commonParent) {
             out.append(currentObject.localTransform);
             currentObject = currentObject.parent;
         }
 
-        if (commonParent == targetSpace) {
+        if (commonParent === targetSpace) {
             return out;
         }
 
@@ -123,7 +123,7 @@ export class DisplayUtil {
 
         DisplayUtil.GET_TRANSFORMATION_MATRIX.identity();
         currentObject = targetSpace;
-        while (currentObject != commonParent) {
+        while (currentObject !== commonParent) {
             DisplayUtil.GET_TRANSFORMATION_MATRIX.append(currentObject.localTransform);
             currentObject = currentObject.parent;
         }
@@ -145,9 +145,9 @@ export class DisplayUtil {
     public static getBoundsRelative(disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle = null): Rectangle {
         if (out == null) out = new Rectangle();
 
-        if (targetSpace == disp) {
+        if (targetSpace === disp) {
             disp.getLocalBounds(out);
-        } else if (targetSpace == disp.parent && !DisplayUtil.isRotated(disp)) {
+        } else if (targetSpace === disp.parent && !DisplayUtil.isRotated(disp)) {
             // optimization
             let scaleX: number = disp.scale.x;
             let scaleY: number = disp.scale.y;
@@ -339,7 +339,7 @@ export class DisplayUtil {
         }
 
         currentObject = object2;
-        while (currentObject && DisplayUtil.sAncestors.indexOf(currentObject) == -1) {
+        while (currentObject && DisplayUtil.sAncestors.indexOf(currentObject) === -1) {
             currentObject = currentObject.parent;
         }
 
@@ -353,7 +353,7 @@ export class DisplayUtil {
     }
 
     private static isRotated(disp: DisplayObject): boolean {
-        return disp.rotation != 0 || disp.skew.x != 0 || disp.skew.y != 0;
+        return disp.rotation !== 0 || disp.skew.x !== 0 || disp.skew.y !== 0;
     }
 
     /** The topmost object in the display tree the object is part of. */

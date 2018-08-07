@@ -29,7 +29,7 @@ export class Plot extends Container {
         this._upper_bounds = (maxvals != null ? maxvals.slice() : null);
 
         if (ghost_data != null) {
-            if (ghost_data.length != data.length) {
+            if (ghost_data.length !== data.length) {
                 throw new Error("Data lengths don't match");
             }
             this._ghost_data = ghost_data.slice();
@@ -57,8 +57,8 @@ export class Plot extends Container {
             return;
         }
 
-        if (this._num_bases == 0) {
-            if (this._data != null && this._data.length == 0) {
+        if (this._num_bases === 0) {
+            if (this._data != null && this._data.length === 0) {
                 return;
             }
             this._num_bases = this._data.length;
@@ -73,7 +73,7 @@ export class Plot extends Container {
         this._graphics.drawRect(0, 0, this._width, this._height);
         this._graphics.endFill();
 
-        if (this._type == PlotType.BAR) {
+        if (this._type === PlotType.BAR) {
             this._graphics.lineStyle(0, 0xFFFFFF);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let len: number = (this._data[ii] / this._upper_bounds[ii]) * this._height;
@@ -89,7 +89,7 @@ export class Plot extends Container {
                     this._graphics.drawRect(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 4.0, Plot.H_MARGIN + this._height - ghostlen, horizontal_space / 4.0, ghostlen);
                 }
             }
-        } else if (this._type == PlotType.LINE) {
+        } else if (this._type === PlotType.LINE) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let x_coord = Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0 + x;
@@ -106,7 +106,7 @@ export class Plot extends Container {
             this._graphics.lineStyle(2, 0x00AA00);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let hlen: number = (this._data[ii] / (this._upper_bounds[ii])) * (this._height - Plot.H_MARGIN);
-                if (ii == 0) {
+                if (ii === 0) {
                     this._graphics.moveTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, this._height - hlen);
                 } else {
                     this._graphics.lineTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, this._height - hlen);
@@ -117,14 +117,14 @@ export class Plot extends Container {
                 this._graphics.lineStyle(2, 0xAA0000);
                 for (let ii = 0; ii < this._ghost_data.length; ii++) {
                     let ghosthlen: number = (this._ghost_data[ii] / this._upper_bounds[ii]) * this._height;
-                    if (ii == 0) {
+                    if (ii === 0) {
                         this._graphics.moveTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, Plot.H_MARGIN + this._height - ghosthlen);
                     } else {
                         this._graphics.lineTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, Plot.H_MARGIN + this._height - ghosthlen);
                     }
                 }
             }
-        } else if (this._type == PlotType.SCATTER) {
+        } else if (this._type === PlotType.SCATTER) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 10; ii < this._num_bases; ii += 10) {
                 let x_coord = (ii / this._num_bases) * this._width + x;

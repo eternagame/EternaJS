@@ -4,21 +4,21 @@ export class PowerEaser {
     }
 
     public readonly easeIn = (from: number, to: number, dt: number, t: number): number => {
-        if (t == 0) {
+        if (t === 0) {
             return to;
         }
         return from + ((to - from) * Math.pow(dt / t, this._pow));
     };
 
     public readonly easeOut = (from: number, to: number, dt: number, t: number): number => {
-        if (t == 0) {
+        if (t === 0) {
             return to;
         }
         return from + ((to - from) * (1 - Math.pow(1 - dt / t, this._pow)));
     };
 
     public readonly easeInOut = (from: number, to: number, dt: number, t: number): number => {
-        if (t == 0) {
+        if (t === 0) {
             return to;
         }
 

@@ -32,7 +32,7 @@ export class BaseAssets {
         if (BaseAssets.isBaseType(base_type) && color_level < 0) {
             return BaseAssets.getBaseBitmaps(base_type).getBodyBitmap(zoom_level, flags);
 
-        } else if (base_type == EPars.RNABASE_LOCK) {
+        } else if (base_type === EPars.RNABASE_LOCK) {
             return BaseAssets.bitmap_for_size(BaseAssets._backbone_body_data, 0, zoom_level);
 
         } else if (color_level < 0) {
@@ -56,7 +56,7 @@ export class BaseAssets {
     }
 
     public static getBarcodeBitmap(zoomLevel: number, drawFlags: number): Texture | null {
-        if ((drawFlags & BaseDrawFlags.USE_BARCODE) != 0) {
+        if ((drawFlags & BaseDrawFlags.USE_BARCODE) !== 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
                 return BaseAssets.bitmap_for_size(BaseAssets._barcode_data, 0, zoomLevel);
             } else if (zoomLevel < Base.NUM_ZOOM_LEVELS * 2) {
@@ -88,9 +88,9 @@ export class BaseAssets {
     }
 
     public static getSatellite1Bitmap(zoom_level: number, st1_diff_degree: number, pair_type: number): Texture {
-        if (pair_type == -1 || pair_type == 2) {
+        if (pair_type === -1 || pair_type === 2) {
             return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Math.trunc(st1_diff_degree / 5), zoom_level);
-        } else if (pair_type == 1) {
+        } else if (pair_type === 1) {
             return BaseAssets.bitmap_for_size(BaseAssets._satellite_weaker_data, Math.trunc(st1_diff_degree / 5), zoom_level);
         } else {
             return BaseAssets.bitmap_for_size(BaseAssets._satellite_stronger_data, Math.trunc(st1_diff_degree / 5), zoom_level);
@@ -291,7 +291,7 @@ export class BaseAssets {
     }
 
     private static bitmap_for_size(bitmaps: Texture[], ii: number, size_num: number): Texture {
-        if (bitmaps.length % Base.NUM_ZOOM_LEVELS != 0) {
+        if (bitmaps.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error("Invalid bitmaps array length " + bitmaps.length);
         }
 

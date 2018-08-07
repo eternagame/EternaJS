@@ -107,7 +107,7 @@ export class PoseEditMode extends GameMode {
         this._toolbar.spec_button.clicked.connect(() => this.show_spec());
         this._toolbar.paste_button.clicked.connect(() =>  this.showPasteSequenceDialog());
         this._toolbar.view_options_button.clicked.connect(() => {
-            let mode = this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL ?
+            let mode = this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL ?
                 EternaViewOptionsMode.LAB :
                 EternaViewOptionsMode.PUZZLE;
             this.showDialog(new EternaViewOptionsDialog(mode));
@@ -303,7 +303,7 @@ export class PoseEditMode extends GameMode {
     }
 
     public select_folder(folder_name: string): boolean {
-        if (this._folder.get_folder_name() == folder_name) return true;
+        if (this._folder.get_folder_name() === folder_name) return true;
         let folder: Folder = FolderManager.instance.get_folder(folder_name);
         if (this._puzzle.has_target_type("multistrand") && !folder.can_multifold()) {
             return false;
@@ -433,7 +433,7 @@ export class PoseEditMode extends GameMode {
                 for (let ii: number = 0; ii < pose_fields.length; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
                     let pose: Pose2D = pose_field.get_pose();
-                    if (index == ii) {
+                    if (index === ii) {
                         pose.on_pose_mouse_down(e, closest_index);
                     } else {
                         pose.on_pose_mouse_down_propagate(e, closest_index);
@@ -456,7 +456,7 @@ export class PoseEditMode extends GameMode {
 
         this._is_databrowser_mode = false;
         // if (this.root.loaderInfo.parameters.databrowser
-        //     && this.root.loaderInfo.parameters.databrowser == "true") {
+        //     && this.root.loaderInfo.parameters.databrowser === "true") {
         //     this._is_databrowser_mode = true;
         // }
 
@@ -521,7 +521,7 @@ export class PoseEditMode extends GameMode {
         this._unstable_index = -1;
 
         if (num_constraints > 0) {
-            if (num_constraints % 2 != 0) {
+            if (num_constraints % 2 !== 0) {
                 throw new Error("Wrong constraints length");
             }
 
@@ -541,14 +541,14 @@ export class PoseEditMode extends GameMode {
                     this._constraint_shape_boxes[ii] = null;
                     this._constraint_antishape_boxes[ii] = null;
                     for (let jj = 0; jj < num_constraints; jj += 2) {
-                        if (constraints[jj] == ConstraintType.SHAPE) {
-                            if (Number(constraints[jj + 1]) == ii) {
+                        if (constraints[jj] === ConstraintType.SHAPE) {
+                            if (Number(constraints[jj + 1]) === ii) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_shape_boxes[ii] = newbox;
                                 this.addObject(newbox, this._constraintsLayer);
                             }
-                        } else if (constraints[jj] == ConstraintType.ANTISHAPE) {
-                            if (Number(constraints[jj + 1]) == ii) {
+                        } else if (constraints[jj] === ConstraintType.ANTISHAPE) {
+                            if (Number(constraints[jj + 1]) === ii) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                                 this._constraint_antishape_boxes[ii] = newbox;
                                 this.addObject(newbox, this._constraintsLayer);
@@ -570,7 +570,7 @@ export class PoseEditMode extends GameMode {
 
         // this._scriptbar.visible = false;
         // if (this.root.loaderInfo.parameters.scriptbar
-        //     && this.root.loaderInfo.parameters.scriptbar == "true") {
+        //     && this.root.loaderInfo.parameters.scriptbar === "true") {
         //     this._scriptbar.visible = true;
         //     this._scriptbar.add_item(this._nid_field, false, false);
         //     this._scriptbar.add_item(this._run_button, false, false);
@@ -597,7 +597,7 @@ export class PoseEditMode extends GameMode {
         this._folder_button.display.position = new Point(17, 160);
         this._folder_button.display.scale = new Point(0.5, 0.5);
         this.addObject(this._folder_button, this._uiLayer);
-        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
             this._folder_button.clicked.connect(() => this.change_folder());
             this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
                 this._folder_button.display.visible = multiEngine;
@@ -621,16 +621,16 @@ export class PoseEditMode extends GameMode {
 
             if (seq == null) {
                 seq = this._puzzle.get_beginning_sequence(ii);
-                if (this._puzzle.get_puzzle_type() == PuzzleType.CHALLENGE && !this._isReset) {
+                if (this._puzzle.get_puzzle_type() === PuzzleType.CHALLENGE && !this._isReset) {
                     let saved_seq: number[] = this._puzzle.get_saved_sequence();
                     if (saved_seq != null) {
-                        if (saved_seq.length == seq.length) {
+                        if (saved_seq.length === seq.length) {
                             seq = saved_seq;
                         }
                     }
                 }
             } else {
-                if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL && this._puzzle.is_using_tails()) {
+                if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL && this._puzzle.is_using_tails()) {
                     seq = Puzzle.probe_tail(seq);
                 }
             }
@@ -724,7 +724,7 @@ export class PoseEditMode extends GameMode {
     //     ExternalInterface.addCallback("get_targets", function (): any[] {
     //         // that.trace_js("get_targets() called");
     //         let conditions: any[] = puz.get_target_conditions();
-    //         if (conditions.length == 0) conditions.push(null);
+    //         if (conditions.length === 0) conditions.push(null);
     //         for (let ii: number = 0; ii < conditions.length; ii++) {
     //             if (conditions[ii] == null) {
     //                 conditions[ii] = {};
@@ -824,7 +824,7 @@ export class PoseEditMode extends GameMode {
     //         return EPars.pairs_array_to_parenthesis(folded.slice(0, len))
     //             + "&" + EPars.pairs_array_to_parenthesis(folded.slice(len));
     //     });
-    //     if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+    //     if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
     //         ExternalInterface.addCallback("select_folder", function (folder_name: string): boolean {
     //             // that.trace_js("select_folder() called");
     //             let ok: boolean = that.select_folder(folder_name);
@@ -901,7 +901,7 @@ export class PoseEditMode extends GameMode {
         let folder: Folder = this._folder;
 
         let nid: string = this._nid_field.text;
-        if (nid.length == 0) {
+        if (nid.length === 0) {
             return;
         }
 
@@ -971,26 +971,26 @@ export class PoseEditMode extends GameMode {
     public onKeyboardEvent(e: KeyboardEvent): void {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
-        if (!handled && e.type == KeyboardEventType.KEY_DOWN) {
+        if (!handled && e.type === KeyboardEventType.KEY_DOWN) {
             let key = e.code;
             let ctrl = e.ctrlKey;
 
-            if (!ctrl && key == KeyCode.KeyN) {
+            if (!ctrl && key === KeyCode.KeyN) {
                 Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
                 handled = true;
-            } else if (!ctrl && key == KeyCode.KeyG) {
+            } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
                 handled = true;
-            } else if (!ctrl && key == KeyCode.KeyS) {
+            } else if (!ctrl && key === KeyCode.KeyS) {
                 this.show_spec();
                 handled = true;
-            } else if (ctrl && key == KeyCode.KeyZ) {
+            } else if (ctrl && key === KeyCode.KeyZ) {
                 this.move_undo_stack_to_last_stable();
                 handled = true;
-            } else if (this._stack_level == 0 && key == KeyCode.KeyD && this._next_design_cb != null) {
+            } else if (this._stack_level === 0 && key === KeyCode.KeyD && this._next_design_cb != null) {
                 this._next_design_cb();
                 handled = true;
-            } else if (this._stack_level == 0 && key == KeyCode.KeyU && this._prev_design_cb != null) {
+            } else if (this._stack_level === 0 && key === KeyCode.KeyU && this._prev_design_cb != null) {
                 this._prev_design_cb();
                 handled = true;
             }
@@ -1088,9 +1088,9 @@ export class PoseEditMode extends GameMode {
 
             this.display_constraint_boxes(false, true);
 
-            if (this._pose_state == PoseState.NATIVE) {
+            if (this._pose_state === PoseState.NATIVE) {
                 this.set_to_native_mode();
-            } else if (this._pose_state == PoseState.TARGET) {
+            } else if (this._pose_state === PoseState.TARGET) {
                 this.set_to_target_mode();
             } else {
                 this.set_to_frozen_mode();
@@ -1127,7 +1127,7 @@ export class PoseEditMode extends GameMode {
     /*override*/
     protected enter(): void {
         log.debug("TODO: enter()");
-        // if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+        // if (this._puzzle.get_puzzle_type() !== PuzzleType.EXPERIMENTAL) {
         //     Application.instance.get_application_gui("View options").set_advanced(0);
         // }
         // //let _this:PoseEditMode = this;
@@ -1144,7 +1144,7 @@ export class PoseEditMode extends GameMode {
         // my_menu.customItems.push(this._view_options_cmi);
         // this._view_options_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.on_ctx_menu_item);
         //
-        // if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        // if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
         //     this._view_solutions_cmi = new ContextMenuItem("Design browser");
         //     my_menu.customItems.push(this._view_solutions_cmi);
         //     this._view_solutions_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.on_ctx_menu_item);
@@ -1215,7 +1215,7 @@ export class PoseEditMode extends GameMode {
     //     hub.set_text("Player: " + Application.instance.get_player_name() + "\n" +
     //         "Puzzle ID: " + puzzle_id + "\n" +
     //         "Puzzle Title: " + this._puzzle.get_puzzle_name() + "\n" +
-    //         "Mode: " + (this._native_button.get_selected() == true ? "NativeMode" : "TargetMode"));
+    //         "Mode: " + (this._native_button.get_selected() === true ? "NativeMode" : "TargetMode"));
     //
     //     let w_walker: number = 0;
     //     for (ii = 0; ii < imgs.length; ii++) {
@@ -1302,7 +1302,7 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        if (this._pose_state == PoseState.NATIVE) {
+        if (this._pose_state === PoseState.NATIVE) {
             this.set_to_native_mode();
         } else {
             this.set_pose_target(0, this._current_target_index);
@@ -1316,7 +1316,7 @@ export class PoseEditMode extends GameMode {
         if (this._target_conditions) {
             let max_len: number = this._poses[target_index].get_sequence().length;
             for (let ii: number = 0; ii < this._poses.length; ii++) {
-                if (ii == target_index || this._target_conditions[ii]['force_struct'] == null) {
+                if (ii === target_index || this._target_conditions[ii]['force_struct'] == null) {
                     continue;
                 }
 
@@ -1327,13 +1327,13 @@ export class PoseEditMode extends GameMode {
                 let forced: number[] = EPars.parenthesis_to_forced_array(this._target_conditions[ii]['force_struct']);
                 let jj;
                 for (jj = 0; jj < max_len && jj < forced.length; jj++) {
-                    let _stat: number = (forced[jj] == EPars.FORCE_IGNORE ? 1 : 0);
-                    if ((curr ^ _stat) != 0) {
+                    let _stat: number = (forced[jj] === EPars.FORCE_IGNORE ? 1 : 0);
+                    if ((curr ^ _stat) !== 0) {
                         elems.push(jj - _stat);
                         curr = _stat;
                     }
                 }
-                if ((elems.length % 2) == 1) {
+                if ((elems.length % 2) === 1) {
                     elems.push(jj - 1);
                 }
             }
@@ -1347,7 +1347,7 @@ export class PoseEditMode extends GameMode {
             this._poses[pose_index].set_sequence(this._puzzle.transform_sequence(this._poses[target_index].get_sequence(), target_index));
             let tc_type: string = this._target_conditions[target_index]['type'];
 
-            if (tc_type == "multistrand") {
+            if (tc_type === "multistrand") {
                 let odefs: OligoDef[] = this._target_conditions[target_index]['oligos'];
                 let ndefs: Oligo[] = [];
                 for (let ii: number = 0; ii < odefs.length; ii++) {
@@ -1394,8 +1394,8 @@ export class PoseEditMode extends GameMode {
         }
         this._poses[pose_index].set_forced_highlights(this.get_forced_highlights(target_index));
 
-        if (this._puzzle.get_node_id() == 2390140) {
-            if (target_index == 1) {
+        if (this._puzzle.get_node_id() === 2390140) {
+            if (target_index === 1) {
                 this._poses[pose_index].set_aux_info(null);
             } else {
                 this._poses[pose_index].set_aux_info({cleaving_site: 28});
@@ -1463,9 +1463,9 @@ export class PoseEditMode extends GameMode {
     }
 
     private toggle_posestate(): void {
-        if (this._pose_state == PoseState.TARGET) {
+        if (this._pose_state === PoseState.TARGET) {
             this.set_to_native_mode();
-        } else if (this._pose_state == PoseState.NATIVE) {
+        } else if (this._pose_state === PoseState.NATIVE) {
             this.set_to_target_mode();
         } else {
             throw new Error("Invalid pose state");
@@ -1532,7 +1532,7 @@ export class PoseEditMode extends GameMode {
         this._folder = FolderManager.instance.get_next_folder(curr_f, (folder: Folder): boolean => {
             return this._puzzle.has_target_type("multistrand") && !folder.can_multifold();
         });
-        if (this._folder.get_folder_name() == curr_f) return;
+        if (this._folder.get_folder_name() === curr_f) return;
 
         this.folder_updated();
     }
@@ -1562,9 +1562,9 @@ export class PoseEditMode extends GameMode {
         log.debug("TODO: navigate_to_puzzle");
         // let req: URLRequest = new URLRequest;
         // req.url = "/puzzle/";
-        // if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
+        // if (this._puzzle.get_puzzle_type() === PuzzleType.BASIC) {
         //     req.url += "Basic/";
-        // } else if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        // } else if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
         //     req.url += "Experimental/";
         // } else {
         //     req.url += "Challenge/";
@@ -1590,7 +1590,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private submit_current_pose(): void {
-        if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+        if (this._puzzle.get_puzzle_type() !== PuzzleType.EXPERIMENTAL) {
             /// Always submit the sequence in the first state
             let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
             this.submit_solution({title: "Cleared Solution", comment: "No comment"}, sol_to_submit);
@@ -1648,17 +1648,17 @@ export class PoseEditMode extends GameMode {
 
     /** Creates solution-submission data for shipping off to the server */
     private createSubmitData(details: SubmitPoseDetails, undoBlock: UndoBlock): any {
-        if (details.title.length == 0) {
+        if (details.title.length === 0) {
             details.title = "Default title";
         }
 
-        if (details.comment.length == 0) {
+        if (details.comment.length === 0) {
             details.comment = "No comment";
         }
 
         let post_data: any = {};
 
-        if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL) {
+        if (this._puzzle.get_puzzle_type() !== PuzzleType.EXPERIMENTAL) {
             let next_puzzle: number = this._puzzle.get_next_puzzle();
 
             if (next_puzzle > 0) {
@@ -1699,7 +1699,7 @@ export class PoseEditMode extends GameMode {
         post_data["ua"] = undoBlock.get_param(UndoBlockParam.AU);
         post_data["body"] = details.comment;
 
-        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
             post_data["melt"] = undoBlock.get_param(UndoBlockParam.MELTING_POINT);
 
             if (this._fold_total_time >= 1000.0) {
@@ -1723,7 +1723,7 @@ export class PoseEditMode extends GameMode {
 
         // Show a "Submitting now!" dialog
         let submittingRef: GameObjectRef = GameObjectRef.NULL;
-        if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
         }
 
@@ -1812,7 +1812,7 @@ export class PoseEditMode extends GameMode {
                     this.set_ancestor_id(data['solution-id']);
                 }
 
-                if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+                if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
                     if (this._puzzle.get_use_barcode()) {
                         let hairpin: string = EPars.get_barcode_hairpin(seqString);
                         if (hairpin != null) {
@@ -1943,11 +1943,11 @@ export class PoseEditMode extends GameMode {
         let w_walker: number = 17;
 
         for (let xx = 0; xx < this._target_pairs.length; xx++) {
-            if (xx == 0) {
+            if (xx === 0) {
                 // scan for non-(ANTI)SHAPE
                 for (let ii = 0; ii < num_constraints / 2; ii++) {
                     const box = this._constraint_boxes[ii];
-                    if (box.constraintType == ConstraintType.SHAPE || box.constraintType == ConstraintType.ANTISHAPE) {
+                    if (box.constraintType === ConstraintType.SHAPE || box.constraintType === ConstraintType.ANTISHAPE) {
                         continue;
                     }
                     let cpos = new Point(w_walker, 35);
@@ -1959,7 +1959,7 @@ export class PoseEditMode extends GameMode {
                 if (w_walker > 17) {
                     w_walker += 25;
                 }
-            } else if (xx == 1) {
+            } else if (xx === 1) {
                 // save the offset for later use (avoid overlaps in PIP mode)
                 this._constraints_offset = w_walker;
             }
@@ -1967,27 +1967,27 @@ export class PoseEditMode extends GameMode {
             // scan for SHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
                 const box = this._constraint_boxes[ii];
-                if (box.constraintType != ConstraintType.SHAPE || Number(constraints[2 * ii + 1]) != xx) {
+                if (box.constraintType !== ConstraintType.SHAPE || Number(constraints[2 * ii + 1]) !== xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
                 box.setLocation(cpos, animate);
                 box.show_big_text(false);
-                box.display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+                box.display.visible = (xx === 0 || !this._is_pip_mode) ? display : false;
             }
 
             // scan for ANTISHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
                 const box = this._constraint_boxes[ii];
-                if (box.constraintType != ConstraintType.ANTISHAPE || Number(constraints[2 * ii + 1]) != xx) {
+                if (box.constraintType !== ConstraintType.ANTISHAPE || Number(constraints[2 * ii + 1]) !== xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
                 box.setLocation(cpos, animate);
                 box.show_big_text(false);
-                box.display.visible = (xx == 0 || !this._is_pip_mode) ? display : false;
+                box.display.visible = (xx === 0 || !this._is_pip_mode) ? display : false;
             }
         }
 
@@ -1998,7 +1998,7 @@ export class PoseEditMode extends GameMode {
         this._is_playing = false;
 
         const constraints: string[] = this._puzzle.curConstraints;
-        if (constraints == null || constraints.length == 0 || !this._show_mission_screen) {
+        if (constraints == null || constraints.length === 0 || !this._show_mission_screen) {
             this.start_playing(false);
             return;
         }
@@ -2046,7 +2046,7 @@ export class PoseEditMode extends GameMode {
         let constraints = this._puzzle.get_constraints();
         for (let ii = 0; ii < constraints.length; ii += 2) {
             const type: ConstraintType = constraints[ii] as ConstraintType;
-            if (type == ConstraintType.SHAPE || type == ConstraintType.ANTISHAPE) {
+            if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
                 continue;
             }
 
@@ -2079,7 +2079,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private autosave_data(e: Event): void {
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
+        if (this._puzzle.get_puzzle_type() === PuzzleType.BASIC) {
             return;
         }
 
@@ -2120,12 +2120,12 @@ export class PoseEditMode extends GameMode {
     }
 
     private autoload_data(): boolean {
-        if (this._puzzle.get_puzzle_type() == PuzzleType.BASIC) {
+        if (this._puzzle.get_puzzle_type() === PuzzleType.BASIC) {
             return false;
         }
 
         // if (this.root.loaderInfo.parameters.autoload
-        //     && Number(this.root.loaderInfo.parameters.autoload) == 0) {
+        //     && Number(this.root.loaderInfo.parameters.autoload) === 0) {
         //     return false;
         // }
 
@@ -2135,15 +2135,15 @@ export class PoseEditMode extends GameMode {
 
         if (this._target_conditions[0] && Puzzle.is_oligo_type(this._target_conditions[0]['type'])) {
             oligo_len = this._target_conditions[0]['oligo_sequence'].length;
-            if (this._target_conditions[0]['fold_mode'] == Pose2D.OLIGO_MODE_DIMER) oligo_len++;
-        } else if (this._target_conditions[0] && this._target_conditions[0]['type'] == "multistrand") {
+            if (this._target_conditions[0]['fold_mode'] === Pose2D.OLIGO_MODE_DIMER) oligo_len++;
+        } else if (this._target_conditions[0] && this._target_conditions[0]['type'] === "multistrand") {
             let oligos: OligoDef[] = this._target_conditions[0]['oligos'];
             for (let ii = 0; ii < oligos.length; ii++) {
                 oligo_len += (oligos[ii]['sequence'].length + 1);
             }
         }
 
-        if (beginning_sequence.length != locks.length || (beginning_sequence.length + oligo_len) != this._target_pairs[0].length) {
+        if (beginning_sequence.length !== locks.length || (beginning_sequence.length + oligo_len) !== this._target_pairs[0].length) {
             return false;
         }
         this.clear_undo_stack();
@@ -2173,7 +2173,7 @@ export class PoseEditMode extends GameMode {
                 /// JEEFIX : Don't override secstruct from autoload without checking whther the puzzle can vary length.
                 /// KWSFIX : Only allow when shiftable mode (=> shift_limit = 0)
 
-                if (this._puzzle.get_shift_limit() == 0 && undo_block.get_target_pairs().length != this._target_pairs[ii].length) {
+                if (this._puzzle.get_shift_limit() === 0 && undo_block.get_target_pairs().length !== this._target_pairs[ii].length) {
                     return false;
                 }
 
@@ -2184,7 +2184,7 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        if ((a.length + oligo_len) != this._target_pairs[0].length) {
+        if ((a.length + oligo_len) !== this._target_pairs[0].length) {
             return false;
         }
 
@@ -2222,11 +2222,11 @@ export class PoseEditMode extends GameMode {
     private move_history_add_mutations(before: number[], after: number[]): void {
         let muts: any[] = [];
         for (let ii: number = 0; ii < after.length; ii++) {
-            if (after[ii] != before[ii]) {
+            if (after[ii] !== before[ii]) {
                 muts.push({pos: ii + 1, base: EPars.sequence_array_to_string([after[ii]])});
             }
         }
-        if (muts.length == 0) return;
+        if (muts.length === 0) return;
         this._move_count++;
         this._moves.push(muts.slice());
     }
@@ -2259,7 +2259,7 @@ export class PoseEditMode extends GameMode {
             this.start_countdown();
         } else {
             /// Given init sequence (solution) in the lab, don't show mission animation - go straight to game
-            if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
                 this.start_playing(false);
             } else {
                 this.start_countdown();
@@ -2280,25 +2280,25 @@ export class PoseEditMode extends GameMode {
         // let w: number;
         // let h: number;
         //
-        // if (ui_name == "GU_PAIR") {
+        // if (ui_name === "GU_PAIR") {
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.ug_box.x, this._palette.ug_box.y);
         //     w = this._palette.ug_box.width;
         //     h = this._palette.ug_box.height;
         //
-        // } else if (ui_name == "GC_PAIR") {
+        // } else if (ui_name === "GC_PAIR") {
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.gc_box.x, this._palette.gc_box.y);
         //     w = this._palette.gc_box.width;
         //     h = this._palette.gc_box.height;
         //
-        // } else if (ui_name == "UA_PAIR") {
+        // } else if (ui_name === "UA_PAIR") {
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.au_box.x, this._palette.au_box.y);
         //     w = this._palette.au_box.width;
         //     h = this._palette.au_box.height;
         //
-        // } else if (ui_name == "G") {
+        // } else if (ui_name === "G") {
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.g_box.x, this._palette.g_box.y);
         //     w = this._palette.g_box.width;
@@ -2324,38 +2324,38 @@ export class PoseEditMode extends GameMode {
         log.debug("TODO: draw_arrow");
         // let pos: UDim;
         //
-        // if (ui_name == "GU_PAIR") {
+        // if (ui_name === "GU_PAIR") {
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.ug_box.x, this._palette.ug_box.y);
         //
-        // } else if (ui_name == "GC_PAIR") {
+        // } else if (ui_name === "GC_PAIR") {
         //
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.gc_box.x, this._palette.gc_box.y);
         //
-        // } else if (ui_name == "UA_PAIR") {
+        // } else if (ui_name === "UA_PAIR") {
         //
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.au_box.x, this._palette.au_box.y);
         //
-        // } else if (ui_name == "G") {
+        // } else if (ui_name === "G") {
         //
         //     pos = this._palette.get_pos();
         //     pos.translate(this._palette.g_box.x, this._palette.g_box.y);
         //
-        // } else if (ui_name == "MODES_NATIVE") {
+        // } else if (ui_name === "MODES_NATIVE") {
         //
         //     pos = this._native_button.get_pos();
         //
-        // } else if (ui_name == "MODES_TARGET") {
+        // } else if (ui_name === "MODES_TARGET") {
         //
         //     pos = this._target_button.get_pos();
         //
-        // } else if (ui_name == "MODES_SECOND") {
+        // } else if (ui_name === "MODES_SECOND") {
         //     // FIXME: what is MODES_SECOND ???
         //     pos = this._native_button.get_pos();
         //
-        // } else if (ui_name == "MODES_PIP") {
+        // } else if (ui_name === "MODES_PIP") {
         //
         //     pos = this._pip_button.get_pos();
         //
@@ -2395,28 +2395,28 @@ export class PoseEditMode extends GameMode {
     private get_ui_pos(pos: any[]): UDim {
         log.debug("TODO: get_ui_pos");
         return new UDim(0.5, 0.5, 0, 0);
-        // if (pos[0] == UIPos.CENTER) {
+        // if (pos[0] === UIPos.CENTER) {
         //     return new UDim(0.5, 0.5, 0, 0);
-        // } else if (pos[0] == UIPos.BASE) {
+        // } else if (pos[0] === UIPos.BASE) {
         //     let p: Point = this._poses[0].get_base_xy(pos[1]);
         //     return new UDim(0, 0, p.x, p.y);
-        // } else if (pos[0] == UIPos.UDIM) {
+        // } else if (pos[0] === UIPos.UDIM) {
         //     return new UDim(pos[1], pos[2], pos[3], pos[4]);
-        // } else if (pos[0] == UIPos.PALLETE) {
+        // } else if (pos[0] === UIPos.PALLETE) {
         //     return this._palette.get_pos();
-        // } else if (pos[0] == UIPos.MODES) {
+        // } else if (pos[0] === UIPos.MODES) {
         //     return this._native_button.get_pos();
-        // } else if (pos[0] == UIPos.MODES_NATIVE) {
+        // } else if (pos[0] === UIPos.MODES_NATIVE) {
         //     return this._native_button.get_pos();
-        // } else if (pos[0] == UIPos.MODES_TARGET) {
+        // } else if (pos[0] === UIPos.MODES_TARGET) {
         //     return this._target_button.get_pos();
-        // } else if (pos[0] == UIPos.UNDO_BUTTON) {
+        // } else if (pos[0] === UIPos.UNDO_BUTTON) {
         //     return this._undo_button.get_pos();
-        // } else if (pos[0] == UIPos.ZOOM_IN_BUTTON) {
+        // } else if (pos[0] === UIPos.ZOOM_IN_BUTTON) {
         //     return this._zoom_in_button.get_pos();
-        // } else if (pos[0] == UIPos.ZOOM_OUT_BUTTON) {
+        // } else if (pos[0] === UIPos.ZOOM_OUT_BUTTON) {
         //     return this._zoom_out_button.get_pos();
-        // } else if (pos[0] == UIPos.CONSTRAINT) {
+        // } else if (pos[0] === UIPos.CONSTRAINT) {
         //     let box: ConstraintBox = this._constraint_boxes[Number(pos[1])];
         //     let udim: UDim = box.get_pos();
         //     udim.translate(0, 50);
@@ -2428,7 +2428,7 @@ export class PoseEditMode extends GameMode {
 
     private run_action(action: any[]): void {
         log.debug("TODO: run_action");
-        // if (action[0] == "NO") {
+        // if (action[0] === "NO") {
         //     return;
         // }
         //
@@ -2437,27 +2437,27 @@ export class PoseEditMode extends GameMode {
         // let target: number;
         // let lock: any[];
         //
-        // if (action[0] == "START_COUNTDOWN") {
+        // if (action[0] === "START_COUNTDOWN") {
         //     this.clear_undo_stack();
         //     this.pose_edit_by_target(0);
         //     this.start_countdown();
-        // } else if (action[0] == "CLEAR_UNDO_STACK") {
+        // } else if (action[0] === "CLEAR_UNDO_STACK") {
         //     this.clear_undo_stack();
         //     this.pose_edit_by_target(0);
-        // } else if (action[0] == "START_COUNTDOWN_DIRTY") {
+        // } else if (action[0] === "START_COUNTDOWN_DIRTY") {
         //     this.start_countdown();
-        // } else if (action[0] == "MUTATE") {
+        // } else if (action[0] === "MUTATE") {
         //
         //     sequence = this._poses[0].get_sequence();
         //     for (ii = 1; ii < action.length; ii += 2) {
         //
         //         let s: number;
         //
-        //         if (action[ii + 1] == "A") {
+        //         if (action[ii + 1] === "A") {
         //             s = EPars.RNABASE_ADENINE;
-        //         } else if (action[ii + 1] == "G") {
+        //         } else if (action[ii + 1] === "G") {
         //             s = EPars.RNABASE_GUANINE;
-        //         } else if (action[ii + 1] == "U") {
+        //         } else if (action[ii + 1] === "U") {
         //             s = EPars.RNABASE_URACIL;
         //         } else {
         //             s = EPars.RNABASE_CYTOSINE;
@@ -2472,65 +2472,65 @@ export class PoseEditMode extends GameMode {
         //     this.pose_edit_by_target(0);
         //     this.update_score();
         //
-        // } else if (action[0] == "CHANGEMODE") {
-        //     if (action[1] == "NATIVE") {
+        // } else if (action[0] === "CHANGEMODE") {
+        //     if (action[1] === "NATIVE") {
         //         this.set_to_native_mode();
-        //     } else if (action[1] == "TARGET") {
+        //     } else if (action[1] === "TARGET") {
         //         this.set_to_target_mode();
-        //     } else if (action[1] == "FROZEN") {
+        //     } else if (action[1] === "FROZEN") {
         //         this.set_to_frozen_mode();
-        //     } else if (action[1] == "PIP") {
+        //     } else if (action[1] === "PIP") {
         //         this.set_pip(true);
-        //     } else if (action[1] == "NPIP") {
+        //     } else if (action[1] === "NPIP") {
         //         this.set_pip(false);
         //     } else {
         //         throw new Error("Unrecognized error " + action[1]);
         //     }
         //
-        // } else if (action[0] == "ZOOM") {
+        // } else if (action[0] === "ZOOM") {
         //     for (ii = 0; ii < this._pose_fields.length; ii++) {
         //         this._pose_fields[ii].set_zoom(Number(action[1]));
         //     }
-        // } else if (action[0] == "ZOOM_OUT") {
+        // } else if (action[0] === "ZOOM_OUT") {
         //     for (ii = 0; ii < this._pose_fields.length; ii++) {
         //         this._pose_fields[ii].zoom_out();
         //     }
-        // } else if (action[0] == "ZOOM_IN") {
+        // } else if (action[0] === "ZOOM_IN") {
         //     for (ii = 0; ii < this._pose_fields.length; ii++) {
         //         this._pose_fields[ii].zoom_in();
         //     }
-        // } else if (action[0] == "ALLOW_MOVING") {
+        // } else if (action[0] === "ALLOW_MOVING") {
         //     for (ii = 0; ii < this._pose_fields.length; ii++) {
         //         this._pose_fields[ii].mouseEnabled = true;
         //         this._pose_fields[ii].mouseChildren = true;
         //     }
-        // } else if (action[0] == "HIGHLIGHT_STACK") {
+        // } else if (action[0] === "HIGHLIGHT_STACK") {
         //     this._poses[0].highlight_stack(action);
-        // } else if (action[0] == "HIGHLIGHT_STACK_PIP") {
+        // } else if (action[0] === "HIGHLIGHT_STACK_PIP") {
         //     target = action[1];
         //     action.splice(1, 1);
         //     this._poses[target].highlight_stack(action);
-        // } else if (action[0] == "HIGHLIGHT_LOOP") {
+        // } else if (action[0] === "HIGHLIGHT_LOOP") {
         //     this._poses[0].highlight_loop(action);
-        // } else if (action[0] == "HIGHLIGHT_LOOP_PIP") {
+        // } else if (action[0] === "HIGHLIGHT_LOOP_PIP") {
         //     target = action[1];
         //     action.splice(1, 1);
         //     this._poses[target].highlight_loop(action);
-        // } else if (action[0] == "CLEAR_HIGHLIGHT") {
+        // } else if (action[0] === "CLEAR_HIGHLIGHT") {
         //     this._poses[0].clear_highlight();
-        // } else if (action[0] == "CLEAR_HIGHLIGHT_PIP") {
+        // } else if (action[0] === "CLEAR_HIGHLIGHT_PIP") {
         //     this._poses[action[1]].clear_highlight();
-        // } else if (action[0] == "NAVIGATE_TO_CHALLENGES") {
+        // } else if (action[0] === "NAVIGATE_TO_CHALLENGES") {
         //     this.navigate_to_challenges();
-        // } else if (action[0] == "UI_HIGHLIGHT") {
+        // } else if (action[0] === "UI_HIGHLIGHT") {
         //     this.highlight_ui(action[1]);
-        // } else if (action[0] == "DRAW_ARROW") {
+        // } else if (action[0] === "DRAW_ARROW") {
         //     this.draw_arrow(action[1]);
-        // } else if (action[0] == "CLEAR_UI_HIGHLIGHT") {
+        // } else if (action[0] === "CLEAR_UI_HIGHLIGHT") {
         //     this.clear_ui_highlight();
-        // } else if (action[0] == "SHOW_CHALLENGE") {
+        // } else if (action[0] === "SHOW_CHALLENGE") {
         //     // Defunct - redirect to setup end screen
-        // } else if (action[0] == "RESET_TEMP_CONSTRAINTS") {
+        // } else if (action[0] === "RESET_TEMP_CONSTRAINTS") {
         //     let constraints_arr: any[] = [];
         //
         //     for (ii = 1; ii < action.length; ii += 2) {
@@ -2541,43 +2541,43 @@ export class PoseEditMode extends GameMode {
         //     this._puzzle.set_temporary_constraints(constraints_arr);
         //     this.check_constraints();
         //
-        // } else if (action[0] == "CLEAR_TEMP_CONSTRAINTS") {
+        // } else if (action[0] === "CLEAR_TEMP_CONSTRAINTS") {
         //     this._puzzle.set_temporary_constraints(null);
         //     this.check_constraints();
-        // } else if (action[0] == "DISABLE_TOOLS") {
+        // } else if (action[0] === "DISABLE_TOOLS") {
         //     this.disable_tools(true);
-        // } else if (action[0] == "ENABLE_TOOLS") {
+        // } else if (action[0] === "ENABLE_TOOLS") {
         //     this.disable_tools(false);
-        // } else if (action[0] == "DISABLE_PALLETE") {
+        // } else if (action[0] === "DISABLE_PALLETE") {
         //     this._palette.enabled = false;
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[ii].set_current_color(-1);
         //     }
-        // } else if (action[0] == "ENABLE_PALLETE") {
+        // } else if (action[0] === "ENABLE_PALLETE") {
         //     this._palette.set_disabled(false);
         //     this._palette.click_a();
-        // } else if (action[0] == "ENABLE_MODES") {
+        // } else if (action[0] === "ENABLE_MODES") {
         //     this._native_button.set_disabled(false);
         //     this._target_button.set_disabled(false);
-        // } else if (action[0] == "DISABLE_MODES") {
+        // } else if (action[0] === "DISABLE_MODES") {
         //     this._native_button.enabled = false;
         //     this._target_button.enabled = false;
-        // } else if (action[0] == "CENTER_POSE") {
+        // } else if (action[0] === "CENTER_POSE") {
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[0].set_zoom_level(0, true, true);
         //     }
-        // } else if (action[0] == "ENABLE_PIP") {
+        // } else if (action[0] === "ENABLE_PIP") {
         //     this._pip_button.set_disabled(false);
-        // } else if (action[0] == "DISABLE_PIP") {
+        // } else if (action[0] === "DISABLE_PIP") {
         //     this._pip_button.enabled = false;
-        // } else if (action[0] == "WAIT") {
-        //     if (action[1] == "TRUE") {
+        // } else if (action[0] === "WAIT") {
+        //     if (action[1] === "TRUE") {
         //         this._waiting_for_input = true;
         //     } else {
         //         this._waiting_for_input = false;
         //     }
-        // } else if (action[0] == "STAMP") {
-        //     if (action[1] == "GREAT") {
+        // } else if (action[0] === "STAMP") {
+        //     if (action[1] === "GREAT") {
         //         this._game_stamp.set_bitmap(BitmapManager.get_bitmap(BitmapManager.GreatImg));
         //     }
         //
@@ -2585,7 +2585,7 @@ export class PoseEditMode extends GameMode {
         //     this._game_stamp.visible = true;
         //     this._game_stamp.set_pos(new UDim(0.5, 0.5, -this._game_stamp.width / 2, -this._game_stamp.height / 2));
         //     this._game_stamp.set_animator(new GameAnimatorZFly(0.4, 0.35, 0, 3, 0.3));
-        // } else if (action[0] == "ADD_LOCK") {
+        // } else if (action[0] === "ADD_LOCK") {
         //
         //     sequence = this._poses[0].get_sequence();
         //     lock = [];
@@ -2601,7 +2601,7 @@ export class PoseEditMode extends GameMode {
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[ii].set_puzzle_locks(lock);
         //     }
-        // } else if (action[0] == "REMOVE_LOCK") {
+        // } else if (action[0] === "REMOVE_LOCK") {
         //     sequence = this._poses[0].get_sequence();
         //     lock = [];
         //
@@ -2623,32 +2623,32 @@ export class PoseEditMode extends GameMode {
         const undoBlock: UndoBlock = this.get_current_undo_block();
         const sequence = undoBlock.get_sequence();
 
-        if (type == ConstraintType.GU) {
+        if (type === ConstraintType.GU) {
             const count: number = undoBlock.get_param(UndoBlockParam.GU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.GU, value, isSatisfied, count);
             }
-        } else if (type == ConstraintType.AU) {
+        } else if (type === ConstraintType.AU) {
             const count: number = undoBlock.get_param(UndoBlockParam.AU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.AU, value, isSatisfied, count)
             }
-        } else if (type == ConstraintType.GC) {
+        } else if (type === ConstraintType.GC) {
             const count: number = undoBlock.get_param(UndoBlockParam.GC);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.GC, value, isSatisfied, count);
             }
-        } else if (type == ConstraintType.MUTATION) {
+        } else if (type === ConstraintType.MUTATION) {
             const sequence_diff: number = EPars.sequence_diff(this._puzzle.get_subsequence_without_barcode(sequence), this._puzzle.get_subsequence_without_barcode(this._puzzle.get_beginning_sequence()));
             isSatisfied = sequence_diff <= Number(value);
             if (render) {
                 box.set_content(ConstraintType.MUTATION, value, isSatisfied, sequence_diff);
             }
 
-        } else if (type == ConstraintType.SHAPE) {
+        } else if (type === ConstraintType.SHAPE) {
             const target_index = Number(value);
             const ublk: UndoBlock = this.get_current_undo_block(target_index);
             let native_pairs = ublk.get_pairs();
@@ -2688,12 +2688,12 @@ export class PoseEditMode extends GameMode {
                     native: native_pairs,
                     structure_constraints: structure_constraints
                 }, isSatisfied, 0);
-                box.set_flagged(this._unstable_index == ii);
+                box.set_flagged(this._unstable_index === ii);
                 // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
                 //     set_callback(this, box, ii);
                 // }
 
-                if (this._unstable_index == ii) {
+                if (this._unstable_index === ii) {
                     outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, this._target_pairs[target_index], structure_constraints, isSatisfied);
                 }
             }
@@ -2707,7 +2707,7 @@ export class PoseEditMode extends GameMode {
                             native: native_pairs,
                             structure_constraints: structure_constraints
                         }, isSatisfied, 0);
-                        this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                        this._constraint_shape_boxes[target_index].set_flagged(this._unstable_index === ii);
                         // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
                         //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
                         // }
@@ -2717,7 +2717,7 @@ export class PoseEditMode extends GameMode {
                 }
             }
 
-        } else if (type == ConstraintType.ANTISHAPE) {
+        } else if (type === ConstraintType.ANTISHAPE) {
             let target_index = Number(value);
             let native_pairs = this.get_current_undo_block(target_index).get_pairs();
             if (this._target_conditions == null) {
@@ -2750,12 +2750,12 @@ export class PoseEditMode extends GameMode {
                     index: input_index,
                     structure_constraints: anti_structure_constraints
                 }, isSatisfied, 0);
-                box.set_flagged(this._unstable_index == ii);
+                box.set_flagged(this._unstable_index === ii);
                 // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
                 //     set_callback(this, box, ii);
                 // }
 
-                if (this._unstable_index == ii) {
+                if (this._unstable_index === ii) {
                     outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, isSatisfied);
                 }
             }
@@ -2769,7 +2769,7 @@ export class PoseEditMode extends GameMode {
                             index: input_index,
                             structure_constraints: anti_structure_constraints
                         }, isSatisfied, 0);
-                        this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index == ii);
+                        this._constraint_antishape_boxes[target_index].set_flagged(this._unstable_index === ii);
                         // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
                         //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
                         // }
@@ -2779,7 +2779,7 @@ export class PoseEditMode extends GameMode {
                 }
             }
 
-        } else if (type == ConstraintType.BINDINGS) {
+        } else if (type === ConstraintType.BINDINGS) {
             const target_index = Number(value);
             const undoblk: UndoBlock = this.get_current_undo_block(target_index);
 
@@ -2821,7 +2821,7 @@ export class PoseEditMode extends GameMode {
                 let lbl: string = oligos[jj]['label'] != null ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
                 label.push(lbl);
 
-                if (bmap[jj] != expected) {
+                if (bmap[jj] !== expected) {
                     isSatisfied = false;
                     if (outInfo.restricted_local == null) {
                         outInfo.restricted_local = [];
@@ -2843,63 +2843,63 @@ export class PoseEditMode extends GameMode {
                 }, isSatisfied, 0);
             }
 
-        } else if (type == ConstraintType.G) {
+        } else if (type === ConstraintType.G) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.G, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.GMAX) {
+        } else if (type === ConstraintType.GMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.GMAX, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.A) {
+        } else if (type === ConstraintType.A) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_ADENINE);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.A, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.AMAX) {
+        } else if (type === ConstraintType.AMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_ADENINE);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.AMAX, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.U) {
+        } else if (type === ConstraintType.U) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_URACIL);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.U, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.UMAX) {
+        } else if (type === ConstraintType.UMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_URACIL);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.UMAX, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.C) {
+        } else if (type === ConstraintType.C) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.set_content(ConstraintType.C, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.CMAX) {
+        } else if (type === ConstraintType.CMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.set_content(ConstraintType.CMAX, value, isSatisfied, count);
             }
 
-        } else if (type == ConstraintType.PAIRS) {
+        } else if (type === ConstraintType.PAIRS) {
             let num_gu: number = undoBlock.get_param(UndoBlockParam.GU);
             let num_gc: number = undoBlock.get_param(UndoBlockParam.GC);
             let num_ua: number = undoBlock.get_param(UndoBlockParam.AU);
@@ -2909,14 +2909,14 @@ export class PoseEditMode extends GameMode {
                 box.set_content(ConstraintType.PAIRS, value, isSatisfied, num_gc + num_gu + num_ua);
             }
 
-        } else if (type == ConstraintType.STACK) {
+        } else if (type === ConstraintType.STACK) {
             const stack_len: number = undoBlock.get_param(UndoBlockParam.STACK);
             isSatisfied = (stack_len >= Number(value));
 
             if (render) {
                 box.set_content(ConstraintType.STACK, value, isSatisfied, stack_len);
             }
-        } else if (type == ConstraintType.CONSECUTIVE_G) {
+        } else if (type === ConstraintType.CONSECUTIVE_G) {
             let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (consecutive_g_count < Number(value));
 
@@ -2926,7 +2926,7 @@ export class PoseEditMode extends GameMode {
 
             outInfo.max_allowed_guanine = Number(value);
 
-        } else if (type == ConstraintType.CONSECUTIVE_C) {
+        } else if (type === ConstraintType.CONSECUTIVE_C) {
             let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE);
             isSatisfied = (consecutive_c_count < Number(value));
 
@@ -2936,7 +2936,7 @@ export class PoseEditMode extends GameMode {
 
             outInfo.max_allowed_cytosine = Number(value);
 
-        } else if (type == ConstraintType.CONSECUTIVE_A) {
+        } else if (type === ConstraintType.CONSECUTIVE_A) {
             let consecutive_a_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_ADENINE);
             isSatisfied = (consecutive_a_count < Number(value));
 
@@ -2946,7 +2946,7 @@ export class PoseEditMode extends GameMode {
 
             outInfo.max_allowed_adenine = Number(value);
 
-        } else if (type == ConstraintType.LAB_REQUIREMENTS) {
+        } else if (type === ConstraintType.LAB_REQUIREMENTS) {
             let locks: boolean[] = undoBlock.get_puzzle_locks();
             let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE, locks);
             let consecutive_c_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
@@ -2966,16 +2966,16 @@ export class PoseEditMode extends GameMode {
                 }, isSatisfied, 0);
             }
 
-        } else if (type == ConstraintType.BARCODE) {
+        } else if (type === ConstraintType.BARCODE) {
             isSatisfied = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
             if (render) {
                 box.set_content(ConstraintType.BARCODE, 0, isSatisfied, 0);
             }
 
-        } else if (type == ConstraintType.OLIGO_BOUND) {
+        } else if (type === ConstraintType.OLIGO_BOUND) {
             let target_index = Number(value);
             let nnfe: number[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-            isSatisfied = (nnfe != null && nnfe[0] == -2);
+            isSatisfied = (nnfe != null && nnfe[0] === -2);
 
             if (this._target_conditions == null) {
                 throw new Error("Target object not available for BINDINGS constraint");
@@ -3010,10 +3010,10 @@ export class PoseEditMode extends GameMode {
                 }, isSatisfied, 0);
             }
 
-        } else if (type == ConstraintType.OLIGO_UNBOUND) {
+        } else if (type === ConstraintType.OLIGO_UNBOUND) {
             let target_index = Number(value);
             let nnfe: number[] = this.get_current_undo_block(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-            isSatisfied = (nnfe == null || nnfe[0] != -2);
+            isSatisfied = (nnfe == null || nnfe[0] !== -2);
 
             if (this._target_conditions == null) {
                 throw new Error("Target object not available for BINDINGS constraint");
@@ -3048,7 +3048,7 @@ export class PoseEditMode extends GameMode {
                 }, isSatisfied, 0);
             }
 
-        } else if (type == ConstraintType.SCRIPT) {
+        } else if (type === ConstraintType.SCRIPT) {
             let nid: string = value;
 
             log.debug("TODO: SCRIPT constraint");
@@ -3071,7 +3071,7 @@ export class PoseEditMode extends GameMode {
             //                 if (ret.cause.value != null) value = ret.cause.value;
             //                 if (ret.cause.index != null) {
             //                     index = (ret.cause.index + 1).toString();
-            //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index == this._current_target_index ? 0 : -1);
+            //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index === this._current_target_index ? 0 : -1);
             //                     if (ll >= 0) {
             //                         if (ret.cause.highlight != null) {
             //                             Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
@@ -3119,13 +3119,13 @@ export class PoseEditMode extends GameMode {
 
     private checkConstraints(render: boolean = true): boolean {
         const constraints: string[] = this._puzzle.curConstraints;
-        if (constraints == null || constraints.length == 0) {
+        if (constraints == null || constraints.length === 0) {
             return false;
         }
 
         // let set_callback = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
         //     cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
-        //         pose._unstable_index = (pose._unstable_index == kk) ? -1 : kk;
+        //         pose._unstable_index = (pose._unstable_index === kk) ? -1 : kk;
         //         pose.checkConstraints();
         //     });
         // };
@@ -3155,17 +3155,17 @@ export class PoseEditMode extends GameMode {
             allAreSatisfied = allAreSatisfied && isSatisfied;
             allWereSatisfied = allWereSatisfied && wasSatisfied;
 
-            if (type == ConstraintType.SHAPE || type == ConstraintType.ANTISHAPE) {
+            if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
                 const target_index = Number(value);
                 if (!this._is_pip_mode) {
-                    box.display.alpha = (target_index == this._current_target_index) ? 1.0 : 0.3;
+                    box.display.alpha = (target_index === this._current_target_index) ? 1.0 : 0.3;
                 } else {
                     box.display.alpha = 1.0;
                 }
 
                 if (this._is_pip_mode && target_index > 0) {
                     box.display.visible = false;
-                } else if (this._puz_state == PuzzleState.GAME || this._puz_state == PuzzleState.CLEARED) {
+                } else if (this._puz_state === PuzzleState.GAME || this._puz_state === PuzzleState.CLEARED) {
                     box.display.visible = true;
                 }
             }
@@ -3186,13 +3186,13 @@ export class PoseEditMode extends GameMode {
             let curr: number = 0;
             let jj: number;
             for (jj = 0; jj < constraintsInfo.wrong_pairs.length; jj++) {
-                let stat: number = (constraintsInfo.wrong_pairs[jj] == 1 ? 1 : 0);
-                if ((curr ^ stat) != 0) {
+                let stat: number = (constraintsInfo.wrong_pairs[jj] === 1 ? 1 : 0);
+                if ((curr ^ stat) !== 0) {
                     unstable.push(jj - curr);
                     curr = stat;
                 }
             }
-            if ((unstable.length % 2) == 1) {
+            if ((unstable.length % 2) === 1) {
                 unstable.push(jj - 1);
             }
         }
@@ -3208,7 +3208,7 @@ export class PoseEditMode extends GameMode {
         const restricted_global: number[] = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let jj = this._is_pip_mode ? ii : (ii == 0 ? this._current_target_index : ii);
+            let jj = this._is_pip_mode ? ii : (ii === 0 ? this._current_target_index : ii);
             let restricted: number[];
             if (constraintsInfo.restricted_local && constraintsInfo.restricted_local[jj]) {
                 restricted = restricted_global.concat(constraintsInfo.restricted_local[jj]);
@@ -3220,9 +3220,9 @@ export class PoseEditMode extends GameMode {
         }
 
         if (allAreSatisfied && !allWereSatisfied) {
-            if (this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+            if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
                 Eterna.sound.play_se(Sounds.SoundAllConditions);
-            } else if (this._puz_state != PuzzleState.GAME) {
+            } else if (this._puz_state !== PuzzleState.GAME) {
                 Eterna.sound.play_se(Sounds.SoundCondition);
             }
         } else if (play_condition_music) {
@@ -3237,7 +3237,7 @@ export class PoseEditMode extends GameMode {
     private update_score(): void {
         this.autosave_data(null);
         // let dn: GameObject = (<GameObject>Application.instance.get_application_gui("Design Name"));
-        // if (dn != null) dn.visible = (this._stack_level == 0);
+        // if (dn != null) dn.visible = (this._stack_level === 0);
 
         let undo_block: UndoBlock = this.get_current_undo_block();
         let sequence: number[] = undo_block.get_sequence();
@@ -3246,7 +3246,7 @@ export class PoseEditMode extends GameMode {
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
-                if (ii == 0 && this._pose_state == PoseState.NATIVE && !this._is_pip_mode) {
+                if (ii === 0 && this._pose_state === PoseState.NATIVE && !this._is_pip_mode) {
                     this._poses[0].set_oligos(this.get_current_undo_block().get_target_oligos(),
                         this.get_current_undo_block().get_oligo_order(),
                         this.get_current_undo_block().get_oligos_paired());
@@ -3273,7 +3273,7 @@ export class PoseEditMode extends GameMode {
 
         } else {
             for (let ii = 0; ii < this._poses.length; ++ii) {
-                if (ii == 0 && this._pose_state == PoseState.TARGET && !this._is_pip_mode) {
+                if (ii === 0 && this._pose_state === PoseState.TARGET && !this._is_pip_mode) {
                     this._poses[0].set_oligos(this.get_current_undo_block().get_target_oligos(),
                         this.get_current_undo_block().get_target_oligo_order(),
                         this.get_current_undo_block().get_oligos_paired());
@@ -3311,7 +3311,7 @@ export class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             let jj: number;
 
-            if (ii == 0 && !this._is_pip_mode) {
+            if (ii === 0 && !this._is_pip_mode) {
                 jj = this._current_target_index;
             } else {
                 jj = ii;
@@ -3329,16 +3329,16 @@ export class PoseEditMode extends GameMode {
             if (Puzzle.is_oligo_type(this._target_conditions[jj]['type'])) {
                 this._poses[ii].set_oligo_malus(this._target_conditions[jj]['malus']);
                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-                if (nnfe != null && nnfe[0] == -2) {
+                if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].set_oligo_paired(true);
                     this._poses[ii].set_duplex_cost(nnfe[1] * 0.01);
                 } else {
                     this._poses[ii].set_oligo_paired(false);
                 }
             }
-            if (this._target_conditions[jj]['type'] == "multistrand") {
+            if (this._target_conditions[jj]['type'] === "multistrand") {
                 nnfe = this.get_current_undo_block(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-                if (nnfe != null && nnfe[0] == -2) {
+                if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].set_duplex_cost(nnfe[1] * 0.01);
                 }
             }
@@ -3374,13 +3374,13 @@ export class PoseEditMode extends GameMode {
         let is_there_temp_constraints: boolean = (this._puzzle.get_temporary_constraints() != null);
 
         if (constraints_satisfied && !is_there_temp_constraints) {
-            if (this._puzzle.get_puzzle_type() != PuzzleType.EXPERIMENTAL && this._puz_state == PuzzleState.GAME) {
+            if (this._puzzle.get_puzzle_type() !== PuzzleType.EXPERIMENTAL && this._puz_state === PuzzleState.GAME) {
                 this.submit_current_pose();
             }
         }
 
         //when constaints are satisfied, trigger publish hint animation
-        if (constraints_satisfied && !was_satisfied && this._puzzle.get_puzzle_type() == PuzzleType.EXPERIMENTAL) {
+        if (constraints_satisfied && !was_satisfied && this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
             log.debug("TODO: submit_button.respond()")
             // this._submit_button.respond(150, 160);
         }
@@ -3389,10 +3389,10 @@ export class PoseEditMode extends GameMode {
 
     private flash_constraint_for_target(target_index: number): void {
         let box: ConstraintBox = null;
-        if (target_index == 0 || !this._is_pip_mode) {
+        if (target_index === 0 || !this._is_pip_mode) {
             let constraints: string[] = this._puzzle.get_constraints();
             for (let ii: number = 0; ii < constraints.length; ii += 2) {
-                if (constraints[ii] == ConstraintType.SHAPE && Number(constraints[ii + 1]) == target_index) {
+                if (constraints[ii] === ConstraintType.SHAPE && Number(constraints[ii + 1]) === target_index) {
                     box = this._constraint_boxes[ii / 2];
                     break;
                 }
@@ -3420,8 +3420,8 @@ export class PoseEditMode extends GameMode {
             }
         }
         // we want 2 blocks (2x2) && same length && separated by at least 3 bases
-        if (segments.length == 4
-            && segments[1] - segments[0] == segments[3] - segments[2]
+        if (segments.length === 4
+            && segments[1] - segments[0] === segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
                 || EPars.has_cut(this._poses[target_index].get_full_sequence(), segments[1], segments[2]))) {
             /*
@@ -3460,8 +3460,8 @@ export class PoseEditMode extends GameMode {
                         num_wrong++;
                     }
                 }
-                if (dontcare_ok && num_wrong == 0) {
-                    if (num_unpaired == 0) {
+                if (dontcare_ok && num_wrong === 0) {
+                    if (num_unpaired === 0) {
                         for (let jj = segments[0]; jj <= segments[1]; jj++) {
                             this._target_pairs[xx][jj] = -1;
                         }
@@ -3471,7 +3471,7 @@ export class PoseEditMode extends GameMode {
                         Eterna.sound.play_se(Sounds.SoundRY);
                         this.flash_constraint_for_target(xx);
                         this._poses[target_index].clear_design_struct();
-                    } else if (num_unpaired == segments[1] - segments[0] + segments[3] - segments[2] + 2) {
+                    } else if (num_unpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
                         // breaking pairs is safe, but adding them may not always be
                         if (EPars.validate_parenthesis(EPars.pairs_array_to_parenthesis(this._target_pairs[xx]).slice(segments[1] + 1, segments[2]), false) == null) {
                             for (let jj = segments[0]; jj <= segments[1]; jj++) this._target_pairs[xx][jj] = segments[3] - (jj - segments[0]);
@@ -3526,7 +3526,7 @@ export class PoseEditMode extends GameMode {
         let last_shifted_command: number = this._poses[target_index].get_last_shifted_command();
         for (let ii: number = 0; ii < this._poses.length; ii++) {
             if (last_shifted_index > 0 && last_shifted_command >= 0) {
-                if (ii != target_index) {
+                if (ii !== target_index) {
                     this._poses[ii].base_shift_with_command(last_shifted_command, last_shifted_index);
                 }
 
@@ -3539,10 +3539,10 @@ export class PoseEditMode extends GameMode {
 
                 let anti_structure_constraints: any[] = this._target_conditions[ii]['anti_structure_constraints'];
                 if (anti_structure_constraints != null) {
-                    if (last_shifted_command == EPars.RNABASE_ADD_BASE) {
+                    if (last_shifted_command === EPars.RNABASE_ADD_BASE) {
                         let anti_structure_constraint: boolean = anti_structure_constraints[last_shifted_index];
                         anti_structure_constraints.splice(last_shifted_index, 0, anti_structure_constraint);
-                    } else if (last_shifted_command == EPars.RNABASE_DELETE) {
+                    } else if (last_shifted_command === EPars.RNABASE_DELETE) {
                         anti_structure_constraints.splice(last_shifted_index, 1);
                     }
                 }
@@ -3552,7 +3552,7 @@ export class PoseEditMode extends GameMode {
                     let constraint_val: boolean = structure_constraints[last_shifted_index];
                     let new_constraints: any[];
 
-                    if (last_shifted_command == EPars.RNABASE_ADD_BASE) {
+                    if (last_shifted_command === EPars.RNABASE_ADD_BASE) {
                         new_constraints = structure_constraints.slice(0, last_shifted_index);
                         new_constraints.push(constraint_val);
                         new_constraints = new_constraints.concat(structure_constraints.slice(last_shifted_index, structure_constraints.length));
@@ -3570,10 +3570,10 @@ export class PoseEditMode extends GameMode {
                     this._target_conditions[ii]['anti_secstruct'] = antiResult[0];
                 }
 
-                if (this._target_conditions[ii]['type'] == "aptamer") {
+                if (this._target_conditions[ii]['type'] === "aptamer") {
                     let binding_site: number[] = this._target_conditions[ii]['site'].slice(0);
                     let binding_pairs: number[] = [];
-                    if (last_shifted_command == EPars.RNABASE_ADD_BASE) {
+                    if (last_shifted_command === EPars.RNABASE_ADD_BASE) {
                         for (let ss: number = 0; ss < binding_site.length; ss++) {
                             if (binding_site[ss] >= last_shifted_index) {
                                 binding_site[ss]++;
@@ -3693,7 +3693,7 @@ export class PoseEditMode extends GameMode {
         let bonus: number;
         let sites: number[];
 
-        if (ii == 0) {
+        if (ii === 0) {
             /// Pushing undo block
             this._stack_level++;
             this._seq_stacks[this._stack_level] = [];
@@ -3706,23 +3706,23 @@ export class PoseEditMode extends GameMode {
 
         if (this._target_conditions[ii]) force_struct = this._target_conditions[ii]['force_struct'];
 
-        if (this._target_conditions[ii] == null || this._target_conditions[ii]['type'] == "single") {
+        if (this._target_conditions[ii] == null || this._target_conditions[ii]['type'] === "single") {
             log.debug("folding");
             best_pairs = this._folder.fold_sequence(this._puzzle.transform_sequence(seq, ii), null, force_struct);
 
-        } else if (this._target_conditions[ii]['type'] == "aptamer") {
+        } else if (this._target_conditions[ii]['type'] === "aptamer") {
             bonus = this._target_conditions[ii]['bonus'];
             sites = this._target_conditions[ii]['site'];
             best_pairs = this._folder.fold_sequence_with_binding_site(this._puzzle.transform_sequence(seq, ii), this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
 
-        } else if (this._target_conditions[ii]['type'] == "oligo") {
+        } else if (this._target_conditions[ii]['type'] === "oligo") {
             fold_mode = this._target_conditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._target_conditions[ii]['fold_mode'];
-            if (fold_mode == Pose2D.OLIGO_MODE_DIMER) {
+            if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.string_to_sequence_array("&" + this._target_conditions[ii]['oligo_sequence']));
                 malus = Number(this._target_conditions[ii]['malus'] * 100);
                 best_pairs = this._folder.cofold_sequence(full_seq, null, malus, force_struct);
-            } else if (fold_mode == Pose2D.OLIGO_MODE_EXT5P) {
+            } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']).concat(seq);
                 best_pairs = this._folder.fold_sequence(full_seq, null, force_struct);
             } else {
@@ -3730,16 +3730,16 @@ export class PoseEditMode extends GameMode {
                 best_pairs = this._folder.fold_sequence(full_seq, null, force_struct);
             }
 
-        } else if (this._target_conditions[ii]['type'] == "aptamer+oligo") {
+        } else if (this._target_conditions[ii]['type'] === "aptamer+oligo") {
             bonus = this._target_conditions[ii]['bonus'];
             sites = this._target_conditions[ii]['site'];
             fold_mode = this._target_conditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._target_conditions[ii]['fold_mode'];
-            if (fold_mode == Pose2D.OLIGO_MODE_DIMER) {
+            if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.string_to_sequence_array("&" + this._target_conditions[ii]['oligo_sequence']));
                 malus = Number(this._target_conditions[ii]['malus'] * 100);
                 best_pairs = this._folder.cofold_sequence_with_binding_site(full_seq, sites, bonus, force_struct, malus);
-            } else if (fold_mode == Pose2D.OLIGO_MODE_EXT5P) {
+            } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']).concat(seq);
                 best_pairs = this._folder.fold_sequence_with_binding_site(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
             } else {
@@ -3747,7 +3747,7 @@ export class PoseEditMode extends GameMode {
                 best_pairs = this._folder.fold_sequence_with_binding_site(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
             }
 
-        } else if (this._target_conditions[ii]['type'] == "multistrand") {
+        } else if (this._target_conditions[ii]['type'] === "multistrand") {
             let oligos: any[] = [];
             for (let jj: number = 0; jj < this._target_conditions[ii]['oligos'].length; jj++) {
                 oligos.push({
@@ -3767,7 +3767,7 @@ export class PoseEditMode extends GameMode {
             };
             let mfold: any = this._folder.get_cache(key);
 
-            if (mfold == null && this._force_synch == false) {
+            if (mfold == null && this._force_synch === false) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 let ops: PoseOp[] = this._folder.multifold_unroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
@@ -3836,7 +3836,7 @@ export class PoseEditMode extends GameMode {
 
             if (constraints != null) {
                 for (let ii = 0; ii < constraints.length; ii += 2) {
-                    if (constraints[ii] == ConstraintType.SHAPE) {
+                    if (constraints[ii] === ConstraintType.SHAPE) {
                         is_shape_constrained = true;
                     }
                 }
@@ -3845,7 +3845,7 @@ export class PoseEditMode extends GameMode {
             let pairs_diff: number[] = [];
 
             for (let ii = 0; ii < best_pairs.length; ii++) {
-                if (last_best_pairs[ii] == best_pairs[ii]) {
+                if (last_best_pairs[ii] === best_pairs[ii]) {
                     pairs_diff[ii] = 0;
                 } else if (best_pairs[ii] < 0 && last_best_pairs[ii] >= 0) {
                     pairs_diff[ii] = -1;
@@ -3864,12 +3864,12 @@ export class PoseEditMode extends GameMode {
                 let stack_start: number = -1;
                 let last_other_stack: number = -1;
                 for (let ii = 0; ii < best_pairs.length; ii++) {
-                    if (pairs_diff[ii] > 0 && ((!is_shape_constrained && this._pose_state == PoseState.NATIVE) || (best_pairs[ii] == this._target_pairs[target_index][ii]))) {
+                    if (pairs_diff[ii] > 0 && ((!is_shape_constrained && this._pose_state === PoseState.NATIVE) || (best_pairs[ii] === this._target_pairs[target_index][ii]))) {
                         if (stack_start < 0) {
                             stack_start = ii;
                             last_other_stack = best_pairs[ii];
                         } else {
-                            if (best_pairs[ii] != last_other_stack - 1) {
+                            if (best_pairs[ii] !== last_other_stack - 1) {
                                 this._poses[target_index].praise_stack(stack_start, ii - 1);
                                 stack_start = ii;
                             }
@@ -4037,21 +4037,21 @@ export class PoseEditMode extends GameMode {
     }
 
     // private on_ctx_menu_item(event: ContextMenuEvent): void {
-    //     if (event.target == this._view_options_cmi) {
+    //     if (event.target === this._view_options_cmi) {
     //         Application.instance.get_application_gui("View options").open_view_options();
-    //     } else if (event.target == this._view_solutions_cmi) {
+    //     } else if (event.target === this._view_solutions_cmi) {
     //         Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this._puzzle.get_node_id()]);
-    //     } else if (event.target == this._submit_cmi) {
+    //     } else if (event.target === this._submit_cmi) {
     //         this.submit_current_pose();
-    //     } else if (event.target == this._spec_cmi) {
+    //     } else if (event.target === this._spec_cmi) {
     //         this.show_spec();
-    //     } else if (event.target == this._reset_cmi) {
+    //     } else if (event.target === this._reset_cmi) {
     //         this.ask_retry();
-    //     } else if (event.target == this._copy_cmi) {
+    //     } else if (event.target === this._copy_cmi) {
     //         Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
-    //     } else if (event.target == this._paste_cmi) {
+    //     } else if (event.target === this._paste_cmi) {
     //          this.showPasteSequenceDialog();
-    //     } else if (event.target == this._beam_cmi) {
+    //     } else if (event.target === this._beam_cmi) {
     //         let _this: PoseEditMode = this;
     //         _this.transfer_to_puzzlemaker();
     //     }

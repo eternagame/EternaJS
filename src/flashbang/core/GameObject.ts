@@ -25,7 +25,7 @@ export class GameObject extends GameObjectBase {
     public getNamedObject(name: string): GameObjectBase {
         let cur: GameObjectRef = this._children;
         while (cur != null) {
-            if (cur._obj != null && cur._obj._name == name) {
+            if (cur._obj != null && cur._obj._name === name) {
                 return cur._obj;
             }
             cur = cur._next;
@@ -38,7 +38,7 @@ export class GameObject extends GameObjectBase {
     }
 
     public removeObject(obj: GameObjectBase): void {
-        Assert.isTrue(obj._parent == this, "We don't own this object");
+        Assert.isTrue(obj._parent === this, "We don't own this object");
 
         // We may be in the middle of being removed ourselves, in which case this object
         // will be removed automatically.
@@ -55,7 +55,7 @@ export class GameObject extends GameObjectBase {
             prev._next = next;
         } else {
             // if prev is null, ref was the head of the list
-            Assert.isTrue(ref == this._children);
+            Assert.isTrue(ref === this._children);
             this._children = next;
         }
 
@@ -72,7 +72,7 @@ export class GameObject extends GameObjectBase {
     }
 
     public removeNamedObjects(name: string): void {
-        this.removeObjects((obj: GameObjectBase): boolean => obj._name == name);
+        this.removeObjects((obj: GameObjectBase): boolean => obj._name === name);
     }
 
     protected removeObjects(pred: (obj: GameObjectBase) => boolean): void {

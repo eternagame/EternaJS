@@ -90,6 +90,6 @@ export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
      * be performed if a force is not requested.
      */
     protected valuesAreEqual(value1: T, value2: T): boolean {
-        return value1 == value2;
+        return value1 === value2;
     }
 }

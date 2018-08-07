@@ -62,7 +62,7 @@ export class Puzzle {
         this._name = puzname;
         this._puzzle_type = puzzle_type;
 
-        if (puzzle_type == PuzzleType.EXPERIMENTAL) {
+        if (puzzle_type === PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.get_last_used_folder();
         } else {
             this._folder = Vienna.NAME;
@@ -118,7 +118,7 @@ export class Puzzle {
     }
 
     public get_puzzle_name(linked: boolean = false): string {
-        if (linked && this._puzzle_type != PuzzleType.EXPERIMENTAL) {
+        if (linked && this._puzzle_type !== PuzzleType.EXPERIMENTAL) {
             let url: string = EternaURL.generate_url({page: "puzzle", nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
         }
@@ -222,7 +222,7 @@ export class Puzzle {
     public has_target_type(tc_type: string): boolean {
         if (this._target_conditions == null) return false;
         for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]["type"] == tc_type) {
+            if (this._target_conditions[ii]["type"] === tc_type) {
                 return true;
             }
         }
@@ -258,7 +258,7 @@ export class Puzzle {
 
             // Simple oligos
 
-            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii].hasOwnProperty("fold_mode") == false) {
+            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii].hasOwnProperty("fold_mode") === false) {
                 this._target_conditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER;
             }
 
@@ -274,7 +274,7 @@ export class Puzzle {
 
             // Multi-strands
 
-            if (this._target_conditions[ii]["type"] == "multistrand") {
+            if (this._target_conditions[ii]["type"] === "multistrand") {
                 let oligos: any[] = this._target_conditions[ii]["oligos"];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
@@ -318,14 +318,14 @@ export class Puzzle {
         this._use_modes = 0;
 
         for (let ii: number = 0; ii < ui_spec.length; ii++) {
-            if (ui_spec[ii] == "NOMODES") {
+            if (ui_spec[ii] === "NOMODES") {
                 this._use_modes = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] == "STARTSTATE") {
+            } else if (ui_spec[ii] === "STARTSTATE") {
                 this._defaultPoseState = <PoseState>(ui_spec[ii + 1].toUpperCase());
                 ii++;
-            } else if (ui_spec[ii] == "NOTOOLS") {
+            } else if (ui_spec[ii] === "NOTOOLS") {
                 this._use_tools = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] == "NOPALLETE") {
+            } else if (ui_spec[ii] === "NOPALLETE") {
                 this._use_pallete = Puzzle.BOOL_FALSE;
             }
         }
@@ -429,9 +429,9 @@ export class Puzzle {
         let antishapes: boolean[] = [];
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] == ConstraintType.SHAPE) {
+            if (constraints[ii] === ConstraintType.SHAPE) {
                 shapes[Number(constraints[ii + 1])] = true;
-            } else if (constraints[ii] == ConstraintType.ANTISHAPE) {
+            } else if (constraints[ii] === ConstraintType.ANTISHAPE) {
                 antishapes[Number(constraints[ii + 1])] = true;
             }
         }
@@ -449,12 +449,12 @@ export class Puzzle {
         }
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] != ConstraintType.SHAPE
-                && constraints[ii] != ConstraintType.SOFT
-                && constraints[ii] != ConstraintType.ANTISHAPE) {
+            if (constraints[ii] !== ConstraintType.SHAPE
+                && constraints[ii] !== ConstraintType.SOFT
+                && constraints[ii] !== ConstraintType.ANTISHAPE) {
                 this._constraints.push(constraints[ii]);
                 this._constraints.push(constraints[ii + 1]);
-            } else if (constraints[ii] == ConstraintType.SOFT) {
+            } else if (constraints[ii] === ConstraintType.SOFT) {
                 this._is_soft_constraint = true;
             }
         }
@@ -489,18 +489,18 @@ export class Puzzle {
     }
 
     public is_undo_zoom_allowed(): boolean {
-        if (this._use_tools != 0) {
-            return this._use_tools == Puzzle.BOOL_TRUE;
+        if (this._use_tools !== 0) {
+            return this._use_tools === Puzzle.BOOL_TRUE;
         }
 
         return true;
     }
 
     public is_pair_brush_allowed(): boolean {
-        let is_basic: boolean = (this._puzzle_type != PuzzleType.BASIC);
+        let is_basic: boolean = (this._puzzle_type !== PuzzleType.BASIC);
         let has_target: boolean = false;
         for (let ii: number = 0; ii < this._constraints.length; ii++) {
-            if (this._constraints[ii] == ConstraintType.SHAPE) {
+            if (this._constraints[ii] === ConstraintType.SHAPE) {
                 has_target = true;
             }
         }
@@ -509,15 +509,15 @@ export class Puzzle {
     }
 
     public are_modes_available(): boolean {
-        if (this._use_modes != 0) {
-            return this._use_modes == Puzzle.BOOL_TRUE;
+        if (this._use_modes !== 0) {
+            return this._use_modes === Puzzle.BOOL_TRUE;
         }
         return true;
     }
 
     public is_pallete_allowed(): boolean {
-        if (this._use_pallete != 0) {
-            return this._use_pallete == Puzzle.BOOL_TRUE;
+        if (this._use_pallete !== 0) {
+            return this._use_pallete === Puzzle.BOOL_TRUE;
         }
         return true;
     }
@@ -525,7 +525,7 @@ export class Puzzle {
     public default_mode(): PoseState {
         if (this._defaultPoseState != null) {
             return this._defaultPoseState;
-        } else if (this._puzzle_type != PuzzleType.BASIC) {
+        } else if (this._puzzle_type !== PuzzleType.BASIC) {
             return PoseState.TARGET;
         } else {
             return PoseState.FROZEN;
@@ -571,7 +571,7 @@ export class Puzzle {
 
                 let locks: boolean[] = this.get_puzzle_locks();
 
-                if (locks.length != target_seq.length || target_seq.length != seq.length) {
+                if (locks.length !== target_seq.length || target_seq.length !== seq.length) {
                     throw new Error("lock length doesn't match object sequence");
                 }
 

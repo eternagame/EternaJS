@@ -86,7 +86,7 @@ class PaintCursor extends GameObject implements Updatable {
             oc = PaintCursor.NULL;
         }
 
-        if (oc != PaintCursor.NULL) {
+        if (oc !== PaintCursor.NULL) {
             this._graphics.beginFill(ic, 0);
             this._graphics.lineStyle(4, oc, 0.5);
             this._graphics.drawCircle(0, 0, 8 + 3 * Math.cos(this.mode.time / 300.0));

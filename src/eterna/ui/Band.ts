@@ -37,10 +37,10 @@ export class Band extends ContainerObject implements Updatable {
     }
 
     public set_strength(strength: number): void {
-        if (strength == 1) {
+        if (strength === 1) {
             this._st0.texture = Band._satellite_bitmap;
             this._st1.texture = Band._satellite_invert;
-        } else if (strength == 2) {
+        } else if (strength === 2) {
             this._st0.texture = Band._satellite_stronger_bitmap;
             this._st1.texture = Band._satellite_stronger_invert;
         } else {

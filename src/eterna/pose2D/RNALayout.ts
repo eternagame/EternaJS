@@ -60,7 +60,7 @@ export class RNALayout {
         }
         this._bi_pairs[0] = bi_pairs.length;
 
-        if (dangling_start == bi_pairs.length) {
+        if (dangling_start === bi_pairs.length) {
             return;
         }
 
@@ -141,7 +141,7 @@ export class RNALayout {
 
     /// DO NOT remove these _old methods until the new ones (below) are fully validated
     public score_tree_old(seq: number[], folder: Folder): void {
-        if (this._bi_pairs == null || seq.length != (this._bi_pairs.length - 1)) {
+        if (this._bi_pairs == null || seq.length !== (this._bi_pairs.length - 1)) {
             throw new Error("Layout tree is not properly setup for scoring " + this._bi_pairs.length + " " + seq.length);
         }
 
@@ -180,7 +180,7 @@ export class RNALayout {
         }
 
         let newnode: RNATreeNode;
-        if (bi_pairs[start_index] == end_index) {
+        if (bi_pairs[start_index] === end_index) {
             newnode = new RNATreeNode;
             newnode._is_pair = true;
             newnode._index_a = start_index;
@@ -239,7 +239,7 @@ export class RNALayout {
         rootnode._go_x = go_x;
         rootnode._go_y = go_y;
 
-        if (rootnode._children.length == 1) {
+        if (rootnode._children.length === 1) {
             rootnode._x = start_x;
             rootnode._y = start_y;
 
@@ -327,7 +327,7 @@ export class RNALayout {
                 throw new Error("Pair node should never have more than one child");
             }
 
-            if (rootnode._children.length == 0) {
+            if (rootnode._children.length === 0) {
                 throw new Error("Pair node can't be childless");
             }
 
@@ -373,7 +373,7 @@ export class RNALayout {
             }
             let i: number, j: number, p: number, q: number;
 
-            if (num_stacks == 1 && parentnode != null) {
+            if (num_stacks === 1 && parentnode != null) {
 
                 i = parentnode._index_a + 1;
                 j = parentnode._index_b + 1;
@@ -384,7 +384,7 @@ export class RNALayout {
                 type2 = EPars.pair_type(S[q], S[p]);
                 rootnode._score = folder.loop_energy(p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true);
 
-            } else if (num_stacks == 0) {
+            } else if (num_stacks === 0) {
                 i = parentnode._index_a + 1;
                 j = parentnode._index_b + 1;
 
@@ -394,7 +394,7 @@ export class RNALayout {
 
                 i = parentnode._index_a + 1;
                 let cuti: number = folder.cut_in_loop(i);
-                rootnode._score = (cuti == 0) ? folder.ml_energy(this._bi_pairs, S, i, false) : folder.ml_energy(this._bi_pairs, S, cuti, true);
+                rootnode._score = (cuti === 0) ? folder.ml_energy(this._bi_pairs, S, i, false) : folder.ml_energy(this._bi_pairs, S, cuti, true);
             }
 
             for (ii = 0; ii < rootnode._children.length; ii++) {
@@ -413,7 +413,7 @@ export class RNALayout {
                 throw new Error("Pair node should never have more than one child");
             }
 
-            if (rootnode._children.length == 0) {
+            if (rootnode._children.length === 0) {
                 throw new Error("Pair node can't be childless");
             }
 
@@ -456,9 +456,9 @@ export class RNALayout {
             }
             let i: number, j: number, p: number, q: number;
 
-            if (num_stacks == 1 && parentnode != null) {
+            if (num_stacks === 1 && parentnode != null) {
                 rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
-            } else if (num_stacks == 0) {
+            } else if (num_stacks === 0) {
                 rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
             } else if (num_stacks > 1 && parentnode != null) {
                 rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
@@ -473,7 +473,7 @@ export class RNALayout {
     /// FIXME: there's surely a smarter way to do this...
     private static lookup_fe(nnfe: number[], index: number): number {
         for (let ii: number = 0; ii < nnfe.length - 1; ii += 2) {
-            if (nnfe[ii] == index) return nnfe[ii + 1];
+            if (nnfe[ii] === index) return nnfe[ii + 1];
         }
         return 0;
     }

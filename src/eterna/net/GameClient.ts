@@ -15,7 +15,7 @@ export class GameClient {
         return this.get("/eterna_authenticate.php")
             .then(rsp => rsp.text())
             .then((res) => {
-                if (res == "NOT LOGGED IN") {
+                if (res === "NOT LOGGED IN") {
                     return Promise.resolve<[string, number]>(["Anonymous", 0]);
                 } else {
                     try {
@@ -103,9 +103,9 @@ export class GameClient {
 
     public toggle_solution_vote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
         let post_params: any = {solnid: solution_nid, puznid};
-        if (myVotes == 1) {
+        if (myVotes === 1) {
             post_params["type"] = "unvote";
-        } else if (myVotes == 0) {
+        } else if (myVotes === 0) {
             post_params["type"] = "vote";
         } else {
             throw new Error("Wrong vote value - can't submit");

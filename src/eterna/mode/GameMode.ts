@@ -142,7 +142,7 @@ export abstract class GameMode extends AppMode {
         } else {
             for (let ii = 0; ii < this._pose_fields.length; ii++) {
                 let poseField = this._pose_fields[ii];
-                if (ii == 0) {
+                if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
                     poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;

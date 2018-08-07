@@ -85,7 +85,7 @@ export abstract class Folder {
     //     if (this._clib_inst != null) {
     //         let cb: Function = function (e: Event): void {
     //             let res: boolean = false;
-    //             if (e.type != IOErrorEvent.IO_ERROR) {
+    //             if (e.type !== IOErrorEvent.IO_ERROR) {
     //                 res = this.load_parameters_from_buffer(e.target.data);
     //             }
     //             if (done_cb != null) done_cb(res);

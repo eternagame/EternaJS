@@ -128,6 +128,6 @@ export class PoseUtil {
     }
 
     private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
-        return (s1 == type1 && s2 == type2) || (s1 == type2 && s2 == type1);
+        return (s1 === type1 && s2 === type2) || (s1 === type2 && s2 === type1);
     }
 }

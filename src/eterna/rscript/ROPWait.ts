@@ -26,11 +26,11 @@ export class ROPWait extends RScriptOp {
     }
 
     public static NotifyClickUI(id: RScriptUIElementID): void {
-        ROPWait.GenericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => (op.GetElements().indexOf(id) != -1));
+        ROPWait.GenericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => (op.GetElements().indexOf(id) !== -1));
     }
 
     public static NotifyNucleotideChange(i: number, inColor: number): void {
-        if (i == -1) {
+        if (i === -1) {
             return;
         }
 
@@ -81,7 +81,7 @@ export class ROPWait extends RScriptOp {
     }
 
     public static NotifyTextboxProgress(id: string): void {
-        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.GetId() + ROPTextbox.id_postfix == id));
+        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.GetId() + ROPTextbox.id_postfix === id));
     }
 
     public static NotifyFinishRNA(): void {
@@ -137,7 +137,7 @@ export class ROPWait extends RScriptOp {
 
     /* override */
     public IsPaused(): boolean {
-        if (this._waitType == ROPWaitType.NUCLEOTIDEPAIR) {
+        if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
             let paired: number = this._env.GetRNA().get_pairs()[this._start_idx];
             if (paired < 0) {
                 return true;
@@ -150,30 +150,30 @@ export class ROPWait extends RScriptOp {
                 this._env.GetRNA().get_base(paired).get_type()
             ).toUpperCase();
 
-            return !((t1 == this._color1 && t2 == this._color2) || (t2 == this._color1 && t1 == this._color2));
-        } else if (this._waitType == ROPWaitType.NUCLEOTIDECHANGE && !this._condition_clear) {
+            return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
+        } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (RScriptEnv.ConvertNucleotideIntToString(
                     this._env.GetRNA().get_base(ii).get_type()
-                ).toUpperCase() != this._expected_color) {
+                ).toUpperCase() !== this._expected_color) {
                     return true;
                 }
             }
             return false;
-        } else if (this._waitType == ROPWaitType.TIME && !this._condition_clear) {
+        } else if (this._waitType === ROPWaitType.TIME && !this._condition_clear) {
             let now: number = new Date().getTime();
             if (now < this._start_time + this._delay) {
                 return true;
             }
             this.ClearCondition();
-        } else if (this._waitType == ROPWaitType.BLACKMARK && !this._condition_clear) {
+        } else if (this._waitType === ROPWaitType.BLACKMARK && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (!this._env.GetRNA().is_tracked_index(ii)) {
                     return true;
                 }
             }
             this.ClearCondition();
-        } else if (this._waitType == ROPWaitType.BLUEMARK && !this._condition_clear) {
+        } else if (this._waitType === ROPWaitType.BLUEMARK && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (!this._env.GetRNA().is_design_structure_highlighted(ii)) {
                     return true;
@@ -193,17 +193,17 @@ export class ROPWait extends RScriptOp {
             this._all_nucleotides_completed = [];
         }
 
-        if (this._expected_color && color != this._expected_color && color != "") {
+        if (this._expected_color && color !== this._expected_color && color !== "") {
             return false;
         }
 
-        if (this._waitType == ROPWaitType.MUTATION) {
-            return (this._elements.indexOf(i) != -1);
+        if (this._waitType === ROPWaitType.MUTATION) {
+            return (this._elements.indexOf(i) !== -1);
         }
 
         this._all_nucleotides_completed.push(i);
         for (let x: number = this._start_idx; x <= this._end_idx; ++x) {
-            if (this._all_nucleotides_completed.indexOf(x) == -1) {
+            if (this._all_nucleotides_completed.indexOf(x) === -1) {
                 return false;
             }
         }
@@ -219,14 +219,14 @@ export class ROPWait extends RScriptOp {
             this._all_nucleotides_completed.push(i);
         } else {
             let pos: number = this._all_nucleotides_completed.indexOf(i);
-            while (pos != -1) {
+            while (pos !== -1) {
                 this._all_nucleotides_completed.splice(pos, 1);
                 pos = this._all_nucleotides_completed.indexOf(i);
             }
         }
 
         for (let x: number = this._start_idx; x <= this._end_idx; ++x) {
-            if (this._all_nucleotides_completed.indexOf(x) == -1) {
+            if (this._all_nucleotides_completed.indexOf(x) === -1) {
                 return false;
             }
         }
@@ -255,28 +255,28 @@ export class ROPWait extends RScriptOp {
     protected ParseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
-            if (this._waitType == ROPWaitType.CLICKUI) {
+            if (this._waitType === ROPWaitType.CLICKUI) {
                 this._elements.push(this._env.GetStringRef(arg).toUpperCase());
-            } else if (this._waitType == ROPWaitType.TEXTBOX) {
+            } else if (this._waitType === ROPWaitType.TEXTBOX) {
                 this._id = this._env.GetStringRef(arg);
-            } else if (this._waitType == ROPWaitType.MUTATION) {
-                if ("AUGC".indexOf(arg.toUpperCase()) != -1) {
+            } else if (this._waitType === ROPWaitType.MUTATION) {
+                if ("AUGC".indexOf(arg.toUpperCase()) !== -1) {
                     this._expected_color = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
                 } else {
                     this._elements.push(Number(arg) - 1);
                 }
-            } else if (this._waitType == ROPWaitType.TIME) {
+            } else if (this._waitType === ROPWaitType.TIME) {
                 this._delay = Number(arg);
             } else {
                 this._start_idx = Number(arg) - 1;
             }
             break;
         case 1:
-            if (this._waitType == ROPWaitType.CLICKUI) {
+            if (this._waitType === ROPWaitType.CLICKUI) {
                 this._elements.push(this._env.GetStringRef(arg).toUpperCase());
-            } else if (this._waitType == ROPWaitType.NUCLEOTIDEPAIR) {
+            } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
                 this._color1 = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
-            } else if (this._waitType == ROPWaitType.MUTATION) {
+            } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {
                 this._end_idx = Number(arg) - 1;
@@ -284,31 +284,31 @@ export class ROPWait extends RScriptOp {
 
             break;
         case 2:
-            if (this._waitType == ROPWaitType.CLICKUI) {
+            if (this._waitType === ROPWaitType.CLICKUI) {
                 this._elements.push(this._env.GetStringRef(arg).toUpperCase());
-            } else if (this._waitType == ROPWaitType.NUCLEOTIDECHANGE) {
+            } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE) {
                 this._expected_color = this._env.GetStringRef(arg);
-            } else if (this._waitType == ROPWaitType.PAINT) {
+            } else if (this._waitType === ROPWaitType.PAINT) {
                 this._id = this._env.GetStringRef(arg);
-            } else if (this._waitType == ROPWaitType.NUCLEOTIDEPAIR) {
+            } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
                 this._color2 = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
-            } else if (this._waitType == ROPWaitType.MUTATION) {
+            } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             }
             break;
         case 3:
-            if (this._waitType == ROPWaitType.CLICKUI) {
+            if (this._waitType === ROPWaitType.CLICKUI) {
                 this._elements.push(this._env.GetStringRef(arg).toUpperCase());
-            } else if (this._waitType == ROPWaitType.MUTATION) {
+            } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {
                 this._expected_color = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
             }
             break;
         default:
-            if (this._waitType == ROPWaitType.CLICKUI) {
+            if (this._waitType === ROPWaitType.CLICKUI) {
                 this._elements.push(this._env.GetStringRef(arg).toUpperCase());
-            } else if (this._waitType == ROPWaitType.MUTATION) {
+            } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {
                 throw new Error("Too many arguments for a ROP Wait Instruction");
@@ -341,7 +341,7 @@ export class ROPWait extends RScriptOp {
     }
 
     private static NotifyMark(mark_type: ROPWaitType, i: number, marked: boolean): void {
-        if (i == -1) {
+        if (i === -1) {
             return;
         }
 

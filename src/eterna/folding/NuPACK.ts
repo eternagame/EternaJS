@@ -109,7 +109,7 @@ export class NuPACK extends Folder {
 
         let cut: number = seq.lastIndexOf(EPars.RNABASE_CUT);
         if (cut >= 0) {
-            if (cache.nodes[0] != -2 || cache.nodes.length == 2 || (cache.nodes[0] == -2 && cache.nodes[2] != -1)) {
+            if (cache.nodes[0] !== -2 || cache.nodes.length === 2 || (cache.nodes[0] === -2 && cache.nodes[2] !== -1)) {
                 // we just scored a duplex that wasn't one, so we have to redo it properly
                 let seqA: number[] = seq.slice(0, cut);
                 let pairsA: number[] = pairs.slice(0, cut);
@@ -126,7 +126,7 @@ export class NuPACK extends Folder {
                 let nodesB: number[] = [];
                 let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
-                if (nodesA[0] >= 0 || nodesB[0] != -1) {
+                if (nodesA[0] >= 0 || nodesB[0] !== -1) {
                     throw new Error("Something went terribly wrong in score_structures()");
                 }
 
@@ -134,7 +134,7 @@ export class NuPACK extends Folder {
                 for (let ii = 0; ii < nodesA.length; ii++) {
                     cache.nodes[ii] = nodesA[ii];
                 }
-                if (cache.nodes[0] == -2) {
+                if (cache.nodes[0] === -2) {
                     cache.nodes[3] += nodesB[1]; // combine the free energies of the external loops
                 } else {
                     cache.nodes[1] += nodesB[1]; // combine the free energies of the external loops
@@ -148,7 +148,7 @@ export class NuPACK extends Folder {
             } else {
                 cut = 0;
                 for (let ii = 0; ii < cache.nodes.length; ii += 2) {
-                    if (seq[ii / 2] == EPars.RNABASE_CUT) {
+                    if (seq[ii / 2] === EPars.RNABASE_CUT) {
                         cut++;
                     } else {
                         cache.nodes[ii] += cut;
@@ -209,7 +209,7 @@ export class NuPACK extends Folder {
         let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index == 1) {
+            if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
             } else {
@@ -309,7 +309,7 @@ export class NuPACK extends Folder {
         let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index == 1) {
+            if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
             } else {
@@ -395,7 +395,7 @@ export class NuPACK extends Folder {
                     ms_seq = ms_seq.concat(oligos[order[jj]].seq);
                 }
                 let ms_pairs: number[];
-                if (ii == 0) {
+                if (ii === 0) {
                     ms_pairs = this.fold_sequence(ms_seq, null, null, temp);
                 } else {
                     ms_pairs = this.cofold_seq2(ms_seq, null, null, temp);
@@ -453,7 +453,7 @@ export class NuPACK extends Folder {
                     ms_seq = ms_seq.concat(oligos[order[jj]].seq);
                 }
 
-                if (ii == 0) {
+                if (ii === 0) {
                     ops.push(new PoseOp(null, () => this.fold_sequence(ms_seq, null, null, temp)));
                 } else {
                     ops.push(new PoseOp(null, () => this.cofold_seq2(ms_seq, null, null, temp)));

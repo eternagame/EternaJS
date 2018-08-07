@@ -55,7 +55,7 @@ export class GamePanel extends BaseGamePanel {
             return;
         }
 
-        if (this._panel_type == GamePanelType.INVISIBLE) {
+        if (this._panel_type === GamePanelType.INVISIBLE) {
             this._background.beginFill(0x000000, 0);
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();

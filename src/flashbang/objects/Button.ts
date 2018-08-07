@@ -51,11 +51,11 @@ export abstract class Button extends ContainerObject implements Enableable {
     }
 
     public get enabled(): boolean {
-        return (this._state != ButtonState.DISABLED);
+        return (this._state !== ButtonState.DISABLED);
     }
 
     public set enabled(val: boolean) {
-        if (val != this.enabled) {
+        if (val !== this.enabled) {
             this.setState(val ? ButtonState.UP : ButtonState.DISABLED);
         }
     }
@@ -70,7 +70,7 @@ export abstract class Button extends ContainerObject implements Enableable {
 
             // We can be destroyed as the result of the clicked signal, so ensure we're still
             // live before proceeding
-            if (this.isLiveObject && this._state != ButtonState.DOWN) {
+            if (this.isLiveObject && this._state !== ButtonState.DOWN) {
                 this.addObject(new SerialTask(
                     new CallbackTask(() => {
                         this.showState(ButtonState.DOWN);
@@ -115,7 +115,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
-            if (e.type == "pointerup" || e.type == "pointerupoutside") {
+            if (e.type === "pointerup" || e.type === "pointerupoutside") {
                 // Pointer released. Were we clicked?
                 let wasClicked: boolean = this.hitTest(e.data.global);
 
@@ -127,7 +127,7 @@ export abstract class Button extends ContainerObject implements Enableable {
                 if (wasClicked) {
                     this.clicked.emit();
                 }
-            } else if (e.type == "pointercancel") {
+            } else if (e.type === "pointercancel") {
                 this.endCapture(true);
             } else {
                 this.onPointerMove(e);
@@ -152,21 +152,21 @@ export abstract class Button extends ContainerObject implements Enableable {
     }
 
     protected set isPointerDown(val: boolean) {
-        if (this._isPointerDown != val) {
+        if (this._isPointerDown !== val) {
             this._isPointerDown = val;
             this.updateEnabledState();
         }
     }
 
     protected set isPointerOver(val: boolean) {
-        if (this._isPointerOver != val) {
+        if (this._isPointerOver !== val) {
             this._isPointerOver = val;
             this.updateEnabledState();
         }
     }
 
     protected updateEnabledState(): void {
-        if (this._state == ButtonState.DISABLED) {
+        if (this._state === ButtonState.DISABLED) {
             return;
         }
 
@@ -178,10 +178,10 @@ export abstract class Button extends ContainerObject implements Enableable {
     }
 
     protected setState(newState: ButtonState): void {
-        if (this._state != newState) {
+        if (this._state !== newState) {
             let oldState: ButtonState = this._state;
             this._state = newState;
-            if (this._state == ButtonState.DISABLED) {
+            if (this._state === ButtonState.DISABLED) {
                 this.endCapture();
             }
             this.showState(this._state);
@@ -200,7 +200,7 @@ export abstract class Button extends ContainerObject implements Enableable {
      */
     protected playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
         // TODO: make SoundManager part of Flashbang
-        if (toState == ButtonState.DOWN && this.downSound != null) {
+        if (toState === ButtonState.DOWN && this.downSound != null) {
             Eterna.sound.play_se(this.downSound);
         }
     }

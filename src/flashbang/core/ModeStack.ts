@@ -160,7 +160,7 @@ export class ModeStack {
         };
 
         const doRemoveMode = (index: number) => {
-            if (this._modeStack.length == 0) {
+            if (this._modeStack.length === 0) {
                 throw new Error("Can't remove a mode from an empty stack");
             }
 
@@ -173,7 +173,7 @@ export class ModeStack {
 
             // if the top mode is removed, make sure it's exited first
             let mode: AppMode = this._modeStack[index];
-            if (mode == initialTopMode) {
+            if (mode === initialTopMode) {
                 initialTopMode.exitInternal();
                 initialTopMode = null;
             }
@@ -213,13 +213,13 @@ export class ModeStack {
 
             case ModeTransition.UNWIND:
                 // pop modes until we find the one we're looking for
-                while (this._modeStack.length > 0 && this.topMode != mode) {
+                while (this._modeStack.length > 0 && this.topMode !== mode) {
                     doRemoveMode(-1);
                 }
 
-                Assert.isTrue(this.topMode == mode || this._modeStack.length == 0);
+                Assert.isTrue(this.topMode === mode || this._modeStack.length === 0);
 
-                if (this._modeStack.length == 0 && mode != null) {
+                if (this._modeStack.length === 0 && mode != null) {
                     doPushMode(mode);
                 }
                 break;
@@ -227,7 +227,7 @@ export class ModeStack {
         }
 
         let topMode: AppMode = this.topMode;
-        if (topMode != initialTopMode) {
+        if (topMode !== initialTopMode) {
             if (initialTopMode != null) {
                 initialTopMode.exitInternal();
             }

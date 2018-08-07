@@ -36,9 +36,9 @@ export class Vector2 {
     /** Creates a vector from polar coordinates */
     public static fromPolar(magnitude: number, angle: number, out: Vector2 = null): Vector2 {
         return (out || new Vector2()).set(
-            Math.cos(angle) * magnitude, // == mag * (cos(angle)*x - sin(angle)*y)
+            Math.cos(angle) * magnitude, // === mag * (cos(angle)*x - sin(angle)*y)
             Math.sin(angle) * magnitude
-        ); // == mag * (sin(angle)*x + cos(angle)*y)
+        ); // === mag * (sin(angle)*x + cos(angle)*y)
     }
 
     /**
@@ -60,7 +60,7 @@ export class Vector2 {
      * Result will be in range [0, pi].
      */
     public static smallerAngleBetween(v1: Vector2, v2: Vector2): number {
-        // v1 dot v2 == |v1||v2|cos(theta)
+        // v1 dot v2 === |v1||v2|cos(theta)
         // theta = acos ((v1 dot v2) / (|v1||v2|))
 
         const dot: number = v1.dot(v2);
@@ -78,7 +78,7 @@ export class Vector2 {
 
     /** Return true if this is the zero Vector */
     public get isZero(): boolean {
-        return (this.x == 0 && this.y == 0);
+        return (this.x === 0 && this.y === 0);
     }
 
     /** Sets the vector's components to the given values. */
@@ -274,7 +274,7 @@ export class Vector2 {
     /** Returns true if this vector is exactly equal to v. */
     public equals(obj: Object): boolean {
         const v: Vector2 = (<Vector2>obj);
-        return (v != null && this.x == v.x && this.y == v.y);
+        return (v != null && this.x === v.x && this.y === v.y);
     }
 
     /** Returns true if this Vector's components are equal to v within epsilon */

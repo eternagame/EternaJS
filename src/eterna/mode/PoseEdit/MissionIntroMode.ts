@@ -206,7 +206,7 @@ export class MissionIntroMode extends AppMode {
     }
 
     private setPuzzleThumbnail(index: number): void {
-        if (this._curThumbnail == index) {
+        if (this._curThumbnail === index) {
             return;
         }
         this._curThumbnail = index;

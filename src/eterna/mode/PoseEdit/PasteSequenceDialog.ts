@@ -35,7 +35,7 @@ export class PasteSequenceDialog extends Dialog<string> {
 
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
-            if (char != "A" && char != "U" && char != "G" && char != "C") {
+            if (char !== "A" && char !== "U" && char !== "G" && char !== "C") {
                 Application.instance.setup_msg_box("You can only use characters A, U, G, and C");
                 return;
             }

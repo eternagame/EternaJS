@@ -186,7 +186,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
             return false;
         }
 
-        if (e.type == KeyboardEventType.KEY_DOWN) {
+        if (e.type === KeyboardEventType.KEY_DOWN) {
             switch (e.code) {
             case KeyCode.Digit1:
                 this.clickTarget(PaletteTargetType.A);
@@ -302,7 +302,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         let tooltip: string = (target != null ? target.tooltip : null);
 
-        if (tooltip != this._last_tooltip) {
+        if (tooltip !== this._last_tooltip) {
             this._last_tooltip = tooltip;
             log.debug(`TODO: show tooltip: ${tooltip}`);
             // if (tooltip == null) {

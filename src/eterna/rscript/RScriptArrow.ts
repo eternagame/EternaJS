@@ -38,28 +38,28 @@ export class RScriptArrow extends SceneObject {
     }
 
     public set triSize(value: number) {
-        if (this._triSize != value) {
+        if (this._triSize !== value) {
             this._triSize = value;
             this._needsRedraw = true;
         }
     }
 
     public set baseLength(value: number) {
-        if (this._baseLength != value) {
+        if (this._baseLength !== value) {
             this._baseLength = value;
             this._needsRedraw = true;
         }
     }
 
     public set outlineColor(value: number) {
-        if (this._outlineColor != value) {
+        if (this._outlineColor !== value) {
             this._outlineColor = value;
             this._needsRedraw = true;
         }
     }
 
     public set fillColor(value: number) {
-        if (this._fillColor != value) {
+        if (this._fillColor !== value) {
             this._fillColor = value;
             this._needsRedraw = true;
         }

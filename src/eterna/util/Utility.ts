@@ -73,7 +73,7 @@ export class Utility {
             }
         }
 
-        return (hit_count % 2) == 1;
+        return (hit_count % 2) === 1;
     }
 
     public static find_intersection(A: Point, B: Point, E: Point, F: Point, as_seg: boolean = true): Point {
@@ -93,7 +93,7 @@ export class Utility {
         c2 = F.x * E.y - E.x * F.y;
 
         let denom: number = a1 * b2 - a2 * b1;
-        if (denom == 0) {
+        if (denom === 0) {
             return null;
         }
 

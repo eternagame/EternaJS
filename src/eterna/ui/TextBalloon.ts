@@ -73,7 +73,7 @@ export class TextBalloon extends ContainerObject {
     }
 
     public showButton(show: boolean): GameButton {
-        if (show != this._button.display.visible) {
+        if (show !== this._button.display.visible) {
             this._button.display.visible = show;
             this.updateView();
         }

@@ -21,7 +21,7 @@ export class FoldUtil {
                 more = true;
                 break;
             }
-            if (ii == 0) {
+            if (ii === 0) {
                 v.reverse();
                 break;
             }
@@ -30,13 +30,13 @@ export class FoldUtil {
     }
 
     public static binding_site_formed(pairs: number[], groups: number[][]): boolean {
-        if (pairs[groups[0][0]] != groups[1][groups[1].length - 1]) return false;
-        if (pairs[groups[0][groups[0].length - 1]] != groups[1][0]) return false;
+        if (pairs[groups[0][0]] !== groups[1][groups[1].length - 1]) return false;
+        if (pairs[groups[0][groups[0].length - 1]] !== groups[1][0]) return false;
         for (let ii = 1; ii < groups[0].length - 1; ii++) {
-            if (pairs[groups[0][ii]] != -1) return false;
+            if (pairs[groups[0][ii]] !== -1) return false;
         }
         for (let ii = 1; ii < groups[1].length - 1; ii++) {
-            if (pairs[groups[1][ii]] != -1) return false;
+            if (pairs[groups[1][ii]] !== -1) return false;
         }
 
         return true;

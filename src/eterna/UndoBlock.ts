@@ -81,7 +81,9 @@ export class UndoBlock {
 
     public get_oligo_name(): string {
         let tc: any = this.get_target_conditions();
-        if (tc == null) return null;
+        if (tc == null) {
+            return null;
+        }
         return tc.hasOwnProperty("oligo_name") ? tc["oligo_name"] : null;
     }
 
@@ -199,8 +201,8 @@ export class UndoBlock {
         this.set_param(UndoBlockParam.REPETITION, EPars.get_sequence_repetition(EPars.sequence_array_to_string(seq), 5), temp);
         let full_seq: number[] = seq.slice();
         if (this._target_oligo) {
-            if (this.get_oligo_mode() == Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
-            if (this.get_oligo_mode() == Pose2D.OLIGO_MODE_EXT5P) {
+            if (this.get_oligo_mode() === Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
+            if (this.get_oligo_mode() === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = this._target_oligo.concat(full_seq);
             } else {
                 full_seq = full_seq.concat(this._target_oligo);
@@ -256,12 +258,12 @@ export class UndoBlock {
                 let index_j: number = cur_dat[jj + 1] - 1;
 
                 if (index_i < index_j) {
-                    if (ref_pairs[index_i] == index_j) {
+                    if (ref_pairs[index_i] === index_j) {
                         prob_score += Number(cur_dat[jj + 2]);
                         score_count++;
                     }
                 } else if (index_j < index_i) {
-                    if (ref_pairs[index_j] == index_i) {
+                    if (ref_pairs[index_j] === index_i) {
                         prob_score += Number(cur_dat[jj + 2]);
                         score_count++;
                     }

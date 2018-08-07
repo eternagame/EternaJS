@@ -140,51 +140,51 @@ export class Solution {
     }
 
     public get_property(keyword: string): any {
-        if (keyword == "Title") {
+        if (keyword === "Title") {
             return this._title;
-        } else if (keyword == "GU Pairs") {
+        } else if (keyword === "GU Pairs") {
             return this._num_gus;
-        } else if (keyword == "GC Pairs") {
+        } else if (keyword === "GC Pairs") {
             return this._num_gcs;
-        } else if (keyword == "UA Pairs") {
+        } else if (keyword === "UA Pairs") {
             return this._num_uas;
-        } else if (keyword == "Melting Point") {
+        } else if (keyword === "Melting Point") {
             return this._melting_point;
-        } else if (keyword == "Designer") {
+        } else if (keyword === "Designer") {
             return this._player_name;
-        } else if (keyword == "Sequence") {
+        } else if (keyword === "Sequence") {
             return this._sequence;
-        } else if (keyword == "Free Energy") {
+        } else if (keyword === "Free Energy") {
             return this._free_energy;
-        } else if (keyword == "Description") {
+        } else if (keyword === "Description") {
             return this._short_desc;
-        } else if (keyword == "Round") {
+        } else if (keyword === "Round") {
             return this._round;
-        } else if (keyword == "Votes") {
+        } else if (keyword === "Votes") {
             if (this._synthesized_round) {
                 return -1;
             }
             return this._num_votes;
-        } else if (keyword == "My Votes") {
+        } else if (keyword === "My Votes") {
             if (this._synthesized_round) {
                 return -1;
             }
             return this._num_my_votes;
-        } else if (keyword == "Synthesized") {
+        } else if (keyword === "Synthesized") {
             if (this._synthesized_round > 0) {
                 return "y";
             } else {
                 return "n";
             }
-        } else if (keyword == "Synthesis score") {
+        } else if (keyword === "Synthesis score") {
             if (this._exp_feedback != null && this._exp_feedback.get_shape_data() != null) {
                 return this._synthesis_score;
-            } else if (this._exp_feedback != null && this._exp_feedback.is_failed() != 0) {
+            } else if (this._exp_feedback != null && this._exp_feedback.is_failed() !== 0) {
                 return this._exp_feedback.is_failed();
             } else {
                 return Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf("NOT SYNTHESIZED")];
             }
-        } else if (keyword == "Id") {
+        } else if (keyword === "Id") {
             return this._nid;
         }
 

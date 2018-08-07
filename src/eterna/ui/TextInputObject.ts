@@ -7,7 +7,7 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     public readonly valueChanged: Signal<string> = new Signal();
 
     public constructor(fontSize: number, width: number = 100, rows: number = 1) {
-        super(Eterna.OVERLAY_DIV_ID, rows == 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
+        super(Eterna.OVERLAY_DIV_ID, rows === 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
 
         this.width = width;
         this._obj.style.fontSize = DOMObject.sizeToString(fontSize);

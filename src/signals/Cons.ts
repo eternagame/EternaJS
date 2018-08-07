@@ -65,7 +65,7 @@ export class Cons implements Connection {
     static remove(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return head;
-        } else if (head == cons) {
+        } else if (head === cons) {
             return head.next;
         } else {
             head.next = Cons.remove(head.next, cons);
@@ -77,7 +77,7 @@ export class Cons implements Connection {
     static removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;
-        } else if (head.listener == listener) {
+        } else if (head.listener === listener) {
             return Cons.removeAll(head.next, listener);
         } else {
             head.next = Cons.removeAll(head.next, listener);

@@ -53,7 +53,7 @@ export class ROPHint extends RScriptOp {
             this._id = this._env.GetStringRef(arg);
             break;
         case 3:
-            this._loop = (arg.toUpperCase() == "TRUE");
+            this._loop = (arg.toUpperCase() === "TRUE");
             break;
         default:
             throw (`Invalid argument to ROPHint: ${arg}`);

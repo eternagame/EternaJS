@@ -45,7 +45,7 @@ export class FancyGamePanel extends BaseGamePanel {
     protected updateView(): void {
         this._background.clear();
 
-        if (this._width <= 0 || this._height <= 0 || this._type == FancyGamePanelType.INVISIBLE) {
+        if (this._width <= 0 || this._height <= 0 || this._type === FancyGamePanelType.INVISIBLE) {
             return;
         }
 
@@ -56,7 +56,7 @@ export class FancyGamePanel extends BaseGamePanel {
 
         this._background.clear();
 
-        if (this._type == FancyGamePanelType.NEW_NOVA) {
+        if (this._type === FancyGamePanelType.NEW_NOVA) {
             if (this._title != null) {
                 this._background.beginFill(0xC0DCE7, 1.0);
                 this._background.drawRoundedRect(-1, -25, this._width + 2, this._height + 26, 8);

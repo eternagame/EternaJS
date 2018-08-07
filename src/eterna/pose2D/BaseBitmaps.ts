@@ -49,9 +49,9 @@ export class BaseBitmaps {
     }
 
     public getBodyBitmap (zoom_level: number, flags: number): Texture {
-        const locked: boolean = (flags & BaseDrawFlags.LOCKED) != 0;
-        const lettermode: boolean = (flags & BaseDrawFlags.LETTER_MODE) != 0;
-        const is_dontcare: boolean = (flags & BaseDrawFlags.IS_DONTCARE) != 0;
+        const locked: boolean = (flags & BaseDrawFlags.LOCKED) !== 0;
+        const lettermode: boolean = (flags & BaseDrawFlags.LETTER_MODE) !== 0;
+        const is_dontcare: boolean = (flags & BaseDrawFlags.IS_DONTCARE) !== 0;
 
         if (zoom_level < Base.NUM_ZOOM_LEVELS) {
             if (!locked && !lettermode) {
@@ -73,8 +73,8 @@ export class BaseBitmaps {
     }
 
     public getLetterBitmap (zoom_level: number, drawFlags: number): Texture {
-        const lettermode: boolean = (drawFlags & BaseDrawFlags.LETTER_MODE) != 0;
-        const locked: boolean = (drawFlags & BaseDrawFlags.LOCKED) != 0;
+        const lettermode: boolean = (drawFlags & BaseDrawFlags.LETTER_MODE) !== 0;
+        const locked: boolean = (drawFlags & BaseDrawFlags.LOCKED) !== 0;
 
         if (zoom_level < Base.NUM_ZOOM_LEVELS && ((lettermode && !locked))) {
             return BaseBitmaps.bitmap_for_size(this.letter_data, 0, zoom_level);
@@ -117,7 +117,7 @@ export class BaseBitmaps {
     }
 
     private static bitmap_for_size (bitmaps: Texture[], ii: number, size_num: number): Texture {
-        if (bitmaps.length % Base.NUM_ZOOM_LEVELS != 0) {
+        if (bitmaps.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error("Invalid bitmaps array length " + bitmaps.length);
         }
 

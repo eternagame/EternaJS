@@ -32,7 +32,7 @@ export class SolutionManager {
 
     public get_solution_by_sequence(seq: string): Solution {
         for (let ii: number = 0; ii < this._solutions.length; ii++) {
-            if (this._solutions[ii].get_sequence() == seq) {
+            if (this._solutions[ii].get_sequence() === seq) {
                 return this._solutions[ii];
             }
         }
@@ -52,7 +52,7 @@ export class SolutionManager {
         if (hairpin == null) return true;
 
         for (let ii: number = 0; ii < this._hairpins.length; ii++) {
-            if (this._hairpins[ii] == hairpin) {
+            if (this._hairpins[ii] === hairpin) {
                 return true;
             }
         }
@@ -63,7 +63,7 @@ export class SolutionManager {
         let titles: any[] = [];
         let myid: number = Eterna.player_id;
         for (let ii: number = 0; ii < this._solutions.length; ii++) {
-            if (this._solutions[ii].get_property("Round") == round && this._solutions[ii].get_player_id() == myid) {
+            if (this._solutions[ii].get_property("Round") === round && this._solutions[ii].get_player_id() === myid) {
                 titles.push(this._solutions[ii].get_title());
             }
         }
@@ -104,7 +104,7 @@ export class SolutionManager {
 
                 for (let ii: number = 0; ii < synthesis_data.length; ii++) {
                     let synthesis: any = synthesis_data[ii];
-                    if (synthesis["reactive"] == "SHAPE") {
+                    if (synthesis["reactive"] === "SHAPE") {
                         let peaks: any[] = [];
                         peaks.push(synthesis["start_index"]);
 
@@ -120,7 +120,7 @@ export class SolutionManager {
                     }
                 }
                 // / Ad-hoc handling for different exp types : Brent's theophylline puzzle
-            } else if (synthesis_data_raw["type"] == "brent_theo") {
+            } else if (synthesis_data_raw["type"] === "brent_theo") {
                 if (newfb == null) {
                     newfb = new Feedback();
                 }
@@ -143,15 +143,15 @@ export class SolutionManager {
                 let min: Object = null;
                 let threshold: Object = null;
 
-                if (obj["SHAPE-threshold"] != null && obj["SHAPE-threshold"] != "") {
+                if (obj["SHAPE-threshold"] != null && obj["SHAPE-threshold"] !== "") {
                     threshold = (obj["SHAPE-threshold"]);
                 }
 
-                if (obj["SHAPE-max"] != null && obj["SHAPE-max"] != "") {
+                if (obj["SHAPE-max"] != null && obj["SHAPE-max"] !== "") {
                     max = (obj["SHAPE-max"]);
                 }
 
-                if (obj["SHAPE-min"] != null && obj["SHAPE-min"] != "") {
+                if (obj["SHAPE-min"] != null && obj["SHAPE-min"] !== "") {
                     min = (obj["SHAPE-min"]);
                 }
 
@@ -163,7 +163,7 @@ export class SolutionManager {
         newsol.set_exp_feedback(newfb);
 
         if (obj["has-fold-data"] != null) {
-            newsol.set_fold_data_available(obj["has-fold-data"] != 0);
+            newsol.set_fold_data_available(obj["has-fold-data"] !== 0);
         }
 
         if (obj["fold-data"] != null) {

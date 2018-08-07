@@ -115,7 +115,7 @@ export class SpecBox extends ContainerObject {
     }
 
     public set_size(width: number, height: number): void {
-        if (this._width != width || this._height != height) {
+        if (this._width !== width || this._height !== height) {
             this._width = width;
             this._height = height;
             if (this.isLiveObject) {
@@ -383,7 +383,7 @@ export class SpecBox extends ContainerObject {
             let block_length: number = this.getDotplotOffsetSize();
             let x: number = (localPoint.x - this._dotplotOriginX) / block_length;
             let y: number = (localPoint.y - this._dotplotOriginY) / block_length;
-            if (y == 0 || Number.isNaN(y)) {
+            if (y === 0 || Number.isNaN(y)) {
                 y = 1;
             }
 
@@ -421,7 +421,7 @@ export class SpecBox extends ContainerObject {
         pos_from.copy(from.position);
         let diff_x: number = this.getDotplotOffsetSize();
         let diff_y: number = this.getDotplotOffsetSize();
-        if (d == SpecBox.HORIZONTAL) {
+        if (d === SpecBox.HORIZONTAL) {
             return new Point(pos_from.x + diff_x * (index + 1), pos_from.y);
         } else {
             return new Point(pos_from.x + from.width, pos_from.y + diff_y * (index + 1));

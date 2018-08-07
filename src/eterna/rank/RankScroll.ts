@@ -76,7 +76,7 @@ export class RankScroll extends ContainerObject {
             let common_entry: boolean = false;
             let common_index: number = 0;
             for (let ii = 0; ii < prevRicher.length; ii++) {
-                if (prevRicher[ii]["uid"] == last_after_entry_uid) {
+                if (prevRicher[ii]["uid"] === last_after_entry_uid) {
                     common_entry = true;
                     common_index = ii;
                     break;
@@ -85,7 +85,7 @@ export class RankScroll extends ContainerObject {
 
             if (!common_entry) {
                 for (let ii = 0; ii < prevPoorer.length; ii++) {
-                    if (prevPoorer[ii]["uid"] == last_after_entry_uid) {
+                    if (prevPoorer[ii]["uid"] === last_after_entry_uid) {
                         common_entry = true;
                         common_index = -ii;
                         break;

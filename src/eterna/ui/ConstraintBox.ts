@@ -179,7 +179,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._flag.position = new Point(4, 4);
         this.container.addChild(this._flag);
 
-        if (this._boxType == ConstraintBoxType.MISSION_SCREEN) {
+        if (this._boxType === ConstraintBoxType.MISSION_SCREEN) {
             this._side_txt = new MultiStyleText("", {
                 default: {
                     fontFamily: Fonts.STDFONT_REGULAR,
@@ -250,12 +250,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     public get_wrong_pairs(native_pairs: number[], target_pairs: number[], structure_constraints: any[], satisfied: boolean): number[] {
         let wrong_pairs: number[] = new Array(native_pairs.length);
 
-        if (this._constraintType == ConstraintType.SHAPE) {
+        if (this._constraintType === ConstraintType.SHAPE) {
             for (let ii = 0; ii < wrong_pairs.length; ii++) {
                 wrong_pairs[ii] = -1;
             }
             for (let ii = 0; ii < wrong_pairs.length; ii++) {
-                if (native_pairs[ii] != target_pairs[ii]) {
+                if (native_pairs[ii] !== target_pairs[ii]) {
                     if (structure_constraints == null || structure_constraints[ii]) {
                         wrong_pairs[ii] = 1;
                     } else {
@@ -267,7 +267,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                     wrong_pairs[ii] = 0;
                 }
             }
-        } else if (this._constraintType == ConstraintType.ANTISHAPE) {
+        } else if (this._constraintType === ConstraintType.ANTISHAPE) {
             for (let ii = 0; ii < wrong_pairs.length; ii++) {
                 wrong_pairs[ii] = 0;
             }
@@ -314,10 +314,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._small_thumbnail.visible = false;
         this._big_thumbnail.visible = false;
         this._flag.visible = false;
-        this._check.visible = satisfied && this._boxType == ConstraintBoxType.DEFAULT;
+        this._check.visible = satisfied && this._boxType === ConstraintBoxType.DEFAULT;
         this._req.visible = false;
 
-        if (constraintType == ConstraintType.SHAPE || constraintType == ConstraintType.ANTISHAPE) {
+        if (constraintType === ConstraintType.SHAPE || constraintType === ConstraintType.ANTISHAPE) {
             if (this._enlarged) {
                 this._check.position = new Point(144, 144);
                 this._no_text.position = new Point(124, 1);
@@ -332,9 +332,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
         this._outline.texture = satisfied ? this._success_outline : this._fail_outline;
-        const isMissionScreen: boolean = this._boxType == ConstraintBoxType.MISSION_SCREEN;
+        const isMissionScreen: boolean = this._boxType === ConstraintBoxType.MISSION_SCREEN;
 
-        if (constraintType == ConstraintType.BOOST) {
+        if (constraintType === ConstraintType.BOOST) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -365,7 +365,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.NOGU) {
+        } else if (constraintType === ConstraintType.NOGU) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -396,7 +396,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.GU) {
+        } else if (constraintType === ConstraintType.GU) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -426,9 +426,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.GC
-            || constraintType == ConstraintType.GCMIN
-            || constraintType == ConstraintType.NOGC) {
+        } else if (constraintType === ConstraintType.GC
+            || constraintType === ConstraintType.GCMIN
+            || constraintType === ConstraintType.NOGC) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -440,13 +440,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             let newClarifyText = "";
 
-            if (constraintType == ConstraintType.GCMIN) {
+            if (constraintType === ConstraintType.GCMIN) {
                 tooltip.append(`${val.toString()} or more`);
                 newClarifyText += `${(Number(val)).toString()} OR MORE`;
-            } else if (constraintType == ConstraintType.GC) {
+            } else if (constraintType === ConstraintType.GC) {
                 tooltip.append("at most", "altText").append(` ${(Number(val)).toString()}`);
                 newClarifyText += `${(Number(val)).toString()} OR FEWER`;
-            } else if (constraintType == ConstraintType.NOGC) {
+            } else if (constraintType === ConstraintType.NOGC) {
                 tooltip.append("no");
                 newClarifyText += "NO GC PAIRS";
             }
@@ -459,7 +459,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_clarify_text.text = newClarifyText;
             this._req_stat_txt.text = stat.toString();
 
-            if (constraintType == ConstraintType.NOGC) {
+            if (constraintType === ConstraintType.NOGC) {
                 this._req.texture = isMissionScreen
                     ? BitmapManager.get_bitmap(Bitmaps.NovaNoGCMissionReq)
                     : BitmapManager.get_bitmap(Bitmaps.NovaNoGCReq);
@@ -471,7 +471,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.AU || constraintType == ConstraintType.AUMAX) {
+        } else if (constraintType === ConstraintType.AU || constraintType === ConstraintType.AUMAX) {
             this._val_text.visible = true;
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
@@ -482,10 +482,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             tooltip.append("You must have ");
 
             let newClarifyText = "";
-            if (constraintType == ConstraintType.AU) {
+            if (constraintType === ConstraintType.AU) {
                 tooltip.append(`${val.toString()} or more`);
                 newClarifyText += `${(Number(val)).toString()} OR MORE`;
-            } else if (constraintType == ConstraintType.AUMAX) {
+            } else if (constraintType === ConstraintType.AUMAX) {
                 tooltip.append("at most", "altText").append((Number(val)).toString());
                 newClarifyText += `${(Number(val)).toString()} OR FEWER`;
             }
@@ -503,7 +503,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.SHAPE) {
+        } else if (constraintType === ConstraintType.SHAPE) {
             this.changeShapeThumbnailBG();
             this._bg.visible = true;
 
@@ -537,7 +537,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             }
 
             tooltip.apply(this._big_text);
-        } else if (constraintType == ConstraintType.ANTISHAPE) {
+        } else if (constraintType === ConstraintType.ANTISHAPE) {
             this.changeShapeThumbnailBG();
             this._bg.visible = true;
 
@@ -573,7 +573,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._no_text.visible = true;
 
             tooltip.apply(this._big_text);
-        } else if (constraintType == ConstraintType.BINDINGS) {
+        } else if (constraintType === ConstraintType.BINDINGS) {
             this._req_clarify_text.visible = true;
 
             if (isMissionScreen) {
@@ -610,7 +610,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let tw: number = Math.min(101, 15 * (2 * val.bind.length - 1));
             let step: number = tw / (2 * val.bind.length - 1);
             let orig: number = (111 - tw) * 0.5;
-            if (val.bind.length == 1) tw = 45;
+            if (val.bind.length === 1) tw = 45;
 
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
@@ -632,17 +632,17 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._state_text.text = val.index + 1;
 
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.A || constraintType == ConstraintType.AMAX
-            || constraintType == ConstraintType.C || constraintType == ConstraintType.CMAX
-            || constraintType == ConstraintType.G || constraintType == ConstraintType.GMAX
-            || constraintType == ConstraintType.U || constraintType == ConstraintType.UMAX) {
+        } else if (constraintType === ConstraintType.A || constraintType === ConstraintType.AMAX
+            || constraintType === ConstraintType.C || constraintType === ConstraintType.CMAX
+            || constraintType === ConstraintType.G || constraintType === ConstraintType.GMAX
+            || constraintType === ConstraintType.U || constraintType === ConstraintType.UMAX) {
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
             }
             tooltip.append("You must have ");
 
             let letter: string = constraintType.substr(0, 1);
-            if (constraintType == letter) {
+            if (constraintType === letter) {
                 tooltip.append(`${val.toString()} or more`);
             } else {
                 tooltip.append("at most", "altText").append(` ${(Number(val)).toString()}`);
@@ -652,7 +652,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            let newClarifyText = constraintType == letter
+            let newClarifyText = constraintType === letter
                 ? `${(Number(val)).toString()} OR MORE`
                 : `${(Number(val)).toString()} OR FEWER`;
 
@@ -669,7 +669,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.PAIRS) {
+        } else if (constraintType === ConstraintType.PAIRS) {
             this._req_clarify_text.visible = true;
             this._req_stat_txt.visible = true;
 
@@ -691,7 +691,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.MUTATION) {
+        } else if (constraintType === ConstraintType.MUTATION) {
             this._base1.texture = ConstraintBox._A;
             this._base2.texture = ConstraintBox._G;
             this._base3.texture = ConstraintBox._U;
@@ -722,7 +722,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             tooltip.append(`You can only mutate up to ${val.toString()} bases`);
             tooltip.apply(this._big_text);
-        } else if (constraintType == ConstraintType.STACK) {
+        } else if (constraintType === ConstraintType.STACK) {
             this._base1.texture = ConstraintBox._W;
             this._base2.texture = ConstraintBox._W;
             this._base3.texture = ConstraintBox._W;
@@ -787,7 +787,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.LAB_REQUIREMENTS) {
+        } else if (constraintType === ConstraintType.LAB_REQUIREMENTS) {
             this._bg.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
@@ -848,7 +848,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             }
 
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.BARCODE) {
+        } else if (constraintType === ConstraintType.BARCODE) {
             this._req_clarify_text.visible = true;
 
             if (isMissionScreen) {
@@ -905,7 +905,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType == ConstraintType.SCRIPT) {
+        } else if (constraintType === ConstraintType.SCRIPT) {
             let nid: string = val.nid;
             let goal: string = val.goal;
             let name: string = val.name;
@@ -975,13 +975,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         // let more: number = newClarifyText.indexOf("MORE");
         // let less: number = newClarifyText.indexOf("FEWER");
-        // let idx: number = (more == -1) ? less : more;
+        // let idx: number = (more === -1) ? less : more;
         // let bf: TextFormat = Fonts.arial(11, true);
-        // if (idx != -1) {
-        //     this._req_clarify_text.GetTextBox().setTextFormat(bf, idx, idx + (more == -1 ? 5 : 4));
+        // if (idx !== -1) {
+        //     this._req_clarify_text.GetTextBox().setTextFormat(bf, idx, idx + (more === -1 ? 5 : 4));
         // }
         //
-        // if (keyword == "NOGC") {
+        // if (keyword === "NOGC") {
         //     this._req_clarify_text.GetTextBox().setTextFormat(bf, 0, 2);
         // }
 
@@ -1061,7 +1061,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     }
 
     public flare(satisfied: boolean): void {
-        if (this._boxType == ConstraintBoxType.MISSION_SCREEN) {
+        if (this._boxType === ConstraintBoxType.MISSION_SCREEN) {
             this.removeNamedObjects(ConstraintBox.BACKLIGHT_ANIM);
             this.removeNamedObjects(ConstraintBox.FGLOW_ANIM);
             this._backlight.visible = false;

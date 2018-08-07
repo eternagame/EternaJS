@@ -45,24 +45,24 @@ export class NovaPaintHint extends ContainerObject implements Updatable {
             startPos = this._rna.get_base_xy(this._base);
         }
 
-        if (this._lastTimeTick == 0) {
+        if (this._lastTimeTick === 0) {
             this._lastTimeTick = current_time;
             return;
         }
 
-        if (this._startAnimTime == -1) {
+        if (this._startAnimTime === -1) {
             this._startAnimTime = current_time;
         }
 
         let stageTime: number = (current_time - this._startAnimTime);
         let dir: Vector2 = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
-        if (stageTime < 1.5 && this._curStage == 0) {
+        if (stageTime < 1.5 && this._curStage === 0) {
             if (stageTime >= 1.4) {
                 ++this._curStage;
             } else if (stageTime > 0.7) {
                 this._img.texture = this._click_img;
             }
-        } else if (this._curStage == 1) {
+        } else if (this._curStage === 1) {
             let deltaTime: number = current_time - this._lastTimeTick;
             // Move from our current position to the end
             let stepDistance = deltaTime * NovaPaintHint.PAINT_HINT_SPEED;
@@ -71,7 +71,7 @@ export class NovaPaintHint extends ContainerObject implements Updatable {
                 this._endAnimTime = current_time;
                 ++this._curStage;
             }
-        } else if (this._curStage == 2) {
+        } else if (this._curStage === 2) {
             if (!this._loop) {
                 this._active = false;
                 return;
