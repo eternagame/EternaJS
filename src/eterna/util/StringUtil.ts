@@ -114,7 +114,7 @@ export class StringUtil {
     /** Format the specified numbers as coordinates, (e.g. "+3-2" or "-7.4432-54.23+6.3"). */
     public static toCoordsString(x: number, y: number, z: number = NaN): string {
         let result: string = ((x >= 0) ? "+" : "") + x + ((y >= 0) ? "+" : "") + y;
-        if (!isNaN(z)) {
+        if (!Number.isNaN(z)) {
             result += ((z >= 0) ? "+" : "") + z;
         }
         return result;
@@ -417,7 +417,7 @@ export class StringUtil {
         }
 
         let result: number = parseInt(str, radix);
-        if (isNaN(result)) {
+        if (Number.isNaN(result)) {
             // this shouldn't happen..
             throw new Error(`Could not parseInt: ${arguments[0]}`);
         }

@@ -85,8 +85,8 @@ export function toMatchCloseTo(this: MatcherUtils, received: any, expected: any,
  */
 function recursiveCheck(actual: any, expected: any, decimals: number, strict: boolean = true) {
     if (typeof actual === 'number' && typeof expected === 'number') {
-        if (isNaN(actual)) {
-            return !isNaN(expected);
+        if (Number.isNaN(actual)) {
+            return !Number.isNaN(expected);
         } else if ((Math.abs(actual - expected) <= Math.pow(10, -decimals))) {
             return false;
         } else {

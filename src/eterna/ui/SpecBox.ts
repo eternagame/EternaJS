@@ -223,8 +223,8 @@ export class SpecBox extends ContainerObject {
             log.warn("scale dotplot level under 1");
             return;
         }
-        if (isNaN(this._dotplotOriginX)) this._dotplotOriginX = 0;
-        if (isNaN(this._dotplotOriginY)) this._dotplotOriginY = 0;
+        if (Number.isNaN(this._dotplotOriginX)) this._dotplotOriginX = 0;
+        if (Number.isNaN(this._dotplotOriginY)) this._dotplotOriginY = 0;
 
         let plot_size: number = this.getPlotSize();
         let plot_size_level: number = plot_size * level;
@@ -383,7 +383,7 @@ export class SpecBox extends ContainerObject {
             let block_length: number = this.getDotplotOffsetSize();
             let x: number = (localPoint.x - this._dotplotOriginX) / block_length;
             let y: number = (localPoint.y - this._dotplotOriginY) / block_length;
-            if (y == 0 || isNaN(y)) {
+            if (y == 0 || Number.isNaN(y)) {
                 y = 1;
             }
 
