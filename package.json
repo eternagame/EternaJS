@@ -8,7 +8,7 @@
     "build:dev": "webpack --config webpack.dev.js",
     "build:prod": "webpack --config webpack.prod.js",
     "test": "jest --verbose",
-    "lint": "eslint src --ext .ts src"
+    "lint": "eslint src --ext .ts"
   },
   "jest": {
     "moduleFileExtensions": [
