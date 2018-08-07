@@ -10,6 +10,8 @@ import {BaseAssets} from "./BaseAssets";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {Pose2D, RNAHighlightState} from "./Pose2D";
 
+type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
+
 export class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS: number = 2;
     public static ZOOM_SCALE_FACTOR: number = 0.75;
@@ -545,28 +547,21 @@ export class Base extends ContainerObject implements LateUpdatable {
             if (highlight_state.nuc.indexOf(baseIdx) === -1) {
                 sprite.alpha = 0.55;
             } else {
-                // TSC, 8/6/2018:
-                //
-                // The Flash version overdrew the sprite 3 times, effectively
-                // brightening its alpha-faded pixels. We're not using a bitblitting
-                // system, so the approach doesn't make as much sense here; I'm using
-                // a saturation filter instead.
-                //
-                // If there are complaints with this approach, we probably just want
-                // to make hilited versions of our satellite and body textures
-
-                let filter = new PIXI.filters.ColorMatrixFilter();
-                filter.saturate(3);
-                sprite.filters = [filter];
-
-                // canvas.copyPixels(bd_data, rect, point, null, null, true);
-                // // draw it twice more to highlight
-                // if (highlight_state.isOn) {
-                //     canvas.copyPixels(bd_data, rect, point, null, null, true);
-                //     canvas.copyPixels(bd_data, rect, point, null, null, true);
-                // }
+                sprite.filters = [this.multiplyAlphaFilter(1.33)];
             }
         }
+    }
+
+    private static multiplyAlphaFilter(multiplier: number): ColorMatrixFilter {
+        let filter = new PIXI.filters.ColorMatrixFilter();
+        filter.matrix = [
+            1, 0, 0, 0, 0,
+            0, 1, 0, 0, 0,
+            0, 0, 1, 0, 0,
+            0, 0, 0, multiplier, 0,
+            0, 0, 0, 0, 1
+        ];
+        return filter;
     }
 
     private static showSprite(sprite: Sprite, tex: Texture): Sprite {
