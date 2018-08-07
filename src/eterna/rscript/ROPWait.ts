@@ -6,14 +6,14 @@ import {RScriptUIElementID} from "./RScriptUIElementID";
 export enum ROPWaitType {
     MOVECAMERA = "MOVECAMERA",
     CLICKUI = "CLICKUI",
-    NUCLEOTIDECHANGE = "NUCLEOTIDECHANGE",	// single range
+    NUCLEOTIDECHANGE = "NUCLEOTIDECHANGE",  // single range
     PAINT = "PAINT",
     TEXTBOX = "TEXTBOX",
     NUCLEOTIDEPAIR = "NUCLEOTIDEPAIR",
-    MUTATION = "MUTATION",					// list of indices
+    MUTATION = "MUTATION",                  // list of indices
     TIME = "TIME",
     BLACKMARK = "BLACKMARK",
-    BLUEMARK = "BLUEMARK",					// 'magic glue'
+    BLUEMARK = "BLUEMARK",                  // 'magic glue'
 }
 
 export class ROPWait extends RScriptOp {

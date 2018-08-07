@@ -509,5 +509,5 @@ export class SpecBox extends ContainerObject {
     private static readonly H0_DEFAULT_Y: number = 55;
     private static readonly V0_DEFAULT_X: number = 30;
     private static readonly V0_DEFAULT_Y: number = 70;
-    private static readonly OFFSET: number = 10;	// coord offset
+    private static readonly OFFSET: number = 10;    // coord offset
 }
