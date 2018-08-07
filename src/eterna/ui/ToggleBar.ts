@@ -3,17 +3,19 @@ import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {LocationTask} from "../../flashbang/tasks/LocationTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
 import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
+import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class ToggleBar extends ContainerObject implements KeyboardListener {
+export class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
 
@@ -68,10 +70,6 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
-    public register_ui_for_rscript(id: string): void {
-        this._rscript_name = id;
-    }
-
     public set_state(new_state: number): void {
         if (new_state != this._selectedState) {
             if ((this._selectedState >= 0) && (this._selectedState < this._numStates)) {
@@ -89,7 +87,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (this._disabled || !this.display.visible) {
+        if (!this._enabled|| !this.display.visible) {
             return false;
         }
 
@@ -102,9 +100,13 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
         }
     }
 
-    public set_disabled(disabled: boolean): void {
-        this._disabled = disabled;
-        this.display.alpha = disabled ? 0.3 : 1.0;
+    public get enabled(): boolean {
+        return this._enabled;
+    }
+
+    public set enabled(value: boolean) {
+        this.display.alpha = value ? 1.0 : 0.3;
+        this._enabled = value;
     }
 
     private onMouseClick(e: InteractionEvent): void {
@@ -114,7 +116,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
         }
 
         this.set_state(state);
-        ROPWait.NotifyClickUI("SWITCH");
+        ROPWait.NotifyClickUI(RScriptUIElementID.SWITCH);
     }
 
     private onMouseOver(): void {
@@ -165,12 +167,11 @@ export class ToggleBar extends ContainerObject implements KeyboardListener {
 
     private readonly _numStates: number;
 
-    private _disabled: boolean = false;
+    private _enabled: boolean = true;
     private _selectedState: number = -1;
     private _hoveredState: number = -1;
     private _mouseOver: boolean = false;
     private _labels: Text[] = [];
-    private _rscript_name: string = "";
 
     private static readonly BUTTON_SIZE: number = 25;
     private static readonly ROUND_RECT_RADIUS = 10;

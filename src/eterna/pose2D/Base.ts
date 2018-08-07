@@ -1,5 +1,5 @@
 ﻿import * as log from "loglevel";
-import {Point, Rectangle, Sprite, Texture} from "pixi.js";
+import {Point, Sprite, Texture} from "pixi.js";
 import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Constants} from "../Constants";
@@ -8,7 +8,7 @@ import {Eterna} from "../Eterna";
 import {ROPWait} from "../rscript/ROPWait";
 import {BaseAssets} from "./BaseAssets";
 import {BaseDrawFlags} from "./BaseDrawFlags";
-import {Pose2D} from "./Pose2D";
+import {Pose2D, RNAHighlightState} from "./Pose2D";
 
 export class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS: number = 2;
@@ -221,7 +221,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null) {
+    public bit_blit(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null) {
         this._zoom_level = zoom_level;
         this._off_x = off_x;
         this._off_y = off_y;
@@ -239,15 +239,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         }
     }
 
-    private static showSprite(sprite: Sprite, tex: Texture): Sprite {
-        sprite.visible = true;
-        sprite.texture = tex;
-        sprite.pivot.x = tex.width * 0.5;
-        sprite.pivot.y = tex.height * 0.5;
-        return sprite;
-    }
-
-    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: Object = null): void {
+    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
@@ -329,14 +321,11 @@ export class Base extends ContainerObject implements LateUpdatable {
                     // body_data = temp_bd;
                 }
 
-                if (highlight_state) {
-                    throw new Error("TODO");
-                    // this.bit_blit_highlight(canvas, base_rect, base_point, body_data, highlight_state);
-                } else {
-                    Base.showSprite(this._body, body_data);
-                    this._body.x = random_x + off_x;
-                    this._body.y = random_y + off_y;
-                }
+                Base.showSprite(this._body, body_data);
+                Base.showHighlightState(this._body, this._base_idx, highlight_state);
+
+                this._body.x = random_x + off_x;
+                this._body.y = random_y + off_y;
 
                 let letterdata: Texture = BaseAssets.getLetterBitmap(this._base_type, zoom_level, drawFlags);
                 if (letterdata != null) {
@@ -388,14 +377,11 @@ export class Base extends ContainerObject implements LateUpdatable {
                     let st0_sin: number = Math.sin(st0_angle);
                     let st0_x: number = this._go_x / 2.5 * st0_cos - this._go_y / 2.5 * st0_sin + off_x + random_x;
                     let st0_y: number = this._go_x / 2.5 * st0_sin + this._go_y / 2.5 * st0_cos + off_y + random_y;
-                    if (highlight_state) {
-                        // this.bit_blit_highlight(canvas, st0_rect, st0_point, satellite_body_data, highlight_state);
-                        throw new Error("TODO");
-                    } else {
-                        Base.showSprite(this._sat0, satellite_body_data);
-                        this._sat0.x = st0_x;
-                        this._sat0.y = st0_y;
-                    }
+
+                    Base.showSprite(this._sat0, satellite_body_data);
+                    Base.showHighlightState(this._sat0, this._base_idx, highlight_state);
+                    this._sat0.x = st0_x;
+                    this._sat0.y = st0_y;
                 }
 
                 let draw_st1: boolean = !this._force_unpaired;
@@ -471,14 +457,10 @@ export class Base extends ContainerObject implements LateUpdatable {
                 this._last_satellite1_abs_degree = st1_diff_degree + 90.0;
 
                 if (draw_st1) {
-                    if (highlight_state) {
-                        // this.bit_blit_highlight(canvas, st1_rect, st1_point, satellite_body_data, highlight_state);
-                        throw new Error("TODO");
-                    } else {
-                        Base.showSprite(this._sat1, satellite_body_data);
-                        this._sat1.x = st1_x;
-                        this._sat1.y = st1_y;
-                    }
+                    Base.showSprite(this._sat1, satellite_body_data);
+                    Base.showHighlightState(this._sat1, this._base_idx, highlight_state);
+                    this._sat1.x = st1_x;
+                    this._sat1.y = st1_y;
                 }
             }
         }
@@ -555,22 +537,44 @@ export class Base extends ContainerObject implements LateUpdatable {
         return new Point(this._last_center_x, this._last_center_y);
     }
 
-    private bit_blit_highlight (canvas: Texture, rect: Rectangle, point: Point, bd_data: Texture, highlight_state: any): void {
-        // if (highlight_state.isOn && highlight_state.nuc.indexOf(this._base_idx) == -1) {
-        //     let bd: Texture = bd_data.clone();
-        //     let ct: ColorTransform = new ColorTransform();
-        //     ct.alphaMultiplier = 0.55;
-        //     bd.colorTransform(rect, ct);
-        //     canvas.copyPixels(bd, rect, point, null, null, true);
-        // } else {
-        //     canvas.copyPixels(bd_data, rect, point, null, null, true);
-        //     // draw it twice more to highlight
-        //     if (highlight_state.isOn) {
-        //         canvas.copyPixels(bd_data, rect, point, null, null, true);
-        //         canvas.copyPixels(bd_data, rect, point, null, null, true);
-        //     }
-        // }
-        throw new Error("TODO");
+    private static showHighlightState (sprite: Sprite, baseIdx: number, highlight_state?: RNAHighlightState) {
+        sprite.filters = null;
+        sprite.alpha = 1;
+
+        if (highlight_state != null && highlight_state.isOn) {
+            if (highlight_state.nuc.indexOf(baseIdx) == -1) {
+                sprite.alpha = 0.55;
+            } else {
+                // TSC, 8/6/2018:
+                //
+                // The Flash version overdrew the sprite 3 times, effectively
+                // brightening its alpha-faded pixels. We're not using a bitblitting
+                // system, so the approach doesn't make as much sense here; I'm using
+                // a saturation filter instead.
+                //
+                // If there are complaints with this approach, we probably just want
+                // to make hilited versions of our satellite and body textures
+
+                let filter = new PIXI.filters.ColorMatrixFilter();
+                filter.saturate(3);
+                sprite.filters = [filter];
+
+                // canvas.copyPixels(bd_data, rect, point, null, null, true);
+                // // draw it twice more to highlight
+                // if (highlight_state.isOn) {
+                //     canvas.copyPixels(bd_data, rect, point, null, null, true);
+                //     canvas.copyPixels(bd_data, rect, point, null, null, true);
+                // }
+            }
+        }
+    }
+
+    private static showSprite(sprite: Sprite, tex: Texture): Sprite {
+        sprite.visible = true;
+        sprite.texture = tex;
+        sprite.pivot.x = tex.width * 0.5;
+        sprite.pivot.y = tex.height * 0.5;
+        return sprite;
     }
 
     private static to_canonical_range(deg: number): number {
@@ -639,6 +643,6 @@ export class Base extends ContainerObject implements LateUpdatable {
     private _off_y: number = 0;
     private _current_time: number = 0;
     private _drawFlags: number = 0;
-    private _highlight_state: any;
+    private _highlight_state: RNAHighlightState;
     private _numberBitmap: Texture;
 }
