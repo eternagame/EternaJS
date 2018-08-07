@@ -10,6 +10,7 @@ import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
 import {ROPWait} from "../rscript/ROPWait";
 import {Bitmaps} from "../resources/Bitmaps";
+import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -77,37 +78,37 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         this._targets = new Array(7);
 
         this._targets[PaletteTargetType.A] = new PaletteTarget(
-            PaletteTargetType.A, "A", false, KeyCode.Digit1,
+            PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
             [new Rectangle(9, 7, 25, 25)],
             "Mutate to <FONT COLOR='#FFFF33'>A (Adenine)</FONT>. (1)");
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
-            PaletteTargetType.U, "U", false, KeyCode.Digit2,
+            PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
             [new Rectangle(58, 7, 25, 25)],
             "Mutate to <FONT COLOR='#7777FF'>U (Uracil)</FONT>. (2)");
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
-            PaletteTargetType.G, "G", false, KeyCode.Digit3,
+            PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
             [new Rectangle(107, 7, 25, 25)],
             "Mutate to <FONT COLOR='#FF3333'>G (Guanine)</FONT>. (3)");
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
-            PaletteTargetType.C, "C", false, KeyCode.Digit4,
+            PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
             [new Rectangle(156, 7, 25, 25)],
             "Mutate to <FONT COLOR='#33FF33'>C (Cytosine)</FONT>. (4)");
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
-            PaletteTargetType.AU, "AU", true, KeyCode.KeyQ,
+            PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
             [new Rectangle(31, 30, 30, 20), new Rectangle(37, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FFFF33'>A</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (Q)");
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
-            PaletteTargetType.UG, "UG", true, KeyCode.KeyW,
+            PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
             [new Rectangle(80, 30, 30, 20), new Rectangle(87, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (W)");
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
-            PaletteTargetType.GC, "GC", true, KeyCode.KeyE,
+            PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
             [new Rectangle(127, 30, 30, 20), new Rectangle(137, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#33FF33'>C</FONT>). (E)");
 
@@ -217,7 +218,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this.targetClicked.emit(type);
         this.show_selection(target.hitboxes[0], target.isPair, true);
-        ROPWait.NotifyClickUI(target.name);
+        ROPWait.NotifyClickUI(target.id);
     }
 
     public clear_selection(): void {
@@ -327,16 +328,16 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
 class PaletteTarget {
     public readonly type: PaletteTargetType;
-    public readonly name: string;
+    public readonly id: RScriptUIElementID;
     public readonly isPair: boolean;
     public readonly keyCode: string;
     public readonly hitboxes: Rectangle[];
     public readonly tooltip: string;
     public enabled: boolean = true;
 
-    public constructor(type: PaletteTargetType, name: string, isPair: boolean, keyCode: string, hitboxes: Rectangle[], tooltip: string) {
+    public constructor(type: PaletteTargetType, id: RScriptUIElementID, isPair: boolean, keyCode: string, hitboxes: Rectangle[], tooltip: string) {
         this.type = type;
-        this.name = name;
+        this.id = id;
         this.isPair = isPair;
         this.keyCode = keyCode;
         this.hitboxes = hitboxes;
