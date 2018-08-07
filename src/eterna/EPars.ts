@@ -2,60 +2,60 @@ import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
 import {IntLoopPars} from "./IntLoopPars";
 
 export class EPars {
-    public static INF: number = 1000000;
-    public static NST: number = 0;
-    public static MAXLOOP: number = 30;
-    public static MAX_NINIO: number = 300;
-    public static LXC: number = 107.856;
-    public static TERM_AU: number = 50;
-    public static NBPAIRS: number = 7;
-    public static ML_INTERN37: number = 40;
-    public static TURN: number = 3;
-    public static DANGLES: number = 1;
+    public static readonly INF: number = 1000000;
+    public static readonly NST: number = 0;
+    public static readonly MAXLOOP: number = 30;
+    public static readonly MAX_NINIO: number = 300;
+    public static readonly LXC: number = 107.856;
+    public static readonly TERM_AU: number = 50;
+    public static readonly NBPAIRS: number = 7;
+    public static readonly ML_INTERN37: number = 40;
+    public static readonly TURN: number = 3;
+    public static readonly DANGLES: number = 1;
 
-    public static ML_BASE37: number = 0;
-    public static ML_CLOSING37: number = 340;
+    public static readonly ML_BASE37: number = 0;
+    public static readonly ML_CLOSING37: number = 340;
 
-    public static DUPLEX_INIT: number = 4.1;
+    public static readonly DUPLEX_INIT: number = 4.1;
 
-    public static RNABASE_UNDEFINED: number = 0;
-    public static RNABASE_GUANINE: number = 3;
-    public static RNABASE_ADENINE: number = 1;
-    public static RNABASE_URACIL: number = 4;
-    public static RNABASE_CYTOSINE: number = 2;
-    public static RNABASE_PAIR: number = 5;
-    public static RNABASE_SELECT: number = 6;
-    public static RNABASE_MAGIC: number = 7;
-    public static RNABASE_RANDOM: number = 8;
-    public static RNABASE_AU_PAIR: number = 9;
-    public static RNABASE_GU_PAIR: number = 10;
-    public static RNABASE_GC_PAIR: number = 11;
+    public static readonly RNABASE_UNDEFINED: number = 0;
+    public static readonly RNABASE_GUANINE: number = 3;
+    public static readonly RNABASE_ADENINE: number = 1;
+    public static readonly RNABASE_URACIL: number = 4;
+    public static readonly RNABASE_CYTOSINE: number = 2;
+    public static readonly RNABASE_PAIR: number = 5;
+    public static readonly RNABASE_SELECT: number = 6;
+    public static readonly RNABASE_MAGIC: number = 7;
+    public static readonly RNABASE_RANDOM: number = 8;
+    public static readonly RNABASE_AU_PAIR: number = 9;
+    public static readonly RNABASE_GU_PAIR: number = 10;
+    public static readonly RNABASE_GC_PAIR: number = 11;
 
-    public static RNABASE_ADD_BASE: number = 12;
-    public static RNABASE_ADD_PAIR: number = 13;
-    public static RNABASE_DELETE: number = 14;
-    public static RNABASE_LOCK: number = 15;
-    public static RNABASE_BINDING_SITE: number = 16;
+    public static readonly RNABASE_ADD_BASE: number = 12;
+    public static readonly RNABASE_ADD_PAIR: number = 13;
+    public static readonly RNABASE_DELETE: number = 14;
+    public static readonly RNABASE_LOCK: number = 15;
+    public static readonly RNABASE_BINDING_SITE: number = 16;
 
-    public static RNABASE_SHIFT: number = 17;
-    // public static const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
-    public static RNABASE_CUT: number = 19;
+    public static readonly RNABASE_SHIFT: number = 17;
+    // public static readonly const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
+    public static readonly RNABASE_CUT: number = 19;
 
     // (almost) follows the Vienna convention for the BP array
-    public static FORCE_PAIRED: number = -1;
-    public static FORCE_PAIRED3P: number = -2;
-    public static FORCE_PAIRED5P: number = -3;
-    public static FORCE_UNPAIRED: number = -4;
-    public static FORCE_IGNORE: number = -5;
+    public static readonly FORCE_PAIRED: number = -1;
+    public static readonly FORCE_PAIRED3P: number = -2;
+    public static readonly FORCE_PAIRED5P: number = -3;
+    public static readonly FORCE_UNPAIRED: number = -4;
+    public static readonly FORCE_IGNORE: number = -5;
 
-    public static RNABASE_DYNAMIC_FIRST: number = 100;
+    public static readonly RNABASE_DYNAMIC_FIRST: number = 100;
 
-    public static DEFAULT_TEMPERATURE: number = 37;
+    public static readonly DEFAULT_TEMPERATURE: number = 37;
 
-    public static F_ninio37: number[] = [0, 40, 50, 20, 10];
+    public static readonly F_ninio37: number[] = [0, 40, 50, 20, 10];
     /* only F[2] used */
 
-    public static RNABASE_LAST20: number[] = [
+    public static readonly RNABASE_LAST20: number[] = [
         EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_GUANINE, EPars.RNABASE_ADENINE,
         EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE,
         EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
