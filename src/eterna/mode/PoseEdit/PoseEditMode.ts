@@ -1131,7 +1131,6 @@ export class PoseEditMode extends GameMode {
         //     Application.instance.get_application_gui("View options").set_advanced(0);
         // }
         // //let _this:PoseEditMode = this;
-        // this.register_ui_for_rscript();
         // //_menuitem = Application.instance.get_application_gui("Menu").add_sub_item_cb("Beam to puzzlemaker", "Puzzle", function () :void {
         // //	_this.transfer_to_puzzlemaker();
         // //});
@@ -1231,24 +1230,6 @@ export class PoseEditMode extends GameMode {
     //
     //     return bd;
     // }
-
-    private register_ui_for_rscript(): void {
-        log.debug("TODO: register_ui_for_rscript");
-        // this._target_button.register_ui_for_rscript("TOGGLETARGET");
-        // this._native_button.register_ui_for_rscript("TOGGLENATURAL");
-        // this._zoom_in_button.register_ui_for_rscript("ZOOMIN");
-        // this._zoom_out_button.register_ui_for_rscript("ZOOMOUT");
-        // this._retry_button.register_ui_for_rscript("RESET");
-        // this._undo_button.register_ui_for_rscript("UNDO");
-        // this._redo_button.register_ui_for_rscript("REDO");
-        // this._pair_swap_button.register_ui_for_rscript("SWAP");
-        // this._hint_button.register_ui_for_rscript("HINT");
-        // this._pip_button.register_ui_for_rscript("PIP");
-        // this._freeze_button.register_ui_for_rscript("FREEZE");
-        // if (this._toggle_bar != null) {
-        //     this._toggle_bar.register_ui_for_rscript("SWITCH");
-        // }
-    }
 
     private on_click_addbase(): void {
         for (let pose of this._poses) {

@@ -1,11 +1,14 @@
 import * as log from "loglevel";
-import {Graphics, Point} from "pixi.js";
+import {DisplayObject, Graphics, Point} from "pixi.js";
+import {GameObject} from "../../flashbang/core/GameObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
+import {EternaMenu} from "../ui/EternaMenu";
 import {ColorUtil} from "../util/ColorUtil";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
@@ -55,10 +58,10 @@ export class ROPHighlight extends RScriptOp {
             this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
 
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
-            const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementID);
+            const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
             const highlightParent: any = this.GetUIElementReference(elementID, altParam);
             if (highlightParent == null) {
-                log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementID}']`);
+                log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementString}']`);
                 return;
             }
 
@@ -100,7 +103,7 @@ export class ROPHighlight extends RScriptOp {
                 if (this._mode == ROPHighlightMode.RNA) {
                     this._start_idx = Number(arg) - 1;
                 } else if (this._mode == ROPHighlightMode.UI) {
-                    this._uiElementID = this._env.GetStringRef(arg).toUpperCase();
+                    this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
                 }
             }
             break;
@@ -124,33 +127,39 @@ export class ROPHighlight extends RScriptOp {
         }
     }
 
-    private GetUIElementSize(obj: any, padding: Point, key: RScriptUIElementID): Point {
-        if (obj == null) {
-            return new Point(0, 0);
+    private GetUIElementSize(uiObj: any, padding: Point, key: RScriptUIElementID): Point {
+        let size: Point = new Point(2 * padding.x, 2 * padding.y);
+        if (uiObj instanceof GameObject && uiObj.display != null) {
+            size.x += DisplayUtil.width(uiObj.display);
+            size.y += DisplayUtil.height(uiObj.display);
+        } else if (uiObj instanceof DisplayObject) {
+            size.x += DisplayUtil.width(uiObj);
+            size.y += DisplayUtil.height(uiObj);
         }
 
-        let p: Point = new Point(obj.width + 2 * padding.x, obj.height + 2 * padding.y);
         switch (key) {
         case RScriptUIElementID.OBJECTIVES:
             let n: number = this._env.GetUI().get_constraint_count();
             let firstObj: ConstraintBox = this._env.GetUI().get_constraint(0);
             let lastObj: ConstraintBox = this._env.GetUI().get_constraint(n - 1);
-            p.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
-            p.y = 84;
+            size.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
+            size.y = 84;
             break;
         case RScriptUIElementID.SHAPEOBJECTIVE:
-            p.x = 84;
-            p.y = 84;
+            size.x = 84;
+            size.y = 84;
             break;
         case RScriptUIElementID.OBJECTIVE:
-            p.x = 10 + obj.real_width();
-            p.y = 84;
+            size.x = 10 + (uiObj as ConstraintBox).real_width();
+            size.y = 84;
             break;
         case RScriptUIElementID.SWAP:
-            p.x -= 6;
+            size.x -= 6;
             break;
         case RScriptUIElementID.ACTION_MENU:
-            p = new Point(obj.get_width(false) + 2 * padding.x, obj.get_height() + 2 * padding.y);
+            size = new Point(
+                (uiObj as EternaMenu).get_width(false) + 2 * padding.x,
+                (uiObj as EternaMenu).get_height() + 2 * padding.y);
             // no break statement, intentional!
         case RScriptUIElementID.ZOOMIN:
         case RScriptUIElementID.ZOOMOUT:
@@ -158,7 +167,7 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.REDO:
         case RScriptUIElementID.RESET:
         case RScriptUIElementID.PIP:
-            p.x -= 5;
+            size.x -= 5;
             break;
         case RScriptUIElementID.AU:
         case RScriptUIElementID.UA:
@@ -166,8 +175,8 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.UG:
         case RScriptUIElementID.GC:
         case RScriptUIElementID.CG:
-            p.x = 30;
-            p.y = 15;
+            size.x = 30;
+            size.y = 15;
             break;
         case RScriptUIElementID.AUCOMPLETE:
         case RScriptUIElementID.UACOMPLETE:
@@ -175,17 +184,17 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.UGCOMPLETE:
         case RScriptUIElementID.GCCOMPLETE:
         case RScriptUIElementID.CGCOMPLETE:
-            p.x += 24;
+            size.x += 24;
             break;
         case RScriptUIElementID.HELP:
-            p.x -= 6;
+            size.x -= 6;
             break;
         case RScriptUIElementID.TOGGLENATURAL:
         case RScriptUIElementID.TOGGLETARGET:
 
             break;
         }
-        return p;
+        return size;
     }
 
     private GetUIElementReference(key: RScriptUIElementID, altParam: number = -1): any {
@@ -221,7 +230,7 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.REDO:
         case RScriptUIElementID.PIP:
         case RScriptUIElementID.SWITCH:
-            return this._env.GetUIElement(key as RScriptUIElementID);
+            return this._env.GetUIElement(key);
         }
         return this._env.GetUI();
     }
@@ -285,5 +294,5 @@ export class ROPHighlight extends RScriptOp {
     private _end_idx: number = -1;
     private _id: string = "";
     private _color: number = 0xffffff;
-    private _uiElementID: string;
+    private _uiElementString: string;
 }

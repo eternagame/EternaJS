@@ -4,7 +4,10 @@ import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {Registration} from "../../signals/Registration";
+import {Registrations} from "../../signals/Registrations";
 import {Value} from "../../signals/Value";
+import {ROPWait} from "../rscript/ROPWait";
+import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
 import {Fonts} from "../util/Fonts";
 
 export class GameButton extends Button implements KeyboardListener {
@@ -49,6 +52,19 @@ export class GameButton extends Button implements KeyboardListener {
     /** Sets a single texture for all states */
     public allStates(tex: Texture | string): GameButton {
         return this.up(tex).over(tex).down(tex).disabled(tex);
+    }
+
+    public rscriptID(value: RScriptUIElementID): GameButton {
+        if (this._rscriptID != value) {
+            this._rscriptID = value;
+            this._rscriptClickReg.close();
+            if (value != null) {
+                this._rscriptClickReg = this.clicked.connect(() => {
+                    ROPWait.NotifyClickUI(this._rscriptID);
+                });
+            }
+        }
+        return this;
     }
 
     public selected(tex: Texture | string): GameButton {
@@ -215,6 +231,9 @@ export class GameButton extends Button implements KeyboardListener {
     private _hotkeyCtrl: boolean;
     private _buttonStateTextures: Texture[];
     private _selectedTexture: Texture;
+
+    private _rscriptID: RScriptUIElementID;
+    private _rscriptClickReg: Registration = Registrations.Null();
 
     private _hotkeyReg: Registration;
 
