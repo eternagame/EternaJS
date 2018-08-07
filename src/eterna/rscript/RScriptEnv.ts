@@ -2,52 +2,14 @@ import * as log from "loglevel";
 import {Container, DisplayObject} from "pixi.js";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {EPars} from "../EPars";
 import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
-import {Pose2D} from "../pose2D/Pose2D";
+import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PaletteTargetType} from "../ui/NucleotidePalette";
 import {TextBalloon} from "../ui/TextBalloon";
-
-export enum UIElementType {
-    ACTION_MENU = "ACTION_MENU",
-    OBJECTIVES = "OBJECTIVES",
-    SHAPEOBJECTIVE = "SHAPEOBJECTIVE",
-    OBJECTIVE = "OBJECTIVE-",
-    SWITCH = "SWITCH",
-    TOTALENERGY = "TOTALENERGY",
-    PRIMARY_ENERGY = "PRIMARY_ENERGY",
-    SECONDARY_ENERGY = "SECONDARY_ENERGY",
-    PALETTE = "PALETTE",
-    PALETTEALT = "PALETTEALT",
-    TOGGLENATURAL = "TOGGLENATURAL",
-    TOGGLETARGET = "TOGGLETARGET",
-    TOGGLEBAR = "TOGGLEBAR",
-    ZOOMIN = "ZOOMIN",
-    ZOOMOUT = "ZOOMOUT",
-    ACTIONBAR = "ACTIONBAR",
-    RESET = "RESET",
-    UNDO = "UNDO",
-    REDO = "REDO",
-    SWAP = "SWAP",
-    PIP = "PIP",
-    A = "A",
-    U = "U",
-    G = "G",
-    C = "C",
-    AU = "AU",
-    UA = "UA",
-    AUCOMPLETE = "AUCOMPLETE",
-    UACOMPLETE = "UACOMPLETE",
-    GU = "GU",
-    UG = "UG",
-    GUCOMPLETE = "GUCOMPLETE",
-    UGCOMPLETE = "UGCOMPLETE",
-    GC = "GC",
-    CG = "CG",
-    GCCOMPLETE = "GCCOMPLETE",
-    CGCOMPLETE = "CGCOMPLETE",
-}
+import {RScriptUIElementID} from "./RScriptUIElementID";
 
 /**
  * RScript Environment.
@@ -74,8 +36,12 @@ export class RScriptEnv extends ContainerObject {
             return;
         }
 
-        let textBox: TextBalloon = this.GetVar(id);
-        textBox.display.visible = isVisible;
+        let value = this.GetVar(id);
+        if (value instanceof TextBalloon) {
+            value.display.visible = isVisible;
+        } else {
+            log.warn(`'${id}' is not a Textbox`)
+        }
     }
 
     /** Generate string reference name. */
@@ -91,7 +57,13 @@ export class RScriptEnv extends ContainerObject {
         if (ref.indexOf("$$STRING_REF:") != 0) {
             return ref;
         } else {
-            return this.GetVar(ref);
+            let value = this.GetVar(ref);
+            if (typeof(value) === "string") {
+                return value;
+            } else {
+                log.warn(`'${ref}' is not a string`);
+                return ref;
+            }
         }
     }
 
@@ -117,9 +89,9 @@ export class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     // 	have been passed in.
-    public GetUIElementFromId(key: string): [any, string, number] {
+    public GetUIElementFromId(key: string): [any, RScriptUIElementID, number] {
         // Highlight UI.
-        let obj: any;
+        let uiElement: any;
 
         // Used UI Element ID.
         let splitId: string[] = key.split("-");
@@ -128,7 +100,8 @@ export class RScriptEnv extends ContainerObject {
         // So for the objectives: objective-### (format).
         // The input number will always come after the dash. The dash should be
         // included in the key that is passed.
-        let usable_id: string = splitId[0] + (splitId.length > 1 ? "-" : "");
+        let idString: string = splitId[0] + (splitId.length > 1 ? "-" : "");
+        let elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
 
         if (splitId.length > 2) {
             throw new Error("Invalid UI Element ID format");
@@ -136,12 +109,20 @@ export class RScriptEnv extends ContainerObject {
 
         let altParam: number = -1;
         if (splitId.length > 1) {
-            altParam = Number(splitId[1]);
-            obj = this.GetUIElement(usable_id as UIElementType, altParam);
+            altParam = Math.floor(Number(splitId[1]));
+            if (isNaN(altParam)) {
+                // If splitId[1] is malformed, altParam will be NaN.
+                // The Flash version of the game interprets this as a 0,
+                // and some tutorials rely on this behavior. (E.g. tutorial level 2 references "Objective-#0", rather
+                // than "Objective-0"). Ideally we'd throw an error here, but that would break puzzles in the wild.
+                log.warn(`Malformed UIElementID '${key}'`);
+                altParam = 0;
+            }
+            uiElement = this.GetUIElement(elementID, altParam);
         } else {
-            obj = this.GetUIElement(usable_id as UIElementType);
+            uiElement = this.GetUIElement(elementID);
         }
-        return [obj, usable_id, altParam];
+        return [uiElement, elementID, altParam];
     }
 
     public GetTotalConstraints(): number {
@@ -149,135 +130,125 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
-        if (elementID.toUpperCase() == "ENERGY") {
+        elementID = elementID.toUpperCase();
+
+        if (elementID == RScriptUIElementID.ENERGY) {
             this.GetUI().set_display_score_texts(visible);
-            return;
-        } else if (elementID.toUpperCase() == "BASENUMBERING") {
+        } else if (elementID == RScriptUIElementID.BASENUMBERING) {
             this.GetUI().set_show_numbering(visible);
-            return;
-        } else if (elementID.toUpperCase() == "TOTALENERGY") {
+        } else if (elementID == RScriptUIElementID.TOTALENERGY) {
             this.GetUI().set_show_total_energy(visible);
-            return;
-        } else if (elementID.toUpperCase() == "HINT") {
+        } else if (elementID == RScriptUIElementID.HINT) {
             // no-op
-            return;
-        } else if (elementID.toUpperCase() == "TOGGLEBAR") {
-            this.ShowHideUI("TOGGLETARGET", visible, disabled);
-            this.ShowHideUI("TOGGLENATURAL", visible, disabled);
-            return;
-        } else if (elementID.toUpperCase() == "SWITCH") {
+        } else if (elementID == RScriptUIElementID.TOGGLEBAR) {
+            this.ShowHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
+            this.ShowHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
+        } else if (elementID == RScriptUIElementID.SWITCH) {
             this.GetUIElementFromId(elementID)[0].visible = visible;
-            return;
-        }
-
-        log.debug("TODO: ShowHideUI");
-
-        if (visible) {
-            if (elementID.toUpperCase() == "PALETTE") {
+        } else {
+            if (visible && elementID == RScriptUIElementID.PALETTE) {
                 this.GetUI().toolbar.palette.set_override_default();
                 this.GetUI().toolbar.palette.change_default_mode();
-            } else if (elementID.toUpperCase() == "PALETTEALT") {
+            } else if (visible && elementID == RScriptUIElementID.PALETTEALT) {
                 this.GetUI().toolbar.palette.set_override_no_pair();
                 this.GetUI().toolbar.palette.change_no_pair_mode();
             }
-        }
 
-        // let obj: GameObject = this.GetUIElementFromId(elementID)[0];
-        // obj.override_visible(true, visible);
-        // RScriptEnv.SetUIVisible(obj, visible);
-        // if (visible) {
-        //     if (obj.hasOwnProperty("set_disabled")) {
-        //         if (obj instanceof GameButton) {
-        //             GameButton(obj).override_disable(true, disabled);
-        //             GameButton(obj).set_disabled(disabled);
-        //         }
-        //         obj.set_disabled(disabled);
-        //     }
-        // }
+            let obj: any = this.GetUIElementFromId(elementID)[0];
+            if (obj instanceof DisplayObject) {
+                obj.visible = visible;
+            } else if (obj instanceof GameObject && obj.display != null) {
+                obj.display.visible = visible;
+            }
+
+            if ((<Enableable>(obj as any)).enabled !== undefined) {
+                (<Enableable>(obj as any)).enabled = visible && !disabled;
+            }
+        }
     }
 
-    public GetUIElement(type: UIElementType, i: number = -1): any {
+    public GetUIElement(type: RScriptUIElementID, i: number = -1): any {
         switch (type) {
-        case UIElementType.ACTION_MENU:
+        case RScriptUIElementID.ACTION_MENU:
             return this.GetUI().toolbar.actionMenu;
-        case UIElementType.OBJECTIVES:
+        case RScriptUIElementID.OBJECTIVES:
             return this.GetUI().constraintsLayer;
-        case UIElementType.SHAPEOBJECTIVE:
+        case RScriptUIElementID.SHAPEOBJECTIVE:
             return this.GetUI().get_shape_box(0);
-        case UIElementType.OBJECTIVE:
+        case RScriptUIElementID.OBJECTIVE:
             return this.GetUI().get_constraint(i);
-        case UIElementType.SWITCH:
+        case RScriptUIElementID.SWITCH:
             return this.GetUI().toolbar.puzzleStateToggle;
-        case UIElementType.TOTALENERGY:
-        case UIElementType.PRIMARY_ENERGY:
+        case RScriptUIElementID.TOTALENERGY:
+        case RScriptUIElementID.PRIMARY_ENERGY:
             return this.GetRNA().get_primary_score_display();
-        case UIElementType.SECONDARY_ENERGY:
+        case RScriptUIElementID.SECONDARY_ENERGY:
             return this.GetRNA().get_secondary_score_display();
-        case UIElementType.PALETTE:
-        case UIElementType.PALETTEALT:
+        case RScriptUIElementID.PALETTE:
+        case RScriptUIElementID.PALETTEALT:
             return this.GetUI().toolbar.palette;
-        case UIElementType.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLENATURAL:
             return this.GetUI().toolbar.native_button;
-        case UIElementType.TOGGLETARGET:
+        case RScriptUIElementID.TOGGLETARGET:
             return this.GetUI().toolbar.target_button;
-        case UIElementType.TOGGLEBAR:
+        case RScriptUIElementID.TOGGLEBAR:
             // NOTE: There is no longer a toggle bar...
             return this.GetUI().toolbar.native_button;
-        case UIElementType.ZOOMIN:
+        case RScriptUIElementID.ZOOMIN:
             return this.GetUI().toolbar.zoom_in_button;
-        case UIElementType.ZOOMOUT:
+        case RScriptUIElementID.ZOOMOUT:
             return this.GetUI().toolbar.zoom_out_button;
-        case UIElementType.ACTIONBAR:
+        case RScriptUIElementID.ACTIONBAR:
             // NOTE: There is no longer an action bar...
             return this.GetUI().toolbar.zoom_in_button;
-        case UIElementType.RESET:
+        case RScriptUIElementID.RESET:
             return this.GetUI().toolbar.retry_button;
-        case UIElementType.UNDO:
+        case RScriptUIElementID.UNDO:
             return this.GetUI().toolbar.undo_button;
-        case UIElementType.REDO:
+        case RScriptUIElementID.REDO:
             return this.GetUI().toolbar.redo_button;
-        case UIElementType.SWAP:
+        case RScriptUIElementID.SWAP:
             return this.GetUI().toolbar.pair_swap_button;
-        case UIElementType.PIP:
+        case RScriptUIElementID.PIP:
             return this.GetUI().toolbar.pip_button;
-        case UIElementType.A:
+        case RScriptUIElementID.A:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.A);
-        case UIElementType.U:
+        case RScriptUIElementID.U:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.U);
-        case UIElementType.G:
+        case RScriptUIElementID.G:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.G);
-        case UIElementType.C:
+        case RScriptUIElementID.C:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.C);
-        case UIElementType.AU:
-        case UIElementType.UA:
-        case UIElementType.AUCOMPLETE:
-        case UIElementType.UACOMPLETE:
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.AU);
-        case UIElementType.GU:
-        case UIElementType.UG:
-        case UIElementType.GUCOMPLETE:
-        case UIElementType.UGCOMPLETE:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.UG);
-        case UIElementType.GC:
-        case UIElementType.CG:
-        case UIElementType.GCCOMPLETE:
-        case UIElementType.CGCOMPLETE:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.GC);
         default:
             throw new Error("Invalid UI Element: " + type);
         }
     }
 
-    public StoreVar(key: string, inValue: any, parent: any): void {
+    public StoreVar(key: string, inValue: RScriptVarType, parent: any): void {
         this._mapping.set(key, {val: inValue, par: parent});
     }
 
-    public GetVar(key: string): any {
+    public GetVar(key: string): RScriptVarType {
         let scriptVar = this._mapping.get(key);
         return scriptVar != null ? scriptVar.val : null;
     }
 
-    public DeleteVar(key: string, actualDelete: boolean = true): void {
+    public DeleteVar(key: string): void {
         let scriptVar = this._mapping.get(key);
         if (scriptVar == null) {
             return;
@@ -292,9 +263,7 @@ export class RScriptEnv extends ContainerObject {
             scriptVar.val.destroy();
         }
 
-        if (actualDelete) {
-            this._mapping.delete(key);
-        }
+        this._mapping.delete(key);
     }
 
     public Exists(key: string): boolean {
@@ -308,7 +277,9 @@ export class RScriptEnv extends ContainerObject {
     private _string_count: number = 0;
 }
 
+export type RScriptVarType = GameObject | DisplayObject | RNAHighlightState | string;
+
 interface ScriptVar {
-    val: any;
+    val: RScriptVarType;
     par: any;
 }

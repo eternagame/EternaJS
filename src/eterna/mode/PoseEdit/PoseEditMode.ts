@@ -580,7 +580,7 @@ export class PoseEditMode extends GameMode {
         //         this._scriptbar.set_disabled(false);
         //         this._run_button.set_click_callback(this.on_click_run);
         //     } else {
-        //         this._scriptbar.set_disabled(true);
+        //         this._scriptbar.enabled = false;
         //         this._run_button.set_click_callback(null);
         //     }
         // }
@@ -1131,7 +1131,6 @@ export class PoseEditMode extends GameMode {
         //     Application.instance.get_application_gui("View options").set_advanced(0);
         // }
         // //let _this:PoseEditMode = this;
-        // this.register_ui_for_rscript();
         // //_menuitem = Application.instance.get_application_gui("Menu").add_sub_item_cb("Beam to puzzlemaker", "Puzzle", function () :void {
         // //	_this.transfer_to_puzzlemaker();
         // //});
@@ -1231,24 +1230,6 @@ export class PoseEditMode extends GameMode {
     //
     //     return bd;
     // }
-
-    private register_ui_for_rscript(): void {
-        log.debug("TODO: register_ui_for_rscript");
-        // this._target_button.register_ui_for_rscript("TOGGLETARGET");
-        // this._native_button.register_ui_for_rscript("TOGGLENATURAL");
-        // this._zoom_in_button.register_ui_for_rscript("ZOOMIN");
-        // this._zoom_out_button.register_ui_for_rscript("ZOOMOUT");
-        // this._retry_button.register_ui_for_rscript("RESET");
-        // this._undo_button.register_ui_for_rscript("UNDO");
-        // this._redo_button.register_ui_for_rscript("REDO");
-        // this._pair_swap_button.register_ui_for_rscript("SWAP");
-        // this._hint_button.register_ui_for_rscript("HINT");
-        // this._pip_button.register_ui_for_rscript("PIP");
-        // this._freeze_button.register_ui_for_rscript("FREEZE");
-        // if (this._toggle_bar != null) {
-        //     this._toggle_bar.register_ui_for_rscript("SWITCH");
-        // }
-    }
 
     private on_click_addbase(): void {
         for (let pose of this._poses) {
@@ -1806,8 +1787,6 @@ export class PoseEditMode extends GameMode {
         .then(submissionResponse => {
             submittingRef.destroyObject();
 
-            this.trigger_ending();
-
             let data: any = submissionResponse['data'];
 
             this.showMissionClearedPanel(data);
@@ -1865,6 +1844,7 @@ export class PoseEditMode extends GameMode {
         let nextPuzzle: Puzzle = null;
         if (nextPuzzleData) {
             nextPuzzle = PuzzleManager.instance.parse_puzzle(nextPuzzleData);
+            log.info(`Loaded next puzzle [id=${nextPuzzle.get_node_id()}]`);
         }
 
         let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
@@ -2569,7 +2549,7 @@ export class PoseEditMode extends GameMode {
         // } else if (action[0] == "ENABLE_TOOLS") {
         //     this.disable_tools(false);
         // } else if (action[0] == "DISABLE_PALLETE") {
-        //     this._palette.set_disabled(true);
+        //     this._palette.enabled = false;
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[ii].set_current_color(-1);
         //     }
@@ -2580,8 +2560,8 @@ export class PoseEditMode extends GameMode {
         //     this._native_button.set_disabled(false);
         //     this._target_button.set_disabled(false);
         // } else if (action[0] == "DISABLE_MODES") {
-        //     this._native_button.set_disabled(true);
-        //     this._target_button.set_disabled(true);
+        //     this._native_button.enabled = false;
+        //     this._target_button.enabled = false;
         // } else if (action[0] == "CENTER_POSE") {
         //     for (ii = 0; ii < this._poses.length; ii++) {
         //         this._poses[0].set_zoom_level(0, true, true);
@@ -2589,7 +2569,7 @@ export class PoseEditMode extends GameMode {
         // } else if (action[0] == "ENABLE_PIP") {
         //     this._pip_button.set_disabled(false);
         // } else if (action[0] == "DISABLE_PIP") {
-        //     this._pip_button.set_disabled(true);
+        //     this._pip_button.enabled = false;
         // } else if (action[0] == "WAIT") {
         //     if (action[1] == "TRUE") {
         //         this._waiting_for_input = true;
@@ -4042,12 +4022,6 @@ export class PoseEditMode extends GameMode {
         // this._mission_cleared.set_animator(new GameAnimatorFader(1, 0, 0.3, true));
         this.disable_tools(false);
         this.set_show_menu(true);
-    }
-
-    private trigger_ending(): void {
-        log.debug("TODO: trigger_ending");
-        // let state_dict: Map<any, any> = new Map();
-        // this._puzzle_events.process_events(state_dict);
     }
 
     private clear_undo_stack(): void {

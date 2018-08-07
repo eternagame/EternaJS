@@ -1,6 +1,7 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Enableable} from "../../flashbang/objects/Enableable";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {DelayTask} from "../../flashbang/tasks/DelayTask";
@@ -27,7 +28,7 @@ export enum ConstraintBoxType {
     MISSION_SCREEN = "MISSION_SCREEN"  // slightly minimized, requirements text on the right
 }
 
-export class ConstraintBox extends ContainerObject {
+export class ConstraintBox extends ContainerObject implements Enableable {
     public constructor(type: ConstraintBoxType) {
         super();
 
@@ -212,8 +213,12 @@ export class ConstraintBox extends ContainerObject {
         }
     }
 
-    public set_disabled(dis: boolean): void {
-        this.display.visible = !dis;
+    public get enabled(): boolean {
+        return this.display.visible;
+    }
+
+    public set enabled(value: boolean) {
+        this.display.visible = value;
     }
 
     public show_big_text(show_txt: boolean): void {

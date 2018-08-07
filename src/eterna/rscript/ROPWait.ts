@@ -1,6 +1,7 @@
 import {ROPTextbox} from "./ROPTextbox";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
+import {RScriptUIElementID} from "./RScriptUIElementID";
 
 export enum ROPWaitType {
     MOVECAMERA = "MOVECAMERA",
@@ -24,13 +25,9 @@ export class ROPWait extends RScriptOp {
         ROPWait.GenericNotifyClear(ROPWaitType.MOVECAMERA, (): boolean => true);
     }
 
-    public static NotifyClickUI(key: string): void {
-        if (key == "") {
-            return;
-        }
-
+    public static NotifyClickUI(id: RScriptUIElementID): void {
         ROPWait.GenericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => {
-            return (op.GetElements().indexOf(key) != -1);
+            return (op.GetElements().indexOf(id) != -1);
         });
     }
 

@@ -47,8 +47,12 @@ export class ROPTextbox extends RScriptOp {
             if (ROPTextbox.isTextbox(this._mode)) {
                 this.RemoveTextbox();
             } else {
-                let prevArr: GameObject = this._env.GetVar(this._id);
-                this.RemoveArrow(prevArr);
+                let prevArr = this._env.GetVar(this._id);
+                if (prevArr instanceof GameObject) {
+                    this.RemoveArrow(prevArr);
+                } else {
+                    log.warn(`${this._id} is not an arrow`);
+                }
             }
         }
 
@@ -122,8 +126,13 @@ export class ROPTextbox extends RScriptOp {
         } else if (this._show) {
             let parent: FancyTextBalloon = null;
             if (this._has_parent) {
-                parent = this._env.GetVar(this._parent_id);
-                if (!parent) {
+                let parentVal = this._env.GetVar(this._parent_id);
+                if (parentVal instanceof FancyTextBalloon) {
+                    parent = parentVal;
+                } else if (parentVal == null) {
+                    this._has_parent = false;
+                } else {
+                    log.warn(`${this._parent_id}: is not a FancyTextBalloon`);
                     this._has_parent = false;
                 }
             }
@@ -135,14 +144,12 @@ export class ROPTextbox extends RScriptOp {
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
                     Flashbang.stageHeight * this._y_pos + this._y_rel);
-                // newArrow.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
             } else if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 newArrow.display.position = this._env.GetRNA().get_base_xy(this._nuc_idx);
             }
 
             // Determine where we want to draw the tip of the arrow
             if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                // endPoint.x += 6;
                 newArrow.display.position.x += 6;
             }
 
@@ -357,7 +364,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     private RemoveTextbox(): void {
-        this._env.DeleteVar(this._id, false);
+        this._env.DeleteVar(this._id);
     }
 
     private RemoveArrow(inArr: GameObject): void {

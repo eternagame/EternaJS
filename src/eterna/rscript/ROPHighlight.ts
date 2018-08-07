@@ -1,12 +1,18 @@
-import {Graphics, Point} from "pixi.js";
+import * as log from "loglevel";
+import {DisplayObject, Graphics, Point} from "pixi.js";
+import {GameObject} from "../../flashbang/core/GameObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
+import {EternaMenu} from "../ui/EternaMenu";
 import {ColorUtil} from "../util/ColorUtil";
-import {RScriptEnv, UIElementType} from "./RScriptEnv";
+import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
+import {RScriptUIElementID} from "./RScriptUIElementID";
 
 export enum ROPHighlightMode {
     RNA = "RNA",
@@ -33,45 +39,48 @@ export class ROPHighlight extends RScriptOp {
     public exec(): void {
         // Remove highlight with ID.
         if (this._env.Exists(this._id)) {
-            let obj2: any = this._env.GetVar(this._id);
-            if (obj2 instanceof SceneObject) {
-                obj2.destroySelf();
-            } else {
-                this.RemoveHighlight(obj2);
+            let existing: any = this._env.GetVar(this._id);
+            if (existing instanceof SceneObject) {
+                existing.destroySelf();
+            } else if (existing instanceof RNAHighlightState) {
+                this.RemoveHighlight(existing);
             }
             this._env.DeleteVar(this._id);
         }
 
         if (this._op_visible && this._mode == ROPHighlightMode.RNA) {
             // Highlight nucleotides.
-            let res: any[] = [];
+            let res: number[] = [];
             for (let i: number = this._start_idx; i <= this._end_idx; ++i) {
                 res.push(i);
             }
-            let hl2: any = this._env.GetRNA().create_new_highlight(res);
-            this._env.StoreVar(this._id, hl2, this._env.GetRNA());
+            let rnaHighlight: RNAHighlightState = this._env.GetRNA().create_new_highlight(res);
+            this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
 
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
-            let ret: any[] = this._env.GetUIElementFromId(this._ui_element);
-            let highlightParent: any = this.GetUIElementReference(ret[1], ret[2]);
-            let obj: any = ret[0];
+            const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
+            const highlightParent: any = this.GetUIElementReference(elementID, altParam);
+            if (highlightParent == null) {
+                log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementString}']`);
+                return;
+            }
 
             // Draw highlight around the UI element.
             // Give it a bit of padding so the highlight isn't so tight.
-            let padding: Point = new Point(5, 5);
-            let offset: Point = ROPHighlight.GetUIElementOffset(ret[1]);
-            let realWidth: Point = this.GetUIElementSize(obj, padding, ret[1]);
+            const padding = new Point(5, 5);
+            const offset: Point = ROPHighlight.GetUIElementOffset(elementID);
+            const realWidth: Point = this.GetUIElementSize(uiElement, padding, elementID);
 
-            let new_x: number = (highlightParent == obj ? 0 : obj.x) - padding.x + offset.x;
-            let new_y: number = (highlightParent == obj ? 0 : obj.y) - padding.y + offset.y;
+            const new_x: number = (highlightParent == uiElement ? 0 : uiElement.x) - padding.x + offset.x;
+            const new_y: number = (highlightParent == uiElement ? 0 : uiElement.y) - padding.y + offset.y;
 
-            let highlight = new Graphics();
+            const highlight = new Graphics();
             highlight.alpha = 0;
             highlight.clear();
             highlight.lineStyle(5, this._color, 0.7);
             highlight.drawRoundedRect(new_x, new_y, realWidth.x, realWidth.y, 10);
 
-            let highlightObj = new SceneObject(highlight);
+            const highlightObj = new SceneObject(highlight);
             highlightObj.addObject(new RepeatingTask(() => {
                 return new SerialTask(
                     new AlphaTask(1, 0.5),
@@ -94,7 +103,7 @@ export class ROPHighlight extends RScriptOp {
                 if (this._mode == ROPHighlightMode.RNA) {
                     this._start_idx = Number(arg) - 1;
                 } else if (this._mode == ROPHighlightMode.UI) {
-                    this._ui_element = this._env.GetStringRef(arg).toUpperCase();
+                    this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
                 }
             }
             break;
@@ -118,109 +127,115 @@ export class ROPHighlight extends RScriptOp {
         }
     }
 
-    private GetUIElementSize(obj: any, padding: Point, key: string): Point {
-        if (obj == null) {
-            return new Point(0, 0);
+    private GetUIElementSize(uiObj: any, padding: Point, key: RScriptUIElementID): Point {
+        let size: Point = new Point(2 * padding.x, 2 * padding.y);
+        if (uiObj instanceof GameObject && uiObj.display != null) {
+            size.x += DisplayUtil.width(uiObj.display);
+            size.y += DisplayUtil.height(uiObj.display);
+        } else if (uiObj instanceof DisplayObject) {
+            size.x += DisplayUtil.width(uiObj);
+            size.y += DisplayUtil.height(uiObj);
         }
 
-        let p: Point = new Point(obj.width + 2 * padding.x, obj.height + 2 * padding.y);
-        switch (key.toUpperCase()) {
-        case "OBJECTIVES":
+        switch (key) {
+        case RScriptUIElementID.OBJECTIVES:
             let n: number = this._env.GetUI().get_constraint_count();
             let firstObj: ConstraintBox = this._env.GetUI().get_constraint(0);
             let lastObj: ConstraintBox = this._env.GetUI().get_constraint(n - 1);
-            p.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
-            p.y = 84;
+            size.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
+            size.y = 84;
             break;
-        case "SHAPEOBJECTIVE":
-            p.x = 84;
-            p.y = 84;
+        case RScriptUIElementID.SHAPEOBJECTIVE:
+            size.x = 84;
+            size.y = 84;
             break;
-        case "OBJECTIVE-":
-            p.x = 10 + obj.real_width();
-            p.y = 84;
+        case RScriptUIElementID.OBJECTIVE:
+            size.x = 10 + (uiObj as ConstraintBox).real_width();
+            size.y = 84;
             break;
-        case "SWAP":
-            p.x -= 6;
+        case RScriptUIElementID.SWAP:
+            size.x -= 6;
             break;
-        case "ACTION_MENU":
-            p = new Point(obj.get_width(false) + 2 * padding.x, obj.get_height() + 2 * padding.y);
+        case RScriptUIElementID.ACTION_MENU:
+            size = new Point(
+                (uiObj as EternaMenu).get_width(false) + 2 * padding.x,
+                (uiObj as EternaMenu).get_height() + 2 * padding.y);
             // no break statement, intentional!
-        case "ZOOMIN":
-        case "ZOOMOUT":
-        case "UNDO":
-        case "REDO":
-        case "RESET":
-        case "PIP":
-            p.x -= 5;
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.RESET:
+        case RScriptUIElementID.PIP:
+            size.x -= 5;
             break;
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
-            p.x = 30;
-            p.y = 15;
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
+            size.x = 30;
+            size.y = 15;
             break;
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
-            p.x += 24;
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
+            size.x += 24;
             break;
-        case "HELP":
-            p.x -= 6;
+        case RScriptUIElementID.HELP:
+            size.x -= 6;
             break;
-        case "TOGGLENATURAL":
-        case "TOGGLETARGET":
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
 
             break;
         }
-        return p;
+        return size;
     }
 
-    private GetUIElementReference(key: string, altParam: number = -1): any {
-        switch (key.toUpperCase()) {
-        case "A":
-        case "U":
-        case "G":
-        case "C":
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
-            return this._env.GetUIElement(UIElementType.PALETTE);
-        case "OBJECTIVES":
-            return this._env.GetUIElement(UIElementType.OBJECTIVE, 0);
-        case "OBJECTIVE-":
-            return this._env.GetUIElement(UIElementType.OBJECTIVE, altParam);
-        case UIElementType.ACTION_MENU:
-        case UIElementType.SWAP:
-        case UIElementType.TOGGLENATURAL:
-        case UIElementType.TOGGLETARGET:
-        case UIElementType.ZOOMIN:
-        case UIElementType.ZOOMOUT:
-        case UIElementType.UNDO:
-        case UIElementType.REDO:
-        case UIElementType.PIP:
-        case UIElementType.SWITCH:
-            return this._env.GetUIElement(key as UIElementType);
+    private GetUIElementReference(key: RScriptUIElementID, altParam: number = -1): any {
+        switch (key) {
+        case RScriptUIElementID.A:
+        case RScriptUIElementID.U:
+        case RScriptUIElementID.G:
+        case RScriptUIElementID.C:
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
+            return this._env.GetUIElement(RScriptUIElementID.PALETTE);
+        case RScriptUIElementID.OBJECTIVES:
+            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, 0);
+        case RScriptUIElementID.OBJECTIVE:
+            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, altParam);
+        case RScriptUIElementID.ACTION_MENU:
+        case RScriptUIElementID.SWAP:
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.PIP:
+        case RScriptUIElementID.SWITCH:
+            return this._env.GetUIElement(key);
         }
         return this._env.GetUI();
     }
 
-    private RemoveHighlight(obj: any): void {
+    private RemoveHighlight(obj: RNAHighlightState): void {
         this._env.GetRNA().remove_new_highlight(obj);
     }
 
@@ -229,43 +244,43 @@ export class ROPHighlight extends RScriptOp {
         return inId + ROPHighlight.id_postfix;
     }
 
-    private static GetUIElementOffset(key: string): Point {
+    private static GetUIElementOffset(id: RScriptUIElementID): Point {
         let offset: Point = new Point(0, 0);
-        switch (key.toUpperCase()) {
-        case "SWAP":
+        switch (id) {
+        case RScriptUIElementID.SWAP:
             offset = new Point(4, 0);
             break;
-        case "A":
-        case "U":
-        case "G":
-        case "C":
+        case RScriptUIElementID.A:
+        case RScriptUIElementID.U:
+        case RScriptUIElementID.G:
+        case RScriptUIElementID.C:
             break;
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
             offset = new Point(9, 11);
             break;
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
             offset = new Point(-19, 0);
             break;
-        case "TOGGLENATURAL":
-        case "TOGGLETARGET":
-        case "RESET":
-        case "ZOOMIN":
-        case "ZOOMOUT":
-        case "UNDO":
-        case "REDO":
-        case "PIP":
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
+        case RScriptUIElementID.RESET:
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.PIP:
             break;
-        case "OBJECTIVES":
+        case RScriptUIElementID.OBJECTIVES:
             offset = new Point(-5, 0);
             break;
         }
@@ -279,5 +294,5 @@ export class ROPHighlight extends RScriptOp {
     private _end_idx: number = -1;
     private _id: string = "";
     private _color: number = 0xffffff;
-    private _ui_element: string;
+    private _uiElementString: string;
 }

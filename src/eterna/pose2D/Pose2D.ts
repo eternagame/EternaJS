@@ -1164,8 +1164,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public create_new_highlight(nucleotides: number[]): any {
-        let hl: any = {};
+    public create_new_highlight(nucleotides: number[]): RNAHighlightState {
+        let hl: RNAHighlightState = new RNAHighlightState();
 
         // If any of the nucleotides are part of a stack, highlight its pair as well.
         let addition: number[] = [];
@@ -1183,10 +1183,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         return hl;
     }
 
-    public remove_new_highlight(hl: any): void {
-        let i: number = this._all_new_highlights.indexOf(hl);
-        this._all_new_highlights.splice(i, 1);
-        this._redraw = true;
+    public remove_new_highlight(highlight: RNAHighlightState): void {
+        let idx: number = this._all_new_highlights.indexOf(highlight);
+        if (idx >= 0) {
+            this._all_new_highlights.splice(idx, 1);
+            this._redraw = true;
+        }
     }
 
     public on_praise_seq(seq_start: number, seq_end: number): void {
@@ -1966,16 +1968,15 @@ export class Pose2D extends ContainerObject implements Updatable {
             let r: Rectangle;
 
             // Create highlight state to pass to bases.
-            let hl_state: any = null;
-            // TODO: all_new_highlights
-            // if (this._all_new_highlights.length > 0) {
-            //     hl_state = {};
-            //     hl_state.nuc = [];
-            //     hl_state.isOn = true;
-            //     for (i = 0; i < this._all_new_highlights.length; ++i) {
-            //         hl_state.nuc = hl_state.nuc.concat(this._all_new_highlights[i].nuc);
-            //     }
-            // }
+            let hl_state: RNAHighlightState = null;
+            if (this._all_new_highlights.length > 0) {
+                hl_state = new RNAHighlightState();
+                hl_state.nuc = [];
+                hl_state.isOn = true;
+                for (let existingHighlight of this._all_new_highlights) {
+                    hl_state.nuc = hl_state.nuc.concat(existingHighlight.nuc);
+                }
+            }
 
             for (let ii = 0; ii < full_seq.length; ii++) {
                 // skip the oligo separator
@@ -3398,7 +3399,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 	 * 	- Unhighlighted Nucleotides: Draw at 65% opacity.
 	 *	- Highlight Nucleotides: Brighten glow around the nucleotide.
 	 */
-    private _all_new_highlights: any[] = [];
+    private _all_new_highlights: RNAHighlightState[] = [];
 
     private static readonly CLEAVING_SITE = "cleaving_site";
 
@@ -3409,4 +3410,9 @@ export interface Oligo {
     malus: number;
     name: string;
     sequence: number[];
+}
+
+export class RNAHighlightState {
+    public nuc: number[] = null;  // nucleotides
+    public isOn: boolean = false;
 }

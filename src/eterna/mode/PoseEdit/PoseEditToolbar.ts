@@ -12,6 +12,7 @@ import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Eterna} from "../../Eterna";
 import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {Bitmaps} from "../../resources/Bitmaps";
+import {RScriptUIElementID} from "../../rscript/RScriptUIElementID";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
@@ -98,7 +99,8 @@ export class PoseEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgPipOver)
             .down(Bitmaps.ImgPipHit)
             .tooltip("Set PiP mode")
-            .hotkey(KeyCode.KeyP);
+            .hotkey(KeyCode.KeyP)
+            .rscriptID(RScriptUIElementID.PIP);
         if (this._puzzle.get_secstructs().length > 1) {
             this.addObject(this.pip_button, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -110,7 +112,8 @@ export class PoseEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgFreezeOver)
             .selected(Bitmaps.ImgFreezeSelected)
             .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
-            .hotkey(KeyCode.KeyF);
+            .hotkey(KeyCode.KeyF)
+            .rscriptID(RScriptUIElementID.FREEZE);
         if (Eterna.settings.freezeButtonAlwaysVisible.value) {
             this.addObject(this.freeze_button, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -122,7 +125,8 @@ export class PoseEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgNativeOver)
             .down(Bitmaps.ImgNativeSelected)
             .selected(Bitmaps.ImgNativeSelected)
-            .tooltip("Natural Mode. RNA folds into the most stable shape.");
+            .tooltip("Natural Mode. RNA folds into the most stable shape.")
+            .rscriptID(RScriptUIElementID.TOGGLENATURAL);
         this.addObject(this.native_button, this._toolbarLayout);
 
         // TARGET
@@ -131,7 +135,8 @@ export class PoseEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgTargetOver)
             .down(Bitmaps.ImgTargetSelected)
             .selected(Bitmaps.ImgTargetSelected)
-            .tooltip("Target Mode. RNA freezes into the desired shape.");
+            .tooltip("Target Mode. RNA freezes into the desired shape.")
+            .rscriptID(RScriptUIElementID.TOGGLETARGET);
         this.addObject(this.target_button, this._toolbarLayout);
 
         this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -151,13 +156,14 @@ export class PoseEditToolbar extends ContainerObject {
                     .down(Bitmaps.ImgSwapOver)
                     .selected(Bitmaps.ImgSwapSelect)
                     .hotkey(KeyCode.Digit5)
-                    .tooltip("Swap paired bases.");
+                    .tooltip("Swap paired bases.")
+                    .rscriptID(RScriptUIElementID.SWAP);
                 this.addObject(this.pair_swap_button, this._toolbarLayout);
             } else {
                 this.palette.change_no_pair_mode();
             }
         } else {
-            this.palette.set_disabled(true);
+            this.palette.enabled = false;
         }
 
 
@@ -168,7 +174,8 @@ export class PoseEditToolbar extends ContainerObject {
             .down(Bitmaps.ImgZoomInHit)
             .disabled(Bitmaps.ImgZoomInDisable)
             .tooltip("Zoom in")
-            .hotkey(KeyCode.Equal);
+            .hotkey(KeyCode.Equal)
+            .rscriptID(RScriptUIElementID.ZOOMIN);
 
         this.zoom_out_button = new GameButton()
             .up(Bitmaps.ImgZoomOut)
@@ -176,7 +183,8 @@ export class PoseEditToolbar extends ContainerObject {
             .down(Bitmaps.ImgZoomOutHit)
             .disabled(Bitmaps.ImgZoomOutDisable)
             .tooltip("Zoom out")
-            .hotkey(KeyCode.Minus);
+            .hotkey(KeyCode.Minus)
+            .rscriptID(RScriptUIElementID.ZOOMOUT);
 
         this.undo_button = new GameButton()
             .up(Bitmaps.ImgUndo)
@@ -184,7 +192,8 @@ export class PoseEditToolbar extends ContainerObject {
             .down(Bitmaps.ImgUndoHit)
             .disabled(Bitmaps.ImgUndo)
             .tooltip("Undo")
-            .hotkey(KeyCode.KeyZ);
+            .hotkey(KeyCode.KeyZ)
+            .rscriptID(RScriptUIElementID.UNDO);
 
         this.redo_button = new GameButton()
             .up(Bitmaps.ImgRedo)
@@ -192,7 +201,8 @@ export class PoseEditToolbar extends ContainerObject {
             .down(Bitmaps.ImgRedoHit)
             .disabled(Bitmaps.ImgRedo)
             .tooltip("Redo")
-            .hotkey(KeyCode.KeyY);
+            .hotkey(KeyCode.KeyY)
+            .rscriptID(RScriptUIElementID.REDO);
 
         if (this._puzzle.is_undo_zoom_allowed()) {
             this._toolbarLayout.addHSpacer(SPACE_WIDE);
@@ -234,7 +244,8 @@ export class PoseEditToolbar extends ContainerObject {
             .allStates(Bitmaps.ImgReset)
             .label("Reset", 14)
             .scaleBitmapToLabel()
-            .tooltip("Reset and try this puzzle again.");
+            .tooltip("Reset and try this puzzle again.")
+            .rscriptID(RScriptUIElementID.RESET);
         this.actionMenu.add_sub_menu_button(0, this.retry_button);
 
         this.copy_button = new GameButton()
@@ -259,7 +270,8 @@ export class PoseEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgHintOver)
             .down(Bitmaps.ImgHintHit)
             .hotkey(KeyCode.KeyH)
-            .tooltip("Hint");
+            .tooltip("Hint")
+            .rscriptID(RScriptUIElementID.HINT);
         if (this._puzzle.get_hint() != null) {
             this.addObject(this.hint_button, this._toolbarLayout);
         }
@@ -393,7 +405,7 @@ export class PoseEditToolbar extends ContainerObject {
     }
 
     public disable_tools(disable: boolean): void {
-        this.palette.set_disabled(disable);
+        this.palette.enabled = !disable;
         this.pair_swap_button.enabled = !disable;
         for (let k: number = 0; k < this.dyn_paint_tools.length; k++) {
             this.dyn_paint_tools[k].enabled = !disable;
@@ -428,10 +440,10 @@ export class PoseEditToolbar extends ContainerObject {
         this.pip_button.enabled = !disable;
 
         if (this.puzzleStateToggle != null) {
-            this.puzzleStateToggle.set_disabled(disable);
+            this.puzzleStateToggle.enabled = !disable;
         }
 
-        this.actionMenu.set_disabled(disable);
+        this.actionMenu.enabled = !disable;
     }
 
     private readonly _puzzle: Puzzle;
