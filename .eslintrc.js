@@ -57,5 +57,7 @@ module.exports = {
         'import/order': 'off',
         // We use subclasses, so this rule frequently throws up false positives
         'class-methods-use-this': 'off',
+        // prefer-default-export hurts refactorability, and leads to style inconsistencies (enums can't be default-exported)
+        'import/prefer-default-export': 'off',
     }
 };
