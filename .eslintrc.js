@@ -53,5 +53,7 @@ module.exports = {
         // Outparams are used in some places to reduce allocations, however it'd be nice to have in general...
         // Should probably reconfigure with ignorePropertyModificationsFor
         'no-param-reassign': 'off',
+        // This is currently broken https://github.com/benmosher/eslint-plugin-import/issues/1152
+        'import/order': 'off',
     } 
 };
