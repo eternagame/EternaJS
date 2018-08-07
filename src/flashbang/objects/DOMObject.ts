@@ -123,7 +123,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
             value = value.substr(0, idx);
         }
         let size: number = Number(value);
-        return !isNaN(size) ? size : 0;
+        return !Number.isNaN(size) ? size : 0;
     }
 
     protected readonly _dummyDisp: Graphics = new Graphics();

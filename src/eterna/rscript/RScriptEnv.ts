@@ -110,7 +110,7 @@ export class RScriptEnv extends ContainerObject {
         let altParam: number = -1;
         if (splitId.length > 1) {
             altParam = Math.floor(Number(splitId[1]));
-            if (isNaN(altParam)) {
+            if (Number.isNaN(altParam)) {
                 // If splitId[1] is malformed, altParam will be NaN.
                 // The Flash version of the game interprets this as a 0,
                 // and some tutorials rely on this behavior. (E.g. tutorial level 2 references "Objective-#0", rather
