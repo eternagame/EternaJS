@@ -9,7 +9,8 @@ import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PaletteTargetType} from "../ui/NucleotidePalette";
 import {TextBalloon} from "../ui/TextBalloon";
-import {RScriptUIElementID} from "./RScriptUIElementID";
+import {ToggleBar} from "../ui/ToggleBar";
+import {RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
 
 /**
  * RScript Environment.
@@ -89,9 +90,9 @@ export class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     //  have been passed in.
-    public GetUIElementFromId(key: string): [any, RScriptUIElementID, number] {
+    public GetUIElementFromId(key: string): [RScriptUIElement, RScriptUIElementID, number] {
         // Highlight UI.
-        let uiElement: any;
+        let uiElement: RScriptUIElement;
 
         // Used UI Element ID.
         let splitId: string[] = key.split("-");
@@ -144,7 +145,7 @@ export class RScriptEnv extends ContainerObject {
             this.ShowHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
             this.ShowHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
         } else if (elementID === RScriptUIElementID.SWITCH) {
-            this.GetUIElementFromId(elementID)[0].visible = visible;
+            (this.GetUIElementFromId(elementID)[0] as ToggleBar).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {
                 this.GetUI().toolbar.palette.set_override_default();
@@ -154,7 +155,7 @@ export class RScriptEnv extends ContainerObject {
                 this.GetUI().toolbar.palette.change_no_pair_mode();
             }
 
-            let obj: any = this.GetUIElementFromId(elementID)[0];
+            let obj: RScriptUIElement = this.GetUIElementFromId(elementID)[0];
             if (obj instanceof DisplayObject) {
                 obj.visible = visible;
             } else if (obj instanceof GameObject && obj.display != null) {
@@ -167,7 +168,7 @@ export class RScriptEnv extends ContainerObject {
         }
     }
 
-    public GetUIElement(type: RScriptUIElementID, i: number = -1): any {
+    public GetUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
         switch (type) {
         case RScriptUIElementID.ACTION_MENU:
             return this.GetUI().toolbar.actionMenu;

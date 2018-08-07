@@ -12,7 +12,7 @@ import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Eterna} from "../../Eterna";
 import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {Bitmaps} from "../../resources/Bitmaps";
-import {RScriptUIElementID} from "../../rscript/RScriptUIElementID";
+import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";

@@ -12,7 +12,7 @@ import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
 import {ROPWait} from "../rscript/ROPWait";
 import {Bitmaps} from "../resources/Bitmaps";
-import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
+import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;

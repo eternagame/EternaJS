@@ -1,3 +1,25 @@
+import {DisplayObject, Rectangle} from "pixi.js";
+import {GameObject} from "../../flashbang/core/GameObject";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+
+export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
+
+export function GetRScriptUIElementBounds(element: RScriptUIElement): Rectangle {
+    if (element instanceof GameObject) {
+        return element.display != null ?
+            new Rectangle(
+                element.display.x,
+                element.display.y,
+                DisplayUtil.width(element.display),
+                DisplayUtil.height(element.display)) :
+            new Rectangle();
+    } else if (element instanceof DisplayObject) {
+        return new Rectangle(element.x, element.y, DisplayUtil.width(element), DisplayUtil.height(element));
+    } else {
+        return element;
+    }
+}
+
 export enum RScriptUIElementID {
     TOGGLETARGET = "TOGGLETARGET",
     TOGGLENATURAL = "TOGGLENATURAL",

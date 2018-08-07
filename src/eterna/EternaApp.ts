@@ -34,6 +34,7 @@ enum PuzzleID {
     Tutorial2 = 6502942,
     Tutorial3 = 6502943,
     Tutorial4 = 6502944,
+    Tutorial6 = 6502945,
 }
 
 interface EternaAppParameters {
@@ -148,7 +149,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1024;
     private readonly _height: number = 768;
-    private readonly _puzzleID: number = PuzzleID.Tutorial4;
+    private readonly _puzzleID: number = PuzzleID.Tutorial6;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
