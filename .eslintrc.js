@@ -46,7 +46,7 @@ module.exports = {
         'prefer-const': 'off',
         'lines-between-class-members': ['error', 'always', {exceptAfterSingleLine: true}],
         'comma-dangle': ['error', 'never'],
-        'max-len': ['error', {code: 120}],
+        'max-len': ['warn', {code: 120}],
         'no-else-return': 'off',
         // At least until the dynamic content changes to interfaces
         'dot-notation': 'off',
