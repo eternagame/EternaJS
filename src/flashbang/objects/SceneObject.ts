@@ -13,7 +13,7 @@ export class SceneObject extends GameObject implements PointerTarget {
         this._displayObject = displayObject;
     }
 
-    public /*final*/ get display(): DisplayObject {
+    public /* final */ get display(): DisplayObject {
         return this._displayObject;
     }
 

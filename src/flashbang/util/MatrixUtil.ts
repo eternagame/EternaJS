@@ -18,8 +18,8 @@ export class MatrixUtil {
 
     /** Determines if the matrix is an identity matrix. */
     public static isIdentity(matrix: Matrix): boolean {
-        return matrix.a == 1.0 && matrix.b == 0.0 && matrix.c == 0.0 && matrix.d == 1.0 &&
-            matrix.tx == 0.0 && matrix.ty == 0.0;
+        return matrix.a == 1.0 && matrix.b == 0.0 && matrix.c == 0.0 && matrix.d == 1.0
+            && matrix.tx == 0.0 && matrix.ty == 0.0;
     }
 
     /** Transform a point with the given matrix. */
@@ -124,11 +124,11 @@ export class MatrixUtil {
         MatrixUtil.sRawData2[4] = matrix.d;
         MatrixUtil.sRawData2[5] = matrix.ty;
 
-        return "[Matrix rawData=\n" + MatrixUtil.formatRawData(MatrixUtil.sRawData2, 3, 2, precision) + "\n]";
+        return `[Matrix rawData=\n${MatrixUtil.formatRawData(MatrixUtil.sRawData2, 3, 2, precision)}\n]`;
     }
 
     private static formatRawData(data: number[], numCols: number, numRows: number,
-                                 precision: number, indent: string = "  "): string {
+        precision: number, indent: string = "  "): string {
         let result: string = indent;
         let numValues: number = numCols * numRows;
         let highestValue: number = 0.0;
@@ -147,13 +147,13 @@ export class MatrixUtil {
                 value = data[numCols * y + x];
                 valueString = value.toFixed(precision);
 
-                while (valueString.length < numChars) valueString = " " + valueString;
+                while (valueString.length < numChars) valueString = ` ${valueString}`;
 
                 result += valueString;
                 if (x != numCols - 1) result += ", ";
             }
 
-            if (y != numRows - 1) result += "\n" + indent;
+            if (y != numRows - 1) result += `\n${indent}`;
         }
 
         return result;
@@ -173,7 +173,10 @@ export class MatrixUtil {
         const E: number = 0.0001;
 
         let doSnap: boolean = false;
-        let aSq: number, bSq: number, cSq: number, dSq: number;
+        let aSq: number,
+            bSq: number,
+            cSq: number,
+            dSq: number;
 
         if (matrix.b + E > 0 && matrix.b - E < 0 && matrix.c + E > 0 && matrix.c - E < 0) {
             // what we actually want is 'Math.abs(matrix.a)', but squaring

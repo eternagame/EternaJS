@@ -1,4 +1,4 @@
-﻿import {EPars} from "../EPars";
+import {EPars} from "../EPars";
 import {Eterna} from "../Eterna";
 import {Feedback} from "../Feedback";
 import {CSVParser} from "../util/CSVParser";
@@ -7,15 +7,15 @@ import {Solution} from "./Solution";
 export class SolutionManager {
     public static get instance(): SolutionManager {
         if (SolutionManager._instance == null) {
-            SolutionManager._instance = new SolutionManager;
+            SolutionManager._instance = new SolutionManager();
         }
         return SolutionManager._instance;
     }
 
     public get_solutions_by_puzzle_nid(puznid: number): Promise<Solution[]> {
         return Eterna.client.get_solutions(puznid).then((json) => {
-            let data: any = json['data'];
-            let solutions: any[] = data['solutions'];
+            let data: any = json["data"];
+            let solutions: any[] = data["solutions"];
             this._solutions = [];
 
             for (let ii: number = 0; ii < solutions.length; ii++) {
@@ -41,8 +41,7 @@ export class SolutionManager {
     }
 
     public add_hairpins(hairpins: any[]): void {
-        if (hairpins == null)
-            return;
+        if (hairpins == null) return;
         for (let ii: number = 0; ii < hairpins.length; ii++) {
             this._hairpins.push(hairpins[ii]);
         }
@@ -50,13 +49,13 @@ export class SolutionManager {
 
     public check_redundancy_by_hairpin(seq: string): boolean {
         let hairpin: string = EPars.get_barcode_hairpin(seq);
-        if (hairpin == null)
-            return true;
+        if (hairpin == null) return true;
 
-        for (let ii: number = 0; ii < this._hairpins.length; ii++)
+        for (let ii: number = 0; ii < this._hairpins.length; ii++) {
             if (this._hairpins[ii] == hairpin) {
                 return true;
             }
+        }
         return false;
     }
 
@@ -105,32 +104,31 @@ export class SolutionManager {
 
                 for (let ii: number = 0; ii < synthesis_data.length; ii++) {
                     let synthesis: any = synthesis_data[ii];
-                    if (synthesis['reactive'] == "SHAPE") {
+                    if (synthesis["reactive"] == "SHAPE") {
                         let peaks: any[] = [];
-                        peaks.push(synthesis['start_index']);
+                        peaks.push(synthesis["start_index"]);
 
-                        for (let ss: number = 0; ss < synthesis['peaks'].length; ss++) {
-                            peaks.push(synthesis['peaks'][ss]);
+                        for (let ss: number = 0; ss < synthesis["peaks"].length; ss++) {
+                            peaks.push(synthesis["peaks"][ss]);
                         }
 
                         if (newfb == null) {
-                            newfb = new Feedback;
+                            newfb = new Feedback();
                         }
 
-                        newfb.set_shape_data(peaks, synthesis['target_index'], synthesis['threshold'], synthesis['max'], synthesis['min'], null);
+                        newfb.set_shape_data(peaks, synthesis["target_index"], synthesis["threshold"], synthesis["max"], synthesis["min"], null);
                     }
                 }
-                /// Ad-hoc handling for different exp types : Brent's theophylline puzzle
-            } else if (synthesis_data_raw['type'] == "brent_theo") {
+                // / Ad-hoc handling for different exp types : Brent's theophylline puzzle
+            } else if (synthesis_data_raw["type"] == "brent_theo") {
                 if (newfb == null) {
-                    newfb = new Feedback;
+                    newfb = new Feedback();
                 }
                 newfb.set_brent_theo_data(synthesis_data_raw);
-
             }
         } else if (obj["SHAPE"] != null && obj["SHAPE"].length > 0) {
             if (newfb == null) {
-                newfb = new Feedback;
+                newfb = new Feedback();
             }
 
             if (Feedback.EXPSTRINGS.indexOf(obj["SHAPE"]) >= 0) {

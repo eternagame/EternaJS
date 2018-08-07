@@ -65,8 +65,8 @@ export abstract class RScriptOp {
             let s_idx: number = arg.indexOf("'");
             let s_matchIdx: number = arg.indexOf("'", s_idx + 1);
 
-            let d_idx: number = arg.indexOf('"');
-            let d_matchIdx: number = arg.indexOf('"', d_idx + 1);
+            let d_idx: number = arg.indexOf("\"");
+            let d_matchIdx: number = arg.indexOf("\"", d_idx + 1);
 
             let idx: number = -1;
             let matchIdx: number = -1;

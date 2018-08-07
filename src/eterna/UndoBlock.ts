@@ -47,19 +47,19 @@ export class UndoBlock {
 
     public fromJson(json: any): void {
         try {
-            this._sequence = JSONUtil.require(json, 'sequence_');
-            this._pairs_array = JSONUtil.require(json, 'pairs_array_');
-            this._params_array = JSONUtil.require(json, 'params_array_');
-            this._stable = JSONUtil.require(json, 'stable_');
-            this._target_oligo = JSONUtil.require(json, 'target_oligo_');
-            this._target_oligos = JSONUtil.require(json, 'target_oligos_');
-            this._oligo_order = JSONUtil.require(json, 'oligo_order_');
-            this._oligos_paired = JSONUtil.require(json, 'oligos_paired_');
-            this._target_pairs = JSONUtil.require(json, 'target_pairs_');
-            this._target_oligo_order = JSONUtil.require(json, 'target_oligo_order_');
-            this._puzzle_locks = JSONUtil.require(json, 'puzzle_locks_');
-            this._forced_struct = JSONUtil.require(json, 'forced_struct_');
-            this._target_conditions = JSONUtil.require(json, 'target_conditions_');
+            this._sequence = JSONUtil.require(json, "sequence_");
+            this._pairs_array = JSONUtil.require(json, "pairs_array_");
+            this._params_array = JSONUtil.require(json, "params_array_");
+            this._stable = JSONUtil.require(json, "stable_");
+            this._target_oligo = JSONUtil.require(json, "target_oligo_");
+            this._target_oligos = JSONUtil.require(json, "target_oligos_");
+            this._oligo_order = JSONUtil.require(json, "oligo_order_");
+            this._oligos_paired = JSONUtil.require(json, "oligos_paired_");
+            this._target_pairs = JSONUtil.require(json, "target_pairs_");
+            this._target_oligo_order = JSONUtil.require(json, "target_oligo_order_");
+            this._puzzle_locks = JSONUtil.require(json, "puzzle_locks_");
+            this._forced_struct = JSONUtil.require(json, "forced_struct_");
+            this._target_conditions = JSONUtil.require(json, "target_conditions_");
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
@@ -76,13 +76,13 @@ export class UndoBlock {
     public get_oligo_mode(): number {
         let tc: any = this.get_target_conditions();
         if (tc == null) return 0;
-        return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : tc['fold_mode'];
+        return tc["fold_mode"] == null ? Pose2D.OLIGO_MODE_DIMER : tc["fold_mode"];
     }
 
     public get_oligo_name(): string {
         let tc: any = this.get_target_conditions();
         if (tc == null) return null;
-        return tc.hasOwnProperty('oligo_name') ? tc['oligo_name'] : null;
+        return tc.hasOwnProperty("oligo_name") ? tc["oligo_name"] : null;
     }
 
     public set_target_oligos(target_oligos: any[]): void {

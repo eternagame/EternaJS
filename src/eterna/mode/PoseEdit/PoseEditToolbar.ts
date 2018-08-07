@@ -336,12 +336,14 @@ export class PoseEditToolbar extends ContainerObject {
             this.addObject(this.puzzleStateToggle, this._content);
             DisplayUtil.positionRelative(
                 this.puzzleStateToggle.display, Align.CENTER, Align.BOTTOM,
-                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5);
+                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5
+            );
         }
 
         DisplayUtil.positionRelative(
             this._content, Align.CENTER, Align.BOTTOM,
-            this._invisibleBackground, Align.CENTER, Align.BOTTOM);
+            this._invisibleBackground, Align.CENTER, Align.BOTTOM
+        );
 
         this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
     }
@@ -369,7 +371,9 @@ export class PoseEditToolbar extends ContainerObject {
                         new LocationTask(
                             this._uncollapsedContentLoc.x,
                             this._uncollapsedContentLoc.y,
-                            0.25, Easing.easeOut, this._content));
+                            0.25, Easing.easeOut, this._content
+                        )
+                    );
                 }
             };
 
@@ -382,7 +386,9 @@ export class PoseEditToolbar extends ContainerObject {
                         new LocationTask(
                             this._uncollapsedContentLoc.x,
                             this._uncollapsedContentLoc.y + 72,
-                            0.25, Easing.easeOut, this._content));
+                            0.25, Easing.easeOut, this._content
+                        )
+                    );
                 }
             };
 
@@ -391,7 +397,6 @@ export class PoseEditToolbar extends ContainerObject {
             this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
 
             collapse();
-
         } else {
             if (this._autoCollapseRegs != null) {
                 this._autoCollapseRegs.close();

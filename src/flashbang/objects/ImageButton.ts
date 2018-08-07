@@ -12,19 +12,16 @@ export class ImageButton extends Button {
         this._textures.length = 4;
 
         // Fill in substitute images for any that are missing
-        this._textures[ButtonState.OVER] =
-            this._textures[ButtonState.OVER] ||
-            this._textures[ButtonState.DOWN] ||
-            this._textures[ButtonState.UP];
+        this._textures[ButtonState.OVER] = this._textures[ButtonState.OVER]
+            || this._textures[ButtonState.DOWN]
+            || this._textures[ButtonState.UP];
 
-        this._textures[ButtonState.DOWN] =
-            this._textures[ButtonState.DOWN] ||
-            this._textures[ButtonState.OVER] ||
-            this._textures[ButtonState.UP];
+        this._textures[ButtonState.DOWN] = this._textures[ButtonState.DOWN]
+            || this._textures[ButtonState.OVER]
+            || this._textures[ButtonState.UP];
 
-        this._textures[ButtonState.DISABLED] =
-            this._textures[ButtonState.DISABLED] ||
-            this._textures[ButtonState.UP];
+        this._textures[ButtonState.DISABLED] = this._textures[ButtonState.DISABLED]
+            || this._textures[ButtonState.UP];
     }
 
     protected showState(state: ButtonState): void {

@@ -8,15 +8,15 @@ export class ROPUI extends RScriptOp {
         this._op_disabled = isDisabled;
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         this._env.ShowHideUI(this._element_id, this._op_visible, this._op_disabled);
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         if (i > 0) {
-            throw new Error("Invalid number of arguments for ROP UI: " + i);
+            throw new Error(`Invalid number of arguments for ROP UI: ${i}`);
         }
         this._element_id = arg;
     }

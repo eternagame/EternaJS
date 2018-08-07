@@ -4,13 +4,13 @@ import {StringUtil} from "./StringUtil";
 export class ColorUtil {
     public static fromString(str: string): number {
         if (str.length == 0 || str.charAt(0) != "#") {
-            throw new Error("Invalid color string: " + str);
+            throw new Error(`Invalid color string: ${str}`);
         }
 
         try {
             return StringUtil.parseUnsignedInteger(str.substr(1), 16);
         } catch (e) {
-            throw new Error("Invalid color string: " + str);
+            throw new Error(`Invalid color string: ${str}`);
         }
     }
 
@@ -73,8 +73,8 @@ export class ColorUtil {
         redOffset: number = 0,
         greenOffset: number = 0,
         blueOffset: number = 0,
-        alphaOffset: number = 0): PIXI.filters.ColorMatrixFilter {
-
+        alphaOffset: number = 0
+    ): PIXI.filters.ColorMatrixFilter {
         const filter = new PIXI.filters.ColorMatrixFilter();
         filter.matrix = [
             redMultiplier, 0, 0, 0, redOffset,

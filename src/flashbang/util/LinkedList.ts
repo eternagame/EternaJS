@@ -92,7 +92,7 @@ export class LinkedList<T> {
         return cons;
     }
 
-    /*internal*/
+    /* internal */
     removeCons(cons: Cons<T>): void {
         if (this.isIterating) {
             this._pendingRuns = LinkedList.pend(this._pendingRuns, new Runs(() => {

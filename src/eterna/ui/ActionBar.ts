@@ -1,4 +1,4 @@
-﻿import {Graphics, Point} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -36,7 +36,7 @@ export class ActionBar extends ContainerObject {
         }
     }
 
-    /*override*/
+    /* override */
     // public set_disabled(disabled: boolean): void {
     //     for (let ii: number = 0; ii < this._items.length; ii++) {
     //         if (this._items[ii].hasOwnProperty("set_disabled")) {
@@ -79,7 +79,8 @@ export class ActionBar extends ContainerObject {
             let item_y: number = whole_height / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._height_mods[ii];
             this._items[ii].display.position = new Point(
                 bar_space + bar_space / 2.0 + item_space_walker + (bar_space) * ii,
-                item_y);
+                item_y
+            );
             item_space_walker += cur_space;
         }
 

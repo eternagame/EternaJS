@@ -9,7 +9,7 @@ export class VisibleTask extends ObjectTask {
         this._target = target;
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         // If we weren't given a target, operate on our parent object
         let target = this._target;

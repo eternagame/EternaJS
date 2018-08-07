@@ -1,13 +1,15 @@
 import * as _ from "lodash";
-import {BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture, Container} from "pixi.js";
+import {
+    BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture, Container
+} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 import {Assert} from "./Assert";
 
 export class TextureUtil {
-    public static load (source: Texture | string | string[]): Promise<void> {
+    public static load(source: Texture | string | string[]): Promise<void> {
         if (source instanceof Texture) {
             return this.loadTexture(source as Texture).then(() => {});
-        } else if (typeof source == "string") {
+        } else if (typeof source === "string") {
             return this.loadURL(source as string).then(() => {});
         } else {
             return this.loadURLs(source as string[]).then(() => {});
@@ -18,9 +20,9 @@ export class TextureUtil {
     public static loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
         if (!base.isLoading) {
-            return base.hasLoaded ?
-                Promise.resolve(tex) :
-                Promise.reject(`texture failed to load [url=${base.imageUrl}]`);
+            return base.hasLoaded
+                ? Promise.resolve(tex)
+                : Promise.reject(`texture failed to load [url=${base.imageUrl}]`);
         } else {
             // log.debug(`Loading image... [url=${base.imageUrl}]`);
             return new Promise<Texture>((resolve, reject) => {
@@ -40,7 +42,7 @@ export class TextureUtil {
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
     public static loadURLs(urls: string[]): Promise<Texture[]> {
-        return Promise.all(_.map(urls, (url) => this.loadURL(url)));
+        return Promise.all(_.map(urls, url => this.loadURL(url)));
     }
 
     /**

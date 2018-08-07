@@ -82,7 +82,6 @@ export class NovaPaintHint extends ContainerObject implements Updatable {
                 this._startAnimTime = -1;
                 this._curStage = 0;
                 this.InitializeHint();
-
             } else if (endTime > 0.5) {
                 this._img.texture = this._no_click;
             }

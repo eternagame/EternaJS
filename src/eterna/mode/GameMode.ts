@@ -149,7 +149,6 @@ export abstract class GameMode extends AppMode {
                 } else {
                     poseField.display.visible = false;
                 }
-
             }
         }
 
@@ -183,7 +182,7 @@ export abstract class GameMode extends AppMode {
         // }
     }
 
-    /// To be overridden
+    // / To be overridden
     protected get_screenshot(): any {
         return null;
     }
@@ -201,5 +200,4 @@ export abstract class GameMode extends AppMode {
     protected _force_synch: boolean = false;
 
     // protected _pic_button: GameButton;
-
 }

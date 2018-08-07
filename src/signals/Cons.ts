@@ -14,7 +14,7 @@ export class Cons implements Connection {
     }
 
     /** Indicates whether this connection is one-shot or persistent. */
-    public /*final*/ oneShot(): boolean {
+    public /* final */ oneShot(): boolean {
         return this._oneShot;
     }
 
@@ -48,7 +48,7 @@ export class Cons implements Connection {
         return this;
     }
 
-    /*internal*/
+    /* internal */
     static insert(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return cons;
@@ -61,7 +61,7 @@ export class Cons implements Connection {
         }
     }
 
-    /*internal*/
+    /* internal */
     static remove(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return head;
@@ -73,7 +73,7 @@ export class Cons implements Connection {
         }
     }
 
-    /*internal*/
+    /* internal */
     static removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;

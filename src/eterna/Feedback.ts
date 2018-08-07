@@ -1,10 +1,11 @@
-﻿export class Feedback {
+export class Feedback {
     public static readonly EXPCODES: number[] = [1, -100, -200];
     public static readonly EXPSTRINGS: string[] = ["NOT SYNTHESIZED", "FAILED", "NOT INTERPRETABLE"];
     public static readonly EXPDISPLAYS: string[] = ["-", "<FONT COLOR='#FF3333'>Failed</FONT>", "<FONT COLOR='#FF33FF'>Unreadable</FONT>"];
     public static readonly EXPDISPLAYS_LONG: string[] = ["Not synthesized",
         "<B><FONT COLOR='#FF3333'>[FAILED..]</FONT></B> This design failed to synthesize in test tubes.",
         "<B><FONT COLOR='#FF33FF'>[Unreadable..]</FONT></B> The synthesis result of this was not interpretable."];
+
     public static readonly EXPSCORES: number[] = [0, 10, 15];
 
     public static score_feedback(shapedata: number[], secstruct: string, start_index: number, min: number, threshold: number, max: number): number {
@@ -24,17 +25,15 @@
                 if (shapedata[ii - start_index] > (threshold / 4 + min / 4 * 3)) {
                     score++;
                 }
-            } else {
-                if (shapedata[ii - start_index] < threshold) {
-                    score++;
-                }
+            } else if (shapedata[ii - start_index] < threshold) {
+                score++;
             }
         }
 
         return Math.round(score / shapedata.length * 100);
     }
 
-    /// Ad-hoc object for Brent's theophylline puzzle
+    // / Ad-hoc object for Brent's theophylline puzzle
     public set_brent_theo_data(dat: Object): void {
         this._brent_theo_data = dat;
     }
@@ -45,7 +44,6 @@
 
     public set_shape_data(dat: any[], index: number, threshold: Object, max: Object, min: Object, failed: string): void {
         if (dat != null) {
-
             this._shape_starts[index] = dat[0] - 1;
             dat.splice(0, 1);
             this._shape_data[index] = dat.slice();
@@ -104,31 +102,23 @@
     }
 
     public get_shape_start_index(index: number = 0): number {
-        if (this._shape_data[index] != null)
-            return this._shape_starts[index];
-        else
-            return 0.5;
+        if (this._shape_data[index] != null) return this._shape_starts[index];
+        else return 0.5;
     }
 
     public get_shape_threshold(index: number = 0): number {
-        if (this._shape_data[index] != null)
-            return this._shape_thresholds[index];
-        else
-            return 0.5;
+        if (this._shape_data[index] != null) return this._shape_thresholds[index];
+        else return 0.5;
     }
 
     public get_shape_max(index: number = 0): number {
-        if (this._shape_data[index] != null)
-            return this._shape_maxs[index];
-        else
-            return 1.0;
+        if (this._shape_data[index] != null) return this._shape_maxs[index];
+        else return 1.0;
     }
 
     public get_shape_min(index: number = 0): number {
-        if (this._shape_data[index] != null)
-            return this._shape_mins[index];
-        else
-            return 0.0;
+        if (this._shape_data[index] != null) return this._shape_mins[index];
+        else return 0.0;
     }
 
     public is_failed(index: number = 0): number {
@@ -141,7 +131,6 @@
     private _shape_maxs: any[] = [];
     private _shape_mins: any[] = [];
     private _faileds: any[] = [];
-    /// Ad-hoc data storage object for Brent's theophylline puzzle
+    // / Ad-hoc data storage object for Brent's theophylline puzzle
     private _brent_theo_data: any = null;
-
 }

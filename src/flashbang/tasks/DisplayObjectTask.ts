@@ -9,7 +9,7 @@ export class DisplayObjectTask extends InterpolatingTask {
         this._target = target;
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         super.added();
         // If we weren't given a target, operate on our parent object

@@ -26,9 +26,7 @@ export class ROPWait extends RScriptOp {
     }
 
     public static NotifyClickUI(id: RScriptUIElementID): void {
-        ROPWait.GenericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => {
-            return (op.GetElements().indexOf(id) != -1);
-        });
+        ROPWait.GenericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => (op.GetElements().indexOf(id) != -1));
     }
 
     public static NotifyNucleotideChange(i: number, inColor: number): void {
@@ -38,13 +36,9 @@ export class ROPWait extends RScriptOp {
 
         let newColor: string = RScriptEnv.ConvertNucleotideIntToString(inColor);
 
-        ROPWait.GenericNotifyClear(ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => {
-            return op.AddNucleotideCompletion(i, newColor);
-        });
+        ROPWait.GenericNotifyClear(ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => op.AddNucleotideCompletion(i, newColor));
 
-        ROPWait.GenericNotifyClear(ROPWaitType.MUTATION, (op: ROPWait): boolean => {
-            return op.AddNucleotideCompletion(i, newColor);
-        });
+        ROPWait.GenericNotifyClear(ROPWaitType.MUTATION, (op: ROPWait): boolean => op.AddNucleotideCompletion(i, newColor));
     }
 
     public static NotifyBlackMark(i: number, marked: boolean): void {
@@ -87,9 +81,7 @@ export class ROPWait extends RScriptOp {
     }
 
     public static NotifyTextboxProgress(id: string): void {
-        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => {
-            return (op.GetId() + ROPTextbox.id_postfix == id);
-        });
+        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.GetId() + ROPTextbox.id_postfix == id));
     }
 
     public static NotifyFinishRNA(): void {
@@ -102,7 +94,7 @@ export class ROPWait extends RScriptOp {
         ROPWait.RegisterROPWait(this);
     }
 
-    /*override*/
+    /* override */
     public get_pause_next(): RScriptOp {
         return (this._children[0] instanceof ROPWait) ? this._children[0] : this;
     }
@@ -143,7 +135,7 @@ export class ROPWait extends RScriptOp {
         return this._id;
     }
 
-    /*override*/
+    /* override */
     public IsPaused(): boolean {
         if (this._waitType == ROPWaitType.NUCLEOTIDEPAIR) {
             let paired: number = this._env.GetRNA().get_pairs()[this._start_idx];
@@ -152,16 +144,18 @@ export class ROPWait extends RScriptOp {
             }
 
             let t1: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(this._start_idx).get_type()).toUpperCase();
+                this._env.GetRNA().get_base(this._start_idx).get_type()
+            ).toUpperCase();
             let t2: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(paired).get_type()).toUpperCase();
+                this._env.GetRNA().get_base(paired).get_type()
+            ).toUpperCase();
 
             return !((t1 == this._color1 && t2 == this._color2) || (t2 == this._color1 && t1 == this._color2));
-
         } else if (this._waitType == ROPWaitType.NUCLEOTIDECHANGE && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (RScriptEnv.ConvertNucleotideIntToString(
-                    this._env.GetRNA().get_base(ii).get_type()).toUpperCase() != this._expected_color) {
+                    this._env.GetRNA().get_base(ii).get_type()
+                ).toUpperCase() != this._expected_color) {
                     return true;
                 }
             }
@@ -251,13 +245,13 @@ export class ROPWait extends RScriptOp {
         this._previous_color_idx.push(i);
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         this.isWaitActive = true;
         if (this._start_time < 0) this._start_time = new Date().getTime();
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
@@ -351,9 +345,7 @@ export class ROPWait extends RScriptOp {
             return;
         }
 
-        ROPWait.GenericNotifyClear(mark_type, (op: ROPWait): boolean => {
-            return op.AddMarkCompletion(i, marked);
-        });
+        ROPWait.GenericNotifyClear(mark_type, (op: ROPWait): boolean => op.AddMarkCompletion(i, marked));
     }
 
     private static GenericNotifyClear(inType: ROPWaitType, clear_check: (op: ROPWait) => boolean): void {

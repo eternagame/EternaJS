@@ -9,7 +9,7 @@ export class LocationTask extends DisplayObjectTask {
         this._toY = y;
     }
 
-    /*override*/
+    /* override */
     protected updateValues(): void {
         if (this._fromX === undefined) {
             this._fromX = this._target.x;

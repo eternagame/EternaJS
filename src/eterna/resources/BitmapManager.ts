@@ -6,12 +6,12 @@ import {Fonts} from "../util/Fonts";
 import {Bitmaps} from "./Bitmaps";
 
 export class BitmapManager {
-    /// TODO: remove me!
+    // / TODO: remove me!
     public static get_bitmap(source: string): Texture {
         return Texture.fromImage(source);
     }
 
-    /// TODO: remove me!
+    // / TODO: remove me!
     public static get_bitmap_named(name: string): Texture {
         let source: string = (Bitmaps as any)[name];
         Assert.notNull(source, `No such bitmap: ${name}`);
@@ -30,7 +30,7 @@ export class BitmapManager {
         let bitmap: Texture = BitmapManager._textBitmaps.get(text);
         if (bitmap == null) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);
-            if (bold){
+            if (bold) {
                 builder.bold();
             }
             bitmap = TextureUtil.renderToTexture(builder.build());

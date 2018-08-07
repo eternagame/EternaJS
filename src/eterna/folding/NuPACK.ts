@@ -15,7 +15,7 @@ export class NuPACK extends Folder {
      * @returns {Promise<NuPACK>}
      */
     public static create(): Promise<NuPACK> {
-        return import('./engines/nupack')
+        return import("./engines/nupack")
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new NuPACK(program));
     }
@@ -25,14 +25,16 @@ export class NuPACK extends Folder {
         this._lib = lib;
     }
 
-    /*override*/
+    /* override */
     public can_dot_plot(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: any = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {
+            primitive: "dotplot", seq, pairs, temp
+        };
         let ret_array: number[] = this.get_cache(key);
         if (ret_array != null) {
             // trace("dotplot cache hit");
@@ -59,24 +61,26 @@ export class NuPACK extends Folder {
         return ret_array;
     }
 
-    /*override*/
+    /* override */
     public get_folder_name(): string {
         return NuPACK.NAME;
     }
 
-    /*override*/
+    /* override */
     public is_functional(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public can_score_structures(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
-        let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {
+            primitive: "score", seq, pairs, temp
+        };
         let cache: FullEvalCache = this.get_cache(key);
         if (cache != null) {
             // trace("score cache hit");
@@ -93,7 +97,6 @@ export class NuPACK extends Folder {
                     EPars.sequence_array_to_string(seq),
                     EPars.pairs_array_to_parenthesis(pairs));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
-
             } catch (e) {
                 log.error("FullEval error", e);
                 return 0;
@@ -102,7 +105,7 @@ export class NuPACK extends Folder {
                     result.delete();
                 }
             }
-        } while(0);
+        } while (0);
 
         let cut: number = seq.lastIndexOf(EPars.RNABASE_CUT);
         if (cut >= 0) {
@@ -164,14 +167,14 @@ export class NuPACK extends Folder {
         return energy;
     }
 
-    /*override*/
+    /* override */
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            desired_pairs,
+            temp
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
@@ -184,16 +187,16 @@ export class NuPACK extends Folder {
         return pairs;
     }
 
-    /*override*/
+    /* override */
     public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold_aptamer",
-            seq: seq,
-            target_pairs: target_pairs,
-            binding_site: binding_site,
-            bonus: bonus,
-            version: version,
-            temp: temp
+            seq,
+            target_pairs,
+            binding_site,
+            bonus,
+            version,
+            temp
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
@@ -226,7 +229,7 @@ export class NuPACK extends Folder {
         return pairs;
     }
 
-    /*override*/
+    /* override */
     public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -235,11 +238,11 @@ export class NuPACK extends Folder {
 
         let key: any = {
             primitive: "cofold",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            malus: malus,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            malus,
+            desired_pairs,
+            temp
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
@@ -263,7 +266,7 @@ export class NuPACK extends Folder {
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
+            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
             co_pairs = EPars.parenthesis_to_pair_array(struc);
         }
 
@@ -271,12 +274,12 @@ export class NuPACK extends Folder {
         return co_pairs;
     }
 
-    /*override*/
+    /* override */
     public can_cofold_with_binding_site(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -285,12 +288,12 @@ export class NuPACK extends Folder {
 
         let key: any = {
             primitive: "cofold_aptamer",
-            seq: seq,
-            malus: malus,
-            desired_pairs: desired_pairs,
-            binding_site: binding_site,
-            bonus: bonus,
-            temp: temp
+            seq,
+            malus,
+            desired_pairs,
+            binding_site,
+            bonus,
+            temp
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
@@ -341,7 +344,7 @@ export class NuPACK extends Folder {
         }
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
+            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
             co_pairs = EPars.parenthesis_to_pair_array(struc);
         }
 
@@ -349,20 +352,20 @@ export class NuPACK extends Folder {
         return co_pairs;
     }
 
-    /*override*/
+    /* override */
     public can_multifold(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public multifold(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): any {
         let key: any = {
             primitive: "multifold",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            oligos: oligos,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            oligos,
+            desired_pairs,
+            temp
         };
         let mfold: any = this.get_cache(key);
         if (mfold != null) {
@@ -371,9 +374,9 @@ export class NuPACK extends Folder {
         }
 
         mfold = {};
-        mfold['pairs'] = null;
-        mfold['order'] = null;
-        mfold['count'] = -1;
+        mfold["pairs"] = null;
+        mfold["order"] = null;
+        mfold["count"] = -1;
 
         let best_fe: number = 1000000;
         let order: number[] = [];
@@ -407,7 +410,7 @@ export class NuPACK extends Folder {
                     let s_nodes: number[] = [];
                     let s_fe: number = this.score_structures(oligos[order[jj]].seq, s_pairs, temp, s_nodes);
 
-                    let struc: string = EPars.pairs_array_to_parenthesis(ms_pairs) + "&" + EPars.pairs_array_to_parenthesis(s_pairs);
+                    let struc: string = `${EPars.pairs_array_to_parenthesis(ms_pairs)}&${EPars.pairs_array_to_parenthesis(s_pairs)}`;
                     ms_pairs = EPars.parenthesis_to_pair_array(struc);
                     ms_fe += s_fe;
                 }
@@ -528,7 +531,7 @@ export class NuPACK extends Folder {
             log.debug("done cofolding_wbs");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            log.error('CoFoldSequenceWithBindingSite error', e);
+            log.error("CoFoldSequenceWithBindingSite error", e);
             return [];
         } finally {
             if (result != null) {
@@ -541,10 +544,10 @@ export class NuPACK extends Folder {
     private cofold_seq2(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
             primitive: "cofold2",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            desired_pairs,
+            temp
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {

@@ -44,7 +44,7 @@ export class ROPPre extends RScriptOp {
         }
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         switch (this._type) {
         case ROPPreType.DISABLE_MISSION_SCREEN:
@@ -55,7 +55,7 @@ export class ROPPre extends RScriptOp {
             this._env.GetUI().toolbar.palette.change_no_pair_mode();
             break;
         case ROPPreType.DISABLE_HINTS:
-            //_env.GetUI().remove_hint_system(true);
+            // _env.GetUI().remove_hint_system(true);
             break;
         case ROPPreType.DISABLE_OBJECTIVES:
             this._env.GetUI().set_show_constraints(false);
@@ -89,7 +89,7 @@ export class ROPPre extends RScriptOp {
             this._env.GetPuzzle().set_default_mode(this._fold_mode);
             break;
         default:
-            throw new Error("Invalid Preprocessing Command: " + this._type);
+            throw new Error(`Invalid Preprocessing Command: ${this._type}`);
         }
     }
 

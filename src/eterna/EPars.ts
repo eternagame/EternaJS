@@ -1,4 +1,4 @@
-﻿import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
+import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
 import {IntLoopPars} from "./IntLoopPars";
 
 export class EPars {
@@ -38,7 +38,7 @@ export class EPars {
     public static RNABASE_BINDING_SITE: number = 16;
 
     public static RNABASE_SHIFT: number = 17;
-    //public static const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
+    // public static const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
     public static RNABASE_CUT: number = 19;
 
     // (almost) follows the Vienna convention for the BP array
@@ -92,10 +92,8 @@ export class EPars {
                 let is_continued: boolean = false;
                 if (last_stack_other < 0) {
                     is_continued = true;
-                } else {
-                    if (pairs[ii] == last_stack_other - 1) {
-                        is_continued = true;
-                    }
+                } else if (pairs[ii] == last_stack_other - 1) {
+                    is_continued = true;
                 }
 
                 if (is_continued) {
@@ -108,7 +106,6 @@ export class EPars {
                     last_stack_other = -1;
                     stack_start = -1;
                 }
-
             } else {
                 if (stack_start >= 0 && ii - stack_start > longlen) {
                     longlen = ii - stack_start;
@@ -116,7 +113,6 @@ export class EPars {
 
                 stack_start = -1;
                 last_stack_other = -1;
-
             }
         }
 
@@ -146,9 +142,9 @@ export class EPars {
 
     public static get_colored_letter(letter: string): string {
         if (letter == "G") {
-            return "<G>G</G>"
+            return "<G>G</G>";
         } else if (letter == "A") {
-            return "<A>A</A>"
+            return "<A>A</A>";
         } else if (letter == "U") {
             return "<U>U</U>";
         } else if (letter == "C") {
@@ -164,7 +160,6 @@ export class EPars {
             res += EPars.get_colored_letter(seq.charAt(ii));
         }
         return res;
-
     }
 
     public static get_exp_colored_sequence(seq: string, exp_data: number[]): string {
@@ -191,12 +186,10 @@ export class EPars {
         for (let ii = 0; ii < seq.length; ii++) {
             if (ii < offset - 1 || ii >= exp_data.length) {
                 res += seq.charAt(ii);
+            } else if (exp_data[ii] < avg) {
+                res += `<FONT COLOR='#7777FF'>${seq.charAt(ii)}</FONT>`;
             } else {
-                if (exp_data[ii] < avg) {
-                    res += "<FONT COLOR='#7777FF'>" + seq.charAt(ii) + "</FONT>";
-                } else {
-                    res += "<FONT COLOR='#FF7777'>" + seq.charAt(ii) + "</FONT>"
-                }
+                res += `<FONT COLOR='#FF7777'>${seq.charAt(ii)}</FONT>`;
             }
         }
 
@@ -209,30 +202,26 @@ export class EPars {
         let ii: number = 0;
         let start_index: number = -1;
         for (ii = 0; ii < sequence.length; ii++) {
-
             if (sequence[ii] == letter) {
                 if (start_index < 0) {
                     start_index = ii;
                 }
-            } else {
-                if (start_index >= 0) {
-                    if (max_consecutive < ii - start_index) {
-                        if (locks == null) {
+            } else if (start_index >= 0) {
+                if (max_consecutive < ii - start_index) {
+                    if (locks == null) {
+                        max_consecutive = ii - start_index;
+                    } else {
+                        let all_locked: boolean = true;
+                        let jj: number;
+                        for (jj = start_index; jj < ii; jj++) {
+                            all_locked = all_locked && locks[jj];
+                        }
+                        if (all_locked == false) {
                             max_consecutive = ii - start_index;
-                        } else {
-                            let all_locked: boolean = true;
-                            let jj: number;
-                            for (jj = start_index; jj < ii; jj++) {
-                                all_locked = all_locked && locks[jj];
-                            }
-                            if (all_locked == false) {
-                                max_consecutive = ii - start_index;
-                            }
                         }
                     }
-                    start_index = -1;
                 }
-
+                start_index = -1;
             }
         }
 
@@ -260,26 +249,24 @@ export class EPars {
                 if (start_index < 0) {
                     start_index = ii;
                 }
-            } else {
-                if (start_index >= 0) {
-                    if (max_allowed < ii - start_index) {
-                        if (locks == null) {
+            } else if (start_index >= 0) {
+                if (max_allowed < ii - start_index) {
+                    if (locks == null) {
+                        restricted.push(start_index);
+                        restricted.push(ii - 1);
+                    } else {
+                        let all_locked: boolean = true;
+                        let jj: number;
+                        for (jj = start_index; jj < ii; jj++) {
+                            all_locked = all_locked && locks[jj];
+                        }
+                        if (all_locked == false) {
                             restricted.push(start_index);
                             restricted.push(ii - 1);
-                        } else {
-                            let all_locked: boolean = true;
-                            let jj: number;
-                            for (jj = start_index; jj < ii; jj++) {
-                                all_locked = all_locked && locks[jj];
-                            }
-                            if (all_locked == false) {
-                                restricted.push(start_index);
-                                restricted.push(ii - 1);
-                            }
                         }
                     }
-                    start_index = -1;
                 }
+                start_index = -1;
             }
         }
 
@@ -325,36 +312,32 @@ export class EPars {
             } else {
                 throw new Error(`Bad nucleotide '${value}`);
             }
+        } else if (allowUnknown) {
+            return "?";
         } else {
-            if (allowUnknown) {
-                return "?";
-            } else {
-                throw new Error(`Bad nucleotide '${value}`);
-            }
+            throw new Error(`Bad nucleotide '${value}`);
         }
     }
 
     public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
-        if (value == 'A' || value == 'a') {
+        if (value == "A" || value == "a") {
             return EPars.RNABASE_ADENINE;
-        } else if (value == 'G' || value == 'g') {
+        } else if (value == "G" || value == "g") {
             return EPars.RNABASE_GUANINE;
-        } else if (value == 'U' || value == 'u') {
+        } else if (value == "U" || value == "u") {
             return EPars.RNABASE_URACIL;
-        } else if (value == 'C' || value == 'c') {
+        } else if (value == "C" || value == "c") {
             return EPars.RNABASE_CYTOSINE;
-        } else if (value == '&' || value == '-' || value == '+') {
+        } else if (value == "&" || value == "-" || value == "+") {
             if (allowCut) {
                 return EPars.RNABASE_CUT;
             } else {
                 throw new Error(`Bad nucleotide '${value}`);
             }
+        } else if (allowUnknown) {
+            return EPars.RNABASE_UNDEFINED;
         } else {
-            if (allowUnknown) {
-                return EPars.RNABASE_UNDEFINED;
-            } else {
-                throw new Error(`Bad nucleotide '${value}`);
-            }
+            throw new Error(`Bad nucleotide '${value}`);
         }
     }
 
@@ -439,22 +422,22 @@ export class EPars {
         let pair_stack: number[] = [];
 
         if (length_limit >= 0 && parenthesis.length > length_limit) {
-            return "Structure length limit is " + length_limit;
+            return `Structure length limit is ${length_limit}`;
         }
 
         for (let jj: number = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == '(') {
+            if (parenthesis.charAt(jj) == "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ')') {
+            } else if (parenthesis.charAt(jj) == ")") {
                 if (pair_stack.length == 0) {
                     return "Unbalanced parenthesis notation";
                 }
 
                 pair_stack.pop();
-            } else if (parenthesis.charAt(jj) == '.') {
+            } else if (parenthesis.charAt(jj) == ".") {
 
             } else {
-                return "Unrecognized character " + parenthesis.charAt(jj);
+                return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }
 
@@ -468,13 +451,13 @@ export class EPars {
 
         let index: number = parenthesis.indexOf("(.)");
         if (index >= 0) {
-            return "There is a length 1 hairpin loop which is impossible at base " + (index + 2);
+            return `There is a length 1 hairpin loop which is impossible at base ${index + 2}`;
         }
 
         index = parenthesis.indexOf("(..)");
 
         if (index >= 0) {
-            return "There is a length 2 hairpin loop which is impossible at base " + (index + 2);
+            return `There is a length 2 hairpin loop which is impossible at base ${index + 2}`;
         }
 
         return null;
@@ -489,9 +472,9 @@ export class EPars {
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == '(') {
+            if (parenthesis.charAt(jj) == "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ')') {
+            } else if (parenthesis.charAt(jj) == ")") {
                 if (pair_stack.length == 0) {
                     throw new Error("Invalid parenthesis notation");
                 }
@@ -523,7 +506,6 @@ export class EPars {
                     ret_pairs[pairs[ii]] = -1;
                 }
             }
-
         }
 
         return ret_pairs;
@@ -547,15 +529,13 @@ export class EPars {
 
         for (let ii = 0; ii < bi_pairs.length; ii++) {
             if (bi_pairs[ii] > ii) {
-                str += '(';
+                str += "(";
             } else if (bi_pairs[ii] >= 0) {
-                str += ')';
+                str += ")";
+            } else if (seq != null && seq[ii] == EPars.RNABASE_CUT) {
+                str += "&";
             } else {
-                if (seq != null && seq[ii] == EPars.RNABASE_CUT) {
-                    str += '&';
-                } else {
-                    str += '.';
-                }
+                str += ".";
             }
         }
 
@@ -563,7 +543,6 @@ export class EPars {
     }
 
     public static parenthesis_to_forced_array(parenthesis: string): number[] {
-
         let forced: number[] = [];
         let pair_stack: number[] = [];
 
@@ -572,19 +551,19 @@ export class EPars {
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == '.') {
+            if (parenthesis.charAt(jj) == ".") {
                 continue;
-            } else if (parenthesis.charAt(jj) == '|') {
+            } else if (parenthesis.charAt(jj) == "|") {
                 forced[jj] = EPars.FORCE_PAIRED;
-            } else if (parenthesis.charAt(jj) == '<') {
+            } else if (parenthesis.charAt(jj) == "<") {
                 forced[jj] = EPars.FORCE_PAIRED3P;
-            } else if (parenthesis.charAt(jj) == '>') {
+            } else if (parenthesis.charAt(jj) == ">") {
                 forced[jj] = EPars.FORCE_PAIRED5P;
-            } else if (parenthesis.charAt(jj) == 'x') {
+            } else if (parenthesis.charAt(jj) == "x") {
                 forced[jj] = EPars.FORCE_UNPAIRED;
-            } else if (parenthesis.charAt(jj) == '(') {
+            } else if (parenthesis.charAt(jj) == "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ')') {
+            } else if (parenthesis.charAt(jj) == ")") {
                 if (pair_stack.length == 0) {
                     throw new Error("Invalid parenthesis notation");
                 }
@@ -605,21 +584,20 @@ export class EPars {
         let str: string = "";
 
         for (let ii: number = 0; ii < forced.length; ii++) {
-
             if (forced[ii] > ii) {
-                str = str.concat('(');
+                str = str.concat("(");
             } else if (forced[ii] >= 0) {
-                str = str.concat(')');
+                str = str.concat(")");
             } else if (forced[ii] == EPars.FORCE_PAIRED) {
-                str = str.concat('|');
+                str = str.concat("|");
             } else if (forced[ii] == EPars.FORCE_PAIRED3P) {
-                str = str.concat('<');
+                str = str.concat("<");
             } else if (forced[ii] == EPars.FORCE_PAIRED5P) {
-                str = str.concat('>');
+                str = str.concat(">");
             } else if (forced[ii] == EPars.FORCE_UNPAIRED) {
-                str = str.concat('x');
+                str = str.concat("x");
             } else {
-                str = str.concat('.');
+                str = str.concat(".");
             }
         }
 
@@ -719,7 +697,6 @@ export class EPars {
                     }
                 }
             }
-
         }
         return true;
     }
@@ -761,7 +738,7 @@ export class EPars {
         571, 576, 580, 585, 589, 594, 598, 602, 605, 609];
 
     public static get_bulge(i: number): number {
-        return EPars.bulge37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.));
+        return EPars.bulge37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
     }
 
     public static internal37: number[] = [
@@ -770,7 +747,7 @@ export class EPars {
         330, 335, 340, 345, 349, 353, 357, 361, 365, 369];
 
     public static get_internal(i: number): number {
-        return EPars.internal37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.));
+        return EPars.internal37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
     }
 
     public static hairpin_mismatch(type: number, s1: number, s2: number): number {
@@ -913,7 +890,7 @@ export class EPars {
         EPars.INF, -30, -10, -20, -20, /* UG */
         EPars.INF, -30, -30, -40, -20, /* AU */
         EPars.INF, -30, -10, -20, -20, /* UA */
-        0, 0, 0, 0, 0  /*  @ */
+        0, 0, 0, 0, 0 /*  @ */
     ];
 
     public static dangle3_37: number[] = [
@@ -925,7 +902,7 @@ export class EPars {
         EPars.INF, -80, -50, -80, -60, /* UG */
         EPars.INF, -70, -10, -70, -10, /* AU */
         EPars.INF, -80, -50, -80, -60, /* UA */
-        0, 0, 0, 0, 0   /*  @ */
+        0, 0, 0, 0, 0 /*  @ */
     ];
 
     public static tetra_energy_37: number[] = [
@@ -993,5 +970,4 @@ export class EPars {
             return IntLoopPars.int22_37_7[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
         }
     }
-
 }

@@ -59,7 +59,7 @@ export class RectangleUtil {
 
     /** Extends the rectangle in all four directions. */
     public static extend(rect: Rectangle, left: number = 0, right: number = 0,
-                         top: number = 0, bottom: number = 0): void {
+        top: number = 0, bottom: number = 0): void {
         rect.x -= left;
         rect.y -= top;
         rect.width += left + right;
@@ -82,8 +82,10 @@ export class RectangleUtil {
     public static getBounds(rectangle: Rectangle, matrix: Matrix, out: Rectangle = null): Rectangle {
         if (out == null) out = new Rectangle();
 
-        let minX: number = Number.MAX_VALUE, maxX: number = -Number.MAX_VALUE;
-        let minY: number = Number.MAX_VALUE, maxY: number = -Number.MAX_VALUE;
+        let minX: number = Number.MAX_VALUE,
+            maxX: number = -Number.MAX_VALUE;
+        let minY: number = Number.MAX_VALUE,
+            maxY: number = -Number.MAX_VALUE;
         let positions: Point[] = RectangleUtil.getPositions(rectangle, RectangleUtil.sPositions);
 
         for (let i: number = 0; i < 4; ++i) {
@@ -126,10 +128,10 @@ export class RectangleUtil {
         } else if (r2 == null) {
             return false;
         } else {
-            return r1.x > r2.x - e && r1.x < r2.x + e &&
-                r1.y > r2.y - e && r1.y < r2.y + e &&
-                r1.width > r2.width - e && r1.width < r2.width + e &&
-                r1.height > r2.height - e && r1.height < r2.height + e;
+            return r1.x > r2.x - e && r1.x < r2.x + e
+                && r1.y > r2.y - e && r1.y < r2.y + e
+                && r1.width > r2.width - e && r1.width < r2.width + e
+                && r1.height > r2.height - e && r1.height < r2.height + e;
         }
     }
 

@@ -9,13 +9,13 @@ export class ROPHint extends RScriptOp {
         this._op_visible = isVisible;
     }
 
-    /*override*/
+    /* override */
     public InitializeROP(op: string, args: string): void {
         super.InitializeROP(op, args);
         this._id = ROPHint.ProcessId(this._id);
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         // Remove hint with ID.
         if (this._env.Exists(this._id)) {
@@ -36,7 +36,7 @@ export class ROPHint extends RScriptOp {
         this._env.StoreVar(this._id, hint, this._env.GetUI());
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
@@ -56,7 +56,7 @@ export class ROPHint extends RScriptOp {
             this._loop = (arg.toUpperCase() == "TRUE");
             break;
         default:
-            throw("Invalid argument to ROPHint: " + arg);
+            throw (`Invalid argument to ROPHint: ${arg}`);
         }
     }
 

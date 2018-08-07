@@ -1,4 +1,6 @@
-import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
+import {
+    DisplayObject, Graphics, Matrix, Point, Rectangle
+} from "pixi.js";
 import {Align} from "../core/Align";
 import {Flashbang} from "../core/Flashbang";
 import {RectangleUtil} from "./RectangleUtil";
@@ -31,9 +33,9 @@ export class DisplayUtil {
     public static hitTest(disp: DisplayObject, globalLoc: Point): boolean {
         disp.toLocal(globalLoc, null, DisplayUtil.P, false);
 
-        return (disp.hitArea != null ?
-            disp.hitArea.contains(DisplayUtil.P.x, DisplayUtil.P.y) :
-            disp.getLocalBounds(DisplayUtil.R).contains(DisplayUtil.P.x, DisplayUtil.P.y));
+        return (disp.hitArea != null
+            ? disp.hitArea.contains(DisplayUtil.P.x, DisplayUtil.P.y)
+            : disp.getLocalBounds(DisplayUtil.R).contains(DisplayUtil.P.x, DisplayUtil.P.y));
     }
 
     /** Returns a rectangle filled with the given color */
@@ -231,8 +233,8 @@ export class DisplayUtil {
         dispHAlign: Align, dispVAlign: Align,
         relativeTo: DisplayObject,
         targetHAlign: Align, targetVAlign: Align,
-        xOffset: number = 0, yOffset: number = 0): void {
-
+        xOffset: number = 0, yOffset: number = 0
+    ): void {
         DisplayUtil.positionRelativeToBounds(disp,
             dispHAlign, dispVAlign,
             DisplayUtil.getBoundsRelative(relativeTo, disp.parent || relativeTo, DisplayUtil.POSITION_RELATIVE_RECT),
@@ -247,8 +249,8 @@ export class DisplayUtil {
         disp: DisplayObject,
         dispHAlign: Align, dispVAlign: Align,
         targetHAlign: Align, targetVAlign: Align,
-        xOffset: number = 0, yOffset: number = 0): void {
-
+        xOffset: number = 0, yOffset: number = 0
+    ): void {
         RectangleUtil.setTo(DisplayUtil.SCREEN_BOUNDS, 0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
         if (disp.parent != null) {
             RectangleUtil.getBounds(DisplayUtil.SCREEN_BOUNDS, disp.parent.localTransform, DisplayUtil.SCREEN_BOUNDS);
@@ -268,8 +270,8 @@ export class DisplayUtil {
         dispHAlign: Align, dispVAlign: Align,
         relativeTo: Rectangle,
         targetHAlign: Align, targetVAlign: Align,
-        xOffset: number = 0, yOffset: number = 0): void {
-
+        xOffset: number = 0, yOffset: number = 0
+    ): void {
         let x: number = xOffset;
         let y: number = yOffset;
 

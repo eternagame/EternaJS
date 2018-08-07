@@ -1,4 +1,4 @@
-﻿import {GlowFilter} from "pixi-filters";
+import {GlowFilter} from "pixi-filters";
 import {Graphics} from "pixi.js";
 import {Vector2} from "../../flashbang/geom/Vector2";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
@@ -57,7 +57,7 @@ export class LightRay extends SceneObject {
         const innerStrength = 0;
         const quality = 1;
         this._graphics.filters = [
-            new GlowFilter(distance, outerStrength, innerStrength, 0xffffff, quality),
+            new GlowFilter(distance, outerStrength, innerStrength, 0xffffff, quality)
         ];
     }
 

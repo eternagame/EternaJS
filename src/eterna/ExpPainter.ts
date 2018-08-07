@@ -61,10 +61,8 @@ export class ExpPainter {
     public get_color(ii: number): number {
         if (ii < this._start_index) {
             return ExpPainter.EXPCOLOR_NODATA;
-
         } else if (ii - this._start_index >= this._data.length) {
             return ExpPainter.EXPCOLOR_NODATA;
-
         } else {
             let diff: number = (this._data[ii - this._start_index] - this._data_avg);
 
@@ -76,13 +74,12 @@ export class ExpPainter {
                     diff = MathUtil.clamp(diff, 0, 1);
                 }
 
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     diff = 1;
                 }
 
                 return ColorUtil.blend(ExpPainter.EXPCOLOR_EXPOSED, ExpPainter.EXPCOLOR_MID, diff);
-
             } else {
                 if (Math.abs(this._data_min - this._data_avg) < Constants.EPSILON) {
                     diff = 0;
@@ -91,7 +88,7 @@ export class ExpPainter {
                     diff /= (this._data_avg - this._data_min);
                 }
 
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     diff = 1;
                 }
@@ -104,10 +101,8 @@ export class ExpPainter {
     public get_color_with_midpoint(ii: number, midpoint: number): number {
         if (ii < this._start_index) {
             return ExpPainter.EXPCOLOR_NODATA;
-
         } else if (ii - this._start_index >= this._data.length) {
             return ExpPainter.EXPCOLOR_NODATA;
-
         } else {
             let diff: number = (this._data[ii - this._start_index] - midpoint);
 
@@ -118,13 +113,12 @@ export class ExpPainter {
                     diff /= (this._data_max - midpoint);
                     diff = MathUtil.clamp(diff, 0, 1);
                 }
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     diff = 1;
                 }
 
                 return ColorUtil.blend(ExpPainter.EXPCOLOR_EXPOSED, ExpPainter.EXPCOLOR_MID, diff);
-
             } else {
                 if (Math.abs(this._data_min - midpoint) < Constants.EPSILON) {
                     diff = 0;
@@ -133,7 +127,7 @@ export class ExpPainter {
                     diff /= (midpoint - this._data_min);
                 }
 
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     diff = 1;
                 }
@@ -146,7 +140,6 @@ export class ExpPainter {
     public get_color_level_with_midpoint(jj: number, mid: number, hi: number): number {
         if (jj < this._start_index || jj >= this._start_index + this._data.length) {
             return ExpPainter.NUM_COLORS * 3 + 1;
-
         } else {
             let diff: number = (this._data[jj - this._start_index] - hi);
 
@@ -171,7 +164,7 @@ export class ExpPainter {
                     return ExpPainter.NUM_COLORS;
                 }
 
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     return ExpPainter.NUM_COLORS * 2;
                 } else {
@@ -179,14 +172,12 @@ export class ExpPainter {
                     diff = MathUtil.clamp(diff, 0, 1);
                     return Math.round(ExpPainter.NUM_COLORS * diff) + ExpPainter.NUM_COLORS;
                 }
-
             } else {
-
                 if (Math.abs(this._data_min - mid) < Constants.EPSILON) {
                     return ExpPainter.NUM_COLORS;
                 }
 
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     return 0;
                 } else {
@@ -202,12 +193,11 @@ export class ExpPainter {
     public get_color_level(jj: number): number {
         if (jj < this._start_index || jj >= this._start_index + this._data.length) {
             return ExpPainter.NUM_COLORS * 3 + 1;
-
         } else {
             let diff: number = (this._data[jj - this._start_index] - this._data_avg);
 
             if (diff > 0) {
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     return ExpPainter.NUM_COLORS * 2;
                 } else {
@@ -215,9 +205,8 @@ export class ExpPainter {
                     diff = MathUtil.clamp(diff, 0, 1);
                     return Math.round(ExpPainter.NUM_COLORS * diff) + ExpPainter.NUM_COLORS;
                 }
-
             } else {
-                /// SUPER HACK - binary coloring
+                // / SUPER HACK - binary coloring
                 if (!this._continuous) {
                     return 0;
                 } else {

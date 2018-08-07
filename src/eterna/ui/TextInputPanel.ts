@@ -61,7 +61,8 @@ export class TextInputPanel extends GamePanel {
 
         this._okButton.display.position = new Point(
             (width * 0.5) - 30 - this._okButton.container.width,
-            height_walker);
+            height_walker
+        );
         this._cancelButton.display.position = new Point((width * 0.5) + 30, height_walker);
     }
 
@@ -80,7 +81,7 @@ export class TextInputPanel extends GamePanel {
         let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();
         this.container.addChild(label);
 
-        this._fields.push({input: input, label: label, name: name});
+        this._fields.push({input, label, name});
 
         return input;
     }

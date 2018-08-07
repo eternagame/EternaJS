@@ -45,7 +45,7 @@ export class StyledTextBuilder {
 
     public pushStyle(style: ExtendedTextStyle | string): StyledTextBuilder {
         let styleName: string;
-        if (typeof(style) === "string") {
+        if (typeof (style) === "string") {
             if (this._styles[style] == null) {
                 log.warn(`Unrecognized style '${style}'`);
             }

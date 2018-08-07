@@ -1,4 +1,4 @@
-﻿export class PlayerRank {
+export class PlayerRank {
     public name: string;
     public score: number;
     public rank: number;
@@ -16,6 +16,6 @@
     }
 
     public toString(): string {
-        return this.name + " " + this.score;
+        return `${this.name} ${this.score}`;
     }
 }

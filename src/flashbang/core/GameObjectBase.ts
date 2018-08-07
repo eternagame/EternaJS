@@ -32,30 +32,30 @@ export class GameObjectBase {
     /**
      * Returns the unique GameObjectRef that stores a reference to this GameObject.
      */
-    public /*final*/ get ref(): GameObjectRef {
+    public /* final */ get ref(): GameObjectRef {
         return this._ref;
     }
 
-    public /*final*/ get parent(): GameObject {
+    public /* final */ get parent(): GameObject {
         return this._parent;
     }
 
     /**
      * Returns the AppMode that this object is contained in.
      */
-    public /*final*/ get mode(): AppMode {
+    public /* final */ get mode(): AppMode {
         return this._mode;
     }
 
     /**
      * Returns the ModeStack that this object is a part of
      */
-    public /*final*/ get modeStack(): ModeStack {
+    public /* final */ get modeStack(): ModeStack {
         return this._mode.modeStack;
     }
 
     /** Returns true if the object belongs to an AppMode and is not pending removal */
-    public /*final*/ get isLiveObject(): boolean {
+    public /* final */ get isLiveObject(): boolean {
         return (this._mode != null && this._ref != null && this._ref._obj != null);
     }
 
@@ -64,7 +64,7 @@ export class GameObjectBase {
      * (If a subclass needs to cleanup after itself after being destroyed, it should do
      * so either in removed() or dispose()).
      */
-    public /*final*/ destroySelf(): void {
+    public /* final */ destroySelf(): void {
         if (this._parent != null) {
             this._parent.removeObject(this);
         }
@@ -114,17 +114,17 @@ export class GameObjectBase {
     protected dispose(): void {
     }
 
-    /*internal*/
+    /* internal */
     _attachToDisplayList(displayParent: Container, displayIdx: number): void {
         // implemented by subclasses
     }
 
-    /*internal*/
+    /* internal */
     _addedInternal(): void {
         this.added();
     }
 
-    /*internal*/
+    /* internal */
     _removedInternal(): void {
         this._ref._obj = null;
         this._parent = null;
@@ -137,7 +137,7 @@ export class GameObjectBase {
         this._disposeInternal();
     }
 
-    /*internal*/
+    /* internal */
     _disposeInternal(): void {
         this._ref._obj = null;
         this.dispose();
@@ -147,7 +147,7 @@ export class GameObjectBase {
         }
     }
 
-    /*internal*/
+    /* internal */
     get _wasRemoved(): boolean {
         return (this._ref != null && this._ref._obj == null);
     }
@@ -156,10 +156,10 @@ export class GameObjectBase {
     private _regs: RegistrationGroup;
     private _destroyed: UnitSignal;
 
-    /*internal*/ _name: string;
-    /*internal*/ _ref: GameObjectRef;
-    /*internal*/ _parent: GameObject;
-    /*internal*/ _mode: AppMode;
+    /* internal */ _name: string;
+    /* internal */ _ref: GameObjectRef;
+    /* internal */ _parent: GameObject;
+    /* internal */ _mode: AppMode;
 
     private static readonly EMPTY_ARRAY: any[] = [];
 }

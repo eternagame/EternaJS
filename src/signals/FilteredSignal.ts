@@ -9,7 +9,7 @@ export class FilteredSignal<T> extends MappedSignal<T> {
         this._pred = pred;
     }
 
-    /*override*/
+    /* override */
     protected connectToSource(): Connection {
         return this._source.connect((value) => {
             if (this._pred(value)) {

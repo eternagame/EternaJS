@@ -1,5 +1,7 @@
 import * as log from "loglevel";
-import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {
+    Point, Rectangle, Sprite, Text, Texture
+} from "pixi.js";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
@@ -80,37 +82,44 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
             [new Rectangle(9, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#FFFF33'>A (Adenine)</FONT>. (1)");
+            "Mutate to <FONT COLOR='#FFFF33'>A (Adenine)</FONT>. (1)"
+        );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
             [new Rectangle(58, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#7777FF'>U (Uracil)</FONT>. (2)");
+            "Mutate to <FONT COLOR='#7777FF'>U (Uracil)</FONT>. (2)"
+        );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
             [new Rectangle(107, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#FF3333'>G (Guanine)</FONT>. (3)");
+            "Mutate to <FONT COLOR='#FF3333'>G (Guanine)</FONT>. (3)"
+        );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
             [new Rectangle(156, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#33FF33'>C (Cytosine)</FONT>. (4)");
+            "Mutate to <FONT COLOR='#33FF33'>C (Cytosine)</FONT>. (4)"
+        );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
             [new Rectangle(31, 30, 30, 20), new Rectangle(37, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FFFF33'>A</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (Q)");
+            "Mutate to pair (<FONT COLOR='#FFFF33'>A</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (Q)"
+        );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
             [new Rectangle(80, 30, 30, 20), new Rectangle(87, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (W)");
+            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (W)"
+        );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
             [new Rectangle(127, 30, 30, 20), new Rectangle(137, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#33FF33'>C</FONT>). (E)");
+            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#33FF33'>C</FONT>). (E)"
+        );
 
         this._enabled = true;
         this._last_tooltip = null;
@@ -119,8 +128,8 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     protected added(): void {
         super.added();
 
-        this.regs.add(this.pointerDown.connect((e) => this.on_click(e)));
-        this.regs.add(this.pointerMove.connect((e) => this.on_move_mouse(e)));
+        this.regs.add(this.pointerDown.connect(e => this.on_click(e)));
+        this.regs.add(this.pointerMove.connect(e => this.on_move_mouse(e)));
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
@@ -178,7 +187,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         }
 
         if (e.type == KeyboardEventType.KEY_DOWN) {
-            switch(e.code) {
+            switch (e.code) {
             case KeyCode.Digit1:
                 this.clickTarget(PaletteTargetType.A);
                 return true;
@@ -295,7 +304,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         if (tooltip != this._last_tooltip) {
             this._last_tooltip = tooltip;
-            log.debug("TODO: show tooltip: " + tooltip);
+            log.debug(`TODO: show tooltip: ${tooltip}`);
             // if (tooltip == null) {
             //     this.set_mouse_over_object(null, 1.0);
             // } else {

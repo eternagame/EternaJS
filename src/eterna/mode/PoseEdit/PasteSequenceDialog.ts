@@ -27,7 +27,7 @@ export class PasteSequenceDialog extends Dialog<string> {
         inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
 
         inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
+        inputPanel.okClicked.connect(values => this.onSequenceEntered(values.get(SEQUENCE)));
     }
 
     private onSequenceEntered(sequence: string): void {

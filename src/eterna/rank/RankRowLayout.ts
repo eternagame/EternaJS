@@ -6,7 +6,7 @@ import {PlayerRank} from "./PlayerRank";
 
 export class RankRowLayout extends ContainerObject {
     public constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
-                       fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
+        fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
         super();
 
         this._tfName = Fonts.std_regular("", fontSize).color(textColor).build();
@@ -26,7 +26,7 @@ export class RankRowLayout extends ContainerObject {
     }
 
     public setRank(rank: number): void {
-        this._tfRank.text = rank < 0 ? "" : "" + rank;
+        this._tfRank.text = rank < 0 ? "" : `${rank}`;
         this._rank = rank;
     }
 

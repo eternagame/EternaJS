@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Text
+} from "pixi.js";
 import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
@@ -43,7 +45,10 @@ export class MissionClearedPanel extends ContainerObject {
 
         const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
         const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
-            .color(0xffffff).font(Fonts.STDFONT_REGULAR).fontSize(15).hAlign("left").lineHeight(1.2).selectable(false);
+            .color(0xffffff).font(Fonts.STDFONT_REGULAR).fontSize(15)
+            .hAlign("left")
+            .lineHeight(1.2)
+            .selectable(false);
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
@@ -77,7 +82,8 @@ export class MissionClearedPanel extends ContainerObject {
         this.nextButton = new GameButton().label(this._hasNextPuzzle ? "NEXT PUZZLE" : "WHAT'S NEXT?");
         this.nextButton.display.position = new Point(
             (MissionClearedPanel.WIDTH * 0.5) - 10 - this.nextButton.container.width,
-            Flashbang.stageHeight - 20 - this.nextButton.container.height);
+            Flashbang.stageHeight - 20 - this.nextButton.container.height
+        );
         this.addObject(this.nextButton, this.container);
 
         this.onResize();
@@ -124,12 +130,14 @@ export class MissionClearedPanel extends ContainerObject {
         DisplayUtil.positionRelative(
             this.closeButton.display, Align.RIGHT, Align.TOP,
             this._bg, Align.RIGHT, Align.TOP,
-            -10, 10);
+            -10, 10
+        );
 
         DisplayUtil.positionRelative(
             this.nextButton.display, Align.CENTER, Align.BOTTOM,
             this._bg, Align.CENTER, Align.BOTTOM,
-            0, -25);
+            0, -25
+        );
 
         // this._tfLoading.visible = !this._panel.display.visible;
 
@@ -137,11 +145,13 @@ export class MissionClearedPanel extends ContainerObject {
             this._rankScrollHeading.set_size(310, this._tfPlayer.height);
             this._rankScrollHeading.display.position = new Point(
                 ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
-                0);
+                0
+            );
 
             this._rankScroll.display.position = new Point(
                 ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
-                10 + this._tfPlayer.height);
+                10 + this._tfPlayer.height
+            );
         }
 
         this._contentLayout.scale = new Point(1, 1);
@@ -155,7 +165,8 @@ export class MissionClearedPanel extends ContainerObject {
 
         this._contentLayout.position = new Point(
             (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
-            (Flashbang.stageHeight - this._contentLayout.height) * 0.5);
+            (Flashbang.stageHeight - this._contentLayout.height) * 0.5
+        );
     }
 
     private readonly _infoText: string;

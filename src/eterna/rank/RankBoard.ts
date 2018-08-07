@@ -42,8 +42,7 @@ export class RankBoard extends ContainerObject implements Updatable {
             let rankIdx: number = loopNum * this._rows.length + ii; // this row's player index in the data array
             if (rankIdx < this._rankData.length) { // Catch if entry doesn't exist (ie. rank 1)
                 const row = this._rows[ii];
-                row.display.position.y =
-                    RankBoard.ROW_HEIGHT * (this._rankData.length - ii - 1) // Starting position
+                row.display.position.y = RankBoard.ROW_HEIGHT * (this._rankData.length - ii - 1) // Starting position
                     - this._rows.length * RankBoard.ROW_HEIGHT // Height of all entries combined, allows looping
                     * loopNum; // Multiplied by how many loops this row has gone through
 

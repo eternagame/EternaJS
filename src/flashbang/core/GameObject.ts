@@ -51,7 +51,7 @@ export class GameObject extends GameObjectBase {
         let prev: GameObjectRef = ref._prev;
         let next: GameObjectRef = ref._next;
 
-        if (null != prev) {
+        if (prev != null) {
             prev._next = next;
         } else {
             // if prev is null, ref was the head of the list
@@ -59,7 +59,7 @@ export class GameObject extends GameObjectBase {
             this._children = next;
         }
 
-        if (null != next) {
+        if (next != null) {
             next._prev = prev;
         }
 
@@ -72,9 +72,7 @@ export class GameObject extends GameObjectBase {
     }
 
     public removeNamedObjects(name: string): void {
-        this.removeObjects((obj: GameObjectBase): boolean => {
-            return obj._name == name;
-        });
+        this.removeObjects((obj: GameObjectBase): boolean => obj._name == name);
     }
 
     protected removeObjects(pred: (obj: GameObjectBase) => boolean): void {
@@ -89,11 +87,10 @@ export class GameObject extends GameObjectBase {
         }
     }
 
-    /*internal*/
+    /* internal */
     _addObjectInternal(obj: GameObjectBase,
-                       name: string, replaceExisting: boolean,
-                       displayParent: Container, displayIdx: number = -1): GameObjectRef {
-
+        name: string, replaceExisting: boolean,
+        displayParent: Container, displayIdx: number = -1): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal
 
@@ -116,7 +113,7 @@ export class GameObject extends GameObjectBase {
         let oldListHead: GameObjectRef = this._children;
         this._children = ref;
 
-        if (null != oldListHead) {
+        if (oldListHead != null) {
             ref._next = oldListHead;
             oldListHead._prev = ref;
         }
@@ -138,11 +135,11 @@ export class GameObject extends GameObjectBase {
         return ref;
     }
 
-    /*internal*/
+    /* internal */
     _attachToDisplayList(displayParent: Container, displayIdx: number): void {
         // Attach the object to a display parent.
         // (This is purely a convenience - the client is free to do the attaching themselves)
-        Assert.isTrue(null != this.display, "obj must manage a non-null DisplayObject to be attached to a display parent");
+        Assert.isTrue(this.display != null, "obj must manage a non-null DisplayObject to be attached to a display parent");
 
         if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
             displayParent.addChild(this.display);
@@ -151,15 +148,15 @@ export class GameObject extends GameObjectBase {
         }
     }
 
-    /*internal*/
+    /* internal */
     _registerObject(obj: GameObjectBase): void {
         this._mode.registerObjectInternal(obj);
         obj._addedInternal();
     }
 
-    /*override*/
+    /* override */
 
-    /*internal*/
+    /* internal */
     _addedInternal(): void {
         // Add pending children first
         if (this._pendingChildren != null) {
@@ -172,9 +169,9 @@ export class GameObject extends GameObjectBase {
         super._addedInternal();
     }
 
-    /*override*/
+    /* override */
 
-    /*internal*/
+    /* internal */
     _removedInternal(): void {
         // null out ref immediately - so that we're not considered "live"
         // while children are being removed - rather than waiting for
@@ -196,9 +193,9 @@ export class GameObject extends GameObjectBase {
         super._removedInternal();
     }
 
-    /*override*/
+    /* override */
 
-    /*internal*/
+    /* internal */
     _disposeInternal(): void {
         this._ref._obj = null;
         // dispose our children

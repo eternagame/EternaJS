@@ -50,19 +50,19 @@ export class AppMode {
         return this._regs;
     }
 
-    public /*final*/ get modeSprite(): Container {
+    public /* final */ get modeSprite(): Container {
         return this._modeSprite;
     }
 
     /** Returns the ModeStack that this AppMode lives in */
-    public /*final*/ get modeStack(): ModeStack {
+    public /* final */ get modeStack(): ModeStack {
         return this._modeStack;
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
     public destroyObjectWithId(id: Object): void {
         let obj: GameObject = this.getObjectWithId(id);
-        if (null != obj) {
+        if (obj != null) {
             obj.destroySelf();
         }
     }
@@ -184,13 +184,13 @@ export class AppMode {
     protected registerObject(obj: GameObjectBase): void {
     }
 
-    /*internal*/
+    /* internal */
     setupInternal(modeStack: ModeStack): void {
         this._modeStack = modeStack;
         this.setup();
     }
 
-    /*internal*/
+    /* internal */
     disposeInternal(): void {
         Assert.isTrue(!this._isDiposed, "already disposed");
         this._isDiposed = true;
@@ -216,7 +216,7 @@ export class AppMode {
         this._disposed.emit();
     }
 
-    /*internal*/
+    /* internal */
     enterInternal(): void {
         this._isActive = true;
         this.modeSprite.interactiveChildren = true;
@@ -224,20 +224,20 @@ export class AppMode {
         this._entered.emit();
     }
 
-    /*internal*/
+    /* internal */
     exitInternal(): void {
         this._isActive = false;
         this.modeSprite.interactiveChildren = false;
         this.exit();
     }
 
-    /*internal*/
+    /* internal */
     updateInternal(dt: number): void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
-    /*internal*/
+    /* internal */
     registerObjectInternal(obj: GameObjectBase): void {
         obj._mode = this;
 
@@ -264,7 +264,7 @@ export class AppMode {
 
         let lateUpdatable: LateUpdatable = <LateUpdatable> (obj as any);
         if (lateUpdatable.lateUpdate !== undefined) {
-            obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
+            obj.regs.add(this.lateUpdate.connect(dt => lateUpdatable.lateUpdate(dt)));
         }
 
         this.registerObject(obj);

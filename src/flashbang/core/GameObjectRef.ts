@@ -10,7 +10,7 @@ export class GameObjectRef {
     }
 
     public destroyObject(): void {
-        if (null != this._obj) {
+        if (this._obj != null) {
             this._obj.destroySelf();
         }
     }
@@ -20,11 +20,11 @@ export class GameObjectRef {
     }
 
     public get isLive(): boolean {
-        return (null != this._obj);
+        return (this._obj != null);
     }
 
     public get isNull(): boolean {
-        return (null == this._obj);
+        return (this._obj == null);
     }
 
     // managed by ObjectDB

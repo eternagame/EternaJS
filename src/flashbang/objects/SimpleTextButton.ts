@@ -21,7 +21,7 @@ export class SimpleTextButton extends Button {
         this.container.addChild(this._tf);
     }
 
-    /*override*/
+    /* override */
     protected showState(state: ButtonState): void {
         this._bg.clear();
         this._bg.beginFill(SimpleTextButton.BG_COLORS.get(state));
@@ -52,5 +52,4 @@ export class SimpleTextButton extends Button {
         [ButtonState.OVER, 0x144AC5],
         [ButtonState.DISABLED, 0x3B3B3]
     ]);
-
 }

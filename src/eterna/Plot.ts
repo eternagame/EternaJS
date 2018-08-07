@@ -1,4 +1,4 @@
-﻿import {Graphics, Text, Container} from "pixi.js";
+import {Graphics, Text, Container} from "pixi.js";
 import {ColorUtil} from "./util/ColorUtil";
 import {Fonts} from "./util/Fonts";
 
@@ -90,7 +90,6 @@ export class Plot extends Container {
                 }
             }
         } else if (this._type == PlotType.LINE) {
-
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let x_coord = Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0 + x;
@@ -106,7 +105,6 @@ export class Plot extends Container {
 
             this._graphics.lineStyle(2, 0x00AA00);
             for (let ii = 0; ii < this._data.length; ii++) {
-
                 let hlen: number = (this._data[ii] / (this._upper_bounds[ii])) * (this._height - Plot.H_MARGIN);
                 if (ii == 0) {
                     this._graphics.moveTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, this._height - hlen);
@@ -126,7 +124,6 @@ export class Plot extends Container {
                     }
                 }
             }
-
         } else if (this._type == PlotType.SCATTER) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 10; ii < this._num_bases; ii += 10) {

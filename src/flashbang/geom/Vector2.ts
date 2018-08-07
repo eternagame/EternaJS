@@ -36,8 +36,9 @@ export class Vector2 {
     /** Creates a vector from polar coordinates */
     public static fromPolar(magnitude: number, angle: number, out: Vector2 = null): Vector2 {
         return (out || new Vector2()).set(
-            Math.cos(angle) * magnitude,   // == mag * (cos(angle)*x - sin(angle)*y)
-            Math.sin(angle) * magnitude);  // == mag * (sin(angle)*x + cos(angle)*y)
+            Math.cos(angle) * magnitude, // == mag * (cos(angle)*x - sin(angle)*y)
+            Math.sin(angle) * magnitude
+        ); // == mag * (sin(angle)*x + cos(angle)*y)
     }
 
     /**
@@ -50,7 +51,8 @@ export class Vector2 {
         const q: number = 1 - p;
         return out.set(
             q * a.x + p * b.x,
-            q * a.y + p * b.y);
+            q * a.y + p * b.y
+        );
     }
 
     /**
@@ -290,6 +292,6 @@ export class Vector2 {
 
     /** Returns a string representation of the Vector2. */
     public toString(): string {
-        return "" + this.x + "," + this.y;
+        return `${this.x},${this.y}`;
     }
 }

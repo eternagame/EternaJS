@@ -40,7 +40,7 @@ export class RScriptEnv extends ContainerObject {
         if (value instanceof TextBalloon) {
             value.display.visible = isVisible;
         } else {
-            log.warn(`'${id}' is not a Textbox`)
+            log.warn(`'${id}' is not a Textbox`);
         }
     }
 
@@ -48,7 +48,7 @@ export class RScriptEnv extends ContainerObject {
     public GenerateStringRefName(): string {
         // Strings will be referenced via $$STRING_REF:ID_HERE
         ++this._string_count;
-       return `$$STRING_REF:${this._string_count}`;
+        return `$$STRING_REF:${this._string_count}`;
     }
 
     public GetStringRef(ref: string): string {
@@ -58,7 +58,7 @@ export class RScriptEnv extends ContainerObject {
             return ref;
         } else {
             let value = this.GetVar(ref);
-            if (typeof(value) === "string") {
+            if (typeof (value) === "string") {
                 return value;
             } else {
                 log.warn(`'${ref}' is not a string`);
@@ -235,7 +235,7 @@ export class RScriptEnv extends ContainerObject {
         case RScriptUIElementID.CGCOMPLETE:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.GC);
         default:
-            throw new Error("Invalid UI Element: " + type);
+            throw new Error(`Invalid UI Element: ${type}`);
         }
     }
 

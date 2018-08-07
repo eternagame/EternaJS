@@ -1,4 +1,4 @@
-import * as log from 'loglevel';
+import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {TestMode} from "./debug/TestMode";
@@ -25,12 +25,12 @@ enum PuzzleID {
     FunAndEasy = 4350940,
     TryptophanASameState = 8787266,
     NandosZippers = 3562529,
-    TheRealXORChallenge = 6096060,          // multi-state
-    AAMismatchPilotRun = 3263276,           // locks, tails
-    TheophyllineRibozymeSwitch = 2390140,   // aux info
-    MicrofluidicChip = 6502997,             // level 4/7 - MissionCleared info
-    AandB_RO = 6892307,                     // Oligos
-    Tutorial1 = 6502927,                    // rscript
+    TheRealXORChallenge = 6096060, // multi-state
+    AAMismatchPilotRun = 3263276, // locks, tails
+    TheophyllineRibozymeSwitch = 2390140, // aux info
+    MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
+    AandB_RO = 6892307, // Oligos
+    Tutorial1 = 6502927, // rscript
     Tutorial2 = 6502942,
     Tutorial3 = 6502943,
     Tutorial4 = 6502944,
@@ -44,17 +44,19 @@ interface EternaAppParameters {
 }
 
 export class EternaApp extends FlashbangApp {
-    public constructor({containerID = "eterna-container", width, height, puzzleID}: EternaAppParameters) {
+    public constructor({
+        containerID = "eterna-container", width, height, puzzleID
+    }: EternaAppParameters) {
         super();
 
         let eternaContainer: HTMLElement = document.getElementById(containerID);
         eternaContainer.style.position = "relative";
 
-        let pixiContainer: HTMLElement = document.createElement('div');
+        let pixiContainer: HTMLElement = document.createElement("div");
         pixiContainer.id = EternaApp.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
 
-        let overlay: HTMLElement = document.createElement('div');
+        let overlay: HTMLElement = document.createElement("div");
         overlay.id = Eterna.OVERLAY_DIV_ID;
         eternaContainer.appendChild(overlay);
 
@@ -76,17 +78,17 @@ export class EternaApp extends FlashbangApp {
         return document.getElementById(EternaApp.PIXI_CONTAINER_ID);
     }
 
-    /*override*/
+    /* override */
     protected setup(): void {
         Eterna.settings = new EternaSettings();
-        Eterna.client = new GameClient(process.env['APP_SERVER_URL']);
+        Eterna.client = new GameClient(process.env["APP_SERVER_URL"]);
         Eterna.sound = new SoundManager(Eterna.settings);
 
         Fonts.loadFonts()
             .then(() => this.authenticate())
             .then(() => {
                 this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
-                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)])
+                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)]);
             })
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
@@ -98,7 +100,7 @@ export class EternaApp extends FlashbangApp {
             .then((puzzle) => {
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
             })
-            .catch((err) => Eterna.onFatalError(err));
+            .catch(err => Eterna.onFatalError(err));
     }
 
     protected onUncaughtError(err: any): void {
@@ -113,18 +115,18 @@ export class EternaApp extends FlashbangApp {
                     Eterna.set_player(username, uid);
                 });
         } else {
-            let playerID = process.env['DEBUG_PLAYER_ID'];
+            let playerID = process.env["DEBUG_PLAYER_ID"];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
             if (playerID.length == 0) {
                 return Eterna.client.logout()
                     .then(() => {})
-                    .catch(err => {
+                    .catch((err) => {
                         log.debug(`Logout error: ${err}`);
-                    })
+                    });
             }
 
-            let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            let playerPassword = process.env["DEBUG_PLAYER_PASSWORD"];
             log.debug(`Logging in ${playerID}...`);
             return Eterna.client.login(playerID, playerPassword).then((uid) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
@@ -148,5 +150,5 @@ export class EternaApp extends FlashbangApp {
     private readonly _height: number = 768;
     private readonly _puzzleID: number = PuzzleID.Tutorial4;
 
-    private static readonly PIXI_CONTAINER_ID = 'pixi-container';
+    private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }

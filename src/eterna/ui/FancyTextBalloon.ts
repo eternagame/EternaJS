@@ -11,8 +11,8 @@ import {TextBalloon} from "./TextBalloon";
 
 export class FancyTextBalloon extends TextBalloon implements Updatable {
     public constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
-                       showOutline: boolean = false, outlineColor: number = 0xFFFFFF,
-                       outlineAlpha: number = 0.70) {
+        showOutline: boolean = false, outlineColor: number = 0xFFFFFF,
+        outlineAlpha: number = 0.70) {
         super(null, balloonColor, balloonAlpha);
 
         this._balloonColor = balloonColor;
@@ -27,9 +27,9 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         this._panel.destroySelf();
         this._button.destroySelf();
 
-        this._panel = this._showOutline ?
-            new FancyGamePanel(2, this._balloonAlpha, this._balloonColor, this._outlineColor, this._outlineAlpha) :
-            new FancyGamePanel(0, this._balloonAlpha, this._balloonColor);
+        this._panel = this._showOutline
+            ? new FancyGamePanel(2, this._balloonAlpha, this._balloonColor, this._outlineColor, this._outlineAlpha)
+            : new FancyGamePanel(0, this._balloonAlpha, this._balloonColor);
         this.addObject(this._panel, this.container, 0);
 
         this._button = new GameButton()
@@ -55,17 +55,17 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         }
     }
 
-    /*override*/
+    /* override */
     public balloon_width(): number {
         return this._has_fixed_width ? this._fixed_width : super.balloon_width();
     }
 
-    /*override*/
+    /* override */
     public balloon_height(): number {
         return super.balloon_height() + this._button.container.height;
     }
 
-    /*override*/
+    /* override */
     public set_title(title: string): void {
         this._panel.set_panel_title(title);
         this._hasTitle = title != null;
@@ -75,7 +75,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         this._children_arrows.push(arrow);
     }
 
-    /*override*/
+    /* override */
     protected updateView(): void {
         this._panel.set_size(this.balloon_width(), this.balloon_height());
 
@@ -88,7 +88,6 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
             }
 
             this._panel.display.position = new Point(0, 0);
-
         } else {
             if (this._text != null) {
                 this._text.position = new Point(-innerWidth / 2, TextBalloon.H_MARGIN);
@@ -101,7 +100,8 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
             DisplayUtil.positionRelative(
                 this._button.display, Align.RIGHT, Align.BOTTOM,
                 this._panel.container, Align.RIGHT, Align.BOTTOM,
-                -TextBalloon.W_MARGIN, -TextBalloon.H_MARGIN);
+                -TextBalloon.W_MARGIN, -TextBalloon.H_MARGIN
+            );
         }
     }
 
@@ -125,14 +125,16 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
                 arrow.rotation += 180;
             }
 
-            if (ydiff < 0.0) {  // Above
+            if (ydiff < 0.0) { // Above
                 arrow.baseLength = Vector2.distance(
                     arrow.display.x, arrow.display.y,
-                    this.display.x + this.container.width / 2, this.display.y + this.container.height);
+                    this.display.x + this.container.width / 2, this.display.y + this.container.height
+                );
             } else { // Below
                 arrow.baseLength = Vector2.distance(
                     arrow.display.x, arrow.display.y,
-                    this.display.x + this.container.width / 2, this.display.y - 50);
+                    this.display.x + this.container.width / 2, this.display.y - 50
+                );
             }
 
             arrow.redrawIfDirty();

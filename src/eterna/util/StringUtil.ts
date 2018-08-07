@@ -55,15 +55,15 @@ export class StringUtil {
     /** Return true iff the first character is a lower-case character. */
     public static isLowerCase(str: string): boolean {
         let firstChar: string = str.charAt(0);
-        return (firstChar.toUpperCase() != firstChar) &&
-            (firstChar.toLowerCase() == firstChar);
+        return (firstChar.toUpperCase() != firstChar)
+            && (firstChar.toLowerCase() == firstChar);
     }
 
     /** Return true iff the first character is an upper-case character. */
     public static isUpperCase(str: string): boolean {
         let firstChar: string = str.charAt(0);
-        return (firstChar.toUpperCase() == firstChar) &&
-            (firstChar.toLowerCase() != firstChar);
+        return (firstChar.toUpperCase() == firstChar)
+            && (firstChar.toLowerCase() != firstChar);
     }
 
     /**
@@ -139,7 +139,7 @@ export class StringUtil {
         // hackily add commas
         let prefixLength: number = (n < 0) ? 1 : 0;
         while (s.length - prefixLength > 3) {
-            postfix = "," + s.substring(s.length - 3) + postfix;
+            postfix = `,${s.substring(s.length - 3)}${postfix}`;
             s = s.substring(0, s.length - 3);
         }
         return s + postfix;
@@ -238,7 +238,7 @@ export class StringUtil {
         // TODO: FIXME: this might be wrong, if your {0} replacement has a {1} in it, then
         // that'll get replaced next iteration.
         for (let ii: number = 0; ii < len; ii++) {
-            str = str.replace(new RegExp("\\{" + ii + "\\}", "g"), args[ii]);
+            str = str.replace(new RegExp(`\\{${ii}\\}`, "g"), args[ii]);
         }
         return str;
     }
@@ -308,7 +308,8 @@ export class StringUtil {
      * truncation.
      */
     public static truncate(
-        s: string, maxLength: number, append: string = ""): string {
+        s: string, maxLength: number, append: string = ""
+    ): string {
         if ((s == null) || (s.length <= maxLength)) {
             return s;
         } else {
@@ -352,7 +353,7 @@ export class StringUtil {
             s = s.substring(index + url.length);
             // clean up the url if necessary
             if (StringUtil.startsWith(url.toLowerCase(), "www.")) {
-                url = "http://" + url;
+                url = `http://${url}`;
             }
             array.push(url);
         }
@@ -395,18 +396,14 @@ export class StringUtil {
             if (StringUtil.startsWith(str, "0x")) {
                 str = str.substring(2);
                 radix = 16;
-
             } else if (StringUtil.startsWith(str, "0")) {
                 str = str.substring(1);
                 radix = 8;
-
             } else {
                 radix = 10;
             }
-
         } else if (radix == 16 && StringUtil.startsWith(str, "0x")) {
             str = str.substring(2);
-
         } else if (radix < 2 || radix > 16) {
             throw new Error(`Radix out of range: ${radix}`);
         }
@@ -437,7 +434,7 @@ export class StringUtil {
     private static DECIMAL_REGEXP: RegExp = /^-?[0-9]*\.?[0-9]+(e-?[0-9]+)?$/;
 
     /** A regular expression that finds URLs. */
-    private static URL_REGEXP: RegExp = //new RegExp("(http|https|ftp)://\\S+", "i");
+    private static URL_REGEXP: RegExp = // new RegExp("(http|https|ftp)://\\S+", "i");
         // from John Gruber: http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
         new RegExp("\\b(([\\w-]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^!\\\"#$%&'()*+,\\-./:;<=>?@\\[\\\\\\]\\^_`{|}~\\s]|/)))", "i");
 }

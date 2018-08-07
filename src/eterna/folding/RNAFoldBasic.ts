@@ -1,4 +1,4 @@
-﻿import {EPars} from "../EPars";
+import {EPars} from "../EPars";
 import {Folder} from "./Folder";
 
 export class RNAFoldBasic extends Folder {
@@ -13,12 +13,12 @@ export class RNAFoldBasic extends Folder {
         return true;
     }
 
-    /*override*/
+    /* override */
     public get_folder_name(): string {
         return RNAFoldBasic.NAME;
     }
 
-    /*override*/
+    /* override */
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let score: number = 0;
 
@@ -35,7 +35,7 @@ export class RNAFoldBasic extends Folder {
         return score;
     }
 
-    /*override*/
+    /* override */
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let n: number = seq.length;
         let pairs: number[] = new Array(n);
@@ -70,7 +70,6 @@ export class RNAFoldBasic extends Folder {
                 let current_val: number = 0;
 
                 if (ii_walker < n - 1 && jj_walker > 0 && ii_walker < jj_walker - 1) {
-
                     if (EPars.pair_type(seq[ii_walker], seq[jj_walker])) {
                         current_val = dp_array[(ii_walker + 1) * n + jj_walker - 1] + 1;
 
@@ -82,12 +81,10 @@ export class RNAFoldBasic extends Folder {
                             max_val = current_val;
                             max_case = 1;
                         }
-
                     }
                 }
 
                 if (jj_walker > 0) {
-
                     current_val = dp_array[(ii_walker) * n + jj_walker - 1];
 
                     if (current_val < 0) {
@@ -101,7 +98,6 @@ export class RNAFoldBasic extends Folder {
                 }
 
                 if (ii_walker < n - 1) {
-
                     current_val = dp_array[(ii_walker + 1) * n + jj_walker];
 
                     if (current_val < 0) {
@@ -116,7 +112,6 @@ export class RNAFoldBasic extends Folder {
 
                 if (ii_walker + 1 < jj_walker) {
                     for (let kk_walker: number = ii_walker + 1; kk_walker < jj_walker; kk_walker++) {
-
                         if (dp_array[ii_walker * n + kk_walker] < 0 || dp_array[kk_walker * n + jj_walker] < 0) {
                             console.warn("Something is wrong with DP case k");
                         }
@@ -124,10 +119,8 @@ export class RNAFoldBasic extends Folder {
                         current_val = dp_array[ii_walker * n + kk_walker] + dp_array[(kk_walker + 1) * n + jj_walker];
 
                         if (current_val > max_val) {
-
                             max_val = current_val;
                             max_case = -kk_walker;
-
                         }
                     }
                 }
@@ -164,6 +157,5 @@ export class RNAFoldBasic extends Folder {
             this.trace_pairs(trace_array, pairs, n, ii_start, kk);
             this.trace_pairs(trace_array, pairs, n, kk + 1, jj_start);
         }
-
     }
 }

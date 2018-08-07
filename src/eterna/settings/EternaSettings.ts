@@ -20,7 +20,7 @@ export class EternaSettings extends Settings {
 
     // TODO: recreate settings when playerID changes?
     public constructor() {
-        super(`EternaSettings`);
+        super("EternaSettings");
 
         this.showNumbers = this.setting("showNumbers", true);
         this.showLetters = this.setting("showLetters", false);

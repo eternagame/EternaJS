@@ -1,4 +1,6 @@
-import {Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {
+    Graphics, Point, Sprite, Text, Texture
+} from "pixi.js";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
@@ -77,8 +79,8 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public label(text: string | TextBuilder, fontSize?: number): GameButton {
-        if (typeof(text) === "string") {
-            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize ? fontSize : 22).bold().color(0xFFFFFF);
+        if (typeof (text) === "string") {
+            this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
@@ -111,12 +113,11 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (this.enabled &&
-            this.display.visible &&
-            e.type == KeyboardEventType.KEY_DOWN &&
-            e.code == this._hotkey &&
-            e.ctrlKey == this._hotkeyCtrl) {
-
+        if (this.enabled
+            && this.display.visible
+            && e.type == KeyboardEventType.KEY_DOWN
+            && e.code == this._hotkey
+            && e.ctrlKey == this._hotkeyCtrl) {
             this.click();
             return true;
         }
@@ -161,7 +162,6 @@ export class GameButton extends Button implements KeyboardListener {
                 this._label.height + (GameButton.HMARGIN * 2),
                 3);
             this._styleBox.endFill();
-
         } else if (this._styleBox != null) {
             this._styleBox.destroy({children: true});
             this._styleBox = null;
@@ -175,9 +175,9 @@ export class GameButton extends Button implements KeyboardListener {
                 this._img.scale = new Point(scale, scale);
             }
 
-            this._label.position = tex == null ?
-                new Point(GameButton.WMARGIN, GameButton.HMARGIN) :
-                new Point(this._img.width + 5, (this._img.height - this._label.height) * 0.5);
+            this._label.position = tex == null
+                ? new Point(GameButton.WMARGIN, GameButton.HMARGIN)
+                : new Point(this._img.width + 5, (this._img.height - this._label.height) * 0.5);
             this.container.addChild(this._label);
         }
     }
@@ -214,9 +214,9 @@ export class GameButton extends Button implements KeyboardListener {
         if (selected && this._selectedTexture != null) {
             return this._selectedTexture;
         } else {
-            return this._buttonStateTextures != null && this._buttonStateTextures.length > state ?
-                this._buttonStateTextures[state] :
-                null;
+            return this._buttonStateTextures != null && this._buttonStateTextures.length > state
+                ? this._buttonStateTextures[state]
+                : null;
         }
     }
 

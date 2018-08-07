@@ -81,8 +81,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
      * If elementNames is non-null, the style will only be applied to elements with the given names.
      */
     protected static applyStyleRecursive(element: HTMLElement, name: string, value: string,
-                                         replaceIfExists: boolean = false, elementNames: string[] = null): void {
-
+        replaceIfExists: boolean = false, elementNames: string[] = null): void {
         let apply = true;
         if (elementNames != null) {
             apply = false;
@@ -115,7 +114,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     }
 
     protected static sizeToString(size: number): string {
-        return "" + size + "px";
+        return `${size}px`;
     }
 
     protected static stringToSize(value: string): number {

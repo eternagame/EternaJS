@@ -8,13 +8,13 @@ export class GameClient {
 	    this._baseURL = baseURL;
     }
 
-    /// ACCOUNT
+    // / ACCOUNT
 
     /** Authenticates the logged-in player. */
     public authenticate(): Promise<[string, number]> {
         return this.get("/eterna_authenticate.php")
             .then(rsp => rsp.text())
-            .then(res => {
+            .then((res) => {
                 if (res == "NOT LOGGED IN") {
                     return Promise.resolve<[string, number]>(["Anonymous", 0]);
                 } else {
@@ -22,7 +22,7 @@ export class GameClient {
                         let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
                         return Promise.resolve<[string, number]>([username, Number(uid)]);
                     } catch (e) {
-                        throw new Error('Authentication response malformed');
+                        throw new Error("Authentication response malformed");
                     }
                 }
             });
@@ -30,13 +30,13 @@ export class GameClient {
 
     /** Logs the player in. Resolves with the player's UID if successful. */
     public login(name: string, password: string): Promise<number> {
-        return this.post("/login/", {"name": name, "pass": password, "type": "login"})
+        return this.post("/login/", {name, pass: password, type: "login"})
             .then(rsp => rsp.json())
-            .then(json => {
+            .then((json) => {
                 if (json["error"] != null) {
                     throw new Error(`Failed to log in as ${name}: ${json["error"]}`);
                 } else if (json["data"] == null || json["data"]["uid"] == null) {
-                    throw new Error(`Failed to log in (bad response data)`);
+                    throw new Error("Failed to log in (bad response data)");
                 }
 
                 return Number(json["data"]["uid"]);
@@ -44,7 +44,7 @@ export class GameClient {
     }
 
     public logout(): Promise<void> {
-        return this.get("/eterna_logout.php", {"noredirect": true})
+        return this.get("/eterna_logout.php", {noredirect: true})
             .then(rsp => rsp.text()).then(() => {});
     }
 
@@ -52,15 +52,15 @@ export class GameClient {
         return this.get("/banned.list").then(rsp => rsp.json());
     }
 
-    /// PUZZLES
+    // / PUZZLES
 
     public get_puzzle(puznid: number, scriptid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {"type": "puzzle", "nid": puznid, "script": scriptid})
+        return this.get(GameClient.GET_URI, {type: "puzzle", nid: puznid, script: scriptid})
             .then((rsp: Response) => rsp.json());
     }
 
     public get_puzzle_votes(puznid: number, round: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {"type": "votes", "puznid": puznid, "round": round})
+        return this.get(GameClient.GET_URI, {type: "votes", puznid, round})
             .then(rsp => rsp.json());
     }
 
@@ -77,36 +77,36 @@ export class GameClient {
     }
 
     public get_solutions(puznid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {"type": "solutions", "puznid": puznid})
+        return this.get(GameClient.GET_URI, {type: "solutions", puznid})
             .then(rsp => rsp.json());
     }
 
     public get_solution_info(solutionid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {"type": "solution_info", "solid": solutionid, "round": "1"})
+        return this.get(GameClient.GET_URI, {type: "solution_info", solid: solutionid, round: "1"})
             .then(rsp => rsp.json());
     }
 
     public get_solution_comments(solution_nid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {"nid": solution_nid, "type": "comments"})
+        return this.get(GameClient.GET_URI, {nid: solution_nid, type: "comments"})
             .then(rsp => rsp.json());
     }
 
     public submit_solution_comment(solution_nid: number, body: string): Promise<JSONData> {
-        return this.post(GameClient.POST_URI, {"type": "post_comment", "nid": solution_nid, "body": body})
+        return this.post(GameClient.POST_URI, {type: "post_comment", nid: solution_nid, body})
             .then(rsp => rsp.json());
     }
 
     public delete_solution(solution_nid: number): Promise<JSONData> {
-        return this.post(GameClient.POST_URI, {'type': "delete_solution", "nid": solution_nid})
+        return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solution_nid})
             .then(rsp => rsp.json());
     }
 
     public toggle_solution_vote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
-        let post_params: any = {'solnid': solution_nid, "puznid": puznid};
+        let post_params: any = {solnid: solution_nid, puznid};
         if (myVotes == 1) {
-            post_params['type'] = "unvote";
+            post_params["type"] = "unvote";
         } else if (myVotes == 0) {
-            post_params['type'] = "vote";
+            post_params["type"] = "vote";
         } else {
             throw new Error("Wrong vote value - can't submit");
         }
@@ -117,13 +117,13 @@ export class GameClient {
     public update_solution_fold_data(solution_nid: number, fold_data: any): Promise<string> {
         let dataString: string = JSON.stringify(fold_data);
         return this.post(GameClient.POST_URI, {
-            "type": "update_solution_fold_data",
-            "nid": solution_nid,
+            type: "update_solution_fold_data",
+            nid: solution_nid,
             "fold-data": dataString
-        }).then((rsp) => rsp.text());
+        }).then(rsp => rsp.text());
     }
 
-    /// OTHER
+    // / OTHER
 
     public post_screenshot(imgBytes: any): Promise<JSONData> {
         throw new Error("TODO");
@@ -140,15 +140,15 @@ export class GameClient {
         }
 
         return fetch(url.toString(), {
-            headers: new Headers({'Content-Type': 'text/plain'}),
+            headers: new Headers({"Content-Type": "text/plain"}),
             credentials: "include"
         }).then((rsp) => {
             if (!rsp.ok) {
-                throw new Error("HTTP status code: " + rsp.status);
+                throw new Error(`HTTP status code: ${rsp.status}`);
             }
             return rsp;
         }).catch((err) => {
-            throw new Error(url.toString() + ": " + err);
+            throw new Error(`${url.toString()}: ${err}`);
         });
     }
 
@@ -164,15 +164,15 @@ export class GameClient {
         return fetch(url.toString(), {
             method: "POST",
             body: postParams.toString(),
-            headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
+            headers: new Headers({"Content-Type": "application/x-www-form-urlencoded"}),
             credentials: "include"
         }).then((rsp) => {
             if (!rsp.ok) {
-                throw new Error("HTTP status code: " + rsp.status);
+                throw new Error(`HTTP status code: ${rsp.status}`);
             }
             return rsp;
         }).catch((err) => {
-            throw new Error(url.toString() + ": " + err);
+            throw new Error(`${url.toString()}: ${err}`);
         });
 
         // Passing params in a FormData is more correct, I think,

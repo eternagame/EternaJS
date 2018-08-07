@@ -1,6 +1,6 @@
 export class Assert {
     public static ok(predicate: () => boolean, message?: string): void {
-        if (process.env.NODE_ENV !== 'production' && !predicate()) {
+        if (process.env.NODE_ENV !== "production" && !predicate()) {
             throw new Error(message || "assertion failure!");
         }
     }

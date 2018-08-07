@@ -33,11 +33,12 @@ export class ConfirmDialog extends Dialog<boolean> {
 
         let box = new TextBalloon("", 0x152843, 1.0, 0xC0DCE7, 0.27);
         box.set_title("Are you sure?");
-        box.set_text(this._prompt + "\n\n");
+        box.set_text(`${this._prompt}\n\n`);
         box.display.alpha = 0;
         box.display.position = new Point(
             (Flashbang.stageWidth - box.balloon_width()) * 0.5,
-            (Flashbang.stageHeight - box.balloon_height()) * 0.5);
+            (Flashbang.stageHeight - box.balloon_height()) * 0.5
+        );
         this.addObject(box, this.container);
         box.addObject(new AlphaTask(1, 0.3));
 
@@ -53,7 +54,8 @@ export class ConfirmDialog extends Dialog<boolean> {
         box.container.addChild(buttonLayout);
         buttonLayout.position = new Point(
             (box.balloon_width() - buttonLayout.width) * 0.5,
-            (box.balloon_height() - buttonLayout.height - 7));
+            (box.balloon_height() - buttonLayout.height - 7)
+        );
 
         yes_button.clicked.connect(() => this.close(true));
         no_button.clicked.connect(() => this.close(false));

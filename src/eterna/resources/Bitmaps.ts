@@ -285,11 +285,11 @@ export class Bitmaps {
     public static readonly BaseAPattern: string = require("assets/RNABase/yellow_pattern.png");
     public static readonly BaseAMin: string = require("assets/RNABase/yellow_small.png");
 
-    public static get all (): string[] {
+    public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];
             for (let value of _.values(Bitmaps)) {
-                if (typeof(value) === "string") {
+                if (typeof (value) === "string") {
                     Bitmaps.ALL_URLS.push(value);
                 }
             }

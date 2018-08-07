@@ -48,4 +48,3 @@ export class RegistrationGroup implements Registration {
 
     private _regs: Set<Registration>; // lazily instantiated
 }
-

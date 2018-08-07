@@ -13,7 +13,7 @@ export class BitmapUtil {
     public static create_scaled(bitmaps: Texture[], scaleFactor: number, numScaleLevels: number): void {
         let orig_length: number = bitmaps.length;
         let size_scaler: number = scaleFactor;
-        let scaler_mat: Matrix = new Matrix;
+        let scaler_mat: Matrix = new Matrix();
 
         for (let ss: number = 1; ss < numScaleLevels; ss++) {
             scaler_mat.identity();

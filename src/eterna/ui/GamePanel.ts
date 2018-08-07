@@ -59,7 +59,6 @@ export class GamePanel extends BaseGamePanel {
             this._background.beginFill(0x000000, 0);
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();
-
         } else {
             this._background.lineStyle(2, this._border_color, this._border_alpha);
             this._background.beginFill(this._color, this._alpha);
@@ -95,4 +94,3 @@ export class GamePanel extends BaseGamePanel {
     protected _width: number = 0;
     protected _height: number = 0;
 }
-
