@@ -21,7 +21,7 @@ module.exports = {
         'no-continue': 'off',
         'no-plusplus': 'off',
         'no-underscore-dangle': 'off',
-        // We like using for..of statements, so we have to redefine with everything else via the airbnb config (https://github.com/airbnb/javascript/blob/a510095acf20e3d96a94e6d0d0b26cfac71d2c7f/packages/eslint-config-airbnb-base/rules/style.js#L334) 
+        // We like using for..of statements, so we have to redefine with everything else via the airbnb config (https://github.com/airbnb/javascript/blob/a510095acf20e3d96a94e6d0d0b26cfac71d2c7f/packages/eslint-config-airbnb-base/rules/style.js#L334)
         'no-restricted-syntax': [
             'error',
             {
@@ -38,7 +38,7 @@ module.exports = {
             },
         ],
         // For everything here on out, keep at least for now, so as not to cause issues/slow down while porting.
-        // Discuss/review these later for final determinations 
+        // Discuss/review these later for final determinations
         'indent': ['error', 4],
         'camelcase': 'off',
         'quotes': ['error', 'double'],
@@ -55,5 +55,7 @@ module.exports = {
         'no-param-reassign': 'off',
         // This is currently broken https://github.com/benmosher/eslint-plugin-import/issues/1152
         'import/order': 'off',
-    } 
+        // We use subclasses, so this rule frequently throws up false positives
+        'class-methods-use-this': 'off',
+    }
 };
