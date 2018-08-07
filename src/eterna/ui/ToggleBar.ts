@@ -70,10 +70,6 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
-    public register_ui_for_rscript(id: string): void {
-        this._rscript_name = id;
-    }
-
     public set_state(new_state: number): void {
         if (new_state != this._selectedState) {
             if ((this._selectedState >= 0) && (this._selectedState < this._numStates)) {
@@ -176,7 +172,6 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     private _hoveredState: number = -1;
     private _mouseOver: boolean = false;
     private _labels: Text[] = [];
-    private _rscript_name: string = "";
 
     private static readonly BUTTON_SIZE: number = 25;
     private static readonly ROUND_RECT_RADIUS = 10;
