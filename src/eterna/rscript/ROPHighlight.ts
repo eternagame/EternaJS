@@ -7,8 +7,9 @@ import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {ColorUtil} from "../util/ColorUtil";
-import {RScriptEnv, UIElementType} from "./RScriptEnv";
+import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
+import {RScriptUIElementID} from "./RScriptUIElementID";
 
 export enum ROPHighlightMode {
     RNA = "RNA",
@@ -123,104 +124,104 @@ export class ROPHighlight extends RScriptOp {
         }
     }
 
-    private GetUIElementSize(obj: any, padding: Point, key: string): Point {
+    private GetUIElementSize(obj: any, padding: Point, key: RScriptUIElementID): Point {
         if (obj == null) {
             return new Point(0, 0);
         }
 
         let p: Point = new Point(obj.width + 2 * padding.x, obj.height + 2 * padding.y);
-        switch (key.toUpperCase()) {
-        case "OBJECTIVES":
+        switch (key) {
+        case RScriptUIElementID.OBJECTIVES:
             let n: number = this._env.GetUI().get_constraint_count();
             let firstObj: ConstraintBox = this._env.GetUI().get_constraint(0);
             let lastObj: ConstraintBox = this._env.GetUI().get_constraint(n - 1);
             p.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
             p.y = 84;
             break;
-        case "SHAPEOBJECTIVE":
+        case RScriptUIElementID.SHAPEOBJECTIVE:
             p.x = 84;
             p.y = 84;
             break;
-        case "OBJECTIVE-":
+        case RScriptUIElementID.OBJECTIVE:
             p.x = 10 + obj.real_width();
             p.y = 84;
             break;
-        case "SWAP":
+        case RScriptUIElementID.SWAP:
             p.x -= 6;
             break;
-        case "ACTION_MENU":
+        case RScriptUIElementID.ACTION_MENU:
             p = new Point(obj.get_width(false) + 2 * padding.x, obj.get_height() + 2 * padding.y);
             // no break statement, intentional!
-        case "ZOOMIN":
-        case "ZOOMOUT":
-        case "UNDO":
-        case "REDO":
-        case "RESET":
-        case "PIP":
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.RESET:
+        case RScriptUIElementID.PIP:
             p.x -= 5;
             break;
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
             p.x = 30;
             p.y = 15;
             break;
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
             p.x += 24;
             break;
-        case "HELP":
+        case RScriptUIElementID.HELP:
             p.x -= 6;
             break;
-        case "TOGGLENATURAL":
-        case "TOGGLETARGET":
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
 
             break;
         }
         return p;
     }
 
-    private GetUIElementReference(key: string, altParam: number = -1): any {
-        switch (key.toUpperCase()) {
-        case "A":
-        case "U":
-        case "G":
-        case "C":
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
-            return this._env.GetUIElement(UIElementType.PALETTE);
-        case "OBJECTIVES":
-            return this._env.GetUIElement(UIElementType.OBJECTIVE, 0);
-        case "OBJECTIVE-":
-            return this._env.GetUIElement(UIElementType.OBJECTIVE, altParam);
-        case UIElementType.ACTION_MENU:
-        case UIElementType.SWAP:
-        case UIElementType.TOGGLENATURAL:
-        case UIElementType.TOGGLETARGET:
-        case UIElementType.ZOOMIN:
-        case UIElementType.ZOOMOUT:
-        case UIElementType.UNDO:
-        case UIElementType.REDO:
-        case UIElementType.PIP:
-        case UIElementType.SWITCH:
-            return this._env.GetUIElement(key as UIElementType);
+    private GetUIElementReference(key: RScriptUIElementID, altParam: number = -1): any {
+        switch (key) {
+        case RScriptUIElementID.A:
+        case RScriptUIElementID.U:
+        case RScriptUIElementID.G:
+        case RScriptUIElementID.C:
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
+            return this._env.GetUIElement(RScriptUIElementID.PALETTE);
+        case RScriptUIElementID.OBJECTIVES:
+            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, 0);
+        case RScriptUIElementID.OBJECTIVE:
+            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, altParam);
+        case RScriptUIElementID.ACTION_MENU:
+        case RScriptUIElementID.SWAP:
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.PIP:
+        case RScriptUIElementID.SWITCH:
+            return this._env.GetUIElement(key as RScriptUIElementID);
         }
         return this._env.GetUI();
     }
@@ -234,43 +235,43 @@ export class ROPHighlight extends RScriptOp {
         return inId + ROPHighlight.id_postfix;
     }
 
-    private static GetUIElementOffset(key: string): Point {
+    private static GetUIElementOffset(id: RScriptUIElementID): Point {
         let offset: Point = new Point(0, 0);
-        switch (key.toUpperCase()) {
-        case "SWAP":
+        switch (id) {
+        case RScriptUIElementID.SWAP:
             offset = new Point(4, 0);
             break;
-        case "A":
-        case "U":
-        case "G":
-        case "C":
+        case RScriptUIElementID.A:
+        case RScriptUIElementID.U:
+        case RScriptUIElementID.G:
+        case RScriptUIElementID.C:
             break;
-        case "AU":
-        case "UA":
-        case "GU":
-        case "UG":
-        case "GC":
-        case "CG":
+        case RScriptUIElementID.AU:
+        case RScriptUIElementID.UA:
+        case RScriptUIElementID.GU:
+        case RScriptUIElementID.UG:
+        case RScriptUIElementID.GC:
+        case RScriptUIElementID.CG:
             offset = new Point(9, 11);
             break;
-        case "AUCOMPLETE":
-        case "UACOMPLETE":
-        case "GUCOMPLETE":
-        case "UGCOMPLETE":
-        case "GCCOMPLETE":
-        case "CGCOMPLETE":
+        case RScriptUIElementID.AUCOMPLETE:
+        case RScriptUIElementID.UACOMPLETE:
+        case RScriptUIElementID.GUCOMPLETE:
+        case RScriptUIElementID.UGCOMPLETE:
+        case RScriptUIElementID.GCCOMPLETE:
+        case RScriptUIElementID.CGCOMPLETE:
             offset = new Point(-19, 0);
             break;
-        case "TOGGLENATURAL":
-        case "TOGGLETARGET":
-        case "RESET":
-        case "ZOOMIN":
-        case "ZOOMOUT":
-        case "UNDO":
-        case "REDO":
-        case "PIP":
+        case RScriptUIElementID.TOGGLENATURAL:
+        case RScriptUIElementID.TOGGLETARGET:
+        case RScriptUIElementID.RESET:
+        case RScriptUIElementID.ZOOMIN:
+        case RScriptUIElementID.ZOOMOUT:
+        case RScriptUIElementID.UNDO:
+        case RScriptUIElementID.REDO:
+        case RScriptUIElementID.PIP:
             break;
-        case "OBJECTIVES":
+        case RScriptUIElementID.OBJECTIVES:
             offset = new Point(-5, 0);
             break;
         }

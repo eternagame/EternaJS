@@ -10,6 +10,7 @@ import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
 import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
+import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -119,7 +120,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         }
 
         this.set_state(state);
-        ROPWait.NotifyClickUI("SWITCH");
+        ROPWait.NotifyClickUI(RScriptUIElementID.SWITCH);
     }
 
     private onMouseOver(): void {
