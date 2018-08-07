@@ -196,7 +196,7 @@ class NormalDistPRNG {
         w = Math.sqrt(-2 * Math.log(w) / w);
 
         NormalDistPRNG.cached = true;
-        NormalDistPRNG.cache = x * w;			//  Cache one of the outputs
-        return y * w;			//  and return the other.
+        NormalDistPRNG.cache = x * w;           //  Cache one of the outputs
+        return y * w;           //  and return the other.
     }
 }

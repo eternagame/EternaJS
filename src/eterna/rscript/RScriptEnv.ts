@@ -88,7 +88,7 @@ export class RScriptEnv extends ContainerObject {
 
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
-    // 	have been passed in.
+    //  have been passed in.
     public GetUIElementFromId(key: string): [any, RScriptUIElementID, number] {
         // Highlight UI.
         let uiElement: any;
