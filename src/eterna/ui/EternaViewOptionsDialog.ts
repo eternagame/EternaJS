@@ -64,7 +64,8 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         this.container.addChild(viewLayout);
         DisplayUtil.positionRelative(
             viewLayout, Align.CENTER, Align.CENTER,
-            panel.display, Align.CENTER, Align.CENTER, 0, panel.get_title_space() * 0.5);
+            panel.display, Align.CENTER, Align.CENTER, 0, panel.get_title_space() * 0.5
+        );
 
         // Eterna.sound.get_mute_button().set_pos(new UDim(0, 1, 20, -85));
         // Eterna.sound.get_volume_button(1).set_pos(new UDim(0, 1, 45, -82));

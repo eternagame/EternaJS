@@ -16,7 +16,7 @@ export class SerialTask extends ObjectTask {
         this._subtasks.push(task);
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         this.nextTask();
     }
@@ -37,7 +37,7 @@ export class SerialTask extends ObjectTask {
         }
     }
 
-    /*override*/
+    /* override */
     protected removed(): void {
         if (this._subtasks.length > 0 && this._nextIdx <= this._subtasks.length) {
             // destroy the active task

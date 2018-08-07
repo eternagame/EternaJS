@@ -34,7 +34,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
         spec_box.addObject(cancel_button, spec_box.container);
         cancel_button.display.position = new Point(
             spec_box.width - cancel_button.container.width - 20,
-            spec_box.height - cancel_button.container.height - 20);
+            spec_box.height - cancel_button.container.height - 20
+        );
 
         cancel_button.clicked.connect(() => this.close(false));
 
@@ -46,7 +47,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
         DisplayUtil.positionRelative(
             add_thumbnail_button.display, Align.RIGHT, Align.CENTER,
             cancel_button.display, Align.LEFT, Align.CENTER,
-            -20, 0);
+            -20, 0
+        );
 
         add_thumbnail_button.clicked.connect(() => this.close(true));
     }

@@ -26,7 +26,7 @@ export class EventSignal extends AbstractSignal<InteractionEvent> implements Sig
         return new FilteredSignal(this, pred);
     }
 
-    /*override*/
+    /* override */
     protected connectionAdded(): void {
         super.connectionAdded();
         if (!this._connected) {
@@ -34,7 +34,7 @@ export class EventSignal extends AbstractSignal<InteractionEvent> implements Sig
         }
     }
 
-    /*override*/
+    /* override */
     protected connectionRemoved(): void {
         super.connectionRemoved();
         if (!this.hasConnections && this._connected) {

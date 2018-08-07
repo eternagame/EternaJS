@@ -1,4 +1,4 @@
-﻿import {Constants} from "../Constants";
+import {Constants} from "../Constants";
 import {EPars} from "../EPars";
 import {FolderManager} from "../folding/FolderManager";
 import {Vienna} from "../folding/Vienna";
@@ -76,9 +76,9 @@ export class Puzzle {
     public get_secstruct(index: number = 0): string {
         if (this._use_tails) {
             if (this._use_short_tails) {
-                return ".." + this._secstructs[index] + "....................";
+                return `..${this._secstructs[index]}....................`;
             } else {
-                return "....." + this._secstructs[index] + "....................";
+                return `.....${this._secstructs[index]}....................`;
             }
         } else {
             return this._secstructs[index];
@@ -120,7 +120,7 @@ export class Puzzle {
     public get_puzzle_name(linked: boolean = false): string {
         if (linked && this._puzzle_type != PuzzleType.EXPERIMENTAL) {
             let url: string = EternaURL.generate_url({page: "puzzle", nid: this._nid});
-            return "<u><A HREF=\"" + url + "\" TARGET=\"_blank\">" + this._name + "</a></u>";
+            return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
         }
 
         return this._name;
@@ -177,9 +177,7 @@ export class Puzzle {
                 puzlocks.push(false);
             }
             return puzlocks;
-
         } else if (this._use_tails) {
-
             puzlocks = [];
 
             if (this._use_short_tails) {
@@ -204,9 +202,7 @@ export class Puzzle {
                 puzlocks.push(true);
             }
             return puzlocks;
-
         } else {
-
             return this._puzzle_locks.slice();
         }
     }
@@ -226,7 +222,7 @@ export class Puzzle {
     public has_target_type(tc_type: string): boolean {
         if (this._target_conditions == null) return false;
         for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]['type'] == tc_type) {
+            if (this._target_conditions[ii]["type"] == tc_type) {
                 return true;
             }
         }
@@ -239,55 +235,55 @@ export class Puzzle {
         let concentration: number;
 
         for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]['secstruct'] == null) {
+            if (this._target_conditions[ii]["secstruct"] == null) {
                 throw new Error("Can't find secstruct from a target condition");
             }
-            this._secstructs.push(this._target_conditions[ii]['secstruct']);
+            this._secstructs.push(this._target_conditions[ii]["secstruct"]);
 
-            let tc_type: string = this._target_conditions[ii]['type'];
+            let tc_type: string = this._target_conditions[ii]["type"];
             // Aptamers
 
-            if (Puzzle.is_aptamer_type(tc_type) && this._target_conditions[ii]['site'] != null) {
+            if (Puzzle.is_aptamer_type(tc_type) && this._target_conditions[ii]["site"] != null) {
                 let binding_pairs: any[] = [];
-                let binding_site: any[] = this._target_conditions[ii]['site'];
+                let binding_site: any[] = this._target_conditions[ii]["site"];
                 let target_pairs: number[] = EPars.parenthesis_to_pair_array(this.get_secstruct(ii));
 
                 for (let jj = 0; jj < binding_site.length; jj++) {
                     binding_pairs.push(target_pairs[binding_site[jj]]);
                 }
 
-                this._target_conditions[ii]['binding_pairs'] = binding_pairs;
-                this._target_conditions[ii]['bonus'] = -0.6 * Math.log(this._target_conditions[ii]['concentration'] / 3) * 100;
+                this._target_conditions[ii]["binding_pairs"] = binding_pairs;
+                this._target_conditions[ii]["bonus"] = -0.6 * Math.log(this._target_conditions[ii]["concentration"] / 3) * 100;
             }
 
             // Simple oligos
 
-            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii].hasOwnProperty('fold_mode') == false) {
-                this._target_conditions[ii]['fold_mode'] = Pose2D.OLIGO_MODE_DIMER;
+            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii].hasOwnProperty("fold_mode") == false) {
+                this._target_conditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER;
             }
 
-            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii]['oligo_sequence'] != null) {
+            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii]["oligo_sequence"] != null) {
                 concentration = 0;
-                if (this._target_conditions[ii]['oligo_concentration'] != null) {
-                    concentration = this._target_conditions[ii]['oligo_concentration'];
+                if (this._target_conditions[ii]["oligo_concentration"] != null) {
+                    concentration = this._target_conditions[ii]["oligo_concentration"];
                 } else {
-                    concentration = 1.;
+                    concentration = 1.0;
                 }
-                this._target_conditions[ii]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                this._target_conditions[ii]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
             }
 
             // Multi-strands
 
-            if (this._target_conditions[ii]['type'] == "multistrand") {
-                let oligos: any[] = this._target_conditions[ii]['oligos'];
+            if (this._target_conditions[ii]["type"] == "multistrand") {
+                let oligos: any[] = this._target_conditions[ii]["oligos"];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
-                    if (oligos[jj]['concentration'] != null) {
-                        concentration = oligos[jj]['concentration'];
+                    if (oligos[jj]["concentration"] != null) {
+                        concentration = oligos[jj]["concentration"];
                     } else {
-                        concentration = 1.;
+                        concentration = 1.0;
                     }
-                    oligos[jj]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                    oligos[jj]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
                 }
             }
         }
@@ -394,7 +390,6 @@ export class Puzzle {
             for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
                 barcodes.push(ii);
             }
-
         } else {
             for (ii = secstruct.length - 19; ii < secstruct.length; ii++) {
                 barcodes.push(ii);
@@ -444,22 +439,21 @@ export class Puzzle {
         for (let ii = shapes.length - 1; ii >= 0; ii--) {
             if (antishapes[ii]) {
                 this._constraints.push(ConstraintType.ANTISHAPE);
-                this._constraints.push("" + ii);
+                this._constraints.push(`${ii}`);
             }
 
             if (shapes[ii]) {
                 this._constraints.push(ConstraintType.SHAPE);
-                this._constraints.push("" + ii);
+                this._constraints.push(`${ii}`);
             }
         }
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] != ConstraintType.SHAPE &&
-                constraints[ii] != ConstraintType.SOFT &&
-                constraints[ii] != ConstraintType.ANTISHAPE) {
+            if (constraints[ii] != ConstraintType.SHAPE
+                && constraints[ii] != ConstraintType.SOFT
+                && constraints[ii] != ConstraintType.ANTISHAPE) {
                 this._constraints.push(constraints[ii]);
                 this._constraints.push(constraints[ii + 1]);
-
             } else if (constraints[ii] == ConstraintType.SOFT) {
                 this._is_soft_constraint = true;
             }
@@ -548,8 +542,8 @@ export class Puzzle {
 
     public transform_sequence(seq: number[], target_index: number): number[] {
         if (this._target_conditions != null) {
-            if (this._target_conditions[target_index]['sequence'] != null) {
-                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._target_conditions[target_index]['sequence']);
+            if (this._target_conditions[target_index]["sequence"] != null) {
+                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._target_conditions[target_index]["sequence"]);
                 let target_seq: number[] = [];
 
                 if (this._use_tails) {
@@ -563,7 +557,6 @@ export class Puzzle {
                         target_seq.push(EPars.RNABASE_ADENINE);
                         target_seq.push(EPars.RNABASE_ADENINE);
                     }
-
                 }
 
                 for (let ii: number = 0; ii < target_seq_temp.length; ii++) {
@@ -588,7 +581,6 @@ export class Puzzle {
                     }
                 }
                 return target_seq;
-
             }
         }
         return seq;

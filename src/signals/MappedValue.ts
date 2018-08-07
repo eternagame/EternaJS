@@ -25,7 +25,7 @@ export abstract class MappedValue<T> extends AbstractValue<T> {
      */
     protected abstract connectToSource(): Connection;
 
-    /*override*/
+    /* override */
     protected connectionAdded(): void {
         super.connectionAdded();
         if (this._conn == null) {
@@ -33,7 +33,7 @@ export abstract class MappedValue<T> extends AbstractValue<T> {
         }
     }
 
-    /*override*/
+    /* override */
     protected connectionRemoved(): void {
         super.connectionRemoved();
         if (!this.hasConnections && this._conn != null) {
@@ -52,12 +52,12 @@ class MappedValueImpl<TMapped, TSource> extends MappedValue<TMapped> {
         this._f = f;
     }
 
-    /*override*/
+    /* override */
     public get value(): TMapped {
         return this._f(this._source.value);
     }
 
-    /*override*/
+    /* override */
     protected connectToSource(): Connection {
         return this._source.connect((value: TSource, ovalue: TSource) => {
             this.notifyChange(this._f(value), this._f(ovalue));

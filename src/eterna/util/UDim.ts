@@ -1,4 +1,4 @@
-﻿import {DisplayObject, Rectangle} from "pixi.js";
+import {DisplayObject, Rectangle} from "pixi.js";
 
 // TODO: get rid of this
 export class UDim {

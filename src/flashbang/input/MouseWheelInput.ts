@@ -46,4 +46,3 @@ export class MouseWheelInput {
 
     private _listeners: LinkedList<MouseWheelListener> = new LinkedList();
 }
-

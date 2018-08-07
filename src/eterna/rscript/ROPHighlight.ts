@@ -28,14 +28,13 @@ export class ROPHighlight extends RScriptOp {
         this._mode = inMode;
     }
 
-    /*override*/
+    /* override */
     public InitializeROP(op: string, args: string): void {
         super.InitializeROP(op, args);
         this._id = ROPHighlight.ProcessId(this._id);
-
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         // Remove highlight with ID.
         if (this._env.Exists(this._id)) {
@@ -56,7 +55,6 @@ export class ROPHighlight extends RScriptOp {
             }
             let rnaHighlight: RNAHighlightState = this._env.GetRNA().create_new_highlight(res);
             this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
-
         } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
             const highlightParent: any = this.GetUIElementReference(elementID, altParam);
@@ -81,30 +79,26 @@ export class ROPHighlight extends RScriptOp {
             highlight.drawRoundedRect(new_x, new_y, realWidth.x, realWidth.y, 10);
 
             const highlightObj = new SceneObject(highlight);
-            highlightObj.addObject(new RepeatingTask(() => {
-                return new SerialTask(
-                    new AlphaTask(1, 0.5),
-                    new AlphaTask(0, 0.5)
-                );
-            }));
+            highlightObj.addObject(new RepeatingTask(() => new SerialTask(
+                new AlphaTask(1, 0.5),
+                new AlphaTask(0, 0.5)
+            )));
 
             highlightParent.addObject(highlightObj, highlightParent.container);
             this._env.StoreVar(this._id, highlight, highlightParent);
         }
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
             if (!this._op_visible) {
                 this._id = this._env.GetStringRef(arg);
-            } else {
-                if (this._mode == ROPHighlightMode.RNA) {
-                    this._start_idx = Number(arg) - 1;
-                } else if (this._mode == ROPHighlightMode.UI) {
-                    this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
-                }
+            } else if (this._mode == ROPHighlightMode.RNA) {
+                this._start_idx = Number(arg) - 1;
+            } else if (this._mode == ROPHighlightMode.UI) {
+                this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
             }
             break;
         case 1:
@@ -159,7 +153,8 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.ACTION_MENU:
             size = new Point(
                 (uiObj as EternaMenu).get_width(false) + 2 * padding.x,
-                (uiObj as EternaMenu).get_height() + 2 * padding.y);
+                (uiObj as EternaMenu).get_height() + 2 * padding.y
+            );
             // no break statement, intentional!
         case RScriptUIElementID.ZOOMIN:
         case RScriptUIElementID.ZOOMOUT:

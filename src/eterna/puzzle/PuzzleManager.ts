@@ -1,4 +1,4 @@
-﻿import * as log from "loglevel";
+import * as log from "loglevel";
 import {Eterna} from "../Eterna";
 import {CSVParser} from "../util/CSVParser";
 import {Puzzle} from "./Puzzle";
@@ -7,7 +7,7 @@ import {SolutionManager} from "./SolutionManager";
 export class PuzzleManager {
     public static get instance(): PuzzleManager {
         if (PuzzleManager._instance == null) {
-            PuzzleManager._instance = new PuzzleManager;
+            PuzzleManager._instance = new PuzzleManager();
         }
         return PuzzleManager._instance;
     }
@@ -37,8 +37,8 @@ export class PuzzleManager {
             newpuz.set_puzzle_locks(locks);
         }
 
-        if (json['objective']) {
-            let objective: any = JSON.parse(json['objective'])[0];
+        if (json["objective"]) {
+            let objective: any = JSON.parse(json["objective"])[0];
             if (objective["shift_limit"]) {
                 newpuz.set_shift_limit(objective["shift_limit"]);
             } else {
@@ -48,7 +48,7 @@ export class PuzzleManager {
 
         if (json["beginseq"] && json["beginseq"].length > 0) {
             if (json["beginseq"].length != json["secstruct"].length) {
-                throw new Error("Beginning sequence length doesn't match pair length for puzzle " + json["Title"]);
+                throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json["Title"]}`);
             }
             newpuz.set_beginning_sequence(json["beginseq"]);
         }
@@ -72,15 +72,14 @@ export class PuzzleManager {
 
         if (json["ui-specs"]) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json["ui-specs"].substr(0, 1) == "{")
-                newpuz.set_boosters(JSON.parse(json["ui-specs"]));
+            if (json["ui-specs"].substr(0, 1) == "{") newpuz.set_boosters(JSON.parse(json["ui-specs"]));
             else
             // Fallback for the old tutorials
-                newpuz.set_ui_specs(json["ui-specs"].split(","));
+            { newpuz.set_ui_specs(json["ui-specs"].split(",")); }
         }
 
-        if (json['next-puzzle']) {
-            newpuz.set_next_puzzle(Number(json['next-puzzle']));
+        if (json["next-puzzle"]) {
+            newpuz.set_next_puzzle(Number(json["next-puzzle"]));
         }
 
         if (json["last-round"] != null) {
@@ -125,32 +124,30 @@ export class PuzzleManager {
         if (target_conditions != null) {
             for (let ii = 0; ii < target_conditions.length; ii++) {
                 if (target_conditions[ii] != null) {
-                    let constrained_bases: any[] = target_conditions[ii]['structure_constrained_bases'];
+                    let constrained_bases: any[] = target_conditions[ii]["structure_constrained_bases"];
                     if (constrained_bases != null) {
                         if (constrained_bases.length % 2 == 0) {
-                            target_conditions[ii]['structure_constraints'] = [];
-                            for (let jj = 0; jj < target_conditions[ii]['secstruct'].length; jj++)
-                                target_conditions[ii]['structure_constraints'][jj] = false;
+                            target_conditions[ii]["structure_constraints"] = [];
+                            for (let jj = 0; jj < target_conditions[ii]["secstruct"].length; jj++) target_conditions[ii]["structure_constraints"][jj] = false;
 
                             for (let jj = 0; jj < constrained_bases.length; jj += 2) {
                                 for (let kk = constrained_bases[jj]; kk <= constrained_bases[jj + 1]; kk++) {
-                                    target_conditions[ii]['structure_constraints'][kk] = true;
+                                    target_conditions[ii]["structure_constraints"][kk] = true;
                                 }
                             }
                         }
                     }
 
-                    let anti_constrained_bases: any[] = target_conditions[ii]['anti_structure_constrained_bases'];
+                    let anti_constrained_bases: any[] = target_conditions[ii]["anti_structure_constrained_bases"];
                     if (anti_constrained_bases != null) {
-                        if (target_conditions[ii]['anti_secstruct'] != null && target_conditions[ii]['anti_secstruct'].length == target_conditions[ii]['secstruct'].length) {
+                        if (target_conditions[ii]["anti_secstruct"] != null && target_conditions[ii]["anti_secstruct"].length == target_conditions[ii]["secstruct"].length) {
                             if (anti_constrained_bases.length % 2 == 0) {
-                                target_conditions[ii]['anti_structure_constraints'] = [];
-                                for (let jj = 0; jj < target_conditions[ii]['secstruct'].length; jj++)
-                                    target_conditions[ii]['anti_structure_constraints'][jj] = false;
+                                target_conditions[ii]["anti_structure_constraints"] = [];
+                                for (let jj = 0; jj < target_conditions[ii]["secstruct"].length; jj++) target_conditions[ii]["anti_structure_constraints"][jj] = false;
 
                                 for (let jj = 0; jj < anti_constrained_bases.length; jj += 2) {
                                     for (let kk = anti_constrained_bases[jj]; kk <= anti_constrained_bases[jj + 1]; kk++) {
-                                        target_conditions[ii]['anti_structure_constraints'][kk] = true;
+                                        target_conditions[ii]["anti_structure_constraints"][kk] = true;
                                     }
                                 }
                             }
@@ -158,7 +155,6 @@ export class PuzzleManager {
                     }
                 }
             }
-
         }
 
         if (json["constraints"] && json["constraints"].length > 0) {
@@ -199,9 +195,9 @@ export class PuzzleManager {
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
         return Eterna.client.get_puzzle(puznid, scriptid)
             .then((json: any) => {
-                let data: any = json['data'];
-                if (data['hairpins']) {
-                    SolutionManager.instance.add_hairpins(data['hairpins']);
+                let data: any = json["data"];
+                if (data["hairpins"]) {
+                    SolutionManager.instance.add_hairpins(data["hairpins"]);
                 }
 
                 let puzzle = this.parse_puzzle(data["puzzle"]);
@@ -214,9 +210,9 @@ export class PuzzleManager {
 
     private static _instance: PuzzleManager;
 
-    private static readonly OBJECTIVE_877668: string = '[{"type":"single","secstruct":".....................(((((............)))))"},{"type":"aptamer","site":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],"concentration":100,"secstruct":"(((......(((....))).....)))................"}]';
-    private static readonly OBJECTIVE_885046: string = '[{"type":"single","secstruct":".....................(((((((............)))))))"},{"type":"aptamer","site":[8,9,10,11,12,13,14,15,26,27,28,29,30,31,32],"concentration":10000,"secstruct":"((((......((((....)))).....))))................"}]';
-    private static readonly OBJECTIVE_1420804: string = '[{"type":"single","secstruct":".....................(((((((............)))))))........"},{"type":"aptamer","site":[12,13,14,15,16,17,18,19,33,34,35,36,37,38,39],"concentration":10000,"secstruct":"..(((.((......(((((....)).))).....)))))................"}]';
+    private static readonly OBJECTIVE_877668: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((............)))))\"},{\"type\":\"aptamer\",\"site\":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],\"concentration\":100,\"secstruct\":\"(((......(((....))).....)))................\"}]";
+    private static readonly OBJECTIVE_885046: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))\"},{\"type\":\"aptamer\",\"site\":[8,9,10,11,12,13,14,15,26,27,28,29,30,31,32],\"concentration\":10000,\"secstruct\":\"((((......((((....)))).....))))................\"}]";
+    private static readonly OBJECTIVE_1420804: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))........\"},{\"type\":\"aptamer\",\"site\":[12,13,14,15,16,17,18,19,33,34,35,36,37,38,39],\"concentration\":10000,\"secstruct\":\"..(((.((......(((((....)).))).....)))))................\"}]";
 
     private static readonly RE_MISSION_TEXT: RegExp = /<span id="mission">(.*?)<\/span>/s;
 }

@@ -24,7 +24,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         let menuButton: GameButton = new GameButton();
 
         if (url != null && url.length > 0) {
-            menuButton.label("<A HREF=\"" + url + "\"><U>" + label + "</U></A>", 12);
+            menuButton.label(`<A HREF="${url}"><U>${label}</U></A>`, 12);
             menuButton.clicked.connect(() => {
                 window.open(url, "_self");
             });
@@ -183,7 +183,8 @@ export class EternaMenu extends GamePanel implements Enableable {
         this._menu_width = (width_offset + space);
         this._right_margin = Math.max(
             lastButtonWidth,
-            this._menus[lastIdx].panel.get_panel_width()) - lastButtonWidth;
+            this._menus[lastIdx].panel.get_panel_width()
+        ) - lastButtonWidth;
 
         this.set_size(width_offset, this._menu_height + 1);
     }

@@ -30,7 +30,7 @@ export abstract class MappedSignal<T> extends AbstractSignal<T> {
         return new FilteredSignal(this, pred);
     }
 
-    /*override*/
+    /* override */
     protected connectionAdded(): void {
         super.connectionAdded();
         if (this._conn == null) {
@@ -38,7 +38,7 @@ export abstract class MappedSignal<T> extends AbstractSignal<T> {
         }
     }
 
-    /*override*/
+    /* override */
     protected connectionRemoved(): void {
         super.connectionRemoved();
         if (!this.hasConnections && this._conn != null) {
@@ -57,7 +57,7 @@ class MappedSignalImpl<TMapped, TSource> extends MappedSignal<TMapped> {
         this._f = f;
     }
 
-    /*override*/ protected connectToSource(): Connection {
+    /* override */ protected connectToSource(): Connection {
         return this._source.connect((value) => { this.notifyEmit(this._f(value)); });
     }
 

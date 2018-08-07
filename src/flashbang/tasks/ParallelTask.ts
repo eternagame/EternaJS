@@ -16,7 +16,7 @@ export class ParallelTask extends ObjectTask {
         this._subtasks.push(task);
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         this._numActive = this._subtasks.length;
         for (let task of this._subtasks) {
@@ -33,7 +33,7 @@ export class ParallelTask extends ObjectTask {
         }
     }
 
-    /*override*/
+    /* override */
     protected removed(): void {
         for (let task of this._subtasks) {
             task.destroySelf();

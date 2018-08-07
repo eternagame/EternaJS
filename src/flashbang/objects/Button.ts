@@ -33,7 +33,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this.container.interactive = true;
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         super.added();
 
@@ -44,7 +44,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this.regs.add(this.pointerDown.connect(() => this.onPointerDown()));
     }
 
-    /*override*/
+    /* override */
     protected dispose(): void {
         this.endCapture();
         super.dispose();
@@ -77,9 +77,9 @@ export abstract class Button extends ContainerObject implements Enableable {
                     }),
                     new DelayTask(0.1),
                     new CallbackTask(() => {
-                            this.showState(this._state);
-                        }
-                    )));
+                        this.showState(this._state);
+                    })
+                ));
             }
         }
     }
@@ -127,7 +127,6 @@ export abstract class Button extends ContainerObject implements Enableable {
                 if (wasClicked) {
                     this.clicked.emit();
                 }
-
             } else if (e.type == "pointercancel") {
                 this.endCapture(true);
             } else {

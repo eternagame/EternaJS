@@ -100,7 +100,7 @@ export class Background extends ContainerObject {
         this.render_background();
     }
 
-    /*override*/
+    /* override */
     protected on_resize(): void {
         this.render_background();
 

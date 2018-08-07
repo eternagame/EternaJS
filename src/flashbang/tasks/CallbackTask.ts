@@ -7,7 +7,7 @@ export class CallbackTask extends ObjectTask {
         this._callback = callback;
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         this._callback();
         this.destroySelf();

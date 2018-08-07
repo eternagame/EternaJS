@@ -51,7 +51,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         this._selectedHilite.endFill();
 
         for (let ii = 0; ii < this._numStates; ii++) {
-            this._labels[ii] = Fonts.arial("" + (ii + 1), 12).color(ToggleBar.COLOR_TEXT).build();
+            this._labels[ii] = Fonts.arial(`${ii + 1}`, 12).color(ToggleBar.COLOR_TEXT).build();
             this._labels[ii].position = new Point((ii * ToggleBar.BUTTON_SIZE) + 9, 5);
             this.container.addChild(this._labels[ii]);
         }
@@ -61,8 +61,8 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         this.display.interactive = true;
         this.pointerOver.connect(() => this.onMouseOver());
         this.pointerOut.connect(() => this.onMouseOut());
-        this.pointerTap.connect((event) => this.onMouseClick(event));
-        this.pointerMove.connect((event) => this.onMouseMove(event));
+        this.pointerTap.connect(event => this.onMouseClick(event));
+        this.pointerMove.connect(event => this.onMouseMove(event));
     }
 
     protected added(): void {
@@ -87,7 +87,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (!this._enabled|| !this.display.visible) {
+        if (!this._enabled || !this.display.visible) {
             return false;
         }
 

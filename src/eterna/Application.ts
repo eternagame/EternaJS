@@ -3,7 +3,7 @@ import {GameObject} from "../flashbang/core/GameObject";
 import {Assert} from "../flashbang/util/Assert";
 import {Puzzle} from "./puzzle/Puzzle";
 
-/// TODO: remove this entire class
+// / TODO: remove this entire class
 export class Application {
     public static get instance(): Application {
         if (Application._instance == null) {
@@ -237,7 +237,7 @@ export class Application {
     private _mouse_move_cb: Function;
 
     private _is_debug_mode: boolean;
-    /// Temporary variables for debugging
+    // / Temporary variables for debugging
     private _ui_count: number;
 
     private static _instance: Application;

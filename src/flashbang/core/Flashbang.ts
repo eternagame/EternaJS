@@ -27,7 +27,7 @@ export class Flashbang {
         return this._interaction.mouse.global;
     }
 
-    /*internal*/
+    /* internal */
     static registerApp(app: FlashbangApp): void {
         Assert.isTrue(Flashbang._app == null, "A FlashbangApp has already been registered");
         Flashbang._app = app;

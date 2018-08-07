@@ -33,13 +33,11 @@ export class LoadingMode extends AppMode {
 
         container.addObject(new SerialTask(
             new DelayTask(0.5),
-            new RepeatingTask((): ObjectTask => {
-                return new SerialTask(
-                    new ScaleTask(0.9, 0.9, 1, Easing.easeInOut),
-                    new ScaleTask(1, 1, 1, Easing.easeInOut)
-                );
-            }))
-        );
+            new RepeatingTask((): ObjectTask => new SerialTask(
+                new ScaleTask(0.9, 0.9, 1, Easing.easeInOut),
+                new ScaleTask(1, 1, 1, Easing.easeInOut)
+            ))
+        ));
     }
 
     private readonly _text: string;

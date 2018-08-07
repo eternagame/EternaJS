@@ -1,6 +1,8 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {Point, Sprite, Text, Graphics} from "pixi.js";
+import {
+    Point, Sprite, Text, Graphics
+} from "pixi.js";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
@@ -32,10 +34,10 @@ export class SpecBox extends ContainerObject {
         this._dotplotOriginY = 0;
         this._dotplotScaleLevel = 1;
 
-        /// Dotplot h0
+        // / Dotplot h0
         this._h0 = Fonts.arial("A", 12).color(0xffffff).build();
 
-        /// Meltplot h0
+        // / Meltplot h0
         this._h0_melt = Fonts.arial("37°C", 12).color(0xffffff).build();
         this._hn_melt = Fonts.arial("97°C", 12).color(0xffffff).build();
         this._v0 = Fonts.arial("1", 12).color(0xffffff).build();
@@ -54,7 +56,7 @@ export class SpecBox extends ContainerObject {
         this._meltplot_canvas = new Sprite();
 
         this._stattext = new MultiStyleText("", {
-            "default": {
+            default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 14,
                 fill: 0xffffff
@@ -62,7 +64,7 @@ export class SpecBox extends ContainerObject {
         });
 
         let url: string = EternaURL.generate_url({page: "manual"});
-        let helpText: string = "";//"<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
+        let helpText: string = "";// "<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
         this._helptext = Fonts.arial(helpText, 14).color(0xffffff).build();
 
         this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
@@ -92,10 +94,10 @@ export class SpecBox extends ContainerObject {
 
         if (docked) {
             let pointerTarget = new DisplayObjectPointerTarget(this._dotplot_canvas);
-            pointerTarget.pointerMove.connect((e) => this.onDotPlotMouseMove(e));
-            pointerTarget.pointerOut.connect((e) => this.onDotPlotMouseOut(e));
-            pointerTarget.pointerDown.connect((e) => this.onDotPlotMouseDown(e));
-            pointerTarget.pointerUp.connect((e) => this.onDotPlotMouseUp(e));
+            pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
+            pointerTarget.pointerOut.connect(e => this.onDotPlotMouseOut(e));
+            pointerTarget.pointerDown.connect(e => this.onDotPlotMouseDown(e));
+            pointerTarget.pointerUp.connect(e => this.onDotPlotMouseUp(e));
         }
     }
 
@@ -140,16 +142,16 @@ export class SpecBox extends ContainerObject {
         EPars.addLetterStyles(statstring);
 
         statstring
-            .append(EPars.get_colored_letter("A") + "-" + EPars.get_colored_letter("U") + " pairs : ", "bold")
-            .append(datablock.get_param(UndoBlockParam.AU, temperature) + "   ")
-            .append(EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("C") + " pairs : ", "bold")
-            .append(datablock.get_param(UndoBlockParam.GC, temperature) + "   ")
-            .append(EPars.get_colored_letter("G") + "-" + EPars.get_colored_letter("U") + " pairs : ", "bold")
-            .append(datablock.get_param(UndoBlockParam.GU, temperature) + "\n")
+            .append(`${EPars.get_colored_letter("A")}-${EPars.get_colored_letter("U")} pairs : `, "bold")
+            .append(`${datablock.get_param(UndoBlockParam.AU, temperature)}   `)
+            .append(`${EPars.get_colored_letter("G")}-${EPars.get_colored_letter("C")} pairs : `, "bold")
+            .append(`${datablock.get_param(UndoBlockParam.GC, temperature)}   `)
+            .append(`${EPars.get_colored_letter("G")}-${EPars.get_colored_letter("U")} pairs : `, "bold")
+            .append(`${datablock.get_param(UndoBlockParam.GU, temperature)}\n`)
             .append("Melting point : ", "bold")
-            .append(datablock.get_param(UndoBlockParam.MELTING_POINT, temperature) + "°C\n")
+            .append(`${datablock.get_param(UndoBlockParam.MELTING_POINT, temperature)}°C\n`)
             .append("Free energy : ", "bold")
-            .append(Number(datablock.get_param(UndoBlockParam.FE, temperature) / 100).toFixed(1) + "kcal\n");
+            .append(`${Number(datablock.get_param(UndoBlockParam.FE, temperature) / 100).toFixed(1)}kcal\n`);
 
         statstring.apply(this._stattext);
 
@@ -173,7 +175,7 @@ export class SpecBox extends ContainerObject {
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            let vnew: Text = Fonts.arial("" + (ii / SpecBox.OFFSET * 10), 12).color(0xffffff).build();
+            let vnew: Text = Fonts.arial(`${ii / SpecBox.OFFSET * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }
@@ -262,7 +264,6 @@ export class SpecBox extends ContainerObject {
 
             this._zoom_in.display.visible = false;
             this._zoom_out.display.visible = false;
-
         } else {
             this._panel.set_panel_title("RNA Spec");
 
@@ -305,21 +306,26 @@ export class SpecBox extends ContainerObject {
                 this._h0_melt.position = new Point(15, (this._height * 0.5) + plot_size + 10);
                 this._hn_melt.position = new Point(
                     25 + plot_size - this._hn_melt.width,
-                    (this._height * 0.5) + plot_size + 10);
+                    (this._height * 0.5) + plot_size + 10
+                );
                 this._v0_melt.position = new Point(
                     25 - this._v0_melt.width - 3,
-                    (this._height * 0.5) + plot_size - 10);
+                    (this._height * 0.5) + plot_size - 10
+                );
                 this._vn_melt.position = new Point(
                     25 - this._vn_melt.width - 3,
-                    (this._height * 0.5) + 5);
+                    (this._height * 0.5) + 5
+                );
             } else {
                 this._h0_melt.position = new Point((this._width * 0.5) + 15, plot_size + 75);
                 this._hn_melt.position = new Point(
                     (this._width * 0.5) + 25 + plot_size - this._hn_melt.width,
-                    plot_size + 75);
+                    plot_size + 75
+                );
                 this._v0_melt.position = new Point(
                     (this._width * 0.5) + 25 - this._v0_melt.width - 3,
-                    55 + plot_size);
+                    55 + plot_size
+                );
             }
         }
     }
@@ -372,7 +378,6 @@ export class SpecBox extends ContainerObject {
             // this._dotplot.cacheAsBitmap = true;
             this._dotplot_canvas.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotX, this._dotplotY);
-
         } else {
             let localPoint = e.data.getLocalPosition(this._dotplot_canvas);
             let block_length: number = this.getDotplotOffsetSize();
@@ -382,12 +387,11 @@ export class SpecBox extends ContainerObject {
                 y = 1;
             }
 
-            let msg: string = String.fromCharCode(65 + x) + "," + (y * 10) + " - (" + (x * 10) + ", " + (y * 10) + ")";
+            let msg: string = `${String.fromCharCode(65 + x)},${y * 10} - (${x * 10}, ${y * 10})`;
             if (this._coordBalloon != null) {
                 this._coordBalloon.set_text(msg);
                 this._coordBalloon.display.visible = true;
-            }
-            else {
+            } else {
                 this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);
                 this.addObject(this._coordBalloon, this.container);
                 // this.set_mouse_over_object(this._coordBalloon, 1.0);
@@ -438,8 +442,7 @@ export class SpecBox extends ContainerObject {
         for (let ii = 0; ii < this._hvec.length; ++ii) {
             let pos = this.calculateCoordPosition(this._h0, ii, SpecBox.HORIZONTAL);
             this._hvec[ii].position = pos;
-            this._hvec[ii].visible =
-                !(pos.x >= plot_size + h0_default_x - this._hvec[ii].width || pos.x < h0_default_x);
+            this._hvec[ii].visible = !(pos.x >= plot_size + h0_default_x - this._hvec[ii].width || pos.x < h0_default_x);
         }
 
         let v0_default_x: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
@@ -456,8 +459,7 @@ export class SpecBox extends ContainerObject {
             let pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
             this._vvec[ii].position = pos;
-            this._vvec[ii].visible =
-                !((pos.y >= plot_size + v0_default_y - this._vvec[ii].height || pos.y < v0_default_y));
+            this._vvec[ii].visible = !((pos.y >= plot_size + v0_default_y - this._vvec[ii].height || pos.y < v0_default_y));
         }
     }
 

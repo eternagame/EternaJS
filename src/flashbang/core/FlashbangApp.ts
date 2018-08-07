@@ -41,7 +41,7 @@ export class FlashbangApp {
         window.addEventListener("focus", () => this.isActive.value = true);
         window.addEventListener("blur", () => this.isActive.value = false);
 
-        this.isActive.connect((value) => this.onIsActiveChanged(value));
+        this.isActive.connect(value => this.onIsActiveChanged(value));
     }
 
     public addUpdatable(obj: Updatable): void {
@@ -113,7 +113,6 @@ export class FlashbangApp {
 
             // update viewports
             this._modeStack.update(dt);
-
         } finally {
             this._isUpdating = false;
 

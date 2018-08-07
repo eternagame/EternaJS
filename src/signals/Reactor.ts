@@ -96,7 +96,7 @@ export abstract class Reactor {
         // noop
     }
 
-    /*internal*/
+    /* internal */
     _addCons(cons: Cons): Cons {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
@@ -110,7 +110,7 @@ export abstract class Reactor {
         return cons;
     }
 
-    /*internal*/
+    /* internal */
     _removeCons(cons: Cons): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {

@@ -23,7 +23,7 @@ export class ModeStack {
     }
 
     /** Returns the top mode on the mode stack, or null if the stack is empty. */
-    public /*final*/ get topMode(): AppMode | null {
+    public /* final */ get topMode(): AppMode | null {
         return (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null);
     }
 
@@ -122,7 +122,7 @@ export class ModeStack {
         }
     }
 
-    /*internal*/
+    /* internal */
     handleModeTransitions(): void {
         if (this._pendingModeTransitionQueue.length <= 0) {
             return;
@@ -132,7 +132,7 @@ export class ModeStack {
         let self: ModeStack = this;
 
         const doPushMode = (newMode: AppMode) => {
-            if (null == newMode) {
+            if (newMode == null) {
                 throw new Error("Can't push a null mode to the mode stack");
             }
 
@@ -143,7 +143,7 @@ export class ModeStack {
         };
 
         const doInsertMode = (newMode: AppMode, index: number) => {
-            if (null == newMode) {
+            if (newMode == null) {
                 throw new Error("Can't insert a null mode in the mode stack");
             }
 
@@ -205,7 +205,7 @@ export class ModeStack {
 
             case ModeTransition.CHANGE:
                 // a pop followed by a push
-                if (null != this.topMode) {
+                if (this.topMode != null) {
                     doRemoveMode(-1);
                 }
                 doPushMode(mode);
@@ -219,7 +219,7 @@ export class ModeStack {
 
                 Assert.isTrue(this.topMode == mode || this._modeStack.length == 0);
 
-                if (this._modeStack.length == 0 && null != mode) {
+                if (this._modeStack.length == 0 && mode != null) {
                     doPushMode(mode);
                 }
                 break;
@@ -228,18 +228,18 @@ export class ModeStack {
 
         let topMode: AppMode = this.topMode;
         if (topMode != initialTopMode) {
-            if (null != initialTopMode) {
+            if (initialTopMode != null) {
                 initialTopMode.exitInternal();
             }
 
-            if (null != topMode) {
+            if (topMode != null) {
                 topMode.enterInternal();
             }
             this.topModeChanged.emit();
         }
     }
 
-    /*internal*/
+    /* internal */
     clearModeStackNow(): void {
         this._pendingModeTransitionQueue.length = 0;
         if (this._modeStack.length > 0) {
@@ -248,7 +248,7 @@ export class ModeStack {
         }
     }
 
-    /*internal*/
+    /* internal */
     dispose(): void {
         this.clearModeStackNow();
         this._modeStack = null;

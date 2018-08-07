@@ -82,7 +82,7 @@ export class RNAScript {
             }
             return ret;
         } else {
-            throw new Error("Invalid instruction format :: " + instruction);
+            throw new Error(`Invalid instruction format :: ${instruction}`);
         }
     }
 
@@ -111,30 +111,28 @@ export class RNAScript {
             let textboxMode: ROPTextboxMode;
             if (regResult[2].toUpperCase() == "ARROW") {
                 if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() == "LOCATION" ?
-                        ROPTextboxMode.ARROW_LOCATION :
-                        ROPTextboxMode.ARROW_NUCLEOTIDE;
+                    textboxMode = regResult[3].toUpperCase() == "LOCATION"
+                        ? ROPTextboxMode.ARROW_LOCATION
+                        : ROPTextboxMode.ARROW_NUCLEOTIDE;
                 } else {
                     textboxMode = ROPTextboxMode.ARROW_DEFAULT;
                 }
+            } else if (regResult[3]) {
+                textboxMode = regResult[3].toUpperCase() == "LOCATION"
+                    ? ROPTextboxMode.TEXTBOX_LOCATION
+                    : ROPTextboxMode.TEXTBOX_NUCLEOTIDE;
             } else {
-                if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() == "LOCATION" ?
-                        ROPTextboxMode.TEXTBOX_LOCATION :
-                        ROPTextboxMode.TEXTBOX_NUCLEOTIDE;
-                } else {
-                    textboxMode = ROPTextboxMode.TEXTBOX_DEFAULT;
-                }
+                textboxMode = ROPTextboxMode.TEXTBOX_DEFAULT;
             }
 
             let show: boolean = regResult[1].toUpperCase() == "SHOW";
             return new ROPTextbox(this._env, show, textboxMode);
-
         } else if ((regResult = highlightRegex.exec(op))) {
             return new ROPHighlight(
                 regResult[1].toUpperCase() == "SHOW",
                 regResult[2] ? ROPHighlightMode.UI : ROPHighlightMode.RNA,
-                this._env);
+                this._env
+            );
         } else if ((regResult = uiRegex.exec(op))) {
             return new ROPUI(this._env, regResult[1].toUpperCase() != "HIDE", regResult[1].toUpperCase() == "DISABLE");
         } else if ((regResult = hintRegex.exec(op))) {
@@ -147,7 +145,7 @@ export class RNAScript {
             return new ROPRNA(ropRNAType, this._env);
         }
         // Shouldn't reach here ever.
-        throw new Error("Invalid operation: " + op);
+        throw new Error(`Invalid operation: ${op}`);
     }
 
     private _env: RScriptEnv;

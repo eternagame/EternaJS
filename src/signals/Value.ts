@@ -35,7 +35,7 @@ export class Value<T> extends AbstractValue<T> implements ValueView<T> {
         return this.updateAndNotify(value);
     }
 
-    /*override*/
+    /* override */
     protected updateLocal(value: T): T {
         let oldValue: T = this._value;
         this._value = value;

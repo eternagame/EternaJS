@@ -1,4 +1,4 @@
-﻿export class CSVParser {
+export class CSVParser {
     public static parse_into_array(csl: string): string[] {
         let vals: string[] = [];
         let last_comma: number = -1;
@@ -38,5 +38,4 @@
 
         return vals;
     }
-
 }

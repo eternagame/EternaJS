@@ -8,7 +8,7 @@ export class RotationTask extends DisplayObjectTask {
         this._to = radians;
     }
 
-    /*override*/
+    /* override */
     protected updateValues(): void {
         if (this._from === undefined) {
             this._from = this._target.rotation;

@@ -1,4 +1,4 @@
-﻿import {PoseOp} from "../pose2D/PoseOp";
+import {PoseOp} from "../pose2D/PoseOp";
 
 export abstract class Folder {
     protected constructor() {
@@ -40,7 +40,7 @@ export abstract class Folder {
         return false;
     }
 
-    /// Overridables
+    // / Overridables
 
     public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         return null;
@@ -126,7 +126,7 @@ export abstract class Folder {
         this._cache.set(key_str, data);
     }
 
-    /// Helpers
+    // / Helpers
 
     protected reset_cache(): void {
         this._cache.clear();

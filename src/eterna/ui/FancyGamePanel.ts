@@ -65,7 +65,6 @@ export class FancyGamePanel extends BaseGamePanel {
                 this._title_text = Fonts.arial(this._title, 13).bold().color(0x061F3A).build();
                 this._title_text.position = new Point(5, -20);
                 this.container.addChild(this._title_text);
-
             } else {
                 // Draw the border by just drawing another round rectangle behind the original
                 this._background.beginFill(this._outlineColor, this._outlineAlpha);

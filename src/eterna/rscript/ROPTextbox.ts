@@ -33,7 +33,7 @@ export class ROPTextbox extends RScriptOp {
         this._mode = mode;
     }
 
-    /*override*/
+    /* override */
     public InitializeROP(op: string, args: string): void {
         super.InitializeROP(op, args);
         this._id = ROPTextbox.ProcessId(this._id, this._mode);
@@ -41,7 +41,7 @@ export class ROPTextbox extends RScriptOp {
         this._text = ROPTextbox.ProcessText(this._text);
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         if (this._env.Exists(this._id)) {
             if (ROPTextbox.isTextbox(this._mode)) {
@@ -73,7 +73,7 @@ export class ROPTextbox extends RScriptOp {
             let textStyle: ExtendedTextStyle = {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 13,
-                fill: 0xC0DCE7,
+                fill: 0xC0DCE7
 
                 // TSC: wordWrap + letterSpacing is currently broken:
                 // https://github.com/tleunen/pixi-multistyle-text/issues/67
@@ -96,12 +96,13 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == ROPTextboxMode.TEXTBOX_LOCATION) {
                 textBox.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
-                    Flashbang.stageHeight * this._y_pos + this._y_rel);
+                    Flashbang.stageHeight * this._y_pos + this._y_rel
+                );
                 // textBox.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
             } else if (this._mode == ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
                 let p: Point = this._env.GetRNA().get_base_xy(this._nuc_idx);
-                //trace((-1.0 * textBox.height / 2) + " " + _y_offset_specified + " " + _y_offset);
+                // trace((-1.0 * textBox.height / 2) + " " + _y_offset_specified + " " + _y_offset);
                 let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._x_offset_specified) {
                     offset.x = this._x_offset;
@@ -143,7 +144,8 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode == ROPTextboxMode.ARROW_LOCATION) {
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
-                    Flashbang.stageHeight * this._y_pos + this._y_rel);
+                    Flashbang.stageHeight * this._y_pos + this._y_rel
+                );
             } else if (this._mode == ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 newArrow.display.position = this._env.GetRNA().get_base_xy(this._nuc_idx);
             }
@@ -178,11 +180,13 @@ export class ROPTextbox extends RScriptOp {
                 if (ydiff < 0.0) { // Above
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent.display.x + parent.container.width * 0.5, parent.display.y + parent.container.height);
-                } else {  // Below
+                        parent.display.x + parent.container.width * 0.5, parent.display.y + parent.container.height
+                    );
+                } else { // Below
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent.display.x + parent.container.width / 2, parent.display.y - 50);
+                        parent.display.x + parent.container.width / 2, parent.display.y - 50
+                    );
                 }
             }
 
@@ -213,7 +217,7 @@ export class ROPTextbox extends RScriptOp {
         }
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         let rx: RegExp = /^([^+-]*)((?:\+|-).+)$/g;
         let regResult: RegExpExecArray = null;
@@ -351,11 +355,11 @@ export class ROPTextbox extends RScriptOp {
             break;
 
         default:
-            throw new Error("Invalid argument for ROP: Textbox -- " + this._env.GetStringRef(arg));
+            throw new Error(`Invalid argument for ROP: Textbox -- ${this._env.GetStringRef(arg)}`);
         }
     }
 
-    /*override*/
+    /* override */
     protected VerifyArguments(): void {
     }
 
@@ -380,10 +384,10 @@ export class ROPTextbox extends RScriptOp {
     private static ProcessText(inText: string): string {
         if (!inText) return "";
         inText = inText.replace(/\<color/gi, "<font color");
-        inText = inText.replace(/\<red/gi, "<font color = \"#" + ROPTextbox.STD_RED_COLOR + "\"");
-        inText = inText.replace(/\<green/gi, "<font color = \"#" + ROPTextbox.STD_GREEN_COLOR + "\"");
-        inText = inText.replace(/\<blue/gi, "<font color = \"#" + ROPTextbox.STD_BLUE_COLOR + "\"");
-        inText = inText.replace(/\<yellow/gi, "<font color = \"#" + ROPTextbox.STD_YELLOW_COLOR + "\"");
+        inText = inText.replace(/\<red/gi, `<font color = "#${ROPTextbox.STD_RED_COLOR}"`);
+        inText = inText.replace(/\<green/gi, `<font color = "#${ROPTextbox.STD_GREEN_COLOR}"`);
+        inText = inText.replace(/\<blue/gi, `<font color = "#${ROPTextbox.STD_BLUE_COLOR}"`);
+        inText = inText.replace(/\<yellow/gi, `<font color = "#${ROPTextbox.STD_YELLOW_COLOR}"`);
 
         inText = inText.replace(/\/(color|red|green|blue|yellow)/gi, "/font");
         return inText;

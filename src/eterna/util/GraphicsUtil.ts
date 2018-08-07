@@ -27,7 +27,7 @@ export class GraphicsUtil {
 
         // draw rectangle
         const rectHeight = triSize - 20;
-        let r_start = basePoint.offset(-perp_dir.x * rectHeight * 0.5,  -perp_dir.y * rectHeight * 0.5);
+        let r_start = basePoint.offset(-perp_dir.x * rectHeight * 0.5, -perp_dir.y * rectHeight * 0.5);
         graphics.drawRect(r_start.x, r_start.y, baseLength, rectHeight);
         graphics.endFill();
 

@@ -8,7 +8,7 @@ export class AlphaTask extends DisplayObjectTask {
         this._to = alpha;
     }
 
-    /*override*/
+    /* override */
     protected updateValues(): void {
         if (this._from === undefined) {
             this._from = this._target.alpha;

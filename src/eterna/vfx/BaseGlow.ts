@@ -1,4 +1,4 @@
-﻿import {Point, Sprite, Texture} from "pixi.js";
+import {Point, Sprite, Texture} from "pixi.js";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
 import {BitmapUtil} from "../util/BitmapUtil";
@@ -29,9 +29,9 @@ export class BaseGlow extends Sprite {
         let prog_ind: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
         if (this._backward) prog_ind = BaseGlow.NUM_ANIMATION_STEPS - 1 - prog_ind;
 
-        let body_data: Texture = this._is_wrong ?
-            BaseGlow._bitmap_wrong_data[zoom_level][prog_ind] :
-            BaseGlow._bitmap_data[zoom_level][prog_ind];
+        let body_data: Texture = this._is_wrong
+            ? BaseGlow._bitmap_wrong_data[zoom_level][prog_ind]
+            : BaseGlow._bitmap_data[zoom_level][prog_ind];
 
         this.texture = body_data;
         this.position = new Point(x - body_data.width / 2, y - body_data.height / 2);
@@ -54,7 +54,8 @@ export class BaseGlow extends Sprite {
 
             for (let ii: number = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
                 let new_base_data: Texture = BitmapUtil.color_transform_alpha(
-                    base_data, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0);
+                    base_data, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0
+                );
                 new_base_data = BitmapUtil.scale_by(new_base_data, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
                 bitmaps_in_zoom.push(new_base_data);
 
@@ -75,5 +76,4 @@ export class BaseGlow extends Sprite {
 
     private static readonly NUM_ANIMATION_STEPS: number = 60;
     private static readonly ANIMATION_SPAN: number = 1.1;
-
 }

@@ -36,12 +36,10 @@ export class Bubble extends SpriteObject implements Updatable {
             else if (this._bubbleSize == 1) bubbleType = 1;
             else if (this._bubbleSize == 2) bubbleType = 2;
             else bubbleType = 3;
-        } else {
-            if (this._bubbleSize == 0) bubbleType = 4;
-            else if (this._bubbleSize == 1) bubbleType = 5;
-            else if (this._bubbleSize == 2) bubbleType = 6;
-            else bubbleType = 7;
-        }
+        } else if (this._bubbleSize == 0) bubbleType = 4;
+        else if (this._bubbleSize == 1) bubbleType = 5;
+        else if (this._bubbleSize == 2) bubbleType = 6;
+        else bubbleType = 7;
 
         this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
 
@@ -63,7 +61,6 @@ export class Bubble extends SpriteObject implements Updatable {
                 new ScaleTask(1, 1, 1),
                 new AlphaTask(1, 1, Easing.easeOut)
             ));
-
         } else {
             this.sprite.x = Math.random() * Flashbang.stageWidth;
             this.sprite.y = (Math.random() * (Flashbang.stageHeight + 200)) + Flashbang.stageHeight;
@@ -81,7 +78,7 @@ export class Bubble extends SpriteObject implements Updatable {
         this._hideTime = active ? this._lastTime + Math.random() * 6 * 1000.0 : -1;
     }
 
-    /*override*/
+    /* override */
     public update(dt: number): void {
         if (this.sprite.texture == null) {
             return;

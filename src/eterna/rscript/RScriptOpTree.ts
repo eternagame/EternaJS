@@ -35,18 +35,15 @@ export class RScriptOpTree {
             this._curptr.exec();
             let waitRet: RScriptOp = this._curptr.get_pause_next();
             if (waitRet != this._curptr && this._curptr.IsPaused() && waitRet instanceof ROPWait) {
-
                 // If the next instruction can be executed (as determined by ROPWait),
                 // then execute it.
                 this._waitQueue.push(this._curptr);
                 this._curptr = waitRet;
                 return waitRet;
             } else if (this._curptr.IsPaused() && this._waitQueue.indexOf(this._curptr)) {
-
                 this._waitQueue.push(this._curptr);
                 return null;
             } else {
-
                 // If it cannot then see if the wait queue is clear.
                 if (this.CheckWaitQueueContinue()) {
                     // Clear queue and proceed.
@@ -55,7 +52,6 @@ export class RScriptOpTree {
                     return null;
                 }
             }
-
         }
 
         let ret: RScriptOp = this._curptr;

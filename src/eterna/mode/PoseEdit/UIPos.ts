@@ -12,14 +12,14 @@ export class UIPos {
 	public static readonly CONSTRAINT: string = "CONSTRAINT";
 
 	public static UDIM_(rel_x: number, rel_y: number, pix_x: number, pix_y: number): string {
-		return UIPos.UDIM + " " + rel_x + " " + rel_y + " " + pix_x + " " + pix_y;
+	    return `${UIPos.UDIM} ${rel_x} ${rel_y} ${pix_x} ${pix_y}`;
 	}
 
 	public static BASE_(val: number): string {
-		return UIPos.BASE + " " + val;
+	    return `${UIPos.BASE} ${val}`;
 	}
 
 	public static CONSTRAINT_(val: number) :string {
-		return UIPos.CONSTRAINT + " " + val;
+	    return `${UIPos.CONSTRAINT} ${val}`;
 	}
 }

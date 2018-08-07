@@ -6,31 +6,31 @@ export abstract class LayoutContainer extends Container {
         return this._needsLayout;
     }
 
-    /*override*/
+    /* override */
     public addChildAt<T extends DisplayObject>(child: T, index: number): T {
         this._needsLayout = true;
         return super.addChildAt(child, index);
     }
 
-    /*override*/
+    /* override */
     public addChild<T extends DisplayObject>(child: T, ...additionalChildren: DisplayObject[]): T {
         this._needsLayout = true;
         return super.addChild(child, ...additionalChildren);
     }
 
-    /*override*/
+    /* override */
     public removeChildAt(index: number): DisplayObject {
         this._needsLayout = true;
         return super.removeChildAt(index);
     }
 
-    /*override*/
+    /* override */
     public removeChild(child: DisplayObject): DisplayObject {
         this._needsLayout = true;
         return super.removeChild(child);
     }
 
-    /*override*/
+    /* override */
     public removeChildren(beginIndex?: number, endIndex?: number): DisplayObject[] {
         this._needsLayout = true;
         return super.removeChildren(beginIndex, endIndex);
@@ -56,7 +56,7 @@ export abstract class LayoutContainer extends Container {
         // If our parent is a layout sprite, force it to re-layout, since our size has
         // likely changed.
         if (this.parent instanceof LayoutContainer) {
-            let layoutParent: LayoutContainer = (<LayoutContainer>this.parent);
+            let layoutParent: LayoutContainer = (<LayoutContainer> this.parent);
             if (!layoutParent._isLayingOut) {
                 layoutParent.layout(true);
             }
@@ -87,5 +87,3 @@ class Spacer extends Container {
         this.addChild(sprite);
     }
 }
-
-

@@ -46,4 +46,3 @@ export class KeyboardInput {
 
     private _listeners: LinkedList<KeyboardListener> = new LinkedList();
 }
-

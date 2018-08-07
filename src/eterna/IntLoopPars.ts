@@ -1,4 +1,4 @@
-﻿export class IntLoopPars {
+export class IntLoopPars {
     public static int11_37: number[] = [
         0, 0, 0, 0, 0,
         0, 0, 0, 0, 0,

@@ -41,19 +41,19 @@ export class Dragger extends GameObject {
         this.startY = this.curY = Flashbang.globalMouse.y;
 
         let touchable = new DisplayObjectPointerTarget(this._disp);
-        this.regs.add(touchable.pointerMove.connect(e => {
+        this.regs.add(touchable.pointerMove.connect((e) => {
             this.updateMouseLoc();
             this.dragged.emit();
 
             e.stopPropagation();
         }));
 
-        this.regs.add(touchable.pointerUp.connect(e => {
+        this.regs.add(touchable.pointerUp.connect((e) => {
             this.complete();
             this.destroySelf();
 
             e.stopPropagation();
-        }))
+        }));
     }
 
     protected removed(): void {

@@ -15,12 +15,12 @@ export class RepeatingTask extends ObjectTask {
         this._taskCreator = taskCreator;
     }
 
-    /*override*/
+    /* override */
     protected added(): void {
         this.restart();
     }
 
-    /*override*/
+    /* override */
     protected removed(): void {
         if (this._curTask != null) {
             this._curTask.destroySelf();
@@ -49,7 +49,5 @@ export class RepeatingTask extends ObjectTask {
 }
 
 export function Repeat(count: number, taskCreator: TaskCreator): RepeatingTask {
-    return new RepeatingTask((): ObjectTask => {
-        return (count-- > 0 ? taskCreator() : null);
-    });
+    return new RepeatingTask((): ObjectTask => (count-- > 0 ? taskCreator() : null));
 }

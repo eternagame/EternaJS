@@ -1,9 +1,9 @@
-﻿import {Point} from "pixi.js";
+import {Point} from "pixi.js";
 
 export class Utility {
     public static byte2hex(byte: number): string {
-        let hex: string = '';
-        let arr: string = 'FEDCBA';
+        let hex: string = "";
+        let arr: string = "FEDCBA";
 
         for (let i: number = 0; i < 2; i++) {
             if (((byte & (0xF0 >> (i * 4))) >> (4 - (i * 4))) > 9) {
@@ -53,7 +53,7 @@ export class Utility {
                 res += "&";
             }
 
-            res += key + "=" + (obj as any)[key];
+            res += `${key}=${(obj as any)[key]}`;
         }
 
         return res;
@@ -102,9 +102,9 @@ export class Utility {
         ip.y = (a2 * c1 - a1 * c2) / denom;
 
         //---------------------------------------------------
-        //Do checks to see if intersection to endpoints
-        //distance is longer than actual Segments.
-        //Return null if it is with any.
+        // Do checks to see if intersection to endpoints
+        // distance is longer than actual Segments.
+        // Return null if it is with any.
         //---------------------------------------------------
 
         if (as_seg) {

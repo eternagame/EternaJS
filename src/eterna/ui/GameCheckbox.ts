@@ -33,7 +33,8 @@ export class GameCheckbox extends ToggleButton {
         this.container.addChild(label);
         DisplayUtil.positionRelative(
             label, Align.LEFT, Align.CENTER,
-            box, Align.RIGHT, Align.CENTER, 4, 0);
+            box, Align.RIGHT, Align.CENTER, 4, 0
+        );
     }
 
     protected showState(state: ButtonState): void {

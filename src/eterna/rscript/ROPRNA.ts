@@ -20,7 +20,7 @@ export class ROPRNA extends RScriptOp {
         this._type = type;
     }
 
-    /*override*/
+    /* override */
     public exec(): void {
         if (this._type == ROPRNAType.SETBASE) {
             this._env.GetRNA().set_base_color(this._nuc_idx,
@@ -52,7 +52,7 @@ export class ROPRNA extends RScriptOp {
         }
     }
 
-    /*override*/
+    /* override */
     protected ParseArgument(arg: string, i: number): void {
         switch (i) {
         case 0: // Nucleotide index when changing nucleotide color. Fold mode in Mode 1.
@@ -85,9 +85,8 @@ export class ROPRNA extends RScriptOp {
                 this._scope.push(Number(arg) - 1);
             } else if (this._type == ROPRNAType.SETZOOM) {
                 this._center = (arg.toUpperCase() == "TRUE");
-            }
-            else {
-                throw new Error("Invalid argument for ROP: RNA -- " + this._env.GetStringRef(arg));
+            } else {
+                throw new Error(`Invalid argument for ROP: RNA -- ${this._env.GetStringRef(arg)}`);
             }
             break;
         }
@@ -104,5 +103,4 @@ export class ROPRNA extends RScriptOp {
     private _zoom_level: number;
     private _animate: boolean = true;
     private _center: boolean = false;
-
 }

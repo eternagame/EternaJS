@@ -24,7 +24,7 @@ export class Setting<T> extends AbstractValue<T> {
         this.updateAndNotifyIf(value);
     }
 
-    /*override*/
+    /* override */
     public get value(): T {
         return (this.exists ? this._store.get(this._name) : this._defaultVal);
     }
@@ -37,7 +37,7 @@ export class Setting<T> extends AbstractValue<T> {
         return MappedValue.create(this, func);
     }
 
-    /*override*/
+    /* override */
     protected updateLocal(value: T): T {
         let oldValue: T = this.value;
         this._store.set(this._name, value);

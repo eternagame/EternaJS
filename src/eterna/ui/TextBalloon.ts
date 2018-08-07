@@ -121,11 +121,11 @@ export class TextBalloon extends ContainerObject {
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
                     TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display));
+                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display)
+                );
             }
 
             this._panel.display.position = new Point(0, 0);
-
         } else {
             if (this._text != null) {
                 this._text.position = new Point(-whole_width / 2, TextBalloon.H_MARGIN + title_space);
@@ -134,7 +134,8 @@ export class TextBalloon extends ContainerObject {
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
                     -whole_width / 2 + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display));
+                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display)
+                );
             }
 
             this._panel.display.position = new Point(-whole_width / 2, 0);

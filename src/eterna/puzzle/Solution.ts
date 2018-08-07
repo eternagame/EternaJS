@@ -1,4 +1,4 @@
-﻿import {Eterna} from "../Eterna";
+import {Eterna} from "../Eterna";
 import {Feedback} from "../Feedback";
 
 export class Solution {
@@ -126,9 +126,9 @@ export class Solution {
                 return Promise.resolve(this._fold_data);
             } else {
                 return Eterna.client.get_solution_info(this._nid).then((json) => {
-                    let data: any = json['data'];
-                    if (data['solution'] != null) {
-                        this.set_fold_data(JSON.parse(data['solution']['fold-data']));
+                    let data: any = json["data"];
+                    if (data["solution"] != null) {
+                        this.set_fold_data(JSON.parse(data["solution"]["fold-data"]));
                     }
 
                     return this._fold_data;
@@ -188,7 +188,7 @@ export class Solution {
             return this._nid;
         }
 
-        throw new Error("Undefiend solution property " + keyword);
+        throw new Error(`Undefiend solution property ${keyword}`);
     }
 
     private readonly _nid: number;

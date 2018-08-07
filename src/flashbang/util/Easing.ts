@@ -19,7 +19,5 @@ export class Easing {
         return from + ((to - from) * (dt / t));
     };
 
-    public static none = (from: number, to: number, dt: number, t: number): number => {
-        return (dt >= t ? to : from);
-    };
+    public static none = (from: number, to: number, dt: number, t: number): number => (dt >= t ? to : from);
 }

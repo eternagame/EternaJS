@@ -16,7 +16,7 @@ export class Vienna2 extends Folder {
      * @returns {Promise<Vienna2>}
      */
     public static create(): Promise<Vienna2> {
-        return import('./engines/vrna2')
+        return import("./engines/vrna2")
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna2(program));
     }
@@ -26,14 +26,16 @@ export class Vienna2 extends Folder {
         this._lib = lib;
     }
 
-    /*override*/
+    /* override */
     public can_dot_plot(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public get_dot_plot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        let key: any = {primitive: "dotplot", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {
+            primitive: "dotplot", seq, pairs, temp
+        };
         let ret_array: number[] = this.get_cache(key);
         if (ret_array != null) {
             return ret_array.slice();
@@ -61,7 +63,7 @@ export class Vienna2 extends Folder {
         ret_array = [];
 
         if (temp_array.length % 4 != 0) {
-            throw new Error("Something's wrong with dot plot return " + temp_array.length);
+            throw new Error(`Something's wrong with dot plot return ${temp_array.length}`);
         }
 
         for (let ii: number = 0; ii < temp_array.length; ii += 4) {
@@ -80,24 +82,26 @@ export class Vienna2 extends Folder {
         return ret_array;
     }
 
-    /*override*/
+    /* override */
     public get_folder_name(): string {
         return Vienna2.NAME;
     }
 
-    /*override*/
+    /* override */
     public is_functional(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public can_score_structures(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
-        let key: any = {primitive: "score", seq: seq, pairs: pairs, temp: temp};
+        let key: any = {
+            primitive: "score", seq, pairs, temp
+        };
         let cache: FullEvalCache = this.get_cache(key);
 
         if (cache != null) {
@@ -115,7 +119,6 @@ export class Vienna2 extends Folder {
                     EPars.sequence_array_to_string(seq),
                     EPars.pairs_array_to_parenthesis(pairs));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
-
             } catch (e) {
                 log.error("FullEval error", e);
                 return 0;
@@ -124,7 +127,7 @@ export class Vienna2 extends Folder {
                     result.delete();
                 }
             }
-        } while(0);
+        } while (0);
 
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut >= 0 && cache.nodes[0] != -2) {
@@ -169,14 +172,14 @@ export class Vienna2 extends Folder {
         return energy;
     }
 
-    /*override*/
+    /* override */
     public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            desired_pairs,
+            temp
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
@@ -189,16 +192,16 @@ export class Vienna2 extends Folder {
         return pairs;
     }
 
-    /*override*/
+    /* override */
     public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold_aptamer",
-            seq: seq,
-            target_pairs: target_pairs,
-            binding_site: binding_site,
-            bonus: bonus,
-            version: version,
-            temp: temp
+            seq,
+            target_pairs,
+            binding_site,
+            bonus,
+            version,
+            temp
         };
         let pairs: number[] = this.get_cache(key);
         if (pairs != null) {
@@ -241,12 +244,12 @@ export class Vienna2 extends Folder {
         return pairs;
     }
 
-    /*override*/
+    /* override */
     public can_cofold(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -255,11 +258,11 @@ export class Vienna2 extends Folder {
 
         let key: any = {
             primitive: "cofold",
-            seq: seq,
-            second_best_pairs: second_best_pairs,
-            malus: malus,
-            desired_pairs: desired_pairs,
-            temp: temp
+            seq,
+            second_best_pairs,
+            malus,
+            desired_pairs,
+            temp
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
@@ -283,7 +286,7 @@ export class Vienna2 extends Folder {
         let co_fe: number = this.score_structures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
+            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
             co_pairs = EPars.parenthesis_to_pair_array(struc);
         }
 
@@ -291,12 +294,12 @@ export class Vienna2 extends Folder {
         return co_pairs;
     }
 
-    /*override*/
+    /* override */
     public can_cofold_with_binding_site(): boolean {
         return true;
     }
 
-    /*override*/
+    /* override */
     public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -305,12 +308,12 @@ export class Vienna2 extends Folder {
 
         let key: any = {
             primitive: "cofold_aptamer",
-            seq: seq,
-            malus: malus,
-            desired_pairs: desired_pairs,
-            binding_site: binding_site,
-            bonus: bonus,
-            temp: temp
+            seq,
+            malus,
+            desired_pairs,
+            binding_site,
+            bonus,
+            temp
         };
         let co_pairs: number[] = this.get_cache(key);
         if (co_pairs != null) {
@@ -357,7 +360,7 @@ export class Vienna2 extends Folder {
         if (FoldUtil.binding_site_formed(co_pairs, site_groups)) co_fe += bonus;
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = EPars.pairs_array_to_parenthesis(pairsA) + "&" + EPars.pairs_array_to_parenthesis(pairsB);
+            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
             co_pairs = EPars.parenthesis_to_pair_array(struc);
         }
 
@@ -365,7 +368,7 @@ export class Vienna2 extends Folder {
         return co_pairs;
     }
 
-    /*override*/
+    /* override */
     public load_custom_params(): boolean {
         throw new Error("TODO");
         // if (this._lib != null && this._lib.hasOwnProperty("loadParams")) {
@@ -376,13 +379,23 @@ export class Vienna2 extends Folder {
         // return false;
     }
 
-    /*override*/
+    /* override */
     public ml_energy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
-        let energy: number, cx_energy: number, best_energy: number;
+        let energy: number,
+            cx_energy: number,
+            best_energy: number;
         best_energy = EPars.INF;
-        let i1: number, j: number, p: number, q: number, u: number, x: number, type: number, count: number;
+        let i1: number,
+            j: number,
+            p: number,
+            q: number,
+            u: number,
+            x: number,
+            type: number,
+            count: number;
         let mlintern: number[] = new Array(EPars.NBPAIRS + 1);
-        let mlclosing: number, mlbase: number;
+        let mlclosing: number,
+            mlbase: number;
 
         let dangles: number = EPars.DANGLES;
 
@@ -424,7 +437,8 @@ export class Vienna2 extends Folder {
             cx_energy = EPars.INF;
 
             do { /* walk around the multi-loop */
-                let tt: number, new_cx: number;
+                let tt: number,
+                    new_cx: number;
                 new_cx = EPars.INF;
 
                 /* hope over unpaired positions */
@@ -468,7 +482,6 @@ export class Vienna2 extends Folder {
 
                     default: /* many unpaired base between helices *this./* many unpaired base between helices */
                         energy += dang5 + dang3;
-
                     }
                     type = tt;
                 }
@@ -500,23 +513,23 @@ export class Vienna2 extends Folder {
         return energy;
     }
 
-    /*override*/
+    /* override */
     public cut_in_loop(i: number): number {
         return 0;
     }
 
-    /*override*/
+    /* override */
     public loop_energy(n1: number, n2: number, type: number, type_2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean): number {
         let loop_score: number = 0;
 
         /* compute energy of degree 2 loop (stack bulge or interior) */
-        let nl: number, ns: number;
+        let nl: number,
+            ns: number;
 
         if (n1 > n2) {
             nl = n1;
             ns = n2;
-        }
-        else {
+        } else {
             nl = n2;
             ns = n1;
         }
@@ -526,7 +539,7 @@ export class Vienna2 extends Folder {
             /* stack */
         }
 
-        if (ns == 0) {                       /* bulge */
+        if (ns == 0) { /* bulge */
             if (nl <= EPars.MAXLOOP) {
                 loop_score = EPars.bulge37[nl];
             } else {
@@ -543,15 +556,14 @@ export class Vienna2 extends Folder {
                 }
             }
             return loop_score;
-        } else {                             /* interior loop */
-
+        } else { /* interior loop */
             if (ns == 1) {
-                if (nl == 1)                     // 1x1 loop
+                if (nl == 1) // 1x1 loop
                 {
                     return EPars.get_int11(type, type_2, si1, sj1);
                 }
 
-                if (nl == 2) {                   // 2x1 loop
+                if (nl == 2) { // 2x1 loop
                     if (n1 == 1) {
                         loop_score = EPars.get_int21(type, type_2, si1, sq1, sj1);
                     } else {
@@ -560,13 +572,13 @@ export class Vienna2 extends Folder {
 
                     return loop_score;
                 }
-            } else if (n1 == 2 && n2 == 2)         // 2x2 loop
+            } else if (n1 == 2 && n2 == 2) // 2x2 loop
             {
                 return EPars.get_int22(type, type_2, si1, sp1, sq1, sj1);
             }
 
             {
-                /* generic interior loop (no else here!)*/
+                /* generic interior loop (no else here!) */
                 if ((n1 + n2 <= EPars.MAXLOOP)) {
                     loop_score = EPars.internal37[n1 + n2];
                 } else {
@@ -575,21 +587,20 @@ export class Vienna2 extends Folder {
 
                 loop_score += Math.min(EPars.MAX_NINIO, (nl - ns) * EPars.F_ninio37[2]);
                 loop_score += EPars.internal_mismatch(type, si1, sj1) + EPars.internal_mismatch(type_2, sq1, sp1);
-
             }
         }
 
         return loop_score;
     }
 
-    /*override*/
+    /* override */
     public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
         let hairpin_score: number = 0;
 
         if (size <= 30) {
             hairpin_score = EPars.hairpin37[size];
         } else {
-            hairpin_score = EPars.hairpin37[30] + Number(EPars.LXC * Math.log((size) / 30.));
+            hairpin_score = EPars.hairpin37[30] + Number(EPars.LXC * Math.log((size) / 30.0));
         }
 
         if (size == 4) {
@@ -613,7 +624,6 @@ export class Vienna2 extends Folder {
             if (type > 2) {
                 hairpin_score += EPars.TERM_AU;
             }
-
         } else {
             hairpin_score += EPars.hairpin_mismatch(type, si1, sj1);
         }
@@ -629,7 +639,7 @@ export class Vienna2 extends Folder {
             result = this._lib.FullFoldTemperature(temp, seqStr, structStr || "");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            log.error('FullFoldTemperature error', e);
+            log.error("FullFoldTemperature error", e);
             return [];
         } finally {
             if (result != null) {
@@ -648,7 +658,7 @@ export class Vienna2 extends Folder {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            log.error('FullFoldWithBindingSite error', e);
+            log.error("FullFoldWithBindingSite error", e);
             return [];
         } finally {
             if (result != null) {
@@ -668,7 +678,7 @@ export class Vienna2 extends Folder {
             log.debug("done cofolding");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            log.error('CoFoldSequence error', e);
+            log.error("CoFoldSequence error", e);
             return [];
         } finally {
             if (result != null) {
@@ -676,7 +686,6 @@ export class Vienna2 extends Folder {
                 result = null;
             }
         }
-
     }
 
     private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
@@ -689,7 +698,7 @@ export class Vienna2 extends Folder {
             log.debug("done cofolding");
             return EPars.parenthesis_to_pair_array(result.structure);
         } catch (e) {
-            log.error('CoFoldSequenceWithBindingSite error', e);
+            log.error("CoFoldSequenceWithBindingSite error", e);
             return [];
         } finally {
             if (result != null) {

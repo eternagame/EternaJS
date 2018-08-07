@@ -1,4 +1,4 @@
-import {DisplayObject,} from "pixi.js";
+import {DisplayObject} from "pixi.js";
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;

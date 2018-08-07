@@ -1,4 +1,6 @@
-﻿import {Graphics, Matrix, Point, Sprite, Text, Texture} from "pixi.js";
+import {
+    Graphics, Matrix, Point, Sprite, Text, Texture
+} from "pixi.js";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {MathUtil} from "../../flashbang/util/MathUtil";
@@ -47,7 +49,7 @@ export class Band extends ContainerObject implements Updatable {
         }
     }
 
-    /*override*/
+    /* override */
     public update(dt: number): void {
         if (this._start_time < 0) {
             this._start_time = dt;
@@ -112,5 +114,4 @@ export class Band extends ContainerObject implements Updatable {
     private static _satellite_stronger_invert: Texture;
     private static _satellite_weaker_bitmap: Texture;
     private static _satellite_weaker_invert: Texture;
-
 }

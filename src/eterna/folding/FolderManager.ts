@@ -1,4 +1,4 @@
-﻿import {Eterna} from "../Eterna";
+import {Eterna} from "../Eterna";
 import {Folder} from "./Folder";
 import {RNAFoldBasic} from "./RNAFoldBasic";
 import {Vienna} from "./Vienna";
@@ -6,7 +6,7 @@ import {Vienna} from "./Vienna";
 export class FolderManager {
     public static get instance(): FolderManager {
         if (FolderManager._instance == null) {
-            FolderManager._instance = new FolderManager;
+            FolderManager._instance = new FolderManager();
         }
         return FolderManager._instance;
     }
@@ -14,7 +14,7 @@ export class FolderManager {
     public add_folder(folder: Folder): void {
         for (let other of this._folders) {
             if (other.get_folder_name() == folder.get_folder_name()) {
-                throw new Error("Trying to generate folders with duplicate names ('" + folder.get_folder_name() + "')");
+                throw new Error(`Trying to generate folders with duplicate names ('${folder.get_folder_name()}')`);
             }
         }
         this._folders.push(folder);
@@ -47,10 +47,10 @@ export class FolderManager {
             let idx: number = (curFolderIdx + jj) % this._folders.length;
             let folder: Folder = this._folders[idx];
 
-            if (folder.get_folder_name().length == 0 ||
-                folder.get_folder_name() == RNAFoldBasic.NAME ||
-                !folder.is_functional() ||
-                (filter_cb != null && filter_cb(folder))) {
+            if (folder.get_folder_name().length == 0
+                || folder.get_folder_name() == RNAFoldBasic.NAME
+                || !folder.is_functional()
+                || (filter_cb != null && filter_cb(folder))) {
                 continue;
             }
 
