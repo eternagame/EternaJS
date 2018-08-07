@@ -34,7 +34,7 @@ export class RScriptOpTree {
         if (this._curptr instanceof ROPWait) {
             this._curptr.exec();
             let waitRet: RScriptOp = this._curptr.get_pause_next();
-            if (waitRet != this._curptr && this._curptr.IsPaused() && waitRet instanceof ROPWait) {
+            if (waitRet !== this._curptr && this._curptr.IsPaused() && waitRet instanceof ROPWait) {
                 // If the next instruction can be executed (as determined by ROPWait),
                 // then execute it.
                 this._waitQueue.push(this._curptr);

@@ -22,7 +22,7 @@ export class RNAFoldBasic extends Folder {
     public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let score: number = 0;
 
-        if (pairs.length != seq.length) {
+        if (pairs.length !== seq.length) {
             throw new Error("Sequence and pairs lengths don't match");
         }
 
@@ -50,7 +50,7 @@ export class RNAFoldBasic extends Folder {
 
                 if (ii > jj + 1) {
                     dp_array[index] = -1;
-                } else if ((ii == jj) || (ii + 1 == jj) || (ii == jj + 1)) {
+                } else if ((ii === jj) || (ii + 1 === jj) || (ii === jj + 1)) {
                     dp_array[index] = 0;
                 } else {
                     dp_array[index] = -1;
@@ -141,16 +141,16 @@ export class RNAFoldBasic extends Folder {
     private trace_pairs(trace_array: number[], pairs: number[], n: number, ii_start: number, jj_start: number): void {
         let dir: number = trace_array[ii_start * n + jj_start];
 
-        if (dir == 1) {
+        if (dir === 1) {
             pairs[ii_start] = jj_start;
             pairs[jj_start] = ii_start;
 
             this.trace_pairs(trace_array, pairs, n, ii_start + 1, jj_start - 1);
-        } else if (dir == 2) {
+        } else if (dir === 2) {
             this.trace_pairs(trace_array, pairs, n, ii_start + 1, jj_start);
-        } else if (dir == 3) {
+        } else if (dir === 3) {
             this.trace_pairs(trace_array, pairs, n, ii_start, jj_start - 1);
-        } else if (dir == 0) {
+        } else if (dir === 0) {
 
         } else {
             let kk: number = -dir;

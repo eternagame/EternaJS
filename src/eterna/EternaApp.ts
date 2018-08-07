@@ -118,7 +118,7 @@ export class EternaApp extends FlashbangApp {
             let playerID = process.env["DEBUG_PLAYER_ID"];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
-            if (playerID.length == 0) {
+            if (playerID.length === 0) {
                 return Eterna.client.logout()
                     .then(() => {})
                     .catch((err) => {

@@ -137,9 +137,9 @@ export class FlashbangApp {
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
-        if (e.type == KeyboardEventType.KEY_DOWN) {
+        if (e.type === KeyboardEventType.KEY_DOWN) {
             this._keyDown.set(e.code, true);
-        } else if (e.type == KeyboardEventType.KEY_UP) {
+        } else if (e.type === KeyboardEventType.KEY_UP) {
             this._keyDown.set(e.code, false);
         }
 

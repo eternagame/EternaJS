@@ -113,7 +113,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
                 ydiff += this.container.height;
             }
 
-            if (xdiff != 0) {
+            if (xdiff !== 0) {
                 arrow.rotation = Math.atan(ydiff / xdiff) * 180 / Math.PI;
             } else {
                 arrow.rotation = 0.0;

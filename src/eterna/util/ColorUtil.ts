@@ -3,7 +3,7 @@ import {StringUtil} from "./StringUtil";
 
 export class ColorUtil {
     public static fromString(str: string): number {
-        if (str.length == 0 || str.charAt(0) != "#") {
+        if (str.length === 0 || str.charAt(0) !== "#") {
             throw new Error(`Invalid color string: ${str}`);
         }
 

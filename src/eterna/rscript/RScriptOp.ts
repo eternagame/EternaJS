@@ -41,7 +41,7 @@ export abstract class RScriptOp {
             let arg: string = param[i];
             arg = arg.replace(/^\s*/, "");
             arg = arg.replace(/\s*$/, "");
-            if (arg == "") {
+            if (arg === "") {
                 continue;
             }
             this.ParseArgument(arg, i);
@@ -70,15 +70,15 @@ export abstract class RScriptOp {
 
             let idx: number = -1;
             let matchIdx: number = -1;
-            if ((s_idx < d_idx || d_idx == -1) && s_idx >= 0 && s_matchIdx >= 0) {
+            if ((s_idx < d_idx || d_idx === -1) && s_idx >= 0 && s_matchIdx >= 0) {
                 idx = s_idx;
                 matchIdx = s_matchIdx;
-            } else if ((d_idx < s_idx || s_idx == -1) && d_idx >= 0 && d_matchIdx >= 0) {
+            } else if ((d_idx < s_idx || s_idx === -1) && d_idx >= 0 && d_matchIdx >= 0) {
                 idx = d_idx;
                 matchIdx = d_matchIdx;
             }
 
-            if (idx == -1 || matchIdx == -1) {
+            if (idx === -1 || matchIdx === -1) {
                 break;
             }
 

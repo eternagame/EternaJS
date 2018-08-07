@@ -23,7 +23,7 @@ export class MultiFailureError extends Error {
             }
             buf += MultiFailureError.getMessageInternal(failure, false);
         }
-        return `${this._failures.length}${this._failures.length != 1 ? " failures: " : " failure: "}${buf}`;
+        return `${this._failures.length}${this._failures.length !== 1 ? " failures: " : " failure: "}${buf}`;
     }
 
     private static getMessageInternal(error: any, wantStackTrace: boolean): string {

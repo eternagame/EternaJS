@@ -71,7 +71,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     }
 
     public set_state(new_state: number): void {
-        if (new_state != this._selectedState) {
+        if (new_state !== this._selectedState) {
             if ((this._selectedState >= 0) && (this._selectedState < this._numStates)) {
                 this._labels[this._selectedState].style.fill = ToggleBar.COLOR_TEXT;
             }
@@ -91,7 +91,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
             return false;
         }
 
-        if (e.type == KeyboardEventType.KEY_DOWN && e.code == KeyCode.Tab && !e.ctrlKey) {
+        if (e.type === KeyboardEventType.KEY_DOWN && e.code === KeyCode.Tab && !e.ctrlKey) {
             this.set_state((this._selectedState + 1) % this._numStates);
             e.preventDefault(); // prevent Tab from changing focus in the browser
             return true;
@@ -111,7 +111,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
 
     private onMouseClick(e: InteractionEvent): void {
         let state: number = this.getStateUnderMouse(e);
-        if ((state == this._selectedState) || (state < 0) || (state >= this._numStates)) {
+        if ((state === this._selectedState) || (state < 0) || (state >= this._numStates)) {
             return;
         }
 
@@ -126,7 +126,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     private onMouseOut(): void {
         this._mouseOver = false;
         this._hoverHilite.visible = false;
-        if ((this._hoveredState >= 0) && (this._hoveredState != this._selectedState)) {
+        if ((this._hoveredState >= 0) && (this._hoveredState !== this._selectedState)) {
             this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_TEXT;
         }
         this._hoveredState = -1;
@@ -138,16 +138,16 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         }
 
         let state: number = this.getStateUnderMouse(e);
-        if ((state == this._hoveredState) || (state < 0) || (state >= this._numStates)) {
+        if ((state === this._hoveredState) || (state < 0) || (state >= this._numStates)) {
             return;
         }
 
-        if (this._hoveredState >= 0 && this._hoveredState != this._selectedState) {
+        if (this._hoveredState >= 0 && this._hoveredState !== this._selectedState) {
             this._labels[this._hoveredState].style.fill = ToggleBar.COLOR_TEXT;
         }
 
         this._hoveredState = state;
-        if (this._hoveredState == this._selectedState) {
+        if (this._hoveredState === this._selectedState) {
             this._hoverHilite.visible = false;
         } else {
             this._hoverHilite.visible = true;

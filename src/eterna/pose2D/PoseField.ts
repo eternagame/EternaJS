@@ -68,7 +68,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     public zoom_in(): void {
         let prev_zoom: number = this._pose.get_zoom_level();
 
-        if (prev_zoom == 0)
+        if (prev_zoom === 0)
             return;
 
         this._pose.set_zoom_level(prev_zoom - 1);
@@ -77,7 +77,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     public zoom_out(): void {
         let prev_zoom: number = this._pose.get_zoom_level();
 
-        if (prev_zoom == Pose2D.ZOOM_SPACINGS.length - 1)
+        if (prev_zoom === Pose2D.ZOOM_SPACINGS.length - 1)
             return;
 
         this._pose.set_zoom_level(prev_zoom + 1);
@@ -141,28 +141,28 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         const X_OFFSET: number = 5;
         const Y_OFFSET: number = 5;
 
-        if (!e.ctrlKey && e.code == KeyCode.ArrowDown) {
+        if (!e.ctrlKey && e.code === KeyCode.ArrowDown) {
             if (e.shiftKey) {
                 this._pose.shift_5prime();
             } else {
                 this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() + Y_OFFSET);
             }
             return true;
-        } else if (!e.ctrlKey && e.code == KeyCode.ArrowUp) {
+        } else if (!e.ctrlKey && e.code === KeyCode.ArrowUp) {
             if (e.shiftKey) {
                 this._pose.shift_3prime();
             } else {
                 this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() - Y_OFFSET);
             }
             return true;
-        } else if (!e.ctrlKey && e.code == KeyCode.ArrowRight) {
+        } else if (!e.ctrlKey && e.code === KeyCode.ArrowRight) {
             if (e.shiftKey) {
                 this._pose.shift_3prime();
             } else {
                 this._pose.set_offset(this._pose.get_x_offset() + X_OFFSET, this._pose.get_y_offset());
             }
             return true;
-        } else if (!e.ctrlKey && e.code == KeyCode.ArrowLeft) {
+        } else if (!e.ctrlKey && e.code === KeyCode.ArrowLeft) {
             if (e.shiftKey) {
                 this._pose.shift_5prime();
             } else {

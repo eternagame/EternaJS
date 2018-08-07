@@ -32,7 +32,7 @@ export class PuzzleManager {
             let locks: boolean[] = [];
 
             for (let kk = 0; kk < lock_str.length; kk++) {
-                locks.push(lock_str.charAt(kk) == "x");
+                locks.push(lock_str.charAt(kk) === "x");
             }
             newpuz.set_puzzle_locks(locks);
         }
@@ -47,20 +47,20 @@ export class PuzzleManager {
         }
 
         if (json["beginseq"] && json["beginseq"].length > 0) {
-            if (json["beginseq"].length != json["secstruct"].length) {
+            if (json["beginseq"].length !== json["secstruct"].length) {
                 throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json["Title"]}`);
             }
             newpuz.set_beginning_sequence(json["beginseq"]);
         }
 
         if (json["saved_sequence"] && json["saved_sequence"].length > 0) {
-            if (json["saved_sequence"].length == json["secstruct"].length && json["type"] == "Challenge") {
+            if (json["saved_sequence"].length === json["secstruct"].length && json["type"] === "Challenge") {
                 newpuz.set_saved_sequence(json["saved_sequence"]);
             }
         }
 
         let usetails: number = Number(json["usetails"]);
-        newpuz.set_use_tails(usetails > 0, usetails == 2);
+        newpuz.set_use_tails(usetails > 0, usetails === 2);
 
         if (json["folder"] && json["folder"].length > 0) {
             newpuz.set_folder(json["folder"]);
@@ -72,7 +72,7 @@ export class PuzzleManager {
 
         if (json["ui-specs"]) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json["ui-specs"].substr(0, 1) == "{") newpuz.set_boosters(JSON.parse(json["ui-specs"]));
+            if (json["ui-specs"].substr(0, 1) === "{") newpuz.set_boosters(JSON.parse(json["ui-specs"]));
             else
             // Fallback for the old tutorials
             { newpuz.set_ui_specs(json["ui-specs"].split(",")); }
@@ -112,11 +112,11 @@ export class PuzzleManager {
             newpuz.set_hint(json["hint"]);
         }
 
-        if (newpuz.get_node_id() == 877668) {
+        if (newpuz.get_node_id() === 877668) {
             newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_877668));
-        } else if (newpuz.get_node_id() == 885046) {
+        } else if (newpuz.get_node_id() === 885046) {
             newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_885046));
-        } else if (newpuz.get_node_id() == 1420804) {
+        } else if (newpuz.get_node_id() === 1420804) {
             newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_1420804));
         }
 
@@ -126,7 +126,7 @@ export class PuzzleManager {
                 if (target_conditions[ii] != null) {
                     let constrained_bases: any[] = target_conditions[ii]["structure_constrained_bases"];
                     if (constrained_bases != null) {
-                        if (constrained_bases.length % 2 == 0) {
+                        if (constrained_bases.length % 2 === 0) {
                             target_conditions[ii]["structure_constraints"] = [];
                             for (let jj = 0; jj < target_conditions[ii]["secstruct"].length; jj++) target_conditions[ii]["structure_constraints"][jj] = false;
 
@@ -140,8 +140,8 @@ export class PuzzleManager {
 
                     let anti_constrained_bases: any[] = target_conditions[ii]["anti_structure_constrained_bases"];
                     if (anti_constrained_bases != null) {
-                        if (target_conditions[ii]["anti_secstruct"] != null && target_conditions[ii]["anti_secstruct"].length == target_conditions[ii]["secstruct"].length) {
-                            if (anti_constrained_bases.length % 2 == 0) {
+                        if (target_conditions[ii]["anti_secstruct"] != null && target_conditions[ii]["anti_secstruct"].length === target_conditions[ii]["secstruct"].length) {
+                            if (anti_constrained_bases.length % 2 === 0) {
                                 target_conditions[ii]["anti_structure_constraints"] = [];
                                 for (let jj = 0; jj < target_conditions[ii]["secstruct"].length; jj++) target_conditions[ii]["anti_structure_constraints"][jj] = false;
 
@@ -171,7 +171,7 @@ export class PuzzleManager {
         let replace: boolean = false;
 
         for (let jj = 0; jj < this._puzzles.length; jj++) {
-            if (newpuz.get_node_id() == this._puzzles[jj].get_node_id()) {
+            if (newpuz.get_node_id() === this._puzzles[jj].get_node_id()) {
                 this._puzzles[jj] = newpuz;
                 replace = true;
                 break;
@@ -187,7 +187,7 @@ export class PuzzleManager {
 
     public get_puzzle_by_nid(puznid: number, scriptid: number = -1): Promise<Puzzle> {
         for (let ii: number = 0; ii < this._puzzles.length; ii++) {
-            if (this._puzzles[ii].get_node_id() == puznid) {
+            if (this._puzzles[ii].get_node_id() === puznid) {
                 return Promise.resolve(this._puzzles[ii]);
             }
         }

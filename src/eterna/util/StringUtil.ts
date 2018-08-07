@@ -16,7 +16,7 @@ export class StringUtil {
 
     /** Is the specified string null, empty, or does it contain only whitespace? */
     public static isBlank(str: string): boolean {
-        return (str == null) || (str.search("\\S") == -1);
+        return (str == null) || (str.search("\\S") === -1);
     }
 
     /** Return the specified String, or "" if it is null. */
@@ -41,11 +41,11 @@ export class StringUtil {
 
     /** Does the specified string start with any of the specified substrings. */
     public static startsWith(str: string, substr: string, ...additionalSubstrs: string[]): boolean {
-        if (str.indexOf(substr, 0) == 0) {
+        if (str.indexOf(substr, 0) === 0) {
             return true;
         }
         for (let additional of additionalSubstrs) {
-            if (str.indexOf(additional, 0) == 0) {
+            if (str.indexOf(additional, 0) === 0) {
                 return true;
             }
         }
@@ -55,15 +55,15 @@ export class StringUtil {
     /** Return true iff the first character is a lower-case character. */
     public static isLowerCase(str: string): boolean {
         let firstChar: string = str.charAt(0);
-        return (firstChar.toUpperCase() != firstChar)
-            && (firstChar.toLowerCase() == firstChar);
+        return (firstChar.toUpperCase() !== firstChar)
+            && (firstChar.toLowerCase() === firstChar);
     }
 
     /** Return true iff the first character is an upper-case character. */
     public static isUpperCase(str: string): boolean {
         let firstChar: string = str.charAt(0);
-        return (firstChar.toUpperCase() == firstChar)
-            && (firstChar.toLowerCase() != firstChar);
+        return (firstChar.toUpperCase() === firstChar)
+            && (firstChar.toLowerCase() !== firstChar);
     }
 
     /**
@@ -131,7 +131,7 @@ export class StringUtil {
 
         // move any fractional portion to the postfix
         const dex: number = s.lastIndexOf(".");
-        if (dex != -1) {
+        if (dex !== -1) {
             postfix = s.substring(dex);
             s = s.substring(0, dex);
         }
@@ -159,11 +159,11 @@ export class StringUtil {
         }
 
         // deal with a few special cases
-        if (str == "Infinity") {
+        if (str === "Infinity") {
             return Infinity;
-        } else if (str == "-Infinity") {
+        } else if (str === "-Infinity") {
             return -Infinity;
-        } else if (str == "NaN") {
+        } else if (str === "NaN") {
             return NaN;
         }
 
@@ -190,9 +190,9 @@ export class StringUtil {
 
         if (str != null) {
             str = str.toLowerCase();
-            if (str == "true" || str == "1") {
+            if (str === "true" || str === "1") {
                 return true;
-            } else if (str == "false" || str == "0") {
+            } else if (str === "false" || str === "0") {
                 return false;
             }
         }
@@ -283,7 +283,7 @@ export class StringUtil {
     }
 
     /**
-     * @return true if the specified String is == to a single whitespace character.
+     * @return true if the specified String is === to a single whitespace character.
      */
     public static isWhitespace(character: string): boolean {
         switch (character) {
@@ -358,7 +358,7 @@ export class StringUtil {
             array.push(url);
         }
 
-        if (s != "" || array.length == 0) { // avoid putting an empty string on the end
+        if (s !== "" || array.length === 0) { // avoid putting an empty string on the end
             array.push(s);
         }
         return array;
@@ -381,18 +381,18 @@ export class StringUtil {
             throw new Error("Cannot parseInt(null)");
         }
 
-        let negative: boolean = (str.charAt(0) == "-");
+        let negative: boolean = (str.charAt(0) === "-");
         if (negative) {
             str = str.substring(1);
         }
 
         // handle this special case immediately, to prevent confusion about
         // a leading 0 meaning "parse as octal"
-        if (str == "0") {
+        if (str === "0") {
             return 0;
         }
 
-        if (radix == 0) {
+        if (radix === 0) {
             if (StringUtil.startsWith(str, "0x")) {
                 str = str.substring(2);
                 radix = 16;
@@ -402,7 +402,7 @@ export class StringUtil {
             } else {
                 radix = 10;
             }
-        } else if (radix == 16 && StringUtil.startsWith(str, "0x")) {
+        } else if (radix === 16 && StringUtil.startsWith(str, "0x")) {
             str = str.substring(2);
         } else if (radix < 2 || radix > 16) {
             throw new Error(`Radix out of range: ${radix}`);
@@ -411,7 +411,7 @@ export class StringUtil {
         // now verify that str only contains valid chars for the radix
         for (let ii: number = 0; ii < str.length; ii++) {
             let dex: number = StringUtil.HEX.indexOf(str.charAt(ii).toLowerCase());
-            if (dex == -1 || dex >= radix) {
+            if (dex === -1 || dex >= radix) {
                 throw new Error(`Invalid characters in String [string=${arguments[0]}, radix=${radix}`);
             }
         }

@@ -43,7 +43,7 @@ export class Constraints {
     public static count(sequence: number[], type: number): number {
         let total: number = 0;
         for (let value of sequence) {
-            if (value == type) {
+            if (value === type) {
                 total++;
             }
         }

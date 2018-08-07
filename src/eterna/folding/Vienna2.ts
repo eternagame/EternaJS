@@ -62,12 +62,12 @@ export class Vienna2 extends Folder {
         let temp_array: string[] = CSVParser.parse_into_array_with_white_spaces(probabilitiesString);
         ret_array = [];
 
-        if (temp_array.length % 4 != 0) {
+        if (temp_array.length % 4 !== 0) {
             throw new Error(`Something's wrong with dot plot return ${temp_array.length}`);
         }
 
         for (let ii: number = 0; ii < temp_array.length; ii += 4) {
-            if (temp_array[ii + 3] == "ubox") {
+            if (temp_array[ii + 3] === "ubox") {
                 ret_array.push(Number(temp_array[ii]));
                 ret_array.push(Number(temp_array[ii + 1]));
                 ret_array.push(Number(temp_array[ii + 2]));
@@ -130,7 +130,7 @@ export class Vienna2 extends Folder {
         } while (0);
 
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
-        if (cut >= 0 && cache.nodes[0] != -2) {
+        if (cut >= 0 && cache.nodes[0] !== -2) {
             // we just scored a duplex that wasn't one, so we have to redo it properly
             let seqA: number[] = seq.slice(0, cut);
             let pairsA: number[] = pairs.slice(0, cut);
@@ -145,7 +145,7 @@ export class Vienna2 extends Folder {
             let nodesB: number[] = [];
             let retB: number = this.score_structures(seqB, pairsB, temp, nodesB);
 
-            if (nodesA[0] != -1 || nodesB[0] != -1) {
+            if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error("Something went terribly wrong in score_structures()");
             }
 
@@ -220,7 +220,7 @@ export class Vienna2 extends Folder {
         let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index == 1) {
+            if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
             } else {
@@ -234,7 +234,7 @@ export class Vienna2 extends Folder {
             site_groups.push(current_group);
         }
 
-        if (site_groups.length == 2) {
+        if (site_groups.length === 2) {
             pairs = this.fold_sequence_alch_with_binding_site(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         } else {
             pairs = this.fold_sequence_alch_with_binding_site_old(seq, target_pairs, binding_site, bonus);
@@ -329,7 +329,7 @@ export class Vienna2 extends Folder {
         let current_group: number[] = [];
 
         for (let jj: number = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index == 1) {
+            if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
             } else {
@@ -372,7 +372,7 @@ export class Vienna2 extends Folder {
     public load_custom_params(): boolean {
         throw new Error("TODO");
         // if (this._lib != null && this._lib.hasOwnProperty("loadParams")) {
-        //     let success: boolean = (this._lib.loadParams("custom.par") == 0);
+        //     let success: boolean = (this._lib.loadParams("custom.par") === 0);
         //     if (success) this.reset_cache();
         //     return success;
         // }
@@ -418,7 +418,7 @@ export class Vienna2 extends Folder {
         for (count = 0; count < 2; count++) { /* do it twice */
             let ld5: number = 0;
             /* 5' dangle energy on prev pair (type) */
-            if (i == 0) {
+            if (i === 0) {
                 j = pairs[0] + 1;
                 type = 0;
                 /* no pair */
@@ -426,7 +426,7 @@ export class Vienna2 extends Folder {
                 j = pairs[i];
                 type = EPars.pair_type(S[j], S[i]);
 
-                if (type == 0) {
+                if (type === 0) {
                     type = 7;
                 }
             }
@@ -442,19 +442,19 @@ export class Vienna2 extends Folder {
                 new_cx = EPars.INF;
 
                 /* hope over unpaired positions */
-                while (p <= pairs[0] && pairs[p] == 0) p++;
+                while (p <= pairs[0] && pairs[p] === 0) p++;
 
                 /* memorize number of unpaired positions */
                 u += p - i1 - 1;
                 /* get position of pairing partner */
-                if (p == pairs[0] + 1) {
+                if (p === pairs[0] + 1) {
                     q = tt = 0;
                     /* virtual root pair */
                 } else {
                     q = pairs[p];
                     /* get type of base pair P->q */
                     tt = EPars.pair_type(S[p], S[q]);
-                    if (tt == 0) tt = 7;
+                    if (tt === 0) tt = 7;
                 }
 
                 energy += mlintern[tt];
@@ -476,7 +476,7 @@ export class Vienna2 extends Folder {
                     switch (p - i1 - 1) {
                     case 0: /* adjacent helices *this./* adjacent helices */
                     case 1: /* 1 unpaired base between helices *this./* 1 unpaired base between helices */
-                        dang = (dangles == 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
+                        dang = (dangles === 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
                         energy += dang;
                         break;
 
@@ -488,20 +488,20 @@ export class Vienna2 extends Folder {
 
                 i1 = q;
                 p = q + 1;
-            } while (q != i);
+            } while (q !== i);
 
             best_energy = Math.min(energy, best_energy);
             /* don't use cx_energy here */
 
-            if (dangles != 3 || is_extloop) {
+            if (dangles !== 3 || is_extloop) {
                 break;
                 /* may break cofold with co-ax */
             }
             /* skip a helix and start again */
-            while (pairs[p] == 0) {
+            while (pairs[p] === 0) {
                 p++;
             }
-            if (i == pairs[p]) break;
+            if (i === pairs[p]) break;
             i = pairs[p];
         }
 
@@ -534,18 +534,18 @@ export class Vienna2 extends Folder {
             ns = n1;
         }
 
-        if (nl == 0) {
+        if (nl === 0) {
             return EPars.get_stack_score(type, type_2, b1, b2);
             /* stack */
         }
 
-        if (ns == 0) { /* bulge */
+        if (ns === 0) { /* bulge */
             if (nl <= EPars.MAXLOOP) {
                 loop_score = EPars.bulge37[nl];
             } else {
                 loop_score = EPars.get_bulge(nl);
             }
-            if (nl == 1) {
+            if (nl === 1) {
                 loop_score += EPars.get_stack_score(type, type_2, b1, b2);
             } else {
                 if (type > 2) {
@@ -557,14 +557,14 @@ export class Vienna2 extends Folder {
             }
             return loop_score;
         } else { /* interior loop */
-            if (ns == 1) {
-                if (nl == 1) // 1x1 loop
+            if (ns === 1) {
+                if (nl === 1) // 1x1 loop
                 {
                     return EPars.get_int11(type, type_2, si1, sj1);
                 }
 
-                if (nl == 2) { // 2x1 loop
-                    if (n1 == 1) {
+                if (nl === 2) { // 2x1 loop
+                    if (n1 === 1) {
                         loop_score = EPars.get_int21(type, type_2, si1, sq1, sj1);
                     } else {
                         loop_score = EPars.get_int21(type_2, type, sq1, si1, sp1);
@@ -572,7 +572,7 @@ export class Vienna2 extends Folder {
 
                     return loop_score;
                 }
-            } else if (n1 == 2 && n2 == 2) // 2x2 loop
+            } else if (n1 === 2 && n2 === 2) // 2x2 loop
             {
                 return EPars.get_int22(type, type_2, si1, sp1, sq1, sj1);
             }
@@ -603,16 +603,16 @@ export class Vienna2 extends Folder {
             hairpin_score = EPars.hairpin37[30] + Number(EPars.LXC * Math.log((size) / 30.0));
         }
 
-        if (size == 4) {
+        if (size === 4) {
             let loop_str: string = "";
             for (let walker: number = i; walker <= j; walker++) {
-                if (sequence[walker] == EPars.RNABASE_ADENINE) {
+                if (sequence[walker] === EPars.RNABASE_ADENINE) {
                     loop_str += "A";
-                } else if (sequence[walker] == EPars.RNABASE_GUANINE) {
+                } else if (sequence[walker] === EPars.RNABASE_GUANINE) {
                     loop_str += "G";
-                } else if (sequence[walker] == EPars.RNABASE_URACIL) {
+                } else if (sequence[walker] === EPars.RNABASE_URACIL) {
                     loop_str += "U";
-                } else if (sequence[walker] == EPars.RNABASE_CYTOSINE) {
+                } else if (sequence[walker] === EPars.RNABASE_CYTOSINE) {
                     loop_str += "C";
                 }
             }
@@ -620,7 +620,7 @@ export class Vienna2 extends Folder {
             hairpin_score += EPars.get_tetra_loop_bonus(loop_str);
         }
 
-        if (size == 3) {
+        if (size === 3) {
             if (type > 2) {
                 hairpin_score += EPars.TERM_AU;
             }
@@ -728,11 +728,11 @@ export class Vienna2 extends Folder {
 
         for (let bb: number = 0; bb < binding_site.length; bb++) {
             let bi: number = binding_site[bb];
-            if (target_pairs[bi] != native_pairs[bi]) {
+            if (target_pairs[bi] !== native_pairs[bi]) {
                 native_bound = false;
             }
 
-            if (target_pairs[bi] != target_satisfied[bi]) {
+            if (target_pairs[bi] !== target_satisfied[bi]) {
                 target_bound = false;
             }
         }

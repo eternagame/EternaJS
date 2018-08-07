@@ -25,7 +25,7 @@ export class ScoreDisplayNode {
     }
 
     public get_text_label(): string {
-        return (this._type == ScoreDisplayNodeType.STACK ? "Stack" : "Loop");
+        return (this._type === ScoreDisplayNodeType.STACK ? "Stack" : "Loop");
     }
 
     public get_text_score(): string {

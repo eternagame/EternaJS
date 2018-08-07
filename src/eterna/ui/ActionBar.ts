@@ -47,7 +47,7 @@ export class ActionBar extends ContainerObject {
 
     public do_layout(): void {
         this._bg.clear();
-        if (this._items.length == 0) {
+        if (this._items.length === 0) {
             return;
         }
 
@@ -89,7 +89,7 @@ export class ActionBar extends ContainerObject {
     }
 
     public get_bar_width(): number {
-        if (this._items.length == 0) {
+        if (this._items.length === 0) {
             return 0;
         }
 

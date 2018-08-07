@@ -42,7 +42,7 @@ export class LinkedList<T> {
     }
 
     public get isIterating(): boolean {
-        return this._head == this.ITERATING;
+        return this._head === this.ITERATING;
     }
 
     public clear(): void {
@@ -58,7 +58,7 @@ export class LinkedList<T> {
     }
 
     public beginIteration(): LinkedElement<T> {
-        if (this._head == this.ITERATING) {
+        if (this._head === this.ITERATING) {
             throw new Error("Initiated beginIteration while iterating");
         }
         this._iterating = this._head;
@@ -68,7 +68,7 @@ export class LinkedList<T> {
 
     public endIteration(): void {
         // note that we're no longer dispatching
-        if (this._head != this.ITERATING) {
+        if (this._head !== this.ITERATING) {
             throw new Error("Not iterating");
         }
 
@@ -173,7 +173,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
     public static remove<T>(head: Cons<T>, cons: Cons<T>): Cons<T> {
         if (head == null) {
             return head;
-        } else if (head == cons) {
+        } else if (head === cons) {
             return head._next;
         } else {
             head._next = Cons.remove(head._next, cons);

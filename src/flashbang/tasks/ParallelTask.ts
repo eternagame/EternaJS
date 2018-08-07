@@ -28,7 +28,7 @@ export class ParallelTask extends ObjectTask {
     }
 
     private onTaskComplete(): void {
-        if (--this._numActive == 0) {
+        if (--this._numActive === 0) {
             this.destroySelf();
         }
     }

@@ -21,7 +21,7 @@ export class Feedback {
 
             let char: string = secstruct.charAt(ii);
 
-            if (char == ".") {
+            if (char === ".") {
                 if (shapedata[ii - start_index] > (threshold / 4 + min / 4 * 3)) {
                     score++;
                 }

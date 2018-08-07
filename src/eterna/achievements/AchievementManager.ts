@@ -15,7 +15,7 @@ export class AchievementManager {
         //     count++;
         // }
         //
-        // if (count == 0) {
+        // if (count === 0) {
         //     return;
         // }
         //

@@ -13,7 +13,7 @@ export class FolderManager {
 
     public add_folder(folder: Folder): void {
         for (let other of this._folders) {
-            if (other.get_folder_name() == folder.get_folder_name()) {
+            if (other.get_folder_name() === folder.get_folder_name()) {
                 throw new Error(`Trying to generate folders with duplicate names ('${folder.get_folder_name()}')`);
             }
         }
@@ -22,7 +22,7 @@ export class FolderManager {
 
     public get_folder(name: string): Folder {
         for (let folder of this._folders) {
-            if (folder.get_folder_name() == name) {
+            if (folder.get_folder_name() === name) {
                 return folder;
             }
         }
@@ -33,7 +33,7 @@ export class FolderManager {
     public get_next_folder(folder_name: string, filter_cb: Function = null): Folder {
         let curFolderIdx: number = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
-            if (this._folders[ii].get_folder_name() == folder_name) {
+            if (this._folders[ii].get_folder_name() === folder_name) {
                 curFolderIdx = ii;
                 break;
             }
@@ -47,8 +47,8 @@ export class FolderManager {
             let idx: number = (curFolderIdx + jj) % this._folders.length;
             let folder: Folder = this._folders[idx];
 
-            if (folder.get_folder_name().length == 0
-                || folder.get_folder_name() == RNAFoldBasic.NAME
+            if (folder.get_folder_name().length === 0
+                || folder.get_folder_name() === RNAFoldBasic.NAME
                 || !folder.is_functional()
                 || (filter_cb != null && filter_cb(folder))) {
                 continue;

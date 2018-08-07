@@ -19,7 +19,7 @@ export class HLayoutContainer extends LayoutContainer {
 
     /** If true, then children are laid out right-to-left instead of left-to-right */
     public set reversed(val: boolean) {
-        if (this._reversed != val) {
+        if (this._reversed !== val) {
             this._reversed = val;
             this._needsLayout = true;
         }
@@ -30,7 +30,7 @@ export class HLayoutContainer extends LayoutContainer {
     }
 
     public set hOffset(val: number) {
-        if (this._hOffset != val) {
+        if (this._hOffset !== val) {
             this._hOffset = val;
             this._needsLayout = true;
         }
@@ -41,7 +41,7 @@ export class HLayoutContainer extends LayoutContainer {
     }
 
     public set vAlign(val: Align) {
-        if (this._vAlign != val) {
+        if (this._vAlign !== val) {
             this._vAlign = val;
             this._needsLayout = true;
         }
@@ -58,7 +58,7 @@ export class HLayoutContainer extends LayoutContainer {
     /* override */
     protected doLayout(): void {
         let maxHeight: number = 0;
-        if (this._vAlign != Align.TOP) {
+        if (this._vAlign !== Align.TOP) {
             for (let child of this.children) {
                 if (child.visible) {
                     maxHeight = Math.max(child.getLocalBounds(HLayoutContainer.R).height, maxHeight);
@@ -80,7 +80,7 @@ export class HLayoutContainer extends LayoutContainer {
         }
 
         let x: number = 0;
-        for (let ii = from; ii != to; ii += inc) {
+        for (let ii = from; ii !== to; ii += inc) {
             let child = this.getChildAt(ii);
             if (child.visible) {
                 child.x = 0;
@@ -88,9 +88,9 @@ export class HLayoutContainer extends LayoutContainer {
                 let bounds: Rectangle = child.getLocalBounds(HLayoutContainer.R);
                 child.x = -bounds.left + x;
                 child.y = -bounds.top;
-                if (this._vAlign == Align.CENTER) {
+                if (this._vAlign === Align.CENTER) {
                     child.y += (maxHeight - bounds.height) * 0.5;
-                } else if (this._vAlign == Align.BOTTOM) {
+                } else if (this._vAlign === Align.BOTTOM) {
                     child.y += maxHeight - bounds.height;
                 }
 

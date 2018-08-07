@@ -124,7 +124,7 @@ export abstract class Reactor {
     }
 
     private get isDispatching(): boolean {
-        return this._listeners == Reactor.DISPATCHING;
+        return this._listeners === Reactor.DISPATCHING;
     }
 
     protected static insert(head: Runs, action: Runs): Runs {

@@ -63,7 +63,7 @@ export class StyledTextBuilder {
     }
 
     public popStyle(): StyledTextBuilder {
-        if (this._styleStack.length == 0) {
+        if (this._styleStack.length === 0) {
             log.warn("Unbalanced popStyle");
         } else {
             let lastStyle = this._styleStack.pop();

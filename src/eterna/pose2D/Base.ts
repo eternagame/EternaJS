@@ -92,7 +92,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     }
 
     public set_type(type: number, playsound: boolean = false): void {
-        if (this._base_type == type) {
+        if (this._base_type === type) {
             return;
         }
 
@@ -125,7 +125,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     }
 
     public need_redraw(is_static: boolean): boolean {
-        if (!this.display.visible || this._base_type == EPars.RNABASE_CUT) {
+        if (!this.display.visible || this._base_type === EPars.RNABASE_CUT) {
             return false;
         }
 
@@ -150,7 +150,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     }
 
     public set_last(lastbase: boolean): void {
-        if (this._is_last != lastbase) {
+        if (this._is_last !== lastbase) {
             this._is_last = lastbase;
             this._needsRedraw = true;
         }
@@ -175,7 +175,7 @@ export class Base extends ContainerObject implements LateUpdatable {
             this._needsRedraw = true;
         }
 
-        if (this._pair_type != pair_type) {
+        if (this._pair_type !== pair_type) {
             this._needsRedraw = true;
         }
 
@@ -233,7 +233,7 @@ export class Base extends ContainerObject implements LateUpdatable {
     }
 
     public lateUpdate(dt: number): void {
-        if (this._needsRedraw && this.display.visible && this._base_type != EPars.RNABASE_CUT) {
+        if (this._needsRedraw && this.display.visible && this._base_type !== EPars.RNABASE_CUT) {
             this.redraw(this._zoom_level, this._off_x, this._off_y, this._current_time, this._drawFlags, this._numberBitmap, this._highlight_state);
             this._needsRedraw = false;
         }
@@ -252,7 +252,7 @@ export class Base extends ContainerObject implements LateUpdatable {
             drawFlags |= BaseDrawFlags.IS_DONTCARE;
         }
 
-        const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) != 0;
+        const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
         let body_data: Texture = BaseAssets.getBodyBitmap(this._base_type, this._color_level, zoom_level, drawFlags);
         const barcode_data: Texture = BaseAssets.getBarcodeBitmap(zoom_level, drawFlags);
@@ -286,7 +286,7 @@ export class Base extends ContainerObject implements LateUpdatable {
                 this._pairing_start_time = current_time;
             }
 
-            if (this._pairing_duration == 0) {
+            if (this._pairing_duration === 0) {
                 pairing_prog = 1;
                 this._pairing_complete_time = current_time;
             } else {
@@ -542,7 +542,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         sprite.alpha = 1;
 
         if (highlight_state != null && highlight_state.isOn) {
-            if (highlight_state.nuc.indexOf(baseIdx) == -1) {
+            if (highlight_state.nuc.indexOf(baseIdx) === -1) {
                 sprite.alpha = 0.55;
             } else {
                 // TSC, 8/6/2018:

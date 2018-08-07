@@ -30,19 +30,19 @@ export class PoseThumbnail {
     private static create(sequence: number[], pairs: number[], size: number, colormode: number, exp_start_index: number, wrong_pairs: number[], exp_use_threshold: boolean, exp_threshold: number, canvas: Graphics = null): DisplayObject {
         let frame: DisplayObject;
 
-        if (size == 1) {
+        if (size === 1) {
             frame = Sprite.fromImage(Bitmaps.SolutionSmallFrame);
-        } else if (size == 2) {
+        } else if (size === 2) {
             frame = Sprite.fromImage(Bitmaps.SolutionBigFrame);
-        } else if (size == 3) {
+        } else if (size === 3) {
             frame = DisplayUtil.fillRect(62, 62, 0x0);
-        } else if (size == 4) {
+        } else if (size === 4) {
             frame = DisplayUtil.fillRect(210, 125, 0x0);
-        } else if (size == 5) {
+        } else if (size === 5) {
             frame = DisplayUtil.fillRect(124, 124, 0x0);
-        } else if (size == 6) {
+        } else if (size === 6) {
             frame = DisplayUtil.fillRect(200, 200, 0x0);
-        } else if (size == 7) {
+        } else if (size === 7) {
             frame = DisplayUtil.fillRect(300, 300, 0x0);
         }
 
@@ -55,7 +55,7 @@ export class PoseThumbnail {
         bd.addChild(DisplayUtil.fillRect(frameBounds.width, frameBounds.height, 0x0));
         let n: number = pairs.length;
 
-        if (n == 0) {
+        if (n === 0) {
             return bd;
         }
 
@@ -106,7 +106,7 @@ export class PoseThumbnail {
 
         let exp_painter: ExpPainter = null;
 
-        if (colormode == PoseThumbnail.THUMBNAIL_EXP_COLORED) {
+        if (colormode === PoseThumbnail.THUMBNAIL_EXP_COLORED) {
             exp_painter = new ExpPainter(sequence, exp_start_index);
         }
 
@@ -143,11 +143,11 @@ export class PoseThumbnail {
         for (let ii = 0; ii < n; ii++) {
             color = 0;
 
-            if (colormode == PoseThumbnail.THUMBNAIL_WHITE) {
+            if (colormode === PoseThumbnail.THUMBNAIL_WHITE) {
                 color = 0xFFFFFF;
-            } else if (colormode == PoseThumbnail.THUMBNAIL_WRONG_COLORED) {
-                if (wrong_pairs[ii] == 1) {
-                    if (ii == 0 || (ii > 0 && sequence[ii - 1] == EPars.RNABASE_CUT)) {
+            } else if (colormode === PoseThumbnail.THUMBNAIL_WRONG_COLORED) {
+                if (wrong_pairs[ii] === 1) {
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
                         wrong_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
                         wrong_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
 
@@ -156,7 +156,7 @@ export class PoseThumbnail {
 
                         wrong_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                         wrong_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
-                    } else if (ii == n - 1 || (ii < n - 1 && sequence[ii + 1] == EPars.RNABASE_CUT)) {
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
                         wrong_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
                         wrong_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
 
@@ -175,8 +175,8 @@ export class PoseThumbnail {
                         wrong_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                         wrong_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
                     }
-                } else if (wrong_pairs[ii] == -1) {
-                    if (ii == 0 || (ii > 0 && sequence[ii - 1] == EPars.RNABASE_CUT)) {
+                } else if (wrong_pairs[ii] === -1) {
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
                         right_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
                         right_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
 
@@ -185,7 +185,7 @@ export class PoseThumbnail {
 
                         right_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                         right_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
-                    } else if (ii == n - 1 || (ii < n - 1 && sequence[ii + 1] == EPars.RNABASE_CUT)) {
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
                         right_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
                         right_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
 
@@ -204,7 +204,7 @@ export class PoseThumbnail {
                         right_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                         right_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
                     }
-                } else if (ii == 0 || (ii > 0 && sequence[ii - 1] == EPars.RNABASE_CUT)) {
+                } else if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
                     dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
                     dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
 
@@ -213,7 +213,7 @@ export class PoseThumbnail {
 
                     dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                     dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
-                } else if (ii == n - 1 || (ii < n - 1 && sequence[ii + 1] == EPars.RNABASE_CUT)) {
+                } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
                     dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
                     dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
 
@@ -232,19 +232,19 @@ export class PoseThumbnail {
                     dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                     dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
                 }
-            } else if (colormode == PoseThumbnail.THUMBNAIL_BASE_COLORED) {
-                if (sequence[ii] == EPars.RNABASE_ADENINE) {
+            } else if (colormode === PoseThumbnail.THUMBNAIL_BASE_COLORED) {
+                if (sequence[ii] === EPars.RNABASE_ADENINE) {
                     color = 0xFFFF00;
-                } else if (sequence[ii] == EPars.RNABASE_GUANINE) {
+                } else if (sequence[ii] === EPars.RNABASE_GUANINE) {
                     color = 0xFF0000;
-                } else if (sequence[ii] == EPars.RNABASE_CYTOSINE) {
+                } else if (sequence[ii] === EPars.RNABASE_CYTOSINE) {
                     color = 0x00FF00;
-                } else if (sequence[ii] == EPars.RNABASE_URACIL) {
+                } else if (sequence[ii] === EPars.RNABASE_URACIL) {
                     color = 0x8888FF;
                 } else {
                     color = 0xFFFFFF;
                 }
-            } else if (colormode == PoseThumbnail.THUMBNAIL_EXP_COLORED) {
+            } else if (colormode === PoseThumbnail.THUMBNAIL_EXP_COLORED) {
                 if (exp_use_threshold) color = exp_painter.get_color_with_midpoint(ii, exp_threshold);
                 else color = exp_painter.get_color(ii);
             }
@@ -254,20 +254,20 @@ export class PoseThumbnail {
             xpos = (xarray[ii] - xmin) * scale + x_offset;
             ypos = (yarray[ii] - ymin) * scale + y_offset;
 
-            if (ii == 0 || sequence[ii] == EPars.RNABASE_CUT) {
+            if (ii === 0 || sequence[ii] === EPars.RNABASE_CUT) {
                 canvas.moveTo(xpos, ypos);
             } else {
                 canvas.lineTo(xpos, ypos);
             }
         }
 
-        if (colormode == PoseThumbnail.THUMBNAIL_WRONG_COLORED) {
+        if (colormode === PoseThumbnail.THUMBNAIL_WRONG_COLORED) {
             color = 0xFFFFFF;
             canvas.lineStyle(Math.min(size, 3), color, 1);
 
             for (let jj = 0; jj < right_xcoords.length; jj++) {
-                if (jj % 3 == 0) {
-                    if (sequence[jj / 3] == EPars.RNABASE_CUT) jj += 2;
+                if (jj % 3 === 0) {
+                    if (sequence[jj / 3] === EPars.RNABASE_CUT) jj += 2;
                     else canvas.moveTo(right_xcoords[jj], right_ycoords[jj]);
                 } else canvas.lineTo(right_xcoords[jj], right_ycoords[jj]);
             }
@@ -276,8 +276,8 @@ export class PoseThumbnail {
             canvas.lineStyle(Math.min(size, 3), color, 1);
 
             for (let jj = 0; jj < wrong_xcoords.length; jj++) {
-                if (jj % 3 == 0) {
-                    if (sequence[jj / 3] == EPars.RNABASE_CUT) jj += 2;
+                if (jj % 3 === 0) {
+                    if (sequence[jj / 3] === EPars.RNABASE_CUT) jj += 2;
                     else canvas.moveTo(wrong_xcoords[jj], wrong_ycoords[jj]);
                 } else {
                     canvas.lineTo(wrong_xcoords[jj], wrong_ycoords[jj]);
@@ -288,8 +288,8 @@ export class PoseThumbnail {
             canvas.lineStyle(Math.min(size, 3), color, 0.65);
 
             for (let jj = 0; jj < dontcare_xcoords.length; jj++) {
-                if (jj % 3 == 0) {
-                    if (sequence[jj / 3] == EPars.RNABASE_CUT) jj += 2;
+                if (jj % 3 === 0) {
+                    if (sequence[jj / 3] === EPars.RNABASE_CUT) jj += 2;
                     else canvas.moveTo(dontcare_xcoords[jj], dontcare_ycoords[jj]);
                 } else canvas.lineTo(dontcare_xcoords[jj], dontcare_ycoords[jj]);
             }

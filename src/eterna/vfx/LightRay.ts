@@ -62,13 +62,13 @@ export class LightRay extends SceneObject {
     }
 
     private static getColor(baseType: number): number {
-        if (baseType == EPars.RNABASE_ADENINE) {
+        if (baseType === EPars.RNABASE_ADENINE) {
             return 0xFFFF00;
-        } else if (baseType == EPars.RNABASE_URACIL) {
+        } else if (baseType === EPars.RNABASE_URACIL) {
             return 0x0000FF;
-        } else if (baseType == EPars.RNABASE_GUANINE) {
+        } else if (baseType === EPars.RNABASE_GUANINE) {
             return 0xFF0000;
-        } else if (baseType == EPars.RNABASE_CYTOSINE) {
+        } else if (baseType === EPars.RNABASE_CYTOSINE) {
             return 0x00FF00;
         } else {
             return 0xFFFFFF;

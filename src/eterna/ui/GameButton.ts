@@ -57,7 +57,7 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public rscriptID(value: RScriptUIElementID): GameButton {
-        if (this._rscriptID != value) {
+        if (this._rscriptID !== value) {
             this._rscriptID = value;
             this._rscriptClickReg.close();
             if (value != null) {
@@ -101,7 +101,7 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public hotkey(keycode: string, ctrl: boolean = false): GameButton {
-        if (keycode != this._hotkey || ctrl != this._hotkeyCtrl) {
+        if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
             this._hotkey = keycode;
             this._hotkeyCtrl = ctrl;
             if (this.isLiveObject) {
@@ -115,9 +115,9 @@ export class GameButton extends Button implements KeyboardListener {
     public onKeyboardEvent(e: KeyboardEvent): boolean {
         if (this.enabled
             && this.display.visible
-            && e.type == KeyboardEventType.KEY_DOWN
-            && e.code == this._hotkey
-            && e.ctrlKey == this._hotkeyCtrl) {
+            && e.type === KeyboardEventType.KEY_DOWN
+            && e.code === this._hotkey
+            && e.ctrlKey === this._hotkeyCtrl) {
             this.click();
             return true;
         }

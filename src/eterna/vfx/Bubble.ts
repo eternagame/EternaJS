@@ -32,13 +32,13 @@ export class Bubble extends SpriteObject implements Updatable {
         }
 
         if (useBlueBubble) {
-            if (this._bubbleSize == 0) bubbleType = 0;
-            else if (this._bubbleSize == 1) bubbleType = 1;
-            else if (this._bubbleSize == 2) bubbleType = 2;
+            if (this._bubbleSize === 0) bubbleType = 0;
+            else if (this._bubbleSize === 1) bubbleType = 1;
+            else if (this._bubbleSize === 2) bubbleType = 2;
             else bubbleType = 3;
-        } else if (this._bubbleSize == 0) bubbleType = 4;
-        else if (this._bubbleSize == 1) bubbleType = 5;
-        else if (this._bubbleSize == 2) bubbleType = 6;
+        } else if (this._bubbleSize === 0) bubbleType = 4;
+        else if (this._bubbleSize === 1) bubbleType = 5;
+        else if (this._bubbleSize === 2) bubbleType = 6;
         else bubbleType = 7;
 
         this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
@@ -109,11 +109,11 @@ export class Bubble extends SpriteObject implements Updatable {
         if (this._lastTime < 0) this._lastTime = current_time;
 
         if (!this.is_paused) {
-            if (this._bubbleSize == 0) {
+            if (this._bubbleSize === 0) {
                 this._accY += -30;
-            } else if (this._bubbleSize == 1) {
+            } else if (this._bubbleSize === 1) {
                 this._accY += -20;
-            } else if (this._bubbleSize == 2) {
+            } else if (this._bubbleSize === 2) {
                 this._accY += -10;
             } else {
                 this._accY += -110;
@@ -172,7 +172,7 @@ class NormalDistPRNG {
     }
 
     public static random(): number {
-        if (NormalDistPRNG.s == 0) {
+        if (NormalDistPRNG.s === 0) {
             NormalDistPRNG.seed(Date.now());
         }
 

@@ -47,7 +47,7 @@ export class ROPHighlight extends RScriptOp {
             this._env.DeleteVar(this._id);
         }
 
-        if (this._op_visible && this._mode == ROPHighlightMode.RNA) {
+        if (this._op_visible && this._mode === ROPHighlightMode.RNA) {
             // Highlight nucleotides.
             let res: number[] = [];
             for (let i: number = this._start_idx; i <= this._end_idx; ++i) {
@@ -55,7 +55,7 @@ export class ROPHighlight extends RScriptOp {
             }
             let rnaHighlight: RNAHighlightState = this._env.GetRNA().create_new_highlight(res);
             this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
-        } else if (this._op_visible && this._mode == ROPHighlightMode.UI) {
+        } else if (this._op_visible && this._mode === ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
             const highlightParent: any = this.GetUIElementReference(elementID, altParam);
             if (highlightParent == null) {
@@ -69,8 +69,8 @@ export class ROPHighlight extends RScriptOp {
             const offset: Point = ROPHighlight.GetUIElementOffset(elementID);
             const realWidth: Point = this.GetUIElementSize(uiElement, padding, elementID);
 
-            const new_x: number = (highlightParent == uiElement ? 0 : uiElement.x) - padding.x + offset.x;
-            const new_y: number = (highlightParent == uiElement ? 0 : uiElement.y) - padding.y + offset.y;
+            const new_x: number = (highlightParent === uiElement ? 0 : uiElement.x) - padding.x + offset.x;
+            const new_y: number = (highlightParent === uiElement ? 0 : uiElement.y) - padding.y + offset.y;
 
             const highlight = new Graphics();
             highlight.alpha = 0;
@@ -95,23 +95,23 @@ export class ROPHighlight extends RScriptOp {
         case 0:
             if (!this._op_visible) {
                 this._id = this._env.GetStringRef(arg);
-            } else if (this._mode == ROPHighlightMode.RNA) {
+            } else if (this._mode === ROPHighlightMode.RNA) {
                 this._start_idx = Number(arg) - 1;
-            } else if (this._mode == ROPHighlightMode.UI) {
+            } else if (this._mode === ROPHighlightMode.UI) {
                 this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
             }
             break;
         case 1:
-            if (this._mode == ROPHighlightMode.RNA) {
+            if (this._mode === ROPHighlightMode.RNA) {
                 this._end_idx = Number(arg) - 1;
-            } else if (this._mode == ROPHighlightMode.UI) {
+            } else if (this._mode === ROPHighlightMode.UI) {
                 this._id = this._env.GetStringRef(arg);
             }
             break;
         case 2:
-            if (this._mode == ROPHighlightMode.RNA) {
+            if (this._mode === ROPHighlightMode.RNA) {
                 this._id = this._env.GetStringRef(arg);
-            } else if (this._mode == ROPHighlightMode.UI) {
+            } else if (this._mode === ROPHighlightMode.UI) {
                 this._color = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
             }
             break;

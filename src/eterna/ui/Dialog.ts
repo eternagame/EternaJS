@@ -18,7 +18,7 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         let capture = new PointerCapture(bg);
         capture.beginCapture((e) => {
             e.stopPropagation();
-            if (e.type == "pointerdown") {
+            if (e.type === "pointerdown") {
                 this.onBGClicked();
             }
         });

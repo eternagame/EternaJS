@@ -66,7 +66,7 @@ export class RNAScript {
     private CreateOpFromInstruction(instruction: string): RScriptOp {
         instruction = instruction.replace(/^\s*/, "");
         instruction = instruction.replace(/\s*$/, "");
-        if (instruction == "") {
+        if (instruction === "") {
             return null;
         }
 
@@ -109,34 +109,34 @@ export class RNAScript {
             return null;
         } else if ((regResult = textboxRegex.exec(op))) {
             let textboxMode: ROPTextboxMode;
-            if (regResult[2].toUpperCase() == "ARROW") {
+            if (regResult[2].toUpperCase() === "ARROW") {
                 if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() == "LOCATION"
+                    textboxMode = regResult[3].toUpperCase() === "LOCATION"
                         ? ROPTextboxMode.ARROW_LOCATION
                         : ROPTextboxMode.ARROW_NUCLEOTIDE;
                 } else {
                     textboxMode = ROPTextboxMode.ARROW_DEFAULT;
                 }
             } else if (regResult[3]) {
-                textboxMode = regResult[3].toUpperCase() == "LOCATION"
+                textboxMode = regResult[3].toUpperCase() === "LOCATION"
                     ? ROPTextboxMode.TEXTBOX_LOCATION
                     : ROPTextboxMode.TEXTBOX_NUCLEOTIDE;
             } else {
                 textboxMode = ROPTextboxMode.TEXTBOX_DEFAULT;
             }
 
-            let show: boolean = regResult[1].toUpperCase() == "SHOW";
+            let show: boolean = regResult[1].toUpperCase() === "SHOW";
             return new ROPTextbox(this._env, show, textboxMode);
         } else if ((regResult = highlightRegex.exec(op))) {
             return new ROPHighlight(
-                regResult[1].toUpperCase() == "SHOW",
+                regResult[1].toUpperCase() === "SHOW",
                 regResult[2] ? ROPHighlightMode.UI : ROPHighlightMode.RNA,
                 this._env
             );
         } else if ((regResult = uiRegex.exec(op))) {
-            return new ROPUI(this._env, regResult[1].toUpperCase() != "HIDE", regResult[1].toUpperCase() == "DISABLE");
+            return new ROPUI(this._env, regResult[1].toUpperCase() !== "HIDE", regResult[1].toUpperCase() === "DISABLE");
         } else if ((regResult = hintRegex.exec(op))) {
-            return new ROPHint(regResult[1].toUpperCase() == "SHOW", this._env);
+            return new ROPHint(regResult[1].toUpperCase() === "SHOW", this._env);
         } else if ((regResult = waitRegex.exec(op))) {
             let waitType: ROPWaitType = regResult[1].toUpperCase();
             return new ROPWait(waitType, this._env);

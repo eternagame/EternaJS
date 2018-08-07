@@ -66,7 +66,7 @@ export class EnergyScoreDisplay extends Container {
     }
 
     public set_size(width: number, height: number): void {
-        if (width != this._width || height != this._height) {
+        if (width !== this._width || height !== this._height) {
             this._width = width;
             this._height = height;
             this.updateBG();

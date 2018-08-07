@@ -13,13 +13,13 @@ import {Matrix, Point} from "pixi.js";
 /** A utility class containing methods related to the Matrix class. */
 export class MatrixUtil {
     public static equals(a: Matrix, b: Matrix): boolean {
-        return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d && a.tx == b.tx && a.ty == b.ty;
+        return a.a === b.a && a.b === b.b && a.c === b.c && a.d === b.d && a.tx === b.tx && a.ty === b.ty;
     }
 
     /** Determines if the matrix is an identity matrix. */
     public static isIdentity(matrix: Matrix): boolean {
-        return matrix.a == 1.0 && matrix.b == 0.0 && matrix.c == 0.0 && matrix.d == 1.0
-            && matrix.tx == 0.0 && matrix.ty == 0.0;
+        return matrix.a === 1.0 && matrix.b === 0.0 && matrix.c === 0.0 && matrix.d === 1.0
+            && matrix.tx === 0.0 && matrix.ty === 0.0;
     }
 
     /** Transform a point with the given matrix. */
@@ -150,10 +150,10 @@ export class MatrixUtil {
                 while (valueString.length < numChars) valueString = ` ${valueString}`;
 
                 result += valueString;
-                if (x != numCols - 1) result += ", ";
+                if (x !== numCols - 1) result += ", ";
             }
 
-            if (y != numRows - 1) result += `\n${indent}`;
+            if (y !== numRows - 1) result += `\n${indent}`;
         }
 
         return result;

@@ -25,7 +25,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     public same_queue(): boolean {
-        return this._last_known_queue == this._queue;
+        return this._last_known_queue === this._queue;
     }
 
     public is_on(): boolean {
@@ -42,7 +42,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     public set enabled(value: boolean) {
-        if (value == this._enabled){
+        if (value === this._enabled){
             return;
         }
 
@@ -65,7 +65,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
 
     public set_highlight(type: HighlightType, elems: number[]): void {
         // TODO: don't store type in _queue
-        if (elems.length == 0) {
+        if (elems.length === 0) {
             this._queue = null;
         } else {
             this._queue = [type];
@@ -94,7 +94,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         } else  {
             // Redraw when we're dirty or the zoom level has changed
             this.display.visible = true;
-            if (this._dirty || this._pose.get_zoom_level() != this._prevZoomLevel || this.basePositionChanged) {
+            if (this._dirty || this._pose.get_zoom_level() !== this._prevZoomLevel || this.basePositionChanged) {
                 this.redraw();
                 this._prevZoomLevel = this._pose.get_zoom_level();
                 this._dirty = false;
@@ -109,7 +109,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         }
 
         let pos: Point = this._pose.get_base_xy(this._queue[1], HighlightBox.P);
-        return this._prevPosition.x != pos.x || this._prevPosition.y != pos.y;
+        return this._prevPosition.x !== pos.x || this._prevPosition.y !== pos.y;
     }
 
     private redraw(): void {
@@ -131,15 +131,15 @@ export class HighlightBox extends GameObject implements LateUpdatable {
 
         let type: HighlightType = this._queue[0];
 
-        if (type == HighlightType.STACK) {
+        if (type === HighlightType.STACK) {
             base_size = 25;
-        } else if (zoom_level == 0) {
+        } else if (zoom_level === 0) {
             base_size = 18;
-        } else if (zoom_level == 1) {
+        } else if (zoom_level === 1) {
             base_size = 14;
-        } else if (zoom_level == 2) {
+        } else if (zoom_level === 2) {
             base_size = 10;
-        } else if (zoom_level == 3) {
+        } else if (zoom_level === 3) {
             base_size = 7;
         } else {
             base_size = 4;
@@ -173,7 +173,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             break;
         }
 
-        if (type == HighlightType.STACK) {
+        if (type === HighlightType.STACK) {
             this.render_stack(color, base_size);
         } else {
             this.render_loop(color, base_size);
@@ -221,7 +221,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private render_loop(_color: number, base_size: number): void {
         let pairs: number[] = this._pose.get_pairs();
         let full_len: number = this._pose.get_full_sequence().length;
-        let strict: boolean = (this._queue[0] == HighlightType.LOOP);
+        let strict: boolean = (this._queue[0] === HighlightType.LOOP);
 
         for (let i: number = 1; i < this._queue.length; i += 2) {
             let loop_start: number = this._queue[i];
@@ -250,12 +250,12 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                     axis.y += from_prev.y;
                     num_gos++;
 
-                    if (ii == loop_start) {
+                    if (ii === loop_start) {
                         start_from.x = from_prev.x;
                         start_from.y = from_prev.y;
                     }
 
-                    if (ii == loop_end && ii == full_len - 1) {
+                    if (ii === loop_end && ii === full_len - 1) {
                         end_to.x = from_prev.x;
                         end_to.y = from_prev.y;
                     }
@@ -269,18 +269,18 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                     axis.y += to_next.y;
                     num_gos++;
 
-                    if (ii == loop_start) {
+                    if (ii === loop_start) {
                         start_from.x = to_next.x;
                         start_from.y = to_next.y;
                     }
 
-                    if (ii == loop_end) {
+                    if (ii === loop_end) {
                         end_to.x = to_next.x;
                         end_to.y = to_next.y;
                     }
                 }
 
-                if (num_gos == 0) {
+                if (num_gos === 0) {
                     throw new Error("Something wrong with loop highlight!");
                 }
 
@@ -301,7 +301,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                 this._graphics.lineTo(base_xy.x + axes[ii - loop_start].x * base_size, base_xy.y + axes[ii - loop_start].y * base_size);
             }
 
-            if (this._queue[0] != HighlightType.USER_DEFINED) {
+            if (this._queue[0] !== HighlightType.USER_DEFINED) {
                 this._graphics.lineTo(loop_end_xy.x + loop_end_axis.x * base_size + end_to.x * base_size, loop_end_xy.y + loop_end_axis.y * base_size + end_to.y * base_size);
                 this._graphics.lineTo(loop_end_xy.x - loop_end_axis.x * base_size + end_to.x * base_size, loop_end_xy.y - loop_end_axis.y * base_size + end_to.y * base_size);
 

@@ -13,7 +13,7 @@ export class Easing {
     public static easeInOut: EasingFunc = Easing.cubic.easeInOut;
 
     public static linear = (from: number, to: number, dt: number, t: number): number => {
-        if (t == 0) {
+        if (t === 0) {
             return to;
         }
         return from + ((to - from) * (dt / t));

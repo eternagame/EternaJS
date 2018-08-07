@@ -33,7 +33,7 @@ export class ExpPainter {
     }
 
     constructor(data: number[], start_index: number) {
-        if (data == null || data.length == 0) {
+        if (data == null || data.length === 0) {
             throw new Error("ExpPainter got empty array");
         }
 

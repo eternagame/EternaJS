@@ -92,7 +92,7 @@ export class EPars {
                 let is_continued: boolean = false;
                 if (last_stack_other < 0) {
                     is_continued = true;
-                } else if (pairs[ii] == last_stack_other - 1) {
+                } else if (pairs[ii] === last_stack_other - 1) {
                     is_continued = true;
                 }
 
@@ -120,13 +120,13 @@ export class EPars {
     }
 
     public static get_letter_color(letter: string): number {
-        if (letter == "G") {
+        if (letter === "G") {
             return 0xFF3333;
-        } else if (letter == "A") {
+        } else if (letter === "A") {
             return 0xFFFF33;
-        } else if (letter == "U") {
+        } else if (letter === "U") {
             return 0x7777FF;
-        } else if (letter == "C") {
+        } else if (letter === "C") {
             return 0x33FF33;
         }
 
@@ -141,13 +141,13 @@ export class EPars {
     }
 
     public static get_colored_letter(letter: string): string {
-        if (letter == "G") {
+        if (letter === "G") {
             return "<G>G</G>";
-        } else if (letter == "A") {
+        } else if (letter === "A") {
             return "<A>A</A>";
-        } else if (letter == "U") {
+        } else if (letter === "U") {
             return "<U>U</U>";
-        } else if (letter == "C") {
+        } else if (letter === "C") {
             return "<C>C</C>";
         }
 
@@ -202,7 +202,7 @@ export class EPars {
         let ii: number = 0;
         let start_index: number = -1;
         for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] == letter) {
+            if (sequence[ii] === letter) {
                 if (start_index < 0) {
                     start_index = ii;
                 }
@@ -216,7 +216,7 @@ export class EPars {
                         for (jj = start_index; jj < ii; jj++) {
                             all_locked = all_locked && locks[jj];
                         }
-                        if (all_locked == false) {
+                        if (all_locked === false) {
                             max_consecutive = ii - start_index;
                         }
                     }
@@ -245,7 +245,7 @@ export class EPars {
         }
 
         for (ii = 0; ii < sequence.length; ii++) {
-            if (sequence[ii] == letter) {
+            if (sequence[ii] === letter) {
                 if (start_index < 0) {
                     start_index = ii;
                 }
@@ -260,7 +260,7 @@ export class EPars {
                         for (jj = start_index; jj < ii; jj++) {
                             all_locked = all_locked && locks[jj];
                         }
-                        if (all_locked == false) {
+                        if (all_locked === false) {
                             restricted.push(start_index);
                             restricted.push(ii - 1);
                         }
@@ -298,15 +298,15 @@ export class EPars {
     }
 
     public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
-        if (value == EPars.RNABASE_ADENINE) {
+        if (value === EPars.RNABASE_ADENINE) {
             return "A";
-        } else if (value == EPars.RNABASE_URACIL) {
+        } else if (value === EPars.RNABASE_URACIL) {
             return "U";
-        } else if (value == EPars.RNABASE_GUANINE) {
+        } else if (value === EPars.RNABASE_GUANINE) {
             return "G";
-        } else if (value == EPars.RNABASE_CYTOSINE) {
+        } else if (value === EPars.RNABASE_CYTOSINE) {
             return "C";
-        } else if (value == EPars.RNABASE_CUT) {
+        } else if (value === EPars.RNABASE_CUT) {
             if (allowCut) {
                 return "&";
             } else {
@@ -320,15 +320,15 @@ export class EPars {
     }
 
     public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
-        if (value == "A" || value == "a") {
+        if (value === "A" || value === "a") {
             return EPars.RNABASE_ADENINE;
-        } else if (value == "G" || value == "g") {
+        } else if (value === "G" || value === "g") {
             return EPars.RNABASE_GUANINE;
-        } else if (value == "U" || value == "u") {
+        } else if (value === "U" || value === "u") {
             return EPars.RNABASE_URACIL;
-        } else if (value == "C" || value == "c") {
+        } else if (value === "C" || value === "c") {
             return EPars.RNABASE_CYTOSINE;
-        } else if (value == "&" || value == "-" || value == "+") {
+        } else if (value === "&" || value === "-" || value === "+") {
             if (allowCut) {
                 return EPars.RNABASE_CUT;
             } else {
@@ -395,7 +395,7 @@ export class EPars {
         let there_start: number = Math.min(pair_start_there, pair_end_there);
         let there_end: number = Math.max(pair_start_there, pair_end_there);
 
-        if (pair_start_here == there_start) {
+        if (pair_start_here === there_start) {
             return null;
         }
 
@@ -426,22 +426,22 @@ export class EPars {
         }
 
         for (let jj: number = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == "(") {
+            if (parenthesis.charAt(jj) === "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ")") {
-                if (pair_stack.length == 0) {
+            } else if (parenthesis.charAt(jj) === ")") {
+                if (pair_stack.length === 0) {
                     return "Unbalanced parenthesis notation";
                 }
 
                 pair_stack.pop();
-            } else if (parenthesis.charAt(jj) == ".") {
+            } else if (parenthesis.charAt(jj) === ".") {
 
             } else {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }
 
-        if (pair_stack.length != 0) {
+        if (pair_stack.length !== 0) {
             return "Unbalanced parenthesis notation";
         }
 
@@ -472,10 +472,10 @@ export class EPars {
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == "(") {
+            if (parenthesis.charAt(jj) === "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ")") {
-                if (pair_stack.length == 0) {
+            } else if (parenthesis.charAt(jj) === ")") {
+                if (pair_stack.length === 0) {
                     throw new Error("Invalid parenthesis notation");
                 }
 
@@ -498,7 +498,7 @@ export class EPars {
             if (pairs[ii] < 0) {
                 ret_pairs[ii] = -1;
             } else if (pairs[ii] > ii) {
-                if (EPars.pair_type(seq[ii], seq[pairs[ii]]) != 0) {
+                if (EPars.pair_type(seq[ii], seq[pairs[ii]]) !== 0) {
                     ret_pairs[ii] = pairs[ii];
                     ret_pairs[pairs[ii]] = ii;
                 } else {
@@ -532,7 +532,7 @@ export class EPars {
                 str += "(";
             } else if (bi_pairs[ii] >= 0) {
                 str += ")";
-            } else if (seq != null && seq[ii] == EPars.RNABASE_CUT) {
+            } else if (seq != null && seq[ii] === EPars.RNABASE_CUT) {
                 str += "&";
             } else {
                 str += ".";
@@ -551,20 +551,20 @@ export class EPars {
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) == ".") {
+            if (parenthesis.charAt(jj) === ".") {
                 continue;
-            } else if (parenthesis.charAt(jj) == "|") {
+            } else if (parenthesis.charAt(jj) === "|") {
                 forced[jj] = EPars.FORCE_PAIRED;
-            } else if (parenthesis.charAt(jj) == "<") {
+            } else if (parenthesis.charAt(jj) === "<") {
                 forced[jj] = EPars.FORCE_PAIRED3P;
-            } else if (parenthesis.charAt(jj) == ">") {
+            } else if (parenthesis.charAt(jj) === ">") {
                 forced[jj] = EPars.FORCE_PAIRED5P;
-            } else if (parenthesis.charAt(jj) == "x") {
+            } else if (parenthesis.charAt(jj) === "x") {
                 forced[jj] = EPars.FORCE_UNPAIRED;
-            } else if (parenthesis.charAt(jj) == "(") {
+            } else if (parenthesis.charAt(jj) === "(") {
                 pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) == ")") {
-                if (pair_stack.length == 0) {
+            } else if (parenthesis.charAt(jj) === ")") {
+                if (pair_stack.length === 0) {
                     throw new Error("Invalid parenthesis notation");
                 }
 
@@ -588,13 +588,13 @@ export class EPars {
                 str = str.concat("(");
             } else if (forced[ii] >= 0) {
                 str = str.concat(")");
-            } else if (forced[ii] == EPars.FORCE_PAIRED) {
+            } else if (forced[ii] === EPars.FORCE_PAIRED) {
                 str = str.concat("|");
-            } else if (forced[ii] == EPars.FORCE_PAIRED3P) {
+            } else if (forced[ii] === EPars.FORCE_PAIRED3P) {
                 str = str.concat("<");
-            } else if (forced[ii] == EPars.FORCE_PAIRED5P) {
+            } else if (forced[ii] === EPars.FORCE_PAIRED5P) {
                 str = str.concat(">");
-            } else if (forced[ii] == EPars.FORCE_UNPAIRED) {
+            } else if (forced[ii] === EPars.FORCE_UNPAIRED) {
                 str = str.concat("x");
             } else {
                 str = str.concat(".");
@@ -620,10 +620,10 @@ export class EPars {
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] == EPars.RNABASE_GUANINE && sequence[pairs[ii]] == EPars.RNABASE_URACIL) {
+                if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
                     ret++;
                 }
-                if (sequence[ii] == EPars.RNABASE_URACIL && sequence[pairs[ii]] == EPars.RNABASE_GUANINE) {
+                if (sequence[ii] === EPars.RNABASE_URACIL && sequence[pairs[ii]] === EPars.RNABASE_GUANINE) {
                     ret++;
                 }
             }
@@ -637,10 +637,10 @@ export class EPars {
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] == EPars.RNABASE_GUANINE && sequence[pairs[ii]] == EPars.RNABASE_CYTOSINE) {
+                if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_CYTOSINE) {
                     ret++;
                 }
-                if (sequence[ii] == EPars.RNABASE_CYTOSINE && sequence[pairs[ii]] == EPars.RNABASE_GUANINE) {
+                if (sequence[ii] === EPars.RNABASE_CYTOSINE && sequence[pairs[ii]] === EPars.RNABASE_GUANINE) {
                     ret++;
                 }
             }
@@ -654,10 +654,10 @@ export class EPars {
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (sequence[ii] == EPars.RNABASE_ADENINE && sequence[pairs[ii]] == EPars.RNABASE_URACIL) {
+                if (sequence[ii] === EPars.RNABASE_ADENINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
                     ret++;
                 }
-                if (sequence[ii] == EPars.RNABASE_URACIL && sequence[pairs[ii]] == EPars.RNABASE_ADENINE) {
+                if (sequence[ii] === EPars.RNABASE_URACIL && sequence[pairs[ii]] === EPars.RNABASE_ADENINE) {
                     ret++;
                 }
             }
@@ -669,7 +669,7 @@ export class EPars {
     public static sequence_diff(seq1: number[], seq2: number[]): number {
         let diff: number = 0;
         for (let ii: number = 0; ii < seq1.length; ii++) {
-            if (seq1[ii] != seq2[ii]) {
+            if (seq1[ii] !== seq2[ii]) {
                 diff++;
             }
         }
@@ -677,13 +677,13 @@ export class EPars {
     }
 
     public static are_pairs_same(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
-        if (a_pairs.length != b_pairs.length) {
+        if (a_pairs.length !== b_pairs.length) {
             return false;
         }
 
         for (let ii: number = 0; ii < a_pairs.length; ii++) {
             if (b_pairs[ii] >= 0) {
-                if (b_pairs[ii] != a_pairs[ii]) {
+                if (b_pairs[ii] !== a_pairs[ii]) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }
@@ -691,7 +691,7 @@ export class EPars {
             }
 
             if (a_pairs[ii] >= 0) {
-                if (b_pairs[ii] != a_pairs[ii]) {
+                if (b_pairs[ii] !== a_pairs[ii]) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }
@@ -703,7 +703,7 @@ export class EPars {
 
     public static has_cut(seq: number[], from: number, to: number): boolean {
         for (let ii: number = from; ii <= to; ii++) {
-            if (seq[ii] == EPars.RNABASE_CUT) {
+            if (seq[ii] === EPars.RNABASE_CUT) {
                 return true;
             }
         }
@@ -917,7 +917,7 @@ export class EPars {
 
     public static get_tetra_loop_bonus(loop: string): number {
         for (let ii: number = 0; ii < EPars.tetra_loops.length; ii++) {
-            if (EPars.tetra_loops[ii] == loop) {
+            if (EPars.tetra_loops[ii] === loop) {
                 return EPars.tetra_energy_37[ii];
             }
         }
@@ -952,19 +952,19 @@ export class EPars {
     }
 
     public static get_int22(t1: number, t2: number, s1: number, s2: number, s3: number, s4: number): number {
-        if (t1 == 0) {
+        if (t1 === 0) {
             return 0;
-        } else if (t1 == 1) {
+        } else if (t1 === 1) {
             return IntLoopPars.int22_37_1[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 == 2) {
+        } else if (t1 === 2) {
             return IntLoopPars.int22_37_2[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 == 3) {
+        } else if (t1 === 3) {
             return IntLoopPars.int22_37_3[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 == 4) {
+        } else if (t1 === 4) {
             return IntLoopPars.int22_37_4[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 == 5) {
+        } else if (t1 === 5) {
             return IntLoopPars.int22_37_5[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 == 6) {
+        } else if (t1 === 6) {
             return IntLoopPars.int22_37_6[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
         } else {
             return IntLoopPars.int22_37_7[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];

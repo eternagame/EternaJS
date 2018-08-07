@@ -37,7 +37,7 @@ export class EternaMenu extends GamePanel implements Enableable {
     }
 
     public add_menu_button(menuButton: GameButton): number {
-        let existingIdx = _.findIndex(this._menus, (menu): boolean => menu.menuButton == menuButton);
+        let existingIdx = _.findIndex(this._menus, (menu): boolean => menu.menuButton === menuButton);
         if (existingIdx >= 0) {
             return existingIdx;
         }
@@ -119,7 +119,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this._menus.push(menu);
 
         menu.panel = new GamePanel(0, 0.85);
-        if (this._menu_style == EternaMenuStyle.PULLUP) {
+        if (this._menu_style === EternaMenuStyle.PULLUP) {
             menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
         }
         menu.panel.display.visible = false;
@@ -139,7 +139,7 @@ export class EternaMenu extends GamePanel implements Enableable {
 
     private do_layout(): void {
         for (let menu of this._menus) {
-            if (menu.itemButtons.length == 0) {
+            if (menu.itemButtons.length === 0) {
                 menu.panel.set_size(0, 0);
                 continue;
             }
@@ -160,7 +160,7 @@ export class EternaMenu extends GamePanel implements Enableable {
             menu.panel.set_size(width_walker, height_walker);
         }
 
-        let space: number = (this._menu_style == EternaMenuStyle.PULLUP ? 1 : 10);
+        let space: number = (this._menu_style === EternaMenuStyle.PULLUP ? 1 : 10);
         let width_offset: number = space;
         this._menu_height = 0;
 
@@ -169,9 +169,9 @@ export class EternaMenu extends GamePanel implements Enableable {
             let buttonHeight: number = menu.menuButton.container.height;
 
             menu.menuButton.display.position = new Point(width_offset, 0);
-            if (this._menu_style == EternaMenuStyle.DEFAULT) {
+            if (this._menu_style === EternaMenuStyle.DEFAULT) {
                 menu.panel.display.position = new Point(0, buttonHeight - 1);
-            } else if (this._menu_style == EternaMenuStyle.PULLUP) {
+            } else if (this._menu_style === EternaMenuStyle.PULLUP) {
                 menu.panel.display.position = new Point(0, -menu.panel.get_panel_height() - 1);
             }
             width_offset += buttonWidth + space;
