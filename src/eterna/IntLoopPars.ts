@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 export class IntLoopPars {
     public static readonly int11_37: number[] = [
         0, 0, 0, 0, 0,
