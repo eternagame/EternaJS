@@ -1,18 +1,17 @@
 import * as log from "loglevel";
-import {DisplayObject, Graphics, Point} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {EternaMenu} from "../ui/EternaMenu";
 import {ColorUtil} from "../util/ColorUtil";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
-import {RScriptUIElementID} from "./RScriptUIElementID";
+import {GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
 
 export enum ROPHighlightMode {
     RNA = "RNA",
@@ -39,7 +38,7 @@ export class ROPHighlight extends RScriptOp {
         // Remove highlight with ID.
         if (this._env.Exists(this._id)) {
             let existing: any = this._env.GetVar(this._id);
-            if (existing instanceof SceneObject) {
+            if (existing instanceof GameObject) {
                 existing.destroySelf();
             } else if (existing instanceof RNAHighlightState) {
                 this.RemoveHighlight(existing);
@@ -69,8 +68,9 @@ export class ROPHighlight extends RScriptOp {
             const offset: Point = ROPHighlight.GetUIElementOffset(elementID);
             const realWidth: Point = this.GetUIElementSize(uiElement, padding, elementID);
 
-            const new_x: number = (highlightParent === uiElement ? 0 : uiElement.x) - padding.x + offset.x;
-            const new_y: number = (highlightParent === uiElement ? 0 : uiElement.y) - padding.y + offset.y;
+            const uiElementBounds = GetRScriptUIElementBounds(uiElement);
+            const new_x: number = (highlightParent === uiElement ? 0 : uiElementBounds.x) - padding.x + offset.x;
+            const new_y: number = (highlightParent === uiElement ? 0 : uiElementBounds.y) - padding.y + offset.y;
 
             const highlight = new Graphics();
             highlight.alpha = 0;
@@ -121,15 +121,9 @@ export class ROPHighlight extends RScriptOp {
         }
     }
 
-    private GetUIElementSize(uiObj: any, padding: Point, key: RScriptUIElementID): Point {
-        let size: Point = new Point(2 * padding.x, 2 * padding.y);
-        if (uiObj instanceof GameObject && uiObj.display != null) {
-            size.x += DisplayUtil.width(uiObj.display);
-            size.y += DisplayUtil.height(uiObj.display);
-        } else if (uiObj instanceof DisplayObject) {
-            size.x += DisplayUtil.width(uiObj);
-            size.y += DisplayUtil.height(uiObj);
-        }
+    private GetUIElementSize(uiObj: RScriptUIElement, padding: Point, key: RScriptUIElementID): Point {
+        const bounds = GetRScriptUIElementBounds(uiObj);
+        let size: Point = new Point(bounds.width + (2 * padding.x), bounds.height + (2 * padding.y));
 
         switch (key) {
         case RScriptUIElementID.OBJECTIVES:

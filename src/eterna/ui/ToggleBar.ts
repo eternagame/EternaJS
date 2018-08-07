@@ -10,7 +10,7 @@ import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
 import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
-import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
+import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;

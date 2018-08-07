@@ -9,7 +9,7 @@ import {Registration} from "../../signals/Registration";
 import {Registrations} from "../../signals/Registrations";
 import {Value} from "../../signals/Value";
 import {ROPWait} from "../rscript/ROPWait";
-import {RScriptUIElementID} from "../rscript/RScriptUIElementID";
+import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
 
 export class GameButton extends Button implements KeyboardListener {
