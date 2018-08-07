@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 /**
  * KeyboardEvent.code constants
  * (note: NOT KeyboardEvent.keyCode)

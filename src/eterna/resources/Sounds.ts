@@ -1,3 +1,5 @@
+/* eslint-disable max-len, global-require */
+
 export class Sounds {
     public static readonly SoundSwitch: string = require("assets/Sounds/1-TextBubble-Click-A.mp3");
     public static readonly SoundButtonClick: string = require("assets/Sounds/1-TextBubble-Click-C.mp3");

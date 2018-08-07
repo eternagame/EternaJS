@@ -1,3 +1,5 @@
+/* eslint-disable max-len, global-require */
+
 import * as _ from "lodash";
 
 export class Bitmaps {
