@@ -81,8 +81,8 @@ export class ROPHighlight extends RScriptOp {
 
             const highlightObj = new SceneObject(highlight);
             highlightObj.addObject(new RepeatingTask(() => new SerialTask(
-                new AlphaTask(1, 0.75, Easing.easeInOut),
-                new AlphaTask(0, 0.75, Easing.easeInOut)
+                new AlphaTask(0.2, 0.75, Easing.easeInOut),
+                new AlphaTask(1.0, 0.75, Easing.easeInOut),
             )));
 
             highlightParent.addObject(highlightObj, highlightParent.container);
