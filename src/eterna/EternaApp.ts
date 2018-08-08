@@ -45,6 +45,7 @@ interface EternaAppParameters {
     puzzleID?: number,
 }
 
+/** Entry point for the game */
 export class EternaApp extends FlashbangApp {
     public constructor({
         containerID = "eterna-container", width, height, puzzleID
