@@ -83,7 +83,7 @@ export class PoseEditMode extends GameMode {
         this.addObject(this._toolbar, this._uiLayer);
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, Align.CENTER, Align.BOTTOM,
-            Align.CENTER, Align.BOTTOM, 0, -20);
+            Align.CENTER, Align.BOTTOM, 20, -20);
 
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());

@@ -10,7 +10,7 @@ import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Eterna} from "../../Eterna";
-import {Puzzle, PuzzleType} from "../../puzzle/Puzzle";
+import {BoostersData, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
 import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
@@ -57,7 +57,7 @@ export class PoseEditToolbar extends ContainerObject {
         super.added();
 
         const SPACE_NARROW: number = 7;
-        const SPACE_WIDE: number = 28;
+        const SPACE_WIDE: number = 25;
 
         this._invisibleBackground = new Graphics();
         this._invisibleBackground
@@ -139,7 +139,7 @@ export class PoseEditToolbar extends ContainerObject {
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
         this.addObject(this.target_button, this._toolbarLayout);
 
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        this._toolbarLayout.addHSpacer(SPACE_WIDE);
 
         // PALETTE
         this.palette = new NucleotidePalette();
@@ -276,54 +276,43 @@ export class PoseEditToolbar extends ContainerObject {
             this.addObject(this.hint_button, this._toolbarLayout);
         }
 
-        let obj: any = this._puzzle.get_boosters();
-        if (obj) {
-            log.debug("TODO: paint_tools");
-            // if (obj['paint_tools'] != null) {
-            //     for (let k = 0; k < obj.paint_tools.length; k++) {
-            //         let booster = new Booster(this, obj.paint_tools[k], (me: Booster, dummy: number) => {
-            //             me.on_load();
-            //             let button: GameButton = me.create_button();
-            //             button.set_click_callback(() => {
-            //                 this.set_poses_color(me.get_tool_color());
-            //                 this.deselect_all_colorings();
-            //                 button.set_selected(true);
-            //             });
-            //             this.dyn_paint_tools.push(button);
-            //             this.tools_container.addObject(button);
-            //             this.layout_bars();
-            //         });
-            //     }
-            // }
-            // if (obj['actions'] != null) {
-            // this.boosters_button = new GameButton()
-            //     .up(BitmapManager.NovaBoosters)
-            //     .over(BitmapManager.NovaBoosters)
-            //     .down(BitmapManager.NovaBoosters);
-            //     let idx: number = this.actionMenu.add_menu_button(this.boosters_button);
-            //     for (let k = 0; k < obj.actions.length; k++) {
-            //         obj.actions[k]['menu_index'] = k;
-            //         let booster = new Booster(this, obj.actions[k], (me: Booster, midx: number = 0) => {
-            //             let button: GameButton = me.create_button(14);
-            //             button.set_click_callback(() => {
-            //                 me.on_run();
-            //             });
-            //             this.actionMenu.add_sub_menu_button_at(idx, button, midx);
-            //             this.dyn_action_tools.push(button);
-            //             this.layout_bars();
-            //         });
-            //     }
-            // }
-            // let infotxt: string;
-            // if (obj['mission'] != null) {
-            //     missionDescriptionOverride = obj.mission['text'];
-            // }
-            // if (obj['mission_cleared'] != null) {
-            //     infotxt = obj.mission_cleared['info'];
-            //     let moretxt: string = obj.mission_cleared['more'];
-            //     this.mission_cleared.setup_screen(infotxt, moretxt);
-            //     this.yt_id = obj.mission_cleared['yt'];
-            // }
+        let boostersData: BoostersData = this._puzzle.get_boosters();
+        if (boostersData) {
+            if (boostersData.paint_tools != null) {
+                log.debug("TODO: boostersData.paint_tools");
+                // for (let k = 0; k < boostersData.paint_tools.length; k++) {
+                //     let booster = new Booster(this, boostersData.paint_tools[k], (me: Booster, dummy: number) => {
+                //         me.on_load();
+                //         let button: GameButton = me.create_button();
+                //         button.clicked.connect(() => {
+                //             this.set_poses_color(me.get_tool_color());
+                //             this.deselect_all_colorings();
+                //             button.set_selected(true);
+                //         });
+                //         this.dyn_paint_tools.push(button);
+                //         this.tools_container.addObject(button);
+                //         this.layout_bars();
+                //     });
+                // }
+            }
+
+            if (boostersData.actions != null) {
+                this.boosters_button = new GameButton().allStates(Bitmaps.NovaBoosters);
+                let idx: number = this.actionMenu.add_menu_button(this.boosters_button);
+                log.debug("TODO: boostersData.actions");
+                // for (let k = 0; k < boostersData.actions.length; k++) {
+                //     boostersData.actions[k]['menu_index'] = k;
+                //     let booster = new Booster(this, boostersData.actions[k], (me: Booster, midx: number = 0) => {
+                //         let button: GameButton = me.create_button(14);
+                //         button.set_click_callback(() => {
+                //             me.on_run();
+                //         });
+                //         this.actionMenu.add_sub_menu_button_at(idx, button, midx);
+                //         this.dyn_action_tools.push(button);
+                //         this.layout_bars();
+                //     });
+                // }
+            }
         }
 
         this._toolbarLayout.layout();
