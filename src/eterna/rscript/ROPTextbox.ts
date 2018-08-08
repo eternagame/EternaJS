@@ -86,8 +86,7 @@ export class ROPTextbox extends RScriptOp {
                 textStyle.wordWrapWidth = 185;
             }
 
-            // textBox.use_html(true);
-            textBox.set_styled_text(new StyledTextBuilder(textStyle).append(this._text));
+            textBox.set_styled_text(new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text));
 
             if (this._title.length > 0) {
                 textBox.set_title(this._title);

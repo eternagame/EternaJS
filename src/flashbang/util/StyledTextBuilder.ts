@@ -1,5 +1,6 @@
 import * as log from "loglevel";
 import {default as MultiStyleText, ExtendedTextStyle, TextStyleSet} from "pixi-multistyle-text";
+import {ColorUtil} from "../../eterna/util/ColorUtil";
 
 export class StyledTextBuilder {
     public constructor(defaultStyle?: ExtendedTextStyle) {
@@ -81,6 +82,64 @@ export class StyledTextBuilder {
             this.popStyle();
         }
         return this;
+    }
+
+    /**
+     * Attempts to parse HTML style tags from the given string.
+     * In general: don't do this! It's primarily here for compatibility with Eterna's tutorial scripts.
+     * Supported tags: <font color = "#xxxxxx">, <b>
+     */
+    public appendHTMLStyledText(text: string): StyledTextBuilder {
+        type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, ExtendedTextStyle];
+
+        const parseHTMLStyle = (text: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback): string => {
+            while (true) {
+                let openMatch = openTag.exec(text);
+                if (openMatch == null) {
+                    break;
+                }
+
+                const [styleName, style] = createStyle(openMatch);
+                if (!this.hasStyle(styleName)) {
+                    this.addStyle(styleName, style);
+                }
+
+                text = text.slice(0, openMatch.index) + `<${styleName}>` + text.slice(openMatch.index + openMatch[0].length);
+
+                let closeMatch = closeTag.exec(text);
+                if (closeMatch == null) {
+                    break;
+                }
+
+                text = text.slice(0, closeMatch.index) + `</${styleName}>` + text.slice(closeMatch.index + closeMatch[0].length);
+            }
+
+            return text;
+        };
+
+        // Parse <font>
+        const FONT_OPEN = /<font\s*color\s*=\s*["']#(\w*)["']>/i;
+        const FONT_CLOSE = /<\/font>/i;
+        text = parseHTMLStyle(text, FONT_OPEN, FONT_CLOSE, (openMatch) => {
+            let colorString = openMatch[1];
+            let color: number;
+            try {
+                color = ColorUtil.fromString(`#${colorString}`);
+            } catch (e) {
+                log.warn(`Error parsing color string '${colorString}': ${e}`);
+                color = 0xffffff;
+            }
+
+            const styleName = `__color_#${colorString}`;
+            return [styleName, {fill: color}];
+        });
+
+        // Parse <b>
+        const BOLD_OPEN = /<b>/i;
+        const BOLD_CLOSE = /<\/b>/i;
+        text = parseHTMLStyle(text, BOLD_OPEN, BOLD_CLOSE, () => ["__bold", {fontStyle: "bold"}]);
+
+        return this.append(text);
     }
 
     public getStyle(name: string): ExtendedTextStyle {
