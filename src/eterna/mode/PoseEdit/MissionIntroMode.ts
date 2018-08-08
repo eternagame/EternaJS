@@ -5,6 +5,7 @@ import {AppMode} from "../../../flashbang/core/AppMode";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
+import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../../EPars";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
@@ -43,7 +44,14 @@ export class MissionIntroMode extends AppMode {
             123
         );
 
-        let descriptionLabel = Fonts.std_light(this._puzzleDescription).color(0xBCD8E3).fontSize(36).leading(50)
+        const descriptionStyle = {
+            fontFamily: Fonts.STDFONT_LIGHT,
+            fill: 0xBCD8E3,
+            fontSize: 36,
+            leading: 50
+        };
+        let descriptionLabel = new StyledTextBuilder(descriptionStyle)
+            .appendHTMLStyledText(this._puzzleDescription)
             .build();
         this.modeSprite.addChild(descriptionLabel);
         descriptionLabel.position = new Point(
