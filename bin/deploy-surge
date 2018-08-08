@@ -8,9 +8,9 @@ cleanup() {
 }
 
 cp .env .env.cur
-cp .env.prod .env
+cp .env.surge .env
 
 npm run clean
-npm run build:prod
+npm run build:surge
 
-surge dist/prod --domain eterna.surge.sh
+surge dist/surge --domain eterna.surge.sh
