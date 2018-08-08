@@ -31,8 +31,6 @@ enum PuzzleID {
     MicrofluidicChip = 6502997, // level 4/7 - MissionCleared info
     AandB_RO = 6892307, // Oligos
     Tutorial1 = 6502927, // rscript
-    Tutorial2 = 6502942,
-    Tutorial3 = 6502943,
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
@@ -157,7 +155,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1024;
     private readonly _height: number = 768;
-    private readonly _puzzleID: number = PuzzleID.Tutorial1;
+    private readonly _puzzleID: number = PuzzleID.Tutorial4;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
