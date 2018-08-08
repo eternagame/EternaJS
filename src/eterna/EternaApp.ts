@@ -35,6 +35,7 @@ enum PuzzleID {
     Tutorial3 = 6502943,
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
+    Tutorial8 = 6502947,
 }
 
 interface EternaAppParameters {
@@ -85,17 +86,23 @@ export class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(process.env["APP_SERVER_URL"]);
         Eterna.sound = new SoundManager(Eterna.settings);
 
+        let loadingMode = new LoadingMode("");
+        this._modeStack.unwindToMode(loadingMode);
+
         Fonts.loadFonts()
-            .then(() => this.authenticate())
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode("Loading assets..."));
+                loadingMode.text = "Authenticating...";
+                return this.authenticate();
+            })
+            .then(() => {
+                loadingMode.text = "Loading assets...";
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)]);
             })
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
-                this._modeStack.unwindToMode(new LoadingMode(`Loading puzzle ${this._puzzleID}...`));
+                loadingMode.text = `Loading puzzle ${this._puzzleID}...`;
                 return PuzzleManager.instance.get_puzzle_by_nid(this._puzzleID);
             })
             .then((puzzle) => {
@@ -149,7 +156,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1024;
     private readonly _height: number = 768;
-    private readonly _puzzleID: number = PuzzleID.Tutorial6;
+    private readonly _puzzleID: number = PuzzleID.Tutorial8;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
