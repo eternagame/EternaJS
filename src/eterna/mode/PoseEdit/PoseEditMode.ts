@@ -35,6 +35,7 @@ import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
+import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
@@ -156,10 +157,6 @@ export class PoseEditMode extends GameMode {
         this._constraint_boxes = [];
         this._constraintsLayer = new Container();
         this._uiLayer.addChild(this._constraintsLayer);
-
-        // this._game_stamp = new GameBitmap(null);
-        // this._game_stamp.visible = false;
-        // this.addObject(this._game_stamp);
 
         this._exit_button = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exit_button.display.scale = new Point(0.3, 0.3);
@@ -494,10 +491,15 @@ export class PoseEditMode extends GameMode {
         puzzleIcon.position = new Point(11, 8);
         this.modeSprite.addChild(puzzleIcon);
 
-        let puzzleTitle = Fonts.arial(this._puzzle.get_puzzle_name(true), 14).bold().color(0xffffff).build();
-        this.modeSprite.addChild(puzzleTitle);
+        let puzzleTitle = new HTMLTextObject(this._puzzle.get_puzzle_name(true))
+            .font(Fonts.ARIAL)
+            .fontSize(14)
+            .bold()
+            .color(0xffffff);
+        puzzleTitle.hideWhenModeInactive();
+        this.addObject(puzzleTitle, this.modeSprite);
         DisplayUtil.positionRelative(
-            puzzleTitle, Align.LEFT, Align.CENTER,
+            puzzleTitle.display, Align.LEFT, Align.CENTER,
             puzzleIcon, Align.RIGHT, Align.CENTER, 3, 0);
 
         this._constraintsLayer.visible = true;
