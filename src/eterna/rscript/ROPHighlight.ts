@@ -5,6 +5,7 @@ import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {Easing} from "../../flashbang/util/Easing";
 import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {EternaMenu} from "../ui/EternaMenu";
@@ -66,7 +67,7 @@ export class ROPHighlight extends RScriptOp {
             // Give it a bit of padding so the highlight isn't so tight.
             const padding = new Point(5, 5);
             const offset: Point = ROPHighlight.GetUIElementOffset(elementID);
-            const realWidth: Point = this.GetUIElementSize(uiElement, padding, elementID);
+            const elementSize: Point = this.GetUIElementSize(uiElement, padding, elementID);
 
             const uiElementBounds = GetRScriptUIElementBounds(uiElement);
             const new_x: number = (highlightParent === uiElement ? 0 : uiElementBounds.x) - padding.x + offset.x;
@@ -76,12 +77,12 @@ export class ROPHighlight extends RScriptOp {
             highlight.alpha = 0;
             highlight.clear();
             highlight.lineStyle(5, this._color, 0.7);
-            highlight.drawRoundedRect(new_x, new_y, realWidth.x, realWidth.y, 10);
+            highlight.drawRoundedRect(new_x, new_y, elementSize.x, elementSize.y, 4);
 
             const highlightObj = new SceneObject(highlight);
             highlightObj.addObject(new RepeatingTask(() => new SerialTask(
-                new AlphaTask(1, 0.5),
-                new AlphaTask(0, 0.5)
+                new AlphaTask(1, 0.75, Easing.easeInOut),
+                new AlphaTask(0, 0.75, Easing.easeInOut)
             )));
 
             highlightParent.addObject(highlightObj, highlightParent.container);
@@ -250,7 +251,7 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.UG:
         case RScriptUIElementID.GC:
         case RScriptUIElementID.CG:
-            offset = new Point(9, 11);
+            offset = new Point(8, 7);
             break;
         case RScriptUIElementID.AUCOMPLETE:
         case RScriptUIElementID.UACOMPLETE:
