@@ -4,7 +4,7 @@ import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
 import {SoundManager} from "./resources/SoundManager";
 
-/** Constants and managers */
+/** Constants and global managers */
 export class Eterna {
     public static readonly OVERLAY_DIV_ID: string = "overlay";
 
