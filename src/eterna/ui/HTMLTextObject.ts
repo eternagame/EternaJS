@@ -48,6 +48,16 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         return this;
     }
 
+    public fontWeight(weight: string): HTMLTextObject {
+        DOMObject.applyStyleRecursive(this._obj, "font-weight", weight, false, HTMLTextObject.STYLE_NODE_NAMES);
+        this.onSizeChanged();
+        return this;
+    }
+
+    public bold(): HTMLTextObject {
+        return this.fontWeight("bold");
+    }
+
     public hAlign(align: "left" | "center" | "right" | "justify"): HTMLTextObject {
         DOMObject.applyStyleRecursive(this._obj, "text-align", align, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
