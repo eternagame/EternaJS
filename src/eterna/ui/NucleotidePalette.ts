@@ -105,19 +105,19 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
-            [new Rectangle(31, 30, 30, 20), new Rectangle(37, 15, 22, 20)],
+            [new Rectangle(31, 29, 30, 20), new Rectangle(37, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FFFF33'>A</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (Q)"
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
-            [new Rectangle(80, 30, 30, 20), new Rectangle(87, 15, 22, 20)],
+            [new Rectangle(80, 29, 30, 20), new Rectangle(87, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (W)"
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
-            [new Rectangle(127, 30, 30, 20), new Rectangle(137, 15, 22, 20)],
+            [new Rectangle(129, 29, 30, 20), new Rectangle(137, 15, 22, 20)],
             "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#33FF33'>C</FONT>). (E)"
         );
 
