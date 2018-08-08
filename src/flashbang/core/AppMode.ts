@@ -1,6 +1,7 @@
 import {Container} from "pixi.js";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Signal} from "../../signals/Signal";
+import {SignalView} from "../../signals/SignalView";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {KeyboardInput} from "../input/KeyboardInput";
 import {MouseWheelInput} from "../input/MouseWheelInput";
@@ -13,14 +14,21 @@ import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 
 export class AppMode {
-    /** Emitted at the beginning of the update process */
-    public readonly updateBegan: Signal<number> = new Signal();
-    /** Emitted after updateBegan has completed. */
-    public readonly lateUpdate: Signal<number> = new Signal();
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
     /** Default mouse wheel input processor */
     public readonly mouseWheelInput: MouseWheelInput = new MouseWheelInput();
+
+    /** Emitted at the beginning of the update process */
+    public get updateBegan(): SignalView<number> { return this._updateBegan; }
+    /** Emitted after updateBegan has completed. */
+    public get lateUpdate(): SignalView<number> { return this._lateUpdate; }
+    /** Emitted when the mode is entered */
+    public get entered(): SignalView<void> { return this._entered; }
+    /** Emitted when the mode is exited */
+    public get exited(): SignalView<void> { return this._exited; }
+    /** Emitted when the mode is disposed */
+    public get disposed(): SignalView<void> { return this._disposed; }
 
     /**
      * A convenience function that converts an Array of GameObjectRefs into an array of GameObjects.
@@ -160,8 +168,8 @@ export class AppMode {
     protected update(dt: number): void {
         this._runningTime += dt;
         // update all Updatable objects
-        this.updateBegan.emit(dt);
-        this.lateUpdate.emit(dt);
+        this._updateBegan.emit(dt);
+        this._lateUpdate.emit(dt);
     }
 
     /** Called when the mode is added to the mode stack */
@@ -226,6 +234,7 @@ export class AppMode {
 
     /* internal */
     exitInternal(): void {
+        this._exited.emit();
         this._isActive = false;
         this.modeSprite.interactiveChildren = false;
         this.exit();
@@ -270,9 +279,12 @@ export class AppMode {
         this.registerObject(obj);
     }
 
-    protected _updateComplete: UnitSignal = new UnitSignal();
-    protected _entered: UnitSignal = new UnitSignal();
-    protected _disposed: UnitSignal = new UnitSignal();
+    protected readonly _updateBegan: Signal<number> = new Signal();
+    protected readonly _lateUpdate: Signal<number> = new Signal();
+    protected readonly _updateComplete: UnitSignal = new UnitSignal();
+    protected readonly _entered: UnitSignal = new UnitSignal();
+    protected readonly _exited: UnitSignal = new UnitSignal();
+    protected readonly _disposed: UnitSignal = new UnitSignal();
 
     protected _modeSprite: Container = new Container();
     protected _modeStack: ModeStack;
