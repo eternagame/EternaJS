@@ -27,10 +27,46 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         return this._dummyDisp;
     }
 
+    /**
+     * Causes the object to auto-hide when its containing mode is inactive.
+     * Since DOMObjects float above the PIXI canvas, there can be layering issues
+     * when a DOMObject's mode is not the top-most mode.
+     */
+    public hideWhenModeInactive(): void {
+        if (!this._hideWhenModeInactive) {
+            this._hideWhenModeInactive = true;
+            if (this.isLiveObject) {
+                this.handleHideWhenModeInactive();
+            }
+        }
+    }
+
+    private handleHideWhenModeInactive(): void {
+        let wasExited: boolean = false;
+        let wasVisible: boolean = false;
+
+        this.regs.add(this.mode.exited.connect(() => {
+            wasExited = true;
+            wasVisible = this.display.visible;
+            this.display.visible = false;
+        }));
+
+        this.regs.add(this.mode.entered.connect(() => {
+            if (wasExited) {
+                this.display.visible = wasVisible;
+                wasExited = false;
+            }
+        }));
+    }
+
     protected added(): void {
         super.added();
         this._domParent.appendChild(this._obj);
         this.onSizeChanged();
+
+        if (this._hideWhenModeInactive) {
+            this.handleHideWhenModeInactive();
+        }
 
         // Update the HTML element's transform during the PIXI postrender event -
         // this is the point where the dummy display object's transform will be up to date.
@@ -129,6 +165,8 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     protected readonly _dummyDisp: Graphics = new Graphics();
     protected readonly _domParent: HTMLElement;
     protected readonly _obj: T;
+
+    protected _hideWhenModeInactive: boolean = false;
 
     private readonly _lastTransform: Matrix = new Matrix();
 }
