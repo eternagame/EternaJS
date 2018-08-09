@@ -40,6 +40,7 @@ import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePa
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
+import {ExternalInterface} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
 import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
@@ -699,209 +700,237 @@ export class PoseEditMode extends GameMode {
         return this._folder;
     }
 
-    /*override*/
-    // public register_script_callbacks(): void {
-    //     if (this._script_hooks) return;
-    //     this._script_hooks = true;
-    //
-    //     let that: PoseEditMode = this;
-    //     let puz: Puzzle = this._puzzle;
-    //     let folder: Folder = this._folder;
-    //
-    //     ExternalInterface.addCallback("get_sequence_string", function (): string {
-    //         // that.trace_js("get_sequence_string() called");
-    //         return that.get_pose(0).get_sequence_string();
-    //     });
-    //     ExternalInterface.addCallback("get_full_sequence", function (indx: number): string {
-    //         // that.trace_js("get_full_sequence() called");
-    //         if (indx < 0 || indx >= that._poses.length) return null;
-    //         return EPars.sequence_array_to_string(that.get_pose(indx).get_full_sequence());
-    //     });
-    //     ExternalInterface.addCallback("get_locks", function (): any[] {
-    //         // that.trace_js("get_locks() called");
-    //         let pose: Pose2D = that.get_pose(0);
-    //         let locks: any[] = pose.get_puzzle_locks().slice(0, pose.get_sequence().length);
-    //         return locks;
-    //     });
-    //     ExternalInterface.addCallback("get_targets", function (): any[] {
-    //         // that.trace_js("get_targets() called");
-    //         let conditions: any[] = puz.get_target_conditions();
-    //         if (conditions.length === 0) conditions.push(null);
-    //         for (let ii: number = 0; ii < conditions.length; ii++) {
-    //             if (conditions[ii] == null) {
-    //                 conditions[ii] = {};
-    //                 conditions[ii]['type'] = "single";
-    //                 conditions[ii]['secstruct'] = puz.get_secstruct(ii);
-    //             }
-    //         }
-    //         return JSON.parse(JSON.stringify(conditions));
-    //     });
-    //     ExternalInterface.addCallback("get_native_structure", function (indx: number): string {
-    //         if (indx < 0 || indx >= that._poses.length) return null;
-    //         let native_pairs: any[] = that.get_current_undo_block(indx).get_pairs();
-    //         return EPars.pairs_array_to_parenthesis(native_pairs);
-    //     });
-    //     ExternalInterface.addCallback("get_full_structure", function (indx: number): string {
-    //         if (indx < 0 || indx >= that._poses.length) return null;
-    //         let native_pairs: any[] = that.get_current_undo_block(indx).get_pairs();
-    //         let seq_arr: any[] = that.get_pose(indx).get_full_sequence();
-    //         return EPars.pairs_array_to_parenthesis(native_pairs, seq_arr);
-    //     });
-    //     ExternalInterface.addCallback("get_free_energy", function (indx: number): number {
-    //         if (indx < 0 || indx >= that._poses.length) return Number.NaN;
-    //         return that.get_current_undo_block(indx).get_param(UndoBlockParam.FE);
-    //     });
-    //     ExternalInterface.addCallback("get_constraints", function (): any[] {
-    //         // that.trace_js("get_constraints() called");
-    //         return JSON.parse(JSON.stringify(puz.get_constraints()));
-    //     });
-    //     ExternalInterface.addCallback("check_constraints", function (): boolean {
-    //         // that.trace_js("check_constraints() called");
-    //         return that.check_constraints(false);
-    //     });
-    //     ExternalInterface.addCallback("constraint_satisfied", function (indx: number): boolean {
-    //         // that.trace_js("constraint_satisfied() called");
-    //         that.check_constraints(true);
-    //         if (indx < that.get_constraint_count()) {
-    //             let o: Object = that.get_constraint(indx);
-    //             return o.is_satisfied();
-    //         } else {
-    //             return false;
-    //         }
-    //     });
-    //     ExternalInterface.addCallback("get_tracked_indices", function (): any[] {
-    //         // that.trace_js("get_tracked_indices() called");
-    //         return that.get_pose(0).get_tracked_indices();
-    //     });
-    //     ExternalInterface.addCallback("get_barcode_indices", function (): any[] {
-    //         // that.trace_js("get_barcode_indices() called");
-    //         return puz.get_barcode_indices();
-    //     });
-    //     ExternalInterface.addCallback("is_barcode_available", function (seq: string): boolean {
-    //         // that.trace_js("is_barcode_available() called");
-    //         return SolutionManager.instance.check_redundancy_by_hairpin(seq);
-    //     });
-    //     ExternalInterface.addCallback("current_folder", function (): string {
-    //         // that.trace_js("current_folder() called");
-    //         return that._folder.get_folder_name();
-    //     });
-    //
-    //     ExternalInterface.addCallback("fold", function (seq: string, constraint: string = null): string {
-    //         // that.trace_js("fold() called");
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
-    //         let folded: any[] = folder.fold_sequence(seq_arr, null, constraint);
-    //         return EPars.pairs_array_to_parenthesis(folded);
-    //     });
-    //     ExternalInterface.addCallback("fold_with_binding_site", function (seq: string, site: any[], bonus: number): string {
-    //         // that.trace_js("fold_with_binding_site() called");
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
-    //         let folded: any[] = folder.fold_sequence_with_binding_site(seq_arr, null, site, Number(bonus * 100.), 2.5);
-    //         return EPars.pairs_array_to_parenthesis(folded);
-    //     });
-    //     ExternalInterface.addCallback("energy_of_structure", function (seq: string, secstruct: string): number {
-    //         // that.trace_js("energy_of_structure() called");
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
-    //         let struct_arr: any[] = EPars.parenthesis_to_pair_array(secstruct);
-    //         let free_energy: number = folder.score_structures(seq_arr, struct_arr);
-    //         return 0.01 * free_energy;
-    //     });
-    //     ExternalInterface.addCallback("pairing_probabilities", function (seq: string, secstruct: string = null): any[] {
-    //         // that.trace_js("pairing_probabilities() called");
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
-    //         let folded: any[];
-    //         if (secstruct) {
-    //             folded = EPars.parenthesis_to_pair_array(secstruct);
-    //         } else {
-    //             folded = folder.fold_sequence(seq_arr, null, null);
-    //         }
-    //         let pp: any[] = folder.get_dot_plot(seq_arr, folded);
-    //         return pp.slice();
-    //     });
-    //     ExternalInterface.addCallback("cofold", function (seq: string, oligo: string, malus: number = 0., constraint: string = null): string {
-    //         // that.trace_js("cofold() called");
-    //         let len: number = seq.length;
-    //         let cseq: string = seq + "&" + oligo;
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(cseq);
-    //         let folded: any[] = folder.cofold_sequence(seq_arr, null, Number(malus * 100.), constraint);
-    //         return EPars.pairs_array_to_parenthesis(folded.slice(0, len))
-    //             + "&" + EPars.pairs_array_to_parenthesis(folded.slice(len));
-    //     });
-    //     if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
-    //         ExternalInterface.addCallback("select_folder", function (folder_name: string): boolean {
-    //             // that.trace_js("select_folder() called");
-    //             let ok: boolean = that.select_folder(folder_name);
-    //             folder = that.get_folder();
-    //             return ok;
-    //         });
-    //         ExternalInterface.addCallback("load_parameters_from_buffer", function (str: string): boolean {
-    //             // that.trace_js("load_parameters_from_buffer() called");
-    //             let buf: ByteArray = new ByteArray;
-    //             buf.writeUTFBytes(str);
-    //             let res: boolean = folder.load_parameters_from_buffer(buf);
-    //             if (res) this.on_change_folder();
-    //             return res;
-    //         });
-    //     }
-    //
-    //     // Miscellanous
-    //     ExternalInterface.addCallback("sparks_effect", function (from: number, to: number): void {
-    //         // that.trace_js("sparks_effect() called");
-    //         // FIXME: check PiP mode and handle accordingly
-    //         for (let ii: number = 0; ii < that.number_of_pose_fields(); ii++) {
-    //             let pose: Pose2D = that.get_pose(ii);
-    //             pose.praise_sequence(from, to);
-    //         }
-    //     });
-    // }
+    public register_script_callbacks(): void {
+        if (this._script_hooks) {
+            return;
+        }
+        this._script_hooks = true;
 
-    // /*override*/
-    // public register_setter_callbacks(): void {
-    //     if (this._setter_hooks) return;
-    //     this._setter_hooks = true;
-    //
-    //     let that: PoseEditMode = this;
-    //
-    //     ExternalInterface.addCallback("set_sequence_string", function (seq: string): boolean {
-    //         // that.trace_js("set_sequence_string() called");
-    //         let seq_arr: any[] = EPars.string_to_sequence_array(seq);
-    //         if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
-    //             that.trace_js("Invalid characters in " + seq);
-    //             return false;
-    //         }
-    //         let force_sync: boolean = this._force_synch;
-    //         this._force_synch = true;
-    //         for (let ii: number = 0; ii < that.number_of_pose_fields(); ii++) {
-    //             let pose: Pose2D = that.get_pose(ii);
-    //             pose.paste_sequence(seq_arr);
-    //         }
-    //         this._force_synch = force_sync;
-    //         that.move_history_add_sequence("paste", seq);
-    //         return true;
-    //     });
-    //     ExternalInterface.addCallback("set_tracked_indices", function (marks: any[]): void {
-    //         // that.trace_js("set_tracked_indices() called");
-    //         for (let ii: number = 0; ii < that.number_of_pose_fields(); ii++) {
-    //             let pose: Pose2D = that.get_pose(ii);
-    //             pose.clear_tracking();
-    //             for (let k: number = 0; k < marks.length; k++) {
-    //                 pose.black_mark(marks[k]);
-    //             }
-    //         }
-    //     });
-    //     ExternalInterface.addCallback("set_design_title", function (design_title: string): void {
-    //         // that.trace_js("set_design_title() called");
-    //         Application.instance.get_application_gui("Design Name").set_text(design_title);
-    //         Application.instance.get_application_gui("Design Name").visible = true;
-    //         this.clear_undo_stack();
-    //         this.pose_edit_by_target(0);
-    //     });
-    // }
-
-    public on_click_run(): void {
-        let that: PoseEditMode = this;
         let puz: Puzzle = this._puzzle;
         let folder: Folder = this._folder;
 
+        ExternalInterface.addCallback("get_sequence_string", (): string => {
+            // this.trace_js("get_sequence_string() called");
+            return this.get_pose(0).get_sequence_string();
+        });
+
+        ExternalInterface.addCallback("get_full_sequence", (indx: number): string => {
+            // this.trace_js("get_full_sequence() called");
+            if (indx < 0 || indx >= this._poses.length) {
+                return null;
+            } else {
+                return EPars.sequence_array_to_string(this.get_pose(indx).get_full_sequence());
+            }
+        });
+
+        ExternalInterface.addCallback("get_locks", (): boolean[] => {
+            // this.trace_js("get_locks() called");
+            let pose: Pose2D = this.get_pose(0);
+            return pose.get_puzzle_locks().slice(0, pose.get_sequence().length);
+        });
+
+        ExternalInterface.addCallback("get_targets", (): any[] => {
+            // this.trace_js("get_targets() called");
+            let conditions: any[] = puz.get_target_conditions();
+            if (conditions.length === 0) conditions.push(null);
+            for (let ii: number = 0; ii < conditions.length; ii++) {
+                if (conditions[ii] == null) {
+                    conditions[ii] = {};
+                    conditions[ii]['type'] = "single";
+                    conditions[ii]['secstruct'] = puz.get_secstruct(ii);
+                }
+            }
+            return JSON.parse(JSON.stringify(conditions));
+        });
+
+        ExternalInterface.addCallback("get_native_structure", (indx: number): string => {
+            if (indx < 0 || indx >= this._poses.length) return null;
+            let native_pairs: any[] = this.get_current_undo_block(indx).get_pairs();
+            return EPars.pairs_array_to_parenthesis(native_pairs);
+        });
+
+        ExternalInterface.addCallback("get_full_structure", (indx: number): string => {
+            if (indx < 0 || indx >= this._poses.length) {
+                return null;
+            }
+
+            let native_pairs: number[] = this.get_current_undo_block(indx).get_pairs();
+            let seq_arr: number[] = this.get_pose(indx).get_full_sequence();
+            return EPars.pairs_array_to_parenthesis(native_pairs, seq_arr);
+        });
+
+        ExternalInterface.addCallback("get_free_energy", (indx: number): number => {
+            if (indx < 0 || indx >= this._poses.length) {
+                return Number.NaN;
+            }
+            return this.get_current_undo_block(indx).get_param(UndoBlockParam.FE);
+        });
+
+        ExternalInterface.addCallback("get_constraints", (): any[] => {
+            // this.trace_js("get_constraints() called");
+            return JSON.parse(JSON.stringify(puz.get_constraints()));
+        });
+
+        ExternalInterface.addCallback("check_constraints", (): boolean => {
+            // this.trace_js("check_constraints() called");
+            return this.checkConstraints(false);
+        });
+
+        ExternalInterface.addCallback("constraint_satisfied", (idx: number): boolean => {
+            // this.trace_js("constraint_satisfied() called");
+            this.checkConstraints(true);
+            if (idx >= 0 && idx < this.get_constraint_count()) {
+                let o: ConstraintBox = this.get_constraint(idx);
+                return o.is_satisfied();
+            } else {
+                return false;
+            }
+        });
+
+        ExternalInterface.addCallback("get_tracked_indices", (): number[] => {
+            // this.trace_js("get_tracked_indices() called");
+            return this.get_pose(0).get_tracked_indices();
+        });
+
+        ExternalInterface.addCallback("get_barcode_indices", (): number[] => {
+            // this.trace_js("get_barcode_indices() called");
+            return puz.get_barcode_indices();
+        });
+
+        ExternalInterface.addCallback("is_barcode_available", (seq: string): boolean => {
+            // this.trace_js("is_barcode_available() called");
+            return SolutionManager.instance.check_redundancy_by_hairpin(seq);
+        });
+
+        ExternalInterface.addCallback("current_folder", (): string => {
+            // this.trace_js("current_folder() called");
+            return this._folder.get_folder_name();
+        });
+
+        ExternalInterface.addCallback("fold", (seq: string, constraint: string = null): string => {
+            // this.trace_js("fold() called");
+            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            let folded: number[] = folder.fold_sequence(seq_arr, null, constraint);
+            return EPars.pairs_array_to_parenthesis(folded);
+        });
+
+        ExternalInterface.addCallback("fold_with_binding_site", (seq: string, site: any[], bonus: number): string => {
+            // this.trace_js("fold_with_binding_site() called");
+            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            let folded: number[] = folder.fold_sequence_with_binding_site(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
+            return EPars.pairs_array_to_parenthesis(folded);
+        });
+
+        ExternalInterface.addCallback("energy_of_structure", (seq: string, secstruct: string): number => {
+            // this.trace_js("energy_of_structure() called");
+            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            let struct_arr: number[] = EPars.parenthesis_to_pair_array(secstruct);
+            let free_energy: number = folder.score_structures(seq_arr, struct_arr);
+            return 0.01 * free_energy;
+        });
+
+        ExternalInterface.addCallback("pairing_probabilities", (seq: string, secstruct: string = null): number[] => {
+            // this.trace_js("pairing_probabilities() called");
+            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            let folded: number[];
+            if (secstruct) {
+                folded = EPars.parenthesis_to_pair_array(secstruct);
+            } else {
+                folded = folder.fold_sequence(seq_arr, null, null);
+            }
+            let pp: number[] = folder.get_dot_plot(seq_arr, folded);
+            return pp.slice();
+        });
+
+        ExternalInterface.addCallback("cofold", (seq: string, oligo: string, malus: number = 0., constraint: string = null): string => {
+            // this.trace_js("cofold() called");
+            let len: number = seq.length;
+            let cseq: string = seq + "&" + oligo;
+            let seq_arr: number[] = EPars.string_to_sequence_array(cseq);
+            let folded: number[] = folder.cofold_sequence(seq_arr, null, Math.floor(malus * 100), constraint);
+            return EPars.pairs_array_to_parenthesis(folded.slice(0, len))
+                + "&" + EPars.pairs_array_to_parenthesis(folded.slice(len));
+        });
+
+        if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
+            ExternalInterface.addCallback("select_folder", (folder_name: string): boolean => {
+                // this.trace_js("select_folder() called");
+                let ok: boolean = this.select_folder(folder_name);
+                folder = this.get_folder();
+                return ok;
+            });
+
+            ExternalInterface.addCallback("load_parameters_from_buffer", (str: string): boolean => {
+                log.info("TODO: load_paramaters_from_buffer");
+                return false;
+                // // this.trace_js("load_parameters_from_buffer() called");
+                // let buf: ByteArray = new ByteArray;
+                // buf.writeUTFBytes(str);
+                // let res: boolean = folder.load_parameters_from_buffer(buf);
+                // if (res) {
+                //     this.on_change_folder();
+                // }
+                // return res;
+            });
+        }
+
+        // Miscellanous
+        ExternalInterface.addCallback("sparks_effect", (from: number, to: number): void => {
+            // this.trace_js("sparks_effect() called");
+            // FIXME: check PiP mode and handle accordingly
+            for (let ii: number = 0; ii < this.number_of_pose_fields(); ii++) {
+                let pose: Pose2D = this.get_pose(ii);
+                pose.praise_sequence(from, to);
+            }
+        });
+    }
+
+    public register_setter_callbacks(): void {
+        if (this._setter_hooks) {
+            return;
+        }
+        this._setter_hooks = true;
+
+        ExternalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
+            // this.trace_js("set_sequence_string() called");
+            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
+                log.info("Invalid characters in " + seq);
+                return false;
+            }
+            let force_sync: boolean = this._force_synch;
+            this._force_synch = true;
+            for (let ii: number = 0; ii < this.number_of_pose_fields(); ii++) {
+                let pose: Pose2D = this.get_pose(ii);
+                pose.paste_sequence(seq_arr);
+            }
+            this._force_synch = force_sync;
+            this.move_history_add_sequence("paste", seq);
+            return true;
+        });
+
+        ExternalInterface.addCallback("set_tracked_indices", (marks: number[]): void => {
+            // this.trace_js("set_tracked_indices() called");
+            for (let ii: number = 0; ii < this.number_of_pose_fields(); ii++) {
+                let pose: Pose2D = this.get_pose(ii);
+                pose.clear_tracking();
+                for (let mark of marks) {
+                    pose.black_mark(mark);
+                }
+            }
+        });
+
+        ExternalInterface.addCallback("set_design_title", (design_title: string): void => {
+            log.info("TODO: set_design_title");
+            // this.trace_js("set_design_title() called");
+            // Application.instance.get_application_gui("Design Name").set_text(design_title);
+            // Application.instance.get_application_gui("Design Name").visible = true;
+            this.clear_undo_stack();
+            this.pose_edit_by_target(0);
+        });
+    }
+
+    public on_click_run(): void {
         let nid: string = this._nid_field.text;
         if (nid.length === 0) {
             return;
@@ -916,34 +945,33 @@ export class PoseEditMode extends GameMode {
         this.register_script_callbacks();
         this.register_setter_callbacks();
 
-        // ExternalInterface.addCallback("set_script_status", function (txt: string): void {
-        //     // that.trace_js("set_script_status() called");
-        //     this._run_status.set_text_color(0xC0C0C0);
-        //     this._run_status.set_text(txt);
-        // });
-        //
-        // let set_end_callback = function (pose: PoseEditMode, sid: string): void {
-        //     ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
-        //         pose.trace_js("end_" + sid + "() called");
-        //         pose.trace_js(ret);
-        //         if (ret['cause'] instanceof String) {
-        //             this._run_status.set_text_color(ret['result'] ? 0x00FF00 : 0xFF0000);
-        //             this._run_status.set_text(ret['cause']);
-        //             // restore
-        //             // FIXME: other clean-ups? should unregister callbacks?
-        //             Application.instance.remove_lock("LOCK_SCRIPT");
-        //         } else {
-        //             // leave the script running asynchronously
-        //         }
-        //     });
-        // };
-        // set_end_callback(this, nid);
+        ExternalInterface.addCallback("set_script_status", (txt: string): void => {
+            // this.trace_js("set_script_status() called");
+            this._run_status.style.fill = 0xC0C0C0;
+            this._run_status.text = txt;
+        });
+
+        let set_end_callback = (pose: PoseEditMode, sid: string): void => {
+            ExternalInterface.addCallback("end_" + sid, (ret: any): void => {
+                log.info("end_" + sid + "() called");
+                log.info(ret);
+                if (typeof(ret['cause']) === "string") {
+                    this._run_status.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
+                    this._run_status.text = ret['cause'];
+                    // restore
+                    // FIXME: other clean-ups? should unregister callbacks?
+                    // Application.instance.remove_lock("LOCK_SCRIPT");
+                } else {
+                    // leave the script running asynchronously
+                }
+            });
+        };
+        set_end_callback(this, nid);
 
         // run
         log.info("running script " + nid);
-        // ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null);
+        ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null);
         log.info("launched");
-        // this.trace_js("launched");
     }
 
     public rop_layout_bars(): void {
@@ -3052,68 +3080,69 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.SCRIPT) {
             let nid: string = value;
+            if (ExternalInterface.available) {
+                let set_end_callback = (pose: PoseEditMode, sid: string, jj: number): void => {
+                    ExternalInterface.addCallback("end_" + sid, (ret: any): void => {
+                        let goal: string = "";
+                        let name: string = "...";
+                        let value: string = "";
+                        let index: string = null;
+                        let data_png: string = "";
+                        let satisfied: boolean = false;
+                        log.info("end_" + sid + "() called");
+                        if (ret && ret.cause) {
+                            if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
+                            if (ret.cause.goal != null) goal = ret.cause.goal;
+                            if (ret.cause.name != null) name = ret.cause.name;
+                            if (ret.cause.value != null) value = ret.cause.value;
+                            if (ret.cause.index != null) {
+                                index = (ret.cause.index + 1).toString();
+                                let ll: number = this._is_pip_mode ?
+                                    ret.cause.index :
+                                    (ret.cause.index === this._current_target_index ? 0 : -1);
+                                if (ll >= 0) {
+                                    if (ret.cause.highlight != null) {
+                                        this._poses[ll].highlight_user_defined_sequence(ret.cause.highlight);
+                                    } else {
+                                        this._poses[ll].clear_user_defined_highlight();
+                                    }
+                                }
+                            }
 
-            log.debug("TODO: SCRIPT constraint");
+                            if (ret.cause.icon_b64) {
+                                data_png = ret.cause.icon_b64;
+                            }
+                        }
 
-            // if (ExternalInterface.available) {
-            //     let set_end_callback = function (pose: PoseEditMode, sid: string, jj: number): void {
-            //         ExternalInterface.addCallback("end_" + sid, function (ret: Object): void {
-            //             let goal: string = "";
-            //             let name: string = "...";
-            //             let value: string = "";
-            //             let index: string = null;
-            //             let data_png: string = "";
-            //             let satisfied: boolean = false;
-            //             pose.trace_js("end_" + sid + "() called");
-            //             //pose.trace_js(ret);
-            //             if (ret && ret.cause) {
-            //                 if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-            //                 if (ret.cause.goal != null) goal = ret.cause.goal;
-            //                 if (ret.cause.name != null) name = ret.cause.name;
-            //                 if (ret.cause.value != null) value = ret.cause.value;
-            //                 if (ret.cause.index != null) {
-            //                     index = (ret.cause.index + 1).toString();
-            //                     let ll: number = this._is_pip_mode ? ret.cause.index : (ret.cause.index === this._current_target_index ? 0 : -1);
-            //                     if (ll >= 0) {
-            //                         if (ret.cause.highlight != null) {
-            //                             Pose2D(this._poses[ll]).highlight_user_defined_sequence(ret.cause.highlight);
-            //                         } else {
-            //                             Pose2D(this._poses[ll]).clear_user_defined_highlight();
-            //                         }
-            //                     }
-            //                 }
-            //                 if (ret.cause.icon_b64) data_png = ret.cause.icon_b64;
-            //             }
-            //
-            //             if (render) {
-            //                 this._constraint_boxes[jj].set_content("SCRIPT", {
-            //                     "nid": sid,
-            //                     "goal": goal,
-            //                     "name": name,
-            //                     "value": value,
-            //                     "index": index,
-            //                     "data_png": data_png
-            //                 }, satisfied, 0);
-            //             }
-            //
-            //             isSatisfied = satisfied;
-            //         });
-            //     };
-            //
-            //     this.register_script_callbacks();
-            //     set_end_callback(this, nid, ii / 2);
-            //
-            //     // run
-            //     isSatisfied = false;
-            //     this.trace_js("running script " + nid);
-            //     ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
-            //     this.trace_js("launched");
-            // } else {
-            //
-            //     if (render) {
-            //         box.set_content(ConstraintType.SCRIPT, {"nid": nid, "goal": "", "name": "..."}, isSatisfied, 0);
-            //     }
-            // }
+                        if (render) {
+                            this._constraint_boxes[jj].set_content(ConstraintType.SCRIPT, {
+                                "nid": sid,
+                                "goal": goal,
+                                "name": name,
+                                "value": value,
+                                "index": index,
+                                "data_png": data_png
+                            }, satisfied, 0);
+                        }
+
+                        isSatisfied = satisfied;
+                    });
+                };
+
+                this.register_script_callbacks();
+                set_end_callback(this, nid, ii / 2);
+
+                // run
+                isSatisfied = false;
+                log.info("running script " + nid);
+                ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
+                log.info("launched");
+
+            } else {
+                if (render) {
+                    box.set_content(ConstraintType.SCRIPT, {"nid": nid, "goal": "", "name": "..."}, isSatisfied, 0);
+                }
+            }
         }
 
         return isSatisfied;

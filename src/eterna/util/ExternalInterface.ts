@@ -4,7 +4,7 @@ import * as log from "loglevel";
 /** Exposes named functions to external scripts  */
 export class ExternalInterface {
     // TODO: remove me
-    public static readonly isAvailable: boolean = true;
+    public static readonly available: boolean = true;
 
     public static addCallback(name: string, callback: Function): void {
         let root: any = (Flashbang.app as any);
