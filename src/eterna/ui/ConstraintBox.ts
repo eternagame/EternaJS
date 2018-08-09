@@ -15,6 +15,7 @@ import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
 import {Assert} from "../../flashbang/util/Assert";
 import {Easing} from "../../flashbang/util/Easing";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
+import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {EPars} from "../EPars";
 import {ConstraintType} from "../puzzle/Constraints";
@@ -921,10 +922,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let data_png: string = val.data_png;
             if (data_png != null) {
                 this._icon.visible = true;
-                Assert.isTrue(true, "TODO: set_bitmap_from_datauri");
-                // this._icon.set_bitmap_from_datauri(data_png, function (): void {
-                //     this._icon.set_pos(new UDim(0, 0, (111 - this._icon.width) / 2, 2));
-                // });
+                TextureUtil.loadURL(data_png).then(texture => {
+                    if (this.isLiveObject) {
+                        this._icon.texture = texture;
+                        this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
+                    }
+                });
             } else {
                 this._icon.visible = false;
                 this._icon.texture = Texture.EMPTY;

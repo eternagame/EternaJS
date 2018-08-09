@@ -34,6 +34,7 @@ enum PuzzleID {
     Tutorial4 = 6502944,
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
+    LiquidRobotics10_of_11 = 6503036,   // Script constraints
 }
 
 interface EternaAppParameters {
@@ -155,7 +156,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1024;
     private readonly _height: number = 768;
-    private readonly _puzzleID: number = PuzzleID.Tutorial1;
+    private readonly _puzzleID: number = PuzzleID.LiquidRobotics10_of_11;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
