@@ -1,0 +1,312 @@
+<block url="/web/roadmap/">
+  <block name="top-bar"></block>
+  <block style="min-height:1px;" builder="BuilderRoadmap" input="ach_type:{ach_type};">  
+    <div id="roadmap" style="position:relative; margin-top:22px;">
+    
+      <block defonly="1" name="roadmap-box-active" class="block-roadmap-box-active rounded" style="width:245px;">
+	{IF image}
+          <div style="text-align:center; padding-top:50px; height:256px;">
+            <div class="img-meter-wrap">
+              <img id="img-meter-wrap" src="{image}" style="max-width:256px; max-height:256px; width:auto; height:auto; position:relative; opacity: 0.5"></img>
+            </div>
+          </div>
+        {ENDIF}
+        <div>
+          <div style="text-align:center; font-size:14px; font-weight:bolder">            
+          </div>
+	  {IF link == ""}
+            <div class="red-button rounded-5 centered" style="width:100px; padding:7px; margin-top:7px; position:absolute; bottom:7px; left:67px">
+              <div class="red-button-bg rounded-5"></div>
+              Coming Soon
+            </div>  
+          {ELSE}
+            <div class="clickable green-button rounded-5 centered" style="width:100px; padding:7px; margin-top:7px; position:absolute; bottom:7px; left:67px">
+              <div class="green-button-bg rounded-5"></div>          
+              <a href="{link}">
+                {IF verb}
+                  {verb}
+                {ELSE}
+                  PLAY!
+                {ENDIF}
+              </a>
+            </div>
+          {ENDIF}
+        </div>
+      </block>
+      
+      <block defonly="1" name="roadmap-box-cleared" style="width:245px;">
+        <div class="block-roadmap-box-cleared rounded" style="position:absolute; z-index:-1; top:0px; left:0px; width:100%; height:100%"></div>
+        <img src="https://s3.amazonaws.com/eterna/eterna2/cleared-text.png" style="position:absolute; right:-20px; top:-20px"></img>
+	{IF image}
+          <div style="text-align:center; padding-top:50px; height:256px;">
+            <img src="{image}" style="max-width:256px; max-height:256px; width:auto; height:auto;"></img>
+          </div>
+        {ENDIF} 
+        <div>
+          {IF link == ""}
+            <div class="red-button rounded-5 centered" style="width:100px; padding:7px; margin-top:7px; position:absolute; bottom:7px; left:67px">
+              <div class="red-button-bg rounded-5"></div>
+              Coming Soon
+            </div>  
+          {ENDIF}
+        </div>
+      </block>
+  
+      <block defonly="1" name="roadmap-box-inactive" style="width:245px; position:relative;">
+        <div class="block-roadmap-box-inactive rounded" style="position:absolute; z-index:-1; top:0px; left:0px; width:100%; height:100%"></div>
+	{IF image}
+          <div style="text-align:center; padding-top:50px; height:256px;">
+            <img src="{image}" style="max-width:256px; max-height:256px; width:auto; height:auto; opacity:0.5"></img>
+          </div>
+        {ENDIF} 
+        <div>          
+          {IF link == ""}
+            <div class="red-button rounded-5 centered" style="width:100px; padding:7px; margin-top:7px; position:absolute; bottom:7px; left:67px">
+              <div class="red-button-bg rounded-5"></div>
+              Coming Soon
+            </div>  
+          {ENDIF}
+        </div>
+      </block>
+      
+    </div>
+  </block>
+</block>
+
+
+
+
+
+
+<block name="mini-roadmap" class="mini-roadmap" style="padding:10px 0px;">
+<!-- TODO: ideally, split into mini-roadmap-tools/mini-roadmap-sp-->  
+{IF key == "ten_tools"}
+
+
+  {IF state == "active"}
+  {IF node_key == "ten_tools_lab_access"}
+  <div class="trans-panel rounded-10" style="width:230px; min-height:326px; float:center">
+  {ELSE}
+  <div class="trans-panel rounded-10 box-glow-active-10" style="width:230px; min-height:326px; float:center;">
+  {ENDIF}
+  {ELSE}
+  <div class="trans-panel rounded-10" style="width:230px; min-height:326px; float:center">
+  {ENDIF}
+    <div class="trans-panel-bg  rounded-10"></div>
+
+    {IF image}
+    <div style="text-align:center; padding-top:55px; height:128px;">
+	  
+
+    {IF node_key == "ten_tools_lab_access"}
+      {IF state == "inactive"}
+        <div name="img-meter" class="img-meter-wrap">
+	  <img src="{image}" style="opacity:0.25; left:50%; margin-left:50px; top:50%; margin-top:20px; max-width:230px; max-height:230px; width:auto; height:auto;"></img>
+          <img src="/puzzle-progression/icons/icon_locked_white.png" style="max-width:230px; max-height:230px; width:auto; height:auto; position:absolute; left:90px;top:32%;"></img>
+        </div>
+      {ELSE}
+      <a href="/web/labs/explore/" class="info-description">
+         <img src="{image}" style="width:128px; height:128px; opacity:1.0; left:50%; margin-left:50px; top:50%; margin-top:20px;"></img>
+        {IF desc}<span>{desc}</span>{ENDIF}
+      </a>
+      {ENDIF}
+    {ELSE}
+
+      {IF state == "cleared"}
+      <a href="/web/progression/?search=%5B{title}%5D%20Level" class="info-description">
+        <img src="{image}" style="max-width:230px; max-height:230px; width:auto; height:auto;"></img>
+	  {IF desc}<span>{desc}</span>{ENDIF}
+      </a>
+      {ENDIF}
+  
+      {IF state == "active"}
+      <a href="{link}" class="info-description">
+          <div id="img-meter" class="img-meter-wrap">
+          <img id="img-meter-wrap" src="{image}" style="max-width:230px; max-height:230px; width:auto; height:auto; position:relative; opacity: 1.0"></img>
+        </div>
+        {IF desc}<span>{desc}</span>{ENDIF}
+      </a>
+      {ENDIF}
+      
+      {IF state == "inactive"}
+        <div name="img-meter" class="img-meter-wrap">
+	  <img src="{image}" style="max-width:230px; max-height:230px; width:auto; height:auto; opacity:0.25;"></img>
+          <img src="/puzzle-progression/icons/icon_locked_white.png" style="max-width:230px; max-height:230px; width:auto; height:auto; position:absolute; left:90px;top:32%;"></img>
+        </div>
+      {ENDIF}
+    {ENDIF}
+
+    </div>
+    {ENDIF}
+
+    {IF state == "active"}
+    {IF node_key == "ten_tools_lab_access"}
+      {IF link}
+      <a href="{link}">
+        <div class="clickable blue-button-interactive rounded-5 centered" style="width:100px; padding:4px 7px;  margin-top:7px; position:absolute; bottom:35px; left:58px; font-weight:bold; font-size:16px;">
+          <div class="blue-button-bg rounded-5" ></div>          
+          {IF verb}{verb}{ELSE}PLAY!{ENDIF}
+        </div>
+      </a>
+      {ENDIF}
+    {ELSE}
+      {IF link}
+      <a href="{link}">
+        <div class="clickable green-button-interactive rounded-5 centered" style="width:100px; padding:4px 7px;  margin-top:7px; position:absolute; bottom:35px; left:58px; font-weight:bold; font-size:16px;">
+          <div class="green-button-bg rounded-5" ></div>          
+          {IF verb}{verb}{ELSE}PLAY!{ENDIF}
+        </div>
+      </a>
+      {ENDIF}
+    {ENDIF}
+    {ENDIF}
+      
+    {IF state == "cleared"}
+      {IF node_key == "ten_tools_lab_access"}
+      <a href="/web/labs/"><img src="/puzzle-progression/icons/checkmark_blue_40x40.png" class="circle-glow-active-15" style="margin-top:7px; position:absolute; bottom:30px; left:50%; margin-left:-20px;"></img></a>
+      {ELSE}
+      <a href="/web/progression/?search=%5B{title}%5D%20Level"><img src="/puzzle-progression/icons/checkmark_blue_40x40.png" class="circle-glow-active-15" style="margin-top:7px; position:absolute; bottom:30px; left:50%; margin-left:-20px;"></img></a>
+      {ENDIF}
+    {ENDIF}
+
+  </div>
+
+{ELSE}<!--not ten tools badge ############################################# -->
+
+
+  <div class="trans-panel rounded-10" style="width:180px;margin:-5px 0px;margin-right:10px;  min-height:260px;">
+    <div class="trans-panel-bg  rounded-10"></div>
+    
+    {IF image}
+    {IF display_sp_title}
+    <div class="header rounded-10-top" style="font-size:12px; text-align:left; padding-bottom:0px; height:28px;">
+     <center>{title}</center>
+    </div>
+    {ENDIF}
+    <div style="text-align:center; padding-top:35px; height:128px;">
+	  
+
+        {IF state == "cleared"}
+        <a class="info-description" {IF image_link} href="{image_link}" {ELSE} href="{link}" {ENDIF} >
+	  <img src="{image}" onError="this.onerror=null;this.src='/puzzle-progression/badges/default-eterna-badge.png'" style="max-width:128px; max-height:128px; width:auto; height:auto;"></img> 
+          {IF desc}<span>{desc}</span>{ENDIF}
+	</a>
+        {ENDIF}
+
+        {IF state == "active"}
+        <a class="info-description" {IF image_link} href="{image_link}" {ELSE} href="{link}" {ENDIF} >
+	  <div id="img-meter" class="img-meter-wrap">
+            <img id="img-meter-wrap" src="{image}" onError="this.onerror=null;this.src='/puzzle-progression/badges/default-eterna-badge.png'" style="max-width:128px; max-height:128px; width:auto; height:auto; position:relative; opacity: 1.0"></img>
+	  </div>
+	  {IF desc}<span>{desc}</span>{ENDIF}
+        </a>
+	{ENDIF}
+	 
+        {IF state == "inactive"}
+          <div name="img-meter" class="img-meter-wrap">
+            <img src="{image}" onError="this.onerror=null;this.src='/puzzle-progression/badges/default-eterna-badge.png'" style="max-width:128px; max-height:128px; width:auto; height:auto;"></img> 
+	  </div>
+        {ENDIF}
+
+      </div>
+    {ENDIF}
+        	
+    {IF state == "active"}
+      {IF link}  
+      <a href="{link}">
+	{IF verb == "Coming Soon"}
+          <div class="clickable red-button-interactive rounded-5 centered" style="width:100px; padding:4px 7px; margin:0px 0px; position:absolute; bottom:48px; left:33px; font-weight:bolder; font-size:13px;">
+            <div class="red-button-bg rounded-5" ></div>          
+            {verb}
+          </div>
+        {ELSE}
+	  <div class="clickable green-button-interactive rounded-5 centered" style="width:100px; padding:4px 7px; margin:0px 0px; position:absolute; bottom:48px; left:33px; font-weight:bolder; font-size:13px;">
+            <div class="green-button-bg rounded-5" ></div>          
+            {IF verb}{verb}{ELSE}PLAY!{ENDIF}
+          </div>
+        {ENDIF}
+      </a>
+      {ENDIF}
+      
+      <div class="meter-wrap" style="height: 15px; width:116px; margin-top:7px; position:absolute; bottom:15px; left:33px; text-align:center;">
+	{IF progress}
+	<div class="meter-value rounded-small" style="width: {progress}%;">
+	</div>
+	{ELSE}
+	<div class="meter-value rounded-small" style="width: 0%;">
+	  <div class="meter-text font-gothic" style="font-weight:bold; font-size:10px;">
+          0%	   
+	  </div>
+	</div>
+
+	{ENDIF}
+      </div>
+    {ENDIF}
+      
+    {IF state == "cleared"}
+      <img src="/puzzle-progression/icons/checkmark_blue_40x40.png" class="circle-glow-active-15" style="margin-top:7px; position:absolute; bottom:30px; left:50%; margin-left:-20px;"></img>
+    {ENDIF}
+
+  </div>
+
+  
+{ENDIF}    
+</block>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<block name="mini-achievement" style="width:75px; padding-right:5px; padding-left:5px; height:150px;">
+  <div style="display:{display}">
+    <a class="info-title-mini">
+      <img src="{img}" 
+	   onError="this.onerror=null;this.src='/puzzle-progression/badges/default-eterna-badge.png'"
+	   style="max-height:75px; width:auto; height:auto;">
+      </img>
+      {IF past}<span>{past}</span>{ENDIF}
+    </a>       
+  </div>
+</block>
+
+<block name="mini-overlay-achievement" style="padding-top:11px;">
+  <div style="float:left;">
+    <a class="info-title-mini">
+      <img src="{img}" 
+	   onError="this.onerror=null;this.src='/puzzle-progression/badges/default-eterna-badge.png'"
+	   style="max-height:75px; width:auto; height:auto;">
+      </img>
+      {IF past}<span>{past}</span>{ENDIF}
+    </a>       
+  </div>
+  <div class="clearer"></div>
+</block>
+
+
+<block name="overlay-achievements" class="trans-panel rounded-5" builder="BuilderOverlayAchievements">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Congratulations!
+  </div>
+  <div style="padding-left:17px; padding-top:17px;">
+    You have earned new achievements
+  </div>
+  <div id="achievements" style="padding:17px;" packerinput="block-name:mini-overlay-achievement"></div>
+</block>
+

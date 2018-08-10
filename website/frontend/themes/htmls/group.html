@@ -1,0 +1,476 @@
+<block name="group-item">
+  <div class="block-puzzle-main trans-panel rounded-5 gradientBoxesWithOuterShadows" style="float:left; width:204px; height:204px; padding:11px; margin-right:10px; margin-top:11px;">
+  <div class="trans-panel-bg-bright rounded-5"></div>
+    <div class="group-image-frame centered">            
+    {IF group_picture}
+    <img class="group-image" src="{group_picture}"></img>&nbsp;
+    {ELSE}
+    <img class="group-image" src="https://s3.amazonaws.com/eterna/eterna2/user-group.png"></img>&nbsp;
+    {ENDIF}              
+    {IF is_private}              
+    <img class="small-private-image" src="https://s3.amazonaws.com/eterna/eterna2/lock.png"></img>&nbsp;
+    {ELSE}
+    <img class="small-private-image hidden" src="https://s3.amazonaws.com/eterna/eterna2/lock.png"></img>&nbsp;            
+    {ENDIF}
+    </div>
+    <div class="clearer"></div>
+    <div class="groups-inner-block">
+      <a transition="page" style="font-weight:bolder;font-size:13px;" href="/web/group/{nid}/">{name}</a>&nbsp;&nbsp;<i>by</i>&nbsp;&nbsp;{founder_name}
+      <div style="padding-top:3px;">
+        <img style="font-size:12px; position:relative; width:14px; height:14px; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/small-people.png"></img>&nbsp;
+        {num_members}&nbsp;&nbsp;
+        Created on {created}
+      </div>
+    </div>
+    <div class="clearer"></div>
+  </div>                
+</block>
+
+<block url="/web/group/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">
+    <block builder="BuilderMyGroups">
+    {IF my_group_valid}
+	    <div class="trans-panel">
+	        <div class="trans-panel-bg rounded-5"></div>
+	        <div class="yellow-header">
+	          <div style="float:left; padding:3px;">My Group&nbsp;&nbsp;</div>    
+	          <div style="float:right; margin-right:10px; padding:3px;"><input id="my_search" placeholder="search" class="input" style="width:150px;padding:3px;"></input></div>
+	          <div style="float:right; font-size:12px; padding-top:6px; margin-right:10px;">
+	            sort by&nbsp;
+	            {IF my_sort == "date"}
+	              <i><a style="text-decoration:underline" href="{date_sort_url}">Date</a></i>
+	            {ELSE}
+	              <a style="text-decoration:underline" href="{date_sort_url}">Date</a>
+	            {ENDIF}&nbsp;
+	            {IF my_sort == "title"}
+	              <i><a style="text-decoration:underline" href="{title_sort_url}">Title</a></i>
+	            {ELSE}
+	              <a style="text-decoration:underline" href="{title_sort_url}">Title</a>
+	            {ENDIF}&nbsp;            
+	          </div>
+	          <div class="clearer"></div>            
+	        </div>
+	        <div class="trans-panel" id="groups" style="padding-left:11px" packerinput="block-name:group-item;"></div>
+	        <div class="clearer"></div>
+	        <div style="text-align:center; padding:17px" id="my_pager"></div>
+	    </div>
+	    <div class="clearer" style="padding:10px;"></div>
+    {ENDIF}
+    </block>
+    <block builder="BuilderGroups" class="trans-panel">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left; padding:3px;">Groups&nbsp;&nbsp;</div>
+          <div class="green-button rounded-5 clickable" style="float:left; font-size: 12px; margin-left:20px; padding:5px; width:150px;">
+              <div class="green-button-bg rounded-5" style="padding:3px;"></div>
+              <a href="/web/create/group/">Create a New Group</a>
+          </div>     
+          <div style="float:right; margin-right:10px; padding:3px;"><input id="search" placeholder="search" class="input" style="width:150px;padding:3px;"></input></div>
+          <div style="float:right; font-size:12px; padding-top:6px; margin-right:10px;">
+            sort by&nbsp;
+            {IF sort == "date"}
+              <i><a style="text-decoration:underline" href="{date_sort_url}">Date</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{date_sort_url}">Date</a>
+            {ENDIF}&nbsp;
+            {IF sort == "title"}
+              <i><a style="text-decoration:underline" href="{title_sort_url}">Title</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{title_sort_url}">Title</a>
+            {ENDIF}&nbsp;            
+          </div>
+          <div class="clearer"></div>            
+        </div>
+        <div class="trans-panel" id="groups" style="padding-left:11px" packerinput="block-name:group-item;"></div>
+        <div class="clearer"></div>
+        <div style="text-align:center; padding:17px;" id="pager"></div>                
+    </block>
+  </div>  
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/group/{nid}/"> 
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">  
+    <block name="group-page" input="nid:{nid}" builder="BuilderGroup">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">          
+	        <div style="float:left;">{name}</div>	        	        
+	        {IF is_logged_in}	          
+		        <div id="unsubscribe_group" class="clickable green-button rounded-5 centered group-subscribe-button">            
+		           <div class="green-button-bg rounded-5"></div>Unsubscribe</div>
+		        <div id="subscribe_group" class="clickable green-button rounded-5 centered group-subscribe-button">
+		          <div class="green-button-bg rounded-5"></div>Subscribe</div>
+            <div id="follow_group" class="clickable green-button rounded-5 centered group-subscribe-button">            
+              <div class="green-button-bg rounded-5"></div>Follow</div>
+            <div id="unfollow_group" class="clickable green-button rounded-5 centered group-subscribe-button">
+              <div class="green-button-bg rounded-5"></div>Unfollow</div>
+	        {ENDIF}	                
+	        {IF is_admin}        
+          <div class="green-button rounded-5 centered clickable group-edit-button" id="edit_group_profile">
+            <div class="green-button-bg rounded-5"></div><a href="/web/edit/group/{nid}/">Edit</a>
+          </div>
+          {ENDIF}
+          {IF is_founder}
+	        <div class="green-button rounded-5 centered clickable group-edit-button" id="delete_group">
+	          <div class="green-button-bg rounded-5"></div>Delete
+	        </div>        
+	        {ENDIF}
+	        <div class="clearer"></div> 
+        </div>
+        <div class="group-block">
+          <div class="group-inner-block">        
+            {IF group_picture}            
+            <img class="individual-group-image" src="{group_picture}"></img>&nbsp;
+            {ELSE}
+            <img class="individual-group-image" src="https://s3.amazonaws.com/eterna/eterna2/user-group.png"></img>&nbsp;
+            {ENDIF}             
+            {IF is_private}
+            <img class="private-image" src="https://s3.amazonaws.com/eterna/eterna2/lock.png"></img>&nbsp;
+            {ELSE}
+            <img class="private-image hidden" src="https://s3.amazonaws.com/eterna/eterna2/lock.png"></img>&nbsp;            
+            {ENDIF}
+          </div>
+          <div class="group-inner-block">
+            <div class="group-contents">
+              <span class="group-contents-white">Created by</span><span class="group-contents-yellow"><a transition="page" href="/web/player/{founder_uid}/">{founder_name}</a></span>
+              <span class="group-contents-white">on</span><span class="group-contents-yellow">{created}</span>
+            </div>
+            <div class="group-contents">
+              <img class="money-image" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;&nbsp;{score}&nbsp;&nbsp;
+              <img style="font-size:13px; position:relative; width:14px; height:14px; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/small-people.png"></img>&nbsp;&nbsp;{num_members}
+            </div>
+            <div class="clearer"></div> 
+            <div>
+            {IF body}
+            <div class="group-contents" style="width:350px; word-wrap:break-word;">{body}</div>
+            {ELSE}
+            Group description is not available
+            {ENDIF}
+            </div>              
+          </div>
+          <div style="float:left;" class="group-pending-message" id="pending_group">Your group subscription is pending moderator approval</div>
+          {IF is_admin}
+          <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 175px;">            
+            {IF is_group_admin}
+              <div class="red-button rounded-5 clickable" id="sendmessage" style="font-size: 12px; padding:7px;">
+                <div class="red-button-bg"></div>
+                Send Group Message
+              </div>
+            {ENDIF}
+          </div>
+          {ENDIF}
+          <div class="clearer"></div>                                
+        </div>    
+        <div class="clearer"></div>  
+        <div style="margin:20px;">
+	        <div><b>Group Admins</b></div>
+	        <div class="group-contents" id="group_admins" packerinput="block-name:admin-item;">
+	          <block defonly="true" name="admin-item">
+	            <div style="float:left; width:25px; height:25px; border-width:1px; border-color:#FFFFFF; border-style:solid;"><img src="{picture}" style="max-width:25px; max-height:25px; width:auto; height:auto;"></img></div>
+	            <div style="float:left; width:120px; padding:10px;"><a transition="page" href="/web/player/{uid}/">{name}</a></div>
+	          </block>
+	        </div>          
+	        <div class="clearer"></div>
+	        <div><b>Group Members</b></div>
+	        <div class="group-contents" id="group_members" packerinput="block-name:member-item;">
+	          <block defonly="true" name="member-item">
+	            <div style="float:left; width:25px; height:25px; border-width:1px; border-color:#FFFFFF; border-style:solid;"><img src="{picture}" style="max-width:25px; max-height:25px; width:auto; height:auto;"></img></div>
+	            <div style="float:left; width:120px; padding:10px;"><a transition="page" href="/web/player/{uid}/">{name}</a></div>
+	          </block></div>
+	        <div class="clearer"></div>
+	        {IF is_admin}
+	        <div><b>Pending Members</b></div>
+	        <div class="group-contents" id="group_pendings" packerinput="block-name:pending-item;">
+	          <block defonly="true" name="pending-item">
+	            <div style="float:left; width:25px; height:25px; border-width:1px; border-color:#FFFFFF; border-style:solid;"><img src="{picture}" style="max-width:25px; max-height:25px; width:auto; height:auto;"></img></div>
+	            <div style="float:left; width:120px; padding:10px;"><a transition="page" href="/web/player/{uid}/">{name}</a></div>
+	            <div id="{idx}_accept" class="green-button clickable accept-or-reject-button">
+	              <div class="green-button-bg"></div>Accept
+	            </div>
+	            <div id="{idx}_reject" class="red-button clickable accept-or-reject-button">
+	              <div class="red-button-bg"></div>>Reject
+	            </div>
+	          </block>
+	        </div>
+	        <div class="clearer"></div>
+	        {ENDIF}	        
+        </div>
+        <div style="padding-bottom:3px;"></div>  
+      </div>
+      {IF acc_comments}
+      <div class="trans-panel rounded-5" style="margin-top:17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Comments <input id="search" placeholder="search" class="input" style="float:right;width:150px;padding:3px;"></input></div>        
+          <block name="comments" style="padding:11px; padding-top:17px;"></block>
+          <div style="text-align:center; padding:17px;" id="pager"></div>
+      </div>
+      {ELSE}
+      <div class="trans-panel rounded-5" style="margin-top:17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Comments</div>        
+        <div style="padding:20px;">Only members can access comments thread</div>
+      </div>      
+      {ENDIF}      
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/create/group/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <block Builder="BuilderGroupCreate">
+  <div style="float:left; width:720px; min-height:1px;">
+  <div class="trans-panel">
+    <div class="trans-panel-bg "></div>
+    <div class="yellow-header">
+      <center>Create a New Group</center>
+    </div>
+    <form action="/post/" accept-charset="UTF-8" method="post" id="group_profile" enctype="multipart/form-data">
+    <input type="hidden" name="type" value="create_group"></input>
+    <div style="padding:22px;">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Title</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="float: left; padding:30px;">
+          <input type="text" name="group-title-input" id="group-title-input" style="width: 200px;" placeholder="Group Title"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Description</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="float: left; padding:30px;">
+          <input type="text" name="group-description-input" id="group-description-input" style="width: 200px;" placeholder="Group Description"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Picture</div>
+          <div class="clearer"></div>
+        </div>
+        <div style="padding:33px;">
+          <input type="hidden" name="picture_delete" id="edit-picture-delete" value=""></input>
+          <div class="form-item" id="edit-picture-upload-wrapper">
+            <div>Upload picture: </div>
+            <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+            <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Your virtual face or picture. Maximum dimensions are <em>85x85</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+          </div>
+        </div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Type</div>    
+          <div class="clearer"></div>  
+        </div>
+        <div style="padding:15px;">
+          <form>
+            <div style="margin:5px;"><input class="radio" id="public" type="radio" name="group-type" value="public">Public <span class="radio-description">(anyone can join)</span></input></div>
+            <div style="margin:5px;"><input class="radio" id="private" type="radio" name="group-type" value="private">Private <span class="radio-description">(members must be approved by you)</span></input></div>            
+          </form>
+        </div>   
+      </div>      
+    </div>    
+    <div style="padding-bottom:20px;">
+      <div class="green-button clickable rounded-5" id="cancel-button" style="float:left; padding:5px; margin-left:175px; width:125px; height:20px;">
+        <div class="green-button-bg rounded-5" style="padding-left:35px;">Cancel</div>
+      </div>
+      <div class="green-button clickable rounded-5" id="create-button" style="float:right; padding:5px; margin-right:175px; width:125px; height:20px;">
+        <div class="green-button-bg rounded-5" style="padding-left:35px;">Create</div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </form>  
+  </div>
+  </div>
+  </block>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/edit/group/{nid}/" Builder="BuilderGroupEdit">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;"> 
+  <div class="trans-panel">
+    <div class="trans-panel-bg"></div>
+    <div class="yellow-header">
+      <center>Edit {group_name}</center>
+    </div>
+    <form action="/post/" accept-charset="UTF-8" method="post" id="group_profile" enctype="multipart/form-data">
+    <input type="hidden" name="type" value="edit_group"></input>
+    <input type="hidden" name="nid" value="{nid}"></input>
+    <div style="padding:22px;">    
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Title</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="padding:20px;">
+          <input type="text" id="group-title-input" name="group-title-input" style="width: 200px;" placeholder="{group_name}"></input>
+          <div class="clearer"></div>
+        </div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Description</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="padding:20px;">
+          <input type="text" id="group-description-input" name="group-description-input" style="width: 580px; padding:25px;" placeholder="{group_description}"></input>
+          <div class="clearer"></div>
+          </div>
+        </div>      
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Picture</div>
+          <div class="clearer"></div>
+        </div>
+        <div style="padding:33px;">
+          <input type="hidden" name="picture_delete" id="edit-picture-delete" value=""></input>
+          <div class="form-item" id="edit-picture-upload-wrapper">
+            <div>Upload picture: </div>
+            <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+            <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Your virtual face or picture. Maximum dimensions are <em>85x85</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+          </div>
+        </div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Group Type</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="padding:15px;">
+          <form>
+            {IF is_private}
+              <div style="margin:5px;"><input class="radio" id="public" type="radio" name="group-type" value="public">Public <span class="radio-description">(anyone can join)</span></input></div>
+              <div style="margin:5px;"><input class="radio" id="private" type="radio" name="group-type" value="private" checked>Private <span class="radio-description">(members must be approved by you)</span></input></div>
+            {ELSE}
+              <div style="margin:5px;"><input class="radio" id="public" type="radio" name="group-type" value="public" checked>Public <span class="radio-description">(anyone can join)</span></input></div>
+              <div style="margin:5px;"><input class="radio" id="private" type="radio" name="group-type" value="private">Private <span class="radio-description">(members must be approved by you)</span></input></div>         
+            {ENDIF}            
+          </form>
+          <div class="clearer"></div> 
+        </div>  
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Invite Members</div>
+          <div class="clearer"></div>
+        </div>
+        <div style="clear:both; float:right; padding-top: 11px; margin-right:20px; padding-bottom: 11px; width: 175px;">
+          <div class="red-button rounded-5 clickable" id="invite-member" style="font-size: 12px; padding:7px;">
+            <div class="red-button-bg"></div>
+            INVITE GROUP MEMBERS
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Add Admins</div>    
+          <div class="clearer"></div>      
+        </div>
+        <div style="clear:both; float:right; padding-top: 11px; margin-right:20px; padding-bottom: 11px; width: 175px;">
+          <div class="red-button rounded-5 clickable" id="add-admin" style="font-size: 12px; padding:7px;">
+            <div class="red-button-bg"></div>
+            ADD ADMINS
+          </div>
+        </div>        
+        <div class="clearer"></div>
+      </div>
+    </div>
+    <div style="padding-bottom:15px;">
+      <div class="green-button clickable rounded-5" id="cancel-button" style="float:left; margin-left:200px; width:125px; height:23px;">
+        <div class="green-button-bg rounded-5" style="padding:3px; padding-left:35px;">Cancel</div>
+      </div>
+      <div class="green-button clickable rounded-5" id="edit-button" style="float:right; margin-right:200px; width:125px; height:23px;">
+        <div class="green-button-bg rounded-5" style="padding:3px; padding-left:50px;">Edit</div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </form>
+  </div>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="overlay-messages" class="trans-panel rounded-5" builder="BuilderOverlayMessages">
+  <div id="sendmessage">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Send Message
+  </div>
+    <div>
+    <span style="font-weight: bolder">To :&nbsp;</span> {target_name}
+    </div>
+    <div style="padding-top: 11px; width: 350px;">
+        <textarea id="body" style="width: 80%; height: 100px;"></textarea>
+    </div>
+    <div style="padding-top: 11px;">
+        <span class="orangebutton clickable" id="send-button" style="font-size: 12px;">Send</span>
+    </div>
+  </div> 
+</block>
+
+<block name="overlay-invite-message" class="trans-panel rounded-5" builder="BuilderOverlayInviteMember">
+  <div id="invite-member">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Invite member
+  </div>
+    <div style="padding:10px; margin-top:5px; height:25px;">
+	    <div style="float:left; font-weight: bolder">To :&nbsp;</div>
+	    <textarea id="to" style=" width: 80%; height: 15px;"></textarea>
+    </div>
+    <div id="invite-message" style="padding: 17px; width: 350px;">
+        I'd like to invite you to our group.<br></br> 
+        Please come to visit <a transition="page" style="font-weight:bolder;font-size:13px;" href="/web/group/{nid}/"> us.</a>        
+    </div>
+    <div style="padding: 17px;">
+        <span class="red-button clickable rounded-5" id="send-button" style="padding:5px 10px; font-size: 12px;">Send</span>
+    </div>
+  </div>
+</block> 
+
+<block name="overlay-add-admin-message" class="trans-panel rounded-5" builder="BuilderOverlayAddAdmin">
+  <div id="add-admin">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Add admin
+  </div>
+    <div style="padding:10px; margin-top:5px; height:25px;">
+        <div style="float:left; font-weight: bolder">To :&nbsp;</div>
+        <textarea id="to" style=" width: 80%; height: 15px;"></textarea>
+    </div>
+    <div id="add-message" style="padding: 17px; width: 350px;">
+      You are now one of administrator of <a transition="page" style="font-weight:bolder;font-size:13px;" href="/web/group/{nid}/">this group.</a>        
+    </div>
+    <div style="padding: 17px;">
+        <span class="red-button clickable rounded-5" id="send-button" style="padding:5px 10px; font-size: 12px;">Send</span>
+    </div>
+  </div>
+</block>

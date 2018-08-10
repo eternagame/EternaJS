@@ -1,0 +1,1371 @@
+<block url="/web/labs/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float: left; width: 720px; min-height: 1px;">
+    <block builder="BuilderLabs">
+      <div class="trans-panel" style="clear: both; width:720px;">
+        <div class="trans-panel-bg trans-panel-bg-blue-bordered rounded-5"></div>
+        <div class="yellow-header">
+          Paper Labs
+        </div>
+        <div style="padding:11px">  
+          <div>
+            <div style="font-size:15px; padding-top:0px;">
+              <div>
+                Participate in amazing projects created by both Eterna players and professional scientists.
+              </div>
+              <div style="padding-top:3px;">
+                Total&nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:14px;">{IF total_synth_slots}{total_synth_slots}{ELSE}0{ENDIF}</span>&nbsp;designs will be selected for synthesis on&nbsp;<span style="font-weight:bolder; font-size:14px; color: #FEC942">{countdown_deadline_hr}</span>.
+              </div>
+            </div>  
+            <div style="float:right; font-size:11px;">
+              <input type="text" placeholder="search" id="search" style="width:100px"></input>
+            </div>
+            <div style="float:right; font-size:11px; padding-top:6px; margin-right:5px;">
+              sort by&nbsp;
+              {IF sort == "date"}
+                <i><a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a>
+              {ENDIF}&nbsp;
+              {IF sort == "synthesis"}
+                <i><a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a>
+              {ENDIF}&nbsp;
+            </div>
+          </div>
+          <div style="padding-top:17px; display:none">
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="single"></input>&nbsp;'Single state' only&nbsp;&nbsp;
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="switch"></input>&nbsp;'Switch' only&nbsp;&nbsp;
+          </div>  
+          <div style="clear:both; padding-top:17px;" id="labs" packerinput="block-name:lab-block;"></div>
+          <div style="text-align:center; padding-top:17px" id="pager">pager</div>
+        </div>                
+        <div class="clearer"></div>   
+      </div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="lab-block" class="trans-panel gradientBoxesWithOuterShadows" style="margin-bottom:17px;" builder="BuilderLab">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div style="padding:10px; position:relative;">
+    {IF is_featured}
+      <img src="https://s3.amazonaws.com/eterna/cloudlabs/lab_featured.png" style="position:absolute; left:0px; top:0px"></img>
+      <div style="padding-left:50px; float:left">
+        <b>{title}</b>
+        {IF cleared}
+          &nbsp;<img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" width=12px height=12px></img>
+        {ENDIF}
+      </div>
+    {ELSE}
+      <div style="float:left">
+        <b>{title}</b>
+        {IF cleared}
+          &nbsp;<img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" width=12px height=12px></img>
+        {ENDIF}
+      </div>
+    {ENDIF}
+    <div style="float:right; margin-top:-4px;">
+      <img src="{founder_picture}" style="max-width:18px; max-height:18px; position:relative; top:3px; width:auto; height:auto"></img>&nbsp;
+      <span style=""><a transition="page" href="/web/player/{founder_uid}/" style="text-decoration:none; font-size:12px;">{founder}</a></span>
+    </div>
+    <div class="clearer"></div>
+    {IF is_expert}
+      {IF is_featured}
+        <div style="font-size:12px; padding-top:3px; padding-left:50px">
+          featured by
+          {IF affiliation_url}
+            <a href="{affiliation_url}" target="_blank" style="color:#FE9C42; font-weight:bolder;">{affiliation}</a>
+          {ELSE}
+            <span style="color:#FEC942; font-weight:bolder;">{affiliation}</span>
+          {ENDIF}
+        </div>      
+      {ELSE}
+        <div style="font-size:12px; padding-top:3px;">
+          featured by
+          {IF affiliation_url}
+            <a href="{affiliation_url}" target="_blank" style="color:#FE9C42; font-weight:bolder;">{affiliation}</a>
+          {ELSE}
+            <span style="color:#FEC942; font-weight:bolder;">{affiliation}</span>
+          {ENDIF}
+        </div>
+      {ENDIF}
+    {ENDIF}
+  </div>             
+  <div style="padding: 11px; padding-right:0px; padding-bottom:0px;">
+    <div style="float: left; width: 110px; height:110px; text-align:center;">
+      {IF cover_image}
+        <img style="max-width:100px; max-height:100px; width:auto; height:auto" src="{cover_image}"></img>
+      {ELSE}
+        <img style="max-width:100px; max-height:100px; width:auto; height:auto" src="{thumbnail}"></img>
+      {ENDIF}
+    </div>
+    {IF body}
+      <div style="float:left; padding:11px; padding-right:0px; padding-top:5px; width:659px; font-size:12px;">
+        <div style="font-size: 13px; color:#CECECE;">
+        {IF body}
+          {body}
+        {ENDIF}
+        </div>     
+        <div style="padding-top:43px; float:right;">
+          {IF restart}
+            {IF pending}
+              <div style="float:right; margin-right:5px; padding-top:5px; padding-bottom:5px;">
+            {ELSE}
+              <div style="float:left; margin-right:5px; padding-top:5px; padding-bottom:5px;">
+            {ENDIF}
+                <b>Author requested&nbsp;&nbsp;<span style="font-size:19px; color:#FEC942">RERUN</span>&nbsp;&nbsp;this project!</b>
+              </div>
+          {ENDIF}
+          {IF pending}
+            {IF is_featured}
+              <div style="clear:both; float:left; margin-right:10px; padding-top:10px;">
+                <b>This project has been approved by admins.</b>
+              </div>
+              <div class="green-button clickable rounded-5 centered" style="float:left; padding: 7px; font-size: 15px; width:75px">
+                <div class="green-button-bg"></div>
+                <a href="/web/lab/{nid}/">Review</a>
+              </div>
+            {ELSE}
+            <block builder="BuilderLabVoter" input="nid:{nid}; voted:{voted}; num_voters:{num_voters}">
+              <div style="clear:both; float:left; margin-right:10px; padding-top:5px;">
+                <b><span id="num_voters" style="font-size:19px; color:#FEC942">{num_voters}</span>&nbsp;people voted for this project.</b>
+              </div>
+              <div class="green-button clickable rounded-5 centered" style="float:left; padding: 7px; font-size: 15px; width:75px">
+                <div class="green-button-bg"></div>
+                <a href="/web/lab/{nid}/">Review</a>
+              </div>
+              {IF logged_in}
+                {IF voted == "VOTED"}
+                  <div id="button" class="red-button clickable rounded-5 centered" style="float:left; padding: 7px; font-size: 15px; width:75px; margin-left:4px;">
+                    <div class="red-button-bg"></div>
+                    <a>Unvote</a>
+                  </div>        
+                {ELSE}
+                  <div id="button" class="green-button clickable rounded-5 centered" style="float:left; padding: 7px; font-size: 15px; width:75px; margin-left:4px;">
+                    <div class="green-button-bg"></div>
+                    <a>Vote</a>
+                  </div>
+                {ENDIF}
+              {ELSE}
+                <block builder="BuilderPopOverlay" input="block-name:register-box" class="green-button clickable rounded-5 centered" style="float:left; padding: 7px; font-size: 15px; width:75px; margin-left:4px;">
+                  <div class="green-button-bg"></div>
+                  <a>Vote</a>    
+                </block>
+              {ENDIF}
+              <div class="clearer"></div>
+            </block>
+            {ENDIF}
+          {ELSE}
+            <div class="green-button clickable rounded-5 centered" style="float:right; padding: 7px; font-size: 15px; width:100px">
+              <div class="green-button-bg"></div>
+              <a href="/web/lab/{nid}/">
+                {IF waiting}Review{ELSE}Participate{ENDIF}
+              </a>
+            </div>
+            <div class="green-button clickable rounded-5 centered" style="display:none; float:right; padding: 7px; font-size: 15px; width:100px; margin-right:4px;">
+              <div class="green-button-bg"></div>
+              <a href="/web/labs/data-browser/?project_id={nid}">
+                Designs
+              </a>
+            </div>
+          {ENDIF}
+        </div>        
+        <div class="clearer"></div>
+      </div>
+    {ENDIF}    
+    <div class="clearer"></div>
+  </div> 
+  <div class="clearer"></div>
+</block>
+
+<block url="/web/labs/proposed/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+
+  <div style="float: left; width: 720px; min-height: 1px;">  
+    <block builder="BuilderLabs" input="lab_type:pending_projects">
+    
+      {IF project_type == "pilot"}
+      <div class="blue-inactive-tab" style="float: left;">
+        <a style="text-decoration: none" href="/web/labs/proposed/">Proposals</a>
+      </div>
+      <div class="blue-active-tab" style="float: left;">
+        Pilot Projects
+      </div>      
+      {ELSE}
+      <div class="blue-active-tab" style="float: left;">
+        Proposals
+      </div>
+      <div class="blue-inactive-tab" style="float: left;">
+        <a style="text-decoration: none" href="/web/labs/proposed/?project_type=pilot">Pilot Projects</a>
+      </div>
+      {ENDIF}    
+    
+      <div class="trans-panel" style="clear: both; padding:11px; width:698px;">
+        <div class="trans-panel-bg trans-panel-bg-blue-bordered rounded-5"></div>
+        <div>
+          <div style="font-size:15px; padding-top:0px;">  
+            <div style="float:left; width:400px;">
+              <div style="padding-bottom:5px">
+                {IF project_type == "pilot"}
+                  Pilot projects are for those who want to experimentally test their sequences in smaller scales (up to 40 sequences per project). Top voted projects will be picked at the end of the month.
+                {ELSE}
+                  Propose your research idea as a Paper Lab project and colalborate with Eterna players to solve your problem. Players will vote on which projects they want to work on. The top voted projects will be picked at the end of the month and featured in Cloud Lab. Featured Paper Labs will be given up to 400 synthesis slots,
+                {ENDIF}
+              </div>
+              <div style="display:none">
+                Total&nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:16px;">{total_labs}</span>&nbsp;projects requested&nbsp;<span style="font-weight:bolder; font-size:16px; color: #FEC942">{IF total_synth_slots}{total_synth_slots}{ELSE}0{ENDIF}</span>&nbsp;synthesis slots.
+              </div>
+            </div>
+            <div style="float:right; margin-top:0px;">
+              {IF logged_in}
+                {IF puzzle_creatable}
+                <div class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:230px">
+                  <div class="green-button-bg"></div>
+                  {IF project_type == "pilot"}
+                    <a href="/web/propose/pilot/sequences/">Propose a Pilot Project!</a>
+                  {ELSE}
+                    <a href="/web/propose/paper/design/">Propose a Paper Lab!</a>
+                  {ENDIF}
+                </div>
+                {ELSE}
+                  <div class="gray-button centered" style=" padding:7px; font-size:14px; width:230px;">
+                    <div class="gray-button-bg"></div>
+                    Gather 20,000 points to propose a project
+                  </div>                       
+                {ENDIF}
+              {ELSE}
+                <block builder="BuilderPopOverlay" input="block-name:register-box" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:230px">
+                  <div class="green-button-bg"></div>
+                  <a>Propose a Lab Project!</a>  
+                </block>
+              {ENDIF}
+            </div> 
+            <div style="clear:both; float:right; font-size:11px; padding-top:11px;">
+              <input type="text" placeholder="search" id="search" style="width:100px"></input>
+            </div>
+            <div style="float:right; font-size:11px; padding-top:15px; margin-right:5px;">
+              sort by&nbsp;
+              {IF sort == "date"}
+                <i><a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a>
+              {ENDIF}&nbsp;
+              {IF sort == "synthesis"}
+                <i><a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a>
+              {ENDIF}&nbsp;
+            </div>  
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div style="padding-top:17px; display:none">
+          <input type="checkbox" style="width:11px;vertical-align: middle;" id="single"></input>&nbsp;'Single state' only&nbsp;&nbsp;
+          <input type="checkbox" style="width:11px;vertical-align: middle;" id="switch"></input>&nbsp;'Switch' only&nbsp;&nbsp;
+        </div>      
+        <div style="clear:both; padding-top:17px;" id="labs" packerinput="block-name:lab-block;"></div> 
+        <div class="clearer"></div>  
+        <div style="text-align:center; padding-top:17px" id="pager"></div>
+      </div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/labs/past/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float: left; width: 720px; min-height: 1px;">
+    <block builder="BuilderLabs" input="lab_type:past_projects">
+      <div class="trans-panel" style="clear: both; width:720px;">
+        <div class="yellow-header">
+          Previous Lab Projects
+        </div>
+        <div class="trans-panel-bg trans-panel-bg-blue-bordered rounded-5"></div>
+        <div style="padding:11px;">
+        
+          <div style="font-size:15px; padding-top:0px;">
+            <div style="padding-top:3px;">
+              Cloud Lab has synthesized&nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:14px;">{total_synth_slots}}</span>&nbsp;sequences in&nbsp;<span style="font-weight:bolder; font-size:14px; color: #FEC942">{total_labs}</span>&nbsp;projects.
+            </div>
+          </div>          
+          
+          <div style="float:right; font-size:11px;">
+            <input type="text" placeholder="search" id="search" style="width:100px"></input>
+          </div>
+          <div style="float:right; font-size:11px; padding-top:6px; margin-right:5px;">
+            sort by&nbsp;
+            {IF sort == "date"}
+            <i><a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a></i>
+            {ELSE}
+            <a style="text-decoration:underline" href="{date_sort_url}">Puzzle post date</a>
+            {ENDIF}&nbsp;
+            {IF sort == "synthesis"}
+            <i><a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a></i>
+            {ELSE}
+            <a style="text-decoration:underline" href="{synthesis_sort_url}">Synthesis slot</a>
+            {ENDIF}&nbsp;
+          </div>      
+          <div style="padding-top:11px; float:left; display:none">
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="single"></input>&nbsp;'Single state' only&nbsp;&nbsp;
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="switch"></input>&nbsp;'Switch' only&nbsp;&nbsp;
+          </div>
+          <div class="clearer"></div>
+        </div>
+        <div id="labs" packerinput="block-name:past-lab" style="padding:11px">
+             <block name="past-lab" defonly="1" class="trans-panel" style="margin-bottom:17px;" builder="BuilderLab">
+               <div class="trans-panel-bg rounded-5"></div>
+               {IF is_expert}
+               <div style="padding:10px 10px 10px 60px; position:relative;">
+                 <img src="https://s3.amazonaws.com/eterna/cloudlabs/lab_featured.png" style="position:absolute; left:0px; top:0px"></img>
+                 <div style="float:left; font-weight:bolder; width:400px">
+                   {title}
+                   {IF is_waiting}
+                   &nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:14px;">[Waiting for synthesis results]</span>
+                   {ENDIF}          
+                   {IF cleared}
+                   &nbsp;<img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" width=12px height=12px></img>
+                   {ENDIF}
+                 </div>
+                 <div style="float:right;">
+                   by&nbsp;<span style="color:#FEC942"><a transition="page" href="/web/player/{founder_uid}/">{founder}</a></span>
+                   <span>&nbsp;on&nbsp;{created}</span>
+                 </div>
+                 <div style="clear:both; padding-top:2px; font-size:12px">
+                   featured by&nbsp;
+                   <span style="color:#FEC942; font-weight:bolder">
+                     {IF affiliation_url}
+                       <a target="_blank" href="{affiliation_url}">{affiliation}</a>
+                     {ELSE}
+                       {affiliation}
+                     {ENDIF}
+                   </span>
+                 </div>
+               </div>
+               {ELSE}
+               <div style="padding:10px 10px 10px 10px; position:relative;">
+                 <div style="float:left; font-weight:bolder; width:400px">
+                   {title}
+                   {IF is_waiting}
+                   &nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:14px;">[Waiting for synthesis results]</span>
+                   {ENDIF} 
+                   {IF cleared}
+                   &nbsp;<img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" width=12px height=12px></img>
+                   {ENDIF}
+                 </div>
+                 <div style="float:right;">
+                   by&nbsp;<span style="color:#FEC942"><a transition="page" href="/web/player/{founder_uid}/">{founder}</a></span>
+                   <span>&nbsp;on&nbsp;{created}</span>
+                 </div>
+               </div>
+               {ENDIF} 
+               <div style="clear:both; margin-top:10px; padding: 11px;">
+                 <div style="float: left; width: 210px; text-align:center;">
+                   <img src="{cover_image}" style="max-width:210px; max-height:210px;"></img>
+                 </div>
+                 <div style="float: left; width: 430px; padding-top: 7px; font-size: 13px; color:#CECECE;">
+                   {body}
+                 </div>
+                 <div class="clearer"></div>
+               </div>
+               <div style="font-size: 13px; color:#CECECE; margin: 20px;">
+                  <b>Conclusion:</b>&nbsp;
+                  {IF conclusion}
+                    {IF logged_in}
+                      {conclusion}
+                    {ELSE}
+                      The experimental conclusions from this lab are ready! Please log in or register to review.
+                    {ENDIF}
+                  {ELSE}
+                    Conclusion has not been added yet for this lab. Please contact the admin of this lab to submit a conclusion, which will earn the admin {conclusion_points}&nbsp;points.
+                  {ENDIF}
+               </div>
+               {IF num_winners}
+               <div style="font-size: 15px; margin: 20px;">
+                 <b>Winners</b>&nbsp;&nbsp;(<span class="group-contents-yellow">{num_winners}</span>&nbsp;out of {num_synthesized})
+               </div>
+               <div style="margin-top: 7px; margin-bottom: 15px; font-weight:bold;font-size: 15px;">
+		        <b>
+		          <div style="float: left; width: 30px; margin-left: 22px;">User</div>
+		          <div style="float: left; width: 100px; margin-left: 20px;">Name</div>
+		          <div style="float: left; width: 200px; margin-left: 10px;">Puzzle Title</div>
+		          <div style="float: left; width: 200px; margin-left: 10px;">Solution Title</div>
+		          <div style="float: left; margin-left: 5px; width: 50px;">Score</div>
+		        </b>
+               </div>
+               <div class="clearer"></div>
+               <div style="margin: 8px 20px;" class="trans-bar"></div>
+               {ENDIF}
+               <div id="winnersinfo"
+	    	    style="max-height:450px;overflow-y:auto;margin-bottom:10px;">
+		        <block defonly="1" name="winners-info" style="font-size:13px; padding-top:5px; padding-left:22px; margin-bottom:7px;">
+		          <div style="float: left; width: 30px; height: 30px;">
+		            <img src="{picture}" style="max-width: 30px; max-height: 30px; width: auto; height: auto;"></img>
+		          </div>
+		          <div style="float: left; width: 100px; margin-left: 20px; padding-top: 5px;">
+		            <a href="/web/player/{uid}/">{name}</a>
+		          </div>
+		          <div style="float: left; width: 200px; margin-left: 10px; padding-top: 5px;"><a href="/web/labs/data-browser/?puzzle_id={puznid}">{puztitle}</a></div>
+		          <div style="float: left; width: 200px; margin-left: 10px; padding-top: 5px;"><a href="/web/browse/{puznid}/?ID={solnid}">{title}</a></div>
+		          <div style="float: left; margin-left: 5px; width: 50px; padding-top: 5px;">{score}</div>
+		          <div class="clearer"></div>
+		        </block>
+               </div>
+               <div style="padding: 0px 22px 22px 22px;">
+		        <div class="green-button clickable rounded-5" style="float: right; margin-top: 10px; margin-bottom: 10px; padding: 5px; font-size: 17px; width:100px;">
+		          <div class="green-button-bg"></div>
+		          <a href="/web/lab/{nid}/">
+		            Lab Info
+		          </a>
+		        </div>
+		        <div class="green-button clickable rounded-5" style="float: right; margin-top: 10px; margin-bottom: 10px; padding: 5px; font-size: 17px; margin-right:4px;">
+		          <div class="green-button-bg centered"></div>
+		          <a href="/web/labs/data-browser/?project_id={nid}">Review results</a>
+		        </div>
+		        <div class="clearer"></div>
+               </div>
+          </block>
+        </div>
+        <div style="text-align:center; padding-top:17px" id="pager"></div>
+      </div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/strategymarket/" builder="BuilderStrategies">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float: left; width: 720px; min-height: 1px;">
+    <div class="trans-panel rounded-5">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">What is Strategy Market (Design Rule Collection)?</div>
+      <div style="padding:22px">
+        <div>
+          Tell us your strategy for picking successful designs in the lab and your strategy will be integrated into <strong><a href="http://eternabot.cmu.edu/" target="_blank">EternaBot</a></strong>&nbsp;which is open to public.
+        </div>
+        <div style="padding-top:11px">
+           To participate, write your own strategy in the <a href="/getsatisfactionredirect.php" target="_blank"><strong>forum</strong></a>&nbsp;(See an <a href="http://getsatisfaction.com/eternagame/topics/_strategy_market_example_60_of_pairs_must_be_gc_pairs-1erc6" target="_blank"><strong>example post</strong></a>.) Eterna developers will write an algorithm based on your post and integrate it into EternaBot.
+        </div>
+        <div style="clear:both; padding-top:11px" id="read-more-parent">
+          <a id="read-more" style="cursor:pointer;"><u>Read more - what strategies do we want? What are all these numbers?</u></a>
+        </div>
+        <div id="read-more-content" style="clear:both; padding-top:11px; display:none; line-height:120%">
+          <div>We ask you to design a strategy that scores RNA designs in 0~100 scale (See an <a href="http://getsatisfaction.com/eternagame/topics/_strategy_market_example_60_of_pairs_must_be_gc_pairs-1erc6" target="_blank">example</a>.)</div>
+          <div style="padding-top:11px">Most importantly, we ask you to use <strong>one feature</strong>&nbsp;per strategy. For example, rather than having one strategy that looks at all pair percentages, free energy, melt point, etc..we want your strategy to focus on one single thing. You can of course submit multiple strategies for multiple ideas. All strategies are integrated into the <strong><a href="http://eternabot.cmu.edu/" target="_blank">EternaBot</a></strong>, so we don't want you to worry about assembling multiple features. We want you to focus on creating a new strategy!</div>
+          <div style="padding-top:11px">We look at 2 categories to score your strategy.</div>
+          <div style="clear:both; padding-top:11px"><strong style="color:#AAFFAA">Ordering : </strong> We use your strategy to score all synthesized designs and order them. Then we calculates how well your ordering matches the ordering based on actual synthesis scores! The correlation score ranges from -1.0 to 1.0. If you got 1.0, you got the ordering completely right. -1.0 is the opposite. Note that if you order designs randomly, you'll still get a score of 0.0. So your strategy should aim to do better than 0.0!</div>
+          <div style="clear:both; padding-top:11px"><strong style="color:#FFAAAA">Length : </strong> When you design a strategy, a general rule is that the longer the strategy is, the more likely it'll only work on specific instances. We encourage short and simple strategies.</div>
+        </div>
+      </div>
+    </div>
+    <div class="trans-panel rounded-5" style="margin-top:11px">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="red-header">Submitted Strategies</div>
+      <div id="strategies" style="padding-top:11px; padding-bottom:11px" packerinput="block-name:strategy">
+        <block name="strategy" defonly="1">
+          <div style="float:left; margin-top:10px; padding-left:25px; width:48px; height:48px">
+            <img style="max-width:48px; max-height:48px" src="{picture}"></img>
+          </div>
+          <div style="padding-left:17px; padding-top:10px; float:left; width:370px">
+            <strong><a href="/web/player/{uid}/" target="_blank">{name}</a></strong>'s <strong><a href="{field_algorithm_src_value}" target="_blank">{title}</a></strong>
+          </div>
+          <div style="float:right; color:#FFAAAA; margin-top:7px; padding-right:5px; width:70px; text-align:center" title="Length : How long is the strategy when it's converted to a computer algorithm? (The shorter the better)">
+            <div class="h2" style="margin:0px">{field_algorithm_code_length_value}</div>
+            <span style="position:relative; top:-3px; font-size:11px">length</span>
+          </div>
+          <div style="float:right; color:#AAFFAA; margin-top:7px; padding-right:5px; width:70px; text-align:center" title="Ordering : How well does the strategy order designs from the most successful to the least successful? (The higher the better)">
+            <div class="h2" style="margin:0px">{field_algorithm_kt_corr_value}</div>
+            <span style="position:relative; top:-3px; font-size:11px">Ordering</span>
+          </div>
+          <a href="{strategy_url}" style="position:absolute; display:none; right:-25px; bottom:-23px"><img src="https://s3.amazonaws.com/eterna/icon_img/algorithm_run.png"></img></a>
+          <div class="clearer"></div>
+        </block>
+      </div>
+    </div>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/lab/manual/"> 
+<block name="top-bar"></block>
+<div id="page-container">
+<div style="float: left; width: 720px; min-height: 1px;">
+  <div class="trans-panel rounded-5">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="red-header">RNA Lab - Video Tutorials</div>
+    <div style="width: 640px; padding-top: 22px;" class="centered">
+      <object width="640" height="385">
+        <param name="movie" value="http://www.youtube.com/v/LPQRdir-6ik?fs=1&amp;hl=en_US&amp;rel=0&amp;hd=1"></param>
+        <param name="allowFullScreen" value="true"></param>
+        <param name="allowscriptaccess" value="always"></param>
+        <param name="wmode" value="transparent"></param>
+        <embed src="http://www.youtube.com/v/LPQRdir-6ik?fs=1&amp;hl=en_US&amp;rel=0&amp;hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="transparent" width="640" height="385"></embed>
+      </object>
+    </div>
+    <div style="width: 640px; padding-top: 22px; padding-bottom: 22px;" class="centered">
+      <object width="640" height="385">
+        <param name="movie" value="http://www.youtube.com/v/4_dcUS8BKNQ?fs=1&amp;hl=en_US&amp;rel=0&amp;hd=1"></param>
+        <param name="allowFullScreen" value="true"></param>
+        <param name="allowscriptaccess" value="always"></param>
+        <param name="wmode" value="transparent"></param>
+        <embed src="http://www.youtube.com/v/4_dcUS8BKNQ?fs=1&amp;hl=en_US&amp;rel=0&amp;hd=1" allowscriptaccess="always" allowfullscreen="true" wmode="transparent" width="640" height="385"></embed>
+      </object>
+    </div>
+  </div>
+  <div class="trans-panel rounded-5" style="margin-top: 17px;">
+    <a name="barcode"></a>
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="blue-header">Special requirements for RNA Lab - Barcodes</div>
+    <div style="padding: 22px">
+      <div>
+        <img src="http://eterna.cmu.edu/sites/default/files/chat_screens/10_1358979415.png"></img>
+      </div>
+      <div style="padding-top:7px;">
+        In the cloud labs, we use a state-of-the-art experimental pipeline and protocol which would allows to synthesize hundreds of sequences at once (potentially tens of thousands in near future).  
+      </div>     
+      <div style="padding-top:7px">
+        Our experimental protocol creates all the designs at once inside a single test tube! We are then able to infer what data go with which design based on the sequence at the last part of the sequence. Each lag puzzle includes a seven-base-pair hairpin near the end. Your sequence in the last seven nucleotides of this hairpin act as a 'barcode' for identifying your design.
+      </div>
+      <div style="padding-top:7px;">
+        For that reason, it is important that your barcode hairpin sequence is "unique". Not just among the lab, but among all the sequences that will be synthesized together.
+      </div>
+      <div style="padding-top:7px;">
+        The barcode region is marked with rounded barcodes as in the screenshot above. If you try to submit a sequence with a barcode that exists in other submitted sequences, you will get a warning message and won't be able to submit your sequence. 
+      </div>
+    </div>
+  </div>
+  <div class="trans-panel rounded-5" style="margin-top: 17px;">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="blue-header">RNA Lab FAQ</div>
+    <div style="padding: 22px">
+      <div style="padding-bottom: 7px; font-weight: bolder;">Q : What is RNA Lab?</div>
+      <strong> A : </strong> RNA lab aims to build a library of synthetic RNAs that have not been discovered in nature. In RNA lab, you not only design RNAs to solve puzzles, but also to successfully fold in <i>nature</i>. Every round, players vote for <strong>8</strong> designs which are synthesized in test tubes and get scored by how well they fold.
+      <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">Q : When are we done with a lab puzzle?</div>
+      <strong> A : </strong> The lab puzzle is done when one of players come up with a design that get's 94 or more synthesis score. The winner designs show up on our <a href="{labhistoryurl}">RNA lab history</a>&nbsp; and we move onto a more challenging lab puzzle.
+      <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">Q : Do I get rewarded for participating in lab?</div>
+      <strong> A : </strong> Yes! In each round, once we get back synthesis results we score not only the synthesized designs, but also other designs based on how close they are to synthesized designs. In the end every design ends up with a synthesis score ranging from 0 to 100.
+      <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">Q : How do I know if an RNA design is good or bad?</div>
+      <strong> A : </strong> Short answer is, no one knows. It's yet known which RNAs fold correctly in nature, and it's <i>your</i> job to figure it out. Look through past synthesis results and create your own hypothesis to design and vote. It's also always good idea to discuss with other people in chat, or in the <a href="http://eterna.cmu.edu/getsatisfactionredirect.php" target="_blank">forum</a>.
+      <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">Q : Is there a strategy guide?</div>
+      <strong> A : </strong>To read the strategy guide <a href="http://getsatisfaction.com/eternagame/topics/strategy_guide_for_rna_lab" target="_blank">click here</a>
+    </div>
+  </div>
+  <div class="trans-panel rounded-5" style="margin-top: 17px;">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="green-header">Dictionary</div>
+    <div style="padding: 22px">
+      <div class="graypanel-body" style="text-align: left;">
+        <div style="padding-bottom: 7px; font-weight: bolder;">>Free energy</div>
+        When you are playing the puzzles in Eterna, there is a box in the top left corner which displays the [free] energy of the current molecule. What that is a measure of is the potential energy of the molecule. Everything (at temperatures above 0 K)
+        has some amount of internal energy. When you look at energy, LOWER ENERGY IS (generally) BETTER, meaning larger negative numbers. In the world of protein folding and RNA folding, the general theory is that the lowest energy state is the most
+        stable. However, this does not necessarily mean that when designing a solution for the RNA lab, you should try to get the lowest possible free energy. There are other things to consider as well, which are discussed in the <a href="http://getsatisfaction.com/eternagame/topics/strategy_guide_for_rna_lab" target="_blank">RNA Lab Guide</a>.
+        <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">>Melting point</div>
+        The melting temperature can be thought of as the temperature at which there would be enough energy to pull the structure apart from it folded structure to a linear form. In general, a higher
+        melting temperature indicates higher stability in your structure. However there is a caveat which is that the algorithm in Eterna that calculates the melting temperature is not very
+        good. It is only accurate to the nearest 10 degrees. Therefore, you should be careful in trying to use the information from the melting temperature. Melting temperature relates to the free
+        energy in that as free energy goes down, melting temperature goes up, as both are measures of stability.
+        <div style="padding-top: 25px; padding-bottom: 7px; font-weight: bolder;">>Pairing probability</div>
+        <img src="/sites/default/files/dotplot.png" style="float: left; margin-right: 22px"></img> RNA folds into the minimum free energy structure (i.e, the most stable shape,
+        or the predicted shape in the game.) However, in nature, it does not constantly stay in the structure, but constantly shifts between other structures as well. The pairing probability plot represents what possibilities of two bases pairing up in one of
+        such transitions. The plot has 2 axis, both horizontal axis and vertical axis representing the RNA sequence. The upper half triangle of the plot shows full set of pairing possibilities.
+        The color at the position (x,y) represents the probability that base x and base y pairs up. The darker the color, the higher the probability. The lower half triangle of the plot only colors
+        pairs that are in the minimum free energy structure. In general, the more the upper half looks like the lower half, it would mean the RNA has more chance of staying in the predicted shape. However, as with the melting point, calculation of paring
+        probabilities is only a simulation and therefore you should be careful in trying to use the information.
+      </div>
+    </div>
+  </div>
+</div>
+<block name="side-bar"></block>
+</div>
+</block>
+
+<block url="/web/lab/{nid}/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float: left; width: 720px; min-height: 1px;">
+    <block name="page-lab" builder="BuilderLabPage" input="nid:{nid};">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="red-header">
+          {title}
+         
+            {IF lab_founder}
+            <div style="padding-top:11px;">
+              <a href="/web/lab/{nid}/edit/">
+                <div class="clickable green-button rounded-5 centered" style="float:left; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+                <div class="green-button-bg rounded-5"></div>
+                  Edit
+                </div>
+              </a>
+              <block builder="BuilderPopOverlay" input="block-name:add-coadmin; nid:{nid};" class="clickable green-button rounded-5 centered" style="float:left; font-size: 12px; width: 150px; padding: 3px; margin-top:-5px;">
+                <div class="green-button-bg rounded-5"></div>
+                Manage Coadmin
+              </block>
+              {IF is_pending}
+              <div class="clickable green-button rounded-5 centered" id="delete-proposed-lab" style="float:left; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+                <div class="green-button-bg rounded-5"></div>
+                  Delete
+              </div>
+              {ENDIF}
+              <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:left; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+                <div class="green-button-bg rounded-5"></div>
+                Unfollow
+              </div>
+              <div id="follow" class="clickable green-button rounded-5 centered" style="float:left; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+                <div class="green-button-bg rounded-5"></div>
+                Follow
+              </div>
+              <div class="clearer"></div>
+            </div>
+            {ELSE}
+            <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+              <div class="green-button-bg rounded-5"></div>
+              Unfollow
+            </div>
+            <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-5px;">
+              <div class="green-button-bg rounded-5"></div>
+              Follow
+            </div>                            
+            {ENDIF}          
+
+        </div>
+
+	{IF nid == "6645697"}
+        <div style="font-size:15px; padding:11px;">
+          Total&nbsp;<span style="font-weight:bolder; color: #FEC942; font-size:14px;">{IF total_synth_slots}{total_synth_slots}{ELSE}7000{ENDIF}</span>&nbsp;designs will be selected for synthesis on&nbsp;<span style="font-weight:bolder; font-size:14px; color: #FEC942">{countdown_deadline_hr}</span>.
+        </div>
+	{ENDIF}
+
+	
+        <div style="padding: 11px;">
+          <div style="float: left; width: 200px; min-height:150px; padding-left:5px; text-align:center;">
+            {IF cover_image}
+              <img src="{cover_image}" style="max-width:200px; max-height:200px;"></img>
+            {ELSE}
+              <img src="/sites/default/files/puzzle_cloud_thumbnails/thumbnail{nid}.png"></img>
+            {ENDIF}
+          </div>
+          <div style="float: left; width: 430px; padding-top: 7px; padding-left:5px;">{body}</div>
+          <div style="padding-left:22px;">
+            {IF is_pending}
+              {IF is_featured}
+               <div style="clear:both; padding-top:5px; padding-left:2px">
+                  <b>This project has been approved by the admins and is <span style="font-size:19px; color:#FEC942">waiting to be synthesized</span>.</b>
+                </div>              
+              {ELSE}
+                <block builder="BuilderLabVoter" style="clear:both; float:left; padding-top: 7px; " input="nid:{nid}; voted:{voted}">
+                  {IF logged_in}
+                    {IF voted == "VOTED"}
+                      <div id="button" class="red-button clickable rounded-5 centered" style="padding: 7px; font-size: 17px; width:75px; margin-left:0px;">
+                        <div class="red-button-bg"></div>
+                        <a>Unvote</a>
+                      </div>        
+                    {ELSE}
+                      <div id="button" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 17px; width:75px; margin-left:0px;">
+                        <div class="green-button-bg"></div>
+                        <a>Vote</a>
+                      </div>
+                    {ENDIF}
+                  {ELSE}
+                    <block builder="BuilderPopOverlay" input="block-name:register-box" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 17px; width:75px; margin-left:0px;">
+                      <div class="green-button-bg"></div>
+                      <a>Vote</a>    
+                    </block>
+                  {ENDIF}        
+                </block>
+                <div style="clear:both; padding-top:5px; padding-left:2px">
+                  <b>This lab project is <span style="font-size:19px; color:#FEC942">Pending</span>. Vote for this lab to go active!</b>
+                </div>
+              {ENDIF}
+            {ELSE}
+              {IF is_active}
+              {ELSE}
+              
+                {IF waiting}
+                {ELSE}
+                  {IF lab_founder}
+                  <div id="start_next_round" class="green-button rounded-5 clickable" style="clear:both;float: left; padding: 5px; margin-top:10px; font-size: 17px; display:none">
+                    <div class="green-button-bg"></div>
+                    Start next round
+                  </div>
+                  {ENDIF}
+                {ENDIF}
+                <div style="clear:both; padding-left:2px; padding-top:5px;">
+                  <b>This lab is 
+                    {IF waiting}
+                      <span style="font-size:19px; color:#FEC942">waiting for synthesis results</span>
+                    {ELSE}
+                      <span style="font-size:19px; color:#FEC942">closed</span>
+                    {ENDIF}
+                  </b>
+                </div>
+              {ENDIF}
+            {ENDIF}
+          </div>
+          <div class="clearer"></div>
+        </div>
+      </div>
+
+      {IF is_archive}
+      <div class="trans-panel rounded-5" style="margin-top: 11px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Conclusion</div>
+        <div id="div-display-conclusion" style="padding:10px;padding-bottom:20px;">
+          {IF has_conclusion}
+            {IF logged_in}
+              {conclusion}
+            {ELSE}
+              <div style="text-align: center; font-weight: bold;">The experimental conclusions from this lab are ready! Please log in or register to review.</div>
+            {ENDIF}
+          {ELSE}
+            Conclusion has not been added yet
+          {ENDIF}
+          {IF lab_founder}
+          <div id="conclusion-edit-container" style="padding-top: 7px; padding-bottom: 25px;">
+            <div id="conclusion-edit" style="float: right; padding: 3px; font-size: 11px;" class="green-button rounded-5 clickable">
+              <div class="green-button-bg rounded-5 "></div>
+              {IF has_conclusion}Edit Conclusion{ELSE}Add Conclusion{ENDIF}
+            </div>
+          </div>
+          {ENDIF}
+        </div>
+        <div id="div-save-conclusion" style="padding:10px; display:none;">
+          <textarea id="conclusion-text" class="dark-input" style="width:685px">{IF has_conclusion}{conclusion}{ENDIF}</textarea>
+          <div id="conclusion-submit-container" style="padding-top: 7px; padding-bottom: 25px;">
+            <div id="conclusion-submit" style="float: right; padding: 3px; font-size: 11px;" class="green-button rounded-5 clickable">
+              <div class="green-button-bg rounded-5 "></div>
+              Save Conclusion
+            </div>
+          </div>
+        </div>
+      </div>
+      {ENDIF}
+
+      <div id="project_history" style="text-align:center;"></div>
+      <div class="trans-panel rounded-5" style="margin-top: 11px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="green-header">Lab info</div>
+        <block name="lab-info" builder="BuilderLabPageInfo" input="states:{states}; project_type:{project_type}" style="padding:5px;">
+          {IF admin_name}
+            <div style="padding:7px; padding-left:17px; ">
+              Admin : &nbsp;
+              <span style="font-weight:bolder; color:#FEC942; font-size:17px">
+                {admin_name}
+              </span>        
+            </div>                   
+          {ENDIF}          
+          
+          {IF coadmin_names}
+            <div style="padding:7px; padding-left:17px; ">
+              Co-admins : &nbsp;
+              <span style="font-weight:bolder; color:#FEC942; font-size:17px">
+                {coadmin_names}
+              </span>        
+            </div>                   
+          {ENDIF}
+          
+          {IF is_expert}
+            <div style="padding:7px; padding-left:17px; ">
+              Research affiliation : &nbsp;
+              <span style="font-weight:bolder; color:#FEC942; font-size:17px">
+                {IF affiliation_url}
+                  <a href="{affiliation_url}" taget="_blank">{affiliation}</a>
+                {ELSE}
+                  {affiliation}
+                {ENDIF}
+              </span>        
+            </div>        
+          {ENDIF}
+          {IF is_pending}
+            <div style="padding:7px; padding-left:17px; ">
+              Requested synthesis slots : &nbsp;
+              <span style="font-weight:bolder; color:#FEC942; font-size:17px">{num_slots}</span>&nbsp;        
+            </div>
+            {IF project_type == "pilot"}{ELSE}
+              <div style="padding:7px; padding-left:17px; ">
+                Selection method : &nbsp;
+                <span style="font-weight:bolder; color:#FEC942; font-size:17px">{selection}</span>&nbsp;        
+              </div>
+            {ENDIF}
+          {ELSE}
+            {IF is_active}
+              <div style="padding:7px; padding-left:17px; ">
+                Synthesis slots : &nbsp;
+                <span style="font-weight:bolder; color:#FEC942; font-size:17px">{num_slots}</span>&nbsp;        
+              </div>
+              <div style="padding:7px; padding-left:17px; ">
+                Selection method : &nbsp;
+                <span style="font-size:17px; font-weight:bolder; color:#FEC942">{selection}</span>&nbsp;        
+              </div>
+              {IF logged_in}
+                <div style="padding:7px; padding-left:17px; ">
+                  Number of your votes : &nbsp;
+                  <span style="font-size:17px; font-weight:bolder; color:#FEC942">{my_votes}</span>&nbsp;        
+                </div>
+                <div style="padding:7px; padding-left:17px; ">
+                  Designs you submitted : &nbsp;
+                  <span style="font-size:17px; font-weight:bolder; color:#FEC942">{num_solutions}</span>&nbsp;        
+                </div>                              
+                {IF lab_founder}
+                  <div style="padding:7px; padding-left:17px; ">
+                    Slots left : &nbsp;
+                    <span style="font-size:17px; font-weight:bolder; color:#FEC942">{slots_left}</span>&nbsp;        
+                  </div>                
+                {ENDIF}
+              {ENDIF}
+            {ELSE}                   
+              <div style="padding:7px; padding-left:17px; ">
+                Number of synthesized designs : &nbsp;
+                <span style="font-size:17px; font-weight:bolder; color:#FEC942">{num_synthesized}</span>&nbsp;        
+              </div>
+            {ENDIF}
+            <div style="padding:7px; padding-left:17px; ">
+              Designs submitted : &nbsp;
+              <span style="font-size:17px; font-weight:bolder; color:#FEC942">{submitted}</span>&nbsp;        
+            </div>  
+          {ENDIF}
+        </block>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top: 11px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="red-header">News from Lab Admins</div>
+        <block name="comments" input="super:1; supercomments:{supercomments}; uid:{uid}" style="padding-top:11px; padding-left:11px; padding-right:11px;"></block>
+      </div>
+      <block name="project-status-tracker-block"></block>
+      {IF results_empty}
+        <div class="trans-panel rounded-5" style="margin-top: 11px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="blue-header">Synthesis Results</div>
+          <div style="padding-top:7px;padding-bottom:7px;text-align:center">
+              This lab does not have synthesized designs yet.
+          </div>
+        </div>
+      {ELSE}
+        <div class="trans-panel rounded-5 block-roadmap-box-active"
+	     style="margin-top: 11px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="blue-header">
+	    Synthesis Results
+	    <div class="green-button clickable rounded-5"
+	         style="float:right;font-size:12px;font-weight:bold;padding:5px 10px;margin-top:-5px;">
+              <div class="green-button-bg"></div>
+              <a href="/web/labs/data-browser/?project_id={nid}">Data Browser</a>
+            </div>
+          </div>
+          <div style="padding: 11px; text-align: left;">
+            <div id="synthesized">
+              <div style="font-size: 16px; margin: 20px;">
+                <b>Top Designs</b>&nbsp;&nbsp;(<span class="group-contents-yellow">{num_top_solutions}</span>&nbsp;out of {num_synthesized})
+              </div>
+              <div style="margin-top: 7px; margin-bottom: 15px; font-size: 15px;font-weight:bold;">
+	        <b>
+		  <div style="float: left; width: 30px; margin-left: 22px;">User</div>
+		  <div style="float: left; width: 100px; margin-left: 20px;">Name</div>
+		  <div style="float: left; width: 200px; margin-left: 10px;">Puzzle Title</div>
+		  <div style="float: left; width: 200px; margin-left: 10px;">Solution Title</div>
+		  <div style="float: left; margin-left: 20px; width: 50px;">Score</div>
+		</b>
+              </div>
+              <div class="clearer"></div>
+              <div style="margin: 8px 20px;" class="trans-bar"></div>
+	      <div id="top-players-box"
+		   style="max-height:450px;overflow-y:auto;margin-bottom:10px;">
+                <block defonly="1" name="top-players" style="font-size:13px; padding-top:5px; padding-left:22px; margin-bottom:7px;">
+		  <div style="float: left; width: 30px; height: 30px;"><img src="{picture}" style="max-width: 30px; max-height: 30px; width: auto; height: auto;"></img></div>
+		  <div style="float: left; width: 100px; margin-left: 20px; padding-top: 5px;"><a href="/web/player/{uid}/">{name}</a></div>
+		  <div style="float: left; width: 200px; margin-left: 10px; padding-top: 5px;"><a href="/web/labs/data-browser/?puzzle_id={puznid}">{puztitle}</a></div>
+		  <div style="float: left; width: 200px; margin-left: 10px; padding-top: 5px;"><a href="/web/browse/{puznid}/?ID={solnid}">{title}</a></div>
+                  <div style="float: left; margin-left: 20px; width: 50px; padding-top: 5px;">{score}</div>
+		  <div class="clearer"></div>
+	         </block>
+               </div>
+	    </div>
+          </div>	  
+        </div>   
+      {ENDIF}
+      <div class="trans-panel rounded-5" style="margin-top: 11px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Discussion</div>
+        <block name="comments" style="padding:11px;"></block>
+      </div>
+
+      <block name="event-tracker" id="event-tracker" input="lab_nid:{nid}"></block>
+      
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="project-status-tracker-block">
+      <div class="trans-panel rounded-5" style="display:block; margin-top: 11px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Lab Tracker</div>
+        <div class="lab_tracker_wrapper">
+          <img id="status_thumbnail_1" src="https://s3.amazonaws.com/eterna/eterna2/tracker/deactive-1.png" class="deactive_thumbnail"></img>
+          <div id="status_bar_2" class="long_progress_bar"></div>
+          <img id="status_thumbnail_2" src="https://s3.amazonaws.com/eterna/eterna2/tracker/deactive-2.png" class="deactive_thumbnail"></img>
+          <div id="status_bar_3" class="long_progress_bar"></div>
+          <img id="status_thumbnail_3" src="https://s3.amazonaws.com/eterna/eterna2/tracker/deactive-3.png" class="deactive_thumbnail"></img>
+          <div id="status_bar_4" class="long_progress_bar"></div>
+          <img id="status_thumbnail_4" src="https://s3.amazonaws.com/eterna/eterna2/tracker/deactive-4.png" class="deactive_thumbnail"></img>
+          <div id="status_bar_5" class="long_progress_bar"></div>
+          <img id="status_thumbnail_5" src="https://s3.amazonaws.com/eterna/eterna2/tracker/deactive-5.png" class="deactive_thumbnail"></img>
+          <div class="clearer"></div>
+          <div class="status_text">Accepting Submissions</div>
+          <div class="status_text">Ordering DNA Template</div>
+          <div class="status_text">Synthesizing RNA</div>
+          <div class="status_text">Getting Data</div>
+          <div class="status_text" style="margin-right:0px;">Results Posted</div>
+          <div class="clearer"></div>
+        </div>
+        <div class="fake-panel-7"></div>
+      </div>
+</block>
+
+<block name="project-round-block" input="puzzles:{puzzles}; states:{states}" builder="BuilderLabProjectRound" defonly="1">
+  {IF current_round}        
+  <div class="trans-panel rounded-5 block-roadmap-box-active" style="margin-top: 11px;padding-bottom:10px;">
+    <img src="https://s3.amazonaws.com/eterna/cloudlabs/lab_focused3.png" style="position:absolute; left:0px; top:0px; z-index:100;"></img>
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="blue-header"><div style="margin-left:45px;">Current Round</div></div>
+  {ELSE}
+  <div class="trans-panel rounded-5" style="margin-top: 11px;padding-bottom:10px;">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="blue-header">{round_title}</div>
+  {ENDIF}
+    <div style="float: left; padding-left:7px;" id="project_round_puzzles"></div>
+    <div class="clearer"></div>
+  </div>
+</block>
+
+<block name="project-puzzle-block" defonly="1" style="float:left;">
+  <div class="block-puzzle-main trans-panel rounded-5 gradientBoxesWithOuterShadows" style="width: 200px; height: 200px; padding: 11px; margin-left: 8px; margin-right: 4px; margin-top: 11px;">
+  <div class="trans-panel-bg-bright rounded-5"></div>
+  <div style="text-align:center;font-weight:normal; font-size:15px; width:100%; height:24px;">{title}</div>
+  <div style="clear:both; padding-top:5px;float:right;">
+    <img style="font-size:13px; position:relative; width:14px; height:14px; top:3px" src="https://s3.amazonaws.com/eterna/cloudlabs/beaker.png"></img>&nbsp;
+    <span style="color:#FEC942">{num_slots}</span>&nbsp;&nbsp;
+  </div>
+  <div class="centered" style="clear:both; margin-top:5px; height:120px;">
+    <img style="max-width:120px; max-height:120px; width:auto; height:auto; margin-top:-15px; margin-bottom:5px;" src="{thumbnail}"></img>   
+  </div>
+  {IF is_active}
+    {IF is_lab_member}  
+      <div style="text-align:center; margin-top: 3px;">
+        <div class="green-button clickable rounded-5" style="float:left;font-size:14px; width:80px; padding:5px; margin-top:-5px; margin-left:5px">
+          <div class="green-button-bg"></div>
+          <a href="/game/puzzle/{nid}/">Design</a>
+        </div>
+        <div class="green-button clickable rounded-5" style="float:right;font-size:14px; width:80px; padding:5px; margin-top:-5px; margin-right: 5px;">
+          <div class="green-button-bg"></div>
+          <a href="/web/labs/data-browser/?puzzle_id={nid}">Review</a>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    {ELSE}   
+    {ENDIF}
+  {ELSE}
+    <div style="text-align:center; margin-top: 3px;">
+      {IF is_pending}
+        <div class="green-button clickable rounded-5 centered" style="float:left;font-size:13px; width:80px; padding:5px; margin-top:-5px;margin-left:5px">
+          <div class="green-button-bg"></div>
+          <a href="/game/puzzle/{nid}/">Puzzle</a>
+        </div>
+        <div class="green-button clickable rounded-5" style="float:left;font-size:13px; width:80px; padding:5px; margin-top:-5px; margin-right: 5px;">
+          <div class="green-button-bg"></div>
+          <a href="/web/labs/data-browser/?puzzle_id={nid}">Sequences</a>
+        </div>
+      {ELSE}
+        <div class="green-button clickable rounded-5 centered" style="float:left;font-size:13px; width:80px; padding:5px; margin-top:-5px; margin-left:5px;">
+          <div class="green-button-bg"></div>
+          <a href="/game/puzzle/{nid}/">Puzzle</a>
+        </div>
+        <div class="green-button clickable rounded-5" style="float:right;font-size:13px; width:80px; padding:5px; margin-top:-5px; margin-right:5px;">
+          <div class="green-button-bg"></div>
+          <a href="/web/labs/data-browser/?puzzle_id={nid}">Sequences</a>
+        </div>       
+      {ENDIF}
+    </div>
+  {ENDIF} 
+  </div>
+</block>
+
+
+
+<block url="/web/RNALayout/test/">
+  <block name="top-bar" style="margin-left:-30px;"></block>
+  <block builder="BuilderRNALayoutTest">
+    <div class="trans-panel rounded-5" style="float:left; margin-left:-30px; width:750px;">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+        RNALayout Test
+      </div>
+      <div style="padding:20px;display:none;">
+        <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Target Shape</div>
+          <div id="rnalayout-canvas"></div>
+        </div>
+      </div>
+      <div style="padding:20px;display:block;">
+        <div class="trans-panel rounded-5" style="height:500px;">
+        <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Thumnail using Line</div>
+          <div id="rnalayout-thumbnail-div">
+            <canvas id="rnalayout-thumbnail-line"></canvas>
+          </div>
+        </div>
+      </div>    
+      <div class="clearer"></div>
+       <div style="padding:20px;">  
+        <div class="trans-panel rounded-5" style="float:left; width:100%; margin-bottom:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Change Shape</div>
+          <div style="padding:20px;">
+            <div style="margin-right:20px; padding:5px; float:left; width:300px !important;"><input type="text" id="c_structure" name="c_structure" style="width:300px; !important;"></input></div>
+            <div class="green-button clickable rounded-5" id="change-structure" style="margin-bottom:10px; padding:5px; width:225px; float:left;">
+              <div class="green-button-bg"></div>
+              Change structure
+            </div>
+            <div class="clearer"></div>
+            <div style="display:none;">
+	            <div style="margin-right:20px; padding:5px; float:left; width:300px !important;"><input type="text" id="c_sequence" name="c_sequence" style="width:300px; !important;"></input></div>
+	            <div class="green-button clickable rounded-5" id="change-sequence" style="margin-bottom: 10px; padding: 5px; width: 225px; float:left;">
+	              <div class="green-button-bg"></div>
+	              Change sequence
+	            </div>
+            </div>
+            <div style="display:display;margin-right:20px; padding:5px; float:left; width:300px !important;"><input type="text" id="c_primary" name="c_primary" style="width:300px; !important;"></input></div>
+            <div class="green-button clickable rounded-5" id="change-primary-space" style="display:block;margin-bottom: 10px; padding: 5px; width: 225px; float:left;">
+              <div class="green-button-bg"></div>
+              Change Primary Space
+            </div>
+            <div class="clearer"></div>
+            <div style="display:display;margin-right:20px; padding:5px; float:left; width:300px !important;"><input type="text" id="c_pair" name="c_pair" style="width:300px; !important;"></input></div>
+            <div class="green-button clickable rounded-5" id="change-pair-space" style="display:block;margin-bottom: 10px; padding: 5px; width: 225px; float:left;">
+              <div class="green-button-bg"></div>
+              Change Pair Space
+            </div>
+            <div class="clearer"></div>
+            <div style="display:display;margin-right:20px; padding:5px; float:left; width:300px !important;"><input type="text" id="c_line_width" name="c_line_width" style="width:300px; !important;"></input></div>
+            <div class="green-button clickable rounded-5" id="change-line-width" style="display:block;margin-bottom: 10px; padding: 5px; width: 225px; float:left;">
+              <div class="green-button-bg"></div>
+              Change Line Width
+            </div>
+            <div class="clearer"></div>            
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+      <div style="padding:20px; margin-bottom:17px;">
+        <div class="trans-panel rounded-5" style="float:left; width:100%;margin-bottom:17px;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">Shape Info</div>
+          <div style="padding:5px;">
+            <div class="group-contents-yellow" style="padding:17px; padding:bottom:0px;">Secstructure </div> 
+            <div id="curr-struct" style="padding:17px; padding-top:10px; word-wrap:break-word;">{secstruct}</div>
+            <div style="display:none;">
+              <div class="group-contents-yellow" style="padding:17px; padding:bottom:0px;">Sequence </div>
+              <div id="curr-seq" style="padding:17px; padding-top:10px; word-wrap:break-word;">{seq}</div>
+            </div>  
+          </div>
+        </div>
+      </div>
+    </div>
+  </block>  
+</block>
+
+<block url="/web/admin/trace/"> 
+	<block name="top-bar"></block>
+		<div style="float: left; width: 720px; min-height: 1px;">
+		  <div class="trans-panel rounded-5" style="float:left; margin-left:-30px; width:750px;">
+			  <div class="trans-panel-bg rounded-5"></div>
+			  <div class="yellow-header">
+			    Current Waiting Lab List
+			  </div>
+        <block builder="BuilderLabTracker">
+	        <form action="/post/" accept-charset="UTF-8" method="post" id="waiting_labs_profile" enctype="multipart/form-data">
+            <input type="hidden" name="type" value="submit_exp_phase"></input>
+	          <div style="clear:both; padding-top:17px; padding-left:17px;" id="tracked-labs" packerinput="block-name:tracked-lab;">
+		          <div class="tracked-lab-title"><b>Lab Title</b></div>
+		          <div class="tracked-lab-status"><b>Lab Status</b></div>
+		          <div class="tracked-lab-expected-date"><b>Deadline(UTC)</b></div>
+		          <div class="clearer"></div>          
+	          </div>
+	          <div class="clearer"></div>
+	          <div class="clickable green-button rounded-5 centered" id="submit-exp-phase" style="float:left; font-size:17px; padding:7px; margin:10px; margin-left:35%; margin-right:40%; width:20%;">
+	            <div class="green-button-bg rounded-5"></div>Submit
+	          </div>
+	        </form>
+        </block>
+			</div>
+	  </div>
+	<block name="side-bar"></block>
+</block> 
+
+<block name="tracked-lab" builder="BuilderLab">
+	<div class="tracked-lab-title">{title}</div>
+	<div class="tracked-lab-status">
+		<select id="{nid}_status" name="status[]">
+		  <option value="1">Accepting Submissions(Default)</option>
+		  <option value="2">Ordering DNA Template</option>
+		  <option value="3">Synthesizing RNA</option>
+		  <option value="4">Getting Data</option>
+		  <option value="5">Results Posted</option>
+    </select>
+  </div>
+	<div class="tracked-lab-expected-date">
+	  <input id="{nid}_date" name="date[]" class="datepicker" type="text" size="15"></input>
+  </div>
+	<div class="clearer"></div>
+</block>
+
+<block name="add-coadmin" builder="BuilderProjectAddCoadmin" input="nid:{nid}">
+  <div class="trans-panel rounded-5" style="width:300px; margin-top: 55px;">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="green-header">Manage Coadmin</div>  
+    <div style="padding:11px">
+      <input id="name" style="width:100%" placeholder="Add username"></input>
+      <div style="width:100px;" class="centered">
+        <div id="add" style="width:100px; padding:7px; margin-top:11px;" class="green-button clickable rounded-5">  
+          <div class="green-button-bg"></div>
+          <a>Add</a>
+        </div>
+        <div id="remove" style="width:100px; padding:7px; margin-top:11px;" class="red-button clickable rounded-5">  
+          <div class="red-button-bg"></div>
+          <a>Remove</a>
+        </div>        
+      </div>
+    </div>
+  </div>
+</block>
+
+<block url="/web/labs/collection/">
+    <block name="top-bar"></block>
+    <div style="float: left; width: 100%; min-height: 1px;">
+        <div class="trans-panel rounded-5">
+            <block builder="BuilderLabsSequenceCollection">
+                <form action="/post/" accept-charset="UTF-8" method="post" id="labs_sequence_collection" enctype="multipart/form-data">
+                    <div class="trans-panel-bg rounded-5"></div>
+                    <div class="yellow-header">
+                        Lab Round Sequence Collection
+                    </div>
+                    <div class="header">
+                        Paper Labs
+                    </div>
+                    <div style="clear:both; padding-top:1px; padding-left:10px;" id="paper-labs" packerinput="block-name:lab-collection;">
+                        <div class="lab-60px lab-gold"><b><center>Select</center></b></div>
+                        <div class="lab-520px lab-gold"><b>Title</b></div>
+                        <div class="lab-140px lab-gold"><b>Author</b></div>
+                        <div class="lab-60px lab-gold"><b>Slots</b></div>
+                        <div class="lab-60px lab-gold"><b>Designs</b></div>
+                        <div class="clearer"></div>
+                    </div>
+                    <div class="yellow-header"></div>
+                    <div class="header">
+                        Pilot Labs
+                    </div>
+                    <div style="clear:both; padding-top:1px; padding-left:10px;" id="pilot-labs" packerinput="block-name:lab-collection;">
+                        <div class="lab-60px lab-gold"><b><center>Select</center></b></div>
+                        <div class="lab-520px lab-gold"><b>Title</b></div>
+                        <div class="lab-140px lab-gold"><b>Author</b></div>
+                        <div class="lab-60px lab-gold"><b>Slots</b></div>
+                        <div class="lab-60px lab-gold"><b>Designs</b></div>
+                        <div class="clearer"></div>
+                    </div>
+                    <div class="yellow-header"></div>
+                    <div class="header">
+                        Additional Sequences
+                    </div>
+                    <div style="clear:both; padding-top:12px; padding-left:25px; padding-bottom:20px;" id="additional-labs">
+                        <textarea id="lab-additional-sequences" class="dark-input" style="width:97%; height:200px; overflow-wrap:normal; overflow-x:scroll" wrap="off"></textarea>
+                        <div class="clearer"></div>
+                    </div>
+                    <div class="clickable green-button rounded-5 centered" id="submit-lab-collection" style="float:left; font-size:17px; padding:7px; margin-top:20px; margin-bottom:10px; margin-left:35%; margin-right:40%; width:20%;">
+                        <div class="green-button-bg rounded-5"></div>Collect Sequences
+                    </div>
+                    <div class="clickable green-button rounded-5 centered" id="submit-lab-collection-file" style="float:left; font-size:17px; padding:7px; margin-top:20px; margin-bottom:10px; margin-left:35%; margin-right:40%; width:20%;">
+                        <div class="green-button-bg rounded-5"></div>Sequence File
+                    </div>
+                </form>
+            </block>
+        </div>
+    </div>
+</block>
+
+<block name="lab-collection" builder="BuilderLabSequenceCollection">
+    <div class="lab-60px">
+        <center><input type="checkbox" style="width:11px;vertical-align: middle;" id="select" checked="checked"></input></center>
+    </div>
+    <div class="lab-520px lab-white">{title}</div>
+    <div class="lab-140px lab-white">{author}</div>
+    <div class="lab-60px lab-white">{slots}</div>
+    <div class="lab-60px lab-white">{designs}</div>
+	<div class="clearer"></div>
+</block>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<block url="/web/labs/explore/">
+  <block name="top-bar"></block>
+  <div id="page-container" >
+
+  <div id="labs-explore-page" style="float: left; width: 720px; min-height: 1px;">
+    <block builder="BuilderLabCardsMap">
+
+      <div id="lab-cards-panel" class="trans-panel rounded-10" style="width:720px; z-index:1; margin-top: 0px;margin-bottom:27px;">
+        <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;">
+          <div style="padding-top:7px; float:center; text-transform:capitalize; font-size:30px;">
+            Explore Experimental Labs 
+	  </div>
+          <div class="clearer"></div>
+        </div>
+
+        <div style="position:relative;padding:22px; text-align:center;display:none;" id="processing-labs-0">
+	    Loading... please wait.
+        </div>
+
+	<div class="centered" id="lab-cards-map"
+	     packerinput="block-name:mini-lab-cards-map; type:cards; width:190px; height:240px; max-columns:10;"
+	     style="padding-left:0px; padding-right: 0px; padding-top: 0px;">
+	</div>
+	<div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+
+        <div style="position:relative;padding:22px; text-align:center;display:none;" id="processing-labs-1">
+	  <div class="small-loading centered" style="padding-top:7px;"></div>
+        </div>
+	
+      </div>
+      
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+
+
+
+
+<block name="mini-lab-cards-map" class="mini-lab-cards-map" style="padding:5px 0px;">
+
+  <div class="trans-panel rounded-10" style="width:180px;margin-right:10px; margin-bottom: 0px; min-height:260px;">
+    <div class="trans-panel-bg  rounded-10"></div>
+
+    <!-- TITLE -->
+    <div class="header rounded-10-top" style="text-align:left; padding-bottom:0px; height:34px;">
+      {IF exp_phase == "1"}
+        <img src="https://s3.amazonaws.com/eterna/cloudlabs/lab_focused3.png" style="position:absolute; left:0px; top:0px; width:50px; height:50px;"></img>
+	<center class="lab-card-title" style="line-height:34px;font-size:13px;position:relative; float:left; left:50%; width:100px; margin-left:-50px;">{title}</center>
+      {ELSE}
+	<center class="lab-card-title" style="line-height:34px;font-size:13px;">{title}</center>	
+      {ENDIF}
+ 
+      <div class="clearer"></div> 
+    </div>
+    
+    <!-- IMAGE -->
+    <div style="text-align:center; margin:10px 0px; height:128px; position:relative">
+      <a href="/web/lab/{nid}/" class="info-description">
+        <div id="img-meter" class="img-meter-wrap">
+          {IF cover_image}
+            <img id="img-meter-wrap"
+	         src="{cover_image}"
+ 	         style="max-width:128px; max-height:100px; width:auto; heigt:auto; position:relative; opacity: 1.0">
+            </img>
+	  {ELSE}
+            <img id="img-meter-wrap"
+                 src="/puzzle-progression/badges/default-eterna-badge.png"
+	         style="max-width:128px; max-height:100px; width:auto; heigt:auto; position:relative; opacity: 1.0">
+            </img>
+	  {ENDIF}
+	   
+	</div>
+        {IF desc}<span>{desc}</span>{ENDIF}
+      </a>
+    </div>
+
+
+      <!-- BUTTON -->
+      <a href="{link}">
+        <div class="clickable green-button-interactive rounded-5 centered" style="width:100px; padding:4px 7px; margin:0px 0px; position:absolute; bottom:60px; left:31px; font-weight:bolder; font-size:13px;">
+          <div class="green-button-bg rounded-5" ></div>          
+          {verb}
+        </div>
+      </a>
+      
+
+
+      <div style="position:absolute; bottom:15px; left:23px; width:140px; height:20px;padding:4px 0px;">
+	  
+	<!-- LAB TRACKER STATUS IMAGE -->
+        <a href="/web/lab/{nid}/" class="info-title" style="position:relative;float:left;width:35px;left:50%;margin-left:-20.5px;">
+	  <img src="https://s3.amazonaws.com/eterna/eterna2/tracker/active-{exp_phase}.png"
+	       class="info-title circle-small-glow-active-15"
+	       style="position:relative; float:left; bottom:0px; width:35px;height:35px; margin-top:-5px">
+          </img>
+   	  <span style="font-size:14px;">{exp_status}</span>
+        </a>
+	
+        {IF show_exp_counts}
+	  {IF exp_phase == "5"}
+          <!-- {num_solutions} designs submitted -->
+          <div class="exp-counter" style="left:-12.5px;">
+	    <a class="info-title" >
+              <span style="font-size:14px;">Submitted Designs</span>
+	      {IF num_solutions}{num_solutions}{ELSE}0{ENDIF}
+            </a>
+          </div>
+          <!-- {num_synthesized} designs synthesized -->
+          <div class="exp-counter" style="float:right; right:6px;">
+	    <a class="info-title">
+              <span style="font-size:14px;">Synthesized Designs</span>
+	      {IF num_synthesized}{num_synthesized}{ELSE}0{ENDIF}
+            </a>
+          </div>
+        {ELSE}
+          <!-- {submitted} designs submitted submitted -->
+          <div class="exp-counter" style="left:-12.5px;">
+	    <a class="info-title">
+              <span style="font-size:14px;">Submitted Designs</span>
+	      {IF submitted}{submitted}{ELSE}0{ENDIF}
+            </a>
+  	  </div>         
+	  <!-- {num_slots} synthesis slots -->
+          <div class="exp-counter" style="float:right; right:6px;">
+	    <a class="info-title" >
+              <span style="font-size:14px;">Synthesis Slots</span>
+	      {IF num_slots}{num_slots}{ELSE}0{ENDIF}
+            </a>
+          </div>
+	{ENDIF}
+      {ENDIF}
+
+
+      </div>
+
+      
+  </div>
+</block>

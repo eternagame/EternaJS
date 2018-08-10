@@ -1,0 +1,35 @@
+<block name="event-tracker" builder="BuilderEventTracker">
+  <div class=""></div>
+</block>
+
+
+<block defonly="true" name="event-block" id="event-block" class="event-block">
+  <div class="trans-panel2 rounded-10 active-glow">
+    <div class="trans-panel-bg rounded-10"></div>
+    <block id="news-block" builder="BuilderNewsPage" input="nid:{event_nid}">
+      <div class="trans-panel2 rounded-10" style="float:center; max-width:980px;">
+        <div class="trans-panel-bg rounded-10"></div>
+        <div class="header rounded-10" style="display:none; text-align:center;">{title}</div>
+        <div style="padding: 22px; font-size:22px;">{body}</div>
+      </div>
+    </block>
+      <div class="clearer"></div>
+      <div id="loading" class="small-loading centered" style="display:none;"></div>
+      <a id="close-event" class="close-event"
+	 style="text-decoration:none; font-weight:bolder; margin-top:-22px; margin-left:-50px; position:absolute;"
+         href="javascript:;"
+         title="Continue">
+        <div id="" class="clickable blue-button-interactive rounded-5 centered"
+	     style="font-size:14px; padding:5px; width:100px;">
+          <div class="blue-button-bg rounded-5;"></div>
+          Continue
+        </div>
+      </a>
+      <div class="clearer" style="padding-bottom:34px;"></div>
+  </div>
+  <block name="fireworks-sky-block" builder="BuilderFireworks"></block>
+</block>
+
+
+
+  

@@ -1,0 +1,1864 @@
+<!-- block name="page" builder="BuilderStateManager" -->
+<block name="page">
+  <block name="bg"></block>
+  <div id="pages" style="width: 100%; margin-left: auto; margin-right: auto;position:relative; margin-bottom:110px;">
+    <img style="position: absolute; z-index: -1; top: px; left:calc(50% - 490px);" src="https://s3.amazonaws.com/eterna/eterna2/logo-bubble.png"></img>
+  </div>
+  <block name="footer" id="footer"></block>
+</block>
+
+<block name="body">
+  <div id="page">
+    <div id="content" style="position: relative; z-index: 0;"></div>
+  </div>
+</block>
+
+<block name="page-footer">
+  {IF logged_in}
+    <block class="trans-panel" style="float:center; width:720px; height:60px; border-top:1px solid #FFF">
+      <div class="header rounded-10" style="text-align:center;"> 
+        <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:22px; font-weight:normal;">
+          Help Eterna invent medicine. <a class="interactive-link" href="/web/donate/" target="_blank" style="font-weight:bolder;">Make a donation today.</a>
+        </div>
+      </div>
+
+      <div style="padding: 0px 30px;">
+        <ul style="margin-left: 0px; list-style: none; display:block; float:center;">
+          <li style="width:25%;float:left;margin-right:0%;">
+            <img style="max-width:85%;padding:10px 10px;" src="/puzzle-progression/site/logo_gates.png"></img>
+            <div class="clearer"></div>
+          </li> 
+
+          <li style="width:25%;float:left;margin-right:0%;">
+            <img style="max-width:75%;padding:10px 10px;" src="/puzzle-progression/site/logo_stanford.png"></img>
+            <div class="clearer"></div>
+          </li> 
+
+          <li style="width:25%;float:left;">
+            <img style="max-width:95%;padding:10px 10px;" src="/puzzle-progression/site/logo_NIH.png"></img>
+            <div class="clearer"></div>
+          </li>
+
+          <li style="width:25%;float:left; text-align:right;padding-top:0.3rem;">
+            <a href="http://twitter.com/@eternagame">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_twt.png"></img>
+            </a>
+
+            <a href="https://www.youtube.com/channel/UCt811OXJqe35TDhe9hPYzJg">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_yt.png"></img>
+            </a>
+
+            <a href="https://www.facebook.com/eternathegame/">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_fb.png"></img>
+            </a>
+
+            <div class="clearer"></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="clearer"></div>
+    </block>
+  {ELSE}
+    <block class="trans-panel" style="float:center; width:100%; height:60px; border-top:0px solid #FFF">
+      <div class="header rounded-10" style="text-align:center;"> 
+        <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:22px;font-weight:normal;">
+          Help Eterna invent medicine. <a class="interactive-link" href="/web/donate/" target="_blank" style="font-weight:bolder;">Make a donation today.</a>
+        </div>
+      </div>
+
+      <div style="padding: 0px 30px;">
+        <ul style="margin-left: 0px; list-style: none; display:block; float:center;">
+          <li style="width:25%;float:left;margin-right:0%;">
+            <img style="max-width:85%;padding:10px 10px;" src="/puzzle-progression/site/logo_gates.png"></img>
+            <div class="clearer"></div>
+          </li> 
+
+          <li style="width:25%;float:left;margin-right:0%;">
+            <img style="max-width:75%;padding:10px 10px;" src="/puzzle-progression/site/logo_stanford.png"></img>
+            <div class="clearer"></div>
+          </li> 
+
+          <li style="width:25%;float:left;">
+            <img style="max-width:95%;padding:10px 10px;" src="/puzzle-progression/site/logo_NIH.png"></img>
+            <div class="clearer"></div>
+          </li>
+
+          <li style="width:25%;float:left; text-align:right;padding-top:0.3rem;">
+            <a href="http://twitter.com/@eternagame">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_twt.png"></img>
+            </a>
+
+            <a href="https://www.youtube.com/channel/UCt811OXJqe35TDhe9hPYzJg">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_yt.png"></img>
+            </a>
+
+            <a href="https://www.facebook.com/eternathegame/">
+              <img style="max-width:15%;padding:5px 5px;" src="/puzzle-progression/site/icon_fb.png"></img>
+            </a>
+
+            <div class="clearer"></div>
+          </li>
+        </ul>
+      </div>
+      <div class="clearer"></div>
+    </block>
+  {ENDIF}
+</block>
+    
+<block name="overlay">
+  <div id="overlay-under" class="block-overlay-under"></div>
+
+  <div id="overlay" class="block-overlay">
+
+    <div class="center-block block-overlay-panelholder"
+      id="overlay-panelholder">
+      <block name="overlay-loading" defonly="true">
+        <div class="overlay-panel">
+          <div class="small-loading"></div>
+        </div>
+      </block>
+  
+      <block name="overlay-yesno" defonly="true">
+        <div class="overlay-panel">
+          {text}
+          <div class="overlay-yesno-buttons">
+            <span id="yes">Yes</span>&nbsp;&nbsp;&nbsp; <span id="no">No</span>
+          </div>
+        </div>
+      </block>
+  
+      <block name="overlay-message" defonly="true">
+        <div class="overlay-panel">
+          {text}
+          <div class="overlay-message-buttons">
+            <span id="ok" class="ok-button">okay</span>
+          </div>
+        </div>
+      </block>
+ 
+    </div>
+    <div class="clickable" id="overlay-close-layer" style="position: fixed; width: 100%; height: 100%; z-index: 0; right: 30px; bottom: 30px;"></div>
+  </div>
+</block>
+
+<block name="bg" style="width:100%; height:30%; position:fixed; z-index:-5000; background-image:url(https://s3.amazonaws.com/eterna/icon_img/bg_bubbles3.png); background-position: center center; background-repeat:repeat;">
+  <div class="clearer"></div>
+</block>
+
+<block style="clear:both; padding-top:17px; padding-bottom:17px; text-align:center;" default="display_images:false" name="footer">
+  {IF display_images}
+  <div style="font-family: 'Helvetica Neue', 'Open Sans', Arial, gulim; font-size:11px; font-weight: 300; color:#D0D0D0; padding:8px;">Users agree that all user-submitted content is licensed under a <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Creative Commons Attribution Non Commercial ShareAlike 4.0 International License</a>.</div>
+  <img src="https://s3.amazonaws.com/eterna/eterna2/footer.png"></img>
+  {ENDIF}
+</block>
+
+<block name="logo" default="use_tb_logo:1" style="position:relative;">
+  {IF use_tb_logo}
+    <a id="banner-eterna-logo" href="/web/labs/" style="position: relative; z-index: 0; display:none;">
+      <img height="80px" src="/puzzle-progression/site/eterna_logo_v4.png"></img>
+    </a>
+    {IF use_banner_event_link}
+      <a id="banner-crispr-link" href="/web/lab/8787276/" style="position: relative; z-index: 0">
+        <img height="80px" src="/puzzle-progression/images/banner_lightup.png"></img>
+      </a>
+    {ELSE}
+      <a id="banner-crispr-link" href="/web/lab/8787276/" style="position: relative; z-index: 0">
+        <img height="80px" src="/puzzle-progression/images/banner_lightup.png"></img>
+      </a>
+    {ENDIF}
+
+  {ELSE}
+    <a id="banner-eterna-logo" href="/web/" style="position: relative; z-index: 0;">
+      <img height="80px" src="/puzzle-progression/site/eterna_logo_v4.png"></img>
+    </a>     
+  {ENDIF}
+  <a id="banner-eterna-logo-mini" href="/web/" style="position: fixed; z-index: 0; left: calc(50% - 40px); display:none;">
+    <img height="80px" width="80px" src="/puzzle-progression/badges/default-eterna-badge.png"></img>
+  </a>
+</block>
+
+<block name="navigation-menu" style="position:relative; z-index:10; margin-top:0px;">
+  <div class="trans-panel rounded-5">
+    <div class="trans-panel-bg rounded-5"></div>
+    <ul id="HDropdown-orange-classic">
+	    <li>
+        <a style="font-weight: bold;" href="/web/">Home</a>
+      </li>
+    </ul>
+  </div>
+</block>
+
+
+<block name="navbar-lock" style="display:inline-block;float:right;margin-right:20px;">
+  <span class="info-hint" style="left:40%;text-transform:none;font-size:12px;line-height:20px;">
+    <span>Unlock with Lab Access</span>
+    <img src="/puzzle-progression/icons/icon_locked_black.png" style="width:13px;height:13px;"></img>
+  </span>
+</block>
+
+<block name="navigation-menu-vert" builder="BuilderNotification" style="position:relative; margin-top:-10px;">
+  <div id="navmenu-vert-container">
+    <div id="HDropdown-orange-vert">
+      <ul>
+        <li>
+          <a style="font-weight: bold;" href="/web/">Home</a>
+        </li>
+
+        <li>
+          <a id="menu-item-newsfeed" style="font-weight: bold;" href="/web/newsfeed/?sort=date">Newsfeed</a>
+        </li>
+
+        <li>
+          <a style="font-weight: bold;">Community</a>
+          <ul style="margin-top:132px;">       
+            {IF logged_in}
+            <li><a href="/web/player/{uid}/">My Profile</a></li>
+            {ENDIF}
+            <li><a href="/web/players/">Players</a></li>
+            <li><a href="/eterna_getsat_redirect.php" target="_blank">Forums</a></li>
+            <li><a href="http://eternawiki.org/wiki/" target="_blank">Wiki</a></li>
+            <li><a href="/web/conduct/">Code of Conduct</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <a style="font-weight: bold;">Resources</a>
+          <ul style="margin-top:198px;">
+            <li>
+              <a href="/web/strategy_guides/">Strategy Guides</a>
+            </li>
+            <li>
+              {IF is_lab_member}
+              <a href="/web/challenges/">Challenges</a>
+              {ELSE}
+              <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+                Challenges <block name="navbar-lock"></block>
+              </a>
+              {ENDIF}
+            </li>
+            <li>
+              {IF is_lab_member}
+              <a href="/web/playerpuzzles/">Player Puzzles</a>
+              {ELSE}
+              <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+                Player Puzzles <block name="navbar-lock"></block>
+              </a>
+              {ENDIF}
+            </li>
+            <li>
+              {IF is_lab_member}
+              <a href="/web/script/">Eterna Scripts</a>
+              {ELSE}
+              <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+                Eterna Scripts <block name="navbar-lock"></block>
+              </a>
+              {ENDIF}
+            </li>
+            <li>
+              {IF is_lab_member}
+              <a href="/web/labs/past/">Lab Archive</a>
+              {ELSE}
+              <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+                Lab Archive <block name="navbar-lock"></block>
+              </a>
+              {ENDIF}
+            </li>
+            <li>
+              {IF is_lab_member}
+              <a href="/web/labs/data-browser/">Data Browser </a>
+              {ELSE}
+              <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+                Data Browser <block name="navbar-lock"></block>
+              </a>
+              {ENDIF}
+            </li>
+            <!--Puzzle Maker-->
+            <!--Tutorial Creator-->
+          </ul>
+        </li>
+
+        <li>
+          <a style="font-weight: bold;">About</a>
+          <ul style="margin-top:264px;">       
+            <li><a href="/web/about/">Overview</a></li>
+            <li><a href="/web/pubs/">Publications</a></li>
+            <li><a href="/web/news/15121/">License (EULA)</a></li>
+            <li><a href="/web/donate/">Make a Donation</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</block>
+
+<block name="navmenu-mini" id="navmenu-mini" builder="BuilderNotification" style="margin-top:0px;margin-right:30px; margin-left:-135px;">
+  <div class="navmenu-mini-main clearfix" style="width:80px">
+    <p class = "navicon">&#9776;</p>
+  </div>
+  {IF use_navmini}
+  <ul class="navmenu-mini-main-dropdown clearfix">
+    <li>
+      <a style="font-weight: bold;" href="/web/">Home</a>
+    </li>
+
+    <li>
+      <a id="menu-item-newsfeed" style="font-weight: bold;" href="/web/newsfeed/?sort=date">Newsfeed</a>
+    </li>
+
+    <li>
+      <a style="font-weight: bold;">Community</a>
+      <ul style="margin-top:132px;">       
+        {IF logged_in}
+        <li><a href="/web/player/{uid}/">My Profile</a></li>
+        {ENDIF}
+        <li><a href="/web/players/">Players</a></li>
+        <li><a href="/eterna_getsat_redirect.php" target="_blank">Forums</a></li>
+        <li><a href="http://eternawiki.org/wiki/" target="_blank">Wiki</a></li>
+        <li><a href="/web/conduct/">Code of Conduct</a></li>
+      </ul>
+    </li>
+	
+    <!-- show lock icon and make unclicable until unlocked -->
+	  <li>
+      <a style="font-weight: bold;">Resources</a>
+      <ul style="margin-top:198px;">
+        <li>
+          <a href="/web/strategy_guides/">Strategy Guides</a>
+        </li>
+        <li>
+          {IF is_lab_member}
+          <a href="/web/challenges/">Challenges</a>
+          {ELSE}
+          <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+            Challenges <block name="navbar-lock"></block>
+          </a>
+          {ENDIF}
+        </li>
+        <li>
+          {IF is_lab_member}
+          <a href="/web/playerpuzzles/">Player Puzzles</a>
+          {ELSE}
+          <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+            Player Puzzles <block name="navbar-lock"></block>
+          </a>
+          {ENDIF}
+        </li>
+        <li>
+          {IF is_lab_member}
+          <a href="/web/script/">Eterna Scripts</a>
+          {ELSE}
+          <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+            Eterna Scripts <block name="navbar-lock"></block>
+          </a>
+          {ENDIF}
+        </li>
+	      <li>
+          {IF is_lab_member}
+          <a href="/web/labs/past/">Lab Archive</a>
+          {ELSE}
+          <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+            Lab Archive <block name="navbar-lock"></block>
+          </a>
+          {ENDIF}
+        </li>
+        <li>
+          {IF is_lab_member}
+          <a href="/web/labs/data-browser/">Data Browser </a>
+          {ELSE}
+          <a style="color:rgba(57,57,57,0.5);text-decoration:none;" href="javascript:void(0);">
+            Data Browser <block name="navbar-lock"></block>
+          </a>
+	        {ENDIF}
+	      </li>
+        <!--Puzzle Maker-->
+        <!--Tutorial Creator-->
+      </ul>
+	  </li>
+
+    <li><a style="font-weight: bold;">About</a>
+      <ul style="margin-top:264px;">       
+        <li><a href="/web/about/">Overview</a></li>
+        <li><a href="/web/pubs/">Publications</a></li>
+        <li><a href="/web/news/15121/">License (EULA)</a></li>
+        <li><a href="/web/donate/">Make a Donation</a></li>
+      </ul>
+    </li>
+  </ul>
+  {ENDIF}
+</block>
+
+<block name="user-login" id="user-login" style="margin-top:0px;"> 
+  {IF logged_in}
+    {IF resp}
+      <div style="font-size: 12px; margin-bottom: 10px; padding-left: 15px;width:80px">
+        <block builder="BuilderUser" style="text-align:right;">
+          <a href="/web/player/{uid}/" style="text-align: center; vertical-align: middle; line-height:50px; z-index: 2; text-decoration:none; position:relative;">
+            <div class="img-user gradientBoxesWithOuterShadows" style="height: 50px; width:50px; top:5px; background-repeat:no-repeat; background-image:url({userpicture}); background-position:center center; background-size:contain; border-radius:50%;cursor:pointer;"></div>
+          </a>
+        </block>
+        <div class="clearer"></div>
+      </div>
+    {ELSE}
+      <div style="font-size: 12px; margin-bottom: 15px; padding-right: 15px;">
+        <block builder="BuilderUser" style="text-align:right;">
+          <img class="img-user gradientBoxesWithOuterShadows" src="{userpicture}"></img>
+          <span style="margin-right: 20px; text-align: center;">
+            <a href="/web/player/{uid}/">{username}</a>
+          </span>
+          <span style="margin-right: 20px; text-align: center;">rank #{userrank}</span>
+          <img class="img-money" src="https://s3.amazonaws.com/eterna/eterna2/money.png" align="center">&nbsp;</img>
+          <span style="margin-right: 20px; text-align: center;">{usermoney}</span>
+          <span style="text-align: center;" class="clickable" id="logout">Logout</span>
+        </block>
+        <div class="clearer"></div>
+      </div>
+    {ENDIF}
+  {ELSE}
+    <block id="login-block" builder="BuilderLogin" style="height:50px; float:right; margin-top: 5px; margin-bottom: 5px;margin-right:10px;">
+      <div style="height:100%; margin-top: 0px;">
+        <div style="top:0px;">
+          <div id="login-username" style="float:left; width: 90px; padding-top:5px;padding-left:15px;">
+            <input class="noborder dark-input" style="width: 80px; padding: 5px; height:16px; font-size:12px;" id="username" type="text" placeholder="username"></input>
+          </div>
+          <div id="login-password" style="float:left; width: 90px; padding-left: 15px; padding-top:5px;">
+            <input class="noborder dark-input" style="width: 80px; padding: 5px; height:16px; font-size:12px;" id="password" type="password" placeholder="password"></input>
+          </div> 
+
+	        <div id="login-button" style="float:left; width: 80px; padding-left:15px;">
+            <div id="login" class="green-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; float: left; width: 80px; height: 26px;">
+              <div class="rounded-5 green-button-bg"></div>
+	              <div class="centered-button-text">
+                  Log in
+                </div>
+	          </div>
+          </div>
+
+          <div id="register-button" style="float:left; width:80px; padding-left:15px; ">
+            <block tag="a" class="centered-button-text" builder="BuilderPopOverlay" input="block-name:register-box" style="color:#FFFFFF; text-decoration: none; cursor: pointer; ">
+              <div id="register" class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; line-height: 26px; font-size: 14px; float: left; width: 80px; height: 26px;">
+                <div class="rounded-5 blue-button-bg"></div>
+                  Register
+                </div>
+	          </block>
+          </div>
+          <div class="clearer"></div>       
+        </div>
+      </div>
+    </block>
+  {ENDIF}
+</block>
+
+<block name="user-login-mini" id="user-login-mini" style="margin-top:0px;margin-left:30px; margin-right:-135px;"> 
+  {IF logged_in}
+    <div style="font-size: 12px; margin-bottom: 10px; padding-left: 15px;width:80px">
+      <block builder="BuilderUser" style="text-align:right;">
+        <a href="/web/player/{uid}/" style="text-align: center; vertical-align: middle; line-height:50px; z-index: 2; text-decoration:none; position:relative;">
+          <div class="img-user gradientBoxesWithOuterShadows" style="height: 50px; width:50px; top:5px; background-repeat:no-repeat; background-image:url({userpicture}); background-position:center center; background-size:contain; border-radius:50%;cursor:pointer;"></div>
+        </a>
+      </block>
+      <div class="clearer"></div>
+    </div>
+  {ELSE}
+    <div id="login-block" style="height:80px; float:left; margin-top: 10px; margin-bottom: 5px;left:30px;">
+      <div style="height:100%; margin-top:5px;">
+        <div style="top:0px;">
+          <a href="/web/">
+            <div id="login-button" style="float:left; left:15px; width: 80px; padding-left:15px;">
+              <div id="login" class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; float: left; width: 80px; height: 26px;">
+                <div class="rounded-5 blue-button-bg"></div>
+                <div class="centered-button-text">
+                  Log in
+                </div>
+              </div>
+            </div>
+          </a>
+          <div class="clearer"></div>       
+        </div>
+      </div>
+    </div>
+  {ENDIF}
+</block>
+
+<block name="top-bar" default="use_header_right:1;use_logo:1;use_tb_logo:1;" style="padding-top:20px; height:75px; background-image:url(https://s3.amazonaws.com/eterna/eterna2/bg_rna.png); background-repeat:no-repeat; background-position:right -70px;width:100%;z-index:2;position:absolute;top:-110px;width:980px;left:calc(50% - 490px);" builder="BuilderTopBar">
+  <div id="top-bar-container" style="position:relative; width:980px;left:calc(50% - 490px);">
+    {IF nav_menu_horizontal}
+      <block name="navigation-menu" style="clear:both; float:right; padding-right:10px;"></block>
+    {ELSE}
+      {IF use_header_right}
+        <div style="float: right;">
+          <block name="user-login" style="clear:both; padding-right:10px;"></block>
+          <block name="user-login-mini" style="clear:both; padding-right:10px;display:none"></block>
+          <div style="clear: both; height: 10px"></div>
+        </div>
+        {IF resp}
+          <div style="float: right">
+            <block name="navmenu-mini" style="clear:both;"></block>
+            <div style="clear: both; height: 10px"></div>
+          </div>
+        {ELSE}
+          <div style="float: right">
+            <block name="navmenu-mini" style="clear:both; display:none"></block>
+            <div style="clear: both; height: 10px"></div>
+          </div>
+        {ENDIF}
+      {ENDIF}
+    {ENDIF}
+    {IF use_logo}  
+      <block name="logo" input="use_tb_logo:{use_tb_logo}" style="float:left; left:10px; margin-top:-10px;"></block>
+    {ENDIF}
+    <div class="clearer"></div>
+  </div>
+</block>
+
+<block name="side-bar" builder="BuilderSideBar" style="margin-top:17px;" default="what_is_this:This page is..;display_latest_news:false">
+  <div class="side-container" id="side-container">
+    <div class="trans-panel rounded-10" style="position:relative; z-index:10;">
+      <div class="trans-panel-bg rounded-5"></div>
+      <block name="navigation-menu-vert" style="clear:both; float:left; padding-top:10px; margin-bottom: 31px;"></block>
+    </div>
+    <block builder="BuilderChat">
+      <div class="chat-container" style="position:relative; z-index:1 margin-top: 47px;margin-bottom:47px;">
+        {IF chatvars}
+          <iframe src="https://irc.eternagame.org/chat.html?{chatvars}" style="width: 100%; height: 400px; border: none;"></iframe>
+        {ELSE}
+          <iframe src="https://irc.eternagame.org/chat.html" style="width: 100%; height: 400px; border: none;"></iframe>
+        {ENDIF}
+        <a href="/web/chat/" target="_blank" style="font-weight: bold; font-size: 13px;">Open Chat Window</a>
+      </div>
+    </block>
+
+    {IF display_latest_news}
+    <div class="trans-panel rounded-5" style="position:relative; z-index:0; margin-bottom:20px">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">Latest News</div>
+      <block builder="BuilderRecents">
+        <div id="newslist" class="news-list" packerinput="block-name:newsitem-small;">
+          <block defonly="true" name="newsitem-small" style="padding-top:7px">
+            <div>
+              <div style="text-decoration:underline">
+                {IF type == "news"}
+                  <a transition="page" href="/web/news/{nid}/">[News] {title}</a>              
+                {ELSE}
+                  <a transition="page" href="/web/blog/{nid}/">[Blog] {title}</a>  
+                {ENDIF}
+              </div>
+            </div>
+          </block>                  
+        </div> 
+      </block>
+    </div>
+    <div class="trans-panel rounded-5" style="position:relative; margin-top:0px;">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">Latest Topics&nbsp;&nbsp;
+      </div>
+      <div class="news-list">
+        <div style="padding-top:10px;">
+          <div style="text-decoration:underline; padding:3px;">
+            <a href="https://getsatisfaction.com/eternagame/topics/johan-s-microrna-lab">[Forum] Johans microRNA Lab</a>
+          </div>
+          <div style="text-decoration:underline; padding:3px;">
+            <a href="https://getsatisfaction.com/eternagame/topics/switch-scores-for-eterna-switch-puzzles">[Forum] Switch Scores for Eterna Switch Puzzles</a>
+          </div>
+          <div style="text-decoration:underline; padding:3px;">
+            <a href="https://getsatisfaction.com/eternagame/topics/switch-lab-intro">[Forum] Switch Lab Intro</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {ENDIF}
+    <div class="trans-panel rounded-5" style="display: none;">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="blue-header">What is this page?</div>
+      <div style="padding: 11px">{what_is_this}</div>
+    </div>
+  </div>
+</block>
+
+<!--
+  <a href="http://ec2-54-242-172-93.compute-1.amazonaws.com/wiki/">
+  <img height="30px" src="https://s3.amazonaws.com/eterna/icon_img/e-wiki.png"></img></a>
+-->
+
+<block url="/web/" url2="/eterna_page.php">
+  {IF logged_in}
+    <block name="top-bar"></block>
+  {ELSE}
+    <block name="top-bar" input="use_header_right:false;use_tb_logo:false"></block>
+  {ENDIF}
+  <div id="page-container">
+    {IF logged_in}
+      <div id="home-page" style="float: left; width: 720px; min-height: 1px; margin-top:0px;">
+        <block builder="BuilderMe">
+          {IF processing_incognito}
+            <div class="trans-panel rounded-5">
+              <div class="trans-panel-bg rounded-5"></div>
+              <div class="header">        
+                Reclaiming your points..
+              </div>
+              <div style="padding:22px; text-align:center;">
+                <div class="small-loading centered" style="padding-top:7px;"></div>
+                We are reclaiming your points..please wait.
+              </div>
+            </div>
+          {ELSE}
+            {IF is_lab_member}
+              <!-- BEGIN home-page-slick -->   
+              <div class="home-page-slick" style="width:720px; height:425px; margin-bottom: 60px;">
+                <div id="lab-member-panel" class="trans-panel rounded-10" style="text-align:center; float:left; width:720px; height:455px; margin-bottom:50px;z-index:2;margin-top:0px;">
+                  <div class="trans-panel-bg rounded-10"></div>
+                  <block class="trans-panel" style="float:center; width:720px; height:60px;">
+                    <div class="header rounded-10" style="text-align:center;"> 
+                      <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:30px;">
+                        Join Us For Eternacon 2018
+                      </div>
+                    </div>
+                    <div class="clearer"></div>
+                  </block>
+  
+                  <block class="trans-panel" style="float:left; margin: 40px; margin-right:20px; width:438px; height:226px;">
+                    <div class="trans-panel-bg noborder"></div>
+                      <img src="/puzzle-progression/images/eternacon_2018_slide.jpg" style="width:438px; height: 246px; position: absolute; z-index: 2; left: 0px; bottom: 0px"></img>
+                  </block>
+                    
+                  <block class="trans-panel" style="float:left; margin-top: 20px; margin-left:10px; margin-right:40px; width:170px; height:128px;">
+                    <div style="float:center; font-size:14px;">Late registration is now active. Food, swag, and funding are not guaranteed - register ASAP to know if they are still available.</div>
+                  </block>
+  
+                  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 5px; width:222px; height:40px;">
+                    <a href="https://goo.gl/forms/LuJS3UxBODXQE0rp2" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+                      <div class="green-button green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+                        <div class="rounded-5 green-button-bg"></div>
+                        <div class="centered-button-text">
+                          Register Now
+                        </div>
+                      </div>
+                    </a>
+                  </block>
+  
+                  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 20px; width:222px; height:40px;">
+                    <a href="/web/news/8835372/" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+                      <div class="blue-button blue-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+                        <div class="rounded-5 green-button-bg"></div>
+                        <div class="centered-button-text">
+                          Learn More
+                        </div>
+                      </div>
+                    </a>
+                  </block>
+                </div>
+              
+                <div id="lab-member-panel" class="trans-panel rounded-10" style="text-align:center; float:left; width:720px; height:455px; margin-bottom:50px;z-index:2;margin-top:0px;">
+                  <div class="trans-panel-bg rounded-10"></div>
+                  <block class="trans-panel" style="float:center; width:720px; height:60px;">
+                    <div class="header rounded-10" style="text-align:center;"> 
+                      <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:30px;">
+                        Lighting Up Dark Cells
+                      </div>
+                    </div>
+                    <div class="clearer"></div>
+                  </block>
+
+                  <block class="trans-panel" style="float:left; margin: 40px; margin-right:20px; width:438px; height:226px;">
+                    <div class="trans-panel-bg noborder"></div>
+                    <img src="/puzzle-progression/images/lightup_sensor_still.jpg" style="width:438px; height: 246px; position: absolute; z-index: 2; left: 0px; bottom: 0px"></img>
+                  </block>
+                  
+                  <block class="trans-panel" style="float:left; margin-top: 20px; margin-left:10px; margin-right:40px; width:170px; height:128px;">
+                    {IF current_uid}
+                      <div class="intrinsic-container intrinsic-container-16x9">
+                        <iframe id="mySubmissions" src="https://irc.eternagame.org/submission_widget/project/8787276/?uid={current_uid}" frameBorder="0" scrolling="no"></iframe>
+                      </div>
+                    {ELSE}
+                      <img src="/puzzle-progression/badges/badge_lab_unlocked.png" style="width:128px; height: 128px; left:calc(50% - 82px); position:relative;"></img>
+                    {ENDIF}
+                  </block>
+          
+                  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 5px; width:222px; height:40px;">
+                    <a href="/web/lab/8787276/" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+                      <div class="green-button green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+                        <div class="rounded-5 green-button-bg"></div>
+                        <div class="centered-button-text">
+                          Enter Lab
+                        </div>
+                      </div>
+                    </a>
+                  </block>
+
+                  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 20px; width:222px; height:40px;">
+                    <a href="/web/labs/explore/" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+                      <div class="blue-button blue-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+                        <div class="rounded-5 green-button-bg"></div>
+                        <div class="centered-button-text">
+                          Explore Projects
+                        </div>
+                      </div>
+                    </a>
+                  </block>
+                  <div class="clearer"></div>          
+
+                  <div style="position:relative; float:left; padding-left:40px; top:-25px;">
+                    <iframe src="https://irc.eternagame.org/submission_widget/project/8787276" frameBorder="0" scrolling="no" width="635" height="80"></iframe>
+                  </div>
+                </div>
+                
+                {IF daily_puzzle}
+                  <block name="daily-puzzle-panel"></block>
+                {ENDIF}
+
+                {IF lab_training}
+                  <block name="lab-training-panel" id="lab-training-panel"></block>
+                {ENDIF}
+              </div>
+              <!-- END home-page-slick -->
+            {ENDIF}
+
+            {IF is_lab_member}
+              <div id="side-quest-roadmap-panel" class="trans-panel rounded-10" style="z-index:1; margin-top: -3px;">
+
+                <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;position:relative;">
+                  <div style="padding-top:7px; float:center; text-transform:capitalize; font-size:30px;">
+                    Mastering Eterna
+                  </div>
+                  <div class="clearer"></div>          
+                </div>
+
+                <div style="position:relative;padding:22px; text-align:center;display:block;" id="loading-side-projects">
+                  <div class="small-loading centered" style="padding-top:7px;"></div>
+                </div>
+
+                <div class="centered" id="side-quest-roadmap" packerinput="block-name:mini-roadmap; type:cards; width:190px; height:240px;left: calc(100% - 600px);" style="padding-left:0px; padding-right: 0px; padding-top: 27px; width:100%;"></div>
+                <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                </div>
+              </div>
+
+              <block builder="BuilderLabCardsMap" input="cards_type:my_lab_cards">
+                <div id="lab-cards-panel" class="trans-panel rounded-10" style="margin-top: 27px;margin-bottom:27px;">
+                  <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;">
+                    <div style="padding-top:7px; float:center; text-transform:capitalize; font-size:30px;">
+                      My Recent Projects
+                    </div>
+                    <div class="clearer"></div>          
+                  </div>
+                  <div style="position:relative;padding:22px; text-align:center;display:none;" id="processing-labs-1">
+                    <div class="small-loading centered" style="padding-top:7px;"></div>
+                  </div>
+            
+                  <div class="centered" id="lab-cards-map" packerinput="block-name:mini-lab-cards-map; type:cards; width:190px; height:240px; max-columns:10" style="padding-left:0px; padding-right: 0px; padding-top: 0px;"></div>
+                  <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+                </div>
+              </block>
+      
+              <!-- {IF is_lab_member_legacy} -->
+              <br></br>
+              <block name="ten-tools-tracker-block"></block>
+          
+              <div id="achievement-roadmap-panel" class="trans-panel rounded-10">
+                <div class="centered achievement-roadmap" id="achievement-roadmap" packerinput="block-name:mini-roadmap; type:cards; width:240px; min-columns:11" style="padding: 0px 0px; width:720px;"></div>
+                <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+              </div>
+              <!-- {ENDIF} -->
+            {ELSE}
+              <block name="ten-tools-tracker-block"></block>
+              
+              <div id="achievement-roadmap-panel" class="trans-panel rounded-10" style="z-index:2;">
+                <div class="centered achievement-roadmap" id="achievement-roadmap" packerinput="block-name:mini-roadmap; type:cards; width:240px; min-columns:11" style="padding: 0px 0px; width:720px;"></div>
+                <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+              </div>
+
+              <div id="side-quest-roadmap-panel" class="trans-panel rounded-10" style="z-index:1; margin-top: 27px;">
+                <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;position:relative;top:27px;">
+                  <div style="padding-top:7px; float:center; text-transform:capitalize; font-size:30px;">
+                    Mastering Eterna
+                  </div>
+                  <div class="clearer"></div>          
+                </div>
+                <div style="position:relative;padding:22px; text-align:center;display:block;" id="loading-side-projects">
+                  <div class="small-loading centered" style="padding-top:7px;"></div>
+                </div>
+                <div class="centered" id="side-quest-roadmap" packerinput="block-name:mini-roadmap; type:cards; width:190px; height:240px; left: calc(100% - 600px);" style="padding-left:0px; padding-right: 0px; padding-top: 27px; width:100%;"></div>
+                <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+              </div>
+            {ENDIF}
+
+            <div class="trans-panel rounded-5" style="margin-top: 17px; display:none">
+              <div class="trans-panel-bg rounded-5"></div>
+              <div class="yellow-header">My Badges</div>
+              <div id="achievements" packerinput="block-name:mini-achievement; type:float;" style="padding-left: 30px; padding-right: 30px; padding-top: 20px;"></div>
+              <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div id="badges" class="green-button clickable rounded-5" style="font-size: 11px; padding: 7px;">
+                  <div class="green-button-bg"></div>
+                  <a href="/web/player/{uid}/">See Full Profile</a>
+                </div>
+              </div>      
+              <div class="clearer" style="padding-bottom: 22px;"></div>
+            </div>
+
+            {IF is_lab_memberaaa}
+              <div class="trans-panel rounded-5" style="margin-top: 17px;">
+                <div class="trans-panel-bg rounded-5"></div>
+                <div class="yellow-header">
+                  <div style="float: left">My Lab Projects</div>
+                  <div style="float: right; padding-right: 22px; font-weight: normal; font-size: 14px;">
+                    <span class="clickable" id="all" style="font-weight: bold;">all</span>&nbsp; 
+                    <span class="clickable" id="lab-created">created</span>&nbsp;
+                    <span class="clickable" id="lab-participating">participating</span>&nbsp;
+                    <span class="clickable" id="lab-following">following</span>&nbsp;
+                  </div>                     
+                  <div class="clearer"></div>
+                </div>
+                <div style="text-align:center; padding:22px;">
+                  No lab messages.
+                </div>
+              </div>
+            {ENDIF}
+
+            {IF is_lab_member}{ELSE}
+              <block name="lab-member-panel-locked" id="lab-member-panel"></block>
+            {ENDIF}
+          {ENDIF}
+          
+          <div class="clearer" style="height:50px;"></div>
+          <block name="page-footer"></block>
+        </block>
+      </div>
+
+      <block name="side-bar"></block>
+    {ELSE}
+      {IF use_youtube_player}
+      <div class="trans-panel" style="text-align: center; float:left; width:658px; height:687px; margin-top: 0px;">
+      {ELSE}
+        {IF hide_video}
+      <div class="trans-panel" style="text-align: center; float:left; width:658px; height:485px; margin-top: 0px;">
+        {ELSE}
+      <div class="trans-panel" style="text-align: center; float:left; width:658px; height:687px; margin-top: 0px;">
+        {ENDIF}
+      {ENDIF}
+        <div class="trans-panel-bg trans-panel-bg-green-bordered rounded"></div>
+        <embed flashvars="sequence=GGACGAUUGAGGAUAUUAUGACAAUGAGAAGGCAAUGAAGAGAGAGCUUUUUAAAGAAACAACAACAACAAC&secstruct=..........................(((((((............)))))))...................." src="/eterna_resources/EternaSplash3.swf" width="100%" height="100%" wmode="transparent"></embed>
+        <img src="/puzzle-progression/site/home_text.png" style="width:300px; position: absolute; z-index: 2; left: 25px; bottom: 20px"></img>
+      </div>
+
+      <div>
+        <block class="trans-panel" style="float:left; margin-left: 17px; margin-top: 0px; width:305px; height:116px;">
+          <div class="trans-panel-bg rounded noborder"></div>
+          <a href="/game/puzzle/6502927/" style="text-align: center; vertical-align: middle; line-height:80px; z-index: 2; text-decoration:none;">
+            <div class="green-button-interactive clickable rounded-5" style="position:absolute; left:15px; bottom:21px; width:275px; height:80px; font-size:38px;font-weight:bold;">
+              <div class="rounded-5 green-button-bg"></div>
+              <div class="centered-button-text">
+                Play Now
+              </div>
+            </div>
+          </a>
+        </block>
+      </div>
+      
+      <div>
+        <block class="trans-panel" style="float:left; margin-left: 17px; margin-top: 17px; width:305px;height: 116px;">
+          <div class="trans-panel-bg rounded noborder"></div>
+          <a href="/web/about/" style="text-align: center; vertical-align:middle; line-height:80px; z-index: 2; text-decoration:none;">
+            <div class="blue-button-interactive clickable rounded-5" style="position: absolute; left:15px; bottom:21px; width:275px; height:80px; font-size:38px; font-weight:bold;">
+              <center>About Eterna</center>
+            </div>
+          </a>
+        </block>
+      </div>
+
+      {IF use_youtube_player}
+      <div>
+        <block class="trans-panel" style="float:left; margin-left: 17px; margin-top: 17px; width:305px;height: 185px;">
+          <div class="trans-panel-bg rounded noborder"></div>
+          <block name="youtube-container-block" input="data_id:V2qtNyJ3KQg;" style="width:275px; height: 155px; position: absolute; z-index: 2; left: 13px; bottom: 17px"></block>
+          <!-- <block name="youtube-container-block" input="data_id:IGYpu4BVnhA;" style="width:275px; height: 155px; position: absolute; z-index: 2; left: 13px; bottom: 17px"></block> -->
+        </block>
+      </div>
+      {ENDIF}
+
+      {IF hide_video}{ELSE}
+        <div>
+          <block class="trans-panel" style="float:left; margin-left: 17px; margin-top: 17px; width:305px;height: 185px;">
+            <div class="trans-panel-bg rounded noborder"></div>
+            {IF jwplayer}
+              <block name="native-player-container-block" input="modal:true;src:/puzzle-progression/videos/tb-clean-v1.mp4;image:/puzzle-progression/videos/tb_poster_img_v2.png;" style="width:275px; height: 155px; position: absolute; z-index: 2; left: 15px; top: 15px"></block>
+            {ELSE}
+              <block name="youtube-container-block" input="data_id:V2qtNyJ3KQg;modal:true;image:/puzzle-progression/videos/eterna_overview_poster.jpg;" style="width:275px; height: 155px; position: absolute; z-index: 2; left: 15px; top: 15px"></block>
+            {ENDIF}
+          </block>
+        </div>
+      {ENDIF}
+      
+      <div style="padding-top: 17px">
+        <block builder="BuilderLogin" class="trans-panel" style="float:left; margin-left: 17px; margin-top: 17px; width:305px; height:220px;">
+          <div class="trans-panel-bg rounded noborder"></div>	
+          <div style="height:100%; margin-top: 15px;">
+            <div style="width: 265px; padding-left: 15px; padding-bottom:10px;">
+              <input class="noborder dark-input" style="width: 100%; padding: 5px; height:20; font-size:16px;" id="username" type="text" placeholder="username"></input>
+            </div>
+            <div class="clearer"></div>
+            <div style="width: 265px; padding-left: 15px;">
+              <input class="noborder dark-input" style="width: 100%; padding: 5px; height:20; font-size:16px;" id="password" type="password" placeholder="password"></input>
+            </div> 
+            <div class="clearer"></div>
+
+            <div style="padding-top:10px;">
+              <div style="margin-left:15px; float:left;">
+                <a href="/user/" class="interactive-link font-gothic">Facebook connect</a>
+              </div>   
+              <div style="margin-right:15px; float:right;">
+                <a href="/user/password/" class="interactive-link font-gothic">Forgot password?</a>
+              </div>
+              <div class="clearer"></div>
+            </div>
+        
+            {IF incognito_points}
+              <div class="font-gothic" style="color: #FEC942; height:20px; padding-top:5px; padding-bottom:10px; margin-left:15px; margin-right:15px; text-align:center;">
+                <span>Register now to see what you've built!</span>
+                <div class="clearer"></div>
+              </div>
+            {ELSE}
+              <div style="height: 35px;"></div>
+            {ENDIF}
+
+            <div style="padding-left: 15px;">
+              <div id="login" class="green-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 20px; line-height:50px; float: left; width: 130px; height: 50px;">
+                <div class="rounded-5 green-button-bg"></div>
+                <div class="centered-button-text">
+                  Log in
+                </div>
+              </div>
+            </div>
+
+            <div style="padding-left: 157px; ">
+              <block tag="a" class="centered-button-text" builder="BuilderPopOverlay" input="block-name:register-box" style="color:#FFFFFF; text-decoration: none; cursor: pointer; ">
+                <div id="register" class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; line-height: 50px; font-size: 20px; float: left; width: 130px; height: 50px;">
+                <div class="rounded-5 blue-button-bg"></div>
+                  Register
+                </div>
+              </block>
+              <div class="clearer"></div>
+            </div>
+          </div>        
+        </block>
+      </div>
+      
+      <div class="clearer" style="height:10px;"></div>
+      <block name="page-footer"></block>
+    {ENDIF}
+  </div>
+</block>
+
+<block url="/web/strategy_guides/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float: left; width: 720px; min-height: 1px;">
+    <block builder="BuilderNewsPage" input="nid:51904">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="red-header">{title}</div>
+        <div style="padding: 22px;">{body}</div>
+      </div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/chat/"> 
+  <block name="top-bar"></block>
+  <div id="page-container">
+
+  <block builder="BuilderChat">
+    <div id="chat-container" style="height:800px">
+      {IF chatvars}
+        <iframe src="https://irc.eternagame.org/chat.html?{chatvars}" style="width: 100%; height: 100%; border: none;"></iframe>
+      {ELSE}
+        <iframe src="https://irc.eternagame.org/chat.html" style="width: 100%; height: 100%; border: none;"></iframe>
+      {ENDIF}
+    </div>
+  </block>
+  </div>
+</block>
+
+<block url="/web/register/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="clear:both; float: left; width: 720px; margin-bottom: 25px;">
+    <block name="register-box"></block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="register-box" builder="BuilderRegister">
+  <div class="trans-panel">
+    <div class="trans-panel-bg "></div>
+    <div class="yellow-header">
+      <center>Register</center>
+    </div>
+    {IF incognito_points}
+      <div style="padding-top: 22px; padding-left: 22px">
+        Register now to claim&nbsp;&nbsp;
+        <img src="https://s3.amazonaws.com/eterna/eterna2/money.png" style="position: relative; top: 2px;"></img>&nbsp;
+        <strong>{incognito_points}</strong>&nbsp;points.
+      </div>
+    {ENDIF}
+
+    <div style="padding:22px;">
+      <div style="text-align: left;">
+        <div style="float: left; width: 100px;">username :</div>
+        <div style="float: left">
+          <input type="text" id="username-input" style="width: 200px;" placeholder="username"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: left; padding-top: 17px;">
+        <div style="float: left; width: 100px;">password :</div>
+        <div style="float: left">
+          <input type="password" id="password-input" style="width: 200px;" placeholder="password"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: left; padding-top: 17px;">
+        <div style="float: left; width: 100px;">Re-enter password :</div>
+        <div style="float: left">
+          <input type="password" id="password-confirm-input" style="width: 200px;" placeholder="password"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: left; padding-top: 17px;">
+        <div style="float: left; width: 100px;">E-mail (optional) :</div>
+        <div style="float: left">
+          <input type="text" id="email-input" style="width: 200px;" placeholder="email@email.com"></input>
+        </div>
+        <div class="clearer"></div>
+      </div>
+
+      <div style="text-align: left; padding-top: 17px; padding-right: 2px;">
+        <div id="recaptcha-container" style="float: left;"></div>
+        <div class="clearer"></div>
+      </div>
+
+    </div>
+    <div style="padding-bottom:15px;">
+      <block style="float:left; margin-left:20px; margin-right:25px;" class="clickable" builder="BuilderFBConnect">
+        <a href="/user/"><img src="https://s3.amazonaws.com/eterna/redesign/facebook-connect_v2.png"></img></a>
+      </block>
+      <div class="green-button rounded-5 clickable" id="register-button" style="float:left; width:125px; height:18px;">
+        <div class="green-button-bg rounded-5 " style="padding-left:35px;">Register</div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </div>
+</block>
+
+<block name="comments" builder="BuilderComments" input="comments:{comments}; nid:{nid}; supercomments:{supercomments}; super:0">
+  {IF logged_in}
+    <div style="padding-top:10px;padding-right:9px;">
+      <div class="comment-suggestions"
+	         id="comment-suggestions"
+	         packerinput="block-name:comment-suggestion"
+	         style="margin: 5px 0px;position:absolute;top:5px;text-align:center;min-width:60%;min-height:40px;display:none;max-height:240px;overflow-y:auto;">
+	
+	      <block defonly="1" name="comment-suggestion" class="comment-suggestion" id="comment-suggestion" builder="BuilderCommentSuggestion"
+               style="clear:both; padding:5px 10px; float:center; font-size:14px; text-align:left;line-height:30px;">
+          {IF topbar}
+            <div id="comment-suggestion-topbar" style="pointer-events:none">
+              <span style="position:relative;float:left;margin-left: 2px;font-size:12px;padding-right:15px;">
+                Players {IF search} matching <span style="font-weight:bold;">"@{search}"</span> {ENDIF}
+              </span>
+              <span style="position:relative; float:right; margin-right: 2px;text-align:right; font-size:12px;">
+                <span style="font-weight:bold">tab</span>&nbsp;to navigate
+                &nbsp;&nbsp;
+                <span style="font-weight:bold">enter</span>&nbsp;to select
+                &nbsp;&nbsp;
+                <span style="font-weight:bold">esc</span>&nbsp;to dismiss
+              </span>
+            </div>
+          {ENDIF}
+          {IF loading}
+	          <div id="comment-suggestion-loading" style="pointer-events:none">  
+  	          <div style="float: left; width: 30px; margin-left: 2px; top:50%;">
+                <div id="user-img" class="img-user gradientBoxesWithOuterShadows"
+                     style="top:0px; height:30px; width:30px; margin: 0px 0px; background-repeat:no-repeat; background-image:url({loading}); background-position:center center; background-size:contain; border-radius:3px;">
+                </div>
+              </div>
+              <div style="position:relative; float: left; margin-left: 15px; text-align: left;">
+      	        <span id="user-name" style="font-weight:bolder;">
+                  <i>looking for players
+                    {IF search} matching <span style="font-weight:bold">"@{search}"</span> {ENDIF} &nbsp;...
+                  </i>
+                </span>
+              </div>
+            </div>
+	        {ENDIF}
+	        {IF username}
+	          <div id="comment-suggestion-user"  data-username="{username}">  
+  	          <div style="float: left; width: 30px; margin-left: 2px; top:50%;">
+                <div id="user-img" class="img-user gradientBoxesWithOuterShadows"
+                     style="top:0px; height:30px; width:30px; margin: 0px 0px; background-repeat:no-repeat; background-image:url({userpicture}); background-position:center center; background-size:contain; border-radius:3px;">
+                </div>
+              </div>
+              <div style="position:relative; float: left; margin-left: 15px; text-align: left;">
+                <span id="user-name" style="font-weight:bold;">{username}</span>
+              </div>
+            </div>
+          {ENDIF}
+          <div class="clearer"></div>
+        </block>
+      </div>
+
+      <div id="submitting" class="small-loading"
+           style="position:absolute;left:calc(50% - 10px);top:calc(50% - 10px);display:none">
+      </div>
+      <textarea id="comment-input"
+                class="dark-input font-helvetica"
+                style="width:100%; font-size:14px;"
+                placeholder="Leave a comment">
+      </textarea>
+    </div>
+    <div id="comment-submit-container" style="padding-top: 7px; padding-bottom: 20px;">
+      <div id="comment-submit" style="float: right; padding: 4px; padding-left: 7px; padding-right: 7px; font-size: 14px; font-weight:bolder" class="green-button-interactive2D rounded-5 clickable">
+        <div class="green-button-bg rounded-5"></div>
+        <div class="centered-button-text">Comment</div>
+      </div>
+      <div id="mention-button" class="blue-button-interactive2D rounded-5 clickable info-hint" style="z-index: 10; float: right; margin-right:8px; height:28px; width:28px; font-size: 14px; border-radius:5px;text-align:center;">
+        <div class="blue-button-bg rounded-5"></div>
+        <div class="centered-button-text font-helvetica" style="line-height:25px;font-size:20px;font-weight:normal">@</div>
+	      <span style="font-size:14px;">Mention <b style="font-weight:bolder">@player</b></span>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  {ELSE}
+    <div style="font-weight:bold;text-align: center; padding: 11px; color: #EEEEEE">Please log in to leave a comment</div>
+  {ENDIF}
+  <div id="comments" packerinput="block-name:comment">
+    <block defonly="1" name="comment" builder="BuilderComment" style="clear:both; padding-bottom:19px;">
+      <div style="float: left; width: 30px">
+        <img src="{picture}" style="max-width: 30px; max-height: 30px; width: auto; height: auto"></img>
+      </div>
+      <div style="float: left; width: 560px; padding-left: 10px; text-align: left;">
+        <div>
+          <a href="/web/player/{uid}/">{name}</a>&nbsp;&nbsp; <span>{comment}</span>
+        </div>
+        <div style="font-size: 10px; padding-top: 11px;">
+          {created} 
+          {IF is_deletable}
+            &nbsp;&nbsp;<span id="delete" class="clickable">[delete]</span>
+          {ENDIF}
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </block>
+  </div>
+</block>
+
+<!-- Nova Landing Page -->
+<block url="/web/novatransfer/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="clear:both; float: left; width: 100%; margin-bottom: 25px;">
+    <div class="trans-panel">
+      <div class="trans-panel-bg "></div>
+        <div class="red-header">
+          <center>Welcome to Eterna!</center>
+        </div>
+        <div style="padding:20px; padding-bottom:10px;">
+          <p>
+            Hello NOVA players and welcome to Eterna! The next steps on your RNA puzzle-solving journey are:
+          </p>
+          <br></br>
+            1. Register for Eterna. The 5,000 points you scored in the NOVA RNA Lab will be transferred to your Eterna Profile.
+          <br></br>
+            2. Put your RNA folding skills into practice by solving more challenging puzzles on Eterna.
+          <br></br>
+            3. Once you have reached a score of 10,000 points, enter the Eterna Lab and design RNAs that will be voted on by the worldwide Eterna community.
+          <br></br>
+            4. If you design a winning RNA, it will be made and tested by scientists to see if it folds in the way you predicted. The very best molecules will become the basis of a molecular toolkit to explore possible RNA-based therapies.
+          <br></br>
+          <p>
+            To learn more, check out the <a href="/web/about/">About Eterna</a>&nbsp; page.
+          </p>
+        </div>
+        <div style="padding:20px;">
+          <img src="https://s3.amazonaws.com/eterna/eterna2/novatransfer-infographic.png" style:"height:40px;"></img>
+        </div>
+    </div>
+    <div style="height:30px;"></div>
+    <block name="register-box-nova"></block>
+  </div>
+  </div>
+</block>
+
+<block name="register-box-nova" builder="BuilderRegister">
+  <div class="trans-panel" style="width: 55%; float: left;">
+    <div class="trans-panel-bg "></div>
+    <div class="red-header">
+      <center>Register</center>
+    </div>
+    <div style="padding:22px;">
+      <center>
+      <div style="text-align: center;">
+        <span>Username: </span>
+        <span>
+          <input type="text" id="username-input" style="width: 200px;" placeholder="Enter a username.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: center; padding-top: 20px;">
+        <span>Password: </span>
+        <span>
+          <input type="password" id="password-input" style="width: 200px;" placeholder="Enter Password.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: center; padding-top: 20px;">
+        <span style="margin-left:-85px;">Password Confirmation: </span>
+        <span>
+          <input type="password" id="password-confirm-input" style="width: 200px;" placeholder="Re-Enter Password.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: center; padding-top: 20px;">
+        <span style="margin-left:-40px;">E-mail (optional): </span>
+        <span>
+          <input type="text" id="email-input" style="width: 200px;" placeholder="Enter email.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      <div style="padding-top: 17px; padding-right: 2px;">
+        <div id="recaptcha-container" style="margin-right:10px;"></div>
+        <div class="clearer"></div>
+      </div>
+      </center>
+    </div>
+    <div style="padding-bottom:15px; text-align:center;">
+      <span style="margin-left:22%; margin-right:5px;float:left;">
+        <block  class="clickable" builder="BuilderFBConnect">
+          <a href="/user/"><img src="https://s3.amazonaws.com/eterna/redesign/facebook-connect_v2.png"></img></a>
+        </block>
+      </span>
+      <span>
+        <div class="green-button rounded-5 clickable" id="register-button" style="width:125px; height:18px; float:left;">
+          <div class="green-button-bg rounded-5 " style="padding-left:35px;">Register</div>
+        </div>
+      </span>
+      <div class="clearer"></div>
+    </div>
+  </div>
+  <div class="trans-panel" style="width: 43%; float: right;">
+    <div class="trans-panel-bg "></div>
+    <div class="red-header">
+      <center>Existing Members</center>
+    </div>
+    <div style="padding:22px;">
+      <center>
+      <div style="text-align: center;">
+        <span>Username: </span>
+        <span>
+          <input type="text" id="username-transfer-input" style="width: 200px;" placeholder="Enter a username.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      <div style="text-align: center; padding-top: 20px;">
+        <span>Password: </span>
+        <span>
+          <input type="password" id="password-transfer-input" style="width: 200px;" placeholder="Enter Password.."></input>
+        </span>
+        <div class="clearer"></div>
+      </div>
+      </center>
+    </div>
+    <div style="padding-bottom:20px; padding-left:142px;">
+      <div class="green-button rounded-5 clickable" id="nova-transfer-button" style="width:200px; height:18px;">
+        <div class="green-button-bg rounded-5" style="padding-left: 22px;">Transfer Nova Credit</div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </div>
+</block>
+
+<block url="/web/conduct/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float: left; width: 100%; margin-bottom: 25px;">
+    <div class="trans-panel rounded-5">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header" style="padding-left: 32px;">
+        <h3>Code of Conduct</h3>
+      </div>
+      <div style="padding: 22px;">
+        <div style="padding: 10px; text-align: justify;">
+          <h3 style="padding-bottom: 16px;">Respect the Eterna Community</h3>
+          Eterna players come from different countries, age groups, institutions, schools, companies, teaching, online gaming, and scientific communities. As a part of the Eterna community, you are invited to discuss research topics, game experiences, competitions status, lab results, puzzle strategies, ideas, suggestions, and just to socialize! We trust you to be responsible in the community. While playing Eterna, please follow the community guidelines highlighted here. While using the Eterna site and chat:<br></br>
+          <ul style="padding-left: 20px;">
+            <li>Please do not display any violent, nude, racial, unsuitable pictures or posts, derogatory language, or links to adult content.</li>
+            <li>Please do not abuse, harass, or threaten any person.</li>
+            <li>Please do not send spams (unwanted messages) or virus links</li>
+            <li>Please do not behave like a <a href="http://en.wikipedia.org/wiki/Troll_(Internet)" target="_blank">troll</a></li>
+          </ul>
+          <p style="padding-top: 15px;">
+            While off topic conversation is frequent in chat, it is generally not tolerated when it disrupts legitimate Eterna conversation.
+          </p>
+          <br></br>
+          <p>
+            These rules also apply to Username, About Me, Group Description, Player and Group profile pictures. Anyone who fails to follow the guidelines may be suspended or banned from Eterna. Remember that Eterna is your community! Each and every player helps Eterna get better. To report abuses of the Code of Conduct, please send a private message to our <a href="/web/player/158495/" target="_blank">development team</a>, who will keep your identity confidential.
+            <br></br><br></br>
+            Thanks for reading and understanding the guidelines!
+            <br></br>
+            The Eterna Team.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</block>
+
+<block url="/web/newsfeed/">
+    <block name="top-bar"></block>
+    <div id="page-container" >
+
+    <div style="float: left; width: 720px; min-height: 1px">
+      <block builder="BuilderMe">
+        <div class="trans-panel rounded-5" style="margin-top: 0px;" id="my-feed">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            <div style="float: left">My Feed</div>
+            <div style="float: right; padding-right: 22px; font-weight: 300; font-size: 14px;">
+              <span class="clickable" id="all" style="font-weight: bold;text-decoration:underline;">all</span>&nbsp; 
+              <span class="clickable" id="messages">messages</span>&nbsp;
+              <span class="clickable" id="news">news</span>&nbsp;
+              <span class="clickable" id="blogs">blogs</span>&nbsp;
+              <span class="clickable" id="rewards">lab</span>&nbsp;
+              <span class="clickable" id="groups">groups</span>
+            </div>                     
+            <div class="clearer"></div>
+          </div>
+            
+          <block defonly="true" name="follow-puzzle-box" id="follow_puzzle_box" builder="BuilderFollowOverlay">
+            <div class="trans-panel">
+              <div class="trans-panel-bg "></div>
+              <div class="yellow-header">
+                <center>{title}</center>
+              </div>
+              <div id="follow_info" packerinput="block-name:follow_info_puzzle_block;" style="padding:5px;">
+                <block name="follow_info_puzzle_block" defonly="true">
+                  <div style="width:200px; text-aligh:left; padding:5px;">
+                    <div><a href="/web/puzzle/{puzzle_id}/">{puzzle_title}</a></div>
+                  </div>
+                </block>
+              </div>
+              <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+            </div>
+          </block> 
+          
+            <block defonly="true" name="follow-user-box" id="follow_user_box" builder="BuilderFollowOverlay">
+            <div class="trans-panel">
+              <div class="trans-panel-bg "></div>
+              <div class="yellow-header">
+              <center>{title}</center>
+              </div>
+              <div id="follow_info" packerinput="block-name:follow_info_user_block;" style="padding:5px;">
+                <block name="follow_info_user_block" defonly="true">
+                  <div style="clear:both; width:200px; text-aligh:left; padding:5px; margin:5px;">
+                    <div style="float:left;"><img src="{user_picture}" style="width:30px;"></img></div>
+                    <div><a href="/web/player/{uid}/">{user_name}</a></div>
+                  </div>
+                </block>
+              </div>
+              <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+            </div>
+          </block>     
+
+          <block defonly="true" name="follow-group-box" id="follow_group_box" builder="BuilderFollowOverlay">
+            <div class="trans-panel">
+              <div class="trans-panel-bg "></div>
+              <div class="yellow-header">
+                <center>{title}</center>
+              </div>
+              <div id="follow_info" packerinput="block-name:follow_info_group_block;" style="padding:5px;">
+                <block name="follow_info_group_block" defonly="true">
+                  <div style="width:200px; text-aligh:left; padding:5px;">
+                    <div><a href="/web/group/{group_id}/">{group_title}</a></div>
+                  </div>
+                </block>
+              </div>
+              <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+            </div>
+          </block> 
+
+          <block defonly="true" name="follow-survey-box" id="follow_survey_box">
+            <div class="trans-panel">
+              <div class="trans-panel-bg "></div>
+              <block builder="BuilderNewsPage" input="nid:15121">
+                <div class="trans-panel rounded-5">
+                  <div class="trans-panel-bg rounded-5"></div>
+                  <div class="red-header">{title}</div>
+                  <div style="padding: 22px;">{body}</div>
+                </div>
+              </block>
+              <div style="padding:2px;">
+                <div style="padding-bottom:10px; padding-right:100px; padding-left:135px;" align="left"><input type="checkbox" style="width:40px; height:16px; vertical-align:middle;" id="agree_13" onclick="BuilderMe.prototype.agree_check();"></input>I am 13 or older</div>
+                <div style="padding-bottom:10px; padding-right:100px; padding-left:135px;" align="left"><input type="checkbox" style="width:40px; height:16px; vertical-align:middle;" id="agree_terms" onclick="BuilderMe.prototype.agree_check();"></input>I agree to the above terms of service</div>
+                <div style="padding-bottom:30px; padding-right:100px; padding-left:135px;" align="left"><input type="checkbox" style="width:40px; height:16px; vertical-align:middle;" id="agree_respect" onclick="BuilderMe.prototype.agree_check();"></input>I agree to be respectful of others</div>
+                <div id="agree_button" class="clickable gray-button rounded-5 centered" style="font-size:14px; padding:5px; width:250px; cursor:default;" disabled="true" onclick="BuilderMe.prototype.survey_clicked('EULA_Agree');">
+                  <div class="green-button-bg rounded-5;"></div>
+                  I Agree
+                </div><br></br>
+                <div class="clearer"></div>
+              </div>
+              <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+            </div>
+          </block>
+
+          <div id="newsfeed" style="clear: both; padding: 22px;">
+            <block defonly="true" name="newsfeed-noti">
+              <div style="padding-top: 10px; padding-bottom: 10px; line-height: 18px; display: {display}" class="{nid}">
+                <div style="width: 48px; height: 48px; float: left; clear: both;">
+                  <table style="border-spacing: 0px; padding: 0px; height: 48px;">
+                    <tr style="border-spacing: 0px; padding: 0px; height: 48px; border: 0px;">
+                      <td style="padding: 0px; vertical-align: center; height: 48px;">
+                        <img style="max-width: 48px; max-height: 48px" src="{img}"></img>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+    
+                <div style="float: left; padding-left: 20px; width: 550px;">
+                  <div>
+        {IF moderator_alert}
+                      <span class="tag-alert">moderator alert</span>&nbsp;
+            {ELSE}
+                      {IF mention_alert}
+                        <span class="tag bg-cyan">@mention</span>&nbsp;
+          {ELSE}
+                        <span class="tag bg-green">message</span>&nbsp;
+    {ENDIF}
+                    {ENDIF}
+        <span style="font-weight:bold;text-decoration:none;">{ids}</span>&nbsp;
+                    <span style="font-size: 10px;">{created_time}</span>
+        {IF mention_alert}
+                    <div style="padding-top:5px;padding-bottom:5px">
+            <span class="interactive-mention">@{ids}</span>&nbsp;
+      <span style="font-weight: bolder;">mentioned you in a comment:</span>&nbsp;	
+        <div style="margin:7px;margin-left:5.5px;padding-left:7px;border-left:2px solid rgba(255,255,255,0.5);">
+        {body}
+      </div>
+      <i style="font-weight:bolder">see {node_type}:</i>&nbsp;<a href="{node_url}" class="interactive-mention" style="text-decoration:underline;">{node_title}</a>
+          </div>         
+        {ELSE}
+                    <div style="padding-top:5px;padding-bottom:5px">
+                      {IF node_comment}
+            <span class="interactive-mention">@{ids}</span>&nbsp;
+      <span style="font-weight: bolder;">commented:</span>&nbsp;	
+                        <div style="margin:7px;margin-left:5.5px;padding-left:7px;border-left:2px solid rgba(255,255,255,0.5);">
+        {body}
+      </div>
+      <i style="font-weight:bolder">see {node_type}:</i>&nbsp;<a href="{node_url}" class="interactive-mention" style="text-decoration:underline;">{node_title}</a>
+                {ELSE}
+                        {body}
+                      {ENDIF}
+          </div>
+                    {ENDIF}
+              </div>
+                  {IF show_reply_button}
+                  <span id="reply-and-see-all" onClick="$('.{nid}').show(); $(this).hide(); var height=$('.{nid}').last().offset().top-$('.{nid}').first().offset().top; $(window).scrollTop($(window).scrollTop()+height); " class="clickable" style="text-decoration: underline; font-size: 11px;">Open this thread & reply </span>
+      <span id="mark-as-read" class="clickable interactive-link" style="text-decoration: underline; font-size: 11px;margin-left:5px">Mark as read</span>
+                  {ENDIF}
+                  {IF can_reply}
+                    <div style="padding-top: 11px; display: none;" id="reply-widget" class="{nid}">
+                      <textarea style="width: 450px; height: 15px; padding: 2px;" id="reply-body"></textarea>
+                      &nbsp;&nbsp;
+                      <span id="reply-button" class="rounded-5 green-button clickable" style="font-size: 10px; position: relative; top: -7px; padding:5px;">
+                        <span class="green-button-bg rounded-5 " ></span>
+                        <input id="reference" type="hidden" value="{nid}"></input>
+                        Reply
+                      </span>
+                    </div>
+                  {ENDIF}
+                </div>
+                <div class="clearer"></div>
+              </div>
+              <div style="text-align:center; padding-top:17px; display:none;" id="pager"></div>              
+            </block>
+            
+            <block defonly="true" name="newsfeed-groups">
+              <div style="padding-top: 10px; padding-bottom: 10px; line-height: 18px; display: {display}" class="{nid}">
+                <div style="width: 48px; height: 48px; float: left; clear: both;">
+                  <table style="border-spacing: 0px; padding: 0px; height: 48px;">
+                    <tr style="border-spacing: 0px; padding: 0px; height: 48px; border: 0px;">
+                      <td style="padding: 0px; vertical-align: center; height: 48px;">
+                        <img style="max-width: 48px; max-height: 48px" src="{img}"></img>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+    
+                <div style="float: left; padding-left: 20px; width: 550px;">
+                  <div>
+                    <span style="font-weight: bolder;">{ids} :</span>&nbsp;
+                    {body}
+                    {IF node_comment}
+                      &nbsp;&nbsp;commented on the {node_type}&nbsp;<a transition="page" href="{node_url}">"{node_title}"</a>
+                    {ENDIF}
+                  </div>
+                  <span style="font-size: 10px;">{created_time}</span>&nbsp;
+                  {IF show_reply_button}
+                    <span id="reply-and-see-all" onClick="$('.{nid}').show(); $(this).hide()" class="clickable" style="text-decoration: underline; font-size: 11px;">Open this thread & reply </span>
+                  {ENDIF}
+                  {IF can_reply}
+                    <div style="padding-top: 11px; display: none;" id="reply-widget" class="{nid}">
+                      <textarea style="width: 450px; height: 15px; padding: 2px;" id="reply-body"></textarea>
+                      &nbsp;&nbsp;
+                      <span id="reply-button" class="rounded-5 green-button clickable" style="font-size: 10px; position: relative; top: -7px; padding:5px;">
+                        <span class="green-button-bg rounded-5 " ></span>
+                        <input id="reference" type="hidden" value="{nid}"></input>
+                        Reply
+                      </span>
+                    </div>
+                  {ENDIF}
+                </div>
+                <div class="clearer"></div>
+              </div>
+              <div style="text-align:center; padding-top:17px; display:none;" id="pager"></div>              
+            </block>  
+                
+            <block defonly="true" name="newsfeed-news" style="padding-top:10px; padding-bottom:10px;">
+              <div style="float: left; width:48px; height:48px; text-align:center;">
+                <img src="https://s3.amazonaws.com/eterna/eterna2/newsfeed-news.png"></img>
+              </div>
+              <div style="float: left; padding-left: 22px; width: 600px;">
+                <span class="tag bg-red">news</span>&nbsp;
+                <span style="color: #ABE0FE; font-weight: bolder; text-decoration: underline">
+                  {IF sticky}
+                    <a transition="page" style="font-weight: bolder;" href="/web/news/{nid}/">{title}</a>
+                  {ELSE}
+                    <a transition="page" href="/web/news/{nid}/">{title}</a>
+                  {ENDIF}
+                </span>
+                <div style="padding-top: 11px;">{body}</div>
+              </div>
+              <div class="clearer"></div>
+            </block>
+            
+            <block defonly="true" name="blogs-list" style="padding-top:10px; padding-bottom:10px;">
+              <div style="float:left;width:48px; height:48px;  text-align:center;">
+                <img width="30px" height="30px" src="https://s3.amazonaws.com/eterna/icon_img2/Blog.png"></img>
+              </div>
+              <div style="float: left; padding-left: 22px; width: 600px;">
+                <span class="tag bg-orange">blogs</span>&nbsp;
+                <span style="color: #ABE0FE; font-weight: bolder; text-decoration: underline">
+                  {IF sticky}
+                    <a transition="page" style="font-weight: bolder;" href="/web/blog/{nid}/">{title}</a>
+                  {ELSE}
+                    <a transition="page" href="/web/blog/{nid}/">{title}</a>
+                  {ENDIF}
+                </span>
+                <div style="padding-top: 11px;">{body}</div>
+              </div>
+              <div class="clearer"></div>
+            </block>              
+
+            <block defonly="true" name="newsfeed-reward" style="padding-top:10px; padding-bottom:10px;">
+              <div style="float: left">
+                {IF field_reward_type_value == "VOTE"}
+                  <img src="https://s3.amazonaws.com/eterna/icon_img/lab_vote.png"></img>
+                {ELSE}
+                  <img src="https://s3.amazonaws.com/eterna/icon_img/news_lab_icon.png" width=18 height=20></img>
+                {ENDIF}
+              </div>
+              <div style="float: left; padding-left: 22px; width: 600px;">
+                <div style="color: #ABE0FE; font-weight: bolder; text-decoration: underline">
+                  <a href="/game/browse/{field_reward_puzzle_nid_value}/?filter1=Id&filter1_arg1={field_reward_solution_nid_value}&filter1_arg2={field_reward_solution_nid_value}">Lab reward&nbsp;-&nbsp;{title}</a>
+                  <!--/web/browse/{field_reward_puzzle_nid_value}/?ID={field_reward_solution_nid_value}-->
+                </div>
+                <div style="padding-top: 11px;">
+                  {IF field_reward_type_value == "VOTE"}
+                    You have been rewarded&nbsp;{field_reward_amount_value}&nbsp;points for voting on the synthesized sequence&nbsp;"{field_reward_solution_title_value}"&nbsp; in the lab&nbsp;"{field_reward_puzzle_title_value}".
+                  {ELSE}  
+                    You have been rewarded&nbsp;{field_reward_amount_value}&nbsp;points for designing the synthesized sequence&nbsp;"{field_reward_solution_title_value}"&nbsp; in the lab&nbsp;"{field_reward_puzzle_title_value}".
+                  {ENDIF}
+                </div>
+              </div>
+              <div class="clearer"></div>
+            </block>   
+          </div>	    
+    
+          <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="more-loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+          <div class="centered" id="more" style="clear: both; padding-top: 11px; padding-bottom: 30px; width: 120px;">
+            <div id="more-message" class="green-button clickable rounded-5" style="font-size: 11px; padding: 7px;">
+              <div class="green-button-bg"></div>
+              More messages
+            </div>
+          </div>
+        </div>
+  
+        <div class="yellow-header" style="border-width:0px 0px 0px;">      
+          <div style="float: center; padding-right: 22px; font-weight: 300; font-size: 14px;">
+            <block builder="BuilderPopOverlay" input="block-name:follow-user-box; postfix:player; title:Following users; follow_type:users" style="float:right; margin-left:7px; margin-top:-3px; font-size:14px; font-weight: 300; padding:3px; color: #FFFFFF; text-decoration: underline; cursor: pointer;">
+              Following Users
+            </block>
+
+            <block builder="BuilderPopOverlay" input="block-name:follow-puzzle-box; postfix:puzzles; title:Following puzzles; follow_type:puzzles" style="float:right; margin-left:7px; margin-top:-3px; font-size:14px; font-weight: 300; padding:3px; color:#FFFFFF; text-decoration: underline; cursor: pointer;">
+              Following Puzzles
+            </block>
+            
+            <block builder="BuilderPopOverlay" input="block-name:follow-group-box; postfix:groups; title:Following groups; follow_type:groups" style="float:right; margin-left:7px; margin-top:-3px; font-size:14px; font-weight: 300; padding:3px; color:#FFFFFF; text-decoration: underline; cursor: pointer;">
+              <div class="green-button-bg"></div>
+              Following Groups
+            </block>              
+          </div>                     
+          <div class="clearer"></div>
+        </div>
+
+        <div class="trans-panel rounded-5" style="margin-top:17px; display:none;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">My Labs</div>
+          <div style="padding:17px;">
+            <div id="my-labs-statistics" packerinput="block-name:my-lab-statistics;">
+              <block name="my-lab-statistics" defonly="1" transition="page" style="float:left; width:50%; padding-top:10px; padding-bottom:10px;">
+                <div style="float:left;">
+                  {IF cover_image}
+                    <img src="{cover_image}" style="max-width:35px; max-height:35px; width:auto; height:auto"></img>
+                  {ELSE}
+                    <img src="{thumbnail}" style="max-width:35px; max-height:35px; width:auto; height:auto"></img>
+                  {ENDIF}
+                </div>
+                <div style="float:left; padding-left:22px;">
+                  <div style="color: #ABE0FE; font-weight: bolder; text-decoration: underline">
+                    <div>{title}</div>
+                  </div>
+                  <div style="padding-top: 11px;">
+                    <div>
+                      Number of your votes : &nbsp;
+                      <span style="font-size:13px; font-weight:bolder; color:#FEC942">{my_votes}</span>&nbsp;
+                    </div>
+                    <div>
+                      Designs you submitted : &nbsp;
+                      <span style="font-size:13px; font-weight:bolder; color:#FEC942">{my_designs}</span>&nbsp;
+                    </div>
+                  </div>
+                </div>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </block>
+    </div>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="ten-tools-tracker-block">
+  <div class="trans-panel rounded-10 trans-panel-bg-white-bordered2" style="float:center; display:block; margin-top: 11px;">
+    <div class="trans-panel-bg2 rounded-10 "></div>
+    <div class="ten_tools_tracker_wrapper">
+      <div id="status_tracker_header" class="font-gothic" style="padding-top:0px; text-align:center; float:center; text-transform:capitalize; font-size:30px;font-weight:bold;margin-bottom:25px;">
+        {IF is_lab_member}
+          {IF is_press_corps}
+            Continue the puzzle progression
+          {ELSE}
+            {IF is_lab_member_legacy}
+              Try out the puzzle progression
+            {ELSE}
+              Congratulations! You've earned lab access.
+            {ENDIF}
+          {ENDIF}
+        {ELSE}
+          Earn 10 tools to start real experiments
+        {ENDIF}
+      </div>
+      <div id="status_thumbnail_0" class="deactive_thumbnail"></div>
+      <div id="status_bar_1" class="long_progress_bar"></div>
+      <div id="status_thumbnail_1" class="deactive_thumbnail">1</div>
+      <div id="status_bar_2" class="long_progress_bar"></div>
+      <div id="status_thumbnail_2" class="deactive_thumbnail">2</div>
+      <div id="status_bar_3" class="long_progress_bar"></div>
+      <div id="status_thumbnail_3" class="deactive_thumbnail">3</div>
+      <div id="status_bar_4" class="long_progress_bar"></div>
+      <div id="status_thumbnail_4" class="deactive_thumbnail">4</div>
+      <div id="status_bar_5" class="long_progress_bar"></div>
+      <div id="status_thumbnail_5" class="deactive_thumbnail">5</div>
+      <div id="status_bar_6" class="long_progress_bar"></div>
+      <div id="status_thumbnail_6" class="deactive_thumbnail">6</div>
+      <div id="status_bar_7" class="long_progress_bar"></div>
+      <div id="status_thumbnail_7" class="deactive_thumbnail">7</div>
+      <div id="status_bar_8" class="long_progress_bar"></div>
+      <div id="status_thumbnail_8" class="deactive_thumbnail">8</div>
+      <div id="status_bar_9" class="long_progress_bar"></div>
+      <div id="status_thumbnail_9" class="deactive_thumbnail">9</div>
+      <div id="status_bar_10" class="long_progress_bar"></div>
+      <div id="status_thumbnail_10"class="deactive_thumbnail">10</div>
+      <div class="clearer"></div>
+      <div class="clearer"></div>
+    </div>
+    <div class="fake-panel-7"></div>
+  </div>
+</block>
+
+<!-- merge with block above -->
+<block name="lab-member-panel-locked" class="trans-panel rounded-10" style="text-align:center; float:left; width:720px; height:375px; margin-bottom:30px;z-index:2;margin-top:20px;">
+  <div class="trans-panel-bg rounded-10"></div>
+
+  <block class="trans-panel" style="float:center; width:720px; height:60px;">
+    <div class="header rounded-10" style="text-align:center;"> 
+      <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:30px;">
+        Unlock Lab Access to Help Invent Medicine
+      </div>
+    </div>
+    <div class="clearer"></div>
+  </block>
+
+  <block class="trans-panel" style="float:left; margin: 40px; margin-right:20px; width:438px; height:226px;">
+    <div class="trans-panel-bg noborder"></div>
+    {IF hide_video}
+      <img src="/puzzle-progression/videos/openCRISPR_poster.png" style="width:438px; height: 246px; position: absolute; z-index: 2; left: 0px; bottom: 0px"></img>
+    {ELSE}
+      {IF jwplayer}
+        <block name="native-player-container-block" input="src:/puzzle-progression/videos/tb-clean-v1.mp4;image:/puzzle-progression/videos/tb_poster_img_v2.png;" style="width:438px; height: 246px; position: absolute; z-index: 2; left: 0px; bottom: 0px"></block>
+      {ELSE}
+        <block name="youtube-container-block" input="data_id:TdcyJkJx1yA;image:/puzzle-progression/videos/openTB_beyond_still.jpg;" style="width:438px; height: 246px; position: absolute; z-index: 2; left: 0px; bottom: 0px"></block>
+      {ENDIF}
+    {ENDIF}
+  </block>
+
+  <block class="trans-panel" style="float:left; margin-top: 20px; margin-left:10px; margin-right:40px; width:170px; height:128px;">
+    <img src="/puzzle-progression/badges/badge_lab_unlocked.png"
+         style="width:128px; height: 128px; left:50%; opacity:0.25;  filter:alpha(opacity=25);"></img>
+    <img src="/puzzle-progression/icons/icon_locked_white.png"
+         style="max-width:128px; max-height:128px; width:auto; height:auto; position:absolute; left:60px;top:32%;"></img>
+  </block>
+      
+  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 5px; width:222px; height:40px;">
+    <a id="" href="#" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;cursor:default;">
+      <div class="green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold; opacity:0.25; filter:alpha(opacity=25);">
+        <div class="rounded-5 green-button-bg"></div>
+        <div class="centered-button-text">
+          Enter Lab
+        </div>
+      </div>
+    </a>
+  </block>
+
+  <block class="trans-panel" style="float:left; margin-left: 0px; margin-top: 20px; width:222px; height:40px;">
+    <a href="#" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;cursor:default;">
+      <div class="blue-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold; opacity:0.25; filter:alpha(opacity=25);">
+        <div class="rounded-5 blue-button-bg"></div>
+        <div class="centered-button-text">
+          Explore Projects
+        </div>
+      </div>
+    </a>
+  </block>
+  <div class="clearer"></div>
+</block>
+
+<block name="daily-puzzle-panel" style="position:relative; width:720px; height:425px; margin-bottom:30px;">
+  <div class="trans-panel-bg rounded-10"></div>
+  <block class="trans-panel" style="float:center; width:720px; height:60px;">
+    <div class="header rounded-10" style="text-align:center;"> 
+      <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:30px;">
+        Eternacon 2016 Puzzle Solving Fun
+      </div>
+    </div>
+    <div class="clearer"></div>
+  </block>
+
+  <block id="daily-puzzle-deadline" builder="BuilderCountdown" style="position:absolute; font-size:18px; padding:11px; padding-bottom:27px; bottom:15px; left:calc(50% - 222px);">
+    Puzzle Solving Fun closes in:&nbsp;
+    <span id="countdown-clock" 
+          data-deadline="{countdown_deadline}"
+	        data-timezone="America/Los_Angeles">
+    </span>
+  </block>
+
+  <block class="trans-panel" style="float:left; margin: 20px; margin-left:40px; width:438px; height:246px;">
+    <div class="trans-panel rounded-5 box-glow-purple-5"
+	       style="position:relative; width:438px; height:246px; top:0px; left:calc(50% - 219px); z-index:0">
+        <div class="trans-panel-bg rounded-5; z-index:0"></div>
+        {IF hide_flash_potd}
+          <img src="https://s3.amazonaws.com/eterna/puzzle_mid_thumbnails/thumbnail6895404.png"
+	             style="position:relative; width:216px; height:216px; top:calc(50% - 108px); left:calc(50% - 108px);">
+          </img>
+       	{ELSE}
+          <embed flashvars="sequence=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&secstruct=.((((((.(((((((((((((((((((((((((((((((..(((..(((..((((((((((.((.(...(((.((..(((((.((.(((((...)))))).)))))).))).)).).).)))))..))..((((..(((((...))))).))))))))((((((....))..(((..((....))..))))))))))(((....))))))((((...))))))).((((((((...)))).((((...))))((....)).))))(((...))).))))))))))))))))))))))))))))(....).(((...)))))))))" src="/eterna_resources/EternaSplash3.swf" width="100%" height="100%" wmode="transparent"></embed>
+        {ENDIF}
+        </div>
+     </block>
+    
+     <block style="float:left; margin-top: 32px; margin-left:10px; margin-right:40px; width:164px; height:128px;" class="trans-panel">
+        <img src="/puzzle-progression/badges/badge_sp_potd.png"
+             style="position:relative; width:128px; height: 128px; left:calc(50% - 64px); top:calc(50% - 64px);">
+        </img>
+     </block>
+
+    <block class="trans-panel" style="float:left; margin-left: -6px; margin-top: 24px; width:222px; height:40px;">
+      <a id="start-daily-puzzle-link" href="/web/puzzle/7126413/" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+        <div class="green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+          <div class="rounded-5 green-button-bg"></div>
+          <div class="centered-button-text">
+            Solve Now
+          </div>
+        </div>
+      </a>
+    </block>
+</block>
+
+<block name="lab-training-panel" style="position:relative; width:720px; height:425px; margin-bottom:30px;">
+    <div class="trans-panel-bg rounded-10"></div>
+    <block class="trans-panel" style="float:center; width:720px; height:60px;">
+      <div class="header rounded-10" style="text-align:center;"> 
+        <div style="margin-top:8px; float:center; text-transform:capitalize; font-size:30px;">
+           Train for the lab: Switch Puzzles
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </block>
+
+    {IF skip_packer}
+      <div style="width:calc(50% - 50px); float:left; position:relative; margin-left:40px;">
+        <block style="float:left; margin-top: 32px; margin-left:10px; margin-right:40px; width:164px; height:128px;" class="trans-panel">
+          <img src="/puzzle-progression/badges/badge_sp_switch_1.png"
+               style="position:relative; width:128px; height: 128px; left:calc(50% - 64px); top:calc(50% - 64px);">
+          </img>
+        </block>
+
+        <block class="trans-panel" style="float:left; margin-left: -6px; margin-top: 24px; width:222px; height:40px;">
+          <a id="training-puzzle-link" href="/web/playerpuzzles/?size=24&search=2%20states&switch=checked&sort=date" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+            <div class="green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+              <div class="rounded-5 green-button-bg"></div>
+              <div class="centered-button-text">
+                2-State Switches
+              </div>
+            </div>
+          </a>
+        </block>
+      </div>
+
+      <div style="width:calc(50% - 50px); float:right; position:relative; margin-right:40px;">
+        
+        <block style="float:left; margin-top: 32px; margin-left:10px; margin-right:40px; width:164px; height:128px;" class="trans-panel">
+          <img src="/puzzle-progression/badges/badge_sp_switch_2.png"
+               style="position:relative; width:128px; height: 128px; left:calc(50% - 64px); top:calc(50% - 64px);">
+          </img>
+        </block>
+
+        <block class="trans-panel" style="float:left; margin-left: -6px; margin-top: 24px; width:222px; height:40px;">
+          <a id="training-puzzle-link" href="/web/playerpuzzles/?size=24&search=3%20states&switch=checked&sort=date" style="text-align:center; vertical-align: middle; line-height:40px; z-index: 2; text-decoration:none;">
+            <div class="green-button-interactive clickable rounded-5" style="position:absolute; left:15px; top:10px; width:160px; height:40px; font-size:18px;font-weight:bold;">
+              <div class="rounded-5 green-button-bg"></div>
+              <div class="centered-button-text">
+                3-State Switches
+              </div>
+            </div>
+          </a>
+        </block>
+      </div>
+    {ELSE}
+    	<div id="lab-training-roadmap-panel" class="trans-panel rounded-10" style="z-index:2;top:10px;left: 30px">
+	      <div class="centered achievement-roadmap" id="lab-training-roadmap" packerinput="block-name:mini-roadmap; type:cards; width:240px; min-columns:1; max-columns:3" style="padding: 0px 0px; width:680px; left:calc(50% - 360px);"></div>
+        <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;"></div>
+      </div>
+    {ENDIF}
+</block>

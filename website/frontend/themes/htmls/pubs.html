@@ -1,0 +1,165 @@
+
+
+
+<block name="researcher-pubs" url="/web/pubs/researcher/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:725px; min-height:1px;">
+
+    <block builder="BuilderResearcherPubsList">
+
+      <div class="trans-panel rounded-10" style="width:720px; z-index:1; margin-top: 0px;margin-bottom:27px;">
+        <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;">
+          <div style="padding-top:7px; float:left; text-transform:capitalize; font-size:30px;">
+            Researcher Publications
+          </div>
+          <div style="float:right;font-size:14px; margin-top:10px;">
+            <a style="text-decoration:none;" href="/web/pubs/">
+              <div class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; float: left; width: 170px; height: 26px; padding: 0 10px;">
+                <div class="rounded-5 blue-button-bg"></div>
+                <div class="centered-button-text">View Player Publications</div>
+              </div>
+            </a>
+          </div> 
+          <div class="clearer"></div>
+        </div>
+
+        <div id="researcherpubslist" packerinput="block-name:researcherpubsitem;">
+          <block defonly="1" name="researcherpubsitem" style="margin-bottom:10px;">
+            <div class="trans-panel rounded-5">
+              
+              <div class="trans-panel-bg rounded-5"></div>
+              
+
+              <div style="padding:15px; padding-bottom:15px; min-height:128px; line-height:1.5rem;">
+              
+                {IF preprint}
+                <div style="font-size:11px; font-weight:bold; line-height:1.2rem; color:#389CDC">PREPRINT</div>
+                {ENDIF}
+
+                {IF image}
+                <a target="_blank" href="{link}"><img src="{image}" style="float:left; padding-right:10px; padding-bottom:10px; text-align:top; width:210px; height:128px;">
+                </img></a>
+                {ENDIF}
+
+                <a onclick="" class="interactive-link" target="_blank" style="font-weight:bold; font-size:24px;" href="{link}">{title}</a> 
+                
+                <div style="font-size:15px; color:#c0dce7"><em>{journal}</em>&nbsp;- {pub_date}</div>
+                <div style="font-size:13px; line-height:1.2rem;">{authors}</div>
+
+                {IF review_link}
+                <div id="review" class="green-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; width: 170px; height: 26px; margin: 1rem 0;">
+                  <a target="_blank" style="text-decoration:none;" href="{review_link}">
+                    <div class="rounded-5 green-button-bg"></div>
+                    <div class="centered-button-text">REVIEW &amp; COMMENT</div>
+                  </a>
+                </div>
+                {ENDIF}
+
+                <div style="font-size:10px; line-height:1.2rem; margin-top:0.75rem;"><a onclick="" class="interactive-link" target="_blank" href="{link}">{link}</a></div>
+              </div>
+
+
+            </div>
+
+          </block>   
+          <div class="clearer"></div>
+        </div>    
+
+        <div class="clearer"></div> 
+        <div style="text-align:center; padding:17px" id="pager"></div>
+      </div>
+    </block>
+
+
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+
+
+
+<block name="player-pubs" url="/web/pubs/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:725px; min-height:1px;">
+
+    <block builder="BuilderPlayerPubsList">
+
+      <div class="trans-panel rounded-10" style="width:720px; z-index:1; margin-top: 0px;margin-bottom:27px;">
+        <div class="header rounded-10" style="text-align:center; border-width:0px 0px 0px 0px; margin-bottom:10px;">
+          <div style="padding-top:7px; float:left; text-transform:capitalize; font-size:30px;">
+            Player Publications
+          </div>
+
+          <div style="float:right;font-size:14px; margin-top:10px;">
+            <a style="text-decoration:none;" href="/web/pubs/researcher/">
+              <div class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; float: left; width: 210px; height: 26px; padding: 0 10px;">
+                <div class="rounded-5 blue-button-bg"></div>
+                <div class="centered-button-text">View Researcher Publications</div>
+              </div>
+            </a>
+          </div> 
+
+          <div class="clearer"></div>
+        </div>
+
+        <div class="trans-panel rounded-10" style="width:720px; z-index:1; margin: 0px 10px 27px 10px;">
+          <p>Over 60,000 Eterna players have contributed to scientific publications, including several players as lead authors. Have a new paper idea? Want to help us edit upcoming player papers? Please contact <a href="/web/player/57675/">Omei</a>.</p>
+
+        </div>
+
+        <div id="playerpubslist" packerinput="block-name:playerpubsitem;">
+          <block defonly="1" name="playerpubsitem" style="margin-bottom:10px;">
+            <div class="trans-panel rounded-5">
+              
+              <div class="trans-panel-bg rounded-5"></div>
+              
+              <div style="padding:15px; padding-bottom:15px; min-height:128px; line-height:1.5rem;">
+              
+                {IF preprint}
+                <div style="font-size:11px; font-weight:bold; line-height:1.2rem; color:#389CDC">PREPRINT</div>
+                {ENDIF}
+
+                {IF image}
+                <a target="_blank" href="{link}"><img src="{image}" style="float:left; padding-right:10px; padding-bottom:10px; text-align:top; width:210px; height:128px;">
+                </img></a>
+                {ENDIF}
+
+                <a onclick="" class="interactive-link" target="_blank" style="font-weight:bold; font-size:24px;" href="{link}">{title}</a> 
+                
+                <div style="font-size:15px; color:#c0dce7"><em>{journal}</em>&nbsp;- {pub_date}</div>
+                <div style="font-size:13px; line-height:1.2rem;">{authors}</div>
+
+                <div style="font-size:13px; line-height:1.3rem; margin-top:1.5rem;">{abstract}</div>
+
+                {IF review_link}
+                <div id="review" class="green-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; font-size: 14px; line-height:26px; width: 170px; height: 26px; margin: 1rem 0;">
+                  <a target="_blank" style="text-decoration:none;" href="{review_link}">
+                    <div class="rounded-5 green-button-bg"></div>
+                    <div class="centered-button-text">REVIEW &amp; COMMENT</div>
+                  </a>
+                </div>
+                {ENDIF}
+
+                <div style="font-size:10px; line-height:1.2rem; margin-top:1rem;"><a onclick="" class="interactive-link" target="_blank" href="{link}">{link}</a> | <a onclick="" class="interactive-link" target="_blank" href="{pdf_link}">PDF</a></div>
+
+              </div>
+
+            </div>
+            
+          </block>   
+          <div class="clearer"></div>
+        </div>    
+
+        <div class="clearer"></div> 
+        <div style="text-align:center; padding:17px" id="pager"></div>
+      </div>
+    </block>
+
+
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>

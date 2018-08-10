@@ -1,0 +1,321 @@
+<block url="/web/browse/{nid}/">
+  <block name="top-bar" input="nav_menu_horizontal:1" style="clear:both; margin-left:25px;"></block>
+  <div id="overlay" class="block-overlay" style="display:block; position:relative; margin:20% auto;">
+    <div class="center-block block-overlay-panelholder" id="overlay-panelholder">
+      <div style="display: block;">
+        <div class="overlay-panel"><div class="small-loading"></div></div>
+      </div>
+    </div>
+    <div class="clickable" id="overlay-close-layer" style="position: fixed; width: 100%; height: 100%; z-index: 0; right: 30px; bottom: 30px; display: none;"></div>
+  </div>
+  <block name="browser" builder="BuilderBrowser" input="nid:{nid};Designer:{Designer}" style="clear:both; position:absolute;left:10px; width:83%;">
+    <div style="clear:all; padding-left:25px; padding-right:25px; margin-right:0%; margin-left:0%;">
+      <div class="trans-panel rounded-5" style="width:120%;">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div id="lab-title" class="red-header" style="font-size:20px;">
+          <div style="float:left;margin:5px;">{lab_title}</div> 
+          <div>
+            <div class="blue-button clickable rounded-5" style="float:right; padding:5px 10px; font-size:12px; margin-left: 10px;">
+              <div class="blue-button-bg"></div>
+              <a href="/tsv/synthesis{nid}.tsv" target="_blank">Download SHAPE data</a>
+            </div>
+            <div class="green-button clickable centered rounded-5" id="adv-seq-search-button" style="float:right; padding: 5px 10px; margin-left: 10px;  font-size: 12px;">
+              <div class="purple-button-bg"></div>
+              <block tag="a" builder="BuilderPopOverlay" input="block-name:advanced-seq-search;" class="clickable">Advanced Search</block> 
+            </div>
+            <div class="green-button clickable centered rounded-5" id="seq-view-opt-button" style="float:right; padding: 5px 10px; font-size: 12px; margin-left: 10px;">
+              <div class="purple-button-bg"></div>
+              <block tag="a" builder="BuilderPopOverlay" input="block-name:sequence-view-options;" class="clickable">Sequence View options</block> 
+            </div>
+            <div class="purple-button clickable centered rounded-5" style="float:right; padding: 5px 10px; font-size: 12px;">
+              <div class="purple-button-bg"></div>
+              <block tag="a" builder="BuilderPopOverlay" input="block-name:col-sort-view-options;" class="clickable">Column Options</block> 
+            </div>                        
+            <div class="clearer"></div>        
+          </div>
+        </div>
+        <div style="padding-top:10px;padding-left:17px;display:none;">* You can vote <span class="group-contents-yellow">8</span>&nbsp;designs in this lab. You voted <span id="my-votes-panel" class="group-contents-yellow">{my_votes}&nbsp;</span>designs already.</div>
+        {IF is_founder}
+          <div style="padding-top:10px;padding-left:17px; display:none;">* You are an admin. You can pick <span class="group-contents-yellow">{num_slots}</span>&nbsp;designs for synthesis in this lab. You picked <span id="pick-sum-panel" class="group-contents-yellow">{pick_sum}&nbsp;</span>designs already.</div>
+        {ENDIF}
+        <div class="yellow-button clickable centered rounded-5" id="old-ui-button" style="float:right; padding: 5px; font-size: 12px; width: 100px; margin:3px 17px 3px 0px;">
+          <div class="yellow-button-bg"></div>
+          <a href="/game/browse/{nid}/" class="clickable">Old lab browser</a>
+        </div>
+        <div id="board" class="board"></div>
+      </div>
+    </div>
+  </block>
+</block>      
+
+<block url="/web/browse/view/{solid}/">
+  <block name="view-result" builder="BuilderViewResult">
+    {IF is_not_on_overlay}  
+    <block name="top-bar" style="margin-left:-30px;"></block>
+    {ENDIF}
+    {IF is_not_on_overlay}
+    <div class="trans-panel rounded-5" style="float:left; margin-left:-30px; width:750px;">
+    {ELSE}
+    <div class="trans-panel rounded-5" style="float:left; width:750px;">
+    {ENDIF}
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+        <div>
+          <span>{title}</span><span class="group-contents-white">&nbsp;&nbsp;by&nbsp;<a transition="page" href="/web/player/{uid}/">{name}</a></span>
+        </div>
+        <div style="float:right; margin-top:-22px;">
+          <div id="prev-solution" class="green-button clickable rounded-5 browse-arrow">prev</div>
+          <div id="next-solution" class="green-button clickable rounded-5 browse-arrow">next</div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+      
+      <div style="padding:22px;padding-top:7px;">
+        <div>       
+          <div id="get-design-url" class="clickable" style="float:left; margin-right:50px; color:#FEC942; text-decoration:underline; text-align: left; padding:7px; padding-bottom:15px;">Get URL for this design</div>
+          <div id="get-player-design-url" class="clickable" style="float:left; color:#FEC942; text-decoration:underline; text-align: left; padding:7px; padding-bottom:15px;">Get URL for all designs by this player</div>
+          <div class="clearer"></div>
+        </div>
+        {IF is_failed_synthesize}
+          <div style="text-align:left; padding:7px; padding-bottom:17px;">[FAILED!] This design was failed to synthesize </div>
+        {ELSE}
+          {IF synthesized}
+          <div style="text-align: left; padding:7px;">[SYNTHESIZED!]</div>
+            {IF score}
+              <div style="text-align:left; padding:7px; padding-bottom:17px;">This design was synthesized with score {score} / 100</div>
+            {ENDIF}
+          {ENDIF}
+        {ENDIF}
+        {IF additional_results_url}
+          <div style="text-align:left; padding-left:7px; padding-bottom:17px;"><a href="{additional_results_url}" target="_blank">Additional Results Data</a></div>
+        {ENDIF}
+        <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Design Description</div>
+          <div style="text-align: left; padding:17px;">{body}</div>
+        </div>
+        <div style="padding:10px;"></div>
+        <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Target Shape</div>
+          <div id="secstructures"></div>
+          <div id="view-and-copy" class="green-button clickable centered rounded-5" style="float:left;padding:5px;margin:0px 90px 15px 90px;font-size:17px;width:150px;">
+            <div class="green-button-bg"></div><a href="/game/solution/{puznid}/{nid}/copyandview/" target="_blank">See Result</a>
+          </div>
+          {IF synthesized}
+            {IF score}
+            <div id="see-result" class="green-button clickable centered rounded-5" style="float:left;padding:5px;margin:0px 90px 15px 90px;font-size:17px;width:150px;">
+              <div class="green-button-bg"></div><a href="/game/solution/{puznid}/{nid}/seeresult/" target="_blank">See Result</a>
+            </div>
+            {ENDIF}
+          {ENDIF}
+          <div class="clearer"></div>
+        </div>
+        <div style="padding:10px;"></div>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Comments</div>
+          <block name="comments" style="padding:11px;"></block>
+        </div>
+        <div class="clearer"></div>
+        {IF synthesized}
+        {ELSE}
+          {IF is_curr_round}
+            {IF selected_by_admin}
+              {IF is_founder}
+              <div id="pick" class="green-button clickable centered rounded-5" style="float:left; padding: 5px; margin:15px; margin-left:0px; font-size: 17px; width: 75px;">
+                <div class="green-button-bg"></div>Pick
+              </div>
+              <div id="unpick" class="green-button clickable centered rounded-5" style="float:left; padding: 5px; margin:15px; margin-left:0px; font-size: 17px; width: 75px;">
+                <div class="green-button-bg"></div>Unpick
+              </div>
+              {ENDIF}
+              <div id="pick-loading" class="small-loading" style="float:left;margin:20px; margin-right:40px; display:none"></div>              
+            {ELSE}
+              <div id="vote" class="green-button clickable centered rounded-5" style="float:left; padding: 5px; margin:15px; margin-left:0px; font-size: 17px; width: 75px;">
+                <div class="green-button-bg"></div>Vote
+              </div>
+              <div id="unvote" class="green-button clickable centered rounded-5" style="float:left; padding: 5px; margin:15px; margin-left:0px; font-size: 17px; width: 75px;">
+                <div class="green-button-bg"></div>Unvote
+              </div>
+              <div id="vote-loading" class="small-loading" style="float:left;margin:20px; margin-right:40px; display:none"></div>          
+            {ENDIF}
+          {ENDIF}
+        {ENDIF}
+      </div>
+    </div>
+  {IF is_not_on_overlay}
+  <block name="side-bar"></block>
+  {ENDIF}     
+  </block>
+</block>
+
+
+
+<block name="advanced-seq-search" builder="BuilderAdvancedSeqSearch">
+  <div id="_self" class="trans-panel" style="width:375px; margin-top:150px;">
+    <div class="trans-panel-bg"></div>
+    <div class="green-header">
+      Advanced Sequence Search
+    </div>
+    <div style="margin:17px;">
+      <span class="advanced-seq-search-query-title">Start Base</span>
+      <span>Type<input type="text" id="type-1" class="advacned-seq-search-type"></input></span>
+      <span>Location<input type="text" id="loc-1" class="advacned-seq-search-location"></input></span>
+    </div>
+    <div style="margin:17px;">
+      <span class="advanced-seq-search-query-title">End Base</span>
+      <span>Type<input type="text" id="type-2" class="advacned-seq-search-type"></input></span>
+      <span>Location<input type="text" id="loc-2" class="advacned-seq-search-location"></input></span>
+    </div>
+    <div class="green-button clickable centered rounded-5" id="advanced-seq-search-button">
+      <div class="green-button-bg"></div>
+      Search
+    </div>
+    <div class="fake-panel-7"></div>
+  </div>
+</block>
+
+<block name="col-sort-view-options"  builder="BuilderColumnOptions">
+  <div id="_self" class="trans-panel rounded-5" style="clear:both; width:760px;">
+    <div class="trans-panel-bg"></div>
+    <div class="yellow-header">
+      Column Sort&View Options
+    </div>
+    <div class="trans-panel rounded-5 col-options-panel">
+      <div class="trans-panel-bg"></div>
+      <div class="green-header">Displayed Info</div>
+      <div>
+        <ul id="displayed-info" class="ui-sortable col-option-holder" style=""></ul>
+      </div>
+    </div>
+    <div class="col-change-arrows">
+      <div class="col-change-description centered">Hide</div><div class="clickable" id="remove-col-arrow"></div>
+      <div class="clickable" id="add-col-arrow"></div><div class="col-change-description centered">Show </div>
+    </div>
+    <div class="trans-panel rounded-5 col-options-panel">
+      <div class="trans-panel-bg"></div>
+      <div class="green-header">Types of displayed info</div>
+      <ul id="types-of-displayed-info" class="ui-sortable col-option-holder" style="">
+        <li class="clickable gray-button centered rounded-5 type-of-displayed-info" id="col-opt-0">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Designer</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-0">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-1">         
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Title</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-1">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-2">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Sequence</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-2">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-3">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">ID</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-3">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-4">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Vote</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-4">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-5">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">My Vote</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-5">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-6">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Description</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-6">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-7">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Round</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-7">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-8">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">GC pairs</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-8">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-9">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">UA pairs</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-9">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-10">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">GU pairs</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-10">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-11">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Melting Point</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-11">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-12">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Free Energy</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-12">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-13">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Synthesized</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-13">none</div>
+        </li>
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-14">
+          <div class="gray-button-bg"></div>
+          <div class="column-title">Score</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-14">none</div>
+        </li>          
+        <li class="gray-button centered rounded-5 clickable type-of-displayed-info" id="col-opt-15">          
+          <div class="grey-button-bg"></div>
+          <div class="column-title">Shape Threshold</div>
+          <div class="col-sort-opt rounded-small" id="col-sort-opt-15">none</div>
+        </li>
+      </ul>
+    </div>
+    <div class="clearer"></div>
+    <div class="green-button clickable centered rounded-5" id="cols-reset-button" style="display:none;">
+      <div class="green-button-bg"></div>Reset
+    </div>
+    <div class="green-button clickable centered rounded-5" id="cols-set-button">
+      <div class="green-button-bg"></div>Set
+    </div>
+    <div class="clearer"></div>
+    <div class="fake-panel-7"></div>
+  </div>
+</block>
+
+<block name="sequence-view-options" builder="BuilderSeqViewOptions">
+  <div id="_self" class="trans-panel rounded-5" style="margin-top:150px;">
+    <div class="trans-panel-bg"></div>
+    <div class="yellow-header">
+      Sequence Coloring
+    </div>
+    <div>
+      <div class="seq-view-option"><input type="radio" id="seq-view-option-0" name="sequence-view-option-buttons" class="seq-view-option-button" value=0></input>Base Coloring<div class="sequence-view-option-image"><img width=110 height=115 src="https://s3.amazonaws.com/eterna/eterna2/browser/image-1.png"></img></div></div>
+      <div class="seq-view-option"><input type="radio" id="seq-view-option-1" name="sequence-view-option-buttons" class="seq-view-option-button" value=1></input>Continuous Shape<div class="sequence-view-option-image"><img width=110 height=115 src="https://s3.amazonaws.com/eterna/eterna2/browser/image-2.png"></img></div></div>
+      <div class="seq-view-option"><input type="radio" id="seq-view-option-2" name="sequence-view-option-buttons" class="seq-view-option-button" value=2></input>Discrete Shape<div class="sequence-view-option-image"><img width=110 height=115 src="https://s3.amazonaws.com/eterna/eterna2/browser/image-3.png"></img></div></div>
+      <div class="seq-view-option"><input type="radio" id="seq-view-option-3" name="sequence-view-option-buttons" class="seq-view-option-button" value=3></input>Shape with Error<div class="sequence-view-option-image"><img width=110 height=115 src="https://s3.amazonaws.com/eterna/eterna2/browser/image-4.png"></img></div></div>
+      <div class="seq-view-option"><input type="radio" id="seq-view-option-4" name="sequence-view-option-buttons" class="seq-view-option-button" value=4></input>Shape as background<div class="sequence-view-option-image"><img width=110 height=115 src="https://s3.amazonaws.com/eterna/eterna2/browser/image-5.png"></img></div></div>
+    </div>
+    <div class="clearer"></div>
+    <div class="yellow-header">
+      Background Coloring
+    </div>
+    <div>
+      <div class="bg-coloring-option-title"><input type="radio" name="bg-coloring-option-buttons" class="seq-view-option-button" value=1></input>On (Default)</div>
+      <div class="bg-coloring-option-title"><input type="radio" name="bg-coloring-option-buttons" class="seq-view-option-button" value=0></input>Off</div>
+    </div>
+    <div class="green-button clickable centered rounded-5" id="seq-view-options-button" style="margin-top: 20px; margin-bottom: 10px; padding: 5px; font-size: 17px; width: 125px;">
+      <div class="green-button-bg"></div>
+      Set
+    </div>
+    <div class="fake-panel-7"></div>
+  </div>
+</block>

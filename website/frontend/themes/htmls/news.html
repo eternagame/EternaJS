@@ -1,0 +1,81 @@
+<block url="/web/news/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+    <block builder="BuilderNewsList">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left;">News</div>
+          <div style="float:right" class="news-search"><input id="search" placeholder="search" class="input news-search-input" style="width:100%;"></input></div>
+          <div class="clearer"></div>
+        </div>
+        <div id="newslist" class="news-list" packerinput="block-name:newsitem;">
+          <block defonly="true" name="newsitem" style="padding-top:17px">
+            <div style="float:left">
+              <img src="https://s3.amazonaws.com/eterna/eterna2/newsfeed-news.png"></img>
+            </div>
+            <div style="float:left; padding-left:22px; width:500px;">
+              <div style="color:#ABE0FE; text-decoration:underline">
+                {IF sticky}
+                  <a transition="page" style="font-weight:bolder;" href="/web/news/{nid}/">{title}</a>
+                {ELSE}
+                  <a transition="page" href="/web/news/{nid}/">{title}</a>              
+                {ENDIF}
+              </div>
+            </div>
+            <div style="clear:both; padding-left:50px; padding-top:3px;">
+              {body}
+            </div>
+            <div style="clear:both; padding-top:7px; padding-left:50px; font-size:10px;">
+              {created}
+            </div>
+            <div class="clearer"></div>
+          </block>                  
+        </div> 
+      </div>
+      <div style="text-align:center; padding-top:17px" id="pager"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+
+<block url="/web/news/{nid}/">
+  {IF is_on_overlay}
+    <block name="news-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">  
+      <block name="news-page" input="nid:{nid}" builder="BuilderNewsPage">
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            {title}&nbsp;&nbsp;
+            <span style="font-size:12px">{created}</span>
+            <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+              <div class="green-button-bg rounded-5"></div>
+              Unfollow
+            </div>
+            <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+              <div class="green-button-bg rounded-5"></div>
+              Follow
+            </div>
+          </div>
+           <div style="padding:17px; text-align:left;"> 
+            {body}
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Comments</div>
+          <block name="comments" style="padding:11px; padding-top:17px;"></block>
+        </div>
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+  {ENDIF}
+</block>

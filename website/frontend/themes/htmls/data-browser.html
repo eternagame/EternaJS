@@ -1,0 +1,42 @@
+<block url="/web/labs/data-browser/">
+  <block id="top-bar" name="data-browser-top-bar"></block>
+  <block id="data-browser" name="data-browser" style="clear:both; position:absolute; width:100%;"></block>
+</block>
+
+<block name="data-browser" builder="BuilderDataBrowser">
+  <iframe id="data-browser-iframe"
+	  frameborder="0" 
+	  style="width:100%; height:100%"
+          src="/lab/data-browser.html">
+  </iframe>
+</block>
+
+
+
+<block name="data-browser-nav-menu" style="position:relative; z-index:10; margin-top:0px;">
+  <div class="trans-panel rounded-5">
+    <div class="trans-panel-bg rounded-5"></div>
+    <ul id="HDropdown-orange-classic">
+      <li>
+	<a style="font-weight: bold;" href="/web/">Home</a>
+
+      </li>
+      <li>
+	<a style="font-weight: bold;"
+	     href="https://docs.google.com/document/d/1zpScAHfh2I8ody_qnOqMY2GJ-amYPh1WlBN2JrxB5GE/edit#"
+	     target="_blank">Documentation</a>
+      </li>
+    </ul>
+  </div>
+</block>
+
+
+
+<block name="data-browser-top-bar" builder="BuilderTopBar"
+       style="padding-top:20px; height:75px; background-image:url(https://s3.amazonaws.com/eterna/eterna2/bg_rna.png); background-repeat:no-repeat; background-position:right -70px;width:100%;z-index:2;position:absolute;top:-110px;margin-left:0px;border-bottom: 3px solid #DDD">
+  <div id="top-bar-container" style="position:relative; width:980px;left:calc(50% - 490px);">
+    <block name="data-browser-nav-menu" style="clear:both; float:right; padding-right:10px;"></block>
+    <block name="logo" input="use_tb_logo:1" style="float:left;left:10px;margin-top:-10px;"></block>
+    <div class="clearer"></div>
+  </div>
+</block>

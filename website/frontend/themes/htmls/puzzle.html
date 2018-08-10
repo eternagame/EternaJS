@@ -1,0 +1,535 @@
+<block name="puzzle" builder="BuilderPuzzle">
+  <div class="block-puzzle-main trans-panel rounded-5 gradientBoxesWithOuterShadows" style="width:204px; height:204px;  padding:11px; margin-right:10px; margin-top:11px;">
+    <div class="trans-panel-bg-bright rounded-5"></div>
+    <div style="font-weight:normal; font-size:15px; width:150px">{title}</div>
+    <div style="padding-top:5px;">
+      <img style="font-size:13px; position:relative; width:14px; height:14px; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/small-people.png"></img>&nbsp;
+      {num_cleared}&nbsp;&nbsp;
+      <img style="font-size:13px; position:relative; width:16px; height:16px; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+      {reward}
+    </div>
+    <div class="centered" style="margin-top:5px;padding-left:5px;">
+    <img style="max-width:165px; max-height:135px; width:auto; height:auto;" src="{thumbnail}"></img>  
+    {IF cleared}
+      <img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" style="position:absolute; top:11px; right:11px;"></img>
+    {ENDIF}
+    </div>
+    
+    <div class="block-puzzle-overlay trans-panel-overlay rounded-5">    
+      {IF play_direct}
+      <a href="/game/puzzle/{id}/" style="text-decoration:none;">
+        <div class="clickable green-button rounded-5" style="font-size:15px; margin-left:57px; margin-top:90px; width:90px; padding:10px">
+          <div class="green-button-bg rounded-5"></div>
+          Play Now
+	</div>
+      </a>
+      {ELSE}
+      <a href="/web/puzzle/{id}/" style="text-decoration:none;">
+        <div class="clickable green-button rounded-5" style="font-size:15px; margin-left:57px; margin-top:90px; width:90px; padding:10px">
+          <div class="green-button-bg rounded-5"></div>
+	  Play Puzzle
+        </div>
+      </a>
+      {ENDIF}
+    </div>
+
+    {IF username}
+      <div style="position:absolute; bottom:60px; right:10px; font-size:13px; text-align:center; white-space:nowrap">
+        <img style="position:relative; max-width:10px; max-height:13px; width:auto; height:auto;" src="{userpicture}"></img>&nbsp;
+        <span>{username}</span>
+      </div>
+    {ENDIF}
+    
+    {IF is_player_puzzle}
+      <div style="position:absolute; top:180px; left:0px; z-index:1; height:75px; width:100%;">
+        {IF solved_by_vienna}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_solved.png" style="position:absolute; left:15px; top:0px;"></img>
+        {ENDIF}
+        {IF failed_by_vienna}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_failed.png" style="position:absolute; left:15px; top:0px;"></img>
+        {ENDIF}
+        {IF solved_by_rnassd}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_solved.png" style="position:absolute; left:80px; top:0px;"></img>
+        {ENDIF}
+        {IF failed_by_rnassd}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_failed.png" style="position:absolute; left:80px; top:0px;"></img>
+        {ENDIF}
+        {IF solved_by_inforna}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_solved.png" style="position:absolute; left:145px; top:0px;"></img>
+        {ENDIF}
+        {IF failed_by_inforna}
+          <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_failed.png" style="position:absolute; left:145px; top:0px;"></img>
+        {ENDIF}     
+      </div>
+    {ENDIF}
+  </div>
+</block>
+
+<block url="/web/tutorials/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">  
+    <block class="trans-panel rounded-5" builder="BuilderPuzzles" input="type:tutorials">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+        <div style="float:left">Tutorials</div>
+        <div class="clearer"></div>
+      </div>
+      <div id="puzzles" style="padding-left:11px" packerinput="type:float; block-name:puzzle"></div>
+      <div class="clearer" style="padding-top:11px"></div>
+    </block>
+    <div class="clearer" style="padding-top:11px"></div>
+    <block class="trans-panel rounded-5" builder="BuilderPuzzles" input="type:switch-tutorials">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+        <div style="float:left">Switch Tutorials</div>
+        <div class="clearer"></div>
+      </div>
+      <div id="puzzles" style="padding-left:11px" packerinput="type:float; block-name:puzzle"></div>
+      <div class="clearer" style="padding-top:11px"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>  
+  </div>
+</block>
+
+<block url="/web/progression/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+    <block class="trans-panel rounded-5" builder="BuilderPuzzles" input="type:progression">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+	<div style="float:left">Progression</div>
+	<div class="clearer"></div>
+      </div>
+      <div id="puzzles" style="padding-left:11px" packerinput="type:float; block-name:puzzle"></div>
+      <div class="clearer" style="padding-top:11px"></div>
+    </block>
+    <div class="clearer" style="padding-top:11px"></div>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/challenges/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">
+    <block builder="BuilderPuzzles" input="type:challenges">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div>
+            <div style="float:left; margin-top:5px;">Challenges</div>
+            <a href="/web/playerpuzzles/">
+  	      <div class="green-button clickable rounded-5" style="float:left; margin-left:15px; padding-left:10px; padding-top:3px; padding-right:10px; height:20px; font-size:12px; line-height: 23px;">
+                <div class="green-button-bg"></div>
+                Go To Player Puzzles
+              </div>
+	    </a>
+          </div>
+          <div style="float:right;">     
+            <div style="font-size:11px; padding-top:6px; margin-right:0px;">
+              sort by&nbsp;
+              {IF sort == "date"}
+                <i><a style="text-decoration:underline" href="{date_sort_url}">Post date</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{date_sort_url}">Post date</a>
+              {ENDIF}&nbsp;
+              {IF sort == "solved"}
+                <i><a style="text-decoration:underline" href="{solved_sort_url}">Number of people cleared</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{solved_sort_url}">Number of people cleared</a>
+              {ENDIF}&nbsp;
+              {IF sort == "reward"}
+                <i><a style="text-decoration:underline" href="{reward_sort_url}">Reward</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{reward_sort_url}">Reward</a>
+              {ENDIF}&nbsp;
+              {IF sort == "length"}
+                <i><a style="text-decoration:underline" href="{length_sort_url}">Length</a></i>
+              {ELSE}
+                <a style="text-decoration:underline" href="{length_sort_url}">Length</a>
+              {ENDIF}&nbsp;
+            </div>
+            <div style="float:right; margin-top:10px; font-size:11px;">
+              <input type="checkbox" style="width:11px;vertical-align: middle;" id="single"></input>&nbsp;Single only&nbsp;&nbsp;
+              <input type="checkbox" style="width:11px;vertical-align: middle;" id="switch"></input>&nbsp;Switch only&nbsp;&nbsp;
+              <input type="checkbox" id="notcleared" style="width:11px;vertical-align: middle;"></input>&nbsp;Uncleared&nbsp;&nbsp;
+			        <input type="text" placeholder="search" id="search" style="width:100px"></input>
+			      </div>
+		      </div>
+          <div class="clearer"></div>
+        </div>
+        <div id="puzzles" style="padding-left:11px;"; packerinput="block-name:puzzle; type:float;"></div>
+        <div class="clearer" style="padding-top:11px;"></div>
+      </div>
+      <div style="text-align:center; padding-top:17px" id="pager"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>  
+  </div>
+</block>
+
+<block url="/web/playerpuzzles/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">  
+    <block builder="BuilderPuzzles" input="type:playerpuzzles">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="padding-top:3px; float:left">Player Puzzles</div>  
+          <a href="/web/challenges/">
+	    <div class="green-button clickable rounded-5" style="float:left; margin-left:15px; padding-left:10px; padding-top:3px; padding-right:10px; height:20px; font-size:12px; line-height: 23px;">
+              <div class="green-button-bg"></div>
+              Go To Challenges
+            </div>
+          </a>
+          <div style="float:right; font-size:11px;">
+            sort by&nbsp;&nbsp;
+            {IF sort == "date"}
+              <i><a style="text-decoration:underline" href="{date_sort_url}">Post date</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{date_sort_url}">Post date</a>
+            {ENDIF}&nbsp;
+            {IF sort == "solved"}
+              <i><a style="text-decoration:underline" href="{solved_sort_url}">Number of people cleared</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{solved_sort_url}">Number of people cleared</a>
+            {ENDIF}&nbsp;
+            {IF sort == "reward"}
+              <i><a style="text-decoration:underline" href="{reward_sort_url}">Reward</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{reward_sort_url}">Reward</a>
+            {ENDIF}&nbsp;
+            {IF sort == "length"}
+              <i><a style="text-decoration:underline" href="{length_sort_url}">Length</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{length_sort_url}">Length</a>
+            {ENDIF}&nbsp;
+          </div>
+          <div style="float:right;font-size:11px; margin-top:11px;">
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="single"></input>&nbsp;Single only&nbsp;&nbsp;
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="switch"></input>&nbsp;Switch only&nbsp;&nbsp;
+
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="vienna"></input>&nbsp;Vienna&nbsp;&nbsp;
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="rnassd"></input>&nbsp;Rnassd&nbsp;&nbsp;
+            <input type="checkbox" style="width:11px;vertical-align: middle;" id="inforna"></input>&nbsp;Inforna&nbsp;&nbsp;
+            <input type="checkbox" id="notcleared" style="width:11px;vertical-align: middle;"></input>&nbsp;Uncleared&nbsp;&nbsp;
+            <input type="text" placeholder="Search Puzzles" id="search" style="width:100px;text-align:center;"></input>
+          </div>          
+          <div class="clearer"></div>
+        </div>
+        {IF puzzle_creatable}
+          <div style="padding-top:11px; width:710px;" class="centered">
+            <a href="/game/puzzlemaker/">
+	      <div class="green-button clickable" style=" padding:7px; font-size:13px; float:left;">
+                <div class="green-button-bg"></div>
+                Create Puzzle
+              </div>
+            </a>
+            <a href="/game/switchmaker/2/">
+              <div class="green-button clickable" style=" padding:7px; font-size:13px; margin-left:7px; float:left;">
+                <div class="green-button-bg"></div>
+                Create Switch [2 states]
+              </div>
+            </a>
+	    <a href="/game/switchmaker/3/">
+              <div class="green-button clickable" style=" padding:7px; font-size:13px; margin-left:7px; float:left;">
+                <div class="green-button-bg"></div>
+                Create Switch [3 states]
+              </div>
+	    </a>
+            <div class="clearer"></div> 
+          </div>
+        {ELSE}
+          <div style="padding-top:11px;">
+            <div class="gray-button centered" style=" padding:7px; font-size:14px; width:350px;">
+              <div class="gray-button-bg"></div>
+              Gather 20,000 points to create puzzles
+            </div>
+            <div class="clearer"></div>
+          </div>        
+        {ENDIF}
+        <div id="puzzles" style="padding-left:11px" packerinput="block-name:puzzle; type:float;"></div>
+        <div class="clearer" style="padding-top:11px"></div>
+      </div>
+      <div style="text-align:center; padding-top:17px" id="pager"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>  
+  </div>
+</block>
+
+<block url="/web/puzzle/{nid}/">
+  {IF is_on_overlay}
+    <block name="puzzle-page" style="width:720px;"></block>
+  {ELSE}
+  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">  
+      <block name="puzzle-page" input="nid:{nid}" builder="BuilderPuzzlePage">
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            {title}&nbsp;&nbsp;
+            {IF cleared}
+              <img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" style="width:21px; height:21px; position:relative; top:4px;"></img>
+              <!--&nbsp; [Cleared!]-->
+            {ENDIF}
+            {IF can_modify}  
+            <a id="tutorial-link" href="/game/tuttest/?pid={nid}">
+              <div id="tutorials" class="clickable red-button rounded-5 centered" style="float:right; font-size: 12px; width: 80px; padding: 3px">
+                <div class="red-button-bg rounded-5"></div>
+                Tutorial
+              </div>
+            </a>
+
+            <a href="/web/puzzle/{nid}/edit/">
+              <div class="clickable green-button rounded-5 centered" style="float:right;font-size: 12px; width: 80px; padding: 3px">
+              <div class="green-button-bg rounded-5"></div>
+                Edit
+              </div>
+            </a>
+            {ENDIF}
+            <div id="unfollow_puzzle" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+            </div>
+            <div id="follow_puzzle" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+            </div>
+
+            <div id="create_image" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+              <div class="green-button-bg rounded-5"></div>
+              Image
+            </div>
+            {IF cleared}
+              <div id="run_script" class="clickable green-button rounded-5 centered" style="float:right; font-size: 12px; width: 85px; padding: 3px; margin-right:5px; display:none;">
+              <div class="green-button-bg rounded-5"></div>
+                Run Scripts
+              </div>
+            {ENDIF}
+          </div>
+          <div style="padding:11px;">
+            <div class="block-puzzle-main trans-panel rounded-5" style="padding:11px; float:left;">
+              <div class="trans-panel-bg-bright rounded-5"></div>
+              <img src="{thumbnail}"></img>
+              <div style="float:right; padding-left:22px;">
+              <div>
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/small-people.png"></img>&nbsp;
+                <strong>{num_cleared}</strong>&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <strong>{reward}</strong>
+                {IF created}
+                  &nbsp;&nbsp;&nbsp;<strong>{created}</strong>
+                {ENDIF}
+              </div>
+              {IF is_player_puzzle}
+                <div style="padding-top:7px">
+                  <div style="white-space:nowrap">
+                    <img style="position:relative; top:5px; max-width:20px; max-height:20px; width:auto; height:auto" src="{userpicture}"></img>&nbsp;
+                    <span>{username}</span>
+                  </div>
+                  
+                  <div style="position:relative; margin-top:11px;">
+                    {IF solved_by_vienna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_solved.png" style="position:absolute; left:0px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_vienna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_failed.png" style="position:absolute; left:0px; top:0px;"></img>
+                    {ENDIF}
+                    {IF solved_by_rnassd}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_solved.png" style="position:absolute; left:65px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_rnassd}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_failed.png" style="position:absolute; left:65px; top:0px;"></img>
+                    {ENDIF}
+                    {IF solved_by_inforna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_solved.png" style="position:absolute; left:130px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_inforna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_failed.png" style="position:absolute; left:130px; top:0px;"></img>
+                    {ENDIF}
+                  </div>
+                </div>
+              {ENDIF}
+            </div>
+            </div>
+            <div style="float:right; margin-top:80px;">
+	      <a href="/game/puzzle/{nid}/" style="text-decoration:none;">
+                <div class="clickable green-button rounded-5 centered" style="font-size:35px; width:180px; height:45px; padding:10px">
+                  <div class="green-button-bg rounded-5"></div>
+                  <div id="citylights"><h1>Play Now</h1></div>
+                </div>
+              </a>
+            </div>            
+            <div class="clearer"></div>          
+          </div>
+        </div>
+        
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Puzzle Description</div>
+          <div class="puzzle-description"> 
+            {body}
+          </div> 
+        </div>
+          
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Structure Notation</div>
+          <div id="structure_notation" class="puzzle-description">
+          <block defonly="1" id="notation" name="notation">{secstruct}</block>
+          </div> 
+        </div>
+  
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Comments</div>
+          <block name="comments" style="padding:11px; padding-top:17px;"></block>
+        </div>
+
+      </block>
+ 
+    </div>
+    <block name="side-bar"></block>
+    </div>
+  {ENDIF}
+</block>
+
+
+<block url="/web/puzzle/{nid}/edit/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">  
+    <block name="puzzle-page-edit" input="nid:{nid}" builder="BuilderPuzzlePageEdit">
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            <input id="title" type="text" value="{title}" style="width:95%;"></input>
+            {IF cleared}
+              <img src="https://s3.amazonaws.com/eterna/eterna2/cleared.png" style="width:21px; height:21px; position:relative; top:4px;"></img>
+              &nbsp; [Cleared!]
+            {ENDIF}
+          </div>
+          <div style="padding:11px;">
+            <div class="block-puzzle-main trans-panel rounded-5" style="padding:11px; float:left;">
+              <div class="trans-panel-bg-bright rounded-5"></div>
+              <img src="{thumbnail}"></img>
+              <div style="float:right; padding-left:22px;">
+              <div>
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/small-people.png"></img>&nbsp;
+                <strong>{num_cleared}</strong>&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <strong>{reward}</strong>
+                {IF created}
+                  &nbsp;&nbsp;&nbsp;<strong>{created}</strong>
+                {ENDIF}
+              </div>
+              {IF is_player_puzzle}
+                <div style="padding-top:7px">
+                  <div style="white-space:nowrap">
+                    <img style="position:relative; top:5px; max-width:20px; max-height:20px; width:auto; height:auto" src="{userpicture}"></img>&nbsp;
+                    <span>{username}</span>
+                  </div>
+                  
+                  <div style="position:relative; margin-top:11px;">
+                    {IF solved_by_vienna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_solved.png" style="position:absolute; left:0px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_vienna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/ViennaRNA_failed.png" style="position:absolute; left:0px; top:0px;"></img>
+                    {ENDIF}
+                    {IF solved_by_rnassd}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_solved.png" style="position:absolute; left:65px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_rnassd}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/RNASSD_failed.png" style="position:absolute; left:65px; top:0px;"></img>
+                    {ENDIF}
+                    {IF solved_by_inforna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_solved.png" style="position:absolute; left:130px; top:0px;"></img>
+                    {ENDIF}
+                    {IF failed_by_inforna}
+                      <img src="https://s3.amazonaws.com/eterna/icon_img/InfoRNA_failed.png" style="position:absolute; left:130px; top:0px;"></img>
+                    {ENDIF}
+                  </div>
+                </div>
+              {ENDIF}
+            </div>
+            </div>
+            <div class="clearer"></div>          
+          </div>
+        </div>
+        
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Puzzle Description</div>
+          <div class="puzzle-description"> 
+            <textarea id="description" style="width:100%; height:250px;">
+              {body}
+            </textarea>
+          </div> 
+        <div class="centered" style="padding:10px;">    
+          <div class="clickable green-button rounded-5 centered" style="font-size:35px; width:180px; height:45px; padding:10px">
+          <div class="green-button-bg rounded-5"></div>
+          <div id="citylights"><h1>Edit</h1></div>
+          </div>              
+        </div>
+        </div>
+
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">Structure Notation</div>
+          <div id="structure_notation" class="puzzle-description">
+          <block defonly="1" id="notation" name="notation">{secstruct}</block>
+          </div> 
+        </div>
+
+      </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+
+
+
+<block name="overlay-runscript" class="trans-panel rounded-5" builder="BuilderRunScriptOverlay">
+  <div id="runscript" style="width:700px;">
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="red-header">
+      Run Scripts
+    </div>
+    <div id="script_lists" style="margin-top:20px;">
+      <block name="script-lists-overlay" defonly="1">
+        <div style="padding:2px;">
+          <span style="display:inline-block;width:60px;">{id}</span>
+          <a href="/web/player/{uid}/" style="display:inline-block;width:80px;">{name}</a>
+          <a href="/web/script/{id}/" style="display:inline-block;width:300px; padding-left:25px;text-align:left;">{title}&nbsp;({commentcounts})</a>
+          <span id="{id}" class="green-button rounded-5 clickable" style="width:100px; margin-right:100px;">Run</span>
+        </div>
+      </block>
+    </div>
+    <div style="width:100%; text-align:center;"><img style="display: none; width:60%;" id="loading" src="https://s3.amazonaws.com/eterna/icon_img/loading_wh.gif"></img></div>
+    <div id="morescripts" class="clickable green-button rounded-5 centered" style="width:200px; margin-top:20px;">More</div>
+    <div style="text-align:center; padding-top:17px" id="pager"></div>
+    <div class="trans-panel-bg rounded-5"></div>
+    <div class="red-header">
+      Result
+    </div>
+    <div style="font-size:11px; margin:20px auto; width:80%;">
+      <div style="padding-bottom:10px; padding-left:0px;text-align:left;">
+        Timeout : <input type="text" value="10" id="timeout" style="width:50px; height:8px; vertical-align: middle;"></input>&nbsp;sec
+      </div> 
+      <textarea id="result" placeholder="Result" style="width:100%; height:200px;"></textarea>
+    </div>
+  </div>
+  <div style="height:0px;">
+    <object id="viennalib"></object>
+  </div>
+</block>

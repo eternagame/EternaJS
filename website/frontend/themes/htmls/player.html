@@ -1,0 +1,707 @@
+<block name="player" builder="BuilderPlayer" style="font-size:16px; padding-top:17px; padding-left:22px;">
+  <div style="float:left; width:60px; padding-top:7px;">#&nbsp;{rank}</div>
+  <div style="float:left; width:36px; height:36px; border-width:1px; border-color:#FFFFFF; border-style:solid;"><img src="{picture}" style="max-width:36px; max-height:36px; width:auto; height:auto;"></img></div>
+  <div style="float:left; padding-left:10px; width:190px; padding-top:7px;"><a transition="page" href="/web/player/{uid}/">{name}</a></div>
+  <div style="float:left; width:140px; padding-top:7px;">
+    <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+    <span>{points}</span>&nbsp;&nbsp;
+  </div>
+  <div style="float:left; width:100px; padding-top:7px;">
+    <img style="position:relative; top:3px" height="16" width="16" src="https://s3.amazonaws.com/eterna/cloudlabs/beaker.png"></img>&nbsp;
+    <span>{synths}</span>&nbsp;&nbsp;
+  </div>
+  <div style="float:left; width:140px; padding-top:7px;">
+    <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+    <span>{created}</span>&nbsp;&nbsp;
+  </div>  
+  <div class="clearer"></div>
+</block>
+
+<block url="/web/edit/player/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">  
+    <block builder="BuilderPlayerEdit">
+      <form action="/login/"  accept-charset="UTF-8" method="post" id="profile_form_profile" enctype="multipart/form-data">
+        <input type="hidden" name="type" value="edit"></input>  
+        <div class="trans-panel rounded-5" style="">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            <div style="float:left">Profile</div>
+            <div class="clearer"></div>
+          </div>
+          <div style="padding:33px;">
+            Profile
+            <div style="width: 95%;" class="" id="edit-profile-profile-wrapper">
+               <textarea cols="60" rows="5" name="profile_profile" id="edit-profile-profile"  class="" style="margin-bottom: 0; width: 100%;">{IF profile}{profile}{ENDIF}</textarea>
+               <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Describe yourself!</div>
+            </div>
+          </div>
+        </div>
+       
+        <div class="trans-panel rounded-5" style="margin-top: 17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            <div style="float:left">Picture</div>
+            <div class="clearer"></div>
+          </div>
+          <div style="padding:33px;">
+            <input type="hidden" name="picture_delete" id="edit-picture-delete" value=""></input>
+            <div class="form-item" id="edit-picture-upload-wrapper">
+              <div>Upload picture: </div>
+              <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Your virtual face or picture. Maximum dimensions are <em>85x85</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+            </div>
+          </div>
+        </div>
+       
+        <div class="trans-panel rounded-5" style="margin-top: 17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            <div style="float:left">Account information</div>
+            <div class="clearer"></div>
+          </div>        
+          <div style="padding: 33px;">
+            <div class="form-item" id="edit-mail-wrapper">
+              <div>E-mail address: <span class="" style="color: #FFAE00;" title="This field is required.">*</span></div>
+              <input type="text" maxlength="320" name="mail" id="edit-mail" size="60" value="{email}" class="form-text required" style="width:300px;"></input>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.</div>
+            </div>
+            <div class="form-item" id="edit-email-notification">
+              <input type="checkbox" style="width:auto;" name="profile_mail_notification" id="profile_mail_notification" {mail_notification}></input>
+              <span style="margin-left:10px;">E-mail Notification for private messages</span>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Check if you want to get email notification for private messages.</div>
+              <input type="checkbox" style="width:auto;" name="profile_news_mail_notification" id="profile_news_mail_notification" {news_mail_notification}></input>
+              <span style="margin-left:10px;">E-mail Notification for new news entries</span>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Check if you want to get email notification for new news entries.</div>
+              <input type="checkbox" style="width:auto;" name="profile_blog_mail_notification" id="profile_blog_mail_notification" {blog_mail_notification}></input>
+              <span style="margin-left:10px;">E-mail Notification for new blog entries</span>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Check if you want to get email notification for new blog entries.</div>
+            </div>
+            <div class="" id="edit-pass-wrapper" style="margin-top: 1em; margin-bottom: 1em;">
+              <div class="form-item" id="edit-pass-pass1-wrapper" style="padding-top:10px;">
+                <div>Password: </div>
+                <input type="password" name="pass[pass1]" id="edit-pass-pass1" maxlength="128" size="25" class="form-text password-field" style="width:300px;"></input>
+              </div>
+              <div class="form-item" id="edit-pass-pass2-wrapper" style="padding-top:10px;">
+                <div>Confirm password: </div>
+                <input type="password" name="pass[pass2]" id="edit-pass-pass2" maxlength="128" size="25" class="form-text password-confirm" style="width:300px;"></input>
+              </div>
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">To change the current user password, enter the new password in both fields.</div>
+            </div>
+          </div> 
+        </div>     
+
+        <div class="centered" style="clear: both; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+          <div id="save" class="green-button clickable rounded-5" style="font-size: 11px; padding: 7px;">
+            <div class="green-button-bg"></div>
+            Save
+          </div>
+        </div>
+      </form>
+      <div style="text-align:center; padding-top:17px" id="pager"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/players/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+  <div style="float:left; width:720px; min-height:1px;">  
+    <block builder="BuilderPlayers">
+      <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left">Players</div>
+          <div style="float:right"><input type="text" placeholder="search" id="search" style="width:110px"></input></div>
+          <div style="float:right; font-size:11px; padding-top:3px; padding-right:11px;">
+            sort by&nbsp;
+            {IF sort == "active"}
+              <i><a style="text-decoration:underline" href="{active_sort_url}">Points Last 30 Days</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{active_sort_url}">Points Last 30 Days</a>
+            {ENDIF}&nbsp;          
+            {IF sort == "point"}
+              <i><a style="text-decoration:underline" href="{point_sort_url}">Richest</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{point_sort_url}">Richest</a>
+            {ENDIF}&nbsp;          
+            {IF sort == "synthesizes"}
+              <i><a style="text-decoration:underline" href="{synthesizes_sort_url}">Synthesizes</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{synthesizes_sort_url}">Synthesizes</a>
+            {ENDIF}&nbsp;
+            {IF sort == "date"}
+              <i><a style="text-decoration:underline" href="{date_sort_url}">Newest</a></i>
+            {ELSE}
+              <a style="text-decoration:underline" href="{date_sort_url}"></a>
+            {ENDIF}&nbsp;
+          </div>
+          <div class="clearer"></div>
+        </div>
+        <div id="players" style="padding-left:11px;"; packerinput="block-name:player;"></div>
+        <div class="clearer" style="padding-top:11px;"></div>
+      
+      </div>
+      <div style="text-align:center; padding-top:17px" id="pager"></div>
+    </block>
+  </div>
+  <block name="side-bar"></block>  
+  </div>
+</block>
+
+<block name="player-tab">
+  <div id="about-active" class="blue-active-tab player-active-tab" style="float:left; display:none;">About Player</div>
+  <div id="about-inactive" class="blue-inactive-tab player-inactive-tab" style="float: left;">
+    <a style="text-decoration: none" href="/web/player/{uid}/">About Player</a>
+  </div>
+  <div id="synthesized-active" class="blue-active-tab player-active-tab" style="float: left;">Synthesized RNAs</div>
+  <div id="synthesized-inactive" class="blue-inactive-tab player-inactive-tab" style="float: left;">
+    <a style="text-decoration: none" href="/web/player/{uid}/synthesized_RNAs/">Synthesized RNAs</a>
+  </div>
+  <div id="latest-active" class="blue-active-tab player-active-tab" style="float: left;">Latest Played Puzzles</div>
+  <div id="latest-inactive" class="blue-inactive-tab player-inactive-tab" style="float: left;">
+    <a style="text-decoration: none" href="/web/player/{uid}/latest_played_puzzles/">Latest Played Puzzles</a>
+  </div>
+  <div id="created-active" class="blue-active-tab player-active-tab" style="float: left;">Created Puzzles</div>
+  <div id="created-inactive" class="blue-inactive-tab player-inactive-tab" style="float: left;">
+    <a style="text-decoration: none" href="/web/player/{uid}/created_puzzles/">Created Puzzles</a>
+  </div>
+  <div id="cleared-active" class="blue-active-tab player-active-tab" style="float: left;">Cleared Puzzles</div>
+  <div id="cleared-inactive" class="blue-inactive-tab player-inactive-tab" style="float: left;">
+    <a style="text-decoration: none" href="/web/player/{uid}/cleared_puzzles/">Cleared Puzzles</a>
+  </div>  
+  <div class="clearer"></div>
+</block>  
+
+<block url="/web/player/{uid}/">
+  {IF is_on_overlay}
+    <block name="player-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="player-page" input="uid:{uid};tab_type:about;" builder="BuilderPlayerPage">
+        <block name="player-tab"></block>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Profile Summary
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+          </div>                        
+          </div>        
+          <div style="padding:33px;">
+            <div style="float:left; width:85px;">
+              <img src="{picture}"></img>
+            </div>            
+            <div style="float:left; padding-left:33px; margin-top:-10px">
+              <div>
+                <span style="font-weight:bolder; font-size:18px">{name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style="font-weight:bolder; font-size:18px">Global rank &nbsp;<span style="color:#FEC942; font-size:32px">{rank}</span></span>
+              </div>
+              <div style="padding-top:11px; text-align:left;">
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <span>{points}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+                <span>{created}</span>
+              </div>
+            </div>
+            {IF editable}
+             <div style="float:right; padding-top: 0px; padding-bottom: 11px; width: 120px;">
+               <a href="/web/edit/player/" style="text-decoration:none">
+		 <div class="green-button clickable" id="editprofile" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  Edit profile
+                </div>
+	      </a>
+            </div>
+            {ENDIF}
+	    {IF editable}
+	      {IF resetable} 
+               <div style="clear:none;float:right; padding-top: 0px; padding-bottom: 11px; width: 120px;">
+                 <a href="/web/" id="reset-progress" style="text-decoration:none">
+                   <div class="red-button clickable" id="reset-progress" style="font-size: 12px; padding:7px;">
+                     <div class="red-button-bg"></div>
+		     Reset progress
+                   </div>
+		 </a>
+               </div>
+               <div style="clear:right;float:right; padding-top: 0px; padding-bottom: 11px; width: 120px;">
+                 <a href="/web/" id="restore-progress" style="text-decoration:none">
+                   <div class="yellow-button clickable" id="restore-progress" style="font-size: 12px; padding:7px;">
+                     <div class="yellow-button-bg"></div>
+		     Restore progress
+                   </div>
+		 </a>
+               </div>
+	      {ENDIF}
+	    {ENDIF} 
+            {IF editable}
+            <div style="clear:both;margin-top: 0px; float:right; width: 120px;text-align:center;">
+              <div style="font-size: 14px; color: #FFFFFF; text-decoration: underline; cursor: pointer;">
+                <a href="/certificate/{uid}" target="_blank">Eterna Certificate</a>
+              </div>
+            </div>
+            {ELSE}
+            <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+              <div class="green-button clickable rounded-5" id="sendmessage" style="font-size: 12px; padding:7px;">
+                <div class="green-button-bg"></div>
+                Send message
+              </div>
+            </div>
+
+            {ENDIF}
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="red-header">
+            About Me
+          </div>
+          <div style="padding:17px; text-align:left;">
+            {profile}
+          </div>
+        </div>        
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="green-header">
+            My Groups
+          </div>
+          <div style="padding:17px;">
+            <div id="my-group" packerinput="block-name:my-group;">
+              <block name="my-group" defonly="1">
+                <a href="/web/group/{group_nid}/">{group_title}</a>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        {IF editable}
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Surveys
+          </div>
+          <div style="padding:17px;">
+	    {IF use_citizen_science_survey}
+            <a href="https://gse.qualtrics.com/SE/?SID=SV_dhFfLYOLLjr4NBr" onclick="BuilderMe.prototype.survey_clicked('Yes,1');">Getting Started with Citizen Science Survey</a>
+	    {ENDIF}
+          </div>
+        </div>
+        {ENDIF}
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="blue-header">
+            Badges
+          </div>
+          <div style="padding:17px;">
+            <div id="achievements" packerinput="block-name:mini-achievement; type:float;"></div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+</block>
+
+<block url="/web/player/{uid}/synthesized_RNAs/">
+  {IF is_on_overlay}
+    <block name="player-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="player-synthesized-rnas-page" input="uid:{uid};tab_type:synthesized;" builder="BuilderPlayerPage">
+        <block name="player-tab"></block>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Profile Summary
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+          </div>                        
+          </div>        
+          <div style="padding:33px;">
+            <div style="float:left; width:85px;">
+              <img src="{picture}"></img>
+            </div>            
+            <div style="float:left; padding-left:33px; margin-top:-10px">
+              <div>
+                <span style="font-weight:bolder; font-size:18px">{name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style="font-weight:bolder; font-size:18px">Global rank &nbsp;<span style="color:#FEC942; font-size:32px">{rank}</span></span>
+              </div>
+              <div style="padding-top:11px; text-align:left;">
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <span>{points}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+                <span>{created}</span>
+              </div>
+            </div>
+            {IF editable}
+             <div style="float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable" id="editprofile" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  <a href="/web/edit/player/">Edit profile</a>
+                </div>
+            </div>
+            {ENDIF}
+             <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable rounded-5" id="sendmessage" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  Send message
+                </div>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Synthesized RNAs
+          </div>
+          <div id="synthesized" style="clear:both; padding:17px;" packerinput="block-name:synthesized-item">
+            <div id="synthesized-header" style="clear:both; padding-bottom:11px;">
+              <div style="width:67%; text-align:left; float:left">
+                RNA title
+              </div>
+              <div style="width:28%; text-align:right; font-weight:bolder; float:left">
+                Synthesis score
+              </div>
+              <div class="clearer"></div>
+            </div>
+            <block name="synthesized-item" defonly="1" style="clear:both;">
+              <div style="width:67%; text-align:left; float:left">
+                <a href="{item_url}" target="_blank">{title}</a>
+              </div>
+              <div style="width:28%; text-align:right; font-weight:bolder; float:left">
+                {IF score}
+                  {score}
+                {ELSE}
+                  Waiting
+                {ENDIF}
+              </div>
+              <div class="clearer"></div>
+            </block>
+          </div>
+        </div>
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+</block>
+
+<block url="/web/player/{uid}/latest_played_puzzles/">
+  {IF is_on_overlay}
+    <block name="player-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="player-latest-played-puzzles-page" input="uid:{uid};tab_type:latest;" builder="BuilderPlayerPage">
+        <block name="player-tab"></block>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Profile Summary
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+          </div>                        
+          </div>        
+          <div style="padding:33px;">
+            <div style="float:left; width:85px;">
+              <img src="{picture}"></img>
+            </div>            
+            <div style="float:left; padding-left:33px; margin-top:-10px">
+              <div>
+                <span style="font-weight:bolder; font-size:18px">{name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style="font-weight:bolder; font-size:18px">Global rank &nbsp;<span style="color:#FEC942; font-size:32px">{rank}</span></span>
+              </div>
+              <div style="padding-top:11px; text-align:left;">
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <span>{points}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+                <span>{created}</span>
+              </div>
+            </div>
+            {IF editable}
+             <div style="float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable" id="editprofile" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  <a href="/web/edit/player/">Edit profile</a>
+                </div>
+            </div>
+            {ENDIF}
+             <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable rounded-5" id="sendmessage" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  Send message
+                </div>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Latest Played Puzzle
+          </div>
+          <div style="padding:17px;">
+            <div id="latest-puzzles" packerinput="block-name:latest-puzzle;">
+              <block name="latest-puzzle" defonly="1">
+                <a href="/web/puzzle/{puznid}/">{title}</a>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>        
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+</block>
+
+<block url="/web/player/{uid}/created_puzzles/">
+  {IF is_on_overlay}
+    <block name="player-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="player-create-puzzles-page" input="uid:{uid};tab_type:created;" builder="BuilderPlayerPage">
+        <block name="player-tab"></block>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Profile Summary
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+          </div>                        
+          </div>        
+          <div style="padding:33px;">
+            <div style="float:left; width:85px;">
+              <img src="{picture}"></img>
+            </div>            
+            <div style="float:left; padding-left:33px; margin-top:-10px">
+              <div>
+                <span style="font-weight:bolder; font-size:18px">{name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style="font-weight:bolder; font-size:18px">Global rank &nbsp;<span style="color:#FEC942; font-size:32px">{rank}</span></span>
+              </div>
+              <div style="padding-top:11px; text-align:left;">
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <span>{points}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+                <span>{created}</span>
+              </div>
+            </div>
+            {IF editable}
+             <div style="float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable" id="editprofile" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  <a href="/web/edit/player/">Edit profile</a>
+                </div>
+            </div>
+            {ENDIF}
+             <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable rounded-5" id="sendmessage" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  Send message
+                </div>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header" style="padding-top: 12px; padding-bottom: 15px;">
+            <div id="show_thumbnails" class="clickable green-button rounded-5 centered" style="float:right; font-size: 12px; width: 160px; padding: 4px;">
+            <div class="green-button-bg rounded-5"></div>
+              Show Thumbnails
+          </div> 
+          <div id="hide_thumbnails" class="clickable green-button rounded-5 centered" style="float:right; font-size: 12px; display:none; width: 160px; padding: 4px;">
+            <div class="green-button-bg rounded-5"></div>
+              Hide Thumbnails
+          </div> 
+          <div style="padding-top:5px;">
+            Created Puzzles
+          </div>
+          </div>
+          <div style="padding:17px;">
+            <div id="created-puzzles" packerinput="block-name:created-puzzle;">
+              <block name="created-puzzle" defonly="1">
+                <a href="/web/puzzle/{id}/">{title}</a>
+                <div style="height:10px;"></div>
+                <div  id="created_puzzle_thumbs">
+                  <img src="https://s3.amazonaws.com/eterna/puzzle_mid_thumbnails/thumbnail{id}.png"></img>
+                </div>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header" style="padding-top: 12px; padding-bottom: 15px;">
+            Created Labs
+          </div>
+          <div style="padding:17px;">
+            <div id="created-labs" packerinput="block-name:created-lab;">
+              <block name="created-lab" defonly="1">
+                <a href="/web/lab/{id}/">{title}</a>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div> 
+           
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+</block>
+
+<block url="/web/player/{uid}/cleared_puzzles/">
+  {IF is_on_overlay}
+    <block name="player-page" style="width:720px;"></block>
+  {ELSE}  
+    <block name="top-bar"></block>
+    <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="player-cleared-puzzles-page" input="uid:{uid};tab_type:cleared;" builder="BuilderPlayerPage">
+        <block name="player-tab"></block>
+        <div class="trans-panel rounded-5">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="yellow-header">
+            Profile Summary
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px">
+            <div class="green-button-bg rounded-5"></div>
+              Follow
+          </div>                        
+          </div>        
+          <div style="padding:33px;">
+            <div style="float:left; width:85px;">
+              <img src="{picture}"></img>
+            </div>            
+            <div style="float:left; padding-left:33px; margin-top:-10px">
+              <div>
+                <span style="font-weight:bolder; font-size:18px">{name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style="font-weight:bolder; font-size:18px">Global rank &nbsp;<span style="color:#FEC942; font-size:32px">{rank}</span></span>
+              </div>
+              <div style="padding-top:11px; text-align:left;">
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/money.png"></img>&nbsp;
+                <span>{points}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img style="position:relative; top:3px" src="https://s3.amazonaws.com/eterna/eterna2/calender.png"></img>&nbsp;
+                <span>{created}</span>
+              </div>
+            </div>
+            {IF editable}
+             <div style="float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable" id="editprofile" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  <a href="/web/edit/player/">Edit profile</a>
+                </div>
+             </div>
+            {ENDIF}
+             <div style="clear:both; float:right; padding-top: 11px; padding-bottom: 11px; width: 120px;">
+                <div class="green-button clickable rounded-5" id="sendmessage" style="font-size: 12px; padding:7px;">
+                  <div class="green-button-bg"></div>
+                  Send message
+                </div>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>
+        <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+          <div class="green-header">
+            Cleared Puzzles
+            <div style="float:right;font-size:13px;">
+              <input type="radio" name="view-option" style="width:11px;vertical-align: middle;" id="solveddate"></input>&nbsp;Solved Date&nbsp;&nbsp;
+              <input type="radio" name="view-option" style="width:11px;vertical-align: middle;" id="puzzledate"></input>&nbsp;Puzzle Date&nbsp;&nbsp;
+              <input type="radio" name="view-option" style="width:11px;vertical-align: middle;" id="puzzlename"></input>&nbsp;Puzzle Name&nbsp;&nbsp;
+            </div>            
+          </div>
+          <div style="padding:17px;">
+            <div id="cleared-puzzles" packerinput="block-name:cleared-puzzle;">
+              <block name="cleared-puzzle" defonly="1">
+                <a href="/web/puzzle/{id}/">{title}</a>
+              </block>
+            </div>
+            <div class="clearer"></div>
+          </div>
+        </div>           
+      </block>
+    </div>
+    <block name="side-bar"></block>
+    </div>
+</block>
+
+<block name="overlay-message" class="trans-panel rounded-5" builder="BuilderOverlayMessage">
+  <div id="sendmessage">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Send Message
+  </div>
+ 	<div>
+	<span style="font-weight: bolder">To :&nbsp;</span> {target_name}
+	</div>
+	<div style="padding-top: 11px; width: 350px;">
+		<textarea id="body" style="width: 80%; height: 100px;"></textarea>
+	</div>
+	<div style="padding-top: 11px;">
+		<span class="orangebutton clickable" id="send-button" style="font-size: 12px;">Send</span>
+	</div>
+  </div>
+</block>
+
+<block name="overlay-message-register" class="trans-panel rounded-5" builder="BuilderOverlayMessage">
+  <div id="sendmessage">
+  <div class="trans-panel-bg rounded-5"></div>
+  <div class="red-header">
+    Send Message
+  </div>
+        <div>
+        <div style="padding-top: 11px; width: 350px;">Please register so that {target_name}</div>
+        <div>can contact you back!</div>
+	</div>
+	
+	<div style="height:35px; position:relative; left:50%; margin-left:-37.5px; padding: 20px 0px;">
+	  <block tag="a" class="centered-button-text" builder="BuilderPopOverlay" input="block-name:register-box;redirect_url:{redirect_url}" style="color:#FFFFFF; text-decoration: none; cursor: pointer; ">
+	    <div id="register" class="blue-button-interactive rounded-5 clickable" style="text-align: center; vertical-align: middle; line-height: 22px; font-size: 12px; float: left; width: 75px; height: 22px;">
+              <div class="rounded-5 blue-button-bg"></div>
+	      Register
+	    </div>
+	  </block>
+	</div>
+        
+  </div>
+</block>

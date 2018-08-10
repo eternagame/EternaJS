@@ -1,0 +1,420 @@
+
+<block url="/web/resources/documentation/script/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div class="trans-panel" style="float: left; width: 720px; min-height:300px;">
+      <div class="trans-panel-bg rounded-5"></div>
+      
+      <div class="header" style="padding:14px;border-bottom:2px solid rgba(256,256,256,0.4);">
+        <div style="font-size:22px;float:left">
+         Eterna Script Documentation & APIs
+        </div>
+        <a href="/web/script/create/" class="green-button rounded-5"
+           style="font-size:14px;float:right; padding:5px 15px;font-weight:bold;margin-right:0px">
+          Script Editor
+        </a>
+        <a href="/web/script/" class="blue-button rounded-5"
+           style="font-size:14px;float:right; padding:5px 15px;margin-right:5px;font-weight:bold;">
+          Eterna Scripts
+        </a>
+        <div class="clearer"></div>
+      </div>
+            
+      <div style="margin:45px;width:auto;font-size:18px;">
+
+        <div style="margin:30px 0px;">
+  	  <h3><span id="General_Documentation">General Documentation</span></h3>
+	  <ul style="margin:20px;font-weight:bolder;">
+            <li>
+	      <a href="https://docs.google.com/document/d/1VC94wTuRhNd-FN60ueaBc5mUxBsiIy8UzJzQL6ap3CE/edit#"
+	         class="interactive-link"><b>Eterna Script Intro</b>&nbsp; (by Eli Fisker)</a>
+	    </li>
+	  </ul>
+        </div>
+      
+        <div style="margin:60px 0px;">
+	  <h3><span id="Script_APIs">Eterna Script APIs</span></h3>
+	  <ul style="margin:20px;font-weight:bolder;">
+	    <li>
+	      <a href="/web/script/documentation/functions/"
+	         class="interactive-link"><b>Eterna Script API</b>&nbsp; (functions & classes)</a>
+	    </li>
+	    <li>
+	      <a href="/web/resources/documentation/script/ScriptAPIs/Boosters/"
+	  	 class="interactive-link"><b>Eterna Flash API</b>&nbsp; (for in-game Boosters)</a>
+	    </li>
+  	  </ul>
+        </div>
+
+        <div style="margin:60px 0px;">
+	  <h3><span id="Script_APIs">Miscellaneous</span></h3>
+	  <ul style="margin:20px;font-weight:bolder;">
+	    <li>
+	      <a href="https://bluejeans.com/s/9oU_K/"
+	         class="interactive-link"><b>Eterna Boosters</b>&nbsp; (special live chat)</a>
+	    </li>
+  	  </ul>
+        </div>
+
+        <div style="margin:60px;text-align:center;display:block;">	
+  	  <a class="info-hint-right" class="interactive-link" target="_blank" href="/web/news/6990398/">
+	    <span style="font-size:14px;">Learn more about Eterna's open-source initiative</span>
+	    <img src="/puzzle-progression/site/icon_rewrite_eterna.png"
+	         style="left:calc(50% - 78px);width:156px;"></img>
+	  </a>
+        </div>
+	
+      </div>
+    </div>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+
+
+<block url="/web/resources/documentation/script/ScriptAPIs/Boosters/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div class="trans-panel" style="float: left; width: 720px; min-height: 1px;">
+      <div class="trans-panel-bg"></div>
+
+      <div class="header" style="padding:14px;border-bottom:2px solid rgba(256,256,256,0.4);">
+        <div style="font-size:22px;float:left">
+          Eterna Flash API for Boosters
+        </div>
+        <a href="/web/script/create/" class="green-button rounded-5"
+           style="font-size:14px;float:right; padding:5px 15px;font-weight:bold;margin-right:0px">
+          Script Editor
+        </a>
+        <a href="/web/script/" class="blue-button rounded-5"
+           style="font-size:14px;float:right; padding:5px 15px;font-weight:bold;margin-right:5px;">
+          Eterna Scripts
+        </a>
+        <div class="clearer"></div>
+      </div>
+
+      <block name="FlashAPI-Boosters"></block>
+
+    </div>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+
+<block name="FlashAPI-Boosters" style="float:left; width:100%; min-height: 1px;">
+  <div style="margin:20px 30px;width:auto;min-height:300px;font-size:14px;">
+  
+            
+  <p>&nbsp;</p><p></p>
+
+  <p>Please discuss on the Eterna Wiki <a href="http://eternawiki.org/wiki/index.php5/Talk:Flash_API_for_Boosters" title="Talk:Flash API for Boosters">Talk</a>&nbsp;page.</p>
+
+  <p>&nbsp;</p><p></p><p>&nbsp;</p>
+
+  <h2>
+    <span id="General_coding_form">
+      General coding form
+    </span>
+  </h2>
+
+  <p>&nbsp;</p>
+
+  <h3>
+    <span id="Accessing_the_applet">
+      Accessing the applet
+    </span>
+  </h3>
+
+  <p>&nbsp;</p>
+
+  <p style="padding-left: 30px;">
+    <code>var applet = document.getElementById('maingame');</code>
+  </p>
+  <p style="padding-left: 30px;">
+    <code>if (applet == null) return "maingame element missing";</code>
+  </p>
+
+  <p>&nbsp;</p>
+
+  <p>from there, APIs can be used like this:</p>
+
+  <p>&nbsp;</p>
+
+  <p style="padding-left: 30px;">
+    <code>var ok = applet.set_sequence_string(my_seq);</code>
+  </p>
+  
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3>
+    <span id="Exploring_the_API_without_writing_a_booster">
+      Exploring the API without writing a booster
+    </span>
+  </h3>
+
+  <p>&nbsp;</p>
+
+  <p>Every modern browser has some sort of console that lets users input javascript commands.&nbsp;</p>
+  <ul style="margin:20px;">
+    <li><span style="background-color: initial;">Open the puzzle</span></li>
+    <li><span style="background-color: initial;">Use the stamper option in the booster menu, but cancel the operation. This activates the scripting interface</span></li>
+    <li><span style="background-color: initial;">Open the javascript console of your browser, and play around</span></li>
+  </ul>
+
+  <p>&nbsp;</p>
+
+  <p>
+    <a href="http://eternawiki.org/wiki/index.php5/File:Flash_API_1.png" class="image">
+      <img alt="Flash API 1.png" src="http://eternawiki.org/wiki/images/Flash_API_1.png" height="419" width="500"></img>
+    </a>
+  </p>
+  
+  <p>
+    <a href="http://eternawiki.org/wiki/index.php5/File:Flash_API_2.png" class="image">
+      <img alt="Flash API 2.png" src="http://eternawiki.org/wiki/images/Flash_API_2.png" height="136" width="500"></img>
+    </a>
+  </p>
+
+  <p>&nbsp;</p>
+
+  <p>Now let's see what happens:</p>
+
+  <p>&nbsp;</p>
+
+  <p>
+    <a href="http://eternawiki.org/wiki/index.php5/File:Flash_API_3.png" class="image">
+      <img alt="Flash API 3.png" src="http://eternawiki.org/wiki/images/Flash_API_3.png" height="56" width="500"></img>
+    </a>
+  </p>
+
+  <p>
+    <a href="http://eternawiki.org/wiki/index.php5/File:Flash_API_4.png" class="image">
+      <img alt="Flash API 4.png" src="http://eternawiki.org/wiki/images/Flash_API_4.png" height="429" width="500"></img>
+    </a>
+  </p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3>
+    <span id="Synchronous_vs_Asynchronous">
+      Synchronous vs Asynchronous
+    </span>
+  </h3>
+
+  <p>&nbsp;</p>
+
+  <p>The <a rel="nofollow" class="external text" href="http://www.eternagame.org/web/script/7070114/">Tsumego</a>&nbsp;script is an example of a <span style="font-weight:bolder">synchronous</span>&nbsp;booster. Synchronous boosters have following properties:</p>
+
+  <ul style="margin:10px 20px;">
+    <li style="margin:5px 0px;"><span style="background-color: initial;">they do not use setTimeout() or setInterval()</span></li>
+    <li style="margin:5px 0px;"><span style="background-color: initial;">they return a simple value</span></li>
+  </ul>
+
+  <p>&nbsp;</p>
+
+  <p>The <a rel="nofollow" class="external text" href="http://www.eternagame.org/web/script/6713763/">Naive Solver</a>&nbsp;script is an example of an <span style="font-weight:bolder">asynchronous</span>&nbsp;booster. The features that make it asynchronous are:</p>
+
+  <ul style="margin:10px 20px;">
+    <li style="margin:5px 0px;"><span style="background-color: initial;">it uses setTimeout()</span></li>
+    <li style="margin:5px 0px;"><span style="background-color: initial;">the script signals asynchronicity to the applet by using the statement:</span><div style="margin:10px;"><span style="background-color: initial;"><code>return {async: "true"};&nbsp;</code></span></div></li>
+    <li style="margin:5px 0px;"><span style="background-color: initial;">the actual end of the execution is signalled by calling:<div style="margin:10px;"><code>applet['end_'+sid](r);</code></div>where sid is the Drupal node ID of the script (here, &nbsp;<span>6713763)</span></span></li>
+    <li style="margin:5px 0px;"><span style="background-color: initial;"><span>EternaScripts have timeout-checking statements automatically inserted in loops. A special statement is used in lengthy computations to prevent this global timeout (10 seconds by default) from unwanted triggering:<div style="margin:10px;"><code>global_timer = new Date();</code></div>&nbsp;</span></span></li>
+  </ul>
+
+  <p>&nbsp;</p>
+
+  <h2>
+    <span id="Getters">
+      <span>
+	Getters
+      </span>
+    </span>
+  </h2>
+
+  <p>&nbsp;</p>
+
+  <h3><span id="get_sequence_string.28.29">get_sequence_string()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">a string representing the sequence</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="get_full_sequence.28index.29">get_full_sequence(index)</span></h3>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>index</em>: 0-based index of the state to be queried</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;"><span style="white-space: pre;"> </span>a string representing the full-length sequence, including the oligos in the case of a multistrand puzzle</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="get_locks.28.29">get_locks()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">a 0-based array of booleans indicating locked (true) and mutable (false) positions in the puzzle</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+  
+  <h3> <span class="mw-headline" id="get_targets.28.29">get_targets()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">an array of objects describing the structural constraints of each state in the puzzle&nbsp;<span style="background-color: initial;">(details to be added later)</span></p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="get_native_structure.28index.29">get_native_structure(index)</span></h3>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>index</em>: 0-based index of the state to be queried</p>
+  <p>Returns:</p>     
+  <p style="padding-left: 30px;">the dot-bracket representation of the predicted MFE for the queried state in the puzzle (i.e. the native fold)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+  
+  <h3> <span class="mw-headline" id="get_full_structure.28index.29">get_full_structure(index)</span></h3>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>index</em>: 0-based index of the state to be queried</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">the complete dot-bracket representation of the predicted MFE, including oligos, for the queried state in the puzzle (i.e. the native fold)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+  
+  <h3> <span class="mw-headline" id="get_free_energy.28index.29">get_free_energy(index)</span></h3>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>index</em>: 0-based index of the state to be queried</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">the free energy of the queried state</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="get_tracked_indices.28.29">get_tracked_indices()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">an array listing the indices of the bases that have been marked with the black mark</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="get_barcode_indices.28.29">get_barcode_indices()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">an array listing the indices of the bases forming the barcode, if present in the lab puzzle</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="is_barcode_available.28.29">is_barcode_available()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">a boolean describing whether the barcode in the puzzle is still available for the current round or not</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="current_folder.28.29">current_folder()</span></h3>
+  <p>Parameters: none</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">the name of the currently selected folding engine (only available in labs)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+
+  <h2>
+    <span id="Setters">
+      Setters
+    </span>
+  </h2>
+
+  <p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="select_folder.28folder_name.29">select_folder(folder_name)</span></h3>
+  <p style="padding-left: 30px;">selects a folding engine by its name</p>
+  <p style="padding-left: 30px;">only available in lab puzzles</p>
+  <p>Parameters:&nbsp;</p>
+  <p style="padding-left: 30px;"><em>folder_name</em>: name of the folding engine to be used</p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">a boolean, <em>true</em> if successful, <em>false</em> otherwise (the operation may fail, for instance Vienna2 cannot be selected on a puzzle that contains multistrand states)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="set_sequence_string.28seq.29">set_sequence_string(seq)</span></h3>
+  <p style="padding-left: 30px;">sets the sequence in the puzzle</p>
+  <p style="padding-left: 30px;">the applet recomputes foldings, free energies and reevaluates contraints</p>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>seq</em>: the sequence</p>
+  <p>Returns</p>
+  <p style="padding-left: 30px;">a boolean, <em>true</em> if successful, <em>false</em> otherwise (the operation may fail, if <em>seq</em> contains invalid characters for instance)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="set_tracked_indices.28marks.29">set_tracked_indices(marks)</span></h3>
+  <p><span style="white-space: pre;"> </span>sets all black marks in the puzzle</p>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>marks</em>: an array of indices of bases to be marked</p>
+  <p>Returns: nothing</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="set_design_title.28design_title.29">set_design_title(design_title)</span></h3>
+  <p style="padding-left: 30px;">Data browser specific.</p>
+  <p style="padding-left: 30px;">Displays a title for the current view.</p>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>design_title</em>: a string containing a title/description</p>
+  <p>Returns: nothing</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+  
+
+  <h2>
+    <span class="mw-headline" id="Folding">
+      Folding
+    </span>
+  </h2>
+
+  <p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="fold.28seq.2C_constraint_.3D_null.29">fold(seq, constraint = null)</span></h3>
+  <p style="padding-left: 30px;">Folds the <em>seq</em> sequence, eventually considering limitations defined in <em>constraint</em></p>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>seq</em>: a string rep<span style="color: #ffffff;">resenting the sequence to be folded</span></p>
+  <p style="padding-left: 30px;"><span style="background-color: initial;"><em>constraint</em>: optional constraints (Vienna formatted)</span></p>
+  <p>Returns:</p>
+  <p style="padding-left: 30px;">the dot-bracket representation of the MFE structure</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="energy_of_structure.28seq.2C_secstruct.29">energy_of_structure(seq, secstruct)</span></h3>
+  <p style="padding-left: 30px;">computes the free energy of the <em>seq</em> sequence folded as specified by <em>secstruct</em></p>
+  <p>Parameters:</p>
+  <p style="padding-left: 30px;"><em>seq</em>: the sequence</p>
+  <p style="padding-left: 30px;"><em>secstruct</em>: the dot-bracket representation of the secondary structure</p>
+  <p>Return:</p>
+  <p style="padding-left: 30px;">a floating-point number, expressed in kcal/mol</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="fold_with_binding_site.28seq.2C_site.2C_bonus.29"><span style="background-color: initial;">fold_with_binding_site(seq, site, bonus)</span></span></h3>
+  <p><span style="background-color: initial;">(tbd)</span></p>
+  <p>&nbsp;</p>
+  <h3> <span class="mw-headline" id="pairing_probabilities.28seq.2C_secstruct_.3D_null.29">pairing_probabilities(seq, secstruct = null)</span></h3>
+  <p>(tbd)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="cofold.28seq.2C_oligo.2C_malus_.3D_0..2C_constraint_.3D_null.29">cofold(seq, oligo, malus = 0., constraint = null)</span></h3>
+  <p>(tbd)</p>
+
+  <p>&nbsp;</p><p>&nbsp;</p>
+
+  <h2>
+    <span class="mw-headline" id="Miscellanous">
+      Miscellanous
+    </span>
+  </h2>
+
+  <p>&nbsp;</p>
+
+  <h3> <span class="mw-headline" id="sparks_effect.28from.2C_to.29">sparks_effect(from, to)</span></h3>
+  <p style="padding-left: 30px;">initiates a sparking effect on the specified segment</p>
+  <p><span style="background-color: initial;">Parameters:</span></p>
+  <p style="padding-left: 30px;"><em>from</em>: start index</p>
+  <p style="padding-left: 30px;"><em>to</em>: index of the last base</p>
+      
+  </div>
+</block>

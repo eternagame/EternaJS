@@ -1,0 +1,42 @@
+<block name="native-player-container-block" class="" default="modal:false;src:false;image:false;" builder="BuilderNativePlayer"> 
+  {IF src}
+  <div id="native-player-container" style="width:100%; height:100%;">  
+    <div id="native-player" style="width:100%; height:100%;"
+	 data-modal="{modal}"
+         data-src="{src}"
+         data-image="{image}">
+    </div>
+    {IF modal == "true"}
+    <a id="close-button" class="close-button"
+       href="javascript:;"
+       title="Close Player"
+       style="display:none">
+      <img src="/puzzle-progression/icons/button_x_50px.png" style="position:relative;top:-15px;width:30px;height:100%;border-radius:50%;"></img>
+    </a>
+    {ENDIF}
+  </div>
+  {ENDIF}
+</block>
+
+
+<block name="youtube-container-block" class="" default="data_id:false;modal:false;image:false;" builder="BuilderYouTubePlayer">
+  {IF data_id}
+  <div id="youtube-container" style="width:100%; height:100%;">
+    <div id="youtube-player" style="width:100%; height:100%;"
+	 data-id="{data_id}"
+	 data-modal="{modal}"
+         data-image="{image}">
+    </div>
+    {IF modal == "true"}
+    <a id="close-button" class="close-button"
+       href="javascript:;"
+       title="Close Player"
+       style="display:none">
+      <img src="/puzzle-progression/icons/button_x_50px.png"
+	   style="position:relative;top:-15px;width:30px;height:100%;border-radius:50%;">
+      </img>
+    </a>
+    {ENDIF}
+  </div>
+  {ENDIF}
+</block>

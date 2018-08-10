@@ -1,0 +1,92 @@
+<block url="/web/blog/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:725px; min-height:1px;">
+    <block builder="BuilderBlogsList">
+      <div class="trans-panel rounded-5" builder="BuilderBlogsList">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div style="float:left;">Dev Blog</div>          
+          <div style="float:right" class="news-search"><input id="search" placeholder="search" class="input news-search-input" style="width:100%;"></input></div>        
+          <div class="clearer"></div>          
+        </div>
+        <div id="blogslist">
+					<block defonly="1" name="blogsitem" style="font-size:13px;">
+					  <div class="trans-panel rounded-5" style="margin:20px 10px;">
+					    <div class="trans-panel-bg rounded-5"></div>
+					      <div class="yellow-header">
+					          {title}&nbsp;&nbsp;
+					          <span style="font-size:12px">{created}</span>
+					          {IF Editable}
+					          <div class="green-button clickable rounded-5" style="float:right; font-size:14px; padding:3px; width:100px; margin-top:-4px;">
+					            <div class="green-button-bg"></div>
+					            <a href="#" onclick="Popup=window.open('http://eternawiki.org/file_upload.html','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no, width=420,height=400,left=430,top=23'); return false;">Image Upload</a>
+					          </div>  					          
+					          <div class="green-button clickable rounded-5" style="float:right; font-size: 14px; padding:3px; width:75px; margin-top:-4px;">
+					            <div class="green-button-bg"></div>
+					            <a href="/node/{nid}/edit">Edit</a>
+					          </div>
+					          {ENDIF}
+					          <div id="{nid}-unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:block; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+						          <div class="green-button-bg rounded-5"></div>
+						          Unfollow
+						        </div>
+					          <div id="{nid}-follow" class="clickable green-button rounded-5 centered" style="float:right; display:block; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+					            <div class="green-button-bg rounded-5"></div>
+					            Follow
+					          </div>					          
+					      </div>
+					      <div style="padding-left:17px; padding-top:5px;">
+					        <b>URL : </b><a href="/web/blog/{nid}/">https://eternagame.org/web/blog/{nid}/</a>
+					      </div>
+					      <div style="padding:17px; text-align:left; word-wrap:break-word;">{body}</div>
+					      <div style="padding:10px; color:yellow"><h4>Comments</h4></div>
+					      <block name="comments" style="padding:10px;"></block>
+					      </div>  
+					</block>                          
+        </div>      
+        <div style="text-align:center; padding:17px" id="pager"></div>
+      </div>
+    </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/blog/{nid}/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:725px; min-height:1px;">
+    <block builder="BuilderBlog">
+      <div class="trans-panel rounded-5" style="margin:0px 0px;">
+      <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          {title}&nbsp;&nbsp;
+          <span style="font-size:12px">{created}</span>
+          {IF Editable}
+          <div class="green-button clickable" style="float:right; font-size: 14px; padding:3px; width:75px; margin-top:-4px;">
+            <div class="green-button-bg"></div>
+            <a href="/node/{nid}/edit">EDIT</a>
+          </div>
+          {ENDIF}
+          <div id="unfollow" class="clickable green-button rounded-5 centered" style="float:right; display:none; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+            <div class="green-button-bg rounded-5"></div>
+            Unfollow
+          </div>
+          <div id="follow" class="clickable green-button rounded-5 centered" style="float:right; display:block; font-size: 12px; width: 80px; padding: 3px; margin-top:-4px;">
+            <div class="green-button-bg rounded-5"></div>
+            Follow
+          </div>
+        </div>
+        <div style="padding:17px; text-align:left; word-wrap:break-word;">{body}</div>
+      </div>
+      <div class="trans-panel rounded-5" style="margin-top:17px;">
+          <div class="trans-panel-bg rounded-5"></div>
+	  <div class="yellow-header">Comments</div>
+	  <block name="comments" style="padding:11px; padding-top:17px;"></block>
+	</div>
+     </block>
+  </div>
+  <block name="side-bar"></block>
+  </div>
+</block>

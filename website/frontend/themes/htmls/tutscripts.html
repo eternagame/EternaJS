@@ -1,0 +1,146 @@
+<block url="/web/tutscripts/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <div style="float:left; width:720px; min-height:1px;">
+      <block name="tutorial-script-display"></block>
+    </div>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/tutscript/new/{pid}">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <block name="tutorial-script-editor" input="new:1"></block>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+<block url="/web/tutscript/{nid}/">
+  <block name="top-bar"></block>
+  <div id="page-container">
+    <block name="tutorial-script-editor"></block>
+    <block name="side-bar"></block>
+  </div>
+</block>
+
+<block name="tutorial-script-editor" builder="BuilderTutScriptEditor">
+<div style="float:left; width:720px; min-height:1px;">
+  <form action="/post/"  accept-charset="UTF-8" method="post" id="form_script" enctype="multipart/form-data">
+    {IF new}
+    <input type="hidden" name="mode" value="create"></input>
+    {ELSE}
+    <input type="hidden" name="mode" value="edit"></input>
+    {ENDIF}
+    <input type="hidden" name="puzzle" value={pid}></input>
+    <div class="trans-panel rounded-5">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="yellow-header">
+        <div>
+          <div style="float:left; margin-top:5px;">
+            {IF user_does_not_own}
+              {title}
+            {ELSE}
+              <input type="text" name="title" value="{title}"></input>   
+            {ENDIF}
+          </div>
+
+          {IF user_does_not_own}
+          {ELSE}
+          <div id="save" class="red-button clickable rounded-5" style="float:left; margin-left:15px; padding-left:10px; padding-top:3px; padding-right:10px; height:20px; font-size:12px;">
+              <div class="red-button-bg"></div>Save
+          </div>
+          {ENDIF}
+
+          {IF new}
+          {ELSE}
+          <div class="green-button clickable rounded-5" style="float:left; margin-left:15px; padding-left:10px; padding-top:3px; padding-right:10px; height:20px; font-size:12px;">
+              <div class="green-button-bg"></div>
+              <a href="/game/puzzle/{pid}/?script={nid}" target="_blank">Play</a>
+          </div>
+          {ENDIF}
+
+          <div class="yellow-button clickable rounded-5" style="float:left; margin-left:15px; padding-left:10px; padding-top:3px; padding-right:10px; height:20px; font-size:12px;">
+              <div class="yellow-button-bg"></div>
+              <a href="/web/puzzle/{pid}/" target="_blank">Puzzle Info</a>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+
+      <div style="padding:17px;">
+        <input type="hidden" name="nid" value={nid}></input>
+        <input type="hidden" name="type" value="tutscript"></input>
+        {IF user_does_not_own}
+          <textarea cols="100" rows="40" name="script" id="edit-tutscript-area"  class="" style="margin-bottom: 0; width: 100%; overflow-y: scroll;" readonly>{script}</textarea>
+        {ELSE}
+          <textarea cols="100" rows="40" name="script" id="edit-tutscript-area"  class="" style="margin-bottom: 0; width: 100%; overflow-y: scroll;">{script}</textarea>
+        {ENDIF}
+        <div class="clearer"></div>
+      </div>
+
+      <div style="padding:17px;">
+        {IF user_does_not_own}
+          <textarea cols="100" rows="40" name="description" id="edit-tutscript-body-area"  class="" style="margin-bottom: 0; width: 100%; overflow-y: scroll;" readonly>{description}</textarea>
+        {ELSE}
+          <textarea cols="100" rows="40" name="description" id="edit-tutscript-body-area"  class="" style="margin-bottom: 0; width: 100%; overflow-y: scroll;">{description}</textarea>
+        {ENDIF}
+        <div class="clearer"></div>
+      </div>
+    </div>
+  </form>
+</div>
+</block>
+
+<block name="tutorial-script-display" builder="BuilderTutScripts">
+  <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div>
+            <div style="float:left; margin-top:5px;">Tutorial Scripts</div>
+          </div>
+
+          {IF can_create_script}
+          <div class="green-button clickable rounded-5" style="float:right; padding: 3px;">
+              <div class="green-button-bg"></div>
+              <a href="/web/tutscript/new/{pid}">Create New Tutorial</a>
+          </div>
+          {ENDIF}
+          <div class="clearer"></div>
+        </div>
+        <div style="padding:17px;">
+          <div id="scripts" style="padding-left:11px;"; packerinput="block-name:tutscript;">
+            <block name="tutscript" defonly="1">
+                  <a href="/web/tutscript/{id}/">{title}</a>
+            </block>
+          </div>
+          <div class="clearer"></div>
+        </div>
+  </div>
+</block>
+
+<block url="/web/tutorial/" style="padding-top:20px; height:75px; background-image:url(https://s3.amazonaws.com/eterna/eterna2/bg_rna.png); background-repeat:no-repeat; background-position:right -70px;">
+  <div style="float:left; width:30%; min-height:1px;">
+    <block name="tutorial-script-display_jn"></block>
+    <textarea cols="100" rows="40" name="script" id="edit-tutscript-area"  class="" style="margin-bottom: 0; width: 100%; overflow-y: scroll;" readonly>{script}</textarea>
+  </div>
+</block>
+
+<block name="tutorial-script-display_jn" builder="BuilderTutScripts">
+  <div class="trans-panel rounded-5">
+        <div class="trans-panel-bg rounded-5"></div>
+        <div class="yellow-header">
+          <div>
+            <div style="float:left; margin-top:5px;">Tutorial Authoring</div>
+          </div>
+
+          <div class="green-button clickable rounded-5" style="float:right; padding: 3px;">
+              <div class="green-button-bg"></div>
+              <a href="/web/tutscript/new/{pid}">Run Tutorial</a>
+          </div>
+          <div class="clearer"></div>
+        </div>
+  </div>
+</block>
+
+

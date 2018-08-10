@@ -1,0 +1,396 @@
+<block builder="BuilderLabPageEdit" url="/web/lab/edit/puzzles/{nid}/" url2="/web/lab/{nid}/edit/">
+  <block name="top-bar"></block>
+  <div style="float: left; width: 720px; min-height: 1px;">
+    <div class="trans-panel rounded-5">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="green-header">Project Edit</div>    
+      <div style="padding:22px">
+        <form action="/post/"  accept-charset="UTF-8" method="post" id="cloud-lab-edit-form" enctype="multipart/form-data">
+          <input type="hidden" name="type" value="edit_project"></input>
+          <input type="hidden" name="nid" value="{nid}"></input>
+          <div class="trans-panel rounded-5">
+            <div class="trans-panel-bg rounded-5"></div>
+            <div class="red-header">Title & Objective</div> 
+            <div style="padding:22px;">
+              <input name="title" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" value="{title}"></input>
+              <div style="padding-top:11px;">
+                <div style="color:#898989">Upload picture: </div>
+                <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+                <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Representative picture for the project. Maximum dimensions are <em>200x200</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+              </div>              
+              <textarea name="project-body" id="project-body" style="width:620px; height:70px; padding:3px; margin-top:11px" class="dark-input">{body}</textarea>        
+            {IF is_expert}
+               <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Name and Affiliation</b></div>
+              <div>
+                <input name="affiliation" id="affiliation" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" value="{affiliation}"></input>
+              </div>
+              <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Email</b></div>
+              <div>
+                <input name="email" id="email" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" value="{email}"></input>
+              </div>         
+            {ENDIF} 
+            </div>
+          </div>
+          <div class="trans-panel rounded-5" style="margin-top:11px; padding-bottom:10px;">
+            <div class="trans-panel-bg rounded-5"></div>
+            <div class="yellow-header">Structure & Constraints</div>
+            <block builder="BuilderLabPuzzleModify" name="lab-puzzle-modify" input="previous_labs:{previous_labs}">
+              <table style="clear:both; margin:auto; width:97%; margin-top:20px;">
+                <thead style="font-weight:bolder; background-color:#EAEAEA; color:black;opacity:0.5; border:1px solid #EAEAEA;">
+                  <tr>
+                    <td style="text-align:center; width:5%">Use</td>
+                    <td style="text-align:center; width:10%">Thumbnail</td>
+                    <td style="text-align:center; ">Title</td>
+                    <td style="text-align:center; width:10%">Secstruct</td>
+                    <td style="text-align:center; width:10%">Sequence</td>
+                    <td style="text-align:center; width:10%">Constraints</td>
+                    <td style="text-align:center; width:10%">Slots</td>
+                  </tr>
+                </thead>
+                <tbody id="lab-propose-puzzles" style="text-align:center;">
+                </tbody>
+              </table>
+              <div style="padding:22px;">
+                <input id="lab-new-puzzle-title" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Lab Puzzle title"></input>
+                <div id="lab-propose-puzzle-maker" name="lab-propose-puzzle-maker" style="clear:both;"></div>
+                <div style="padding:11px;">
+                  <div style="float:left; background-image:url(https://s3.amazonaws.com/eterna/cloudlabs/UA_constraint.png); width:97px; height:37px; padding-top:60px; text-align:center;">
+                    <b>MIN:&nbsp;</b><input id="aus-input" style="width:30px; padding:2px; color:#FFFFFF;" class="dark-input"></input>    
+                  </div>
+                  <div style="float:left; margin-left:7px; background-image:url(https://s3.amazonaws.com/eterna/cloudlabs/GU_constraint.png); width:97px; height:37px; padding-top:60px; text-align:center;">
+                    <b>MIN:&nbsp;</b><input id="gus-input" style="width:30px; padding:2px; color:#FFFFFF;" class="dark-input"></input>  
+                  </div>
+                  <div style="float:left; margin-left:7px; background-image:url(https://s3.amazonaws.com/eterna/cloudlabs/GC_constraint.png); width:97px; height:37px; padding-top:60px; text-align:center;">
+                    <b>MAX:&nbsp;</b><input id="gcs-input" style="width:30px; padding:2px; color:#FFFFFF;" class="dark-input"></input>  
+                  </div>
+                  <div style="float:left; margin-left:7px; background-image:url(https://s3.amazonaws.com/eterna/cloudlabs/mutation_constraint.png); width:97px; height:37px; padding-top:60px; text-align:center;">
+                    <b>MAX:&nbsp;</b><input id="mutation-limit-input" style="width:30px; padding:2px; color:#FFFFFF;" class="dark-input"></input>  
+                  </div>                
+                  <div class="clearer"></div>
+                </div>
+              </div>  
+              <div style="padding:22px;">   
+                <div style="font-weight:bolder">
+                  How many synthesis slots do you need for your project?
+                </div>
+                <div style="padding-top:7px;">
+                  <input id="num_synthesis_input" style="width:50px; padding:3px; color:#FFFFFF;" class="dark-input" value="40"></input>
+                </div>
+              </div>
+              <div id="cloud-lab-add" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-bottom:10px; width:150px">
+                <div class="green-button-bg"></div>
+                Add Puzzle
+              </div>
+              <block name="lab-puzzle-small-block" defonly="1" style="float:left; padding:10px;" tag="none">
+                <tr>
+                  <td style=" text-align:center; ">
+                    {IF expert}
+                      <input id="use" style="width:25px;" type="checkbox" checked="true" disabled></input>
+                    {ELSE}
+                      <input id="use" style="width:25px;" type="checkbox" checked="true"></input>
+                    {ENDIF}
+                    {IF nid}
+                      <input id="puznid" type="hidden" value="{puznid}"></input>
+                    {ENDIF}
+                  </td>
+                  <td style=" text-align:center; ">
+                    <img id="cover_image" src="{cover_image}" style="max-width:50px; max-height:50px; padding:5px;"></img>
+                  </td>
+                  <td style="">
+                    {title}
+                    <span id="disabled_display" style="display:none; font-size:12px; color:red;">&nbsp;&nbsp;DISABLED</span>
+                    <span id="enabled_display" style="display:none; font-size:12px; color:green;">&nbsp;&nbsp;ENABLED</span>
+                    <input id="title" type="hidden" value="{title}"></input>
+                  </td>
+                  <td style=" text-align:center; ">
+                    <div onclick="alert('{secstruct}');" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 13px;">
+                      <div class="green-button-bg"></div>
+                      Show
+                    </div>
+                    <input id="secstruct" type="hidden" value="{secstruct}"></input>
+                    
+                  </td>
+                  {IF expert}
+                  {ELSE}
+                    <td style=" text-align:center; width:10%">
+                      <div onclick="alert('{sequence}');" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 13px;">
+                        <div class="green-button-bg"></div>
+                        Show
+                      </div>
+                      <input id="sequence" type="hidden" value="{sequence}"></input>
+                    </td>
+                    <td style=" text-align:center; ">
+                      {IF aus}
+                        AU({aus})&nbsp;
+                        <input id="aus" type="hidden" value="{aus}"></input>
+                      {ENDIF}
+                      {IF gus}
+                        GU({gus})&nbsp;
+                        <input id="gus" type="hidden" value="{gus}"></input> 
+                      {ENDIF}
+                      {IF gcs}
+                        GC({gcs})&nbsp;
+                        <input id="gcs" type="hidden" value="{gcs}"></input>
+                      {ENDIF}
+                      {IF mutation_limit}
+                        MUT({mutation_limit})&nbsp;
+                        <input id="mutation_limit" type="hidden" value="{mutation_limit}"></input>
+                      {ENDIF}
+                      <input id="locks" type="hidden" value="{locks}"></input>
+                      <input id="shift_locks" type="hidden" value="{shift_locks}"></input>
+                      <input id="shift_limit" type="hidden" value="{shift_limit}"></input>
+                    </td>
+                  {ENDIF}
+                  <td style=" text-align:center; ">
+                    <span id="num_synthesis_display">{num_synthesis}</span>
+                    <input id="num_synthesis" type="hidden" value="{num_synthesis}"></input>
+                  </td>
+                </tr>
+              </block>
+            </block>
+          </div>
+          <div style="padding-top:22px;">
+            <div id="cloud-lab-edit" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:200px">
+              <div class="green-button-bg"></div>
+              Update
+            </div>
+          </div>
+          <div class="clearer"></div>
+          <input type="hidden" name="form-data" id="form-data"></input>
+        </form>
+      </div>
+    </div>
+  </div>
+  <block name="side-bar"></block>
+</block>
+
+<block builder="BuilderExpertLabProposePuzzle" url="/web/propose/paper/design/">
+  <block name="top-bar"></block>
+  <div style="min-height: 1px; width:720px;float:left;">
+   <div class="blue-active-tab" style="float:left; width:176px;">
+     General Design
+   </div>
+   <div class="blue-inactive-tab" style="float:left; font-size:11px">
+     Alt. Structures (Coming soon)
+   </div>
+   <div class="blue-inactive-tab" style="float:left">
+     Switch (Coming soon)
+   </div>   
+   <div class="clearer"></div>
+   <div class="clearer"></div>
+   <div class="trans-panel rounded-5">
+     <div class="trans-panel-bg rounded-5"></div>
+     <div class="green-header">Paper Lab Proposal</div>    
+     <div style="padding:22px">
+       <form action="/post/"  accept-charset="UTF-8" method="post" id="cloud-lab-form" enctype="multipart/form-data">
+         <input type="hidden" name="type" value="expert_cloud_lab_puzzle"></input>
+         <div class="trans-panel rounded-5">
+           <div class="trans-panel-bg rounded-5"></div>
+           <div class="red-header">Title & Objective</div> 
+           <div style="padding:22px;">
+             <div style="padding-bottom:5px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;title</b></div>
+             <input id="title" name="title" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Lab project title"></input>
+             <div style="padding-top:11px;">
+               <div style="color:#FFFFFF; padding-bottom:5px;"><b>Upload picture</b></div>
+               <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+               <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Representative picture for the project. Maximum dimensions are <em>200x200</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+             </div>
+             <div style="padding-bottom:0px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Project description</b></div>            
+             <textarea id="project-body" name="project-body" style="width:620px; height:70px; padding:3px; margin-top:5px" class="dark-input" placeholder="Describe your research objective here."></textarea>          
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Name and Affiliation</b></div>
+             <div>
+               <input id="affiliation" name="affiliation" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your Affiliation (Optional)"></input>
+             </div>
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Email</b></div>
+             <div>
+               <input id="email" name="email" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your email (Optional)"></input>
+             </div>         
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Script</b></div>
+             <div>
+               <input id="script" name="script" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your script (Optional)"></input>
+             </div>
+           </div>
+         </div>
+         <div class="trans-panel rounded-5" style="margin-top:11px; padding-bottom:10px;">
+           <div class="trans-panel-bg rounded-5"></div>
+           <div class="yellow-header">Structure & Constraints</div>
+           <block builder="BuilderLabPuzzleModify" name="lab-puzzle-modify">
+           </block>
+         </div>
+         <div style="padding-top:22px;">
+           <div style="text-align:center; padding-left:22px; padding-right:22px; padding-bottom:11px;">
+             Your request will be reviewed by Eterna staff. You'll shortly receive a response from us through your email.
+           </div>
+           <div id="cloud-lab-submit" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:200px">
+             <div class="green-button-bg"></div>
+             Request
+           </div>
+         </div>
+         <div class="clearer"></div>
+         <input type="hidden" name="form-data" id="form-data"></input>
+       </form>
+     </div>
+   </div>
+  </div>
+  <block name="side-bar"></block>
+</block>
+
+
+<block builder="BuilderExpertLabProposePuzzle" url="/web/propose/pilot/puzzle/" input="project_type:pilot">
+  <block name="top-bar"></block>
+  <div style="min-height: 1px; width:720px;float:left;">
+   <div class="blue-inactive-tab" style="float:left; width:176px;">
+     <a href="/web/propose/pilot/sequences/" style="text-decoration:none">Propose sequences</a>
+   </div>
+   <div class="blue-active-tab" style="float:left">
+     Propose puzzles
+   </div>
+   <div class="clearer"></div>
+   <div class="clearer"></div>
+   <div class="trans-panel rounded-5">
+     <div class="trans-panel-bg rounded-5"></div>
+     <div class="green-header">Pilot Project Proposal</div>    
+     <div style="padding:22px">
+       <form action="/post/"  accept-charset="UTF-8" method="post" id="cloud-lab-form" enctype="multipart/form-data">
+         <input type="hidden" name="type" value="expert_cloud_lab_puzzle"></input>
+         <input type="hidden" name="project_type" value="{project_type}"></input>
+         <div class="trans-panel rounded-5">
+           <div class="trans-panel-bg rounded-5"></div>
+           <div class="red-header">Title & Objective</div> 
+           <div style="padding:22px;">
+             <div style="padding-bottom:5px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;title</b></div>
+             <input id="title" name="title" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Lab project title"></input>
+             <div style="padding-top:11px;">
+               <div style="color:#FFFFFF; padding-bottom:5px;"><b>Upload picture</b></div>
+               <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+               <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Representative picture for the project. Maximum dimensions are <em>200x200</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+             </div>
+             <div style="padding-bottom:0px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Project description</b></div>            
+             <textarea id="project-body" name="project-body" style="width:620px; height:70px; padding:3px; margin-top:5px" class="dark-input" placeholder="Describe your research objective here."></textarea>          
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Name and Affiliation</b></div>
+             <div>
+               <input id="affiliation" name="affiliation" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your Affiliation (Optional)"></input>
+             </div>
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Email</b></div>
+             <div>
+               <input id="email" name="email" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your email (Optional)"></input>
+             </div>
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Pilot Code</b></div> 
+             <div>
+               <input id="pilot_code" name="pilot_code" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your pilot project code"></input>
+             </div>               
+             <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Script</b></div>
+             <div>
+               <input id="script" name="script" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your script (Optional)"></input>
+             </div>
+           </div>
+         </div>
+         <div class="trans-panel rounded-5" style="margin-top:11px; padding-bottom:10px;">
+           <div class="trans-panel-bg rounded-5"></div>
+           <div class="yellow-header">Structure & Constraints</div>
+           <block builder="BuilderLabPuzzleModify" name="lab-puzzle-modify">
+           </block>
+         </div>
+         <div style="padding-top:22px;">
+           <div style="text-align:center; padding-left:22px; padding-right:22px; padding-bottom:11px;">
+             Your request will be reviewed by Eterna staff. You'll shortly receive a response from us through your email.
+           </div>
+           <div id="cloud-lab-submit" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:200px">
+             <div class="green-button-bg"></div>
+             Request
+           </div>
+         </div>
+         <div class="clearer"></div>
+         <input type="hidden" name="form-data" id="form-data"></input>
+       </form>
+     </div>
+   </div>
+  </div>
+  <block name="side-bar"></block>
+</block>
+
+<block builder="BuilderExpertLabProposeSequences" url="/web/propose/pilot/sequences/" input="project_type:pilot">
+  <block name="top-bar"></block>
+  <div style="min-height: 1px; width:720px;float:left;" class="centered">
+    <div class="blue-active-tab" style="float:left; width:176px;">
+      Propose sequences
+    </div>
+    <div class="blue-inactive-tab" style="float:left">
+      <a href="/web/propose/pilot/puzzle/" style="text-decoration:none">Propose puzzles</a>
+    </div>    
+    <div class="clearer"></div>
+    <div class="trans-panel rounded-5">
+      <div class="trans-panel-bg rounded-5"></div>
+      <div class="green-header">Pilot Project Proposal</div>    
+      <div style="padding:22px">
+        <form action="/post/"  accept-charset="UTF-8" method="post" id="cloud-lab-form" enctype="multipart/form-data">
+          <input type="hidden" name="type" value="expert_cloud_lab_sequences"></input>
+          <input type="hidden" name="project_type" value="{project_type}"></input>
+          <div class="trans-panel rounded-5">
+            <div class="trans-panel-bg rounded-5"></div>
+            <div class="red-header">Title & Objective</div> 
+            <div style="padding:22px;">
+              <div style="padding-bottom:5px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;title</b></div>
+              <input id="title" name="title" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Lab project title"></input>
+              <div style="padding-top:11px;">
+                <div style="color:#FFFFFF; padding-bottom:5px;"><b>Upload picture</b></div>
+                <input type="file" name="files[picture_upload]"  class="form-file" id="edit-picture-upload" size="48" style="width:300px;"></input>
+                <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989;">Representative picture for the project. Maximum dimensions are <em>200x200</em> and the maximum size is <em>2000</em> kB. If your picture is bigger than the specified size, it'll be automatically resized.</div>
+              </div>
+              <div style="padding-bottom:0px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Project description</b></div>            
+              <textarea id="project-body" name="project-body" style="width:620px; height:70px; padding:3px; margin-top:5px" class="dark-input" placeholder="Describe your research objective here."></textarea>          
+              <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Pilot Code</b></div>
+              <div>
+                <input id="pilot_code" name="pilot_code" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your pilot project code"></input>
+              </div>              
+              <div class="description" style="font-size: 0.85em;line-height: 150%; margin-bottom: 0.75em; color: #898989; padding-top:3px;">If you have a pilot code, your project will be approved without voting</div>
+              <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF">Name and Affiliation</b></div>
+              <div>
+                <input id="affiliation" name="affiliation" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your Affiliation (Optional)"></input>
+              </div>
+              <div style="padding-bottom:5px; padding-top:11px;"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Email</b></div>
+              <div>
+                <input id="email" name="email" style="width:620px; padding:3px; color:#FFFFFF;" class="dark-input" placeholder="Your email (Optional)"></input>
+              </div>
+            </div>
+          </div>
+          <div class="trans-panel rounded-5" style="margin-top:11px">
+            <div class="trans-panel-bg rounded-5"></div>
+            <div class="yellow-header">Sequences & Structure & Constraints
+            <div id="gen-mutation-map" class="yellow-button clickable rounded-5 centered" style="float:right; padding: 5px; font-size: 12px; margin-top:-5px; margin-right:5px; width:175px">
+              <div class="yellow-button-bg"></div>
+              Generate Mutate-and-Map
+            </div>            
+            </div>
+            <div style="padding:22px">
+              <div style="padding-bottom:0px"><b style="color:#FFFFFF"><span style="color:#FF0000">*</span>&nbsp;Sequences Secondary Structure and titles (Tab delimited. 1 per line)</b></div> 
+              <textarea id="sequences" name="sequences" style="width:620px; height:70px; padding:3px; margin-top:5px" class="dark-input" placeholder="Sequence secstruct title"></textarea>          
+              <div style="padding-top:3px; color:#777777; font-size:11px">
+                Your sequences will have "GG" attached at the 5'end and "NNNNNNNUUCGNNNNNNNAAAAGAAACAACAACAACAAC" at the 3' end.
+              </div>
+            </div>
+            <div class="clearer"></div>
+          </div>
+          <div style="padding-top:22px;">
+            <div style="text-align:center; padding-left:22px; padding-right:22px; padding-bottom:11px;">
+              Your request will be reviewed by Eterna staff. You'll shortly receive a response from us through your email.
+            </div>
+            <div id="cloud-lab-submit" class="green-button clickable rounded-5 centered" style="padding: 7px; font-size: 19px; margin-top:0px; width:200px">
+              <div class="green-button-bg"></div>
+              Request
+            </div>
+          </div>
+        <div class="clearer"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <block name="side-bar"></block>
+</block>
+
+
+
+
+
+
+
