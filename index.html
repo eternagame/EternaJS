@@ -72,18 +72,18 @@
     <script src="./frontend/jscripts/eterna/builder-tutscripts.js"></script>
 </head>
 <body>
-<div id="eterna-container"></div>
+<!-- Scripts expect that an element with "maingame" will exist, so this name shouldn't be changed -->
+<div id="maingame"></div>
 <script src="./main.js"></script>
 <script>
     // Handle ?puzzle=[puzzle_id] URL param
     let params = new URLSearchParams(window.location.search);
+    let puzid = undefined;
     if (params.has("puzzle")) {
-        var puzid = Number(params.get("puzzle"));
+        puzid = Number(params.get("puzzle"));
     }
 
-    window.app = new EternaApp({
-        puzzleID: puzid,
-    });
+    window.app = new EternaApp({puzzleID: puzid});
     app.run();
 </script>
 </body>

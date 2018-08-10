@@ -15,6 +15,7 @@ import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {Bitmaps} from "./resources/Bitmaps";
 import {EternaSettings} from "./settings/EternaSettings";
+import {ExternalInterface} from "./util/ExternalInterface";
 import {Fonts} from "./util/Fonts";
 import {SoundManager} from "./resources/SoundManager";
 
@@ -46,9 +47,7 @@ interface EternaAppParameters {
 
 /** Entry point for the game */
 export class EternaApp extends FlashbangApp {
-    public constructor({
-        containerID = "eterna-container", width, height, puzzleID
-    }: EternaAppParameters) {
+    public constructor({containerID = "maingame", width, height, puzzleID}: EternaAppParameters) {
         super();
 
         let eternaContainer: HTMLElement = document.getElementById(containerID);
@@ -65,6 +64,8 @@ export class EternaApp extends FlashbangApp {
         if (width) this._width = width;
         if (height) this._height = height;
         if (puzzleID) this._puzzleID = puzzleID;
+
+        ExternalInterface.init(eternaContainer);
     }
 
     protected createPixi(): PIXI.Application {
