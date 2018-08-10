@@ -22,8 +22,8 @@ export class ExternalInterface {
 
     public static call(name: string, ...args: any[]): any {
         try {
-            let f = getDeepProperty(window as any, name) as Function;
-            return f.apply(null, args);
+            let [parent, f] = getDeepProperty(window as any, name);
+            return (f as Function).apply(parent, args);
         } catch (e) {
             log.error(`ExternalInterface: error calling '${name}': ${e}`);
             return undefined;
@@ -34,13 +34,19 @@ export class ExternalInterface {
 }
 
 
-function getDeepProperty(obj: any, name: string): any {
-    let prop = obj;
-    for (let component of name.split(".")) {
-        if (prop === undefined) {
-            throw new Error(`'${name}' is not a property of ${obj}`);
+function getDeepProperty(obj: any, name: string): [any, any] {
+    if (name === "") {
+        return [obj, undefined];
+    } else {
+        let prop = obj;
+        let parent;
+        for (let component of name.split(".")) {
+            if (prop === undefined) {
+                throw new Error(`'${name}' is not a property of ${obj}`);
+            }
+            parent = prop;
+            prop = prop[component];
         }
-        prop = prop[component];
+        return [parent, prop];
     }
-    return prop;
 }
