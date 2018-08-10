@@ -17,6 +17,8 @@ import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
+import {Booster} from "./Booster";
+import {PoseEditMode} from "./PoseEditMode";
 
 export class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
@@ -279,21 +281,22 @@ export class PoseEditToolbar extends ContainerObject {
         let boostersData: BoostersData = this._puzzle.get_boosters();
         if (boostersData) {
             if (boostersData.paint_tools != null) {
-                log.debug("TODO: boostersData.paint_tools");
-                // for (let k = 0; k < boostersData.paint_tools.length; k++) {
-                //     let booster = new Booster(this, boostersData.paint_tools[k], (me: Booster, dummy: number) => {
-                //         me.on_load();
-                //         let button: GameButton = me.create_button();
-                //         button.clicked.connect(() => {
-                //             this.set_poses_color(me.get_tool_color());
-                //             this.deselect_all_colorings();
-                //             button.set_selected(true);
-                //         });
-                //         this.dyn_paint_tools.push(button);
-                //         this.tools_container.addObject(button);
-                //         this.layout_bars();
-                //     });
-                // }
+                let mode: PoseEditMode = this.mode as PoseEditMode;
+                for (let data of boostersData.paint_tools) {
+                    Booster.create(mode, data).then(([booster, _]: [Booster, number]) => {
+                        booster.on_load();
+                        let button: GameButton = booster.create_button();
+                        button.clicked.connect(() => {
+                            log.info("TODO: booster button clicked");
+                            // mode.set_poses_color(booster.get_tool_color());
+                            // mode.deselect_all_colorings();
+                            // button.set_selected(true);
+                        });
+                        // this.dyn_paint_tools.push(button);
+                        // this.tools_container.addObject(button);
+                        // this.layout_bars();
+                    });
+                }
             }
 
             if (boostersData.actions != null) {
