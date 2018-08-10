@@ -1,10 +1,14 @@
-Application.GET_URI = "/get/"
-Application.POST_URI = "/post/"
+#Application.GET_URI = "/get/"
+#Application.POST_URI = "/post/"
+# TSC: temporarily hardcoding these
+Application.GET_URI = "https://eternagame.org/get/"
+Application.POST_URI = "https://eternagame.org/post/"
+
 Application.DEFAULT_USER_PICTURE = "https://s3.amazonaws.com/eterna/icon_img/question.png"
 Application.SCRIPT_URI = "http://ec2-54-242-61-159.compute-1.amazonaws.com:3000"
 
 Application.on_initialize = () ->
-  
+
   @GLOBAL_THEME_PARAMETERS = new Object()
   # If user data is rendered in DataManager, we are logged in
   user_prerender = DataManager.get_from_stash('user')
@@ -19,19 +23,19 @@ Application.on_initialize = () ->
     @GLOBAL_THEME_PARAMETERS['is_lab_member'] = parseInt(user_prerender['ten_tools_level']) >= 10
     # check for become a lab memeber badge here !!!
     if @GLOBAL_THEME_PARAMETERS['is_lab_member_legacy'] == true
-      @GLOBAL_THEME_PARAMETERS['is_lab_member'] = true 
-    @GLOBAL_THEME_PARAMETERS['ten_tools_puzzle_count'] = parseInt(user_prerender['ten_tools_puzzle_count']) 
+      @GLOBAL_THEME_PARAMETERS['is_lab_member'] = true
+    @GLOBAL_THEME_PARAMETERS['ten_tools_puzzle_count'] = parseInt(user_prerender['ten_tools_puzzle_count'])
     @GLOBAL_THEME_PARAMETERS['is_press_corps'] = parseInt(user_prerender['is_press_corps']) > 0
     if @GLOBAL_THEME_PARAMETERS['is_press_corps'] == true
       @GLOBAL_THEME_PARAMETERS['is_lab_member'] = false
       @GLOBAL_THEME_PARAMETERS['is_lab_member_legacy'] = false
       @GLOBAL_THEME_PARAMETERS['is_lab_member_press_corps'] = false
-      if @GLOBAL_THEME_PARAMETERS['ten_tools_puzzle_count'] >= 1 
+      if @GLOBAL_THEME_PARAMETERS['ten_tools_puzzle_count'] >= 1
         @GLOBAL_THEME_PARAMETERS['is_lab_member'] = true
         @GLOBAL_THEME_PARAMETERS['is_lab_member_legacy'] = true
         @GLOBAL_THEME_PARAMETERS['is_lab_member_press_corps'] = true
     #alert(@GLOBAL_THEME_PARAMETERS['ten_tools_puzzle_count'])
-    
+
   @GOOGLE_ANALYTICS_ID = "UA-17383892-2"
   @initialize_google_analytics(@GOOGLE_ANALYTICS_ID, "")
 
