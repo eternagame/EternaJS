@@ -951,22 +951,19 @@ export class PoseEditMode extends GameMode {
             this._run_status.text = txt;
         });
 
-        let set_end_callback = (pose: PoseEditMode, sid: string): void => {
-            ExternalInterface.addCallback("end_" + sid, (ret: any): void => {
-                log.info("end_" + sid + "() called");
-                log.info(ret);
-                if (typeof(ret['cause']) === "string") {
-                    this._run_status.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
-                    this._run_status.text = ret['cause'];
-                    // restore
-                    // FIXME: other clean-ups? should unregister callbacks?
-                    // Application.instance.remove_lock("LOCK_SCRIPT");
-                } else {
-                    // leave the script running asynchronously
-                }
-            });
-        };
-        set_end_callback(this, nid);
+        ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
+            log.info("end_" + nid + "() called");
+            log.info(ret);
+            if (typeof(ret['cause']) === "string") {
+                this._run_status.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
+                this._run_status.text = ret['cause'];
+                // restore
+                // FIXME: other clean-ups? should unregister callbacks?
+                // Application.instance.remove_lock("LOCK_SCRIPT");
+            } else {
+                // leave the script running asynchronously
+            }
+        });
 
         // run
         log.info("running script " + nid);
@@ -3081,56 +3078,53 @@ export class PoseEditMode extends GameMode {
         } else if (type === ConstraintType.SCRIPT) {
             let nid: string = value;
             if (ExternalInterface.available) {
-                let set_end_callback = (pose: PoseEditMode, sid: string, jj: number): void => {
-                    ExternalInterface.addCallback("end_" + sid, (ret: any): void => {
-                        let goal: string = "";
-                        let name: string = "...";
-                        let value: string = "";
-                        let index: string = null;
-                        let data_png: string = "";
-                        let satisfied: boolean = false;
-                        log.info("end_" + sid + "() called");
-                        if (ret && ret.cause) {
-                            if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-                            if (ret.cause.goal != null) goal = ret.cause.goal;
-                            if (ret.cause.name != null) name = ret.cause.name;
-                            if (ret.cause.value != null) value = ret.cause.value;
-                            if (ret.cause.index != null) {
-                                index = (ret.cause.index + 1).toString();
-                                let ll: number = this._is_pip_mode ?
-                                    ret.cause.index :
-                                    (ret.cause.index === this._current_target_index ? 0 : -1);
-                                if (ll >= 0) {
-                                    if (ret.cause.highlight != null) {
-                                        this._poses[ll].highlight_user_defined_sequence(ret.cause.highlight);
-                                    } else {
-                                        this._poses[ll].clear_user_defined_highlight();
-                                    }
+                this.register_script_callbacks();
+
+                ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
+                    let goal: string = "";
+                    let name: string = "...";
+                    let value: string = "";
+                    let index: string = null;
+                    let data_png: string = "";
+                    let satisfied: boolean = false;
+                    log.info("end_" + nid + "() called");
+                    if (ret && ret.cause) {
+                        if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
+                        if (ret.cause.goal != null) goal = ret.cause.goal;
+                        if (ret.cause.name != null) name = ret.cause.name;
+                        if (ret.cause.value != null) value = ret.cause.value;
+                        if (ret.cause.index != null) {
+                            index = (ret.cause.index + 1).toString();
+                            let ll: number = this._is_pip_mode ?
+                                ret.cause.index :
+                                (ret.cause.index === this._current_target_index ? 0 : -1);
+                            if (ll >= 0) {
+                                if (ret.cause.highlight != null) {
+                                    this._poses[ll].highlight_user_defined_sequence(ret.cause.highlight);
+                                } else {
+                                    this._poses[ll].clear_user_defined_highlight();
                                 }
                             }
-
-                            if (ret.cause.icon_b64) {
-                                data_png = ret.cause.icon_b64;
-                            }
                         }
 
-                        if (render) {
-                            this._constraint_boxes[jj].set_content(ConstraintType.SCRIPT, {
-                                "nid": sid,
-                                "goal": goal,
-                                "name": name,
-                                "value": value,
-                                "index": index,
-                                "data_png": data_png
-                            }, satisfied, 0);
+                        if (ret.cause.icon_b64) {
+                            data_png = ret.cause.icon_b64;
                         }
+                    }
 
-                        isSatisfied = satisfied;
-                    });
-                };
+                    if (render) {
+                        this._constraint_boxes[ii / 2].set_content(ConstraintType.SCRIPT, {
+                            "nid": nid,
+                            "goal": goal,
+                            "name": name,
+                            "value": value,
+                            "index": index,
+                            "data_png": data_png
+                        }, satisfied, 0);
+                    }
 
-                this.register_script_callbacks();
-                set_end_callback(this, nid, ii / 2);
+                    isSatisfied = satisfied;
+                });
 
                 // run
                 isSatisfied = false;
