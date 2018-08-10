@@ -922,11 +922,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let data_png: string = val.data_png;
             if (data_png != null) {
                 this._icon.visible = true;
-                TextureUtil.loadURL(data_png).then(texture => {
-                    if (this.isLiveObject) {
-                        this._icon.texture = texture;
-                        this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
-                    }
+                TextureUtil.fromBase64PNG(data_png).then(tex => {
+                    this._icon.texture = tex;
+                    this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
                 });
             } else {
                 this._icon.visible = false;
@@ -953,11 +951,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 this._req_stat_txt.visible = false;
             }
 
-            tooltip.append(`Your puzzle must satisfy script ${nid}`);
-            if (goal != null && goal.length > 0) {
-                tooltip.append(goal);
-            }
-
+            tooltip.append(goal != null && goal.length > 0 ? goal : `Your puzzle must satisfy script ${nid}`);
             this._outline.visible = true;
         }
 
