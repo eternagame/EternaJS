@@ -23,6 +23,7 @@ import {EPars} from "../EPars";
 import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
+import {Booster} from "../mode/PoseEdit/Booster";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Sounds} from "../resources/Sounds";
 import {ROPWait} from "../rscript/ROPWait";
@@ -2364,7 +2365,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.set_parenthesis(parenthesis);
     }
 
-    public register_paint_tool(paint_color: number, tool: Object): void {
+    public register_paint_tool(paint_color: number, tool: Booster): void {
         this._dyn_paint_colors.push(paint_color);
         this._dyn_paint_tools.push(tool);
     }
@@ -3273,8 +3274,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _design_struct_updated: boolean;
 
     /// Scripted painters
-    private _dyn_paint_colors: any[] = [];
-    private _dyn_paint_tools: any[] = [];
+    private _dyn_paint_colors: number[] = [];
+    private _dyn_paint_tools: Booster[] = [];
 
     /// Is this pose editable?
     private _editable: boolean;
