@@ -369,8 +369,9 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public load_custom_params(): boolean {
-        throw new Error("TODO");
+    protected load_custom_params(): boolean {
+        log.info("TODO: Vienna2.load_custom_params");
+        return false;
         // if (this._lib != null && this._lib.hasOwnProperty("loadParams")) {
         //     let success: boolean = (this._lib.loadParams("custom.par") === 0);
         //     if (success) this.reset_cache();
