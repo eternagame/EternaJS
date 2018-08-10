@@ -1,27 +1,27 @@
 class @BuilderLabs extends Builder
   on_build : (block, $container, params) ->
     Application.track_google_analytics_event("lab","open","")
-    
+
     skip = 0
     if params['skip']?
       skip = parseInt(params['skip'])
     else
       params['skip'] = skip
-      
+
     size = 21
     if params['size']?
       size = parseInt(params['size'])
     else
       params['size'] = 21
-      
+
     PageData.get_labs(params['lab_type'], params, (page) =>
       labs = page['labs']
-      
+
       for lab in labs
         lab['is_expert'] = lab['affiliation'] != null
         if lab['body']?
           lab['short_body'] = Utils.shorten_str(lab['body'], 60)
-          
+
         if lab['affiliation']?
           try
             affiliation = JSON.parse(lab['affiliation'])
@@ -41,34 +41,34 @@ class @BuilderLabs extends Builder
 
         if params['lab_type'] is "waiting_projects"
           lab['waiting'] = true
-        
+
       params['total_labs'] = page['num_labs']
       params['total_synth_slots'] = page['num_slots']
-      
+
       if Application.CURRENT_USER?
         if Application.CURRENT_USER['points']?
           if parseInt(Application.CURRENT_USER['points']) >= 20000
             params['puzzle_creatable'] = true
-            
+
       param_string = {}
       param_string.single = if params['single'] then params['single'] else undefined
       param_string.switch = if params['switch'] then params['switch'] else undefined
-      
+
       skip = params['skip']
       if !(skip?)
         skip = 0
-        
+
       size = params['size']
       if !(size?)
         size = 21
-        
+
       param_string.skip = skip
       param_string.size = size
       param_string.search = params['search']
       sort = params['sort']
       if !(sort?)
         sort = "date"
-        
+
       param_string.sort = "date"
       if params['lab_type'] is "past_projects"
         params.date_sort_url = "/web/labs/past/?" + Utils.generate_parameter_string(param_string)
@@ -76,7 +76,7 @@ class @BuilderLabs extends Builder
         params.date_sort_url = "/web/labs/proposed/?" + Utils.generate_parameter_string(param_string)
       else
         params.date_sort_url = "/web/labs/?" + Utils.generate_parameter_string(param_string)
-        
+
       param_string.sort = "synthesis"
       if params['lab_type'] is "past_projects"
         params.synthesis_sort_url = "/web/labs/past/?" + Utils.generate_parameter_string(param_string)
@@ -84,20 +84,20 @@ class @BuilderLabs extends Builder
         params.synthesis_sort_url = "/web/labs/proposed/?" + Utils.generate_parameter_string(param_string)
       else
         params.synthesis_sort_url = "/web/labs/?" + Utils.generate_parameter_string(param_string)
-        
+
       params.sort = sort
       param_string.sort = sort
 
       params['num_voters'] = page['num_voters']
       ThemeCompiler.compile_block(block,params,$container)
-      
+
       if $labs = @get_element("labs")
         packer = Packers($labs)
         packer.add(labs)
-        
+
       if $single = @get_element("single")
         if params['single'] is "checked" then $single.attr("checked", true)
-        
+
         $single.click(() =>
           if params['single'] isnt "checked" then param_string.single="checked" else param_string.single=undefined
           if params['lab_type'] is "past_projects"
@@ -106,7 +106,7 @@ class @BuilderLabs extends Builder
             url = "/web/labs/?" + Utils.generate_parameter_string(param_string)
           Utils.redirect_to(url)
         )
-        
+
       if $switch = @get_element("switch")
         if params['switch'] is "checked" then $switch.attr("checked", true)
         $switch.click(() =>
@@ -117,7 +117,7 @@ class @BuilderLabs extends Builder
             url = "/web/labs/?" + Utils.generate_parameter_string(param_string)
           Utils.redirect_to(url)
         )
-        
+
       if $search = @get_element("search")
         if params['search'] then $search.attr("value", params['search'])
         $search.keyup((e) =>
@@ -132,10 +132,10 @@ class @BuilderLabs extends Builder
             url += Utils.generate_parameter_string(param_string)
             Utils.redirect_to(url)
         )
-        
+
       total_labs = page["num_labs"]
       if $pager = @get_element("pager")
-        pager_str = EternaUtils.get_pager(Math.floor(skip /size), Math.ceil(total_labs/size), (pageindex) =>
+        pager_str = EternaUtils.get_pager(Math.floor(skip/size), Math.ceil(total_labs/size), (pageindex) =>
           url_params = {skip:pageindex * size, size:size, search:params['search'], sort:sort, project_type:params['project_type']}
           if params['lab_type'] is "past_projects" then url = "/web/labs/past/?"
           else if params['lab_type'] is "pending_projects" then url = "/web/labs/proposed/?"
@@ -145,7 +145,7 @@ class @BuilderLabs extends Builder
         )
         $pager.html(pager_str)
     )
-       
+
 class @BuilderLab extends Builder
 
   on_build : (block ,$container, params) ->
@@ -169,11 +169,11 @@ class @BuilderLabPage extends Builder
 
   on_build : (block,$container,params) ->
     nid = params['nid']
-    
+
     if !(nid?)
       Utils.display_error("nid missing?")
       return
-    
+
     PageData.get_lab(nid, (page) =>
       lab = page['lab']
       params = @parse_state(page, params)
@@ -210,20 +210,20 @@ class @BuilderLabPage extends Builder
           round_params['puzzles'] = puzzles
           round_params['is_playable'] = puzzle_history[ii]['is_playable'] || (lab['affiliation'] == null)
           round_block.add_block($project_puzzles,round_params)
-      
+
       if !params['is_pending']
         @show_project_status(lab)
-      
+
       if $co = @get_element("synthesized")
         @show_synthesis_results($co, lab['synthesized_solutions'])
-            
+
       if page['follow']? && page['follow'][0]?
         params['is_already_followed'] = true
         @show_unfollow()
       else
         params['is_already_followed'] = false
         @show_follow()
-        
+
       @draw_target_structure(@, lab)
       if $delete_proposed_lab = @get_element("delete-proposed-lab")
         $delete_proposed_lab.click(() =>
@@ -284,7 +284,7 @@ class @BuilderLabPage extends Builder
             Overlay.hide()
           )
         )
-      
+
       if $unfollow = @get_element("unfollow")
         $unfollow.click(() =>
           Overlay.set_loading("")
@@ -298,48 +298,48 @@ class @BuilderLabPage extends Builder
           )
         )
     )
-  
+
   show_project_status : (lab) ->
     if lab['exp_phase'] is null and lab['winner']?
       curr_phase = 5
     else
       curr_phase = parseInt(lab['exp_phase'])
-    
+
     if curr_phase?
       for ii in [1..curr_phase-1] by 1
         if $thumbnail = @get_element("status_thumbnail_#{ii}")
-          $thumbnail.attr("src", "https://s3.amazonaws.com/eterna/eterna2/tracker/active-"+ii+".png") 
+          $thumbnail.attr("src", "https://s3.amazonaws.com/eterna/eterna2/tracker/active-"+ii+".png")
         if $bar = @get_element("status_bar_#{ii}")
           $bar.css('background-color', '#3192AC')
-        
+
       if $curr_thumbnail = @get_element("status_thumbnail_#{curr_phase}")
         $curr_thumbnail.attr("src","https://s3.amazonaws.com/eterna/eterna2/tracker/active-"+ii+".png")
         $curr_thumbnail.removeClass("deactive_thumbnail").addClass("active_thumbnail")
-        
+
         if lab['exp_phase_end']
           date = new Date(lab['exp_phase_end'] * 1000)
           $curr_thumbnail.attr('title','Expected Completion Date: '+date)
         else
           $curr_thumbnail.attr('title','Expected Completion Date: not applicable')
-          
+
       if $prev_bar = @get_element("status_bar_#{curr_phase}")
         $prev_bar.removeClass("long_progress_bar").addClass("prev_progress_bar")
         $prev_bar.css('background-color','#3192AC')
-        
+
       if $curr_bar = @get_element("status_bar_#{curr_phase+1}")
         $curr_bar.removeClass("long_progress_bar").addClass("curr_progress_bar")
-          
+
       curr_time = lab['curr_time']
       if start = parseInt(lab['exp_phase_start'])
         past_minutes = (curr_time-start)/60
         if end = parseInt(lab['exp_phase_end'])
           expected_minutes = (end-start)/60
         else
-          expected_minutes = 1440 
+          expected_minutes = 1440
       else
         past_minutes = 0
       percentage = Math.floor((past_minutes/expected_minutes)*100)
-      
+
       if $curr_bar
         if percentage >= 100
           $curr_bar.css('background-color','#3192AC')
@@ -348,7 +348,7 @@ class @BuilderLabPage extends Builder
           $curr_bar.css('background', '-webkit-linear-gradient(left, #3192ac +'+percentage+'%,#cccccc '+percentage+'%)')
           $curr_bar.css('background', '-moz-linear-gradient(left, #3192ac +'+percentage+'%,#cccccc '+percentage+'%)')
           $curr_bar.css('background', '-o-linear-gradient(left, #3192ac +'+percentage+'%,#cccccc '+percentage+'%)')
-                    
+
   show_synthesis_results : ($co, synthesized_results) ->
     $box = @get_element("top-players-box")
     top_players_block = Blocks("top-players")
@@ -362,7 +362,7 @@ class @BuilderLabPage extends Builder
             synthesis_score = parseFloat(synthesis_data['score']).toFixed(3)+"x"
             synthesis_score += " (" + c_before + " / " + c_after + ")"
       top_players_block.add_block($box, {picture:EternaUtils.get_user_picture(synthesized_results[ii]['picture']), title: synthesized_results[ii]['title'], score: synthesis_score, name: synthesized_results[ii]['name'], uid:synthesized_results[ii]['uid'], puznid:synthesized_results[ii]['puznid'], puztitle:synthesized_results[ii]['puztitle'],solnid:synthesized_results[ii]['id']})
- 
+
 
   parse_state : (page, params) ->
     lab = page['lab']
@@ -385,7 +385,7 @@ class @BuilderLabPage extends Builder
       params['selection'] = "Admin selection"
     else
       params['selection'] = "User voting"
-      
+
     params['is_active'] = true
     if lab['pending']
       params['is_active'] = false
@@ -395,17 +395,17 @@ class @BuilderLabPage extends Builder
     else if lab['winner']
       params['is_active'] = false
       params['is_archive'] = true
-      
+
     if page['my_votes']?
       params['my_votes'] = page['my_votes']
     else
       params['my_votes'] = 0
-        
+
     if page['sum_picks']?
       sum_picks = parseInt(page['sum_picks'])
     else
       sum_picks = 0
-        
+
     if lab['uid'] is page['uid']
       params['lab_founder'] = true
     else
@@ -433,7 +433,7 @@ class @BuilderLabPage extends Builder
       history = histories[ii]
       round = history['round']
       puzzles = history['puzzles']
-      
+
       for puzzle in puzzles
         params['num_slots'] += puzzle['num_slots']
         params['num_solutions'] += puzzle['num_solutions']
@@ -514,31 +514,31 @@ class @BuilderLabPage extends Builder
       $follow.show()
     if $unfollow = @get_element("unfollow")
       $unfollow.hide()
-  
+
   show_unfollow : () ->
     if $follow = @get_element("follow")
       $follow.hide()
     if $unfollow = @get_element("unfollow")
       $unfollow.show()
-  
+
   hide_follows : () ->
     if $follow = @get_element("follow")
       $follow.hide()
     if $unfollow = @get_element("unfollow")
       $unfollow.hide()
-  
+
   show_save_conclusion : () ->
     if $save_conclusion = @get_element("div-save-conclusion")
       $save_conclusion.show()
-  
+
   hide_save_conclusion : () ->
     if $save_conclusion = @get_element("div-save-conclusion")
       $save_conclusion.hide()
-  
+
   show_edit_conclusion : () ->
     if $edit_conclusion = @get_element("div-display-conclusion")
       $edit_conclusion.show()
-  
+
   hide_edit_conclusion : () ->
     if $edit_conclusion = @get_element("div-display-conclusion")
       $edit_conclusion.hide()
@@ -597,10 +597,10 @@ class @BuilderLabPageInfo extends Builder
 class @BuilderLabPageEdit extends Builder
   on_build : (block, $container, params) ->
     nid = params['nid']
-    
+
     PageData.get_lab(nid, (page) =>
       params = BuilderLabPage.prototype.parse_state(page, params)
- 
+
       lab = page['lab']
 
       if lab['uid'] != Application.CURRENT_USER['uid']
@@ -636,12 +636,12 @@ class @BuilderLabPageEdit extends Builder
                 if !( (/([^@]+@.+)/i).exec(email) )
                   Utils.display_error("Invalid email input")
                   return
-       
+
             if @get_element("affiliation") and affiliation = @get_element("affiliation").attr("value")
               if Utils.is_text_empty(affiliation)
                 Utils.display_error("Please enter your affiliation")
                 return
-       
+
             if !(title?) or title == ""
               alert "Please enter title"
               return
@@ -652,11 +652,11 @@ class @BuilderLabPageEdit extends Builder
 
             #serialize datas
             data = BuilderLabPuzzleModify.prototype.serialize_datas()
-          
+
             if data.length == 0
               Utils.display_error("You should add at least one puzzle")
               return
-          
+
             post_data = new Array()
             # remove unused data
             for ii in [0..data.length-1]
@@ -712,7 +712,7 @@ class @BuilderLabPuzzleModify extends Builder
           if isNaN(gcs) then gcs = undefined
           if isNaN(aus) then aus = undefined
           if isNaN(mutation_limit) then mutation_limit = mutation_limit
-      
+
           if Utils.is_text_empty(title)
             Utils.display_error("Please enter title")
             return
@@ -742,7 +742,7 @@ class @BuilderLabPuzzleModify extends Builder
     if $formal_puzzles = @get_element("lab-propose-puzzles")
       block = Blocks("lab-puzzle-small-block")
       for formal_puzzle in last_round_puzzles
-        
+
         # parse constraints
         if constraints = formal_puzzle['constraints']
           constraints = constraints.split(",")
@@ -778,13 +778,13 @@ class @BuilderStrategies extends Builder
     PageData.get_strategies((page) =>
       strategies = page['strategies']
       ThemeCompiler.compile_block(block,params,$container)
-      
+
       if $strategies = @get_element("strategies")
         for ii in [0..strategies.length-1] by 1
           strategies[ii]['picture'] = EternaUtils.get_user_picture(strategies[ii]['picture'])
         packer = Packers($strategies)
         packer.add(strategies)
-        
+
       if $readmore = @get_element("read-more")
         if $readmore_parent = @get_element("read-more-parent")
           if $readmore_content = @get_element("read-more-content")
@@ -792,12 +792,12 @@ class @BuilderStrategies extends Builder
               $readmore_content.show()
             )
     )
-    
+
 class @BuilderLabVoter extends Builder
   on_build : (block ,$container, params) ->
     $container.html("")
     ThemeCompiler.compile_block(block,params,$container)
-    
+
     if $button = @get_element("button")
       nid = params['nid']
       if params['voted'] == "VOTED"
@@ -830,16 +830,16 @@ class @BuilderLabVoter extends Builder
             Utils.display_error("Vote failed - please try again later!")
           )
         )
-        
+
 
 class @BuilderExpertLabProposeSequences extends Builder
   on_build : (block ,$container, params) ->
     project_type = params['project_type']
     ThemeCompiler.compile_block(block,params,$container)
-    
+
     if !(Application.CURRENT_USER?)
       Utils.display_error("Warning : You are not logged in - you won't be able to submit your proposal!")
-    
+
     if $gen_mutation = @get_element("gen-mutation-map")
       $gen_mutation.click(() =>
         sequence = prompt("Please enter the sequence, secondary structure and title")
@@ -853,7 +853,7 @@ class @BuilderExpertLabProposeSequences extends Builder
                 tmp_seq += map['map'][ii]+"\t"+seq_match[1]+"\t"+seq_match[2]+"-"+map['title'][ii]+"\n"
               $sequences.val(tmp_seq)
       )
-      
+
     if $submit = @get_element("cloud-lab-submit")
       $submit.click(() =>
         title = @get_element("title").attr("value")
@@ -864,46 +864,46 @@ class @BuilderExpertLabProposeSequences extends Builder
 
         if Utils.is_text_empty(title)
           Utils.display_error("Please enter title")
-          return 
+          return
 
         if secstruct?
           if (/[^\(\.\)]/).exec(secstruct)
             Utils.display_error("Wrong secondary structure - only use ( . )")
             return
-        
+
         if Utils.is_text_empty(sequences)
           Utils.display_error("Please enter the sequences")
           return
-                
+
         sequences_array = sequences.split('\n')
         new_sequences_array = []
-        
+
         for seq_string in sequences_array
           ne_match = (/[^\s\n]+/).exec(seq_string)
-        
+
           if !(ne_match?)
             continue
-          
+
           seq_string = seq_string.replace(/\n/g, "")
           seq_string = seq_string.replace(/\r/g, "")
           seq_match = (/^([^\s]+)\s+([^\s]+)\s+([^\n]+)\n?$/i).exec(seq_string)
-          
+
           if !(seq_match?)
             Utils.display_error("Wrong sequence/secstruct/title format " + seq_string + ".")
             return
-          
+
           seq = seq_match[1]
           sec = seq_match[2]
           title = seq_match[3]
-          
+
           if (/([^AUGCT])/gi).exec(seq)
             Utils.display_error("Your sequence " + seq + " has a letter other than AUCGT")
             return
-          
+
           if !(seq?)
             Utils.display_error("Wrong sequence format")
             return
-          
+
           if !(title?)
             Utils.display_error("Wrong title format")
             return
@@ -913,24 +913,24 @@ class @BuilderExpertLabProposeSequences extends Builder
           if (/[^\(\.\)]/).exec(sec)
             Utils.display_error("Your secstruct " + sec + " has a letter other than ( ) . ")
             return
- 
+
           if seq.length > 110
             Utils.display_error("You can't have sequences with lengths more than 110")
             return
-           
+
           new_sequences_array.push(seq_string)
-        
+
         @get_element("sequences").attr("value", new_sequences_array.join("\n"))
         if Utils.is_text_empty(title)
           Utils.display_error("Please enter the project title")
           return
-        
+
         if Utils.is_text_empty(body)
           Utils.display_error("Please enter the project body")
           return
         Overlay.set_loading()
         Overlay.show()
-        
+
         if !(Application.CURRENT_USER?)
           Utils.display_error("You must be logged in to submit a proposal")
           return
@@ -941,25 +941,25 @@ class @BuilderExpertLabProposeSequences extends Builder
     if Utils.is_text_empty(sequences)
       Utils.display_error("Please enter the sequences")
       return
-            
+
     sequences_array = sequences.split('\n')
     new_sequences_array = []
     new_sequences_json_array = []
- 
+
     for seq_string in sequences_array
       ne_match = (/[^\s\n]+/).exec(seq_string)
-    
+
       if !(ne_match?)
         continue
-      
+
       seq_string = seq_string.replace(/\n/g, "")
       seq_string = seq_string.replace(/\r/g, "")
       seq_match = (/^([^\s]+)\s+([^\s]+)\s+([^\n]+)\n?$/i).exec(seq_string)
-      
+
       if !(seq_match?)
         Utils.display_error("Wrong sequence/secstruct/title format " + seq_string + ".")
         return
-      
+
       seq = seq_match[1]
       sec = seq_match[2]
       title = seq_match[3]
@@ -967,11 +967,11 @@ class @BuilderExpertLabProposeSequences extends Builder
       if (/([^AUGCT])/gi).exec(seq)
         Utils.display_error("Your sequence " + seq + " has a letter other than AUCGT")
         return
-      
+
       if !(seq?)
         Utils.display_error("Wrong sequence format")
         return
-      
+
       if !(title?)
         Utils.display_error("Wrong title format")
         return
@@ -1013,11 +1013,11 @@ class @BuilderExpertLabProposePuzzle extends Builder
         #serialize datas
         data = BuilderLabPuzzleModify.prototype.serialize_datas()
 
-      
+
         if data.length == 0
           Utils.display_error("You should add at least one puzzle")
           return
-      
+
         post_data = new Array()
         # remove unused data
         for ii in [0..data.length-1]
@@ -1028,7 +1028,7 @@ class @BuilderExpertLabProposePuzzle extends Builder
         if !post_data.length
           Utils.display_error("You should add at least one puzzle")
           return
-      
+
         if $form_data = @get_element("form-data")
           $form_data.val(JSON.stringify(post_data))
 
@@ -1049,7 +1049,7 @@ class @BuilderExpertLabProposePuzzle extends Builder
 class @BuilderExpertLabSimple extends Builder
   on_build : (block ,$container, params) ->
     ThemeCompiler.compile_block(block,params,$container)
-    
+
     if $delete = @get_element("cloud-delete")
       $delete.click(() =>
         Overlay.set_loading()
@@ -1063,11 +1063,11 @@ class @BuilderExpertLabSimple extends Builder
 class @BuilderProjectAddCoadmin extends Builder
   on_build : (block, $container, params) ->
     ThemeCompiler.compile_block(block,params,$container)
-    
+
     $name = @get_element("name");
     $add = @get_element("add");
     $remove = @get_element("remove");
-    
+
     $add.click(() =>
       Overlay.set_loading("")
       Overlay.show()
@@ -1079,7 +1079,7 @@ class @BuilderProjectAddCoadmin extends Builder
           Overlay.hide()
       )
     )
-    
+
     $remove.click(() =>
       Overlay.set_loading("")
       Overlay.show()
@@ -1099,12 +1099,12 @@ class @BuilderLabsSequenceCollection extends Builder
     PageData.get_labs_for_collection(params, (page) =>
     #PageData.get_labs_for_tracker(params, (page) =>
       labs = page['labs']
-      
+
       $additional_sequences = @get_element("lab-additional-sequences")
       if $paper_labs = @get_element("paper-labs")
         packer = Packers($paper_labs)
         packer.add(labs)
-      
+
       if $collect_sequences = @get_element("submit-lab-collection")
         $collect_sequences.click(() =>
           #Overlay.set_loading("replying...")
@@ -1133,7 +1133,7 @@ class @BuilderLabsSequenceCollection extends Builder
           #AjaxManager.query("GET", url, query_params)
           #alert "jntest"
         )
-        
+
       if $collect_sequence_file = @get_element("submit-lab-collection-file")
         $collect_sequence_file.click(() =>
           PageData.get_sequence_data_for_collection(params, (data) =>
@@ -1180,12 +1180,12 @@ class @BuilderLabCardsMap extends Builder
     if params['cards_type']?
       cards_type = params['cards_type']
     params['cards_type'] = cards_type
-    
+
     ThemeCompiler.compile_block(block,params,$container)
 
-    $lab_cards_map_ = @get_element("lab-cards-map")	
+    $lab_cards_map_ = @get_element("lab-cards-map")
     if !($lab_cards_map_?)
-      return 
+      return
 
     if params['cards_type']? and params['cards_type'] == 'my_lab_cards'
       @build_my_lab_cards(block, $container, params)
@@ -1202,7 +1202,7 @@ class @BuilderLabCardsMap extends Builder
 
 
   build_lab_cards_lazy : (block, $container, params) ->
- 
+
     pageindex = 0
 
     status = @load_lab_cards_lazy(params, pageindex)
@@ -1218,10 +1218,10 @@ class @BuilderLabCardsMap extends Builder
   build_lab_cards : (block, $container, params) ->
 
     pageindex = 0
-    
+
     status = @load_lab_cards_lazy(params, pageindex)
     status = @preprocess_lab_cards(params, ++pageindex)
- 
+
     this2 = this
     $(window).scroll(() ->
 
@@ -1231,7 +1231,7 @@ class @BuilderLabCardsMap extends Builder
           status = this2.preprocess_lab_cards(params, ++pageindex)
 
       this2.fade_in_lab_cards(params)
-     
+
     )
 
 
@@ -1246,15 +1246,15 @@ class @BuilderLabCardsMap extends Builder
 
   format_lab_cards : () ->
     card_titles = $(".lab-card-title")
-    for title in card_titles 
+    for title in card_titles
       fs = parseInt($(title).css('font-size'))
-      if $(title).height() > 34.0    
+      if $(title).height() > 34.0
         $(title).css('line-height', 17+'px')
         while $(title).height() > 34.0 and fs > 0
           $(title).css('font-size', (--fs)+"px")
         $(title).css('line-height', (fs+2)+'px')
         $(title).css('margin-top', (15-fs)+'px')
-      
+
 
   fade_in_lab_cards : (params, on_enter = true) ->
     speed = 300
@@ -1286,7 +1286,7 @@ class @BuilderLabCardsMap extends Builder
           continue
         $(card).fadeTo(0, 0)
         cards_.push(card)
-        
+
 
   load_lab_cards : (pageindex) ->
 
@@ -1301,18 +1301,18 @@ class @BuilderLabCardsMap extends Builder
 
     @format_lab_cards()
     @fade_out_lab_cards()
-    
+
     @set_processing(pageindex, false)
     return true
-    
+
 
   preprocess_lab_cards : (params, pageindex) ->
 
     params = @init_params(params, pageindex)
-        
+
     # process labs for lab cards
     @set_processing(pageindex, true)
-    PageData.get_labs_for_lab_cards(params, (page) =>     
+    PageData.get_labs_for_lab_cards(params, (page) =>
       labs_ = (@parse_lab(lab) for lab in page['labs'])
       if pageindex != 1 or (params['mode']? and params['mode'] == 'lazy')
         @set_processing(pageindex, false)
@@ -1326,14 +1326,14 @@ class @BuilderLabCardsMap extends Builder
 
     # process labs for lab cards
     @set_processing(pageindex, true)
-    PageData.get_labs_for_lab_cards(params, (page) =>     
+    PageData.get_labs_for_lab_cards(params, (page) =>
       labs = (@parse_lab(lab) for lab in page['labs'])
       @set_processing(pageindex, false)
 
       # display labs in lab cards map
       packer = Packers($lab_cards_map_)
       packer.add(labs)
-  
+
       @fade_out_lab_cards()
 
       if params['cards_type'] == 'my_lab_cards'
@@ -1353,9 +1353,9 @@ class @BuilderLabCardsMap extends Builder
 
 
   parse_lab : (lab) ->
-  
+
     lab['is_expert'] = lab['affiliation'] != null
-          
+
     if !(lab['cover_image']?)
       try
         lab['cover_image'] = EternaUtils.get_puzzle_middle_thumbnail(lab['puzzles'][0]['puzzles'][0])
@@ -1363,22 +1363,22 @@ class @BuilderLabCardsMap extends Builder
       lab['selection'] = "Admin selection"
     else
       lab['selection'] = "User voting"
-                     
+
     show_exp_counts = false
     if show_exp_counts
       if !(lab['num_slots']?)
         lab['num_slots'] = 0
-       
+
       if !(lab['num_solutions']?)
         lab['num_synthesized'] = 0
-       
+
       if !(lab['submitted']?)
         lab['submitted'] = 0
-       
+
       if !(lab['num_synthesized']?)
         lab['num_synthesized'] = 0
-       
-        
+
+
     if !(lab['exp_phase'])? or parseInt(lab['exp_phase']) < 1
       lab['exp_phase'] = 5
 
@@ -1390,24 +1390,24 @@ class @BuilderLabCardsMap extends Builder
 
     nid = lab['nid']
     exp_phase = lab['exp_phase']
-     
+
     exp_statuses = [
       "Accepting Submissions",
       "Ordering DNA Templates",
-      "Synthesizing RNA", 
+      "Synthesizing RNA",
       "Getting Data",
       "Results Posted"
     ]
     lab['exp_status'] = exp_statuses[exp_phase-1]
     lab['link'] = "/web/lab/"+nid+"/"
-    lab['verb'] = "Enter"  
+    lab['verb'] = "Enter"
 
     if lab['puz_nid']? and lab['user_name']?
       #lab['link'] = "/web/labs/data-browser/?project_id=id&designer=name"
       lab['link'] = "/web/browse/"+lab['nid']+"/?Designer="+lab['user_name']
       if exp_phase < 5
         lab['verb'] = "Review Designs" #Review
-      else 
+      else
         lab['verb'] = "Browse Results" #Browse
 
     return lab

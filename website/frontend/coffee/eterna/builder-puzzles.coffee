@@ -1,17 +1,17 @@
 class @BuilderPuzzlePage extends Builder
   on_build : (block, $container, params) ->
-           
+
     nid = params['nid']
-    
+
     if !(nid?)
       Utils.display_error("nid not specified")
       return
-    
+
     Application.track_google_analytics_event("puzzle","open", "");
     PageData.get_puzzle(nid, (page)=>
       @process_pagebuild(block, $container, params, nid, page)
       )
-  
+
   process_pagebuild : (block, $container, params, nid, page) ->
       puzzle = page['puzzle']
       cleared = page['cleared']
@@ -24,42 +24,42 @@ class @BuilderPuzzlePage extends Builder
       input_params['body'] = EternaUtils.format_body(puzzle['body'])
       input_params['comments'] = page['comments']
       input_params['created'] = puzzle['created']
-      
+
       if Application.CURRENT_USER?
         input_params['can_modify'] = (Application.CURRENT_USER['uid']==puzzle['uid'])
-        
+
       if cleared?
         for ii in [0..cleared.length-1] by 1
           if cleared[ii]['nid'] == nid
             input_params['cleared'] = true
             break
-    
+
       if is_player_puzzle = (parseInt(puzzle['made-by-player']) > 0)
-        
+
         input_params['is_player_puzzle'] = is_player_puzzle
         solved_by_bot = puzzle['solved-by-bot']
         input_params['username'] = puzzle['username']
         input_params['userpicture'] = EternaUtils.get_user_picture(puzzle['userpicture'])
-        
+
         if false # solved_by_bot
           if (/InfoRNA_/i).exec(solved_by_bot)
             if (/InfoRNA_failure/i).exec(solved_by_bot) ||  (/InfoRNA_timeout/i).exec(solved_by_bot)
               input_params["failed_by_inforna"] = true
             else
               input_params["solved_by_inforna"] = true
-    
+
           if (/ViennaRNA_/i).exec(solved_by_bot)
             if (/ViennaRNA_failure/i).exec(solved_by_bot) ||  (/ViennaRNA_timeout/i).exec(solved_by_bot)
               input_params["failed_by_vienna"] = true
             else
               input_params["solved_by_vienna"] = true
-            
+
           if (/RNASSD_/i).exec(solved_by_bot)
             if (/RNASSD_failure/i).exec(solved_by_bot) ||  (/RNASSD_timeout/i).exec(solved_by_bot)
               input_params["failed_by_rnassd"] = true
             else
               input_params["solved_by_rnassd"] = true
-        
+
       ThemeCompiler.compile_block(block,input_params,$container)
       if $structure_notation = @get_element("structure_notation")
         notation_block = Blocks("notation")
@@ -72,7 +72,7 @@ class @BuilderPuzzlePage extends Builder
             if $shape = @get_element("shape-"+ii)
               #EternaUtils.draw_secstructure(switch_struct_data[ii], $shape, null, null, null)
               $sec_struct = switch_struct_data[0]
-        else          
+        else
             notation_block.add_block($structure_notation, {secstruct: puzzle['secstruct']})
             $structure_notation.append('<div id="shape"></div>');
             if $shape = @get_element("shape")
@@ -103,7 +103,7 @@ class @BuilderPuzzlePage extends Builder
         $tutorial_link.hide()
         PageData.get_puzzle_tutscripts(nid, (page) =>
           if page['tutscripts']?
-            if page['tutscripts'][0]?     
+            if page['tutscripts'][0]?
               $tutorial_link.show()
         )
       ###
@@ -115,7 +115,7 @@ class @BuilderPuzzlePage extends Builder
       else
         input_params['is_already_followed'] = false
         @show_follow()
-      
+
       if $follow_puzzle = @get_element("follow_puzzle")
         $follow_puzzle.click(() =>
           Overlay.set_loading("replying..")
@@ -125,7 +125,7 @@ class @BuilderPuzzlePage extends Builder
               @show_unfollow()
             else
               alert "Follow fail!!"
-            Overlay.hide()  
+            Overlay.hide()
             )
           )
       if $unfollow_puzzle = @get_element("unfollow_puzzle")
@@ -137,7 +137,7 @@ class @BuilderPuzzlePage extends Builder
               @show_follow()
             else
               alert "Unfollow fail!!"
-            Overlay.hide()  
+            Overlay.hide()
             )
           )
       if $run_script = @get_element("run_script")
@@ -149,32 +149,32 @@ class @BuilderPuzzlePage extends Builder
           if block['template_context_variables_'] == null
             block.add_block($overlay_slot, {nid:input_params['nid'], secstruct:input_params['secstruct']})
           )
-      
+
       if $playpuzzle = @get_element("playpuzzle")
         $playpuzzle.click(()=>
           Application.track_google_analytics_event("puzzle","play", "");
           Utils.redirect_to("/game/puzzle/"+input_params['nid'])
-          )    
+          )
 
   show_create_image : () ->
     if $create_image = @get_element("create_image")
       $create_image.show()
-    
+
   show_follow : () ->
     if $follow_puzzle = @get_element("follow_puzzle")
       $follow_puzzle.show()
     if $unfollow_puzzle = @get_element("unfollow_puzzle")
       $unfollow_puzzle.hide()
-  
+
   show_unfollow : () ->
     if $follow_puzzle = @get_element("follow_puzzle")
       $follow_puzzle.hide()
     if $unfollow_puzzle = @get_element("unfollow_puzzle")
-      $unfollow_puzzle.show()    
-      
+      $unfollow_puzzle.show()
+
 class @BuilderPuzzle extends Builder
   on_build : (block, $container, params) ->
-    
+
     input_params = {}
     input_params['id'] = params['id']
     input_params['title'] = params['title']
@@ -185,55 +185,55 @@ class @BuilderPuzzle extends Builder
     input_params['play_direct'] = (params['type'] == "Basic" || params['type'] == "SwitchBasic")
 
     if is_player_puzzle = (parseInt(params['made-by-player']) > 0)
-      
+
       input_params['is_player_puzzle'] = is_player_puzzle
       solved_by_bot = params['solved-by-bot']
       input_params['username'] = params['username']
       input_params['userpicture'] = EternaUtils.get_user_picture(params['userpicture'])
-      
+
       if false # solved_by_bot
         if (/InfoRNA_/i).exec(solved_by_bot)
           if (/InfoRNA_failure/i).exec(solved_by_bot) ||  (/InfoRNA_timeout/i).exec(solved_by_bot)
             input_params["failed_by_inforna"] = true
           else
             input_params["solved_by_inforna"] = true
-  
+
         if (/ViennaRNA_/i).exec(solved_by_bot)
           if (/ViennaRNA_failure/i).exec(solved_by_bot) ||  (/ViennaRNA_timeout/i).exec(solved_by_bot)
             input_params["failed_by_vienna"] = true
           else
             input_params["solved_by_vienna"] = true
-          
+
         if (/RNASSD_/i).exec(solved_by_bot)
           if (/RNASSD_failure/i).exec(solved_by_bot) ||  (/RNASSD_timeout/i).exec(solved_by_bot)
             input_params["failed_by_rnassd"] = true
           else
-            input_params["solved_by_rnassd"] = true            
-    
+            input_params["solved_by_rnassd"] = true
+
     ThemeCompiler.compile_block(block,input_params,$container)
 
 class @BuilderPuzzles extends Builder
-  
+
   on_build : (block, $container, params) ->
-    
+
     type = params['type']
     skip = params['skip']
     size = params['size']
     sort = params['sort']
     search = params['search']
-    
+
     if !(sort?)
       if type == "playerpuzzles"
         sort = params['sort'] = "date"
       else
         sort = params['sort'] = "reward"
-      
-    
+
+
     if !(skip?)
       skip = 0
     if !(size?)
       size = 24
-      
+
     if type == "tutorials"
       PageData.get_tutorials((page) =>
         @build_puzzles(block, $container, params, page)
@@ -246,13 +246,13 @@ class @BuilderPuzzles extends Builder
     else if type == "challenges"
       send_params = {}
       send_params['single'] = params['single']
-      send_params['switch'] = params['switch']     
+      send_params['switch'] = params['switch']
       send_params['notcleared'] = params['notcleared']
       if params['notcleared']
         if Application.CURRENT_USER?
           send_params['uid'] = Application.CURRENT_USER['uid']
       PageData.get_challenges(skip, size, sort, search, send_params, (page)=>
-        @build_puzzles(block, $container, params, page)  
+        @build_puzzles(block, $container, params, page)
       )
     else if type == "playerpuzzles"
       send_params = {}
@@ -266,8 +266,8 @@ class @BuilderPuzzles extends Builder
         if Application.CURRENT_USER?
           send_params['uid'] = Application.CURRENT_USER['uid']
       PageData.get_player_puzzles(skip, size, sort, search, send_params, (page) =>
-        @build_puzzles(block, $container, params, page) 
-      )  
+        @build_puzzles(block, $container, params, page)
+      )
 
     else if type == "progression"
       send_params = {}
@@ -276,20 +276,20 @@ class @BuilderPuzzles extends Builder
         @build_puzzles(block, $container, params, page)
       )
 
-    
+
   build_puzzles : (block, $container, params, page) ->
- 
+
     type = params['type']
     skip = params['skip']
     size = params['size']
     sort = params['sort']
     search = params['search']
-    
+
     if Application.CURRENT_USER?
       if Application.CURRENT_USER['points']?
         if parseInt(Application.CURRENT_USER['points']) >= 20000
-          params['puzzle_creatable'] = true 
-    
+          params['puzzle_creatable'] = true
+
 
     param_string = {}
     param_string.size = size
@@ -309,12 +309,12 @@ class @BuilderPuzzles extends Builder
 
     param_string.sort = "solved"
     params['solved_sort_url'] = "/web/" + type + "/?" + Utils.generate_parameter_string(param_string)
-    
+
     param_string.sort = "length"
     params['length_sort_url'] = "/web/" + type + "/?" + Utils.generate_parameter_string(param_string)
 
     param_string.sort = params['sort']
-    
+
     if !(skip?)
       skip = 0
     if !(size?)
@@ -324,47 +324,47 @@ class @BuilderPuzzles extends Builder
     num_puzzles = page["num_puzzles"]
     cleared_puzzles = page["cleared"]
     ThemeCompiler.compile_block(block,params,$container)
-      
+
     $puzzles = @get_element("puzzles")
     packer = Packers($puzzles)
     puzzle_params = []
-      
+
     for ii in [0..puzzles.length-1] by 1
       puzzleid = puzzles[ii]['id']
       cleared = false
-      
+
       if cleared_puzzles?
         for jj in [0..cleared_puzzles.length-1] by 1
           if puzzleid == cleared_puzzles[jj]['nid']
             cleared=true
             break;
-      
+
       puzzles[ii]['cleared'] = cleared
       puzzle_params.push(puzzles[ii])
-      
+
     packer.add(puzzle_params)
-      
+
     total_puzzles = page["num_puzzles"]
     if $pager = @get_element("pager")
-      pager_str = EternaUtils.get_pager(Math.floor(skip /size), Math.ceil(total_puzzles/size), (pageindex) =>
+      pager_str = EternaUtils.get_pager(Math.floor(skip/size), Math.ceil(total_puzzles/size), (pageindex) =>
         url_params = {skip:pageindex * size, size:size, sort:sort, single:params['single'], switch:params['switch'], vienna:params['vienna'], rnassd:params['rnassd'], inforna:params['inforna'], notcleared:params['notcleared']}
         if search?
           url_params['search'] = search
-        return "/web/" + type + "/?" + Utils.generate_parameter_string(url_params, true)  
+        return "/web/" + type + "/?" + Utils.generate_parameter_string(url_params, true)
       )
-      
+
       $pager.html(pager_str)
-    
+
     if $search = @get_element("search")
       $search.attr("value", search)
-      
+
       $search.keyup((e) =>
         if e.keyCode == KeyCode.KEYCODE_ENTER
           search = $search.attr("value")
           param_string.search = search
           url = "/web/" + type + "/?" + Utils.generate_parameter_string(param_string)
           Utils.redirect_to(url)
-      )  
+      )
 
     if $single = @get_element("single")
       if params['single'] == "checked" then $single.attr("checked", true)
@@ -382,8 +382,8 @@ class @BuilderPuzzles extends Builder
          if params['switch']!="checked" then param_string.switch="checked" else param_string.switch=undefined
          url = "/web/" + type + "/?" + Utils.generate_parameter_string(param_string)
          Utils.redirect_to(url)
-      )      
-    
+      )
+
     if $vienna = @get_element("vienna")
       if params['vienna'] == "fail" then $vienna.attr("checked", true)
 
@@ -391,7 +391,7 @@ class @BuilderPuzzles extends Builder
          if params['vienna']!="fail" then param_string.vienna="fail" else param_string.vienna=undefined
          url = "/web/" + type + "/?" + Utils.generate_parameter_string(param_string)
          Utils.redirect_to(url)
-      )  
+      )
 
 
     if $rnassd = @get_element("rnassd")
@@ -425,22 +425,22 @@ class @BuilderPuzzles extends Builder
 class @BuilderPuzzlePageEdit extends Builder
   on_build : (block, $container, params) ->
     nid = params['nid']
-    
+
     if !(nid?)
       Utils.display_error("nid not specified")
       return
-    
+
     PageData.get_puzzle(nid, (page)=>
       puzzle = page['puzzle']
       if Application.CURRENT_USER['uid'] != puzzle['uid']
         alert "Can't modify this puzzle"
         url = "/web/puzzle/"+nid+"/"
         Utils.redirect_to(url)
-        return       
+        return
       BuilderPuzzlePage.prototype.process_pagebuild(block, $container, params, nid, page)
       if $edit = @get_element("citylights")
         $edit.click(()=>
-            $title = @get_element("title") 
+            $title = @get_element("title")
             $description = @get_element("description")
             title = $title.val()
             description = $description.val()
@@ -471,7 +471,7 @@ class @BuilderRunScriptOverlay extends @BuilderScriptListsPage
     @skip = params['skip']
     size = params['size']
     search = "Puzzle Solving"
-    secstruct = params['secstruct'] 
+    secstruct = params['secstruct']
     if !(skip?)
       @skip = 0
     if !(size?)
@@ -482,26 +482,26 @@ class @BuilderRunScriptOverlay extends @BuilderScriptListsPage
         @skip += size
         @initialize_scripts(@skip, size, search, secstruct)
         )
-  
+
 
   initialize_scripts : (skip, size, search, secstruct) ->
     if $script_lists_container = @get_element("script_lists")
       if $loading = @get_element("loading")
-        $loading.show(); 
+        $loading.show();
       Script.get_script_lists(skip,size,search,(data) =>
         if skip > data['total_script']
           $loading.hide()
           return
-        
+
         block = Blocks("script-lists-overlay")
         scripts = data['lists']
         @set_script_lists(block, $script_lists_container, scripts)
-            
+
         builderscript = new BuilderScriptPage
         builderscript.initialize_flash()
         builderscript.initialize_pervasives()
         timeout = 10
-        
+
         for i in [0..scripts.length-1]
           id = scripts[i]['nid']
           do (id) =>
@@ -520,8 +520,8 @@ class @BuilderRunScriptOverlay extends @BuilderScriptListsPage
                   result = func(secstruct)
                 catch Error
                   result = Error
-                finally  
+                finally
                   $result.attr('value', result)
-            ) 
-        $loading.hide()    
+            )
+        $loading.hide()
       )
