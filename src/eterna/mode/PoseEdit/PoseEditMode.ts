@@ -861,7 +861,7 @@ export class PoseEditMode extends GameMode {
             });
 
             ExternalInterface.addCallback("load_parameters_from_buffer", (str: string): boolean => {
-                log.info("TODO: load_paramaters_from_buffer");
+                log.info("TODO: load_parameters_from_buffer");
                 return false;
                 // // this.trace_js("load_parameters_from_buffer() called");
                 // let buf: ByteArray = new ByteArray;

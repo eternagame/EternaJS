@@ -54,10 +54,6 @@ export abstract class Folder {
         return null;
     }
 
-    public load_custom_params(): boolean {
-        return false;
-    }
-
     public can_multifold(): boolean {
         return false;
     }
@@ -79,31 +75,10 @@ export abstract class Folder {
     //     }
     //     return res;
     // }
-    //
-    // public load_parameters_from_url(url: string, done_cb: Function = null): void {
-    //
-    //     if (this._clib_inst != null) {
-    //         let cb: Function = function (e: Event): void {
-    //             let res: boolean = false;
-    //             if (e.type !== IOErrorEvent.IO_ERROR) {
-    //                 res = this.load_parameters_from_buffer(e.target.data);
-    //             }
-    //             if (done_cb != null) done_cb(res);
-    //         };
-    //
-    //         let rsc: URLLoader = new URLLoader();
-    //         rsc.dataFormat = URLLoaderDataFormat.BINARY;
-    //         rsc.addEventListener(IOErrorEvent.IO_ERROR, function (e: Event): void {
-    //             cb(e);
-    //         });
-    //         rsc.addEventListener(Event.COMPLETE, function (e: Event): void {
-    //             cb(e);
-    //         });
-    //         rsc.load(new URLRequest(url));
-    //         return;
-    //     }
-    //     if (done_cb != null) done_cb(false);
-    // }
+
+    protected load_custom_params(): boolean {
+        return false;
+    }
 
     public hairpin_energy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
         return 0;
