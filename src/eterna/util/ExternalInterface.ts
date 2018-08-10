@@ -1,7 +1,12 @@
 import * as log from "loglevel";
 import {Assert} from "../../flashbang/util/Assert";
 
-/** Exposes named functions to external scripts  */
+/**
+ * Exposes named functions to external scripts.
+ * This mirrors Flash's ExternalInterface class: it installs functions on the "maingame" <div> that the Eterna
+ * app lives inside, and also calls into functions exposed by `script-interface.coffee`, a set of javascript functions
+ * loaded by the page.
+ */
 export class ExternalInterface {
     // TODO: remove me
     public static readonly available: boolean = true;
@@ -24,8 +29,8 @@ export class ExternalInterface {
 
     public static call(name: string, ...args: any[]): any {
         try {
-            let [parent, f] = getDeepProperty(window as any, name);
-            return (f as Function).apply(parent, args);
+            let [thisVal, f] = getDeepProperty(window as any, name);
+            return (f as Function).apply(thisVal, args);
         } catch (e) {
             log.error(`ExternalInterface: error calling '${name}': ${e}`);
             return undefined;
@@ -35,7 +40,6 @@ export class ExternalInterface {
     private static _scriptRoot: any;
     private static _callbacks: Set<string> = new Set();
 }
-
 
 function getDeepProperty(obj: any, name: string): [any, any] {
     if (name === "") {
