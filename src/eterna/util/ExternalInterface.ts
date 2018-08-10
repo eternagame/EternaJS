@@ -1,22 +1,24 @@
-import {Flashbang} from "../../flashbang/core/Flashbang";
 import * as log from "loglevel";
+import {Assert} from "../../flashbang/util/Assert";
 
 /** Exposes named functions to external scripts  */
 export class ExternalInterface {
     // TODO: remove me
     public static readonly available: boolean = true;
 
+    public static init(scriptRoot: HTMLElement) {
+        Assert.isTrue(this._scriptRoot === undefined, "Already initialized");
+        this._scriptRoot = scriptRoot;
+    }
+
     public static addCallback(name: string, callback: Function): void {
-        let root: any = (Flashbang.app as any);
-        root[name] = callback;
+        this._scriptRoot[name] = callback;
         ExternalInterface._callbacks.add(name);
     }
 
     public static removeCallback(name: string): void {
-        let root: any = (Flashbang.app as any);
-
         if (ExternalInterface._callbacks.delete(name)) {
-            delete root[name];
+            delete this._scriptRoot[name];
         }
     }
 
@@ -30,6 +32,7 @@ export class ExternalInterface {
         }
     }
 
+    private static _scriptRoot: any;
     private static _callbacks: Set<string> = new Set();
 }
 
