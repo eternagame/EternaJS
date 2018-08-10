@@ -1,11 +1,23 @@
 import * as _ from "lodash";
-import {
-    BaseRenderTexture, BaseTexture, DisplayObject, Rectangle, RenderTexture, Texture, Container
-} from "pixi.js";
+import {BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 import {Assert} from "./Assert";
 
 export class TextureUtil {
+    public static fromBase64PNG(base64PNG: string): Promise<Texture> {
+        // <img> elements can be created from base64 strings.
+        // We create an img, set its src data to the base64 string,
+        // and then use that as the source for a new PIXI texture.
+        let img = document.createElement("img");
+        img.src = `data:image/png;base64, ${base64PNG}`;
+        let baseTex = new BaseTexture(img);
+        let tex = new Texture(baseTex);
+
+        return new Promise<Texture>(resolve => {
+            tex.once("update", tex => resolve(tex));
+        });
+    }
+
     public static load(source: Texture | string | string[]): Promise<void> {
         if (source instanceof Texture) {
             return this.loadTexture(source as Texture).then(() => {});
