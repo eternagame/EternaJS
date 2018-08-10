@@ -8,9 +8,6 @@ import {Assert} from "../../flashbang/util/Assert";
  * loaded by the page.
  */
 export class ExternalInterface {
-    // TODO: remove me
-    public static readonly available: boolean = true;
-
     public static init(scriptRoot: HTMLElement) {
         Assert.isTrue(this._scriptRoot === undefined, "Already initialized");
         this._scriptRoot = scriptRoot;

@@ -3077,66 +3077,59 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.SCRIPT) {
             let nid: string = value;
-            if (ExternalInterface.available) {
-                this.register_script_callbacks();
+            this.register_script_callbacks();
 
-                ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
-                    let goal: string = "";
-                    let name: string = "...";
-                    let value: string = "";
-                    let index: string = null;
-                    let data_png: string = "";
-                    let satisfied: boolean = false;
-                    log.info("end_" + nid + "() called");
-                    if (ret && ret.cause) {
-                        if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-                        if (ret.cause.goal != null) goal = ret.cause.goal;
-                        if (ret.cause.name != null) name = ret.cause.name;
-                        if (ret.cause.value != null) value = ret.cause.value;
-                        if (ret.cause.index != null) {
-                            index = (ret.cause.index + 1).toString();
-                            let ll: number = this._is_pip_mode ?
-                                ret.cause.index :
-                                (ret.cause.index === this._current_target_index ? 0 : -1);
-                            if (ll >= 0) {
-                                if (ret.cause.highlight != null) {
-                                    this._poses[ll].highlight_user_defined_sequence(ret.cause.highlight);
-                                } else {
-                                    this._poses[ll].clear_user_defined_highlight();
-                                }
+            ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
+                let goal: string = "";
+                let name: string = "...";
+                let value: string = "";
+                let index: string = null;
+                let data_png: string = "";
+                let satisfied: boolean = false;
+                log.info("end_" + nid + "() called");
+                if (ret && ret.cause) {
+                    if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
+                    if (ret.cause.goal != null) goal = ret.cause.goal;
+                    if (ret.cause.name != null) name = ret.cause.name;
+                    if (ret.cause.value != null) value = ret.cause.value;
+                    if (ret.cause.index != null) {
+                        index = (ret.cause.index + 1).toString();
+                        let ll: number = this._is_pip_mode ?
+                            ret.cause.index :
+                            (ret.cause.index === this._current_target_index ? 0 : -1);
+                        if (ll >= 0) {
+                            if (ret.cause.highlight != null) {
+                                this._poses[ll].highlight_user_defined_sequence(ret.cause.highlight);
+                            } else {
+                                this._poses[ll].clear_user_defined_highlight();
                             }
                         }
-
-                        if (ret.cause.icon_b64) {
-                            data_png = ret.cause.icon_b64;
-                        }
                     }
 
-                    if (render) {
-                        this._constraint_boxes[ii / 2].set_content(ConstraintType.SCRIPT, {
-                            "nid": nid,
-                            "goal": goal,
-                            "name": name,
-                            "value": value,
-                            "index": index,
-                            "data_png": data_png
-                        }, satisfied, 0);
+                    if (ret.cause.icon_b64) {
+                        data_png = ret.cause.icon_b64;
                     }
-
-                    isSatisfied = satisfied;
-                });
-
-                // run
-                isSatisfied = false;
-                log.info("running script " + nid);
-                ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
-                log.info("launched");
-
-            } else {
-                if (render) {
-                    box.set_content(ConstraintType.SCRIPT, {"nid": nid, "goal": "", "name": "..."}, isSatisfied, 0);
                 }
-            }
+
+                if (render) {
+                    this._constraint_boxes[ii / 2].set_content(ConstraintType.SCRIPT, {
+                        "nid": nid,
+                        "goal": goal,
+                        "name": name,
+                        "value": value,
+                        "index": index,
+                        "data_png": data_png
+                    }, satisfied, 0);
+                }
+
+                isSatisfied = satisfied;
+            });
+
+            // run
+            isSatisfied = false;
+            log.info("running script " + nid);
+            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
+            log.info("launched");
         }
 
         return isSatisfied;
