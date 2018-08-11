@@ -283,19 +283,19 @@ export class PoseEditToolbar extends ContainerObject {
             let mode: PoseEditMode = this.mode as PoseEditMode;
 
             if (boostersData.paint_tools != null) {
+                log.info("TODO: validate paint tools");
                 for (let data of boostersData.paint_tools) {
                     Booster.create(mode, data).then(booster => {
                         booster.on_load();
                         let button: GameButton = booster.create_button();
                         button.clicked.connect(() => {
-                            log.info("TODO: booster button clicked");
-                            // mode.set_poses_color(booster.get_tool_color());
-                            // mode.deselect_all_colorings();
-                            // button.set_selected(true);
+                            mode.set_poses_color(booster.get_tool_color());
+                            mode.deselect_all_colorings();
+                            button.toggled.value = true;
                         });
-                        // this.dyn_paint_tools.push(button);
-                        // this.tools_container.addObject(button);
-                        // this.layout_bars();
+                        this.dyn_paint_tools.push(button);
+                        this.addObject(button, this._toolbarLayout);
+                        this._toolbarLayout.layout();
                     });
                 }
             }
