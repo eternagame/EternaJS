@@ -43,7 +43,7 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public fontSize(size: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-size", `${size}pt`, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, "font-size", `${size}px`, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
