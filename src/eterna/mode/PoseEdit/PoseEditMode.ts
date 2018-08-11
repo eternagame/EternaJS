@@ -496,6 +496,7 @@ export class PoseEditMode extends GameMode {
             .font(Fonts.ARIAL)
             .fontSize(14)
             .bold()
+            .selectable(false)
             .color(0xffffff);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.modeSprite);

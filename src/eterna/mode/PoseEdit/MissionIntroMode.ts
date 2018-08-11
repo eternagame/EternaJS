@@ -76,7 +76,7 @@ export class MissionIntroMode extends AppMode {
 
         let nameLabel = new HTMLTextObject(this._puzzleName)
             .font(Fonts.STDFONT_LIGHT)
-            .fontSize(14)
+            .fontSize(18)
             .color(0xffffff)
             .selectable(false)
             .maxWidth(Flashbang.stageWidth);
