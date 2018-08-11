@@ -15,7 +15,7 @@ export enum BoosterType {
 }
 
 export class Booster {
-    public static create(view: GameMode, data: any): Promise<[Booster, number]> {
+    public static create(view: GameMode, data: any): Promise<Booster> {
         if (!data['type']) {
             return Promise.reject("Invalid booster definition (missing 'type')");
         } else if (!data["icons_b64"] || data["icons_b64"].length != 5) {
@@ -45,7 +45,7 @@ export class Booster {
                 log.info("color_num=" + tool_color);
             }
 
-            let booster = new Booster(
+            return new Booster(
                 view,
                 type,
                 tool_color,
@@ -53,8 +53,6 @@ export class Booster {
                 data['tooltip'],
                 data['script'],
                 buttonStateTextures);
-
-            return Promise.resolve<[Booster, number]>([booster, data['menu_index']]);
         });
     }
 

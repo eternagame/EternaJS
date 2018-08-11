@@ -280,10 +280,11 @@ export class PoseEditToolbar extends ContainerObject {
 
         let boostersData: BoostersData = this._puzzle.get_boosters();
         if (boostersData) {
+            let mode: PoseEditMode = this.mode as PoseEditMode;
+
             if (boostersData.paint_tools != null) {
-                let mode: PoseEditMode = this.mode as PoseEditMode;
                 for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, data).then(([booster, _]: [Booster, number]) => {
+                    Booster.create(mode, data).then(booster => {
                         booster.on_load();
                         let button: GameButton = booster.create_button();
                         button.clicked.connect(() => {
@@ -302,19 +303,16 @@ export class PoseEditToolbar extends ContainerObject {
             if (boostersData.actions != null) {
                 this.boosters_button = new GameButton().allStates(Bitmaps.NovaBoosters);
                 let idx: number = this.actionMenu.add_menu_button(this.boosters_button);
-                log.debug("TODO: boostersData.actions");
-                // for (let k = 0; k < boostersData.actions.length; k++) {
-                //     boostersData.actions[k]['menu_index'] = k;
-                //     let booster = new Booster(this, boostersData.actions[k], (me: Booster, midx: number = 0) => {
-                //         let button: GameButton = me.create_button(14);
-                //         button.set_click_callback(() => {
-                //             me.on_run();
-                //         });
-                //         this.actionMenu.add_sub_menu_button_at(idx, button, midx);
-                //         this.dyn_action_tools.push(button);
-                //         this.layout_bars();
-                //     });
-                // }
+                for (let ii = 0; ii < boostersData.actions.length; ii++) {
+                    let data = boostersData.actions[ii];
+                    Booster.create(mode, data).then(booster => {
+                        let button: GameButton = booster.create_button(14);
+                        button.clicked.connect(() => booster.on_run());
+                        this.actionMenu.add_sub_menu_button_at(idx, button, ii);
+                        this.dyn_action_tools.push(button);
+                        this._toolbarLayout.layout();
+                    });
+                }
             }
         }
 
