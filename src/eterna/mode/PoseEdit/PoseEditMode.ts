@@ -1909,7 +1909,7 @@ export class PoseEditMode extends GameMode {
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
     }
 
-    private deselect_all_colorings(): void {
+    public deselect_all_colorings(): void {
         this._toolbar.palette.clear_selection();
         this._toolbar.pair_swap_button.toggled.value = false;
         for (let k: number = 0; k < this._toolbar.dyn_paint_tools.length; k++) {
@@ -1917,7 +1917,7 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    private set_poses_color(paint_color: number): void {
+    public set_poses_color(paint_color: number): void {
         for (let pose of this._poses) {
             pose.set_current_color(paint_color);
         }
