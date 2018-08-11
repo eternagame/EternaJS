@@ -13,9 +13,14 @@ export class TextureUtil {
         let baseTex = new BaseTexture(img);
         let tex = new Texture(baseTex);
 
-        return new Promise<Texture>(resolve => {
-            tex.once("update", tex => resolve(tex));
-        });
+        if (baseTex.hasLoaded) {
+            // The image may already be loaded
+            return Promise.resolve(tex);
+        } else {
+            return new Promise<Texture>(resolve => {
+                tex.once("update", tex => resolve(tex));
+            });
+        }
     }
 
     public static load(source: Texture | string | string[]): Promise<void> {
