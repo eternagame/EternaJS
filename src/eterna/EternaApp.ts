@@ -74,8 +74,11 @@ export class EternaApp extends FlashbangApp {
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
-        PIXI.settings.RENDER_OPTIONS.roundPixels = true;
-        return new PIXI.Application(this._width, this._height, {backgroundColor: 0x061A34/*, forceCanvas: true*/});
+        return new PIXI.Application(this._width, this._height, {
+            backgroundColor: 0x061A34,
+            antialias: true,
+            roundPixels: true,
+        });
     }
 
     protected get pixiParent(): HTMLElement {
