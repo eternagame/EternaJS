@@ -36,6 +36,7 @@ enum PuzzleID {
     Tutorial6 = 6502945,
     Tutorial8 = 6502947,
     LiquidRobotics10_of_11 = 6503036,   // Script constraints
+    EternaCon2018 = 8952159,
 }
 
 interface EternaAppParameters {
@@ -74,7 +75,7 @@ export class EternaApp extends FlashbangApp {
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
         PIXI.settings.RENDER_OPTIONS.roundPixels = true;
-        return new PIXI.Application(this._width, this._height, {backgroundColor: 0x061A34});
+        return new PIXI.Application(this._width, this._height, {backgroundColor: 0x061A34/*, forceCanvas: true*/});
     }
 
     protected get pixiParent(): HTMLElement {
@@ -155,9 +156,9 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    private readonly _width: number = 1024;
-    private readonly _height: number = 768;
-    private readonly _puzzleID: number = PuzzleID.LiquidRobotics10_of_11;
+    private readonly _width: number = 1280;
+    private readonly _height: number = 1024;
+    private readonly _puzzleID: number = PuzzleID.AAMismatchPilotRun;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
