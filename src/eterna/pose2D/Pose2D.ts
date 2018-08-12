@@ -3005,10 +3005,13 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            let score_label: string = "Total";
-            let score_score: string = "";
+            let score_label = "Total";
+            let score_score = "";
             let factor: number = 0;
-            if ((this._molecular_binding_bases != null) || (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) || (this._oligos != null)) {
+            if ((this._molecular_binding_bases != null) ||
+                (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) ||
+                (this._oligos != null)) {
+
                 let label_elems: string[] = [];
                 let score_elems: string[] = [];
 
@@ -3016,7 +3019,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     factor++;
                     if (this._molecule_is_bound_real) {
                         label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
-                        let molecule_bonus: number = Number(this._molecular_binding_bonus * 100) / 100.0;
+                        let molecule_bonus: number = Math.round(this._molecular_binding_bonus);
                         score_elems.push(EnergyScoreDisplay.green(` ${molecule_bonus} kcal`));
                     } else {
                         label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
@@ -3025,7 +3028,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
                 if (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) {
                     factor++;
-                    let malus: number = this._duplex_cost + Number(this._oligo_malus * 100) / 100.0;
+                    let malus: number = this._duplex_cost + Math.round(this._oligo_malus);
                     if (this._oligo_paired) {
                         label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
                         score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
@@ -3046,7 +3049,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     } else {
                         let malus = this._duplex_cost;
                         for (let ii = 0; ii < this._oligos_paired; ii++) {
-                            malus += Number(this._oligos[this._oligos_order[ii]].malus * 100) / 100.0;
+                            malus += Math.round(this._oligos[this._oligos_order[ii]].malus);
                         }
                         if (this._oligos_paired > 1) {
                             label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
