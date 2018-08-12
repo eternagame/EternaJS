@@ -168,6 +168,46 @@ export class PoseEditToolbar extends ContainerObject {
             this.palette.enabled = false;
         }
 
+        // BOOSTERS
+        let boostersData: BoostersData = this._puzzle.get_boosters();
+        if (boostersData) {
+            let mode: PoseEditMode = this.mode as PoseEditMode;
+
+            if (boostersData.paint_tools != null) {
+                let boosterPaintToolsLayout = new HLayoutContainer();
+                this._toolbarLayout.addHSpacer(SPACE_NARROW);
+                this._toolbarLayout.addChild(boosterPaintToolsLayout);
+                for (let data of boostersData.paint_tools) {
+                    Booster.create(mode, data).then(booster => {
+                        booster.on_load();
+                        let button: GameButton = booster.create_button();
+                        button.clicked.connect(() => {
+                            mode.set_poses_color(booster.get_tool_color());
+                            mode.deselect_all_colorings();
+                            button.toggled.value = true;
+                        });
+                        this.dyn_paint_tools.push(button);
+                        this.addObject(button, boosterPaintToolsLayout);
+                        this.updateLayout();
+                    });
+                }
+            }
+
+            if (boostersData.actions != null) {
+                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters);
+                let idx: number = this.actionMenu.add_menu_button(this.boostersMenu);
+                for (let ii = 0; ii < boostersData.actions.length; ii++) {
+                    let data = boostersData.actions[ii];
+                    Booster.create(mode, data).then(booster => {
+                        let button: GameButton = booster.create_button(14);
+                        button.clicked.connect(() => booster.on_run());
+                        this.actionMenu.add_sub_menu_button_at(idx, button, ii);
+                        this.dyn_action_tools.push(button);
+                    });
+                }
+            }
+        }
+
 
         // ZOOM IN, ZOOM OUT, UNDO, REDO
         this.zoom_in_button = new GameButton()
@@ -278,68 +318,35 @@ export class PoseEditToolbar extends ContainerObject {
             this.addObject(this.hint_button, this._toolbarLayout);
         }
 
-        let boostersData: BoostersData = this._puzzle.get_boosters();
-        if (boostersData) {
-            let mode: PoseEditMode = this.mode as PoseEditMode;
-
-            if (boostersData.paint_tools != null) {
-                log.info("TODO: validate paint tools");
-                for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, data).then(booster => {
-                        booster.on_load();
-                        let button: GameButton = booster.create_button();
-                        button.clicked.connect(() => {
-                            mode.set_poses_color(booster.get_tool_color());
-                            mode.deselect_all_colorings();
-                            button.toggled.value = true;
-                        });
-                        this.dyn_paint_tools.push(button);
-                        this.addObject(button, this._toolbarLayout);
-                        this._toolbarLayout.layout();
-                    });
-                }
-            }
-
-            if (boostersData.actions != null) {
-                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters);
-                let idx: number = this.actionMenu.add_menu_button(this.boostersMenu);
-                for (let ii = 0; ii < boostersData.actions.length; ii++) {
-                    let data = boostersData.actions[ii];
-                    Booster.create(mode, data).then(booster => {
-                        let button: GameButton = booster.create_button(14);
-                        button.clicked.connect(() => booster.on_run());
-                        this.actionMenu.add_sub_menu_button_at(idx, button, ii);
-                        this.dyn_action_tools.push(button);
-                        this._toolbarLayout.layout();
-                    });
-                }
-            }
-        }
-
-        this._toolbarLayout.layout();
-        this._content.addChild(this._toolbarLayout);
-
         // TOGGLE_BAR
         let target_secstructs: string[] = this._puzzle.get_secstructs();
         this.puzzleStateToggle = new ToggleBar(target_secstructs.length);
         if (target_secstructs.length > 1) {
+            // We create the puzzleStateToggle even if we don't add it to the mode,
+            // as scripts may rely on its existence
             this.addObject(this.puzzleStateToggle, this._content);
+        }
+
+        this.updateLayout();
+        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
+    }
+
+    private updateLayout(): void {
+        this._toolbarLayout.layout(true);
+
+        if (this.puzzleStateToggle.isLiveObject) {
             DisplayUtil.positionRelative(
                 this.puzzleStateToggle.display, Align.CENTER, Align.BOTTOM,
-                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5
-            );
+                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5);
         }
 
         DisplayUtil.positionRelative(
             this._content, Align.CENTER, Align.BOTTOM,
-            this._invisibleBackground, Align.CENTER, Align.BOTTOM
-        );
-
-        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
+            this._invisibleBackground, Align.CENTER, Align.BOTTOM);
     }
 
     public set_toolbar_autohide(enabled: boolean): void {
-        const COLLAPSE_ANIM: string = "CollapseAnim";
+        const COLLAPSE_ANIM = "CollapseAnim";
 
         if (this._auto_collapse === enabled) {
             return;

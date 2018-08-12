@@ -1912,8 +1912,8 @@ export class PoseEditMode extends GameMode {
     public deselect_all_colorings(): void {
         this._toolbar.palette.clear_selection();
         this._toolbar.pair_swap_button.toggled.value = false;
-        for (let k: number = 0; k < this._toolbar.dyn_paint_tools.length; k++) {
-            this._toolbar.dyn_paint_tools[k].toggled.value = false;
+        for (let button of this._toolbar.dyn_paint_tools) {
+            button.toggled.value = false;
         }
     }
 
@@ -1935,9 +1935,9 @@ export class PoseEditMode extends GameMode {
 
         this._folder_button.enabled = !disable;
 
-        for (let ii = 0; ii < this._pose_fields.length; ii++) {
-            // this._pose_fields[ii].mouseEnabled = !disable;
-            // this._pose_fields[ii].mouseChildren = !disable;
+        for (let field of this._pose_fields) {
+            field.container.interactive = !disable;
+            field.container.interactiveChildren = !disable;
         }
 
         if (disable) {

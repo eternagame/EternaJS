@@ -37,6 +37,7 @@ enum PuzzleID {
     Tutorial8 = 6502947,
     LiquidRobotics10_of_11 = 6503036,   // Script constraints
     EternaCon2018 = 8952159,
+    SameState_TryptophanB = 7656242,    // Booster paint tool
 }
 
 interface EternaAppParameters {
@@ -161,7 +162,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1280;
     private readonly _height: number = 1024;
-    private readonly _puzzleID: number = PuzzleID.AAMismatchPilotRun;
+    private readonly _puzzleID: number = PuzzleID.SameState_TryptophanB;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
