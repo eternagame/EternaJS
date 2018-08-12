@@ -1,6 +1,4 @@
-import {
-    Graphics, Point, Sprite, Text, Texture
-} from "pixi.js";
+import {Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
@@ -134,7 +132,13 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     protected showState(state: ButtonState): void {
+        this._img.alpha = 1;
         let tex: Texture = this.getTexture(state, this.isSelected);
+        if (tex == null && state == ButtonState.DISABLED) {
+            // If we're missing the disabled texture, use the UP texture at 50% alpha
+            tex = this.getTexture(ButtonState.UP, this.isSelected);
+            this._img.alpha = 0.5;
+        }
         this._img.texture = tex || Texture.EMPTY;
 
         // Create label

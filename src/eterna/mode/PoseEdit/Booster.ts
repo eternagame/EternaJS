@@ -86,11 +86,21 @@ export class Booster {
     public create_button(fontsize: number = 22): GameButton {
         let button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
         if (this._type == BoosterType.PAINTER) {
-            button.up(this._buttonStateTextures[0])
-                .over(this._buttonStateTextures[1])
-                .down(this._buttonStateTextures[2])
-                .selected(this._buttonStateTextures[3])
-                .disabled(this._buttonStateTextures[4]);
+            if (this._buttonStateTextures[0] !== undefined) {
+                button.up(this._buttonStateTextures[0]);
+            }
+            if (this._buttonStateTextures[1] !== undefined) {
+                button.over(this._buttonStateTextures[1]);
+            }
+            if (this._buttonStateTextures[2] !== undefined) {
+                button.down(this._buttonStateTextures[2]);
+            }
+            if (this._buttonStateTextures[3] !== undefined) {
+                button.selected(this._buttonStateTextures[3]);
+            }
+            if (this._buttonStateTextures[4] !== undefined) {
+                button.disabled(this._buttonStateTextures[4]);
+            }
         }
         if (this._label != null) {
             button.label(this._label, fontsize);

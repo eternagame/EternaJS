@@ -331,7 +331,7 @@ export class Puzzle {
         }
     }
 
-    public set_boosters(obj: any): void {
+    public set_boosters(obj: BoostersData): void {
         this._booster_defs = obj;
     }
 
