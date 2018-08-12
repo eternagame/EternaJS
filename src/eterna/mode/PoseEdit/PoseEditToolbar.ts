@@ -31,7 +31,7 @@ export class PoseEditToolbar extends ContainerObject {
     public puzzleStateToggle: ToggleBar;
 
     public actionMenu: EternaMenu;
-    public boosters_button: GameButton;
+    public boostersMenu: GameButton;
     public undo_button: GameButton;
     public redo_button: GameButton;
     public zoom_in_button: GameButton;
@@ -301,8 +301,8 @@ export class PoseEditToolbar extends ContainerObject {
             }
 
             if (boostersData.actions != null) {
-                this.boosters_button = new GameButton().allStates(Bitmaps.NovaBoosters);
-                let idx: number = this.actionMenu.add_menu_button(this.boosters_button);
+                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters);
+                let idx: number = this.actionMenu.add_menu_button(this.boostersMenu);
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
                     Booster.create(mode, data).then(booster => {
