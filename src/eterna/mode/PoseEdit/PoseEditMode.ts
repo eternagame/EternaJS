@@ -1807,7 +1807,7 @@ export class PoseEditMode extends GameMode {
             // show achievements, if we were awarded any
             let cheevs: any = submissionResponse['new_achievements'];
             if (cheevs != null) {
-                return AchievementManager.award_achievement(cheevs).then(() => submissionResponse);
+                return this._achievements.award_achievement(cheevs).then(() => submissionResponse);
             } else {
                 return Promise.resolve(submissionResponse);
             }

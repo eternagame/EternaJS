@@ -5,6 +5,7 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Assert} from "../../flashbang/util/Assert";
+import {AchievementManager} from "../achievements/AchievementManager";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
@@ -26,6 +27,9 @@ export abstract class GameMode extends AppMode {
         this.modeSprite.addChild(this.uiLayer);
         this.modeSprite.addChild(this.dialogLayer);
         this.modeSprite.addChild(this.achievementsLayer);
+
+        this._achievements = new AchievementManager();
+        this.addObject(this._achievements);
     }
 
     public get_pose(i: number): Pose2D {
@@ -204,6 +208,8 @@ export abstract class GameMode extends AppMode {
     protected get_screenshot(): any {
         return null;
     }
+
+    protected _achievements: AchievementManager;
 
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
 
