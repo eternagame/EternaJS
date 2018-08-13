@@ -76,12 +76,12 @@ export class PoseEditMode extends GameMode {
         super.setup();
 
         this._background = new Background();
-        this.addObject(this._background, this._bgLayer);
+        this.addObject(this._background, this.bgLayer);
 
         this._is_screenshot_supported = true;
 
         this._toolbar = new PoseEditToolbar(this._puzzle);
-        this.addObject(this._toolbar, this._uiLayer);
+        this.addObject(this._toolbar, this.uiLayer);
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, Align.CENTER, Align.BOTTOM,
             Align.CENTER, Align.BOTTOM, 20, -20);
@@ -139,7 +139,7 @@ export class PoseEditMode extends GameMode {
         this._docked_spec_box.display.position = new Point(15, 190);
         this._docked_spec_box.set_size(155, 251);
         this._docked_spec_box.display.visible = false;
-        this.addObject(this._docked_spec_box, this._uiLayer);
+        this.addObject(this._docked_spec_box, this.uiLayer);
 
         let x_button: GameButton = new GameButton()
             .allStates(Bitmaps.ImgMaximize)
@@ -153,11 +153,11 @@ export class PoseEditMode extends GameMode {
         this._docked_spec_box.addObject(x_button, this._docked_spec_box.container);
 
         this._ui_highlight = new SpriteObject();
-        this.addObject(this._ui_highlight, this._uiLayer);
+        this.addObject(this._ui_highlight, this.uiLayer);
 
         this._constraint_boxes = [];
         this._constraintsLayer = new Container();
-        this._uiLayer.addChild(this._constraintsLayer);
+        this.uiLayer.addChild(this._constraintsLayer);
 
         this._exit_button = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exit_button.display.scale = new Point(0.3, 0.3);
@@ -166,7 +166,7 @@ export class PoseEditMode extends GameMode {
         this.regs.add(this._exit_button.clicked.connect(() => this.exit_puzzle()));
 
         this._scriptbar = new ActionBar(50);
-        this.addObject(this._scriptbar, this._uiLayer);
+        this.addObject(this._scriptbar, this.uiLayer);
 
         this._nid_field = Fonts.arial("", 16).color(0xffffff).build();
         this._nid_field.width = 100;
@@ -180,7 +180,7 @@ export class PoseEditMode extends GameMode {
 
         this._target_name = Fonts.std_regular("", 18).build();
         this._target_name.visible = false;
-        this._uiLayer.addChild(this._target_name);
+        this.uiLayer.addChild(this._target_name);
 
         // _force_synch = false;
 
@@ -336,7 +336,7 @@ export class PoseEditMode extends GameMode {
             hintBox.container.addChild(hintText);
             hintBox.set_size(420, hintText.height + 46);
 
-            this._hintBoxRef = this.addObject(hintBox, this._uiLayer);
+            this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
             hintBox.display.position = new Point(
                 Flashbang.stageWidth - 440,
                 Flashbang.stageHeight - hintBox.container.height - 90);
@@ -600,7 +600,7 @@ export class PoseEditMode extends GameMode {
             .tooltip("Select the folding engine.");
         this._folder_button.display.position = new Point(17, 160);
         this._folder_button.display.scale = new Point(0.5, 0.5);
-        this.addObject(this._folder_button, this._uiLayer);
+        this.addObject(this._folder_button, this.uiLayer);
         if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
             this._folder_button.clicked.connect(() => this.change_folder());
             this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
@@ -1757,7 +1757,7 @@ export class PoseEditMode extends GameMode {
 
         // Kick off a BubbleSweep animation
         let bubbles = new BubbleSweep(800);
-        this.addObject(bubbles, this._bgLayer);
+        this.addObject(bubbles, this.bgLayer);
         bubbles.start_sweep();
 
         // Show an explosion animation
@@ -1878,7 +1878,7 @@ export class PoseEditMode extends GameMode {
         let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
-        this.addObject(missionClearedPanel, this._dialogLayer);
+        this.addObject(missionClearedPanel, this.dialogLayer);
         missionClearedPanel.createRankScroll(submitSolutionRspData);
 
         const keepPlaying = () => {

@@ -3,7 +3,6 @@ import {Container, Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Assert} from "../../flashbang/util/Assert";
 import {Pose2D} from "../pose2D/Pose2D";
@@ -12,20 +11,20 @@ import {ConfirmDialog} from "../ui/ConfirmDialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
 
 export abstract class GameMode extends AppMode {
+    public readonly bgLayer: Container = new Container();
+    public readonly poseLayer: Container = new Container();
+    public readonly uiLayer: Container = new Container();
+    public readonly dialogLayer: Container = new Container();
+    public readonly achievementsLayer: Container = new Container();
+
     protected setup(): void {
         super.setup();
 
-        this._bgLayer = new Container();
-        this.modeSprite.addChild(this._bgLayer);
-
-        this._pose_fields_container = new ContainerObject();
-        this.addObject(this._pose_fields_container, this.modeSprite);
-
-        this._uiLayer = new Container();
-        this.modeSprite.addChild(this._uiLayer);
-
-        this._dialogLayer = new Container();
-        this.modeSprite.addChild(this._dialogLayer);
+        this.modeSprite.addChild(this.bgLayer);
+        this.modeSprite.addChild(this.poseLayer);
+        this.modeSprite.addChild(this.uiLayer);
+        this.modeSprite.addChild(this.dialogLayer);
+        this.modeSprite.addChild(this.achievementsLayer);
     }
 
     public get_pose(i: number): Pose2D {
@@ -76,7 +75,7 @@ export abstract class GameMode extends AppMode {
             this._dialogRef.destroyObject();
         }
 
-        this._dialogRef = this.addObject(dialog, this._dialogLayer);
+        this._dialogRef = this.addObject(dialog, this.dialogLayer);
         return dialog;
     }
 
@@ -117,7 +116,7 @@ export abstract class GameMode extends AppMode {
         let poses: Pose2D[] = [];
 
         for (let newPoseField of newPoseFields) {
-            this._pose_fields_container.addObject(newPoseField, this._pose_fields_container.container);
+            this.addObject(newPoseField, this.poseLayer);
             this._pose_fields.push(newPoseField);
             poses.push(newPoseField.get_pose());
         }
@@ -187,13 +186,9 @@ export abstract class GameMode extends AppMode {
         return null;
     }
 
-    protected _bgLayer: Container;
-    protected _uiLayer: Container;
-    protected _dialogLayer: Container;
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _is_screenshot_supported: boolean = false;
-    protected _pose_fields_container: ContainerObject;
     protected _pose_fields: PoseField[] = [];
     protected _poses: Pose2D[] = [];
     protected _is_pip_mode: boolean = false;
