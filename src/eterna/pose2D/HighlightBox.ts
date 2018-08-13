@@ -115,7 +115,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private redraw(): void {
         let color: number;
         let base_size: number;
-        let fadeTime: number = 1;//0.5;
+        let fadeTime: number = 0.85;
         let zoom_level: number = this._pose.get_zoom_level();
 
         this.display.alpha = 0;
@@ -182,7 +182,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         this.replaceNamedObject(HighlightBox.ANIM, new RepeatingTask((): ObjectTask => {
             return new SerialTask(
                 new AlphaTask(1, fadeTime),
-                new AlphaTask(0, fadeTime)
+                new AlphaTask(0.2, fadeTime)
             );
         }));
 
