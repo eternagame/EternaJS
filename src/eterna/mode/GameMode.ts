@@ -9,6 +9,7 @@ import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
+import {UILockDialog} from "../ui/UILockDialog";
 
 export abstract class GameMode extends AppMode {
     public readonly bgLayer: Container = new Container();
@@ -61,15 +62,15 @@ export abstract class GameMode extends AppMode {
         super.exit();
     }
 
-    protected showConfirmDialog(prompt: string): ConfirmDialog {
+    public showConfirmDialog(prompt: string): ConfirmDialog {
         return this.showDialog(new ConfirmDialog(prompt));
     }
 
-    protected showNotificationDialog(message: string, extraButtonTitle?: string): NotificationDialog {
+    public showNotificationDialog(message: string, extraButtonTitle?: string): NotificationDialog {
         return this.showDialog(new NotificationDialog(message, "Ok", extraButtonTitle));
     }
 
-    protected showDialog<T extends SceneObject>(dialog: T): T {
+    public showDialog<T extends SceneObject>(dialog: T): T {
         if (this._dialogRef.isLive) {
             log.warn("Dialog already showing");
             this._dialogRef.destroyObject();
@@ -77,6 +78,24 @@ export abstract class GameMode extends AppMode {
 
         this._dialogRef = this.addObject(dialog, this.dialogLayer);
         return dialog;
+    }
+
+    /** Draws a dimrect over the game + UI (but below the achievements layer.) */
+    public pushUILock(): void {
+        if (this._dialogRef.object instanceof UILockDialog) {
+            (this._dialogRef.object as UILockDialog).addRef();
+        } else {
+            this.showDialog(new UILockDialog());
+        }
+    }
+
+    /** Removes the currently-active ui lock */
+    public popUILock(): void {
+        if (this._dialogRef.object instanceof UILockDialog) {
+            (this._dialogRef.object as UILockDialog).releaseRef();
+        } else {
+            log.warn("UILockDialog not currently active");
+        }
     }
 
     public number_of_pose_fields(): number {
