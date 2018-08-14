@@ -57,17 +57,17 @@ export abstract class GameMode extends AppMode {
 
     /** Draws a dimrect over the game + UI (but below the achievements layer.) */
     public pushUILock(): void {
-        if (this._dialogRef.object instanceof UILockDialog) {
-            (this._dialogRef.object as UILockDialog).addRef();
+        if (this._uiLockRef.isLive) {
+            (this._uiLockRef.object as UILockDialog).addRef();
         } else {
-            this.showDialog(new UILockDialog());
+            this._uiLockRef = this.addObject(new UILockDialog(), this.dialogLayer, 0);
         }
     }
 
     /** Removes the currently-active ui lock */
     public popUILock(): void {
-        if (this._dialogRef.object instanceof UILockDialog) {
-            (this._dialogRef.object as UILockDialog).releaseRef();
+        if (this._uiLockRef.isLive) {
+            (this._uiLockRef.object as UILockDialog).releaseRef();
         } else {
             log.warn("UILockDialog not currently active");
         }
@@ -151,38 +151,31 @@ export abstract class GameMode extends AppMode {
     protected on_set_pip(pip_mode: boolean): void {
     }
 
-    protected take_picture(): void {
-        Assert.isTrue(false, "TODO");
-        // this._pic_button.set_click_callback(null);
-        // this._pic_button.alpha = 1.0;
-        // //This could take awhile, any way to redraw here?
-        // let img: BitmapData = this.get_screenshot();
-        //
-        // if (img) {
-        //     let imageBytes: ByteArray = PNGEncoder.encode(img);
-        //     GameClient.instance.post_screenshot(imageBytes, function (datastring: string): void {
-        //         let data: any = this.com.adobe.serialization.json.JSON.decode(datastring)['data'];
-        //         if (!data['success']) {
-        //             Application.instance.setup_msg_box("Error - " + data['error']);
-        //         }
-        //         this._pic_button.set_click_callback(this.take_picture);
-        //     });
-        //
-        // } else {
-        //     this._pic_button.set_click_callback(this.take_picture);
-        //     this._pic_button.alpha = 0.5;
-        //     Application.instance.setup_msg_box("There's no image to take a screenshot of right now!");
-        // }
-    }
+    protected postScreenshot(screenshot: ArrayBuffer): void {
+        this.pushUILock();
 
-    // / To be overridden
-    protected get_screenshot(): any {
-        return null;
+        Eterna.client.post_screenshot(screenshot)
+            .then(filename => {
+                let url = new URL(filename, Eterna.serverURL);
+                let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
+                this.showConfirmDialog(prompt, true).closed.connect(confirmed => {
+                    if (confirmed) {
+                        log.info("TODO: post to chat!");
+                    }
+                });
+            })
+            .catch(err => {
+                this.showNotificationDialog(`There was an error posting the screenshot\n${err}`);
+            })
+            ./*finally*/then(() => {
+                this.popUILock();
+            });
     }
 
     protected _achievements: AchievementManager;
 
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
+    protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _is_screenshot_supported: boolean = false;
     protected _pose_fields: PoseField[] = [];

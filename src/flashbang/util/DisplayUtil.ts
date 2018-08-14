@@ -1,11 +1,17 @@
-import {
-    DisplayObject, Graphics, Matrix, Point, Rectangle
-} from "pixi.js";
+import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
 import {Align} from "../core/Align";
 import {Flashbang} from "../core/Flashbang";
 import {RectangleUtil} from "./RectangleUtil";
 
+// the @types file for upng-js is broken, so we just require it directly
+const UPNG = require("upng-js");
+
 export class DisplayUtil {
+    public static renderToPNG(target: DisplayObject): ArrayBuffer {
+        let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
+        return UPNG.encode([pixels.buffer], DisplayUtil.width(target), DisplayUtil.height(target));
+    }
+
     /**
      * Removes the given DisplayObject from its parent, if it has one.
      * Use DisplayObject.destroy() if you want to dispose of the object (destroy() also removes the object

@@ -1,4 +1,3 @@
-import * as log from "loglevel";
 import {Container, Graphics, Point} from "pixi.js";
 import {Align} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
@@ -41,6 +40,7 @@ export class PoseEditToolbar extends ContainerObject {
     public view_options_button: GameButton;
     public retry_button: GameButton;
     public spec_button: GameButton;
+    public screenshotButton: GameButton;
 
     public pair_swap_button: GameButton;
     public hint_button: GameButton;
@@ -58,8 +58,8 @@ export class PoseEditToolbar extends ContainerObject {
     protected added(): void {
         super.added();
 
-        const SPACE_NARROW: number = 7;
-        const SPACE_WIDE: number = 25;
+        const SPACE_NARROW = 7;
+        const SPACE_WIDE = 25;
 
         this._invisibleBackground = new Graphics();
         this._invisibleBackground
@@ -257,6 +257,13 @@ export class PoseEditToolbar extends ContainerObject {
         }
 
         // MENU BUTTONS
+        this.screenshotButton = new GameButton()
+            .allStates(Bitmaps.ImgScreenshot)
+            .label("Screenshot", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Screenshot");
+        this.actionMenu.add_sub_menu_button(0, this.screenshotButton);
+
         this.view_options_button = new GameButton()
             .allStates(Bitmaps.ImgSettings)
             .label("Settings", 14)
