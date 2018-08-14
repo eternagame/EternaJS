@@ -637,9 +637,6 @@ export class PoseEditMode extends GameMode {
 
         this.clear_undo_stack();
 
-        /// Setup Puzzle events
-        // this._puzzle_events.set_events(TutorialManager.get_events(this._puzzle.get_node_id()), this.get_ui_pos, this.run_action);
-
         this.set_puzzle_state(PuzzleState.SETUP);
         this.disable_tools(true);
 
@@ -649,7 +646,7 @@ export class PoseEditMode extends GameMode {
         let autoloaded: boolean = false;
 
         if (!this._isReset) {
-            this.autoload_data(); //Does nothing if no data saved, no need to load timer
+            this.autoload_data();
             // re-register script APIs
             this._script_hooks = false;
             this._setter_hooks = false;
