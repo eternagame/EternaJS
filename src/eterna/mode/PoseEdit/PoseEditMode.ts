@@ -79,9 +79,6 @@ export class PoseEditMode extends GameMode {
 
         this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
-        DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
@@ -139,16 +136,15 @@ export class PoseEditMode extends GameMode {
         this._docked_spec_box.display.visible = false;
         this.addObject(this._docked_spec_box, this.uiLayer);
 
-        let x_button: GameButton = new GameButton()
+        this._x_button = new GameButton()
             .allStates(Bitmaps.ImgMaximize)
             .tooltip("Re-maximize")
             .hotkey(KeyCode.KeyM);
-        x_button.display.position = new Point(Flashbang.stageWidth - 22, 5);
-        x_button.clicked.connect(() => {
+        this._x_button.clicked.connect(() => {
             this._docked_spec_box.display.visible = false;
             this.show_spec();
         });
-        this._docked_spec_box.addObject(x_button, this._docked_spec_box.container);
+        this._docked_spec_box.addObject(this._x_button, this._docked_spec_box.container);
 
         this._ui_highlight = new SpriteObject();
         this.addObject(this._ui_highlight, this.uiLayer);
@@ -159,7 +155,6 @@ export class PoseEditMode extends GameMode {
 
         this._exit_button = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exit_button.display.scale = new Point(0.3, 0.3);
-        this._exit_button.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._exit_button.display.visible = false;
         this.regs.add(this._exit_button.clicked.connect(() => this.exit_puzzle()));
 
@@ -180,18 +175,26 @@ export class PoseEditMode extends GameMode {
         this._target_name.visible = false;
         this.uiLayer.addChild(this._target_name);
 
-        // _force_synch = false;
-
         this._asynch_text = Fonts.arial("folding...", 12).build();
         this._asynch_text.position = new Point(16, 200);
 
         this.set_puzzle();
+
+        this.updateLayout();
     }
 
     public onResized(): void {
+        this.updateLayout();
+        super.onResized();
+    }
+
+    private updateLayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        this._exit_button.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
+        this._x_button.display.position = new Point(Flashbang.stageWidth - 22, 5);
 
         this.layout_bars();
         this.layout_constraints();
@@ -199,8 +202,6 @@ export class PoseEditMode extends GameMode {
         this._docked_spec_box.set_size(Flashbang.stageWidth, Flashbang.stageHeight - 340);
         let s: number = this._docked_spec_box.getPlotSize();
         this._docked_spec_box.set_size(s + 55, s * 2 + 51);
-
-        super.onResized();
     }
 
     public get toolbar(): PoseEditToolbar {
@@ -4128,6 +4129,7 @@ export class PoseEditMode extends GameMode {
     // private _beam_cmi: ContextMenuItem = null;
     /// Scripts
     private _scriptbar: ActionBar;
+    private _x_button: GameButton;
     private _nid_field: Text;
     private _run_button: GameButton;
     private _run_status: Text;

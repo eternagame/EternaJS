@@ -4,7 +4,6 @@ import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {Assert} from "../../flashbang/util/Assert";
 import {AchievementManager} from "../achievements/AchievementManager";
 import {Eterna} from "../Eterna";
 import {Pose2D} from "../pose2D/Pose2D";
@@ -99,6 +98,11 @@ export abstract class GameMode extends AppMode {
     public register_setter_callbacks(): void {
     }
 
+    public onResized(): void {
+        this.layoutPoseFields();
+        super.onResized();
+    }
+
     protected set_pose_fields(newPoseFields: PoseField[]): void {
         if (this._pose_fields != null) {
             for (let poseField of this._pose_fields) {
@@ -123,8 +127,12 @@ export abstract class GameMode extends AppMode {
 
     protected set_pip(pip_mode: boolean): void {
         this._is_pip_mode = pip_mode;
+        this.layoutPoseFields();
+        this.on_set_pip(pip_mode);
+    }
 
-        if (pip_mode) {
+    protected layoutPoseFields(): void {
+        if (this._is_pip_mode) {
             let numFields: number = this._pose_fields.length;
             for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._pose_fields[ii];
@@ -144,8 +152,6 @@ export abstract class GameMode extends AppMode {
                 }
             }
         }
-
-        this.on_set_pip(pip_mode);
     }
 
     protected on_set_pip(pip_mode: boolean): void {
