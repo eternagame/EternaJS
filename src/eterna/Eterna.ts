@@ -14,6 +14,7 @@ export class Eterna {
     public static player_name: string;
     public static readonly is_dev_mode: boolean = true; // TODO: what does this mean?
     public static readonly is_debug_mode: boolean = parseBool(process.env["DEBUG"]);
+    public static readonly serverURL: string = process.env["APP_SERVER_URL"];
 
     public static client: GameClient;
     public static sound: SoundManager;
