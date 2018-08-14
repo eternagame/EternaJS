@@ -1,4 +1,5 @@
 import * as log from "loglevel";
+import {Flashbang} from "../flashbang/core/Flashbang";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {TestMode} from "./debug/TestMode";
@@ -75,10 +76,13 @@ export class EternaApp extends FlashbangApp {
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
+
         return new PIXI.Application(this._width, this._height, {
             backgroundColor: 0x061A34,
             antialias: true,
             roundPixels: true,
+            autoResize: true,
+            resolution: devicePixelRatio
         });
     }
 

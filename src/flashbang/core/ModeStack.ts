@@ -109,6 +109,13 @@ export class ModeStack {
         this.doModeTransition(ModeTransition.UNWIND, mode);
     }
 
+    /** Called when the app is resized */
+    public onResized(): void {
+        if (this.topMode != null) {
+            this.topMode.onResized();
+        }
+    }
+
     public update(dt: number): void {
         if (this._pendingModeTransitionQueue.length > 0) {
             // handleModeTransition generates a lot of garbage in memory, avoid calling it on

@@ -1,6 +1,4 @@
-import {
-    Container, Graphics, Point, Sprite
-} from "pixi.js";
+import {Container, Graphics, Point, Sprite} from "pixi.js";
 import {AppMode} from "../../../flashbang/core/AppMode";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
@@ -183,10 +181,9 @@ export class MissionIntroMode extends AppMode {
         this.setPuzzleThumbnail(0);
     }
 
-    protected on_resize(): void {
-        this.drawBackground();
-        this.updateConstraintScroll();
-        this.setupConstraintScrollMask();
+    public onResized(): void {
+        this.modeStack.changeMode(new MissionIntroMode(
+            this._puzzleName, this._puzzleDescription, this._puzzleThumbnails, this._constraintBoxes));
     }
 
     private drawBackground(): void {
