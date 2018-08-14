@@ -57,7 +57,7 @@ export class TextBuilder {
         return this;
     }
 
-    /** Equivalent to <code>hAlign(Align.LEFT)</code> */
+    /** Equivalent to <code>hAlign(HAlign.LEFT)</code> */
     public hAlignLeft(): TextBuilder {
         return this.hAlign("left");
     }
@@ -67,7 +67,7 @@ export class TextBuilder {
         return this.hAlign("center");
     }
 
-    /** Equivalent to <code>hAlign(Align.RIGHT)</code> */
+    /** Equivalent to <code>hAlign(HAlign.RIGHT)</code> */
     public hAlignRight(): TextBuilder {
         return this.hAlign("right");
     }

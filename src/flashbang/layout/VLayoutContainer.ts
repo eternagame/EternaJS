@@ -1,5 +1,5 @@
 import {Rectangle} from "pixi.js";
-import {Align} from "../core/Align";
+import {HAlign} from "../core/Align";
 import {LayoutContainer} from "./LayoutContainer";
 
 /**
@@ -7,7 +7,7 @@ import {LayoutContainer} from "./LayoutContainer";
  * Call layout() after adding or removing children to update the sprite's layout.
  */
 export class VLayoutContainer extends LayoutContainer {
-    public constructor(vOffset: number = 0, hAlign: Align = Align.CENTER) {
+    public constructor(vOffset: number = 0, hAlign: HAlign = HAlign.CENTER) {
         super();
         this._vOffset = vOffset;
         this._hAlign = hAlign;
@@ -36,11 +36,11 @@ export class VLayoutContainer extends LayoutContainer {
         }
     }
 
-    public get hAlign(): Align {
+    public get hAlign(): HAlign {
         return this._hAlign;
     }
 
-    public set hAlign(val: Align) {
+    public set hAlign(val: HAlign) {
         if (this._hAlign !== val) {
             this._hAlign = val;
             this._needsLayout = true;
@@ -58,7 +58,7 @@ export class VLayoutContainer extends LayoutContainer {
     /* override */
     protected doLayout(): void {
         let maxWidth: number = 0;
-        if (this._hAlign !== Align.LEFT) {
+        if (this._hAlign !== HAlign.LEFT) {
             for (let child of this.children) {
                 if (child.visible) {
                     maxWidth = Math.max(child.getLocalBounds(VLayoutContainer.R).width, maxWidth);
@@ -88,9 +88,9 @@ export class VLayoutContainer extends LayoutContainer {
                 let bounds: Rectangle = child.getLocalBounds(VLayoutContainer.R);
                 child.y = -bounds.top + y;
                 child.x = -bounds.left;
-                if (this._hAlign === Align.CENTER) {
+                if (this._hAlign === HAlign.CENTER) {
                     child.x += (maxWidth - bounds.width) * 0.5;
-                } else if (this._hAlign === Align.RIGHT) {
+                } else if (this._hAlign === HAlign.RIGHT) {
                     child.x += maxWidth - bounds.width;
                 }
 
@@ -100,7 +100,7 @@ export class VLayoutContainer extends LayoutContainer {
     }
 
     protected _vOffset: number;
-    protected _hAlign: Align;
+    protected _hAlign: HAlign;
     protected _reversed: boolean;
 
     protected static R: Rectangle = new Rectangle();

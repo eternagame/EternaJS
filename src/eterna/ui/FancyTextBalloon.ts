@@ -1,5 +1,5 @@
 import {Point} from "pixi.js";
-import {Align} from "../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {Vector2} from "../../flashbang/geom/Vector2";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -98,8 +98,8 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
         if (this._button.display.visible) {
             DisplayUtil.positionRelative(
-                this._button.display, Align.RIGHT, Align.BOTTOM,
-                this._panel.container, Align.RIGHT, Align.BOTTOM,
+                this._button.display, HAlign.RIGHT, VAlign.BOTTOM,
+                this._panel.container, HAlign.RIGHT, VAlign.BOTTOM,
                 -TextBalloon.W_MARGIN, -TextBalloon.H_MARGIN
             );
         }

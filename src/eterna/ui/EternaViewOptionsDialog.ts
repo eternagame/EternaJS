@@ -1,4 +1,4 @@
-import {Align} from "../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Setting} from "../../flashbang/settings/Setting";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -21,7 +21,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        let settingsLayout: VLayoutContainer = new VLayoutContainer(18, Align.LEFT);
+        let settingsLayout: VLayoutContainer = new VLayoutContainer(18, HAlign.LEFT);
 
         let bind = (setting: Setting<boolean>, name: string) => {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
@@ -44,7 +44,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
             bind(Eterna.settings.displayAuxInfo, "Display auxiliary information about RNAs");
         }
 
-        let viewLayout: VLayoutContainer = new VLayoutContainer(22, Align.CENTER);
+        let viewLayout: VLayoutContainer = new VLayoutContainer(22, HAlign.CENTER);
         viewLayout.addChild(settingsLayout);
 
         let ok_button: GameButton = new GameButton().label("Done", 14);
@@ -57,14 +57,14 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         panel.set_panel_title("Game options");
         panel.set_size(viewLayout.width + 40, viewLayout.height + 40 + panel.get_title_space());
         this.addObject(panel, this.container);
-        DisplayUtil.positionRelativeToStage(panel.display, Align.CENTER, Align.CENTER, Align.CENTER, Align.CENTER);
+        DisplayUtil.positionRelativeToStage(panel.display, HAlign.CENTER, VAlign.CENTER, HAlign.CENTER, VAlign.CENTER);
 
         panel.display.interactive = true;
 
         this.container.addChild(viewLayout);
         DisplayUtil.positionRelative(
-            viewLayout, Align.CENTER, Align.CENTER,
-            panel.display, Align.CENTER, Align.CENTER, 0, panel.get_title_space() * 0.5
+            viewLayout, HAlign.CENTER, VAlign.CENTER,
+            panel.display, HAlign.CENTER, VAlign.CENTER, 0, panel.get_title_space() * 0.5
         );
 
         // Eterna.sound.get_mute_button().set_pos(new UDim(0, 1, 20, -85));

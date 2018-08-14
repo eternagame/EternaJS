@@ -1,4 +1,4 @@
-import {Align} from "../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {CallbackTask} from "../../flashbang/tasks/CallbackTask";
@@ -58,8 +58,8 @@ export class AchievementManager extends GameObject {
 
         DisplayUtil.positionRelativeToStage(
             view.display,
-            Align.CENTER, Align.CENTER,
-            Align.CENTER, Align.CENTER);
+            HAlign.CENTER, VAlign.CENTER,
+            HAlign.CENTER, VAlign.CENTER);
         view.animate();
 
         view.destroyed.connect(() => {

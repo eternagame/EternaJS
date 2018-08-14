@@ -1,7 +1,5 @@
-import {
-    Container, Graphics, Point, Text
-} from "pixi.js";
-import {Align} from "../../../flashbang/core/Align";
+import {Container, Graphics, Point, Text} from "pixi.js";
+import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
@@ -38,7 +36,7 @@ export class MissionClearedPanel extends ContainerObject {
         // this._tfLoading.set_pos(new UDim(0.5, 0.5, -150, 220));
         // this.add_object(this._tfLoading);
 
-        this._contentLayout = new VLayoutContainer(25, Align.CENTER);
+        this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
         this.container.addChild(this._contentLayout);
 
         this._contentLayout.addChild(Fonts.std_light("Mission Accomplished!", 36).color(0xFFCC00).build());
@@ -129,14 +127,14 @@ export class MissionClearedPanel extends ContainerObject {
         this.nextButton.display.visible = this._rankScrollContainer.visible;
 
         DisplayUtil.positionRelative(
-            this.closeButton.display, Align.RIGHT, Align.TOP,
-            this._bg, Align.RIGHT, Align.TOP,
+            this.closeButton.display, HAlign.RIGHT, VAlign.TOP,
+            this._bg, HAlign.RIGHT, VAlign.TOP,
             -10, 10
         );
 
         DisplayUtil.positionRelative(
-            this.nextButton.display, Align.CENTER, Align.BOTTOM,
-            this._bg, Align.CENTER, Align.BOTTOM,
+            this.nextButton.display, HAlign.CENTER, VAlign.BOTTOM,
+            this._bg, HAlign.CENTER, VAlign.BOTTOM,
             0, -25
         );
 

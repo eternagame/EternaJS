@@ -1,5 +1,5 @@
 import {Point} from "pixi.js";
-import {Align} from "../../flashbang/core/Align";
+import {HAlign} from "../../flashbang/core/Align";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
@@ -40,7 +40,7 @@ export class ConfirmDialog extends Dialog<boolean> {
         panel.set_panel_title("Are you sure?");
         this.addObject(panel, this.container);
 
-        let panelLayout = new VLayoutContainer(0, Align.CENTER);
+        let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
 
         if (this._useHTML) {
