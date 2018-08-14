@@ -44,6 +44,17 @@ export class FlashbangApp {
         this.isActive.connect(value => this.onIsActiveChanged(value));
     }
 
+    public get view(): HTMLCanvasElement {
+        return this._pixi.view;
+    }
+
+    public resize(width: number, height: number): void {
+        if (width != this._pixi.renderer.screen.width || height != this._pixi.renderer.screen.height) {
+            this._pixi.renderer.resize(width, height);
+            this._modeStack.onResized();
+        }
+    }
+
     public addUpdatable(obj: Updatable): void {
         this._updatables.push(obj);
     }

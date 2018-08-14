@@ -27,6 +27,8 @@ export class AppMode {
     public get entered(): SignalView<void> { return this._entered; }
     /** Emitted when the mode is exited */
     public get exited(): SignalView<void> { return this._exited; }
+    /** Emitted when the app is resized while this mode is active. */
+    public get resized(): SignalView<void> { return this._resized; }
     /** Emitted when the mode is disposed */
     public get disposed(): SignalView<void> { return this._disposed; }
 
@@ -164,6 +166,11 @@ export class AppMode {
         this.mouseWheelInput.handleMouseWheelEvent(e);
     }
 
+    /** Called when the app is resized while this mode is active */
+    public onResized(): void {
+        this._resized.emit();
+    }
+
     /** Called once per update tick. Updates all objects in the mode. */
     protected update(dt: number): void {
         this._runningTime += dt;
@@ -285,6 +292,7 @@ export class AppMode {
     protected readonly _entered: UnitSignal = new UnitSignal();
     protected readonly _exited: UnitSignal = new UnitSignal();
     protected readonly _disposed: UnitSignal = new UnitSignal();
+    protected readonly _resized: UnitSignal = new UnitSignal();
 
     protected _modeSprite: Container = new Container();
     protected _modeStack: ModeStack;
