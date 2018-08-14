@@ -54,18 +54,22 @@ export class AchievementManager extends GameObject {
         let view = new AchievementBox(nextData.image, nextData.past);
         this._cur = this.addObject(view, (this.mode as GameMode).achievementsLayer);
 
-        view.okButton.clicked.connect(() => view.destroySelf());
-
-        DisplayUtil.positionRelativeToStage(
-            view.display,
-            HAlign.CENTER, VAlign.CENTER,
-            HAlign.CENTER, VAlign.CENTER);
         view.animate();
+        view.okButton.clicked.connect(() => view.destroySelf());
 
         view.destroyed.connect(() => {
             this.maybeShowNextAchievement();
             (this.mode as GameMode).popUILock();
         });
+
+        let updateLoc = () => {
+            DisplayUtil.positionRelativeToStage(
+                view.display,
+                HAlign.CENTER, VAlign.CENTER,
+                HAlign.CENTER, VAlign.CENTER);
+        };
+        updateLoc();
+        view.regs.add(this.mode.resized.connect(updateLoc));
     }
 
     private _cur: GameObjectRef = GameObjectRef.NULL;
