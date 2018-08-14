@@ -30,12 +30,6 @@ export class MissionClearedPanel extends ContainerObject {
     protected added(): void {
         super.added();
 
-        // this._tfLoading = Fonts.std_regular("Submitting your design - please wait...", 20).bold().build();
-        // this.container.addChild(this._tfLoading);
-        // this._tfLoading.set_animator(new GameAnimatorFader(1, 0, 0.3, false, true));
-        // this._tfLoading.set_pos(new UDim(0.5, 0.5, -150, 220));
-        // this.add_object(this._tfLoading);
-
         this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
         this.container.addChild(this._contentLayout);
 
@@ -79,12 +73,9 @@ export class MissionClearedPanel extends ContainerObject {
         this.addObject(this.closeButton, this.container);
 
         this.nextButton = new GameButton().label(this._hasNextPuzzle ? "NEXT PUZZLE" : "WHAT'S NEXT?");
-        this.nextButton.display.position = new Point(
-            (MissionClearedPanel.WIDTH * 0.5) - 10 - this.nextButton.container.width,
-            Flashbang.stageHeight - 20 - this.nextButton.container.height
-        );
         this.addObject(this.nextButton, this.container);
 
+        this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
     }
 
@@ -138,8 +129,6 @@ export class MissionClearedPanel extends ContainerObject {
             0, -25
         );
 
-        // this._tfLoading.visible = !this._panel.display.visible;
-
         if (this._rankScroll != null) {
             this._rankScrollHeading.set_size(310, this._tfPlayer.height);
             this._rankScrollHeading.display.position = new Point(
@@ -165,6 +154,11 @@ export class MissionClearedPanel extends ContainerObject {
         this._contentLayout.position = new Point(
             (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
             (Flashbang.stageHeight - this._contentLayout.height) * 0.5
+        );
+
+        this.nextButton.display.position = new Point(
+            (MissionClearedPanel.WIDTH - this.nextButton.container.width) * 0.5,
+            Flashbang.stageHeight - 20 - this.nextButton.container.height
         );
     }
 
