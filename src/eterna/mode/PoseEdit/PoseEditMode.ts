@@ -11,7 +11,6 @@ import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
-import {AchievementManager} from "../../achievements/AchievementManager";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
@@ -114,6 +113,7 @@ export class PoseEditMode extends GameMode {
                 EternaViewOptionsMode.PUZZLE;
             this.showDialog(new EternaViewOptionsDialog(mode));
         });
+        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.copy_button.clicked.connect(() => {
             let sequenceString = EPars.sequence_array_to_string(this._poses[0].get_sequence());
@@ -207,25 +207,6 @@ export class PoseEditMode extends GameMode {
             }
         });
     }
-
-    /*override*/
-    // public enter_mode(): void {
-    //     if (this._is_screenshot_supported) {
-    //         if (this._pic_button == null) {
-    //             let chatbox_camera: BitmapData = BitmapManager.get_bitmap(BitmapManager.ImgScreenshot);
-    //             this._pic_button = new GameButton(14, chatbox_camera);
-    //             this._pic_button.set_text("Screenshot");
-    //             this._pic_button.scale_icon_to_text();
-    //             this._pic_button.set_disabled(this._is_pic_disabled);
-    //         }
-    //         this._pic_button.visible = true;
-    //         this._pic_button.set_click_callback(this.take_picture);
-    //         this._pic_button.set_tooltip("Take a screenshot");
-    //
-    //         this._ll_menu.add_sub_menu_button(0, this._pic_button, true);
-    //     }
-    //     this.on_enter();
-    // }
 
     public set_next_design_cb(cb: () => void): void {
         this._next_design_cb = cb;
@@ -486,11 +467,11 @@ export class PoseEditMode extends GameMode {
         }
 
         this._exit_button.display.visible = false;
-        this.addObject(this._exit_button, this.modeSprite);
+        this.addObject(this._exit_button, this.uiLayer);
 
         let puzzleIcon = new Sprite(BitmapManager.get_bitmap(Bitmaps.NovaPuzzleImg));
         puzzleIcon.position = new Point(11, 8);
-        this.modeSprite.addChild(puzzleIcon);
+        this.uiLayer.addChild(puzzleIcon);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.get_puzzle_name(true))
             .font(Fonts.ARIAL)
@@ -499,7 +480,7 @@ export class PoseEditMode extends GameMode {
             .selectable(false)
             .color(0xffffff);
         puzzleTitle.hideWhenModeInactive();
-        this.addObject(puzzleTitle, this.modeSprite);
+        this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, Align.LEFT, Align.CENTER,
             puzzleIcon, Align.RIGHT, Align.CENTER, 3, 0);
@@ -1207,57 +1188,43 @@ export class PoseEditMode extends GameMode {
         super.enter();
     }
 
-    /*override*/
-    // protected on_leave(): void {
-    //     Application.instance.get_application_gui("Design Name").visible = false;
-    //     if (this._menuitem) Application.instance.get_application_gui("Menu").remove_sub_item("eterna.Puzzle", this._menuitem);
-    // }
+    private createScreenshot(): ArrayBuffer {
+        let bgVis = this.bgLayer.visible;
+        let constraintsVis = this.constraintsLayer.visible;
+        let uiVis = this.uiLayer.visible;
+        let dialogVis = this.dialogLayer.visible;
+        let achievementsVis = this.achievementsLayer.visible;
 
-    /*override*/
-    // protected get_screenshot(): BitmapData {
-    //     let w: number = 0;
-    //     let h: number = 0;
-    //     let imgs: any[] = [];
-    //     let ii: number;
-    //     let img: BitmapData;
-    //
-    //     if (this._is_pip_mode) {
-    //         for (ii = 0; ii < this._poses.length; ii++) {
-    //             img = this._poses[ii].get_canvas();
-    //             w += img.width;
-    //             h = Math.max(img.height, h);
-    //             imgs.push(img);
-    //         }
-    //     } else {
-    //         img = this._poses[0].get_canvas();
-    //         w += img.width;
-    //         h = Math.max(img.height, h);
-    //         imgs.push(img);
-    //     }
-    //
-    //     let bd: BitmapData = new BitmapData(w, h, false, 0x061A34);
-    //
-    //     let hub: Text = new Text(Fonts.arial(12, false));
-    //     hub.set_pos(new UDim(1, 0, 3, -3));
-    //     let puzzle_id: number = this._puzzle.get_node_id();
-    //     hub.set_text("Player: " + Application.instance.get_player_name() + "\n" +
-    //         "Puzzle ID: " + puzzle_id + "\n" +
-    //         "Puzzle Title: " + this._puzzle.get_puzzle_name() + "\n" +
-    //         "Mode: " + (this._native_button.get_selected() === true ? "NativeMode" : "TargetMode"));
-    //
-    //     let w_walker: number = 0;
-    //     for (ii = 0; ii < imgs.length; ii++) {
-    //         img = imgs[ii];
-    //         let mat: Matrix = new Matrix();
-    //         mat.translate(w_walker, 0);
-    //         w_walker += img.width;
-    //         bd.draw(img, mat, null, "add", null, false);
-    //     }
-    //
-    //     bd.draw(hub);
-    //
-    //     return bd;
-    // }
+        this.bgLayer.visible = false;
+        this.constraintsLayer.visible = false;
+        this.uiLayer.visible = false;
+        this.dialogLayer.visible = false;
+        this.achievementsLayer.visible = false;
+
+        let tempBG = DisplayUtil.fillStageRect(0x061A34);
+        this.modeSprite.addChildAt(tempBG, 0);
+
+        let info =
+            `Player: ${Eterna.player_name}\n` +
+            `Puzzle ID: ${this._puzzle.get_node_id()}\n` +
+            `Puzzle Title: ${this._puzzle.get_puzzle_name()}\n` +
+            `Mode: ${this.toolbar.native_button.isSelected ? "NativeMode" : "TargetMode"}`;
+        let infoText = Fonts.arial(info).color(0xffffff).build();
+        this.modeSprite.addChild(infoText);
+
+        let pngData = DisplayUtil.renderToPNG(this.modeSprite);
+
+        tempBG.destroy({children: true});
+        infoText.destroy({children: true});
+
+        this.bgLayer.visible = bgVis;
+        this.constraintsLayer.visible = constraintsVis;
+        this.uiLayer.visible = uiVis;
+        this.dialogLayer.visible = dialogVis;
+        this.achievementsLayer.visible = achievementsVis;
+
+        return pngData;
+    }
 
     private on_click_addbase(): void {
         for (let pose of this._poses) {

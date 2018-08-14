@@ -1,4 +1,5 @@
 import * as log from "loglevel";
+import * as base64 from "base64-js";
 
 type JSONData = any;
 
@@ -123,12 +124,22 @@ export class GameClient {
         }).then(rsp => rsp.text());
     }
 
-    // / OTHER
-
-    public post_screenshot(imgBytes: any): Promise<JSONData> {
-        throw new Error("TODO");
-        // let imageString: string = Base64.encodeByteArray(imgBytes);
-        // return this.post(GameClient.POST_URI, {"data": imageString, "type": "screenshot"});
+    /** Returns a promise that resolves with the screenshot's hosted filename, on success */
+    public post_screenshot(imgBytes: ArrayBuffer): Promise<string> {
+        let encoded = base64.fromByteArray(new Uint8Array(imgBytes));
+        return this.post(GameClient.POST_URI, {
+            type: "screenshot",
+            data: encoded
+        })
+        .then(rsp => rsp.json())
+        .then(jsonData => {
+            let data = jsonData["data"];
+            if (data["success"]) {
+                return data["filename"];
+            } else {
+                throw new Error(`Failed to post screenshot: ${data["error"]}`);
+            }
+        });
     }
 
     private get(urlString: string, params?: any): Promise<Response> {
