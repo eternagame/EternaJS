@@ -41,9 +41,6 @@ export class LoadingMode extends AppMode {
 
         let container = new ContainerObject();
         container.container.addChild(this._textField);
-
-        container.display.x = Flashbang.stageWidth * 0.5;
-        container.display.y = Flashbang.stageHeight * 0.5;
         this.addObject(container, this.modeSprite);
 
         container.addObject(new SerialTask(
@@ -53,6 +50,13 @@ export class LoadingMode extends AppMode {
                 new ScaleTask(1, 1, 1, Easing.easeInOut)
             ))
         ));
+
+        let updateLoc = () => {
+            container.display.x = Flashbang.stageWidth * 0.5;
+            container.display.y = Flashbang.stageHeight * 0.5;
+        };
+        updateLoc();
+        this.resized.connect(updateLoc);
     }
 
     private _text: string;
