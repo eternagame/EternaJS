@@ -120,11 +120,7 @@ export class StringUtil {
         return result;
     }
 
-    /**
-     * Format the specified number, nicely, with commas.
-     * TODO: format specifyer, locale handling, etc. We'll probably move this into a
-     * NumberFormat-style class.
-     */
+    /** Format the specified number, nicely, with commas. */
     public static formatNumber(n: number): string {
         let postfix: string = "";
         let s: string = n.toString(); // use standard to-stringing
