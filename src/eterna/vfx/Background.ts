@@ -6,23 +6,25 @@ import {Bubble} from "./Bubble";
 export class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {
         super();
+        this._bubbleCount = bubbleCount;
+        this._foreground = foreground;
+    }
 
-        // this._bgGradientBitmap = new Bitmap;
-        // this.addChild(this._bgGradientBitmap);
+    protected added(): void {
+        super.added();
 
         this.render_background();
 
         this._bubbles = [];
-        for (let ii: number = 0; ii < bubbleCount; ii++) {
-            let bub: Bubble = new Bubble(foreground);
+        for (let ii: number = 0; ii < this._bubbleCount; ii++) {
+            let bub: Bubble = new Bubble(this._foreground);
             // bub.sprite.visible = false;
             bub.init();
             this.addObject(bub, this.container);
             this._bubbles.push(bub);
         }
 
-        this._foreground = foreground;
-        this._isFrozen = false;
+        this.regs.add(this.mode.resized.connect(() => this.onResized()));
     }
 
     public disable_bubbles(disable: boolean): void {
@@ -100,18 +102,17 @@ export class Background extends ContainerObject {
         this.render_background();
     }
 
-    /* override */
-    protected on_resize(): void {
+    private onResized(): void {
         this.render_background();
-
         for (let bubble of this._bubbles) {
             bubble.init();
         }
     }
 
-    private _bgImage: Graphics = null;
+    private readonly _bubbleCount: number;
+    private readonly _foreground: boolean;
 
-    private _foreground: boolean;
-    private _isFrozen: boolean;
-    private readonly _bubbles: Bubble[];
+    private _bubbles: Bubble[];
+    private _bgImage: Graphics = null;
+    private _isFrozen: boolean = false;
 }

@@ -57,7 +57,7 @@ export class Bubble extends SpriteObject implements Updatable {
             this.sprite.x = Math.random() * Flashbang.stageWidth;
             this.sprite.y = Math.random() * Flashbang.stageHeight;
 
-            this.addObject(new ParallelTask(
+            this.replaceNamedObject("InitAnim", new ParallelTask(
                 new ScaleTask(1, 1, 1),
                 new AlphaTask(1, 1, Easing.easeOut)
             ));
