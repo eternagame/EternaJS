@@ -6,6 +6,7 @@ import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Assert} from "../../flashbang/util/Assert";
 import {AchievementManager} from "../achievements/AchievementManager";
+import {Eterna} from "../Eterna";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
@@ -36,38 +37,8 @@ export abstract class GameMode extends AppMode {
         return this._poses[i];
     }
 
-    protected enter(): void {
-        super.enter();
-
-        // if (this._is_screenshot_supported) {
-        //     if (this._pic_button == null) {
-        //         let chatbox_camera: BitmapData = BitmapManager.get_bitmap(BitmapManager.ImgScreenshot);
-        //         this._pic_button = new GameButton(22, chatbox_camera);
-        //         this._pic_button.set_states(chatbox_camera,
-        //             BitmapManager.get_bitmap(BitmapManager.ImgScreenshotOver),
-        //             BitmapManager.get_bitmap(BitmapManager.ImgScreenshotHit),
-        //             null,
-        //             null);
-        //         this._pic_button.set_disabled(false);
-        //     }
-        //     this._pic_button.visible = true;
-        //     this._pic_button.set_click_callback(this.take_picture);
-        //     this._pic_button.set_tooltip("Take a screenshot");
-        //     this.addObject(this._pic_button);
-        // }
-    }
-
-    protected exit(): void {
-        // if (this._is_screenshot_supported) {
-        //     this._pic_button.set_click_callback(null);
-        //     this.remove_object(this._pic_button);
-        // }
-
-        super.exit();
-    }
-
-    public showConfirmDialog(prompt: string): ConfirmDialog {
-        return this.showDialog(new ConfirmDialog(prompt));
+    public showConfirmDialog(prompt: string, promptIsHTML: boolean = false): ConfirmDialog {
+        return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
     }
 
     public showNotificationDialog(message: string, extraButtonTitle?: string): NotificationDialog {
@@ -218,6 +189,4 @@ export abstract class GameMode extends AppMode {
     protected _poses: Pose2D[] = [];
     protected _is_pip_mode: boolean = false;
     protected _force_synch: boolean = false;
-
-    // protected _pic_button: GameButton;
 }
