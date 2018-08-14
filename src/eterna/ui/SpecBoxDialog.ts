@@ -1,5 +1,5 @@
 import {Point} from "pixi.js";
-import {Align} from "../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -45,8 +45,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
             .hotkey(KeyCode.KeyM);
         spec_box.addObject(add_thumbnail_button, spec_box.container);
         DisplayUtil.positionRelative(
-            add_thumbnail_button.display, Align.RIGHT, Align.CENTER,
-            cancel_button.display, Align.LEFT, Align.CENTER,
+            add_thumbnail_button.display, HAlign.RIGHT, VAlign.CENTER,
+            cancel_button.display, HAlign.LEFT, VAlign.CENTER,
             -20, 0
         );
 

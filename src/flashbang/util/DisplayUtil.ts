@@ -1,5 +1,5 @@
 import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
-import {Align} from "../core/Align";
+import {HAlign, VAlign} from "../core/Align";
 import {Flashbang} from "../core/Flashbang";
 import {RectangleUtil} from "./RectangleUtil";
 
@@ -236,9 +236,9 @@ export class DisplayUtil {
     /** Positions a DisplayObject in relation to another DisplayObject */
     public static positionRelative(
         disp: DisplayObject,
-        dispHAlign: Align, dispVAlign: Align,
+        dispHAlign: HAlign, dispVAlign: VAlign,
         relativeTo: DisplayObject,
-        targetHAlign: Align, targetVAlign: Align,
+        targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         DisplayUtil.positionRelativeToBounds(disp,
@@ -253,8 +253,8 @@ export class DisplayUtil {
     /** Positions a DisplayObject relative to the screen */
     public static positionRelativeToStage(
         disp: DisplayObject,
-        dispHAlign: Align, dispVAlign: Align,
-        targetHAlign: Align, targetVAlign: Align,
+        dispHAlign: HAlign, dispVAlign: VAlign,
+        targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         RectangleUtil.setTo(DisplayUtil.SCREEN_BOUNDS, 0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
@@ -273,33 +273,33 @@ export class DisplayUtil {
 
     public static positionRelativeToBounds(
         disp: DisplayObject,
-        dispHAlign: Align, dispVAlign: Align,
+        dispHAlign: HAlign, dispVAlign: VAlign,
         relativeTo: Rectangle,
-        targetHAlign: Align, targetVAlign: Align,
+        targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
         let x: number = xOffset;
         let y: number = yOffset;
 
         switch (targetHAlign) {
-        case Align.LEFT:
+        case HAlign.LEFT:
             x += relativeTo.left;
             break;
-        case Align.RIGHT:
+        case HAlign.RIGHT:
             x += relativeTo.right;
             break;
-        case Align.CENTER:
+        case HAlign.CENTER:
             x += relativeTo.left + (relativeTo.width * 0.5);
             break;
         }
         switch (targetVAlign) {
-        case Align.TOP:
+        case VAlign.TOP:
             y += relativeTo.top;
             break;
-        case Align.BOTTOM:
+        case VAlign.BOTTOM:
             y += relativeTo.bottom;
             break;
-        case Align.CENTER:
+        case VAlign.CENTER:
             y += relativeTo.top + (relativeTo.height * 0.5);
             break;
         }
@@ -310,24 +310,24 @@ export class DisplayUtil {
         // should this be relative to self or parent?
         // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         switch (dispHAlign) {
-        case Align.LEFT:
+        case HAlign.LEFT:
             x -= dispBounds.left;
             break;
-        case Align.RIGHT:
+        case HAlign.RIGHT:
             x -= dispBounds.right;
             break;
-        case Align.CENTER:
+        case HAlign.CENTER:
             x -= dispBounds.left + (dispBounds.width * 0.5);
             break;
         }
         switch (dispVAlign) {
-        case Align.TOP:
+        case VAlign.TOP:
             y -= dispBounds.top;
             break;
-        case Align.BOTTOM:
+        case VAlign.BOTTOM:
             y -= dispBounds.bottom;
             break;
-        case Align.CENTER:
+        case VAlign.CENTER:
             y -= dispBounds.top + (dispBounds.height * 0.5);
             break;
         }

@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import {Container, Point, Sprite, Text} from "pixi.js";
-import {Align} from "../../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
 import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
@@ -82,8 +82,8 @@ export class PoseEditMode extends GameMode {
         this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
         DisplayUtil.positionRelativeToStage(
-            this._toolbar.display, Align.CENTER, Align.BOTTOM,
-            Align.CENTER, Align.BOTTOM, 20, -20);
+            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
+            HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
@@ -482,8 +482,8 @@ export class PoseEditMode extends GameMode {
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
-            puzzleTitle.display, Align.LEFT, Align.CENTER,
-            puzzleIcon, Align.RIGHT, Align.CENTER, 3, 0);
+            puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
+            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0);
 
         this._constraintsLayer.visible = true;
 

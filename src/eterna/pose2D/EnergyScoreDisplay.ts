@@ -1,6 +1,6 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Container, Graphics, Point} from "pixi.js";
-import {Align} from "../../flashbang/core/Align";
+import {HAlign} from "../../flashbang/core/Align";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Fonts} from "../util/Fonts";
 
@@ -27,7 +27,7 @@ export class EnergyScoreDisplay extends Container {
         this.addChild(this._bg);
         this.updateBG();
 
-        let textLayout: VLayoutContainer = new VLayoutContainer(2, Align.LEFT);
+        let textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
         this._labelText = new MultiStyleText("Total", {
             "default": {

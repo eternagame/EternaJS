@@ -1,3 +1,7 @@
-export enum Align {
-    LEFT, RIGHT, TOP, BOTTOM, CENTER
+export enum HAlign {
+    LEFT, CENTER, RIGHT
+}
+
+export enum VAlign {
+    TOP, CENTER, BOTTOM
 }

@@ -1,5 +1,5 @@
 import {Rectangle} from "pixi.js";
-import {Align} from "../core/Align";
+import {VAlign} from "../core/Align";
 import {LayoutContainer} from "./LayoutContainer";
 
 /**
@@ -7,7 +7,7 @@ import {LayoutContainer} from "./LayoutContainer";
  * Call layout() after adding or removing children to update the sprite's layout.
  */
 export class HLayoutContainer extends LayoutContainer {
-    public constructor(hOffset: number = 0, vAlign: Align = Align.CENTER) {
+    public constructor(hOffset: number = 0, vAlign: VAlign = VAlign.CENTER) {
         super();
         this._hOffset = hOffset;
         this._vAlign = vAlign;
@@ -36,11 +36,11 @@ export class HLayoutContainer extends LayoutContainer {
         }
     }
 
-    public get vAlign(): Align {
+    public get vAlign(): VAlign {
         return this._vAlign;
     }
 
-    public set vAlign(val: Align) {
+    public set vAlign(val: VAlign) {
         if (this._vAlign !== val) {
             this._vAlign = val;
             this._needsLayout = true;
@@ -58,7 +58,7 @@ export class HLayoutContainer extends LayoutContainer {
     /* override */
     protected doLayout(): void {
         let maxHeight: number = 0;
-        if (this._vAlign !== Align.TOP) {
+        if (this._vAlign !== VAlign.TOP) {
             for (let child of this.children) {
                 if (child.visible) {
                     maxHeight = Math.max(child.getLocalBounds(HLayoutContainer.R).height, maxHeight);
@@ -88,9 +88,9 @@ export class HLayoutContainer extends LayoutContainer {
                 let bounds: Rectangle = child.getLocalBounds(HLayoutContainer.R);
                 child.x = -bounds.left + x;
                 child.y = -bounds.top;
-                if (this._vAlign === Align.CENTER) {
+                if (this._vAlign === VAlign.CENTER) {
                     child.y += (maxHeight - bounds.height) * 0.5;
-                } else if (this._vAlign === Align.BOTTOM) {
+                } else if (this._vAlign === VAlign.BOTTOM) {
                     child.y += maxHeight - bounds.height;
                 }
 
@@ -100,7 +100,7 @@ export class HLayoutContainer extends LayoutContainer {
     }
 
     protected _hOffset: number;
-    protected _vAlign: Align;
+    protected _vAlign: VAlign;
     protected _reversed: boolean;
 
     protected static R: Rectangle = new Rectangle();

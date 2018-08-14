@@ -1,5 +1,5 @@
 import {Graphics} from "pixi.js";
-import {Align} from "../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {ButtonState} from "../../flashbang/objects/Button";
 import {ToggleButton} from "../../flashbang/objects/ToggleButton";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -32,8 +32,8 @@ export class GameCheckbox extends ToggleButton {
         let label = Fonts.std_regular(txt, size).color(0xC0DCE7).build();
         this.container.addChild(label);
         DisplayUtil.positionRelative(
-            label, Align.LEFT, Align.CENTER,
-            box, Align.RIGHT, Align.CENTER, 4, 0
+            label, HAlign.LEFT, VAlign.CENTER,
+            box, HAlign.RIGHT, VAlign.CENTER, 4, 0
         );
     }
 

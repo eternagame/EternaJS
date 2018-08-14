@@ -1,5 +1,5 @@
 import {Container, Graphics, Point} from "pixi.js";
-import {Align} from "../../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
@@ -343,13 +343,13 @@ export class PoseEditToolbar extends ContainerObject {
 
         if (this.puzzleStateToggle.isLiveObject) {
             DisplayUtil.positionRelative(
-                this.puzzleStateToggle.display, Align.CENTER, Align.BOTTOM,
-                this._toolbarLayout, Align.CENTER, Align.TOP, 0, -5);
+                this.puzzleStateToggle.display, HAlign.CENTER, VAlign.BOTTOM,
+                this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5);
         }
 
         DisplayUtil.positionRelative(
-            this._content, Align.CENTER, Align.BOTTOM,
-            this._invisibleBackground, Align.CENTER, Align.BOTTOM);
+            this._content, HAlign.CENTER, VAlign.BOTTOM,
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
     }
 
     public set_toolbar_autohide(enabled: boolean): void {
