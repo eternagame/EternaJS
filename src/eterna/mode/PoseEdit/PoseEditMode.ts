@@ -77,8 +77,6 @@ export class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
-        this._is_screenshot_supported = true;
-
         this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
         DisplayUtil.positionRelativeToStage(
@@ -188,6 +186,14 @@ export class PoseEditMode extends GameMode {
         this._asynch_text.position = new Point(16, 200);
 
         this.set_puzzle();
+    }
+
+    public onResized(): void {
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
+            HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        super.onResized();
     }
 
     public get toolbar(): PoseEditToolbar {
@@ -318,9 +324,15 @@ export class PoseEditMode extends GameMode {
             hintBox.set_size(420, hintText.height + 46);
 
             this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
-            hintBox.display.position = new Point(
-                Flashbang.stageWidth - 440,
-                Flashbang.stageHeight - hintBox.container.height - 90);
+
+            let updatePosition = () => {
+                hintBox.display.position = new Point(
+                    Flashbang.stageWidth - 440,
+                    Flashbang.stageHeight - hintBox.container.height - 90);
+            };
+
+            updatePosition();
+            hintBox.regs.add(this.resized.connect(updatePosition));
         }
     }
 

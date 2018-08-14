@@ -177,7 +177,6 @@ export abstract class GameMode extends AppMode {
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
 
-    protected _is_screenshot_supported: boolean = false;
     protected _pose_fields: PoseField[] = [];
     protected _poses: Pose2D[] = [];
     protected _is_pip_mode: boolean = false;

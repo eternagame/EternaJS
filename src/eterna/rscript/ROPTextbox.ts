@@ -41,67 +41,57 @@ export class ROPTextbox extends RScriptOp {
         this._text = ROPTextbox.ProcessText(this._text);
     }
 
-    /* override */
-    public exec(): void {
-        if (this._env.Exists(this._id)) {
-            if (ROPTextbox.isTextbox(this._mode)) {
-                this.RemoveTextbox();
+    private showTextbox(): void {
+        let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
+        let parent: ContainerObject = this._env;
+        if (this._initial_show) {
+            if (this._forceTopmost && false) {
+                // parent = Application.instance.get_front_object_container();
+                // Application.instance.get_front_object_container().add_object(textBox);
             } else {
-                let prevArr = this._env.GetVar(this._id);
-                if (prevArr instanceof GameObject) {
-                    this.RemoveArrow(prevArr);
-                } else {
-                    log.warn(`${this._id} is not an arrow`);
-                }
+                this._env.addObject(textBox, this._env.container);
             }
         }
 
-        if (this._show && ROPTextbox.isTextbox(this._mode)) {
-            let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
-            let parent: ContainerObject = this._env;
-            if (this._initial_show) {
-                if (this._forceTopmost && false) {
-                    // parent = Application.instance.get_front_object_container();
-                    // Application.instance.get_front_object_container().add_object(textBox);
-                } else {
-                    this._env.addObject(textBox, this._env.container);
-                }
-            }
+        this._env.StoreVar(this._id, textBox, parent);
 
-            this._env.StoreVar(this._id, textBox, parent);
+        let textStyle: ExtendedTextStyle = {
+            fontFamily: Fonts.ARIAL,
+            fontSize: 13,
+            fill: 0xC0DCE7
 
-            let textStyle: ExtendedTextStyle = {
-                fontFamily: Fonts.ARIAL,
-                fontSize: 13,
-                fill: 0xC0DCE7
+            // TSC: wordWrap + letterSpacing is currently broken:
+            // https://github.com/tleunen/pixi-multistyle-text/issues/67
+            // letterSpacing: 1.0
+        };
 
-                // TSC: wordWrap + letterSpacing is currently broken:
-                // https://github.com/tleunen/pixi-multistyle-text/issues/67
-                // letterSpacing: 1.0
-            };
+        if (this._fixedSize) {
+            textBox.set_fixed_width(215);
+            textStyle.wordWrap = true;
+            textStyle.wordWrapWidth = 185;
+        }
 
-            if (this._fixedSize) {
-                textBox.set_fixed_width(215);
-                textStyle.wordWrap = true;
-                textStyle.wordWrapWidth = 185;
-            }
+        textBox.set_styled_text(new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text));
 
-            textBox.set_styled_text(new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text));
+        if (this._title.length > 0) {
+            textBox.set_title(this._title);
+        }
 
-            if (this._title.length > 0) {
-                textBox.set_title(this._title);
-            }
+        if (this._button_text !== "") {
+            textBox.showButton(true).clicked.connect(() => this.OnClickEvent());
+        } else {
+            textBox.showButton(false);
+        }
 
+        let updateLocation = () => {
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                 textBox.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
                     Flashbang.stageHeight * this._y_pos + this._y_rel
                 );
-                // textBox.set_pos(new UDim(this._x_pos, this._y_pos, this._x_rel, this._y_rel));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
                 let p: Point = this._env.GetRNA().get_base_xy(this._nuc_idx);
-                // trace((-1.0 * textBox.height / 2) + " " + _y_offset_specified + " " + _y_offset);
                 let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._x_offset_specified) {
                     offset.x = this._x_offset;
@@ -117,29 +107,31 @@ export class ROPTextbox extends RScriptOp {
                 this._env.SetTextboxVisible(this._id, true);
                 return;
             }
+        };
 
-            if (this._button_text !== "") {
-                textBox.showButton(true).clicked.connect(() => this.OnClickEvent());
+        textBox.regs.add(this._env.mode.resized.connect(updateLocation));
+        updateLocation();
+    }
+
+    private showArrow(): void {
+        let parent: FancyTextBalloon = null;
+        if (this._has_parent) {
+            let parentVal = this._env.GetVar(this._parent_id);
+            if (parentVal instanceof FancyTextBalloon) {
+                parent = parentVal;
+            } else if (parentVal == null) {
+                this._has_parent = false;
             } else {
-                textBox.showButton(false);
+                log.warn(`${this._parent_id}: is not a FancyTextBalloon`);
+                this._has_parent = false;
             }
-        } else if (this._show) {
-            let parent: FancyTextBalloon = null;
-            if (this._has_parent) {
-                let parentVal = this._env.GetVar(this._parent_id);
-                if (parentVal instanceof FancyTextBalloon) {
-                    parent = parentVal;
-                } else if (parentVal == null) {
-                    this._has_parent = false;
-                } else {
-                    log.warn(`${this._parent_id}: is not a FancyTextBalloon`);
-                    this._has_parent = false;
-                }
-            }
+        }
 
-            // Draw Arrow.
-            let newArrow = new RScriptArrow(this._my_width + 20, 60, this._outlineColor, this._fillColor);
+        // Draw Arrow.
+        let newArrow = new RScriptArrow(this._my_width + 20, 60, this._outlineColor, this._fillColor);
+        this._env.addObject(newArrow, this._env.container);
 
+        let updateLocation = () => {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._x_pos + this._x_rel,
@@ -208,11 +200,35 @@ export class ROPTextbox extends RScriptOp {
                 // TSC - I'm not sure if this is ever called or what it should do
                 // newArrow.set_anchor_nucleotide(this._env.GetRNA(), this._nuc_idx, offset.x, offset.y);
             }
-            this._env.addObject(newArrow, this._env.container);
-            this._env.StoreVar(this._id, newArrow, this._env);
-            if (this._has_parent) {
-                parent.add_child_arrow(newArrow);
+        };
+
+        updateLocation();
+        newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
+
+        this._env.StoreVar(this._id, newArrow, this._env);
+        if (this._has_parent) {
+            parent.add_child_arrow(newArrow);
+        }
+    }
+
+    public exec(): void {
+        if (this._env.Exists(this._id)) {
+            if (ROPTextbox.isTextbox(this._mode)) {
+                this.RemoveTextbox();
+            } else {
+                let prevArr = this._env.GetVar(this._id);
+                if (prevArr instanceof GameObject) {
+                    this.RemoveArrow(prevArr);
+                } else {
+                    log.warn(`${this._id} is not an arrow`);
+                }
             }
+        }
+
+        if (this._show && ROPTextbox.isTextbox(this._mode)) {
+            this.showTextbox();
+        } else if (this._show && ROPTextbox.isArrow(this._mode)) {
+            this.showArrow();
         }
     }
 
