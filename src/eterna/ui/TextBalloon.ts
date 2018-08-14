@@ -6,13 +6,13 @@ import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Fonts} from "../util/Fonts";
 import {BaseGamePanel} from "./BaseGamePanel";
 import {GameButton} from "./GameButton";
-import {GamePanel} from "./GamePanel";
+import {GamePanel, GamePanelType} from "./GamePanel";
 
 export class TextBalloon extends ContainerObject {
     public constructor(text: string = "", balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07, borderColor: number = 0, borderAlpha: number = 0) {
         super();
 
-        this._panel = new GamePanel(0, balloonAlpha, balloonColor, borderAlpha, borderColor);
+        this._panel = new GamePanel(GamePanelType.NORMAL, balloonAlpha, balloonColor, borderAlpha, borderColor);
         this.addObject(this._panel, this.container);
 
         this._button = new GameButton().label("Next", 12);
