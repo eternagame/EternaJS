@@ -1,7 +1,8 @@
+import {Graphics} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Signal} from "../../signals/Signal";
 
 /** Convenience base class for dialog objects. */
@@ -12,8 +13,9 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
     protected added() {
         super.added();
 
-        let bg = DisplayUtil.fillStageRect(0x0, this.bgAlpha);
+        let bg = new Graphics();
         this.container.addChild(bg);
+
         // eat clicks on our BG
         let capture = new PointerCapture(bg);
         capture.beginCapture((e) => {
@@ -24,6 +26,15 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         });
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
+
+        let updateBG = () => {
+            bg.clear()
+                .beginFill(0x0, this.bgAlpha)
+                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .endFill();
+        };
+        updateBG();
+        this.regs.add(this.mode.resized.connect(updateBG));
     }
 
     /**

@@ -193,6 +193,13 @@ export class PoseEditMode extends GameMode {
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
+        this.layout_bars();
+        this.layout_constraints();
+
+        this._docked_spec_box.set_size(Flashbang.stageWidth, Flashbang.stageHeight - 340);
+        let s: number = this._docked_spec_box.getPlotSize();
+        this._docked_spec_box.set_size(s + 55, s * 2 + 51);
+
         super.onResized();
     }
 
@@ -1130,16 +1137,6 @@ export class PoseEditMode extends GameMode {
             this.change_target(this._current_target_index);
             this._poses[0].set_zoom_level(this._poses[0].compute_default_zoom_level(), true, true);
         }
-    }
-
-    /*override*/
-    protected on_resize(): void {
-        this.layout_bars();
-        this.layout_constraints();
-
-        this._docked_spec_box.set_size(Flashbang.stageWidth, Flashbang.stageHeight - 340);
-        let s: number = this._docked_spec_box.getPlotSize();
-        this._docked_spec_box.set_size(s + 55, s * 2 + 51);
     }
 
     /*override*/

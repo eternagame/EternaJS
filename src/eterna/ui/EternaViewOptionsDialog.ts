@@ -1,4 +1,5 @@
 import {HAlign, VAlign} from "../../flashbang/core/Align";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Setting} from "../../flashbang/settings/Setting";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -57,15 +58,25 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         panel.set_panel_title("Game options");
         panel.set_size(viewLayout.width + 40, viewLayout.height + 40 + panel.get_title_space());
         this.addObject(panel, this.container);
-        DisplayUtil.positionRelativeToStage(panel.display, HAlign.CENTER, VAlign.CENTER, HAlign.CENTER, VAlign.CENTER);
 
         panel.display.interactive = true;
 
         this.container.addChild(viewLayout);
-        DisplayUtil.positionRelative(
-            viewLayout, HAlign.CENTER, VAlign.CENTER,
-            panel.display, HAlign.CENTER, VAlign.CENTER, 0, panel.get_title_space() * 0.5
-        );
+
+        let updateLocation = () => {
+            DisplayUtil.positionRelativeToStage(
+                panel.display,
+                HAlign.CENTER, VAlign.CENTER,
+                HAlign.CENTER, VAlign.CENTER);
+
+            DisplayUtil.positionRelative(
+                viewLayout, HAlign.CENTER, VAlign.CENTER,
+                panel.display, HAlign.CENTER, VAlign.CENTER, 0, panel.get_title_space() * 0.5
+            );
+        };
+
+        updateLocation();
+        this.regs.add(this._mode.resized.connect(updateLocation));
 
         // Eterna.sound.get_mute_button().set_pos(new UDim(0, 1, 20, -85));
         // Eterna.sound.get_volume_button(1).set_pos(new UDim(0, 1, 45, -82));

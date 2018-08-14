@@ -22,19 +22,16 @@ export class SpecBoxDialog extends Dialog<boolean> {
     protected added(): void {
         super.added();
 
-        let spec_box = new SpecBox();
-        spec_box.set_spec(this._datablock);
-        spec_box.set_size(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
-        this.addObject(spec_box, this.container);
-
-        spec_box.display.position.x = (Flashbang.stageWidth - spec_box.width) * 0.5;
-        spec_box.display.position.y = (Flashbang.stageHeight - spec_box.height) * 0.5;
+        let specBox = new SpecBox();
+        specBox.set_spec(this._datablock);
+        specBox.set_size(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
+        this.addObject(specBox, this.container);
 
         let cancel_button: GameButton = new GameButton().label("Ok", 14).hotkey(KeyCode.KeyS);
-        spec_box.addObject(cancel_button, spec_box.container);
+        specBox.addObject(cancel_button, specBox.container);
         cancel_button.display.position = new Point(
-            spec_box.width - cancel_button.container.width - 20,
-            spec_box.height - cancel_button.container.height - 20
+            specBox.width - cancel_button.container.width - 20,
+            specBox.height - cancel_button.container.height - 20
         );
 
         cancel_button.clicked.connect(() => this.close(false));
@@ -43,7 +40,7 @@ export class SpecBoxDialog extends Dialog<boolean> {
             .label("Minimize Window", 14)
             .tooltip("Minimize")
             .hotkey(KeyCode.KeyM);
-        spec_box.addObject(add_thumbnail_button, spec_box.container);
+        specBox.addObject(add_thumbnail_button, specBox.container);
         DisplayUtil.positionRelative(
             add_thumbnail_button.display, HAlign.RIGHT, VAlign.CENTER,
             cancel_button.display, HAlign.LEFT, VAlign.CENTER,
@@ -51,6 +48,13 @@ export class SpecBoxDialog extends Dialog<boolean> {
         );
 
         add_thumbnail_button.clicked.connect(() => this.close(true));
+
+        let updateLocation = () => {
+            specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
+            specBox.display.position.y = (Flashbang.stageHeight - specBox.height) * 0.5;
+        };
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
     private readonly _datablock: UndoBlock;

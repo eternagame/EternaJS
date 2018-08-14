@@ -36,9 +36,6 @@ export class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
 
         title.setFocus();
 
-        inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
-        inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
-
         inputPanel.set_hotkeys(null, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
@@ -46,5 +43,12 @@ export class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
             let dict = inputPanel.get_dictionary();
             this.close({title: dict.get(TITLE), comment: dict.get(COMMENT)});
         });
+
+        let updateLocation = () => {
+            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
+            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
+        };
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }

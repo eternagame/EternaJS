@@ -77,11 +77,17 @@ export class ConfirmDialog extends Dialog<boolean> {
         panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.get_title_space());
 
         panel.display.alpha = 0;
-        panel.display.position = new Point(
-            (Flashbang.stageWidth - panel.get_panel_width()) * 0.5,
-            (Flashbang.stageHeight - panel.get_panel_height()) * 0.5
-        );
         panel.addObject(new AlphaTask(1, 0.3));
+
+        let updateLocation = () => {
+            panel.display.position = new Point(
+                (Flashbang.stageWidth - panel.get_panel_width()) * 0.5,
+                (Flashbang.stageHeight - panel.get_panel_height()) * 0.5
+            );
+        };
+
+        updateLocation();
+        this.regs.add(this._mode.resized.connect(updateLocation));
     }
 
     private readonly _prompt: string;
