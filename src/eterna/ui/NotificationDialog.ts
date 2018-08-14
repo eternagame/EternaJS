@@ -34,10 +34,6 @@ export class NotificationDialog extends Dialog<void> {
         let box = new TextBalloon("", 0x152843, 1.0, 0xC0DCE7, 0.27);
         box.set_title("Notice");
         box.set_text(`${this._message}\n\n\n`);
-        box.display.position = new Point(
-            (Flashbang.stageWidth - box.balloon_width()) * 0.5,
-            (Flashbang.stageHeight - box.balloon_height()) * 0.5
-        );
         this.addObject(box, this.container);
 
         box.display.alpha = 0;
@@ -61,6 +57,15 @@ export class NotificationDialog extends Dialog<void> {
         );
 
         box.container.addChild(buttonLayout);
+
+        let updateLocation = () => {
+            box.display.position = new Point(
+                (Flashbang.stageWidth - box.balloon_width()) * 0.5,
+                (Flashbang.stageHeight - box.balloon_height()) * 0.5
+            );
+        };
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
     private readonly _message: string;

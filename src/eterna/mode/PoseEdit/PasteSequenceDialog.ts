@@ -23,11 +23,15 @@ export class PasteSequenceDialog extends Dialog<string> {
 
         inputPanel.set_hotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
-        inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
-        inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
-
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(values => this.onSequenceEntered(values.get(SEQUENCE)));
+
+        let updateLocation = () => {
+            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
+            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
+        };
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
     private onSequenceEntered(sequence: string): void {

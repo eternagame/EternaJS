@@ -1,3 +1,4 @@
+import {Point} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {Dialog} from "../../ui/Dialog";
@@ -24,11 +25,16 @@ export class CopySequenceDialog extends Dialog<void> {
 
         inputPanel.set_hotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
-        inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
-        inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
-
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => this.close(null));
+
+        let updateLocation = () => {
+            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
+            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
+        };
+
+        updateLocation();
+        this.regs.add(this._mode.resized.connect(updateLocation));
     }
 
     private readonly _sequence: string;

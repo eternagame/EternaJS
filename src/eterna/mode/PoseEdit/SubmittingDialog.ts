@@ -12,10 +12,6 @@ export class SubmittingDialog extends Dialog<void> {
         super.added();
 
         let text = Fonts.arial("Submitting...", 20).bold().build();
-        text.position = new Point(
-            (Flashbang.stageWidth - text.width) * 0.5,
-            (Flashbang.stageHeight - text.height) * 0.5
-        );
         this.container.addChild(text);
 
         text.alpha = 0;
@@ -23,5 +19,14 @@ export class SubmittingDialog extends Dialog<void> {
             new AlphaTask(1, 0.3, Easing.linear, text),
             new AlphaTask(0, 0.3, Easing.linear, text),
         )));
+
+        let updateLocation = () => {
+            text.position = new Point(
+                (Flashbang.stageWidth - text.width) * 0.5,
+                (Flashbang.stageHeight - text.height) * 0.5
+            );
+        };
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }
