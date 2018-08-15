@@ -1,9 +1,8 @@
 import * as log from "loglevel";
 import "pixi-sound";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
+import {Eterna} from "../Eterna";
 import {EternaSettings} from "../settings/EternaSettings";
-
-type Sound = PIXI.sound.Sound;
 
 export class SoundManager {
     public constructor(settings: EternaSettings) {
@@ -24,22 +23,53 @@ export class SoundManager {
         }
 
         try {
-            this.getSound(name).play({volume: this._settings.soundVolume.value, start: start_time});
+            let sound = this.getSound(name);
+            sound.play({volume: this._settings.soundVolume.value, start: start_time});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);
         }
     }
 
-    private getSound(name: string): Sound {
+    private getSound(name: string): EternaSound {
         let sound = this._sounds.get(name);
         if (sound === undefined) {
-            sound = PIXI.sound.Sound.from(name);
+            sound = new EternaSound(name);
             this._sounds.set(name, sound);
         }
         return sound;
     }
 
     private readonly _settings: EternaSettings;
-    private readonly _sounds: Map<string, Sound> = new Map();
+    private readonly _sounds: Map<string, EternaSound> = new Map();
     private readonly _regs: RegistrationGroup = new RegistrationGroup();
+}
+
+/**
+ * We load sounds lazily, which means that a sound might not be available when `play()` is called.
+ * For sounds that are loading, we store the last play request, and play the sound with those settings
+ * when it has completed loading.
+ */
+class EternaSound {
+    public constructor(url: string) {
+        this._sound = PIXI.sound.Sound.from({url: url, preload: true, loaded: () => this.onLoaded()});
+    }
+
+    public play(options: PIXI.sound.PlayOptions) {
+        if (this._sound.isLoaded) {
+            this._sound.play(options);
+        } else {
+            this._pendingPlayOptions = options;
+        }
+    }
+
+    private onLoaded(): void {
+        if (this._pendingPlayOptions != null && !Eterna.settings.soundMute.value) {
+            this._pendingPlayOptions.volume = Eterna.settings.soundVolume.value;
+            this._sound.play(this._pendingPlayOptions);
+        }
+        this._pendingPlayOptions = null;
+    }
+
+    private readonly _sound: PIXI.sound.Sound;
+    private _pendingPlayOptions: PIXI.sound.PlayOptions;
 }

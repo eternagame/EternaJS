@@ -28,7 +28,7 @@ export class Eterna {
         let errstring = ErrorUtil.getErrString(err);
 
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
-            log.debug("TODO: Tim, fix this audio bug");
+            log.debug("pixi-sound is misbehaving again");
             return;
         }
 
