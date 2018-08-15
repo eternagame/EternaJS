@@ -9,7 +9,7 @@
     "build:surge": "webpack --config webpack.surge.js",
     "build:prod": "webpack --config webpack.prod.js",
     "postbuild:dev": "cp -R ./website/frontend ./dist/dev && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
-    "postbuild:surge": "cp -R ./website/frontend ./dist/surge && coffee -o ./dist/surge/jscripts -c ./website/frontend/coffee",
+    "postbuild:surge": "cp -R ./website/frontend ./dist/surge && coffee -o ./dist/surge/frontend/jscripts -c ./website/frontend/coffee",
     "test": "jest --verbose",
     "lint": "eslint src --ext .ts"
   },

@@ -162,7 +162,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1280;
     private readonly _height: number = 1024;
-    private readonly _puzzleID: number = PuzzleID.Tutorial1;
+    private readonly _puzzleID: number = PuzzleID.TheophyllineRibozymeSwitch;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
