@@ -35,7 +35,7 @@ export class LoadingMode extends AppMode {
     protected setup(): void {
         super.setup();
 
-        this._textField = Fonts.std_bold(this._text, 36).color(0xffffff).build();
+        this._textField = Fonts.arial(this._text, 36).bold().color(0xffffff).build();
         this._textField.x = -this._textField.width * 0.5;
         this._textField.y = -this._textField.height * 0.5;
 

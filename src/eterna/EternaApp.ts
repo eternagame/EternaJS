@@ -96,17 +96,13 @@ export class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(Eterna.serverURL);
         Eterna.sound = new SoundManager(Eterna.settings);
 
-        let loadingMode = new LoadingMode("");
+        let loadingMode: LoadingMode = new LoadingMode("Authenticating...");
         this._modeStack.unwindToMode(loadingMode);
 
-        Fonts.loadFonts()
-            .then(() => {
-                loadingMode.text = "Authenticating...";
-                return this.authenticate();
-            })
+        this.authenticate()
             .then(() => {
                 loadingMode.text = "Loading assets...";
-                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all)]);
+                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
@@ -166,7 +162,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1280;
     private readonly _height: number = 1024;
-    private readonly _puzzleID: number = PuzzleID.Tutorial4;
+    private readonly _puzzleID: number = PuzzleID.Tutorial1;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
