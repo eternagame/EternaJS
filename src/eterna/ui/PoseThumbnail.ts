@@ -139,14 +139,27 @@ export class PoseThumbnail {
         let dontcare_xcoords: number[] = [];
         let dontcare_ycoords: number[] = [];
 
+        const COLOR_WHITE = 0xffffff;
+
+        const COLOR_RIGHT = 0xffffff;
+        const COLOR_WRONG = 0xff0000;
+        const COLOR_DONTCARE = 0xC080FF;
+
+        const COLOR_ADENINE = 0xFFFF00;
+        const COLOR_GUANINE = 0xFF0000;
+        const COLOR_CYTOSINE = 0x00FF00;
+        const COLOR_URACIL = 0x8888FF;
+
         let color: number = 0;
         for (let ii = 0; ii < n; ii++) {
             color = 0;
 
             if (type === PoseThumbnailType.WHITE) {
-                color = 0xFFFFFF;
+                color = COLOR_WHITE;
             } else if (type === PoseThumbnailType.WRONG_COLORED) {
                 if (wrong_pairs[ii] === 1) {
+                    color = COLOR_WRONG;
+
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
                         wrong_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
                         wrong_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
@@ -176,6 +189,8 @@ export class PoseThumbnail {
                         wrong_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
                     }
                 } else if (wrong_pairs[ii] === -1) {
+                    color = COLOR_RIGHT;
+
                     if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
                         right_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
                         right_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
@@ -204,45 +219,49 @@ export class PoseThumbnail {
                         right_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
                         right_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
                     }
-                } else if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
-                    dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
-                    dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
-
-                    dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
-                    dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
-
-                    dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
-                    dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
-                } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
-                    dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
-                    dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
-
-                    dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
-                    dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
-
-                    dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
-                    dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
                 } else {
-                    dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
-                    dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
+                    color = COLOR_DONTCARE;
 
-                    dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
-                    dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
+                    if (ii === 0 || (ii > 0 && sequence[ii - 1] === EPars.RNABASE_CUT)) {
+                        dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
+                        dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
 
-                    dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
-                    dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
+                        dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
+                        dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
+
+                        dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
+                        dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
+                    } else if (ii === n - 1 || (ii < n - 1 && sequence[ii + 1] === EPars.RNABASE_CUT)) {
+                        dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
+                        dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
+
+                        dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
+                        dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
+
+                        dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
+                        dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
+                    } else {
+                        dontcare_xcoords.push(((xarray[ii] + xarray[ii - 1]) / 2.0 - xmin) * scale + x_offset);
+                        dontcare_ycoords.push(((yarray[ii] + yarray[ii - 1]) / 2.0 - ymin) * scale + y_offset);
+
+                        dontcare_xcoords.push((xarray[ii] - xmin) * scale + x_offset);
+                        dontcare_ycoords.push((yarray[ii] - ymin) * scale + y_offset);
+
+                        dontcare_xcoords.push(((xarray[ii] + xarray[ii + 1]) / 2.0 - xmin) * scale + x_offset);
+                        dontcare_ycoords.push(((yarray[ii] + yarray[ii + 1]) / 2.0 - ymin) * scale + y_offset);
+                    }
                 }
             } else if (type === PoseThumbnailType.BASE_COLORED) {
                 if (sequence[ii] === EPars.RNABASE_ADENINE) {
-                    color = 0xFFFF00;
+                    color = COLOR_ADENINE;
                 } else if (sequence[ii] === EPars.RNABASE_GUANINE) {
-                    color = 0xFF0000;
+                    color = COLOR_GUANINE;
                 } else if (sequence[ii] === EPars.RNABASE_CYTOSINE) {
-                    color = 0x00FF00;
+                    color = COLOR_CYTOSINE;
                 } else if (sequence[ii] === EPars.RNABASE_URACIL) {
-                    color = 0x8888FF;
+                    color = COLOR_URACIL;
                 } else {
-                    color = 0xFFFFFF;
+                    color = COLOR_WHITE;
                 }
             } else if (type === PoseThumbnailType.EXP_COLORED) {
                 if (exp_use_threshold) color = exp_painter.get_color_with_midpoint(ii, exp_threshold);
@@ -262,7 +281,7 @@ export class PoseThumbnail {
         }
 
         if (type === PoseThumbnailType.WRONG_COLORED) {
-            color = 0xFFFFFF;
+            color = COLOR_RIGHT;
             canvas.lineStyle(Math.min(size, 3), color, 1);
 
             for (let jj = 0; jj < right_xcoords.length; jj++) {
@@ -277,7 +296,7 @@ export class PoseThumbnail {
                 }
             }
 
-            color = 0xFF0000;
+            color = COLOR_WRONG;
             canvas.lineStyle(Math.min(size, 3), color, 1);
 
             for (let jj = 0; jj < wrong_xcoords.length; jj++) {
@@ -292,7 +311,7 @@ export class PoseThumbnail {
                 }
             }
 
-            color = 0xC080FF;
+            color = COLOR_DONTCARE;
             canvas.lineStyle(Math.min(size, 3), color, 0.65);
 
             for (let jj = 0; jj < dontcare_xcoords.length; jj++) {
