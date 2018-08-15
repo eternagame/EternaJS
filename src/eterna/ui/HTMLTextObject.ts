@@ -10,7 +10,10 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         if (width) {
             this.width = width;
         } else {
-            this._obj.style.width = "max-content";
+            // width: max-content doesn't seem to work on Firefox, so we set multiple width values
+            this._obj.style.cssText +=
+                "width: max-content;" +
+                "width: -moz-max-content;";
         }
     }
 
