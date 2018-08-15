@@ -9,7 +9,7 @@ import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
 import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {PoseThumbnail} from "../../ui/PoseThumbnail";
+import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {Fonts} from "../../util/Fonts";
 
 export class MissionIntroMode extends AppMode {
@@ -225,7 +225,7 @@ export class MissionIntroMode extends AppMode {
         for (let ii = 0; ii < target_pairs.length; ii++) {
             sequence[ii] = EPars.RNABASE_ADENINE;
         }
-        PoseThumbnail.drawToSprite(this._goalsThumbnail, sequence, target_pairs, 6, PoseThumbnail.THUMBNAIL_WRONG_COLORED, 0, wrong_pairs, false, 0);
+        PoseThumbnail.drawToSprite(this._goalsThumbnail, sequence, target_pairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
     }
 
     private updateConstraintScroll(): void {
