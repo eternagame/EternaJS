@@ -1,7 +1,5 @@
 import MultiStyleText from "pixi-multistyle-text";
-import {
-    Container, Graphics, Point, Sprite, Text, Texture
-} from "pixi.js";
+import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Enableable} from "../../flashbang/objects/Enableable";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
@@ -12,7 +10,6 @@ import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
 import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
-import {Assert} from "../../flashbang/util/Assert";
 import {Easing} from "../../flashbang/util/Easing";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
@@ -23,7 +20,7 @@ import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
 import {Fonts} from "../util/Fonts";
 import {Band} from "./Band";
-import {PoseThumbnail} from "./PoseThumbnail";
+import {PoseThumbnail, PoseThumbnailType} from "./PoseThumbnail";
 import {TextBalloon} from "./TextBalloon";
 
 export enum ConstraintBoxType {
@@ -526,8 +523,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnail.THUMBNAIL_WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnail.THUMBNAIL_WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
 
             if (this._enlarged) {
                 this._small_thumbnail.visible = false;
@@ -560,8 +557,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnail.THUMBNAIL_WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnail.THUMBNAIL_WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
 
             if (this._enlarged) {
                 this._small_thumbnail.visible = false;
