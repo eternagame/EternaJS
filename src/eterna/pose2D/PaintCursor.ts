@@ -107,13 +107,13 @@ class PaintCursor extends GameObject implements Updatable {
     private _color: number;
     private _outer_color: number;
 
-    private static YELLOW: number = 0xFFFF00;
-    private static BLUE: number = 0x0000FF;
-    private static RED: number = 0xFF0000;
-    private static GREEN: number = 0x00FF00;
-    private static WHITE: number = 0xFFFFFF;
-    private static CYAN: number = 0x7EFFFF;
-    private static GREY: number = 0xC0C0C0;
-    private static NULL: number = 0x0;
+    private static readonly YELLOW: number = 0xFFFF00;
+    private static readonly BLUE: number = 0x0000FF;
+    private static readonly RED: number = 0xFF0000;
+    private static readonly GREEN: number = 0x00FF00;
+    private static readonly WHITE: number = 0xFFFFFF;
+    private static readonly CYAN: number = 0x7EFFFF;
+    private static readonly GREY: number = 0xC0C0C0;
+    private static readonly NULL: number = 0x0;
 }
 
