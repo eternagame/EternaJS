@@ -1,6 +1,6 @@
 # EternaJS
 
-A Javascript port of the Eterna game
+A ~~Javascript~~ TypeScript port of the Eterna game
 
 ## Setup
 
