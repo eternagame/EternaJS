@@ -22,7 +22,7 @@ export class FolderManager {
 
     public isFolder(name: string): boolean {
         for (let folder of this._folders) {
-            if (folder.get_folder_name() == name) {
+            if (folder.get_folder_name().toLowerCase() === name.toLowerCase()) {
                 return true;
             }
         }
@@ -31,7 +31,7 @@ export class FolderManager {
 
     public get_folder(name: string): Folder {
         for (let folder of this._folders) {
-            if (folder.get_folder_name() === name) {
+            if (folder.get_folder_name().toLowerCase() === name.toLowerCase()) {
                 return folder;
             }
         }
@@ -42,7 +42,7 @@ export class FolderManager {
     public get_next_folder(folder_name: string, filter_cb: Function = null): Folder {
         let curFolderIdx: number = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
-            if (this._folders[ii].get_folder_name() === folder_name) {
+            if (this._folders[ii].get_folder_name().toLowerCase() === folder_name.toLowerCase()) {
                 curFolderIdx = ii;
                 break;
             }
