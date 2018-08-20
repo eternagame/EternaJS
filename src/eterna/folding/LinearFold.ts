@@ -95,7 +95,7 @@ export class LinearFold extends Folder {
     /* override */
     public fold_sequence_with_binding_site(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         log.warn("LinearFold.fold_sequence_with_binding_site: unimplemented");
-        return [];
+        return this.fold_sequence(seq, null);
     }
 
     /* override */
@@ -106,7 +106,7 @@ export class LinearFold extends Folder {
     /* override */
     public cofold_sequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         log.warn("LinearFold.cofold_sequence: unimplemented");
-        return [];
+        return this.fold_sequence(seq, null);
     }
 
     /* override */
@@ -117,7 +117,7 @@ export class LinearFold extends Folder {
     /* override */
     public cofold_sequence_with_binding_site(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
         log.warn("LinearFold.cofold_sequence_with_binding_site: unimplemented");
-        return [];
+        return this.fold_sequence(seq, null);
     }
 
     /* override */
