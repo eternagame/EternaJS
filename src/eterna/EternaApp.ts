@@ -41,18 +41,28 @@ enum PuzzleID {
     SameState_TryptophanB = 7656242,    // Booster paint tool
 }
 
-interface EternaAppParameters {
+export interface EternaAppParameters {
     containerID?: string,
     width?: number,
     height?: number,
     puzzleID?: number,
+    folderName?: string,
 }
 
 /** Entry point for the game */
 export class EternaApp extends FlashbangApp {
-    public constructor({containerID = "maingame", width, height, puzzleID}: EternaAppParameters) {
+    public constructor(params: EternaAppParameters) {
         super();
 
+        // Default param values
+        params.containerID = params.containerID || "maingame";
+        params.width = params.width || 1280;
+        params.height = params.height || 1024;
+        params.puzzleID = params.puzzleID || PuzzleID.SameState_TryptophanB;
+
+        this._params = params;
+
+        const containerID = params.containerID || "maingame";
         let eternaContainer: HTMLElement = document.getElementById(containerID);
         eternaContainer.style.position = "relative";
 
@@ -64,10 +74,6 @@ export class EternaApp extends FlashbangApp {
         overlay.id = Eterna.OVERLAY_DIV_ID;
         eternaContainer.appendChild(overlay);
 
-        if (width) this._width = width;
-        if (height) this._height = height;
-        if (puzzleID) this._puzzleID = puzzleID;
-
         ExternalInterface.init(eternaContainer);
     }
 
@@ -77,7 +83,7 @@ export class EternaApp extends FlashbangApp {
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
 
-        return new PIXI.Application(this._width, this._height, {
+        return new PIXI.Application(this._params.width, this._params.height, {
             backgroundColor: 0x061A34,
             antialias: true,
             roundPixels: true,
@@ -108,11 +114,15 @@ export class EternaApp extends FlashbangApp {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
-                loadingMode.text = `Loading puzzle ${this._puzzleID}...`;
-                return PuzzleManager.instance.get_puzzle_by_nid(this._puzzleID);
+                loadingMode.text = `Loading puzzle ${this._params.puzzleID}...`;
+                return PuzzleManager.instance.get_puzzle_by_nid(this._params.puzzleID);
             })
             .then((puzzle) => {
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false));
+                let folder: Folder = null;
+                if (this._params.folderName != null && FolderManager.instance.isFolder(this._params.folderName)) {
+                    folder = FolderManager.instance.get_folder(this._params.folderName)
+                }
+                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
             })
             .catch(err => Eterna.onFatalError(err));
     }
@@ -165,9 +175,7 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    private readonly _width: number = 1280;
-    private readonly _height: number = 1024;
-    private readonly _puzzleID: number = PuzzleID.TryptophanASameState;
+    private readonly _params: EternaAppParameters;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }

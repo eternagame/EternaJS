@@ -20,6 +20,15 @@ export class FolderManager {
         this._folders.push(folder);
     }
 
+    public isFolder(name: string): boolean {
+        for (let folder of this._folders) {
+            if (folder.get_folder_name() == name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public get_folder(name: string): Folder {
         for (let folder of this._folders) {
             if (folder.get_folder_name() === name) {

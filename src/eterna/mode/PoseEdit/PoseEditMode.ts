@@ -64,11 +64,12 @@ export enum PuzzleState {
 }
 
 export class PoseEditMode extends GameMode {
-    public constructor(puz: Puzzle, init_seq?: number[], is_reset?: boolean) {
+    public constructor(puz: Puzzle, init_seq?: number[], is_reset?: boolean, initialFolder?: Folder) {
         super();
         this._puzzle = puz;
         this._initSeq = init_seq;
         this._isReset = is_reset;
+        this._initialFolder = initialFolder;
     }
 
     protected setup(): void {
@@ -593,7 +594,9 @@ export class PoseEditMode extends GameMode {
         this.layout_bars();
         this.layout_constraints();
 
-        this._folder = FolderManager.instance.get_folder(this._puzzle.get_folder());
+        this._folder = this._initialFolder != null ?
+            this._initialFolder :
+            FolderManager.instance.get_folder(this._puzzle.get_folder());
 
         this._folder_button = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -4053,6 +4056,7 @@ export class PoseEditMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private readonly _initSeq: number[];
     private readonly _isReset: boolean;
+    private readonly _initialFolder: Folder;
 
     private _constraintsLayer: Container;
 
