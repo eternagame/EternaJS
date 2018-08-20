@@ -15,10 +15,10 @@ export class StructureInput extends GamePanel {
     protected added(): void {
         super.added();
 
-        this._input_box = new TextInputObject(20);
-        this._input_box.width = this._width - 20;
-        this._input_box.display.position = new Point(10, 10);
-        this.addObject(this._input_box, this.container);
+        this._textInput = new TextInputObject(20);
+        this._textInput.width = this._width - 20;
+        this._textInput.display.position = new Point(10, 10);
+        this.addObject(this._textInput, this.container);
 
         // this._input_box.addEventListener('keyUp', this.handle_key_down, false, 1, false);
         // this._input_box.addEventListener('mouseDown', this.handle_mouse_down, false, 1, false);
@@ -26,18 +26,18 @@ export class StructureInput extends GamePanel {
 
     public set_size(width: number, height: number): void {
         super.set_size(width, height);
-        this._input_box.width = width - 20;
+        this._textInput.width = width - 20;
     }
 
     public set_pose(op: PuzzleEditOp = null, index: number = -1): void {
-        let cur_sec: string = this._input_box.text;
+        let cur_sec: string = this._textInput.text;
         let length_limit: number = 400;
 
         let error: string = EPars.validate_parenthesis(cur_sec, false, length_limit);
         if (error != null) {
             this.set_warning(error);
             cur_sec = cur_sec.replace(/[^\.\(\)]/g, "");
-            this._input_box.text = cur_sec;
+            this._textInput.text = cur_sec;
         } else {
             this.set_warning("");
         }
@@ -180,16 +180,16 @@ export class StructureInput extends GamePanel {
         this._pose.set_molecular_binding_site(binding_site);
         this._pose.call_pose_edit_callback();
 
-        this._pose.track_cursor(this._input_box.caretPosition);
+        this._pose.track_cursor(this._textInput.caretPosition);
     }
 
     public get_secstruct(): string {
-        let secstruct: string = this._input_box.text;
+        let secstruct: string = this._textInput.text;
         return secstruct.replace(/[^\.\(\)]/g, "");
     }
 
     public set_secstruct(struct: string): void {
-        this._input_box.text = struct;
+        this._textInput.text = struct;
         this.set_warning("");
     }
 
@@ -214,6 +214,6 @@ export class StructureInput extends GamePanel {
     }
 
     private readonly _pose: Pose2D;
-    private _input_box: TextInputObject;
+    private _textInput: TextInputObject;
 
 }
