@@ -8,7 +8,7 @@
     - Pass `-DCMAKE_BUILD_TYPE=Debug` for a debug build (-O0 optimizations), or `Release` for a release build (-O3 optimizations)
     - Built libraries are output in `nupack/dist`, `vienna/dist`, etc.
 * Copy the built libraries into the typescript project:
-    - `$ for ii in "nupack" "vienna" "vrna2"; do cp "$ii"/dist/"$ii".js ../src/eterna/folding/engines/"$ii".js; done`
+    - `$ for ii in "nupack" "vienna" "vrna2 LinearFold"; do cp "$ii"/dist/"$ii".js ../src/eterna/folding/engines/"$ii".js; done`
 
 
 # Emscripten notes
