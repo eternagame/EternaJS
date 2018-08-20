@@ -46,6 +46,10 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         this._obj.value = value;
     }
 
+    public get caretPosition(): number {
+        return this._obj.selectionStart;
+    }
+
     private static createTextArea(rows: number): HTMLTextAreaElement {
         let element = document.createElement("textarea");
         element.rows = rows;
