@@ -38,6 +38,7 @@ import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
 import {Molecule} from "./Molecule";
 import {PoseUtil} from "./PoseUtil";
+import {PuzzleEditOp} from "./PuzzleEditOp";
 import {RNAAnchorObject} from "./RNAAnchorObject";
 import {RNALayout} from "./RNALayout";
 import {RNATreeNode} from "./RNATreeNode";
@@ -1284,7 +1285,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.callExplosionCompleteCallback();
     }
 
-    public set_pose_edit_callback(cb: Function): void {
+    public set_pose_edit_callback(cb: () => void): void {
         this._pose_edit_callback = cb;
     }
 
@@ -1294,7 +1295,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_track_moves_callback(cb: Function): void {
+    public set_track_moves_callback(cb: (count: number, moves: any[]) => void): void {
         this._track_moves_callback = cb;
     }
 
@@ -1304,13 +1305,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_add_base_callback(cb: Function): void {
+    public set_add_base_callback(cb: (parenthesis: string, op: PuzzleEditOp, index: number) => void): void {
         this._add_base_callback = cb;
     }
 
-    public call_add_base_callback(parenthesis: string = null, mode: number = -1, index: number = -1): void {
+    public call_add_base_callback(parenthesis: string = null, op: PuzzleEditOp = null, index: number = -1): void {
         if (this._add_base_callback != null) {
-            this._add_base_callback(parenthesis, mode, index);
+            this._add_base_callback(parenthesis, op, index);
         }
     }
 
@@ -1826,7 +1827,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     //highlight the base before the cursor
     public track_cursor(index: number): void {
-        // TODO: track_cursor
+        log.warn("TODO: track_cursor");
         // this.cursor_index = index;
         // if (this.cursor_index > 0) {
         //     let center: Point = this.get_base_xy(this.cursor_index - 1);
@@ -2228,12 +2229,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         let cmd: any[] = this.parse_command(command, index);
         if (cmd != null) {
             let parenthesis: string = cmd[0];
-            let mode: number = cmd[1];
-            this.base_shift(parenthesis, mode, index);
+            let op: PuzzleEditOp = cmd[1];
+            this.base_shift(parenthesis, op, index);
         }
     }
 
-    public base_shift(parenthesis: string, mode: number, index: number): void {
+    public base_shift(parenthesis: string, op: PuzzleEditOp, index: number): void {
         let sequence: number[] = this.get_sequence();
         let locks: boolean[] = this.get_puzzle_locks();
         let binding_site: boolean[] = this.get_molecular_binding_site();
@@ -2254,7 +2255,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             binding_site.push(false);
         }
         // BASE SHIFTING MODIFIED HERE. Delete comments to apply the changes
-        if (mode === 0) {
+        if (op === PuzzleEditOp.ADD_BASE) {
             // Add a base
             let after_index: number[] = sequence.slice(index);
             let after_lock_index: boolean[] = locks.slice(index);
@@ -2269,7 +2270,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 locks[ii + index + 1] = after_lock_index[ii];
                 binding_site[ii + index + 1] = after_binding_site_index[ii];
             }
-        } else if (mode === 1) {
+        } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
             pindex = (this.get_pairs())[index];
             let after_index = sequence.slice(index);
@@ -2296,7 +2297,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             }
 
-        } else if (mode === 2) {
+        } else if (op === PuzzleEditOp.ADD_CYCLE) {
             // Add a cycle of length 3
             let after_index = sequence.slice(index);
             let after_lock_index = locks.slice(index);
@@ -2326,7 +2327,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 binding_site[ii + index + 5] = after_binding_site_index[ii];
             }
 
-        } else if (mode === 3) {
+        } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
             pindex = (this.get_pairs())[index];
             let after_index = sequence_backup.slice(index + 1);
@@ -2345,7 +2346,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-        } else if (mode === 4) {
+        } else if (op === PuzzleEditOp.DELETE_BASE) {
             // Delete a base
             let after_index = sequence_backup.slice(index + 1);
             let after_lock_index = locks_backup.slice(index + 1);
@@ -3285,9 +3286,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _editable_indices: number[] = null;
 
     /// Pointer to callback function to be called after change in pose
-    private _pose_edit_callback: Function = null;
-    private _track_moves_callback: Function = null;
-    private _add_base_callback: Function;
+    private _pose_edit_callback: () => void = null;
+    private _track_moves_callback: (count: number, moves: any[]) => void = null;
+    private _add_base_callback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
     private _start_mousedown_callback: PoseMouseDownCallback;
     private _mouse_down_altKey: boolean = false;
 

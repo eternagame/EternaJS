@@ -20,6 +20,7 @@ import {EternaURL} from "../../net/EternaURL";
 import {Oligo, Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PoseOp} from "../../pose2D/PoseOp";
+import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {Constraints, ConstraintType} from "../../puzzle/Constraints";
 import {BoostersData, PoseState, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
 import {PuzzleManager} from "../../puzzle/PuzzleManager";
@@ -408,7 +409,7 @@ export class PoseEditMode extends GameMode {
         // }
 
         let bind_addbase_cb = (pose: Pose2D, kk: number) => {
-            pose.set_add_base_callback((parenthesis: string, mode: number, index: number) => {
+            pose.set_add_base_callback((parenthesis: string, mode: PuzzleEditOp, index: number) => {
                 pose.base_shift(parenthesis, mode, index);
                 this.pose_edit_by_target(kk);
             });

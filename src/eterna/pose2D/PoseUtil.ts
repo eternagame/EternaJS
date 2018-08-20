@@ -1,4 +1,5 @@
 import {EPars} from "../EPars";
+import {PuzzleEditOp} from "./PuzzleEditOp";
 
 /** Utility functions for pose data */
 export class PoseUtil {
@@ -26,7 +27,7 @@ export class PoseUtil {
             }
         }
         let parenthesis: string = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 0, mutated_pairs];
+        return [parenthesis, PuzzleEditOp.ADD_BASE, mutated_pairs];
     }
 
     public static add_pair_with_index(index: number, pairs: number[]): any[] {
@@ -60,7 +61,7 @@ export class PoseUtil {
             mutated_pairs[pindex + 2] = index;
 
             parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 1];
+            return [parenthesis, PuzzleEditOp.ADD_PAIR];
 
         }
         //add a cycle of length 3
@@ -79,7 +80,7 @@ export class PoseUtil {
             mutated_pairs[index + 4] = index;
 
             parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-            return [parenthesis, 2];
+            return [parenthesis, PuzzleEditOp.ADD_CYCLE];
         }
     }
 
@@ -95,7 +96,7 @@ export class PoseUtil {
         }
 
         parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 4, mutated_pairs];
+        return [parenthesis, PuzzleEditOp.DELETE_BASE, mutated_pairs];
     }
 
     public static delete_pair_with_index(index: number, pairs: number[]): any[] {
@@ -124,7 +125,7 @@ export class PoseUtil {
         }
 
         parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
-        return [parenthesis, 3];
+        return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 
     private static isPair(s1: number, s2: number, type1: number, type2: number): boolean {
