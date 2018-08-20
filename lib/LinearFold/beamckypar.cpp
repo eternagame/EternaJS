@@ -784,6 +784,8 @@ BeamCKYParser::BeamCKYParser(int beam_size,
 
 // -------------------------------------------------------------
 
+#ifndef __EMSCRIPTEN__
+
 int main(int argc, char** argv){
 
     int beamsize = 0;
@@ -875,3 +877,5 @@ int main(int argc, char** argv){
            total_score/dnum, total_time/dnum, total_time, total_states/dnum);
     return 0;
 }
+
+#endif
