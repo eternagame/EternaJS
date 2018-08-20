@@ -1,5 +1,4 @@
 import * as log from "loglevel";
-import {Flashbang} from "../flashbang/core/Flashbang";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {TestMode} from "./debug/TestMode";
