@@ -6,6 +6,7 @@ import {TestMode} from "./debug/TestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
+import {LinearFold} from "./folding/LinearFold";
 import {NuPACK} from "./folding/NuPACK";
 import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
@@ -151,7 +152,12 @@ export class EternaApp extends FlashbangApp {
 
     private initFoldingEngines(): Promise<void> {
         log.info("Initializing folding engines...");
-        return Promise.all([Vienna.create(), Vienna2.create(), NuPACK.create(), RNAFoldBasic.create()])
+        return Promise.all([
+            Vienna.create(),
+            Vienna2.create(),
+            NuPACK.create(),
+            LinearFold.create(),
+            RNAFoldBasic.create()])
             .then((folders: Folder[]) => {
                 log.info("Folding engines intialized");
                 for (let folder of folders) {
@@ -162,7 +168,7 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _width: number = 1280;
     private readonly _height: number = 1024;
-    private readonly _puzzleID: number = PuzzleID.TheophyllineRibozymeSwitch;
+    private readonly _puzzleID: number = PuzzleID.TryptophanASameState;
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
