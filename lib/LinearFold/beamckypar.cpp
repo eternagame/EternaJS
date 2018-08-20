@@ -23,6 +23,11 @@
 
 #define SPECIAL_HP
 
+// We don't want random stdout in the emscripten build
+#ifdef __EMSCRIPTEN__
+#define printf(...)
+#endif
+
 using namespace std;
 
 void BeamCKYParser::get_parentheses(char* result) {
