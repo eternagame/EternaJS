@@ -39,6 +39,7 @@ enum PuzzleID {
     LiquidRobotics10_of_11 = 6503036,   // Script constraints
     EternaCon2018 = 8952159,
     SameState_TryptophanB = 7656242,    // Booster paint tool
+    TemporalAnomaly = 7796345,          // Really big!
 }
 
 export interface EternaAppParameters {
@@ -119,8 +120,12 @@ export class EternaApp extends FlashbangApp {
             })
             .then((puzzle) => {
                 let folder: Folder = null;
-                if (this._params.folderName != null && FolderManager.instance.isFolder(this._params.folderName)) {
-                    folder = FolderManager.instance.get_folder(this._params.folderName)
+                if (this._params.folderName != null) {
+                    if (FolderManager.instance.isFolder(this._params.folderName)) {
+                        folder = FolderManager.instance.get_folder(this._params.folderName)
+                    } else {
+                        log.warn(`No such folder '${this._params.folderName}'`);
+                    }
                 }
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
             })
