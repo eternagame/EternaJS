@@ -5,7 +5,7 @@ import {MatrixUtil} from "../util/MatrixUtil";
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
- * Contains a "dummy" Container DisplayObject that mirrors the element's transform.
+ * Contains a "dummy" that mirrors the element's transform.
  */
 export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     protected constructor(domParentID: string, obj: T) {
