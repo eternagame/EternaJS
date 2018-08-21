@@ -11,7 +11,13 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
 
         this.width = width;
         this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
-        this._obj.oninput = () => this.valueChanged.emit(this._obj.value);
+        this._obj.oninput = () => this.onInput();
+    }
+
+    /** Remove all input that matches the given regexp */
+    public disallow(regexp: RegExp): TextInputObject {
+        this._disallow = regexp;
+        return this;
     }
 
     public font(fontFamily: string): TextInputObject {
@@ -66,6 +72,18 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         return this._obj.selectionStart;
     }
 
+    private onInput(): void {
+        if (this._disallow != null) {
+            let curValue = this.text;
+            this._obj.value = this._obj.value.replace(this._disallow, "");
+            if (this.text !== curValue) {
+                return;
+            }
+        }
+
+        this.valueChanged.emit(this.text);
+    }
+
     private static createTextArea(rows: number): HTMLTextAreaElement {
         let element = document.createElement("textarea");
         element.rows = rows;
@@ -81,4 +99,6 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         element.title = "";
         return element;
     }
+
+    private _disallow: RegExp;
 }
