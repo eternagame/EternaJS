@@ -68,11 +68,35 @@ export class PuzzleEditToolbar extends ContainerObject {
 
         // SETTINGS
         this.view_options_button = new GameButton()
-            .allStates(Bitmaps.ImgSettings)
-            .label("Settings", 14)
-            .scaleBitmapToLabel()
+            .up(Bitmaps.ImgSettings)
+            .over(Bitmaps.ImgSettingsOver)
+            .down(Bitmaps.ImgSettingsHit)
             .tooltip("Game options");
         this.addObject(this.view_options_button, this._toolbarLayout);
+
+        // ZOOM IN
+        this.zoom_in_button = new GameButton()
+            .up(Bitmaps.ImgZoomIn)
+            .over(Bitmaps.ImgZoomInOver)
+            .down(Bitmaps.ImgZoomInHit)
+            .disabled(Bitmaps.ImgZoomInDisable)
+            .tooltip("Zoom in")
+            .hotkey(KeyCode.Equal)
+            .rscriptID(RScriptUIElementID.ZOOMIN);
+        this.addObject(this.zoom_in_button, this._toolbarLayout);
+
+        // ZOOM OUT
+        this.zoom_out_button = new GameButton()
+            .up(Bitmaps.ImgZoomOut)
+            .over(Bitmaps.ImgZoomOutOver)
+            .down(Bitmaps.ImgZoomOutHit)
+            .disabled(Bitmaps.ImgZoomOutDisable)
+            .tooltip("Zoom out")
+            .hotkey(KeyCode.Minus)
+            .rscriptID(RScriptUIElementID.ZOOMOUT);
+        this.addObject(this.zoom_out_button, this._toolbarLayout);
+
+        this._toolbarLayout.addHSpacer(SPACE_NARROW);
 
         // NATIVE
         this.native_button = new GameButton()
@@ -100,6 +124,26 @@ export class PuzzleEditToolbar extends ContainerObject {
 
         this._toolbarLayout.addHSpacer(SPACE_WIDE);
 
+        // PALETTE
+        this.palette = new NucleotidePalette();
+        this.addObject(this.palette, this._toolbarLayout);
+        this.palette.change_default_mode();
+
+        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+
+        // SWAP
+        this.pair_swap_button = new GameButton()
+            .up(Bitmaps.ImgSwap)
+            .over(Bitmaps.ImgSwapOver)
+            .down(Bitmaps.ImgSwapOver)
+            .selected(Bitmaps.ImgSwapSelect)
+            .hotkey(KeyCode.Digit5)
+            .tooltip("Swap paired bases.")
+            .rscriptID(RScriptUIElementID.SWAP);
+        this.addObject(this.pair_swap_button, this._toolbarLayout);
+
+        this._toolbarLayout.addHSpacer(SPACE_WIDE);
+
         this.undo_button = new GameButton()
             .up(Bitmaps.ImgUndo)
             .over(Bitmaps.ImgUndoOver)
@@ -119,61 +163,6 @@ export class PuzzleEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
         this.addObject(this.redo_button, this._toolbarLayout);
-
-        // SUBMIT BUTTON
-        this.submit_button = new GameButton()
-            .up(Bitmaps.ImgSubmit)
-            .over(Bitmaps.ImgSubmitOver)
-            .down(Bitmaps.ImgSubmitHit)
-            .tooltip("Publish your puzzle!");
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
-        if (!this._embedded) {
-            this.addObject(this.submit_button, this._toolbarLayout);
-        }
-
-        this._toolbarLayout.addHSpacer(SPACE_WIDE);
-
-        // PALETTE
-        this.palette = new NucleotidePalette();
-        this.addObject(this.palette, this._toolbarLayout);
-        this.palette.change_default_mode();
-
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
-
-        // SWAP
-        this.pair_swap_button = new GameButton()
-            .up(Bitmaps.ImgSwap)
-            .over(Bitmaps.ImgSwapOver)
-            .down(Bitmaps.ImgSwapOver)
-            .selected(Bitmaps.ImgSwapSelect)
-            .hotkey(KeyCode.Digit5)
-            .tooltip("Swap paired bases.")
-            .rscriptID(RScriptUIElementID.SWAP);
-        this.addObject(this.pair_swap_button, this._toolbarLayout);
-
-        // ZOOM IN
-        this.zoom_in_button = new GameButton()
-            .up(Bitmaps.ImgZoomIn)
-            .over(Bitmaps.ImgZoomInOver)
-            .down(Bitmaps.ImgZoomInHit)
-            .disabled(Bitmaps.ImgZoomInDisable)
-            .tooltip("Zoom in")
-            .hotkey(KeyCode.Equal)
-            .rscriptID(RScriptUIElementID.ZOOMIN);
-        this.addObject(this.zoom_in_button, this._toolbarLayout);
-
-        // ZOOM OUT
-        this.zoom_out_button = new GameButton()
-            .up(Bitmaps.ImgZoomOut)
-            .over(Bitmaps.ImgZoomOutOver)
-            .down(Bitmaps.ImgZoomOutHit)
-            .disabled(Bitmaps.ImgZoomOutDisable)
-            .tooltip("Zoom out")
-            .hotkey(KeyCode.Minus)
-            .rscriptID(RScriptUIElementID.ZOOMOUT);
-        this.addObject(this.zoom_out_button, this._toolbarLayout);
-
-        this._toolbarLayout.addHSpacer(SPACE_WIDE);
 
         // COPY
         this.copy_button = new GameButton()
@@ -198,6 +187,17 @@ export class PuzzleEditToolbar extends ContainerObject {
             .down(Bitmaps.ImgResetHit)
             .tooltip("Reset all bases to A.");
         this.addObject(this.reset_button, this._toolbarLayout);
+
+        // SUBMIT BUTTON
+        this.submit_button = new GameButton()
+            .up(Bitmaps.ImgSubmit)
+            .over(Bitmaps.ImgSubmitOver)
+            .down(Bitmaps.ImgSubmitHit)
+            .tooltip("Publish your puzzle!");
+        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        if (!this._embedded) {
+            this.addObject(this.submit_button, this._toolbarLayout);
+        }
 
         this.updateLayout();
         this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);

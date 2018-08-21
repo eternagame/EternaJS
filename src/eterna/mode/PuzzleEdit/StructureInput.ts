@@ -1,26 +1,40 @@
 ﻿import {Point} from "pixi.js";
+import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {EPars} from "../../EPars";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {GamePanel} from "../../ui/GamePanel";
 import {TextInputObject} from "../../ui/TextInputObject";
+import {Fonts} from "../../util/Fonts";
 
 export class StructureInput extends GamePanel {
     public constructor(pose: Pose2D) {
         super();
-
         this._pose = pose;
     }
 
     protected added(): void {
         super.added();
 
-        this._textInput = new TextInputObject(20);
+        this._width = 100;
+        this._height = 50;
+
+        this._textInput = new TextInputObject(20)
+            .font(Fonts.ARIAL)
+            .disallow(/[^\.\(\)]/g)
+            .bold();
         this._textInput.width = this._width - 20;
         this._textInput.display.position = new Point(10, 10);
         this.addObject(this._textInput, this.container);
 
-        // this._input_box.addEventListener('keyUp', this.handle_key_down, false, 1, false);
+        this._textInput.valueChanged.connect(() => this.set_pose());
+        this._textInput.element.onkeydown = (e) => {
+            if (e.code === KeyCode.ArrowRight || e.code === KeyCode.ArrowLeft) {
+                e.stopPropagation();
+            }
+            this.set_pose();
+        };
+
         // this._input_box.addEventListener('mouseDown', this.handle_mouse_down, false, 1, false);
     }
 
@@ -201,11 +215,6 @@ export class StructureInput extends GamePanel {
             this.setup(0, 0.07, 0xFFFFFF, 0.0, 0);
             // this.set_mouse_over_object(null, 0);
         }
-    }
-
-    private handle_key_down(e: KeyboardEvent): void {
-        this.set_pose();
-        e.stopPropagation();
     }
 
     private handle_mouse_down(e: MouseEvent): void {
