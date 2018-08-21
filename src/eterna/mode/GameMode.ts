@@ -111,14 +111,12 @@ export abstract class GameMode extends AppMode {
         }
 
         this._pose_fields = [];
-        let poses: Pose2D[] = [];
+        this._poses = [];
 
         for (let newPoseField of newPoseFields) {
-            this.addObject(newPoseField, this.poseLayer);
             this._pose_fields.push(newPoseField);
-            poses.push(newPoseField.get_pose());
+            this._poses.push(newPoseField.get_pose());
         }
-        this._poses = poses;
     }
 
     protected toggle_pip(): void {
