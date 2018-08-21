@@ -29,7 +29,7 @@ export enum ConstraintBoxType {
 }
 
 export class ConstraintBox extends ContainerObject implements Enableable {
-    public constructor(type: ConstraintBoxType) {
+    public constructor(type: ConstraintBoxType = ConstraintBoxType.DEFAULT) {
         super();
 
         this._boxType = type;

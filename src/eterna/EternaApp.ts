@@ -12,6 +12,7 @@ import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
+import {PuzzleEditMode} from "./mode/PuzzleEdit/PuzzleEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {Bitmaps} from "./resources/Bitmaps";
@@ -114,20 +115,23 @@ export class EternaApp extends FlashbangApp {
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
+            // .then(() => {
+            //     loadingMode.text = `Loading puzzle ${this._params.puzzleID}...`;
+            //     return PuzzleManager.instance.get_puzzle_by_nid(this._params.puzzleID);
+            // })
+            // .then((puzzle) => {
+            //     let folder: Folder = null;
+            //     if (this._params.folderName != null) {
+            //         if (FolderManager.instance.isFolder(this._params.folderName)) {
+            //             folder = FolderManager.instance.get_folder(this._params.folderName)
+            //         } else {
+            //             log.warn(`No such folder '${this._params.folderName}'`);
+            //         }
+            //     }
+            //     this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
+            // })
             .then(() => {
-                loadingMode.text = `Loading puzzle ${this._params.puzzleID}...`;
-                return PuzzleManager.instance.get_puzzle_by_nid(this._params.puzzleID);
-            })
-            .then((puzzle) => {
-                let folder: Folder = null;
-                if (this._params.folderName != null) {
-                    if (FolderManager.instance.isFolder(this._params.folderName)) {
-                        folder = FolderManager.instance.get_folder(this._params.folderName)
-                    } else {
-                        log.warn(`No such folder '${this._params.folderName}'`);
-                    }
-                }
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
+                this._modeStack.unwindToMode(new PuzzleEditMode(false, 1));
             })
             .catch(err => Eterna.onFatalError(err));
     }
