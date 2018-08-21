@@ -745,14 +745,15 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public is_locked(seqnum: number): boolean {
-        if (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P) seqnum -= this._oligo.length;
-        if (seqnum < 0 || seqnum >= this._sequence.length) return true;
-        let lock: boolean = false;
-        if (this._locks != null) {
-            lock = lock || this._locks[seqnum];
+        if (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P) {
+            seqnum -= this._oligo.length;
         }
 
-        return lock;
+        if (seqnum < 0 || seqnum >= this._sequence.length) {
+            return true;
+        } else {
+            return this._locks != null && this._locks.length > seqnum && this._locks[seqnum];
+        }
     }
 
     public set_forced_struct(forced: number[]): void {
