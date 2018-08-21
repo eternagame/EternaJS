@@ -1828,26 +1828,25 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     //highlight the base before the cursor
     public track_cursor(index: number): void {
-        log.warn("TODO: track_cursor");
-        // this.cursor_index = index;
-        // if (this.cursor_index > 0) {
-        //     let center: Point = this.get_base_xy(this.cursor_index - 1);
-        //     if (this.cursor_box == null) {
-        //         this.cursor_box = new GameObject();
-        //         this.addObject(this.cursor_box);
-        //     }
-        //     this.cursor_box.x = center.x;
-        //     this.cursor_box.y = center.y;
-        //     this.cursor_box.visible = true;
-        //     this.cursor_box.graphics.clear();
-        //     this.cursor_box.graphics.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
-        //     this.cursor_box.graphics.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
-        // } else {
-        //     if (this.cursor_box != null) {
-        //         this.removeObject(this.cursor_box);
-        //         this.cursor_box = null;
-        //     }
-        // }
+        this._cursor_index = index;
+        if (this._cursor_index > 0) {
+            let center: Point = this.get_base_xy(this._cursor_index - 1);
+            if (this._cursor_box == null) {
+                this._cursor_box = new Graphics();
+                this.container.addChild(this._cursor_box);
+            }
+            this._cursor_box.x = center.x;
+            this._cursor_box.y = center.y;
+            this._cursor_box.visible = true;
+            this._cursor_box.clear();
+            this._cursor_box.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
+            this._cursor_box.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+        } else {
+            if (this._cursor_box != null) {
+                this._cursor_box.destroy({children: true});
+                this._cursor_box = null;
+            }
+        }
     }
 
     /*override*/
@@ -1885,16 +1884,15 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        // TODO: cursor_index
-        // if (this.cursor_index > 0) {
-        //     center = this.get_base_xy(this.cursor_index - 1);
-        //     this.cursor_box.x = center.x;
-        //     this.cursor_box.y = center.y;
-        //     this.cursor_box.visible = true;
-        //     this.cursor_box.graphics.clear();
-        //     this.cursor_box.graphics.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
-        //     this.cursor_box.graphics.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
-        // }
+        if (this._cursor_index > 0) {
+            center = this.get_base_xy(this._cursor_index - 1);
+            this._cursor_box.x = center.x;
+            this._cursor_box.y = center.y;
+            this._cursor_box.visible = true;
+            this._cursor_box.clear();
+            this._cursor_box.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
+            this._cursor_box.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+        }
 
         if (this._base_to_x) {
             // Update base locations
@@ -3372,8 +3370,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     /// For tracking a base
     private _tracked_indices: number[] = [];
     private _base_boxes: Graphics[] = [];
-    private cursor_index: number = 0;
-    private cursor_box: GameObject = null;
+    private _cursor_index: number = 0;
+    private _cursor_box: Graphics = null;
     private _last_shifted_index: number = -1;
     private _last_shifted_command: number = -1;
 
