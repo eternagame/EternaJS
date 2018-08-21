@@ -39,7 +39,7 @@ export class FolderManager {
         throw new Error(`No such folder '${name}'`);
     }
 
-    public get_next_folder(folder_name: string, filter_cb: Function = null): Folder {
+    public get_next_folder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
         let curFolderIdx: number = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
             if (this._folders[ii].get_folder_name().toLowerCase() === folder_name.toLowerCase()) {
