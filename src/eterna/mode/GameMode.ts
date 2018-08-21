@@ -184,7 +184,7 @@ export abstract class GameMode extends AppMode {
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _pose_fields: PoseField[] = [];
-    protected _poses: Pose2D[] = [];
+    protected _poses: Pose2D[] = [];    // TODO: remove me!
     protected _is_pip_mode: boolean = false;
     protected _force_synch: boolean = false;
 }
