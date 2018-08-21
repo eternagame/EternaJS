@@ -23,6 +23,11 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         this._domParent = document.getElementById(domParentID);
     }
 
+    /** The underlying HTMLElement */
+    public get element(): T {
+        return this._obj;
+    }
+
     public get display(): DisplayObject {
         return this._dummyDisp;
     }
