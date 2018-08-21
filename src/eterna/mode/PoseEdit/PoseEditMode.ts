@@ -445,6 +445,7 @@ export class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < target_conditions.length; ii++) {
             let pose_field: PoseField = new PoseField(true);
+            this.addObject(pose_field, this.poseLayer);
             let pose: Pose2D = pose_field.get_pose();
             bind_addbase_cb(pose, ii);
             bind_pose_edit(pose, ii);

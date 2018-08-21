@@ -255,6 +255,7 @@ export class PuzzleEditMode extends GameMode {
                 default_pairs = EPars.parenthesis_to_pair_array(default_structure);
             }
             let pose_field: PoseField = new PoseField(true);
+            this.addObject(pose_field, this.poseLayer);
             let pose: Pose2D = pose_field.get_pose();
             pose.set_score_visualization(this._folder);
             pose.set_molecular_structure(default_pairs);
@@ -289,7 +290,6 @@ export class PuzzleEditMode extends GameMode {
             }
 
             this._constraint_boxes.push(constraint_box);
-
         }
 
         this.set_pose_fields(pose_fields);
