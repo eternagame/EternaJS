@@ -1,6 +1,7 @@
 import {Graphics, Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
+import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
@@ -134,7 +135,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (!this.display.visible) {
+        if (!this.display.visible || e.type != KeyboardEventType.KEY_DOWN) {
             return false;
         }
 
