@@ -1,5 +1,6 @@
 import * as log from "loglevel";
-import {Text} from "pixi.js";
+import {Point, Text} from "pixi.js";
+import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {EPars} from "../../EPars";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
@@ -17,10 +18,11 @@ import {ExternalInterface} from "../../util/ExternalInterface";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
-import InteractionEvent = PIXI.interaction.InteractionEvent;
+
+type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export class PuzzleEditMode extends GameMode {
-    constructor(embedded: boolean) {
+    constructor(embedded: boolean, numTargets: number = -1) {
         super();
         this._embedded = embedded;
     }
@@ -148,6 +150,8 @@ export class PuzzleEditMode extends GameMode {
             ExternalInterface.addCallback("get_thumbnail", this.get_thumbnail);
             ExternalInterface.addCallback("get_shift_limit", this.get_shift_limit);
         }
+
+        this.initialize(this._numTargets);
     }
 
     public get_cookie_token(): string {
@@ -190,7 +194,7 @@ export class PuzzleEditMode extends GameMode {
         }
     }
 
-    public initialize(num_targets: number = 1): void {
+    private initialize(num_targets: number = 1): void {
         log.info("TODO: initialize");
         // this._submit_field = new TextInputPanel;
         // this._submit_field.set_title("Publish your puzzle");
@@ -204,105 +208,108 @@ export class PuzzleEditMode extends GameMode {
         // this._submit_field.set_callbacks(this.submit_puzzle, this.on_cancel_submit);
         // this._submit_field.set_pos(new UDim(0.5, 0.5, -150, -100));
         //
-        // this.clear_undo_stack();
-        //
-        // let pose_fields: any[] = [];
-        // this._sec_ins = [];
-        //
-        // let set_cb = (kk: number): void  => {
-        //     this._poses[kk].set_add_base_callback((parenthesis: string, op: PuzzleEditOp, index: number): void => {
-        //         let secInput: StructureInput = this._sec_ins[kk];
-        //         secInput.set_secstruct(parenthesis);
-        //         secInput.set_pose(op, index);
-        //         //Pose2D(_poses[kk]).base_shift(parenthesis, mode, index);
-        //     });
-        // };
-        //
-        // let pose_edit_setter = function (index: number, pose_to_set: Pose2D): void {
-        //     pose_to_set.set_pose_edit_callback(() => {
-        //         this.pose_edit_by_target(index);
-        //     });
-        // };
-        //
-        // let bind_mousedown_event = (pose: Pose2D, index: number): void => {
-        //     pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number): void => {
-        //         for (let ii: number = 0; ii < num_targets; ++ii) {
-        //             let pose_field: PoseField = pose_fields[ii];
-        //             let pose: Pose2D = pose_field.get_pose();
-        //             if (ii == index) {
-        //                 pose.on_pose_mouse_down(e, closest_index);
-        //             } else {
-        //                 pose.on_pose_mouse_down_propagate(e, closest_index);
-        //             }
-        //         }
-        //     });
-        // };
-        // this._constraint_boxes = [];
-        //
-        // this.set_cookie_token(num_targets);
-        // let states: any[] = this.autoload_data();
-        // for (let ii = 0; ii < num_targets; ii++) {
-        //     let default_structure: string = ".....((((((((....)))))))).....";
-        //     let default_pairs: any[] = EPars.parenthesis_to_pair_array(default_structure);
-        //     let default_sequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        //
-        //     if (states != null && states[ii] != null && states[ii]['sequence'] != null && states[ii]['structure'] != null && states[ii]['structure'] != "") {
-        //         default_structure = states[ii]['structure'];
-        //         default_sequence = states[ii]['sequence'];
-        //         default_pairs = EPars.parenthesis_to_pair_array(default_structure);
-        //     }
-        //     let pose_field: PoseField = new PoseField(true);
-        //     let pose: Pose2D = pose_field.get_pose();
-        //     pose.set_score_visualization(this._folder);
-        //     pose.set_molecular_structure(default_pairs);
-        //     pose.set_molecular_binding_bonus(-4.86);
-        //     pose.set_sequence(EPars.string_to_sequence_array(default_sequence));
-        //     pose_fields.push(pose_field);
-        //
-        //     let sec_in: StructureInput = new StructureInput(pose);
-        //     if (!this._embedded) {
-        //         sec_in.set_size(new UDim(0, 0, 700 / Number(num_targets), 50));
-        //     } else {
-        //         sec_in.set_size(new UDim(0, 0, 500 / Number(num_targets), 50));
-        //     }
-        //     if (!this._embedded) {
-        //         sec_in.set_pos(new UDim(0.5, 1.0, (-350 / Number(num_targets)), -127));
-        //     } else {
-        //         sec_in.set_pos(new UDim(0.5, 1.0, -250, -200));
-        //     }
-        //     sec_in.set_secstruct(default_structure);
-        //     pose_field.add_object(sec_in);
-        //     this._sec_ins.push(sec_in);
-        //
-        //     let constraint_box: ConstraintBox = new ConstraintBox();
-        //     constraint_box.set_pos(new UDim(0, 0, 17, 35));
-        //     pose_field.add_object(constraint_box);
-        //     if (this._embedded) {
-        //         constraint_box.visible = false;
-        //     }
-        //
-        //     this._constraint_boxes.push(constraint_box);
-        //
-        // }
-        //
-        // this.set_pose_fields(pose_fields);
-        // this.pose_edit_by_target(0);
-        //
-        // for (let ii = 0; ii < num_targets; ii++) {
-        //     set_cb(ii);
-        //     pose_edit_setter(ii, this._poses[ii]);
-        //
-        //     if (this._embedded) {
-        //         this._poses[ii].set_zoom_level(2, true, true);
-        //     }
-        //
-        //     bind_mousedown_event(this._poses[ii], ii);
-        // }
-        //
-        // this.set_to_target_mode();
-        // this.on_click_A();
-        // this.set_pip(true);
-        //
+        this.clear_undo_stack();
+
+        let pose_fields: PoseField[] = [];
+        this._sec_ins = [];
+
+        let set_cb = (kk: number): void  => {
+            this._poses[kk].set_add_base_callback((parenthesis: string, op: PuzzleEditOp, index: number): void => {
+                let secInput: StructureInput = this._sec_ins[kk];
+                secInput.set_secstruct(parenthesis);
+                secInput.set_pose(op, index);
+                //Pose2D(_poses[kk]).base_shift(parenthesis, mode, index);
+            });
+        };
+
+        let pose_edit_setter = (index: number, pose_to_set: Pose2D): void => {
+            pose_to_set.set_pose_edit_callback(() => {
+                this.pose_edit_by_target(index);
+            });
+        };
+
+        let bind_mousedown_event = (pose: Pose2D, index: number): void => {
+            pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number): void => {
+                for (let ii: number = 0; ii < num_targets; ++ii) {
+                    let pose_field: PoseField = pose_fields[ii];
+                    let pose: Pose2D = pose_field.get_pose();
+                    if (ii == index) {
+                        pose.on_pose_mouse_down(e, closest_index);
+                    } else {
+                        pose.on_pose_mouse_down_propagate(e, closest_index);
+                    }
+                }
+            });
+        };
+
+        this.set_cookie_token(num_targets);
+        let states: any[] = this.autoload_data();
+        for (let ii = 0; ii < num_targets; ii++) {
+            let default_structure: string = ".....((((((((....)))))))).....";
+            let default_pairs: number[] = EPars.parenthesis_to_pair_array(default_structure);
+            let default_sequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+            if (states != null && states[ii] != null && states[ii]['sequence'] != null && states[ii]['structure'] != null && states[ii]['structure'] != "") {
+                default_structure = states[ii]['structure'];
+                default_sequence = states[ii]['sequence'];
+                default_pairs = EPars.parenthesis_to_pair_array(default_structure);
+            }
+            let pose_field: PoseField = new PoseField(true);
+            let pose: Pose2D = pose_field.get_pose();
+            pose.set_score_visualization(this._folder);
+            pose.set_molecular_structure(default_pairs);
+            pose.set_molecular_binding_bonus(-4.86);
+            pose.set_sequence(EPars.string_to_sequence_array(default_sequence));
+            pose_fields.push(pose_field);
+
+            let sec_in: StructureInput = new StructureInput(pose);
+            pose_field.addObject(sec_in, pose_field.container);
+            if (!this._embedded) {
+                sec_in.set_size(700 / num_targets, 50);
+                sec_in.display.position = new Point(
+                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
+                    -127
+                );
+            } else {
+                sec_in.set_size(500 / num_targets, 50);
+                sec_in.display.position = new Point(
+                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
+                    -200
+                );
+            }
+
+            sec_in.set_secstruct(default_structure);
+            this._sec_ins.push(sec_in);
+
+            let constraint_box = new ConstraintBox();
+            constraint_box.display.position = new Point(17, 35);
+            pose_field.addObject(constraint_box, pose_field.container);
+            if (this._embedded) {
+                constraint_box.display.visible = false;
+            }
+
+            this._constraint_boxes.push(constraint_box);
+
+        }
+
+        this.set_pose_fields(pose_fields);
+        this.pose_edit_by_target(0);
+
+        for (let ii = 0; ii < num_targets; ii++) {
+            set_cb(ii);
+            pose_edit_setter(ii, this._poses[ii]);
+
+            if (this._embedded) {
+                this._poses[ii].set_zoom_level(2, true, true);
+            }
+
+            bind_mousedown_event(this._poses[ii], ii);
+        }
+
+        this.set_to_target_mode();
+        this.onPaletteTargetSelected(PaletteTargetType.A);
+        this.set_pip(true);
+
         // this.update_children_objects(new Date().getTime(), true);
     }
 
@@ -1220,6 +1227,7 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private readonly _embedded: boolean;
+    private readonly _numTargets: number;
 
     private _paste_button: GameButton;
     private _submit_field: TextInputPanel;
