@@ -1,6 +1,10 @@
 import * as log from "loglevel";
 import {Point, Text} from "pixi.js";
+import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
+import {KeyCode} from "../../../flashbang/input/KeyCode";
+import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
+import {MathUtil} from "../../../flashbang/util/MathUtil";
 import {EPars} from "../../EPars";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
@@ -9,6 +13,7 @@ import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {ConstraintType} from "../../puzzle/Constraints";
+import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, NucleotidePalette, PaletteTargetType} from "../../ui/NucleotidePalette";
@@ -22,9 +27,10 @@ import {StructureInput} from "./StructureInput";
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export class PuzzleEditMode extends GameMode {
-    constructor(embedded: boolean, numTargets: number = -1) {
+    constructor(embedded: boolean, numTargets: number = 1) {
         super();
         this._embedded = embedded;
+        this._numTargets = Math.max(numTargets, 1);
     }
 
     protected setup(): void {
@@ -32,57 +38,57 @@ export class PuzzleEditMode extends GameMode {
 
         this._folder = FolderManager.instance.get_folder(Vienna.NAME);
 
-        let toolbar = new PuzzleEditToolbar(this._embedded);
-        this.addObject(toolbar, this.modeSprite);
+        this._folder_button = new GameButton()
+            .allStates(Bitmaps.ShapeImg)
+            .label(this._folder.get_folder_name(), 22)
+            .tooltip("Select the folding engine");
+        this._folder_button.display.scale = new Point(0.5, 0.5);
+        this._folder_button.display.position = new Point(17, 160);
+        this.addObject(this._folder_button, this.uiLayer);
 
-        toolbar.native_button.clicked.connect(() => this.set_to_native_mode());
-        toolbar.target_button.clicked.connect(() => this.set_to_target_mode());
-        toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
-        toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
+        this._folder_button.clicked.connect(() => this.change_folder);
 
-        toolbar.zoom_out_button.clicked.connect(() => {
+        this._toolbar = new PuzzleEditToolbar(this._embedded);
+        this.addObject(this._toolbar, this.uiLayer);
+
+        this._toolbar.native_button.clicked.connect(() => this.set_to_native_mode());
+        this._toolbar.target_button.clicked.connect(() => this.set_to_target_mode());
+        this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
+        this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
+
+        this._toolbar.zoom_out_button.clicked.connect(() => {
             for (let poseField of this._pose_fields) {
                 poseField.zoom_out();
             }
         });
 
-        toolbar.zoom_in_button.clicked.connect(() => {
+        this._toolbar.zoom_in_button.clicked.connect(() => {
             for (let poseField of this._pose_fields) {
                 poseField.zoom_in();
             }
         });
 
-        toolbar.copy_button.clicked.connect(() => {
+        this._toolbar.copy_button.clicked.connect(() => {
             //     Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()),
             //         "Copied the current sequence to the clipboard");
         });
 
-        toolbar.view_options_button.clicked.connect(() => {
+        this._toolbar.view_options_button.clicked.connect(() => {
             // TODO
             // EternaViewOption(Application.instance.get_application_gui("View options")).open_view_options
         });
 
-        toolbar.paste_button.clicked.connect(() => {
+        this._toolbar.paste_button.clicked.connect(() => {
             // TODO
         });
 
         this.init_paste_field();
 
-        toolbar.reset_button.clicked.connect(() => this.ask_retry());
-        toolbar.submit_button.clicked.connect(() => this.on_submit_puzzle());
+        this._toolbar.reset_button.clicked.connect(() => this.promptForReset());
+        this._toolbar.submit_button.clicked.connect(() => this.on_submit_puzzle());
 
-        // this._folder_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ShapeImg));
-        // this._folder_button.set_text(this._folder.get_folder_name());
-        // this._folder_button.set_click_callback(this.change_folder);
-        // this._folder_button.scaleX = 0.5;
-        // this._folder_button.scaleY = 0.5;
-        // this._folder_button.set_tooltip("Select the folding engine.");
-        // this._folder_button.set_pos(new UDim(0, 0, 17, 160));
-        // this._folder_button.set_size(new UDim(0, 0, 111, 40));
-        // this.add_object(this._folder_button);
-
-        toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
-        toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
+        this._toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
+        this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
 
         // this._submitting_text = new GameText(Fonts.arial(20, true));
         // this._submitting_text.set_text("Submitting...");
@@ -151,7 +157,7 @@ export class PuzzleEditMode extends GameMode {
             ExternalInterface.addCallback("get_shift_limit", this.get_shift_limit);
         }
 
-        this.initialize(this._numTargets);
+        this.initialize();
     }
 
     public get_cookie_token(): string {
@@ -194,8 +200,7 @@ export class PuzzleEditMode extends GameMode {
         }
     }
 
-    private initialize(num_targets: number = 1): void {
-        log.info("TODO: initialize");
+    private initialize(): void {
         // this._submit_field = new TextInputPanel;
         // this._submit_field.set_title("Publish your puzzle");
         // this._submit_field.add_field("Title", 200);
@@ -230,7 +235,7 @@ export class PuzzleEditMode extends GameMode {
 
         let bind_mousedown_event = (pose: Pose2D, index: number): void => {
             pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number): void => {
-                for (let ii: number = 0; ii < num_targets; ++ii) {
+                for (let ii: number = 0; ii < this._numTargets; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
                     let pose: Pose2D = pose_field.get_pose();
                     if (ii == index) {
@@ -242,9 +247,9 @@ export class PuzzleEditMode extends GameMode {
             });
         };
 
-        this.set_cookie_token(num_targets);
+        this.set_cookie_token(this._numTargets);
         let states: any[] = this.autoload_data();
-        for (let ii = 0; ii < num_targets; ii++) {
+        for (let ii = 0; ii < this._numTargets; ii++) {
             let default_structure: string = ".....((((((((....)))))))).....";
             let default_pairs: number[] = EPars.parenthesis_to_pair_array(default_structure);
             let default_sequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -266,17 +271,9 @@ export class PuzzleEditMode extends GameMode {
             let sec_in: StructureInput = new StructureInput(pose);
             pose_field.addObject(sec_in, pose_field.container);
             if (!this._embedded) {
-                sec_in.set_size(700 / num_targets, 50);
-                sec_in.display.position = new Point(
-                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    -127
-                );
+                sec_in.set_size(700 / this._numTargets, 50);
             } else {
-                sec_in.set_size(500 / num_targets, 50);
-                sec_in.display.position = new Point(
-                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    -200
-                );
+                sec_in.set_size(500 / this._numTargets, 50);
             }
 
             sec_in.set_secstruct(default_structure);
@@ -295,7 +292,7 @@ export class PuzzleEditMode extends GameMode {
         this.set_pose_fields(pose_fields);
         this.pose_edit_by_target(0);
 
-        for (let ii = 0; ii < num_targets; ii++) {
+        for (let ii = 0; ii < this._numTargets; ii++) {
             set_cb(ii);
             pose_edit_setter(ii, this._poses[ii]);
 
@@ -310,7 +307,7 @@ export class PuzzleEditMode extends GameMode {
         this.onPaletteTargetSelected(PaletteTargetType.A);
         this.set_pip(true);
 
-        // this.update_children_objects(new Date().getTime(), true);
+        this.updateLayout();
     }
 
     public get_secstruct(): string {
@@ -374,9 +371,29 @@ export class PuzzleEditMode extends GameMode {
         // this.on_resize();
     }
 
-    /*override*/
-    protected on_resize(): void {
-        this.layout_bars();
+    public onResized(): void {
+        this.updateLayout();
+        super.onResized();
+    }
+
+    private updateLayout(): void {
+        DisplayUtil.positionRelativeToStage(
+            this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
+            HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        for (let sec_in of this._sec_ins) {
+            if (!this._embedded) {
+                sec_in.display.position = new Point(
+                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
+                    Flashbang.stageHeight - 127
+                );
+            } else {
+                sec_in.display.position = new Point(
+                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
+                    Flashbang.stageHeight - 200
+                );
+            }
+        }
     }
 
     /*override*/
@@ -452,25 +469,26 @@ export class PuzzleEditMode extends GameMode {
         // this._paste_field.set_pos(new UDim(0.5, 0.5, -150, -100));
     }
 
-    private ask_retry(): void {
-        log.info("TODO: ask_retry");
-        // Application.instance.setup_yesno("Do you really want to reset?", this.retry, null);
-    }
+    private promptForReset(): void {
+        const PROMPT = "Do you really want to reset?";
 
-    private retry(): void {
-        for (let pose of this._poses) {
-            let sequence = pose.get_sequence();
-            for (let ii: number = 0; ii < sequence.length; ii++) {
-                if (!pose.is_locked(ii)) {
-                    sequence[ii] = EPars.RNABASE_ADENINE;
+        this.showConfirmDialog(PROMPT).closed.connect((confirmed) => {
+            if (confirmed) {
+                for (let pose of this._poses) {
+                    let sequence = pose.get_sequence();
+                    for (let ii: number = 0; ii < sequence.length; ii++) {
+                        if (!pose.is_locked(ii)) {
+                            sequence[ii] = EPars.RNABASE_ADENINE;
+                        }
+                    }
+
+                    pose.set_puzzle_locks(null);
+                    pose.set_sequence(sequence);
+                    pose.set_molecular_binding_site(null);
                 }
+                this.pose_edit_by_target(0);
             }
-
-            pose.set_puzzle_locks(null);
-            pose.set_sequence(sequence);
-            pose.set_molecular_binding_site(null);
-        }
-        this.pose_edit_by_target(0);
+        });
     }
 
     private on_submit_puzzle(): void {
@@ -729,56 +747,49 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private set_to_native_mode(): void {
-        log.info("TODO: set_to_native_mode");
-        // this._target_button.set_selected(false);
-        // this._native_button.set_selected(true);
-        //
-        // this._target_button.set_hotkey(KeyCode.KEY_SPACE, false, "space");
-        // this._native_button.set_hotkey(KeyCode.KEY_NONE, false, "");
-        //
-        // this._paused = false;
-        // this.update_score();
+        this._toolbar.target_button.toggled.value = false;
+        this._toolbar.native_button.toggled.value = true;
+
+        this._toolbar.target_button.hotkey(KeyCode.Space);
+        this._toolbar.native_button.hotkey(null);
+
+        this._paused = false;
+        this.update_score();
     }
 
     private set_to_target_mode(): void {
-        log.info("TODO: set_to_target_mode");
-        // this._target_button.set_selected(true);
-        // this._native_button.set_selected(false);
-        //
-        // this._native_button.set_hotkey(KeyCode.KEY_SPACE, false, "space");
-        // this._target_button.set_hotkey(KeyCode.KEY_NONE, false, "");
-        //
-        // for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //     this._poses[ii].set_pairs(EPars.parenthesis_to_pair_array(this._sec_ins[ii].get_secstruct()));
-        // }
-        // this._paused = true;
-        //
-        // this.update_score();
+        this._toolbar.target_button.toggled.value = true;
+        this._toolbar.native_button.toggled.value = false;
+
+        this._toolbar.native_button.hotkey(KeyCode.Space);
+        this._toolbar.target_button.hotkey(null);
+
+        for (let ii: number = 0; ii < this._poses.length; ii++) {
+            this._poses[ii].set_pairs(EPars.parenthesis_to_pair_array(this._sec_ins[ii].get_secstruct()));
+        }
+        this._paused = true;
+
+        this.update_score();
     }
 
-    private on_change_folder(): void {
+    private change_folder(): void {
+        let curr_f: string = this._folder.get_folder_name();
+        this._folder = FolderManager.instance.get_next_folder(curr_f, () => false);
+        if (this._folder.get_folder_name() == curr_f) {
+            return;
+        }
+
+        this._folder_button.label(this._folder.get_folder_name());
+
+        for (let pose of this._poses) {
+            pose.set_score_visualization(this._folder);
+        }
+
         this.clear_undo_stack();
         this.pose_edit_by_target(0);
         for (let pose of this._poses) {
             pose.set_display_score_texts(pose.is_displaying_score_texts());
         }
-    }
-
-    private change_folder(): void {
-        log.info("TODO: change_folder");
-        // let curr_f: string = this._folder.get_folder_name();
-        // this._folder = FolderManager.instance.get_next_folder(curr_f, (): boolean => false);
-        // if (this._folder.get_folder_name() == curr_f) {
-        //     return;
-        // }
-        //
-        // this._folder_button.set_text(this._folder.get_folder_name());
-        //
-        // for (let pose of this._poses) {
-        //     pose.set_score_visualization(this._folder);
-        // }
-        //
-        // this.on_change_folder();
     }
 
     private clear_undo_stack(): void {
@@ -873,7 +884,7 @@ export class PuzzleEditMode extends GameMode {
         let num_GU: number = undoblock.get_param(UndoBlockParam.GU);
         let num_GC: number = undoblock.get_param(UndoBlockParam.GC);
 
-        this._palette.set_pair_counts(num_AU, num_GU, num_GC);
+        this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
     }
 
     private layout_bars(): void {
@@ -1229,7 +1240,6 @@ export class PuzzleEditMode extends GameMode {
     private readonly _embedded: boolean;
     private readonly _numTargets: number;
 
-    private _paste_button: GameButton;
     private _submit_field: TextInputPanel;
     private _sec_ins: StructureInput[];
     private _folder: Folder;
@@ -1241,21 +1251,8 @@ export class PuzzleEditMode extends GameMode {
     private _stack_level: number;
     private _stack_size: number;
     private _paused: boolean;
-    /// Modes
-    private _native_button: GameButton;
-    private _target_button: GameButton;
-    /// Palette
-    private _palette: NucleotidePalette;
-    private _pair_swap_button: GameButton;
-    ///
-    private _undo_button: GameButton;
-    private _redo_button: GameButton;
-    private _zoom_in_button: GameButton;
-    private _zoom_out_button: GameButton;
-    private _copy_button: GameButton;
-    private _view_options_button: GameButton;
-    private _reset_button: GameButton;
-    private _submit_button: GameButton;
+
+    private _toolbar: PuzzleEditToolbar;
     private _folder_button: GameButton;
     private _paste_field: TextInputPanel;
     /// Edit tools
@@ -1266,5 +1263,4 @@ export class PuzzleEditMode extends GameMode {
     private _site_button: GameButton;
     private _constraint_boxes: ConstraintBox[] = [];
     private _cookie_token: string;
-
 }
