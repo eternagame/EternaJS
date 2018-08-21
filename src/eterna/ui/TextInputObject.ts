@@ -14,6 +14,22 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         this._obj.oninput = () => this.valueChanged.emit(this._obj.value);
     }
 
+    public font(fontFamily: string): TextInputObject {
+        this._obj.style.fontFamily = fontFamily;
+        this.onSizeChanged();
+        return this;
+    }
+
+    public fontWeight(weight: string): TextInputObject {
+        this._obj.style.fontWeight = weight;
+        this.onSizeChanged();
+        return this;
+    }
+
+    public bold(): TextInputObject {
+        return this.fontWeight("bold");
+    }
+
     public set readOnly(value: boolean) {
         this._obj.readOnly = value;
     }
