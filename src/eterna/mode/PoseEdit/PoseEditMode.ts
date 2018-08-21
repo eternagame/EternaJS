@@ -1285,19 +1285,14 @@ export class PoseEditMode extends GameMode {
     }
 
     private ask_retry(): void {
-        const PROMPT: string = "Do you really want to reset?\nResetting will clear your undo stack.";
+        const PROMPT = "Do you really want to reset?\nResetting will clear your undo stack.";
         this.showConfirmDialog(PROMPT).closed.connect((confirmed) => {
             if (confirmed) {
-                this.retry();
+                this.reset_autosave_data();
+                this._puzzle.set_temporary_constraints(null);
+                this.modeStack.changeMode(new PoseEditMode(this._puzzle, null, false));
             }
         });
-    }
-
-    private retry(): void {
-        // Application.instance.get_application_gui("Design Name").set_text("");
-        this.reset_autosave_data();
-        this._puzzle.set_temporary_constraints(null);
-        this.modeStack.changeMode(new PoseEditMode(this._puzzle, null, false));
     }
 
     private change_target(target_index: number): void {
