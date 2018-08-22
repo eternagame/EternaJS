@@ -58,17 +58,15 @@ export class StructureInput extends GamePanel implements Updatable {
     }
 
     public set_pose(op: PuzzleEditOp = null, index: number = -1): void {
-        let cur_sec: string = this._textInput.text;
+        let input = this._textInput.text;
+        input = input.replace(/[^\.\(\)]/g, "");
+        // Replace () with (.) -- () is illegal and causes an error
+        input = input.replace(/\(\)/g, "(.)");
         let length_limit: number = 400;
 
-        let error: string = EPars.validate_parenthesis(cur_sec, false, length_limit);
-        if (error != null) {
-            this.set_warning(error);
-            cur_sec = cur_sec.replace(/[^\.\(\)]/g, "");
-            this._textInput.text = cur_sec;
-        } else {
-            this.set_warning("");
-        }
+        let error: string = EPars.validate_parenthesis(input, false, length_limit);
+        this.set_warning(error || "");
+        this._textInput.text = input;
 
         let sequence = this._pose.get_sequence();
         let locks = this._pose.get_puzzle_locks();
@@ -77,13 +75,13 @@ export class StructureInput extends GamePanel implements Updatable {
         let locks_backup = this._pose.get_puzzle_locks();
         let binding_site_backup = this._pose.get_molecular_binding_site();
 
-        if (sequence.length > cur_sec.length) {
-            sequence = sequence.slice(0, cur_sec.length);
-            locks = locks.slice(0, cur_sec.length);
-            binding_site = binding_site.slice(0, cur_sec.length);
+        if (sequence.length > input.length) {
+            sequence = sequence.slice(0, input.length);
+            locks = locks.slice(0, input.length);
+            binding_site = binding_site.slice(0, input.length);
         }
 
-        for (let ii: number = sequence.length; ii < cur_sec.length; ii++) {
+        for (let ii: number = sequence.length; ii < input.length; ii++) {
             sequence.push(EPars.RNABASE_ADENINE);
             locks.push(false);
             binding_site.push(false);
