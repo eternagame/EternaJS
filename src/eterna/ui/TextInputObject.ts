@@ -69,7 +69,7 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     }
 
     public get caretPosition(): number {
-        return this._obj.selectionStart;
+        return this._obj.selectionStart === this._obj.selectionEnd ? this._obj.selectionStart : -1;
     }
 
     private onInput(): void {

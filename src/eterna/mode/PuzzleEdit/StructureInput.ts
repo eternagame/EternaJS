@@ -1,4 +1,5 @@
 ﻿import {Point} from "pixi.js";
+import {Updatable} from "../../../flashbang/core/Updatable";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {EPars} from "../../EPars";
 import {Pose2D} from "../../pose2D/Pose2D";
@@ -7,7 +8,14 @@ import {GamePanel} from "../../ui/GamePanel";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 
-export class StructureInput extends GamePanel {
+function IsArrowKey(keyCode: string): boolean {
+    return keyCode === KeyCode.ArrowRight ||
+        keyCode === KeyCode.ArrowLeft ||
+        keyCode === KeyCode.ArrowUp ||
+        keyCode === KeyCode.ArrowDown;
+}
+
+export class StructureInput extends GamePanel implements Updatable {
     public constructor(pose: Pose2D) {
         super();
         this._pose = pose;
@@ -29,13 +37,19 @@ export class StructureInput extends GamePanel {
 
         this._textInput.valueChanged.connect(() => this.set_pose());
         this._textInput.element.onkeydown = (e) => {
-            if (e.code === KeyCode.ArrowRight || e.code === KeyCode.ArrowLeft) {
+            // Prevent arrow key presses from moving the pose around
+            if (IsArrowKey(e.code)) {
                 e.stopPropagation();
             }
-            this.set_pose();
         };
+    }
 
-        // this._input_box.addEventListener('mouseDown', this.handle_mouse_down, false, 1, false);
+    public update(dt: number): void {
+        // Update the cursor highlight when our caret position changes
+        if (this._prevCaretPostion != this._textInput.caretPosition) {
+            this._prevCaretPostion = this._textInput.caretPosition;
+            this._pose.track_cursor(this._textInput.caretPosition);
+        }
     }
 
     public set_size(width: number, height: number): void {
@@ -217,12 +231,8 @@ export class StructureInput extends GamePanel {
         }
     }
 
-    private handle_mouse_down(e: MouseEvent): void {
-        this.set_pose();
-        e.stopPropagation();
-    }
-
     private readonly _pose: Pose2D;
     private _textInput: TextInputObject;
+    private _prevCaretPostion: number = -1;
 
 }
