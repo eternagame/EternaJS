@@ -19,12 +19,12 @@ export class NotificationDialog extends Dialog<void> {
     }
 
     /**
-     * Returns a new Promise that will resolve when the dialog is closed.
-     * If the Dialog has already been closed, the Promise will never resolve.
+     * Returns a new Promise that will resolve when the notification is closed.
+     * If the Notification has already been closed, the Promise will never resolve.
      */
-    public get promise(): Promise<void> {
+    public get dismissed(): Promise<void> {
         return new Promise((resolve) => {
-            this.closed.connect(() => resolve());
+            this.destroyed.connect(() => resolve());
         });
     }
 
