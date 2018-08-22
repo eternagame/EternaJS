@@ -1,8 +1,8 @@
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {Application} from "../../Application";
-import {Dialog} from "../../ui/Dialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
+import {Flashbang} from "../../flashbang/core/Flashbang";
+import {KeyCode} from "../../flashbang/input/KeyCode";
+import {Application} from "../Application";
+import {Dialog} from "./Dialog";
+import {TextInputPanel} from "./TextInputPanel";
 
 /**
  * Prompts the user to paste a sequence.
