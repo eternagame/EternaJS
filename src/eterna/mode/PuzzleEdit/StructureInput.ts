@@ -2,6 +2,7 @@
 import {Updatable} from "../../../flashbang/core/Updatable";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {EPars} from "../../EPars";
+import {Eterna} from "../../Eterna";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {GamePanel} from "../../ui/GamePanel";
@@ -62,9 +63,8 @@ export class StructureInput extends GamePanel implements Updatable {
         input = input.replace(/[^\.\(\)]/g, "");
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, "(.)");
-        let length_limit: number = 400;
 
-        let error: string = EPars.validate_parenthesis(input, false, length_limit);
+        let error: string = EPars.validate_parenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.set_warning(error || "");
         this._textInput.text = input;
 
