@@ -4,7 +4,6 @@ import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {MathUtil} from "../../../flashbang/util/MathUtil";
 import {EPars} from "../../EPars";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
@@ -16,7 +15,7 @@ import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
-import {GetPaletteTargetBaseType, NucleotidePalette, PaletteTargetType} from "../../ui/NucleotidePalette";
+import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {TextInputPanel} from "../../ui/TextInputPanel";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
@@ -1130,16 +1129,12 @@ export class PuzzleEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let last_best_pairs: number[] = null;
-
             let target_pairs: number[] = EPars.parenthesis_to_pair_array(this._sec_ins[ii].get_secstruct());
             let seq = this._poses[ii].get_sequence();
             let lock = this._poses[ii].get_puzzle_locks();
             let binding_site = this._poses[ii].get_molecular_binding_site();
 
             if (this._stack_level >= 0) {
-                last_best_pairs = this._seq_stack[this._stack_level][ii].get_pairs(EPars.DEFAULT_TEMPERATURE);
-
                 if (this._sec_ins[ii].get_secstruct() != EPars.pairs_array_to_parenthesis(this._target_pairs_stack[this._stack_level][ii])) {
                     no_change = false;
                 }
@@ -1184,6 +1179,7 @@ export class PuzzleEditMode extends GameMode {
                 for (let bb = 0; bb < binding_site.length; bb++) {
                     if (binding_site[bb]) {
                         is_there_molecule = true;
+                        break;
                     }
                 }
             }
@@ -1222,17 +1218,6 @@ export class PuzzleEditMode extends GameMode {
         this._lock_stack[this._stack_level] = current_lock;
         this._binding_site_stack[this._stack_level] = current_binding_sites;
         this._stack_size = this._stack_level + 1;
-
-        let num_locks: number[] = [];
-        for (let ii = 0; ii < current_lock.length; ii++) {
-            let lock_count: number = 0;
-            for (let jj: number = 0; jj < current_lock[ii].length; jj++) {
-                if (current_lock[ii][jj]) {
-                    lock_count++;
-                }
-            }
-            num_locks.push(lock_count);
-        }
 
         this.update_score();
     }
