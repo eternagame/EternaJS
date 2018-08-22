@@ -17,6 +17,7 @@ export abstract class GameMode extends AppMode {
     public readonly poseLayer: Container = new Container();
     public readonly uiLayer: Container = new Container();
     public readonly dialogLayer: Container = new Container();
+    public readonly notifLayer: Container = new Container();
     public readonly achievementsLayer: Container = new Container();
 
     protected setup(): void {
@@ -26,6 +27,7 @@ export abstract class GameMode extends AppMode {
         this.modeSprite.addChild(this.poseLayer);
         this.modeSprite.addChild(this.uiLayer);
         this.modeSprite.addChild(this.dialogLayer);
+        this.modeSprite.addChild(this.notifLayer);
         this.modeSprite.addChild(this.achievementsLayer);
 
         this._achievements = new AchievementManager();
@@ -40,10 +42,7 @@ export abstract class GameMode extends AppMode {
         return this.showDialog(new ConfirmDialog(prompt, promptIsHTML));
     }
 
-    public showNotificationDialog(message: string, extraButtonTitle?: string): NotificationDialog {
-        return this.showDialog(new NotificationDialog(message, "Ok", extraButtonTitle));
-    }
-
+    /** Show a dialog. Removes any existing dialog. */
     public showDialog<T extends SceneObject>(dialog: T): T {
         if (this._dialogRef.isLive) {
             log.warn("Dialog already showing");
@@ -52,6 +51,26 @@ export abstract class GameMode extends AppMode {
 
         this._dialogRef = this.addObject(dialog, this.dialogLayer);
         return dialog;
+    }
+
+    /**
+     * Show a notification. Removes any existing notification. Dialogs will be hidden while the notification exists.
+     * Returns a Promise that will resolve when the notification is dismissed.
+     */
+    public showNotification(message: string, extraButtonTitle?: string): NotificationDialog {
+        if (this._notifRef.isLive) {
+            log.warn("Notification already showing");
+            this._notifRef.destroyObject();
+        }
+
+        let notif = new NotificationDialog(message, extraButtonTitle);
+        this._notifRef = this.addObject(notif, this.notifLayer);
+
+        // Hide dialogs while a notification is showing
+        this.dialogLayer.visible = false;
+        notif.destroyed.connect(() => this.dialogLayer.visible = true);
+
+        return notif;
     }
 
     /** Draws a dimrect over the game + UI (but below the achievements layer.) */
@@ -169,7 +188,7 @@ export abstract class GameMode extends AppMode {
                 });
             })
             .catch(err => {
-                this.showNotificationDialog(`There was an error posting the screenshot\n${err}`);
+                this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
             ./*finally*/then(() => {
                 this.popUILock();
@@ -180,6 +199,7 @@ export abstract class GameMode extends AppMode {
 
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
+    protected _notifRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _pose_fields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!

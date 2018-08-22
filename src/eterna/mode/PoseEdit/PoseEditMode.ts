@@ -1097,10 +1097,6 @@ export class PoseEditMode extends GameMode {
         return this._constraint_boxes[i];
     }
 
-    // public get_switch_bar(): ToggleBar {
-    //     return this._toggle_bar;
-    // }
-
     public set_ancestor_id(id: number): void {
         this._ancestor_id = id;
     }
@@ -1609,7 +1605,7 @@ export class PoseEditMode extends GameMode {
                         .then(() => this.promptForExperimentalPuzzleSubmission());
 
                 } else {
-                    this.showNotificationDialog("You didn't satisfy all requirements!");
+                    this.showNotification("You didn't satisfy all requirements!");
                 }
             } else {
                 this.promptForExperimentalPuzzleSubmission();
@@ -1798,7 +1794,7 @@ export class PoseEditMode extends GameMode {
 
             if (data['error'] != null) {
                 if (data['error'].indexOf('barcode') >= 0) {
-                    let dialog = this.showNotificationDialog(data['error'], "More Information");
+                    let dialog = this.showNotification(data['error'], "More Information");
                     dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
                     let hairpin: string = EPars.get_barcode_hairpin(seqString);
                     if (hairpin != null) {
@@ -1806,7 +1802,7 @@ export class PoseEditMode extends GameMode {
                         this.checkConstraints();
                     }
                 } else {
-                    this.showNotificationDialog(data['error']);
+                    this.showNotification(data['error']);
                 }
 
             } else {
