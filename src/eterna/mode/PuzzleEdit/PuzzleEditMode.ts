@@ -16,6 +16,7 @@ import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
+import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
@@ -49,6 +50,10 @@ export class PuzzleEditMode extends GameMode {
         this.addObject(this._folder_button, this.uiLayer);
 
         this._folder_button.clicked.connect(() => this.change_folder);
+
+        this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
+            this._folder_button.display.visible = value;
+        }));
 
         this._toolbar = new PuzzleEditToolbar(this._embedded);
         this.addObject(this._toolbar, this.uiLayer);
@@ -85,8 +90,7 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.view_options_button.clicked.connect(() => {
-            // TODO
-            // EternaViewOption(Application.instance.get_application_gui("View options")).open_view_options
+            this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER));
         });
 
         this._toolbar.reset_button.clicked.connect(() => this.promptForReset());

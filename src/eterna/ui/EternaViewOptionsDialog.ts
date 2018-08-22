@@ -1,5 +1,4 @@
 import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {Flashbang} from "../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {Setting} from "../../flashbang/settings/Setting";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -32,14 +31,17 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         bind(Eterna.settings.showLetters, "Show nucleotides letters");
         bind(Eterna.settings.displayFreeEnergies, "Display free energies for all structures (G)");
         bind(Eterna.settings.highlightRestricted, "Highlight restricted sequences");
-        bind(Eterna.settings.autohideToolbar, "Autohide toolbar");
-        bind(Eterna.settings.freezeButtonAlwaysVisible, "Freeze button always visible");
 
-        if (this._optionsMode > EternaViewOptionsMode.PUZZLE) {
+        if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
+            bind(Eterna.settings.autohideToolbar, "Autohide toolbar");
+            bind(Eterna.settings.freezeButtonAlwaysVisible, "Freeze button always visible");
+        }
+
+        if (this._optionsMode !== EternaViewOptionsMode.PUZZLE) {
             bind(Eterna.settings.multipleFoldingEngines, "Multiple folding engines");
         }
 
-        if (this._optionsMode >= EternaViewOptionsMode.LAB) {
+        if (this._optionsMode === EternaViewOptionsMode.LAB) {
             bind(Eterna.settings.useContinuousColors, "Use continuous colors for the exp. data (advanced)");
             bind(Eterna.settings.useExtendedColors, "Use extended 4-color scale for the exp. data (advanced)");
             bind(Eterna.settings.displayAuxInfo, "Display auxiliary information about RNAs");
