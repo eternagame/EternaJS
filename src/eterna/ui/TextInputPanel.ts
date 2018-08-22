@@ -43,12 +43,14 @@ export class TextInputPanel extends GamePanel {
                 max_w = Math.max(max_w, field.input.width);
             }
 
+            const FIELD_H_OFFSET = 28;
+
             for (let ii = 0; ii < this._fields.length; ii++) {
                 let field = this._fields[ii];
                 field.input.display.x = field_start + (TextInputPanel.W_MARGIN * 2);
-                field.input.display.y = (ii + 1) * 25 + TextInputPanel.H_MARGIN;
+                field.input.display.y = (ii + 1) * FIELD_H_OFFSET + TextInputPanel.H_MARGIN;
                 field.label.x = TextInputPanel.W_MARGIN;
-                field.label.y = (ii + 1) * 25 + TextInputPanel.H_MARGIN;
+                field.label.y = (ii + 1) * FIELD_H_OFFSET + TextInputPanel.H_MARGIN;
             }
 
             let lastInput = this._fields[this._fields.length - 1].input;
@@ -75,7 +77,7 @@ export class TextInputPanel extends GamePanel {
             throw new Error("Add all fields before adding object to mode");
         }
 
-        let input = new TextInputObject(14, width, multiline ? 3 : 1);
+        let input = new TextInputObject(14, width, multiline ? 3 : 1).font(Fonts.ARIAL);
         this.addObject(input, this.container);
 
         let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();
