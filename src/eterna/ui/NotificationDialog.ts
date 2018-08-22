@@ -1,8 +1,6 @@
 import {Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {Easing} from "../../flashbang/util/Easing";
 import {Dialog} from "./Dialog";
 import {GameButton} from "./GameButton";
 import {TextBalloon} from "./TextBalloon";
@@ -36,8 +34,9 @@ export class NotificationDialog extends Dialog<void> {
         box.set_text(`${this._message}\n\n\n`);
         this.addObject(box, this.container);
 
-        box.display.alpha = 0;
-        box.addObject(new AlphaTask(1, 0.3, Easing.easeIn));
+        // This fade-in is annoying and slows the user down.
+        // box.display.alpha = 0;
+        // box.addObject(new AlphaTask(1, 0.3, Easing.easeIn));
 
         let buttonLayout: HLayoutContainer = new HLayoutContainer(2);
 
