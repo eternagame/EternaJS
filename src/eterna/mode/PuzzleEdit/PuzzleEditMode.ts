@@ -17,6 +17,7 @@ import {ConstraintBox} from "../../ui/ConstraintBox";
 import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
+import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {TextInputPanel} from "../../ui/TextInputPanel";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
@@ -73,15 +74,19 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.paste_button.clicked.connect(() => {
-            // TODO
+            this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
+                if (sequence != null) {
+                    for (let pose of this._poses) {
+                        pose.paste_sequence(EPars.string_to_sequence_array(sequence));
+                    }
+                }
+            });
         });
 
         this._toolbar.view_options_button.clicked.connect(() => {
             // TODO
             // EternaViewOption(Application.instance.get_application_gui("View options")).open_view_options
         });
-
-        this.init_paste_field();
 
         this._toolbar.reset_button.clicked.connect(() => this.promptForReset());
         this._toolbar.submit_button.clicked.connect(() => this.on_submit_puzzle());
@@ -430,42 +435,6 @@ export class PuzzleEditMode extends GameMode {
         // bd.draw(hub);
         //
         // return bd;
-    }
-
-    private init_paste_field(): void {
-        log.info("TODO: init_paste_field");
-        // this._paste_field = new TextInputPanel;
-        // this._paste_field.add_field("Sequence", 200);
-        // this._paste_field.set_title("Write down a sequence");
-        // this._paste_field.set_callbacks(
-        //     function (dic: Map<any, any>): void {
-        //         let sequence: string = dic["Sequence"];
-        //         let char: string = "";
-        //         let ii: number;
-        //
-        //         for (ii = 0; ii < sequence.length; ii++) {
-        //             char = sequence.substr(ii, 1);
-        //             if (char != "A" && char != "U" && char != "G" && char != "C") {
-        //                 Application.instance.setup_msg_box("You can only use characters A,U,G and C");
-        //                 return;
-        //             }
-        //         }
-        //
-        //         for (ii = 0; ii < this._poses.length; ii++) {
-        //             this._poses[ii].paste_sequence(EPars.string_to_sequence_array(sequence));
-        //         }
-        //
-        //         this._paste_field.clear_fields();
-        //         Application.instance.remove_lock("PASTESEQUENCE");
-        //         Application.instance.get_modal_container().remove_object(this._paste_field);
-        //     },
-        //     function (): void {
-        //         this._paste_field.clear_fields();
-        //         Application.instance.remove_lock("PASTESEQUENCE");
-        //         Application.instance.get_modal_container().remove_object(this._paste_field);
-        //     }
-        // );
-        // this._paste_field.set_pos(new UDim(0.5, 0.5, -150, -100));
     }
 
     private promptForReset(): void {
@@ -1239,7 +1208,6 @@ export class PuzzleEditMode extends GameMode {
 
     private _toolbar: PuzzleEditToolbar;
     private _folder_button: GameButton;
-    private _paste_field: TextInputPanel;
     /// Edit tools
     private _addbase_button: GameButton;
     private _addpair_button: GameButton;

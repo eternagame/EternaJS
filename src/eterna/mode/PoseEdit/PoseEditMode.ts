@@ -49,7 +49,7 @@ import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
 import {MissionClearedPanel} from "./MissionClearedPanel";
 import {MissionIntroMode} from "./MissionIntroMode";
-import {PasteSequenceDialog} from "./PasteSequenceDialog";
+import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {SubmitPoseDetails} from "./SubmitPoseDetails";
 import {SubmitPoseDialog} from "./SubmitPoseDialog";
