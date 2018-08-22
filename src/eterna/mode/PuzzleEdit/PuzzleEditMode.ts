@@ -5,6 +5,7 @@ import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {EPars} from "../../EPars";
+import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {Vienna} from "../../folding/Vienna";
@@ -164,37 +165,28 @@ export class PuzzleEditMode extends GameMode {
         this.initialize();
     }
 
-    public get_cookie_token(): string {
-        return this._cookie_token;
+    private autoload_data(): any[] {
+        return Eterna.settings.loadObject(this.savedDataTokenName);
     }
 
-    public set_cookie_token(num_targets: number): void {
-        log.info("TODO: set_cookie_token");
-        // this._cookie_token = "puzedit_" + num_targets + "_" + Application.instance.get_player_id();
+    private autosave_data(): void {
+        let objs: any[] = [];
+        for (let pose of this._poses) {
+            objs.push({
+                sequence: EPars.sequence_array_to_string(pose.get_sequence()),
+                structure: EPars.pairs_array_to_parenthesis(pose.get_molecular_structure()),
+            });
+        }
+
+        Eterna.settings.saveObject(this.savedDataTokenName, objs);
     }
 
-    public autoload_data(): any[] {
-        return [];
-        // let objs: any[] = AutosaveManager.instance.loadObjects(this.get_cookie_token());
-        // return objs;
+    private reset_autosave_data(): void {
+        Eterna.settings.removeObject(this.savedDataTokenName);
     }
 
-    public autosave_data(e: Event): void {
-        log.info("TODO: autosave_data");
-        // let objs: any[] = [];
-        // for (let ii: number = 0; ii < this._poses.length; ++ii) {
-        //     let obj: any[] = [];
-        //     let pose: Pose2D = this._poses[ii];
-        //     obj['sequence'] = EPars.sequence_array_to_string(pose.get_sequence());
-        //     obj['structure'] = EPars.pairs_array_to_parenthesis(pose.get_molecular_structure());
-        //     objs.push(obj);
-        // }
-        // AutosaveManager.instance.saveObjects(objs, this.get_cookie_token());
-    }
-
-    public reset_autosave_data(): void {
-        log.info("TODO: reset_autosave_data");
-        // AutosaveManager.instance.saveObjects(null, this.get_cookie_token());
+    private get savedDataTokenName(): string {
+        return `puzedit_${this._numTargets}`;
     }
 
     public set_folder(engine_name: string): void {
@@ -251,7 +243,6 @@ export class PuzzleEditMode extends GameMode {
             });
         };
 
-        this.set_cookie_token(this._numTargets);
         let states: any[] = this.autoload_data();
         for (let ii = 0; ii < this._numTargets; ii++) {
             let default_structure: string = ".....((((((((....)))))))).....";
@@ -822,7 +813,7 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private update_score(): void {
-        this.autosave_data(null);
+        this.autosave_data();
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
             let undoblock: UndoBlock = this.get_current_undo_block(ii);
@@ -1215,5 +1206,4 @@ export class PuzzleEditMode extends GameMode {
     private _lock_button: GameButton;
     private _site_button: GameButton;
     private _constraint_boxes: ConstraintBox[] = [];
-    private _cookie_token: string;
 }
