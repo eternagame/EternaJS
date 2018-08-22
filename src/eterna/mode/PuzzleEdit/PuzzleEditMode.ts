@@ -14,6 +14,7 @@ import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
+import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {TextInputPanel} from "../../ui/TextInputPanel";
@@ -68,17 +69,16 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copy_button.clicked.connect(() => {
-            //     Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()),
-            //         "Copied the current sequence to the clipboard");
+            this.showDialog(new CopySequenceDialog(EPars.sequence_array_to_string(this._poses[0].get_sequence())));
+        });
+
+        this._toolbar.paste_button.clicked.connect(() => {
+            // TODO
         });
 
         this._toolbar.view_options_button.clicked.connect(() => {
             // TODO
             // EternaViewOption(Application.instance.get_application_gui("View options")).open_view_options
-        });
-
-        this._toolbar.paste_button.clicked.connect(() => {
-            // TODO
         });
 
         this.init_paste_field();

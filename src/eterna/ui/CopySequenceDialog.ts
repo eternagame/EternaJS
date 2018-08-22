@@ -1,8 +1,7 @@
-import {Point} from "pixi.js";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {Dialog} from "../../ui/Dialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
+import {Flashbang} from "../../flashbang/core/Flashbang";
+import {KeyCode} from "../../flashbang/input/KeyCode";
+import {Dialog} from "./Dialog";
+import {TextInputPanel} from "./TextInputPanel";
 
 /** Allows the user to copy the current sequence. */
 export class CopySequenceDialog extends Dialog<void> {
