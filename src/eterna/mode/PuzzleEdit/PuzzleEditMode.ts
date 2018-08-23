@@ -1,8 +1,9 @@
 import * as log from "loglevel";
-import {Point, Text} from "pixi.js";
+import {Point} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
+import {Base64} from "../../../flashbang/util/Base64";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
@@ -16,6 +17,7 @@ import {PoseField} from "../../pose2D/PoseField";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
+import {AsyncProcessDialog} from "../../ui/AsyncProcessDialog";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {DialogCanceledError} from "../../ui/Dialog";
@@ -23,6 +25,7 @@ import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaVie
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
+import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
 import {GameMode} from "../GameMode";
@@ -101,10 +104,6 @@ export class PuzzleEditMode extends GameMode {
 
         this._toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
         this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
-
-        // this._submitting_text = new GameText(Fonts.arial(20, true));
-        // this._submitting_text.set_text("Submitting...");
-        // this._submitting_text.set_pos(new UDim(0.5, 0.5, -(this._submitting_text.text_width() / 2), -(this._submitting_text.text_height() / 2)));
         //
         // this._addbase_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgAddBase));
         // this._addbase_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgAddBase),
@@ -349,7 +348,7 @@ export class PuzzleEditMode extends GameMode {
         // let urlname: string = filename;
         // filename = "/persistent/drupal/html" + filename;
         //
-        // let img: BitmapData = PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 6, PoseThumbnail.THUMBNAIL_WHITE);
+        // let img: BitmapData = PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 6, PoseThumbnailType.WHITE);
         // let imageBytes: ByteArray = PNGEncoder.encode(img);
         // let imageString: string = Base64.encodeByteArray(imageBytes);
         //
@@ -503,128 +502,123 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private submit_puzzle(details: SubmitPuzzleDetails): void {
-        // let constraints: string = "";
-        // for (let ii = 0; ii < this._poses.length; ii++) {
-        //     if (ii > 0) {
-        //         constraints += ",";
-        //     }
-        //     constraints += "SHAPE," + ii;
-        // }
-        //
-        // let len: number = this._poses[0].get_sequence().length;
-        //
-        // let locks = this.get_current_lock(0);
-        // let lock_string: string = "";
-        // for (let ii = 0; ii < len; ii++) {
-        //     if (locks[ii]) {
-        //         lock_string += "x";
-        //     } else {
-        //         lock_string += "o";
-        //     }
-        // }
-        //
-        // let sequence: string = EPars.sequence_array_to_string(this._poses[0].get_sequence());
-        // let beginning_sequence: string = "";
-        // for (let ii = 0; ii < len; ii++) {
-        //     if (locks[ii]) {
-        //         beginning_sequence += sequence.substr(ii, 1);
-        //     } else {
-        //         beginning_sequence += "A";
-        //     }
-        // }
-        //
-        // let secstruct: string = EPars.pairs_array_to_parenthesis(this.get_current_target_pairs(0));
-        // let imgdata: BitmapData = PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 4, PoseThumbnail.THUMBNAIL_WHITE);
-        // let mid_imageBytes: ByteArray = PNGEncoder.encode(imgdata);
-        // let mid_image_string: string = Base64.encodeByteArray(mid_imageBytes);
-        //
-        // imgdata = PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 2, PoseThumbnail.THUMBNAIL_WHITE);
-        // let big_imageBytes: ByteArray = PNGEncoder.encode(imgdata);
-        // let big_image_string: string = Base64.encodeByteArray(big_imageBytes);
-        //
-        // if (this._poses.length == 1) {
-        //     let num_pairs: number = EPars.num_pairs(this.get_current_target_pairs(0));
-        //
-        //     if (details.minGU && details.minGU > 0) {
-        //         constraints += ",GU," + details.minGU.toString();
-        //     }
-        //
-        //     if (details.maxGC && details.maxGC <= num_pairs) {
-        //         constraints += ",GC," + details.maxGC.toString();
-        //     }
-        //
-        //     if (details.minAU && details.minAU > 0) {
-        //         constraints += ",AU," + details.minAU.toString();
-        //     }
-        // }
-        //
-        // let objectives: any[] = [];
-        // for (let ii = 0; ii < this._poses.length; ii++) {
-        //     let objective: any = {};
-        //     let binding_site: any[] = this.get_current_binding_site(ii);
-        //     let binding_bases: any[] = [];
-        //     for (let bb: number = 0; bb < binding_site.length; bb++) {
-        //         if (binding_site[bb]) {
-        //             binding_bases.push(bb);
-        //         }
-        //     }
-        //
-        //     objective['secstruct'] = this._sec_ins[ii].get_secstruct();
-        //
-        //     if (binding_bases.length > 0) {
-        //         objective['type'] = "aptamer";
-        //         objective['site'] = binding_bases;
-        //         objective['concentration'] = 10000;
-        //         objective['fold_version'] = 2.0;
-        //     } else {
-        //         objective['type'] = "single";
-        //     }
-        //
-        //     objectives.push(objective);
-        // }
-        //
-        // let post_params: any = {};
-        //
-        // post_params["folder"] = this._folder.get_folder_name();
-        // let params_title: string;
-        // if (this._folder.get_folder_name() == Vienna2.NAME) {
-        //     params_title = "[VRNA_2]";
-        // } else if (this._folder.get_folder_name() == NuPACK.NAME) {
-        //     params_title = "[NuPACK]";
-        // } else {
-        //     params_title = "";
-        // }
-        // if (this._poses.length > 1) {
-        //     params_title += "[switch2.5][" + this._poses.length + " states] " + details.title;
-        // } else {
-        //     params_title += details.title;
-        // }
-        // post_params["title"] = params_title;
-        // post_params["secstruct"] = secstruct;
-        // post_params["constraints"] = constraints;
-        // post_params["body"] = details.description;
-        // post_params["midimgdata"] = mid_image_string;
-        // post_params["bigimgdata"] = big_image_string;
-        // post_params["lock"] = lock_string;
-        // post_params["begin_sequence"] = beginning_sequence;
-        // post_params["objectives"] = JSON.stringify(objectives);
-        //
-        // this._submitting_text.set_animator(new GameAnimatorFader(1, 0, 0.3, false, true));
-        // Application.instance.get_modal_container().add_object(this._submitting_text);
-        //
-        // Eterna.client.submit_puzzle(post_params, function (datastring: string): void {
-        //     let data: any = this.com.adobe.serialization.json.JSON.decode(datastring);
-        //     data = data['data'];
-        //     Application.instance.remove_lock("LOCK_SUBMIT");
-        //     Application.instance.get_modal_container().remove_object(this._submitting_text);
-        //     this._submitting_text.set_animator(null);
-        //
-        //     if (data['success']) {
-        //         Application.instance.setup_msg_box("Your puzzle has been successfully published.\nIt will show up in player puzzle pages within 5 minutes.");
-        //     } else {
-        //         Application.instance.setup_msg_box("Puzzle submission failed : " + data['error']);
-        //     }
-        // });
+        let constraints: string = "";
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            if (ii > 0) {
+                constraints += ",";
+            }
+            constraints += "SHAPE," + ii;
+        }
+
+        let len: number = this._poses[0].get_sequence().length;
+
+        let locks = this.get_current_lock(0);
+        let lock_string: string = "";
+        for (let ii = 0; ii < len; ii++) {
+            if (locks[ii]) {
+                lock_string += "x";
+            } else {
+                lock_string += "o";
+            }
+        }
+
+        let sequence: string = EPars.sequence_array_to_string(this._poses[0].get_sequence());
+        let beginning_sequence: string = "";
+        for (let ii = 0; ii < len; ii++) {
+            if (locks[ii]) {
+                beginning_sequence += sequence.substr(ii, 1);
+            } else {
+                beginning_sequence += "A";
+            }
+        }
+
+        if (this._poses.length == 1) {
+            let num_pairs: number = EPars.num_pairs(this.get_current_target_pairs(0));
+
+            if (details.minGU && details.minGU > 0) {
+                constraints += ",GU," + details.minGU.toString();
+            }
+
+            if (details.maxGC && details.maxGC <= num_pairs) {
+                constraints += ",GC," + details.maxGC.toString();
+            }
+
+            if (details.minAU && details.minAU > 0) {
+                constraints += ",AU," + details.minAU.toString();
+            }
+        }
+
+        let objectives: any[] = [];
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            let objective: any = {};
+            let binding_site: any[] = this.get_current_binding_site(ii);
+            let binding_bases: any[] = [];
+            for (let bb: number = 0; bb < binding_site.length; bb++) {
+                if (binding_site[bb]) {
+                    binding_bases.push(bb);
+                }
+            }
+
+            objective['secstruct'] = this._sec_ins[ii].get_secstruct();
+
+            if (binding_bases.length > 0) {
+                objective['type'] = "aptamer";
+                objective['site'] = binding_bases;
+                objective['concentration'] = 10000;
+                objective['fold_version'] = 2.0;
+            } else {
+                objective['type'] = "single";
+            }
+
+            objectives.push(objective);
+        }
+
+        let post_params: any = {};
+
+        post_params["folder"] = this._folder.get_folder_name();
+        let params_title: string;
+        if (this._folder.get_folder_name() == Vienna2.NAME) {
+            params_title = "[VRNA_2]";
+        } else if (this._folder.get_folder_name() == NuPACK.NAME) {
+            params_title = "[NuPACK]";
+        } else {
+            params_title = "";
+        }
+        if (this._poses.length > 1) {
+            params_title += "[switch2.5][" + this._poses.length + " states] " + details.title;
+        } else {
+            params_title += details.title;
+        }
+
+        // Render pose thumbnail images
+        let midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
+            this._poses[0].get_sequence(), this._poses[0].get_pairs(), 4, PoseThumbnailType.WHITE));
+
+        let bigImageString: string = Base64.encodeDisplayObjectPNG(
+            PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 2, PoseThumbnailType.WHITE));
+
+        post_params["title"] = params_title;
+        post_params["secstruct"] = EPars.pairs_array_to_parenthesis(this.get_current_target_pairs(0));
+        post_params["constraints"] = constraints;
+        post_params["body"] = details.description;
+        post_params["midimgdata"] = midImageString;
+        post_params["bigimgdata"] = bigImageString;
+        post_params["lock"] = lock_string;
+        post_params["begin_sequence"] = beginning_sequence;
+        post_params["objectives"] = JSON.stringify(objectives);
+
+        let submitText = this.showDialog(new AsyncProcessDialog("Submitting...")).ref;
+        Eterna.client.submit_puzzle(post_params)
+            .then(() => {
+                submitText.destroyObject();
+                this.showNotification(
+                    "Your puzzle has been successfully published.\n" +
+                    "It will show up in player puzzle pages within 5 minutes.");
+            })
+            .catch(err => {
+                submitText.destroyObject();
+                this.showNotification(`Puzzle submission failed: ${err}`);
+            });
     }
 
     private set_to_native_mode(): void {
@@ -1109,7 +1103,6 @@ export class PuzzleEditMode extends GameMode {
 
     private _sec_ins: StructureInput[];
     private _folder: Folder;
-    private _submitting_text: Text;
     private _seq_stack: UndoBlock[][];
     private _target_pairs_stack: number[][][];
     private _lock_stack: boolean[][][];

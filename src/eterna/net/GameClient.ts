@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import * as base64 from "base64-js";
+import {Base64} from "../../flashbang/util/Base64";
 
 type JSONData = any;
 
@@ -71,10 +71,18 @@ export class GameClient {
         return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
-    public submit_puzzle(params: any): Promise<JSONData> {
-        // TODO: split out these params!
+    public submit_puzzle(params: any): Promise<void> {
         params["type"] = "puzzle";
-        return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
+        return this.post(GameClient.POST_URI, params)
+            .then(rsp => rsp.json())
+            .then(json => {
+                let data = json["data"];
+                if (data["success"]) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(data["error"]);
+                }
+            });
     }
 
     public get_solutions(puznid: number): Promise<JSONData> {
@@ -126,7 +134,7 @@ export class GameClient {
 
     /** Returns a promise that resolves with the screenshot's hosted filename, on success */
     public post_screenshot(imgBytes: ArrayBuffer): Promise<string> {
-        let encoded = base64.fromByteArray(new Uint8Array(imgBytes));
+        let encoded = Base64.encodeBytes(imgBytes);
         return this.post(GameClient.POST_URI, {
             type: "screenshot",
             data: encoded
