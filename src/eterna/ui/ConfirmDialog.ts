@@ -5,7 +5,7 @@ import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
 import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {Fonts} from "../util/Fonts";
-import {Dialog} from "./Dialog";
+import {Dialog, DialogCanceledError} from "./Dialog";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
 import {HTMLTextObject} from "./HTMLTextObject";
@@ -18,18 +18,18 @@ export class ConfirmDialog extends Dialog<boolean> {
     }
 
     /**
-     * Returns a new Promise that will resolve if the dialog is confirmed, and fail otherwise.
-     * If the Dialog has already been closed, the Promise will never resolve.
+     * Returns a new Promise that will resolve if the dialog is confirmed,
+     * and reject with a DialogCanceledError otherwise.
      */
-    public get promise(): Promise<void> {
+    public get confirmed(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.closed.connect((value) => {
+            this.closed.then(value => {
                 if (value) {
                     resolve();
                 } else {
-                    reject();
+                    reject(new DialogCanceledError());
                 }
-            });
+            })
         });
     }
 

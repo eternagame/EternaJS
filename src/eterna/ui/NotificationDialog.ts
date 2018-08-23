@@ -16,16 +16,6 @@ export class NotificationDialog extends Dialog<void> {
         this._extraButtonTitle = extraButtonTitle;
     }
 
-    /**
-     * Returns a new Promise that will resolve when the notification is closed.
-     * If the Notification has already been closed, the Promise will never resolve.
-     */
-    public get dismissed(): Promise<void> {
-        return new Promise((resolve) => {
-            this.destroyed.connect(() => resolve());
-        });
-    }
-
     protected added() {
         super.added();
 
