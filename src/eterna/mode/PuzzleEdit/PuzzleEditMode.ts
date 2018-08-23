@@ -8,7 +8,9 @@ import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
+import {NuPACK} from "../../folding/NuPACK";
 import {Vienna} from "../../folding/Vienna";
+import {Vienna2} from "../../folding/Vienna2";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
@@ -16,16 +18,17 @@ import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
+import {DialogCanceledError} from "../../ui/Dialog";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
+import {SubmitPuzzleDetails, SubmitPuzzleDialog} from "./SubmitPuzzleDialog";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -455,80 +458,51 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private on_submit_puzzle(): void {
-        log.info("TODO: on_submit_puzzle");
-        // let first_secstruct: string = this._sec_ins[0].get_secstruct();
-        //
-        // for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //     let secstruct: string = this._sec_ins[ii].get_secstruct();
-        //
-        //     let length_limit: number = 400;
-        //     if (Eterna.is_dev_mode) {
-        //         length_limit = -1;
-        //     }
-        //
-        //     let error: string = EPars.validate_parenthesis(secstruct, false, length_limit);
-        //
-        //     if (error != null) {
-        //         Application.instance.setup_msg_box(error);
-        //         return;
-        //     }
-        //
-        //     if (secstruct.length != first_secstruct.length) {
-        //         Application.instance.setup_msg_box("Structure lengths don't match");
-        //         return;
-        //     }
-        //
-        //     if (!EPars.are_pairs_same(this.get_current_target_pairs(ii), this.get_current_undo_block(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.is_dev_mode) {
-        //         Application.instance.setup_msg_box("You should first solve your puzzle before submitting it!");
-        //         return;
-        //     }
-        //
-        //     if (this._poses[ii].check_overlap() && !Eterna.is_dev_mode) {
-        //         Application.instance.setup_msg_box("Some bases overlapped too much!");
-        //         return;
-        //     }
-        // }
-        //
-        // Application.instance.setup_yesno("You can only submit 3 puzzles per 24 hours.\nAre you sure you want to submit?", this.show_submit_field, null);
+        let first_secstruct: string = this._sec_ins[0].get_secstruct();
+
+        for (let ii: number = 0; ii < this._poses.length; ii++) {
+            let secstruct: string = this._sec_ins[ii].get_secstruct();
+
+            let length_limit: number = 400;
+            if (Eterna.is_dev_mode) {
+                length_limit = -1;
+            }
+
+            let error: string = EPars.validate_parenthesis(secstruct, false, length_limit);
+            if (error != null) {
+                this.showNotification(error);
+                return;
+            }
+
+            if (secstruct.length != first_secstruct.length) {
+                this.showNotification("Structure lengths don't match");
+                return;
+            }
+
+            if (!EPars.are_pairs_same(this.get_current_target_pairs(ii), this.get_current_undo_block(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.is_dev_mode) {
+                this.showNotification("You should first solve your puzzle before submitting it!");
+                return;
+            }
+
+            if (this._poses[ii].check_overlap() && !Eterna.is_dev_mode) {
+                this.showNotification("Some bases overlapped too much!");
+                return;
+            }
+        }
+
+        let puzzleState = this.get_current_undo_block(0);
+        const PROMPT = "You can only submit 3 puzzles per 24 hours.\nAre you sure you want to submit?";
+        this.showConfirmDialog(PROMPT).confirmed
+            .then(() => this.showDialog(new SubmitPuzzleDialog(this._poses.length, puzzleState)).confirmed)
+            .then(details => this.submit_puzzle(details))
+            .catch(err => {
+                if (!(err instanceof DialogCanceledError)) {
+                    throw err;
+                }
+            });
     }
 
-    private show_submit_field(): void {
-        log.info("TODO: show_submit_field");
-        // Application.instance.add_lock("LOCK_SUBMIT");
-        // Application.instance.get_modal_container().add_object(this._submit_field);
-        // Application.instance.get_modal_container().setChildIndex(this._submit_field, 0);
-    }
-
-    private on_cancel_submit(): void {
-        log.info("TODO: on_cancel_submit");
-        // Application.instance.get_modal_container().remove_object(this._submit_field);
-        // Application.instance.remove_lock("LOCK_SUBMIT");
-    }
-
-    private submit_puzzle(dict: Map<any, any>): void {
-        log.info("TODO: submit_puzzle");
-        // let app: Application;
-        //
-        // if (dict["Title"] == null || dict["Title"].length == 0) {
-        //     this._submit_field.visible = false;
-        //     app = Application.instance;
-        //     app.setup_msg_box("You must enter a title for your puzzle", false, "Ok", function (): void {
-        //         app.close_msg_box();
-        //         this._submit_field.visible = true;
-        //     });
-        //     return;
-        // }
-        //
-        // if (dict["Description"] == null || dict["Description"].length == 0) {
-        //     this._submit_field.visible = false;
-        //     app = Application.instance;
-        //     app.setup_msg_box("You must write a description of your puzzle", false, "Ok", function (): void {
-        //         app.close_msg_box();
-        //         this._submit_field.visible = true;
-        //     });
-        //     return;
-        // }
-        //
+    private submit_puzzle(details: SubmitPuzzleDetails): void {
         // let constraints: string = "";
         // for (let ii = 0; ii < this._poses.length; ii++) {
         //     if (ii > 0) {
@@ -569,77 +543,24 @@ export class PuzzleEditMode extends GameMode {
         // let big_image_string: string = Base64.encodeByteArray(big_imageBytes);
         //
         // if (this._poses.length == 1) {
-        //     let undoblock: UndoBlock = this.get_current_undo_block(0);
-        //     let num_AU: number = undoblock.get_param(UndoBlock.PARAM_AU, EPars.DEFAULT_TEMPERATURE);
-        //     let num_GU: number = undoblock.get_param(UndoBlock.PARAM_GU, EPars.DEFAULT_TEMPERATURE);
-        //     let num_GC: number = undoblock.get_param(UndoBlock.PARAM_GC, EPars.DEFAULT_TEMPERATURE);
-        //
-        //     let num_gus: string = dict["Min G-U pairs required"];
-        //     let num_gcs: string = dict["Max G-C pairs allowed"];
-        //     let num_aus: string = dict["Min A-U pairs required"];
-        //
         //     let num_pairs: number = EPars.num_pairs(this.get_current_target_pairs(0));
         //
-        //     if (num_gus != null && num_gus.length > 0) {
-        //         let gus: number = Number(num_gus);
-        //         let max_GU: number = (num_AU + num_GU + num_GC) / 3;
-        //
-        //         if (gus < 0 || gus > num_GU || gus > max_GU) {
-        //             this._submit_field.visible = false;
-        //             app = Application.instance;
-        //             app.setup_msg_box("Number of G-U pairs should be either blank or\nan integer between 0 and " + num_GU + " (number of GUs in your current solution)" +
-        //                 " and at most " + max_GU + " (a third of total number of pairs)", false, "Ok", function (): void {
-        //                 app.close_msg_box();
-        //                 this._submit_field.visible = true;
-        //             });
-        //             return;
-        //         }
-        //
-        //         if (gus > 0) {
-        //             constraints += ",GU," + gus.toString();
-        //         }
+        //     if (details.minGU && details.minGU > 0) {
+        //         constraints += ",GU," + details.minGU.toString();
         //     }
         //
-        //     if (num_gcs != null && num_gcs.length > 0) {
-        //         let gcs: number = Number(num_gcs);
-        //
-        //         if (gcs < num_GC) {
-        //             this._submit_field.visible = false;
-        //             app = Application.instance;
-        //             app.setup_msg_box("Number of G-C pairs should be either blank or\nat least " + num_GC + " (number GCs in your current solution)", false, "Ok", function (): void {
-        //                 app.close_msg_box();
-        //                 this._submit_field.visible = true;
-        //             });
-        //             return;
-        //         }
-        //
-        //         if (gcs <= num_pairs) {
-        //             constraints += ",GC," + gcs.toString();
-        //         }
+        //     if (details.maxGC && details.maxGC <= num_pairs) {
+        //         constraints += ",GC," + details.maxGC.toString();
         //     }
         //
-        //     if (num_aus != null && num_aus.length > 0) {
-        //         let aus: number = Number(num_aus);
-        //
-        //         if (aus < 0 || aus > num_AU) {
-        //             this._submit_field.visible = false;
-        //             app = Application.instance;
-        //             app.setup_msg_box("Number of A-U pairs should be either blank or\nan integer between 0 and " + num_AU + " (number of AUs in your current solution)", false, "Ok", function (): void {
-        //                 app.close_msg_box();
-        //                 this._submit_field.visible = true;
-        //             });
-        //             return;
-        //         }
-        //
-        //         if (aus > 0) {
-        //             constraints += ",AU," + aus.toString();
-        //         }
+        //     if (details.minAU && details.minAU > 0) {
+        //         constraints += ",AU," + details.minAU.toString();
         //     }
         // }
         //
         // let objectives: any[] = [];
         // for (let ii = 0; ii < this._poses.length; ii++) {
-        //     let objective: Object = {};
+        //     let objective: any = {};
         //     let binding_site: any[] = this.get_current_binding_site(ii);
         //     let binding_bases: any[] = [];
         //     for (let bb: number = 0; bb < binding_site.length; bb++) {
@@ -660,11 +581,9 @@ export class PuzzleEditMode extends GameMode {
         //     }
         //
         //     objectives.push(objective);
-        //
         // }
-        // // trace(com.adobe.serialization.json.JSON.encode(objectives));
         //
-        // let post_params: Object = {};
+        // let post_params: any = {};
         //
         // post_params["folder"] = this._folder.get_folder_name();
         // let params_title: string;
@@ -676,21 +595,20 @@ export class PuzzleEditMode extends GameMode {
         //     params_title = "";
         // }
         // if (this._poses.length > 1) {
-        //     params_title += "[switch2.5][" + this._poses.length + " states] " + dict["Title"];
+        //     params_title += "[switch2.5][" + this._poses.length + " states] " + details.title;
         // } else {
-        //     params_title += dict["Title"];
+        //     params_title += details.title;
         // }
         // post_params["title"] = params_title;
         // post_params["secstruct"] = secstruct;
         // post_params["constraints"] = constraints;
-        // post_params["body"] = dict["Description"];
+        // post_params["body"] = details.description;
         // post_params["midimgdata"] = mid_image_string;
         // post_params["bigimgdata"] = big_image_string;
         // post_params["lock"] = lock_string;
         // post_params["begin_sequence"] = beginning_sequence;
-        // post_params["objectives"] = this.com.adobe.serialization.json.JSON.encode(objectives);
+        // post_params["objectives"] = JSON.stringify(objectives);
         //
-        // Application.instance.get_modal_container().remove_object(this._submit_field);
         // this._submitting_text.set_animator(new GameAnimatorFader(1, 0, 0.3, false, true));
         // Application.instance.get_modal_container().add_object(this._submitting_text);
         //
@@ -1189,7 +1107,6 @@ export class PuzzleEditMode extends GameMode {
     private readonly _embedded: boolean;
     private readonly _numTargets: number;
 
-    private _submit_field: TextInputPanel;
     private _sec_ins: StructureInput[];
     private _folder: Folder;
     private _submitting_text: Text;
