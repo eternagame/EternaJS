@@ -3,12 +3,19 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Signal} from "../../signals/Signal";
+
+/** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
+export class DialogCanceledError extends Error {}
 
 /** Convenience base class for dialog objects. */
 export abstract class Dialog<T> extends ContainerObject implements KeyboardListener {
-    /** Emitted when the user closes the dialog with the return value of dialog, if any. */
-    public readonly closed: Signal<T> = new Signal();
+    /** A Promise that will resolve when the dialog is closed. */
+    public readonly closed: Promise<T | null>;
+
+    public constructor() {
+        super();
+        this.closed = new Promise(resolve => this._resolvePromise = resolve);
+    }
 
     protected added() {
         super.added();
@@ -45,12 +52,17 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
     }
 
     protected close(value: T) {
-        if (this._closed) {
+        if (this._isClosed) {
             return;
         }
-        this._closed = true;
-        this.closed.emit(value);
+        this._isClosed = true;
+        this._resolvePromise(value);
         this.destroySelf();
+    }
+
+    protected removed() {
+        this.close(null);
+        super.removed();
     }
 
     protected get bgAlpha() :number {
@@ -62,5 +74,6 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         return true;
     }
 
-    private _closed: boolean;
+    protected _resolvePromise: (value: T) => void;
+    protected _isClosed: boolean;
 }

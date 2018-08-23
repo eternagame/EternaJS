@@ -181,7 +181,7 @@ export abstract class GameMode extends AppMode {
             .then(filename => {
                 let url = new URL(filename, Eterna.serverURL);
                 let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
-                this.showConfirmDialog(prompt, true).closed.connect(confirmed => {
+                this.showConfirmDialog(prompt, true).closed.then(confirmed => {
                     if (confirmed) {
                         log.info("TODO: post to chat!");
                     }

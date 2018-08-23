@@ -6,22 +6,6 @@ import {SubmitPoseDetails} from "./SubmitPoseDetails";
 
 /** Prompts the player for a title and comment */
 export class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
-    /**
-     * Returns a new Promise that will resolve if the dialog is confirmed, and fail otherwise.
-     * If the Dialog has already been closed, the Promise will never resolve.
-     */
-    public get promise(): Promise<SubmitPoseDetails> {
-        return new Promise((resolve, reject) => {
-            this.closed.connect((value) => {
-                if (value != null) {
-                    resolve(value);
-                } else {
-                    reject();
-                }
-            });
-        });
-    }
-
     protected added(): void {
         super.added();
 

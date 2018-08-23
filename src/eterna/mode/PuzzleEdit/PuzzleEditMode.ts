@@ -80,7 +80,7 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.paste_button.clicked.connect(() => {
-            this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
+            this.showDialog(new PasteSequenceDialog()).closed.then(sequence => {
                 if (sequence != null) {
                     for (let pose of this._poses) {
                         pose.paste_sequence(EPars.string_to_sequence_array(sequence));
@@ -435,7 +435,7 @@ export class PuzzleEditMode extends GameMode {
     private promptForReset(): void {
         const PROMPT = "Do you really want to reset?";
 
-        this.showConfirmDialog(PROMPT).closed.connect((confirmed) => {
+        this.showConfirmDialog(PROMPT).closed.then(confirmed => {
             if (confirmed) {
                 for (let pose of this._poses) {
                     let sequence = pose.get_sequence();

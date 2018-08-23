@@ -215,7 +215,7 @@ export class PoseEditMode extends GameMode {
     }
 
     protected showPasteSequenceDialog(): void {
-        this.showDialog(new PasteSequenceDialog()).closed.connect((sequence) => {
+        this.showDialog(new PasteSequenceDialog()).closed.then(sequence => {
             if (sequence != null) {
                 for (let pose of this._poses) {
                     pose.paste_sequence(EPars.string_to_sequence_array(sequence));
@@ -1282,7 +1282,7 @@ export class PoseEditMode extends GameMode {
 
     private ask_retry(): void {
         const PROMPT = "Do you really want to reset?\nResetting will clear your undo stack.";
-        this.showConfirmDialog(PROMPT).closed.connect((confirmed) => {
+        this.showConfirmDialog(PROMPT).closed.then(confirmed => {
             if (confirmed) {
                 this.reset_autosave_data();
                 this._puzzle.set_temporary_constraints(null);
@@ -1540,7 +1540,7 @@ export class PoseEditMode extends GameMode {
         let datablock: UndoBlock = this.get_current_undo_block();
 
         let dialog = this.showDialog(new SpecBoxDialog(datablock));
-        dialog.closed.connect((showDocked) => {
+        dialog.closed.then(showDocked => {
             if (showDocked) {
                 this._docked_spec_box.set_spec(datablock);
                 this._docked_spec_box.display.visible = true;
@@ -1601,8 +1601,12 @@ export class PoseEditMode extends GameMode {
 
             if (!this.checkConstraints(false)) {
                 if (this._puzzle.is_soft_constraint() || Eterna.is_dev_mode) {
-                    this.showConfirmDialog(NOT_SATISFIED_PROMPT).promise
-                        .then(() => this.promptForExperimentalPuzzleSubmission());
+                    this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
+                        .then(confirmed => {
+                            if (confirmed) {
+                                this.promptForExperimentalPuzzleSubmission()
+                            }
+                        });
 
                 } else {
                     this.showNotification("You didn't satisfy all requirements!");
@@ -1636,11 +1640,13 @@ export class PoseEditMode extends GameMode {
 
         datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 
-        this.showDialog(new SubmitPoseDialog()).promise.then((submitDetails) => {
-            /// Always submit the sequence in the first state
-            this.update_current_block_with_dot_and_melting_plot(0);
-            let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
-            this.submit_solution(submitDetails, sol_to_submit);
+        this.showDialog(new SubmitPoseDialog()).closed.then(submitDetails => {
+            if (submitDetails != null) {
+                /// Always submit the sequence in the first state
+                this.update_current_block_with_dot_and_melting_plot(0);
+                let sol_to_submit: UndoBlock = this.get_current_undo_block(0);
+                this.submit_solution(submitDetails, sol_to_submit);
+            }
         });
     }
 
