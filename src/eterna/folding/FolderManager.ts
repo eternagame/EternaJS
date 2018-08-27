@@ -11,7 +11,7 @@ export class FolderManager {
         return FolderManager._instance;
     }
 
-    public add_folder(folder: Folder): void {
+    public addFolder(folder: Folder): void {
         for (let other of this._folders) {
             if (other.name === folder.name) {
                 throw new Error(`Trying to generate folders with duplicate names ('${folder.name}')`);
@@ -29,7 +29,7 @@ export class FolderManager {
         return false;
     }
 
-    public get_folder(name: string): Folder {
+    public getFolder(name: string): Folder {
         for (let folder of this._folders) {
             if (folder.name.toLowerCase() === name.toLowerCase()) {
                 return folder;
@@ -39,7 +39,7 @@ export class FolderManager {
         throw new Error(`No such folder '${name}'`);
     }
 
-    public get_next_folder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
+    public getNextFolder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
         let curFolderIdx: number = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
             if (this._folders[ii].name.toLowerCase() === folder_name.toLowerCase()) {
@@ -70,7 +70,7 @@ export class FolderManager {
         return this._folders[curFolderIdx]; // use same one
     }
 
-    public get_last_used_folder(): string {
+    public get lastUsedFolder(): string {
         return Eterna.settings.lastUsedFolder.value || Vienna.NAME;
     }
 
