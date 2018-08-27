@@ -299,7 +299,7 @@ export class PoseEditMode extends GameMode {
 
     public select_folder(folder_name: string): boolean {
         if (this._folder.name === folder_name) return true;
-        let folder: Folder = FolderManager.instance.get_folder(folder_name);
+        let folder: Folder = FolderManager.instance.getFolder(folder_name);
         if (this._puzzle.has_target_type("multistrand") && !folder.canMultifold) {
             return false;
         }
@@ -598,7 +598,7 @@ export class PoseEditMode extends GameMode {
 
         this._folder = this._initialFolder != null ?
             this._initialFolder :
-            FolderManager.instance.get_folder(this._puzzle.get_folder());
+            FolderManager.instance.getFolder(this._puzzle.get_folder());
 
         this._folder_button = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -1528,7 +1528,7 @@ export class PoseEditMode extends GameMode {
 
     private change_folder(): void {
         let curr_f: string = this._folder.name;
-        this._folder = FolderManager.instance.get_next_folder(curr_f, (folder: Folder): boolean => {
+        this._folder = FolderManager.instance.getNextFolder(curr_f, (folder: Folder): boolean => {
             return this._puzzle.has_target_type("multistrand") && !folder.canMultifold;
         });
         if (this._folder.name === curr_f) return;

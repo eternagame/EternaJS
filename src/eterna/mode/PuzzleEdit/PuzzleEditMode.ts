@@ -48,7 +48,7 @@ export class PuzzleEditMode extends GameMode {
         let background = new Background();
         this.addObject(background, this.bgLayer);
 
-        this._folder = FolderManager.instance.get_folder(Vienna.NAME);
+        this._folder = FolderManager.instance.getFolder(Vienna.NAME);
 
         this._folder_button = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -158,7 +158,7 @@ export class PuzzleEditMode extends GameMode {
     }
 
     public set_folder(engine_name: string): void {
-        let newFolder: Folder = FolderManager.instance.get_folder(engine_name);
+        let newFolder: Folder = FolderManager.instance.getFolder(engine_name);
         if (newFolder) {
             this._folder = newFolder;
         }
@@ -593,7 +593,7 @@ export class PuzzleEditMode extends GameMode {
 
     private change_folder(): void {
         let curr_f: string = this._folder.name;
-        this._folder = FolderManager.instance.get_next_folder(curr_f, () => false);
+        this._folder = FolderManager.instance.getNextFolder(curr_f, () => false);
         if (this._folder.name == curr_f) {
             return;
         }

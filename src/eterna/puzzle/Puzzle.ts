@@ -63,7 +63,7 @@ export class Puzzle {
         this._puzzle_type = puzzle_type;
 
         if (puzzle_type === PuzzleType.EXPERIMENTAL) {
-            this._folder = FolderManager.instance.get_last_used_folder();
+            this._folder = FolderManager.instance.lastUsedFolder;
         } else {
             this._folder = Vienna.NAME;
         }

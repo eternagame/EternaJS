@@ -156,7 +156,7 @@ export class EternaApp extends FlashbangApp {
                 let folder: Folder = null;
                 if (folderName != null) {
                     if (FolderManager.instance.isFolder(folderName)) {
-                        folder = FolderManager.instance.get_folder(folderName)
+                        folder = FolderManager.instance.getFolder(folderName)
                     } else {
                         log.warn(`No such folder '${folderName}'`);
                     }
@@ -209,7 +209,7 @@ export class EternaApp extends FlashbangApp {
             .then((folders: Folder[]) => {
                 log.info("Folding engines intialized");
                 for (let folder of folders) {
-                    FolderManager.instance.add_folder(folder);
+                    FolderManager.instance.addFolder(folder);
                 }
             });
     }
