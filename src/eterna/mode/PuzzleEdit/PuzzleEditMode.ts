@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Point} from "pixi.js";
+import {Point, Rectangle} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
@@ -68,6 +68,19 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar = new PuzzleEditToolbar(this._embedded);
         this.addObject(this._toolbar, this.uiLayer);
 
+        this._toolbar.addbase_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.addbase_button, EPars.RNABASE_ADD_BASE));
+        this._toolbar.addpair_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.addpair_button, EPars.RNABASE_ADD_PAIR));
+        this._toolbar.delete_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.delete_button, EPars.RNABASE_DELETE));
+        this._toolbar.lock_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.lock_button, EPars.RNABASE_LOCK));
+        this._toolbar.site_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.site_button, EPars.RNABASE_BINDING_SITE));
+        this._toolbar.pair_swap_button.clicked.connect(() =>
+            this.onEditButtonClicked(this._toolbar.pair_swap_button, EPars.RNABASE_PAIR));
+
         this._toolbar.native_button.clicked.connect(() => this.set_to_native_mode());
         this._toolbar.target_button.clicked.connect(() => this.set_to_target_mode());
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
@@ -107,63 +120,7 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.submit_button.clicked.connect(() => this.on_submit_puzzle());
 
         this._toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
-        this._toolbar.pair_swap_button.clicked.connect(() => this.on_click_P());
-        //
-        // this._addbase_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgAddBase));
-        // this._addbase_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgAddBase),
-        //     BitmapManager.get_bitmap(BitmapManager.ImgAddBaseOver),
-        //     null,
-        //     BitmapManager.get_bitmap(BitmapManager.ImgAddBaseSelect),
-        //     null);
-        // this._addbase_button.set_click_callback(this.on_click_addbase);
-        // this._addbase_button.set_hotkey(KeyCode.KEY_6, false, "6");
-        // this._addbase_button.set_tooltip("Add a single base.");
-        // this.add_object(this._addbase_button);
-        //
-        // this._addpair_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgAddPair));
-        // this._addpair_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgAddPair),
-        //     BitmapManager.get_bitmap(BitmapManager.ImgAddPairOver),
-        //     null,
-        //     BitmapManager.get_bitmap(BitmapManager.ImgAddPairSelect),
-        //     null);
-        // this._addpair_button.set_click_callback(this.on_click_addpair);
-        // this._addpair_button.set_hotkey(KeyCode.KEY_7, false, "7");
-        // this._addpair_button.set_tooltip("Add a pair.");
-        // this.add_object(this._addpair_button);
-        //
-        // this._delete_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgErase));
-        // this._delete_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgErase),
-        //     BitmapManager.get_bitmap(BitmapManager.ImgEraseOver),
-        //     null,
-        //     BitmapManager.get_bitmap(BitmapManager.ImgEraseSelect),
-        //     null);
-        // this._delete_button.set_click_callback(this.on_click_delete);
-        // this._delete_button.set_hotkey(KeyCode.KEY_8, false, "8");
-        // this._delete_button.set_tooltip("Delete a base or a pair.");
-        // this.add_object(this._delete_button);
-        //
-        // this._site_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgMolecule));
-        // this._site_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgMolecule),
-        //     BitmapManager.get_bitmap(BitmapManager.ImgMoleculeOver),
-        //     null,
-        //     BitmapManager.get_bitmap(BitmapManager.ImgMoleculeSelect),
-        //     null);
-        // this._site_button.set_click_callback(this.on_click_binding_site);
-        // // _site_button.set_hotkey(KeyCode.KEY_0,false, "0");
-        // this._site_button.set_tooltip("Create or remove a molecular binding site.");
-        // this.add_object(this._site_button);
-        //
-        // this._lock_button = new GameButton(22, BitmapManager.get_bitmap(BitmapManager.ImgLock));
-        // this._lock_button.set_states(BitmapManager.get_bitmap(BitmapManager.ImgLock),
-        //     BitmapManager.get_bitmap(BitmapManager.ImgLockOver),
-        //     null,
-        //     BitmapManager.get_bitmap(BitmapManager.ImgLockSelect),
-        //     null);
-        // this._lock_button.set_click_callback(this.on_click_lock);
-        // this._lock_button.set_hotkey(KeyCode.KEY_9, false, "9");
-        // this._lock_button.set_tooltip("Lock or unlock a base.");
-        // this.add_object(this._lock_button);
-        //
+
         if (this._embedded) {
             ExternalInterface.addCallback("get_secstruct", this.get_secstruct);
             ExternalInterface.addCallback("get_sequence", this.get_sequence);
@@ -386,16 +343,18 @@ export class PuzzleEditMode extends GameMode {
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
+        let toolbarBounds: Rectangle = this._toolbar.display.getBounds(false);
+
         for (let sec_in of this._sec_ins) {
             if (!this._embedded) {
                 sec_in.display.position = new Point(
                     (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    Flashbang.stageHeight - 127
+                    toolbarBounds.y - sec_in.get_panel_height() - 7
                 );
             } else {
                 sec_in.display.position = new Point(
                     (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    Flashbang.stageHeight - 200
+                    toolbarBounds.y - sec_in.get_panel_height() - 7
                 );
             }
         }
@@ -766,205 +725,22 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
     }
 
-    private layout_bars(): void {
-        log.info("TODO: layout_bars");
-        // // Adjust positions of NOVA-Port UI
-        // let right_x_idx: number = 0;
-        // let left_x_idx: number = 0;
-        //
-        // if (this._palette) {
-        //     this._palette.set_pos(new UDim(0.5, 1, -this._palette.width / 2, -21 - this._palette.height));
-        //     right_x_idx = this._palette.width / 2;
-        //     left_x_idx = this._palette.width / -2;
-        // }
-        //
-        // if (this._pair_swap_button && this.contains(this._pair_swap_button)) {
-        //     this._pair_swap_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._pair_swap_button.height));
-        //     right_x_idx += (4 + this._pair_swap_button.width);
-        // }
-        //
-        // right_x_idx += 20;
-        // if (this._undo_button && this.contains(this._undo_button)) {
-        //     this._undo_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._undo_button.height));
-        //     right_x_idx += (4 + this._undo_button.width);
-        // }
-        // if (this._redo_button && this.contains(this._redo_button)) {
-        //     this._redo_button.set_pos(new UDim(0.5, 1, right_x_idx + 1, -21 - this._redo_button.height));
-        //     right_x_idx += (1 + this._redo_button.width);
-        // }
-        //
-        // if (this._copy_button && this.contains(this._copy_button)) {
-        //     this._copy_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._copy_button.height));
-        //     right_x_idx += (4 + this._copy_button.width);
-        // }
-        //
-        // if (this._paste_button && this.contains(this._paste_button)) {
-        //     this._paste_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._paste_button.height));
-        //     right_x_idx += (4 + this._paste_button.width);
-        // }
-        //
-        // if (this._reset_button && this.contains(this._reset_button)) {
-        //     this._reset_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._reset_button.height));
-        //     right_x_idx += (4 + this._reset_button.width);
-        // }
-        //
-        // if (this._submit_button && this.contains(this._submit_button)) {
-        //     this._submit_button.set_pos(new UDim(0.5, 1, right_x_idx + 4, -21 - this._submit_button.height));
-        //     right_x_idx += (4 + this._submit_button.width);
-        // }
-        //
-        // left_x_idx -= 20;
-        // if (this._target_button) {
-        //     this._target_button.set_pos(new UDim(0.5, 1, left_x_idx - 4 - this._target_button.width, -21 - this._target_button.height));
-        //     left_x_idx -= (4 + this._target_button.width);
-        // }
-        // if (this._native_button) {
-        //     this._native_button.set_pos(new UDim(0.5, 1, left_x_idx - 1 - this._native_button.width, -21 - this._native_button.height));
-        //     left_x_idx -= (1 + this._native_button.width);
-        // }
-        //
-        // if (this._zoom_out_button && this.contains(this._zoom_out_button)) {
-        //     this._zoom_out_button.set_pos(new UDim(0.5, 1, left_x_idx - 4 - this._zoom_out_button.width, -21 - this._zoom_out_button.height));
-        //     left_x_idx -= (4 + this._zoom_out_button.width);
-        // }
-        // if (this._zoom_in_button && this.contains(this._zoom_in_button)) {
-        //     this._zoom_in_button.set_pos(new UDim(0.5, 1, left_x_idx - 1 - this._zoom_in_button.width, -21 - this._zoom_in_button.height));
-        //     left_x_idx -= (1 + this._zoom_in_button.width);
-        // }
-        //
-        // if (this._view_options_button && this.contains(this._view_options_button)) {
-        //     this._view_options_button.set_pos(new UDim(0.5, 1, left_x_idx - 4 - this._view_options_button.width, -21 - this._view_options_button.height));
-        //     left_x_idx -= (4 + this._view_options_button.width);
-        // }
-        //
-        // if (this._pic_button && this.contains(this._pic_button)) {
-        //     this._pic_button.set_pos(new UDim(0.5, 1, left_x_idx - 4 - this._pic_button.width, -21 - this._pic_button.height));
-        //     left_x_idx -= (4 + this._pic_button.width);
-        // }
-        //
-        // // editing tools
-        // if (this._delete_button) {
-        //     this._delete_button.set_pos(new UDim(0.75, 1, -this._delete_button.width / 2, -132 - this._delete_button.height));
-        //     right_x_idx = this._delete_button.width / 2;
-        //     left_x_idx = this._delete_button.width / -2;
-        // }
-        //
-        // if (this._lock_button && this.contains(this._lock_button)) {
-        //     this._lock_button.set_pos(new UDim(0.75, 1, right_x_idx + 4, -132 - this._lock_button.height));
-        //     right_x_idx += (4 + this._lock_button.width);
-        // }
-        //
-        // if (this._site_button && this.contains(this._site_button)) {
-        //     this._site_button.set_pos(new UDim(0.75, 1, right_x_idx + 4, -132 - this._site_button.height));
-        //     right_x_idx += (4 + this._site_button.width);
-        // }
-        //
-        // if (this._addpair_button) {
-        //     this._addpair_button.set_pos(new UDim(0.75, 1, left_x_idx - 4 - this._addpair_button.width, -132 - this._addpair_button.height));
-        //     left_x_idx -= (4 + this._addpair_button.width);
-        // }
-        //
-        // if (this._addbase_button) {
-        //     this._addbase_button.set_pos(new UDim(0.75, 1, left_x_idx - 4 - this._addbase_button.width, -132 - this._addbase_button.height));
-        //     left_x_idx -= (4 + this._addbase_button.width);
-        // }
-    }
-
-    private deselect_all_colorings(): void {
-        log.info("TODO: deselect_all_colorings");
-        // this._palette.clear_selection();
-        // this._pair_swap_button.set_selected(false);
-        // this._addbase_button.set_selected(false);
-        // this._addpair_button.set_selected(false);
-        // this._delete_button.set_selected(false);
-        // this._lock_button.set_selected(false);
-        // this._site_button.set_selected(false);
-    }
-
     private onPaletteTargetSelected(type: PaletteTargetType): void {
+        this._toolbar.deselect_all_colorings();
+
         let baseType: number = GetPaletteTargetBaseType(type);
         for (let pose of this._poses) {
             pose.set_current_color(baseType);
         }
-        this.deselect_all_colorings();
     }
 
-    private on_click_P(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_PAIR);
+    private onEditButtonClicked(button: GameButton, poseColor: number): void {
+        for (let pose of this._poses) {
+            pose.set_current_color(poseColor);
         }
 
-        this.deselect_all_colorings();
-        // this._pair_swap_button.set_selected(true);
-    }
-
-    private on_click_addbase(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_ADD_BASE);
-        }
-
-        this.deselect_all_colorings();
-        // this._addbase_button.set_selected(true);
-    }
-
-    private on_click_addpair(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_ADD_PAIR);
-        }
-
-        this.deselect_all_colorings();
-        // this._addpair_button.set_selected(true);
-    }
-
-    private on_click_delete(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_DELETE);
-        }
-
-        this.deselect_all_colorings();
-        // this._delete_button.set_selected(true);
-    }
-
-    private on_click_lock(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_LOCK);
-        }
-
-        this.deselect_all_colorings();
-        // this._lock_button.set_selected(true);
-    }
-
-    private on_click_binding_site(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_BINDING_SITE);
-        }
-
-        this.deselect_all_colorings();
-        // this._site_button.set_selected(true);
-    }
-
-    private on_click_AU(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_AU_PAIR);
-        }
-
-        this.deselect_all_colorings();
-    }
-
-    private on_click_GC(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_GC_PAIR);
-        }
-
-        this.deselect_all_colorings();
-    }
-
-    private on_click_GU(): void {
-        for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_current_color(EPars.RNABASE_GU_PAIR);
-        }
-
-        this.deselect_all_colorings();
+        this._toolbar.deselect_all_colorings();
+        button.toggled.value = true;
     }
 
     private pose_edit_by_target(index: number): void {
@@ -1117,11 +893,5 @@ export class PuzzleEditMode extends GameMode {
 
     private _toolbar: PuzzleEditToolbar;
     private _folder_button: GameButton;
-    /// Edit tools
-    private _addbase_button: GameButton;
-    private _addpair_button: GameButton;
-    private _delete_button: GameButton;
-    private _lock_button: GameButton;
-    private _site_button: GameButton;
     private _constraint_boxes: ConstraintBox[] = [];
 }
