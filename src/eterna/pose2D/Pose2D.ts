@@ -790,7 +790,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (elems == null) {
             this._forced_highlight_box.clear();
         } else {
-            this._forced_highlight_box.set_highlight(HighlightType.FORCED, elems);
+            this._forced_highlight_box.setHighlight(HighlightType.FORCED, elems);
         }
     }
 
@@ -849,7 +849,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public shift_3prime(): void {
-        let q: number[] = this._shift_highlight_box.get_queue();
+        let q: number[] = this._shift_highlight_box.getQueue();
         if (q == null) {
             return;
         }
@@ -902,11 +902,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._mutated_sequence = this.get_full_sequence().slice();
         this.set_mutated(mutated);
         this.done_coloring();
-        this._shift_highlight_box.set_highlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._shift_highlight_box.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
     public shift_5prime(): void {
-        let q: number[] = this._shift_highlight_box.get_queue();
+        let q: number[] = this._shift_highlight_box.getQueue();
         if (q == null) {
             return;
         }
@@ -958,7 +958,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._mutated_sequence = this.get_full_sequence().slice();
         this.set_mutated(mutated);
         this.done_coloring();
-        this._shift_highlight_box.set_highlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._shift_highlight_box.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
     public is_design_structure_highlighted(index: number): boolean {
@@ -1044,11 +1044,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlight_stack(action: number[]): void {
-        this._selection_highlight_box.set_highlight(HighlightType.STACK, action.slice(1));
+        this._selection_highlight_box.setHighlight(HighlightType.STACK, action.slice(1));
     }
 
     public highlight_loop(action: number[]): void {
-        this._selection_highlight_box.set_highlight(HighlightType.LOOP, action.slice(1));
+        this._selection_highlight_box.setHighlight(HighlightType.LOOP, action.slice(1));
     }
 
     /// For restricted queue
@@ -1057,7 +1057,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlight_restricted_sequence(restricted: number[]): void {
-        this._restricted_highlight_box.set_highlight(HighlightType.RESTRICTED, restricted);
+        this._restricted_highlight_box.setHighlight(HighlightType.RESTRICTED, restricted);
     }
 
     public clear_unstable_highlight(): void {
@@ -1065,7 +1065,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlight_unstable_sequence(unstable: number[]): void {
-        this._unstable_highlight_box.set_highlight(HighlightType.UNSTABLE, unstable);
+        this._unstable_highlight_box.setHighlight(HighlightType.UNSTABLE, unstable);
     }
 
     public clear_user_defined_highlight(): void {
@@ -1073,7 +1073,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlight_user_defined_sequence(user_defined: number[]): void {
-        this._user_defined_highlight_box.set_highlight(HighlightType.USER_DEFINED, user_defined);
+        this._user_defined_highlight_box.setHighlight(HighlightType.USER_DEFINED, user_defined);
     }
 
     public clear_shift_highlight(): void {
@@ -2805,8 +2805,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (elems.length === 0) {
             this._selection_highlight_box.clear();
         } else {
-            this._selection_highlight_box.set_highlight(HighlightType.DESIGN, elems);
-            this._selection_highlight_box.set_on(false);
+            this._selection_highlight_box.setHighlight(HighlightType.DESIGN, elems);
+            this._selection_highlight_box.isOn = false;
         }
     }
 
@@ -2814,8 +2814,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._shift_start < 0) {
             this._shift_highlight_box.clear();
         } else {
-            this._shift_highlight_box.set_highlight(HighlightType.SHIFT, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
-            this._shift_highlight_box.set_on(false);
+            this._shift_highlight_box.setHighlight(HighlightType.SHIFT, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
+            this._shift_highlight_box.isOn = false;
         }
     }
 
