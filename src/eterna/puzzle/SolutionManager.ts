@@ -13,7 +13,7 @@ export class SolutionManager {
     }
 
     public get_solutions_by_puzzle_nid(puznid: number): Promise<Solution[]> {
-        return Eterna.client.get_solutions(puznid).then((json) => {
+        return Eterna.client.getSolutions(puznid).then((json) => {
             let data: any = json["data"];
             let solutions: any[] = data["solutions"];
             this._solutions = [];

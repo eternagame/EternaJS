@@ -49,29 +49,28 @@ export class GameClient {
             .then(rsp => rsp.text()).then(() => {});
     }
 
-    public get_banned_list(): Promise<JSONData> {
+    public getBannedList(): Promise<JSONData> {
         return this.get("/banned.list").then(rsp => rsp.json());
     }
 
     // / PUZZLES
 
-    public get_puzzle(puznid: number, scriptid: number): Promise<JSONData> {
+    public getPuzzle(puznid: number, scriptid: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {type: "puzzle", nid: puznid, script: scriptid})
             .then((rsp: Response) => rsp.json());
     }
 
-    public get_puzzle_votes(puznid: number, round: number): Promise<JSONData> {
+    public getPuzzleVotes(puznid: number, round: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {type: "votes", puznid, round})
             .then(rsp => rsp.json());
     }
 
-    public submit_solution(params: any): Promise<JSONData> {
-        // TODO: split out these params!
+    public submitSolution(params: any): Promise<JSONData> {
         params["type"] = "post_solution";
         return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
-    public submit_puzzle(params: any): Promise<void> {
+    public submitPuzzle(params: any): Promise<void> {
         params["type"] = "puzzle";
         return this.post(GameClient.POST_URI, params)
             .then(rsp => rsp.json())
@@ -85,32 +84,32 @@ export class GameClient {
             });
     }
 
-    public get_solutions(puznid: number): Promise<JSONData> {
+    public getSolutions(puznid: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {type: "solutions", puznid})
             .then(rsp => rsp.json());
     }
 
-    public get_solution_info(solutionid: number): Promise<JSONData> {
+    public getSolutionInfo(solutionid: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {type: "solution_info", solid: solutionid, round: "1"})
             .then(rsp => rsp.json());
     }
 
-    public get_solution_comments(solution_nid: number): Promise<JSONData> {
+    public getSolutionComments(solution_nid: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {nid: solution_nid, type: "comments"})
             .then(rsp => rsp.json());
     }
 
-    public submit_solution_comment(solution_nid: number, body: string): Promise<JSONData> {
+    public submitSolutionComment(solution_nid: number, body: string): Promise<JSONData> {
         return this.post(GameClient.POST_URI, {type: "post_comment", nid: solution_nid, body})
             .then(rsp => rsp.json());
     }
 
-    public delete_solution(solution_nid: number): Promise<JSONData> {
+    public deleteSolution(solution_nid: number): Promise<JSONData> {
         return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solution_nid})
             .then(rsp => rsp.json());
     }
 
-    public toggle_solution_vote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
+    public toggleSolutionVote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
         let post_params: any = {solnid: solution_nid, puznid};
         if (myVotes === 1) {
             post_params["type"] = "unvote";
@@ -123,7 +122,7 @@ export class GameClient {
         return this.post(GameClient.POST_URI, post_params).then(rsp => rsp.json());
     }
 
-    public update_solution_fold_data(solution_nid: number, fold_data: any): Promise<string> {
+    public updateSolutionFoldData(solution_nid: number, fold_data: any): Promise<string> {
         let dataString: string = JSON.stringify(fold_data);
         return this.post(GameClient.POST_URI, {
             type: "update_solution_fold_data",
@@ -132,8 +131,8 @@ export class GameClient {
         }).then(rsp => rsp.text());
     }
 
-    /** Returns a promise that resolves with the screenshot's hosted filename, on success */
-    public post_screenshot(imgBytes: ArrayBuffer): Promise<string> {
+    /** Resolves with the screenshot's hosted filename, on success */
+    public postScreenshot(imgBytes: ArrayBuffer): Promise<string> {
         let encoded = Base64.encodeBytes(imgBytes);
         return this.post(GameClient.POST_URI, {
             type: "screenshot",

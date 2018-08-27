@@ -193,7 +193,7 @@ export class PuzzleManager {
         }
 
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
-        return Eterna.client.get_puzzle(puznid, scriptid)
+        return Eterna.client.getPuzzle(puznid, scriptid)
             .then((json: any) => {
                 let data: any = json["data"];
                 if (data["hairpins"]) {
