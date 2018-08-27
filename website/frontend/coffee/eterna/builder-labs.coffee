@@ -693,7 +693,7 @@ class @BuilderLabPuzzleModify extends Builder
       $cloud_lab_add.click(()=>
         if $lab_propose_new_puzzles = @get_element("lab-propose-puzzles")
           flash = document.getElementById("lab-propose-puzzle-maker")
-          secstruct = flash.get_secstruct()
+          secstruct = flash.structureString()
           sequence = flash.get_sequence()
           locks = flash.get_locks()
           #shift_locks = flash.get_shift_locks()

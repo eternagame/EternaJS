@@ -328,7 +328,7 @@ export class PoseEditMode extends GameMode {
             let hintText = Fonts.arial(this._puzzle.get_hint(), 14).color(0xffffff).wordWrap(true, 400).build();
             hintText.position = new Point(10, 38);
             hintBox.container.addChild(hintText);
-            hintBox.set_size(420, hintText.height + 46);
+            hintBox.setSize(420, hintText.height + 46);
 
             this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
 

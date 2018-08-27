@@ -108,7 +108,7 @@ export class TextBalloon extends ContainerObject {
 
         let balloon_width = this.balloon_width();
         let balloon_height = this.balloon_height();
-        this._panel.set_size(balloon_width, balloon_height);
+        this._panel.setSize(balloon_width, balloon_height);
 
         let whole_width: number = balloon_width - 2 * TextBalloon.W_MARGIN;
         let title_space: number = this._panel.get_title_space();

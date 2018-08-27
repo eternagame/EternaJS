@@ -77,7 +77,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     protected updateView(): void {
-        this._panel.set_size(this.balloon_width(), this.balloon_height());
+        this._panel.setSize(this.balloon_width(), this.balloon_height());
 
         let innerWidth = this.balloon_width() - 2 * TextBalloon.W_MARGIN;
         let outerWidth = this.balloon_width();

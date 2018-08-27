@@ -130,7 +130,7 @@ export class MissionClearedPanel extends ContainerObject {
         );
 
         if (this._rankScroll != null) {
-            this._rankScrollHeading.set_size(310, this._tfPlayer.height);
+            this._rankScrollHeading.setSize(310, this._tfPlayer.height);
             this._rankScrollHeading.display.position = new Point(
                 ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
                 0

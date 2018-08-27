@@ -173,8 +173,8 @@ export class PuzzleEditMode extends GameMode {
         let set_cb = (kk: number): void  => {
             this._poses[kk].set_add_base_callback((parenthesis: string, op: PuzzleEditOp, index: number): void => {
                 let secInput: StructureInput = this._structureInputs[kk];
-                secInput.set_secstruct(parenthesis);
-                secInput.set_pose(op, index);
+                secInput.structureString = parenthesis;
+                secInput.setPose(op, index);
             });
         };
 
@@ -221,12 +221,12 @@ export class PuzzleEditMode extends GameMode {
             let structureInput = new StructureInput(pose);
             pose_field.addObject(structureInput, pose_field.container);
             if (!this._embedded) {
-                structureInput.set_size(700 / this._numTargets, 50);
+                structureInput.setSize(700 / this._numTargets, 50);
             } else {
-                structureInput.set_size(500 / this._numTargets, 50);
+                structureInput.setSize(500 / this._numTargets, 50);
             }
 
-            structureInput.set_secstruct(default_structure);
+            structureInput.structureString = default_structure;
             this._structureInputs.push(structureInput);
 
             let constraint_box = new ConstraintBox();
@@ -261,7 +261,7 @@ export class PuzzleEditMode extends GameMode {
     }
 
     public get structure(): string {
-        return this._structureInputs[0].get_secstruct();
+        return this._structureInputs[0].structureString;
     }
 
     public get sequence(): string {
@@ -401,10 +401,10 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private onSubmitPuzzle(): void {
-        let first_secstruct: string = this._structureInputs[0].get_secstruct();
+        let first_secstruct: string = this._structureInputs[0].structureString;
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            let secstruct: string = this._structureInputs[ii].get_secstruct();
+            let secstruct: string = this._structureInputs[ii].structureString;
 
             let length_limit: number = 400;
             if (Eterna.is_dev_mode) {
@@ -503,7 +503,7 @@ export class PuzzleEditMode extends GameMode {
                 }
             }
 
-            objective['secstruct'] = this._structureInputs[ii].get_secstruct();
+            objective['secstruct'] = this._structureInputs[ii].structureString;
 
             if (binding_bases.length > 0) {
                 objective['type'] = "aptamer";
@@ -584,7 +584,7 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey(null);
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_pairs(EPars.parenthesis_to_pair_array(this._structureInputs[ii].get_secstruct()));
+            this._poses[ii].set_pairs(EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString));
         }
         this._paused = true;
 
@@ -648,8 +648,8 @@ export class PuzzleEditMode extends GameMode {
             this._poses[ii].set_puzzle_locks(this._lockStack[this._stackLevel][ii]);
             this._poses[ii].set_molecular_structure(this._targetPairsStack[this._stackLevel][ii]);
             this._poses[ii].set_molecular_binding_site(this._bindingSiteStack[this._stackLevel][ii]);
-            let target_string: string = EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
-            this._structureInputs[ii].set_secstruct(target_string);
+            this._structureInputs[ii].structureString =
+                EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
 
         this.updateScore();
@@ -666,8 +666,8 @@ export class PuzzleEditMode extends GameMode {
             this._poses[ii].set_puzzle_locks(this._lockStack[this._stackLevel][ii]);
             this._poses[ii].set_molecular_structure(this._targetPairsStack[this._stackLevel][ii]);
             this._poses[ii].set_molecular_binding_site(this._bindingSiteStack[this._stackLevel][ii]);
-            let target_string: string = EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
-            this._structureInputs[ii].set_secstruct(target_string);
+            this._structureInputs[ii].structureString =
+                EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
         this.updateScore();
     }
@@ -757,22 +757,22 @@ export class PuzzleEditMode extends GameMode {
             lengths += "]";
 
             for (let ii = 0; ii < this._poses.length; ii++) {
-                this._structureInputs[ii].set_warning("Structure lengths don't match " + lengths + ".\nSequences won't be synced.");
+                this._structureInputs[ii].setWarning("Structure lengths don't match " + lengths + ".\nSequences won't be synced.");
             }
         } else {
             for (let ii = 0; ii < this._poses.length; ii++) {
-                this._structureInputs[ii].set_warning("");
+                this._structureInputs[ii].setWarning("");
             }
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let target_pairs: number[] = EPars.parenthesis_to_pair_array(this._structureInputs[ii].get_secstruct());
+            let target_pairs: number[] = EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString);
             let seq = this._poses[ii].get_sequence();
             let lock = this._poses[ii].get_puzzle_locks();
             let binding_site = this._poses[ii].get_molecular_binding_site();
 
             if (this._stackLevel >= 0) {
-                if (this._structureInputs[ii].get_secstruct() != EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii])) {
+                if (this._structureInputs[ii].structureString != EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii])) {
                     no_change = false;
                 }
                 if (EPars.sequence_array_to_string(seq) != EPars.sequence_array_to_string(this._seqStack[this._stackLevel][ii].get_sequence())) {

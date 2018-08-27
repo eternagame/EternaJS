@@ -59,7 +59,7 @@ export class TextInputPanel extends GamePanel {
 
         let width = TextInputPanel.W_MARGIN + field_start + TextInputPanel.W_MARGIN + max_w + TextInputPanel.W_MARGIN;
         let height = height_walker + 20 + TextInputPanel.H_MARGIN;
-        this.set_size(width, height);
+        this.setSize(width, height);
 
         this._okButton.display.position = new Point(
             (width * 0.5) - 30 - this._okButton.container.width,

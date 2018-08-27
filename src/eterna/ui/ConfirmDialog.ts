@@ -73,7 +73,7 @@ export class ConfirmDialog extends Dialog<boolean> {
         const H_MARGIN = 10;
 
         panelLayout.layout();
-        panel.set_size(panelLayout.width + (W_MARGIN * 2), panel.get_title_space() + panelLayout.height + (H_MARGIN * 2));
+        panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.get_title_space() + panelLayout.height + (H_MARGIN * 2));
         panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.get_title_space());
 
         panel.display.alpha = 0;
