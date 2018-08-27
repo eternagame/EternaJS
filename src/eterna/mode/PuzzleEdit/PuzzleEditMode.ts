@@ -1,7 +1,5 @@
-import * as log from "loglevel";
-import {Point, Rectangle} from "pixi.js";
+import {DisplayObject, Point} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {Base64} from "../../../flashbang/util/Base64";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
@@ -86,6 +84,8 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.target_button.clicked.connect(() => this.set_to_target_mode());
         this._toolbar.undo_button.clicked.connect(() => this.move_undo_stack_backward());
         this._toolbar.redo_button.clicked.connect(() => this.move_undo_stack_forward());
+
+        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.zoom_out_button.clicked.connect(() => {
             for (let poseField of this._pose_fields) {
@@ -175,7 +175,6 @@ export class PuzzleEditMode extends GameMode {
                 let secInput: StructureInput = this._structureInputs[kk];
                 secInput.set_secstruct(parenthesis);
                 secInput.set_pose(op, index);
-                //Pose2D(_poses[kk]).base_shift(parenthesis, mode, index);
             });
         };
 
@@ -306,56 +305,77 @@ export class PuzzleEditMode extends GameMode {
 
         let toolbarBounds = this._toolbar.display.getBounds(false);
 
-        for (let sec_in of this._structureInputs) {
+        for (let ii = 0; ii < this._numTargets; ++ii) {
+            let structureInput = this._structureInputs[ii];
+            let poseField = this._pose_fields[ii];
             if (!this._embedded) {
-                sec_in.display.position = new Point(
-                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    toolbarBounds.y - sec_in.get_panel_height() - 7
+                structureInput.display.position = new Point(
+                    (poseField.width - structureInput.get_panel_width()) * 0.5,
+                    toolbarBounds.y - structureInput.get_panel_height() - 7
                 );
             } else {
-                sec_in.display.position = new Point(
-                    (Flashbang.stageWidth - sec_in.get_panel_width()) * 0.5,
-                    toolbarBounds.y - sec_in.get_panel_height() - 7
+                structureInput.display.position = new Point(
+                    (poseField.width - structureInput.get_panel_width()) * 0.5,
+                    toolbarBounds.y - structureInput.get_panel_height() - 7
                 );
             }
         }
     }
 
-    /*override*/
-    protected get_screenshot(): ArrayBuffer {
-        log.info("TODO: get_screenshot");
-        return null;
-        // let img_width: number = 0;
-        // let img_height: number = 0;
-        // let imgs: any[] = [];
-        // let img: BitmapData;
-        //
-        // for (let field of this._pose_fields) {
-        //     img = field.get_pose().get_canvas();
-        //     img_width += img.width;
-        //     img_height = Math.max(img_height, img.height);
-        //     imgs.push(img);
-        // }
-        //
-        // let bd: BitmapData = new BitmapData(img_width, img_height, false, 0x061A34);
-        //
-        // let hub: GameText = new GameText(Fonts.arial(12, false));
-        // hub.set_pos(new UDim(1, 0, 3, -3));
-        // hub.set_text("Player: " + Application.instance.get_player_name() + "\n" + "Player Puzzle Designer");
-        //
-        // img_width = 0;
-        //
-        // for (let ii: number = 0; ii < this._poses.length; ii++) {
-        //     img = imgs[ii];
-        //     let trans_mat: Matrix = new Matrix();
-        //     trans_mat.translate(img_width, 0);
-        //     bd.draw(img, trans_mat);
-        //     img_width += img.width;
-        //
-        // }
-        // bd.draw(hub);
-        //
-        // return bd;
+    protected createScreenshot(): ArrayBuffer {
+        let visibleState: Map<DisplayObject, boolean> = new Map();
+        let pushVisibleState = (disp: DisplayObject) => {
+            visibleState.set(disp, disp.visible);
+            disp.visible = false;
+        };
+
+        pushVisibleState(this.bgLayer);
+        pushVisibleState(this.uiLayer);
+        pushVisibleState(this.dialogLayer);
+        pushVisibleState(this.achievementsLayer);
+
+        for (let structureInput of this._structureInputs) {
+            pushVisibleState(structureInput.display);
+        }
+
+        for (let constraintBox of this._constraint_boxes) {
+            pushVisibleState(constraintBox.display);
+        }
+
+        let energyVisible: boolean[] = [];
+        let trackedCursorIdx: number[] = [];
+        for (let pose of this._poses) {
+            energyVisible.push(pose.showTotalEnergy);
+            pose.set_show_total_energy(false);
+
+            trackedCursorIdx.push(pose.trackedCursorIdx);
+            pose.track_cursor(-1);
+        }
+
+        let tempBG = DisplayUtil.fillStageRect(0x061A34);
+        this.modeSprite.addChildAt(tempBG, 0);
+
+        let info =
+            `Player: ${Eterna.player_name}\n` +
+            `Player Puzzle Designer`;
+        let infoText = Fonts.arial(info, 12).color(0xffffff).build();
+        this.modeSprite.addChild(infoText);
+
+        let pngData = DisplayUtil.renderToPNG(this.modeSprite);
+
+        tempBG.destroy({children: true});
+        infoText.destroy({children: true});
+
+        for (let [disp, wasVisible] of visibleState.entries()) {
+            disp.visible = wasVisible;
+        }
+
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            this._poses[ii].set_show_total_energy(energyVisible[ii]);
+            this._poses[ii].track_cursor(trackedCursorIdx[ii]);
+        }
+
+        return pngData;
     }
 
     private promptForReset(): void {

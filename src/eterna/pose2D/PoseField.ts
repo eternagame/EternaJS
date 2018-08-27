@@ -36,6 +36,14 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
 
+    public get width(): number {
+        return this._width;
+    }
+
+    public get height(): number {
+        return this._height;
+    }
+
     public set_size(width: number, height: number, useMask: boolean): void {
         this._width = width;
         this._height = height;

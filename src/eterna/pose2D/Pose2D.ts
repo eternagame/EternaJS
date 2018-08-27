@@ -1847,6 +1847,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public get trackedCursorIdx(): number {
+        return this._cursor_index;
+    }
+
     /*override*/
     public update(dt: number): void {
         if (!this.display.worldVisible) {
@@ -2209,6 +2213,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public is_lettermode(): boolean {
         return this._lettermode;
+    }
+
+    public get showTotalEnergy(): boolean {
+        return this._show_total_energy;
     }
 
     public set_show_total_energy(show: boolean): void {
