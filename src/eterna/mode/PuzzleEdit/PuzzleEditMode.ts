@@ -88,13 +88,13 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
         this._toolbar.zoom_out_button.clicked.connect(() => {
-            for (let poseField of this._pose_fields) {
+            for (let poseField of this._poseFields) {
                 poseField.zoom_out();
             }
         });
 
         this._toolbar.zoom_in_button.clicked.connect(() => {
-            for (let poseField of this._pose_fields) {
+            for (let poseField of this._poseFields) {
                 poseField.zoom_in();
             }
         });
@@ -307,7 +307,7 @@ export class PuzzleEditMode extends GameMode {
 
         for (let ii = 0; ii < this._numTargets; ++ii) {
             let structureInput = this._structureInputs[ii];
-            let poseField = this._pose_fields[ii];
+            let poseField = this._poseFields[ii];
             if (!this._embedded) {
                 structureInput.display.position = new Point(
                     (poseField.width - structureInput.get_panel_width()) * 0.5,
