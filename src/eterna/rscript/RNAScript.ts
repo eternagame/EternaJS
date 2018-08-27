@@ -47,7 +47,7 @@ export class RNAScript {
         // Do not allow us to start executing instructions until the RNA loads properly
         // Also serves to prevent us from positioning anything in relation to the RNA when
         // the RNA bases are in the middle of folding.
-        if (this._env.GetRNA().is_folding() || !this._env.GetUI().is_playing()) {
+        if (this._env.GetRNA().is_folding() || !this._env.GetUI().isPlaying) {
             return;
         }
 
@@ -55,7 +55,7 @@ export class RNAScript {
         while (node) {
             node.exec();
 
-            if (this._env.GetRNA().is_folding() || !this._env.GetUI().is_playing()) {
+            if (this._env.GetRNA().is_folding() || !this._env.GetUI().isPlaying) {
                 return;
             }
 

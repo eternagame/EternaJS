@@ -152,7 +152,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }));
 
         this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify(value => {
-            this.set_display_score_texts(value);
+            this.setDisplayScoreTexts(value);
         }));
 
         this.regs.add(Eterna.settings.highlightRestricted.connectNotify(value => {
@@ -1028,7 +1028,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._display_score_texts;
     }
 
-    public set_display_score_texts(dis: boolean): void {
+    public setDisplayScoreTexts(dis: boolean): void {
         this._display_score_texts = dis;
 
         this.generate_score_nodes();

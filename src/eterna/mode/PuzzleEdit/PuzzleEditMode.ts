@@ -239,7 +239,7 @@ export class PuzzleEditMode extends GameMode {
             this._constraint_boxes.push(constraint_box);
         }
 
-        this.set_pose_fields(pose_fields);
+        this.setPoseFields(pose_fields);
         this.pose_edit_by_target(0);
 
         for (let ii = 0; ii < this._numTargets; ii++) {
@@ -255,7 +255,7 @@ export class PuzzleEditMode extends GameMode {
 
         this.set_to_target_mode();
         this.onPaletteTargetSelected(PaletteTargetType.A);
-        this.set_pip(true);
+        this.setPip(true);
 
         this.updateLayout();
     }
@@ -607,7 +607,7 @@ export class PuzzleEditMode extends GameMode {
         this.clear_undo_stack();
         this.pose_edit_by_target(0);
         for (let pose of this._poses) {
-            pose.set_display_score_texts(pose.is_displaying_score_texts());
+            pose.setDisplayScoreTexts(pose.is_displaying_score_texts());
         }
     }
 

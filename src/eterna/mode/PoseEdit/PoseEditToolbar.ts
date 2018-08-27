@@ -182,8 +182,8 @@ export class PoseEditToolbar extends ContainerObject {
                         booster.onLoad();
                         let button: GameButton = booster.createButton();
                         button.clicked.connect(() => {
-                            mode.set_poses_color(booster.toolColor);
-                            mode.deselect_all_colorings();
+                            mode.setPosesColor(booster.toolColor);
+                            mode.deselectAllColorings();
                             button.toggled.value = true;
                         });
                         this.dyn_paint_tools.push(button);
