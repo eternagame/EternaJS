@@ -18,11 +18,11 @@ export class BaseAssets {
         let bitmapWidth: number;
 
         if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
-            bitmapWidth = BaseAssets.bitmap_for_size(BaseAssets._baseU_bitmaps.body_data, 0, zoomLevel).width;
+            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.body_data, 0, zoomLevel).width;
         } else if (zoomLevel < 2 * Base.NUM_ZOOM_LEVELS) {
-            bitmapWidth = BaseAssets.bitmap_for_size(BaseAssets._baseU_bitmaps.mid_data, 0, zoomLevel - Base.NUM_ZOOM_LEVELS).width;
+            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.mid_data, 0, zoomLevel - Base.NUM_ZOOM_LEVELS).width;
         } else {
-            bitmapWidth = BaseAssets._baseU_bitmaps.min_data.width;
+            bitmapWidth = BaseAssets._baseUBitmaps.min_data.width;
         }
 
         return bitmapWidth / 2.0;
@@ -33,24 +33,24 @@ export class BaseAssets {
             return BaseAssets.getBaseBitmaps(base_type).getBodyBitmap(zoom_level, flags);
 
         } else if (base_type === EPars.RNABASE_LOCK) {
-            return BaseAssets.bitmap_for_size(BaseAssets._backbone_body_data, 0, zoom_level);
+            return BaseAssets.bitmapForSize(BaseAssets._backboneBodyData, 0, zoom_level);
 
         } else if (color_level < 0) {
             if (zoom_level < Base.NUM_ZOOM_LEVELS) {
-                return BaseAssets.bitmap_for_size(BaseAssets._sphere_data, ExpPainter.NUM_COLORS, zoom_level);
+                return BaseAssets.bitmapForSize(BaseAssets._sphereData, ExpPainter.NUM_COLORS, zoom_level);
             } else if (zoom_level < Base.NUM_ZOOM_LEVELS * 2) {
-                return BaseAssets.bitmap_for_size(BaseAssets._sphere_mid_data, ExpPainter.NUM_COLORS, zoom_level - Base.NUM_ZOOM_LEVELS);
+                return BaseAssets.bitmapForSize(BaseAssets._sphereMidData, ExpPainter.NUM_COLORS, zoom_level - Base.NUM_ZOOM_LEVELS);
             } else {
-                return BaseAssets.bitmap_for_size(BaseAssets._sphere_min_data, ExpPainter.NUM_COLORS, zoom_level - Base.NUM_ZOOM_LEVELS);
+                return BaseAssets.bitmapForSize(BaseAssets._sphereMinData, ExpPainter.NUM_COLORS, zoom_level - Base.NUM_ZOOM_LEVELS);
             }
 
         } else {
             if (zoom_level < Base.NUM_ZOOM_LEVELS) {
-                return BaseAssets.bitmap_for_size(BaseAssets._sphere_data, color_level, zoom_level);
+                return BaseAssets.bitmapForSize(BaseAssets._sphereData, color_level, zoom_level);
             } else if (zoom_level < Base.NUM_ZOOM_LEVELS * 2) {
-                return BaseAssets.bitmap_for_size(BaseAssets._sphere_mid_data, color_level, zoom_level - Base.NUM_ZOOM_LEVELS);
+                return BaseAssets.bitmapForSize(BaseAssets._sphereMidData, color_level, zoom_level - Base.NUM_ZOOM_LEVELS);
             } else {
-                return BaseAssets._sphere_min_data[color_level];
+                return BaseAssets._sphereMinData[color_level];
             }
         }
     }
@@ -58,11 +58,11 @@ export class BaseAssets {
     public static getBarcodeBitmap(zoomLevel: number, drawFlags: number): Texture | null {
         if ((drawFlags & BaseDrawFlags.USE_BARCODE) !== 0) {
             if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
-                return BaseAssets.bitmap_for_size(BaseAssets._barcode_data, 0, zoomLevel);
+                return BaseAssets.bitmapForSize(BaseAssets._barcodeData, 0, zoomLevel);
             } else if (zoomLevel < Base.NUM_ZOOM_LEVELS * 2) {
-                return BaseAssets.bitmap_for_size(BaseAssets._barcode_mid_data, 0, zoomLevel - Base.NUM_ZOOM_LEVELS);
+                return BaseAssets.bitmapForSize(BaseAssets._barcodeMidData, 0, zoomLevel - Base.NUM_ZOOM_LEVELS);
             } else {
-                return BaseAssets._barcode_min_data[0];
+                return BaseAssets._barcodeMinData[0];
             }
         }
 
@@ -77,23 +77,23 @@ export class BaseAssets {
 
     public static getBackboneBitmap(zoom_level: number, drawFlags: number): Texture {
         if (zoom_level < Base.NUM_ZOOM_LEVELS) {
-            return BaseAssets.bitmap_for_size(BaseAssets._backbone_body_data, 0, zoom_level);
+            return BaseAssets.bitmapForSize(BaseAssets._backboneBodyData, 0, zoom_level);
         } else {
-            return BaseAssets.bitmap_for_size(BaseAssets._backbone_mid_data, 0, zoom_level - Base.NUM_ZOOM_LEVELS);
+            return BaseAssets.bitmapForSize(BaseAssets._backboneMidData, 0, zoom_level - Base.NUM_ZOOM_LEVELS);
         }
     }
 
     public static getSatellite0Bitmap(zoom_level: number, st0_diff_degree: number): Texture {
-        return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Math.trunc(st0_diff_degree / 5), zoom_level);
+        return BaseAssets.bitmapForSize(BaseAssets._satelliteData, Math.trunc(st0_diff_degree / 5), zoom_level);
     }
 
     public static getSatellite1Bitmap(zoom_level: number, st1_diff_degree: number, pair_type: number): Texture {
         if (pair_type === -1 || pair_type === 2) {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_data, Math.trunc(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmapForSize(BaseAssets._satelliteData, Math.trunc(st1_diff_degree / 5), zoom_level);
         } else if (pair_type === 1) {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_weaker_data, Math.trunc(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmapForSize(BaseAssets._satelliteWeakerData, Math.trunc(st1_diff_degree / 5), zoom_level);
         } else {
-            return BaseAssets.bitmap_for_size(BaseAssets._satellite_stronger_data, Math.trunc(st1_diff_degree / 5), zoom_level);
+            return BaseAssets.bitmapForSize(BaseAssets._satelliteStrongerData, Math.trunc(st1_diff_degree / 5), zoom_level);
         }
     }
 
@@ -108,11 +108,11 @@ export class BaseAssets {
         else if (prog_index < 0)
             prog_index = 0;
 
-        return BaseAssets._spark_bitmaps[prog_index];
+        return BaseAssets._sparkBitmaps[prog_index];
     }
 
     public static getSatelliteReferenceBaseSize(zoom_level: number): number {
-        return BaseAssets.bitmap_for_size(BaseAssets._baseA_bitmaps.body_data, 0, zoom_level).width;
+        return BaseAssets.bitmapForSize(BaseAssets._baseABitmaps.body_data, 0, zoom_level).width;
     }
 
     public static getBaseTypeSound(type: number): string | null {
@@ -129,13 +129,13 @@ export class BaseAssets {
     private static getBaseBitmaps(base_type: number): BaseBitmaps {
         switch (base_type) {
         case EPars.RNABASE_URACIL:
-            return BaseAssets._baseU_bitmaps;
+            return BaseAssets._baseUBitmaps;
         case EPars.RNABASE_ADENINE:
-            return BaseAssets._baseA_bitmaps;
+            return BaseAssets._baseABitmaps;
         case EPars.RNABASE_GUANINE:
-            return BaseAssets._baseG_bitmaps;
+            return BaseAssets._baseGBitmaps;
         case EPars.RNABASE_CYTOSINE:
-            return BaseAssets._baseC_bitmaps;
+            return BaseAssets._baseCBitmaps;
         default:
             throw new Error("Bad base type: " + base_type);
         }
@@ -164,15 +164,15 @@ export class BaseAssets {
 
         // SPHERE BITMAPS
 
-        BaseAssets._sphere_data = [];
-        BaseAssets._sphere_mid_data = [];
-        BaseAssets._sphere_min_data = [];
+        BaseAssets._sphereData = [];
+        BaseAssets._sphereMidData = [];
+        BaseAssets._sphereMinData = [];
 
-        const baseW_outline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWOutline);
-        const baseW_pattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWPattern);
-        const baseW_mid_pattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidPattern);
-        const baseW_mid_outline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidOutline);
-        const baseW_min: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMin);
+        const baseWOutline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWOutline);
+        const baseWPattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWPattern);
+        const baseWMidPattern: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidPattern);
+        const baseWMidOutline: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMidOutline);
+        const baseWMin: Texture = BitmapManager.get_bitmap(Bitmaps.BaseWMin);
 
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             const color: number = ExpPainter.get_color_by_level(ii);
@@ -184,62 +184,62 @@ export class BaseAssets {
 
             do {
                 const sphereBitmap: Container = new Container();
-                sphereBitmap.addChild(new Sprite(baseW_outline));
-                const pattern = new Sprite(baseW_pattern);
+                sphereBitmap.addChild(new Sprite(baseWOutline));
+                const pattern = new Sprite(baseWPattern);
                 pattern.filters = [colorTransform];
                 sphereBitmap.addChild(pattern);
-                BaseAssets._sphere_data.push(TextureUtil.renderToTexture(sphereBitmap));
+                BaseAssets._sphereData.push(TextureUtil.renderToTexture(sphereBitmap));
             } while(0);
 
             do {
                 const sphereBitmapMid: Container = new Container();
-                sphereBitmapMid.addChild(new Sprite(baseW_mid_outline));
-                const pattern = new Sprite(baseW_mid_pattern);
+                sphereBitmapMid.addChild(new Sprite(baseWMidOutline));
+                const pattern = new Sprite(baseWMidPattern);
                 pattern.filters = [colorTransform];
                 sphereBitmapMid.addChild(pattern);
-                BaseAssets._sphere_mid_data.push(TextureUtil.renderToTexture(sphereBitmapMid));
+                BaseAssets._sphereMidData.push(TextureUtil.renderToTexture(sphereBitmapMid));
             } while(0);
 
             do {
                 const sphereBitmapMin: Container = new Container();
-                const pattern = new Sprite(baseW_min);
+                const pattern = new Sprite(baseWMin);
                 pattern.filters = [colorTransform];
                 sphereBitmapMin.addChild(pattern);
-                BaseAssets._sphere_min_data.push(TextureUtil.renderToTexture(sphereBitmapMin));
+                BaseAssets._sphereMinData.push(TextureUtil.renderToTexture(sphereBitmapMin));
 
             } while(0);
         }
 
-        BitmapUtil.create_scaled(BaseAssets._sphere_data, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._sphere_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._sphereData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BASE BODY BITMAPS
-        BaseAssets._baseU_bitmaps = new BaseBitmaps(EPars.RNABASE_URACIL);
-        BaseAssets._baseA_bitmaps = new BaseBitmaps(EPars.RNABASE_ADENINE);
-        BaseAssets._baseG_bitmaps = new BaseBitmaps(EPars.RNABASE_GUANINE);
-        BaseAssets._baseC_bitmaps = new BaseBitmaps(EPars.RNABASE_CYTOSINE);
+        BaseAssets._baseUBitmaps = new BaseBitmaps(EPars.RNABASE_URACIL);
+        BaseAssets._baseABitmaps = new BaseBitmaps(EPars.RNABASE_ADENINE);
+        BaseAssets._baseGBitmaps = new BaseBitmaps(EPars.RNABASE_GUANINE);
+        BaseAssets._baseCBitmaps = new BaseBitmaps(EPars.RNABASE_CYTOSINE);
 
-        BaseAssets._backbone_body_data = [BitmapManager.get_bitmap(Bitmaps.Backbone)];
-        BaseAssets._backbone_mid_data = [BitmapManager.get_bitmap(Bitmaps.BackboneMid)];
+        BaseAssets._backboneBodyData = [BitmapManager.get_bitmap(Bitmaps.Backbone)];
+        BaseAssets._backboneMidData = [BitmapManager.get_bitmap(Bitmaps.BackboneMid)];
 
-        BitmapUtil.create_scaled(BaseAssets._backbone_body_data, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._backbone_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._backboneBodyData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._backboneMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BARCODE BITMAPS
-        BaseAssets._barcode_data = [BaseAssets.draw_circular_barcode(16, 6, /*0.5*/ 1)];
-        BaseAssets._barcode_mid_data = [BaseAssets.draw_circular_barcode(12, 3, /*0.5*/ 1)];
-        BaseAssets._barcode_min_data = [BaseAssets.draw_circular_barcode(6, 2, /*0.5*/ 1)];
+        BaseAssets._barcodeData = [BaseAssets.drawCircularBarcode(16, 6, /*0.5*/ 1)];
+        BaseAssets._barcodeMidData = [BaseAssets.drawCircularBarcode(12, 3, /*0.5*/ 1)];
+        BaseAssets._barcodeMinData = [BaseAssets.drawCircularBarcode(6, 2, /*0.5*/ 1)];
 
-        BitmapUtil.create_scaled(BaseAssets._barcode_data, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._barcode_mid_data, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._barcodeData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.create_scaled(BaseAssets._barcodeMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // SATELLITE BITMAPS
-        BaseAssets._satellite_data = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0));
-        BaseAssets._satellite_weaker_data = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 0.5, 0, 0, 0, 0));
-        BaseAssets._satellite_stronger_data = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
+        BaseAssets._satelliteData = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0));
+        BaseAssets._satelliteWeakerData = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 0.5, 0, 0, 0, 0));
+        BaseAssets._satelliteStrongerData = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
 
         // SPARK BITMAPS
-        BaseAssets._spark_bitmaps = BitmapUtil.create_transparent(BitmapManager.get_bitmap(Bitmaps.BonusSymbol), 10);
+        BaseAssets._sparkBitmaps = BitmapUtil.create_transparent(BitmapManager.get_bitmap(Bitmaps.BonusSymbol), 10);
 
         // SOUNDS
         // log.debug("INIT SOUND");
@@ -249,7 +249,7 @@ export class BaseAssets {
         // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_B, "SoundB");
     }
 
-    public static draw_circular_barcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
+    public static drawCircularBarcode(radius: number, lineThickness: number, lineAlpha: number): Texture {
         let scratch = new Graphics();
 
         scratch.clear();
@@ -290,7 +290,7 @@ export class BaseAssets {
         return bitmaps;
     }
 
-    private static bitmap_for_size(bitmaps: Texture[], ii: number, size_num: number): Texture {
+    private static bitmapForSize(bitmaps: Texture[], ii: number, size_num: number): Texture {
         if (bitmaps.length % Base.NUM_ZOOM_LEVELS !== 0) {
             throw new Error("Invalid bitmaps array length " + bitmaps.length);
         }
@@ -301,29 +301,29 @@ export class BaseAssets {
 
     private static _inited: boolean;
 
-    private static _baseU_bitmaps: BaseBitmaps;
-    private static _baseA_bitmaps: BaseBitmaps;
-    private static _baseG_bitmaps: BaseBitmaps;
-    private static _baseC_bitmaps: BaseBitmaps;
+    private static _baseUBitmaps: BaseBitmaps;
+    private static _baseABitmaps: BaseBitmaps;
+    private static _baseGBitmaps: BaseBitmaps;
+    private static _baseCBitmaps: BaseBitmaps;
 
     /// Backbone bitmaps
-    private static _backbone_body_data: Texture[];
-    private static _backbone_mid_data: Texture[];
+    private static _backboneBodyData: Texture[];
+    private static _backboneMidData: Texture[];
 
     /// Satellites for the max zoom
-    private static _satellite_data: Texture[];
-    private static _satellite_weaker_data: Texture[];
-    private static _satellite_stronger_data: Texture[];
+    private static _satelliteData: Texture[];
+    private static _satelliteWeakerData: Texture[];
+    private static _satelliteStrongerData: Texture[];
 
     /// Barcode outline data
-    private static _barcode_data: Texture[];
-    private static _barcode_mid_data: Texture[];
-    private static _barcode_min_data: Texture[];
+    private static _barcodeData: Texture[];
+    private static _barcodeMidData: Texture[];
+    private static _barcodeMinData: Texture[];
 
     /// Bitmaps for blank bases
-    private static _sphere_data: Texture[];
-    private static _sphere_mid_data: Texture[];
-    private static _sphere_min_data: Texture[];
+    private static _sphereData: Texture[];
+    private static _sphereMidData: Texture[];
+    private static _sphereMinData: Texture[];
 
-    private static _spark_bitmaps: Texture[];
+    private static _sparkBitmaps: Texture[];
 }
