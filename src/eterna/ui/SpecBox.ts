@@ -14,6 +14,7 @@ import {UndoBlock, UndoBlockParam} from "../UndoBlock";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";
+import {HTMLTextObject} from "./HTMLTextObject";
 import {TextBalloon} from "./TextBalloon";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -52,7 +53,10 @@ export class SpecBox extends ContainerObject {
         this.container.addChild(this._vn_melt);
 
         this._dotplot_canvas = new Sprite();
+        this.container.addChild(this._dotplot_canvas);
+
         this._meltplot_canvas = new Sprite();
+        this.container.addChild(this._meltplot_canvas);
 
         this._stattext = new MultiStyleText("", {
             default: {
@@ -61,21 +65,18 @@ export class SpecBox extends ContainerObject {
                 fill: 0xffffff
             }
         });
+        this.container.addChild(this._stattext);
 
-        let url: string = EternaURL.generate_url({page: "manual"});
-        let helpText: string = "";// "<A HREF=\"" + url + "\" TARGET=\"" + Math.random() + "\"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>";
-        this._helptext = Fonts.arial(helpText, 14).color(0xffffff).build();
+        let url = EternaURL.generate_url({page: "manual"});
+        let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>`;
+        this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
+        this.addObject(this._helpText, this.container);
 
         this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
+        this.container.addChild(this._dotplottext);
 
         this._meltplottext = Fonts.arial("Melt plot (% of unpaired bases)", 12).color(0xffffff).build();
-
-        this.container.addChild(this._dotplot_canvas);
-        this.container.addChild(this._meltplot_canvas);
-        this.container.addChild(this._stattext);
-        this.container.addChild(this._dotplottext);
         this.container.addChild(this._meltplottext);
-        this.container.addChild(this._helptext);
 
         this._zoom_in = new GameButton()
             .allStates(Bitmaps.PlusImg)
@@ -257,7 +258,7 @@ export class SpecBox extends ContainerObject {
             this._meltplot_canvas.position = new Point(20, (this._height * 0.5) + 8);
 
             this._stattext.visible = false;
-            this._helptext.visible = false;
+            this._helpText.display.visible = false;
             this._dotplottext.visible = false;
             this._meltplottext.visible = false;
 
@@ -278,8 +279,8 @@ export class SpecBox extends ContainerObject {
             this._stattext.position = new Point(20, this._height - 100);
             // this._stattext.size= new Point(200, 200);
 
-            this._helptext.visible = true;
-            this._helptext.position = new Point(20, this._height - 35);
+            this._helpText.display.visible = true;
+            this._helpText.display.position = new Point(20, this._height - 35);
             this._dotplottext.visible = true;
             this._dotplottext.position = new Point(30, 40);
             this._meltplottext.visible = true;
@@ -477,7 +478,7 @@ export class SpecBox extends ContainerObject {
     private readonly _v0_melt: Text;
     private readonly _vn_melt: Text;
     private readonly _stattext: MultiStyleText;
-    private readonly _helptext: Text;
+    private readonly _helpText: HTMLTextObject;
     private readonly _dotplottext: Text;
     private readonly _meltplottext: Text;
 
