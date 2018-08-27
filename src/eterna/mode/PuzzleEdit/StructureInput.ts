@@ -1,6 +1,7 @@
-﻿import {Point} from "pixi.js";
+﻿import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Updatable} from "../../../flashbang/core/Updatable";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
+import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Pose2D} from "../../pose2D/Pose2D";
@@ -25,16 +26,13 @@ export class StructureInput extends GamePanel implements Updatable {
     protected added(): void {
         super.added();
 
-        this._width = 100;
-        this._height = 50;
-
         this._textInput = new TextInputObject(20)
             .font(Fonts.ARIAL)
             .disallow(/[^\.\(\)]/g)
             .bold();
-        this._textInput.width = this._width - 20;
-        this._textInput.display.position = new Point(10, 10);
         this.addObject(this._textInput, this.container);
+
+        this.set_size(100, 50);
 
         this._textInput.valueChanged.connect(() => this.set_pose());
         this._textInput.element.onkeydown = (e) => {
@@ -56,6 +54,9 @@ export class StructureInput extends GamePanel implements Updatable {
     public set_size(width: number, height: number): void {
         super.set_size(width, height);
         this._textInput.width = width - 20;
+        DisplayUtil.positionRelative(
+            this._textInput.display, HAlign.CENTER, VAlign.CENTER,
+            this.container, HAlign.CENTER, VAlign.CENTER);
     }
 
     public set_pose(op: PuzzleEditOp = null, index: number = -1): void {
