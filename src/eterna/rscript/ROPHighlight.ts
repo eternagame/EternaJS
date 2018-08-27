@@ -128,9 +128,9 @@ export class ROPHighlight extends RScriptOp {
 
         switch (key) {
         case RScriptUIElementID.OBJECTIVES:
-            let n: number = this._env.GetUI().get_constraint_count();
-            let firstObj: ConstraintBox = this._env.GetUI().get_constraint(0);
-            let lastObj: ConstraintBox = this._env.GetUI().get_constraint(n - 1);
+            let n: number = this._env.GetUI().constraintCount;
+            let firstObj: ConstraintBox = this._env.GetUI().getConstraint(0);
+            let lastObj: ConstraintBox = this._env.GetUI().getConstraint(n - 1);
             size.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
             size.y = 84;
             break;

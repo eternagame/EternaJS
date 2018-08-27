@@ -73,8 +73,8 @@ export class Booster {
         this._scriptID = script_nid;
         this._buttonStateTextures = buttonStateTextures;
 
-        for (let ii = 0; ii < this._view.number_of_pose_fields(); ii++) {
-            let pose: Pose2D = this._view.get_pose(ii);
+        for (let ii = 0; ii < this._view.numPoseFields; ii++) {
+            let pose: Pose2D = this._view.getPose(ii);
             pose.register_paint_tool(tool_color, this);
         }
     }
@@ -133,7 +133,7 @@ export class Booster {
         }
 
         // register callbacks
-        this._view.register_script_callbacks();
+        this._view.registerScriptCallbacks();
 
         ExternalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
@@ -147,8 +147,8 @@ export class Booster {
             } else {
                 let force_sync: boolean = this._view.is_forced_synch();
                 this._view.set_forced_synch(true);
-                for (let ii: number = 0; ii < this._view.number_of_pose_fields(); ii++) {
-                    pose = this._view.get_pose(ii);
+                for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
+                    pose = this._view.getPose(ii);
                     pose.paste_sequence(seq_arr);
                 }
                 this._view.set_forced_synch(force_sync);
@@ -157,8 +157,8 @@ export class Booster {
         });
 
         ExternalInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
-            for (let ii: number = 0; ii < this._view.number_of_pose_fields(); ii++) {
-                let pose: Pose2D = this._view.get_pose(ii);
+            for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
+                let pose: Pose2D = this._view.getPose(ii);
                 pose.clear_tracking();
                 for (let k: number = 0; k < marks.length; k++) {
                     pose.black_mark(marks[k]);

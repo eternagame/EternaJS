@@ -34,7 +34,7 @@ export abstract class GameMode extends AppMode {
         this.addObject(this._achievements);
     }
 
-    public get_pose(i: number): Pose2D {
+    public getPose(i: number): Pose2D {
         return this._poses[i];
     }
 
@@ -91,12 +91,12 @@ export abstract class GameMode extends AppMode {
         }
     }
 
-    public number_of_pose_fields(): number {
+    public get numPoseFields(): number {
         return this._pose_fields.length;
     }
 
     public rop_set_pip(pip_mode: boolean): void {
-        this.set_pip(pip_mode);
+        this.setPip(pip_mode);
     }
 
     public is_forced_synch(): boolean {
@@ -111,10 +111,10 @@ export abstract class GameMode extends AppMode {
     public set_multi_engines(multi: boolean): void {
     }
 
-    public register_script_callbacks(): void {
+    public registerScriptCallbacks(): void {
     }
 
-    public register_setter_callbacks(): void {
+    public registerSetterCallbacks(): void {
     }
 
     public onResized(): void {
@@ -122,7 +122,7 @@ export abstract class GameMode extends AppMode {
         super.onResized();
     }
 
-    protected set_pose_fields(newPoseFields: PoseField[]): void {
+    protected setPoseFields(newPoseFields: PoseField[]): void {
         if (this._pose_fields != null) {
             for (let poseField of this._pose_fields) {
                 poseField.destroySelf();
@@ -138,11 +138,11 @@ export abstract class GameMode extends AppMode {
         }
     }
 
-    protected toggle_pip(): void {
-        this.set_pip(!this._is_pip_mode);
+    protected togglePip(): void {
+        this.setPip(!this._is_pip_mode);
     }
 
-    protected set_pip(pip_mode: boolean): void {
+    protected setPip(pip_mode: boolean): void {
         this._is_pip_mode = pip_mode;
         this.layoutPoseFields();
         this.on_set_pip(pip_mode);

@@ -27,7 +27,7 @@ export class ROPRNA extends RScriptOp {
                 RScriptEnv.ConvertNucleotideStringToInt(this._color));
         } else if (this._type === ROPRNAType.CHANGEMODE) {
             if (this._fold_mode === 0) {
-                this._env.GetUI().rop_set_to_native_mode();
+                this._env.GetUI().ropSetToNativeMode();
             } else {
                 this._env.GetUI().rop_set_to_target_mode();
             }

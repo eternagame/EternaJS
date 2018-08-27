@@ -84,7 +84,7 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public GetRNA(): Pose2D {
-        return this._ui.get_pose(0);
+        return this._ui.getPose(0);
     }
 
     // Handles parsing the element ID and getting the right object.
@@ -127,18 +127,18 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public GetTotalConstraints(): number {
-        return this.GetUI().get_constraint_count();
+        return this.GetUI().constraintCount;
     }
 
     public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
         elementID = elementID.toUpperCase();
 
         if (elementID === RScriptUIElementID.ENERGY) {
-            this.GetUI().set_display_score_texts(visible);
+            this.GetUI().setDisplayScoreTexts(visible);
         } else if (elementID === RScriptUIElementID.BASENUMBERING) {
-            this.GetUI().set_show_numbering(visible);
+            this.GetUI().setShowNumbering(visible);
         } else if (elementID === RScriptUIElementID.TOTALENERGY) {
-            this.GetUI().set_show_total_energy(visible);
+            this.GetUI().setShowTotalEnergy(visible);
         } else if (elementID === RScriptUIElementID.HINT) {
             // no-op
         } else if (elementID === RScriptUIElementID.TOGGLEBAR) {
@@ -177,7 +177,7 @@ export class RScriptEnv extends ContainerObject {
         case RScriptUIElementID.SHAPEOBJECTIVE:
             return this.GetUI().get_shape_box(0);
         case RScriptUIElementID.OBJECTIVE:
-            return this.GetUI().get_constraint(i);
+            return this.GetUI().getConstraint(i);
         case RScriptUIElementID.SWITCH:
             return this.GetUI().toolbar.puzzleStateToggle;
         case RScriptUIElementID.TOTALENERGY:
