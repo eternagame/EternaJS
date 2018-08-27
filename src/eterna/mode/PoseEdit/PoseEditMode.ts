@@ -1209,45 +1209,6 @@ export class PoseEditMode extends GameMode {
         return pngData;
     }
 
-    private on_click_addbase(): void {
-        for (let pose of this._poses) {
-            pose.set_current_color(EPars.RNABASE_ADD_BASE);
-        }
-        this.deselectAllColorings();
-    }
-
-    private on_click_addpair(): void {
-        for (let pose of this._poses) {
-            pose.set_current_color(EPars.RNABASE_ADD_PAIR);
-        }
-
-        this.deselectAllColorings();
-    }
-
-    private on_click_delete(): void {
-        for (let pose of this._poses) {
-            pose.set_current_color(EPars.RNABASE_DELETE);
-        }
-
-        this.deselectAllColorings();
-    }
-
-    private on_click_lock(): void {
-        for (let pose of this._poses) {
-            pose.set_current_color(EPars.RNABASE_LOCK);
-        }
-
-        this.deselectAllColorings();
-    }
-
-    private on_click_binding_site(): void {
-        for (let pose of this._poses) {
-            pose.set_current_color(EPars.RNABASE_BINDING_SITE);
-        }
-
-        this.deselectAllColorings();
-    }
-
     private exitPuzzle(): void {
         if (this._submitSolutionRspData == null) {
             throw new Error("exit_puzzle was called before we submitted a solution");
@@ -1388,7 +1349,7 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    private setToNativeMode(trigger_modechange_event: boolean = true): void {
+    private setToNativeMode(): void {
         this._poseState = PoseState.NATIVE;
 
         this._toolbar.targetButton.toggled.value = false;
@@ -1402,7 +1363,7 @@ export class PoseEditMode extends GameMode {
         this.transformPosesMarkers();
     }
 
-    private setToTargetMode(trigger_modechange_event: boolean = true): void {
+    private setToTargetMode(): void {
         this._poseState = PoseState.TARGET;
 
         this._toolbar.targetButton.toggled.value = true;
