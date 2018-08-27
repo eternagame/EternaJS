@@ -1,17 +1,16 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {
-    Point, Sprite, Text, Graphics
-} from "pixi.js";
+import {Graphics, Point, Sprite, Text} from "pixi.js";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
+import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
-import {UndoBlock, UndoBlockParam} from "../UndoBlock";
 import {Bitmaps} from "../resources/Bitmaps";
+import {UndoBlock, UndoBlockParam} from "../UndoBlock";
 import {Fonts} from "../util/Fonts";
 import {GameButton} from "./GameButton";
 import {GamePanel} from "./GamePanel";
@@ -96,8 +95,8 @@ export class SpecBox extends ContainerObject {
             let pointerTarget = new DisplayObjectPointerTarget(this._dotplot_canvas);
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOut.connect(e => this.onDotPlotMouseOut(e));
-            pointerTarget.pointerDown.connect(e => this.onDotPlotMouseDown(e));
-            pointerTarget.pointerUp.connect(e => this.onDotPlotMouseUp(e));
+            pointerTarget.pointerDown.filter(IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
+            pointerTarget.pointerUp.filter(IsLeftMouse).connect(e => this.onDotPlotMouseUp(e));
         }
     }
 

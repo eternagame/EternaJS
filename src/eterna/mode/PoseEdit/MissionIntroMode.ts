@@ -2,6 +2,7 @@ import {Container, Graphics, Point, Sprite} from "pixi.js";
 import {AppMode} from "../../../flashbang/core/AppMode";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
+import {IsLeftMouse} from "../../../flashbang/input/InputUtil";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../../EPars";
@@ -29,7 +30,7 @@ export class MissionIntroMode extends AppMode {
         this.drawBackground();
 
         this._background.interactive = true;
-        new DisplayObjectPointerTarget(this._background).pointerDown.connect(() => this.play());
+        new DisplayObjectPointerTarget(this._background).pointerDown.filter(IsLeftMouse).connect(() => this.play());
 
         let moleculeImg: Sprite = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.modeSprite.addChild(moleculeImg);

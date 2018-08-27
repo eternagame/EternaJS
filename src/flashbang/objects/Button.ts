@@ -2,6 +2,7 @@ import {Point} from "pixi.js";
 import {Eterna} from "../../eterna/Eterna";
 import {Sounds} from "../../eterna/resources/Sounds";
 import {UnitSignal} from "../../signals/UnitSignal";
+import {IsLeftMouse} from "../input/InputUtil";
 import {PointerCapture} from "../input/PointerCapture";
 import {CallbackTask} from "../tasks/CallbackTask";
 import {DelayTask} from "../tasks/DelayTask";
@@ -41,7 +42,7 @@ export abstract class Button extends ContainerObject implements Enableable {
 
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
-        this.regs.add(this.pointerDown.connect(() => this.onPointerDown()));
+        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(() => this.onPointerDown()));
     }
 
     /* override */
@@ -115,7 +116,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
-            if (e.type === "pointerup" || e.type === "pointerupoutside") {
+            if (IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
                 // Pointer released. Were we clicked?
                 let wasClicked: boolean = this.hitTest(e.data.global);
 

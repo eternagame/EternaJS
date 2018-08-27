@@ -1,7 +1,6 @@
 import * as log from "loglevel";
-import {
-    Point, Rectangle, Sprite, Text, Texture
-} from "pixi.js";
+import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
@@ -10,8 +9,8 @@ import {Enableable} from "../../flashbang/objects/Enableable";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
-import {ROPWait} from "../rscript/ROPWait";
 import {Bitmaps} from "../resources/Bitmaps";
+import {ROPWait} from "../rscript/ROPWait";
 import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
 
@@ -128,7 +127,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     protected added(): void {
         super.added();
 
-        this.regs.add(this.pointerDown.connect(e => this.on_click(e)));
+        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(e => this.on_click(e)));
         this.regs.add(this.pointerMove.connect(e => this.on_move_mouse(e)));
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
