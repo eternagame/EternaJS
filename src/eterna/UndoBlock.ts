@@ -2,7 +2,7 @@ import {JSONUtil} from "../flashbang/util/JSONUtil";
 import {EPars} from "./EPars";
 import {Folder} from "./folding/Folder";
 import {Plot, PlotType} from "./Plot";
-import {Pose2D} from "./pose2D/Pose2D";
+import {Oligo, Pose2D} from "./pose2D/Pose2D";
 
 export enum UndoBlockParam {
     GU = 0,
@@ -65,11 +65,11 @@ export class UndoBlock {
         }
     }
 
-    public get_target_oligos(): any[] {
+    public get_target_oligos(): Oligo[] {
         return this._target_oligos;
     }
 
-    public get_target_oligo(): any[] {
+    public get_target_oligo(): number[] {
         return this._target_oligo;
     }
 
@@ -87,11 +87,11 @@ export class UndoBlock {
         return tc.hasOwnProperty("oligo_name") ? tc["oligo_name"] : null;
     }
 
-    public set_target_oligos(target_oligos: any[]): void {
+    public set_target_oligos(target_oligos: Oligo[]): void {
         this._target_oligos = target_oligos == null ? null : JSON.parse(JSON.stringify(target_oligos));
     }
 
-    public set_target_oligo(target_oligo: any[]): void {
+    public set_target_oligo(target_oligo: number[]): void {
         this._target_oligo = target_oligo == null ? null : target_oligo.slice();
     }
 
@@ -119,11 +119,11 @@ export class UndoBlock {
         this._target_pairs = target_pairs.slice();
     }
 
-    public get_target_oligo_order(): any[] {
+    public get_target_oligo_order(): number[] {
         return this._target_oligo_order;
     }
 
-    public set_target_oligo_order(oligo_order: any[]): void {
+    public set_target_oligo_order(oligo_order: number[]): void {
         this._target_oligo_order = oligo_order == null ? null : oligo_order.slice();
     }
 
@@ -143,11 +143,11 @@ export class UndoBlock {
         this._puzzle_locks = locks;
     }
 
-    public get_forced_struct(): any[] {
+    public get_forced_struct(): number[] {
         return this._forced_struct;
     }
 
-    public set_forced_struct(forced: any[]): void {
+    public set_forced_struct(forced: number[]): void {
         this._forced_struct = forced;
     }
 
@@ -171,7 +171,7 @@ export class UndoBlock {
         if (this._params_array[temp] != null) {
             return this._params_array[temp][index];
         } else {
-            return null;
+            return undefined;
         }
     }
 
@@ -345,16 +345,16 @@ export class UndoBlock {
 
     private _sequence: number[];
     private _pairs_array: number[][] = [];
-    private _params_array: number[][] = [];
+    private _params_array: any[][] = [];
     private _stable: boolean = false;
-    private _target_oligo: any[] = null;
-    private _target_oligos: any[] = null;
+    private _target_oligo: number[] = null;
+    private _target_oligos: Oligo[] = null;
     private _oligo_order: number[] = null;
     private _oligos_paired: number = 0;
     private _target_pairs: number[] = [];
-    private _target_oligo_order: any[] = null;
+    private _target_oligo_order: number[] = null;
     private _puzzle_locks: boolean[] = [];
-    private _forced_struct: any[] = [];
+    private _forced_struct: number[] = [];
     private _target_conditions: string = null;
 
     private _dotplot_data: number[];

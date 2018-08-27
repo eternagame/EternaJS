@@ -735,8 +735,10 @@ export class PoseEditMode extends GameMode {
 
         ExternalInterface.addCallback("get_targets", (): any[] => {
             // this.trace_js("get_targets() called");
-            let conditions: any[] = puz.get_target_conditions();
-            if (conditions.length === 0) conditions.push(null);
+            let conditions = puz.get_target_conditions();
+            if (conditions.length === 0) {
+                conditions.push(null);
+            }
             for (let ii: number = 0; ii < conditions.length; ii++) {
                 if (conditions[ii] == null) {
                     conditions[ii] = {};
@@ -749,7 +751,7 @@ export class PoseEditMode extends GameMode {
 
         ExternalInterface.addCallback("get_native_structure", (indx: number): string => {
             if (indx < 0 || indx >= this._poses.length) return null;
-            let native_pairs: any[] = this.get_current_undo_block(indx).get_pairs();
+            let native_pairs = this.get_current_undo_block(indx).get_pairs();
             return EPars.pairs_array_to_parenthesis(native_pairs);
         });
 
@@ -818,7 +820,7 @@ export class PoseEditMode extends GameMode {
             return EPars.pairs_array_to_parenthesis(folded);
         });
 
-        ExternalInterface.addCallback("fold_with_binding_site", (seq: string, site: any[], bonus: number): string => {
+        ExternalInterface.addCallback("fold_with_binding_site", (seq: string, site: number[], bonus: number): string => {
             // this.trace_js("fold_with_binding_site() called");
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
             let folded: number[] = folder.fold_sequence_with_binding_site(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
@@ -2738,7 +2740,7 @@ export class PoseEditMode extends GameMode {
             }
 
             let anti_structure_constraints: any[] = this._target_conditions[target_index]['anti_structure_constraints'];
-            let anti_pairs: any[] = EPars.parenthesis_to_pair_array(anti_structure_string);
+            let anti_pairs: number[] = EPars.parenthesis_to_pair_array(anti_structure_string);
             isSatisfied = !EPars.are_pairs_same(native_pairs, anti_pairs, anti_structure_constraints);
 
             let input_index = 0;
@@ -2803,7 +2805,7 @@ export class PoseEditMode extends GameMode {
             let bind: boolean[] = [];
             let label: string[] = [];
             let bmap: boolean[] = [];
-            let offsets: any[] = [];
+            let offsets: number[] = [];
             let ofs: number = sequence.length;
             let o: number[] = undoblk.get_oligo_order();
             let count: number = undoblk.get_oligos_paired();
@@ -4065,11 +4067,11 @@ export class PoseEditMode extends GameMode {
     private _pose_state: PoseState = PoseState.NATIVE;
     private _target_pairs: number[][] = [];
     private _target_conditions: any[] = [];
-    private _target_oligo: any[] = [];
-    private _oligo_mode: any[] = [];
-    private _oligo_name: any[] = [];
-    private _target_oligos: any[] = [];
-    private _target_oligos_order: any[] = [];
+    private _target_oligo: number[][] = [];
+    private _oligo_mode: number[] = [];
+    private _oligo_name: string[] = [];
+    private _target_oligos: Oligo[][] = [];
+    private _target_oligos_order: number[][] = [];
 
     private _folder_button: GameButton;
     private _is_databrowser_mode: boolean;
