@@ -3075,18 +3075,18 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
             this.update_energy_display_size_location(factor);
 
-            this._primary_score_energy_display.set_energy_text(score_label, score_score);
-            this._secondary_score_energy_display.set_energy_text(node_label, node_score);
+            this._primary_score_energy_display.setEnergyText(score_label, score_score);
+            this._secondary_score_energy_display.setEnergyText(node_label, node_score);
             this._secondary_score_energy_display.visible = (this._show_total_energy && node_found);
         }
     }
 
     private update_energy_display_size_location(factor: number): void {
         this._primary_score_energy_display.position = new Point(17, 118);
-        this._primary_score_energy_display.set_size(111 + factor * 59, 40);
+        this._primary_score_energy_display.setSize(111 + factor * 59, 40);
 
         this._secondary_score_energy_display.position = new Point(17 + 119 + factor * 59, 118);
-        this._secondary_score_energy_display.set_size(111, 40);
+        this._secondary_score_energy_display.setSize(111, 40);
     }
 
     private clear_score_texts(): void {

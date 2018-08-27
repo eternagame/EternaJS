@@ -57,15 +57,15 @@ export class EnergyScoreDisplay extends Container {
         textLayout.position = new Point(5, 4);
         this.addChild(textLayout);
 
-        this.set_energy_text("", "");
+        this.setEnergyText("", "");
     }
 
-    public set_energy_text(label: string, energy: string): void {
+    public setEnergyText(label: string, energy: string): void {
         this._labelText.text = label;
         this._energyText.text = energy;
     }
 
-    public set_size(width: number, height: number): void {
+    public setSize(width: number, height: number): void {
         if (width !== this._width || height !== this._height) {
             this._width = width;
             this._height = height;
@@ -87,7 +87,4 @@ export class EnergyScoreDisplay extends Container {
 
     private _width: number;
     private _height :number;
-
-    private static readonly WIDTH: number = 111;
-    private static readonly HEIGHT: number = 40;
 }
