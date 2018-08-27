@@ -1,6 +1,7 @@
 import {Graphics, Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
+import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
@@ -29,8 +30,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this.addObject(this._pose, this.container);
 
         this.container.interactive = true;
-        this.pointerDown.connect((e) => this.onMouseDown(e));
-        this.pointerUp.connect(() => this.onMouseUp());
+        this.pointerDown.filter(IsLeftMouse).connect((e) => this.onMouseDown(e));
+        this.pointerUp.filter(IsLeftMouse).connect(() => this.onMouseUp());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));

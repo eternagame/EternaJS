@@ -1,9 +1,9 @@
 import * as log from "loglevel";
 import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {Vector2} from "../../flashbang/geom/Vector2";
+import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
@@ -131,7 +131,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this.display.interactive = true;
         this.pointerMove.connect(() => this.pose_mouse_moved());
-        this.pointerDown.connect((e) => this.call_start_mousedown_callback(e));
+        this.pointerDown.filter(IsLeftMouse).connect(e => this.call_start_mousedown_callback(e));
         this.pointerOut.connect((e) => this.on_pose_mouse_out(e));
 
         // handle view settings
