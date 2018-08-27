@@ -28,6 +28,7 @@ import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
+import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
@@ -125,7 +126,7 @@ export class PuzzleEditMode extends GameMode {
             ExternalInterface.addCallback("get_secstruct", this.get_secstruct);
             ExternalInterface.addCallback("get_sequence", this.get_sequence);
             ExternalInterface.addCallback("get_locks", this.get_locks);
-            ExternalInterface.addCallback("get_thumbnail", this.get_thumbnail);
+            ExternalInterface.addCallback("get_thumbnail", this.getThumbnailBase64);
             ExternalInterface.addCallback("get_shift_limit", this.get_shift_limit);
         }
 
@@ -287,21 +288,10 @@ export class PuzzleEditMode extends GameMode {
         return "";
     }
 
-    public get_thumbnail(): string {
-        log.info("TODO: get_thumbnail");
-        return null;
-        // let timestamp: number = new Date().getTime();
-        // let filename: string = "/sites/default/files/chat_screens/scr" +
-        //     Application.instance.get_player_id() + "_" + new Date().getTime() + ".png";
-        //
-        // let urlname: string = filename;
-        // filename = "/persistent/drupal/html" + filename;
-        //
-        // let img: BitmapData = PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 6, PoseThumbnailType.WHITE);
-        // let imageBytes: ByteArray = PNGEncoder.encode(img);
-        // let imageString: string = Base64.encodeByteArray(imageBytes);
-        //
-        // return imageString;
+    public getThumbnailBase64(): string {
+        let img = PoseThumbnail.createFramedBitmap(
+            this._poses[0].get_sequence(), this._poses[0].get_pairs(), 6, PoseThumbnailType.WHITE);
+        return Base64.encodeDisplayObjectPNG(img);
     }
 
     public onResized(): void {
