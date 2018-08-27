@@ -43,11 +43,18 @@ enum PuzzleID {
     TemporalAnomaly = 7796345,          // Really big!
 }
 
+export enum InitialAppMode {
+    POSE_EDIT = "puzzle",
+    PUZZLE_EDIT = "puzzlemaker",
+}
+
 export interface EternaAppParameters {
+    initialAppMode?: InitialAppMode;
     containerID?: string,
     width?: number,
     height?: number,
     puzzleID?: number,
+    puzzleEditNumTargets?: number;
     folderName?: string,
 }
 
@@ -57,10 +64,12 @@ export class EternaApp extends FlashbangApp {
         super();
 
         // Default param values
+        params.initialAppMode = params.initialAppMode || InitialAppMode.POSE_EDIT;
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
         params.puzzleID = params.puzzleID || PuzzleID.SameState_TryptophanB;
+        params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
         this._params = params;
 
@@ -104,40 +113,61 @@ export class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(Eterna.serverURL);
         Eterna.sound = new SoundManager(Eterna.settings);
 
-        let loadingMode: LoadingMode = new LoadingMode("Authenticating...");
-        this._modeStack.unwindToMode(loadingMode);
+        this.setLoadingText("Authenticating...");
 
         this.authenticate()
             .then(() => {
-                loadingMode.text = "Loading assets...";
+                this.setLoadingText("Loading assets...");
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
-            // .then(() => {
-            //     loadingMode.text = `Loading puzzle ${this._params.puzzleID}...`;
-            //     return PuzzleManager.instance.get_puzzle_by_nid(this._params.puzzleID);
-            // })
-            // .then((puzzle) => {
-            //     let folder: Folder = null;
-            //     if (this._params.folderName != null) {
-            //         if (FolderManager.instance.isFolder(this._params.folderName)) {
-            //             folder = FolderManager.instance.get_folder(this._params.folderName)
-            //         } else {
-            //             log.warn(`No such folder '${this._params.folderName}'`);
-            //         }
-            //     }
-            //     this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
-            // })
             .then(() => {
-                this._modeStack.unwindToMode(new PuzzleEditMode(false, 1));
+                switch (this._params.initialAppMode) {
+                case InitialAppMode.PUZZLE_EDIT:
+                    return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
+                case InitialAppMode.POSE_EDIT:
+                    return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
+                default:
+                    log.warn(`Unrecognized mode '${this._params.initialAppMode}'`);
+                    return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
+                }
             })
             .catch(err => Eterna.onFatalError(err));
     }
 
     protected onUncaughtError(err: any): void {
         Eterna.onFatalError(err);
+    }
+
+    private setLoadingText(text: string): void {
+        if (this._modeStack.topMode instanceof LoadingMode) {
+            (this._modeStack.topMode as LoadingMode).text = text;
+        } else {
+            this._modeStack.pushMode(new LoadingMode(text));
+        }
+    }
+
+    public loadPoseEdit(puzzleID: number, folderName: string): Promise<void> {
+        this.setLoadingText(`Loading puzzle ${this._params.puzzleID}...`);
+        return PuzzleManager.instance.get_puzzle_by_nid(puzzleID)
+            .then(puzzle => {
+                let folder: Folder = null;
+                if (folderName != null) {
+                    if (FolderManager.instance.isFolder(folderName)) {
+                        folder = FolderManager.instance.get_folder(folderName)
+                    } else {
+                        log.warn(`No such folder '${folderName}'`);
+                    }
+                }
+                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
+            });
+    }
+
+    public loadPuzzleEditor(numTargets: number): Promise<void> {
+        this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets));
+        return Promise.resolve();
     }
 
     private authenticate(): Promise<void> {

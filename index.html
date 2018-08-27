@@ -75,21 +75,19 @@
 <div id="maingame" style="width: 100%; height: 100%; overflow: hidden"></div>
 <script src="./main.js"></script>
 <script>
-    // Handle ?puzzle=[puzzle_id] URL param
     let params = new URLSearchParams(window.location.search);
-    let puzid = undefined;
-    if (params.has("puzzle")) {
-        puzid = Number(params.get("puzzle"));
-    }
+    let numberParam = (name) => params.has(name) ? Number(params.get(name)) : undefined;
 
     const containerID = "maingame";
     const appContainer = document.getElementById(containerID);
 
     const app = new EternaApp({
+        initialAppMode: params.get("mode"),
         containerID: containerID,
         width: appContainer.clientWidth,
         height: appContainer.clientHeight,
-        puzzleID: puzid,
+        puzzleID: numberParam("puzzle"),
+        puzzleEditNumTargets: numberParam("numTargets"),
         folderName: params.get("folder")});
     window.app = app;
     app.run();
