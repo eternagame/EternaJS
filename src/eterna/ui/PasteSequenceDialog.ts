@@ -1,6 +1,6 @@
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {KeyCode} from "../../flashbang/input/KeyCode";
-import {Application} from "../Application";
+import {GameMode} from "../mode/GameMode";
 import {Dialog} from "./Dialog";
 import {TextInputPanel} from "./TextInputPanel";
 
@@ -12,7 +12,7 @@ export class PasteSequenceDialog extends Dialog<string> {
     protected added(): void {
         super.added();
 
-        const SEQUENCE: string = "Sequence";
+        const SEQUENCE = "Sequence";
 
         let inputPanel = new TextInputPanel();
         let sequenceField = inputPanel.add_field(SEQUENCE, 200);
@@ -40,7 +40,7 @@ export class PasteSequenceDialog extends Dialog<string> {
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
             if (char !== "A" && char !== "U" && char !== "G" && char !== "C") {
-                Application.instance.setup_msg_box("You can only use characters A, U, G, and C");
+                (this.mode as GameMode).showNotification("You can only use characters A, U, G, and C");
                 return;
             }
         }

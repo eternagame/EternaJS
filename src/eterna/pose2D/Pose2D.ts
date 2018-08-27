@@ -18,11 +18,11 @@ import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Dragger} from "../../flashbang/util/Dragger";
 import {Easing} from "../../flashbang/util/Easing";
 import {Registration} from "../../signals/Registration";
-import {Application} from "../Application";
 import {EPars} from "../EPars";
 import {Eterna} from "../Eterna";
 import {ExpPainter} from "../ExpPainter";
 import {Folder} from "../folding/Folder";
+import {GameMode} from "../mode/GameMode";
 import {Booster} from "../mode/PoseEdit/Booster";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Sounds} from "../resources/Sounds";
@@ -2598,7 +2598,8 @@ export class Pose2D extends ContainerObject implements Updatable {
                         this.set_molecular_binding_site(this._binding_site);
                         this._binding_site_updated = true;
                     } else {
-                        Application.instance.setup_msg_box("Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
+                        (this.mode as GameMode).showNotification(
+                            "Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
                     }
                 }
 
