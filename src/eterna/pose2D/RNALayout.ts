@@ -170,7 +170,7 @@ export class RNALayout {
 
         let nnfe: number[] = [];
 
-        folder.score_structures(seq, this._orig_pairs, EPars.DEFAULT_TEMPERATURE, nnfe);
+        folder.scoreStructures(seq, this._orig_pairs, EPars.DEFAULT_TEMPERATURE, nnfe);
         this.score_tree_recursive(nnfe, this._root, null);
     }
 
@@ -335,7 +335,7 @@ export class RNALayout {
 
                 type1 = EPars.pair_type(S[rootnode._index_a + 1], S[rootnode._index_b + 1]);
                 type2 = EPars.pair_type(S[rootnode._children[0]._index_b + 1], S[rootnode._children[0]._index_a + 1]);
-                rootnode._score = folder.loop_energy(0, 0, type1, type2, S[rootnode._index_a + 1 + 1], S[rootnode._index_b - 1 + 1],
+                rootnode._score = folder.loopEnergy(0, 0, type1, type2, S[rootnode._index_a + 1 + 1], S[rootnode._index_b - 1 + 1],
                     S[rootnode._children[0]._index_a + 1 + 1], S[rootnode._children[0]._index_b - 1 + 1], true, true);
             }
 
@@ -350,7 +350,7 @@ export class RNALayout {
             /// Top root case
             if (parentnode == null) {
                 /// initial ml scoring
-                rootnode._score = folder.ml_energy(this._bi_pairs, S, 0, true);
+                rootnode._score = folder.mlEnergy(this._bi_pairs, S, 0, true);
             } else {
                 if (!parentnode._is_pair) {
                     throw new Error("Parent node must be a pair");
@@ -382,19 +382,19 @@ export class RNALayout {
 
                 type1 = EPars.pair_type(S[i], S[j]);
                 type2 = EPars.pair_type(S[q], S[p]);
-                rootnode._score = folder.loop_energy(p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true);
+                rootnode._score = folder.loopEnergy(p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true);
 
             } else if (num_stacks === 0) {
                 i = parentnode._index_a + 1;
                 j = parentnode._index_b + 1;
 
                 let type: number = EPars.pair_type(S[i], S[j]);
-                rootnode._score = folder.hairpin_energy(j - i - 1, type, S[i + 1], S[j - 1], S, i, j);
+                rootnode._score = folder.hairpinEnergy(j - i - 1, type, S[i + 1], S[j - 1], S, i, j);
             } else if (num_stacks > 1 && parentnode != null) {
 
                 i = parentnode._index_a + 1;
-                let cuti: number = folder.cut_in_loop(i);
-                rootnode._score = (cuti === 0) ? folder.ml_energy(this._bi_pairs, S, i, false) : folder.ml_energy(this._bi_pairs, S, cuti, true);
+                let cuti: number = folder.cutInLoop(i);
+                rootnode._score = (cuti === 0) ? folder.mlEnergy(this._bi_pairs, S, i, false) : folder.mlEnergy(this._bi_pairs, S, cuti, true);
             }
 
             for (ii = 0; ii < rootnode._children.length; ii++) {
