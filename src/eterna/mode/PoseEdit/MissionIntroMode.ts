@@ -168,13 +168,13 @@ export class MissionIntroMode extends AppMode {
                 );
                 this.addObject(thumbnailButton, this.container);
 
-                const set_hover_listener = (idx: number): void => {
+                const setHoverListener = (idx: number): void => {
                     thumbnailButton.pointerOver.connect(() => {
                         this.setPuzzleThumbnail(idx);
                     });
                 };
 
-                set_hover_listener(ii);
+                setHoverListener(ii);
             }
         }
 
@@ -217,16 +217,16 @@ export class MissionIntroMode extends AppMode {
         }
         this._curThumbnail = index;
 
-        let target_pairs: number[] = this._puzzleThumbnails[index];
-        let wrong_pairs: number[] = new Array(target_pairs.length);
-        for (let ii = 0; ii < wrong_pairs.length; ii++) {
-            wrong_pairs[ii] = -1;
+        let targetPairs: number[] = this._puzzleThumbnails[index];
+        let wrongPairs: number[] = new Array(targetPairs.length);
+        for (let ii = 0; ii < wrongPairs.length; ii++) {
+            wrongPairs[ii] = -1;
         }
-        let sequence: number[] = new Array(target_pairs.length);
-        for (let ii = 0; ii < target_pairs.length; ii++) {
+        let sequence: number[] = new Array(targetPairs.length);
+        for (let ii = 0; ii < targetPairs.length; ii++) {
             sequence[ii] = EPars.RNABASE_ADENINE;
         }
-        PoseThumbnail.drawToSprite(this._goalsThumbnail, sequence, target_pairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+        PoseThumbnail.drawToSprite(this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0);
     }
 
     private updateConstraintScroll(): void {
