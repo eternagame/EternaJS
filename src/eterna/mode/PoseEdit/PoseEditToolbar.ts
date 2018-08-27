@@ -22,33 +22,33 @@ import {PoseEditMode} from "./PoseEditMode";
 export class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
 
-    public native_button: GameButton;
-    public target_button: GameButton;
-    public pip_button: GameButton;
-    public freeze_button: GameButton;
+    public nativeButton: GameButton;
+    public targetButton: GameButton;
+    public pipButton: GameButton;
+    public freezeButton: GameButton;
 
     public puzzleStateToggle: ToggleBar;
 
     public actionMenu: EternaMenu;
     public boostersMenu: GameButton;
-    public undo_button: GameButton;
-    public redo_button: GameButton;
-    public zoom_in_button: GameButton;
-    public zoom_out_button: GameButton;
-    public copy_button: GameButton;
-    public paste_button: GameButton;
-    public view_options_button: GameButton;
-    public retry_button: GameButton;
-    public spec_button: GameButton;
+    public undoButton: GameButton;
+    public redoButton: GameButton;
+    public zoomInButton: GameButton;
+    public zoomOutButton: GameButton;
+    public copyButton: GameButton;
+    public pasteButton: GameButton;
+    public viewOptionsButton: GameButton;
+    public retryButton: GameButton;
+    public specButton: GameButton;
     public screenshotButton: GameButton;
 
-    public pair_swap_button: GameButton;
-    public hint_button: GameButton;
-    public dyn_paint_tools: GameButton[] = [];
-    public dyn_action_tools: GameButton[] = [];
+    public pairSwapButton: GameButton;
+    public hintButton: GameButton;
+    public dynPaintTools: GameButton[] = [];
+    public dynActionTools: GameButton[] = [];
 
-    public submit_button: GameButton;
-    public view_solutions_button: GameButton;
+    public submitButton: GameButton;
+    public viewSolutionsButton: GameButton;
 
     public constructor(puz: Puzzle) {
         super();
@@ -83,20 +83,20 @@ export class PoseEditToolbar extends ContainerObject {
         this.addObject(this.actionMenu, this._toolbarLayout);
 
         // SUBMIT BUTTON
-        this.submit_button = new GameButton()
+        this.submitButton = new GameButton()
             .up(Bitmaps.ImgSubmit)
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit)
             .tooltip("Publish your solution!");
         if (isExperimental) {
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
-            this.addObject(this.submit_button, this._toolbarLayout);
+            this.addObject(this.submitButton, this._toolbarLayout);
         }
 
         this._toolbarLayout.addHSpacer(SPACE_WIDE);
 
         // PIP BUTTON
-        this.pip_button = new GameButton()
+        this.pipButton = new GameButton()
             .up(Bitmaps.ImgPip)
             .over(Bitmaps.ImgPipOver)
             .down(Bitmaps.ImgPipHit)
@@ -104,12 +104,12 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP);
         if (this._puzzle.get_secstructs().length > 1) {
-            this.addObject(this.pip_button, this._toolbarLayout);
+            this.addObject(this.pipButton, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         // FREEZE
-        this.freeze_button = new GameButton()
+        this.freezeButton = new GameButton()
             .up(Bitmaps.ImgFreeze)
             .over(Bitmaps.ImgFreezeOver)
             .selected(Bitmaps.ImgFreezeSelected)
@@ -117,29 +117,29 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
         if (Eterna.settings.freezeButtonAlwaysVisible.value) {
-            this.addObject(this.freeze_button, this._toolbarLayout);
+            this.addObject(this.freezeButton, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
         // NATIVE
-        this.native_button = new GameButton()
+        this.nativeButton = new GameButton()
             .up(Bitmaps.ImgNative)
             .over(Bitmaps.ImgNativeOver)
             .down(Bitmaps.ImgNativeSelected)
             .selected(Bitmaps.ImgNativeSelected)
             .tooltip("Natural Mode. RNA folds into the most stable shape.")
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
-        this.addObject(this.native_button, this._toolbarLayout);
+        this.addObject(this.nativeButton, this._toolbarLayout);
 
         // TARGET
-        this.target_button = new GameButton()
+        this.targetButton = new GameButton()
             .up(Bitmaps.ImgTarget)
             .over(Bitmaps.ImgTargetOver)
             .down(Bitmaps.ImgTargetSelected)
             .selected(Bitmaps.ImgTargetSelected)
             .tooltip("Target Mode. RNA freezes into the desired shape.")
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
-        this.addObject(this.target_button, this._toolbarLayout);
+        this.addObject(this.targetButton, this._toolbarLayout);
 
         this._toolbarLayout.addHSpacer(SPACE_WIDE);
 
@@ -152,7 +152,7 @@ export class PoseEditToolbar extends ContainerObject {
 
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
 
-                this.pair_swap_button = new GameButton()
+                this.pairSwapButton = new GameButton()
                     .up(Bitmaps.ImgSwap)
                     .over(Bitmaps.ImgSwapOver)
                     .down(Bitmaps.ImgSwapOver)
@@ -160,7 +160,7 @@ export class PoseEditToolbar extends ContainerObject {
                     .hotkey(KeyCode.Digit5)
                     .tooltip("Swap paired bases.")
                     .rscriptID(RScriptUIElementID.SWAP);
-                this.addObject(this.pair_swap_button, this._toolbarLayout);
+                this.addObject(this.pairSwapButton, this._toolbarLayout);
             } else {
                 this.palette.change_no_pair_mode();
             }
@@ -186,7 +186,7 @@ export class PoseEditToolbar extends ContainerObject {
                             mode.deselectAllColorings();
                             button.toggled.value = true;
                         });
-                        this.dyn_paint_tools.push(button);
+                        this.dynPaintTools.push(button);
                         this.addObject(button, boosterPaintToolsLayout);
                         this.updateLayout();
                     });
@@ -202,7 +202,7 @@ export class PoseEditToolbar extends ContainerObject {
                         let button: GameButton = booster.createButton(14);
                         button.clicked.connect(() => booster.onRun());
                         this.actionMenu.add_sub_menu_button_at(idx, button, ii);
-                        this.dyn_action_tools.push(button);
+                        this.dynActionTools.push(button);
                     });
                 }
             }
@@ -210,7 +210,7 @@ export class PoseEditToolbar extends ContainerObject {
 
 
         // ZOOM IN, ZOOM OUT, UNDO, REDO
-        this.zoom_in_button = new GameButton()
+        this.zoomInButton = new GameButton()
             .up(Bitmaps.ImgZoomIn)
             .over(Bitmaps.ImgZoomInOver)
             .down(Bitmaps.ImgZoomInHit)
@@ -219,7 +219,7 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.Equal)
             .rscriptID(RScriptUIElementID.ZOOMIN);
 
-        this.zoom_out_button = new GameButton()
+        this.zoomOutButton = new GameButton()
             .up(Bitmaps.ImgZoomOut)
             .over(Bitmaps.ImgZoomOutOver)
             .down(Bitmaps.ImgZoomOutHit)
@@ -228,7 +228,7 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.Minus)
             .rscriptID(RScriptUIElementID.ZOOMOUT);
 
-        this.undo_button = new GameButton()
+        this.undoButton = new GameButton()
             .up(Bitmaps.ImgUndo)
             .over(Bitmaps.ImgUndoOver)
             .down(Bitmaps.ImgUndoHit)
@@ -237,7 +237,7 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
 
-        this.redo_button = new GameButton()
+        this.redoButton = new GameButton()
             .up(Bitmaps.ImgRedo)
             .over(Bitmaps.ImgRedoOver)
             .down(Bitmaps.ImgRedoHit)
@@ -248,12 +248,12 @@ export class PoseEditToolbar extends ContainerObject {
 
         if (this._puzzle.is_undo_zoom_allowed()) {
             this._toolbarLayout.addHSpacer(SPACE_WIDE);
-            this.addObject(this.zoom_in_button, this._toolbarLayout);
-            this.addObject(this.zoom_out_button, this._toolbarLayout);
+            this.addObject(this.zoomInButton, this._toolbarLayout);
+            this.addObject(this.zoomOutButton, this._toolbarLayout);
 
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
-            this.addObject(this.undo_button, this._toolbarLayout);
-            this.addObject(this.redo_button, this._toolbarLayout);
+            this.addObject(this.undoButton, this._toolbarLayout);
+            this.addObject(this.redoButton, this._toolbarLayout);
         }
 
         // MENU BUTTONS
@@ -264,20 +264,20 @@ export class PoseEditToolbar extends ContainerObject {
             .tooltip("Screenshot");
         this.actionMenu.add_sub_menu_button(0, this.screenshotButton);
 
-        this.view_options_button = new GameButton()
+        this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
             .label("Settings", 14)
             .scaleBitmapToLabel()
             .tooltip("Game options");
-        this.actionMenu.add_sub_menu_button(0, this.view_options_button);
+        this.actionMenu.add_sub_menu_button(0, this.viewOptionsButton);
 
-        this.view_solutions_button = new GameButton()
+        this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
             .label("Designs", 14)
             .scaleBitmapToLabel()
             .tooltip("View all submitted designs for this puzzle.");
 
-        this.spec_button = new GameButton()
+        this.specButton = new GameButton()
             .allStates(Bitmaps.ImgSpec)
             .label("Specs", 14)
             .scaleBitmapToLabel()
@@ -285,36 +285,36 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyS);
 
         if (isExperimental) {
-            this.actionMenu.add_sub_menu_button(0, this.view_solutions_button);
-            this.actionMenu.add_sub_menu_button(0, this.spec_button);
+            this.actionMenu.add_sub_menu_button(0, this.viewSolutionsButton);
+            this.actionMenu.add_sub_menu_button(0, this.specButton);
         }
 
-        this.retry_button = new GameButton()
+        this.retryButton = new GameButton()
             .allStates(Bitmaps.ImgReset)
             .label("Reset", 14)
             .scaleBitmapToLabel()
             .tooltip("Reset and try this puzzle again.")
             .rscriptID(RScriptUIElementID.RESET);
-        this.actionMenu.add_sub_menu_button(0, this.retry_button);
+        this.actionMenu.add_sub_menu_button(0, this.retryButton);
 
-        this.copy_button = new GameButton()
+        this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
             .label("Copy", 14)
             .scaleBitmapToLabel()
             .tooltip("Copy the current sequence");
 
-        this.paste_button = new GameButton()
+        this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
             .label("Paste", 14)
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
 
         if (this._puzzle.get_puzzle_type() !== PuzzleType.BASIC) {
-            this.actionMenu.add_sub_menu_button(0, this.copy_button);
-            this.actionMenu.add_sub_menu_button(0, this.paste_button);
+            this.actionMenu.add_sub_menu_button(0, this.copyButton);
+            this.actionMenu.add_sub_menu_button(0, this.pasteButton);
         }
 
-        this.hint_button = new GameButton()
+        this.hintButton = new GameButton()
             .up(Bitmaps.ImgHint)
             .over(Bitmaps.ImgHintOver)
             .down(Bitmaps.ImgHintHit)
@@ -322,7 +322,7 @@ export class PoseEditToolbar extends ContainerObject {
             .tooltip("Hint")
             .rscriptID(RScriptUIElementID.HINT);
         if (this._puzzle.get_hint() != null) {
-            this.addObject(this.hint_button, this._toolbarLayout);
+            this.addObject(this.hintButton, this._toolbarLayout);
         }
 
         // TOGGLE_BAR
@@ -352,16 +352,16 @@ export class PoseEditToolbar extends ContainerObject {
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
     }
 
-    public set_toolbar_autohide(enabled: boolean): void {
+    public setToolbarAutohide(enabled: boolean): void {
         const COLLAPSE_ANIM = "CollapseAnim";
 
-        if (this._auto_collapse === enabled) {
+        if (this._autoCollapse === enabled) {
             return;
         }
 
-        this._auto_collapse = enabled;
+        this._autoCollapse = enabled;
 
-        if (this._auto_collapse) {
+        if (this._autoCollapse) {
             this.display.interactive = true;
 
             let collapsed: boolean = false;
@@ -413,40 +413,40 @@ export class PoseEditToolbar extends ContainerObject {
         }
     }
 
-    public disable_tools(disable: boolean): void {
+    public disableTools(disable: boolean): void {
         this.palette.enabled = !disable;
-        this.pair_swap_button.enabled = !disable;
-        for (let k: number = 0; k < this.dyn_paint_tools.length; k++) {
-            this.dyn_paint_tools[k].enabled = !disable;
+        this.pairSwapButton.enabled = !disable;
+        for (let k: number = 0; k < this.dynPaintTools.length; k++) {
+            this.dynPaintTools[k].enabled = !disable;
         }
 
-        this.target_button.enabled = !disable;
-        this.native_button.enabled = !disable;
+        this.targetButton.enabled = !disable;
+        this.nativeButton.enabled = !disable;
 
-        this.zoom_in_button.enabled = !disable;
-        this.zoom_out_button.enabled = !disable;
+        this.zoomInButton.enabled = !disable;
+        this.zoomOutButton.enabled = !disable;
 
-        this.native_button.enabled = !disable;
-        this.target_button.enabled = !disable;
+        this.nativeButton.enabled = !disable;
+        this.targetButton.enabled = !disable;
 
-        this.view_options_button.enabled = !disable;
-        this.retry_button.enabled = !disable;
-        this.copy_button.enabled = !disable;
-        this.paste_button.enabled = !disable;
-        this.spec_button.enabled = !disable;
+        this.viewOptionsButton.enabled = !disable;
+        this.retryButton.enabled = !disable;
+        this.copyButton.enabled = !disable;
+        this.pasteButton.enabled = !disable;
+        this.specButton.enabled = !disable;
 
-        this.undo_button.enabled = !disable;
-        this.redo_button.enabled = !disable;
+        this.undoButton.enabled = !disable;
+        this.redoButton.enabled = !disable;
 
-        this.submit_button.enabled = !disable;
-        this.view_solutions_button.enabled = !disable;
+        this.submitButton.enabled = !disable;
+        this.viewSolutionsButton.enabled = !disable;
 
-        this.hint_button.enabled = !disable;
+        this.hintButton.enabled = !disable;
 
-        this.freeze_button.enabled = !disable;
-        this.spec_button.enabled = !disable;
+        this.freezeButton.enabled = !disable;
+        this.specButton.enabled = !disable;
 
-        this.pip_button.enabled = !disable;
+        this.pipButton.enabled = !disable;
 
         if (this.puzzleStateToggle != null) {
             this.puzzleStateToggle.enabled = !disable;
@@ -462,6 +462,6 @@ export class PoseEditToolbar extends ContainerObject {
     private _toolbarLayout: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
-    private _auto_collapse: boolean;
+    private _autoCollapse: boolean;
     private _autoCollapseRegs: RegistrationGroup;
 }
