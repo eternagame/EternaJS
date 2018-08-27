@@ -1,13 +1,12 @@
-import {Container, Graphics, Point} from "pixi.js";
+import * as log from "loglevel";
+import {Graphics} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
+import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {LocationTask} from "../../../flashbang/tasks/LocationTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Easing} from "../../../flashbang/util/Easing";
-import {RegistrationGroup} from "../../../signals/RegistrationGroup";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
 import {GameButton} from "../../ui/GameButton";
@@ -15,6 +14,12 @@ import {NucleotidePalette} from "../../ui/NucleotidePalette";
 
 export class PuzzleEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
+
+    public addbase_button: GameButton;
+    public addpair_button: GameButton;
+    public delete_button: GameButton;
+    public lock_button: GameButton;
+    public site_button: GameButton;
 
     public native_button: GameButton;
     public target_button: GameButton;
@@ -52,11 +57,62 @@ export class PuzzleEditToolbar extends ContainerObject {
         this._invisibleBackground.y = -this._invisibleBackground.height;
         this.container.addChild(this._invisibleBackground);
 
-        this._content = new Container();
+        this._content = new VLayoutContainer(SPACE_NARROW);
         this.container.addChild(this._content);
 
-        this._toolbarLayout = new HLayoutContainer();
-        this._content.addChild(this._toolbarLayout);
+        // UPPER TOOLBAR (structure editing tools)
+        let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
+        this._content.addChild(upperToolbarLayout);
+
+        this.addbase_button = new GameButton()
+            .up(Bitmaps.ImgAddBase)
+            .over(Bitmaps.ImgAddBaseOver)
+            .down(Bitmaps.ImgAddBaseSelect)
+            .selected(Bitmaps.ImgAddBaseSelect)
+            .hotkey(KeyCode.Digit6)
+            .tooltip("Add a single base.");
+        this.addObject(this.addbase_button, upperToolbarLayout);
+
+        this.addpair_button = new GameButton()
+            .up(Bitmaps.ImgAddPair)
+            .over(Bitmaps.ImgAddPairOver)
+            .down(Bitmaps.ImgAddPairSelect)
+            .selected(Bitmaps.ImgAddPairSelect)
+            .hotkey(KeyCode.Digit7)
+            .tooltip("Add a pair.");
+        this.addObject(this.addpair_button, upperToolbarLayout);
+
+        this.delete_button = new GameButton()
+            .up(Bitmaps.ImgErase)
+            .over(Bitmaps.ImgEraseOver)
+            .down(Bitmaps.ImgEraseSelect)
+            .selected(Bitmaps.ImgEraseSelect)
+            .hotkey(KeyCode.Digit8)
+            .tooltip("Delete a base or a pair.");
+        this.addObject(this.delete_button, upperToolbarLayout);
+
+        this.lock_button = new GameButton()
+            .up(Bitmaps.ImgLock)
+            .over(Bitmaps.ImgLockOver)
+            .down(Bitmaps.ImgLockSelect)
+            .selected(Bitmaps.ImgLockSelect)
+            .hotkey(KeyCode.Digit9)
+            .tooltip("Lock or unlock a base.");
+        this.addObject(this.lock_button, upperToolbarLayout);
+
+        this.site_button = new GameButton()
+            .up(Bitmaps.ImgMolecule)
+            .over(Bitmaps.ImgMoleculeOver)
+            .down(Bitmaps.ImgMoleculeSelect)
+            .selected(Bitmaps.ImgMoleculeSelect)
+            .hotkey(KeyCode.Digit0)
+            .tooltip("Create or remove a molecular binding site.");
+        this.addObject(this.site_button, upperToolbarLayout);
+
+        // LOWER TOOLBAR (palette, zoom, settings, etc)
+
+        let lowerToolbarLayout = new HLayoutContainer();
+        this._content.addChild(lowerToolbarLayout);
 
         // SCREENSHOT
         this.screenshotButton = new GameButton()
@@ -64,7 +120,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgScreenshotOver)
             .down(Bitmaps.ImgScreenshotHit)
             .tooltip("Screenshot");
-        this.addObject(this.screenshotButton, this._toolbarLayout);
+        this.addObject(this.screenshotButton, lowerToolbarLayout);
 
         // SETTINGS
         this.view_options_button = new GameButton()
@@ -72,7 +128,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgSettingsOver)
             .down(Bitmaps.ImgSettingsHit)
             .tooltip("Game options");
-        this.addObject(this.view_options_button, this._toolbarLayout);
+        this.addObject(this.view_options_button, lowerToolbarLayout);
 
         // ZOOM IN
         this.zoom_in_button = new GameButton()
@@ -83,7 +139,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Zoom in")
             .hotkey(KeyCode.Equal)
             .rscriptID(RScriptUIElementID.ZOOMIN);
-        this.addObject(this.zoom_in_button, this._toolbarLayout);
+        this.addObject(this.zoom_in_button, lowerToolbarLayout);
 
         // ZOOM OUT
         this.zoom_out_button = new GameButton()
@@ -94,9 +150,9 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Zoom out")
             .hotkey(KeyCode.Minus)
             .rscriptID(RScriptUIElementID.ZOOMOUT);
-        this.addObject(this.zoom_out_button, this._toolbarLayout);
+        this.addObject(this.zoom_out_button, lowerToolbarLayout);
 
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
         // NATIVE
         this.native_button = new GameButton()
@@ -107,7 +163,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Natural Mode. RNA folds into the most stable shape.")
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
         if (!this._embedded) {
-            this.addObject(this.native_button, this._toolbarLayout);
+            this.addObject(this.native_button, lowerToolbarLayout);
         }
 
         // TARGET
@@ -119,17 +175,17 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Target Mode. RNA freezes into the desired shape.")
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
         if (!this._embedded) {
-            this.addObject(this.target_button, this._toolbarLayout);
+            this.addObject(this.target_button, lowerToolbarLayout);
         }
 
-        this._toolbarLayout.addHSpacer(SPACE_WIDE);
+        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
         // PALETTE
         this.palette = new NucleotidePalette();
-        this.addObject(this.palette, this._toolbarLayout);
+        this.addObject(this.palette, lowerToolbarLayout);
         this.palette.change_default_mode();
 
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
         // SWAP
         this.pair_swap_button = new GameButton()
@@ -140,9 +196,9 @@ export class PuzzleEditToolbar extends ContainerObject {
             .hotkey(KeyCode.Digit5)
             .tooltip("Swap paired bases.")
             .rscriptID(RScriptUIElementID.SWAP);
-        this.addObject(this.pair_swap_button, this._toolbarLayout);
+        this.addObject(this.pair_swap_button, lowerToolbarLayout);
 
-        this._toolbarLayout.addHSpacer(SPACE_WIDE);
+        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
         this.undo_button = new GameButton()
             .up(Bitmaps.ImgUndo)
@@ -152,7 +208,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Undo")
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
-        this.addObject(this.undo_button, this._toolbarLayout);
+        this.addObject(this.undo_button, lowerToolbarLayout);
 
         this.redo_button = new GameButton()
             .up(Bitmaps.ImgRedo)
@@ -162,7 +218,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Redo")
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
-        this.addObject(this.redo_button, this._toolbarLayout);
+        this.addObject(this.redo_button, lowerToolbarLayout);
 
         // COPY
         this.copy_button = new GameButton()
@@ -170,7 +226,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgCopyOver)
             .down(Bitmaps.ImgCopyHit)
             .tooltip("Copy the current sequence");
-        this.addObject(this.copy_button, this._toolbarLayout);
+        this.addObject(this.copy_button, lowerToolbarLayout);
 
         // PASTE
         this.paste_button = new GameButton()
@@ -178,7 +234,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgPasteOver)
             .down(Bitmaps.ImgPasteHit)
             .tooltip("Type in a sequence");
-        this.addObject(this.paste_button, this._toolbarLayout);
+        this.addObject(this.paste_button, lowerToolbarLayout);
 
         // RESET
         this.reset_button = new GameButton()
@@ -186,7 +242,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgResetOver)
             .down(Bitmaps.ImgResetHit)
             .tooltip("Reset all bases to A.");
-        this.addObject(this.reset_button, this._toolbarLayout);
+        this.addObject(this.reset_button, lowerToolbarLayout);
 
         // SUBMIT BUTTON
         this.submit_button = new GameButton()
@@ -194,82 +250,20 @@ export class PuzzleEditToolbar extends ContainerObject {
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit)
             .tooltip("Publish your puzzle!");
-        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         if (!this._embedded) {
-            this.addObject(this.submit_button, this._toolbarLayout);
+            this.addObject(this.submit_button, lowerToolbarLayout);
         }
 
         this.updateLayout();
-        this._uncollapsedContentLoc = new Point(this._content.position.x, this._content.position.y);
     }
 
     private updateLayout(): void {
-        this._toolbarLayout.layout(true);
+        this._content.layout(true);
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
-    }
-
-    public set_toolbar_autohide(enabled: boolean): void {
-        const COLLAPSE_ANIM = "CollapseAnim";
-
-        if (this._auto_collapse === enabled) {
-            return;
-        }
-
-        this._auto_collapse = enabled;
-
-        if (this._auto_collapse) {
-            this.display.interactive = true;
-
-            let collapsed: boolean = false;
-
-            const uncollapse = () => {
-                if (collapsed) {
-                    collapsed = false;
-                    this.removeNamedObjects(COLLAPSE_ANIM);
-                    this.addNamedObject(
-                        COLLAPSE_ANIM,
-                        new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y,
-                            0.25, Easing.easeOut, this._content
-                        )
-                    );
-                }
-            };
-
-            const collapse = () => {
-                if (!collapsed) {
-                    collapsed = true;
-                    this.removeNamedObjects(COLLAPSE_ANIM);
-                    this.addNamedObject(
-                        COLLAPSE_ANIM,
-                        new LocationTask(
-                            this._uncollapsedContentLoc.x,
-                            this._uncollapsedContentLoc.y + 72,
-                            0.25, Easing.easeOut, this._content
-                        )
-                    );
-                }
-            };
-
-            this._autoCollapseRegs = new RegistrationGroup();
-            this._autoCollapseRegs.add(this.pointerOver.connect(uncollapse));
-            this._autoCollapseRegs.add(this.pointerOut.connect(collapse));
-
-            collapse();
-        } else {
-            if (this._autoCollapseRegs != null) {
-                this._autoCollapseRegs.close();
-                this._autoCollapseRegs = null;
-            }
-
-            this.removeNamedObjects(COLLAPSE_ANIM);
-            this._content.position = this._uncollapsedContentLoc;
-            this.display.interactive = false;
-        }
     }
 
     public disable_tools(disable: boolean): void {
@@ -294,13 +288,18 @@ export class PuzzleEditToolbar extends ContainerObject {
         this.submit_button.enabled = !disable;
     }
 
+    public deselect_all_colorings(): void {
+        this.palette.clear_selection();
+        this.pair_swap_button.toggled.value = false;
+        this.addbase_button.toggled.value = false;
+        this.addpair_button.toggled.value = false;
+        this.delete_button.toggled.value = false;
+        this.lock_button.toggled.value = false;
+        this.site_button.toggled.value = false;
+    }
+
     private readonly _embedded: boolean;
 
     private _invisibleBackground: Graphics;
-    private _content: Container;
-    private _toolbarLayout: HLayoutContainer;
-
-    private _uncollapsedContentLoc: Point;
-    private _auto_collapse: boolean;
-    private _autoCollapseRegs: RegistrationGroup;
+    private _content: VLayoutContainer;
 }
