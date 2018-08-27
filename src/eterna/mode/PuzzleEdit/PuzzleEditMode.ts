@@ -164,18 +164,6 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private initialize(): void {
-        // this._submit_field = new TextInputPanel;
-        // this._submit_field.set_title("Publish your puzzle");
-        // this._submit_field.add_field("Title", 200);
-        // if (num_targets == 1) {
-        //     this._submit_field.add_field("Min G-U pairs required", 200);
-        //     this._submit_field.add_field("Max G-C pairs allowed", 200);
-        //     this._submit_field.add_field("Min A-U pairs required", 200);
-        // }
-        // this._submit_field.add_field("Description", 200, true);
-        // this._submit_field.set_callbacks(this.submit_puzzle, this.on_cancel_submit);
-        // this._submit_field.set_pos(new UDim(0.5, 0.5, -150, -100));
-        //
         this.clear_undo_stack();
 
         let pose_fields: PoseField[] = [];

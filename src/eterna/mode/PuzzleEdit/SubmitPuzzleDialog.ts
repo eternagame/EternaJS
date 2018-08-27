@@ -53,9 +53,11 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         inputPanel.set_title("Publish your puzzle");
 
         let title = inputPanel.add_field(TITLE, FIELD_WIDTH);
-        inputPanel.add_field(MIN_GU, FIELD_WIDTH);
-        inputPanel.add_field(MAX_GC, FIELD_WIDTH);
-        inputPanel.add_field(MIN_AU, FIELD_WIDTH);
+        if (this._numPoses == 1) {
+            inputPanel.add_field(MIN_GU, FIELD_WIDTH);
+            inputPanel.add_field(MAX_GC, FIELD_WIDTH);
+            inputPanel.add_field(MIN_AU, FIELD_WIDTH);
+        }
         inputPanel.add_field(DESCRIPTION, FIELD_WIDTH, true);
         this.addObject(inputPanel, this.container);
 
