@@ -140,7 +140,7 @@ export class EternaMenu extends GamePanel implements Enableable {
     private do_layout(): void {
         for (let menu of this._menus) {
             if (menu.itemButtons.length === 0) {
-                menu.panel.set_size(0, 0);
+                menu.panel.setSize(0, 0);
                 continue;
             }
 
@@ -157,7 +157,7 @@ export class EternaMenu extends GamePanel implements Enableable {
                 width_walker = Math.max(width_walker, DisplayUtil.width(button.display) + 14);
             }
 
-            menu.panel.set_size(width_walker, height_walker);
+            menu.panel.setSize(width_walker, height_walker);
         }
 
         let space: number = (this._menu_style === EternaMenuStyle.PULLUP ? 1 : 10);
@@ -186,7 +186,7 @@ export class EternaMenu extends GamePanel implements Enableable {
             this._menus[lastIdx].panel.get_panel_width()
         ) - lastButtonWidth;
 
-        this.set_size(width_offset, this._menu_height + 1);
+        this.setSize(width_offset, this._menu_height + 1);
     }
 
     private readonly _menu_style: EternaMenuStyle;

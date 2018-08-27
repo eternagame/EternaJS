@@ -32,9 +32,9 @@ export class StructureInput extends GamePanel implements Updatable {
             .bold();
         this.addObject(this._textInput, this.container);
 
-        this.set_size(100, 50);
+        this.setSize(100, 50);
 
-        this._textInput.valueChanged.connect(() => this.set_pose());
+        this._textInput.valueChanged.connect(() => this.setPose());
         this._textInput.element.onkeydown = (e) => {
             // Prevent arrow key presses from moving the pose around
             if (IsArrowKey(e.code)) {
@@ -51,22 +51,22 @@ export class StructureInput extends GamePanel implements Updatable {
         }
     }
 
-    public set_size(width: number, height: number): void {
-        super.set_size(width, height);
+    public setSize(width: number, height: number): void {
+        super.setSize(width, height);
         this._textInput.width = width - 20;
         DisplayUtil.positionRelative(
             this._textInput.display, HAlign.CENTER, VAlign.CENTER,
             this.container, HAlign.CENTER, VAlign.CENTER);
     }
 
-    public set_pose(op: PuzzleEditOp = null, index: number = -1): void {
+    public setPose(op: PuzzleEditOp = null, index: number = -1): void {
         let input = this._textInput.text;
         input = input.replace(/[^\.\(\)]/g, "");
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, "(.)");
 
         let error: string = EPars.validate_parenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
-        this.set_warning(error || "");
+        this.setWarning(error || "");
         this._textInput.text = input;
 
         let sequence = this._pose.get_sequence();
@@ -203,24 +203,24 @@ export class StructureInput extends GamePanel implements Updatable {
         }
         this._pose.set_sequence(sequence);
         this._pose.set_puzzle_locks(locks);
-        this._pose.set_molecular_structure(EPars.parenthesis_to_pair_array(this.get_secstruct()));
+        this._pose.set_molecular_structure(EPars.parenthesis_to_pair_array(this.structureString));
         this._pose.set_molecular_binding_site(binding_site);
         this._pose.call_pose_edit_callback();
 
         this._pose.track_cursor(this._textInput.caretPosition);
     }
 
-    public get_secstruct(): string {
+    public get structureString(): string {
         let secstruct: string = this._textInput.text;
         return secstruct.replace(/[^\.\(\)]/g, "");
     }
 
-    public set_secstruct(struct: string): void {
+    public set structureString(struct: string) {
         this._textInput.text = struct;
-        this.set_warning("");
+        this.setWarning("");
     }
 
-    public set_warning(warning: string): void {
+    public setWarning(warning: string): void {
         if (warning && warning.length > 0) {
             this.setup(0, 0.5, 0xAA0000, 0.0, 0);
             // this.set_mouse_over_object(new TextBalloon(warning, 0x0, 0.8), 1.0);

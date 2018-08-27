@@ -34,7 +34,7 @@ export class AchievementBox extends ContainerObject {
         const IMAGE_SIZE = 128;
 
         let panel = new GamePanel(GamePanelType.NORMAL, 0.2);
-        panel.set_size(WIDTH, HEIGHT);
+        panel.setSize(WIDTH, HEIGHT);
         panel.display.position = new Point(-WIDTH * 0.5, -HEIGHT * 0.5);
         this.addObject(panel, this.container);
 

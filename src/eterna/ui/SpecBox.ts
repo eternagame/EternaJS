@@ -251,7 +251,7 @@ export class SpecBox extends ContainerObject {
     }
 
     private updateLayout(): void {
-        this._panel.set_size(this._width, this._height);
+        this._panel.setSize(this._width, this._height);
 
         if (this._docked) {
             this._dotplot_canvas.position = new Point(20, 15);

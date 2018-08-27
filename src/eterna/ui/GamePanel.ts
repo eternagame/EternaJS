@@ -25,7 +25,7 @@ export class GamePanel extends BaseGamePanel {
         this.updateView();
     }
 
-    public set_size(width: number, height: number): void {
+    public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
         this.updateView();

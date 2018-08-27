@@ -58,7 +58,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
 
         let panel: GamePanel = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 0.27, 0xC0DCE7);
         panel.set_panel_title("Game options");
-        panel.set_size(viewLayout.width + 40, viewLayout.height + 40 + panel.get_title_space());
+        panel.setSize(viewLayout.width + 40, viewLayout.height + 40 + panel.get_title_space());
         this.addObject(panel, this.container);
 
         panel.display.interactive = true;

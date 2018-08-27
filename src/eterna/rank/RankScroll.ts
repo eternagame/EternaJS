@@ -220,7 +220,7 @@ export class RankScroll extends ContainerObject {
         }
 
         let bg: GamePanel = new GamePanel(0, 0.9, 0x152843);
-        bg.set_size(310, 88);
+        bg.setSize(310, 88);
         bg.display.position = new Point(-10, -10);
         this.addObject(bg, this.container);
 
