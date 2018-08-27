@@ -1,4 +1,3 @@
-import * as log from "loglevel";
 import {Graphics} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
@@ -15,28 +14,28 @@ import {NucleotidePalette} from "../../ui/NucleotidePalette";
 export class PuzzleEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
 
-    public addbase_button: GameButton;
-    public addpair_button: GameButton;
-    public delete_button: GameButton;
-    public lock_button: GameButton;
-    public site_button: GameButton;
+    public addbaseButton: GameButton;
+    public addpairButton: GameButton;
+    public deleteButton: GameButton;
+    public lockButton: GameButton;
+    public siteButton: GameButton;
 
-    public native_button: GameButton;
-    public target_button: GameButton;
+    public nativeButton: GameButton;
+    public targetButton: GameButton;
 
-    public undo_button: GameButton;
-    public redo_button: GameButton;
-    public zoom_in_button: GameButton;
-    public zoom_out_button: GameButton;
-    public copy_button: GameButton;
-    public paste_button: GameButton;
-    public view_options_button: GameButton;
+    public undoButton: GameButton;
+    public redoButton: GameButton;
+    public zoomInButton: GameButton;
+    public zoomOutButton: GameButton;
+    public copyButton: GameButton;
+    public pasteButton: GameButton;
+    public viewOptionsButton: GameButton;
     public screenshotButton: GameButton;
 
-    public pair_swap_button: GameButton;
-    public reset_button: GameButton;
+    public pairSwapButton: GameButton;
+    public resetButton: GameButton;
 
-    public submit_button: GameButton;
+    public submitButton: GameButton;
 
     public constructor(embedded: boolean) {
         super();
@@ -64,50 +63,50 @@ export class PuzzleEditToolbar extends ContainerObject {
         let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
         this._content.addChild(upperToolbarLayout);
 
-        this.addbase_button = new GameButton()
+        this.addbaseButton = new GameButton()
             .up(Bitmaps.ImgAddBase)
             .over(Bitmaps.ImgAddBaseOver)
             .down(Bitmaps.ImgAddBaseSelect)
             .selected(Bitmaps.ImgAddBaseSelect)
             .hotkey(KeyCode.Digit6)
             .tooltip("Add a single base.");
-        this.addObject(this.addbase_button, upperToolbarLayout);
+        this.addObject(this.addbaseButton, upperToolbarLayout);
 
-        this.addpair_button = new GameButton()
+        this.addpairButton = new GameButton()
             .up(Bitmaps.ImgAddPair)
             .over(Bitmaps.ImgAddPairOver)
             .down(Bitmaps.ImgAddPairSelect)
             .selected(Bitmaps.ImgAddPairSelect)
             .hotkey(KeyCode.Digit7)
             .tooltip("Add a pair.");
-        this.addObject(this.addpair_button, upperToolbarLayout);
+        this.addObject(this.addpairButton, upperToolbarLayout);
 
-        this.delete_button = new GameButton()
+        this.deleteButton = new GameButton()
             .up(Bitmaps.ImgErase)
             .over(Bitmaps.ImgEraseOver)
             .down(Bitmaps.ImgEraseSelect)
             .selected(Bitmaps.ImgEraseSelect)
             .hotkey(KeyCode.Digit8)
             .tooltip("Delete a base or a pair.");
-        this.addObject(this.delete_button, upperToolbarLayout);
+        this.addObject(this.deleteButton, upperToolbarLayout);
 
-        this.lock_button = new GameButton()
+        this.lockButton = new GameButton()
             .up(Bitmaps.ImgLock)
             .over(Bitmaps.ImgLockOver)
             .down(Bitmaps.ImgLockSelect)
             .selected(Bitmaps.ImgLockSelect)
             .hotkey(KeyCode.Digit9)
             .tooltip("Lock or unlock a base.");
-        this.addObject(this.lock_button, upperToolbarLayout);
+        this.addObject(this.lockButton, upperToolbarLayout);
 
-        this.site_button = new GameButton()
+        this.siteButton = new GameButton()
             .up(Bitmaps.ImgMolecule)
             .over(Bitmaps.ImgMoleculeOver)
             .down(Bitmaps.ImgMoleculeSelect)
             .selected(Bitmaps.ImgMoleculeSelect)
             .hotkey(KeyCode.Digit0)
             .tooltip("Create or remove a molecular binding site.");
-        this.addObject(this.site_button, upperToolbarLayout);
+        this.addObject(this.siteButton, upperToolbarLayout);
 
         // LOWER TOOLBAR (palette, zoom, settings, etc)
 
@@ -123,15 +122,15 @@ export class PuzzleEditToolbar extends ContainerObject {
         this.addObject(this.screenshotButton, lowerToolbarLayout);
 
         // SETTINGS
-        this.view_options_button = new GameButton()
+        this.viewOptionsButton = new GameButton()
             .up(Bitmaps.ImgSettings)
             .over(Bitmaps.ImgSettingsOver)
             .down(Bitmaps.ImgSettingsHit)
             .tooltip("Game options");
-        this.addObject(this.view_options_button, lowerToolbarLayout);
+        this.addObject(this.viewOptionsButton, lowerToolbarLayout);
 
         // ZOOM IN
-        this.zoom_in_button = new GameButton()
+        this.zoomInButton = new GameButton()
             .up(Bitmaps.ImgZoomIn)
             .over(Bitmaps.ImgZoomInOver)
             .down(Bitmaps.ImgZoomInHit)
@@ -139,10 +138,10 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Zoom in")
             .hotkey(KeyCode.Equal)
             .rscriptID(RScriptUIElementID.ZOOMIN);
-        this.addObject(this.zoom_in_button, lowerToolbarLayout);
+        this.addObject(this.zoomInButton, lowerToolbarLayout);
 
         // ZOOM OUT
-        this.zoom_out_button = new GameButton()
+        this.zoomOutButton = new GameButton()
             .up(Bitmaps.ImgZoomOut)
             .over(Bitmaps.ImgZoomOutOver)
             .down(Bitmaps.ImgZoomOutHit)
@@ -150,12 +149,12 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Zoom out")
             .hotkey(KeyCode.Minus)
             .rscriptID(RScriptUIElementID.ZOOMOUT);
-        this.addObject(this.zoom_out_button, lowerToolbarLayout);
+        this.addObject(this.zoomOutButton, lowerToolbarLayout);
 
         lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
         // NATIVE
-        this.native_button = new GameButton()
+        this.nativeButton = new GameButton()
             .up(Bitmaps.ImgNative)
             .over(Bitmaps.ImgNativeOver)
             .down(Bitmaps.ImgNativeSelected)
@@ -163,11 +162,11 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Natural Mode. RNA folds into the most stable shape.")
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
         if (!this._embedded) {
-            this.addObject(this.native_button, lowerToolbarLayout);
+            this.addObject(this.nativeButton, lowerToolbarLayout);
         }
 
         // TARGET
-        this.target_button = new GameButton()
+        this.targetButton = new GameButton()
             .up(Bitmaps.ImgTarget)
             .over(Bitmaps.ImgTargetOver)
             .down(Bitmaps.ImgTargetSelected)
@@ -175,7 +174,7 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Target Mode. RNA freezes into the desired shape.")
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
         if (!this._embedded) {
-            this.addObject(this.target_button, lowerToolbarLayout);
+            this.addObject(this.targetButton, lowerToolbarLayout);
         }
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
@@ -188,7 +187,7 @@ export class PuzzleEditToolbar extends ContainerObject {
         lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
         // SWAP
-        this.pair_swap_button = new GameButton()
+        this.pairSwapButton = new GameButton()
             .up(Bitmaps.ImgSwap)
             .over(Bitmaps.ImgSwapOver)
             .down(Bitmaps.ImgSwapOver)
@@ -196,11 +195,11 @@ export class PuzzleEditToolbar extends ContainerObject {
             .hotkey(KeyCode.Digit5)
             .tooltip("Swap paired bases.")
             .rscriptID(RScriptUIElementID.SWAP);
-        this.addObject(this.pair_swap_button, lowerToolbarLayout);
+        this.addObject(this.pairSwapButton, lowerToolbarLayout);
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
-        this.undo_button = new GameButton()
+        this.undoButton = new GameButton()
             .up(Bitmaps.ImgUndo)
             .over(Bitmaps.ImgUndoOver)
             .down(Bitmaps.ImgUndoHit)
@@ -208,9 +207,9 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Undo")
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
-        this.addObject(this.undo_button, lowerToolbarLayout);
+        this.addObject(this.undoButton, lowerToolbarLayout);
 
-        this.redo_button = new GameButton()
+        this.redoButton = new GameButton()
             .up(Bitmaps.ImgRedo)
             .over(Bitmaps.ImgRedoOver)
             .down(Bitmaps.ImgRedoHit)
@@ -218,44 +217,54 @@ export class PuzzleEditToolbar extends ContainerObject {
             .tooltip("Redo")
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
-        this.addObject(this.redo_button, lowerToolbarLayout);
+        this.addObject(this.redoButton, lowerToolbarLayout);
 
         // COPY
-        this.copy_button = new GameButton()
+        this.copyButton = new GameButton()
             .up(Bitmaps.ImgCopy)
             .over(Bitmaps.ImgCopyOver)
             .down(Bitmaps.ImgCopyHit)
             .tooltip("Copy the current sequence");
-        this.addObject(this.copy_button, lowerToolbarLayout);
+        this.addObject(this.copyButton, lowerToolbarLayout);
 
         // PASTE
-        this.paste_button = new GameButton()
+        this.pasteButton = new GameButton()
             .up(Bitmaps.ImgPaste)
             .over(Bitmaps.ImgPasteOver)
             .down(Bitmaps.ImgPasteHit)
             .tooltip("Type in a sequence");
-        this.addObject(this.paste_button, lowerToolbarLayout);
+        this.addObject(this.pasteButton, lowerToolbarLayout);
 
         // RESET
-        this.reset_button = new GameButton()
+        this.resetButton = new GameButton()
             .up(Bitmaps.ImgReset)
             .over(Bitmaps.ImgResetOver)
             .down(Bitmaps.ImgResetHit)
             .tooltip("Reset all bases to A.");
-        this.addObject(this.reset_button, lowerToolbarLayout);
+        this.addObject(this.resetButton, lowerToolbarLayout);
 
         // SUBMIT BUTTON
-        this.submit_button = new GameButton()
+        this.submitButton = new GameButton()
             .up(Bitmaps.ImgSubmit)
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit)
             .tooltip("Publish your puzzle!");
         lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         if (!this._embedded) {
-            this.addObject(this.submit_button, lowerToolbarLayout);
+            this.addObject(this.submitButton, lowerToolbarLayout);
         }
 
         this.updateLayout();
+    }
+
+    public deselectAllColorings(): void {
+        this.palette.clear_selection();
+        this.pairSwapButton.toggled.value = false;
+        this.addbaseButton.toggled.value = false;
+        this.addpairButton.toggled.value = false;
+        this.deleteButton.toggled.value = false;
+        this.lockButton.toggled.value = false;
+        this.siteButton.toggled.value = false;
     }
 
     private updateLayout(): void {
@@ -264,38 +273,6 @@ export class PuzzleEditToolbar extends ContainerObject {
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
-    }
-
-    public disable_tools(disable: boolean): void {
-        this.palette.enabled = !disable;
-
-        this.target_button.enabled = !disable;
-        this.native_button.enabled = !disable;
-
-        this.zoom_in_button.enabled = !disable;
-        this.zoom_out_button.enabled = !disable;
-
-        this.native_button.enabled = !disable;
-        this.target_button.enabled = !disable;
-
-        this.view_options_button.enabled = !disable;
-        this.copy_button.enabled = !disable;
-        this.paste_button.enabled = !disable;
-
-        this.undo_button.enabled = !disable;
-        this.redo_button.enabled = !disable;
-
-        this.submit_button.enabled = !disable;
-    }
-
-    public deselect_all_colorings(): void {
-        this.palette.clear_selection();
-        this.pair_swap_button.toggled.value = false;
-        this.addbase_button.toggled.value = false;
-        this.addpair_button.toggled.value = false;
-        this.delete_button.toggled.value = false;
-        this.lock_button.toggled.value = false;
-        this.site_button.toggled.value = false;
     }
 
     private readonly _embedded: boolean;
