@@ -1211,7 +1211,7 @@ export class PoseEditMode extends GameMode {
         pushVisibleState(this.achievementsLayer);
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
-        this.modeSprite.addChildAt(tempBG, 0);
+        this.container.addChildAt(tempBG, 0);
 
         let info =
             `Player: ${Eterna.player_name}\n` +
@@ -1219,9 +1219,9 @@ export class PoseEditMode extends GameMode {
             `Puzzle Title: ${this._puzzle.get_puzzle_name()}\n` +
             `Mode: ${this.toolbar.native_button.isSelected ? "NativeMode" : "TargetMode"}`;
         let infoText = Fonts.arial(info).color(0xffffff).build();
-        this.modeSprite.addChild(infoText);
+        this.container.addChild(infoText);
 
-        let pngData = DisplayUtil.renderToPNG(this.modeSprite);
+        let pngData = DisplayUtil.renderToPNG(this.container);
 
         tempBG.destroy({children: true});
         infoText.destroy({children: true});

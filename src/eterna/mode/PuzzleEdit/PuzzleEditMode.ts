@@ -353,15 +353,15 @@ export class PuzzleEditMode extends GameMode {
         }
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
-        this.modeSprite.addChildAt(tempBG, 0);
+        this.container.addChildAt(tempBG, 0);
 
         let info =
             `Player: ${Eterna.player_name}\n` +
             `Player Puzzle Designer`;
         let infoText = Fonts.arial(info, 12).color(0xffffff).build();
-        this.modeSprite.addChild(infoText);
+        this.container.addChild(infoText);
 
-        let pngData = DisplayUtil.renderToPNG(this.modeSprite);
+        let pngData = DisplayUtil.renderToPNG(this.container);
 
         tempBG.destroy({children: true});
         infoText.destroy({children: true});

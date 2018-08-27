@@ -41,7 +41,7 @@ export class LoadingMode extends AppMode {
 
         let container = new ContainerObject();
         container.container.addChild(this._textField);
-        this.addObject(container, this.modeSprite);
+        this.addObject(container, this.container);
 
         container.addObject(new SerialTask(
             new DelayTask(0.5),

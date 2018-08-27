@@ -144,7 +144,7 @@ export class ModeStack {
             }
 
             this._modeStack.push(newMode);
-            this._topSprite.addChild(newMode.modeSprite);
+            this._topSprite.addChild(newMode.container);
 
             newMode.setupInternal(self);
         };
@@ -161,7 +161,7 @@ export class ModeStack {
             index = Math.min(index, this._modeStack.length);
 
             this._modeStack.splice(index, 0, newMode);
-            this._topSprite.addChildAt(newMode.modeSprite, index);
+            this._topSprite.addChildAt(newMode.container, index);
 
             newMode.setupInternal(self);
         };

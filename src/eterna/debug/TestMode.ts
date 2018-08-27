@@ -12,7 +12,7 @@ export class TestMode extends AppMode {
     protected setup(): void {
         super.setup();
 
-        this.addObject(new Background(), this.modeSprite);
+        this.addObject(new Background(), this.container);
 
         const text = "Make 5 or more <font color = \"#00BFF9\">BLUE</font> bases";
         let builder = new StyledTextBuilder({
@@ -23,7 +23,7 @@ export class TestMode extends AppMode {
         let tf = builder.build();
         tf.x = (Flashbang.stageWidth - tf.width) * 0.5;
         tf.y = (Flashbang.stageHeight - tf.height) * 0.5;
-        this.modeSprite.addChild(tf);
+        this.container.addChild(tf);
 
         ExternalInterface.addCallback("Animate", (time?: number) => {
             if (this.hasNamedObject("Animate")) {
