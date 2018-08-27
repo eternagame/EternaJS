@@ -85,12 +85,12 @@ export class PoseEditMode extends GameMode {
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
         this._toolbar.zoomOutButton.clicked.connect(() => {
-            for (let poseField of this._pose_fields) {
+            for (let poseField of this._poseFields) {
                 poseField.zoom_out();
             }
         });
         this._toolbar.zoomInButton.clicked.connect(() => {
-            for (let poseField of this._pose_fields) {
+            for (let poseField of this._poseFields) {
                 poseField.zoom_in();
             }
         });
@@ -675,7 +675,7 @@ export class PoseEditMode extends GameMode {
         }
 
         this._poseEditByTargetCb = () => {
-            if (this._force_synch) {
+            if (this._forceSynch) {
                 this.setPuzzleEpilog(this._initSeq, this._isReset);
             } else {
                 this._opQueue.push(new PoseOp(
@@ -881,13 +881,13 @@ export class PoseEditMode extends GameMode {
                 log.info("Invalid characters in " + seq);
                 return false;
             }
-            let force_sync: boolean = this._force_synch;
-            this._force_synch = true;
+            let force_sync: boolean = this._forceSynch;
+            this._forceSynch = true;
             for (let ii: number = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.paste_sequence(seq_arr);
             }
-            this._force_synch = force_sync;
+            this._forceSynch = force_sync;
             this.moveHistoryAddSequence("paste", seq);
             return true;
         });
@@ -1079,7 +1079,7 @@ export class PoseEditMode extends GameMode {
     }
 
     /*override*/
-    protected on_set_pip(pip_mode: boolean): void {
+    protected onSetPip(pip_mode: boolean): void {
         Eterna.settings.pipEnabled.value = pip_mode;
 
         if (pip_mode) {
@@ -1412,7 +1412,7 @@ export class PoseEditMode extends GameMode {
 
         this.savePosesMarkersContexts();
 
-        if (this._is_pip_mode) {
+        if (this._isPipMode) {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this._poses[ii].set_oligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].set_oligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
@@ -1885,7 +1885,7 @@ export class PoseEditMode extends GameMode {
 
         this._folderButton.enabled = !disable;
 
-        for (let field of this._pose_fields) {
+        for (let field of this._poseFields) {
             field.container.interactive = !disable;
             field.container.interactiveChildren = !disable;
         }
@@ -1952,7 +1952,7 @@ export class PoseEditMode extends GameMode {
                 w_walker += 77;
                 box.setLocation(cpos, animate);
                 box.show_big_text(false);
-                box.display.visible = (xx === 0 || !this._is_pip_mode) ? display : false;
+                box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
             }
 
             // scan for ANTISHAPE
@@ -1965,7 +1965,7 @@ export class PoseEditMode extends GameMode {
                 w_walker += 77;
                 box.setLocation(cpos, animate);
                 box.show_big_text(false);
-                box.display.visible = (xx === 0 || !this._is_pip_mode) ? display : false;
+                box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
             }
         }
 
@@ -2690,7 +2690,7 @@ export class PoseEditMode extends GameMode {
                         //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
                         // }
 
-                        this._constraintShapeBoxes[target_index].display.visible = this._is_pip_mode;
+                        this._constraintShapeBoxes[target_index].display.visible = this._isPipMode;
                     }
                 }
             }
@@ -2752,7 +2752,7 @@ export class PoseEditMode extends GameMode {
                         //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
                         // }
 
-                        this._constraintAntishapeBoxes[target_index].display.visible = this._is_pip_mode;
+                        this._constraintAntishapeBoxes[target_index].display.visible = this._isPipMode;
                     }
                 }
             }
@@ -3045,7 +3045,7 @@ export class PoseEditMode extends GameMode {
                     if (ret.cause.value != null) value = ret.cause.value;
                     if (ret.cause.index != null) {
                         index = (ret.cause.index + 1).toString();
-                        let ll: number = this._is_pip_mode ?
+                        let ll: number = this._isPipMode ?
                             ret.cause.index :
                             (ret.cause.index === this._curTargetIndex ? 0 : -1);
                         if (ll >= 0) {
@@ -3126,13 +3126,13 @@ export class PoseEditMode extends GameMode {
 
             if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
                 const target_index = Number(value);
-                if (!this._is_pip_mode) {
+                if (!this._isPipMode) {
                     box.display.alpha = (target_index === this._curTargetIndex) ? 1.0 : 0.3;
                 } else {
                     box.display.alpha = 1.0;
                 }
 
-                if (this._is_pip_mode && target_index > 0) {
+                if (this._isPipMode && target_index > 0) {
                     box.display.visible = false;
                 } else if (this._puzState === PuzzleState.GAME || this._puzState === PuzzleState.CLEARED) {
                     box.display.visible = true;
@@ -3177,7 +3177,7 @@ export class PoseEditMode extends GameMode {
         const restricted_global: number[] = restricted_guanine.concat(restricted_cytosine).concat(restricted_adenine);
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let jj = this._is_pip_mode ? ii : (ii === 0 ? this._curTargetIndex : ii);
+            let jj = this._isPipMode ? ii : (ii === 0 ? this._curTargetIndex : ii);
             let restricted: number[];
             if (constraintsInfo.restricted_local && constraintsInfo.restricted_local[jj]) {
                 restricted = restricted_global.concat(constraintsInfo.restricted_local[jj]);
@@ -3215,7 +3215,7 @@ export class PoseEditMode extends GameMode {
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
-                if (ii === 0 && this._poseState === PoseState.NATIVE && !this._is_pip_mode) {
+                if (ii === 0 && this._poseState === PoseState.NATIVE && !this._isPipMode) {
                     this._poses[0].set_oligos(this.getCurrentUndoBlock().get_target_oligos(),
                         this.getCurrentUndoBlock().get_oligo_order(),
                         this.getCurrentUndoBlock().get_oligos_paired());
@@ -3242,7 +3242,7 @@ export class PoseEditMode extends GameMode {
 
         } else {
             for (let ii = 0; ii < this._poses.length; ++ii) {
-                if (ii === 0 && this._poseState === PoseState.TARGET && !this._is_pip_mode) {
+                if (ii === 0 && this._poseState === PoseState.TARGET && !this._isPipMode) {
                     this._poses[0].set_oligos(this.getCurrentUndoBlock().get_target_oligos(),
                         this.getCurrentUndoBlock().get_target_oligo_order(),
                         this.getCurrentUndoBlock().get_oligos_paired());
@@ -3280,7 +3280,7 @@ export class PoseEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             let jj: number;
 
-            if (ii === 0 && !this._is_pip_mode) {
+            if (ii === 0 && !this._isPipMode) {
                 jj = this._curTargetIndex;
             } else {
                 jj = ii;
@@ -3358,7 +3358,7 @@ export class PoseEditMode extends GameMode {
 
     private flashConstraintForTarget(target_index: number): void {
         let box: ConstraintBox = null;
-        if (target_index === 0 || !this._is_pip_mode) {
+        if (target_index === 0 || !this._isPipMode) {
             let constraints: string[] = this._puzzle.get_constraints();
             for (let ii: number = 0; ii < constraints.length; ii += 2) {
                 if (constraints[ii] === ConstraintType.SHAPE && Number(constraints[ii + 1]) === target_index) {
@@ -3378,7 +3378,7 @@ export class PoseEditMode extends GameMode {
     private poseEditByTarget(target_index: number): void {
         this.savePosesMarkersContexts();
 
-        let xx: number = this._is_pip_mode ? target_index : this._curTargetIndex;
+        let xx: number = this._isPipMode ? target_index : this._curTargetIndex;
         let segments: number[] = this._poses[target_index].get_design_segments();
         let idx_map: number[] = this._poses[target_index].get_order_map(this._targetOligosOrder[xx]);
         let structure_constraints: boolean[] = null;
@@ -3631,7 +3631,7 @@ export class PoseEditMode extends GameMode {
         // Application.instance.add_lock("FOLDING");
         // Application.instance.get_modal_container().addObject(this._asynch_text);
 
-        if (this._force_synch) {
+        if (this._forceSynch) {
             for (let ii: number = 0; ii < this._targetPairs.length; ii++) {
                 this.poseEditByTargetFoldTarget(ii);
             }
@@ -3736,7 +3736,7 @@ export class PoseEditMode extends GameMode {
             };
             let mfold: any = this._folder.getCache(key);
 
-            if (mfold == null && this._force_synch === false) {
+            if (mfold == null && this._forceSynch === false) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 let ops: PoseOp[] = this._folder.multifoldUnroll(this._puzzle.transform_sequence(seq, ii), null, oligos);

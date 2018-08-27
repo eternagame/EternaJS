@@ -145,13 +145,13 @@ export class Booster {
             if (this._type == BoosterType.PAINTER && pose) {
                 pose.set_mutated(seq_arr);
             } else {
-                let force_sync: boolean = this._view.is_forced_synch();
-                this._view.set_forced_synch(true);
+                let force_sync: boolean = this._view.isForcedSynch;
+                this._view.isForcedSynch = true;
                 for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
                     pose = this._view.getPose(ii);
                     pose.paste_sequence(seq_arr);
                 }
-                this._view.set_forced_synch(force_sync);
+                this._view.isForcedSynch = force_sync;
             }
             return true;
         });

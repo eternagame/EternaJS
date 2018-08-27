@@ -48,7 +48,7 @@ export class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.SETZOOM) {
             this._env.GetRNA().set_zoom_level(this._zoom_level, this._animate, this._center);
         } else if (this._type === ROPRNAType.SETPIP) {
-            this._env.GetUI().rop_set_pip(this._enabled);
+            this._env.GetUI().ropSetPip(this._enabled);
         }
     }
 

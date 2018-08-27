@@ -92,23 +92,19 @@ export abstract class GameMode extends AppMode {
     }
 
     public get numPoseFields(): number {
-        return this._pose_fields.length;
+        return this._poseFields.length;
     }
 
-    public rop_set_pip(pip_mode: boolean): void {
+    public ropSetPip(pip_mode: boolean): void {
         this.setPip(pip_mode);
     }
 
-    public is_forced_synch(): boolean {
-        return this._force_synch;
+    public get isForcedSynch(): boolean {
+        return this._forceSynch;
     }
 
-    public set_forced_synch(forced: boolean): void {
-        this._force_synch = forced;
-    }
-
-    // overridables
-    public set_multi_engines(multi: boolean): void {
+    public set isForcedSynch(forced: boolean) {
+        this._forceSynch = forced;
     }
 
     public registerScriptCallbacks(): void {
@@ -123,43 +119,43 @@ export abstract class GameMode extends AppMode {
     }
 
     protected setPoseFields(newPoseFields: PoseField[]): void {
-        if (this._pose_fields != null) {
-            for (let poseField of this._pose_fields) {
+        if (this._poseFields != null) {
+            for (let poseField of this._poseFields) {
                 poseField.destroySelf();
             }
         }
 
-        this._pose_fields = [];
+        this._poseFields = [];
         this._poses = [];
 
         for (let newPoseField of newPoseFields) {
-            this._pose_fields.push(newPoseField);
+            this._poseFields.push(newPoseField);
             this._poses.push(newPoseField.get_pose());
         }
     }
 
     protected togglePip(): void {
-        this.setPip(!this._is_pip_mode);
+        this.setPip(!this._isPipMode);
     }
 
     protected setPip(pip_mode: boolean): void {
-        this._is_pip_mode = pip_mode;
+        this._isPipMode = pip_mode;
         this.layoutPoseFields();
-        this.on_set_pip(pip_mode);
+        this.onSetPip(pip_mode);
     }
 
     protected layoutPoseFields(): void {
-        if (this._is_pip_mode) {
-            let numFields: number = this._pose_fields.length;
+        if (this._isPipMode) {
+            let numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
-                let poseField = this._pose_fields[ii];
+                let poseField = this._poseFields[ii];
                 poseField.display.position = new Point(Flashbang.stageWidth / numFields * ii, 0);
                 poseField.set_size(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
-            for (let ii = 0; ii < this._pose_fields.length; ii++) {
-                let poseField = this._pose_fields[ii];
+            for (let ii = 0; ii < this._poseFields.length; ii++) {
+                let poseField = this._poseFields[ii];
                 if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
                     poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight, false);
@@ -171,7 +167,7 @@ export abstract class GameMode extends AppMode {
         }
     }
 
-    protected on_set_pip(pip_mode: boolean): void {
+    protected onSetPip(pip_mode: boolean): void {
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
@@ -201,8 +197,8 @@ export abstract class GameMode extends AppMode {
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
 
-    protected _pose_fields: PoseField[] = [];
+    protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!
-    protected _is_pip_mode: boolean = false;
-    protected _force_synch: boolean = false;
+    protected _isPipMode: boolean = false;
+    protected _forceSynch: boolean = false;
 }
