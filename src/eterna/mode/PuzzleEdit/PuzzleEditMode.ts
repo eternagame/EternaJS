@@ -552,7 +552,7 @@ export class PuzzleEditMode extends GameMode {
         post_params["objectives"] = JSON.stringify(objectives);
 
         let submitText = this.showDialog(new AsyncProcessDialog("Submitting...")).ref;
-        Eterna.client.submit_puzzle(post_params)
+        Eterna.client.submitPuzzle(post_params)
             .then(() => {
                 submitText.destroyObject();
                 this.showNotification(

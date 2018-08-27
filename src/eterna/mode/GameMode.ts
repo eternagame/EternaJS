@@ -173,7 +173,7 @@ export abstract class GameMode extends AppMode {
     protected postScreenshot(screenshot: ArrayBuffer): void {
         this.pushUILock();
 
-        Eterna.client.post_screenshot(screenshot)
+        Eterna.client.postScreenshot(screenshot)
             .then(filename => {
                 let url = new URL(filename, Eterna.serverURL);
                 let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;

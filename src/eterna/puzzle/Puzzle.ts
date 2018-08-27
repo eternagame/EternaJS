@@ -119,7 +119,7 @@ export class Puzzle {
 
     public get_puzzle_name(linked: boolean = false): string {
         if (linked && this._puzzle_type !== PuzzleType.EXPERIMENTAL) {
-            let url: string = EternaURL.generate_url({page: "puzzle", nid: this._nid});
+            let url: string = EternaURL.createURL({page: "puzzle", nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
         }
 

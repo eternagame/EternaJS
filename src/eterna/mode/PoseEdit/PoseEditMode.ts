@@ -1688,7 +1688,7 @@ export class PoseEditMode extends GameMode {
 
         // submit our solution to the server
         log.debug("Submitting solution...");
-        let submissionPromise = Eterna.client.submit_solution(this.createSubmitData(details, undoBlock));
+        let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
         // Wait for explosion completion
         explosionCompletePromise.then(() => {
@@ -3480,7 +3480,7 @@ export class PoseEditMode extends GameMode {
                 }
                 sol.set_fold_data(fd);
 
-                Eterna.client.update_solution_fold_data(sol.get_node_id(), fd).then((datastring: string) => {
+                Eterna.client.updateSolutionFoldData(sol.get_node_id(), fd).then((datastring: string) => {
                     log.debug(datastring);
                 });
             }

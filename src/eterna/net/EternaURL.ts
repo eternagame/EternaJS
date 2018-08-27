@@ -7,11 +7,11 @@ export class EternaURL {
 
     public static getFeedURL(): string {
         return Eterna.player_id === 0
-            ? EternaURL.generate_url({page: "register"})
-            : EternaURL.generate_url({page: "me"});
+            ? EternaURL.createURL({page: "register"})
+            : EternaURL.createURL({page: "me"});
     }
 
-    public static generate_url(params: any): string {
+    public static createURL(params: any): string {
         if (params == null) {
             params = {};
         }

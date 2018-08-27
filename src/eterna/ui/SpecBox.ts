@@ -67,7 +67,7 @@ export class SpecBox extends ContainerObject {
         });
         this.container.addChild(this._stattext);
 
-        let url = EternaURL.generate_url({page: "manual"});
+        let url = EternaURL.createURL({page: "manual"});
         let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>`;
         this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
         this.addObject(this._helpText, this.container);

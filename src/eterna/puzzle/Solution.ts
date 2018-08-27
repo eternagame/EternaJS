@@ -125,7 +125,7 @@ export class Solution {
             if (this._fold_data != null) {
                 return Promise.resolve(this._fold_data);
             } else {
-                return Eterna.client.get_solution_info(this._nid).then((json) => {
+                return Eterna.client.getSolutionInfo(this._nid).then((json) => {
                     let data: any = json["data"];
                     if (data["solution"] != null) {
                         this.set_fold_data(JSON.parse(data["solution"]["fold-data"]));
