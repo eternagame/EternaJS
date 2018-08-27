@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Point, Sprite, Text} from "pixi.js";
+import {Container, DisplayObject, Point, Sprite, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
@@ -1197,17 +1197,17 @@ export class PoseEditMode extends GameMode {
     }
 
     private createScreenshot(): ArrayBuffer {
-        let bgVis = this.bgLayer.visible;
-        let constraintsVis = this.constraintsLayer.visible;
-        let uiVis = this.uiLayer.visible;
-        let dialogVis = this.dialogLayer.visible;
-        let achievementsVis = this.achievementsLayer.visible;
+        let visibleState: Map<DisplayObject, boolean> = new Map();
+        let pushVisibleState = (disp: DisplayObject) => {
+            visibleState.set(disp, disp.visible);
+            disp.visible = false;
+        };
 
-        this.bgLayer.visible = false;
-        this.constraintsLayer.visible = false;
-        this.uiLayer.visible = false;
-        this.dialogLayer.visible = false;
-        this.achievementsLayer.visible = false;
+        pushVisibleState(this.bgLayer);
+        pushVisibleState(this.constraintsLayer);
+        pushVisibleState(this.uiLayer);
+        pushVisibleState(this.dialogLayer);
+        pushVisibleState(this.achievementsLayer);
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.modeSprite.addChildAt(tempBG, 0);
@@ -1225,11 +1225,9 @@ export class PoseEditMode extends GameMode {
         tempBG.destroy({children: true});
         infoText.destroy({children: true});
 
-        this.bgLayer.visible = bgVis;
-        this.constraintsLayer.visible = constraintsVis;
-        this.uiLayer.visible = uiVis;
-        this.dialogLayer.visible = dialogVis;
-        this.achievementsLayer.visible = achievementsVis;
+        for (let [disp, wasVisible] of visibleState.entries()) {
+            disp.visible = wasVisible;
+        }
 
         return pngData;
     }
