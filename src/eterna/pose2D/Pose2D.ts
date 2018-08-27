@@ -1841,11 +1841,9 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._cursor_box.clear();
             this._cursor_box.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
             this._cursor_box.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
-        } else {
-            if (this._cursor_box != null) {
-                this._cursor_box.destroy({children: true});
-                this._cursor_box = null;
-            }
+        } else if (this._cursor_box != null) {
+            this._cursor_box.destroy({children: true});
+            this._cursor_box = null;
         }
     }
 
