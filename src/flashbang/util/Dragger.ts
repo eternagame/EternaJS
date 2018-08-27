@@ -33,7 +33,7 @@ export class Dragger extends GameObject {
 
         this._disp.interactive = true;
 
-        let parent = this._displayParent || this.mode.modeSprite;
+        let parent = this._displayParent || this.mode.container;
         parent.addChild(this._disp);
         this.updateSize();
 

@@ -23,12 +23,12 @@ export abstract class GameMode extends AppMode {
     protected setup(): void {
         super.setup();
 
-        this.modeSprite.addChild(this.bgLayer);
-        this.modeSprite.addChild(this.poseLayer);
-        this.modeSprite.addChild(this.uiLayer);
-        this.modeSprite.addChild(this.dialogLayer);
-        this.modeSprite.addChild(this.notifLayer);
-        this.modeSprite.addChild(this.achievementsLayer);
+        this.container.addChild(this.bgLayer);
+        this.container.addChild(this.poseLayer);
+        this.container.addChild(this.uiLayer);
+        this.container.addChild(this.dialogLayer);
+        this.container.addChild(this.notifLayer);
+        this.container.addChild(this.achievementsLayer);
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);

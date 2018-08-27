@@ -16,7 +16,7 @@ export class RNAScript {
         let strData: string = puz.get_rscript();
 
         this._env = new RScriptEnv(ui, puz);
-        ui.addObject(this._env, ui.modeSprite);
+        ui.addObject(this._env, ui.container);
 
         ROPWait.ClearROPWait();
         this._ops = new RScriptOpTree();

@@ -32,7 +32,7 @@ export class ROPHint extends RScriptOp {
         let hint: NovaPaintHint = new NovaPaintHint(startPoint, endPoint, this._loop);
         hint.set_anchor_nucleotide(this._env.GetRNA(), this._start_idx);
         hint.InitializeHint();
-        this._env.GetUI().addObject(hint, this._env.GetUI().modeSprite);
+        this._env.GetUI().addObject(hint, this._env.GetUI().container);
         this._env.StoreVar(this._id, hint, this._env.GetUI());
     }
 

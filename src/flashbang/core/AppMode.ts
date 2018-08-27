@@ -53,15 +53,16 @@ export class AppMode {
 
     public constructor() {
         this._rootObject = new RootObject(this);
-        this.modeSprite.interactiveChildren = false;
+        this.container.interactiveChildren = false;
     }
 
     public get regs(): RegistrationGroup {
         return this._regs;
     }
 
-    public /* final */ get modeSprite(): Container {
-        return this._modeSprite;
+    /** The PIXI Container that all this mode's DisplayObjects should live within */
+    public get container(): PIXI.Container {
+        return this._container;
     }
 
     /** Returns the ModeStack that this AppMode lives in */
@@ -225,8 +226,8 @@ export class AppMode {
 
         this._modeStack = null;
 
-        this._modeSprite.destroy({children: true});
-        this._modeSprite = null;
+        this._container.destroy({children: true});
+        this._container = null;
 
         this._disposed.emit();
     }
@@ -234,7 +235,7 @@ export class AppMode {
     /* internal */
     enterInternal(): void {
         this._isActive = true;
-        this.modeSprite.interactiveChildren = true;
+        this.container.interactiveChildren = true;
         this.enter();
         this._entered.emit();
     }
@@ -243,7 +244,7 @@ export class AppMode {
     exitInternal(): void {
         this._exited.emit();
         this._isActive = false;
-        this.modeSprite.interactiveChildren = false;
+        this.container.interactiveChildren = false;
         this.exit();
     }
 
@@ -294,7 +295,7 @@ export class AppMode {
     protected readonly _disposed: UnitSignal = new UnitSignal();
     protected readonly _resized: UnitSignal = new UnitSignal();
 
-    protected _modeSprite: Container = new Container();
+    protected _container: Container = new Container();
     protected _modeStack: ModeStack;
 
     protected _runningTime: number = 0;

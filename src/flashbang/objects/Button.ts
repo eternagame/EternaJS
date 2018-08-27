@@ -112,7 +112,7 @@ export abstract class Button extends ContainerObject implements Enableable {
             return;
         }
 
-        this._pointerCapture = new PointerCapture(this.mode.modeSprite);
+        this._pointerCapture = new PointerCapture(this.mode.container);
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
