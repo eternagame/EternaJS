@@ -298,9 +298,9 @@ export class PoseEditMode extends GameMode {
     }
 
     public select_folder(folder_name: string): boolean {
-        if (this._folder.get_folder_name() === folder_name) return true;
+        if (this._folder.name === folder_name) return true;
         let folder: Folder = FolderManager.instance.get_folder(folder_name);
-        if (this._puzzle.has_target_type("multistrand") && !folder.can_multifold()) {
+        if (this._puzzle.has_target_type("multistrand") && !folder.canMultifold) {
             return false;
         }
 
@@ -602,7 +602,7 @@ export class PoseEditMode extends GameMode {
 
         this._folder_button = new GameButton()
             .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.get_folder_name(), 22)
+            .label(this._folder.name, 22)
             .tooltip("Select the folding engine.");
         this._folder_button.display.position = new Point(17, 160);
         this._folder_button.display.scale = new Point(0.5, 0.5);
@@ -616,7 +616,7 @@ export class PoseEditMode extends GameMode {
             this._folder_button.display.visible = false;
         }
 
-        if (this._folder.can_score_structures()) {
+        if (this._folder.canScoreStructures) {
             for (let pose of this._poses) {
                 pose.set_score_visualization(this._folder);
             }
@@ -810,20 +810,20 @@ export class PoseEditMode extends GameMode {
 
         ExternalInterface.addCallback("current_folder", (): string => {
             // this.trace_js("current_folder() called");
-            return this._folder.get_folder_name();
+            return this._folder.name;
         });
 
         ExternalInterface.addCallback("fold", (seq: string, constraint: string = null): string => {
             // this.trace_js("fold() called");
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
-            let folded: number[] = folder.fold_sequence(seq_arr, null, constraint);
+            let folded: number[] = folder.foldSequence(seq_arr, null, constraint);
             return EPars.pairs_array_to_parenthesis(folded);
         });
 
         ExternalInterface.addCallback("fold_with_binding_site", (seq: string, site: number[], bonus: number): string => {
             // this.trace_js("fold_with_binding_site() called");
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
-            let folded: number[] = folder.fold_sequence_with_binding_site(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
+            let folded: number[] = folder.foldSequenceWithBindingSite(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
             return EPars.pairs_array_to_parenthesis(folded);
         });
 
@@ -831,7 +831,7 @@ export class PoseEditMode extends GameMode {
             // this.trace_js("energy_of_structure() called");
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
             let struct_arr: number[] = EPars.parenthesis_to_pair_array(secstruct);
-            let free_energy: number = folder.score_structures(seq_arr, struct_arr);
+            let free_energy: number = folder.scoreStructures(seq_arr, struct_arr);
             return 0.01 * free_energy;
         });
 
@@ -842,9 +842,9 @@ export class PoseEditMode extends GameMode {
             if (secstruct) {
                 folded = EPars.parenthesis_to_pair_array(secstruct);
             } else {
-                folded = folder.fold_sequence(seq_arr, null, null);
+                folded = folder.foldSequence(seq_arr, null, null);
             }
-            let pp: number[] = folder.get_dot_plot(seq_arr, folded);
+            let pp: number[] = folder.getDotPlot(seq_arr, folded);
             return pp.slice();
         });
 
@@ -853,7 +853,7 @@ export class PoseEditMode extends GameMode {
             let len: number = seq.length;
             let cseq: string = seq + "&" + oligo;
             let seq_arr: number[] = EPars.string_to_sequence_array(cseq);
-            let folded: number[] = folder.cofold_sequence(seq_arr, null, Math.floor(malus * 100), constraint);
+            let folded: number[] = folder.cofoldSequence(seq_arr, null, Math.floor(malus * 100), constraint);
             return EPars.pairs_array_to_parenthesis(folded.slice(0, len))
                 + "&" + EPars.pairs_array_to_parenthesis(folded.slice(len));
         });
@@ -1511,9 +1511,9 @@ export class PoseEditMode extends GameMode {
     }
 
     private folder_updated(): void {
-        this._folder_button.label(this._folder.get_folder_name());
+        this._folder_button.label(this._folder.name);
 
-        if (this._folder.can_score_structures()) {
+        if (this._folder.canScoreStructures) {
             for (let pose of this._poses) {
                 pose.set_score_visualization(this._folder);
             }
@@ -1527,11 +1527,11 @@ export class PoseEditMode extends GameMode {
     }
 
     private change_folder(): void {
-        let curr_f: string = this._folder.get_folder_name();
+        let curr_f: string = this._folder.name;
         this._folder = FolderManager.instance.get_next_folder(curr_f, (folder: Folder): boolean => {
-            return this._puzzle.has_target_type("multistrand") && !folder.can_multifold();
+            return this._puzzle.has_target_type("multistrand") && !folder.canMultifold;
         });
-        if (this._folder.get_folder_name() === curr_f) return;
+        if (this._folder.name === curr_f) return;
 
         this.folder_updated();
     }
@@ -1583,7 +1583,7 @@ export class PoseEditMode extends GameMode {
 
     private update_current_block_with_dot_and_melting_plot(index: number = -1): void {
         let datablock: UndoBlock = this.get_current_undo_block(index);
-        if (this._folder.can_dot_plot()) {
+        if (this._folder.canDotPlot) {
             datablock.set_meltingpoint_and_dotplot(this._folder);
         }
     }
@@ -3704,12 +3704,12 @@ export class PoseEditMode extends GameMode {
 
         if (this._target_conditions[ii] == null || this._target_conditions[ii]['type'] === "single") {
             log.debug("folding");
-            best_pairs = this._folder.fold_sequence(this._puzzle.transform_sequence(seq, ii), null, force_struct);
+            best_pairs = this._folder.foldSequence(this._puzzle.transform_sequence(seq, ii), null, force_struct);
 
         } else if (this._target_conditions[ii]['type'] === "aptamer") {
             bonus = this._target_conditions[ii]['bonus'];
             sites = this._target_conditions[ii]['site'];
-            best_pairs = this._folder.fold_sequence_with_binding_site(this._puzzle.transform_sequence(seq, ii), this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
+            best_pairs = this._folder.foldSequenceWithBindingSite(this._puzzle.transform_sequence(seq, ii), this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
 
         } else if (this._target_conditions[ii]['type'] === "oligo") {
             fold_mode = this._target_conditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._target_conditions[ii]['fold_mode'];
@@ -3717,13 +3717,13 @@ export class PoseEditMode extends GameMode {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.string_to_sequence_array("&" + this._target_conditions[ii]['oligo_sequence']));
                 malus = Number(this._target_conditions[ii]['malus'] * 100);
-                best_pairs = this._folder.cofold_sequence(full_seq, null, malus, force_struct);
+                best_pairs = this._folder.cofoldSequence(full_seq, null, malus, force_struct);
             } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']).concat(seq);
-                best_pairs = this._folder.fold_sequence(full_seq, null, force_struct);
+                best_pairs = this._folder.foldSequence(full_seq, null, force_struct);
             } else {
                 full_seq = seq.concat(EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']));
-                best_pairs = this._folder.fold_sequence(full_seq, null, force_struct);
+                best_pairs = this._folder.foldSequence(full_seq, null, force_struct);
             }
 
         } else if (this._target_conditions[ii]['type'] === "aptamer+oligo") {
@@ -3734,13 +3734,13 @@ export class PoseEditMode extends GameMode {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.string_to_sequence_array("&" + this._target_conditions[ii]['oligo_sequence']));
                 malus = Number(this._target_conditions[ii]['malus'] * 100);
-                best_pairs = this._folder.cofold_sequence_with_binding_site(full_seq, sites, bonus, force_struct, malus);
+                best_pairs = this._folder.cofoldSequenceWithBindingSite(full_seq, sites, bonus, force_struct, malus);
             } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']).concat(seq);
-                best_pairs = this._folder.fold_sequence_with_binding_site(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
+                best_pairs = this._folder.foldSequenceWithBindingSite(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
             } else {
                 full_seq = seq.concat(EPars.string_to_sequence_array(this._target_conditions[ii]['oligo_sequence']));
-                best_pairs = this._folder.fold_sequence_with_binding_site(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
+                best_pairs = this._folder.foldSequenceWithBindingSite(full_seq, this._target_pairs[ii], sites, Number(bonus), this._target_conditions[ii]['fold_version']);
             }
 
         } else if (this._target_conditions[ii]['type'] === "multistrand") {
@@ -3761,12 +3761,12 @@ export class PoseEditMode extends GameMode {
                 desired_pairs: null,
                 temp: 37
             };
-            let mfold: any = this._folder.get_cache(key);
+            let mfold: any = this._folder.getCache(key);
 
             if (mfold == null && this._force_synch === false) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                let ops: PoseOp[] = this._folder.multifold_unroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
+                let ops: PoseOp[] = this._folder.multifoldUnroll(this._puzzle.transform_sequence(seq, ii), null, oligos);
                 this._op_queue.unshift(new PoseOp(
                     ii + 1,
                     () => this.pose_edit_by_target_fold_target(ii + this._target_pairs.length)));

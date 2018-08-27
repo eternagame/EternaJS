@@ -2,24 +2,22 @@ import {EPars} from "../EPars";
 import {Folder} from "./Folder";
 
 export class RNAFoldBasic extends Folder {
-    public static readonly NAME: string = "Basic";
+    public static readonly NAME = "Basic";
 
     /** Asynchronously creates a new instance of the RNAFoldBasic folder. */
     public static create(): Promise<RNAFoldBasic> {
         return Promise.resolve(new RNAFoldBasic());
     }
 
-    public is_functional(): boolean {
+    public get isFunctional(): boolean {
         return true;
     }
 
-    /* override */
-    public get_folder_name(): string {
+    public get name(): string {
         return RNAFoldBasic.NAME;
     }
 
-    /* override */
-    public score_structures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let score: number = 0;
 
         if (pairs.length !== seq.length) {
@@ -35,8 +33,7 @@ export class RNAFoldBasic extends Folder {
         return score;
     }
 
-    /* override */
-    public fold_sequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let n: number = seq.length;
         let pairs: number[] = new Array(n);
         let dp_array: number[] = new Array(n * n);

@@ -52,7 +52,7 @@ export class PuzzleEditMode extends GameMode {
 
         this._folder_button = new GameButton()
             .allStates(Bitmaps.ShapeImg)
-            .label(this._folder.get_folder_name(), 22)
+            .label(this._folder.name, 22)
             .tooltip("Select the folding engine");
         this._folder_button.display.scale = new Point(0.5, 0.5);
         this._folder_button.display.position = new Point(17, 160);
@@ -519,11 +519,11 @@ export class PuzzleEditMode extends GameMode {
 
         let post_params: any = {};
 
-        post_params["folder"] = this._folder.get_folder_name();
+        post_params["folder"] = this._folder.name;
         let params_title: string;
-        if (this._folder.get_folder_name() == Vienna2.NAME) {
+        if (this._folder.name == Vienna2.NAME) {
             params_title = "[VRNA_2]";
-        } else if (this._folder.get_folder_name() == NuPACK.NAME) {
+        } else if (this._folder.name == NuPACK.NAME) {
             params_title = "[NuPACK]";
         } else {
             params_title = "";
@@ -592,13 +592,13 @@ export class PuzzleEditMode extends GameMode {
     }
 
     private change_folder(): void {
-        let curr_f: string = this._folder.get_folder_name();
+        let curr_f: string = this._folder.name;
         this._folder = FolderManager.instance.get_next_folder(curr_f, () => false);
-        if (this._folder.get_folder_name() == curr_f) {
+        if (this._folder.name == curr_f) {
             return;
         }
 
-        this._folder_button.label(this._folder.get_folder_name());
+        this._folder_button.label(this._folder.name);
 
         for (let pose of this._poses) {
             pose.set_score_visualization(this._folder);
@@ -823,7 +823,7 @@ export class PuzzleEditMode extends GameMode {
 
             let best_pairs: number[];
             if (!is_there_molecule) {
-                best_pairs = this._folder.fold_sequence(seq, null, null, EPars.DEFAULT_TEMPERATURE);
+                best_pairs = this._folder.foldSequence(seq, null, null, EPars.DEFAULT_TEMPERATURE);
             } else {
                 let bonus: number = -486;
                 let site: number[] = [];
@@ -833,7 +833,7 @@ export class PuzzleEditMode extends GameMode {
                     }
                 }
 
-                best_pairs = this._folder.fold_sequence_with_binding_site(seq, target_pairs, site, Number(bonus), 2.0);
+                best_pairs = this._folder.foldSequenceWithBindingSite(seq, target_pairs, site, Number(bonus), 2.0);
             }
 
             let undo_block = new UndoBlock(seq);

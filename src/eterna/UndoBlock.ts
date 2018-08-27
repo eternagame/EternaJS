@@ -214,25 +214,25 @@ export class UndoBlock {
             }
         }
         let nnfe: number[] = [];
-        let total_fe: number = folder.score_structures(full_seq, best_pairs, temp, nnfe);
+        let total_fe: number = folder.scoreStructures(full_seq, best_pairs, temp, nnfe);
         this.set_param(UndoBlockParam.FE, total_fe, temp);
         this.set_param(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
 
     public set_meltingpoint_and_dotplot(folder: Folder): void {
         if (this.get_param(UndoBlockParam.DOTPLOT, 37) == null) {
-            let dot_array: number[] = folder.get_dot_plot(this.get_sequence(), this.get_pairs(37), 37);
+            let dot_array: number[] = folder.getDotPlot(this.get_sequence(), this.get_pairs(37), 37);
             this.set_param(UndoBlockParam.DOTPLOT, dot_array, 37);
             this._dotplot_data = dot_array.slice();
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.get_pairs(ii) == null) {
-                this.set_pairs(folder.fold_sequence(this.get_sequence(), null, null, ii), ii);
+                this.set_pairs(folder.foldSequence(this.get_sequence(), null, null, ii), ii);
             }
 
             if (this.get_param(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dot_temp_array: number[] = folder.get_dot_plot(this.get_sequence(), this.get_pairs(ii), ii);
+                let dot_temp_array: number[] = folder.getDotPlot(this.get_sequence(), this.get_pairs(ii), ii);
                 this.set_param(UndoBlockParam.DOTPLOT, dot_temp_array, ii);
             }
         }
