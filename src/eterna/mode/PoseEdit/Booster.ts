@@ -67,10 +67,10 @@ export class Booster {
 
         this._view = view;
         this._type = type;
-        this._tool_color = tool_color;
+        this._toolColor = tool_color;
         this._label = label;
         this._tooltip = tooltip;
-        this._script_nid = script_nid;
+        this._scriptID = script_nid;
         this._buttonStateTextures = buttonStateTextures;
 
         for (let ii = 0; ii < this._view.number_of_pose_fields(); ii++) {
@@ -79,11 +79,11 @@ export class Booster {
         }
     }
 
-    public get_tool_color(): number {
-        return this._tool_color;
+    public get toolColor(): number {
+        return this._toolColor;
     }
 
-    public create_button(fontsize: number = 22): GameButton {
+    public createButton(fontsize: number = 22): GameButton {
         let button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
         if (this._type == BoosterType.PAINTER) {
             if (this._buttonStateTextures[0] !== undefined) {
@@ -110,24 +110,24 @@ export class Booster {
         return button;
     }
 
-    public on_load(): void {
-        this.execute_script(null, "ON_LOAD", -1);
+    public onLoad(): void {
+        this.executeScript(null, "ON_LOAD", -1);
     }
 
-    public on_paint(pose: Pose2D, base_num: number): void {
+    public onPaint(pose: Pose2D, base_num: number): void {
         Eterna.sound.play_se(Sounds.SoundPaint);
-        this.execute_script(pose, "MOUSE_DOWN", base_num);
+        this.executeScript(pose, "MOUSE_DOWN", base_num);
     }
 
-    public on_painting(pose: Pose2D, base_num: number): void {
-        this.execute_script(pose, "MOUSE_MOVE", base_num);
+    public onPainting(pose: Pose2D, base_num: number): void {
+        this.executeScript(pose, "MOUSE_MOVE", base_num);
     }
 
-    public on_run(): void {
-        this.execute_script(null, null, -1);
+    public onRun(): void {
+        this.executeScript(null, null, -1);
     }
 
-    private execute_script(pose: Pose2D, cmd: string, base_num: number): void {
+    private executeScript(pose: Pose2D, cmd: string, base_num: number): void {
         if (this._type == BoosterType.ACTION) {
             this._view.pushUILock();
         }
@@ -169,8 +169,8 @@ export class Booster {
         ExternalInterface.addCallback("set_script_status", (txt: string): void => {
         });
 
-        ExternalInterface.addCallback("end_" + this._script_nid, (ret: any): void => {
-            log.info("end_" + this._script_nid + "() called");
+        ExternalInterface.addCallback("end_" + this._scriptID, (ret: any): void => {
+            log.info("end_" + this._scriptID + "() called");
             if (typeof(ret['cause']) === "string" && this._type === BoosterType.ACTION) {
                 this._view.popUILock();
                 Eterna.sound.play_se(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
@@ -178,11 +178,11 @@ export class Booster {
         });
 
         // run
-        log.info("running script " + this._script_nid);
+        log.info("running script " + this._scriptID);
         if (this._type == BoosterType.ACTION) {
-            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._script_nid, {}, null);
+            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._scriptID, {}, null);
         } else {
-            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._script_nid, {
+            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._scriptID, {
                 command: cmd,
                 param: base_num.toString()
             }, null);
@@ -191,11 +191,11 @@ export class Booster {
     }
 
     private readonly _view: GameMode;
-    private readonly _tool_color: number;
+    private readonly _toolColor: number;
     private readonly _type: BoosterType;
     private readonly _label: string;
     private readonly _tooltip: string;
-    private readonly _script_nid: string;
+    private readonly _scriptID: string;
     private readonly _buttonStateTextures: Texture[] = [null, null, null, null, null];
 
     private static _toolColorCounter: number = EPars.RNABASE_DYNAMIC_FIRST;

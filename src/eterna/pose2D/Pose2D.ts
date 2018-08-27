@@ -2682,7 +2682,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                         }
                     } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
                         let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-                        this._dyn_paint_tools[index].on_paint(this, seqnum);
+                        this._dyn_paint_tools[index].onPaint(this, seqnum);
                     }
                 }
             }
@@ -2792,7 +2792,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     }
                 } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
                     let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-                    this._dyn_paint_tools[index].on_painting(this, seqnum);
+                    this._dyn_paint_tools[index].onPainting(this, seqnum);
                 }
             }
         }

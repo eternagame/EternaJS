@@ -179,10 +179,10 @@ export class PoseEditToolbar extends ContainerObject {
                 this._toolbarLayout.addChild(boosterPaintToolsLayout);
                 for (let data of boostersData.paint_tools) {
                     Booster.create(mode, data).then(booster => {
-                        booster.on_load();
-                        let button: GameButton = booster.create_button();
+                        booster.onLoad();
+                        let button: GameButton = booster.createButton();
                         button.clicked.connect(() => {
-                            mode.set_poses_color(booster.get_tool_color());
+                            mode.set_poses_color(booster.toolColor);
                             mode.deselect_all_colorings();
                             button.toggled.value = true;
                         });
@@ -199,8 +199,8 @@ export class PoseEditToolbar extends ContainerObject {
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
                     Booster.create(mode, data).then(booster => {
-                        let button: GameButton = booster.create_button(14);
-                        button.clicked.connect(() => booster.on_run());
+                        let button: GameButton = booster.createButton(14);
+                        button.clicked.connect(() => booster.onRun());
                         this.actionMenu.add_sub_menu_button_at(idx, button, ii);
                         this.dyn_action_tools.push(button);
                     });
