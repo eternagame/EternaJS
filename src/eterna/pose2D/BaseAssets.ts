@@ -18,11 +18,11 @@ export class BaseAssets {
         let bitmapWidth: number;
 
         if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
-            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.body_data, 0, zoomLevel).width;
+            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.bodyData, 0, zoomLevel).width;
         } else if (zoomLevel < 2 * Base.NUM_ZOOM_LEVELS) {
-            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.mid_data, 0, zoomLevel - Base.NUM_ZOOM_LEVELS).width;
+            bitmapWidth = BaseAssets.bitmapForSize(BaseAssets._baseUBitmaps.midData, 0, zoomLevel - Base.NUM_ZOOM_LEVELS).width;
         } else {
-            bitmapWidth = BaseAssets._baseUBitmaps.min_data.width;
+            bitmapWidth = BaseAssets._baseUBitmaps.minData.width;
         }
 
         return bitmapWidth / 2.0;
@@ -112,7 +112,7 @@ export class BaseAssets {
     }
 
     public static getSatelliteReferenceBaseSize(zoom_level: number): number {
-        return BaseAssets.bitmapForSize(BaseAssets._baseABitmaps.body_data, 0, zoom_level).width;
+        return BaseAssets.bitmapForSize(BaseAssets._baseABitmaps.bodyData, 0, zoom_level).width;
     }
 
     public static getBaseTypeSound(type: number): string | null {
