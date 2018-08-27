@@ -82,29 +82,29 @@ export class PoseEditMode extends GameMode {
         this._toolbar = new PoseEditToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
 
-        this._toolbar.undo_button.clicked.connect(() => this.moveUndoStackBackward());
-        this._toolbar.redo_button.clicked.connect(() => this.moveUndoStackForward());
-        this._toolbar.zoom_out_button.clicked.connect(() => {
+        this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
+        this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
+        this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._pose_fields) {
                 poseField.zoom_out();
             }
         });
-        this._toolbar.zoom_in_button.clicked.connect(() => {
+        this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._pose_fields) {
                 poseField.zoom_in();
             }
         });
-        this._toolbar.submit_button.clicked.connect(() => this.submitCurrentPose());
-        this._toolbar.view_solutions_button.clicked.connect(() => {
+        this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
+        this._toolbar.viewSolutionsButton.clicked.connect(() => {
             log.debug("TODO: viewSolutions");
             // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this.puzzle.get_node_id()]);
         });
-        this._toolbar.retry_button.clicked.connect(() => this.askRetry());
-        this._toolbar.native_button.clicked.connect(() => this.togglePosestate());
-        this._toolbar.target_button.clicked.connect(() => this.togglePosestate());
-        this._toolbar.spec_button.clicked.connect(() => this.showSpec());
-        this._toolbar.paste_button.clicked.connect(() =>  this.showPasteSequenceDialog());
-        this._toolbar.view_options_button.clicked.connect(() => {
+        this._toolbar.retryButton.clicked.connect(() => this.askRetry());
+        this._toolbar.nativeButton.clicked.connect(() => this.togglePosestate());
+        this._toolbar.targetButton.clicked.connect(() => this.togglePosestate());
+        this._toolbar.specButton.clicked.connect(() => this.showSpec());
+        this._toolbar.pasteButton.clicked.connect(() =>  this.showPasteSequenceDialog());
+        this._toolbar.viewOptionsButton.clicked.connect(() => {
             let mode = this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL ?
                 EternaViewOptionsMode.LAB :
                 EternaViewOptionsMode.PUZZLE;
@@ -112,22 +112,22 @@ export class PoseEditMode extends GameMode {
         });
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
-        this._toolbar.copy_button.clicked.connect(() => {
+        this._toolbar.copyButton.clicked.connect(() => {
             let sequenceString = EPars.sequence_array_to_string(this._poses[0].get_sequence());
             this.showDialog(new CopySequenceDialog(sequenceString));
         });
 
-        this._toolbar.pip_button.clicked.connect(() => this.togglePip());
+        this._toolbar.pipButton.clicked.connect(() => this.togglePip());
 
         this._toolbar.puzzleStateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
 
-        this._toolbar.freeze_button.clicked.connect(() => this.toggleFreeze());
+        this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
-        this._toolbar.pair_swap_button.clicked.connect(() => this.onSwapClicked());
-        this._toolbar.hint_button.clicked.connect(() => this.onHintClicked());
+        this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
+        this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
 
         this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
-            this._toolbar.set_toolbar_autohide(value);
+            this._toolbar.setToolbarAutohide(value);
         }));
 
         this._dockedSpecBox = new SpecBox(true);
@@ -315,7 +315,7 @@ export class PoseEditMode extends GameMode {
     public onSwapClicked(): void {
         this.setPosesColor(EPars.RNABASE_PAIR);
         this.deselectAllColorings();
-        this._toolbar.pair_swap_button.toggled.value = true;
+        this._toolbar.pairSwapButton.toggled.value = true;
     }
 
     public onHintClicked(): void {
@@ -1021,7 +1021,7 @@ export class PoseEditMode extends GameMode {
 
     /*override*/
     public set_toolbar_autohide(auto: boolean): void {
-        this._toolbar.set_toolbar_autohide(auto);
+        this._toolbar.setToolbarAutohide(auto);
     }
 
     /*override*/
@@ -1193,7 +1193,7 @@ export class PoseEditMode extends GameMode {
             `Player: ${Eterna.player_name}\n` +
             `Puzzle ID: ${this._puzzle.get_node_id()}\n` +
             `Puzzle Title: ${this._puzzle.get_puzzle_name()}\n` +
-            `Mode: ${this.toolbar.native_button.isSelected ? "NativeMode" : "TargetMode"}`;
+            `Mode: ${this.toolbar.nativeButton.isSelected ? "NativeMode" : "TargetMode"}`;
         let infoText = Fonts.arial(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
@@ -1391,10 +1391,10 @@ export class PoseEditMode extends GameMode {
     private setToNativeMode(trigger_modechange_event: boolean = true): void {
         this._poseState = PoseState.NATIVE;
 
-        this._toolbar.target_button.toggled.value = false;
-        this._toolbar.native_button.toggled.value = true;
-        this._toolbar.target_button.hotkey(KeyCode.Space);
-        this._toolbar.native_button.hotkey(null);
+        this._toolbar.targetButton.toggled.value = false;
+        this._toolbar.nativeButton.toggled.value = true;
+        this._toolbar.targetButton.hotkey(KeyCode.Space);
+        this._toolbar.nativeButton.hotkey(null);
 
         this.savePosesMarkersContexts();
         this._paused = false;
@@ -1405,10 +1405,10 @@ export class PoseEditMode extends GameMode {
     private setToTargetMode(trigger_modechange_event: boolean = true): void {
         this._poseState = PoseState.TARGET;
 
-        this._toolbar.target_button.toggled.value = true;
-        this._toolbar.native_button.toggled.value = false;
-        this._toolbar.native_button.hotkey(KeyCode.Space);
-        this._toolbar.target_button.hotkey(null);
+        this._toolbar.targetButton.toggled.value = true;
+        this._toolbar.nativeButton.toggled.value = false;
+        this._toolbar.nativeButton.hotkey(KeyCode.Space);
+        this._toolbar.targetButton.hotkey(null);
 
         this.savePosesMarkersContexts();
 
@@ -1451,9 +1451,9 @@ export class PoseEditMode extends GameMode {
         this._constraintsLayer.alpha = (this._isFrozen ? 0.25 : 1.0);
         this.setShowTotalEnergy(!this._isFrozen);
 
-        this._toolbar.undo_button.enabled = !this._isFrozen;
-        this._toolbar.redo_button.enabled = !this._isFrozen;
-        this._toolbar.freeze_button.toggled.value = this._isFrozen;
+        this._toolbar.undoButton.enabled = !this._isFrozen;
+        this._toolbar.redoButton.enabled = !this._isFrozen;
+        this._toolbar.freezeButton.toggled.value = this._isFrozen;
 
         if (!this._isFrozen) { // we just "thawed", update
             this.poseEditByTarget(this._curTargetIndex);
@@ -1862,8 +1862,8 @@ export class PoseEditMode extends GameMode {
 
     public deselectAllColorings(): void {
         this._toolbar.palette.clear_selection();
-        this._toolbar.pair_swap_button.toggled.value = false;
-        for (let button of this._toolbar.dyn_paint_tools) {
+        this._toolbar.pairSwapButton.toggled.value = false;
+        for (let button of this._toolbar.dynPaintTools) {
             button.toggled.value = false;
         }
     }
@@ -1875,7 +1875,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private disableTools(disable: boolean): void {
-        this._toolbar.disable_tools(disable);
+        this._toolbar.disableTools(disable);
         // this._scriptbar.enabled = !disable;
         // if (this._pic_button) {
         //     this._pic_button.enabled = !disable;
@@ -3319,11 +3319,11 @@ export class PoseEditMode extends GameMode {
         this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
 
         if (!this._isFrozen) {
-            if (this._toolbar.undo_button.display.visible) {
-                this._toolbar.undo_button.enabled = !(this._stackLevel < 1);
+            if (this._toolbar.undoButton.display.visible) {
+                this._toolbar.undoButton.enabled = !(this._stackLevel < 1);
             }
-            if (this._toolbar.redo_button.display.visible) {
-                this._toolbar.redo_button.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
+            if (this._toolbar.redoButton.display.visible) {
+                this._toolbar.redoButton.enabled = !(this._stackLevel + 1 > this._stackSize - 1);
             }
         }
 

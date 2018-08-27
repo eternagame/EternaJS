@@ -189,29 +189,29 @@ export class RScriptEnv extends ContainerObject {
         case RScriptUIElementID.PALETTEALT:
             return this.GetUI().toolbar.palette;
         case RScriptUIElementID.TOGGLENATURAL:
-            return this.GetUI().toolbar.native_button;
+            return this.GetUI().toolbar.nativeButton;
         case RScriptUIElementID.TOGGLETARGET:
-            return this.GetUI().toolbar.target_button;
+            return this.GetUI().toolbar.targetButton;
         case RScriptUIElementID.TOGGLEBAR:
             // NOTE: There is no longer a toggle bar...
-            return this.GetUI().toolbar.native_button;
+            return this.GetUI().toolbar.nativeButton;
         case RScriptUIElementID.ZOOMIN:
-            return this.GetUI().toolbar.zoom_in_button;
+            return this.GetUI().toolbar.zoomInButton;
         case RScriptUIElementID.ZOOMOUT:
-            return this.GetUI().toolbar.zoom_out_button;
+            return this.GetUI().toolbar.zoomOutButton;
         case RScriptUIElementID.ACTIONBAR:
             // NOTE: There is no longer an action bar...
-            return this.GetUI().toolbar.zoom_in_button;
+            return this.GetUI().toolbar.zoomInButton;
         case RScriptUIElementID.RESET:
-            return this.GetUI().toolbar.retry_button;
+            return this.GetUI().toolbar.retryButton;
         case RScriptUIElementID.UNDO:
-            return this.GetUI().toolbar.undo_button;
+            return this.GetUI().toolbar.undoButton;
         case RScriptUIElementID.REDO:
-            return this.GetUI().toolbar.redo_button;
+            return this.GetUI().toolbar.redoButton;
         case RScriptUIElementID.SWAP:
-            return this.GetUI().toolbar.pair_swap_button;
+            return this.GetUI().toolbar.pairSwapButton;
         case RScriptUIElementID.PIP:
-            return this.GetUI().toolbar.pip_button;
+            return this.GetUI().toolbar.pipButton;
         case RScriptUIElementID.A:
             return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.A);
         case RScriptUIElementID.U:

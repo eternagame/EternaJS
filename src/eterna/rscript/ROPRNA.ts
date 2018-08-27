@@ -36,7 +36,7 @@ export class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.SETPAINTER) {
             let ui: PoseEditMode = this._env.GetUI();
             if (this._color === "SWAP") {
-                ui.toolbar.pair_swap_button.click();
+                ui.toolbar.pairSwapButton.click();
             } else {
                 let paletteTargetType = StringToPaletteTargetType(this._color);
                 if (paletteTargetType != null) {
