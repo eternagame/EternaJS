@@ -3509,7 +3509,7 @@ export class PoseEditMode extends GameMode {
                                     this._poses[target_index].clear_design_struct();
                                     more = false;
                                 } else {
-                                    more = FoldUtil.next_perm(new_order);
+                                    more = FoldUtil.nextPerm(new_order);
                                 }
                             } while (more);
                         }

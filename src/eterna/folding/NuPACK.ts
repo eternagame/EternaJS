@@ -327,7 +327,7 @@ export class NuPACK extends Folder {
         let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, binding_site, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
-        if (FoldUtil.binding_site_formed(pairsA, site_groups)) {
+        if (FoldUtil.bindingSiteFormed(pairsA, site_groups)) {
             feA += bonus;
         }
 
@@ -339,7 +339,7 @@ export class NuPACK extends Folder {
         co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
-        if (FoldUtil.binding_site_formed(co_pairs, site_groups)) {
+        if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) {
             co_fe += bonus;
         }
 
@@ -423,7 +423,7 @@ export class NuPACK extends Folder {
                 }
             }
 
-            more = FoldUtil.next_perm(order);
+            more = FoldUtil.nextPerm(order);
         } while (more);
 
         this.putCache(key, mfold);
@@ -460,7 +460,7 @@ export class NuPACK extends Folder {
                 }
             }
 
-            more = FoldUtil.next_perm(order);
+            more = FoldUtil.nextPerm(order);
         } while (more);
 
         ops.push(new PoseOp(null, () => this.multifold(seq, second_best_pairs, oligos, desired_pairs, temp)));
