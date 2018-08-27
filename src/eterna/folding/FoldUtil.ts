@@ -1,5 +1,5 @@
 export class FoldUtil {
-    public static next_perm(v: number[]): boolean {
+    public static nextPerm(v: number[]): boolean {
         let more: boolean = false;
         let ii: number = v.length;
         if (ii <= 1) return more;
@@ -29,7 +29,7 @@ export class FoldUtil {
         return more;
     }
 
-    public static binding_site_formed(pairs: number[], groups: number[][]): boolean {
+    public static bindingSiteFormed(pairs: number[], groups: number[][]): boolean {
         if (pairs[groups[0][0]] !== groups[1][groups[1].length - 1]) return false;
         if (pairs[groups[0][groups[0].length - 1]] !== groups[1][0]) return false;
         for (let ii = 1; ii < groups[0].length - 1; ii++) {
