@@ -28,7 +28,7 @@ export class AchievementManager extends GameObject {
         }
     }
 
-    public award_achievement(achievementData: any): Promise<void> {
+    public awardAchievements(achievementData: any): Promise<void> {
         if (achievementData != null) {
             for (let key in achievementData) {
                 if (achievementData.hasOwnProperty(key)) {
