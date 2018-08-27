@@ -130,29 +130,29 @@ export class RNAFoldBasic extends Folder {
             }
         }
 
-        this.trace_pairs(trace_array, pairs, n, 0, n - 1);
+        this.tracePairs(trace_array, pairs, n, 0, n - 1);
 
         return pairs;
     }
 
-    private trace_pairs(trace_array: number[], pairs: number[], n: number, ii_start: number, jj_start: number): void {
+    private tracePairs(trace_array: number[], pairs: number[], n: number, ii_start: number, jj_start: number): void {
         let dir: number = trace_array[ii_start * n + jj_start];
 
         if (dir === 1) {
             pairs[ii_start] = jj_start;
             pairs[jj_start] = ii_start;
 
-            this.trace_pairs(trace_array, pairs, n, ii_start + 1, jj_start - 1);
+            this.tracePairs(trace_array, pairs, n, ii_start + 1, jj_start - 1);
         } else if (dir === 2) {
-            this.trace_pairs(trace_array, pairs, n, ii_start + 1, jj_start);
+            this.tracePairs(trace_array, pairs, n, ii_start + 1, jj_start);
         } else if (dir === 3) {
-            this.trace_pairs(trace_array, pairs, n, ii_start, jj_start - 1);
+            this.tracePairs(trace_array, pairs, n, ii_start, jj_start - 1);
         } else if (dir === 0) {
 
         } else {
             let kk: number = -dir;
-            this.trace_pairs(trace_array, pairs, n, ii_start, kk);
-            this.trace_pairs(trace_array, pairs, n, kk + 1, jj_start);
+            this.tracePairs(trace_array, pairs, n, ii_start, kk);
+            this.tracePairs(trace_array, pairs, n, kk + 1, jj_start);
         }
     }
 }

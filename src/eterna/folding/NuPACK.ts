@@ -182,7 +182,7 @@ export class NuPACK extends Folder {
             return pairs.slice();
         }
 
-        pairs = this.fold_sequence_alch(seq, desired_pairs, temp);
+        pairs = this.foldSequenceImpl(seq, temp);
         this.putCache(key, pairs.slice());
         return pairs;
     }
@@ -223,7 +223,7 @@ export class NuPACK extends Folder {
             site_groups.push(current_group);
         }
 
-        pairs = this.fold_sequence_alch_with_binding_site(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
+        pairs = this.foldSequenceWithBindingSiteImpl(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
 
         this.putCache(key, pairs.slice());
         return pairs;
@@ -261,7 +261,7 @@ export class NuPACK extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofold_sequence_alch(seq, desired_pairs, temp);
+        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
@@ -336,7 +336,7 @@ export class NuPACK extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
+        co_pairs = this.cofoldSequenceWithBindingSiteImpl(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
         if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) {
@@ -398,7 +398,7 @@ export class NuPACK extends Folder {
                 if (ii === 0) {
                     ms_pairs = this.foldSequence(ms_seq, null, null, temp);
                 } else {
-                    ms_pairs = this.cofold_seq2(ms_seq, null, null, temp);
+                    ms_pairs = this.cofoldSeq2(ms_seq, null, null, temp);
                 }
                 let ms_nodes: number[] = [];
                 let ms_fe: number = this.scoreStructures(ms_seq, ms_pairs, temp, ms_nodes);
@@ -456,7 +456,7 @@ export class NuPACK extends Folder {
                 if (ii === 0) {
                     ops.push(new PoseOp(null, () => this.foldSequence(ms_seq, null, null, temp)));
                 } else {
-                    ops.push(new PoseOp(null, () => this.cofold_seq2(ms_seq, null, null, temp)));
+                    ops.push(new PoseOp(null, () => this.cofoldSeq2(ms_seq, null, null, temp)));
                 }
             }
 
@@ -467,7 +467,7 @@ export class NuPACK extends Folder {
         return ops;
     }
 
-    private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): number[] {
+    private foldSequenceImpl(seq: number[], temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
 
         let result: FullFoldResult = null;
@@ -485,7 +485,7 @@ export class NuPACK extends Folder {
         }
     }
 
-    private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
 
         let result: FullFoldResult = null;
@@ -503,7 +503,7 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): number[] {
+    private cofoldSequenceImpl(seq: number[], str: string = null, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
 
         let result: FullFoldResult = null;
@@ -522,7 +522,7 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private cofoldSequenceWithBindingSiteImpl(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
 
         let result: FullFoldResult;
@@ -541,7 +541,7 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofold_seq2(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    private cofoldSeq2(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
         let key: any = {
             primitive: "cofold2",
             seq,
@@ -555,7 +555,7 @@ export class NuPACK extends Folder {
             return co_pairs.slice();
         }
 
-        co_pairs = this.cofold_sequence_alch(seq, desired_pairs, temp);
+        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs, temp);
 
         this.putCache(key, co_pairs.slice());
         return co_pairs;
