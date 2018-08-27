@@ -28,6 +28,7 @@ import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
+import {Background} from "../../vfx/Background";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
@@ -44,6 +45,9 @@ export class PuzzleEditMode extends GameMode {
 
     protected setup(): void {
         super.setup();
+
+        let background = new Background();
+        this.addObject(background, this.bgLayer);
 
         this._folder = FolderManager.instance.get_folder(Vienna.NAME);
 
