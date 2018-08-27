@@ -144,17 +144,17 @@ export class ROPWait extends RScriptOp {
             }
 
             let t1: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(this._start_idx).get_type()
+                this._env.GetRNA().get_base(this._start_idx).type
             ).toUpperCase();
             let t2: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(paired).get_type()
+                this._env.GetRNA().get_base(paired).type
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
         } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (RScriptEnv.ConvertNucleotideIntToString(
-                    this._env.GetRNA().get_base(ii).get_type()
+                    this._env.GetRNA().get_base(ii).type
                 ).toUpperCase() !== this._expected_color) {
                     return true;
                 }
