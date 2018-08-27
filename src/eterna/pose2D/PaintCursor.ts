@@ -9,7 +9,7 @@ class PaintCursor extends GameObject implements Updatable {
         super();
         this._graphics = new Graphics();
         this._color = PaintCursor.WHITE;
-        this._outer_color = PaintCursor.NULL;
+        this._outColor = PaintCursor.NULL;
     }
 
     /*override*/
@@ -17,57 +17,57 @@ class PaintCursor extends GameObject implements Updatable {
         return this._graphics;
     }
 
-    public set_color(col: number): void {
+    public setColor(col: number): void {
         this._color = col;
     }
 
-    public set_shape(shape: number): void {
+    public setShape(shape: number): void {
         switch (shape) {
         case EPars.RNABASE_ADENINE:
             this._color = PaintCursor.YELLOW;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
             break;
 
         case EPars.RNABASE_URACIL:
             this._color = PaintCursor.BLUE;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
             break;
 
         case EPars.RNABASE_DELETE:
         case EPars.RNABASE_GUANINE:
             this._color = PaintCursor.RED;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
             break;
 
         case EPars.RNABASE_CYTOSINE:
             this._color = PaintCursor.GREEN;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
             break;
 
         case EPars.RNABASE_AU_PAIR:
             this._color = PaintCursor.YELLOW;
-            this._outer_color = PaintCursor.BLUE;
+            this._outColor = PaintCursor.BLUE;
             break;
 
         case EPars.RNABASE_GU_PAIR:
             this._color = PaintCursor.BLUE;
-            this._outer_color = PaintCursor.RED;
+            this._outColor = PaintCursor.RED;
             break;
 
         case EPars.RNABASE_GC_PAIR:
             this._color = PaintCursor.RED;
-            this._outer_color = PaintCursor.GREEN;
+            this._outColor = PaintCursor.GREEN;
             break;
 
         case EPars.RNABASE_ADD_BASE:
         case EPars.RNABASE_ADD_PAIR:
             this._color = PaintCursor.YELLOW;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
             break;
 
         default:
             this._color = PaintCursor.WHITE;
-            this._outer_color = PaintCursor.NULL;
+            this._outColor = PaintCursor.NULL;
         }
     }
 
@@ -76,7 +76,7 @@ class PaintCursor extends GameObject implements Updatable {
         this._graphics.clear();
 
         let ic: number = this._color;
-        let oc: number = this._outer_color;
+        let oc: number = this._outColor;
 
         if (Flashbang.app.isShiftKeyDown) {
             ic = PaintCursor.NULL;
@@ -105,15 +105,15 @@ class PaintCursor extends GameObject implements Updatable {
 
     private readonly _graphics: Graphics;
     private _color: number;
-    private _outer_color: number;
+    private _outColor: number;
 
-    private static readonly YELLOW: number = 0xFFFF00;
-    private static readonly BLUE: number = 0x0000FF;
-    private static readonly RED: number = 0xFF0000;
-    private static readonly GREEN: number = 0x00FF00;
-    private static readonly WHITE: number = 0xFFFFFF;
-    private static readonly CYAN: number = 0x7EFFFF;
-    private static readonly GREY: number = 0xC0C0C0;
-    private static readonly NULL: number = 0x0;
+    private static readonly YELLOW = 0xFFFF00;
+    private static readonly BLUE = 0x0000FF;
+    private static readonly RED = 0xFF0000;
+    private static readonly GREEN = 0x00FF00;
+    private static readonly WHITE = 0xFFFFFF;
+    private static readonly CYAN = 0x7EFFFF;
+    private static readonly GREY = 0xC0C0C0;
+    private static readonly NULL = 0x0;
 }
 
