@@ -129,15 +129,13 @@ export class Booster {
 
     private execute_script(pose: Pose2D, cmd: string, base_num: number): void {
         if (this._type == BoosterType.ACTION) {
-            log.debug("TODO: add_lock");
-            // Application.instance.add_lock("LOCK_SCRIPT");
+            this._view.pushUILock();
         }
 
         // register callbacks
         this._view.register_script_callbacks();
 
         ExternalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
-            // _view.trace_js("set_sequence_string() called");
             let seq_arr: number[] = EPars.string_to_sequence_array(seq);
             if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info("Invalid characters in " + seq);
@@ -159,7 +157,6 @@ export class Booster {
         });
 
         ExternalInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
-            // _view.trace_js("set_tracked_indices() called");
             for (let ii: number = 0; ii < this._view.number_of_pose_fields(); ii++) {
                 let pose: Pose2D = this._view.get_pose(ii);
                 pose.clear_tracking();
@@ -170,27 +167,19 @@ export class Booster {
         });
 
         ExternalInterface.addCallback("set_script_status", (txt: string): void => {
-            // _view.trace_js("set_script_status() called");
         });
 
         ExternalInterface.addCallback("end_" + this._script_nid, (ret: any): void => {
             log.info("end_" + this._script_nid + "() called");
-            log.info(ret);
-            if (ret['cause'] instanceof String) {
-                if (this._type == BoosterType.ACTION) {
-                    Eterna.sound.play_se(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
-                    log.debug("TODO: remove_lock");
-                    // Application.instance.remove_lock("LOCK_SCRIPT");
-                }
-            } else {
-                // leave the script running asynchronously
+            if (typeof(ret['cause']) === "string" && this._type === BoosterType.ACTION) {
+                this._view.popUILock();
+                Eterna.sound.play_se(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
             }
         });
 
         // run
         log.info("running script " + this._script_nid);
         if (this._type == BoosterType.ACTION) {
-            //SoundManager.instance.play_se(SoundManager.SoundScriptExec);
             ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._script_nid, {}, null);
         } else {
             ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._script_nid, {

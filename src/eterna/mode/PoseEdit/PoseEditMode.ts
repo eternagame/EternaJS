@@ -943,7 +943,7 @@ export class PoseEditMode extends GameMode {
         this._run_status.style.fill = 0xC0C0C0;
         this._run_status.text = "running...";
 
-        // Application.instance.add_lock("LOCK_SCRIPT");
+        this.pushUILock();
 
         // register callbacks
         this.register_script_callbacks();
@@ -963,10 +963,11 @@ export class PoseEditMode extends GameMode {
                 this._run_status.text = ret['cause'];
                 // restore
                 // FIXME: other clean-ups? should unregister callbacks?
-                // Application.instance.remove_lock("LOCK_SCRIPT");
             } else {
                 // leave the script running asynchronously
             }
+
+            this.popUILock();
         });
 
         // run

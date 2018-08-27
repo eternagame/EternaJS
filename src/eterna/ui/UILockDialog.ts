@@ -14,7 +14,7 @@ export class UILockDialog extends Dialog<void> {
     }
 
     public releaseRef(): void {
-        if (--this._refCount == 0) {
+        if (--this._refCount === 0) {
             this.destroySelf();
         }
     }
