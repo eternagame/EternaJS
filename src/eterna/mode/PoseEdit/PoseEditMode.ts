@@ -3984,25 +3984,6 @@ export class PoseEditMode extends GameMode {
         this._stack_level = stack_level;
     }
 
-    /*
-		Prompt feed when celebrating about cleared puzzle
-	*/
-    private facebook_prompt_feed(): void {
-        // let req: URLRequest = new URLRequest;
-        //
-        // req.url = Application.instance.get_url_base()
-        //     + "/content/facebook-connect?flag=" + Achievements.FLAG_PUZZLE
-        //     + "&puzzle=" + this._puzzle.get_puzzle_name()
-        //     + "&reward=" + this._puzzle.get_reward()
-        //     + "&node_id=" + this._puzzle.get_node_id();
-        //
-        // this.navigateToURL(req, "facebook");
-    }
-
-    private static go_to_strategy_guide(): void {
-        window.open(EternaURL.STRATEGY_GUIDE, "_blank");
-    }
-
     private set_show_menu(show_menu: boolean): void {
         log.debug("TODO: set_show_menu");
         // let m: GameObject = (<GameObject>Application.instance.get_application_gui("Menu"));
