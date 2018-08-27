@@ -181,7 +181,7 @@ export class Vienna extends Folder {
             return pairs.slice();
         }
 
-        pairs = this.fold_sequence_alch(seq, desired_pairs, temp);
+        pairs = this.foldSequenceImpl(seq, desired_pairs, temp);
         this.putCache(key, pairs.slice());
         return pairs;
     }
@@ -203,7 +203,7 @@ export class Vienna extends Folder {
         }
 
         if (!(version >= 2.0)) {
-            pairs = this.fold_sequence_alch_with_binding_site_old(seq, target_pairs, binding_site, bonus);
+            pairs = this.foldSequenceWithBindingSiteOld(seq, target_pairs, binding_site, bonus);
             this.putCache(key, pairs.slice());
             return pairs;
         }
@@ -228,9 +228,9 @@ export class Vienna extends Folder {
         }
 
         if (site_groups.length === 2) {
-            pairs = this.fold_sequence_alch_with_binding_site(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
+            pairs = this.foldSequenceWithBindingSiteImpl(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         } else {
-            pairs = this.fold_sequence_alch_with_binding_site_old(seq, target_pairs, binding_site, bonus);
+            pairs = this.foldSequenceWithBindingSiteOld(seq, target_pairs, binding_site, bonus);
         }
 
         this.putCache(key, pairs.slice());
@@ -272,7 +272,7 @@ export class Vienna extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofold_sequence_alch(seq, desired_pairs, temp);
+        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
@@ -285,7 +285,7 @@ export class Vienna extends Folder {
         return co_pairs;
     }
 
-    public can_cofold_with_binding_site(): boolean {
+    public get canCofoldWithBindingSite(): boolean {
         return true;
     }
 
@@ -343,7 +343,7 @@ export class Vienna extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofold_sequence_alch_with_binding_site(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
+        co_pairs = this.cofoldSequenceWithBindingSiteImpl(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
         if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) co_fe += bonus;
@@ -605,7 +605,7 @@ export class Vienna extends Folder {
         return hairpin_score;
     }
 
-    private fold_sequence_alch(seq: number[], structStr: string = null, temp: number = 37): number[] {
+    private foldSequenceImpl(seq: number[], structStr: string = null, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
         let result: FullFoldResult;
 
@@ -623,7 +623,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private fold_sequence_alch_with_binding_site(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, false, false);
         const structStr: string = "";
         let result: FullFoldResult;
@@ -642,7 +642,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private cofold_sequence_alch(seq: number[], str: string = null, temp: number = 37): number[] {
+    private cofoldSequenceImpl(seq: number[], str: string = null, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
@@ -662,7 +662,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private cofold_sequence_alch_with_binding_site(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private cofoldSequenceWithBindingSiteImpl(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
         const seqStr = EPars.sequence_array_to_string(seq, true, false);
         const structStr: string = str || "";
         let result: FullFoldResult;
@@ -682,7 +682,7 @@ export class Vienna extends Folder {
         }
     }
 
-    private fold_sequence_alch_with_binding_site_old(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, temp: number = 37): number[] {
+    private foldSequenceWithBindingSiteOld(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, temp: number = 37): number[] {
         let best_pairs: number[];
         let native_pairs: number[] = this.foldSequence(seq, null, null);
 
