@@ -7,21 +7,21 @@ export enum GamePanelType {
 }
 
 export class GamePanel extends BaseGamePanel {
-    public constructor(panel_type: GamePanelType = GamePanelType.NORMAL, alpha_val: number = 0.07, color: number = 0xffffff, border_alpha: number = 0.0, border_color: number = 0) {
+    public constructor(type: GamePanelType = GamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, borderAlpha: number = 0.0, borderColor: number = 0) {
         super();
 
         this._background = new Graphics();
         this.container.addChild(this._background);
 
-        this.setup(panel_type, alpha_val, color, border_alpha, border_color);
+        this.setup(type, alpha, color, borderAlpha, borderColor);
     }
 
-    public setup(panel_type: GamePanelType, alpha_val: number, color: number, border_alpha: number, border_color: number): void {
-        this._panel_type = panel_type;
-        this._alpha = alpha_val;
+    public setup(type: GamePanelType, alpha: number, color: number, borderAlpha: number, borderColor: number): void {
+        this._type = type;
+        this._alpha = alpha;
         this._color = color;
-        this._border_alpha = border_alpha;
-        this._border_color = border_color;
+        this._borderAlpha = borderAlpha;
+        this._borderColor = borderColor;
         this.updateView();
     }
 
@@ -40,11 +40,11 @@ export class GamePanel extends BaseGamePanel {
         return this._title == null ? 0 : 35;
     }
 
-    public get_panel_width(): number {
+    public get width(): number {
         return this._width;
     }
 
-    public get_panel_height(): number {
+    public get height(): number {
         return this._height;
     }
 
@@ -55,24 +55,24 @@ export class GamePanel extends BaseGamePanel {
             return;
         }
 
-        if (this._panel_type === GamePanelType.INVISIBLE) {
+        if (this._type === GamePanelType.INVISIBLE) {
             this._background.beginFill(0x000000, 0);
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();
         } else {
-            this._background.lineStyle(2, this._border_color, this._border_alpha);
+            this._background.lineStyle(2, this._borderColor, this._borderAlpha);
             this._background.beginFill(this._color, this._alpha);
             this._background.drawRoundedRect(0, 0, this._width, this._height, 5);
             this._background.endFill();
 
             if (this._title != null) {
-                if (this._title_text == null) {
-                    this._title_text = Fonts.std_medium().fontSize(16).color(0xffffff).build();
-                    this._title_text.position = new Point(7, 6);
-                    this.container.addChild(this._title_text);
+                if (this._titleText == null) {
+                    this._titleText = Fonts.std_medium().fontSize(16).color(0xffffff).build();
+                    this._titleText.position = new Point(7, 6);
+                    this.container.addChild(this._titleText);
                 }
 
-                this._title_text.text = this._title;
+                this._titleText.text = this._title;
                 this._background.lineStyle(2, 0xC0DCE7, 0.27); // 0xFEC942);
                 this._background.moveTo(0, 35);
                 this._background.lineTo(this._width, 35);
@@ -82,14 +82,14 @@ export class GamePanel extends BaseGamePanel {
 
     protected readonly _background: Graphics;
 
-    protected _panel_type: GamePanelType;
+    protected _type: GamePanelType;
 
     protected _alpha: number = 0;
     protected _color: number = 0;
-    protected _border_alpha: number = 0;
-    protected _border_color: number = 0;
+    protected _borderAlpha: number = 0;
+    protected _borderColor: number = 0;
     protected _title: string = null;
-    protected _title_text: Text = null;
+    protected _titleText: Text = null;
 
     protected _width: number = 0;
     protected _height: number = 0;

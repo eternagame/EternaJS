@@ -308,13 +308,13 @@ export class PuzzleEditMode extends GameMode {
             let poseField = this._poseFields[ii];
             if (!this._embedded) {
                 structureInput.display.position = new Point(
-                    (poseField.width - structureInput.get_panel_width()) * 0.5,
-                    toolbarBounds.y - structureInput.get_panel_height() - 7
+                    (poseField.width - structureInput.width) * 0.5,
+                    toolbarBounds.y - structureInput.height - 7
                 );
             } else {
                 structureInput.display.position = new Point(
-                    (poseField.width - structureInput.get_panel_width()) * 0.5,
-                    toolbarBounds.y - structureInput.get_panel_height() - 7
+                    (poseField.width - structureInput.width) * 0.5,
+                    toolbarBounds.y - structureInput.height - 7
                 );
             }
         }

@@ -68,7 +68,7 @@ export class AchievementBox extends ContainerObject {
         this._okButton = new GameButton().label("CLOSE", 18);
         panel.addObject(this._okButton, panel.container);
         this._okButton.container.position = new Point(
-            (panel.get_panel_width() - this._okButton.container.width) * 0.5,
+            (panel.width - this._okButton.container.width) * 0.5,
             150 + 5);
     }
 

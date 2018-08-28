@@ -81,8 +81,8 @@ export class ConfirmDialog extends Dialog<boolean> {
 
         let updateLocation = () => {
             panel.display.position = new Point(
-                (Flashbang.stageWidth - panel.get_panel_width()) * 0.5,
-                (Flashbang.stageHeight - panel.get_panel_height()) * 0.5
+                (Flashbang.stageWidth - panel.width) * 0.5,
+                (Flashbang.stageHeight - panel.height) * 0.5
             );
         };
 
