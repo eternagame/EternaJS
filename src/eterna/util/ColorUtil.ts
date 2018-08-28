@@ -1,5 +1,5 @@
 import {MathUtil} from "../../flashbang/util/MathUtil";
-import {StringUtil} from "./StringUtil";
+import {StringUtil} from "../../flashbang/util/StringUtil";
 
 export class ColorUtil {
     public static fromString(str: string): number {
