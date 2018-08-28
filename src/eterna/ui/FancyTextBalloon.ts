@@ -47,8 +47,8 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     }
 
     public set fixedWidth(in_width: number) {
-        this._fixed_width = in_width;
-        this._has_fixed_width = true;
+        this._fixedWidth = in_width;
+        this._hasFixedWidth = true;
 
         if (this.isLiveObject) {
             this.updateView();
@@ -57,7 +57,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     public get width(): number {
-        return this._has_fixed_width ? this._fixed_width : super.width;
+        return this._hasFixedWidth ? this._fixedWidth : super.width;
     }
 
     /* override */
@@ -71,8 +71,8 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         this._hasTitle = title != null;
     }
 
-    public add_child_arrow(arrow: RScriptArrow): void {
-        this._children_arrows.push(arrow);
+    public addChildArrow(arrow: RScriptArrow): void {
+        this._childrenArrows.push(arrow);
     }
 
     /* override */
@@ -106,7 +106,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     }
 
     public update(dt: number): void {
-        for (let arrow of this._children_arrows) {
+        for (let arrow of this._childrenArrows) {
             let xdiff: number = (this.display.x + this.container.width / 2) - arrow.display.x;
             let ydiff: number = this.display.y - arrow.display.y;
             if (ydiff < 0.0) {
@@ -147,7 +147,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     private readonly _outlineColor: number;
     private readonly _outlineAlpha: number;
 
-    private _has_fixed_width: boolean = false;
-    private _fixed_width: number;
-    private _children_arrows: RScriptArrow[] = [];
+    private _hasFixedWidth: boolean = false;
+    private _fixedWidth: number;
+    private _childrenArrows: RScriptArrow[] = [];
 }
