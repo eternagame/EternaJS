@@ -15,13 +15,13 @@ export class PasteSequenceDialog extends Dialog<string> {
         const SEQUENCE = "Sequence";
 
         let inputPanel = new TextInputPanel();
-        let sequenceField = inputPanel.add_field(SEQUENCE, 200);
-        inputPanel.set_title("Write down a sequence");
+        let sequenceField = inputPanel.addField(SEQUENCE, 200);
+        inputPanel.title = "Write down a sequence";
         this.addObject(inputPanel, this.container);
 
         sequenceField.setFocus(true);
 
-        inputPanel.set_hotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(values => this.onSequenceEntered(values.get(SEQUENCE)));
