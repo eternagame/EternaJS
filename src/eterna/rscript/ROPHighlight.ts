@@ -37,7 +37,7 @@ export class ROPHighlight extends RScriptOp {
     /* override */
     public exec(): void {
         // Remove highlight with ID.
-        if (this._env.exists(this._id)) {
+        if (this._env.hasVar(this._id)) {
             let existing: any = this._env.getVar(this._id);
             if (existing instanceof GameObject) {
                 existing.destroySelf();
@@ -54,7 +54,7 @@ export class ROPHighlight extends RScriptOp {
                 res.push(i);
             }
             let rnaHighlight: RNAHighlightState = this._env.pose.createNewHighlight(res);
-            this._env.storeVar(this._id, rnaHighlight, this._env.pose);
+            this._env.setVar(this._id, rnaHighlight);
         } else if (this._opVisible && this._mode === ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.getUIElementFromID(this._uiElementString);
             const highlightParent: any = this.getUiElementReference(elementID, altParam);
@@ -86,7 +86,7 @@ export class ROPHighlight extends RScriptOp {
             )));
 
             highlightParent.addObject(highlightObj, highlightParent.container);
-            this._env.storeVar(this._id, highlight, highlightParent);
+            this._env.setVar(this._id, highlight);
         }
     }
 
