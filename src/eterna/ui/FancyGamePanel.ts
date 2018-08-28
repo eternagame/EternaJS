@@ -7,19 +7,19 @@ export enum FancyGamePanelType {
 }
 
 export class FancyGamePanel extends BaseGamePanel {
-    constructor(panel_type: FancyGamePanelType = FancyGamePanelType.NORMAL, alpha_val: number = 0.07, color: number = 0xffffff, outlineColor: number = 0xffffff, outline_alpha: number = 0.2) {
+    constructor(type: FancyGamePanelType = FancyGamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, outlineColor: number = 0xffffff, outlineAlpha: number = 0.2) {
         super();
 
         this._background = new Graphics();
         this.container.addChild(this._background);
 
-        this._type = panel_type;
-        this._alpha = alpha_val;
+        this._type = type;
+        this._alpha = alpha;
         this._outlineColor = outlineColor;
-        this._outlineAlpha = outline_alpha;
+        this._outlineAlpha = outlineAlpha;
         this._color = color;
         this._title = null;
-        this._title_text = null;
+        this._titleText = null;
     }
 
     protected added(): void {
@@ -33,12 +33,12 @@ export class FancyGamePanel extends BaseGamePanel {
         this.updateView();
     }
 
-    public setPanelTitle(title: string): void {
+    public set title(title: string) {
         this._title = title;
         this.updateView();
     }
 
-    public getTitleSpace(): number {
+    public get titleHeight(): number {
         return this._title == null ? 0 : 25;
     }
 
@@ -49,9 +49,9 @@ export class FancyGamePanel extends BaseGamePanel {
             return;
         }
 
-        if (this._title_text != null) {
-            this._title_text.destroy({children: true});
-            this._title_text = null;
+        if (this._titleText != null) {
+            this._titleText.destroy({children: true});
+            this._titleText = null;
         }
 
         this._background.clear();
@@ -62,9 +62,9 @@ export class FancyGamePanel extends BaseGamePanel {
                 this._background.drawRoundedRect(-1, -25, this._width + 2, this._height + 26, 8);
                 this._background.endFill();
 
-                this._title_text = Fonts.arial(this._title, 13).bold().color(0x061F3A).build();
-                this._title_text.position = new Point(5, -20);
-                this.container.addChild(this._title_text);
+                this._titleText = Fonts.arial(this._title, 13).bold().color(0x061F3A).build();
+                this._titleText.position = new Point(5, -20);
+                this.container.addChild(this._titleText);
             } else {
                 // Draw the border by just drawing another round rectangle behind the original
                 this._background.beginFill(this._outlineColor, this._outlineAlpha);
@@ -87,7 +87,7 @@ export class FancyGamePanel extends BaseGamePanel {
     private readonly _color: number = 0;
 
     private _title: string = null;
-    private _title_text: Text = null;
+    private _titleText: Text = null;
     private _width: number = 0;
     private _height: number = 0;
 }
