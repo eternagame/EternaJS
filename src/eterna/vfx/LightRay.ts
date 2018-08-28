@@ -26,7 +26,7 @@ export class LightRay extends SceneObject {
         ));
     }
 
-    public draw_ray(v: Vector2, baseType: number): void {
+    public draw(v: Vector2, baseType: number): void {
         const color = LightRay.getColor(baseType);
 
         const len: number = v.length;
