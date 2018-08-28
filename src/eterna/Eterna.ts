@@ -11,18 +11,18 @@ export class Eterna {
 
     public static settings: EternaSettings;
 
-    public static player_id: number;
-    public static player_name: string;
-    public static readonly is_dev_mode: boolean = true; // TODO: what does this mean?
-    public static readonly is_debug_mode: boolean = parseBool(process.env["DEBUG"]);
+    public static playerID: number;
+    public static playerName: string;
+    public static readonly isDevMode: boolean = true; // TODO: what does this mean?
+    public static readonly isDebugMode: boolean = parseBool(process.env["DEBUG"]);
     public static readonly serverURL: string = process.env["APP_SERVER_URL"];
 
     public static client: GameClient;
     public static sound: SoundManager;
 
-    public static set_player(player_name: string, uid: number): void {
-        this.player_name = player_name;
-        this.player_id = uid;
+    public static setPlayer(name: string, id: number): void {
+        this.playerName = name;
+        this.playerID = id;
     }
 
     public static onFatalError(err: any): void {

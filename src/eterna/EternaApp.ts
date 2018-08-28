@@ -171,11 +171,11 @@ export class EternaApp extends FlashbangApp {
     }
 
     private authenticate(): Promise<void> {
-        if (!Eterna.is_debug_mode) {
+        if (!Eterna.isDebugMode) {
             return Eterna.client.authenticate()
                 .then(([username, uid]) => {
                     log.debug(`Authenticated as [name=${username}, uid=${uid}]`);
-                    Eterna.set_player(username, uid);
+                    Eterna.setPlayer(username, uid);
                 });
         } else {
             let playerID = process.env["DEBUG_PLAYER_ID"];
@@ -193,7 +193,7 @@ export class EternaApp extends FlashbangApp {
             log.debug(`Logging in ${playerID}...`);
             return Eterna.client.login(playerID, playerPassword).then((uid) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-                Eterna.set_player(playerID, uid);
+                Eterna.setPlayer(playerID, uid);
             });
         }
     }
