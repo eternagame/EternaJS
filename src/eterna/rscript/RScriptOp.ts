@@ -11,7 +11,7 @@ export abstract class RScriptOp {
         this._env = env;
     }
 
-    public AddChildOp(op: RScriptOp): void {
+    public addChildOp(op: RScriptOp): void {
         this._children.push(op);
     }
 
@@ -21,20 +21,20 @@ export abstract class RScriptOp {
         return this._children[0];
     }
 
-    public get_pause_next(): RScriptOp {
+    public getPauseNext(): RScriptOp {
         return this;
     }
 
     public exec(): void {
     }
 
-    public InitializeROP(op: string, args: string): void {
-        this._original_op = op;
-        this._original_args = args;
+    public initialize(op: string, args: string): void {
+        this._originalOp = op;
+        this._originalArgs = args;
 
         // Replace <newline> with \n regardless of where it is.
         args = args.replace(/\<newline\>/g, "\n");
-        args = this.CreateStrings(args);
+        args = this.createStrings(args);
 
         let param: string[] = args.split(",");
         for (let i: number = 0; i < param.length; ++i) {
@@ -44,21 +44,21 @@ export abstract class RScriptOp {
             if (arg === "") {
                 continue;
             }
-            this.ParseArgument(arg, i);
+            this.parseArgument(arg, i);
         }
-        this.VerifyArguments();
+        this.verifyArguments();
     }
 
     /** Allows us to delay execution if necessary. */
-    public IsPaused(): boolean {
+    public isPaused(): boolean {
         return false;
     }
 
     /** Meant to throw an error if some argument is invalid. */
-    protected VerifyArguments(): void {
+    protected verifyArguments(): void {
     }
 
-    protected CreateStrings(arg: string): string {
+    protected createStrings(arg: string): string {
         // Identify strings marked by "" or '' and store them in the environment.
         while (true) {
             // Find the first matching pair of quotation marks. Single or double.
@@ -93,13 +93,13 @@ export abstract class RScriptOp {
         return arg;
     }
 
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
     }
 
     protected readonly _env: RScriptEnv;
     protected readonly _children: RScriptOp[];
 
     // Store original text of the inpute op and arguments.
-    protected _original_op: string;
-    protected _original_args: string;
+    protected _originalOp: string;
+    protected _originalArgs: string;
 }

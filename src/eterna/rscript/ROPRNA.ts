@@ -53,7 +53,7 @@ export class ROPRNA extends RScriptOp {
     }
 
     /* override */
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
         switch (i) {
         case 0: // Nucleotide index when changing nucleotide color. Fold mode in Mode 1.
             if (this._type === ROPRNAType.SETBASE) {

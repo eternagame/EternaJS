@@ -17,7 +17,7 @@ export class RScriptOpTree {
             this._head = node;
             this._curptr = node;
         } else {
-            this._curptr.AddChildOp(node);
+            this._curptr.addChildOp(node);
             this._curptr = node;
         }
     }
@@ -33,14 +33,14 @@ export class RScriptOpTree {
 
         if (this._curptr instanceof ROPWait) {
             this._curptr.exec();
-            let waitRet: RScriptOp = this._curptr.get_pause_next();
-            if (waitRet !== this._curptr && this._curptr.IsPaused() && waitRet instanceof ROPWait) {
+            let waitRet: RScriptOp = this._curptr.getPauseNext();
+            if (waitRet !== this._curptr && this._curptr.isPaused() && waitRet instanceof ROPWait) {
                 // If the next instruction can be executed (as determined by ROPWait),
                 // then execute it.
                 this._waitQueue.push(this._curptr);
                 this._curptr = waitRet;
                 return waitRet;
-            } else if (this._curptr.IsPaused() && this._waitQueue.indexOf(this._curptr)) {
+            } else if (this._curptr.isPaused() && this._waitQueue.indexOf(this._curptr)) {
                 this._waitQueue.push(this._curptr);
                 return null;
             } else {
@@ -61,7 +61,7 @@ export class RScriptOpTree {
 
     private CheckWaitQueueContinue(): boolean {
         for (let op of this._waitQueue) {
-            if (op.IsPaused()) {
+            if (op.isPaused()) {
                 return false;
             }
         }

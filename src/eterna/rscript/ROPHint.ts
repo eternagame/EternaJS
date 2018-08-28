@@ -10,8 +10,8 @@ export class ROPHint extends RScriptOp {
     }
 
     /* override */
-    public InitializeROP(op: string, args: string): void {
-        super.InitializeROP(op, args);
+    public initialize(op: string, args: string): void {
+        super.initialize(op, args);
         this._id = ROPHint.ProcessId(this._id);
     }
 
@@ -37,7 +37,7 @@ export class ROPHint extends RScriptOp {
     }
 
     /* override */
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
             if (!this._op_visible) {

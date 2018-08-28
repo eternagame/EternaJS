@@ -78,7 +78,7 @@ export class RNAScript {
             // Based on the OP, create the proper RScriptOp.
             let ret: RScriptOp = this.opToRScriptOp(op, args);
             if (ret) {
-                ret.InitializeROP(op, args);
+                ret.initialize(op, args);
             }
             return ret;
         } else {

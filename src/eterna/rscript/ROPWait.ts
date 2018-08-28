@@ -72,7 +72,7 @@ export class ROPWait extends RScriptOp {
                 continue;
             }
 
-            if (op.IsPaused()) {
+            if (op.isPaused()) {
                 op.ResetPaint();
             } else {
                 op.PassPaint();
@@ -95,7 +95,7 @@ export class ROPWait extends RScriptOp {
     }
 
     /* override */
-    public get_pause_next(): RScriptOp {
+    public getPauseNext(): RScriptOp {
         return (this._children[0] instanceof ROPWait) ? this._children[0] : this;
     }
 
@@ -136,7 +136,7 @@ export class ROPWait extends RScriptOp {
     }
 
     /* override */
-    public IsPaused(): boolean {
+    public isPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
             let paired: number = this._env.GetRNA().pairs[this._start_idx];
             if (paired < 0) {
@@ -252,7 +252,7 @@ export class ROPWait extends RScriptOp {
     }
 
     /* override */
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
             if (this._waitType === ROPWaitType.CLICKUI) {

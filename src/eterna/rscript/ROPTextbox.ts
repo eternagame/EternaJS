@@ -34,8 +34,8 @@ export class ROPTextbox extends RScriptOp {
     }
 
     /* override */
-    public InitializeROP(op: string, args: string): void {
-        super.InitializeROP(op, args);
+    public initialize(op: string, args: string): void {
+        super.initialize(op, args);
         this._id = ROPTextbox.ProcessId(this._id, this._mode);
         this._parent_id = ROPTextbox.ProcessId(this._parent_id, ROPTextboxMode.TEXTBOX_LOCATION);
         this._text = ROPTextbox.ProcessText(this._text);
@@ -233,7 +233,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     /* override */
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
         let rx: RegExp = /^([^+-]*)((?:\+|-).+)$/g;
         let regResult: RegExpExecArray = null;
         switch (i) {
@@ -375,7 +375,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     /* override */
-    protected VerifyArguments(): void {
+    protected verifyArguments(): void {
     }
 
     private OnClickEvent(): void {
