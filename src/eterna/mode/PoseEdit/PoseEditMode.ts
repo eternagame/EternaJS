@@ -691,7 +691,7 @@ export class PoseEditMode extends GameMode {
 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
-        this._rscript.Tick();
+        this._rscript.tick();
 
         // RScript can set our initial poseState
         this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
@@ -1033,7 +1033,7 @@ export class PoseEditMode extends GameMode {
             elapsed = new Date().getTime() - startTime;
         }
 
-        this._rscript.Tick();
+        this._rscript.tick();
 
         super.update(dt);
     }
@@ -1641,7 +1641,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): void {
-        this._rscript.FinishLevel();
+        this._rscript.finishLevel();
 
         if (this._puzzle.nodeID < 0) {
             return;
