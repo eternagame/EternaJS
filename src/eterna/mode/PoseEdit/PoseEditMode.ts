@@ -1180,7 +1180,7 @@ export class PoseEditMode extends GameMode {
         this.container.addChildAt(tempBG, 0);
 
         let info =
-            `Player: ${Eterna.player_name}\n` +
+            `Player: ${Eterna.playerName}\n` +
             `Puzzle ID: ${this._puzzle.nodeID}\n` +
             `Puzzle Title: ${this._puzzle.getPuzzleName()}\n` +
             `Mode: ${this.toolbar.nativeButton.isSelected ? "NativeMode" : "TargetMode"}`;
@@ -1521,7 +1521,7 @@ export class PoseEditMode extends GameMode {
                 "synthesized properly";
 
             if (!this.checkConstraints(false)) {
-                if (this._puzzle.isSoftConstraint || Eterna.is_dev_mode) {
+                if (this._puzzle.isSoftConstraint || Eterna.isDevMode) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
                         .then(confirmed => {
                             if (confirmed) {

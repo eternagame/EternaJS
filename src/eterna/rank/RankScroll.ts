@@ -54,7 +54,7 @@ export class RankScroll extends ContainerObject {
                 ranks.push(rank);
             }
 
-            let playername = Eterna.player_name || "You";
+            let playername = Eterna.playerName || "You";
             player = new PlayerRank(playername, prevPoints);
             player.rank = newRank;
         } else {
@@ -111,7 +111,7 @@ export class RankScroll extends ContainerObject {
                 ranks.push(rank);
             }
 
-            let playername = Eterna.player_name || "You";
+            let playername = Eterna.playerName || "You";
             player = new PlayerRank(playername, prevPoints);
             player.rank = prevRank;
         }

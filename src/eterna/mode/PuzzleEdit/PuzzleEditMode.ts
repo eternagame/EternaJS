@@ -354,7 +354,7 @@ export class PuzzleEditMode extends GameMode {
         this.container.addChildAt(tempBG, 0);
 
         let info =
-            `Player: ${Eterna.player_name}\n` +
+            `Player: ${Eterna.playerName}\n` +
             `Player Puzzle Designer`;
         let infoText = Fonts.arial(info, 12).color(0xffffff).build();
         this.container.addChild(infoText);
@@ -405,7 +405,7 @@ export class PuzzleEditMode extends GameMode {
             let secstruct: string = this._structureInputs[ii].structureString;
 
             let length_limit: number = 400;
-            if (Eterna.is_dev_mode) {
+            if (Eterna.isDevMode) {
                 length_limit = -1;
             }
 
@@ -420,12 +420,12 @@ export class PuzzleEditMode extends GameMode {
                 return;
             }
 
-            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.is_dev_mode) {
+            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.isDevMode) {
                 this.showNotification("You should first solve your puzzle before submitting it!");
                 return;
             }
 
-            if (this._poses[ii].checkOverlap() && !Eterna.is_dev_mode) {
+            if (this._poses[ii].checkOverlap() && !Eterna.isDevMode) {
                 this.showNotification("Some bases overlapped too much!");
                 return;
             }

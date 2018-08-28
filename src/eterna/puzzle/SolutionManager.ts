@@ -67,7 +67,7 @@ export class SolutionManager {
     public myCurrentSolutions(round: number): string[] {
         let titles: string[] = [];
         for (let solution of this._solutions) {
-            if (solution.getProperty("Round") === round && solution.playerID === Eterna.player_id) {
+            if (solution.getProperty("Round") === round && solution.playerID === Eterna.playerID) {
                 titles.push(solution.title);
             }
         }

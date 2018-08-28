@@ -6,7 +6,7 @@ export class EternaURL {
     public static readonly STRATEGY_GUIDE: string = "http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles";
 
     public static getFeedURL(): string {
-        return Eterna.player_id === 0
+        return Eterna.playerID === 0
             ? EternaURL.createURL({page: "register"})
             : EternaURL.createURL({page: "me"});
     }
