@@ -20,7 +20,7 @@ export enum ROPHighlightMode {
 }
 
 export class ROPHighlight extends RScriptOp {
-    public static readonly id_postfix: string = "_highlight_";
+    public static readonly ID_POSTFIX = "_highlight_";
 
     public constructor(isVisible: boolean, inMode: ROPHighlightMode, env: RScriptEnv) {
         super(env);
@@ -230,8 +230,8 @@ export class ROPHighlight extends RScriptOp {
     }
 
     private static processId(inId: string): string {
-        if (!inId) return ROPHighlight.id_postfix;
-        return inId + ROPHighlight.id_postfix;
+        if (!inId) return ROPHighlight.ID_POSTFIX;
+        return inId + ROPHighlight.ID_POSTFIX;
     }
 
     private static getUiElementOffset(id: RScriptUIElementID): Point {
