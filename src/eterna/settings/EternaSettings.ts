@@ -18,7 +18,6 @@ export class EternaSettings extends Settings {
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
 
-    // TODO: recreate settings when playerID changes?
     public constructor() {
         super("EternaSettings");
 
