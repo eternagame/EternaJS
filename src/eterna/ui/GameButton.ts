@@ -60,7 +60,7 @@ export class GameButton extends Button implements KeyboardListener {
             this._rscriptClickReg.close();
             if (value != null) {
                 this._rscriptClickReg = this.clicked.connect(() => {
-                    ROPWait.notifyClickUi(this._rscriptID);
+                    ROPWait.notifyClickUI(this._rscriptID);
                 });
             }
         }

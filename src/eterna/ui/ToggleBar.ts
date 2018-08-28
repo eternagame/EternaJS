@@ -19,10 +19,10 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
 
-    constructor(num_states: number) {
+    constructor(numStates: number) {
         super();
 
-        this._numStates = num_states;
+        this._numStates = numStates;
 
         this._bg = new Graphics();
         this.container.addChild(this._bg);
@@ -56,7 +56,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
             this.container.addChild(this._labels[ii]);
         }
 
-        this.set_state(0);
+        this.state = 0;
 
         this.display.interactive = true;
         this.pointerOver.connect(() => this.onMouseOver());
@@ -70,19 +70,19 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
-    public set_state(new_state: number): void {
-        if (new_state !== this._selectedState) {
+    public set state(newState: number) {
+        if (newState !== this._selectedState) {
             if ((this._selectedState >= 0) && (this._selectedState < this._numStates)) {
                 this._labels[this._selectedState].style.fill = ToggleBar.COLOR_TEXT;
             }
 
-            this._selectedState = new_state;
+            this._selectedState = newState;
             this.replaceNamedObject("BGSelectedAnim",
                 new LocationTask(this._selectedState * ToggleBar.BUTTON_SIZE, 0, 0.5, Easing.easeInOut, this._selectedHilite));
             this._labels[this._selectedState].style.fill = ToggleBar.COLOR_HIGH;
 
             Eterna.sound.playSound(Sounds.SoundSwitch);
-            this.stateChanged.emit(new_state);
+            this.stateChanged.emit(newState);
         }
     }
 
@@ -92,7 +92,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         }
 
         if (e.type === KeyboardEventType.KEY_DOWN && e.code === KeyCode.Tab && !e.ctrlKey) {
-            this.set_state((this._selectedState + 1) % this._numStates);
+            this.state = (this._selectedState + 1) % this._numStates;
             e.preventDefault(); // prevent Tab from changing focus in the browser
             return true;
         } else {
@@ -115,8 +115,8 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
             return;
         }
 
-        this.set_state(state);
-        ROPWait.notifyClickUi(RScriptUIElementID.SWITCH);
+        this.state = state;
+        ROPWait.notifyClickUI(RScriptUIElementID.SWITCH);
     }
 
     private onMouseOver(): void {
@@ -173,13 +173,13 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
     private _mouseOver: boolean = false;
     private _labels: Text[] = [];
 
-    private static readonly BUTTON_SIZE: number = 25;
+    private static readonly BUTTON_SIZE = 25;
     private static readonly ROUND_RECT_RADIUS = 10;
-    private static readonly COLOR_DARK: number = 0x1C304C;
-    private static readonly COLOR_MEDIUM: number = 0x3E566A;
-    private static readonly COLOR_LIGHT: number = 0x88A1B1;
-    private static readonly COLOR_TEXT: number = 0xBEDCE7;
-    private static readonly COLOR_HIGH: number = 0xFFFFFF;
+    private static readonly COLOR_DARK = 0x1C304C;
+    private static readonly COLOR_MEDIUM = 0x3E566A;
+    private static readonly COLOR_LIGHT = 0x88A1B1;
+    private static readonly COLOR_TEXT = 0xBEDCE7;
+    private static readonly COLOR_HIGH = 0xFFFFFF;
 
     private static readonly P: Point = new Point();
 }
