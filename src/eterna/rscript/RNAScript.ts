@@ -13,7 +13,7 @@ import {RScriptOpTree} from "./RScriptOpTree";
 
 export class RNAScript {
     public constructor(puz: Puzzle, ui: PoseEditMode) {
-        let strData: string = puz.get_rscript();
+        let strData: string = puz.rscript;
 
         this._env = new RScriptEnv(ui, puz);
         ui.addObject(this._env, ui.container);

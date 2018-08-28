@@ -86,7 +86,7 @@ export class ROPPre extends RScriptOp {
             // no-op. What was this for?
             break;
         case ROPPreType.SET_DEFAULT_FOLD_MODE:
-            this._env.GetPuzzle().set_default_mode(this._fold_mode);
+            this._env.GetPuzzle().defaultMode = this._fold_mode;
             break;
         default:
             throw new Error(`Invalid Preprocessing Command: ${this._type}`);

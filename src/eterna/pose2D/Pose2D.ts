@@ -666,7 +666,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getTrackedIndices(): number[] {
+    public get trackedIndices(): number[] {
         return this._trackedIndices.slice();
     }
 
@@ -1594,7 +1594,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._prevOligosOrder = null;
 
         // black marks
-        let indices: number[] = this.getTrackedIndices();
+        let indices: number[] = this.trackedIndices;
         this.clearTracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {

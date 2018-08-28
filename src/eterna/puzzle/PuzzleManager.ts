@@ -23,7 +23,7 @@ export class PuzzleManager {
 
             let res: RegExpExecArray = PuzzleManager.RE_MISSION_TEXT.exec(json["body"]);
             if (res != null && res.length >= 2) {
-                newpuz.set_mission_text(res[1]);
+                newpuz.missionText = res[1];
             }
         }
 
@@ -34,15 +34,15 @@ export class PuzzleManager {
             for (let kk = 0; kk < lock_str.length; kk++) {
                 locks.push(lock_str.charAt(kk) === "x");
             }
-            newpuz.set_puzzle_locks(locks);
+            newpuz.puzzleLocks = locks;
         }
 
         if (json["objective"]) {
             let objective: any = JSON.parse(json["objective"])[0];
             if (objective["shift_limit"]) {
-                newpuz.set_shift_limit(objective["shift_limit"]);
+                newpuz.shiftLimit = objective["shift_limit"];
             } else {
-                newpuz.set_shift_limit(0);
+                newpuz.shiftLimit = 0;
             }
         }
 
@@ -50,77 +50,79 @@ export class PuzzleManager {
             if (json["beginseq"].length !== json["secstruct"].length) {
                 throw new Error(`Beginning sequence length doesn't match pair length for puzzle ${json["Title"]}`);
             }
-            newpuz.set_beginning_sequence(json["beginseq"]);
+            newpuz.beginningSequence = json["beginseq"];
         }
 
         if (json["saved_sequence"] && json["saved_sequence"].length > 0) {
             if (json["saved_sequence"].length === json["secstruct"].length && json["type"] === "Challenge") {
-                newpuz.set_saved_sequence(json["saved_sequence"]);
+                newpuz.savedSequenceString = json["saved_sequence"];
             }
         }
 
         let usetails: number = Number(json["usetails"]);
-        newpuz.set_use_tails(usetails > 0, usetails === 2);
+        newpuz.setUseTails(usetails > 0, usetails === 2);
 
         if (json["folder"] && json["folder"].length > 0) {
-            newpuz.set_folder(json["folder"]);
+            newpuz.folderName = json["folder"];
         }
 
         if (json["reward"] && json["reward"].length > 0) {
-            newpuz.set_reward(Number(json["reward"]));
+            newpuz.reward = Number(json["reward"]);
         }
 
         if (json["ui-specs"]) {
             // New style UI elements (scripted) are identified as JSON objects
-            if (json["ui-specs"].substr(0, 1) === "{") newpuz.set_boosters(JSON.parse(json["ui-specs"]));
-            else
-            // Fallback for the old tutorials
-            { newpuz.set_ui_specs(json["ui-specs"].split(",")); }
+            if (json["ui-specs"].substr(0, 1) === "{") {
+                newpuz.boosters = JSON.parse(json["ui-specs"]);
+            } else {
+                // Fallback for the old tutorials
+                newpuz.uiSpecs = json["ui-specs"].split(",");
+            }
         }
 
         if (json["next-puzzle"]) {
-            newpuz.set_next_puzzle(Number(json["next-puzzle"]));
+            newpuz.nextPuzzleID = Number(json["next-puzzle"]);
         }
 
         if (json["last-round"] != null) {
-            newpuz.set_round(Number(json["last-round"]) + 1);
+            newpuz.round = Number(json["last-round"]) + 1;
         }
 
         if (json["objective"] && json["objective"].length > 0) {
-            newpuz.set_objective(JSON.parse(json["objective"]));
+            newpuz.objective = JSON.parse(json["objective"]);
         } else {
-            newpuz.set_secstructs([json["secstruct"]]);
+            newpuz.secstructs = [json["secstruct"]];
         }
 
         if (json["check_hairpin"] && Number(json["check_hairpin"])) {
-            newpuz.set_use_barcode(true);
+            newpuz.useBarcode = true;
         }
 
         if (json["num-submissions"] != null) {
-            newpuz.set_num_submissions(Number(json["num-submissions"]));
+            newpuz.numSubmissions = Number(json["num-submissions"]);
         }
 
         if (json["rscript"]) {
-            newpuz.set_rscript(json["rscript"]);
+            newpuz.rscript = json["rscript"];
         }
 
         if (json["events"]) {
-            newpuz.set_rscript(json["events"]);
+            newpuz.rscript = json["events"];
         }
 
         if (json["hint"]) {
-            newpuz.set_hint(json["hint"]);
+            newpuz.hint = json["hint"];
         }
 
-        if (newpuz.get_node_id() === 877668) {
-            newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_877668));
-        } else if (newpuz.get_node_id() === 885046) {
-            newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_885046));
-        } else if (newpuz.get_node_id() === 1420804) {
-            newpuz.set_objective(JSON.parse(PuzzleManager.OBJECTIVE_1420804));
+        if (newpuz.nodeID === 877668) {
+            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_877668);
+        } else if (newpuz.nodeID === 885046) {
+            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_885046);
+        } else if (newpuz.nodeID === 1420804) {
+            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_1420804);
         }
 
-        let target_conditions: any[] = newpuz.get_target_conditions();
+        let target_conditions: any[] = newpuz.targetConditions;
         if (target_conditions != null) {
             for (let ii = 0; ii < target_conditions.length; ii++) {
                 if (target_conditions[ii] != null) {
@@ -163,15 +165,15 @@ export class PuzzleManager {
                 constraints.push("BARCODE");
                 constraints.push("0");
             }
-            newpuz.set_constraints(constraints);
+            newpuz.constraints = constraints;
         } else if (json["check_hairpin"] && Number(json["check_hairpin"])) {
-            newpuz.set_constraints(["BARCODE", "0"]);
+            newpuz.constraints = ["BARCODE", "0"];
         }
 
         let replace: boolean = false;
 
         for (let jj = 0; jj < this._puzzles.length; jj++) {
-            if (newpuz.get_node_id() === this._puzzles[jj].get_node_id()) {
+            if (newpuz.nodeID === this._puzzles[jj].nodeID) {
                 this._puzzles[jj] = newpuz;
                 replace = true;
                 break;
@@ -187,7 +189,7 @@ export class PuzzleManager {
 
     public get_puzzle_by_nid(puznid: number, scriptid: number = -1): Promise<Puzzle> {
         for (let ii: number = 0; ii < this._puzzles.length; ii++) {
-            if (this._puzzles[ii].get_node_id() === puznid) {
+            if (this._puzzles[ii].nodeID === puznid) {
                 return Promise.resolve(this._puzzles[ii]);
             }
         }
@@ -201,7 +203,7 @@ export class PuzzleManager {
                 }
 
                 let puzzle = this.parse_puzzle(data["puzzle"]);
-                log.info(`Loaded puzzle [name=${puzzle.get_puzzle_name()}]`);
+                log.info(`Loaded puzzle [name=${puzzle.getPuzzleName()}]`);
                 return puzzle;
             });
     }
@@ -210,9 +212,9 @@ export class PuzzleManager {
 
     private static _instance: PuzzleManager;
 
-    private static readonly OBJECTIVE_877668: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((............)))))\"},{\"type\":\"aptamer\",\"site\":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],\"concentration\":100,\"secstruct\":\"(((......(((....))).....)))................\"}]";
-    private static readonly OBJECTIVE_885046: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))\"},{\"type\":\"aptamer\",\"site\":[8,9,10,11,12,13,14,15,26,27,28,29,30,31,32],\"concentration\":10000,\"secstruct\":\"((((......((((....)))).....))))................\"}]";
-    private static readonly OBJECTIVE_1420804: string = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))........\"},{\"type\":\"aptamer\",\"site\":[12,13,14,15,16,17,18,19,33,34,35,36,37,38,39],\"concentration\":10000,\"secstruct\":\"..(((.((......(((((....)).))).....)))))................\"}]";
+    private static readonly OBJECTIVE_877668 = "[{\"type\":\"single\",\"secstruct\":\".....................(((((............)))))\"},{\"type\":\"aptamer\",\"site\":[2,3,4,5,6,7,8,9,18,19,20,21,22,23,24],\"concentration\":100,\"secstruct\":\"(((......(((....))).....)))................\"}]";
+    private static readonly OBJECTIVE_885046 = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))\"},{\"type\":\"aptamer\",\"site\":[8,9,10,11,12,13,14,15,26,27,28,29,30,31,32],\"concentration\":10000,\"secstruct\":\"((((......((((....)))).....))))................\"}]";
+    private static readonly OBJECTIVE_1420804 = "[{\"type\":\"single\",\"secstruct\":\".....................(((((((............)))))))........\"},{\"type\":\"aptamer\",\"site\":[12,13,14,15,16,17,18,19,33,34,35,36,37,38,39],\"concentration\":10000,\"secstruct\":\"..(((.((......(((((....)).))).....)))))................\"}]";
 
-    private static readonly RE_MISSION_TEXT: RegExp = /<span id="mission">(.*?)<\/span>/s;
+    private static readonly RE_MISSION_TEXT = /<span id="mission">(.*?)<\/span>/s;
 }
