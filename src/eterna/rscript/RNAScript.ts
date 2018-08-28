@@ -103,7 +103,7 @@ export class RNAScript {
         let regResult: any[];
         if ((regResult = preRegex.exec(op)) != null) {
             let rop: ROPPre = new ROPPre(regResult[1], this._env);
-            rop.InitArgs(args);
+            rop.initArgs(args);
             rop.exec();
             // DOES NOT RETURN. WE DO NOT ADD THIS TO THE OP TREE.
             return null;
