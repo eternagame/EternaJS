@@ -31,9 +31,9 @@ export class SolutionManager {
     }
 
     public get_solution_by_sequence(seq: string): Solution {
-        for (let ii: number = 0; ii < this._solutions.length; ii++) {
-            if (this._solutions[ii].get_sequence() === seq) {
-                return this._solutions[ii];
+        for (let solution of this._solutions) {
+            if (solution.sequence === seq) {
+                return solution;
             }
         }
 
@@ -62,9 +62,9 @@ export class SolutionManager {
     public my_current_solutions(round: number): any[] {
         let titles: any[] = [];
         let myid: number = Eterna.player_id;
-        for (let ii: number = 0; ii < this._solutions.length; ii++) {
-            if (this._solutions[ii].get_property("Round") === round && this._solutions[ii].get_player_id() === myid) {
-                titles.push(this._solutions[ii].get_title());
+        for (let solution of this._solutions) {
+            if (solution.getProperty("Round") === round && solution.playerID === myid) {
+                titles.push(solution.title);
             }
         }
 
@@ -73,8 +73,8 @@ export class SolutionManager {
 
     private static process_data(obj: any): Solution {
         let newsol: Solution = new Solution(obj["id"], obj["puznid"]);
-        newsol.set_sequence(obj["sequence"]);
-        newsol.set_title(obj["title"]);
+        newsol.sequence = obj["sequence"];
+        newsol.title = obj["title"];
 
         let newfb: Feedback = null;
 
@@ -89,13 +89,13 @@ export class SolutionManager {
             player_id = obj["uid"];
         }
 
-        newsol.set_player(player_name, player_id);
-        newsol.set_num_pairs(obj["gc"], obj["gu"], obj["au"]);
-        newsol.set_melting_point(obj["meltpoint"]);
-        newsol.set_free_energy(obj["energy"]);
-        newsol.set_desc(obj["body"]);
-        newsol.set_round(obj["submitted-round"]);
-        newsol.set_synthesis(obj["synthesis-round"], obj["synthesis-score"]);
+        newsol.setPlayer(player_name, player_id);
+        newsol.setNumPairs(obj["gc"], obj["gu"], obj["au"]);
+        newsol.meltingPoint(obj["meltpoint"]);
+        newsol.freeEnergy = obj["energy"];
+        newsol.desc = obj["body"];
+        newsol.round = obj["submitted-round"];
+        newsol.setSynthesis(obj["synthesis-round"], obj["synthesis-score"]);
 
         if (obj["synthesis-data"] && obj["synthesis-data"].length > 0) {
             let synthesis_data_raw: any = JSON.parse(obj["synthesis-data"]);
@@ -159,15 +159,15 @@ export class SolutionManager {
             }
         }
 
-        newsol.set_player(player_name, player_id);
-        newsol.set_exp_feedback(newfb);
+        newsol.setPlayer(player_name, player_id);
+        newsol.expFeedback = newfb;
 
         if (obj["has-fold-data"] != null) {
-            newsol.set_fold_data_available(obj["has-fold-data"] !== 0);
+            newsol.hasFoldData = obj["has-fold-data"] !== 0;
         }
 
         if (obj["fold-data"] != null) {
-            newsol.set_fold_data(JSON.parse(obj["fold-data"]));
+            newsol.foldData = JSON.parse(obj["fold-data"]);
         }
 
         return newsol;

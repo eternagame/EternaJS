@@ -387,7 +387,7 @@ export class PoseEditMode extends GameMode {
             // Application.instance.add_lock("FOLDING");
             // Application.instance.get_modal_container().addObject(this._asynch_text);
 
-            sol.query_fold_data().then((result) => restart_cb(result));
+            sol.queryFoldData().then((result) => restart_cb(result));
         } else {
             restart_cb(null);
         }
@@ -3216,7 +3216,7 @@ export class PoseEditMode extends GameMode {
             // Application.instance.add_lock("FOLDING");
             // Application.instance.get_modal_container().addObject(this._asynch_text);
 
-            sol.query_fold_data().then((result) => execfold_cb(result));
+            sol.queryFoldData().then((result) => execfold_cb(result));
         } else {
             execfold_cb(null);
         }
@@ -3459,14 +3459,14 @@ export class PoseEditMode extends GameMode {
 
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType("multistrand")) {
             let sol: Solution = SolutionManager.instance.get_solution_by_sequence(this._poses[target_index].getSequenceString());
-            if (sol != null && !sol.has_fold_data()) {
+            if (sol != null && !sol.hasFoldData) {
                 let fd: any[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     fd.push(this.getCurrentUndoBlock(ii).toJson());
                 }
-                sol.set_fold_data(fd);
+                sol.foldData = fd;
 
-                Eterna.client.updateSolutionFoldData(sol.get_node_id(), fd).then((datastring: string) => {
+                Eterna.client.updateSolutionFoldData(sol.nodeID, fd).then((datastring: string) => {
                     log.debug(datastring);
                 });
             }
