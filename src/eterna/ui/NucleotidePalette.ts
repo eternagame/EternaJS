@@ -226,7 +226,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this.targetClicked.emit(type);
         this.show_selection(target.hitboxes[0], target.isPair, true);
-        ROPWait.NotifyClickUI(target.id);
+        ROPWait.notifyClickUi(target.id);
     }
 
     public clear_selection(): void {

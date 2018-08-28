@@ -107,7 +107,7 @@ export class Base extends ContainerObject implements LateUpdatable {
                 Eterna.sound.playSound(soundName);
             }
         }
-        ROPWait.NotifyNucleotideChange(this._baseIdx, type);
+        ROPWait.notifyNucleotideChange(this._baseIdx, type);
     }
 
     public get type(): number {

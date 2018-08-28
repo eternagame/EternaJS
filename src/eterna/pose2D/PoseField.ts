@@ -106,7 +106,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
             let dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
             dragger.dragged.connect(() => {
-                ROPWait.NotifyMoveCamera();
+                ROPWait.notifyMoveCamera();
                 this._pose.setOffset(dragPoseStart.x + dragger.offsetX, dragPoseStart.y + dragger.offsetY);
             });
 
