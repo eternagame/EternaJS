@@ -29,13 +29,13 @@ export class RNAScript {
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
         for (let instruction of instructions) {
-            this._ops.AddNode(this.CreateOpFromInstruction(instruction));
+            this._ops.AddNode(this.createOpFromInstruction(instruction));
         }
         this._ops.FinishCreation();
     }
 
     /** Notify us when RNA is completed (or puzzle finishes). */
-    public FinishLevel(): void {
+    public finishLevel(): void {
         ROPWait.NotifyFinishRNA();
         if (this._env) {
             this._env.Cleanup();
@@ -43,7 +43,7 @@ export class RNAScript {
     }
 
     /** Executes an instruction from the RScript Instruction Stream. */
-    public Tick(): void {
+    public tick(): void {
         // Do not allow us to start executing instructions until the RNA loads properly
         // Also serves to prevent us from positioning anything in relation to the RNA when
         // the RNA bases are in the middle of folding.
@@ -63,7 +63,7 @@ export class RNAScript {
         }
     }
 
-    private CreateOpFromInstruction(instruction: string): RScriptOp {
+    private createOpFromInstruction(instruction: string): RScriptOp {
         instruction = instruction.replace(/^\s*/, "");
         instruction = instruction.replace(/\s*$/, "");
         if (instruction === "") {
@@ -76,7 +76,7 @@ export class RNAScript {
             let op: string = (regResult[1] ? regResult[1] : "") + regResult[2];
             let args: string = regResult[3];
             // Based on the OP, create the proper RScriptOp.
-            let ret: RScriptOp = this.OpToRScriptOp(op, args);
+            let ret: RScriptOp = this.opToRScriptOp(op, args);
             if (ret) {
                 ret.InitializeROP(op, args);
             }
@@ -86,7 +86,7 @@ export class RNAScript {
         }
     }
 
-    private OpToRScriptOp(op: string, args: string): RScriptOp {
+    private opToRScriptOp(op: string, args: string): RScriptOp {
         // Strip op of any pre/post white space
         op = op.replace(/^\s*/, "");
         op = op.replace(/\s*$/, "");
@@ -148,6 +148,6 @@ export class RNAScript {
         throw new Error(`Invalid operation: ${op}`);
     }
 
-    private _env: RScriptEnv;
+    private readonly _env: RScriptEnv;
     private _ops: RScriptOpTree;
 }
