@@ -50,24 +50,24 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         const FIELD_WIDTH = 200;
 
         let inputPanel = new TextInputPanel();
-        inputPanel.set_title("Publish your puzzle");
+        inputPanel.title = "Publish your puzzle";
 
-        let title = inputPanel.add_field(TITLE, FIELD_WIDTH);
+        let title = inputPanel.addField(TITLE, FIELD_WIDTH);
         if (this._numPoses == 1) {
-            inputPanel.add_field(MIN_GU, FIELD_WIDTH);
-            inputPanel.add_field(MAX_GC, FIELD_WIDTH);
-            inputPanel.add_field(MIN_AU, FIELD_WIDTH);
+            inputPanel.addField(MIN_GU, FIELD_WIDTH);
+            inputPanel.addField(MAX_GC, FIELD_WIDTH);
+            inputPanel.addField(MIN_AU, FIELD_WIDTH);
         }
-        inputPanel.add_field(DESCRIPTION, FIELD_WIDTH, true);
+        inputPanel.addField(DESCRIPTION, FIELD_WIDTH, true);
         this.addObject(inputPanel, this.container);
 
         title.setFocus();
 
-        inputPanel.set_hotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
-            let dict = inputPanel.get_dictionary();
+            let dict = inputPanel.getFieldValues();
             let details = {
                 title: dict.get(TITLE),
                 description: dict.get(DESCRIPTION),

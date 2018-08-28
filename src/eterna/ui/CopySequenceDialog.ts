@@ -14,15 +14,15 @@ export class CopySequenceDialog extends Dialog<void> {
         super.added();
 
         let inputPanel = new TextInputPanel();
-        inputPanel.set_title("Current sequence");
-        let sequenceField = inputPanel.add_field("Sequence", 200, true);
+        inputPanel.title = "Current sequence";
+        let sequenceField = inputPanel.addField("Sequence", 200, true);
         sequenceField.text = this._sequence;
         sequenceField.readOnly = true;
         this.addObject(inputPanel, this.container);
 
         sequenceField.setFocus(true);
 
-        inputPanel.set_hotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => this.close(null));

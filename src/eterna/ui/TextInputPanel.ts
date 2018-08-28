@@ -18,15 +18,15 @@ export class TextInputPanel extends GamePanel {
         this._okButton = new GameButton().label("Ok", 14);
         this.addObject(this._okButton, this.container);
         this._okButton.clicked.connect(() => {
-            this.okClicked.emit(this.get_dictionary());
-            this.reset_hotkeys();
+            this.okClicked.emit(this.getFieldValues());
+            this.resetHotkeys();
         });
 
         this._cancelButton = new GameButton().label("Cancel", 14);
         this.addObject(this._cancelButton, this.container);
         this._cancelButton.clicked.connect(() => {
             this.cancelClicked.emit();
-            this.reset_hotkeys();
+            this.resetHotkeys();
         });
     }
 
@@ -68,11 +68,7 @@ export class TextInputPanel extends GamePanel {
         this._cancelButton.display.position = new Point((width * 0.5) + 30, height_walker);
     }
 
-    public set_title(title_txt: string): void {
-        this.title = title_txt;
-    }
-
-    public add_field(name: string, width: number, multiline: boolean = false): TextInputObject {
+    public addField(name: string, width: number, multiline: boolean = false): TextInputObject {
         if (this.isLiveObject) {
             throw new Error("Add all fields before adding object to mode");
         }
@@ -88,16 +84,16 @@ export class TextInputPanel extends GamePanel {
         return input;
     }
 
-    public set_hotkeys(ok_key: string = null, ok_txt: string = "", cancel_key: string = null, cancel_txt: string = ""): void {
+    public setHotkeys(ok_key: string = null, ok_txt: string = "", cancel_key: string = null, cancel_txt: string = ""): void {
         this._okButton.hotkey(ok_key, false).tooltip(ok_txt);
         this._cancelButton.hotkey(cancel_key, false).tooltip(cancel_txt);
     }
 
-    public reset_hotkeys(): void {
-        this.set_hotkeys();
+    public resetHotkeys(): void {
+        this.setHotkeys();
     }
 
-    public get_dictionary(): Map<string, string> {
+    public getFieldValues(): Map<string, string> {
         let dict: Map<string, string> = new Map();
         for (let field of this._fields) {
             dict.set(field.name, field.input.text);
@@ -106,7 +102,7 @@ export class TextInputPanel extends GamePanel {
         return dict;
     }
 
-    public clear_fields(): void {
+    public clearFields(): void {
         for (let field of this._fields) {
             field.input.text = "";
         }
@@ -116,8 +112,8 @@ export class TextInputPanel extends GamePanel {
     private readonly _cancelButton: GameButton;
     private _fields: InputField[] = [];
 
-    private static readonly W_MARGIN: number = 20;
-    private static readonly H_MARGIN: number = 20;
+    private static readonly W_MARGIN = 20;
+    private static readonly H_MARGIN = 20;
 }
 
 interface InputField {

@@ -13,18 +13,18 @@ export class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         const COMMENT = "Comment";
 
         let inputPanel = new TextInputPanel();
-        inputPanel.set_title("Submit your design");
-        let title = inputPanel.add_field(TITLE, 200);
-        inputPanel.add_field(COMMENT, 200, true);
+        inputPanel.title = "Submit your design";
+        let title = inputPanel.addField(TITLE, 200);
+        inputPanel.addField(COMMENT, 200, true);
         this.addObject(inputPanel, this.container);
 
         title.setFocus();
 
-        inputPanel.set_hotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
-            let dict = inputPanel.get_dictionary();
+            let dict = inputPanel.getFieldValues();
             this.close({title: dict.get(TITLE), comment: dict.get(COMMENT)});
         });
 
