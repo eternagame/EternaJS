@@ -1466,30 +1466,6 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    private navigate_to_puzzle(): void {
-        log.debug("TODO: navigate_to_puzzle");
-        // let req: URLRequest = new URLRequest;
-        // req.url = "/puzzle/";
-        // if (this._puzzle.get_puzzle_type() === PuzzleType.BASIC) {
-        //     req.url += "Basic/";
-        // } else if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
-        //     req.url += "Experimental/";
-        // } else {
-        //     req.url += "Challenge/";
-        // }
-        //
-        // req.url += this._puzzle.get_node_id().toString();
-        //
-        // this.navigateToURL(req, "_self");
-    }
-
-    private navigate_to_challenges(): void {
-        log.debug("TODO: navigate_to_challenges");
-        // let req: URLRequest = new URLRequest;
-        // req.url = "/htmls/challenges.html?pagedata=Challenges_easiest";
-        // this.navigateToURL(req, "_self");
-    }
-
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder.canDotPlot) {
