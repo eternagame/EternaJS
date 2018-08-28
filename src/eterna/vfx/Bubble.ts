@@ -9,14 +9,13 @@ import {Easing} from "../../flashbang/util/Easing";
 import {Bitmaps} from "../resources/Bitmaps";
 
 export class Bubble extends SpriteObject implements Updatable {
-    public is_paused: boolean = false;
+    public isPaused: boolean = false;
 
     constructor(foreground: boolean) {
         super();
 
         this._foreground = foreground;
 
-        // TSC: clean up this badness
         let useBlueBubble: boolean;
         let bubbleType: number = 0;
         if (this._foreground) {
@@ -43,7 +42,7 @@ export class Bubble extends SpriteObject implements Updatable {
 
         this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
 
-        this.set_auto_hide(false);
+        this.autoHide = false;
     }
 
     public init(): void {
@@ -69,13 +68,13 @@ export class Bubble extends SpriteObject implements Updatable {
         this._lastTime = -1;
     }
 
-    public set_force(force_x: number, force_y: number): void {
+    public setForce(force_x: number, force_y: number): void {
         this._accX = force_x;
         this._accY = force_y;
     }
 
-    public set_auto_hide(active: boolean): void {
-        this._hideTime = active ? this._lastTime + Math.random() * 6 * 1000.0 : -1;
+    public set autoHide(value: boolean) {
+        this._hideTime = value ? this._lastTime + Math.random() * 6 * 1000.0 : -1;
     }
 
     /* override */
@@ -87,7 +86,7 @@ export class Bubble extends SpriteObject implements Updatable {
         const current_time = this._lastTime + dt;
         const tex = this.sprite.texture;
 
-        if (this.is_paused || (this.sprite.y < -tex.height)) {
+        if (this.isPaused || (this.sprite.y < -tex.height)) {
             this._lastTime = current_time;
             return;
         }
@@ -108,7 +107,7 @@ export class Bubble extends SpriteObject implements Updatable {
 
         if (this._lastTime < 0) this._lastTime = current_time;
 
-        if (!this.is_paused) {
+        if (!this.isPaused) {
             if (this._bubbleSize === 0) {
                 this._accY += -30;
             } else if (this._bubbleSize === 1) {
@@ -147,7 +146,7 @@ export class Bubble extends SpriteObject implements Updatable {
     private _accX: number = 0;
     private _accY: number = 0;
 
-    private static readonly BUBBLE_NAMES: string[] = [
+    private static readonly BUBBLE_NAMES = [
         Bitmaps.Bubble00,
         Bitmaps.Bubble01,
         Bitmaps.Bubble02,
@@ -158,7 +157,7 @@ export class Bubble extends SpriteObject implements Updatable {
         Bitmaps.Bubble13
     ];
 
-    private static readonly P: Point = new Point();
+    private static readonly P = new Point();
 }
 
 
