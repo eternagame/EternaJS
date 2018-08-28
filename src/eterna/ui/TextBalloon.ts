@@ -44,7 +44,7 @@ export class TextBalloon extends ContainerObject {
     }
 
     public set_title(title: string): void {
-        this._panel.set_panel_title(title);
+        this._panel.setPanelTitle(title);
         this._hasTitle = title != null;
     }
 
@@ -98,7 +98,7 @@ export class TextBalloon extends ContainerObject {
             whole_height = Math.max(whole_height, DisplayUtil.height(this._button.display));
         }
 
-        return whole_height + 2 * TextBalloon.H_MARGIN + this._panel.get_title_space();
+        return whole_height + 2 * TextBalloon.H_MARGIN + this._panel.getTitleSpace();
     }
 
     protected updateView(): void {
@@ -111,7 +111,7 @@ export class TextBalloon extends ContainerObject {
         this._panel.setSize(balloon_width, balloon_height);
 
         let whole_width: number = balloon_width - 2 * TextBalloon.W_MARGIN;
-        let title_space: number = this._panel.get_title_space();
+        let title_space: number = this._panel.getTitleSpace();
 
         if (!this._centered) {
             if (this._text != null) {

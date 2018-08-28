@@ -33,12 +33,12 @@ export class FancyGamePanel extends BaseGamePanel {
         this.updateView();
     }
 
-    public set_panel_title(title: string): void {
+    public setPanelTitle(title: string): void {
         this._title = title;
         this.updateView();
     }
 
-    public get_title_space(): number {
+    public getTitleSpace(): number {
         return this._title == null ? 0 : 25;
     }
 

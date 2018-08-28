@@ -67,7 +67,7 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     public set_title(title: string): void {
-        this._panel.set_panel_title(title);
+        this._panel.setPanelTitle(title);
         this._hasTitle = title != null;
     }
 

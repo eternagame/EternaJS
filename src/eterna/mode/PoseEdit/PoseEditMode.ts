@@ -323,7 +323,7 @@ export class PoseEditMode extends GameMode {
             this._hintBoxRef.destroyObject();
         } else {
             let hintBox = new GamePanel();
-            hintBox.set_panel_title("Hint"); // by " + _puzzle.get_coauthor());
+            hintBox.setPanelTitle("Hint"); // by " + _puzzle.get_coauthor());
 
             let hintText = Fonts.arial(this._puzzle.hint, 14).color(0xffffff).wordWrap(true, 400).build();
             hintText.position = new Point(10, 38);

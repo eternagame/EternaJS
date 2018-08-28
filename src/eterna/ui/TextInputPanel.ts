@@ -69,7 +69,7 @@ export class TextInputPanel extends GamePanel {
     }
 
     public set_title(title_txt: string): void {
-        this.set_panel_title(title_txt);
+        this.setPanelTitle(title_txt);
     }
 
     public add_field(name: string, width: number, multiline: boolean = false): TextInputObject {
