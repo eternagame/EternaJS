@@ -40,8 +40,7 @@ import {Molecule} from "./Molecule";
 import {PoseUtil} from "./PoseUtil";
 import {PuzzleEditOp} from "./PuzzleEditOp";
 import {RNAAnchorObject} from "./RNAAnchorObject";
-import {RNALayout} from "./RNALayout";
-import {RNATreeNode} from "./RNATreeNode";
+import {RNALayout, RNATreeNode} from "./RNALayout";
 import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -3091,49 +3090,49 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (coords != null) {
-            if (root._is_pair) {
-                coords.push(root._index_a);
-                coords.push(root._index_b);
-            } else if (root._index_a >= 0) {
-                coords.push(root._index_a);
+            if (root.isPair) {
+                coords.push(root.indexA);
+                coords.push(root.indexB);
+            } else if (root.indexA >= 0) {
+                coords.push(root.indexA);
                 return;
             }
         }
 
         let child_coords: number[];
 
-        if (root._is_pair) {
-            if (root._children.length > 1) {
+        if (root.isPair) {
+            if (root.children.length > 1) {
                 throw new Error("Something's wrong with score tree");
             }
 
-            if (root._children.length !== 0) {
-                if (root._children[0]._is_pair) {
+            if (root.children.length !== 0) {
+                if (root.children[0].isPair) {
                     child_coords = [];
 
-                    child_coords.push(root._index_a);
-                    child_coords.push(root._index_b);
+                    child_coords.push(root.indexA);
+                    child_coords.push(root.indexB);
 
-                    child_coords.push(root._children[0]._index_b);
-                    child_coords.push(root._children[0]._index_a);
+                    child_coords.push(root.children[0].indexB);
+                    child_coords.push(root.children[0].indexA);
 
                     let newnode = new ScoreDisplayNode();
                     nodes.push(newnode);
-                    newnode.set_type(ScoreDisplayNodeType.STACK, child_coords, root._score);
+                    newnode.set_type(ScoreDisplayNodeType.STACK, child_coords, root.score);
 
-                    this.generateScoreNodesRecursive(root._children[0], null, nodes);
+                    this.generateScoreNodesRecursive(root.children[0], null, nodes);
                 } else {
                     child_coords = [];
 
-                    child_coords.push(root._index_b);
-                    child_coords.push(root._index_a);
+                    child_coords.push(root.indexB);
+                    child_coords.push(root.indexA);
 
-                    this.generateScoreNodesRecursive(root._children[0], child_coords, nodes);
+                    this.generateScoreNodesRecursive(root.children[0], child_coords, nodes);
                 }
             }
 
         } else {
-            for (let child of root._children) {
+            for (let child of root.children) {
                 this.generateScoreNodesRecursive(child, coords, nodes);
             }
 
@@ -3141,7 +3140,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 let newnode = new ScoreDisplayNode();
                 nodes.push(newnode);
 
-                newnode.set_type(ScoreDisplayNodeType.LOOP, coords, root._score);
+                newnode.set_type(ScoreDisplayNodeType.LOOP, coords, root.score);
             }
         }
     }
