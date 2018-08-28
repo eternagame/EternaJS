@@ -687,15 +687,15 @@ export class Vienna extends Folder {
         let native_pairs: number[] = this.foldSequence(seq, null, null);
 
         let native_tree: RNALayout = new RNALayout();
-        native_tree.setup_tree(native_pairs);
-        native_tree.score_tree(seq, this);
-        let native_score: number = native_tree.get_total_score();
+        native_tree.setupTree(native_pairs);
+        native_tree.scoreTree(seq, this);
+        let native_score: number = native_tree.totalScore;
 
         let target_satisfied: number[] = EPars.get_satisfied_pairs(target_pairs, seq);
         let target_tree: RNALayout = new RNALayout();
-        target_tree.setup_tree(target_satisfied);
-        target_tree.score_tree(seq, this);
-        let target_score: number = target_tree.get_total_score();
+        target_tree.setupTree(target_satisfied);
+        target_tree.scoreTree(seq, this);
+        let target_score: number = target_tree.totalScore;
 
         let native_bound: boolean = true;
         let target_bound: boolean = true;

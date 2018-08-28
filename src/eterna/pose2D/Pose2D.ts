@@ -273,9 +273,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let rna_coords: RNALayout;
         rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-        rna_coords.setup_tree(this._pairs);
-        rna_coords.draw_tree();
-        rna_coords.get_coords(xarray, yarray);
+        rna_coords.setupTree(this._pairs);
+        rna_coords.drawTree();
+        rna_coords.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
         let xmax: number = xarray[0];
@@ -1784,11 +1784,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rna_drawer: RNALayout = new RNALayout(radius, radius);
-        rna_drawer.setup_tree(this._pairs);
-        rna_drawer.draw_tree();
+        rna_drawer.setupTree(this._pairs);
+        rna_drawer.drawTree();
         let xarray: number[] = new Array(this._bases.length);
         let yarray: number[] = new Array(this._bases.length);
-        rna_drawer.get_coords(xarray, yarray);
+        rna_drawer.getCoords(xarray, yarray);
         for (let ii: number = 0; ii < this._bases.length; ii++) {
             let ax: number = xarray[ii];
             let ay: number = yarray[ii];
@@ -2405,9 +2405,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
         rna_drawer = new RNALayout(Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel], exception_indices);
 
-        rna_drawer.setup_tree(this._pairs);
-        rna_drawer.draw_tree();
-        rna_drawer.get_coords(xarray, yarray);
+        rna_drawer.setupTree(this._pairs);
+        rna_drawer.drawTree();
+        rna_drawer.getCoords(xarray, yarray);
 
         if (this._desiredAngle === 90) {
             let tmp = xarray;
@@ -3061,10 +3061,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         /// JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
         /// But this is cheap, so it shouldn't matter too much
         let score_tree: RNALayout = new RNALayout;
-        score_tree.setup_tree(this.satisfiedPairs);
+        score_tree.setupTree(this.satisfiedPairs);
 
-        let treeroot: RNATreeNode = score_tree.get_root();
-        score_tree.score_tree(this.fullSequence, this._scoreFolder);
+        let treeroot: RNATreeNode = score_tree.root;
+        score_tree.scoreTree(this.fullSequence, this._scoreFolder);
 
         let score_nodes: ScoreDisplayNode[] = [];
         let root_coords: number[] = [];

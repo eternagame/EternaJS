@@ -63,9 +63,9 @@ export class PoseThumbnail {
         let yarray: number[] = new Array(n);
 
         let rna_drawer: RNALayout = new RNALayout(45, 45);
-        rna_drawer.setup_tree(pairs);
-        rna_drawer.draw_tree();
-        rna_drawer.get_coords(xarray, yarray);
+        rna_drawer.setupTree(pairs);
+        rna_drawer.drawTree();
+        rna_drawer.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
         let xmax: number = xarray[0];
