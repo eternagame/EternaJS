@@ -10,7 +10,7 @@ export class ROPUI extends RScriptOp {
 
     /* override */
     public exec(): void {
-        this._env.ShowHideUI(this._elementID, this._visible, this._disabled);
+        this._env.showHideUI(this._elementID, this._visible, this._disabled);
     }
 
     /* override */

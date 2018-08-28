@@ -17,11 +17,11 @@ import {RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
  * Can take care of variables and scope and such.
  */
 export class RScriptEnv extends ContainerObject {
-    public static ConvertNucleotideStringToInt(s: string): number {
+    public static convertNucleotideStringToInt(s: string): number {
         return EPars.stringToNucleotide(s, true, false);
     }
 
-    public static ConvertNucleotideIntToString(i: number): string {
+    public static convertNucleotideIntToString(i: number): string {
         return EPars.nucleotideToString(i, true, false);
     }
 
@@ -32,12 +32,12 @@ export class RScriptEnv extends ContainerObject {
         this._mapping = new Map();
     }
 
-    public SetTextboxVisible(id: string, isVisible: boolean): void {
+    public setTextboxVisible(id: string, isVisible: boolean): void {
         if (id === "" || !this._mapping.hasOwnProperty("id")) {
             return;
         }
 
-        let value = this.GetVar(id);
+        let value = this.getVar(id);
         if (value instanceof TextBalloon) {
             value.display.visible = isVisible;
         } else {
@@ -46,19 +46,19 @@ export class RScriptEnv extends ContainerObject {
     }
 
     /** Generate string reference name. */
-    public GenerateStringRefName(): string {
+    public generateStringRefName(): string {
         // Strings will be referenced via $$STRING_REF:ID_HERE
-        ++this._string_count;
-        return `$$STRING_REF:${this._string_count}`;
+        ++this._stringCount;
+        return `$$STRING_REF:${this._stringCount}`;
     }
 
-    public GetStringRef(ref: string): string {
+    public getStringRef(ref: string): string {
         // Check if it's an actual ref.
         // If it's not, return it back unchanged
         if (ref.indexOf("$$STRING_REF:") !== 0) {
             return ref;
         } else {
-            let value = this.GetVar(ref);
+            let value = this.getVar(ref);
             if (typeof (value) === "string") {
                 return value;
             } else {
@@ -69,28 +69,28 @@ export class RScriptEnv extends ContainerObject {
     }
 
     /** Remove all stored highlights and hints and stuff. */
-    public Cleanup(): void {
+    public cleanup(): void {
         for (let key in this._mapping) {
-            this.DeleteVar(key);
+            this.deleteVar(key);
         }
     }
 
-    public GetUI(): PoseEditMode {
+    public get ui(): PoseEditMode {
         return this._ui;
     }
 
-    public GetPuzzle(): Puzzle {
+    public get puzzle(): Puzzle {
         return this._puz;
     }
 
-    public GetRNA(): Pose2D {
+    public get pose(): Pose2D {
         return this._ui.getPose(0);
     }
 
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     //  have been passed in.
-    public GetUIElementFromId(key: string): [RScriptUIElement, RScriptUIElementID, number] {
+    public getUIElementFromID(key: string): [RScriptUIElement, RScriptUIElementID, number] {
         // Highlight UI.
         let uiElement: RScriptUIElement;
 
@@ -119,43 +119,43 @@ export class RScriptEnv extends ContainerObject {
                 log.warn(`Malformed UIElementID '${key}'`);
                 altParam = 0;
             }
-            uiElement = this.GetUIElement(elementID, altParam);
+            uiElement = this.getUIElement(elementID, altParam);
         } else {
-            uiElement = this.GetUIElement(elementID);
+            uiElement = this.getUIElement(elementID);
         }
         return [uiElement, elementID, altParam];
     }
 
-    public GetTotalConstraints(): number {
-        return this.GetUI().constraintCount;
+    public get totalConstraints(): number {
+        return this.ui.constraintCount;
     }
 
-    public ShowHideUI(elementID: string, visible: boolean, disabled: boolean): void {
+    public showHideUI(elementID: string, visible: boolean, disabled: boolean): void {
         elementID = elementID.toUpperCase();
 
         if (elementID === RScriptUIElementID.ENERGY) {
-            this.GetUI().setDisplayScoreTexts(visible);
+            this.ui.setDisplayScoreTexts(visible);
         } else if (elementID === RScriptUIElementID.BASENUMBERING) {
-            this.GetUI().setShowNumbering(visible);
+            this.ui.setShowNumbering(visible);
         } else if (elementID === RScriptUIElementID.TOTALENERGY) {
-            this.GetUI().setShowTotalEnergy(visible);
+            this.ui.setShowTotalEnergy(visible);
         } else if (elementID === RScriptUIElementID.HINT) {
             // no-op
         } else if (elementID === RScriptUIElementID.TOGGLEBAR) {
-            this.ShowHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
-            this.ShowHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
+            this.showHideUI(RScriptUIElementID.TOGGLETARGET, visible, disabled);
+            this.showHideUI(RScriptUIElementID.TOGGLENATURAL, visible, disabled);
         } else if (elementID === RScriptUIElementID.SWITCH) {
-            (this.GetUIElementFromId(elementID)[0] as ToggleBar).display.visible = visible;
+            (this.getUIElementFromID(elementID)[0] as ToggleBar).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {
-                this.GetUI().toolbar.palette.set_override_default();
-                this.GetUI().toolbar.palette.change_default_mode();
+                this.ui.toolbar.palette.set_override_default();
+                this.ui.toolbar.palette.change_default_mode();
             } else if (visible && elementID === RScriptUIElementID.PALETTEALT) {
-                this.GetUI().toolbar.palette.set_override_no_pair();
-                this.GetUI().toolbar.palette.change_no_pair_mode();
+                this.ui.toolbar.palette.set_override_no_pair();
+                this.ui.toolbar.palette.change_no_pair_mode();
             }
 
-            let obj: RScriptUIElement = this.GetUIElementFromId(elementID)[0];
+            let obj: RScriptUIElement = this.getUIElementFromID(elementID)[0];
             if (obj instanceof DisplayObject) {
                 obj.visible = visible;
             } else if (obj instanceof GameObject && obj.display != null) {
@@ -168,88 +168,88 @@ export class RScriptEnv extends ContainerObject {
         }
     }
 
-    public GetUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
+    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
         switch (type) {
         case RScriptUIElementID.ACTION_MENU:
-            return this.GetUI().toolbar.actionMenu;
+            return this.ui.toolbar.actionMenu;
         case RScriptUIElementID.OBJECTIVES:
-            return this.GetUI().constraintsLayer;
+            return this.ui.constraintsLayer;
         case RScriptUIElementID.SHAPEOBJECTIVE:
-            return this.GetUI().get_shape_box(0);
+            return this.ui.get_shape_box(0);
         case RScriptUIElementID.OBJECTIVE:
-            return this.GetUI().getConstraint(i);
+            return this.ui.getConstraint(i);
         case RScriptUIElementID.SWITCH:
-            return this.GetUI().toolbar.puzzleStateToggle;
+            return this.ui.toolbar.puzzleStateToggle;
         case RScriptUIElementID.TOTALENERGY:
         case RScriptUIElementID.PRIMARY_ENERGY:
-            return this.GetRNA().primaryScoreDisplay;
+            return this.pose.primaryScoreDisplay;
         case RScriptUIElementID.SECONDARY_ENERGY:
-            return this.GetRNA().secondaryScoreDisplay;
+            return this.pose.secondaryScoreDisplay;
         case RScriptUIElementID.PALETTE:
         case RScriptUIElementID.PALETTEALT:
-            return this.GetUI().toolbar.palette;
+            return this.ui.toolbar.palette;
         case RScriptUIElementID.TOGGLENATURAL:
-            return this.GetUI().toolbar.nativeButton;
+            return this.ui.toolbar.nativeButton;
         case RScriptUIElementID.TOGGLETARGET:
-            return this.GetUI().toolbar.targetButton;
+            return this.ui.toolbar.targetButton;
         case RScriptUIElementID.TOGGLEBAR:
             // NOTE: There is no longer a toggle bar...
-            return this.GetUI().toolbar.nativeButton;
+            return this.ui.toolbar.nativeButton;
         case RScriptUIElementID.ZOOMIN:
-            return this.GetUI().toolbar.zoomInButton;
+            return this.ui.toolbar.zoomInButton;
         case RScriptUIElementID.ZOOMOUT:
-            return this.GetUI().toolbar.zoomOutButton;
+            return this.ui.toolbar.zoomOutButton;
         case RScriptUIElementID.ACTIONBAR:
             // NOTE: There is no longer an action bar...
-            return this.GetUI().toolbar.zoomInButton;
+            return this.ui.toolbar.zoomInButton;
         case RScriptUIElementID.RESET:
-            return this.GetUI().toolbar.retryButton;
+            return this.ui.toolbar.retryButton;
         case RScriptUIElementID.UNDO:
-            return this.GetUI().toolbar.undoButton;
+            return this.ui.toolbar.undoButton;
         case RScriptUIElementID.REDO:
-            return this.GetUI().toolbar.redoButton;
+            return this.ui.toolbar.redoButton;
         case RScriptUIElementID.SWAP:
-            return this.GetUI().toolbar.pairSwapButton;
+            return this.ui.toolbar.pairSwapButton;
         case RScriptUIElementID.PIP:
-            return this.GetUI().toolbar.pipButton;
+            return this.ui.toolbar.pipButton;
         case RScriptUIElementID.A:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.A);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
         case RScriptUIElementID.U:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.U);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.U);
         case RScriptUIElementID.G:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.G);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.G);
         case RScriptUIElementID.C:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.C);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.C);
         case RScriptUIElementID.AU:
         case RScriptUIElementID.UA:
         case RScriptUIElementID.AUCOMPLETE:
         case RScriptUIElementID.UACOMPLETE:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.AU);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.AU);
         case RScriptUIElementID.GU:
         case RScriptUIElementID.UG:
         case RScriptUIElementID.GUCOMPLETE:
         case RScriptUIElementID.UGCOMPLETE:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.UG);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.UG);
         case RScriptUIElementID.GC:
         case RScriptUIElementID.CG:
         case RScriptUIElementID.GCCOMPLETE:
         case RScriptUIElementID.CGCOMPLETE:
-            return this.GetUI().toolbar.palette.getTarget(PaletteTargetType.GC);
+            return this.ui.toolbar.palette.getTarget(PaletteTargetType.GC);
         default:
             throw new Error(`Invalid UI Element: ${type}`);
         }
     }
 
-    public StoreVar(key: string, inValue: RScriptVarType, parent: any): void {
+    public storeVar(key: string, inValue: RScriptVarType, parent: any): void {
         this._mapping.set(key, {val: inValue, par: parent});
     }
 
-    public GetVar(key: string): RScriptVarType {
+    public getVar(key: string): RScriptVarType {
         let scriptVar = this._mapping.get(key);
         return scriptVar != null ? scriptVar.val : null;
     }
 
-    public DeleteVar(key: string): void {
+    public deleteVar(key: string): void {
         let scriptVar = this._mapping.get(key);
         if (scriptVar == null) {
             return;
@@ -267,7 +267,7 @@ export class RScriptEnv extends ContainerObject {
         this._mapping.delete(key);
     }
 
-    public Exists(key: string): boolean {
+    public exists(key: string): boolean {
         return this._mapping.has(key);
     }
 
@@ -275,7 +275,7 @@ export class RScriptEnv extends ContainerObject {
     private readonly _puz: Puzzle;
     private readonly _mapping: Map<string, ScriptVar>;
 
-    private _string_count: number = 0;
+    private _stringCount: number = 0;
 }
 
 export type RScriptVarType = GameObject | DisplayObject | RNAHighlightState | string;

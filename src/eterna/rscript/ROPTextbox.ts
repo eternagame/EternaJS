@@ -53,7 +53,7 @@ export class ROPTextbox extends RScriptOp {
             }
         }
 
-        this._env.StoreVar(this._id, textBox, parent);
+        this._env.storeVar(this._id, textBox, parent);
 
         let textStyle: ExtendedTextStyle = {
             fontFamily: Fonts.ARIAL,
@@ -91,7 +91,7 @@ export class ROPTextbox extends RScriptOp {
                 );
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
-                let p: Point = this._env.GetRNA().getBaseXY(this._nucIdx);
+                let p: Point = this._env.pose.getBaseXY(this._nucIdx);
                 let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._hasXOffset) {
                     offset.x = this._xOffset;
@@ -102,9 +102,9 @@ export class ROPTextbox extends RScriptOp {
                 }
 
                 textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
-                this._env.GetRNA().addAnchoredObject(new RNAAnchorObject(textBox, this._nucIdx, offset));
+                this._env.pose.addAnchoredObject(new RNAAnchorObject(textBox, this._nucIdx, offset));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
-                this._env.SetTextboxVisible(this._id, true);
+                this._env.setTextboxVisible(this._id, true);
                 return;
             }
         };
@@ -116,7 +116,7 @@ export class ROPTextbox extends RScriptOp {
     private showArrow(): void {
         let parent: FancyTextBalloon = null;
         if (this._hasParent) {
-            let parentVal = this._env.GetVar(this._parentID);
+            let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
                 parent = parentVal;
             } else if (parentVal == null) {
@@ -138,7 +138,7 @@ export class ROPTextbox extends RScriptOp {
                     Flashbang.stageHeight * this._yPos + this._yRel
                 );
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                newArrow.display.position = this._env.GetRNA().getBaseXY(this._nucIdx);
+                newArrow.display.position = this._env.pose.getBaseXY(this._nucIdx);
             }
 
             // Determine where we want to draw the tip of the arrow
@@ -194,7 +194,7 @@ export class ROPTextbox extends RScriptOp {
                 } else {
                     offset.length = this._xOffset;
                 }
-                let p = this._env.GetRNA().getBaseXY(this._nucIdx);
+                let p = this._env.pose.getBaseXY(this._nucIdx);
                 newArrow.display.position = new Point(p.x + offset.x, p.y + offset.y);
                 log.debug("TODO: set_anchor_nucleotide?");
                 // TSC - I'm not sure if this is ever called or what it should do
@@ -205,18 +205,18 @@ export class ROPTextbox extends RScriptOp {
         updateLocation();
         newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
 
-        this._env.StoreVar(this._id, newArrow, this._env);
+        this._env.storeVar(this._id, newArrow, this._env);
         if (this._hasParent) {
             parent.add_child_arrow(newArrow);
         }
     }
 
     public exec(): void {
-        if (this._env.Exists(this._id)) {
+        if (this._env.exists(this._id)) {
             if (ROPTextbox.isTextbox(this._mode)) {
                 this.removeTextbox();
             } else {
-                let prevArr = this._env.GetVar(this._id);
+                let prevArr = this._env.getVar(this._id);
                 if (prevArr instanceof GameObject) {
                     this.removeArrow(prevArr);
                 } else {
@@ -239,7 +239,7 @@ export class ROPTextbox extends RScriptOp {
         switch (i) {
         case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
             if (this._show && (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE || this._mode === ROPTextboxMode.TEXTBOX_LOCATION)) {
-                this._text = this._env.GetStringRef(arg);
+                this._text = this._env.getStringRef(arg);
             } else if (this._show && this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 if ((regResult = rx.exec(arg)) != null) {
                     this._xPos = Number(regResult[1]);
@@ -250,7 +250,7 @@ export class ROPTextbox extends RScriptOp {
             } else if (this._show && this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 this._nucIdx = Number(arg) - 1;
             } else {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             }
             break;
         case 1: // X in mode 0. Nucleotide index in mode 1.
@@ -269,7 +269,7 @@ export class ROPTextbox extends RScriptOp {
                     this._yPos = Number(arg);
                 }
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else {
                 this._nucIdx = Number(arg) - 1;
             }
@@ -283,38 +283,38 @@ export class ROPTextbox extends RScriptOp {
                     this._yPos = Number(arg);
                 }
             } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 this._arrowRotation = Number(arg);
             } else {
-                this._title = this._env.GetStringRef(arg);
+                this._title = this._env.getStringRef(arg);
             }
             break;
         case 3: // Title in mode 0. Id in mode 1.
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._title = this._env.GetStringRef(arg);
+                this._title = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 this._arrowRotation = Number(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 this._arrowLength = Number(arg);
             } else {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             }
             break;
         case 4: // Id in mode 0. Button text in mode 1.
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 this._arrowLength = Number(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 this._myWidth = Number(arg);
             } else {
-                this._buttonText = this._env.GetStringRef(arg);
+                this._buttonText = this._env.getStringRef(arg);
             }
             break;
         case 5: // Button text in mode 1.
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._buttonText = this._env.GetStringRef(arg);
+                this._buttonText = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 this._myWidth = Number(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
@@ -327,7 +327,7 @@ export class ROPTextbox extends RScriptOp {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
                 this._hasParent = ROPTextbox.parseBool(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._parentID = this._env.GetStringRef(arg);
+                this._parentID = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 this._fixedSize = ROPTextbox.parseBool(arg);
             } else {
@@ -336,9 +336,9 @@ export class ROPTextbox extends RScriptOp {
             break;
         case 7:
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._parentID = this._env.GetStringRef(arg);
+                this._parentID = this._env.getStringRef(arg);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._fillColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+                this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                 this._fixedSize = ROPTextbox.parseBool(arg);
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
@@ -347,9 +347,9 @@ export class ROPTextbox extends RScriptOp {
             break;
         case 8:
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._fillColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+                this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._outlineColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+                this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
                 this._forceTopmost = ROPTextbox.parseBool(arg);
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
@@ -365,12 +365,12 @@ export class ROPTextbox extends RScriptOp {
                 this._hasXOffset = true;
                 this._xOffset = Number(arg);
             } else {
-                this._outlineColor = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+                this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             }
             break;
 
         default:
-            throw new Error(`Invalid argument for ROP: Textbox -- ${this._env.GetStringRef(arg)}`);
+            throw new Error(`Invalid argument for ROP: Textbox -- ${this._env.getStringRef(arg)}`);
         }
     }
 
@@ -383,7 +383,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     private removeTextbox(): void {
-        this._env.DeleteVar(this._id);
+        this._env.deleteVar(this._id);
     }
 
     private removeArrow(inArr: GameObject): void {

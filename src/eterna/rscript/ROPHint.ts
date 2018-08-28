@@ -18,22 +18,22 @@ export class ROPHint extends RScriptOp {
     /* override */
     public exec(): void {
         // Remove hint with ID.
-        if (this._env.Exists(this._id)) {
-            this._env.DeleteVar(this._id);
+        if (this._env.exists(this._id)) {
+            this._env.deleteVar(this._id);
         }
 
         if (!this._opVisible) {
             return;
         }
 
-        let startPoint: Point = this._env.GetRNA().getBaseXY(this._startIdx);
-        let endPoint: Point = this._env.GetRNA().getBaseXY(this._endIdx);
+        let startPoint: Point = this._env.pose.getBaseXY(this._startIdx);
+        let endPoint: Point = this._env.pose.getBaseXY(this._endIdx);
 
         let hint: NovaPaintHint = new NovaPaintHint(startPoint, endPoint, this._loop);
-        hint.setAnchorNucleotide(this._env.GetRNA(), this._startIdx);
+        hint.setAnchorNucleotide(this._env.pose, this._startIdx);
         hint.initialize();
-        this._env.GetUI().addObject(hint, this._env.GetUI().container);
-        this._env.StoreVar(this._id, hint, this._env.GetUI());
+        this._env.ui.addObject(hint, this._env.ui.container);
+        this._env.storeVar(this._id, hint, this._env.ui);
     }
 
     /* override */
@@ -41,7 +41,7 @@ export class ROPHint extends RScriptOp {
         switch (i) {
         case 0:
             if (!this._opVisible) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else {
                 this._startIdx = Number(arg) - 1;
             }
@@ -50,7 +50,7 @@ export class ROPHint extends RScriptOp {
             this._endIdx = Number(arg);
             break;
         case 2:
-            this._id = this._env.GetStringRef(arg);
+            this._id = this._env.getStringRef(arg);
             break;
         case 3:
             this._loop = (arg.toUpperCase() === "TRUE");
