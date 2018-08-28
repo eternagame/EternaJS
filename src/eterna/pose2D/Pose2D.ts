@@ -2948,7 +2948,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                 total_score += this._scoreNodes[ii].score;
 
-                if (!node_found && Utility.is_point_within(mouse_p, node_points)) {
+                if (!node_found && Utility.isPointWithin(mouse_p, node_points)) {
                     node_txt = this._scoreNodes[ii].text;
                     node_label = this._scoreNodes[ii].textLabel;
                     node_score = this._scoreNodes[ii].textScore;

@@ -16,13 +16,13 @@ export class Utility {
         return hex;
     }
 
-    public static round_to(num: number, floating: number): number {
+    public static roundTo(num: number, floating: number): number {
         let div: number = Math.pow(10, floating);
         let temp: number = num * div;
         return Number(temp) / div;
     }
 
-    public static strip_html_tags(str: string): string {
+    public static stripHtmlTags(str: string): string {
         let newlinereg: RegExp = /</g;
         str = str.replace(newlinereg, "&lt;");
         newlinereg = />/g;
@@ -30,7 +30,7 @@ export class Utility {
         return str;
     }
 
-    public static strip_quotations_and_newlines(str: string): string {
+    public static stripQuotationsAndNewlines(str: string): string {
         let newlinereg: RegExp = /\n/g;
         str = str.replace(newlinereg, " ");
         newlinereg = /"/g;
@@ -38,7 +38,7 @@ export class Utility {
         return str;
     }
 
-    public static generate_parameter_string(obj: Object): string {
+    public static generateParameterString(obj: any): string {
         if (obj == null) {
             return "";
         }
@@ -59,7 +59,7 @@ export class Utility {
         return res;
     }
 
-    public static is_point_within(p: Point, polygon: Point[], stretch_length: number = 10000): boolean {
+    public static isPointWithin(p: Point, polygon: Point[], stretch_length: number = 10000): boolean {
         let hit_count: number = 0;
 
         let p_to: Point = new Point(p.x + stretch_length, p.y + stretch_length);
@@ -68,7 +68,7 @@ export class Utility {
             let a: Point = polygon[ii];
             let b: Point = polygon[(ii + 1) % polygon.length];
 
-            if (Utility.find_intersection(a, b, p, p_to) != null) {
+            if (Utility.findIntersection(a, b, p, p_to) != null) {
                 hit_count++;
             }
         }
@@ -76,7 +76,7 @@ export class Utility {
         return (hit_count % 2) === 1;
     }
 
-    public static find_intersection(A: Point, B: Point, E: Point, F: Point, as_seg: boolean = true): Point {
+    public static findIntersection(A: Point, B: Point, E: Point, F: Point, as_seg: boolean = true): Point {
         let ip: Point;
         let a1: number;
         let a2: number;
