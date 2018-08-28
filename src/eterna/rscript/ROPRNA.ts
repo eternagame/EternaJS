@@ -23,10 +23,10 @@ export class ROPRNA extends RScriptOp {
     /* override */
     public exec(): void {
         if (this._type === ROPRNAType.SETBASE) {
-            this._env.GetRNA().setBaseColor(this._nuc_idx,
+            this._env.GetRNA().setBaseColor(this._nucIdx,
                 RScriptEnv.ConvertNucleotideStringToInt(this._color));
         } else if (this._type === ROPRNAType.CHANGEMODE) {
-            if (this._fold_mode === 0) {
+            if (this._foldMode === 0) {
                 this._env.GetUI().ropSetToNativeMode();
             } else {
                 this._env.GetUI().rop_set_to_target_mode();
@@ -46,7 +46,7 @@ export class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.CHANGESTATE) {
             this._env.GetUI().rop_change_target(this._state);
         } else if (this._type === ROPRNAType.SETZOOM) {
-            this._env.GetRNA().setZoomLevel(this._zoom_level, this._animate, this._center);
+            this._env.GetRNA().setZoomLevel(this._zoomLevel, this._animate, this._center);
         } else if (this._type === ROPRNAType.SETPIP) {
             this._env.GetUI().ropSetPip(this._enabled);
         }
@@ -57,9 +57,9 @@ export class ROPRNA extends RScriptOp {
         switch (i) {
         case 0: // Nucleotide index when changing nucleotide color. Fold mode in Mode 1.
             if (this._type === ROPRNAType.SETBASE) {
-                this._nuc_idx = Number(arg) - 1;
+                this._nucIdx = Number(arg) - 1;
             } else if (this._type === ROPRNAType.CHANGEMODE) {
-                this._fold_mode = Number(arg);
+                this._foldMode = Number(arg);
             } else if (this._type === ROPRNAType.ENABLEMODIFICATION || this._type === ROPRNAType.SETPIP) {
                 this._enabled = (arg.toUpperCase() === "TRUE");
             } else if (this._type === ROPRNAType.SETPAINTER) {
@@ -67,7 +67,7 @@ export class ROPRNA extends RScriptOp {
             } else if (this._type === ROPRNAType.CHANGESTATE) {
                 this._state = Number(arg) - 1;
             } else if (this._type === ROPRNAType.SETZOOM) {
-                this._zoom_level = MathUtil.clamp(Number(arg), 0, 4);
+                this._zoomLevel = MathUtil.clamp(Number(arg), 0, 4);
             }
             break;
         case 1:
@@ -94,13 +94,13 @@ export class ROPRNA extends RScriptOp {
 
     private readonly _type: ROPRNAType;
 
-    private _nuc_idx: number = 0;
+    private _nucIdx: number = 0;
     private _color: string;
-    private _fold_mode: number;
+    private _foldMode: number;
     private _enabled: boolean;
     private _scope: number[] = null;
     private _state: number;
-    private _zoom_level: number;
+    private _zoomLevel: number;
     private _animate: boolean = true;
     private _center: boolean = false;
 }
