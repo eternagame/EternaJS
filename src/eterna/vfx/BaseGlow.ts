@@ -9,41 +9,41 @@ export class BaseGlow extends Sprite {
         BaseGlow.initBitmapData();
     }
 
-    public set_wrong(wrong: boolean): void {
-        this._is_wrong = wrong;
+    public set isWrong(wrong: boolean) {
+        this._isWrong = wrong;
     }
 
-    public set_backward(backward: boolean): void {
+    public set backward(backward: boolean) {
         this._backward = backward;
     }
 
     public updateView(zoom_level: number, x: number, y: number, current_time: number): void {
-        if (this._animation_start_time < 0) {
-            this._animation_start_time = current_time;
+        if (this._animStartTime < 0) {
+            this._animStartTime = current_time;
         }
 
-        let diff: number = current_time - this._animation_start_time;
+        let diff: number = current_time - this._animStartTime;
         diff -= Math.floor(diff / BaseGlow.ANIMATION_SPAN) * BaseGlow.ANIMATION_SPAN;
 
         let prog: number = diff / BaseGlow.ANIMATION_SPAN;
         let prog_ind: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
         if (this._backward) prog_ind = BaseGlow.NUM_ANIMATION_STEPS - 1 - prog_ind;
 
-        let body_data: Texture = this._is_wrong
-            ? BaseGlow._bitmap_wrong_data[zoom_level][prog_ind]
-            : BaseGlow._bitmap_data[zoom_level][prog_ind];
+        let body_data: Texture = this._isWrong
+            ? BaseGlow._bitmapWrongData[zoom_level][prog_ind]
+            : BaseGlow._bitmapData[zoom_level][prog_ind];
 
         this.texture = body_data;
         this.position = new Point(x - body_data.width / 2, y - body_data.height / 2);
     }
 
     private static initBitmapData(): void {
-        if (BaseGlow._bitmap_data != null) {
+        if (BaseGlow._bitmapData != null) {
             return;
         }
 
-        BaseGlow._bitmap_data = [];
-        BaseGlow._bitmap_wrong_data = [];
+        BaseGlow._bitmapData = [];
+        BaseGlow._bitmapWrongData = [];
         let original_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz: number = 0; zz < 5; zz++) {
@@ -62,18 +62,18 @@ export class BaseGlow extends Sprite {
                 let wrong_new_base_data: Texture = BitmapUtil.colorTransform(new_base_data, 255, 0, 0, 0, 0, 0);
                 wrong_bitmaps_in_zoom.push(wrong_new_base_data);
             }
-            BaseGlow._bitmap_data.push(bitmaps_in_zoom);
-            BaseGlow._bitmap_wrong_data.push(wrong_bitmaps_in_zoom);
+            BaseGlow._bitmapData.push(bitmaps_in_zoom);
+            BaseGlow._bitmapWrongData.push(wrong_bitmaps_in_zoom);
         }
     }
 
-    private _animation_start_time: number = -1;
-    private _is_wrong: boolean = false;
+    private _animStartTime: number = -1;
+    private _isWrong: boolean = false;
     private _backward: boolean = false;
 
-    private static _bitmap_data: Texture[][];
-    private static _bitmap_wrong_data: Texture[][];
+    private static _bitmapData: Texture[][];
+    private static _bitmapWrongData: Texture[][];
 
-    private static readonly NUM_ANIMATION_STEPS: number = 60;
-    private static readonly ANIMATION_SPAN: number = 1.1;
+    private static readonly NUM_ANIMATION_STEPS = 60;
+    private static readonly ANIMATION_SPAN = 1.1;
 }
