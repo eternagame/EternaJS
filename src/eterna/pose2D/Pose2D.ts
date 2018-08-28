@@ -1476,9 +1476,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             if (this._molecularBindingPairs[ii] !== satisfied_pairs[ii]) {
                 bound_real = false;
-                this._molecularBindingBases[ii].set_wrong(true);
+                this._molecularBindingBases[ii].isWrong = true;
             } else {
-                this._molecularBindingBases[ii].set_wrong(false);
+                this._molecularBindingBases[ii].isWrong = false;
             }
         }
         this._molecule.isWrong = !bound_real;
