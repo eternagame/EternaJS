@@ -132,7 +132,7 @@ export class PoseEditMode extends GameMode {
 
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);
-        this._dockedSpecBox.set_size(155, 251);
+        this._dockedSpecBox.setSize(155, 251);
         this._dockedSpecBox.display.visible = false;
         this.addObject(this._dockedSpecBox, this.uiLayer);
 
@@ -199,9 +199,9 @@ export class PoseEditMode extends GameMode {
         this.layoutBars();
         this.layoutConstraints();
 
-        this._dockedSpecBox.set_size(Flashbang.stageWidth, Flashbang.stageHeight - 340);
-        let s: number = this._dockedSpecBox.getPlotSize();
-        this._dockedSpecBox.set_size(s + 55, s * 2 + 51);
+        this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
+        let s: number = this._dockedSpecBox.plotSize;
+        this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
 
     public get toolbar(): PoseEditToolbar {
@@ -1464,7 +1464,7 @@ export class PoseEditMode extends GameMode {
         let dialog = this.showDialog(new SpecBoxDialog(datablock));
         dialog.closed.then(showDocked => {
             if (showDocked) {
-                this._dockedSpecBox.set_spec(datablock);
+                this._dockedSpecBox.setSpec(datablock);
                 this._dockedSpecBox.display.visible = true;
             }
         });
@@ -1474,7 +1474,7 @@ export class PoseEditMode extends GameMode {
         if (this._dockedSpecBox.display.visible) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
             let datablock: UndoBlock = this.getCurrentUndoBlock();
-            this._dockedSpecBox.set_spec(datablock);
+            this._dockedSpecBox.setSpec(datablock);
         }
     }
 

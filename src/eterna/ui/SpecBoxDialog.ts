@@ -23,8 +23,8 @@ export class SpecBoxDialog extends Dialog<boolean> {
         super.added();
 
         let specBox = new SpecBox();
-        specBox.set_spec(this._datablock);
-        specBox.set_size(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
+        specBox.setSpec(this._datablock);
+        specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
         this.addObject(specBox, this.container);
 
         let cancel_button: GameButton = new GameButton().label("Ok", 14).hotkey(KeyCode.KeyS);
