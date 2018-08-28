@@ -4,13 +4,13 @@ import {RScriptEnv} from "./RScriptEnv";
 export class ROPUI extends RScriptOp {
     constructor(env: RScriptEnv, isVisible: boolean, isDisabled: boolean) {
         super(env);
-        this._op_visible = isVisible;
-        this._op_disabled = isDisabled;
+        this._visible = isVisible;
+        this._disabled = isDisabled;
     }
 
     /* override */
     public exec(): void {
-        this._env.ShowHideUI(this._element_id, this._op_visible, this._op_disabled);
+        this._env.ShowHideUI(this._elementID, this._visible, this._disabled);
     }
 
     /* override */
@@ -18,11 +18,11 @@ export class ROPUI extends RScriptOp {
         if (i > 0) {
             throw new Error(`Invalid number of arguments for ROP UI: ${i}`);
         }
-        this._element_id = arg;
+        this._elementID = arg;
     }
 
-    private readonly _op_visible: boolean;
-    private readonly _op_disabled: boolean;
+    private readonly _visible: boolean;
+    private readonly _disabled: boolean;
 
-    private _element_id: string;
+    private _elementID: string;
 }
