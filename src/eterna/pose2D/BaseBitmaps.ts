@@ -85,14 +85,14 @@ export class BaseBitmaps {
     private static createLetterBitmaps (baseType: number, zoomScalar: number): Texture[] {
         let big_letter: Text = Fonts.arial(BaseBitmaps.type2Letter(baseType)).fontSize(18).bold().color(0x0).build();
         let bitmaps: Texture[] = [TextureUtil.renderToTexture(big_letter)];
-        BitmapUtil.create_scaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(bitmaps, zoomScalar, Base.NUM_ZOOM_LEVELS);
         return bitmaps;
     }
 
     private static createBodyBitmaps (nameTemplate: string, baseType: number): Texture[] {
         let bmName: string = BaseBitmaps.getBitmapName(nameTemplate, baseType);
         let bitmaps: Texture[] = [BitmapManager.getBitmapNamed(bmName)];
-        BitmapUtil.create_scaled(bitmaps, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(bitmaps, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
         return bitmaps;
     }
 

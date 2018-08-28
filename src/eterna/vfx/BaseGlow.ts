@@ -50,16 +50,16 @@ export class BaseGlow extends Sprite {
             let bitmaps_in_zoom: Texture[] = [];
             let wrong_bitmaps_in_zoom: Texture[] = [];
             let zoom_factor: number = 1.0 - zz * 0.1;
-            let base_data: Texture = BitmapUtil.scale_by(original_data, zoom_factor);
+            let base_data: Texture = BitmapUtil.scaleBy(original_data, zoom_factor);
 
             for (let ii: number = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
-                let new_base_data: Texture = BitmapUtil.color_transform_alpha(
+                let new_base_data: Texture = BitmapUtil.colorTransformAlpha(
                     base_data, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0
                 );
-                new_base_data = BitmapUtil.scale_by(new_base_data, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
+                new_base_data = BitmapUtil.scaleBy(new_base_data, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
                 bitmaps_in_zoom.push(new_base_data);
 
-                let wrong_new_base_data: Texture = BitmapUtil.color_transform(new_base_data, 255, 0, 0, 0, 0, 0);
+                let wrong_new_base_data: Texture = BitmapUtil.colorTransform(new_base_data, 255, 0, 0, 0, 0, 0);
                 wrong_bitmaps_in_zoom.push(wrong_new_base_data);
             }
             BaseGlow._bitmap_data.push(bitmaps_in_zoom);

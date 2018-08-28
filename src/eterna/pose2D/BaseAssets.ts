@@ -210,8 +210,8 @@ export class BaseAssets {
             } while(0);
         }
 
-        BitmapUtil.create_scaled(BaseAssets._sphereData, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._sphereData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._sphereMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BASE BODY BITMAPS
         BaseAssets._baseUBitmaps = new BaseBitmaps(EPars.RNABASE_URACIL);
@@ -222,16 +222,16 @@ export class BaseAssets {
         BaseAssets._backboneBodyData = [BitmapManager.getBitmap(Bitmaps.Backbone)];
         BaseAssets._backboneMidData = [BitmapManager.getBitmap(Bitmaps.BackboneMid)];
 
-        BitmapUtil.create_scaled(BaseAssets._backboneBodyData, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._backboneMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._backboneBodyData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._backboneMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // BARCODE BITMAPS
         BaseAssets._barcodeData = [BaseAssets.drawCircularBarcode(16, 6, /*0.5*/ 1)];
         BaseAssets._barcodeMidData = [BaseAssets.drawCircularBarcode(12, 3, /*0.5*/ 1)];
         BaseAssets._barcodeMinData = [BaseAssets.drawCircularBarcode(6, 2, /*0.5*/ 1)];
 
-        BitmapUtil.create_scaled(BaseAssets._barcodeData, 0.75, Base.NUM_ZOOM_LEVELS);
-        BitmapUtil.create_scaled(BaseAssets._barcodeMidData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._barcodeData, 0.75, Base.NUM_ZOOM_LEVELS);
+        BitmapUtil.createScaled(BaseAssets._barcodeMidData, 0.75, Base.NUM_ZOOM_LEVELS);
 
         // SATELLITE BITMAPS
         BaseAssets._satelliteData = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(1, 1, 1, 1, 0, 0, 0, 0));
@@ -239,7 +239,7 @@ export class BaseAssets {
         BaseAssets._satelliteStrongerData = BaseAssets.createSatelliteBitmaps(ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
 
         // SPARK BITMAPS
-        BaseAssets._sparkBitmaps = BitmapUtil.create_transparent(BitmapManager.getBitmap(Bitmaps.BonusSymbol), 10);
+        BaseAssets._sparkBitmaps = BitmapUtil.createTransparent(BitmapManager.getBitmap(Bitmaps.BonusSymbol), 10);
 
         // SOUNDS
         // log.debug("INIT SOUND");
@@ -284,8 +284,8 @@ export class BaseAssets {
         sprite.filters = [colorTransform];
         let bitmap: Texture = TextureUtil.renderToTexture(sprite);
 
-        let bitmaps: Texture[] = BitmapUtil.create_rotated(bitmap, 5);
-        BitmapUtil.create_scaled(bitmaps, 0.75, Base.NUM_ZOOM_LEVELS);
+        let bitmaps: Texture[] = BitmapUtil.createRotated(bitmap, 5);
+        BitmapUtil.createScaled(bitmaps, 0.75, Base.NUM_ZOOM_LEVELS);
 
         return bitmaps;
     }
