@@ -447,10 +447,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     public parseCommand(command: number, closest_index: number): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
-            return PoseUtil.add_base_with_index(closest_index, this._pairs);
+            return PoseUtil.addBaseWithIndex(closest_index, this._pairs);
 
         case EPars.RNABASE_ADD_PAIR:
-            return PoseUtil.add_pair_with_index(closest_index, this._pairs);
+            return PoseUtil.addPairWithIndex(closest_index, this._pairs);
 
         case EPars.RNABASE_DELETE:
             return this.deleteBaseWithIndex(closest_index);
@@ -463,7 +463,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public parseCommandWithPairs(command: number, closest_index: number, pairs: number[]): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
-            return PoseUtil.add_base_with_index(closest_index, pairs);
+            return PoseUtil.addBaseWithIndex(closest_index, pairs);
 
         case EPars.RNABASE_DELETE:
             return this.deleteBaseWithIndexPairs(closest_index, pairs);
@@ -655,7 +655,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this.toggleBlackMark(index);
         }
 
-        return PoseUtil.delete_nopair_with_index(index, pairs);
+        return PoseUtil.deleteNopairWithIndex(index, pairs);
     }
 
     public clearTracking(): void {
@@ -2498,9 +2498,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (this._pairs[index] < 0 || this.isLocked(this._pairs[index])) {
-            return PoseUtil.delete_nopair_with_index(index, this._pairs);
+            return PoseUtil.deleteNopairWithIndex(index, this._pairs);
         } else {
-            return PoseUtil.delete_pair_with_index(index, this._pairs);
+            return PoseUtil.deletePairWithIndex(index, this._pairs);
         }
     }
 

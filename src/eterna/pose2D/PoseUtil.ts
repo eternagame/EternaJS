@@ -3,7 +3,7 @@ import {PuzzleEditOp} from "./PuzzleEditOp";
 
 /** Utility functions for pose data */
 export class PoseUtil {
-    public static get_pair_strength(s1: number, s2: number): number {
+    public static getPairStrength(s1: number, s2: number): number {
         if (PoseUtil.isPair(s1, s2, EPars.RNABASE_ADENINE, EPars.RNABASE_URACIL)) {
             return 2;
         } else if (PoseUtil.isPair(s1, s2, EPars.RNABASE_GUANINE, EPars.RNABASE_URACIL)) {
@@ -15,7 +15,7 @@ export class PoseUtil {
         }
     }
 
-    public static add_base_with_index(index: number, pairs: number[]): any[] {
+    public static addBaseWithIndex(index: number, pairs: number[]): any[] {
         let mutated_pairs: number[];
         mutated_pairs = pairs.slice(0, index);
         mutated_pairs.push(-1);
@@ -30,7 +30,7 @@ export class PoseUtil {
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutated_pairs];
     }
 
-    public static add_pair_with_index(index: number, pairs: number[]): any[] {
+    public static addPairWithIndex(index: number, pairs: number[]): any[] {
         let mutated_pairs: number[];
         let parenthesis: string;
         let ii: number;
@@ -84,7 +84,7 @@ export class PoseUtil {
         }
     }
 
-    public static delete_nopair_with_index(index: number, pairs: number[]): any[] {
+    public static deleteNopairWithIndex(index: number, pairs: number[]): any[] {
         let mutated_pairs: number[];
         let parenthesis: string;
         mutated_pairs = pairs.slice(0, index);
@@ -99,7 +99,7 @@ export class PoseUtil {
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutated_pairs];
     }
 
-    public static delete_pair_with_index(index: number, pairs: number[]): any[] {
+    public static deletePairWithIndex(index: number, pairs: number[]): any[] {
         let pindex: number = pairs[index];
         if (pindex < 0) {
             throw new Error("base doesn't have pair");
