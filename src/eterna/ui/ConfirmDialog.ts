@@ -37,7 +37,7 @@ export class ConfirmDialog extends Dialog<boolean> {
         super.added();
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
-        panel.set_panel_title("Are you sure?");
+        panel.setPanelTitle("Are you sure?");
         this.addObject(panel, this.container);
 
         let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
@@ -73,8 +73,8 @@ export class ConfirmDialog extends Dialog<boolean> {
         const H_MARGIN = 10;
 
         panelLayout.layout();
-        panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.get_title_space() + panelLayout.height + (H_MARGIN * 2));
-        panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.get_title_space());
+        panel.setSize(panelLayout.width + (W_MARGIN * 2), panel.getTitleSpace() + panelLayout.height + (H_MARGIN * 2));
+        panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.getTitleSpace());
 
         panel.display.alpha = 0;
         panel.addObject(new AlphaTask(1, 0.3));

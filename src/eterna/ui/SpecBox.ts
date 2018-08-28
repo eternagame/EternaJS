@@ -265,7 +265,7 @@ export class SpecBox extends ContainerObject {
             this._zoom_in.display.visible = false;
             this._zoom_out.display.visible = false;
         } else {
-            this._panel.set_panel_title("RNA Spec");
+            this._panel.setPanelTitle("RNA Spec");
 
             this._v0.position = new Point(40 - this._v0.width - 3, 70);
 
