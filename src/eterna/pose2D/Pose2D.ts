@@ -97,8 +97,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._selectionHighlightBox = new HighlightBox(this);
         this.addObject(this._selectionHighlightBox, this.container);
 
-        this.restrictedHighlightBox = new HighlightBox(this);
-        this.addObject(this.restrictedHighlightBox, this.container);
+        this._restrictedHighlightBox = new HighlightBox(this);
+        this.addObject(this._restrictedHighlightBox, this.container);
 
         this._unstableHighlightBox = new HighlightBox(this);
         this.addObject(this._unstableHighlightBox, this.container);
@@ -972,9 +972,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._lowperformMode;
     }
 
-    public set highlightRestricted(highlight_restricted: boolean) {
-        this._highlightRestricted = highlight_restricted;
-        this.restrictedHighlightBox.enabled = highlight_restricted;
+    public set highlightRestricted(highlight: boolean) {
+        this._highlightRestricted = highlight;
+        this._restrictedHighlightBox.enabled = highlight;
     }
 
     public get highlightRestricted(): boolean {
@@ -1027,11 +1027,11 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// For restricted queue
     public clearRestrictedHighlight(): void {
-        this.restrictedHighlightBox.clear();
+        this._restrictedHighlightBox.clear();
     }
 
     public highlightRestrictedSequence(restricted: number[]): void {
-        this.restrictedHighlightBox.setHighlight(HighlightType.RESTRICTED, restricted);
+        this._restrictedHighlightBox.setHighlight(HighlightType.RESTRICTED, restricted);
     }
 
     public clearUnstableHighlight(): void {
@@ -1976,7 +1976,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
 
             // TODO: bit_blit_after_effect
-            // for (ii = 0; ii < full_seq.length; ii++) {
+            // for (ii = 0; ii < fullSeq.length; ii++) {
             //     locked = this.is_locked(ii);
             //     r = this._bases[ii].bit_blit_after_effect(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time);
             //     if (r != null) {
@@ -2025,24 +2025,26 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._moleculeLayer.visible = true;
         }
 
-        // TODO: oligo bases
-        // if (this._mol_canvas_data != null && full_seq.indexOf(EPars.RNABASE_CUT) >= 0) {
-        //     if (this._oligo_bases == null) this._oligo_bases = new Array(full_seq.length);
-        //     let bound_len: number = this.get_bound_sequence().length;
-        //     for (let ii = full_seq.indexOf(EPars.RNABASE_CUT) + 1; ii < full_seq.length; ii++) {
-        //         let baseglow = this._oligo_bases[ii];
-        //         if (baseglow == null) {
-        //             baseglow = new BaseGlow();
-        //             this._oligo_bases[ii] = baseglow;
-        //         }
-        //         if ((this._oligo_paired || (this._oligos_paired > 0 && ii < bound_len)) && this._pairs[ii] >= 0) {
-        //             baseglow.set_wrong(this._restricted_highlight_box.is_in_queue(ii));
-        //             let pos = this._bases[ii].get_last_drawn_pos();
-        //             this._mol_dirty.push(baseglow.bit_blit(this._zoom_level, pos.x, pos.y, current_time));
-        //             this._moleculeLayer.visible = true;
-        //         }
-        //     }
-        // }
+        if (fullSeq.indexOf(EPars.RNABASE_CUT) >= 0) {
+            if (this._oligoBases == null) {
+                this._oligoBases = new Array(fullSeq.length);
+            }
+
+            let bound_len: number = this.getBoundSequence().length;
+            for (let ii = fullSeq.indexOf(EPars.RNABASE_CUT) + 1; ii < fullSeq.length; ii++) {
+                let baseglow = this._oligoBases[ii];
+                if (baseglow == null) {
+                    baseglow = new BaseGlow();
+                    this._oligoBases[ii] = baseglow;
+                }
+                if ((this._oligoPaired || (this._oligosPaired > 0 && ii < bound_len)) && this._pairs[ii] >= 0) {
+                    baseglow.isWrong = this._restrictedHighlightBox.isInQueue(ii);
+                    let pos = this._bases[ii].getLastDrawnPos();
+                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, current_time);
+                    this._moleculeLayer.visible = true;
+                }
+            }
+        }
 
         let go_x: number = 0;
         let go_y: number = 0;
@@ -2373,14 +2375,14 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private computeLayout(fast: boolean = false): void {
-        let full_seq: number[] = this.fullSequence;
+        let fullSeq: number[] = this.fullSequence;
 
-        if (full_seq.length > this._bases.length) {
-            log.debug(full_seq.length, this._bases.length);
+        if (fullSeq.length > this._bases.length) {
+            log.debug(fullSeq.length, this._bases.length);
             throw new Error("Sequence length and pose length don't match");
         }
 
-        let n: number = full_seq.length;
+        let n: number = fullSeq.length;
         let x_mid: number = 0;
         let y_mid: number = 0;
 
@@ -2390,13 +2392,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         let rna_drawer: RNALayout;
 
         let exception_indices: number[] = null;
-        if (full_seq.indexOf(EPars.RNABASE_CUT) >= 0) {
+        if (fullSeq.indexOf(EPars.RNABASE_CUT) >= 0) {
             exception_indices = [];
             exception_indices.push(0);
             let oligo_index: number = -1;
             // array of positions of connectors "&"
-            while (full_seq.indexOf(EPars.RNABASE_CUT, oligo_index + 1) >= 0) {
-                oligo_index = full_seq.indexOf(EPars.RNABASE_CUT, oligo_index + 1);
+            while (fullSeq.indexOf(EPars.RNABASE_CUT, oligo_index + 1) >= 0) {
+                oligo_index = fullSeq.indexOf(EPars.RNABASE_CUT, oligo_index + 1);
                 exception_indices.push(oligo_index);
             }
         }
@@ -2836,12 +2838,12 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private checkPairs(): void {
-        let full_seq: number[] = this.fullSequence;
+        let fullSeq: number[] = this.fullSequence;
 
         for (let ii: number = 0; ii < this._pairs.length; ii++) {
             if (this._pairs[ii] >= 0 && this.isPairSatisfied(ii, this._pairs[ii])) {
 
-                let pair_str: number = Pose2D.getPairStrength(full_seq[ii], full_seq[this._pairs[ii]]);
+                let pair_str: number = Pose2D.getPairStrength(fullSeq[ii], fullSeq[this._pairs[ii]]);
 
                 if (this._baseToX) {
                     this._bases[ii].setPairing(true,
@@ -3282,7 +3284,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Selection box
     private _selectionHighlightBox: HighlightBox;
-    private restrictedHighlightBox: HighlightBox;
+    private _restrictedHighlightBox: HighlightBox;
     private _highlightRestricted: boolean = false;
     private _unstableHighlightBox: HighlightBox;
     private _forcedHighlightBox: HighlightBox;
