@@ -157,14 +157,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public addAnchoredObject(obj: RNAAnchorObject): void {
-        throw new Error("TODO: add_anchored_object");
-        // attach SceneObject to Pose2D?
         this._anchoredObjects.push(obj);
     }
 
     public removeAnchoredObject(obj: RNAAnchorObject): void {
-        throw new Error("TODO: remove_anchored_object");
-        // detach SceneObject from Pose2D?
         for (let ii: number = 0; ii < this._anchoredObjects.length; ++ii) {
             if (obj === this._anchoredObjects[ii]) {
                 this._anchoredObjects.splice(ii, 1);
@@ -1838,8 +1834,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let current_time: number = this.mode.time;
         for (let anchor of this._anchoredObjects) {
-            let p: Point = this.getBaseXY(anchor.base);
-            anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
+            if (anchor.isLive) {
+                let p: Point = this.getBaseXY(anchor.base);
+                anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
+            }
         }
 
         let fullSeq: number[] = this.fullSequence;

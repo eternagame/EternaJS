@@ -68,7 +68,7 @@ export class EternaApp extends FlashbangApp {
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || PuzzleID.SameState_TryptophanB;
+        params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
         this._params = params;
