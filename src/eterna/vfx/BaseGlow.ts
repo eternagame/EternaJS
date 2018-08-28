@@ -44,7 +44,7 @@ export class BaseGlow extends Sprite {
 
         BaseGlow._bitmap_data = [];
         BaseGlow._bitmap_wrong_data = [];
-        let original_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgBindingBaseGlow);
+        let original_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz: number = 0; zz < 5; zz++) {
             let bitmaps_in_zoom: Texture[] = [];

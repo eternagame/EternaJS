@@ -58,10 +58,10 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this.display.interactive = true;
 
-        this._palette_image = BitmapManager.get_bitmap(Bitmaps.ImgPalette);
-        this._palette_image_nopairs = BitmapManager.get_bitmap(Bitmaps.ImgPaletteNoPairs);
-        this._select_pair_data = BitmapManager.get_bitmap(Bitmaps.ImgSelectPair);
-        this._select_base_data = BitmapManager.get_bitmap(Bitmaps.ImgSelectBase);
+        this._palette_image = BitmapManager.getBitmap(Bitmaps.ImgPalette);
+        this._palette_image_nopairs = BitmapManager.getBitmap(Bitmaps.ImgPaletteNoPairs);
+        this._select_pair_data = BitmapManager.getBitmap(Bitmaps.ImgSelectPair);
+        this._select_base_data = BitmapManager.getBitmap(Bitmaps.ImgSelectBase);
 
         this._palette_display = new Sprite(this._palette_image);
         this.container.addChild(this._palette_display);

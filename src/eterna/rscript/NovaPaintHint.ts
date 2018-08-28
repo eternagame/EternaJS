@@ -14,8 +14,8 @@ export class NovaPaintHint extends ContainerObject implements Updatable {
         this._endPoint = end;
         this._loop = loop;
 
-        this._no_click = BitmapManager.get_bitmap(Bitmaps.NovaFinger);
-        this._click_img = BitmapManager.get_bitmap(Bitmaps.NovaFingerClick);
+        this._no_click = BitmapManager.getBitmap(Bitmaps.NovaFinger);
+        this._click_img = BitmapManager.getBitmap(Bitmaps.NovaFingerClick);
 
         this._img = new Sprite(this._no_click);
         this.container.addChild(this._img);
