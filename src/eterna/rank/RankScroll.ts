@@ -232,7 +232,7 @@ export class RankScroll extends ContainerObject {
         this.container.addChild(mask_top);
         this._rankBoardTop.display.mask = mask_top;
         this._rankBoardTop.display.position = new Point(0, -((rank_data_top.length - size_indicator) * RankBoard.ROW_HEIGHT));
-        this._rankBoardTop.register_starting_pos();
+        this._rankBoardTop.registerStartingPos();
         this.addObject(this._rankBoardTop, this.container);
 
         this._rankBoardBottom = new RankBoard(this._newRank + 1, rank_data_bottom.reverse(), max_width);
@@ -246,7 +246,7 @@ export class RankScroll extends ContainerObject {
         this._rankBoardBottom.display.position = new Point(0,
             (size_indicator * RankBoard.ROW_HEIGHT) + RankBoard.PLAYER_ROW_HEIGHT
             - (this._moveOffset * RankBoard.ROW_HEIGHT));
-        this._rankBoardBottom.register_starting_pos();
+        this._rankBoardBottom.registerStartingPos();
         this.addObject(this._rankBoardBottom, this.container);
 
         // Set current player's row as center position
