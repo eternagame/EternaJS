@@ -53,7 +53,7 @@ export class ROPHighlight extends RScriptOp {
             for (let i: number = this._start_idx; i <= this._end_idx; ++i) {
                 res.push(i);
             }
-            let rnaHighlight: RNAHighlightState = this._env.GetRNA().create_new_highlight(res);
+            let rnaHighlight: RNAHighlightState = this._env.GetRNA().createNewHighlight(res);
             this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
         } else if (this._op_visible && this._mode === ROPHighlightMode.UI) {
             const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
@@ -226,7 +226,7 @@ export class ROPHighlight extends RScriptOp {
     }
 
     private RemoveHighlight(obj: RNAHighlightState): void {
-        this._env.GetRNA().remove_new_highlight(obj);
+        this._env.GetRNA().removeNewHighlight(obj);
     }
 
     private static ProcessId(inId: string): string {

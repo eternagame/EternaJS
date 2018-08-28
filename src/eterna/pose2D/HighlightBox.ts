@@ -94,9 +94,9 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         } else  {
             // Redraw when we're dirty or the zoom level has changed
             this.display.visible = true;
-            if (this._dirty || this._pose.get_zoom_level() !== this._prevZoomLevel || this.basePositionChanged) {
+            if (this._dirty || this._pose.zoomLevel !== this._prevZoomLevel || this.basePositionChanged) {
                 this.redraw();
-                this._prevZoomLevel = this._pose.get_zoom_level();
+                this._prevZoomLevel = this._pose.zoomLevel;
                 this._dirty = false;
             }
         }
@@ -108,7 +108,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             return false;
         }
 
-        let pos: Point = this._pose.get_base_xy(this._queue[1], HighlightBox.P);
+        let pos: Point = this._pose.getBaseXY(this._queue[1], HighlightBox.P);
         return this._prevPosition.x !== pos.x || this._prevPosition.y !== pos.y;
     }
 
@@ -116,7 +116,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         let color: number;
         let base_size: number;
         let fadeTime: number = 0.85;
-        let zoom_level: number = this._pose.get_zoom_level();
+        let zoom_level: number = this._pose.zoomLevel;
 
         this.display.alpha = 0;
         this.display.visible = true;
@@ -126,7 +126,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             return;
         }
 
-        this._prevPosition = this._pose.get_base_xy(this._queue[1], this._prevPosition);
+        this._prevPosition = this._pose.getBaseXY(this._queue[1], this._prevPosition);
         this._lastKnownQueue = this._queue;
 
         let type: HighlightType = this._queue[0];
@@ -190,7 +190,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderStack(color: number, baseSize: number): void {
-        let pairs: number[] = this._pose.get_pairs();
+        let pairs: number[] = this._pose.pairs;
 
         for (let ii: number = 1; ii < this._queue.length; ii += 2) {
             let stack_start: number = this._queue[ii];
@@ -200,8 +200,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                 throw new Error("Invalid stack highlight from " + stack_start.toString() + " to " + stack_end.toString());
             }
 
-            let p0: Point = this._pose.get_base_xy(stack_start);
-            let p1: Point = this._pose.get_base_xy(pairs[stack_end]);
+            let p0: Point = this._pose.getBaseXY(stack_start);
+            let p1: Point = this._pose.getBaseXY(pairs[stack_end]);
 
             let max_x: number = Math.max(p0.x, p1.x);
             let min_x: number = Math.min(p0.x, p1.x);
@@ -219,8 +219,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderLoop(_color: number, base_size: number): void {
-        let pairs: number[] = this._pose.get_pairs();
-        let full_len: number = this._pose.get_full_sequence().length;
+        let pairs: number[] = this._pose.pairs;
+        let full_len: number = this._pose.fullSequence.length;
         let strict: boolean = (this._queue[0] === HighlightType.LOOP);
 
         for (let i: number = 1; i < this._queue.length; i += 2) {
@@ -240,10 +240,10 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             for (let ii: number = loop_start; ii <= loop_end; ii++) {
                 let num_gos: number = 0;
                 let axis: Vector2 = new Vector2(0, 0);
-                base_xy = this._pose.get_base_xy(ii);
+                base_xy = this._pose.getBaseXY(ii);
 
                 if (ii > 0) {
-                    let prev_base_xy: Point = this._pose.get_base_xy(ii - 1);
+                    let prev_base_xy: Point = this._pose.getBaseXY(ii - 1);
                     let from_prev: Vector2 = new Vector2((base_xy.x - prev_base_xy.x), (base_xy.y - prev_base_xy.y));
                     from_prev.normalizeLocal();
                     axis.x += from_prev.x;
@@ -262,7 +262,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                 }
 
                 if (ii < full_len - 1) {
-                    let next_base_xy: Point = this._pose.get_base_xy(ii + 1);
+                    let next_base_xy: Point = this._pose.getBaseXY(ii + 1);
                     let to_next: Vector2 = new Vector2((next_base_xy.x - base_xy.x), (next_base_xy.y - base_xy.y));
                     to_next.normalizeLocal();
                     axis.x += to_next.x;
@@ -288,8 +288,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                 axes.push(new Point(axis.y, -axis.x));
             }
 
-            let loop_start_xy: Point = this._pose.get_base_xy(loop_start);
-            let loop_end_xy: Point = this._pose.get_base_xy(loop_end);
+            let loop_start_xy: Point = this._pose.getBaseXY(loop_start);
+            let loop_end_xy: Point = this._pose.getBaseXY(loop_end);
             let loop_start_axis: Point = axes[0];
             let loop_end_axis: Point = axes[loop_end - loop_start];
 
@@ -297,7 +297,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             this._graphics.moveTo(loop_start_xy.x + loop_start_axis.x * base_size - start_from.x * base_size, loop_start_xy.y + loop_start_axis.y * base_size - start_from.y * base_size);
 
             for (let ii = loop_start; ii <= loop_end; ii++) {
-                base_xy = this._pose.get_base_xy(ii);
+                base_xy = this._pose.getBaseXY(ii);
                 this._graphics.lineTo(base_xy.x + axes[ii - loop_start].x * base_size, base_xy.y + axes[ii - loop_start].y * base_size);
             }
 
@@ -306,7 +306,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                 this._graphics.lineTo(loop_end_xy.x - loop_end_axis.x * base_size + end_to.x * base_size, loop_end_xy.y - loop_end_axis.y * base_size + end_to.y * base_size);
 
                 for (let ii = loop_end; ii >= loop_start; ii--) {
-                    base_xy = this._pose.get_base_xy(ii);
+                    base_xy = this._pose.getBaseXY(ii);
                     this._graphics.lineTo(base_xy.x - axes[ii - loop_start].x * base_size, base_xy.y - axes[ii - loop_start].y * base_size);
                 }
 

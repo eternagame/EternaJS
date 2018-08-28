@@ -66,19 +66,19 @@ export class Pose2D extends ContainerObject implements Updatable {
     protected added() {
         super.added();
 
-        this._score_node_highlight = new Graphics();
-        this.container.addChild(this._score_node_highlight);
+        this._scoreNodeHighlight = new Graphics();
+        this.container.addChild(this._scoreNodeHighlight);
 
         this.container.addChild(this._baseLayer);
 
-        this._primary_score_energy_display = new EnergyScoreDisplay(111, 40);
-        this._primary_score_energy_display.position = new Point(17, 118);
-        this.container.addChild(this._primary_score_energy_display);
+        this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._primaryScoreEnergyDisplay.position = new Point(17, 118);
+        this.container.addChild(this._primaryScoreEnergyDisplay);
 
-        this._secondary_score_energy_display = new EnergyScoreDisplay(111, 40);
-        this._secondary_score_energy_display.position = new Point(17 + 119, 118);
-        this._secondary_score_energy_display.visible = false;
-        this.container.addChild(this._secondary_score_energy_display);
+        this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._secondaryScoreEnergyDisplay.visible = false;
+        this.container.addChild(this._secondaryScoreEnergyDisplay);
 
         this._moleculeLayer = new Container();
         this.container.addChild(this._moleculeLayer);
@@ -88,80 +88,60 @@ export class Pose2D extends ContainerObject implements Updatable {
         // this._paint_cursor.display.visible = false;
         // this.addObject(this._paint_cursor);
 
-        this._explosion_rays = [];
+        this._explosionRays = [];
         for (let ii: number = 0; ii < 10; ii++) {
             let ray = new LightRay();
-            this._explosion_rays.push(ray);
+            this._explosionRays.push(ray);
             this.addObject(ray, this.container);
         }
 
-        this._selection_highlight_box = new HighlightBox(this);
-        this.addObject(this._selection_highlight_box, this.container);
+        this._selectionHighlightBox = new HighlightBox(this);
+        this.addObject(this._selectionHighlightBox, this.container);
 
-        this._restricted_highlight_box = new HighlightBox(this);
-        this.addObject(this._restricted_highlight_box, this.container);
+        this.restrictedHighlightBox = new HighlightBox(this);
+        this.addObject(this.restrictedHighlightBox, this.container);
 
-        this._unstable_highlight_box = new HighlightBox(this);
-        this.addObject(this._unstable_highlight_box, this.container);
+        this._unstableHighlightBox = new HighlightBox(this);
+        this.addObject(this._unstableHighlightBox, this.container);
 
-        this._user_defined_highlight_box = new HighlightBox(this);
-        this.addObject(this._user_defined_highlight_box, this.container);
+        this._userDefinedHighlightBox = new HighlightBox(this);
+        this.addObject(this._userDefinedHighlightBox, this.container);
 
-        this._forced_highlight_box = new HighlightBox(this);
-        this.addObject(this._forced_highlight_box, this.container);
+        this._forcedHighlightBox = new HighlightBox(this);
+        this.addObject(this._forcedHighlightBox, this.container);
 
-        this._shift_highlight_box = new HighlightBox(this);
-        this.addObject(this._shift_highlight_box, this.container);
+        this._shiftHighlightBox = new HighlightBox(this);
+        this.addObject(this._shiftHighlightBox, this.container);
 
         if (!this._editable) {
-            this._current_color = -1;
+            this._currentColor = -1;
         }
 
-        this._aux_info_canvas = new Graphics();
-        this._aux_info_canvas.visible = false;
-        this.container.addChild(this._aux_info_canvas);
+        this._auxInfoCanvas = new Graphics();
+        this._auxInfoCanvas.visible = false;
+        this.container.addChild(this._auxInfoCanvas);
 
-        this._aux_textballoon = new TextBalloon("", 0x0, 0.9);
-        this._aux_textballoon.display.visible = false;
-        this.addObject(this._aux_textballoon, this._aux_info_canvas);
+        this._auxTextballoon = new TextBalloon("", 0x0, 0.9);
+        this._auxTextballoon.display.visible = false;
+        this.addObject(this._auxTextballoon, this._auxInfoCanvas);
 
-        this._strand_label = new TextBalloon("", 0x0, 0.8);
-        this._strand_label.display.visible = false;
-        this.addObject(this._strand_label, this._aux_info_canvas);
+        this._strandLabel = new TextBalloon("", 0x0, 0.8);
+        this._strandLabel.display.visible = false;
+        this.addObject(this._strandLabel, this._auxInfoCanvas);
 
         this.display.interactive = true;
-        this.pointerMove.connect(() => this.pose_mouse_moved());
-        this.pointerDown.filter(IsLeftMouse).connect(e => this.call_start_mousedown_callback(e));
-        this.pointerOut.connect((e) => this.on_pose_mouse_out(e));
+        this.pointerMove.connect(() => this.onMouseMoved());
+        this.pointerDown.filter(IsLeftMouse).connect(e => this.callStartMousedownCallback(e));
+        this.pointerOut.connect((e) => this.onMouseOut(e));
 
         // handle view settings
-        this.regs.add(Eterna.settings.showNumbers.connectNotify(value => {
-            this.set_show_numbering(value);
-        }));
-
-        this.regs.add(Eterna.settings.showLetters.connectNotify(value => {
-            this.set_lettermode(value);
-        }));
-
-        this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => {
-            this.set_use_continuous_exp_colors(value);
-        }));
-
-        this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => {
-            this.set_use_extended_scale(value);
-        }));
-
-        this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify(value => {
-            this.setDisplayScoreTexts(value);
-        }));
-
-        this.regs.add(Eterna.settings.highlightRestricted.connectNotify(value => {
-            this.set_highlight_restricted(value);
-        }));
-
-        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify(value => {
-            this.set_display_aux_info(value);
-        }));
+        this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
+        this.regs.add(Eterna.settings.showLetters.connectNotify(value => this.lettermode = value));
+        this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => this.useContinuousExpColors = value));
+        this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => this.useExtendedScale = value));
+        this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify(value => this.displayScoreTexts = value));
+        this.regs.add(Eterna.settings.highlightRestricted.connectNotify(value => this.highlightRestricted = value));
+        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify(value => this.displayAuxInfo = value));
     }
 
     public setSize(width: number, height: number): void {
@@ -169,125 +149,125 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._height = height;
     }
 
-    public get_primary_score_display(): EnergyScoreDisplay {
-        return this._primary_score_energy_display;
+    public get primaryScoreDisplay(): EnergyScoreDisplay {
+        return this._primaryScoreEnergyDisplay;
     }
 
-    public get_secondary_score_display(): EnergyScoreDisplay {
-        return this._secondary_score_energy_display;
+    public get secondaryScoreDisplay(): EnergyScoreDisplay {
+        return this._secondaryScoreEnergyDisplay;
     }
 
-    public add_anchored_object(obj: RNAAnchorObject): void {
+    public addAnchoredObject(obj: RNAAnchorObject): void {
         throw new Error("TODO: add_anchored_object");
         // attach SceneObject to Pose2D?
-        this._anchored_objects.push(obj);
+        this._anchoredObjects.push(obj);
     }
 
-    public remove_anchored_object(obj: RNAAnchorObject): void {
+    public removeAnchoredObject(obj: RNAAnchorObject): void {
         throw new Error("TODO: remove_anchored_object");
         // detach SceneObject from Pose2D?
-        for (let ii: number = 0; ii < this._anchored_objects.length; ++ii) {
-            if (obj === this._anchored_objects[ii]) {
-                this._anchored_objects.splice(ii, 1);
+        for (let ii: number = 0; ii < this._anchoredObjects.length; ++ii) {
+            if (obj === this._anchoredObjects[ii]) {
+                this._anchoredObjects.splice(ii, 1);
                 break;
             }
         }
     }
 
     public get isAnimating(): boolean {
-        return this._base_to_x != null;
+        return this._baseToX != null;
     }
 
-    public is_folding(): boolean {
-        return (this._last_sampled_time - this._fold_start_time < this._fold_duration);
+    public get isFolding(): boolean {
+        return (this.lastSampledTime - this._foldStartTime < this._foldDuration);
     }
 
-    public visualize_feedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
+    public visualizeFeedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
         // coloring
         let newdat: number[] = ExpPainter.transform_data(dat, hi, lo);
-        this._exp_painter = new ExpPainter(newdat, start_index);
-        this._exp_mid = mid;
-        this._exp_hi = hi;
-        this.paint_feedback();
+        this._expPainter = new ExpPainter(newdat, start_index);
+        this._expMid = mid;
+        this._expHi = hi;
+        this.paintFeedback();
 
         // print feedback score
-        for (let ii: number = 0; ii < this._feedback_objs.length; ii++) {
-            this.removeObject(this._feedback_objs[ii]);
+        for (let ii: number = 0; ii < this._feedbackObjs.length; ii++) {
+            this.removeObject(this._feedbackObjs[ii]);
         }
 
-        this._feedback_objs_num = dat.length;
-        this._feedback_objs_start_ind = start_index;
-        this.print_feedback(dat);
-        this.update_print_feedback();
+        this._feedbackObjsNum = dat.length;
+        this._feedbackObjsStartInd = start_index;
+        this.printFeedback(dat);
+        this.updatePrintFeedback();
     }
 
-    public paint_feedback(): void {
-        if (!this._exp_painter) {
+    public paintFeedback(): void {
+        if (!this._expPainter) {
             return;
         }
 
-        this._exp_painter.set_continuous(this._exp_continuous);
-        this._exp_painter.set_extended_scale(this._exp_extended_scale);
+        this._expPainter.set_continuous(this._expContinuous);
+        this._expPainter.set_extended_scale(this._expExtendedScale);
 
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
-            this._bases[ii].setColorLevel(true, this._exp_painter.get_color_level_with_midpoint(ii, this._exp_mid, this._exp_hi));
+            this._bases[ii].setColorLevel(true, this._expPainter.get_color_level_with_midpoint(ii, this._expMid, this._expHi));
         }
         this._redraw = true;
     }
 
-    public clear_feedback(): void {
+    public clearFeedback(): void {
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
             this._bases[ii].setColorLevel(false, -1);
         }
         this._redraw = true;
     }
 
-    public get_zoom_level(): number {
-        return this._zoom_level;
+    public get zoomLevel(): number {
+        return this._zoomLevel;
     }
 
-    public set_zoom_level(zoom_level: number, animate: boolean = true, center: boolean = false): void {
-        if ((this._zoom_level !== zoom_level || center) && animate) {
-            if (this._zoom_level === zoom_level && center) {
-                if (Math.abs(this._width / 2 - this._off_x) + Math.abs(this._height / 2 - this._off_y) < 50) {
+    public setZoomLevel(zoom_level: number, animate: boolean = true, center: boolean = false): void {
+        if ((this._zoomLevel !== zoom_level || center) && animate) {
+            if (this._zoomLevel === zoom_level && center) {
+                if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
                     return;
                 }
             }
 
-            this._start_offset_x = this._off_x;
-            this._start_offset_y = this._off_y;
+            this._startOffsetX = this._offX;
+            this._startOffsetY = this._offY;
 
             let scaler: number = 1;
-            if (zoom_level > this._zoom_level) {
-                scaler = Pose2D.ZOOM_SPACINGS[zoom_level] / Pose2D.ZOOM_SPACINGS[this._zoom_level];
+            if (zoom_level > this._zoomLevel) {
+                scaler = Pose2D.ZOOM_SPACINGS[zoom_level] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
             }
 
-            if (!this._offset_translating && !center) {
-                this._end_offset_x = scaler * (this._off_x - this._width / 2) + this._width / 2;
-                this._end_offset_y = scaler * (this._off_y - this._height / 2) + this._height / 2;
-            } else if (this._offset_translating) {
-                this._end_offset_x = scaler * (this._end_offset_x - this._width / 2) + this._width / 2;
-                this._end_offset_y = scaler * (this._end_offset_y - this._height / 2) + this._height / 2;
+            if (!this._offsetTranslating && !center) {
+                this._endOffsetX = scaler * (this._offX - this._width / 2) + this._width / 2;
+                this._endOffsetY = scaler * (this._offY - this._height / 2) + this._height / 2;
+            } else if (this._offsetTranslating) {
+                this._endOffsetX = scaler * (this._endOffsetX - this._width / 2) + this._width / 2;
+                this._endOffsetY = scaler * (this._endOffsetY - this._height / 2) + this._height / 2;
             } else {
-                this._end_offset_x = this._width / 2;
-                this._end_offset_y = this._height / 2;
+                this._endOffsetX = this._width / 2;
+                this._endOffsetY = this._height / 2;
             }
 
-            this._offset_translating = true;
+            this._offsetTranslating = true;
 
-            this._zoom_level = zoom_level;
-            this.compute_layout(true);
+            this._zoomLevel = zoom_level;
+            this.computeLayout(true);
             this._redraw = true;
 
-        } else if (this._zoom_level !== zoom_level) {
-            this._zoom_level = zoom_level;
-            this.compute_layout(true);
+        } else if (this._zoomLevel !== zoom_level) {
+            this._zoomLevel = zoom_level;
+            this.computeLayout(true);
             this._redraw = true;
         }
     }
 
-    public compute_default_zoom_level(): number {
-        let n: number = this.get_full_sequence_length();
+    public computeDefaultZoomLevel(): number {
+        let n: number = this.fullSequenceLength;
         let xarray: number[] = new Array(n);
         let yarray: number[] = new Array(n);
 
@@ -339,78 +319,78 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_current_color(col: number): void {
-        this._current_color = col;
+    public set currentColor(col: number) {
+        this._currentColor = col;
     }
 
-    public get_current_color(): number {
-        return this._current_color;
+    public get currentColor(): number {
+        return this._currentColor;
     }
 
-    public done_coloring(): void {
+    public doneColoring(): void {
         this._coloring = false;
 
         let need_update: boolean = false;
 
-        if (this._mutated_sequence == null) {
+        if (this._mutatedSequence == null) {
             return;
         }
 
-        if (this._mutated_sequence.length !== this.get_full_sequence_length()) {
+        if (this._mutatedSequence.length !== this.fullSequenceLength) {
             throw new Error("Mutated sequence and original sequence lengths don't match");
         }
 
         let num_mut: number = 0;
         let muts: any[] = [];
         let div: number = 1;
-        if (this._current_color === EPars.RNABASE_PAIR
-            || this._current_color === EPars.RNABASE_GC_PAIR
-            || this._current_color === EPars.RNABASE_AU_PAIR
-            || this._current_color === EPars.RNABASE_GU_PAIR) {
+        if (this._currentColor === EPars.RNABASE_PAIR
+            || this._currentColor === EPars.RNABASE_GC_PAIR
+            || this._currentColor === EPars.RNABASE_AU_PAIR
+            || this._currentColor === EPars.RNABASE_GU_PAIR) {
 
             div = 2;
         }
 
-        let ofs: number = (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
+        let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
         let ii: number;
         for (ii = 0; ii < this._sequence.length; ii++) {
-            if (this._sequence[ii] !== this._mutated_sequence[ii + ofs]) {
+            if (this._sequence[ii] !== this._mutatedSequence[ii + ofs]) {
                 num_mut++;
-                this._sequence[ii] = this._mutated_sequence[ii + ofs];
+                this._sequence[ii] = this._mutatedSequence[ii + ofs];
                 muts.push({pos: ii + 1, base: EPars.sequence_array_to_string([this._sequence[ii]])});
                 need_update = true;
             }
         }
         if (need_update) {
-            this.call_track_moves_callback(num_mut / div, muts);
+            this.callTrackMovesCallback(num_mut / div, muts);
         }
 
-        if (need_update || this._lock_updated || this._binding_site_updated || this._design_struct_updated) {
-            this.check_pairs();
+        if (need_update || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
+            this.checkPairs();
             this.updateMolecule();
-            this.generate_score_nodes();
-            this.call_pose_edit_callback();
+            this.generateScoreNodes();
+            this.callPoseEditCallback();
         }
 
-        this._mutated_sequence = null;
-        this._lock_updated = false;
-        this._binding_site_updated = false;
-        this._design_struct_updated = false;
+        this._mutatedSequence = null;
+        this._lockUpdated = false;
+        this._bindingSiteUpdated = false;
+        this._designStructUpdated = false;
     }
 
-    public set_mutated(seq_arr: number[]): void {
-        let n: number = Math.min(this._mutated_sequence.length, seq_arr.length);
-        let ofs: number = (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
+    public setMutated(seq_arr: number[]): void {
+        let n: number = Math.min(this._mutatedSequence.length, seq_arr.length);
+        let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
         for (let ii: number = 0; ii < n; ii++) {
-            if (this._mutated_sequence[ii] !== seq_arr[ii] && !this.is_locked(ofs + ii)) {
-                this._mutated_sequence[ii] = seq_arr[ii];
+            if (this._mutatedSequence[ii] !== seq_arr[ii] && !this.isLocked(ofs + ii)) {
+                this._mutatedSequence[ii] = seq_arr[ii];
                 this._bases[ofs + ii].setType(seq_arr[ii]);
             }
         }
     }
 
-    public paste_sequence(sequence: number[]): void {
+    public pasteSequence(sequence: number[]): void {
         if (sequence == null) {
             return;
         }
@@ -420,10 +400,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let n: number = Math.min(sequence.length, this._sequence.length);
         let need_update: boolean = false;
-        let ofs: number = (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
+        let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
         for (let ii: number = 0; ii < n; ii++) {
-            if (this._sequence[ii] !== sequence[ii] && !this.is_locked(ofs + ii)) {
+            if (this._sequence[ii] !== sequence[ii] && !this.isLocked(ofs + ii)) {
                 num_mut++;
                 this._sequence[ii] = sequence[ii];
                 muts.push({pos: ii + 1, base: EPars.sequence_array_to_string([this._sequence[ii]])});
@@ -433,38 +413,38 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (need_update) {
-            this.call_track_moves_callback(num_mut, muts);
+            this.callTrackMovesCallback(num_mut, muts);
 
-            this.check_pairs();
+            this.checkPairs();
             this.updateMolecule();
-            this.generate_score_nodes();
-            this.call_pose_edit_callback();
+            this.generateScoreNodes();
+            this.callPoseEditCallback();
         }
     }
 
-    public get_base_xy(seq: number, out: Point = null): Point {
+    public getBaseXY(seq: number, out: Point = null): Point {
         if (out == null) {
             out = new Point();
         }
-        out.x = this._bases[seq].x + this._off_x;
-        out.y = this._bases[seq].y + this._off_y;
+        out.x = this._bases[seq].x + this._offX;
+        out.y = this._bases[seq].y + this._offY;
         return out;
     }
 
-    public get_base_out_xy(seq: number, out: Point = null): Point {
+    public getBaseOutXY(seq: number, out: Point = null): Point {
         out = this._bases[seq].getOutXY(out);
-        out.x += this._off_x;
-        out.y += this._off_y;
+        out.x += this._offX;
+        out.y += this._offY;
         return out;
     }
 
-    public clear_mouse(): void {
+    public clearMouse(): void {
         // this._paint_cursor.visible = false;
         // this._paint_cursor.startDrag(false);
         // this._strand_label.visible = false;
     }
 
-    public parse_command(command: number, closest_index: number): any[] {
+    public parseCommand(command: number, closest_index: number): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
             return PoseUtil.add_base_with_index(closest_index, this._pairs);
@@ -473,139 +453,139 @@ export class Pose2D extends ContainerObject implements Updatable {
             return PoseUtil.add_pair_with_index(closest_index, this._pairs);
 
         case EPars.RNABASE_DELETE:
-            return this.delete_base_with_index(closest_index);
+            return this.deleteBaseWithIndex(closest_index);
 
         default:
             return null;
         }
     }
 
-    public parse_command_with_pairs(command: number, closest_index: number, pairs: number[]): any[] {
+    public parseCommandWithPairs(command: number, closest_index: number, pairs: number[]): any[] {
         switch (command) {
         case EPars.RNABASE_ADD_BASE:
             return PoseUtil.add_base_with_index(closest_index, pairs);
 
         case EPars.RNABASE_DELETE:
-            return this.delete_base_with_index_pairs(closest_index, pairs);
+            return this.deleteBaseWithIndexPairs(closest_index, pairs);
 
         default:
             return null;
         }
     }
 
-    public on_pose_mouse_down_propagate(e: InteractionEvent, closest_index: number): void {
+    public onPoseMouseDownPropagate(e: InteractionEvent, closest_index: number): void {
         let altDown: boolean = Flashbang.app.isAltKeyDown;
         let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
         if ((this._coloring && !altDown) || ctrlDown) {
-            if (ctrlDown && closest_index >= this.get_sequence().length) {
+            if (ctrlDown && closest_index >= this.sequence.length) {
                 return;
             }
-            this.on_pose_mouse_down(e, closest_index);
+            this.onPoseMouseDown(e, closest_index);
         }
     }
 
-    public on_pose_mouse_down(e: InteractionEvent, closest_index: number): void {
+    public onPoseMouseDown(e: InteractionEvent, closest_index: number): void {
         let altDown: boolean = Flashbang.app.isAltKeyDown;
         let shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
         if (closest_index >= 0) {
-            this._mouse_down_altKey = altDown;
-            if (ctrlDown && closest_index < this.get_full_sequence_length()) {
-                this.toggle_black_mark(closest_index);
+            this._mouseDownAltKey = altDown;
+            if (ctrlDown && closest_index < this.fullSequenceLength) {
+                this.toggleBlackMark(closest_index);
                 return;
             }
             if (shiftDown) {
-                if (closest_index < this.get_sequence_length()) {
-                    this._shift_start = closest_index;
-                    this._shift_end = closest_index;
-                    this.update_shift_highlight();
+                if (closest_index < this.sequenceLength) {
+                    this._shiftStart = closest_index;
+                    this._shiftEnd = closest_index;
+                    this.updateShiftHighlight();
 
                     let reg: Registration = null;
                     reg = this.pointerUp.connect(() => {
-                        this._shift_start = -1;
-                        this._shift_end = -1;
+                        this._shiftStart = -1;
+                        this._shiftEnd = -1;
                         reg.close();
                     });
                 }
                 e.stopPropagation();
                 return;
             }
-            this._last_shifted_command = -1;
-            this._last_shifted_index = -1;
-            let cmd: any[] = this.parse_command(this._current_color, closest_index);
+            this._lastShiftedCommand = -1;
+            this._lastShiftedIndex = -1;
+            let cmd: any[] = this.parseCommand(this._currentColor, closest_index);
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
-                dragger.dragged.connect(() => this.pose_mouse_moved());
-                dragger.dragComplete.connect(() => this.on_pose_mouse_up());
+                dragger.dragged.connect(() => this.onMouseMoved());
+                dragger.dragComplete.connect(() => this.onMouseUp());
 
-                this.on_base_mouse_down(closest_index, ctrlDown);
+                this.onBaseMouseDown(closest_index, ctrlDown);
             } else {
-                this._last_shifted_command = this._current_color;
-                this._last_shifted_index = closest_index;
+                this._lastShiftedCommand = this._currentColor;
+                this._lastShiftedIndex = closest_index;
 
-                this.call_add_base_callback(cmd[0], cmd[1], closest_index);
+                this.callAddBaseCallback(cmd[0], cmd[1], closest_index);
             }
 
             e.stopPropagation();
         } else {
             if (shiftDown) {
-                this._shift_start = -1;
-                this._shift_end = -1;
-                this.update_shift_highlight();
+                this._shiftStart = -1;
+                this._shiftEnd = -1;
+                this.updateShiftHighlight();
             }
         }
     }
 
-    public toggle_black_mark(closest_index: number): void {
-        let index: number = this._tracked_indices.indexOf(closest_index);
+    public toggleBlackMark(closestIndex: number): void {
+        let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
-            this.black_mark(closest_index);
+            this.addBlackMark(closestIndex);
         } else {
-            this.remove_black_mark(closest_index);
+            this.removeBlackMark(closestIndex);
         }
     }
 
-    public black_mark(closest_index: number): void {
-        let index: number = this._tracked_indices.indexOf(closest_index);
+    public addBlackMark(closestIndex: number): void {
+        let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
-            this._tracked_indices.push(closest_index);
-            ROPWait.NotifyBlackMark(closest_index, true);
+            this._trackedIndices.push(closestIndex);
+            ROPWait.NotifyBlackMark(closestIndex, true);
 
             let base_box: Graphics = new Graphics();
-            this._base_boxes.push(base_box);
+            this._baseBoxes.push(base_box);
             this.container.addChild(base_box);
 
-            let n: number = this._tracked_indices.length;
-            let center: Point = this.get_base_xy(this._tracked_indices[n - 1]);
-            this._base_boxes[n - 1].x = center.x;
-            this._base_boxes[n - 1].y = center.y;
-            this._base_boxes[n - 1].visible = true;
-            this._base_boxes[n - 1].clear();
-            this._base_boxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
-            this._base_boxes[n - 1].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+            let n: number = this._trackedIndices.length;
+            let center: Point = this.getBaseXY(this._trackedIndices[n - 1]);
+            this._baseBoxes[n - 1].x = center.x;
+            this._baseBoxes[n - 1].y = center.y;
+            this._baseBoxes[n - 1].visible = true;
+            this._baseBoxes[n - 1].clear();
+            this._baseBoxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], 0x000000);
+            this._baseBoxes[n - 1].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
         }
     }
 
-    public remove_black_mark(closest_index: number): void {
-        let index: number = this._tracked_indices.indexOf(closest_index);
+    public removeBlackMark(closest_index: number): void {
+        let index: number = this._trackedIndices.indexOf(closest_index);
         if (index !== -1) {
-            this._base_boxes[index].visible = false;
-            this._tracked_indices.splice(index, 1);
-            this._base_boxes.splice(index, 1);
+            this._baseBoxes[index].visible = false;
+            this._trackedIndices.splice(index, 1);
+            this._baseBoxes.splice(index, 1);
             ROPWait.NotifyBlackMark(closest_index, false);
         }
     }
 
-    public is_tracked_index(index: number): boolean {
-        return this._tracked_indices.indexOf(index) >= 0;
+    public isTrackedIndex(index: number): boolean {
+        return this._trackedIndices.indexOf(index) >= 0;
     }
 
-    public pose_mouse_moved(): void {
+    public onMouseMoved(): void {
         if (!this._coloring) {
-            this.clear_mouse();
+            this.clearMouse();
         }
 
         this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
@@ -614,8 +594,8 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let closest_dist: number = -1;
         let closest_index: number = -1;
-        for (let ii = 0; ii < this.get_full_sequence_length(); ii++) {
-            let mouseDist: number = this._bases[ii].isClicked(mouseX - this._off_x, mouseY - this._off_y, this._zoom_level, this._coloring);
+        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+            let mouseDist: number = this._bases[ii].isClicked(mouseX - this._offX, mouseY - this._offY, this._zoomLevel, this._coloring);
             if (mouseDist >= 0) {
                 if (closest_index < 0 || mouseDist < closest_dist) {
                     closest_index = ii;
@@ -624,104 +604,104 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (closest_index >= 0 && this._current_color >= 0) {
-            this.on_base_mouse_move(closest_index);
+        if (closest_index >= 0 && this._currentColor >= 0) {
+            this.onBaseMouseMove(closest_index);
             //Mouse.hide();
             // this._paint_cursor.visible = true;
             // this._paint_cursor.startDrag(true);
             // this._paint_cursor.set_shape(this._current_color);
 
-            let strandName: string = this.get_strand_name(closest_index);
+            let strandName: string = this.getStrandName(closest_index);
             if (strandName != null) {
-                this._strand_label.set_text(strandName);
-                if (mouseX + 16 + this._strand_label.balloon_width() > this._width) {
-                    this._strand_label.display.position = new Point(
-                        mouseX - 16 - this._strand_label.balloon_width(),
+                this._strandLabel.set_text(strandName);
+                if (mouseX + 16 + this._strandLabel.balloon_width() > this._width) {
+                    this._strandLabel.display.position = new Point(
+                        mouseX - 16 - this._strandLabel.balloon_width(),
                         mouseY + 16);
                 } else {
-                    this._strand_label.display.position = new Point(mouseX + 16, mouseY + 16);
+                    this._strandLabel.display.position = new Point(mouseX + 16, mouseY + 16);
                 }
-                this._strand_label.display.visible = true;
+                this._strandLabel.display.visible = true;
             }
 
         } else {
-            this._last_colored_index = -1;
+            this._lastColoredIndex = -1;
         }
 
         if (!this._coloring) {
-            this.update_score_node_gui();
-            if (this._feedback_objs.length > 0) {
-                for (let ii = 0; ii < this._feedback_objs.length; ii++) {
+            this.updateScoreNodeGui();
+            if (this._feedbackObjs.length > 0) {
+                for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
                     if (ii === closest_index) {
                         continue;
                     }
-                    this._feedback_objs[ii].display.visible = false;
+                    this._feedbackObjs[ii].display.visible = false;
                 }
                 if (closest_index >= 0) {
-                    this._feedback_objs[closest_index].display.visible = true;
+                    this._feedbackObjs[closest_index].display.visible = true;
                 }
             }
         }
     }
 
-    public on_pose_mouse_up(): void {
-        this.done_coloring();
-        this._mouse_down_altKey = false;
+    public onMouseUp(): void {
+        this.doneColoring();
+        this._mouseDownAltKey = false;
         ROPWait.NotifyEndPaint();
     }
 
-    public delete_base_with_index_pairs(index: number, pairs: number[]): any[] {
-        if (this.is_tracked_index(index)) {
-            this.toggle_black_mark(index);
+    public deleteBaseWithIndexPairs(index: number, pairs: number[]): any[] {
+        if (this.isTrackedIndex(index)) {
+            this.toggleBlackMark(index);
         }
 
         return PoseUtil.delete_nopair_with_index(index, pairs);
     }
 
-    public clear_tracking(): void {
-        while (this._tracked_indices.length > 0) {
-            this._tracked_indices.pop();
+    public clearTracking(): void {
+        while (this._trackedIndices.length > 0) {
+            this._trackedIndices.pop();
         }
-        while (this._base_boxes.length > 0) {
-            DisplayUtil.removeFromParent(this._base_boxes.pop());
+        while (this._baseBoxes.length > 0) {
+            DisplayUtil.removeFromParent(this._baseBoxes.pop());
         }
     }
 
-    public get_tracked_indices(): number[] {
-        return this._tracked_indices.slice();
+    public getTrackedIndices(): number[] {
+        return this._trackedIndices.slice();
     }
 
-    public get_base(ind: number): Base {
+    public getBase(ind: number): Base {
         return this._bases[ind];
     }
 
-    public get_x_offset(): number {
-        return this._off_x;
+    public get xOffset(): number {
+        return this._offX;
     }
 
-    public get_y_offset(): number {
-        return this._off_y;
+    public get yOffset(): number {
+        return this._offY;
     }
 
-    public set_offset(off_x: number, off_y: number): void {
-        this._off_x = off_x;
-        this._off_y = off_y;
+    public setOffset(off_x: number, off_y: number): void {
+        this._offX = off_x;
+        this._offY = off_y;
         this._redraw = true;
     }
 
-    public get_shift_limit(): number {
-        return this._shift_limit;
+    public get shiftLimit(): number {
+        return this._shiftLimit;
     }
 
-    public set_shift_limit(limit: number): void {
-        this._shift_limit = limit + this._sequence.length;
+    public set shiftLimit(limit: number) {
+        this._shiftLimit = limit + this._sequence.length;
     }
 
-    public set_barcodes(barcodes: number[]): void {
+    public set barcodes(barcodes: number[]) {
         this._barcodes = barcodes.slice();
     }
 
-    public set_puzzle_locks(puzlocks: boolean[]): void {
+    public set puzzleLocks(puzlocks: boolean[]) {
         if (puzlocks == null) {
             this._locks = null;
         } else {
@@ -731,7 +711,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
-    public get_puzzle_locks(): boolean[] {
+    public get puzzleLocks(): boolean[] {
         if (this._locks != null) {
             return this._locks.slice();
         }
@@ -744,8 +724,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public is_locked(seqnum: number): boolean {
-        if (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P) {
+    public isLocked(seqnum: number): boolean {
+        if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
             seqnum -= this._oligo.length;
         }
 
@@ -756,50 +736,50 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_forced_struct(forced: number[]): void {
-        let len: number = this.get_full_sequence_length();
+    public set forcedStruct(forced: number[]) {
+        let len: number = this.fullSequenceLength;
         if (forced == null) {
-            this._forced_struct = null;
+            this._forcedStruct = null;
         } else {
             if (forced.length !== len) {
                 throw new Error("Forced structure length does not match sequence length " + forced.length + " " + this._sequence.length + " " + this._pairs.length);
             }
 
-            this._forced_struct = forced.slice();
+            this._forcedStruct = forced.slice();
         }
 
         for (let ii: number = 0; ii < len; ii++) {
-            this._bases[ii].forced = this._forced_struct != null && this._forced_struct[ii] !== EPars.FORCE_IGNORE;
+            this._bases[ii].forced = this._forcedStruct != null && this._forcedStruct[ii] !== EPars.FORCE_IGNORE;
         }
     }
 
-    public get_forced_struct(): number[] {
-        if (this._forced_struct != null) {
-            return this._forced_struct.slice();
+    public get forcedStruct(): number[] {
+        if (this._forcedStruct != null) {
+            return this._forcedStruct.slice();
         }
 
         let temp: number[] = [];
-        for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
+        for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
             temp.push(EPars.FORCE_IGNORE);
         }
 
         return temp;
     }
 
-    public set_forced_highlights(elems: number[]): void {
+    public set forcedHighlights(elems: number[]) {
         if (elems == null) {
-            this._forced_highlight_box.clear();
+            this._forcedHighlightBox.clear();
         } else {
-            this._forced_highlight_box.setHighlight(HighlightType.FORCED, elems);
+            this._forcedHighlightBox.setHighlight(HighlightType.FORCED, elems);
         }
     }
 
-    public set_struct_constraints(do_care: boolean[]): void {
+    public set structConstraints(do_care: boolean[]) {
         let ii: number;
-        let len: number = this.get_full_sequence_length();
+        let len: number = this.fullSequenceLength;
         let dc: boolean[] = (do_care == null ? null : do_care.slice());
-        if (dc != null && this._oligos_order != null) {
-            let idx_map: number[] = this.get_order_map(null);
+        if (dc != null && this._oligosOrder != null) {
+            let idx_map: number[] = this.getOrderMap(null);
             for (ii = 0; ii < len; ii++) {
                 dc[ii] = do_care[idx_map.indexOf(ii)];
             }
@@ -809,47 +789,47 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public clear_design_struct(): void {
-        for (let jj: number = 0; jj < this.get_full_sequence_length(); jj++) {
-            this._design_struct[jj] = false;
+    public clearDesignStruct(): void {
+        for (let jj: number = 0; jj < this.fullSequenceLength; jj++) {
+            this._designStruct[jj] = false;
         }
-        this.update_design_highlight();
+        this.updateDesignHighlight();
     }
 
-    public toggle_design_struct(seqnum: number): boolean {
-        if (this._design_struct.length !== this._sequence.length) {
-            this._design_struct = new Array(this._sequence.length);
+    public toggleDesignStruct(seqnum: number): boolean {
+        if (this._designStruct.length !== this._sequence.length) {
+            this._designStruct = new Array(this._sequence.length);
         }
 
-        this._design_struct[seqnum] = !this._design_struct[seqnum];
-        ROPWait.NotifyBlueMark(seqnum, this._design_struct[seqnum]);
-        this.update_design_highlight();
-        let segments: number[] = this.get_design_segments();
+        this._designStruct[seqnum] = !this._designStruct[seqnum];
+        ROPWait.NotifyBlueMark(seqnum, this._designStruct[seqnum]);
+        this.updateDesignHighlight();
+        let segments: number[] = this.designSegments;
         return (segments.length === 4
             && segments[1] - segments[0] === segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
-                || EPars.has_cut(this.get_full_sequence(), segments[1], segments[2])));
+                || EPars.has_cut(this.fullSequence, segments[1], segments[2])));
     }
 
-    public get_design_segments(): number[] {
+    public get designSegments(): number[] {
         let elems: number[] = [];
         let curr: number = 0;
-        for (let jj: number = 0; jj < this.get_full_sequence_length(); jj++) {
-            let stat: number = this._design_struct[jj] ? 1 : 0;
+        for (let jj: number = 0; jj < this.fullSequenceLength; jj++) {
+            let stat: number = this._designStruct[jj] ? 1 : 0;
             if ((curr ^ stat) !== 0) {
                 elems.push(jj - curr);
                 curr = stat;
             }
         }
         if ((elems.length % 2) === 1) {
-            elems.push(this.get_full_sequence_length() - 1);
+            elems.push(this.fullSequenceLength - 1);
         }
 
         return elems;
     }
 
-    public shift_3prime(): void {
-        let q: number[] = this._shift_highlight_box.getQueue();
+    public shift3Prime(): void {
+        let q: number[] = this._shiftHighlightBox.getQueue();
         if (q == null) {
             return;
         }
@@ -865,7 +845,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
         // find the next acceptable spot
         let ofs: number = 1;
-        let len: number = this.get_sequence_length();
+        let len: number = this.sequenceLength;
         while (last + ofs < len) {
             for (ii = first + ofs; ii <= last + ofs; ii++) {
                 if (this._locks[ii]) {
@@ -899,14 +879,14 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._mutated_sequence = this.get_full_sequence().slice();
-        this.set_mutated(mutated);
-        this.done_coloring();
-        this._shift_highlight_box.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._mutatedSequence = this.fullSequence.slice();
+        this.setMutated(mutated);
+        this.doneColoring();
+        this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
-    public shift_5prime(): void {
-        let q: number[] = this._shift_highlight_box.getQueue();
+    public shift5Prime(): void {
+        let q: number[] = this._shiftHighlightBox.getQueue();
         if (q == null) {
             return;
         }
@@ -955,23 +935,23 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._mutated_sequence = this.get_full_sequence().slice();
-        this.set_mutated(mutated);
-        this.done_coloring();
-        this._shift_highlight_box.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._mutatedSequence = this.fullSequence.slice();
+        this.setMutated(mutated);
+        this.doneColoring();
+        this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
     }
 
-    public is_design_structure_highlighted(index: number): boolean {
-        return (this._design_struct[index] === true);
+    public isDesignStructureHighlighted(index: number): boolean {
+        return (this._designStruct[index] === true);
     }
 
-    public get_sequence_string(): string {
+    public getSequenceString(): string {
         return EPars.sequence_array_to_string(this._sequence);
     }
 
-    public satisfied(): boolean {
+    public get satisfied(): boolean {
         for (let ii: number = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] > ii && !this.is_pair_satisfied(ii, this._pairs[ii])) {
+            if (this._pairs[ii] > ii && !this.isPairSatisfied(ii, this._pairs[ii])) {
                 return false;
             }
         }
@@ -979,118 +959,117 @@ export class Pose2D extends ContainerObject implements Updatable {
         return true;
     }
 
-    public set_show_numbering(show: boolean): void {
-        this._numbering_mode = show;
+    public set showNumbering(show: boolean) {
+        this._numberingMode = show;
         this._redraw = true;
     }
 
-    public is_showing_numbering(): boolean {
-        return this._numbering_mode;
+    public get showNumbering(): boolean {
+        return this._numberingMode;
     }
 
-    public set_use_low_performance(lowperform: boolean): void {
-        this._lowperform_mode = lowperform;
+    public set useLowPerformance(lowperform: boolean) {
+        this._lowperformMode = lowperform;
         this._redraw = true;
     }
 
-    public is_using_low_performance(): boolean {
-        return this._lowperform_mode;
+    public get useLowPerformance(): boolean {
+        return this._lowperformMode;
     }
 
-    public set_highlight_restricted(highlight_restricted: boolean): void {
-        this._highlight_restricted = highlight_restricted;
-        this._restricted_highlight_box.enabled = highlight_restricted;
+    public set highlightRestricted(highlight_restricted: boolean) {
+        this._highlightRestricted = highlight_restricted;
+        this.restrictedHighlightBox.enabled = highlight_restricted;
     }
 
-    public is_highlighting_restricted(): boolean {
-        return this._highlight_restricted;
+    public get highlightRestricted(): boolean {
+        return this._highlightRestricted;
     }
 
-    public set_use_continuous_exp_colors(cont: boolean): void {
-        this._exp_continuous = cont;
+    public set useContinuousExpColors(cont: boolean) {
+        this._expContinuous = cont;
         this._redraw = true;
 
-        if (this._exp_painter) {
-            this.paint_feedback();
+        if (this._expPainter) {
+            this.paintFeedback();
         }
     }
 
-    public set_use_extended_scale(extended: boolean): void {
-        this._exp_extended_scale = extended;
+    public set useExtendedScale(extended: boolean) {
+        this._expExtendedScale = extended;
         this._redraw = true;
 
-        if (this._exp_painter) {
-            this.paint_feedback();
+        if (this._expPainter) {
+            this.paintFeedback();
         }
     }
 
-    public is_displaying_score_texts(): boolean {
-        return this._display_score_texts;
+    public get displayScoreTexts(): boolean {
+        return this._displayScoreTexts;
     }
 
-    public setDisplayScoreTexts(dis: boolean): void {
-        this._display_score_texts = dis;
-
-        this.generate_score_nodes();
+    public set displayScoreTexts(dis: boolean) {
+        this._displayScoreTexts = dis;
+        this.generateScoreNodes();
     }
 
-    public show_energy_highlight(display: boolean): void {
-        this._highlight_energy_text = display;
-        this.generate_score_nodes();
+    public set showEnergyHighlight(display: boolean) {
+        this._highlightEnergyText = display;
+        this.generateScoreNodes();
     }
 
-    public clear_highlight(): void {
-        this._selection_highlight_box.clear();
+    public clearHighlight(): void {
+        this._selectionHighlightBox.clear();
     }
 
-    public highlight_stack(action: number[]): void {
-        this._selection_highlight_box.setHighlight(HighlightType.STACK, action.slice(1));
+    public highlightStack(action: number[]): void {
+        this._selectionHighlightBox.setHighlight(HighlightType.STACK, action.slice(1));
     }
 
-    public highlight_loop(action: number[]): void {
-        this._selection_highlight_box.setHighlight(HighlightType.LOOP, action.slice(1));
+    public highlightLoop(action: number[]): void {
+        this._selectionHighlightBox.setHighlight(HighlightType.LOOP, action.slice(1));
     }
 
     /// For restricted queue
-    public clear_restricted_highlight(): void {
-        this._restricted_highlight_box.clear();
+    public clearRestrictedHighlight(): void {
+        this.restrictedHighlightBox.clear();
     }
 
-    public highlight_restricted_sequence(restricted: number[]): void {
-        this._restricted_highlight_box.setHighlight(HighlightType.RESTRICTED, restricted);
+    public highlightRestrictedSequence(restricted: number[]): void {
+        this.restrictedHighlightBox.setHighlight(HighlightType.RESTRICTED, restricted);
     }
 
-    public clear_unstable_highlight(): void {
-        this._unstable_highlight_box.clear();
+    public clearUnstableHighlight(): void {
+        this._unstableHighlightBox.clear();
     }
 
-    public highlight_unstable_sequence(unstable: number[]): void {
-        this._unstable_highlight_box.setHighlight(HighlightType.UNSTABLE, unstable);
+    public highlightUnstableSequence(unstable: number[]): void {
+        this._unstableHighlightBox.setHighlight(HighlightType.UNSTABLE, unstable);
     }
 
-    public clear_user_defined_highlight(): void {
-        this._user_defined_highlight_box.clear();
+    public clearUserDefinedHighlight(): void {
+        this._userDefinedHighlightBox.clear();
     }
 
-    public highlight_user_defined_sequence(user_defined: number[]): void {
-        this._user_defined_highlight_box.setHighlight(HighlightType.USER_DEFINED, user_defined);
+    public highlightUserDefinedSequence(user_defined: number[]): void {
+        this._userDefinedHighlightBox.setHighlight(HighlightType.USER_DEFINED, user_defined);
     }
 
-    public clear_shift_highlight(): void {
-        this._shift_highlight_box.clear();
+    public clearShiftHighlight(): void {
+        this._shiftHighlightBox.clear();
     }
 
-    public praise_stack(stack_start: number, stack_end: number): void {
-        this._praise_queue.push(stack_start);
-        this._praise_queue.push(stack_end);
+    public praiseStack(stack_start: number, stack_end: number): void {
+        this._praiseQueue.push(stack_start);
+        this._praiseQueue.push(stack_end);
     }
 
-    public praise_sequence(seq_start: number, seq_end: number): void {
-        this._praise_seq.push(seq_start);
-        this._praise_seq.push(seq_end);
+    public praiseSequence(seq_start: number, seq_end: number): void {
+        this._praiseSeq.push(seq_start);
+        this._praiseSeq.push(seq_end);
     }
 
-    public on_praise_stack(stack_start: number, stack_end: number, play_sound: boolean): void {
+    private onPraiseStack(stack_start: number, stack_end: number, play_sound: boolean): void {
         let x_pos: number = 0;
         let y_pos: number = 0;
 
@@ -1122,8 +1101,8 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             this._bases[ii].startSparking();
             this._bases[this._pairs[ii]].startSparking();
-            let p: Point = this.get_base_xy(ii);
-            let p2: Point = this.get_base_xy(this._pairs[ii]);
+            let p: Point = this.getBaseXY(ii);
+            let p2: Point = this.getBaseXY(this._pairs[ii]);
 
             x_pos += p.x;
             y_pos += p.y;
@@ -1167,7 +1146,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public create_new_highlight(nucleotides: number[]): RNAHighlightState {
+    public createNewHighlight(nucleotides: number[]): RNAHighlightState {
         let hl: RNAHighlightState = new RNAHighlightState();
 
         // If any of the nucleotides are part of a stack, highlight its pair as well.
@@ -1180,49 +1159,49 @@ export class Pose2D extends ContainerObject implements Updatable {
         nucleotides = nucleotides.concat(addition);
 
         hl.nuc = nucleotides;
-        this._all_new_highlights.push(hl);
+        this._allNewHighlights.push(hl);
 
         this._redraw = true;
         return hl;
     }
 
-    public remove_new_highlight(highlight: RNAHighlightState): void {
-        let idx: number = this._all_new_highlights.indexOf(highlight);
+    public removeNewHighlight(highlight: RNAHighlightState): void {
+        let idx: number = this._allNewHighlights.indexOf(highlight);
         if (idx >= 0) {
-            this._all_new_highlights.splice(idx, 1);
+            this._allNewHighlights.splice(idx, 1);
             this._redraw = true;
         }
     }
 
-    public on_praise_seq(seq_start: number, seq_end: number): void {
+    private onPraiseSeq(seq_start: number, seq_end: number): void {
         for (let ii: number = seq_start; ii <= seq_end; ii++) {
-            if (ii >= 0 && ii < this.get_full_sequence_length()) {
+            if (ii >= 0 && ii < this.fullSequenceLength) {
                 this._bases[ii].startSparking();
             }
         }
     }
 
-    public set_display_aux_info(display: boolean): void {
-        this._display_aux_info = display;
-        this._aux_info_canvas.visible = display;
+    public set displayAuxInfo(display: boolean) {
+        this._displayAuxInfo = display;
+        this._auxInfoCanvas.visible = display;
     }
 
-    public set_aux_info(aux_info: any): void {
-        this._aux_info = aux_info;
+    public set auxInfo(aux_info: any) {
+        this._auxInfo = aux_info;
 
-        if (this._aux_info != null && this._aux_info[Pose2D.CLEAVING_SITE] != null) {
-            this._aux_textballoon.display.visible = true;
-            this._aux_textballoon.set_text("Ribozyme cleaving site");
+        if (this._auxInfo != null && this._auxInfo[Pose2D.CLEAVING_SITE] != null) {
+            this._auxTextballoon.display.visible = true;
+            this._auxTextballoon.set_text("Ribozyme cleaving site");
         }
     }
 
-    public start_explosion(): Promise<void> {
-        this._is_exploding = true;
-        this._explosion_start_time = -1;
+    public startExplosion(): Promise<void> {
+        this._isExploding = true;
+        this._explosionStartTime = -1;
 
-        if (this._explosion_rays.length >= this._sequence.length) {
+        if (this._explosionRays.length >= this._sequence.length) {
             for (let ii: number = 0; ii < this._sequence.length; ii++) {
-                const ray = this._explosion_rays[ii];
+                const ray = this._explosionRays[ii];
                 ray.display.visible = false;
                 ray.draw_ray(
                     Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
@@ -1230,17 +1209,17 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             }
         } else {
-            let diff: number = (this._sequence.length - this._explosion_rays.length) / this._explosion_rays.length;
+            let diff: number = (this._sequence.length - this._explosionRays.length) / this._explosionRays.length;
             let diff_walker: number = 0;
             let ray_walker: number = 0;
 
             for (let ii = 0; ii < this._sequence.length; ii++) {
                 if (diff_walker < 1) {
-                    if (ray_walker >= this._explosion_rays.length) {
+                    if (ray_walker >= this._explosionRays.length) {
                         continue;
                     }
 
-                    const ray = this._explosion_rays[ray_walker];
+                    const ray = this._explosionRays[ray_walker];
                     ray.display.visible = false;
                     ray.draw_ray(
                         Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
@@ -1271,56 +1250,56 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public clear_explosion(): void {
-        if (!this._is_exploding) {
+    public clearExplosion(): void {
+        if (!this._isExploding) {
             return;
         }
 
-        this._is_exploding = false;
-        this._explosion_start_time = -1;
+        this._isExploding = false;
+        this._explosionStartTime = -1;
 
-        for (let ray of this._explosion_rays) {
+        for (let ray of this._explosionRays) {
             ray.fadeOutAndHide();
         }
 
         this.callExplosionCompleteCallback();
     }
 
-    public set_pose_edit_callback(cb: () => void): void {
-        this._pose_edit_callback = cb;
+    public set poseEditCallback(cb: () => void) {
+        this._poseEditCallback = cb;
     }
 
-    public call_pose_edit_callback(): void {
-        if (this._pose_edit_callback != null) {
-            this._pose_edit_callback();
+    public callPoseEditCallback(): void {
+        if (this._poseEditCallback != null) {
+            this._poseEditCallback();
         }
     }
 
-    public set_track_moves_callback(cb: (count: number, moves: any[]) => void): void {
-        this._track_moves_callback = cb;
+    public set trackMovesCallback(cb: (count: number, moves: any[]) => void) {
+        this._trackMovesCallback = cb;
     }
 
-    public call_track_moves_callback(count: number, moves: any[]): void {
-        if (this._track_moves_callback != null) {
-            this._track_moves_callback(count, moves);
+    public callTrackMovesCallback(count: number, moves: any[]): void {
+        if (this._trackMovesCallback != null) {
+            this._trackMovesCallback(count, moves);
         }
     }
 
-    public set_add_base_callback(cb: (parenthesis: string, op: PuzzleEditOp, index: number) => void): void {
-        this._add_base_callback = cb;
+    public set addBaseCallback(cb: (parenthesis: string, op: PuzzleEditOp, index: number) => void) {
+        this._addBaseCallback = cb;
     }
 
-    public call_add_base_callback(parenthesis: string = null, op: PuzzleEditOp = null, index: number = -1): void {
-        if (this._add_base_callback != null) {
-            this._add_base_callback(parenthesis, op, index);
+    public callAddBaseCallback(parenthesis: string = null, op: PuzzleEditOp = null, index: number = -1): void {
+        if (this._addBaseCallback != null) {
+            this._addBaseCallback(parenthesis, op, index);
         }
     }
 
-    public set_start_mousedown_callback(cb: PoseMouseDownCallback): void {
-        this._start_mousedown_callback = cb;
+    public set startMousedownCallback(cb: PoseMouseDownCallback) {
+        this._startMousedownCallback = cb;
     }
 
-    public call_start_mousedown_callback(e: InteractionEvent): void {
+    public callStartMousedownCallback(e: InteractionEvent): void {
         e.data.getLocalPosition(this.display, Pose2D.P);
         let mouseX: number = Pose2D.P.x;
         let mouseY: number = Pose2D.P.y;
@@ -1328,9 +1307,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         let closest_dist: number = -1;
         let closest_index: number = -1;
 
-        if (this._start_mousedown_callback != null) {
-            for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
-                let mouseDist: number = this._bases[ii].isClicked(mouseX - this._off_x, mouseY - this._off_y, this._zoom_level, false);
+        if (this._startMousedownCallback != null) {
+            for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
+                let mouseDist: number = this._bases[ii].isClicked(mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false);
                 if (mouseDist >= 0) {
                     if (closest_index < 0 || mouseDist < closest_dist) {
                         closest_index = ii;
@@ -1338,17 +1317,17 @@ export class Pose2D extends ContainerObject implements Updatable {
                     }
                 }
             }
-            this._start_mousedown_callback(e, closest_dist, closest_index);
+            this._startMousedownCallback(e, closest_dist, closest_index);
         } else {
-            this.on_pose_mouse_down(e, closest_index);
+            this.onPoseMouseDown(e, closest_index);
         }
     }
 
-    public get_satisfied_pairs(): number[] {
-        return EPars.get_satisfied_pairs(this._pairs, this.get_full_sequence());
+    public get satisfiedPairs(): number[] {
+        return EPars.get_satisfied_pairs(this._pairs, this.fullSequence);
     }
 
-    public set_sequence(sequence: number[]): void {
+    public set sequence(sequence: number[]) {
         if (Arrays.shallowEqual(this._sequence, sequence)) {
             return;
         }
@@ -1367,13 +1346,13 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         } else if (this._sequence.length < this._bases.length) {
             for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
-                if (this.is_tracked_index(ii)) {
-                    this.remove_black_mark(ii);
+                if (this.isTrackedIndex(ii)) {
+                    this.removeBlackMark(ii);
                 }
             }
         }
 
-        let n: number = this.get_full_sequence_length();
+        let n: number = this.fullSequenceLength;
         for (let ii: number = 0; ii < n; ii++) {
             if (ii < this._sequence.length) {
                 this._bases[ii].setType(this._sequence[ii]);
@@ -1381,55 +1360,55 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._bases[ii].baseIndex = ii;
         }
 
-        this.check_pairs();
+        this.checkPairs();
         this.updateMolecule();
-        this.generate_score_nodes();
+        this.generateScoreNodes();
     }
 
-    public set_molecular_binding_bonus(bonus: number): void {
-        this._molecular_binding_bonus = bonus;
+    public set molecularBindingBonus(bonus: number) {
+        this._molecularBindingBonus = bonus;
     }
 
-    public set_molecular_structure(pairs: number[]): void {
+    public set molecularStructure(pairs: number[]) {
         if (pairs != null) {
-            this._molecule_target_pairs = pairs.slice();
+            this._moleculeTargetPairs = pairs.slice();
         } else {
-            this._molecule_target_pairs = null;
+            this._moleculeTargetPairs = null;
         }
     }
 
-    public get_molecular_structure(): any[] {
-        return this._molecule_target_pairs;
+    public get molecularStructure(): number[] {
+        return this._moleculeTargetPairs;
     }
 
-    public set_molecular_binding_site(binding_site: boolean[]): void {
-        if (binding_site != null) {
-            this._binding_site = binding_site.slice();
+    public set molecularBindingSite(bindingSite: boolean[]) {
+        if (bindingSite != null) {
+            this._bindingSite = bindingSite.slice();
         } else {
-            this._binding_site = null;
-            this.set_molecular_binding(null, null, this._molecular_binding_bonus);
+            this._bindingSite = null;
+            this.setMolecularBinding(null, null, this._molecularBindingBonus);
             return;
         }
 
-        let target_pairs: number[] = this._molecule_target_pairs.slice();
+        let target_pairs: number[] = this._moleculeTargetPairs.slice();
         if (!target_pairs) {
             throw new Error("Can't find molecular target structure");
         }
 
         let binding_bases: number[] = [];
         let binding_pairs: number[] = [];
-        for (let ii: number = 0; ii < binding_site.length; ii++) {
-            if (binding_site[ii]) {
+        for (let ii: number = 0; ii < bindingSite.length; ii++) {
+            if (bindingSite[ii]) {
                 binding_bases.push(ii);
                 binding_pairs.push(target_pairs[ii]);
             }
         }
-        this.set_molecular_binding(binding_bases, binding_pairs, this._molecular_binding_bonus);
+        this.setMolecularBinding(binding_bases, binding_pairs, this._molecularBindingBonus);
     }
 
-    public get_molecular_binding_site(): boolean[] {
-        if (this._binding_site) {
-            return this._binding_site.slice();
+    public get molecularBindingSite(): boolean[] {
+        if (this._bindingSite) {
+            return this._bindingSite.slice();
         }
 
         let temp: boolean[] = [];
@@ -1439,30 +1418,30 @@ export class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public set_molecular_binding(binding_sites: number[], binding_pairs: number[], binding_bonus: number): void {
+    public setMolecularBinding(binding_sites: number[], binding_pairs: number[], binding_bonus: number): void {
         if (this._molecule != null) {
             this._molecule.destroy({children: true});
             this._molecule = null;
         }
 
-        if (this._molecular_binding_bases != null) {
-            for (let glow of this._molecular_binding_bases) {
+        if (this._molecularBindingBases != null) {
+            for (let glow of this._molecularBindingBases) {
                 if (glow != null) {
                     glow.destroy({children: true});
                 }
             }
-            this._molecular_binding_bases = null;
+            this._molecularBindingBases = null;
         }
 
-        this._molecular_binding_pairs = null;
+        this._molecularBindingPairs = null;
 
         if (binding_sites == null || binding_sites.length === 0) {
             return;
         }
 
-        this._molecular_binding_bases = new Array(this._sequence.length);
-        this._molecular_binding_pairs = new Array(this._sequence.length);
-        this._molecular_binding_bonus = binding_bonus;
+        this._molecularBindingBases = new Array(this._sequence.length);
+        this._molecularBindingPairs = new Array(this._sequence.length);
+        this._molecularBindingBonus = binding_bonus;
 
         this._molecule = new Molecule();
         this._moleculeLayer.addChild(this._molecule);
@@ -1472,47 +1451,47 @@ export class Pose2D extends ContainerObject implements Updatable {
             let baseGlow = new BaseGlow();
             this._moleculeLayer.addChild(baseGlow);
 
-            this._molecular_binding_bases[idx] = baseGlow;
-            this._molecular_binding_pairs[idx] = binding_pairs[ii];
+            this._molecularBindingBases[idx] = baseGlow;
+            this._molecularBindingPairs[idx] = binding_pairs[ii];
         }
 
         this.updateMolecule();
     }
 
     private updateMolecule(): void {
-        if (this._molecular_binding_bases == null || this._molecule == null) {
+        if (this._molecularBindingBases == null || this._molecule == null) {
             return;
         }
 
         let bound_render: boolean = true;
         let bound_real: boolean = true;
-        let satisfied_pairs: number[] = this.get_satisfied_pairs();
+        let satisfied_pairs: number[] = this.satisfiedPairs;
 
-        for (let ii: number = 0; ii < this._molecular_binding_pairs.length; ii++) {
-            if (this._molecular_binding_bases[ii] == null) {
+        for (let ii: number = 0; ii < this._molecularBindingPairs.length; ii++) {
+            if (this._molecularBindingBases[ii] == null) {
                 continue;
             }
-            if (this._molecular_binding_pairs[ii] !== this._pairs[ii]) {
+            if (this._molecularBindingPairs[ii] !== this._pairs[ii]) {
                 bound_render = false;
             }
 
-            if (this._molecular_binding_pairs[ii] !== satisfied_pairs[ii]) {
+            if (this._molecularBindingPairs[ii] !== satisfied_pairs[ii]) {
                 bound_real = false;
-                this._molecular_binding_bases[ii].set_wrong(true);
+                this._molecularBindingBases[ii].set_wrong(true);
             } else {
-                this._molecular_binding_bases[ii].set_wrong(false);
+                this._molecularBindingBases[ii].set_wrong(false);
             }
         }
         this._molecule.isWrong = !bound_real;
-        this._molecule_is_bound = bound_render;
-        this._molecule_is_bound_real = bound_real;
+        this._moleculeIsBound = bound_render;
+        this._moleculeIsBoundReal = bound_real;
     }
 
-    public set_oligos(oligos: Oligo[], order: number[] = null, num_paired: number = 0): void {
+    public setOligos(oligos: Oligo[], order: number[] = null, num_paired: number = 0): void {
         if (oligos == null) {
             this._oligos = null;
-            this._oligos_order = null;
-            this._oligos_paired = 0;
+            this._oligosOrder = null;
+            this._oligosPaired = 0;
             return;
         }
 
@@ -1526,19 +1505,19 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let prev_order: number[] = this._oligos_order;
+        let prev_order: number[] = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
-            this._oligos_order = [];
+            this._oligosOrder = [];
             for (let k = 0; k < this._oligos.length; k++) {
-                this._oligos_order[k] = k;
+                this._oligosOrder[k] = k;
             }
         } else {
-            this._oligos_order = order.slice();
+            this._oligosOrder = order.slice();
         }
-        this._oligos_paired = num_paired;
+        this._oligosPaired = num_paired;
 
-        let seq: number[] = this.get_full_sequence();
+        let seq: number[] = this.fullSequence;
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (let k = 0; k < diff; k++) {
@@ -1554,10 +1533,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         // if possible, maintain visual consistency
         // (strands "fly" from their previous location in the previous oligo order)
-        if (same && JSON.stringify(prev_order) !== JSON.stringify(this._oligos_order)) {
+        if (same && JSON.stringify(prev_order) !== JSON.stringify(this._oligosOrder)) {
             let old_x: number[] = [];
             let old_y: number[] = [];
-            let idx_map: number[] = this.get_order_map(prev_order);
+            let idx_map: number[] = this.getOrderMap(prev_order);
             for (let k = 0; k < seq.length; k++) {
                 old_x[k] = this._bases[k].x;
                 old_y[k] = this._bases[k].y;
@@ -1568,11 +1547,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get_oligos(): Oligo[] {
+    public getOligos(): Oligo[] {
         return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
     }
 
-    public get_order_map(other_order: number[]): number[] {
+    public getOrderMap(other_order: number[]): number[] {
         if (this._oligos == null) {
             return null;
         }
@@ -1582,8 +1561,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         let ii: number = this._sequence.length;
         let jj: number;
         for (jj = 0; jj < this._oligos.length; jj++) {
-            ofs[this._oligos_order[jj]] = ii;
-            ii += 1 + this._oligos[this._oligos_order[jj]].sequence.length;
+            ofs[this._oligosOrder[jj]] = ii;
+            ii += 1 + this._oligos[this._oligosOrder[jj]].sequence.length;
         }
         for (ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
         for (jj = 0; jj < this._oligos.length; jj++) {
@@ -1598,52 +1577,52 @@ export class Pose2D extends ContainerObject implements Updatable {
         return idx_map;
     }
 
-    public save_markers_context(): void {
+    public saveMarkersContext(): void {
         if (this._oligos == null) {
-            this._prev_oligos_order = null;
-        } else if (this._prev_oligos_order == null) {
-            this._prev_oligos_order = this._oligos_order.slice();
+            this._prevOligosOrder = null;
+        } else if (this._prevOligosOrder == null) {
+            this._prevOligosOrder = this._oligosOrder.slice();
         }
     }
 
-    public transform_markers(): void {
-        if (this._prev_oligos_order == null || this._prev_oligos_order.length !== this._oligos_order.length) {
-            this._prev_oligos_order = null;
+    public transformMarkers(): void {
+        if (this._prevOligosOrder == null || this._prevOligosOrder.length !== this._oligosOrder.length) {
+            this._prevOligosOrder = null;
             return;
         }
 
-        let idx_map: number[] = this.get_order_map(this._prev_oligos_order);
-        this._prev_oligos_order = null;
+        let idx_map: number[] = this.getOrderMap(this._prevOligosOrder);
+        this._prevOligosOrder = null;
 
         // black marks
-        let indices: number[] = this.get_tracked_indices();
-        this.clear_tracking();
+        let indices: number[] = this.getTrackedIndices();
+        this.clearTracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
             indices[ii] = idx_map[indices[ii]];
-            this.black_mark(indices[ii]);
+            this.addBlackMark(indices[ii]);
         }
 
         // blue highlights ("magic glue")
         let new_design: boolean[] = [];
-        for (ii = 0; ii < this.get_full_sequence_length(); ii++) {
-            new_design[idx_map[ii]] = this._design_struct[ii];
+        for (ii = 0; ii < this.fullSequenceLength; ii++) {
+            new_design[idx_map[ii]] = this._designStruct[ii];
         }
-        this._design_struct = new_design;
-        this.update_design_highlight();
+        this._designStruct = new_design;
+        this.updateDesignHighlight();
     }
 
-    public set_oligo(oligo: number[], mode: number = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
+    public setOligo(oligo: number[], mode: number = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
         if (oligo == null) {
             this._oligo = null;
             return;
         }
 
         this._oligo = oligo.slice();
-        this._oligo_mode = mode;
-        this._oligo_name = o_name;
+        this._oligoMode = mode;
+        this._oligoName = o_name;
 
-        let seq: number[] = this.get_full_sequence();
+        let seq: number[] = this.fullSequence;
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
             for (let i: number = 0; i < diff; i++) {
@@ -1658,30 +1637,30 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set_oligo_malus(malus: number): void {
-        this._oligo_malus = malus;
+    public set oligoMalus(malus: number) {
+        this._oligoMalus = malus;
     }
 
-    public set_duplex_cost(cost: number): void {
-        this._duplex_cost = cost;
+    public set duplexCost(cost: number) {
+        this._duplexCost = cost;
     }
 
-    public set_oligo_paired(paired: boolean): void {
-        let changed: boolean = (this._oligo_paired !== paired);
-        this._oligo_paired = paired;
-        if (changed) this.update_score_node_gui();
+    public set oligoPaired(paired: boolean) {
+        let changed: boolean = (this._oligoPaired !== paired);
+        this._oligoPaired = paired;
+        if (changed) this.updateScoreNodeGui();
     }
 
-    public get_full_sequence(): number[] {
+    public get fullSequence(): number[] {
         if (this._oligo == null && this._oligos == null) {
             return this._sequence;
         }
         let seq: number[] = this._sequence.slice();
         if (this._oligos == null) {
-            if (this._oligo_mode === Pose2D.OLIGO_MODE_EXT5P) {
+            if (this._oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
                 seq = this._oligo.concat(seq);
             } else {
-                if (this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) seq.push(EPars.RNABASE_CUT);
+                if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) seq.push(EPars.RNABASE_CUT);
                 seq = seq.concat(this._oligo);
             }
             return seq;
@@ -1689,19 +1668,19 @@ export class Pose2D extends ContainerObject implements Updatable {
         // _oligos != null, we have a multistrand target
         for (let ii: number = 0; ii < this._oligos.length; ii++) {
             seq.push(EPars.RNABASE_CUT);
-            seq = seq.concat(this._oligos[this._oligos_order[ii]].sequence);
+            seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
         }
         return seq;
     }
 
-    public get_full_sequence_length(): number {
+    public get fullSequenceLength(): number {
         let len: number = this._sequence.length;
         if (this._oligo == null && this._oligos == null) {
             return len;
         }
         if (this._oligos == null) {
             len += this._oligo.length;
-            if (this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) len++;
+            if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) len++;
             return len;
         }
         for (let ii: number = 0; ii < this._oligos.length; ii++) {
@@ -1710,39 +1689,39 @@ export class Pose2D extends ContainerObject implements Updatable {
         return len;
     }
 
-    public get_strand_name(seqnum: number): string {
+    public getStrandName(seqnum: number): string {
         if (this._oligos != null && seqnum >= this._sequence.length) {
             let seq: number[] = this._sequence.slice();
             for (let ii: number = 0; ii < this._oligos.length; ii++) {
                 seq.push(EPars.RNABASE_CUT);
-                seq = seq.concat(this._oligos[this._oligos_order[ii]].sequence);
+                seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
                 if (seqnum < seq.length) {
-                    let o_name: string = this._oligos[this._oligos_order[ii]]['name'];
-                    if (o_name == null) o_name = "Oligo " + (this._oligos_order[ii] + 1).toString();
+                    let o_name: string = this._oligos[this._oligosOrder[ii]]['name'];
+                    if (o_name == null) o_name = "Oligo " + (this._oligosOrder[ii] + 1).toString();
                     return o_name;
                 }
             }
         }
         if (this._oligo != null && seqnum >= this._sequence.length) {
-            return this._oligo_name;
+            return this._oligoName;
         }
         return null;
     }
 
-    public get_bound_sequence(): number[] {
+    public getBoundSequence(): number[] {
         if (this._oligos == null) {
             return this._sequence;
         }
         let seq: number[] = this._sequence.slice();
-        for (let ii: number = 0; ii < this._oligos_paired; ii++) {
+        for (let ii: number = 0; ii < this._oligosPaired; ii++) {
             seq.push(EPars.RNABASE_CUT);
-            seq = seq.concat(this._oligos[this._oligos_order[ii]].sequence);
+            seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
         }
         return seq;
     }
 
-    public set_pairs(pairs: number[]): void {
-        let seq: number[] = this.get_full_sequence();
+    public set pairs(pairs: number[]) {
+        let seq: number[] = this.fullSequence;
         if (pairs.length !== seq.length) {
             log.debug(pairs.length, seq.length);
             throw new Error("Pair length doesn't match sequence length");
@@ -1761,13 +1740,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         /// Recompute sequence layout
-        this.compute_layout(false);
-        this.check_pairs();
+        this.computeLayout(false);
+        this.checkPairs();
         this.updateMolecule();
-        this.generate_score_nodes();
+        this.generateScoreNodes();
     }
 
-    public is_pair_satisfied(a: number, b: number): boolean {
+    public isPairSatisfied(a: number, b: number): boolean {
         if (b < a) {
             let temp: number = a;
             a = b;
@@ -1778,31 +1757,31 @@ export class Pose2D extends ContainerObject implements Updatable {
             return false;
         }
 
-        let fullSeq: number[] = this.get_full_sequence();
+        let fullSeq: number[] = this.fullSequence;
         return (EPars.pair_type(fullSeq[a], fullSeq[b]) !== 0);
     }
 
-    public get_sequence_length(): number {
+    public get sequenceLength(): number {
         return this._sequence.length;
     }
 
-    public get_sequence(): number[] {
+    public get sequence(): number[] {
         return this._sequence.slice();
     }
 
-    public get_sequence_at(seq: number): number {
+    public getSequenceAt(seq: number): number {
         return this._sequence[seq];
     }
 
-    public get_base_at(seq: number): Base {
+    public getBaseAt(seq: number): Base {
         return this._bases[seq];
     }
 
-    public get_pairs(): number[] {
+    public get pairs(): number[] {
         return this._pairs.slice();
     }
 
-    public check_overlap(): boolean {
+    public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rna_drawer: RNALayout = new RNALayout(radius, radius);
         rna_drawer.setup_tree(this._pairs);
@@ -1827,28 +1806,28 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     //highlight the base before the cursor
-    public track_cursor(index: number): void {
-        this._cursor_index = index;
-        if (this._cursor_index > 0) {
-            let center: Point = this.get_base_xy(this._cursor_index - 1);
-            if (this._cursor_box == null) {
-                this._cursor_box = new Graphics();
-                this.container.addChild(this._cursor_box);
+    public trackCursor(index: number): void {
+        this._cursorIndex = index;
+        if (this._cursorIndex > 0) {
+            let center: Point = this.getBaseXY(this._cursorIndex - 1);
+            if (this._cursorBox == null) {
+                this._cursorBox = new Graphics();
+                this.container.addChild(this._cursorBox);
             }
-            this._cursor_box.x = center.x;
-            this._cursor_box.y = center.y;
-            this._cursor_box.visible = true;
-            this._cursor_box.clear();
-            this._cursor_box.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
-            this._cursor_box.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
-        } else if (this._cursor_box != null) {
-            this._cursor_box.destroy({children: true});
-            this._cursor_box = null;
+            this._cursorBox.x = center.x;
+            this._cursorBox.y = center.y;
+            this._cursorBox.visible = true;
+            this._cursorBox.clear();
+            this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
+            this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
+        } else if (this._cursorBox != null) {
+            this._cursorBox.destroy({children: true});
+            this._cursorBox = null;
         }
     }
 
     public get trackedCursorIdx(): number {
-        return this._cursor_index;
+        return this._cursorIndex;
     }
 
     /*override*/
@@ -1859,90 +1838,90 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         let current_time: number = this.mode.time;
-        for (let anchor of this._anchored_objects) {
-            let p: Point = this.get_base_xy(anchor.base);
+        for (let anchor of this._anchoredObjects) {
+            let p: Point = this.getBaseXY(anchor.base);
             anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
         }
 
-        let full_seq: number[] = this.get_full_sequence();
+        let fullSeq: number[] = this.fullSequence;
         let center: Point;
         let prog: number;
         let locked: boolean;
 
         // Hide bases that aren't part of our current sequence
         for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = ii < full_seq.length;
+            this._bases[ii].display.visible = ii < fullSeq.length;
         }
 
-        if (this._tracked_indices.length === this._base_boxes.length && this._tracked_indices.length !== 0) {
-            let n: number = this._tracked_indices.length;
+        if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
+            let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
-                center = this.get_base_xy(this._tracked_indices[ii]);
-                this._base_boxes[ii].x = center.x;
-                this._base_boxes[ii].y = center.y;
-                this._base_boxes[ii].clear();
-                this._base_boxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], 0x000000);
-                this._base_boxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+                center = this.getBaseXY(this._trackedIndices[ii]);
+                this._baseBoxes[ii].x = center.x;
+                this._baseBoxes[ii].y = center.y;
+                this._baseBoxes[ii].clear();
+                this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], 0x000000);
+                this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
             }
         }
 
-        if (this._cursor_index > 0) {
-            center = this.get_base_xy(this._cursor_index - 1);
-            this._cursor_box.x = center.x;
-            this._cursor_box.y = center.y;
-            this._cursor_box.visible = true;
-            this._cursor_box.clear();
-            this._cursor_box.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.get_zoom_level()], Pose2D.COLOR_CURSOR);
-            this._cursor_box.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.get_zoom_level()]);
+        if (this._cursorIndex > 0) {
+            center = this.getBaseXY(this._cursorIndex - 1);
+            this._cursorBox.x = center.x;
+            this._cursorBox.y = center.y;
+            this._cursorBox.visible = true;
+            this._cursorBox.clear();
+            this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
+            this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
         }
 
-        if (this._base_to_x) {
+        if (this._baseToX) {
             // Update base locations
 
-            if (this._fold_start_time < 0) {
-                this._fold_start_time = current_time;
+            if (this._foldStartTime < 0) {
+                this._foldStartTime = current_time;
             }
 
-            prog = (current_time - this._fold_start_time) / (this._fold_duration);
+            prog = (current_time - this._foldStartTime) / (this._foldDuration);
             let done: boolean = false;
 
             if (prog >= 1) {
                 prog = 1;
                 done = true;
-                this._offset_translating = false;
+                this._offsetTranslating = false;
             }
 
-            if (this._offset_translating) {
+            if (this._offsetTranslating) {
                 this._redraw = true;
-                this._off_x = prog * this._end_offset_x + (1 - prog) * this._start_offset_x;
-                this._off_y = prog * this._end_offset_y + (1 - prog) * this._start_offset_y;
+                this._offX = prog * this._endOffsetX + (1 - prog) * this._startOffsetX;
+                this._offY = prog * this._endOffsetY + (1 - prog) * this._startOffsetY;
             }
 
-            for (let ii = 0; ii < full_seq.length; ii++) {
-                let vx: number = this._base_to_x[ii] - this._base_from_x[ii];
-                let vy: number = this._base_to_y[ii] - this._base_from_y[ii];
+            for (let ii = 0; ii < fullSeq.length; ii++) {
+                let vx: number = this._baseToX[ii] - this._baseFromX[ii];
+                let vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-                let current_x: number = this._base_from_x[ii] + (vx + (vx * prog)) / 2 * prog;
-                let current_y: number = this._base_from_y[ii] + (vy + (vy * prog)) / 2 * prog;
+                let current_x: number = this._baseFromX[ii] + (vx + (vx * prog)) / 2 * prog;
+                let current_y: number = this._baseFromY[ii] + (vy + (vy * prog)) / 2 * prog;
 
                 this._bases[ii].setXY(current_x, current_y);
             }
 
             if (done) {
-                this._base_to_x = null;
-                this._base_to_y = null;
-                this._base_from_x = null;
-                this._base_from_y = null;
+                this._baseToX = null;
+                this._baseToY = null;
+                this._baseFromX = null;
+                this._baseFromY = null;
 
-                this.update_score_node_gui();
+                this.updateScoreNodeGui();
             }
 
         } else {
-            if (current_time - this._last_sampled_time > 2 && !this._is_exploding) {
-                this._last_sampled_time = current_time;
+            if (current_time - this.lastSampledTime > 2 && !this._isExploding) {
+                this.lastSampledTime = current_time;
 
-                for (let ii = 0; ii < full_seq.length; ii++) {
-                    if (this._pairs[ii] < 0 && !this._lowperform_mode && Math.random() > 0.7) {
+                for (let ii = 0; ii < fullSeq.length; ii++) {
+                    if (this._pairs[ii] < 0 && !this._lowperformMode && Math.random() > 0.7) {
                         this._bases[ii].animate();
                     }
                 }
@@ -1950,40 +1929,30 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         /// Update score node
-        this.update_score_node_visualization(this._off_x !== this._prevOffsetX || this._off_y !== this._prevOffsetY);
+        this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
 
         /// Bitblt rendering
         let need_redraw: boolean = false;
 
-        for (let ii = 0; ii < full_seq.length && !need_redraw; ii++) {
-            need_redraw = need_redraw || this._bases[ii].needRedraw(this._lowperform_mode);
+        for (let ii = 0; ii < fullSeq.length && !need_redraw; ii++) {
+            need_redraw = need_redraw || this._bases[ii].needRedraw(this._lowperformMode);
         }
 
         if (need_redraw || this._redraw) {
-            // if (this._base_dirty == null || this._redraw) {
-            //     this._canvas_data.fillRect(new Rectangle(0, 0, this._width, this._height), 0x0);
-            // } else {
-            //     this._base_dirty = this._base_dirty.intersection(new Rectangle(0, 0, this._width, this._height));
-            //     this._canvas_data.copyPixels(this._empty_canvas_data, this._base_dirty, this._base_dirty.topLeft, this._empty_canvas_data);
-            // }
-            this._base_dirty = null;
-
-            let r: Rectangle;
-
             // Create highlight state to pass to bases.
             let hl_state: RNAHighlightState = null;
-            if (this._all_new_highlights.length > 0) {
+            if (this._allNewHighlights.length > 0) {
                 hl_state = new RNAHighlightState();
                 hl_state.nuc = [];
                 hl_state.isOn = true;
-                for (let existingHighlight of this._all_new_highlights) {
+                for (let existingHighlight of this._allNewHighlights) {
                     hl_state.nuc = hl_state.nuc.concat(existingHighlight.nuc);
                 }
             }
 
-            for (let ii = 0; ii < full_seq.length; ii++) {
+            for (let ii = 0; ii < fullSeq.length; ii++) {
                 // skip the oligo separator
-                if (full_seq[ii] === EPars.RNABASE_CUT) {
+                if (fullSeq[ii] === EPars.RNABASE_CUT) {
                     continue;
                 }
 
@@ -1992,21 +1961,21 @@ export class Pose2D extends ContainerObject implements Updatable {
                     use_barcode = true;
                 }
 
-                this._bases[ii].forceUnpaired = (this._forced_struct != null && this._forced_struct[ii] === EPars.FORCE_UNPAIRED);
+                this._bases[ii].forceUnpaired = (this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED);
 
                 let drawFlags: number = BaseDrawFlags.builder()
-                    .locked(this.is_locked(ii))
+                    .locked(this.isLocked(ii))
                     .letterMode(this._lettermode)
-                    .lowPerform(this._lowperform_mode)
+                    .lowPerform(this._lowperformMode)
                     .useBarcode(use_barcode)
                     .result();
 
                 let numberBitmap: Texture = null;
-                if (this._numbering_mode && (ii === 0 || (ii + 1) % 5 === 0 || ii === full_seq.length - 1)) {
+                if (this._numberingMode && (ii === 0 || (ii + 1) % 5 === 0 || ii === fullSeq.length - 1)) {
                     numberBitmap = BitmapManager.get_number_bitmap(ii + 1);
                 }
 
-                this._bases[ii].setDrawParams(this._zoom_level, this._off_x, this._off_y, current_time, drawFlags, numberBitmap, hl_state);
+                this._bases[ii].setDrawParams(this._zoomLevel, this._offX, this._offY, current_time, drawFlags, numberBitmap, hl_state);
             }
 
             // TODO: bit_blit_after_effect
@@ -2018,27 +1987,27 @@ export class Pose2D extends ContainerObject implements Updatable {
             //     }
             // }
 
-            if (this._display_aux_info) {
-                this.render_aux_info();
+            if (this._displayAuxInfo) {
+                this.renderAuxInfo();
             }
 
             this._redraw = false;
 
-            if (this._feedback_objs.length > 0) {
-                this.update_print_feedback(false);
+            if (this._feedbackObjs.length > 0) {
+                this.updatePrintFeedback(false);
             }
         }
 
         this._moleculeLayer.visible = false;
-        if (this._molecular_binding_bases != null && this._molecule != null) {
+        if (this._molecularBindingBases != null && this._molecule != null) {
             let mol_x: number = 0;
             let mol_y: number = 0;
             let nbases: number = 0;
-            for (let ii = 0; ii < full_seq.length; ii++) {
-                let baseglow: BaseGlow = this._molecular_binding_bases[ii];
+            for (let ii = 0; ii < fullSeq.length; ii++) {
+                let baseglow: BaseGlow = this._molecularBindingBases[ii];
                 if (baseglow != null) {
                     let pos: Point = this._bases[ii].getLastDrawnPos();
-                    baseglow.updateView(this._zoom_level, pos.x, pos.y, current_time);
+                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, current_time);
                     mol_x += pos.x;
                     mol_y += pos.y;
                     nbases += 1;
@@ -2050,12 +2019,12 @@ export class Pose2D extends ContainerObject implements Updatable {
                 mol_y /= nbases;
             }
 
-            if (!this._molecule_is_bound) {
+            if (!this._moleculeIsBound) {
                 mol_x = 30;
                 mol_y = 200;
             }
 
-            this._molecule.updateView(this._zoom_level, mol_x, mol_y, current_time);
+            this._molecule.updateView(this._zoomLevel, mol_x, mol_y, current_time);
             this._moleculeLayer.visible = true;
         }
 
@@ -2081,11 +2050,11 @@ export class Pose2D extends ContainerObject implements Updatable {
         let go_x: number = 0;
         let go_y: number = 0;
 
-        for (let ii = 0; ii < full_seq.length - 1; ii++) {
+        for (let ii = 0; ii < fullSeq.length - 1; ii++) {
             let out_x: number = go_x;
             let out_y: number = go_y;
 
-            if (this._sequence.length < full_seq.length && ii === this._sequence.length - 1) {
+            if (this._sequence.length < fullSeq.length && ii === this._sequence.length - 1) {
                 this._bases[ii].setGoDir(go_x, go_y);
                 this._bases[ii].setOutDir(-go_y, go_x);
                 this._bases[ii].setLast(true);
@@ -2108,48 +2077,48 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._bases[ii].setLast(false);
         }
 
-        if (full_seq.length >= 1) {
+        if (fullSeq.length >= 1) {
 
-            this._bases[full_seq.length - 1].setGoDir(go_x, go_y);
-            this._bases[full_seq.length - 1].setOutDir(-go_y, go_x);
-            this._bases[full_seq.length - 1].setLast(true);
+            this._bases[fullSeq.length - 1].setGoDir(go_x, go_y);
+            this._bases[fullSeq.length - 1].setOutDir(-go_y, go_x);
+            this._bases[fullSeq.length - 1].setLast(true);
 
         }
 
         /// Praise stacks when RNA is not moving
-        if (!this._offset_translating && this._base_to_x == null) {
-            if (this._praise_queue.length > 0) {
-                for (let ii = 0; ii < this._praise_queue.length; ii += 2) {
-                    this.on_praise_stack(
-                        this._praise_queue[ii],
-                        this._praise_queue[ii + 1],
-                        (ii + 1) === (this._praise_queue.length - 1));
+        if (!this._offsetTranslating && this._baseToX == null) {
+            if (this._praiseQueue.length > 0) {
+                for (let ii = 0; ii < this._praiseQueue.length; ii += 2) {
+                    this.onPraiseStack(
+                        this._praiseQueue[ii],
+                        this._praiseQueue[ii + 1],
+                        (ii + 1) === (this._praiseQueue.length - 1));
                 }
-                this._praise_queue = [];
-            } else if (this._praise_seq.length > 0) {
-                for (let ii = 0; ii < this._praise_seq.length; ii += 2) {
-                    this.on_praise_seq(this._praise_seq[ii], this._praise_seq[ii + 1]);
+                this._praiseQueue = [];
+            } else if (this._praiseSeq.length > 0) {
+                for (let ii = 0; ii < this._praiseSeq.length; ii += 2) {
+                    this.onPraiseSeq(this._praiseSeq[ii], this._praiseSeq[ii + 1]);
                 }
-                this._praise_seq = [];
+                this._praiseSeq = [];
             }
         }
 
-        if (this._is_exploding && !this._offset_translating && this._base_to_x == null) {
-            if (this._explosion_start_time < 0) {
-                this._explosion_start_time = current_time;
-                this._orig_offset_x = this._off_x;
-                this._orig_offset_y = this._off_y;
+        if (this._isExploding && !this._offsetTranslating && this._baseToX == null) {
+            if (this._explosionStartTime < 0) {
+                this._explosionStartTime = current_time;
+                this._origOffsetX = this._offX;
+                this._origOffsetY = this._offY;
             }
 
-            this._off_x = this._orig_offset_x + (Math.random() * 2 - 1) * 5;
-            this._off_y = this._orig_offset_y + (Math.random() * 2 - 1) * 5;
+            this._offX = this._origOffsetX + (Math.random() * 2 - 1) * 5;
+            this._offY = this._origOffsetY + (Math.random() * 2 - 1) * 5;
             this._redraw = true;
 
-            prog = (current_time - this._explosion_start_time) * 5;
+            prog = (current_time - this._explosionStartTime) * 5;
 
-            if (this._explosion_rays.length >= full_seq.length) {
-                for (let ii = 0; ii < Math.min(prog, full_seq.length); ii++) {
-                    const ray = this._explosion_rays[ii];
+            if (this._explosionRays.length >= fullSeq.length) {
+                for (let ii = 0; ii < Math.min(prog, fullSeq.length); ii++) {
+                    const ray = this._explosionRays[ii];
 
                     if (!ray.display.visible) {
                         ray.display.alpha = 0;
@@ -2157,27 +2126,27 @@ export class Pose2D extends ContainerObject implements Updatable {
                         ray.fadeIn();
                     }
 
-                    ray.display.position = this.get_base_xy(ii);
+                    ray.display.position = this.getBaseXY(ii);
                 }
             } else {
-                let diff: number = (full_seq.length - this._explosion_rays.length) / this._explosion_rays.length;
+                let diff: number = (fullSeq.length - this._explosionRays.length) / this._explosionRays.length;
                 let diff_walker: number = 0;
                 let ray_walker: number = 0;
 
-                for (let ii = 0; ii < full_seq.length; ii++) {
+                for (let ii = 0; ii < fullSeq.length; ii++) {
                     if (diff_walker < 1) {
-                        if (ray_walker >= this._explosion_rays.length || ray_walker >= prog) {
+                        if (ray_walker >= this._explosionRays.length || ray_walker >= prog) {
                             continue;
                         }
 
-                        const ray = this._explosion_rays[ray_walker];
+                        const ray = this._explosionRays[ray_walker];
                         if (!ray.display.visible) {
                             ray.display.alpha = 0;
                             ray.display.visible = true;
                             ray.fadeIn();
                         }
 
-                        ray.display.position = this.get_base_xy(ii);
+                        ray.display.position = this.getBaseXY(ii);
                         ray_walker++;
                         diff_walker += diff;
 
@@ -2187,65 +2156,68 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            if (prog >= Math.min(full_seq.length, this._explosion_rays.length) + 10) {
-                this.clear_explosion();
+            if (prog >= Math.min(fullSeq.length, this._explosionRays.length) + 10) {
+                this.clearExplosion();
             }
         }
 
-        this._prevOffsetX = this._off_x;
-        this._prevOffsetY = this._off_y;
+        this._prevOffsetX = this._offX;
+        this._prevOffsetY = this._offY;
     }
 
-    public num_pairs(satisfied: boolean): number {
+    public numPairs(satisfied: boolean): number {
         let n: number = 0;
         for (let ii: number = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] > ii && (!satisfied || this.is_pair_satisfied(ii, this._pairs[ii]))) {
+            if (this._pairs[ii] > ii && (!satisfied || this.isPairSatisfied(ii, this._pairs[ii]))) {
                 n++;
             }
         }
         return n;
     }
 
-    public set_lettermode(lettermode: boolean): void {
+    public set lettermode(lettermode: boolean) {
         this._lettermode = lettermode;
         this._redraw = true;
     }
 
-    public is_lettermode(): boolean {
+    public get lettermode(): boolean {
         return this._lettermode;
     }
 
     public get showTotalEnergy(): boolean {
-        return this._show_total_energy;
+        return this._showTotalEnergy;
     }
 
-    public set_show_total_energy(show: boolean): void {
-        this._show_total_energy = show;
-        this._primary_score_energy_display.visible = (show && this._score_folder != null);
-        this._secondary_score_energy_display.visible = (show && this._score_folder != null);
+    public set showTotalEnergy(show: boolean) {
+        this._showTotalEnergy = show;
+        this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
+        this._secondaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
     }
 
-    public set_score_visualization(folder: Folder): void {
-        this._score_folder = folder;
-        this.set_show_total_energy(this._show_total_energy);
-    }
-
-    public base_shift_with_command(command: number, index: number): void {
-        let cmd: any[] = this.parse_command(command, index);
-        if (cmd != null) {
-            let parenthesis: string = cmd[0];
-            let op: PuzzleEditOp = cmd[1];
-            this.base_shift(parenthesis, op, index);
+    public set scoreFolder(folder: Folder) {
+        if (this._scoreFolder != folder) {
+            this._scoreFolder = folder;
+            this.showTotalEnergy = this._showTotalEnergy;
+            this.generateScoreNodes();
         }
     }
 
-    public base_shift(parenthesis: string, op: PuzzleEditOp, index: number): void {
-        let sequence: number[] = this.get_sequence();
-        let locks: boolean[] = this.get_puzzle_locks();
-        let binding_site: boolean[] = this.get_molecular_binding_site();
-        let sequence_backup: number[] = this.get_sequence();
-        let locks_backup: boolean[] = this.get_puzzle_locks();
-        let binding_site_backup: boolean[] = this.get_molecular_binding_site();
+    public baseShiftWithCommand(command: number, index: number): void {
+        let cmd: any[] = this.parseCommand(command, index);
+        if (cmd != null) {
+            let parenthesis: string = cmd[0];
+            let op: PuzzleEditOp = cmd[1];
+            this.baseShift(parenthesis, op, index);
+        }
+    }
+
+    public baseShift(parenthesis: string, op: PuzzleEditOp, index: number): void {
+        let sequence: number[] = this.sequence;
+        let locks: boolean[] = this.puzzleLocks;
+        let binding_site: boolean[] = this.molecularBindingSite;
+        let sequence_backup: number[] = this.sequence;
+        let locks_backup: boolean[] = this.puzzleLocks;
+        let binding_site_backup: boolean[] = this.molecularBindingSite;
         let pindex: number;
 
         if (sequence.length > parenthesis.length) {
@@ -2277,7 +2249,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            pindex = (this.get_pairs())[index];
+            pindex = this.pairs[index];
             let after_index = sequence.slice(index);
             let after_lock_index = locks.slice(index);
             let after_binding_site_index = binding_site.slice(index);
@@ -2334,7 +2306,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            pindex = (this.get_pairs())[index];
+            pindex = this.pairs[index];
             let after_index = sequence_backup.slice(index + 1);
             let after_lock_index = locks_backup.slice(index + 1);
             let after_binding_site_index = binding_site_backup.slice(index + 1);
@@ -2364,73 +2336,47 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this.set_sequence(sequence);
-        this.set_puzzle_locks(locks);
-        this.set_molecular_structure(EPars.parenthesis_to_pair_array(parenthesis));
-        this.set_molecular_binding_site(binding_site);
-        this.set_parenthesis(parenthesis);
-    }
-
-    public register_paint_tool(paint_color: number, tool: Booster): void {
-        this._dyn_paint_colors.push(paint_color);
-        this._dyn_paint_tools.push(tool);
-    }
-
-    public get_last_shifted_index(): number {
-        return this._last_shifted_index;
-    }
-
-    public get_last_shifted_command(): number {
-        return this._last_shifted_command;
-    }
-
-    public set_parenthesis(parenthesis: string): void {
+        this.sequence = sequence;
+        this.puzzleLocks = locks;
+        this.molecularStructure = EPars.parenthesis_to_pair_array(parenthesis);
+        this.molecularBindingSite = binding_site;
         this.parenthesis = parenthesis;
     }
 
-    public get_parenthesis(): string {
-        return this.parenthesis;
+    public registerPaintTool(paint_color: number, tool: Booster): void {
+        this._dynPaintColors.push(paint_color);
+        this._dynPaintTools.push(tool);
     }
 
-    public set_base_color(seq: number, inColor: number): void {
-        this._mutated_sequence = this._sequence.slice();
-        this._mutated_sequence[seq] = inColor;
+    public get lastShiftedIndex(): number {
+        return this._lastShiftedIndex;
+    }
+
+    public get lastShiftedCommand(): number {
+        return this._lastShiftedCommand;
+    }
+
+    public set parenthesis(parenthesis: string) {
+        this._parenthesis = parenthesis;
+    }
+
+    public setBaseColor(seq: number, inColor: number): void {
+        this._mutatedSequence = this._sequence.slice();
+        this._mutatedSequence[seq] = inColor;
         this._bases[seq].setType(inColor, true);
 
-        this._last_colored_index = seq;
+        this._lastColoredIndex = seq;
         this._bases[seq].animate();
-        this.done_coloring();
+        this.doneColoring();
     }
 
-    public force_editable(b: boolean, edit_list: number[] = null): void {
+    public forceEditable(b: boolean, edit_list: number[] = null): void {
         this._editable = b;
         this._editable_indices = edit_list;
     }
 
-    /*override*/
-    protected on_resize(): void {
-        // if (this._canvas_data != null) {
-        //     this._canvas_data = null;
-        // }
-        // if (this._mol_canvas_data != null) {
-        //     this._mol_canvas_data = null;
-        //     this._empty_canvas_data = null;
-        //     this._mol_dirty = [];
-        // }
-        //
-        // if (this._width > 0 && this._height > 0) {
-        //     this._canvas_data = new Texture(this._width, this._height);
-        //     this._canvas.Texture = this._canvas_data;
-        //     this._mol_canvas_data = new Texture(this._width, this._height, true, 0x0);
-        //     this._empty_canvas_data = new Texture(this._width, this._height, true, 0x0);
-        //     this._mol_canvas.Texture = this._mol_canvas_data;
-        // }
-        //
-        // this._redraw = true;
-    }
-
-    private compute_layout(fast: boolean = false): void {
-        let full_seq: number[] = this.get_full_sequence();
+    private computeLayout(fast: boolean = false): void {
+        let full_seq: number[] = this.fullSequence;
 
         if (full_seq.length > this._bases.length) {
             log.debug(full_seq.length, this._bases.length);
@@ -2457,13 +2403,13 @@ export class Pose2D extends ContainerObject implements Updatable {
                 exception_indices.push(oligo_index);
             }
         }
-        rna_drawer = new RNALayout(Pose2D.ZOOM_SPACINGS[this._zoom_level], Pose2D.ZOOM_SPACINGS[this._zoom_level], exception_indices);
+        rna_drawer = new RNALayout(Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel], exception_indices);
 
         rna_drawer.setup_tree(this._pairs);
         rna_drawer.draw_tree();
         rna_drawer.get_coords(xarray, yarray);
 
-        if (this._desired_angle === 90) {
+        if (this._desiredAngle === 90) {
             let tmp = xarray;
             xarray = yarray;
             yarray = tmp;
@@ -2495,28 +2441,28 @@ export class Pose2D extends ContainerObject implements Updatable {
         x_mid = (xmax + xmin) / 2.0;
         y_mid = (ymax + ymin) / 2.0;
 
-        this._base_from_x = new Array(n);
-        this._base_from_y = new Array(n);
-        this._base_to_x = new Array(n);
-        this._base_to_y = new Array(n);
+        this._baseFromX = new Array(n);
+        this._baseFromY = new Array(n);
+        this._baseToX = new Array(n);
+        this._baseToY = new Array(n);
 
         for (let ii: number = 0; ii < n; ii++) {
-            this._base_from_x[ii] = this._bases[ii].x;
-            this._base_from_y[ii] = this._bases[ii].y;
+            this._baseFromX[ii] = this._bases[ii].x;
+            this._baseFromY[ii] = this._bases[ii].y;
 
-            this._base_to_x[ii] = xarray[ii] - x_mid;
-            this._base_to_y[ii] = yarray[ii] - y_mid;
+            this._baseToX[ii] = xarray[ii] - x_mid;
+            this._baseToY[ii] = yarray[ii] - y_mid;
         }
 
-        this._fold_start_time = -1;
+        this._foldStartTime = -1;
         if (fast) {
-            this._fold_duration = 0.45;
+            this._foldDuration = 0.45;
         } else {
-            this._fold_duration = 0.7;
+            this._foldDuration = 0.7;
         }
     }
 
-    private print_feedback(dat: any[]): void {
+    private printFeedback(dat: any[]): void {
         // for (let i: number = 0; i < dat.length; i++) {
         //     let feedback_obj: GameText = null;
         //     feedback_obj = new GameText(Fonts.arial(12, true));
@@ -2526,7 +2472,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    private update_print_feedback(hide: boolean = true): void {
+    private updatePrintFeedback(hide: boolean = true): void {
         // for (let ii: number = 0; ii < this._feedback_objs_num; ii++) {
         //     let obj_p: Point = this.get_base_xy(ii + this._feedback_objs_start_ind);
         //     let out_p: Point = this.get_base_out_xy(ii + this._feedback_objs_start_ind);
@@ -2540,32 +2486,32 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    private on_pose_mouse_out(e: InteractionEvent): void {
-        this.clear_mouse();
-        this.update_score_node_gui();
+    private onMouseOut(e: InteractionEvent): void {
+        this.clearMouse();
+        this.updateScoreNodeGui();
         e.stopPropagation();
     }
 
-    private delete_base_with_index(index: number): any[] {
-        if (this.is_tracked_index(index)) {
-            this.toggle_black_mark(index);
+    private deleteBaseWithIndex(index: number): any[] {
+        if (this.isTrackedIndex(index)) {
+            this.toggleBlackMark(index);
         }
 
-        if (this._pairs[index] < 0 || this.is_locked(this._pairs[index])) {
+        if (this._pairs[index] < 0 || this.isLocked(this._pairs[index])) {
             return PoseUtil.delete_nopair_with_index(index, this._pairs);
         } else {
             return PoseUtil.delete_pair_with_index(index, this._pairs);
         }
     }
 
-    private on_base_mouse_down(seqnum: number, togglelock: boolean): void {
-        this._last_colored_index = seqnum;
+    private onBaseMouseDown(seqnum: number, togglelock: boolean): void {
+        this._lastColoredIndex = seqnum;
 
-        if (!togglelock && this.is_editable(seqnum)) {
+        if (!togglelock && this.isEditable(seqnum)) {
             this._coloring = true;
-            this._mutated_sequence = this.get_full_sequence().slice();
+            this._mutatedSequence = this.fullSequence.slice();
 
-            if (this._current_color === EPars.RNABASE_LOCK) {
+            if (this._currentColor === EPars.RNABASE_LOCK) {
                 if (!this._locks) {
                     this._locks = [];
                     for (let ii = 0; ii < this._sequence.length; ii++) {
@@ -2574,132 +2520,132 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
                 this._locks[seqnum] = !this._locks[seqnum];
                 this._bases[seqnum].setDirty();
-                this._lock_updated = true;
+                this._lockUpdated = true;
 
-            } else if (this._current_color === EPars.RNABASE_BINDING_SITE) {
-                if (this._binding_site != null && this._binding_site[seqnum]) {
-                    this._binding_site = [];
+            } else if (this._currentColor === EPars.RNABASE_BINDING_SITE) {
+                if (this._bindingSite != null && this._bindingSite[seqnum]) {
+                    this._bindingSite = [];
                     for (let ii = 0; ii < this._sequence.length; ii++) {
-                        this._binding_site.push(false);
+                        this._bindingSite.push(false);
                     }
-                    this.set_molecular_binding_site(this._binding_site);
-                    this._binding_site_updated = true;
+                    this.molecularBindingSite = this._bindingSite;
+                    this._bindingSiteUpdated = true;
                 } else {
                     let binding_bases: number[] = EPars.is_internal(seqnum, this._pairs);
                     if (binding_bases != null && binding_bases.length > 4) {
-                        this._binding_site = [];
+                        this._bindingSite = [];
                         for (let ii = 0; ii < this._sequence.length; ii++) {
-                            this._binding_site.push(false);
+                            this._bindingSite.push(false);
                         }
 
                         for (let ii = 0; ii < binding_bases.length; ii++) {
-                            this._binding_site[binding_bases[ii]] = true;
+                            this._bindingSite[binding_bases[ii]] = true;
                         }
-                        this.set_molecular_binding_site(this._binding_site);
-                        this._binding_site_updated = true;
+                        this.molecularBindingSite = this._bindingSite;
+                        this._bindingSiteUpdated = true;
                     } else {
                         (this.mode as GameMode).showNotification(
                             "Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
                     }
                 }
 
-            } else if (this._mouse_down_altKey) {
-                if (this.toggle_design_struct(seqnum)) {
-                    this._design_struct_updated = true;
+            } else if (this._mouseDownAltKey) {
+                if (this.toggleDesignStruct(seqnum)) {
+                    this._designStructUpdated = true;
                 }
             } else {
 
-                if (!this.is_locked(seqnum)) {
+                if (!this.isLocked(seqnum)) {
 
-                    if (this._current_color >= 1 && this._current_color <= 4) {
-                        this._mutated_sequence[seqnum] = this._current_color;
-                        ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._current_color);
-                        this._bases[seqnum].setType(this._current_color, true);
-                    } else if (this._current_color === EPars.RNABASE_RANDOM) {
+                    if (this._currentColor >= 1 && this._currentColor <= 4) {
+                        this._mutatedSequence[seqnum] = this._currentColor;
+                        ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                        this._bases[seqnum].setType(this._currentColor, true);
+                    } else if (this._currentColor === EPars.RNABASE_RANDOM) {
                         let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
-                        this._mutated_sequence[seqnum] = randbase;
+                        this._mutatedSequence[seqnum] = randbase;
                         this._bases[seqnum].setType(randbase, true)
-                    } else if (this._current_color === EPars.RNABASE_PAIR) {
+                    } else if (this._currentColor === EPars.RNABASE_PAIR) {
                         if (this._pairs[seqnum] >= 0) {
                             let pi = this._pairs[seqnum];
 
-                            if (this.is_locked(pi)) {
+                            if (this.isLocked(pi)) {
                                 return;
                             }
 
-                            let click_base: number = this._mutated_sequence[seqnum];
+                            let click_base: number = this._mutatedSequence[seqnum];
 
-                            this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
-                            this._mutated_sequence[pi] = click_base;
+                            this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
+                            this._mutatedSequence[pi] = click_base;
 
-                            this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                            this._bases[pi].setType(this._mutated_sequence[pi], true);
+                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                            this._bases[pi].setType(this._mutatedSequence[pi], true);
                         }
-                    } else if (this._current_color === EPars.RNABASE_MAGIC) {
-                        this._mutated_sequence[seqnum] = this._current_color;
-                        this._bases[seqnum].setType(this._current_color);
-                    } else if (this._current_color === EPars.RNABASE_AU_PAIR) {
+                    } else if (this._currentColor === EPars.RNABASE_MAGIC) {
+                        this._mutatedSequence[seqnum] = this._currentColor;
+                        this._bases[seqnum].setType(this._currentColor);
+                    } else if (this._currentColor === EPars.RNABASE_AU_PAIR) {
                         if (this._pairs[seqnum] >= 0) {
                             let pi = this._pairs[seqnum];
 
-                            if (this.is_locked(pi)) {
+                            if (this.isLocked(pi)) {
                                 return;
                             }
 
-                            this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
-                            this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
+                            this._mutatedSequence[seqnum] = EPars.RNABASE_ADENINE;
+                            this._mutatedSequence[pi] = EPars.RNABASE_URACIL;
 
-                            this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                            this._bases[pi].setType(this._mutated_sequence[pi], true);
+                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                            this._bases[pi].setType(this._mutatedSequence[pi], true);
                         }
-                    } else if (this._current_color === EPars.RNABASE_GC_PAIR) {
+                    } else if (this._currentColor === EPars.RNABASE_GC_PAIR) {
                         if (this._pairs[seqnum] >= 0) {
                             let pi = this._pairs[seqnum];
 
-                            if (this.is_locked(pi)) {
+                            if (this.isLocked(pi)) {
                                 return;
                             }
 
-                            this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
-                            this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
+                            this._mutatedSequence[seqnum] = EPars.RNABASE_GUANINE;
+                            this._mutatedSequence[pi] = EPars.RNABASE_CYTOSINE;
 
-                            this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                            this._bases[pi].setType(this._mutated_sequence[pi], true);
+                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                            this._bases[pi].setType(this._mutatedSequence[pi], true);
                         }
-                    } else if (this._current_color === EPars.RNABASE_GU_PAIR) {
+                    } else if (this._currentColor === EPars.RNABASE_GU_PAIR) {
                         if (this._pairs[seqnum] >= 0) {
                             let pi = this._pairs[seqnum];
 
-                            if (this.is_locked(pi)) {
+                            if (this.isLocked(pi)) {
                                 return;
                             }
 
-                            this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
-                            this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
+                            this._mutatedSequence[seqnum] = EPars.RNABASE_URACIL;
+                            this._mutatedSequence[pi] = EPars.RNABASE_GUANINE;
 
-                            this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                            this._bases[pi].setType(this._mutated_sequence[pi], true);
+                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                            this._bases[pi].setType(this._mutatedSequence[pi], true);
                         }
-                    } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
-                        let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-                        this._dyn_paint_tools[index].onPaint(this, seqnum);
+                    } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
+                        let index: number = this._dynPaintColors.indexOf(this._currentColor);
+                        this._dynPaintTools[index].onPaint(this, seqnum);
                     }
                 }
             }
         }
     }
 
-    private on_base_mouse_move(seqnum: number): void {
-        if (!this._coloring && this._shift_start >= 0 && seqnum < this.get_sequence_length()) {
-            this._shift_end = seqnum;
-            this.update_shift_highlight();
+    private onBaseMouseMove(seqnum: number): void {
+        if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
+            this._shiftEnd = seqnum;
+            this.updateShiftHighlight();
         }
 
-        if (!this._coloring || (seqnum === this._last_colored_index)) {
+        if (!this._coloring || (seqnum === this._lastColoredIndex)) {
             return;
         }
 
-        if (this._current_color === EPars.RNABASE_LOCK) {
+        if (this._currentColor === EPars.RNABASE_LOCK) {
             if (!this._locks) {
                 this._locks = [];
                 for (let ii: number = 0; ii < this._sequence.length; ii++) {
@@ -2708,114 +2654,114 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
             this._locks[seqnum] = !this._locks[seqnum];
             this._bases[seqnum].setDirty();
-            this._lock_updated = true;
+            this._lockUpdated = true;
 
-        } else if (this._mouse_down_altKey) {
-            if (this.toggle_design_struct(seqnum)) {
-                this._design_struct_updated = true;
+        } else if (this._mouseDownAltKey) {
+            if (this.toggleDesignStruct(seqnum)) {
+                this._designStructUpdated = true;
             }
 
         } else {
-            if (!this.is_locked(seqnum)) {
-                if (this._current_color >= 1 && this._current_color <= 4) {
-                    this._mutated_sequence[seqnum] = this._current_color;
-                    ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._current_color);
-                    this._bases[seqnum].setType(this._current_color, true);
+            if (!this.isLocked(seqnum)) {
+                if (this._currentColor >= 1 && this._currentColor <= 4) {
+                    this._mutatedSequence[seqnum] = this._currentColor;
+                    ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                    this._bases[seqnum].setType(this._currentColor, true);
 
-                } else if (this._current_color === EPars.RNABASE_RANDOM) {
+                } else if (this._currentColor === EPars.RNABASE_RANDOM) {
                     let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
-                    this._mutated_sequence[seqnum] = randbase;
+                    this._mutatedSequence[seqnum] = randbase;
                     this._bases[seqnum].setType(randbase, true)
-                } else if (this._current_color === EPars.RNABASE_PAIR) {
+                } else if (this._currentColor === EPars.RNABASE_PAIR) {
                     if (this._pairs[seqnum] >= 0) {
                         let pi = this._pairs[seqnum];
                         if (this._pairs[seqnum] >= 0) {
                             pi = this._pairs[seqnum];
 
-                            if (this.is_locked(pi)) {
+                            if (this.isLocked(pi)) {
                                 return;
                             }
 
-                            let click_base: number = this._mutated_sequence[seqnum];
+                            let click_base: number = this._mutatedSequence[seqnum];
 
-                            this._mutated_sequence[seqnum] = this._mutated_sequence[pi];
-                            this._mutated_sequence[pi] = click_base;
+                            this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
+                            this._mutatedSequence[pi] = click_base;
 
-                            this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                            this._bases[pi].setType(this._mutated_sequence[pi], true);
+                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                            this._bases[pi].setType(this._mutatedSequence[pi], true);
                         }
                     }
-                } else if (this._current_color === EPars.RNABASE_MAGIC) {
-                    this._mutated_sequence[seqnum] = this._current_color;
-                    this._bases[seqnum].setType(this._current_color);
-                } else if (this._current_color === EPars.RNABASE_AU_PAIR) {
+                } else if (this._currentColor === EPars.RNABASE_MAGIC) {
+                    this._mutatedSequence[seqnum] = this._currentColor;
+                    this._bases[seqnum].setType(this._currentColor);
+                } else if (this._currentColor === EPars.RNABASE_AU_PAIR) {
                     if (this._pairs[seqnum] >= 0) {
                         let pi = this._pairs[seqnum];
 
-                        if (this.is_locked(pi)) {
+                        if (this.isLocked(pi)) {
                             return;
                         }
 
-                        this._mutated_sequence[seqnum] = EPars.RNABASE_ADENINE;
-                        this._mutated_sequence[pi] = EPars.RNABASE_URACIL;
+                        this._mutatedSequence[seqnum] = EPars.RNABASE_ADENINE;
+                        this._mutatedSequence[pi] = EPars.RNABASE_URACIL;
 
-                        this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                        this._bases[pi].setType(this._mutated_sequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence[pi], true);
                     }
-                } else if (this._current_color === EPars.RNABASE_GC_PAIR) {
+                } else if (this._currentColor === EPars.RNABASE_GC_PAIR) {
                     if (this._pairs[seqnum] >= 0) {
                         let pi = this._pairs[seqnum];
 
-                        if (this.is_locked(pi)) {
+                        if (this.isLocked(pi)) {
                             return;
                         }
 
-                        this._mutated_sequence[seqnum] = EPars.RNABASE_GUANINE;
-                        this._mutated_sequence[pi] = EPars.RNABASE_CYTOSINE;
+                        this._mutatedSequence[seqnum] = EPars.RNABASE_GUANINE;
+                        this._mutatedSequence[pi] = EPars.RNABASE_CYTOSINE;
 
-                        this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                        this._bases[pi].setType(this._mutated_sequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence[pi], true);
                     }
-                } else if (this._current_color === EPars.RNABASE_GU_PAIR) {
+                } else if (this._currentColor === EPars.RNABASE_GU_PAIR) {
                     if (this._pairs[seqnum] >= 0) {
                         let pi = this._pairs[seqnum];
 
-                        if (this.is_locked(pi)) {
+                        if (this.isLocked(pi)) {
                             return;
                         }
 
-                        this._mutated_sequence[seqnum] = EPars.RNABASE_URACIL;
-                        this._mutated_sequence[pi] = EPars.RNABASE_GUANINE;
+                        this._mutatedSequence[seqnum] = EPars.RNABASE_URACIL;
+                        this._mutatedSequence[pi] = EPars.RNABASE_GUANINE;
 
-                        this._bases[seqnum].setType(this._mutated_sequence[seqnum], true);
-                        this._bases[pi].setType(this._mutated_sequence[pi], true);
+                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence[pi], true);
                     }
-                } else if (this._dyn_paint_colors.indexOf(this._current_color) >= 0) {
-                    let index: number = this._dyn_paint_colors.indexOf(this._current_color);
-                    this._dyn_paint_tools[index].onPainting(this, seqnum);
+                } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
+                    let index: number = this._dynPaintColors.indexOf(this._currentColor);
+                    this._dynPaintTools[index].onPainting(this, seqnum);
                 }
             }
         }
-        this._last_colored_index = seqnum;
+        this._lastColoredIndex = seqnum;
         this._bases[seqnum].animate();
     }
 
-    private update_design_highlight(): void {
-        let elems: number[] = this.get_design_segments();
+    private updateDesignHighlight(): void {
+        let elems: number[] = this.designSegments;
         if (elems.length === 0) {
-            this._selection_highlight_box.clear();
+            this._selectionHighlightBox.clear();
         } else {
-            this._selection_highlight_box.setHighlight(HighlightType.DESIGN, elems);
-            this._selection_highlight_box.isOn = false;
+            this._selectionHighlightBox.setHighlight(HighlightType.DESIGN, elems);
+            this._selectionHighlightBox.isOn = false;
         }
     }
 
-    private update_shift_highlight(): void {
-        if (this._shift_start < 0) {
-            this._shift_highlight_box.clear();
+    private updateShiftHighlight(): void {
+        if (this._shiftStart < 0) {
+            this._shiftHighlightBox.clear();
         } else {
-            this._shift_highlight_box.setHighlight(HighlightType.SHIFT, this._shift_end < this._shift_start ? [this._shift_end, this._shift_start] : [this._shift_start, this._shift_end]);
-            this._shift_highlight_box.isOn = false;
+            this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, this._shiftEnd < this._shiftStart ? [this._shiftEnd, this._shiftStart] : [this._shiftStart, this._shiftEnd]);
+            this._shiftHighlightBox.isOn = false;
         }
     }
 
@@ -2830,9 +2776,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                 energy.width + PADDING, energy.height + PADDING, 10);
     }
 
-    private update_energy_highlight(energy: Sprite, idx: number, vis: boolean): void {
-        if (idx >= this._energy_highlights.length) {
-            if (!this._highlight_energy_text) {
+    private updateEnergyHighlight(energy: Sprite, idx: number, vis: boolean): void {
+        if (idx >= this._energyHighlights.length) {
+            if (!this._highlightEnergyText) {
                 return;
             }
 
@@ -2846,37 +2792,37 @@ export class Pose2D extends ContainerObject implements Updatable {
             }));
 
             this.addObject(obj, this.container);
-            this._energy_highlights.push(obj);
+            this._energyHighlights.push(obj);
 
         } else {
-            let obj = this._energy_highlights[idx];
+            let obj = this._energyHighlights[idx];
             obj.display.visible = vis;
             Pose2D.drawEnergyHighlight(obj.display as Graphics, energy);
         }
     }
 
-    private clear_energy_highlights(): void {
-        for (let obj of this._energy_highlights) {
+    private clearEnergyHighlights(): void {
+        for (let obj of this._energyHighlights) {
             obj.destroySelf();
         }
 
-        this._energy_highlights = [];
+        this._energyHighlights = [];
     }
 
-    private render_aux_info(): void {
-        this._aux_info_canvas.clear();
+    private renderAuxInfo(): void {
+        this._auxInfoCanvas.clear();
 
-        if (!this._display_aux_info || this._aux_info == null || !this._aux_info[Pose2D.CLEAVING_SITE]) {
+        if (!this._displayAuxInfo || this._auxInfo == null || !this._auxInfo[Pose2D.CLEAVING_SITE]) {
             return;
         }
 
-        let cleaving_site: number = this._aux_info[Pose2D.CLEAVING_SITE];
+        let cleaving_site: number = this._auxInfo[Pose2D.CLEAVING_SITE];
         if (cleaving_site < this._bases.length - 1) {
-            let b_x: number = this._bases[cleaving_site].x + this._off_x;
-            let b_y: number = this._bases[cleaving_site].y + this._off_y;
+            let b_x: number = this._bases[cleaving_site].x + this._offX;
+            let b_y: number = this._bases[cleaving_site].y + this._offY;
 
-            let b_next_x: number = this._bases[cleaving_site + 1].x + this._off_x;
-            let b_next_y: number = this._bases[cleaving_site + 1].y + this._off_y;
+            let b_next_x: number = this._bases[cleaving_site + 1].x + this._offX;
+            let b_next_y: number = this._bases[cleaving_site + 1].y + this._offY;
 
             let c_x: number = (b_x + b_next_x) / 2.0;
             let c_y: number = (b_y + b_next_y) / 2.0;
@@ -2884,26 +2830,26 @@ export class Pose2D extends ContainerObject implements Updatable {
             let go_x: number = b_next_y - b_y;
             let go_y: number = -(b_next_x - b_x);
 
-            this._aux_info_canvas.lineStyle(3, 0xFF0000, 0.9);
-            this._aux_info_canvas.moveTo(c_x + go_x / 2.0, c_y + go_y / 2.0);
-            this._aux_info_canvas.lineTo(c_x - go_x / 2.0, c_y - go_y / 2.0);
+            this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
+            this._auxInfoCanvas.moveTo(c_x + go_x / 2.0, c_y + go_y / 2.0);
+            this._auxInfoCanvas.lineTo(c_x - go_x / 2.0, c_y - go_y / 2.0);
 
-            this._aux_textballoon.display.position = new Point(c_x + go_x / 2.0, c_y + go_y / 2.0);
+            this._auxTextballoon.display.position = new Point(c_x + go_x / 2.0, c_y + go_y / 2.0);
         }
     }
 
-    private check_pairs(): void {
-        let full_seq: number[] = this.get_full_sequence();
+    private checkPairs(): void {
+        let full_seq: number[] = this.fullSequence;
 
         for (let ii: number = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] >= 0 && this.is_pair_satisfied(ii, this._pairs[ii])) {
+            if (this._pairs[ii] >= 0 && this.isPairSatisfied(ii, this._pairs[ii])) {
 
-                let pair_str: number = Pose2D.get_pair_strength(full_seq[ii], full_seq[this._pairs[ii]]);
+                let pair_str: number = Pose2D.getPairStrength(full_seq[ii], full_seq[this._pairs[ii]]);
 
-                if (this._base_to_x) {
+                if (this._baseToX) {
                     this._bases[ii].setPairing(true,
-                        this._base_to_x[this._pairs[ii]] - this._base_to_x[ii],
-                        this._base_to_y[this._pairs[ii]] - this._base_to_y[ii],
+                        this._baseToX[this._pairs[ii]] - this._baseToX[ii],
+                        this._baseToY[this._pairs[ii]] - this._baseToY[ii],
                         0.5, pair_str);
                 } else {
                     this._bases[ii].setPairing(true,
@@ -2917,45 +2863,45 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private update_score_node_visualization(offsetChanged: boolean): void {
-        if (this._score_nodes == null) {
+    private updateScoreNodeVisualization(offsetChanged: boolean): void {
+        if (this._scoreNodes == null) {
             return;
         }
 
-        if (this._base_to_x != null) {
-            this._score_node_index = -1;
+        if (this._baseToX != null) {
+            this._scoreNodeIndex = -1;
         }
 
-        if (this._score_node_index !== this._last_score_node_index || offsetChanged) {
-            this._score_node_highlight.clear();
+        if (this._scoreNodeIndex !== this._lastScoreNodeIndex || offsetChanged) {
+            this._scoreNodeHighlight.clear();
 
-            if (this._score_node_index >= 0 && this._score_nodes[this._score_node_index] != null) {
-                this._score_node_highlight.lineStyle(0, 0, 0);
-                this._score_node_highlight.beginFill(0xFFFFFF, 0.22);
-                let indices: number[] = this._score_nodes[this._score_node_index].get_base_indices();
+            if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null) {
+                this._scoreNodeHighlight.lineStyle(0, 0, 0);
+                this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
+                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].get_base_indices();
 
                 for (let ii: number = 0; ii < indices.length; ii++) {
-                    let p: Point = this.get_base_xy(indices[ii]);
+                    let p: Point = this.getBaseXY(indices[ii]);
 
                     if (ii === 0) {
-                        this._score_node_highlight.moveTo(p.x, p.y);
+                        this._scoreNodeHighlight.moveTo(p.x, p.y);
                     } else {
-                        this._score_node_highlight.lineTo(p.x, p.y);
+                        this._scoreNodeHighlight.lineTo(p.x, p.y);
                     }
                 }
-                this._score_node_highlight.endFill();
+                this._scoreNodeHighlight.endFill();
             }
-            this._last_score_node_index = this._score_node_index;
+            this._lastScoreNodeIndex = this._scoreNodeIndex;
         }
 
-        if (this._score_texts != null) {
-            for (let ii = 0; ii < this._score_nodes.length; ii++) {
-                let indices: number[] = this._score_nodes[ii].get_base_indices();
+        if (this._scoreTexts != null) {
+            for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+                let indices: number[] = this._scoreNodes[ii].get_base_indices();
                 let x_avg: number = 0;
                 let y_avg: number = 0;
 
                 for (let jj: number = 0; jj < indices.length; jj++) {
-                    let p: Point = this.get_base_xy(indices[jj]);
+                    let p: Point = this.getBaseXY(indices[jj]);
                     x_avg += p.x;
                     y_avg += p.y;
                 }
@@ -2965,26 +2911,26 @@ export class Pose2D extends ContainerObject implements Updatable {
                     y_avg /= indices.length;
                 }
 
-                x_avg -= this._score_texts[ii].width / 2;
-                y_avg -= this._score_texts[ii].height / 2;
+                x_avg -= this._scoreTexts[ii].width / 2;
+                y_avg -= this._scoreTexts[ii].height / 2;
 
-                this._score_texts[ii].position = new Point(x_avg, y_avg);
-                this._score_texts[ii].visible = (this._zoom_level < 4);
-                this.update_energy_highlight(this._score_texts[ii], ii, this._score_texts[ii].visible);
+                this._scoreTexts[ii].position = new Point(x_avg, y_avg);
+                this._scoreTexts[ii].visible = (this._zoomLevel < 4);
+                this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
             }
         }
     }
 
     private static readonly MOUSE_LOC: Point = new Point();
-    private update_score_node_gui(): void {
-        this._score_node_index = -1;
+    private updateScoreNodeGui(): void {
+        this._scoreNodeIndex = -1;
 
-        if (this._score_nodes != null) {
+        if (this._scoreNodes != null) {
             let base_xys: Point[] = [];
             let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
 
-            for (let ii: number = 0; ii < this.get_full_sequence_length(); ii++) {
-                base_xys.push(this.get_base_xy(ii));
+            for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
+                base_xys.push(this.getBaseXY(ii));
             }
 
             let total_score: number = 0;
@@ -2993,50 +2939,50 @@ export class Pose2D extends ContainerObject implements Updatable {
             let node_label: string = "";
             let node_score: string = "";
 
-            for (let ii = 0; ii < this._score_nodes.length; ii++) {
-                let base_indices: number[] = this._score_nodes[ii].get_base_indices();
+            for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+                let base_indices: number[] = this._scoreNodes[ii].get_base_indices();
                 let node_points: Point[] = [];
 
                 for (let jj: number = 0; jj < base_indices.length; jj++) {
                     node_points.push(base_xys[base_indices[jj]]);
                 }
 
-                total_score += this._score_nodes[ii].get_score();
+                total_score += this._scoreNodes[ii].get_score();
 
                 if (!node_found && Utility.is_point_within(mouse_p, node_points)) {
-                    node_txt = this._score_nodes[ii].get_text();
-                    node_label = this._score_nodes[ii].get_text_label();
-                    node_score = this._score_nodes[ii].get_text_score();
+                    node_txt = this._scoreNodes[ii].get_text();
+                    node_label = this._scoreNodes[ii].get_text_label();
+                    node_score = this._scoreNodes[ii].get_text_score();
                     node_found = true;
-                    this._score_node_index = ii;
+                    this._scoreNodeIndex = ii;
                 }
             }
 
             let score_label = "Total";
             let score_score = "";
             let factor: number = 0;
-            if ((this._molecular_binding_bases != null) ||
-                (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) ||
+            if ((this._molecularBindingBases != null) ||
+                (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) ||
                 (this._oligos != null)) {
 
                 let label_elems: string[] = [];
                 let score_elems: string[] = [];
 
-                if (this._molecular_binding_bases != null) {
+                if (this._molecularBindingBases != null) {
                     factor++;
-                    if (this._molecule_is_bound_real) {
+                    if (this._moleculeIsBoundReal) {
                         label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
-                        let molecule_bonus: number = Math.round(this._molecular_binding_bonus);
+                        let molecule_bonus: number = Math.round(this._molecularBindingBonus);
                         score_elems.push(EnergyScoreDisplay.green(` ${molecule_bonus} kcal`));
                     } else {
                         label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
                         score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
                     }
                 }
-                if (this._oligo != null && this._oligo_mode === Pose2D.OLIGO_MODE_DIMER) {
+                if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
                     factor++;
-                    let malus: number = this._duplex_cost + Math.round(this._oligo_malus);
-                    if (this._oligo_paired) {
+                    let malus: number = this._duplexCost + Math.round(this._oligoMalus);
+                    if (this._oligoPaired) {
                         label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
                         score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     } else {
@@ -3046,7 +2992,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 }
                 if (this._oligos != null) {
                     factor++;
-                    if (this._oligos_paired === 0) {
+                    if (this._oligosPaired === 0) {
                         if (this._oligos.length > 1) {
                             label_elems.push(EnergyScoreDisplay.grey("No Oligo Bound"));
                         } else {
@@ -3054,11 +3000,11 @@ export class Pose2D extends ContainerObject implements Updatable {
                         }
                         score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
                     } else {
-                        let malus = this._duplex_cost;
-                        for (let ii = 0; ii < this._oligos_paired; ii++) {
-                            malus += Math.round(this._oligos[this._oligos_order[ii]].malus);
+                        let malus = this._duplexCost;
+                        for (let ii = 0; ii < this._oligosPaired; ii++) {
+                            malus += Math.round(this._oligos[this._oligosOrder[ii]].malus);
                         }
-                        if (this._oligos_paired > 1) {
+                        if (this._oligosPaired > 1) {
                             label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
                         } else {
                             label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
@@ -3073,73 +3019,73 @@ export class Pose2D extends ContainerObject implements Updatable {
             } else {
                 score_score = (total_score / 100).toString() + " kcal";
             }
-            this.update_energy_display_size_location(factor);
+            this.updateEnergyDisplaySizeLocation(factor);
 
-            this._primary_score_energy_display.setEnergyText(score_label, score_score);
-            this._secondary_score_energy_display.setEnergyText(node_label, node_score);
-            this._secondary_score_energy_display.visible = (this._show_total_energy && node_found);
+            this._primaryScoreEnergyDisplay.setEnergyText(score_label, score_score);
+            this._secondaryScoreEnergyDisplay.setEnergyText(node_label, node_score);
+            this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && node_found);
         }
     }
 
-    private update_energy_display_size_location(factor: number): void {
-        this._primary_score_energy_display.position = new Point(17, 118);
-        this._primary_score_energy_display.setSize(111 + factor * 59, 40);
+    private updateEnergyDisplaySizeLocation(factor: number): void {
+        this._primaryScoreEnergyDisplay.position = new Point(17, 118);
+        this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._secondary_score_energy_display.position = new Point(17 + 119 + factor * 59, 118);
-        this._secondary_score_energy_display.setSize(111, 40);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118);
+        this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
-    private clear_score_texts(): void {
-        if (this._score_texts != null) {
-            for (let score_text of this._score_texts) {
+    private clearScoreTexts(): void {
+        if (this._scoreTexts != null) {
+            for (let score_text of this._scoreTexts) {
                 score_text.destroy({children: true});
             }
-            this._score_texts = null;
+            this._scoreTexts = null;
         }
     }
 
-    private generate_score_nodes(): void {
-        this._score_nodes = null;
-        this.clear_energy_highlights();
+    private generateScoreNodes(): void {
+        this._scoreNodes = null;
+        this.clearEnergyHighlights();
 
-        if (this._score_folder == null ||
+        if (this._scoreFolder == null ||
             this._sequence == null ||
             this._sequence.length === 0 ||
             this._pairs == null ||
-            this._pairs.length !== this.get_full_sequence_length()) {
+            this._pairs.length !== this.fullSequenceLength) {
 
-            this.clear_score_texts();
+            this.clearScoreTexts();
             return;
         }
 
         /// JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
         /// But this is cheap, so it shouldn't matter too much
         let score_tree: RNALayout = new RNALayout;
-        score_tree.setup_tree(this.get_satisfied_pairs());
+        score_tree.setup_tree(this.satisfiedPairs);
 
         let treeroot: RNATreeNode = score_tree.get_root();
-        score_tree.score_tree(this.get_full_sequence(), this._score_folder);
+        score_tree.score_tree(this.fullSequence, this._scoreFolder);
 
         let score_nodes: ScoreDisplayNode[] = [];
         let root_coords: number[] = [];
-        this.generate_score_nodes_recursive(treeroot, root_coords, score_nodes);
-        this._score_nodes = score_nodes;
+        this.generateScoreNodesRecursive(treeroot, root_coords, score_nodes);
+        this._scoreNodes = score_nodes;
 
-        this.clear_score_texts();
-        if (this._display_score_texts) {
-            this._score_texts = [];
-            for (let scoreNode of this._score_nodes) {
+        this.clearScoreTexts();
+        if (this._displayScoreTexts) {
+            this._scoreTexts = [];
+            for (let scoreNode of this._scoreNodes) {
                 let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.getScoreString(), scoreNode.getScoreColor()));
                 scoreText.visible = false;
-                this._score_texts.push(scoreText);
+                this._scoreTexts.push(scoreText);
                 this.container.addChild(scoreText);
             }
         }
 
-        this.update_score_node_gui();
+        this.updateScoreNodeGui();
     }
 
-    private generate_score_nodes_recursive(root: RNATreeNode, coords: number[], nodes: ScoreDisplayNode[]): void {
+    private generateScoreNodesRecursive(root: RNATreeNode, coords: number[], nodes: ScoreDisplayNode[]): void {
         if (root == null) {
             return;
         }
@@ -3175,20 +3121,20 @@ export class Pose2D extends ContainerObject implements Updatable {
                     nodes.push(newnode);
                     newnode.set_type(ScoreDisplayNodeType.STACK, child_coords, root._score);
 
-                    this.generate_score_nodes_recursive(root._children[0], null, nodes);
+                    this.generateScoreNodesRecursive(root._children[0], null, nodes);
                 } else {
                     child_coords = [];
 
                     child_coords.push(root._index_b);
                     child_coords.push(root._index_a);
 
-                    this.generate_score_nodes_recursive(root._children[0], child_coords, nodes);
+                    this.generateScoreNodesRecursive(root._children[0], child_coords, nodes);
                 }
             }
 
         } else {
             for (let child of root._children) {
-                this.generate_score_nodes_recursive(child, coords, nodes);
+                this.generateScoreNodesRecursive(child, coords, nodes);
             }
 
             if (coords != null) {
@@ -3200,7 +3146,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private is_editable(seqnum: number): boolean {
+    private isEditable(seqnum: number): boolean {
         if (this._editable_indices != null) {
             let in_list: boolean = (this._editable_indices.indexOf(seqnum) !== -1);
             return this._editable ? in_list : !in_list;
@@ -3216,7 +3162,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return base;
     }
 
-    private static get_pair_strength(s1: number, s2: number): number {
+    private static getPairStrength(s1: number, s2: number): number {
         if (Pose2D.isPair(s1, s2, EPars.RNABASE_ADENINE, EPars.RNABASE_URACIL)) {
             return 2;
         } else if (Pose2D.isPair(s1, s2, EPars.RNABASE_GUANINE, EPars.RNABASE_URACIL)) {
@@ -3239,178 +3185,169 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Array of sequence/pairs
     private _sequence: number[] = [];
-    private _mutated_sequence: number[];
+    private _mutatedSequence: number[];
     private _pairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
-    private _forced_struct: number[] = [];
-    private _design_struct: boolean[] = [];
-    private _binding_site: boolean[];
-    private _molecular_binding_bases: BaseGlow[] = null;
-    private _molecular_binding_pairs: number[] = null;
+    private _forcedStruct: number[] = [];
+    private _designStruct: boolean[] = [];
+    private _bindingSite: boolean[];
+    private _molecularBindingBases: BaseGlow[] = null;
+    private _molecularBindingPairs: number[] = null;
     private _molecule: Molecule = null;
-    private _molecule_is_bound: boolean = false;
-    private _molecule_is_bound_real: boolean = false;
-    private _molecular_binding_bonus: number = 0;
-    private _molecule_target_pairs: number[];
-    private parenthesis: string;
-    private _shift_limit: number;
+    private _moleculeIsBound: boolean = false;
+    private _moleculeIsBoundReal: boolean = false;
+    private _molecularBindingBonus: number = 0;
+    private _moleculeTargetPairs: number[];
+    private _parenthesis: string;
+    private _shiftLimit: number;
 
     /// Oligos
     private _oligo: number[] = null;
-    private _oligo_mode: number = Pose2D.OLIGO_MODE_DIMER;
-    private _oligo_name: string = null;
-    private _duplex_cost: number = EPars.DUPLEX_INIT; // total for all strands
-    private _oligo_malus: number = 0; // concentration related penalty
-    private _oligo_bases: BaseGlow[] = null; // for glows
-    private _oligo_paired: boolean = false;
+    private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
+    private _oligoName: string = null;
+    private _duplexCost: number = EPars.DUPLEX_INIT; // total for all strands
+    private _oligoMalus: number = 0; // concentration related penalty
+    private _oligoBases: BaseGlow[] = null; // for glows
+    private _oligoPaired: boolean = false;
 
     /// Multistrands
     private _oligos: Oligo[] = null;
-    private _oligos_order: number[] = null;
-    private _prev_oligos_order: number[];
-    private _oligos_paired: number = 0;
-    private _strand_label: TextBalloon;
+    private _oligosOrder: number[] = null;
+    private _prevOligosOrder: number[];
+    private _oligosPaired: number = 0;
+    private _strandLabel: TextBalloon;
 
     private _barcodes: number[];
     private _moleculeLayer: Container;
 
-    /// Are we coloring?
     private _coloring: boolean = false;
-    private _current_color: number = EPars.RNABASE_URACIL;
-    private _last_colored_index: number;
-    private _lock_updated: boolean;
-    private _binding_site_updated: boolean;
-    private _design_struct_updated: boolean;
+    private _currentColor: number = EPars.RNABASE_URACIL;
+    private _lastColoredIndex: number;
+    private _lockUpdated: boolean;
+    private _bindingSiteUpdated: boolean;
+    private _designStructUpdated: boolean;
 
     /// Scripted painters
-    private _dyn_paint_colors: number[] = [];
-    private _dyn_paint_tools: Booster[] = [];
+    private _dynPaintColors: number[] = [];
+    private _dynPaintTools: Booster[] = [];
 
     /// Is this pose editable?
     private _editable: boolean;
     private _editable_indices: number[] = null;
 
     /// Pointer to callback function to be called after change in pose
-    private _pose_edit_callback: () => void = null;
-    private _track_moves_callback: (count: number, moves: any[]) => void = null;
-    private _add_base_callback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
-    private _start_mousedown_callback: PoseMouseDownCallback;
-    private _mouse_down_altKey: boolean = false;
+    private _poseEditCallback: () => void = null;
+    private _trackMovesCallback: (count: number, moves: any[]) => void = null;
+    private _addBaseCallback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
+    private _startMousedownCallback: PoseMouseDownCallback;
+    private _mouseDownAltKey: boolean = false;
 
-    /// Display bases as letters?
     private _lettermode: boolean = false;
+    private _displayScoreTexts: boolean;
 
-    /// Display score texts?
-    private _display_score_texts: boolean;
-
-    /// Do we have to setDirty pose?
     private _redraw: boolean = true;
-    private _base_dirty: Rectangle = null;
 
     /// Time which we sampled bases to animate last time;
-    private _last_sampled_time: number = -1;
+    private lastSampledTime: number = -1;
 
     /// Pose position offset
-    private _off_x: number = 0;
-    private _off_y: number = 0;
+    private _offX: number = 0;
+    private _offY: number = 0;
     private _prevOffsetX: number = 0;
     private _prevOffsetY: number = 0;
-    private _offset_translating: boolean;
-    private _start_offset_x: number;
-    private _start_offset_y: number;
-    private _end_offset_x: number;
-    private _end_offset_y: number;
+    private _offsetTranslating: boolean;
+    private _startOffsetX: number;
+    private _startOffsetY: number;
+    private _endOffsetX: number;
+    private _endOffsetY: number;
 
     /// For base moving animation
-    private _base_from_x: number[];
-    private _base_from_y: number[];
-    private _base_to_x: number[];
-    private _base_to_y: number[];
-    private _fold_start_time: number;
-    private _fold_duration: number;
+    private _baseFromX: number[];
+    private _baseFromY: number[];
+    private _baseToX: number[];
+    private _baseToY: number[];
+    private _foldStartTime: number;
+    private _foldDuration: number;
     // private _paint_cursor: PaintCursor;
 
-    /// Pose zoom
-    private _zoom_level: number = 0;
-
-    /// Pose angle
-    private _desired_angle: number = 0;
+    private _zoomLevel: number = 0;
+    private _desiredAngle: number = 0;
 
     /// Is explosion animation on going?
-    private _is_exploding: boolean = false;
-    private _explosion_start_time: number = -1;
-    private _explosion_rays: LightRay[];
-    private _orig_offset_x: number;
-    private _orig_offset_y: number;
+    private _isExploding: boolean = false;
+    private _explosionStartTime: number = -1;
+    private _explosionRays: LightRay[];
+    private _origOffsetX: number;
+    private _origOffsetY: number;
 
     private _onExplosionComplete: () => void;
 
     /// Selection box
-    private _selection_highlight_box: HighlightBox;
-    private _restricted_highlight_box: HighlightBox;
-    private _highlight_restricted: boolean = false;
-    private _unstable_highlight_box: HighlightBox;
-    private _forced_highlight_box: HighlightBox;
-    private _user_defined_highlight_box: HighlightBox;
-    private _shift_highlight_box: HighlightBox;
-    private _shift_start: number = -1;
-    private _shift_end: number = -1;
+    private _selectionHighlightBox: HighlightBox;
+    private restrictedHighlightBox: HighlightBox;
+    private _highlightRestricted: boolean = false;
+    private _unstableHighlightBox: HighlightBox;
+    private _forcedHighlightBox: HighlightBox;
+    private _userDefinedHighlightBox: HighlightBox;
+    private _shiftHighlightBox: HighlightBox;
+    private _shiftStart: number = -1;
+    private _shiftEnd: number = -1;
 
     /// For praising stacks
-    private _praise_queue: number[] = [];
-    private _praise_seq: number[] = [];
+    private _praiseQueue: number[] = [];
+    private _praiseSeq: number[] = [];
 
     /// Score display nodes
-    private _score_nodes: ScoreDisplayNode[];
-    private _score_texts: Sprite[];
-    private _score_folder: Folder;
-    private _score_node_index: number = -1;
-    private _last_score_node_index: number = -1;
-    private _score_node_highlight: Graphics;
+    private _scoreNodes: ScoreDisplayNode[];
+    private _scoreTexts: Sprite[];
+    private _scoreFolder: Folder;
+    private _scoreNodeIndex: number = -1;
+    private _lastScoreNodeIndex: number = -1;
+    private _scoreNodeHighlight: Graphics;
 
     // New Score Display panels
-    private _primary_score_energy_display: EnergyScoreDisplay;
-    private _secondary_score_energy_display: EnergyScoreDisplay;
-    private _show_total_energy: boolean = true;
+    private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
+    private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
+    private _showTotalEnergy: boolean = true;
 
     /// For tracking a base
-    private _tracked_indices: number[] = [];
-    private _base_boxes: Graphics[] = [];
-    private _cursor_index: number = 0;
-    private _cursor_box: Graphics = null;
-    private _last_shifted_index: number = -1;
-    private _last_shifted_command: number = -1;
+    private _trackedIndices: number[] = [];
+    private _baseBoxes: Graphics[] = [];
+    private _cursorIndex: number = 0;
+    private _cursorBox: Graphics = null;
+    private _lastShiftedIndex: number = -1;
+    private _lastShiftedCommand: number = -1;
 
     /// Rendering mode
-    private _numbering_mode: boolean = false;
-    private _lowperform_mode: boolean = false;
+    private _numberingMode: boolean = false;
+    private _lowperformMode: boolean = false;
 
     /// Last exp paint data
-    private _exp_painter: ExpPainter = null;
-    private _exp_mid: number = 0;
-    private _exp_hi: number = 0;
-    private _exp_continuous: boolean = false;
-    private _exp_extended_scale: boolean = false;
-    private _display_aux_info: boolean;
-    private _aux_info: any;
-    private _aux_info_canvas: Graphics;
-    private _aux_textballoon: TextBalloon;
+    private _expPainter: ExpPainter = null;
+    private _expMid: number = 0;
+    private _expHi: number = 0;
+    private _expContinuous: boolean = false;
+    private _expExtendedScale: boolean = false;
+    private _displayAuxInfo: boolean;
+    private _auxInfo: any;
+    private _auxInfoCanvas: Graphics;
+    private _auxTextballoon: TextBalloon;
 
-    private _feedback_objs: SceneObject[] = [];
-    private _feedback_objs_num: number;
-    private _feedback_objs_start_ind: number;
+    private _feedbackObjs: SceneObject[] = [];
+    private _feedbackObjsNum: number;
+    private _feedbackObjsStartInd: number;
 
-    private _anchored_objects: RNAAnchorObject[] = [];
-    private _highlight_energy_text: boolean = false;
-    private _energy_highlights: SceneObject[] = [];
+    private _anchoredObjects: RNAAnchorObject[] = [];
+    private _highlightEnergyText: boolean = false;
+    private _energyHighlights: SceneObject[] = [];
     /*
 	 * NEW HIGHLIGHT.
 	 * 	- Input: List of nucleotides that we wish to highlight.
 	 * 	- Unhighlighted Nucleotides: Draw at 65% opacity.
 	 *	- Highlight Nucleotides: Brighten glow around the nucleotide.
 	 */
-    private _all_new_highlights: RNAHighlightState[] = [];
+    private _allNewHighlights: RNAHighlightState[] = [];
 
     private static readonly CLEAVING_SITE = "cleaving_site";
 

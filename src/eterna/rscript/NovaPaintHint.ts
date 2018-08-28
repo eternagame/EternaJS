@@ -42,7 +42,7 @@ export class NovaPaintHint extends ContainerObject implements Updatable {
 
         let startPos: Point = this._startPoint;
         if (this._anchor_set) {
-            startPos = this._rna.get_base_xy(this._base);
+            startPos = this._rna.getBaseXY(this._base);
         }
 
         if (this._lastTimeTick === 0) {

@@ -23,7 +23,7 @@ export class ROPRNA extends RScriptOp {
     /* override */
     public exec(): void {
         if (this._type === ROPRNAType.SETBASE) {
-            this._env.GetRNA().set_base_color(this._nuc_idx,
+            this._env.GetRNA().setBaseColor(this._nuc_idx,
                 RScriptEnv.ConvertNucleotideStringToInt(this._color));
         } else if (this._type === ROPRNAType.CHANGEMODE) {
             if (this._fold_mode === 0) {
@@ -32,7 +32,7 @@ export class ROPRNA extends RScriptOp {
                 this._env.GetUI().rop_set_to_target_mode();
             }
         } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
-            this._env.GetRNA().force_editable(this._enabled, this._scope);
+            this._env.GetRNA().forceEditable(this._enabled, this._scope);
         } else if (this._type === ROPRNAType.SETPAINTER) {
             let ui: PoseEditMode = this._env.GetUI();
             if (this._color === "SWAP") {
@@ -46,7 +46,7 @@ export class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.CHANGESTATE) {
             this._env.GetUI().rop_change_target(this._state);
         } else if (this._type === ROPRNAType.SETZOOM) {
-            this._env.GetRNA().set_zoom_level(this._zoom_level, this._animate, this._center);
+            this._env.GetRNA().setZoomLevel(this._zoom_level, this._animate, this._center);
         } else if (this._type === ROPRNAType.SETPIP) {
             this._env.GetUI().ropSetPip(this._enabled);
         }

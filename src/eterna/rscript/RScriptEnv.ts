@@ -182,9 +182,9 @@ export class RScriptEnv extends ContainerObject {
             return this.GetUI().toolbar.puzzleStateToggle;
         case RScriptUIElementID.TOTALENERGY:
         case RScriptUIElementID.PRIMARY_ENERGY:
-            return this.GetRNA().get_primary_score_display();
+            return this.GetRNA().primaryScoreDisplay;
         case RScriptUIElementID.SECONDARY_ENERGY:
-            return this.GetRNA().get_secondary_score_display();
+            return this.GetRNA().secondaryScoreDisplay;
         case RScriptUIElementID.PALETTE:
         case RScriptUIElementID.PALETTEALT:
             return this.GetUI().toolbar.palette;
