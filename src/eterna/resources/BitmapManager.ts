@@ -6,27 +6,25 @@ import {Fonts} from "../util/Fonts";
 import {Bitmaps} from "./Bitmaps";
 
 export class BitmapManager {
-    // / TODO: remove me!
-    public static get_bitmap(source: string): Texture {
-        return Texture.fromImage(source);
+    public static getBitmap(url: string): Texture {
+        return Texture.fromImage(url);
     }
 
-    // / TODO: remove me!
-    public static get_bitmap_named(name: string): Texture {
+    public static getBitmapNamed(name: string): Texture {
         let source: string = (Bitmaps as any)[name];
         Assert.notNull(source, `No such bitmap: ${name}`);
-        return this.get_bitmap(source);
+        return this.getBitmap(source);
     }
 
-    public static get_number_bitmap(ii: number, color: number = 0xffffff): Texture {
-        return BitmapManager.get_text_bitmap_impl(ii.toString(), Fonts.ARIAL, 14, false, color);
+    public static getNumberBitmap(ii: number, color: number = 0xffffff): Texture {
+        return BitmapManager.getTextBitmapImpl(ii.toString(), Fonts.ARIAL, 14, false, color);
     }
 
-    public static get_text_bitmap(txt: string, color: number = 0xffffff): Texture {
-        return BitmapManager.get_text_bitmap_impl(txt, Fonts.ARIAL, 12, true, color);
+    public static getTextBitmap(txt: string, color: number = 0xffffff): Texture {
+        return BitmapManager.getTextBitmapImpl(txt, Fonts.ARIAL, 12, true, color);
     }
 
-    private static get_text_bitmap_impl(text: string, fontName: string, fontSize: number, bold: boolean, color: number): Texture {
+    private static getTextBitmapImpl(text: string, fontName: string, fontSize: number, bold: boolean, color: number): Texture {
         let bitmap: Texture = BitmapManager._textBitmaps.get(text);
         if (bitmap == null) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);

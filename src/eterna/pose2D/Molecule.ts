@@ -61,8 +61,8 @@ export class Molecule extends Container {
         Molecule._glowWrongTex = [];
         Molecule._bodyTex = [];
 
-        let original_glow_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgMoleculeOuter);
-        let original_body_data: Texture = BitmapManager.get_bitmap(Bitmaps.ImgMoleculeInner);
+        let original_glow_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgMoleculeOuter);
+        let original_body_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgMoleculeInner);
 
         for (let zz: number = 0; zz < 5; zz++) {
             let bitmaps_in_zoom: Texture[] = [];

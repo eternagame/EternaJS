@@ -489,7 +489,7 @@ export class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleIcon = new Sprite(BitmapManager.get_bitmap(Bitmaps.NovaPuzzleImg));
+        let puzzleIcon = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaPuzzleImg));
         puzzleIcon.position = new Point(11, 8);
         this.uiLayer.addChild(puzzleIcon);
 

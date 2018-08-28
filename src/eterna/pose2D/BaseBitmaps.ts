@@ -44,7 +44,7 @@ export class BaseBitmaps {
         this.fMidData = BaseBitmaps.createBodyBitmaps("Base*fMid", baseType);
         this.midLockData = BaseBitmaps.createBodyBitmaps("Base*MidLock", baseType);
         this.fMidLockData = BaseBitmaps.createBodyBitmaps("Base*fMidLock", baseType);
-        this.minData = BitmapManager.get_bitmap_named(BaseBitmaps.getBitmapName("Base*Min", baseType));
+        this.minData = BitmapManager.getBitmapNamed(BaseBitmaps.getBitmapName("Base*Min", baseType));
     }
 
     public getBodyBitmap (zoomLevel: number, flags: number): Texture {
@@ -91,7 +91,7 @@ export class BaseBitmaps {
 
     private static createBodyBitmaps (nameTemplate: string, baseType: number): Texture[] {
         let bmName: string = BaseBitmaps.getBitmapName(nameTemplate, baseType);
-        let bitmaps: Texture[] = [BitmapManager.get_bitmap_named(bmName)];
+        let bitmaps: Texture[] = [BitmapManager.getBitmapNamed(bmName)];
         BitmapUtil.create_scaled(bitmaps, Base.ZOOM_SCALE_FACTOR, Base.NUM_ZOOM_LEVELS);
         return bitmaps;
     }

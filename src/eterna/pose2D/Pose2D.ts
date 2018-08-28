@@ -1971,7 +1971,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                 let numberBitmap: Texture = null;
                 if (this._numberingMode && (ii === 0 || (ii + 1) % 5 === 0 || ii === fullSeq.length - 1)) {
-                    numberBitmap = BitmapManager.get_number_bitmap(ii + 1);
+                    numberBitmap = BitmapManager.getNumberBitmap(ii + 1);
                 }
 
                 this._bases[ii].setDrawParams(this._zoomLevel, this._offX, this._offY, current_time, drawFlags, numberBitmap, hl_state);
@@ -3074,7 +3074,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._displayScoreTexts) {
             this._scoreTexts = [];
             for (let scoreNode of this._scoreNodes) {
-                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.scoreString, scoreNode.scoreColor));
+                let scoreText = new Sprite(BitmapManager.getTextBitmap(scoreNode.scoreString, scoreNode.scoreColor));
                 scoreText.visible = false;
                 this._scoreTexts.push(scoreText);
                 this.container.addChild(scoreText);

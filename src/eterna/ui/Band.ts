@@ -76,7 +76,7 @@ export class Band extends ContainerObject implements Updatable {
             return;
         }
 
-        const satTex: Texture = BitmapManager.get_bitmap(Bitmaps.Satellite);
+        const satTex: Texture = BitmapManager.getBitmap(Bitmaps.Satellite);
         const render = (rotation: number, colorTransform: ColorMatrixFilter = null): Texture => {
             let disp = new Graphics();
             disp.beginFill(0).drawRect(0, 0, 20, 20).endFill();

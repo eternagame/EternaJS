@@ -35,20 +35,20 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._boxType = type;
         this.container.interactive = true;
 
-        this._puz_small_clear_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbSmallMet);
-        this._puz_small_fail_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbSmallFail);
-        this._puz_large_clear_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbLargeMet);
-        this._puz_large_fail_bg = BitmapManager.get_bitmap(Bitmaps.NovaPuzThumbLargeFail);
+        this._puz_small_clear_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
+        this._puz_small_fail_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
+        this._puz_large_clear_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeMet);
+        this._puz_large_fail_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeFail);
 
-        this._success_outline = BitmapManager.get_bitmap(Bitmaps.NovaPassOutline);
-        this._fail_outline = BitmapManager.get_bitmap(Bitmaps.NovaFailOutline);
+        this._success_outline = BitmapManager.getBitmap(Bitmaps.NovaPassOutline);
+        this._fail_outline = BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
 
         if (ConstraintBox._A == null) {
-            ConstraintBox._A = BitmapManager.get_bitmap(Bitmaps.BaseAMid);
-            ConstraintBox._G = BitmapManager.get_bitmap(Bitmaps.BaseGMid);
-            ConstraintBox._U = BitmapManager.get_bitmap(Bitmaps.BaseUMid);
-            ConstraintBox._C = BitmapManager.get_bitmap(Bitmaps.BaseCMid);
-            ConstraintBox._W = BitmapManager.get_bitmap(Bitmaps.BaseWMidPattern);
+            ConstraintBox._A = BitmapManager.getBitmap(Bitmaps.BaseAMid);
+            ConstraintBox._G = BitmapManager.getBitmap(Bitmaps.BaseGMid);
+            ConstraintBox._U = BitmapManager.getBitmap(Bitmaps.BaseUMid);
+            ConstraintBox._C = BitmapManager.getBitmap(Bitmaps.BaseCMid);
+            ConstraintBox._W = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
         }
 
         this._bgGraphics = new Graphics();
@@ -189,7 +189,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this.container.addChild(this._side_txt);
         }
 
-        this._check = new Sprite(BitmapManager.get_bitmap(Bitmaps.NovaGreenCheck));
+        this._check = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaGreenCheck));
         this._check.position = new Point(80, 50);
         this._check.visible = false;
         this.container.addChild(this._check);
@@ -358,8 +358,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaBoostMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaBoostReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaBoostMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaBoostReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -389,8 +389,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaNoGUMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaNoGUReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaNoGUMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaNoGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -419,8 +419,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaGUMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaGUReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaGUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -459,12 +459,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             if (constraintType === ConstraintType.NOGC) {
                 this._req.texture = isMissionScreen
-                    ? BitmapManager.get_bitmap(Bitmaps.NovaNoGCMissionReq)
-                    : BitmapManager.get_bitmap(Bitmaps.NovaNoGCReq);
+                    ? BitmapManager.getBitmap(Bitmaps.NovaNoGCMissionReq)
+                    : BitmapManager.getBitmap(Bitmaps.NovaNoGCReq);
             } else if (isMissionScreen) {
-                this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCMissionReq);
+                this._req.texture = BitmapManager.getBitmap(Bitmaps.NovaGCMissionReq);
             } else {
-                this._req.texture = BitmapManager.get_bitmap(Bitmaps.NovaGCReq);
+                this._req.texture = BitmapManager.getBitmap(Bitmaps.NovaGCReq);
             }
 
             this._req.visible = true;
@@ -496,8 +496,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaAUMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaAUReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaAUReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -662,8 +662,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.visible = true;
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap_named(`Nova${letter}MissionReq`)
-                : BitmapManager.get_bitmap_named(`Nova${letter}Req`);
+                ? BitmapManager.getBitmapNamed(`Nova${letter}MissionReq`)
+                : BitmapManager.getBitmapNamed(`Nova${letter}Req`);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -684,8 +684,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaPairsMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaPairsReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaPairsMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaPairsReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -780,8 +780,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_stat_txt.text = stat.toString();
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap_named(`Nova${letter}RowMissionReq`)
-                : BitmapManager.get_bitmap_named(`Nova${letter}RowReq`);
+                ? BitmapManager.getBitmapNamed(`Nova${letter}RowMissionReq`)
+                : BitmapManager.getBitmapNamed(`Nova${letter}RowReq`);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -793,7 +793,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.endFill();
 
             this._icon.visible = true;
-            this._icon.texture = BitmapManager.get_bitmap(Bitmaps.ImgLabReq);
+            this._icon.texture = BitmapManager.getBitmap(Bitmaps.ImgLabReq);
             this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
 
             if (!isMissionScreen) {
@@ -868,8 +868,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req_clarify_text.text = "MUST BE UNIQUE";
 
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap(Bitmaps.NovaBarcodeMissionReq)
-                : BitmapManager.get_bitmap(Bitmaps.NovaBarcodeReq);
+                ? BitmapManager.getBitmap(Bitmaps.NovaBarcodeMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaBarcodeReq);
 
             this._req.visible = true;
             this._outline.visible = true;
@@ -898,8 +898,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             const ico = binder ? "Bound" : "Unbound";
             this._req.texture = isMissionScreen
-                ? BitmapManager.get_bitmap_named(`Nova${ico}OligoMissionReq`)
-                : BitmapManager.get_bitmap_named(`Nova${ico}OligoReq`);
+                ? BitmapManager.getBitmapNamed(`Nova${ico}OligoMissionReq`)
+                : BitmapManager.getBitmapNamed(`Nova${ico}OligoReq`);
 
             this._req.visible = true;
             this._outline.visible = true;
