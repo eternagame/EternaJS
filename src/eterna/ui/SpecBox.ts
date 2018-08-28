@@ -127,10 +127,10 @@ export class SpecBox extends ContainerObject {
     public setSpec(datablock: UndoBlock): void {
         const temperature: number = 37;
 
-        this._datasize = datablock.get_sequence().length;
+        this._datasize = datablock.sequence.length;
 
-        this._dotplot = datablock.create_dotplot();
-        this._meltplot = datablock.create_meltplot();
+        this._dotplot = datablock.createDotPlot();
+        this._meltplot = datablock.createMeltPlot();
 
         let statstring: StyledTextBuilder = new StyledTextBuilder({
             fontFamily: Fonts.ARIAL,
@@ -143,15 +143,15 @@ export class SpecBox extends ContainerObject {
 
         statstring
             .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
-            .append(`${datablock.get_param(UndoBlockParam.AU, temperature)}   `)
+            .append(`${datablock.getParam(UndoBlockParam.AU, temperature)}   `)
             .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
-            .append(`${datablock.get_param(UndoBlockParam.GC, temperature)}   `)
+            .append(`${datablock.getParam(UndoBlockParam.GC, temperature)}   `)
             .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
-            .append(`${datablock.get_param(UndoBlockParam.GU, temperature)}\n`)
+            .append(`${datablock.getParam(UndoBlockParam.GU, temperature)}\n`)
             .append("Melting point : ", "bold")
-            .append(`${datablock.get_param(UndoBlockParam.MELTING_POINT, temperature)}°C\n`)
+            .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, temperature)}°C\n`)
             .append("Free energy : ", "bold")
-            .append(`${Number(datablock.get_param(UndoBlockParam.FE, temperature) / 100).toFixed(1)}kcal\n`);
+            .append(`${Number(datablock.getParam(UndoBlockParam.FE, temperature) / 100).toFixed(1)}kcal\n`);
 
         statstring.apply(this._stattext);
 

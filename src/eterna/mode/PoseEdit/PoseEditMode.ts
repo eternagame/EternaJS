@@ -361,7 +361,7 @@ export class PoseEditMode extends GameMode {
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     let undo_block: UndoBlock = new UndoBlock([]);
-                    undo_block.fromJson(fd[ii]);
+                    undo_block.fromJSON(fd[ii]);
                     this._seqStacks[this._stackLevel][ii] = undo_block;
                 }
 
@@ -743,7 +743,7 @@ export class PoseEditMode extends GameMode {
 
         ExternalInterface.addCallback("get_native_structure", (indx: number): string => {
             if (indx < 0 || indx >= this._poses.length) return null;
-            let native_pairs = this.getCurrentUndoBlock(indx).get_pairs();
+            let native_pairs = this.getCurrentUndoBlock(indx).getPairs();
             return EPars.pairsToParenthesis(native_pairs);
         });
 
@@ -752,7 +752,7 @@ export class PoseEditMode extends GameMode {
                 return null;
             }
 
-            let native_pairs: number[] = this.getCurrentUndoBlock(indx).get_pairs();
+            let native_pairs: number[] = this.getCurrentUndoBlock(indx).getPairs();
             let seq_arr: number[] = this.getPose(indx).fullSequence;
             return EPars.pairsToParenthesis(native_pairs, seq_arr);
         });
@@ -761,7 +761,7 @@ export class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
-            return this.getCurrentUndoBlock(indx).get_param(UndoBlockParam.FE);
+            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
         });
 
         ExternalInterface.addCallback("get_constraints", (): any[] => {
@@ -1504,7 +1504,7 @@ export class PoseEditMode extends GameMode {
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder.canDotPlot) {
-            datablock.set_meltingpoint_and_dotplot(this._folder);
+            datablock.updateMeltingPointAndDotPlot(this._folder);
         }
     }
 
@@ -1544,22 +1544,22 @@ export class PoseEditMode extends GameMode {
 
         /// Generate dot and melting plot data
         let datablock: UndoBlock = this.getCurrentUndoBlock();
-        if (datablock.get_param(UndoBlockParam.DOTPLOT_BITMAP) == null) {
+        if (datablock.getParam(UndoBlockParam.DOTPLOT_BITMAP) == null) {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        let init_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, 37);
+        let init_score: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37);
 
         let meltpoint: number = 107;
         for (let ii: number = 47; ii < 100; ii += 10) {
-            let current_score: number = datablock.get_param(UndoBlockParam.PROB_SCORE, ii);
+            let current_score: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii);
             if (current_score < init_score * 0.5) {
                 meltpoint = ii;
                 break;
             }
         }
 
-        datablock.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
+        datablock.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
 
         this.showDialog(new SubmitPoseDialog()).closed.then(submitDetails => {
             if (submitDetails != null) {
@@ -1612,25 +1612,25 @@ export class PoseEditMode extends GameMode {
         details.comment = details.comment.replace(newlinereg, "'");
         details.title = details.title.replace(newlinereg, "'");
 
-        let seq_string: string = EPars.sequenceToString(this._puzzle.transformSequence(undoBlock.get_sequence(), 0));
+        let seq_string: string = EPars.sequenceToString(this._puzzle.transformSequence(undoBlock.sequence, 0));
 
         post_data["title"] = details.title;
-        post_data["energy"] = undoBlock.get_param(UndoBlockParam.FE) / 100.0;
+        post_data["energy"] = undoBlock.getParam(UndoBlockParam.FE) / 100.0;
         post_data["puznid"] = this._puzzle.nodeID;
         post_data["sequence"] = seq_string;
-        post_data["repetition"] = undoBlock.get_param(UndoBlockParam.REPETITION);
-        post_data["gu"] = undoBlock.get_param(UndoBlockParam.GU);
-        post_data["gc"] = undoBlock.get_param(UndoBlockParam.GC);
-        post_data["ua"] = undoBlock.get_param(UndoBlockParam.AU);
+        post_data["repetition"] = undoBlock.getParam(UndoBlockParam.REPETITION);
+        post_data["gu"] = undoBlock.getParam(UndoBlockParam.GU);
+        post_data["gc"] = undoBlock.getParam(UndoBlockParam.GC);
+        post_data["ua"] = undoBlock.getParam(UndoBlockParam.AU);
         post_data["body"] = details.comment;
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            post_data["melt"] = undoBlock.get_param(UndoBlockParam.MELTING_POINT);
+            post_data["melt"] = undoBlock.getParam(UndoBlockParam.MELTING_POINT);
 
             if (this._foldTotalTime >= 1000.0) {
                 let fd: any[] = [];
                 for (let ii: number = 0; ii < this._poses.length; ii++) {
-                    fd.push(this.getCurrentUndoBlock(ii).toJson());
+                    fd.push(this.getCurrentUndoBlock(ii).toJSON());
                 }
                 post_data["fold-data"] = JSON.stringify(fd);
             }
@@ -1717,7 +1717,7 @@ export class PoseEditMode extends GameMode {
             this.showMissionClearedPanel(data);
 
             const seqString = EPars.sequenceToString(
-                this._puzzle.transformSequence(undoBlock.get_sequence(), 0));
+                this._puzzle.transformSequence(undoBlock.sequence, 0));
 
             if (data['error'] != null) {
                 if (data['error'].indexOf('barcode') >= 0) {
@@ -2015,9 +2015,9 @@ export class PoseEditMode extends GameMode {
         let msecs: number = 0;
 
         objs.push(msecs);
-        objs.push(this._seqStacks[this._stackLevel][0].get_sequence());
+        objs.push(this._seqStacks[this._stackLevel][0].sequence);
         for (let ii: number = 0; ii < this._poses.length; ++ii) {
-            objs.push(JSON.stringify(this._seqStacks[this._stackLevel][ii].toJson()));
+            objs.push(JSON.stringify(this._seqStacks[this._stackLevel][ii].toJSON()));
         }
 
         Eterna.settings.saveObject(this.savedDataTokenName, objs);
@@ -2088,7 +2088,7 @@ export class PoseEditMode extends GameMode {
             if (json[ii + 2] != null) {
                 let undo_block: UndoBlock = new UndoBlock([]);
                 try {
-                    undo_block.fromJson(JSON.parse(json[ii + 2]));
+                    undo_block.fromJSON(JSON.parse(json[ii + 2]));
                 } catch (e) {
                     log.error("Error loading saved puzzle data", e);
                     return false;
@@ -2097,12 +2097,12 @@ export class PoseEditMode extends GameMode {
                 /// JEEFIX : Don't override secstruct from autoload without checking whther the puzzle can vary length.
                 /// KWSFIX : Only allow when shiftable mode (=> shift_limit = 0)
 
-                if (this._puzzle.shiftLimit === 0 && undo_block.get_target_pairs().length !== this._targetPairs[ii].length) {
+                if (this._puzzle.shiftLimit === 0 && undo_block.targetPairs.length !== this._targetPairs[ii].length) {
                     return false;
                 }
 
-                this._targetPairs[ii] = undo_block.get_target_pairs();
-                this._targetOligosOrder[ii] = undo_block.get_target_oligo_order();
+                this._targetPairs[ii] = undo_block.targetPairs;
+                this._targetOligosOrder[ii] = undo_block.targetOligoOrder;
 
                 this.setPosesWithUndoBlock(ii, undo_block);
             }
@@ -2164,11 +2164,11 @@ export class PoseEditMode extends GameMode {
 
     private setPuzzleEpilog(init_seq: number[], is_reset: boolean): void {
         if (is_reset) {
-            let new_seq: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+            let new_seq: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
             this.moveHistoryAddSequence("reset", EPars.sequenceToString(new_seq));
         } else {
             this._startSolvingTime = new Date().getTime();
-            this._startingPoint = EPars.sequenceToString(this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0));
+            this._startingPoint = EPars.sequenceToString(this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0));
         }
 
         if (this._isDatabrowserMode) {
@@ -2198,22 +2198,22 @@ export class PoseEditMode extends GameMode {
         let isSatisfied: boolean = true;
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        const sequence = undoBlock.get_sequence();
+        const sequence = undoBlock.sequence;
 
         if (type === ConstraintType.GU) {
-            const count: number = undoBlock.get_param(UndoBlockParam.GU);
+            const count: number = undoBlock.getParam(UndoBlockParam.GU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.setContent(ConstraintType.GU, value, isSatisfied, count);
             }
         } else if (type === ConstraintType.AU) {
-            const count: number = undoBlock.get_param(UndoBlockParam.AU);
+            const count: number = undoBlock.getParam(UndoBlockParam.AU);
             isSatisfied = (count >= Number(value));
             if (render) {
                 box.setContent(ConstraintType.AU, value, isSatisfied, count)
             }
         } else if (type === ConstraintType.GC) {
-            const count: number = undoBlock.get_param(UndoBlockParam.GC);
+            const count: number = undoBlock.getParam(UndoBlockParam.GC);
             isSatisfied = (count <= Number(value));
             if (render) {
                 box.setContent(ConstraintType.GC, value, isSatisfied, count);
@@ -2228,14 +2228,14 @@ export class PoseEditMode extends GameMode {
         } else if (type === ConstraintType.SHAPE) {
             const target_index = Number(value);
             const ublk: UndoBlock = this.getCurrentUndoBlock(target_index);
-            let native_pairs = ublk.get_pairs();
+            let native_pairs = ublk.getPairs();
             let structure_constraints: any[] = null;
             if (this._targetConditions != null && this._targetConditions[target_index] != null) {
                 structure_constraints = this._targetConditions[target_index]['structure_constraints'];
 
-                if (ublk.get_oligo_order() != null) {
-                    let np_map: number[] = ublk.get_order_map(ublk.get_oligo_order());
-                    let tp_map: number[] = ublk.get_order_map(ublk.get_target_oligo_order());
+                if (ublk.oligoOrder != null) {
+                    let np_map: number[] = ublk.getOrderMap(ublk.oligoOrder);
+                    let tp_map: number[] = ublk.getOrderMap(ublk.targetOligoOrder);
                     if (np_map != null) {
                         let new_pairs: number[] = [];
                         let new_sc: number[] = [];
@@ -2296,7 +2296,7 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.ANTISHAPE) {
             let target_index = Number(value);
-            let native_pairs = this.getCurrentUndoBlock(target_index).get_pairs();
+            let native_pairs = this.getCurrentUndoBlock(target_index).getPairs();
             if (this._targetConditions == null) {
                 throw new Error("Target object not available for ANTISHAPE constraint");
             }
@@ -2379,8 +2379,8 @@ export class PoseEditMode extends GameMode {
             let bmap: boolean[] = [];
             let offsets: number[] = [];
             let ofs: number = sequence.length;
-            let o: number[] = undoblk.get_oligo_order();
-            let count: number = undoblk.get_oligos_paired();
+            let o: number[] = undoblk.oligoOrder;
+            let count: number = undoblk.oligosPaired;
             for (let jj = 0; jj < o.length; jj++) {
                 bmap[o[jj]] = (jj < count);
                 offsets[o[jj]] = ofs + 1;
@@ -2477,9 +2477,9 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type === ConstraintType.PAIRS) {
-            let num_gu: number = undoBlock.get_param(UndoBlockParam.GU);
-            let num_gc: number = undoBlock.get_param(UndoBlockParam.GC);
-            let num_ua: number = undoBlock.get_param(UndoBlockParam.AU);
+            let num_gu: number = undoBlock.getParam(UndoBlockParam.GU);
+            let num_gc: number = undoBlock.getParam(UndoBlockParam.GC);
+            let num_ua: number = undoBlock.getParam(UndoBlockParam.AU);
             isSatisfied = (num_gc + num_gu + num_ua >= Number(value));
 
             if (render) {
@@ -2487,7 +2487,7 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type === ConstraintType.STACK) {
-            const stack_len: number = undoBlock.get_param(UndoBlockParam.STACK);
+            const stack_len: number = undoBlock.getParam(UndoBlockParam.STACK);
             isSatisfied = (stack_len >= Number(value));
 
             if (render) {
@@ -2524,7 +2524,7 @@ export class PoseEditMode extends GameMode {
             outInfo.max_allowed_adenine = Number(value);
 
         } else if (type === ConstraintType.LAB_REQUIREMENTS) {
-            let locks: boolean[] = undoBlock.get_puzzle_locks();
+            let locks: boolean[] = undoBlock.puzzleLocks;
             let consecutive_g_count: number = EPars.countConsecutive(sequence, EPars.RNABASE_GUANINE, locks);
             let consecutive_c_count: number = EPars.countConsecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
             let consecutive_a_count: number = EPars.countConsecutive(sequence, EPars.RNABASE_ADENINE, locks);
@@ -2551,7 +2551,7 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.OLIGO_BOUND) {
             let target_index = Number(value);
-            let nnfe: number[] = this.getCurrentUndoBlock(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            let nnfe: number[] = this.getCurrentUndoBlock(target_index).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
             isSatisfied = (nnfe != null && nnfe[0] === -2);
 
             if (this._targetConditions == null) {
@@ -2589,7 +2589,7 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.OLIGO_UNBOUND) {
             let target_index = Number(value);
-            let nnfe: number[] = this.getCurrentUndoBlock(target_index).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            let nnfe: number[] = this.getCurrentUndoBlock(target_index).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
             isSatisfied = (nnfe == null || nnfe[0] !== -2);
 
             if (this._targetConditions == null) {
@@ -2766,8 +2766,8 @@ export class PoseEditMode extends GameMode {
         }
 
         const undo_block: UndoBlock = this.getCurrentUndoBlock();
-        const sequence: number[] = undo_block.get_sequence();
-        const locks: boolean[] = undo_block.get_puzzle_locks();
+        const sequence: number[] = undo_block.sequence;
+        const locks: boolean[] = undo_block.puzzleLocks;
 
         const restricted_guanine = EPars.getRestrictedConsecutive(sequence, EPars.RNABASE_GUANINE, constraintsInfo.max_allowed_guanine - 1, locks);
         const restricted_cytosine = EPars.getRestrictedConsecutive(sequence, EPars.RNABASE_CYTOSINE, constraintsInfo.max_allowed_cytosine - 1, locks);
@@ -2808,32 +2808,32 @@ export class PoseEditMode extends GameMode {
         // if (dn != null) dn.visible = (this._stack_level === 0);
 
         let undo_block: UndoBlock = this.getCurrentUndoBlock();
-        let sequence: number[] = undo_block.get_sequence();
-        let best_pairs: number[] = undo_block.get_pairs(EPars.DEFAULT_TEMPERATURE);
+        let sequence: number[] = undo_block.sequence;
+        let best_pairs: number[] = undo_block.getPairs(EPars.DEFAULT_TEMPERATURE);
         let nnfe: number[];
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 if (ii === 0 && this._poseState === PoseState.NATIVE && !this._isPipMode) {
-                    this._poses[0].setOligos(this.getCurrentUndoBlock().get_target_oligos(),
-                        this.getCurrentUndoBlock().get_oligo_order(),
-                        this.getCurrentUndoBlock().get_oligos_paired());
-                    this._poses[0].setOligo(this.getCurrentUndoBlock().get_target_oligo(),
-                        this.getCurrentUndoBlock().get_oligo_mode(),
-                        this.getCurrentUndoBlock().get_oligo_name());
-                    this._poses[0].pairs = this.getCurrentUndoBlock().get_pairs();
+                    this._poses[0].setOligos(this.getCurrentUndoBlock().targetOligos,
+                        this.getCurrentUndoBlock().oligoOrder,
+                        this.getCurrentUndoBlock().oligosPaired);
+                    this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
+                        this.getCurrentUndoBlock().oligoMode,
+                        this.getCurrentUndoBlock().oligoName);
+                    this._poses[0].pairs = this.getCurrentUndoBlock().getPairs();
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] != null) {
                         this._poses[0].structConstraints = this._targetConditions[this._curTargetIndex]['structure_constraints'];
                     }
                     continue;
                 }
-                this._poses[ii].setOligos(this.getCurrentUndoBlock(ii).get_target_oligos(),
-                    this.getCurrentUndoBlock(ii).get_oligo_order(),
-                    this.getCurrentUndoBlock(ii).get_oligos_paired());
-                this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).get_target_oligo(),
-                    this.getCurrentUndoBlock(ii).get_oligo_mode(),
-                    this.getCurrentUndoBlock(ii).get_oligo_name());
-                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).get_pairs();
+                this._poses[ii].setOligos(this.getCurrentUndoBlock(ii).targetOligos,
+                    this.getCurrentUndoBlock(ii).oligoOrder,
+                    this.getCurrentUndoBlock(ii).oligosPaired);
+                this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).targetOligo,
+                    this.getCurrentUndoBlock(ii).oligoMode,
+                    this.getCurrentUndoBlock(ii).oligoName);
+                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).getPairs();
                 if (this._targetConditions != null && this._targetConditions[ii] != null) {
                     this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
                 }
@@ -2842,30 +2842,30 @@ export class PoseEditMode extends GameMode {
         } else {
             for (let ii = 0; ii < this._poses.length; ++ii) {
                 if (ii === 0 && this._poseState === PoseState.TARGET && !this._isPipMode) {
-                    this._poses[0].setOligos(this.getCurrentUndoBlock().get_target_oligos(),
-                        this.getCurrentUndoBlock().get_target_oligo_order(),
-                        this.getCurrentUndoBlock().get_oligos_paired());
-                    this._poses[0].setOligo(this.getCurrentUndoBlock().get_target_oligo(),
-                        this.getCurrentUndoBlock().get_oligo_mode(),
-                        this.getCurrentUndoBlock().get_oligo_name());
-                    this._poses[0].pairs = this.getCurrentUndoBlock().get_target_pairs();
+                    this._poses[0].setOligos(this.getCurrentUndoBlock().targetOligos,
+                        this.getCurrentUndoBlock().targetOligoOrder,
+                        this.getCurrentUndoBlock().oligosPaired);
+                    this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
+                        this.getCurrentUndoBlock().oligoMode,
+                        this.getCurrentUndoBlock().oligoName);
+                    this._poses[0].pairs = this.getCurrentUndoBlock().targetPairs;
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] != null) {
                         this._poses[0].structConstraints = this._targetConditions[this._curTargetIndex]['structure_constraints'];
                     }
-                    this._targetOligos[0] = this.getCurrentUndoBlock(0).get_target_oligos();
-                    this._targetOligosOrder[0] = this.getCurrentUndoBlock(0).get_target_oligo_order();
-                    this._targetOligo[0] = this.getCurrentUndoBlock(0).get_target_oligo();
-                    this._oligoMode[0] = this.getCurrentUndoBlock(0).get_oligo_mode();
-                    this._oligoName[0] = this.getCurrentUndoBlock(0).get_oligo_name();
-                    this._targetPairs[0] = this.getCurrentUndoBlock(0).get_target_pairs();
+                    this._targetOligos[0] = this.getCurrentUndoBlock(0).targetOligos;
+                    this._targetOligosOrder[0] = this.getCurrentUndoBlock(0).targetOligoOrder;
+                    this._targetOligo[0] = this.getCurrentUndoBlock(0).targetOligo;
+                    this._oligoMode[0] = this.getCurrentUndoBlock(0).oligoMode;
+                    this._oligoName[0] = this.getCurrentUndoBlock(0).oligoName;
+                    this._targetPairs[0] = this.getCurrentUndoBlock(0).targetPairs;
                     continue;
                 }
-                this._targetOligos[ii] = this.getCurrentUndoBlock(ii).get_target_oligos();
-                this._targetOligosOrder[ii] = this.getCurrentUndoBlock(ii).get_target_oligo_order();
-                this._targetOligo[ii] = this.getCurrentUndoBlock(ii).get_target_oligo();
-                this._oligoMode[ii] = this.getCurrentUndoBlock(ii).get_oligo_mode();
-                this._oligoName[ii] = this.getCurrentUndoBlock(ii).get_oligo_name();
-                this._targetPairs[ii] = this.getCurrentUndoBlock(ii).get_target_pairs();
+                this._targetOligos[ii] = this.getCurrentUndoBlock(ii).targetOligos;
+                this._targetOligosOrder[ii] = this.getCurrentUndoBlock(ii).targetOligoOrder;
+                this._targetOligo[ii] = this.getCurrentUndoBlock(ii).targetOligo;
+                this._oligoMode[ii] = this.getCurrentUndoBlock(ii).oligoMode;
+                this._oligoName[ii] = this.getCurrentUndoBlock(ii).oligoName;
+                this._targetPairs[ii] = this.getCurrentUndoBlock(ii).targetPairs;
                 this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
                 this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
                 this._poses[ii].pairs = this._targetPairs[ii];
@@ -2896,7 +2896,7 @@ export class PoseEditMode extends GameMode {
             }
             if (Puzzle.isOligoType(this._targetConditions[jj]['type'])) {
                 this._poses[ii].oligoMalus = this._targetConditions[jj]['malus'];
-                nnfe = this.getCurrentUndoBlock(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                nnfe = this.getCurrentUndoBlock(jj).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].oligoPaired = true;
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
@@ -2905,16 +2905,16 @@ export class PoseEditMode extends GameMode {
                 }
             }
             if (this._targetConditions[jj]['type'] === "multistrand") {
-                nnfe = this.getCurrentUndoBlock(jj).get_param(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                nnfe = this.getCurrentUndoBlock(jj).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
                 }
             }
         }
 
-        let num_AU: number = undo_block.get_param(UndoBlockParam.AU);
-        let num_GU: number = undo_block.get_param(UndoBlockParam.GU);
-        let num_GC: number = undo_block.get_param(UndoBlockParam.GC);
+        let num_AU: number = undo_block.getParam(UndoBlockParam.AU);
+        let num_GU: number = undo_block.getParam(UndoBlockParam.GU);
+        let num_GC: number = undo_block.getParam(UndoBlockParam.GC);
         this._toolbar.palette.setPairCounts(num_AU, num_GU, num_GC);
 
         if (!this._isFrozen) {
@@ -2933,7 +2933,7 @@ export class PoseEditMode extends GameMode {
 
         let constraints_satisfied: boolean = this.checkConstraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
-            this.getCurrentUndoBlock(ii).set_stable(constraints_satisfied);
+            this.getCurrentUndoBlock(ii).stable = constraints_satisfied;
         }
 
         /// Update spec thumbnail if it is open
@@ -3190,7 +3190,7 @@ export class PoseEditMode extends GameMode {
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     let undo_block: UndoBlock = new UndoBlock([]);
-                    undo_block.fromJson(fd[ii]);
+                    undo_block.fromJSON(fd[ii]);
                     this._seqStacks[this._stackLevel][ii] = undo_block;
                 }
 
@@ -3358,16 +3358,16 @@ export class PoseEditMode extends GameMode {
         }
 
         let undo_block: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii));
-        undo_block.set_pairs(best_pairs);
-        undo_block.set_target_oligos(this._targetOligos[ii]);
-        undo_block.set_target_oligo(this._targetOligo[ii]);
-        undo_block.set_oligo_order(oligo_order);
-        undo_block.set_oligos_paired(oligos_paired);
-        undo_block.set_target_pairs(this._targetPairs[ii]);
-        undo_block.set_target_oligo_order(this._targetOligosOrder[ii]);
-        undo_block.set_puzzle_locks(this._poses[ii].puzzleLocks);
-        undo_block.set_target_conditions(this._targetConditions[ii]);
-        undo_block.set_basics(this._folder);
+        undo_block.setPairs(best_pairs);
+        undo_block.targetOligos = this._targetOligos[ii];
+        undo_block.targetOligo = this._targetOligo[ii];
+        undo_block.oligoOrder = oligo_order;
+        undo_block.oligosPaired = oligos_paired;
+        undo_block.targetPairs = this._targetPairs[ii];
+        undo_block.targetOligoOrder = this._targetOligosOrder[ii];
+        undo_block.puzzleLocks = this._poses[ii].puzzleLocks;
+        undo_block.targetConditions = this._targetConditions[ii];
+        undo_block.setBasics(this._folder);
         this._seqStacks[this._stackLevel][ii] = undo_block;
     }
 
@@ -3389,9 +3389,9 @@ export class PoseEditMode extends GameMode {
         /// JEEFIX
 
         let last_best_pairs: number[] = null;
-        let best_pairs: number[] = last_best_pairs = this._seqStacks[this._stackLevel][target_index].get_pairs();
+        let best_pairs: number[] = last_best_pairs = this._seqStacks[this._stackLevel][target_index].getPairs();
         if (this._stackLevel > 0) {
-            last_best_pairs = this._seqStacks[this._stackLevel - 1][target_index].get_pairs();
+            last_best_pairs = this._seqStacks[this._stackLevel - 1][target_index].getPairs();
         }
 
         if (last_best_pairs != null) {
@@ -3461,7 +3461,7 @@ export class PoseEditMode extends GameMode {
             if (sol != null && !sol.hasFoldData) {
                 let fd: any[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {
-                    fd.push(this.getCurrentUndoBlock(ii).toJson());
+                    fd.push(this.getCurrentUndoBlock(ii).toJSON());
                 }
                 sol.foldData = fd;
 
@@ -3481,20 +3481,20 @@ export class PoseEditMode extends GameMode {
     }
 
     private setPosesWithUndoBlock(ii: number, undo_block: UndoBlock): void {
-        this._poses[ii].sequence = this._puzzle.transformSequence(undo_block.get_sequence(), ii);
-        this._poses[ii].puzzleLocks = undo_block.get_puzzle_locks();
+        this._poses[ii].sequence = this._puzzle.transformSequence(undo_block.sequence, ii);
+        this._poses[ii].puzzleLocks = undo_block.puzzleLocks;
     }
 
     private moveUndoStack(): void {
         for (let ii: number = 0; ii < this._poses.length; ii++) {
             this.setPosesWithUndoBlock(ii, this._seqStacks[this._stackLevel][ii]);
-            this._targetPairs[ii] = this._seqStacks[this._stackLevel][ii].get_target_pairs();
-            this._targetConditions[ii] = this._seqStacks[this._stackLevel][ii].get_target_conditions();
-            this._targetOligo[ii] = this._seqStacks[this._stackLevel][ii].get_target_oligo();
-            this._oligoMode[ii] = this._seqStacks[this._stackLevel][ii].get_oligo_mode();
-            this._oligoName[ii] = this._seqStacks[this._stackLevel][ii].get_oligo_name();
-            this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].get_target_oligos();
-            this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].get_target_oligo_order();
+            this._targetPairs[ii] = this._seqStacks[this._stackLevel][ii].targetPairs;
+            this._targetConditions[ii] = this._seqStacks[this._stackLevel][ii].targetConditions;
+            this._targetOligo[ii] = this._seqStacks[this._stackLevel][ii].targetOligo;
+            this._oligoMode[ii] = this._seqStacks[this._stackLevel][ii].oligoMode;
+            this._oligoName[ii] = this._seqStacks[this._stackLevel][ii].oligoName;
+            this._targetOligos[ii] = this._seqStacks[this._stackLevel][ii].targetOligos;
+            this._targetOligosOrder[ii] = this._seqStacks[this._stackLevel][ii].targetOligoOrder;
         }
     }
 
@@ -3504,12 +3504,12 @@ export class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         this._stackLevel++;
         this.moveUndoStack();
 
-        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -3522,12 +3522,12 @@ export class PoseEditMode extends GameMode {
         }
         this.savePosesMarkersContexts();
 
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         this._stackLevel--;
         this.moveUndoStack();
 
-        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+        let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
         this.moveHistoryAddMutations(before, after);
 
         this.updateScore();
@@ -3536,15 +3536,15 @@ export class PoseEditMode extends GameMode {
 
     private moveUndoStackToLastStable(): void {
         this.savePosesMarkersContexts();
-        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+        let before: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
 
         let stack_level: number = this._stackLevel;
         while (this._stackLevel >= 1) {
 
-            if (this.getCurrentUndoBlock(0).get_stable()) {
+            if (this.getCurrentUndoBlock(0).stable) {
                 this.moveUndoStack();
 
-                let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).get_sequence(), 0);
+                let after: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
                 this.moveHistoryAddMutations(before, after);
 
                 this.updateScore();
