@@ -38,7 +38,7 @@ export class Background extends ContainerObject {
 
     private freezeBubbles(freeze: boolean): void {
         for (let bubble of this._bubbles) {
-            bubble.is_paused = freeze;
+            bubble.isPaused = freeze;
         }
     }
 

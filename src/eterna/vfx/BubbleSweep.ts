@@ -14,26 +14,26 @@ export class BubbleSweep extends ContainerObject {
 
     public start_sweep(): void {
         for (let bubble of this._bubbles) {
-            bubble.set_auto_hide(false);
+            bubble.autoHide = false;
             bubble.init();
         }
     }
 
     public stop_sweep(): void {
         for (let bubble of this._bubbles) {
-            bubble.is_paused = true;
+            bubble.isPaused = true;
         }
     }
 
     public pause_sweep(): void {
         for (let bubble of this._bubbles) {
-            bubble.is_paused = true;
+            bubble.isPaused = true;
         }
     }
 
     public decay_sweep(): void {
         for (let bubble of this._bubbles) {
-            bubble.set_auto_hide(true);
+            bubble.autoHide = true;
         }
     }
 
