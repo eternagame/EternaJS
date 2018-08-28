@@ -65,7 +65,7 @@ export class StructureInput extends GamePanel implements Updatable {
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, "(.)");
 
-        let error: string = EPars.validate_parenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
+        let error: string = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || "");
         this._textInput.text = input;
 
@@ -203,7 +203,7 @@ export class StructureInput extends GamePanel implements Updatable {
         }
         this._pose.sequence = sequence;
         this._pose.puzzleLocks = locks;
-        this._pose.molecularStructure = EPars.parenthesis_to_pair_array(this.structureString);
+        this._pose.molecularStructure = EPars.parenthesisToPairs(this.structureString);
         this._pose.molecularBindingSite = binding_site;
         this._pose.callPoseEditCallback();
 

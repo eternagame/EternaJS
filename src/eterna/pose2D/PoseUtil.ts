@@ -26,7 +26,7 @@ export class PoseUtil {
                 mutated_pairs[ii]++;
             }
         }
-        let parenthesis: string = EPars.pairs_array_to_parenthesis(mutated_pairs);
+        let parenthesis: string = EPars.pairsToParenthesis(mutated_pairs);
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutated_pairs];
     }
 
@@ -60,7 +60,7 @@ export class PoseUtil {
             mutated_pairs[index] = pindex + 2;
             mutated_pairs[pindex + 2] = index;
 
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
+            parenthesis = EPars.pairsToParenthesis(mutated_pairs);
             return [parenthesis, PuzzleEditOp.ADD_PAIR];
 
         }
@@ -79,7 +79,7 @@ export class PoseUtil {
             mutated_pairs[index] = index + 4;
             mutated_pairs[index + 4] = index;
 
-            parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
+            parenthesis = EPars.pairsToParenthesis(mutated_pairs);
             return [parenthesis, PuzzleEditOp.ADD_CYCLE];
         }
     }
@@ -95,7 +95,7 @@ export class PoseUtil {
             }
         }
 
-        parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
+        parenthesis = EPars.pairsToParenthesis(mutated_pairs);
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutated_pairs];
     }
 
@@ -124,7 +124,7 @@ export class PoseUtil {
             }
         }
 
-        parenthesis = EPars.pairs_array_to_parenthesis(mutated_pairs);
+        parenthesis = EPars.pairsToParenthesis(mutated_pairs);
         return [parenthesis, PuzzleEditOp.DELETE_PAIR];
     }
 

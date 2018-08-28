@@ -348,8 +348,8 @@ export class RNALayout {
 
             if (rootnode.children[0].isPair) {
 
-                type1 = EPars.pair_type(S[rootnode.indexA + 1], S[rootnode.indexB + 1]);
-                type2 = EPars.pair_type(S[rootnode.children[0].indexB + 1], S[rootnode.children[0].indexA + 1]);
+                type1 = EPars.pairType(S[rootnode.indexA + 1], S[rootnode.indexB + 1]);
+                type2 = EPars.pairType(S[rootnode.children[0].indexB + 1], S[rootnode.children[0].indexA + 1]);
                 rootnode.score = folder.loopEnergy(0, 0, type1, type2, S[rootnode.indexA + 1 + 1], S[rootnode.indexB - 1 + 1],
                     S[rootnode.children[0].indexA + 1 + 1], S[rootnode.children[0].indexB - 1 + 1], true, true);
             }
@@ -395,15 +395,15 @@ export class RNALayout {
                 p = rootnode.children[first_stack_index].indexA + 1;
                 q = rootnode.children[first_stack_index].indexB + 1;
 
-                type1 = EPars.pair_type(S[i], S[j]);
-                type2 = EPars.pair_type(S[q], S[p]);
+                type1 = EPars.pairType(S[i], S[j]);
+                type2 = EPars.pairType(S[q], S[p]);
                 rootnode.score = folder.loopEnergy(p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true);
 
             } else if (num_stacks === 0) {
                 i = parentnode.indexA + 1;
                 j = parentnode.indexB + 1;
 
-                let type: number = EPars.pair_type(S[i], S[j]);
+                let type: number = EPars.pairType(S[i], S[j]);
                 rootnode.score = folder.hairpinEnergy(j - i - 1, type, S[i + 1], S[j - 1], S, i, j);
             } else if (num_stacks > 1 && parentnode != null) {
 

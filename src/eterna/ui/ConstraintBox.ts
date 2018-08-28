@@ -379,7 +379,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.append(" no ");
             }
 
-            tooltip.append(`${EPars.get_colored_letter("U")}-${EPars.get_colored_letter("G")} pairs.`);
+            tooltip.append(`${EPars.getColoredLetter("U")}-${EPars.getColoredLetter("G")} pairs.`);
 
             if (isMissionScreen) {
                 tooltip.popStyle();
@@ -410,7 +410,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.append("more ");
             }
 
-            tooltip.append(`${EPars.get_colored_letter("U")}-${EPars.get_colored_letter("G")} pairs.`);
+            tooltip.append(`${EPars.getColoredLetter("U")}-${EPars.getColoredLetter("G")} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -449,7 +449,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 newClarifyText += "NO GC PAIRS";
             }
 
-            tooltip.append(` ${EPars.get_colored_letter("G")}-${EPars.get_colored_letter("C")} pairs.`);
+            tooltip.append(` ${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -487,7 +487,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.append("at most", "altText").append((Number(val)).toString());
                 newClarifyText += `${(Number(val)).toString()} OR FEWER`;
             }
-            tooltip.append(` ${EPars.get_colored_letter("A")}-${EPars.get_colored_letter("U")} pairs.`);
+            tooltip.append(` ${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -645,7 +645,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             } else {
                 tooltip.append("at most", "altText").append(` ${(Number(val)).toString()}`);
             }
-            tooltip.append(` ${EPars.get_colored_letter(letter)}s.`);
+            tooltip.append(` ${EPars.getColoredLetter(letter)}s.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -771,7 +771,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             let letter: string = constraintType.substr(12, 1);
             tooltip.append("at most", "altText")
-                .append(` ${(Number(val) - 1).toString()} ${EPars.get_colored_letter(letter)}s in a row.`);
+                .append(` ${(Number(val) - 1).toString()} ${EPars.getColoredLetter(letter)}s in a row.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -832,15 +832,15 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             }
             tooltip.append("You must have:\n")
                 .append("- ").append("at most", "altText").append(` ${val.g_max - 1} `)
-                .append(`${EPars.get_colored_letter("G")}s in a row\n`)
+                .append(`${EPars.getColoredLetter("G")}s in a row\n`)
                 .append("- ")
                 .append("at most", "altText")
                 .append(` ${val.c_max - 1} `)
-                .append(`${EPars.get_colored_letter("C")}s in a row\n`)
+                .append(`${EPars.getColoredLetter("C")}s in a row\n`)
                 .append("- ")
                 .append("at most", "altText")
                 .append(` ${val.a_max - 1} `)
-                .append(`${EPars.get_colored_letter("A")}s in a row\n`);
+                .append(`${EPars.getColoredLetter("A")}s in a row\n`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }

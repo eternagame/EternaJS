@@ -16,7 +16,7 @@ const ZIPPERS_BEST_PAIRS: string = ".....((((.........)))).((((......))))...";
 const ZIPPERS_TEMP = 37;
 
 function FoldSequence(folder: Folder, seq: string, struct: string): any[] {
-    return folder.foldSequence(EPars.string_to_sequence_array(seq), null, struct);
+    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
 }
 
 function CreateFolder(type: any): Promise<Folder> {
@@ -75,8 +75,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
             .then((folder) => {
                 let outNNFE: number[] = [];
                 let totalFe = folder.scoreStructures(
-                    EPars.string_to_sequence_array(ZIPPERS_SEQ),
-                    EPars.parenthesis_to_pair_array(ZIPPERS_BEST_PAIRS),
+                    EPars.stringToSequence(ZIPPERS_SEQ),
+                    EPars.parenthesisToPairs(ZIPPERS_BEST_PAIRS),
                     ZIPPERS_TEMP,
                     outNNFE);
 
@@ -93,8 +93,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
         return expect(CreateFolder(folderType)
             .then((folder) => {
                 return folder.getDotPlot(
-                    EPars.string_to_sequence_array(SEQ),
-                    EPars.parenthesis_to_pair_array(STRUCT),
+                    EPars.stringToSequence(SEQ),
+                    EPars.parenthesisToPairs(STRUCT),
                     37);
             }))
             .resolves.toEqual([]);
@@ -116,8 +116,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
         return expect(CreateFolder(folderType)
             .then((folder) => {
                 return folder.getDotPlot(
-                    EPars.string_to_sequence_array(SEQ),
-                    EPars.parenthesis_to_pair_array(STRUCT),
+                    EPars.stringToSequence(SEQ),
+                    EPars.parenthesisToPairs(STRUCT),
                     37);
             }))
             .resolves.toBeDeepCloseTo(expectedResult, 5);

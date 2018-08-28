@@ -136,7 +136,7 @@ export class Booster {
         this._view.registerScriptCallbacks();
 
         ExternalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
-            let seq_arr: number[] = EPars.string_to_sequence_array(seq);
+            let seq_arr: number[] = EPars.stringToSequence(seq);
             if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info("Invalid characters in " + seq);
                 return false;

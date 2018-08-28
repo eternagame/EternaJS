@@ -268,7 +268,7 @@ export class Puzzle {
             if (Puzzle.isAptamerType(tc_type) && this._targetConditions[ii]["site"] != null) {
                 let binding_pairs: any[] = [];
                 let binding_site: any[] = this._targetConditions[ii]["site"];
-                let target_pairs: number[] = EPars.parenthesis_to_pair_array(this.getSecstruct(ii));
+                let target_pairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
 
                 for (let jj = 0; jj < binding_site.length; jj++) {
                     binding_pairs.push(target_pairs[binding_site[jj]]);
@@ -312,11 +312,11 @@ export class Puzzle {
     }
 
     public set beginningSequence(seq: string) {
-        this._beginningSequence = EPars.string_to_sequence_array(seq);
+        this._beginningSequence = EPars.stringToSequence(seq);
     }
 
     public set savedSequenceString(seq: string) {
-        this._savedSequence = EPars.string_to_sequence_array(seq);
+        this._savedSequence = EPars.stringToSequence(seq);
     }
 
     public set uiSpecs(ui_spec: string[]) {
@@ -543,7 +543,7 @@ export class Puzzle {
     public transformSequence(seq: number[], target_index: number): number[] {
         if (this._targetConditions != null) {
             if (this._targetConditions[target_index]["sequence"] != null) {
-                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._targetConditions[target_index]["sequence"]);
+                let target_seq_temp: number[] = EPars.stringToSequence(this._targetConditions[target_index]["sequence"]);
                 let target_seq: number[] = [];
 
                 if (this._useTails) {

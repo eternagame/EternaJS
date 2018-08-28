@@ -41,7 +41,7 @@ export class NuPACK extends Folder {
             return ret_array.slice();
         }
 
-        let seq_str: string = EPars.sequence_array_to_string(seq);
+        let seq_str: string = EPars.sequenceToString(seq);
 
         let result: DotPlotResult = null;
         try {
@@ -94,8 +94,8 @@ export class NuPACK extends Folder {
             let result: FullEvalResult = null;
             try {
                 result = this._lib.FullEval(temp,
-                    EPars.sequence_array_to_string(seq),
-                    EPars.pairs_array_to_parenthesis(pairs));
+                    EPars.sequenceToString(seq),
+                    EPars.pairsToParenthesis(pairs));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error("FullEval error", e);
@@ -266,8 +266,8 @@ export class NuPACK extends Folder {
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesis_to_pair_array(struc);
+            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            co_pairs = EPars.parenthesisToPairs(struc);
         }
 
         this.putCache(key, co_pairs.slice());
@@ -344,8 +344,8 @@ export class NuPACK extends Folder {
         }
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairs_array_to_parenthesis(pairsA)}&${EPars.pairs_array_to_parenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesis_to_pair_array(struc);
+            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            co_pairs = EPars.parenthesisToPairs(struc);
         }
 
         this.putCache(key, co_pairs.slice());
@@ -410,8 +410,8 @@ export class NuPACK extends Folder {
                     let s_nodes: number[] = [];
                     let s_fe: number = this.scoreStructures(oligos[order[jj]].seq, s_pairs, temp, s_nodes);
 
-                    let struc: string = `${EPars.pairs_array_to_parenthesis(ms_pairs)}&${EPars.pairs_array_to_parenthesis(s_pairs)}`;
-                    ms_pairs = EPars.parenthesis_to_pair_array(struc);
+                    let struc: string = `${EPars.pairsToParenthesis(ms_pairs)}&${EPars.pairsToParenthesis(s_pairs)}`;
+                    ms_pairs = EPars.parenthesisToPairs(struc);
                     ms_fe += s_fe;
                 }
 
@@ -468,12 +468,12 @@ export class NuPACK extends Folder {
     }
 
     private foldSequenceImpl(seq: number[], temp: number = 37): number[] {
-        const seqStr = EPars.sequence_array_to_string(seq, false, false);
+        const seqStr = EPars.sequenceToString(seq, false, false);
 
         let result: FullFoldResult = null;
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr);
-            return EPars.parenthesis_to_pair_array(result.structure);
+            return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error("FullFoldTemperature error", e);
             return [];
@@ -486,12 +486,12 @@ export class NuPACK extends Folder {
     }
 
     private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
-        const seqStr = EPars.sequence_array_to_string(seq, false, false);
+        const seqStr = EPars.sequenceToString(seq, false, false);
 
         let result: FullFoldResult = null;
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, i, p, j, q, -bonus);
-            return EPars.parenthesis_to_pair_array(result.structure);
+            return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error("FullFoldWithBindingSite error", e);
             return [];
@@ -504,13 +504,13 @@ export class NuPACK extends Folder {
     }
 
     private cofoldSequenceImpl(seq: number[], str: string = null, temp: number = 37): number[] {
-        const seqStr = EPars.sequence_array_to_string(seq, true, false);
+        const seqStr = EPars.sequenceToString(seq, true, false);
 
         let result: FullFoldResult = null;
         try {
             result = this._lib.CoFoldSequence(seqStr);
             log.debug("done cofolding");
-            return EPars.parenthesis_to_pair_array(result.structure);
+            return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error("CoFoldSequence error", e);
             return [];
@@ -523,13 +523,13 @@ export class NuPACK extends Folder {
     }
 
     private cofoldSequenceWithBindingSiteImpl(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
-        const seqStr = EPars.sequence_array_to_string(seq, true, false);
+        const seqStr = EPars.sequenceToString(seq, true, false);
 
         let result: FullFoldResult;
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, i, p, j, q, -bonus);
             log.debug("done cofolding_wbs");
-            return EPars.parenthesis_to_pair_array(result.structure);
+            return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error("CoFoldSequenceWithBindingSite error", e);
             return [];

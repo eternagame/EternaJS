@@ -68,12 +68,12 @@ export class LinearFold extends Folder {
     }
 
     private fullFoldDefault(seq: number[]): number[] {
-        const seqStr = EPars.sequence_array_to_string(seq, false, false);
+        const seqStr = EPars.sequenceToString(seq, false, false);
         let result: FullFoldResult;
 
         try {
             result = this._lib.FullFoldDefault(seqStr);
-            return EPars.parenthesis_to_pair_array(result.structure);
+            return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error("FullFoldDefault error", e);
             return [];

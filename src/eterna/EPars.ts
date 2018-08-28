@@ -61,7 +61,22 @@ export class EPars {
         EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
         EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE];
 
-    public static ml_intern(i: number): number {
+    public static readonly HAIRPIN_37: number[] = [
+        EPars.INF, EPars.INF, EPars.INF, 570, 560, 560, 540, 590, 560, 640, 650,
+        660, 670, 678, 686, 694, 701, 707, 713, 719, 725,
+        730, 735, 740, 744, 749, 753, 757, 761, 765, 769];
+
+    public static readonly BULGE_37: number[] = [
+        EPars.INF, 380, 280, 320, 360, 400, 440, 459, 470, 480, 490,
+        500, 510, 519, 527, 534, 541, 548, 554, 560, 565,
+        571, 576, 580, 585, 589, 594, 598, 602, 605, 609];
+
+    public static readonly INTERNAL_37: number[] = [
+        EPars.INF, EPars.INF, 410, 510, 170, 180, 200, 220, 230, 240, 250,
+        260, 270, 278, 286, 294, 301, 307, 313, 319, 325,
+        330, 335, 340, 345, 349, 353, 357, 361, 365, 369];
+
+    public static mlIntern(i: number): number {
         if (i > 2) {
             return EPars.ML_INTERN37 + EPars.TERM_AU;
         } else {
@@ -69,7 +84,7 @@ export class EPars {
         }
     }
 
-    public static get_barcode_hairpin(seq: string): string {
+    public static getBarcodeHairpin(seq: string): string {
         let hairpin_match: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
         if (hairpin_match == null) {
             return null;
@@ -77,7 +92,7 @@ export class EPars {
         return hairpin_match[1];
     }
 
-    public static get_longest_stack_length(pairs: number[]): number {
+    public static getLongestStackLength(pairs: number[]): number {
         let longlen: number = 0;
 
         let stack_start: number = -1;
@@ -119,7 +134,7 @@ export class EPars {
         return longlen;
     }
 
-    public static get_letter_color(letter: string): number {
+    public static getLetterColor(letter: string): number {
         if (letter === "G") {
             return 0xFF3333;
         } else if (letter === "A") {
@@ -134,13 +149,13 @@ export class EPars {
     }
 
     public static addLetterStyles(builder: StyledTextBuilder): void {
-        builder.addStyle("G", {fill: this.get_letter_color("G")});
-        builder.addStyle("A", {fill: this.get_letter_color("A")});
-        builder.addStyle("U", {fill: this.get_letter_color("U")});
-        builder.addStyle("C", {fill: this.get_letter_color("C")});
+        builder.addStyle("G", {fill: this.getLetterColor("G")});
+        builder.addStyle("A", {fill: this.getLetterColor("A")});
+        builder.addStyle("U", {fill: this.getLetterColor("U")});
+        builder.addStyle("C", {fill: this.getLetterColor("C")});
     }
 
-    public static get_colored_letter(letter: string): string {
+    public static getColoredLetter(letter: string): string {
         if (letter === "G") {
             return "<G>G</G>";
         } else if (letter === "A") {
@@ -154,15 +169,15 @@ export class EPars {
         return "";
     }
 
-    public static get_colored_sequence(seq: string): string {
+    public static getColoredSequence(seq: string): string {
         let res: string = "";
         for (let ii: number = 0; ii < seq.length; ii++) {
-            res += EPars.get_colored_letter(seq.charAt(ii));
+            res += EPars.getColoredLetter(seq.charAt(ii));
         }
         return res;
     }
 
-    public static get_exp_colored_sequence(seq: string, exp_data: number[]): string {
+    public static getExpColoredSequence(seq: string, exp_data: number[]): string {
         if (exp_data == null) {
             return seq;
         }
@@ -196,7 +211,7 @@ export class EPars {
         return res;
     }
 
-    public static count_consecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
+    public static countConsecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
         let max_consecutive: number = 0;
 
         let ii: number = 0;
@@ -234,7 +249,7 @@ export class EPars {
         return max_consecutive;
     }
 
-    public static get_restricted_consecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] | null = null): number[] {
+    public static getRestrictedConsecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] | null = null): number[] {
         let restricted: number[] = [];
 
         let ii: number = 0;
@@ -281,7 +296,7 @@ export class EPars {
         return restricted;
     }
 
-    public static get_sequence_repetition(seq_str: string, n: number): number {
+    public static getSequenceRepetition(seq_str: string, n: number): number {
         let dict: Set<string> = new Set<string>();
         let num_repeats: number = 0;
 
@@ -341,7 +356,7 @@ export class EPars {
         }
     }
 
-    public static string_to_sequence_array(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
+    public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqarray: number[] = [];
         for (let ii: number = 0; ii < seq.length; ii++) {
             let char = seq.charAt(ii);
@@ -350,7 +365,7 @@ export class EPars {
         return seqarray;
     }
 
-    public static sequence_array_to_string(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
+    public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
         let str: string = "";
         for (let value of sequence) {
             str += EPars.nucleotideToString(value, allowCut, allowUnknown);
@@ -358,7 +373,7 @@ export class EPars {
         return str;
     }
 
-    public static is_internal(index: number, pairs: number[]): number[] | null {
+    public static isInternal(index: number, pairs: number[]): number[] | null {
         let pair_start_here: number = -1;
         let pair_end_here: number = -1;
         let pair_start_there: number = -1;
@@ -418,7 +433,7 @@ export class EPars {
         return bases;
     }
 
-    public static validate_parenthesis(parenthesis: string, letteronly: boolean = true, length_limit: number = -1): string | null {
+    public static validateParenthesis(parenthesis: string, letteronly: boolean = true, length_limit: number = -1): string | null {
         let pair_stack: number[] = [];
 
         if (length_limit >= 0 && parenthesis.length > length_limit) {
@@ -463,7 +478,7 @@ export class EPars {
         return null;
     }
 
-    public static parenthesis_to_pair_array(parenthesis: string): number[] {
+    public static parenthesisToPairs(parenthesis: string): number[] {
         let pairs: number[] = [];
         let pair_stack: number[] = [];
 
@@ -491,14 +506,14 @@ export class EPars {
         return pairs;
     }
 
-    public static get_satisfied_pairs(pairs: number[], seq: number[]): number[] {
+    public static getSatisfiedPairs(pairs: number[], seq: number[]): number[] {
         let ret_pairs: number[] = new Array(pairs.length);
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
             if (pairs[ii] < 0) {
                 ret_pairs[ii] = -1;
             } else if (pairs[ii] > ii) {
-                if (EPars.pair_type(seq[ii], seq[pairs[ii]]) !== 0) {
+                if (EPars.pairType(seq[ii], seq[pairs[ii]]) !== 0) {
                     ret_pairs[ii] = pairs[ii];
                     ret_pairs[pairs[ii]] = ii;
                 } else {
@@ -511,7 +526,7 @@ export class EPars {
         return ret_pairs;
     }
 
-    public static pairs_array_to_parenthesis(pairs: number[], seq: number[] | null = null): string {
+    public static pairsToParenthesis(pairs: number[], seq: number[] | null = null): string {
         let bi_pairs: number[] = new Array(pairs.length);
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -542,7 +557,7 @@ export class EPars {
         return str;
     }
 
-    public static parenthesis_to_forced_array(parenthesis: string): number[] {
+    public static parenthesisToForcedArray(parenthesis: string): number[] {
         let forced: number[] = [];
         let pair_stack: number[] = [];
 
@@ -580,7 +595,7 @@ export class EPars {
         return forced;
     }
 
-    public static forced_array_to_parenthesis(forced: number[]): string {
+    public static forcedArrayToParenthesis(forced: number[]): string {
         let str: string = "";
 
         for (let ii: number = 0; ii < forced.length; ii++) {
@@ -604,7 +619,7 @@ export class EPars {
         return str;
     }
 
-    public static num_pairs(pairs: number[]): number {
+    public static numPairs(pairs: number[]): number {
         let ret: number = 0;
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -615,7 +630,7 @@ export class EPars {
         return ret;
     }
 
-    public static num_gu_pairs(sequence: number[], pairs: number[]): number {
+    public static numGUPairs(sequence: number[], pairs: number[]): number {
         let ret: number = 0;
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -632,7 +647,7 @@ export class EPars {
         return ret;
     }
 
-    public static num_gc_pairs(sequence: number[], pairs: number[]): number {
+    public static numGCPairs(sequence: number[], pairs: number[]): number {
         let ret: number = 0;
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -649,7 +664,7 @@ export class EPars {
         return ret;
     }
 
-    public static num_ua_pairs(sequence: number[], pairs: number[]): number {
+    public static numUAPairs(sequence: number[], pairs: number[]): number {
         let ret: number = 0;
 
         for (let ii: number = 0; ii < pairs.length; ii++) {
@@ -666,7 +681,7 @@ export class EPars {
         return ret;
     }
 
-    public static sequence_diff(seq1: number[], seq2: number[]): number {
+    public static sequenceDiff(seq1: number[], seq2: number[]): number {
         let diff: number = 0;
         for (let ii: number = 0; ii < seq1.length; ii++) {
             if (seq1[ii] !== seq2[ii]) {
@@ -676,7 +691,7 @@ export class EPars {
         return diff;
     }
 
-    public static are_pairs_same(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
+    public static arePairsSame(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
         if (a_pairs.length !== b_pairs.length) {
             return false;
         }
@@ -701,7 +716,7 @@ export class EPars {
         return true;
     }
 
-    public static has_cut(seq: number[], from: number, to: number): boolean {
+    public static hasCut(seq: number[], from: number, to: number): boolean {
         for (let ii: number = from; ii <= to; ii++) {
             if (seq[ii] === EPars.RNABASE_CUT) {
                 return true;
@@ -710,7 +725,93 @@ export class EPars {
         return false;
     }
 
-    public static pair_type_mat: number[] = [
+    public static pairType(a: number, b: number): number {
+        return EPars.PAIR_TYPE_MAT[a * (EPars.NBPAIRS + 1) + b];
+    }
+
+    public static get_bulge(i: number): number {
+        return EPars.BULGE_37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
+    }
+
+    public static getInternal(i: number): number {
+        return EPars.INTERNAL_37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
+    }
+
+    public static hairpinMismatch(type: number, s1: number, s2: number): number {
+        return EPars.MISMATCH_H37[type * 25 + s1 * 5 + s2];
+    }
+
+    public static internalMismatch(type: number, s1: number, s2: number): number {
+        return EPars.MISMATCH_I37[type * 25 + s1 * 5 + s2];
+    }
+
+    public static getStackScore(t1: number, t2: number, b1: boolean, b2: boolean): number {
+        if (b1 && b2) {
+            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2];
+        } else if ((!b1) && (!b2)) {
+            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2] + 200;
+        } else {
+            return EPars.STACK_37[t1 * (EPars.NBPAIRS + 1) + t2] + 100;
+        }
+    }
+
+    public static getTetraLoopBonus(loop: string): number {
+        for (let ii: number = 0; ii < EPars.TETRA_LOOPS.length; ii++) {
+            if (EPars.TETRA_LOOPS[ii] === loop) {
+                return EPars.TETRA_ENERGY_37[ii];
+            }
+        }
+
+        return 0;
+    }
+
+    public static getDangle5Score(t1: number, s: number): number {
+        let ret: number = EPars.DANGLE5_37[t1 * 5 + s];
+        if (ret > 0) {
+            return 0;
+        } else {
+            return ret;
+        }
+    }
+
+    public static getDangle3Score(t1: number, s: number): number {
+        let ret: number = EPars.DANGLE3_37[t1 * 5 + s];
+        if (ret > 0) {
+            return 0;
+        } else {
+            return ret;
+        }
+    }
+
+    public static getInt11(t1: number, t2: number, s1: number, s2: number): number {
+        return IntLoopPars.int11_37[s2 + s1 * 5 + t2 * 25 + t1 * (EPars.NBPAIRS + 1) * 25];
+    }
+
+    public static getInt21(t1: number, t2: number, s1: number, s2: number, s3: number): number {
+        return IntLoopPars.int21_37[s3 + s2 * 5 + s1 * 25 + t2 * 125 + t1 * (EPars.NBPAIRS + 1) * 125];
+    }
+
+    public static getInt22(t1: number, t2: number, s1: number, s2: number, s3: number, s4: number): number {
+        if (t1 === 0) {
+            return 0;
+        } else if (t1 === 1) {
+            return IntLoopPars.int22_37_1[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else if (t1 === 2) {
+            return IntLoopPars.int22_37_2[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else if (t1 === 3) {
+            return IntLoopPars.int22_37_3[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else if (t1 === 4) {
+            return IntLoopPars.int22_37_4[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else if (t1 === 5) {
+            return IntLoopPars.int22_37_5[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else if (t1 === 6) {
+            return IntLoopPars.int22_37_6[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        } else {
+            return IntLoopPars.int22_37_7[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
+        }
+    }
+
+    private static readonly PAIR_TYPE_MAT: number[] = [
         /* _  A  C  G  U  X  K  I */
         1, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 5, 0, 0, 5,
@@ -721,44 +822,7 @@ export class EPars {
         0, 0, 0, 0, 0, 1, 0, 0,
         0, 6, 0, 0, 5, 0, 0, 0];
 
-    public static pair_type(a: number, b: number): number {
-        return EPars.pair_type_mat[a * (EPars.NBPAIRS + 1) + b];
-    }
-
-    public static reverse_pair_type: number[] = [0, 2, 1, 4, 3, 6, 5, 7];
-
-    public static hairpin37: number[] = [
-        EPars.INF, EPars.INF, EPars.INF, 570, 560, 560, 540, 590, 560, 640, 650,
-        660, 670, 678, 686, 694, 701, 707, 713, 719, 725,
-        730, 735, 740, 744, 749, 753, 757, 761, 765, 769];
-
-    public static bulge37: number[] = [
-        EPars.INF, 380, 280, 320, 360, 400, 440, 459, 470, 480, 490,
-        500, 510, 519, 527, 534, 541, 548, 554, 560, 565,
-        571, 576, 580, 585, 589, 594, 598, 602, 605, 609];
-
-    public static get_bulge(i: number): number {
-        return EPars.bulge37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
-    }
-
-    public static internal37: number[] = [
-        EPars.INF, EPars.INF, 410, 510, 170, 180, 200, 220, 230, 240, 250,
-        260, 270, 278, 286, 294, 301, 307, 313, 319, 325,
-        330, 335, 340, 345, 349, 353, 357, 361, 365, 369];
-
-    public static get_internal(i: number): number {
-        return EPars.internal37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
-    }
-
-    public static hairpin_mismatch(type: number, s1: number, s2: number): number {
-        return EPars.mismatchH37[type * 25 + s1 * 5 + s2];
-    }
-
-    public static internal_mismatch(type: number, s1: number, s2: number): number {
-        return EPars.mismatchI37[type * 25 + s1 * 5 + s2];
-    }
-
-    public static mismatchI37: number[] = [
+    private static readonly MISMATCH_I37: number[] = [
         0, 0, 0, 0, 0,
         0, 0, 0, 0, 0,
         0, 0, 0, 0, 0,
@@ -816,7 +880,7 @@ export class EPars {
         90, 90, 90, 90, 20
     ];
 
-    public static mismatchH37: number[] = [
+    private static readonly MISMATCH_H37: number[] = [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
         /* CG */
@@ -860,7 +924,7 @@ export class EPars {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    public static stack37: number[] = [
+    private static readonly STACK_37: number[] = [
         /*          CG     GC     GU     UG     AU     UA  */
         EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF,
         EPars.INF, -240, -330, -210, -140, -210, -210, EPars.NST,
@@ -872,17 +936,7 @@ export class EPars {
         EPars.INF, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST, EPars.NST
     ];
 
-    public static get_stack_score(t1: number, t2: number, b1: boolean, b2: boolean): number {
-        if (b1 && b2) {
-            return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2];
-        } else if ((!b1) && (!b2)) {
-            return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2] + 200;
-        } else {
-            return EPars.stack37[t1 * (EPars.NBPAIRS + 1) + t2] + 100;
-        }
-    }
-
-    public static dangle5_37: number[] = [
+    private static readonly DANGLE5_37: number[] = [
         EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
         EPars.INF, -50, -30, -20, -10, /* CG  (stacks on C) */
         EPars.INF, -20, -30, -0, -0, /* GC  (stacks on G) */
@@ -893,7 +947,7 @@ export class EPars {
         0, 0, 0, 0, 0 /*  @ */
     ];
 
-    public static dangle3_37: number[] = [
+    private static readonly DANGLE3_37: number[] = [
         /*   @     A     C     G     U   */
         EPars.INF, EPars.INF, EPars.INF, EPars.INF, EPars.INF, /* no pair */
         EPars.INF, -110, -40, -130, -60, /* CG  (stacks on G) */
@@ -905,69 +959,13 @@ export class EPars {
         0, 0, 0, 0, 0 /*  @ */
     ];
 
-    public static tetra_energy_37: number[] = [
+    private static readonly TETRA_ENERGY_37: number[] = [
         300, -300, -300, -300, -300, -300, -300, -300, -300, -250, -250, -250,
         -250, -250, -200, -200, -200, -200, -200, -150, -150, -150, -150, -150,
         -150, -150, -150, -150, -150, -150];
 
-    public static tetra_loops: string[] = [
+    private static readonly TETRA_LOOPS: string[] = [
         "GGGGAC", "GGUGAC", "CGAAAG", "GGAGAC", "CGCAAG", "GGAAAC", "CGGAAG", "CUUCGG", "CGUGAG", "CGAAGG",
         "CUACGG", "GGCAAC", "CGCGAG", "UGAGAG", "CGAGAG", "AGAAAU", "CGUAAG", "CUAACG", "UGAAAG", "GGAAGC",
         "GGGAAC", "UGAAAA", "AGCAAU", "AGUAAU", "CGGGAG", "AGUGAU", "GGCGAC", "GGGAGC", "GUGAAC", "UGGAAA"];
-
-    public static get_tetra_loop_bonus(loop: string): number {
-        for (let ii: number = 0; ii < EPars.tetra_loops.length; ii++) {
-            if (EPars.tetra_loops[ii] === loop) {
-                return EPars.tetra_energy_37[ii];
-            }
-        }
-
-        return 0;
-    }
-
-    public static get_dangle5_score(t1: number, s: number): number {
-        let ret: number = EPars.dangle5_37[t1 * 5 + s];
-        if (ret > 0) {
-            return 0;
-        } else {
-            return ret;
-        }
-    }
-
-    public static get_dangle3_score(t1: number, s: number): number {
-        let ret: number = EPars.dangle3_37[t1 * 5 + s];
-        if (ret > 0) {
-            return 0;
-        } else {
-            return ret;
-        }
-    }
-
-    public static get_int11(t1: number, t2: number, s1: number, s2: number): number {
-        return IntLoopPars.int11_37[s2 + s1 * 5 + t2 * 25 + t1 * (EPars.NBPAIRS + 1) * 25];
-    }
-
-    public static get_int21(t1: number, t2: number, s1: number, s2: number, s3: number): number {
-        return IntLoopPars.int21_37[s3 + s2 * 5 + s1 * 25 + t2 * 125 + t1 * (EPars.NBPAIRS + 1) * 125];
-    }
-
-    public static get_int22(t1: number, t2: number, s1: number, s2: number, s3: number, s4: number): number {
-        if (t1 === 0) {
-            return 0;
-        } else if (t1 === 1) {
-            return IntLoopPars.int22_37_1[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 2) {
-            return IntLoopPars.int22_37_2[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 3) {
-            return IntLoopPars.int22_37_3[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 4) {
-            return IntLoopPars.int22_37_4[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 5) {
-            return IntLoopPars.int22_37_5[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else if (t1 === 6) {
-            return IntLoopPars.int22_37_6[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        } else {
-            return IntLoopPars.int22_37_7[s4 + s3 * 5 + s2 * 25 + s1 * 125 + t2 * 625];
-        }
-    }
 }

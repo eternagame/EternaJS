@@ -356,7 +356,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence[ii] !== this._mutatedSequence[ii + ofs]) {
                 num_mut++;
                 this._sequence[ii] = this._mutatedSequence[ii + ofs];
-                muts.push({pos: ii + 1, base: EPars.sequence_array_to_string([this._sequence[ii]])});
+                muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence[ii]])});
                 need_update = true;
             }
         }
@@ -405,7 +405,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             if (this._sequence[ii] !== sequence[ii] && !this.isLocked(ofs + ii)) {
                 num_mut++;
                 this._sequence[ii] = sequence[ii];
-                muts.push({pos: ii + 1, base: EPars.sequence_array_to_string([this._sequence[ii]])});
+                muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence[ii]])});
                 this._bases[ofs + ii].setType(sequence[ii]);
                 need_update = true;
             }
@@ -807,7 +807,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         return (segments.length === 4
             && segments[1] - segments[0] === segments[3] - segments[2]
             && (segments[2] - segments[1] > 3
-                || EPars.has_cut(this.fullSequence, segments[1], segments[2])));
+                || EPars.hasCut(this.fullSequence, segments[1], segments[2])));
     }
 
     public get designSegments(): number[] {
@@ -945,7 +945,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public getSequenceString(): string {
-        return EPars.sequence_array_to_string(this._sequence);
+        return EPars.sequenceToString(this._sequence);
     }
 
     public get satisfied(): boolean {
@@ -1323,7 +1323,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get satisfiedPairs(): number[] {
-        return EPars.get_satisfied_pairs(this._pairs, this.fullSequence);
+        return EPars.getSatisfiedPairs(this._pairs, this.fullSequence);
     }
 
     public set sequence(sequence: number[]) {
@@ -1726,7 +1726,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             throw new Error("Pair length doesn't match sequence length");
         }
 
-        if (EPars.are_pairs_same(pairs, this._pairs)) {
+        if (EPars.arePairsSame(pairs, this._pairs)) {
             return;
         }
 
@@ -1757,7 +1757,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         let fullSeq: number[] = this.fullSequence;
-        return (EPars.pair_type(fullSeq[a], fullSeq[b]) !== 0);
+        return (EPars.pairType(fullSeq[a], fullSeq[b]) !== 0);
     }
 
     public get sequenceLength(): number {
@@ -2337,7 +2337,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this.sequence = sequence;
         this.puzzleLocks = locks;
-        this.molecularStructure = EPars.parenthesis_to_pair_array(parenthesis);
+        this.molecularStructure = EPars.parenthesisToPairs(parenthesis);
         this.molecularBindingSite = binding_site;
         this.parenthesis = parenthesis;
     }
@@ -2530,7 +2530,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     this.molecularBindingSite = this._bindingSite;
                     this._bindingSiteUpdated = true;
                 } else {
-                    let binding_bases: number[] = EPars.is_internal(seqnum, this._pairs);
+                    let binding_bases: number[] = EPars.isInternal(seqnum, this._pairs);
                     if (binding_bases != null && binding_bases.length > 4) {
                         this._bindingSite = [];
                         for (let ii = 0; ii < this._sequence.length; ii++) {
