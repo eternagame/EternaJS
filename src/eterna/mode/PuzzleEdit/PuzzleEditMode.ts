@@ -698,7 +698,7 @@ export class PuzzleEditMode extends GameMode {
         let num_GU: number = undoblock.get_param(UndoBlockParam.GU);
         let num_GC: number = undoblock.get_param(UndoBlockParam.GC);
 
-        this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
+        this._toolbar.palette.setPairCounts(num_AU, num_GU, num_GC);
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {

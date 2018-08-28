@@ -182,7 +182,7 @@ export class PuzzleEditToolbar extends ContainerObject {
         // PALETTE
         this.palette = new NucleotidePalette();
         this.addObject(this.palette, lowerToolbarLayout);
-        this.palette.change_default_mode();
+        this.palette.changeDefaultMode();
 
         lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
@@ -258,7 +258,7 @@ export class PuzzleEditToolbar extends ContainerObject {
     }
 
     public deselectAllColorings(): void {
-        this.palette.clear_selection();
+        this.palette.clearSelection();
         this.pairSwapButton.toggled.value = false;
         this.addbaseButton.toggled.value = false;
         this.addpairButton.toggled.value = false;

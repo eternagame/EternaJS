@@ -148,7 +148,7 @@ export class PoseEditToolbar extends ContainerObject {
         this.addObject(this.palette, this._toolbarLayout);
         if (this._puzzle.isPalleteAllowed) {
             if (this._puzzle.isPairBrushAllowed) {
-                this.palette.change_default_mode();
+                this.palette.changeDefaultMode();
 
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
 
@@ -162,7 +162,7 @@ export class PoseEditToolbar extends ContainerObject {
                     .rscriptID(RScriptUIElementID.SWAP);
                 this.addObject(this.pairSwapButton, this._toolbarLayout);
             } else {
-                this.palette.change_no_pair_mode();
+                this.palette.changeNoPairMode();
             }
         } else {
             this.palette.enabled = false;
