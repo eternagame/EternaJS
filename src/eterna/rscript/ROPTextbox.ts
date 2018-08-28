@@ -379,7 +379,7 @@ export class ROPTextbox extends RScriptOp {
     }
 
     private onClickEvent(): void {
-        ROPWait.NotifyTextboxProgress(this._id);
+        ROPWait.notifyTextboxProgress(this._id);
     }
 
     private removeTextbox(): void {

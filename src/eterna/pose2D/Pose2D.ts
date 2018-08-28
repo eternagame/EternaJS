@@ -551,7 +551,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
             this._trackedIndices.push(closestIndex);
-            ROPWait.NotifyBlackMark(closestIndex, true);
+            ROPWait.notifyBlackMark(closestIndex, true);
 
             let base_box: Graphics = new Graphics();
             this._baseBoxes.push(base_box);
@@ -574,7 +574,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._baseBoxes[index].visible = false;
             this._trackedIndices.splice(index, 1);
             this._baseBoxes.splice(index, 1);
-            ROPWait.NotifyBlackMark(closest_index, false);
+            ROPWait.notifyBlackMark(closest_index, false);
         }
     }
 
@@ -646,7 +646,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public onMouseUp(): void {
         this.doneColoring();
         this._mouseDownAltKey = false;
-        ROPWait.NotifyEndPaint();
+        ROPWait.notifyEndPaint();
     }
 
     public deleteBaseWithIndexPairs(index: number, pairs: number[]): any[] {
@@ -801,7 +801,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._designStruct[seqnum] = !this._designStruct[seqnum];
-        ROPWait.NotifyBlueMark(seqnum, this._designStruct[seqnum]);
+        ROPWait.notifyBlueMark(seqnum, this._designStruct[seqnum]);
         this.updateDesignHighlight();
         let segments: number[] = this.designSegments;
         return (segments.length === 4
@@ -2558,7 +2558,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                     if (this._currentColor >= 1 && this._currentColor <= 4) {
                         this._mutatedSequence[seqnum] = this._currentColor;
-                        ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                        ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                         this._bases[seqnum].setType(this._currentColor, true);
                     } else if (this._currentColor === EPars.RNABASE_RANDOM) {
                         let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
@@ -2664,7 +2664,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             if (!this.isLocked(seqnum)) {
                 if (this._currentColor >= 1 && this._currentColor <= 4) {
                     this._mutatedSequence[seqnum] = this._currentColor;
-                    ROPWait.NotifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                    ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                     this._bases[seqnum].setType(this._currentColor, true);
 
                 } else if (this._currentColor === EPars.RNABASE_RANDOM) {

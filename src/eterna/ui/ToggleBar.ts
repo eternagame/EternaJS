@@ -116,7 +116,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         }
 
         this.set_state(state);
-        ROPWait.NotifyClickUI(RScriptUIElementID.SWITCH);
+        ROPWait.notifyClickUi(RScriptUIElementID.SWITCH);
     }
 
     private onMouseOver(): void {
