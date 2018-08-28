@@ -12,7 +12,7 @@ export class PuzzleManager {
         return PuzzleManager._instance;
     }
 
-    public parse_puzzle(json: any): Puzzle {
+    public parsePuzzle(json: any): Puzzle {
         let newpuz: Puzzle = new Puzzle(Number(json["id"]), json["title"], json["type"]);
 
         if (json["body"]) {
@@ -187,10 +187,10 @@ export class PuzzleManager {
         return newpuz;
     }
 
-    public get_puzzle_by_nid(puznid: number, scriptid: number = -1): Promise<Puzzle> {
-        for (let ii: number = 0; ii < this._puzzles.length; ii++) {
-            if (this._puzzles[ii].nodeID === puznid) {
-                return Promise.resolve(this._puzzles[ii]);
+    public getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
+        for (let puzzle of this._puzzles) {
+            if (puzzle.nodeID == puznid) {
+                return Promise.resolve(puzzle);
             }
         }
 
@@ -202,7 +202,7 @@ export class PuzzleManager {
                     SolutionManager.instance.add_hairpins(data["hairpins"]);
                 }
 
-                let puzzle = this.parse_puzzle(data["puzzle"]);
+                let puzzle = this.parsePuzzle(data["puzzle"]);
                 log.info(`Loaded puzzle [name=${puzzle.getPuzzleName()}]`);
                 return puzzle;
             });
