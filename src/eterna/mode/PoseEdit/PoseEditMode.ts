@@ -86,12 +86,12 @@ export class PoseEditMode extends GameMode {
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
-                poseField.zoom_out();
+                poseField.zoomOut();
             }
         });
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
-                poseField.zoom_in();
+                poseField.zoomIn();
             }
         });
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
@@ -430,7 +430,7 @@ export class PoseEditMode extends GameMode {
             pose.startMousedownCallback = ((e: InteractionEvent, closest_dist: number, closest_index: number) => {
                 for (let ii: number = 0; ii < pose_fields.length; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
-                    let pose: Pose2D = pose_field.get_pose();
+                    let pose: Pose2D = pose_field.pose;
                     if (index === ii) {
                         pose.onPoseMouseDown(e, closest_index);
                     } else {
@@ -443,7 +443,7 @@ export class PoseEditMode extends GameMode {
         for (let ii = 0; ii < target_conditions.length; ii++) {
             let pose_field: PoseField = new PoseField(true);
             this.addObject(pose_field, this.poseLayer);
-            let pose: Pose2D = pose_field.get_pose();
+            let pose: Pose2D = pose_field.pose;
             bind_addbase_cb(pose, ii);
             bind_pose_edit(pose, ii);
             bind_track_moves(pose, ii);

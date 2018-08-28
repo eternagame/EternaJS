@@ -130,7 +130,7 @@ export abstract class GameMode extends AppMode {
 
         for (let newPoseField of newPoseFields) {
             this._poseFields.push(newPoseField);
-            this._poses.push(newPoseField.get_pose());
+            this._poses.push(newPoseField.pose);
         }
     }
 
@@ -150,7 +150,7 @@ export abstract class GameMode extends AppMode {
             for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._poseFields[ii];
                 poseField.display.position = new Point(Flashbang.stageWidth / numFields * ii, 0);
-                poseField.set_size(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
+                poseField.setSize(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }
         } else {
@@ -158,7 +158,7 @@ export abstract class GameMode extends AppMode {
                 let poseField = this._poseFields[ii];
                 if (ii === 0) {
                     poseField.display.position = new Point(0, 0);
-                    poseField.set_size(Flashbang.stageWidth, Flashbang.stageHeight, false);
+                    poseField.setSize(Flashbang.stageWidth, Flashbang.stageHeight, false);
                     poseField.display.visible = true;
                 } else {
                     poseField.display.visible = false;

@@ -89,13 +89,13 @@ export class PuzzleEditMode extends GameMode {
 
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
-                poseField.zoom_out();
+                poseField.zoomOut();
             }
         });
 
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
-                poseField.zoom_in();
+                poseField.zoomIn();
             }
         });
 
@@ -186,7 +186,7 @@ export class PuzzleEditMode extends GameMode {
             pose.startMousedownCallback = (e: InteractionEvent, closest_dist: number, closest_index: number): void => {
                 for (let ii: number = 0; ii < this._numTargets; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
-                    let pose: Pose2D = pose_field.get_pose();
+                    let pose: Pose2D = pose_field.pose;
                     if (ii == index) {
                         pose.onPoseMouseDown(e, closest_index);
                     } else {
@@ -209,7 +209,7 @@ export class PuzzleEditMode extends GameMode {
             }
             let pose_field: PoseField = new PoseField(true);
             this.addObject(pose_field, this.poseLayer);
-            let pose: Pose2D = pose_field.get_pose();
+            let pose: Pose2D = pose_field.pose;
             pose.scoreFolder = this._folder;
             pose.molecularStructure = default_pairs;
             pose.molecularBindingBonus = -4.86;
