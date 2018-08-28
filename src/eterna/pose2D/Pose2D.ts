@@ -183,7 +183,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public visualizeFeedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
         // coloring
-        let newdat: number[] = ExpPainter.transform_data(dat, hi, lo);
+        let newdat: number[] = ExpPainter.transformData(dat, hi, lo);
         this._expPainter = new ExpPainter(newdat, start_index);
         this._expMid = mid;
         this._expHi = hi;
@@ -205,11 +205,11 @@ export class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        this._expPainter.set_continuous(this._expContinuous);
-        this._expPainter.set_extended_scale(this._expExtendedScale);
+        this._expPainter.continuous = this._expContinuous;
+        this._expPainter.extendedScale = this._expExtendedScale;
 
         for (let ii: number = 0; ii < this._sequence.length; ii++) {
-            this._bases[ii].setColorLevel(true, this._expPainter.get_color_level_with_midpoint(ii, this._expMid, this._expHi));
+            this._bases[ii].setColorLevel(true, this._expPainter.getColorLevelWithMidpoint(ii, this._expMid, this._expHi));
         }
         this._redraw = true;
     }
