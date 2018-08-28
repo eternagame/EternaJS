@@ -389,7 +389,7 @@ export class SpecBox extends ContainerObject {
 
             let msg: string = `${String.fromCharCode(65 + x)},${y * 10} - (${x * 10}, ${y * 10})`;
             if (this._coordBalloon != null) {
-                this._coordBalloon.set_text(msg);
+                this._coordBalloon.setText(msg);
                 this._coordBalloon.display.visible = true;
             } else {
                 this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);

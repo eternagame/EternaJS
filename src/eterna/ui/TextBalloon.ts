@@ -20,7 +20,7 @@ export class TextBalloon extends ContainerObject {
         this._button.display.visible = false;
 
         if (text != null && text.length > 0) {
-            this.set_text(text);
+            this.setText(text);
         }
     }
 
@@ -28,27 +28,27 @@ export class TextBalloon extends ContainerObject {
         super.added();
 
         if (this._initialText != null) {
-            this.set_styled_text(this._initialText);
+            this.styledText = this._initialText;
         }
 
         this.updateView();
     }
 
-    public get_game_text(): Text {
+    public get text(): Text {
         return this._text;
     }
 
-    public set_centered(center: boolean): void {
+    public set centered(center: boolean) {
         this._centered = center;
         this.updateView();
     }
 
-    public set_title(title: string): void {
+    public set title(title: string) {
         this._panel.title = title;
         this._hasTitle = title != null;
     }
 
-    public set_styled_text(builder: StyledTextBuilder): void {
+    public set styledText(builder: StyledTextBuilder) {
         if (this.isLiveObject) {
             if (this._text != null) {
                 this._text.destroy({children: true});
@@ -62,14 +62,12 @@ export class TextBalloon extends ContainerObject {
         }
     }
 
-    public set_text(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
-        let styled = new StyledTextBuilder({
+    public setText(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
+        this.styledText = new StyledTextBuilder({
             fontFamily: Fonts.ARIAL,
             fontSize: fontsize,
             fill: font_color
         }).append(text);
-
-        this.set_styled_text(styled);
     }
 
     public showButton(show: boolean): GameButton {
@@ -80,7 +78,7 @@ export class TextBalloon extends ContainerObject {
         return this._button;
     }
 
-    public balloon_width(): number {
+    public get width(): number {
         let whole_width: number = this._text != null ? this._text.width : 0;
         if (this._button != null && this._button.display.visible) {
             whole_width += TextBalloon.W_MARGIN;
@@ -90,7 +88,7 @@ export class TextBalloon extends ContainerObject {
         return whole_width + 2 * TextBalloon.W_MARGIN;
     }
 
-    public balloon_height(): number {
+    public get height(): number {
         let whole_height: number = 0;
         whole_height += this._text != null ? this._text.height : 0;
 
@@ -106,11 +104,11 @@ export class TextBalloon extends ContainerObject {
             return;
         }
 
-        let balloon_width = this.balloon_width();
-        let balloon_height = this.balloon_height();
-        this._panel.setSize(balloon_width, balloon_height);
+        let width = this.width;
+        let height = this.height;
+        this._panel.setSize(width, height);
 
-        let whole_width: number = balloon_width - 2 * TextBalloon.W_MARGIN;
+        let whole_width: number = width - 2 * TextBalloon.W_MARGIN;
         let title_space: number = this._panel.titleHeight;
 
         if (!this._centered) {
@@ -151,6 +149,6 @@ export class TextBalloon extends ContainerObject {
     protected _centered: boolean = false;
     protected _hasTitle: boolean = false;
 
-    protected static readonly W_MARGIN: number = 10;
-    protected static readonly H_MARGIN: number = 10;
+    protected static readonly W_MARGIN = 10;
+    protected static readonly H_MARGIN = 10;
 }
