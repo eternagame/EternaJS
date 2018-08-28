@@ -28,8 +28,8 @@ export class CopySequenceDialog extends Dialog<void> {
         inputPanel.okClicked.connect(() => this.close(null));
 
         let updateLocation = () => {
-            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.get_panel_width()) * 0.5;
-            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.get_panel_height()) * 0.5;
+            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
+            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
 
         updateLocation();
