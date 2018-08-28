@@ -175,7 +175,7 @@ export class BaseAssets {
         const baseWMin: Texture = BitmapManager.getBitmap(Bitmaps.BaseWMin);
 
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
-            const color: number = ExpPainter.get_color_by_level(ii);
+            const color: number = ExpPainter.getColorByLevel(ii);
             const r: number = ColorUtil.getRed(color);
             const g: number = ColorUtil.getGreen(color);
             const b: number = ColorUtil.getBlue(color);

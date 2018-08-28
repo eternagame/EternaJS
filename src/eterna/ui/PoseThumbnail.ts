@@ -264,8 +264,8 @@ export class PoseThumbnail {
                     color = COLOR_WHITE;
                 }
             } else if (type === PoseThumbnailType.EXP_COLORED) {
-                if (exp_use_threshold) color = exp_painter.get_color_with_midpoint(ii, exp_threshold);
-                else color = exp_painter.get_color(ii);
+                if (exp_use_threshold) color = exp_painter.getColorWithMidpoint(ii, exp_threshold);
+                else color = exp_painter.getColor(ii);
             }
 
             canvas.lineStyle(Math.min(size, 3), color, 1);
