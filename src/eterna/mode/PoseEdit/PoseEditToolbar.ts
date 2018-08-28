@@ -75,7 +75,7 @@ export class PoseEditToolbar extends ContainerObject {
         this._toolbarLayout = new HLayoutContainer();
         this._content.addChild(this._toolbarLayout);
 
-        const isExperimental = this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL;
+        const isExperimental = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL;
 
         // MENU
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
@@ -103,7 +103,7 @@ export class PoseEditToolbar extends ContainerObject {
             .tooltip("Set PiP mode")
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP);
-        if (this._puzzle.get_secstructs().length > 1) {
+        if (this._puzzle.getSecstructs().length > 1) {
             this.addObject(this.pipButton, this._toolbarLayout);
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
         }
@@ -146,8 +146,8 @@ export class PoseEditToolbar extends ContainerObject {
         // PALETTE
         this.palette = new NucleotidePalette();
         this.addObject(this.palette, this._toolbarLayout);
-        if (this._puzzle.is_pallete_allowed()) {
-            if (this._puzzle.is_pair_brush_allowed()) {
+        if (this._puzzle.isPalleteAllowed) {
+            if (this._puzzle.isPairBrushAllowed) {
                 this.palette.change_default_mode();
 
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
@@ -169,7 +169,7 @@ export class PoseEditToolbar extends ContainerObject {
         }
 
         // BOOSTERS
-        let boostersData: BoostersData = this._puzzle.get_boosters();
+        let boostersData: BoostersData = this._puzzle.boosters;
         if (boostersData) {
             let mode: PoseEditMode = this.mode as PoseEditMode;
 
@@ -246,7 +246,7 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
 
-        if (this._puzzle.is_undo_zoom_allowed()) {
+        if (this._puzzle.isUndoZoomAllowed) {
             this._toolbarLayout.addHSpacer(SPACE_WIDE);
             this.addObject(this.zoomInButton, this._toolbarLayout);
             this.addObject(this.zoomOutButton, this._toolbarLayout);
@@ -309,7 +309,7 @@ export class PoseEditToolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
 
-        if (this._puzzle.get_puzzle_type() !== PuzzleType.BASIC) {
+        if (this._puzzle.puzzleType !== PuzzleType.BASIC) {
             this.actionMenu.add_sub_menu_button(0, this.copyButton);
             this.actionMenu.add_sub_menu_button(0, this.pasteButton);
         }
@@ -321,12 +321,12 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyH)
             .tooltip("Hint")
             .rscriptID(RScriptUIElementID.HINT);
-        if (this._puzzle.get_hint() != null) {
+        if (this._puzzle.hint != null) {
             this.addObject(this.hintButton, this._toolbarLayout);
         }
 
         // TOGGLE_BAR
-        let target_secstructs: string[] = this._puzzle.get_secstructs();
+        let target_secstructs: string[] = this._puzzle.getSecstructs();
         this.puzzleStateToggle = new ToggleBar(target_secstructs.length);
         if (target_secstructs.length > 1) {
             // We create the puzzleStateToggle even if we don't add it to the mode,

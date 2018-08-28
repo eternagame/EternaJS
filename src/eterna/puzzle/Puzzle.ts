@@ -33,15 +33,15 @@ export enum PoseState {
 }
 
 export class Puzzle {
-    public static is_aptamer_type(tc_type: string): boolean {
+    public static isAptamerType(tc_type: string): boolean {
         return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
     }
 
-    public static is_oligo_type(tc_type: string): boolean {
+    public static isOligoType(tc_type: string): boolean {
         return (Puzzle.T_OLIGO.indexOf(tc_type) >= 0);
     }
 
-    public static probe_tail(seq: number[]): number[] {
+    public static probeTail(seq: number[]): number[] {
         if (seq == null) {
             return null;
         }
@@ -57,373 +57,91 @@ export class Puzzle {
         return seq;
     }
 
-    public constructor(nid: number, puzname: string, puzzle_type: PuzzleType) {
+    public constructor(nid: number, name: string, puzzleType: PuzzleType) {
         this._nid = nid;
-        this._name = puzname;
-        this._puzzle_type = puzzle_type;
+        this._name = name;
+        this._puzzleType = puzzleType;
 
-        if (puzzle_type === PuzzleType.EXPERIMENTAL) {
+        if (puzzleType === PuzzleType.EXPERIMENTAL) {
             this._folder = FolderManager.instance.lastUsedFolder;
         } else {
             this._folder = Vienna.NAME;
         }
     }
 
-    public get_node_id(): number {
+    public get nodeID(): number {
         return this._nid;
     }
 
-    public get_secstruct(index: number = 0): string {
-        if (this._use_tails) {
-            if (this._use_short_tails) {
-                return `..${this._secstructs[index]}....................`;
-            } else {
-                return `.....${this._secstructs[index]}....................`;
-            }
-        } else {
-            return this._secstructs[index];
-        }
-    }
-
-    public get_secstructs(index: number = 0): string[] {
-        let secstructs: string[] = [];
-        for (let ii: number = 0; ii < this._secstructs.length; ii++) {
-            secstructs.push(this.get_secstruct(ii));
-        }
-        return secstructs;
-    }
-
-    public get_reward(): number {
+    public get reward(): number {
         return this._reward;
     }
 
-    public get_next_puzzle(): number {
-        return this._next_puzzle;
+    public set reward(reward: number) {
+        this._reward = reward;
     }
 
-    public set_rscript(inText: string): void {
-        this._rscript_ops = inText;
+    public get nextPuzzleID(): number {
+        return this._nextPuzzle;
     }
 
-    public get_rscript(): string {
-        return this._rscript_ops;
+    public set nextPuzzleID(nex: number) {
+        this._nextPuzzle = nex;
     }
 
-    public get_hint(): string {
+    public get rscript(): string {
+        return this._rscriptOps;
+    }
+
+    public set rscript(inText: string) {
+        this._rscriptOps = inText;
+    }
+
+    public get hint(): string {
         return this._hint;
     }
 
-    public set_hint(txt: string): void {
+    public set hint(txt: string) {
         this._hint = txt;
     }
 
-    public get_puzzle_name(linked: boolean = false): string {
-        if (linked && this._puzzle_type !== PuzzleType.EXPERIMENTAL) {
-            let url: string = EternaURL.createURL({page: "puzzle", nid: this._nid});
-            return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
-        }
-
-        return this._name;
+    public get puzzleType(): PuzzleType {
+        return this._puzzleType;
     }
 
-    public get_puzzle_type(): PuzzleType {
-        return this._puzzle_type;
+    public get missionText(): string {
+        return this._missionText;
     }
 
-    public get_mission_text(): string {
-        return this._mission_text;
+    public set missionText(text: string) {
+        this._missionText = text;
     }
 
-    public set_mission_text(text: string) {
-        this._mission_text = text;
-    }
-
-    public get_folder(): string {
+    public get folderName(): string {
         return this._folder;
     }
 
-    public get_target_conditions(): any[] {
-        if (this._target_conditions == null) {
+    public set folderName(folder: string) {
+        this._folder = folder;
+    }
+
+    public get targetConditions(): any[] {
+        if (this._targetConditions == null) {
             let target_conditions: any[] = [];
             for (let ii: number = 0; ii < this._secstructs.length; ii++) {
                 target_conditions.push(null);
             }
             return target_conditions;
         } else {
-            return this._target_conditions;
+            return this._targetConditions;
         }
     }
 
-    public get_constraints(): string[] {
+    public get constraints(): string[] {
         return this._constraints;
     }
 
-    public get_temporary_constraints(): string[] {
-        return this._temp_constraints;
-    }
-
-    /** Returns temporary_constraints, if they're set, else constraints */
-    public get curConstraints(): string[] {
-        return this.get_temporary_constraints() || this.get_constraints();
-    }
-
-    public get_puzzle_locks(): boolean[] {
-        let puzlocks: boolean[];
-        let ii: number;
-
-        if (this._puzzle_locks == null && !this._use_tails) {
-            puzlocks = [];
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
-                puzlocks.push(false);
-            }
-            return puzlocks;
-        } else if (this._use_tails) {
-            puzlocks = [];
-
-            if (this._use_short_tails) {
-                puzlocks.push(true);
-                puzlocks.push(true);
-            } else {
-                puzlocks.push(true);
-                puzlocks.push(true);
-                puzlocks.push(true);
-                puzlocks.push(true);
-                puzlocks.push(true);
-            }
-            for (ii = 0; ii < this._secstructs[0].length; ii++) {
-                if (this._puzzle_locks != null) {
-                    puzlocks.push(this._puzzle_locks[ii]);
-                } else {
-                    puzlocks.push(false);
-                }
-            }
-
-            for (ii = 0; ii < 20; ii++) {
-                puzlocks.push(true);
-            }
-            return puzlocks;
-        } else {
-            return this._puzzle_locks.slice();
-        }
-    }
-
-    public get_shift_limit(): number {
-        return this._shift_limit;
-    }
-
-    public set_shift_limit(limit: number): void {
-        this._shift_limit = limit;
-    }
-
-    public set_secstructs(secstructs: string[]): void {
-        this._secstructs = secstructs.slice();
-    }
-
-    public has_target_type(tc_type: string): boolean {
-        if (this._target_conditions == null) return false;
-        for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]["type"] === tc_type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public set_objective(objectives: any[]): void {
-        this._target_conditions = objectives.slice();
-        this._secstructs = [];
-        let concentration: number;
-
-        for (let ii: number = 0; ii < this._target_conditions.length; ii++) {
-            if (this._target_conditions[ii]["secstruct"] == null) {
-                throw new Error("Can't find secstruct from a target condition");
-            }
-            this._secstructs.push(this._target_conditions[ii]["secstruct"]);
-
-            let tc_type: string = this._target_conditions[ii]["type"];
-            // Aptamers
-
-            if (Puzzle.is_aptamer_type(tc_type) && this._target_conditions[ii]["site"] != null) {
-                let binding_pairs: any[] = [];
-                let binding_site: any[] = this._target_conditions[ii]["site"];
-                let target_pairs: number[] = EPars.parenthesis_to_pair_array(this.get_secstruct(ii));
-
-                for (let jj = 0; jj < binding_site.length; jj++) {
-                    binding_pairs.push(target_pairs[binding_site[jj]]);
-                }
-
-                this._target_conditions[ii]["binding_pairs"] = binding_pairs;
-                this._target_conditions[ii]["bonus"] = -0.6 * Math.log(this._target_conditions[ii]["concentration"] / 3) * 100;
-            }
-
-            // Simple oligos
-
-            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii].hasOwnProperty("fold_mode") === false) {
-                this._target_conditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER;
-            }
-
-            if (Puzzle.is_oligo_type(tc_type) && this._target_conditions[ii]["oligo_sequence"] != null) {
-                concentration = 0;
-                if (this._target_conditions[ii]["oligo_concentration"] != null) {
-                    concentration = this._target_conditions[ii]["oligo_concentration"];
-                } else {
-                    concentration = 1.0;
-                }
-                this._target_conditions[ii]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
-            }
-
-            // Multi-strands
-
-            if (this._target_conditions[ii]["type"] === "multistrand") {
-                let oligos: any[] = this._target_conditions[ii]["oligos"];
-                for (let jj = 0; jj < oligos.length; jj++) {
-                    concentration = 0;
-                    if (oligos[jj]["concentration"] != null) {
-                        concentration = oligos[jj]["concentration"];
-                    } else {
-                        concentration = 1.0;
-                    }
-                    oligos[jj]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
-                }
-            }
-        }
-    }
-
-    public set_reward(reward: number): void {
-        this._reward = reward;
-    }
-
-    public set_folder(folder: string): void {
-        this._folder = folder;
-    }
-
-    public set_next_puzzle(nex: number): void {
-        this._next_puzzle = nex;
-    }
-
-    public set_puzzle_locks(locks: boolean[]): void {
-        this._puzzle_locks = locks.slice();
-    }
-
-    public set_beginning_sequence(seq: string): void {
-        this._beginning_sequence = EPars.string_to_sequence_array(seq);
-    }
-
-    public set_saved_sequence(seq: string): void {
-        this._saved_sequence = EPars.string_to_sequence_array(seq);
-    }
-
-    public set_ui_specs(ui_spec: string[]): void {
-        this._defaultPoseState = null;
-        this._use_modes = 0;
-
-        for (let ii: number = 0; ii < ui_spec.length; ii++) {
-            if (ui_spec[ii] === "NOMODES") {
-                this._use_modes = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] === "STARTSTATE") {
-                this._defaultPoseState = <PoseState>(ui_spec[ii + 1].toUpperCase());
-                ii++;
-            } else if (ui_spec[ii] === "NOTOOLS") {
-                this._use_tools = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] === "NOPALLETE") {
-                this._use_pallete = Puzzle.BOOL_FALSE;
-            }
-        }
-    }
-
-    public set_boosters(obj: BoostersData): void {
-        this._booster_defs = obj;
-    }
-
-    public get_boosters(): BoostersData {
-        return this._booster_defs;
-    }
-
-    public get_beginning_sequence(index: number = 0): number[] {
-        let seq: number[] = [];
-        if (this._use_tails) {
-            if (this._use_short_tails) {
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_GUANINE);
-            } else {
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_GUANINE);
-                seq.push(EPars.RNABASE_ADENINE);
-                seq.push(EPars.RNABASE_ADENINE);
-                seq.push(EPars.RNABASE_ADENINE);
-            }
-        }
-
-        // FIXME: This needs revision, see PoseEditMode:2163
-        let len: number = this._beginning_sequence != null ? this._beginning_sequence.length : this._secstructs[index].length;
-        for (let ii: number = 0; ii < len; ii++) {
-            if (this._beginning_sequence != null) {
-                seq.push(this._beginning_sequence[ii]);
-            } else {
-                seq.push(EPars.RNABASE_ADENINE);
-            }
-        }
-
-        if (this._use_tails) {
-            for (let ii = 0; ii < 20; ii++) {
-                seq.push(EPars.RNABASE_LAST20[ii]);
-            }
-        }
-
-        return seq;
-    }
-
-    public get_saved_sequence(): number[] {
-        return this._saved_sequence;
-    }
-
-    public get_barcode_indices(): number[] {
-        if (!this._use_barcode) {
-            return null;
-        }
-
-        let ii: number;
-
-        let barcodes: number[] = [];
-        let secstruct: string = this.get_secstruct();
-        if (this._use_tails) {
-            for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
-                barcodes.push(ii);
-            }
-        } else {
-            for (ii = secstruct.length - 19; ii < secstruct.length; ii++) {
-                barcodes.push(ii);
-            }
-        }
-        return barcodes;
-    }
-
-    public get_subsequence_without_barcode(seq: any[]): any[] {
-        if (!this._use_barcode) {
-            return seq.slice();
-        }
-        let minus: number = 19;
-        if (this._use_tails) {
-            minus += 20;
-        }
-
-        return seq.slice(0, seq.length - minus);
-    }
-
-    public is_soft_constraint(): boolean {
-        return this._is_soft_constraint;
-    }
-
-    public set_use_tails(use_tails: boolean, use_short_tails: boolean): void {
-        this._use_tails = use_tails;
-        this._use_short_tails = use_short_tails;
-    }
-
-    public set_use_barcode(use_barcode: boolean): void {
-        this._use_barcode = use_barcode;
-    }
-
-    public set_constraints(constraints: string[]): void {
+    public set constraints(constraints: string[]) {
         this._constraints = [];
         let shapes: boolean[] = [];
         let antishapes: boolean[] = [];
@@ -455,49 +173,241 @@ export class Puzzle {
                 this._constraints.push(constraints[ii]);
                 this._constraints.push(constraints[ii + 1]);
             } else if (constraints[ii] === ConstraintType.SOFT) {
-                this._is_soft_constraint = true;
+                this._isSoftConstraint = true;
             }
         }
     }
 
-    public set_temporary_constraints(constraints: string[]): void {
+    public get temporaryConstraints(): string[] {
+        return this._tempConstraints;
+    }
+
+    public set temporaryConstraints(constraints: string[]) {
         if (constraints != null) {
-            this._temp_constraints = constraints.slice();
+            this._tempConstraints = constraints.slice();
         } else {
-            this._temp_constraints = null;
+            this._tempConstraints = null;
         }
     }
 
-    public set_round(round: number): void {
-        this._round = round;
+    /** Returns temporary_constraints, if they're set, else constraints */
+    public get curConstraints(): string[] {
+        return this.temporaryConstraints || this.constraints;
     }
 
-    public get_current_round(): number {
+    public get puzzleLocks(): boolean[] {
+        let puzlocks: boolean[];
+        let ii: number;
+
+        if (this._puzzleLocks == null && !this._useTails) {
+            puzlocks = [];
+            for (ii = 0; ii < this._secstructs[0].length; ii++) {
+                puzlocks.push(false);
+            }
+            return puzlocks;
+        } else if (this._useTails) {
+            puzlocks = [];
+
+            if (this._useShortTails) {
+                puzlocks.push(true);
+                puzlocks.push(true);
+            } else {
+                puzlocks.push(true);
+                puzlocks.push(true);
+                puzlocks.push(true);
+                puzlocks.push(true);
+                puzlocks.push(true);
+            }
+            for (ii = 0; ii < this._secstructs[0].length; ii++) {
+                if (this._puzzleLocks != null) {
+                    puzlocks.push(this._puzzleLocks[ii]);
+                } else {
+                    puzlocks.push(false);
+                }
+            }
+
+            for (ii = 0; ii < 20; ii++) {
+                puzlocks.push(true);
+            }
+            return puzlocks;
+        } else {
+            return this._puzzleLocks.slice();
+        }
+    }
+
+    public set puzzleLocks(locks: boolean[]) {
+        this._puzzleLocks = locks.slice();
+    }
+
+    public get shiftLimit(): number {
+        return this._shiftLimit;
+    }
+
+    public set shiftLimit(limit: number) {
+        this._shiftLimit = limit;
+    }
+
+    public set secstructs(secstructs: string[]) {
+        this._secstructs = secstructs.slice();
+    }
+
+    public set objective(objectives: any[]) {
+        this._targetConditions = objectives.slice();
+        this._secstructs = [];
+        let concentration: number;
+
+        for (let ii: number = 0; ii < this._targetConditions.length; ii++) {
+            if (this._targetConditions[ii]["secstruct"] == null) {
+                throw new Error("Can't find secstruct from a target condition");
+            }
+            this._secstructs.push(this._targetConditions[ii]["secstruct"]);
+
+            let tc_type: string = this._targetConditions[ii]["type"];
+            // Aptamers
+
+            if (Puzzle.isAptamerType(tc_type) && this._targetConditions[ii]["site"] != null) {
+                let binding_pairs: any[] = [];
+                let binding_site: any[] = this._targetConditions[ii]["site"];
+                let target_pairs: number[] = EPars.parenthesis_to_pair_array(this.getSecstruct(ii));
+
+                for (let jj = 0; jj < binding_site.length; jj++) {
+                    binding_pairs.push(target_pairs[binding_site[jj]]);
+                }
+
+                this._targetConditions[ii]["binding_pairs"] = binding_pairs;
+                this._targetConditions[ii]["bonus"] = -0.6 * Math.log(this._targetConditions[ii]["concentration"] / 3) * 100;
+            }
+
+            // Simple oligos
+
+            if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii].hasOwnProperty("fold_mode") === false) {
+                this._targetConditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER;
+            }
+
+            if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii]["oligo_sequence"] != null) {
+                concentration = 0;
+                if (this._targetConditions[ii]["oligo_concentration"] != null) {
+                    concentration = this._targetConditions[ii]["oligo_concentration"];
+                } else {
+                    concentration = 1.0;
+                }
+                this._targetConditions[ii]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+            }
+
+            // Multi-strands
+
+            if (this._targetConditions[ii]["type"] === "multistrand") {
+                let oligos: any[] = this._targetConditions[ii]["oligos"];
+                for (let jj = 0; jj < oligos.length; jj++) {
+                    concentration = 0;
+                    if (oligos[jj]["concentration"] != null) {
+                        concentration = oligos[jj]["concentration"];
+                    } else {
+                        concentration = 1.0;
+                    }
+                    oligos[jj]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                }
+            }
+        }
+    }
+
+    public set beginningSequence(seq: string) {
+        this._beginningSequence = EPars.string_to_sequence_array(seq);
+    }
+
+    public set savedSequenceString(seq: string) {
+        this._savedSequence = EPars.string_to_sequence_array(seq);
+    }
+
+    public set uiSpecs(ui_spec: string[]) {
+        this._defaultPoseState = null;
+        this._useModes = 0;
+
+        for (let ii: number = 0; ii < ui_spec.length; ii++) {
+            if (ui_spec[ii] === "NOMODES") {
+                this._useModes = Puzzle.BOOL_FALSE;
+            } else if (ui_spec[ii] === "STARTSTATE") {
+                this._defaultPoseState = <PoseState>(ui_spec[ii + 1].toUpperCase());
+                ii++;
+            } else if (ui_spec[ii] === "NOTOOLS") {
+                this._useTools = Puzzle.BOOL_FALSE;
+            } else if (ui_spec[ii] === "NOPALLETE") {
+                this._usePallete = Puzzle.BOOL_FALSE;
+            }
+        }
+    }
+
+    public get boosters(): BoostersData {
+        return this._boosterDefs;
+    }
+
+    public set boosters(obj: BoostersData) {
+        this._boosterDefs = obj;
+    }
+
+    public get savedSequence(): number[] {
+        return this._savedSequence;
+    }
+
+    public get barcodeIndices(): number[] {
+        if (!this._useBarcode) {
+            return null;
+        }
+
+        let ii: number;
+
+        let barcodes: number[] = [];
+        let secstruct: string = this.getSecstruct();
+        if (this._useTails) {
+            for (ii = secstruct.length - 39; ii < secstruct.length - 20; ii++) {
+                barcodes.push(ii);
+            }
+        } else {
+            for (ii = secstruct.length - 19; ii < secstruct.length; ii++) {
+                barcodes.push(ii);
+            }
+        }
+        return barcodes;
+    }
+
+    public get isSoftConstraint(): boolean {
+        return this._isSoftConstraint;
+    }
+
+    public get round(): number {
         return this._round;
     }
 
-    public set_num_submissions(num: number): void {
-        this._num_submissions = num;
+    public set round(round: number) {
+        this._round = round;
     }
 
-    public get_num_submissions(): number {
-        return this._num_submissions;
+    public get numSubmissions(): number {
+        return this._numSubmissions;
     }
 
-    public get_use_barcode(): boolean {
-        return this._use_barcode;
+    public set numSubmissions(num: number) {
+        this._numSubmissions = num;
     }
 
-    public is_undo_zoom_allowed(): boolean {
-        if (this._use_tools !== 0) {
-            return this._use_tools === Puzzle.BOOL_TRUE;
+    public get useBarcode(): boolean {
+        return this._useBarcode;
+    }
+
+    public set useBarcode(use_barcode: boolean) {
+        this._useBarcode = use_barcode;
+    }
+
+    public get isUndoZoomAllowed(): boolean {
+        if (this._useTools !== 0) {
+            return this._useTools === Puzzle.BOOL_TRUE;
         }
 
         return true;
     }
 
-    public is_pair_brush_allowed(): boolean {
-        let is_basic: boolean = (this._puzzle_type !== PuzzleType.BASIC);
+    public get isPairBrushAllowed(): boolean {
+        let is_basic: boolean = (this._puzzleType !== PuzzleType.BASIC);
         let has_target: boolean = false;
         for (let ii: number = 0; ii < this._constraints.length; ii++) {
             if (this._constraints[ii] === ConstraintType.SHAPE) {
@@ -508,46 +418,136 @@ export class Puzzle {
         return is_basic || has_target;
     }
 
-    public are_modes_available(): boolean {
-        if (this._use_modes !== 0) {
-            return this._use_modes === Puzzle.BOOL_TRUE;
+    public get areModesAvailable(): boolean {
+        if (this._useModes !== 0) {
+            return this._useModes === Puzzle.BOOL_TRUE;
         }
         return true;
     }
 
-    public is_pallete_allowed(): boolean {
-        if (this._use_pallete !== 0) {
-            return this._use_pallete === Puzzle.BOOL_TRUE;
+    public get isPalleteAllowed(): boolean {
+        if (this._usePallete !== 0) {
+            return this._usePallete === Puzzle.BOOL_TRUE;
         }
         return true;
     }
 
-    public default_mode(): PoseState {
+    public get defaultMode(): PoseState {
         if (this._defaultPoseState != null) {
             return this._defaultPoseState;
-        } else if (this._puzzle_type !== PuzzleType.BASIC) {
+        } else if (this._puzzleType !== PuzzleType.BASIC) {
             return PoseState.TARGET;
         } else {
             return PoseState.FROZEN;
         }
     }
 
-    public set_default_mode(default_mode: PoseState): void {
+    public set defaultMode(default_mode: PoseState) {
         this._defaultPoseState = default_mode;
     }
 
-    public is_using_tails(): boolean {
-        return this._use_tails;
+    public get isUsingTails(): boolean {
+        return this._useTails;
     }
 
-    public transform_sequence(seq: number[], target_index: number): number[] {
-        if (this._target_conditions != null) {
-            if (this._target_conditions[target_index]["sequence"] != null) {
-                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._target_conditions[target_index]["sequence"]);
+    public getSecstruct(index: number = 0): string {
+        if (this._useTails) {
+            if (this._useShortTails) {
+                return `..${this._secstructs[index]}....................`;
+            } else {
+                return `.....${this._secstructs[index]}....................`;
+            }
+        } else {
+            return this._secstructs[index];
+        }
+    }
+
+    public getSecstructs(index: number = 0): string[] {
+        let secstructs: string[] = [];
+        for (let ii: number = 0; ii < this._secstructs.length; ii++) {
+            secstructs.push(this.getSecstruct(ii));
+        }
+        return secstructs;
+    }
+
+    public getPuzzleName(linked: boolean = false): string {
+        if (linked && this._puzzleType !== PuzzleType.EXPERIMENTAL) {
+            let url: string = EternaURL.createURL({page: "puzzle", nid: this._nid});
+            return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
+        }
+
+        return this._name;
+    }
+
+    public hasTargetType(tc_type: string): boolean {
+        if (this._targetConditions == null) return false;
+        for (let ii: number = 0; ii < this._targetConditions.length; ii++) {
+            if (this._targetConditions[ii]["type"] === tc_type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public getBeginningSequence(index: number = 0): number[] {
+        let seq: number[] = [];
+        if (this._useTails) {
+            if (this._useShortTails) {
+                seq.push(EPars.RNABASE_GUANINE);
+                seq.push(EPars.RNABASE_GUANINE);
+            } else {
+                seq.push(EPars.RNABASE_GUANINE);
+                seq.push(EPars.RNABASE_GUANINE);
+                seq.push(EPars.RNABASE_ADENINE);
+                seq.push(EPars.RNABASE_ADENINE);
+                seq.push(EPars.RNABASE_ADENINE);
+            }
+        }
+
+        // FIXME: This needs revision, see PoseEditMode:2163
+        let len: number = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
+        for (let ii: number = 0; ii < len; ii++) {
+            if (this._beginningSequence != null) {
+                seq.push(this._beginningSequence[ii]);
+            } else {
+                seq.push(EPars.RNABASE_ADENINE);
+            }
+        }
+
+        if (this._useTails) {
+            for (let ii = 0; ii < 20; ii++) {
+                seq.push(EPars.RNABASE_LAST20[ii]);
+            }
+        }
+
+        return seq;
+    }
+
+    public getSubsequenceWithoutBarcode(seq: any[]): any[] {
+        if (!this._useBarcode) {
+            return seq.slice();
+        }
+        let minus: number = 19;
+        if (this._useTails) {
+            minus += 20;
+        }
+
+        return seq.slice(0, seq.length - minus);
+    }
+
+    public setUseTails(use_tails: boolean, use_short_tails: boolean): void {
+        this._useTails = use_tails;
+        this._useShortTails = use_short_tails;
+    }
+
+    public transformSequence(seq: number[], target_index: number): number[] {
+        if (this._targetConditions != null) {
+            if (this._targetConditions[target_index]["sequence"] != null) {
+                let target_seq_temp: number[] = EPars.string_to_sequence_array(this._targetConditions[target_index]["sequence"]);
                 let target_seq: number[] = [];
 
-                if (this._use_tails) {
-                    if (this._use_short_tails) {
+                if (this._useTails) {
+                    if (this._useShortTails) {
                         target_seq.push(EPars.RNABASE_GUANINE);
                         target_seq.push(EPars.RNABASE_GUANINE);
                     } else {
@@ -563,13 +563,13 @@ export class Puzzle {
                     target_seq.push(target_seq_temp[ii]);
                 }
 
-                if (this._use_tails) {
+                if (this._useTails) {
                     for (let ii = 0; ii < 20; ii++) {
                         target_seq.push(EPars.RNABASE_LAST20[ii]);
                     }
                 }
 
-                let locks: boolean[] = this.get_puzzle_locks();
+                let locks: boolean[] = this.puzzleLocks;
 
                 if (locks.length !== target_seq.length || target_seq.length !== seq.length) {
                     throw new Error("lock length doesn't match object sequence");
@@ -588,32 +588,32 @@ export class Puzzle {
 
     private readonly _nid: number;
     private readonly _name: string;
-    private readonly _puzzle_type: PuzzleType;
+    private readonly _puzzleType: PuzzleType;
     private _secstructs: string[] = [];
-    private _mission_text: string = Puzzle.DEFAULT_MISSION_TEXT;
-    private _puzzle_locks: boolean[];
-    private _shift_limit: number;
-    private _beginning_sequence: number[];
-    private _saved_sequence: number[];
-    private _use_tails: boolean = false;
-    private _use_short_tails: boolean = false;
-    private _use_barcode: boolean = false;
-    private _target_conditions: any[] = null;
+    private _missionText: string = Puzzle.DEFAULT_MISSION_TEXT;
+    private _puzzleLocks: boolean[];
+    private _shiftLimit: number;
+    private _beginningSequence: number[];
+    private _savedSequence: number[];
+    private _useTails: boolean = false;
+    private _useShortTails: boolean = false;
+    private _useBarcode: boolean = false;
+    private _targetConditions: any[] = null;
     private _constraints: string[] = null;
-    private _temp_constraints: string[];
+    private _tempConstraints: string[];
     private _round: number = -1;
-    private _num_submissions: number = 3;
+    private _numSubmissions: number = 3;
     private _folder: string;
     private _reward: number = 0;
-    private _rscript_ops: string = "";
+    private _rscriptOps: string = "";
     private _defaultPoseState: PoseState;
-    private _use_tools: number = 0;
-    private _use_pallete: number = 0;
-    private _use_modes: number = 0;
-    private _next_puzzle: number = -1;
+    private _useTools: number = 0;
+    private _usePallete: number = 0;
+    private _useModes: number = 0;
+    private _nextPuzzle: number = -1;
     private _hint: string = null;
-    private _is_soft_constraint: boolean = false;
-    private _booster_defs: BoostersData = null;
+    private _isSoftConstraint: boolean = false;
+    private _boosterDefs: BoostersData = null;
 
     private static readonly T_APTAMER: string[] = ["aptamer", "aptamer+oligo"];
     private static readonly T_OLIGO: string[] = ["oligo", "aptamer+oligo"];
