@@ -70,7 +70,7 @@ export class RNAScript {
             return null;
         }
 
-        let instRegex: RegExp = /(\#PRE\-)?(\w+)\s*(.*)/ig;
+        const instRegex: RegExp = /(\#PRE\-)?(\w+)\s*(.*)/ig;
         let regResult: RegExpExecArray;
         if ((regResult = instRegex.exec(instruction)) != null) {
             let op: string = (regResult[1] ? regResult[1] : "") + regResult[2];

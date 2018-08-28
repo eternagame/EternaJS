@@ -81,7 +81,7 @@ export class ROPWait extends RScriptOp {
     }
 
     public static NotifyTextboxProgress(id: string): void {
-        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.GetId() + ROPTextbox.id_postfix === id));
+        ROPWait.GenericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.GetId() + ROPTextbox.ID_POSTFIX === id));
     }
 
     public static NotifyFinishRNA(): void {
@@ -116,11 +116,11 @@ export class ROPWait extends RScriptOp {
         this._previous_colors.splice(0);
         this._previous_color_idx.splice(0);
         this._all_nucleotides_completed.splice(0);
-        this._env.SetTextboxVisible(this._id + ROPTextbox.id_postfix, true);
+        this._env.SetTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, true);
     }
 
     public PassPaint(): void {
-        this._env.SetTextboxVisible(this._id + ROPTextbox.id_postfix, false);
+        this._env.SetTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, false);
     }
 
     public GetWaitType(): ROPWaitType {
