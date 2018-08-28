@@ -1,5 +1,5 @@
 export class CSVParser {
-    public static parse_into_array(csl: string): string[] {
+    public static splitOnComma(csl: string): string[] {
         let vals: string[] = [];
         let last_comma: number = -1;
         let ii: number;
@@ -18,7 +18,7 @@ export class CSVParser {
         return vals;
     }
 
-    public static parse_into_array_with_white_spaces(csl: string): string[] {
+    public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
         let last_comma: number = -1;
         let ii: number;

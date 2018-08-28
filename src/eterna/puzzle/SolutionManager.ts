@@ -138,7 +138,7 @@ export class SolutionManager {
             if (Feedback.EXPSTRINGS.indexOf(obj["SHAPE"]) >= 0) {
                 newfb.set_shape_data(null, 0, null, null, null, obj["SHAPE"]);
             } else {
-                let shape_array: any[] = CSVParser.parse_into_array(obj["SHAPE"]);
+                let shape_array: any[] = CSVParser.splitOnComma(obj["SHAPE"]);
                 for (let kk: number = 0; kk < shape_array.length; kk++) {
                     shape_array[kk] = Number(shape_array[kk]);
                 }

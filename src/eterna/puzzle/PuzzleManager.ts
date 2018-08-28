@@ -160,7 +160,7 @@ export class PuzzleManager {
         }
 
         if (json["constraints"] && json["constraints"].length > 0) {
-            let constraints: string[] = CSVParser.parse_into_array(json["constraints"]);
+            let constraints: string[] = CSVParser.splitOnComma(json["constraints"]);
             if (json["check_hairpin"] && Number(json["check_hairpin"])) {
                 constraints.push("BARCODE");
                 constraints.push("0");
