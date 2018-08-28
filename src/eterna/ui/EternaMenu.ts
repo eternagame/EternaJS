@@ -112,7 +112,10 @@ export class EternaMenu extends GamePanel implements Enableable {
     public set enabled(value: boolean) {
         this._enabled = value;
         for (let menu of this._menus) {
-            menu.menuButton.enabled = this._enabled;
+            menu.menuButton.enabled = value;
+            if (!value) {
+                menu.panel.display.visible = false;
+            }
         }
     }
 
@@ -129,8 +132,16 @@ export class EternaMenu extends GamePanel implements Enableable {
         menu.panel.display.visible = false;
         menuButton.addObject(menu.panel, menuButton.container);
 
-        menuButton.pointerOver.connect(() => menu.panel.display.visible = true);
-        menuButton.pointerOut.connect(() => menu.panel.display.visible = false);
+        menuButton.pointerOver.connect(() => {
+            if (this._enabled) {
+                menu.panel.display.visible = true
+            }
+        });
+        menuButton.pointerOut.connect(() => {
+            if (this._enabled) {
+                menu.panel.display.visible = false
+            }
+        });
 
         return menu;
     }
