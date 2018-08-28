@@ -79,7 +79,7 @@ export class PoseEditToolbar extends ContainerObject {
 
         // MENU
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu));
+        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(null));
         this.addObject(this.actionMenu, this._toolbarLayout);
 
         // SUBMIT BUTTON
@@ -194,7 +194,7 @@ export class PoseEditToolbar extends ContainerObject {
             }
 
             if (boostersData.actions != null) {
-                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters);
+                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
                 let idx: number = this.actionMenu.addMenuButton(this.boostersMenu);
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
@@ -232,7 +232,6 @@ export class PoseEditToolbar extends ContainerObject {
             .up(Bitmaps.ImgUndo)
             .over(Bitmaps.ImgUndoOver)
             .down(Bitmaps.ImgUndoHit)
-            .disabled(Bitmaps.ImgUndo)
             .tooltip("Undo")
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
@@ -241,7 +240,6 @@ export class PoseEditToolbar extends ContainerObject {
             .up(Bitmaps.ImgRedo)
             .over(Bitmaps.ImgRedoOver)
             .down(Bitmaps.ImgRedoHit)
-            .disabled(Bitmaps.ImgRedo)
             .tooltip("Redo")
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
@@ -259,6 +257,7 @@ export class PoseEditToolbar extends ContainerObject {
         // MENU BUTTONS
         this.screenshotButton = new GameButton()
             .allStates(Bitmaps.ImgScreenshot)
+            .disabled(null)
             .label("Screenshot", 14)
             .scaleBitmapToLabel()
             .tooltip("Screenshot");
@@ -266,6 +265,7 @@ export class PoseEditToolbar extends ContainerObject {
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
+            .disabled(null)
             .label("Settings", 14)
             .scaleBitmapToLabel()
             .tooltip("Game options");
@@ -273,12 +273,14 @@ export class PoseEditToolbar extends ContainerObject {
 
         this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
+            .disabled(null)
             .label("Designs", 14)
             .scaleBitmapToLabel()
             .tooltip("View all submitted designs for this puzzle.");
 
         this.specButton = new GameButton()
             .allStates(Bitmaps.ImgSpec)
+            .disabled(null)
             .label("Specs", 14)
             .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
@@ -291,6 +293,7 @@ export class PoseEditToolbar extends ContainerObject {
 
         this.retryButton = new GameButton()
             .allStates(Bitmaps.ImgReset)
+            .disabled(null)
             .label("Reset", 14)
             .scaleBitmapToLabel()
             .tooltip("Reset and try this puzzle again.")
@@ -299,12 +302,14 @@ export class PoseEditToolbar extends ContainerObject {
 
         this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
+            .disabled(null)
             .label("Copy", 14)
             .scaleBitmapToLabel()
             .tooltip("Copy the current sequence");
 
         this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
+            .disabled(null)
             .label("Paste", 14)
             .scaleBitmapToLabel()
             .tooltip("Type in a sequence");
