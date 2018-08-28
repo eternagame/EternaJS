@@ -207,7 +207,7 @@ export class ROPTextbox extends RScriptOp {
 
         this._env.storeVar(this._id, newArrow, this._env);
         if (this._hasParent) {
-            parent.add_child_arrow(newArrow);
+            parent.addChildArrow(newArrow);
         }
     }
 
