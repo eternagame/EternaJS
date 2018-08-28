@@ -8,7 +8,7 @@ import {RScriptOp} from "./RScriptOp";
  * :: Note - Only one entry point.
  */
 export class RScriptOpTree {
-    public AddNode(node: RScriptOp): void {
+    public addNode(node: RScriptOp): void {
         if (!node) {
             return;
         }
@@ -22,7 +22,7 @@ export class RScriptOpTree {
         }
     }
 
-    public FinishCreation(): void {
+    public finishCreation(): void {
         this._curptr = this._head;
     }
 
@@ -45,7 +45,7 @@ export class RScriptOpTree {
                 return null;
             } else {
                 // If it cannot then see if the wait queue is clear.
-                if (this.CheckWaitQueueContinue()) {
+                if (this.checkWaitQueueContinue()) {
                     // Clear queue and proceed.
                     this._waitQueue.splice(0);
                 } else {
@@ -59,7 +59,7 @@ export class RScriptOpTree {
         return ret;
     }
 
-    private CheckWaitQueueContinue(): boolean {
+    private checkWaitQueueContinue(): boolean {
         for (let op of this._waitQueue) {
             if (op.isPaused()) {
                 return false;
