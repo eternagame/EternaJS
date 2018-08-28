@@ -31,12 +31,12 @@ export class GamePanel extends BaseGamePanel {
         this.updateView();
     }
 
-    public setPanelTitle(title: string): void {
+    public set title(title: string) {
         this._title = title;
         this.updateView();
     }
 
-    public getTitleSpace(): number {
+    public get titleHeight(): number {
         return this._title == null ? 0 : 35;
     }
 
