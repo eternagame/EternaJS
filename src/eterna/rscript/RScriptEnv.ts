@@ -29,11 +29,11 @@ export class RScriptEnv extends ContainerObject {
         super();
         this._ui = ui;
         this._puz = puz;
-        this._mapping = new Map();
+        this._vars = new Map();
     }
 
     public setTextboxVisible(id: string, isVisible: boolean): void {
-        if (id === "" || !this._mapping.hasOwnProperty("id")) {
+        if (id === "" || !this._vars.hasOwnProperty("id")) {
             return;
         }
 
@@ -70,7 +70,7 @@ export class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        for (let key in this._mapping) {
+        for (let key in this._vars) {
             this.deleteVar(key);
         }
     }
@@ -240,47 +240,46 @@ export class RScriptEnv extends ContainerObject {
         }
     }
 
-    public storeVar(key: string, inValue: RScriptVarType, parent: any): void {
-        this._mapping.set(key, {val: inValue, par: parent});
+    public setVar(key: string, inValue: RScriptVarType): void {
+        this._vars.set(key, inValue);
     }
 
     public getVar(key: string): RScriptVarType {
-        let scriptVar = this._mapping.get(key);
-        return scriptVar != null ? scriptVar.val : null;
+        let scriptVar = this._vars.get(key);
+        if (scriptVar != null && scriptVar instanceof GameObject) {
+            return scriptVar.isLiveObject ? scriptVar : null;
+        } else {
+            return scriptVar;
+        }
     }
 
     public deleteVar(key: string): void {
-        let scriptVar = this._mapping.get(key);
+        let scriptVar = this._vars.get(key);
         if (scriptVar == null) {
             return;
         }
 
         // Make sure it's removed
-        if (scriptVar.val instanceof GameObject) {
-            scriptVar.val.destroySelf();
-        } else if (scriptVar.val instanceof Container) {
-            scriptVar.val.destroy({children: true});
-        } else if (scriptVar.val instanceof DisplayObject) {
-            scriptVar.val.destroy();
+        if (scriptVar instanceof GameObject && scriptVar.isLiveObject) {
+            scriptVar.destroySelf();
+        } else if (scriptVar instanceof Container) {
+            scriptVar.destroy({children: true});
+        } else if (scriptVar instanceof DisplayObject) {
+            scriptVar.destroy();
         }
 
-        this._mapping.delete(key);
+        this._vars.delete(key);
     }
 
-    public exists(key: string): boolean {
-        return this._mapping.has(key);
+    public hasVar(key: string): boolean {
+        return this._vars.has(key);
     }
 
     private readonly _ui: PoseEditMode;
     private readonly _puz: Puzzle;
-    private readonly _mapping: Map<string, ScriptVar>;
+    private readonly _vars: Map<string, RScriptVarType>;
 
     private _stringCount: number = 0;
 }
 
 export type RScriptVarType = GameObject | DisplayObject | RNAHighlightState | string;
-
-interface ScriptVar {
-    val: RScriptVarType;
-    par: any;
-}

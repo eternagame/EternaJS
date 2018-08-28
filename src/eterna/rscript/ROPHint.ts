@@ -18,7 +18,7 @@ export class ROPHint extends RScriptOp {
     /* override */
     public exec(): void {
         // Remove hint with ID.
-        if (this._env.exists(this._id)) {
+        if (this._env.hasVar(this._id)) {
             this._env.deleteVar(this._id);
         }
 
@@ -33,7 +33,7 @@ export class ROPHint extends RScriptOp {
         hint.setAnchorNucleotide(this._env.pose, this._startIdx);
         hint.initialize();
         this._env.ui.addObject(hint, this._env.ui.container);
-        this._env.storeVar(this._id, hint, this._env.ui);
+        this._env.setVar(this._id, hint);
     }
 
     /* override */

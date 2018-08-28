@@ -43,7 +43,6 @@ export class ROPTextbox extends RScriptOp {
 
     private showTextbox(): void {
         let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
-        let parent: ContainerObject = this._env;
         if (this._initialShow) {
             if (this._forceTopmost && false) {
                 // parent = Application.instance.get_front_object_container();
@@ -53,7 +52,7 @@ export class ROPTextbox extends RScriptOp {
             }
         }
 
-        this._env.storeVar(this._id, textBox, parent);
+        this._env.setVar(this._id, textBox);
 
         let textStyle: ExtendedTextStyle = {
             fontFamily: Fonts.ARIAL,
@@ -205,14 +204,14 @@ export class ROPTextbox extends RScriptOp {
         updateLocation();
         newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
 
-        this._env.storeVar(this._id, newArrow, this._env);
+        this._env.setVar(this._id, newArrow);
         if (this._hasParent) {
             parent.addChildArrow(newArrow);
         }
     }
 
     public exec(): void {
-        if (this._env.exists(this._id)) {
+        if (this._env.hasVar(this._id)) {
             if (ROPTextbox.isTextbox(this._mode)) {
                 this.removeTextbox();
             } else {
