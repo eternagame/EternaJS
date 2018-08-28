@@ -4,48 +4,39 @@ import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 
 export class ActionBar extends ContainerObject {
-    public constructor(bar_height: number = 0) {
+    public constructor(height: number = 0) {
         super();
 
         this._bg = new Graphics();
         this.container.addChild(this._bg);
 
-        this._height = bar_height;
-        this.do_layout();
+        this._height = height;
+        this.doLayout();
     }
 
-    public add_item(obj: SceneObject, layout: boolean = true, height_mod: number = 0): void {
+    public addItem(obj: SceneObject, layout: boolean = true, height_mod: number = 0): void {
         this._items.push(obj);
         this.addObject(obj, this.container);
-        this._height_mods.push(height_mod);
+        this._heightMods.push(height_mod);
 
         if (layout) {
-            this.do_layout();
+            this.doLayout();
         }
     }
 
-    public clear_items(layout: boolean = true): void {
-        for (let ii: number = 0; ii < this._items.length; ii++) {
-            this._items[ii].destroySelf();
+    public clearItems(layout: boolean = true): void {
+        for (let item of this._items) {
+            item.destroySelf();
         }
 
         this._items = [];
 
         if (layout) {
-            this.do_layout();
+            this.doLayout();
         }
     }
 
-    /* override */
-    // public set_disabled(disabled: boolean): void {
-    //     for (let ii: number = 0; ii < this._items.length; ii++) {
-    //         if (this._items[ii].hasOwnProperty("set_disabled")) {
-    //             this._items[ii].set_disabled(disabled);
-    //         }
-    //     }
-    // }
-
-    public do_layout(): void {
+    public doLayout(): void {
         this._bg.clear();
         if (this._items.length === 0) {
             return;
@@ -76,7 +67,7 @@ export class ActionBar extends ContainerObject {
 
         for (let ii = 0; ii < this._items.length; ii++) {
             let cur_space: number = Math.max(DisplayUtil.width(this._items[ii].display), item_space);
-            let item_y: number = whole_height / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._height_mods[ii];
+            let item_y: number = whole_height / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
             this._items[ii].display.position = new Point(
                 bar_space + bar_space / 2.0 + item_space_walker + (bar_space) * ii,
                 item_y
@@ -88,7 +79,7 @@ export class ActionBar extends ContainerObject {
         this._bg.drawRoundedRect(0, 0, whole_width, whole_height, 10);
     }
 
-    public get_bar_width(): number {
+    public get width(): number {
         if (this._items.length === 0) {
             return 0;
         }
@@ -106,8 +97,8 @@ export class ActionBar extends ContainerObject {
     }
 
     private readonly _bg: Graphics;
+    private readonly _height: number;
 
     private _items: SceneObject[] = [];
-    private readonly _height: number;
-    private _height_mods: number[] = [];
+    private _heightMods: number[] = [];
 }

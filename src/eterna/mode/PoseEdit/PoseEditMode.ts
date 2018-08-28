@@ -571,7 +571,7 @@ export class PoseEditMode extends GameMode {
         let pairs: number[] = EPars.parenthesis_to_pair_array(this._puzzle.getSecstruct());
 
         /// Setup Action bar
-        this._scriptbar.clear_items(false);
+        this._scriptbar.clearItems(false);
 
         // this._scriptbar.visible = false;
         // if (this.root.loaderInfo.parameters.scriptbar
@@ -3582,7 +3582,7 @@ export class PoseEditMode extends GameMode {
 
     private layoutBars(): void {
         this._scriptbar.display.position = new Point(
-            Flashbang.stageWidth - 20 - this._scriptbar.get_bar_width(),
+            Flashbang.stageWidth - 20 - this._scriptbar.width,
             Flashbang.stageHeight - 129);
     }
 
