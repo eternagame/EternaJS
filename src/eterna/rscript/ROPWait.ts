@@ -34,7 +34,7 @@ export class ROPWait extends RScriptOp {
             return;
         }
 
-        let newColor: string = RScriptEnv.ConvertNucleotideIntToString(inColor);
+        let newColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
 
         ROPWait.genericNotifyClear(ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor));
 
@@ -50,8 +50,8 @@ export class ROPWait extends RScriptOp {
     }
 
     public static notifyPaint(i: number, inColor: number, newColor: number): void {
-        let previousColor: string = RScriptEnv.ConvertNucleotideIntToString(inColor);
-        let changeColor: string = RScriptEnv.ConvertNucleotideIntToString(newColor);
+        let previousColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
+        let changeColor: string = RScriptEnv.convertNucleotideIntToString(newColor);
         ROPWait.genericNotifyClear(ROPWaitType.PAINT, (op: ROPWait): boolean => {
             op.addPreviousColor(previousColor, i);
             return op.addNucleotideCompletion(i, changeColor);
@@ -109,18 +109,18 @@ export class ROPWait extends RScriptOp {
         }
 
         for (let i: number = 0; i < this._prevColorIndex.length; ++i) {
-            this._env.GetRNA().setBaseColor(this._prevColorIndex[i],
-                RScriptEnv.ConvertNucleotideStringToInt(this._prevColors[i]));
+            this._env.pose.setBaseColor(this._prevColorIndex[i],
+                RScriptEnv.convertNucleotideStringToInt(this._prevColors[i]));
         }
 
         this._prevColors.splice(0);
         this._prevColorIndex.splice(0);
         this._allNucleotidesCompleted.splice(0);
-        this._env.SetTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, true);
+        this._env.setTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, true);
     }
 
     public passPaint(): void {
-        this._env.SetTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, false);
+        this._env.setTextboxVisible(this._id + ROPTextbox.ID_POSTFIX, false);
     }
 
     public get waitType(): ROPWaitType {
@@ -138,23 +138,23 @@ export class ROPWait extends RScriptOp {
     /* override */
     public isPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-            let paired: number = this._env.GetRNA().pairs[this._startIdx];
+            let paired: number = this._env.pose.pairs[this._startIdx];
             if (paired < 0) {
                 return true;
             }
 
-            let t1: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().getBase(this._startIdx).type
+            let t1: string = RScriptEnv.convertNucleotideIntToString(
+                this._env.pose.getBase(this._startIdx).type
             ).toUpperCase();
-            let t2: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().getBase(paired).type
+            let t2: string = RScriptEnv.convertNucleotideIntToString(
+                this._env.pose.getBase(paired).type
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
         } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE && !this._conditionClear) {
             for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (RScriptEnv.ConvertNucleotideIntToString(
-                    this._env.GetRNA().getBase(ii).type
+                if (RScriptEnv.convertNucleotideIntToString(
+                    this._env.pose.getBase(ii).type
                 ).toUpperCase() !== this._expectedColor) {
                     return true;
                 }
@@ -168,14 +168,14 @@ export class ROPWait extends RScriptOp {
             this.clearCondition();
         } else if (this._waitType === ROPWaitType.BLACKMARK && !this._conditionClear) {
             for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (!this._env.GetRNA().isTrackedIndex(ii)) {
+                if (!this._env.pose.isTrackedIndex(ii)) {
                     return true;
                 }
             }
             this.clearCondition();
         } else if (this._waitType === ROPWaitType.BLUEMARK && !this._conditionClear) {
             for (let ii = this._startIdx; ii <= this._endIdx; ++ii) {
-                if (!this._env.GetRNA().isDesignStructureHighlighted(ii)) {
+                if (!this._env.pose.isDesignStructureHighlighted(ii)) {
                     return true;
                 }
             }
@@ -256,12 +256,12 @@ export class ROPWait extends RScriptOp {
         switch (i) {
         case 0:
             if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.GetStringRef(arg).toUpperCase());
+                this._elements.push(this._env.getStringRef(arg).toUpperCase());
             } else if (this._waitType === ROPWaitType.TEXTBOX) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._waitType === ROPWaitType.MUTATION) {
                 if ("AUGC".indexOf(arg.toUpperCase()) !== -1) {
-                    this._expectedColor = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
+                    this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
                 } else {
                     this._elements.push(Number(arg) - 1);
                 }
@@ -273,9 +273,9 @@ export class ROPWait extends RScriptOp {
             break;
         case 1:
             if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.GetStringRef(arg).toUpperCase());
+                this._elements.push(this._env.getStringRef(arg).toUpperCase());
             } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-                this._color1 = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
+                this._color1 = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
             } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {
@@ -285,29 +285,29 @@ export class ROPWait extends RScriptOp {
             break;
         case 2:
             if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.GetStringRef(arg).toUpperCase());
+                this._elements.push(this._env.getStringRef(arg).toUpperCase());
             } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE) {
-                this._expectedColor = this._env.GetStringRef(arg);
+                this._expectedColor = this._env.getStringRef(arg);
             } else if (this._waitType === ROPWaitType.PAINT) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-                this._color2 = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
+                this._color2 = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
             } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             }
             break;
         case 3:
             if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.GetStringRef(arg).toUpperCase());
+                this._elements.push(this._env.getStringRef(arg).toUpperCase());
             } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {
-                this._expectedColor = this._env.GetStringRef(arg).toUpperCase().replace(" ", "");
+                this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
             }
             break;
         default:
             if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.GetStringRef(arg).toUpperCase());
+                this._elements.push(this._env.getStringRef(arg).toUpperCase());
             } else if (this._waitType === ROPWaitType.MUTATION) {
                 this._elements.push(Number(arg) - 1);
             } else {

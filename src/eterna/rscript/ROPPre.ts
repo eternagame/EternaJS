@@ -48,36 +48,36 @@ export class ROPPre extends RScriptOp {
     public exec(): void {
         switch (this._type) {
         case ROPPreType.DISABLE_MISSION_SCREEN:
-            this._env.GetUI().showMissionScreen(false);
+            this._env.ui.showMissionScreen(false);
             break;
         case ROPPreType.USE_ALTERNATE_PALETTE:
-            this._env.GetUI().toolbar.palette.set_override_no_pair();
-            this._env.GetUI().toolbar.palette.change_no_pair_mode();
+            this._env.ui.toolbar.palette.set_override_no_pair();
+            this._env.ui.toolbar.palette.change_no_pair_mode();
             break;
         case ROPPreType.DISABLE_HINTS:
             // _env.GetUI().remove_hint_system(true);
             break;
         case ROPPreType.DISABLE_OBJECTIVES:
-            this._env.GetUI().showConstraints(false);
+            this._env.ui.showConstraints(false);
             break;
         case ROPPreType.DISABLE_UI_ELEMENT:
             for (let i: number = 0; i < this._allArgs.length; ++i) {
                 if (this._allArgs[i].toUpperCase() === "ENERGY") {
-                    this._env.GetUI().ropSetDisplayScoreTexts(this._doVisible);
+                    this._env.ui.ropSetDisplayScoreTexts(this._doVisible);
                     continue;
                 }
                 if (this._allArgs[i].toUpperCase() === "BASENUMBERING") {
-                    this._env.GetUI().ropSetShowNumbering(this._doVisible);
+                    this._env.ui.ropSetShowNumbering(this._doVisible);
                     continue;
                 }
                 if (this._allArgs[i].toUpperCase() === "TOTALENERGY") {
-                    this._env.GetUI().ropSetShowTotalEnergy(this._doVisible);
+                    this._env.ui.ropSetShowTotalEnergy(this._doVisible);
                     continue;
                 }
-                this._env.ShowHideUI(this._allArgs[i], this._doVisible, this._doDisable);
+                this._env.showHideUI(this._allArgs[i], this._doVisible, this._doDisable);
                 if (!this._doVisible) {
                     if (this._allArgs[i].toUpperCase() === "OBJECTIVES") {
-                        this._env.GetUI().showConstraints(false);
+                        this._env.ui.showConstraints(false);
                     }
                 }
             }
@@ -86,7 +86,7 @@ export class ROPPre extends RScriptOp {
             // no-op. What was this for?
             break;
         case ROPPreType.SET_DEFAULT_FOLD_MODE:
-            this._env.GetPuzzle().defaultMode = this._foldMode;
+            this._env.puzzle.defaultMode = this._foldMode;
             break;
         default:
             throw new Error(`Invalid Preprocessing Command: ${this._type}`);

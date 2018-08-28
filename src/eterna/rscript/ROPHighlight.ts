@@ -37,14 +37,14 @@ export class ROPHighlight extends RScriptOp {
     /* override */
     public exec(): void {
         // Remove highlight with ID.
-        if (this._env.Exists(this._id)) {
-            let existing: any = this._env.GetVar(this._id);
+        if (this._env.exists(this._id)) {
+            let existing: any = this._env.getVar(this._id);
             if (existing instanceof GameObject) {
                 existing.destroySelf();
             } else if (existing instanceof RNAHighlightState) {
                 this.removeHighlight(existing);
             }
-            this._env.DeleteVar(this._id);
+            this._env.deleteVar(this._id);
         }
 
         if (this._opVisible && this._mode === ROPHighlightMode.RNA) {
@@ -53,10 +53,10 @@ export class ROPHighlight extends RScriptOp {
             for (let i: number = this._startIdx; i <= this._endIdx; ++i) {
                 res.push(i);
             }
-            let rnaHighlight: RNAHighlightState = this._env.GetRNA().createNewHighlight(res);
-            this._env.StoreVar(this._id, rnaHighlight, this._env.GetRNA());
+            let rnaHighlight: RNAHighlightState = this._env.pose.createNewHighlight(res);
+            this._env.storeVar(this._id, rnaHighlight, this._env.pose);
         } else if (this._opVisible && this._mode === ROPHighlightMode.UI) {
-            const [uiElement, elementID, altParam] = this._env.GetUIElementFromId(this._uiElementString);
+            const [uiElement, elementID, altParam] = this._env.getUIElementFromID(this._uiElementString);
             const highlightParent: any = this.getUiElementReference(elementID, altParam);
             if (highlightParent == null) {
                 log.warn(`ROPHighlight: missing highlight parent [id='${this._uiElementString}']`);
@@ -86,7 +86,7 @@ export class ROPHighlight extends RScriptOp {
             )));
 
             highlightParent.addObject(highlightObj, highlightParent.container);
-            this._env.StoreVar(this._id, highlight, highlightParent);
+            this._env.storeVar(this._id, highlight, highlightParent);
         }
     }
 
@@ -95,29 +95,29 @@ export class ROPHighlight extends RScriptOp {
         switch (i) {
         case 0:
             if (!this._opVisible) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._mode === ROPHighlightMode.RNA) {
                 this._startIdx = Number(arg) - 1;
             } else if (this._mode === ROPHighlightMode.UI) {
-                this._uiElementString = (this._env.GetStringRef(arg).toUpperCase() as RScriptUIElementID);
+                this._uiElementString = (this._env.getStringRef(arg).toUpperCase() as RScriptUIElementID);
             }
             break;
         case 1:
             if (this._mode === ROPHighlightMode.RNA) {
                 this._endIdx = Number(arg) - 1;
             } else if (this._mode === ROPHighlightMode.UI) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             }
             break;
         case 2:
             if (this._mode === ROPHighlightMode.RNA) {
-                this._id = this._env.GetStringRef(arg);
+                this._id = this._env.getStringRef(arg);
             } else if (this._mode === ROPHighlightMode.UI) {
-                this._color = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+                this._color = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             }
             break;
         case 3:
-            this._color = ColorUtil.fromString(`#${this._env.GetStringRef(arg)}`);
+            this._color = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
             break;
         }
     }
@@ -128,9 +128,9 @@ export class ROPHighlight extends RScriptOp {
 
         switch (key) {
         case RScriptUIElementID.OBJECTIVES:
-            let n: number = this._env.GetUI().constraintCount;
-            let firstObj: ConstraintBox = this._env.GetUI().getConstraint(0);
-            let lastObj: ConstraintBox = this._env.GetUI().getConstraint(n - 1);
+            let n: number = this._env.ui.constraintCount;
+            let firstObj: ConstraintBox = this._env.ui.getConstraint(0);
+            let lastObj: ConstraintBox = this._env.ui.getConstraint(n - 1);
             size.x = lastObj.display.x - firstObj.display.x + lastObj.real_width() + 2 * padding.x;
             size.y = 84;
             break;
@@ -205,11 +205,11 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.UGCOMPLETE:
         case RScriptUIElementID.GCCOMPLETE:
         case RScriptUIElementID.CGCOMPLETE:
-            return this._env.GetUIElement(RScriptUIElementID.PALETTE);
+            return this._env.getUIElement(RScriptUIElementID.PALETTE);
         case RScriptUIElementID.OBJECTIVES:
-            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, 0);
+            return this._env.getUIElement(RScriptUIElementID.OBJECTIVE, 0);
         case RScriptUIElementID.OBJECTIVE:
-            return this._env.GetUIElement(RScriptUIElementID.OBJECTIVE, altParam);
+            return this._env.getUIElement(RScriptUIElementID.OBJECTIVE, altParam);
         case RScriptUIElementID.ACTION_MENU:
         case RScriptUIElementID.SWAP:
         case RScriptUIElementID.TOGGLENATURAL:
@@ -220,13 +220,13 @@ export class ROPHighlight extends RScriptOp {
         case RScriptUIElementID.REDO:
         case RScriptUIElementID.PIP:
         case RScriptUIElementID.SWITCH:
-            return this._env.GetUIElement(key);
+            return this._env.getUIElement(key);
         }
-        return this._env.GetUI();
+        return this._env.ui;
     }
 
     private removeHighlight(obj: RNAHighlightState): void {
-        this._env.GetRNA().removeNewHighlight(obj);
+        this._env.pose.removeNewHighlight(obj);
     }
 
     private static processId(inId: string): string {

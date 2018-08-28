@@ -23,18 +23,18 @@ export class ROPRNA extends RScriptOp {
     /* override */
     public exec(): void {
         if (this._type === ROPRNAType.SETBASE) {
-            this._env.GetRNA().setBaseColor(this._nucIdx,
-                RScriptEnv.ConvertNucleotideStringToInt(this._color));
+            this._env.pose.setBaseColor(this._nucIdx,
+                RScriptEnv.convertNucleotideStringToInt(this._color));
         } else if (this._type === ROPRNAType.CHANGEMODE) {
             if (this._foldMode === 0) {
-                this._env.GetUI().ropSetToNativeMode();
+                this._env.ui.ropSetToNativeMode();
             } else {
-                this._env.GetUI().rop_set_to_target_mode();
+                this._env.ui.rop_set_to_target_mode();
             }
         } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
-            this._env.GetRNA().forceEditable(this._enabled, this._scope);
+            this._env.pose.forceEditable(this._enabled, this._scope);
         } else if (this._type === ROPRNAType.SETPAINTER) {
-            let ui: PoseEditMode = this._env.GetUI();
+            let ui: PoseEditMode = this._env.ui;
             if (this._color === "SWAP") {
                 ui.toolbar.pairSwapButton.click();
             } else {
@@ -44,11 +44,11 @@ export class ROPRNA extends RScriptOp {
                 }
             }
         } else if (this._type === ROPRNAType.CHANGESTATE) {
-            this._env.GetUI().rop_change_target(this._state);
+            this._env.ui.rop_change_target(this._state);
         } else if (this._type === ROPRNAType.SETZOOM) {
-            this._env.GetRNA().setZoomLevel(this._zoomLevel, this._animate, this._center);
+            this._env.pose.setZoomLevel(this._zoomLevel, this._animate, this._center);
         } else if (this._type === ROPRNAType.SETPIP) {
-            this._env.GetUI().ropSetPip(this._enabled);
+            this._env.ui.ropSetPip(this._enabled);
         }
     }
 
@@ -63,7 +63,7 @@ export class ROPRNA extends RScriptOp {
             } else if (this._type === ROPRNAType.ENABLEMODIFICATION || this._type === ROPRNAType.SETPIP) {
                 this._enabled = (arg.toUpperCase() === "TRUE");
             } else if (this._type === ROPRNAType.SETPAINTER) {
-                this._color = this._env.GetStringRef(arg);
+                this._color = this._env.getStringRef(arg);
             } else if (this._type === ROPRNAType.CHANGESTATE) {
                 this._state = Number(arg) - 1;
             } else if (this._type === ROPRNAType.SETZOOM) {
@@ -72,7 +72,7 @@ export class ROPRNA extends RScriptOp {
             break;
         case 1:
             if (this._type === ROPRNAType.SETBASE) {
-                this._color = this._env.GetStringRef(arg);
+                this._color = this._env.getStringRef(arg);
             } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
                 this._scope = [];
                 this._scope.push(Number(arg) - 1);
@@ -86,7 +86,7 @@ export class ROPRNA extends RScriptOp {
             } else if (this._type === ROPRNAType.SETZOOM) {
                 this._center = (arg.toUpperCase() === "TRUE");
             } else {
-                throw new Error(`Invalid argument for ROP: RNA -- ${this._env.GetStringRef(arg)}`);
+                throw new Error(`Invalid argument for ROP: RNA -- ${this._env.getStringRef(arg)}`);
             }
             break;
         }
