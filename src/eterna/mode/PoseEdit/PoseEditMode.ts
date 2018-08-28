@@ -241,7 +241,7 @@ export class PoseEditMode extends GameMode {
     public rop_change_target(target_index: number): void {
         this.changeTarget(target_index);
         if (this._toolbar.puzzleStateToggle != null) {
-            this._toolbar.puzzleStateToggle.set_state(target_index);
+            this._toolbar.puzzleStateToggle.state = target_index;
         }
     }
 

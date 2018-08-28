@@ -25,7 +25,7 @@ export class ROPWait extends RScriptOp {
         ROPWait.genericNotifyClear(ROPWaitType.MOVECAMERA, (): boolean => true);
     }
 
-    public static notifyClickUi(id: RScriptUIElementID): void {
+    public static notifyClickUI(id: RScriptUIElementID): void {
         ROPWait.genericNotifyClear(ROPWaitType.CLICKUI, (op: ROPWait): boolean => (op.elements.indexOf(id) !== -1));
     }
 
