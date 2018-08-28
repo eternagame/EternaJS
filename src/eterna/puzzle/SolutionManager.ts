@@ -120,7 +120,7 @@ export class SolutionManager {
                             newfb = new Feedback();
                         }
 
-                        newfb.set_shape_data(peaks, synthesis["target_index"], synthesis["threshold"], synthesis["max"], synthesis["min"], null);
+                        newfb.setShapeData(peaks, synthesis["target_index"], synthesis["threshold"], synthesis["max"], synthesis["min"], null);
                     }
                 }
                 // / Ad-hoc handling for different exp types : Brent's theophylline puzzle
@@ -128,7 +128,7 @@ export class SolutionManager {
                 if (newfb == null) {
                     newfb = new Feedback();
                 }
-                newfb.set_brent_theo_data(synthesis_data_raw);
+                newfb.brentTheoData(synthesis_data_raw);
             }
         } else if (obj["SHAPE"] != null && obj["SHAPE"].length > 0) {
             if (newfb == null) {
@@ -136,16 +136,16 @@ export class SolutionManager {
             }
 
             if (Feedback.EXPSTRINGS.indexOf(obj["SHAPE"]) >= 0) {
-                newfb.set_shape_data(null, 0, null, null, null, obj["SHAPE"]);
+                newfb.setShapeData(null, 0, null, null, null, obj["SHAPE"]);
             } else {
                 let shape_array: any[] = CSVParser.splitOnComma(obj["SHAPE"]);
                 for (let kk: number = 0; kk < shape_array.length; kk++) {
                     shape_array[kk] = Number(shape_array[kk]);
                 }
 
-                let max: Object = null;
-                let min: Object = null;
-                let threshold: Object = null;
+                let max: any = null;
+                let min: any = null;
+                let threshold: any = null;
 
                 if (obj["SHAPE-threshold"] != null && obj["SHAPE-threshold"] !== "") {
                     threshold = (obj["SHAPE-threshold"]);
@@ -159,7 +159,7 @@ export class SolutionManager {
                     min = (obj["SHAPE-min"]);
                 }
 
-                newfb.set_shape_data(shape_array, 0, threshold, max, min, null);
+                newfb.setShapeData(shape_array, 0, threshold, max, min, null);
             }
         }
 

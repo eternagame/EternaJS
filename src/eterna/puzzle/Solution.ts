@@ -179,10 +179,10 @@ export class Solution {
                 return "n";
             }
         } else if (keyword === "Synthesis score") {
-            if (this._expFeedback != null && this._expFeedback.get_shape_data() != null) {
+            if (this._expFeedback != null && this._expFeedback.getShapeData() != null) {
                 return this._synthesisScore;
-            } else if (this._expFeedback != null && this._expFeedback.is_failed() !== 0) {
-                return this._expFeedback.is_failed();
+            } else if (this._expFeedback != null && this._expFeedback.isFailed() !== 0) {
+                return this._expFeedback.isFailed();
             } else {
                 return Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf("NOT SYNTHESIZED")];
             }
