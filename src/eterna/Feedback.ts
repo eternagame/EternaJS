@@ -8,7 +8,7 @@ export class Feedback {
 
     public static readonly EXPSCORES: number[] = [0, 10, 15];
 
-    public static score_feedback(shapedata: number[], secstruct: string, start_index: number, min: number, threshold: number, max: number): number {
+    public static scoreFeedback(shapedata: number[], secstruct: string, start_index: number, min: number, threshold: number, max: number): number {
         let score: number = 0;
 
         for (let ii: number = 0; ii < secstruct.length; ii++) {
@@ -34,20 +34,20 @@ export class Feedback {
     }
 
     // / Ad-hoc object for Brent's theophylline puzzle
-    public set_brent_theo_data(dat: Object): void {
-        this._brent_theo_data = dat;
+    public set brentTheoData(dat: any) {
+        this._brentTheoData = dat;
     }
 
-    public get_brent_theo_data(): Object {
-        return this._brent_theo_data;
+    public get brentTheoData(): any {
+        return this._brentTheoData;
     }
 
-    public set_shape_data(dat: any[], index: number, threshold: Object, max: Object, min: Object, failed: string): void {
+    public setShapeData(dat: any[], index: number, threshold: any, max: any, min: any, failed: string): void {
         if (dat != null) {
-            this._shape_starts[index] = dat[0] - 1;
+            this._shapeStarts[index] = dat[0] - 1;
             dat.splice(0, 1);
-            this._shape_data[index] = dat.slice();
-            let shape_data: any[] = this._shape_data[index];
+            this._shapeData[index] = dat.slice();
+            let shape_data: any[] = this._shapeData[index];
 
             let smax: number = shape_data[0];
             let smin: number = shape_data[0];
@@ -70,30 +70,30 @@ export class Feedback {
             }
 
             if (threshold != null) {
-                this._shape_thresholds[index] = threshold;
+                this._shapeThresholds[index] = threshold;
             } else {
-                this._shape_thresholds[index] = savg;
+                this._shapeThresholds[index] = savg;
             }
 
             if (max != null) {
-                this._shape_maxs[index] = max;
+                this._shapeMaxs[index] = max;
             } else {
-                this._shape_maxs[index] = smax;
+                this._shapeMaxs[index] = smax;
             }
 
             if (min != null) {
-                this._shape_mins[index] = min;
+                this._shapeMins[index] = min;
             } else {
-                this._shape_mins[index] = smin;
+                this._shapeMins[index] = smin;
             }
         } else if (failed != null) {
             this._faileds[index] = Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf(failed)];
         }
     }
 
-    public get_shape_data(index: number = 0): number[] {
-        if (this._shape_data[index] != null) {
-            return this._shape_data[index];
+    public getShapeData(index: number = 0): number[] {
+        if (this._shapeData[index] != null) {
+            return this._shapeData[index];
         } else {
             let shape: number[] = [];
             shape.push(0.5);
@@ -101,36 +101,36 @@ export class Feedback {
         }
     }
 
-    public get_shape_start_index(index: number = 0): number {
-        if (this._shape_data[index] != null) return this._shape_starts[index];
+    public getShapeStartIndex(index: number = 0): number {
+        if (this._shapeData[index] != null) return this._shapeStarts[index];
         else return 0.5;
     }
 
-    public get_shape_threshold(index: number = 0): number {
-        if (this._shape_data[index] != null) return this._shape_thresholds[index];
+    public getShapeThreshold(index: number = 0): number {
+        if (this._shapeData[index] != null) return this._shapeThresholds[index];
         else return 0.5;
     }
 
-    public get_shape_max(index: number = 0): number {
-        if (this._shape_data[index] != null) return this._shape_maxs[index];
+    public getShapeMax(index: number = 0): number {
+        if (this._shapeData[index] != null) return this._shapeMaxs[index];
         else return 1.0;
     }
 
-    public get_shape_min(index: number = 0): number {
-        if (this._shape_data[index] != null) return this._shape_mins[index];
+    public getShapeMin(index: number = 0): number {
+        if (this._shapeData[index] != null) return this._shapeMins[index];
         else return 0.0;
     }
 
-    public is_failed(index: number = 0): number {
+    public isFailed(index: number = 0): number {
         return this._faileds[index];
     }
 
-    private _shape_data: any[] = [];
-    private _shape_starts: any[] = [];
-    private _shape_thresholds: any[] = [];
-    private _shape_maxs: any[] = [];
-    private _shape_mins: any[] = [];
-    private _faileds: any[] = [];
+    private _shapeData: number[][] = [];
+    private _shapeStarts: number[] = [];
+    private _shapeThresholds: number[] = [];
+    private _shapeMaxs: number[] = [];
+    private _shapeMins: number[] = [];
+    private _faileds: number[] = [];
     // / Ad-hoc data storage object for Brent's theophylline puzzle
-    private _brent_theo_data: any = null;
+    private _brentTheoData: any = null;
 }
