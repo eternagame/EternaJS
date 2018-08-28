@@ -104,7 +104,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         if (playSound) {
             const soundName: string = BaseAssets.getBaseTypeSound(type);
             if (soundName != null) {
-                Eterna.sound.play_se(soundName);
+                Eterna.sound.playSound(soundName);
             }
         }
         ROPWait.NotifyNucleotideChange(this._baseIdx, type);

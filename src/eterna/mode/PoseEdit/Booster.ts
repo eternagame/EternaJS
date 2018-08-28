@@ -115,7 +115,7 @@ export class Booster {
     }
 
     public onPaint(pose: Pose2D, base_num: number): void {
-        Eterna.sound.play_se(Sounds.SoundPaint);
+        Eterna.sound.playSound(Sounds.SoundPaint);
         this.executeScript(pose, "MOUSE_DOWN", base_num);
     }
 
@@ -173,7 +173,7 @@ export class Booster {
             log.info("end_" + this._scriptID + "() called");
             if (typeof(ret['cause']) === "string" && this._type === BoosterType.ACTION) {
                 this._view.popUILock();
-                Eterna.sound.play_se(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
+                Eterna.sound.playSound(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
             }
         });
 

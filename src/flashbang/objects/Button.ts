@@ -202,13 +202,13 @@ export abstract class Button extends ContainerObject implements Enableable {
     protected playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
         // TODO: make SoundManager part of Flashbang
         if (toState === ButtonState.DOWN && this.downSound != null) {
-            Eterna.sound.play_se(this.downSound);
+            Eterna.sound.playSound(this.downSound);
         }
     }
 
     protected playDisabledSound(): void {
         if (this.disabledSound != null) {
-            Eterna.sound.play_se(this.disabledSound);
+            Eterna.sound.playSound(this.disabledSound);
         }
     }
 

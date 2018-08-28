@@ -8,7 +8,7 @@ export class PlaySoundTask extends ObjectTask {
     }
 
     protected added(): void {
-        Eterna.sound.play_se(this._soundName);
+        Eterna.sound.playSound(this._soundName);
         this.destroySelf();
     }
 
