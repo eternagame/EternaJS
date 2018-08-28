@@ -30,6 +30,8 @@ export class Base extends ContainerObject implements LateUpdatable {
         this.container.addChild(this._sat0);
         this.container.addChild(this._sat1);
         this.container.addChild(this._number);
+        this.container.addChild(this._spark1);
+        this.container.addChild(this._spark2);
     }
 
     public set baseIndex(i: number) {
@@ -241,7 +243,7 @@ export class Base extends ContainerObject implements LateUpdatable {
         }
     }
 
-    private redraw(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null): void {
+    private redraw(zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
@@ -256,8 +258,8 @@ export class Base extends ContainerObject implements LateUpdatable {
 
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
-        let body_data: Texture = BaseAssets.getBodyBitmap(this._baseType, this._colorLevel, zoom_level, drawFlags);
-        const barcode_data: Texture = BaseAssets.getBarcodeBitmap(zoom_level, drawFlags);
+        let body_data: Texture = BaseAssets.getBodyBitmap(this._baseType, this._colorLevel, zoomLevel, drawFlags);
+        const barcode_data: Texture = BaseAssets.getBarcodeBitmap(zoomLevel, drawFlags);
 
         let random_x: number = 0;
         let random_y: number = 0;
@@ -265,10 +267,10 @@ export class Base extends ContainerObject implements LateUpdatable {
 
         if (this._animate) {
             if (this._animStartTime < 0) {
-                this._animStartTime = current_time;
+                this._animStartTime = currentTime;
             }
 
-            let prog: number = (current_time - this._animStartTime) / 0.3;
+            let prog: number = (currentTime - this._animStartTime) / 0.3;
             if (prog > 2 * Math.PI) {
                 this._animate = false;
                 prog = 2 * Math.PI;
@@ -285,18 +287,18 @@ export class Base extends ContainerObject implements LateUpdatable {
 
         if (this._pairing || this._unpairing) {
             if (this._pairingStartTime < 0) {
-                this._pairingStartTime = current_time;
+                this._pairingStartTime = currentTime;
             }
 
             if (this._pairingDuration === 0) {
                 pairing_prog = 1;
-                this._pairingCompleteTime = current_time;
+                this._pairingCompleteTime = currentTime;
             } else {
-                pairing_prog = (current_time - this._pairingStartTime) / (this._pairingDuration);
+                pairing_prog = (currentTime - this._pairingStartTime) / (this._pairingDuration);
                 if (pairing_prog >= 1) {
                     pairing_prog = 1;
                     if (this._pairingCompleteTime < 0) {
-                        this._pairingCompleteTime = current_time;
+                        this._pairingCompleteTime = currentTime;
                     }
                 }
             }
@@ -306,14 +308,14 @@ export class Base extends ContainerObject implements LateUpdatable {
         if (body_data) {
             draw_body = true;
 
-            this._lastCenterX = this.display.x + random_x + off_x;
-            this._lastCenterY = this.display.y + random_y + off_y;
+            this._lastCenterX = this.display.x + random_x + offX;
+            this._lastCenterY = this.display.y + random_y + offY;
 
             if (draw_body) {
                 if (barcode_data != null) {
                     Base.showSprite(this._barcode, barcode_data);
-                    this._barcode.x = random_x + off_x;
-                    this._barcode.y = random_y + off_y;
+                    this._barcode.x = random_x + offX;
+                    this._barcode.y = random_y + offY;
                 }
 
                 if (this._isForced) {
@@ -326,31 +328,31 @@ export class Base extends ContainerObject implements LateUpdatable {
                 Base.showSprite(this._body, body_data);
                 Base.showHighlightState(this._body, this._baseIdx, highlight_state);
 
-                this._body.x = random_x + off_x;
-                this._body.y = random_y + off_y;
+                this._body.x = random_x + offX;
+                this._body.y = random_y + offY;
 
-                let letterdata: Texture = BaseAssets.getLetterBitmap(this._baseType, zoom_level, drawFlags);
+                let letterdata: Texture = BaseAssets.getLetterBitmap(this._baseType, zoomLevel, drawFlags);
                 if (letterdata != null) {
                     Base.showSprite(this._letter, letterdata);
-                    this._letter.x = random_x + off_x;
-                    this._letter.y = random_y + off_y;
+                    this._letter.x = random_x + offX;
+                    this._letter.y = random_y + offY;
                 }
             }
         }
 
         if (Math.abs(this._goX) > 0 || Math.abs(this._goY) > 0) {
-            if (zoom_level < 2 * Base.NUM_ZOOM_LEVELS && !this._isLast && !lowperform) {
-                const backbone_data: Texture = BaseAssets.getBackboneBitmap(zoom_level, drawFlags);
+            if (zoomLevel < 2 * Base.NUM_ZOOM_LEVELS && !this._isLast && !lowperform) {
+                const backbone_data: Texture = BaseAssets.getBackboneBitmap(zoomLevel, drawFlags);
                 Base.showSprite(this._backbone, backbone_data);
-                this._backbone.x = random_x + off_x + this._goX / 2;
-                this._backbone.y = random_y + off_y + this._goY / 2;
+                this._backbone.x = random_x + offX + this._goX / 2;
+                this._backbone.y = random_y + offY + this._goY / 2;
             }
 
             let go_radian: number = Math.atan2(this._goY, this._goX);
             let satellite_body_data: Texture;
 
-            if (zoom_level < Base.NUM_ZOOM_LEVELS && !lowperform) {
-                const reference_base_size: number = BaseAssets.getSatelliteReferenceBaseSize(zoom_level);
+            if (zoomLevel < Base.NUM_ZOOM_LEVELS && !lowperform) {
+                const reference_base_size: number = BaseAssets.getSatelliteReferenceBaseSize(zoomLevel);
 
                 let st0_diff_degree: number;
                 let st0_angle: number = Math.PI / 5.2 + angle_rand;
@@ -367,9 +369,9 @@ export class Base extends ContainerObject implements LateUpdatable {
                     st0_diff_degree = 0;
                 }
 
-                satellite_body_data = BaseAssets.getSatellite0Bitmap(zoom_level, st0_diff_degree);
+                satellite_body_data = BaseAssets.getSatellite0Bitmap(zoomLevel, st0_diff_degree);
                 if (satellite_body_data == null) {
-                    satellite_body_data = BaseAssets.getSatellite0Bitmap(zoom_level, st0_diff_degree);
+                    satellite_body_data = BaseAssets.getSatellite0Bitmap(zoomLevel, st0_diff_degree);
                 }
 
                 let draw_st0: boolean = !this._forceUnpaired;
@@ -377,8 +379,8 @@ export class Base extends ContainerObject implements LateUpdatable {
                 if (draw_st0) {
                     let st0_cos: number = Math.cos(st0_angle);
                     let st0_sin: number = Math.sin(st0_angle);
-                    let st0_x: number = this._goX / 2.5 * st0_cos - this._goY / 2.5 * st0_sin + off_x + random_x;
-                    let st0_y: number = this._goX / 2.5 * st0_sin + this._goY / 2.5 * st0_cos + off_y + random_y;
+                    let st0_x: number = this._goX / 2.5 * st0_cos - this._goY / 2.5 * st0_sin + offX + random_x;
+                    let st0_y: number = this._goX / 2.5 * st0_sin + this._goY / 2.5 * st0_cos + offY + random_y;
 
                     Base.showSprite(this._sat0, satellite_body_data);
                     Base.showHighlightState(this._sat0, this._baseIdx, highlight_state);
@@ -400,8 +402,8 @@ export class Base extends ContainerObject implements LateUpdatable {
                         st1_diff_degree = Base.toCanonicalRange(st1_diff_degree);
                         let st1_cos: number = Math.cos(st1_angle);
                         let st1_sin: number = Math.sin(st1_angle);
-                        st1_x = this._goX / 2.5 * st1_cos - this._goY / 2.5 * st1_sin + off_x + random_x;
-                        st1_y = this._goX / 2.5 * st1_sin + this._goY / 2.5 * st1_cos + off_y + random_y;
+                        st1_x = this._goX / 2.5 * st1_cos - this._goY / 2.5 * st1_sin + offX + random_x;
+                        st1_y = this._goX / 2.5 * st1_sin + this._goY / 2.5 * st1_cos + offY + random_y;
 
                         this._lastSatellite1Radius = reference_base_size * 0.45;
                     } else {
@@ -419,8 +421,8 @@ export class Base extends ContainerObject implements LateUpdatable {
                         current_radian = current_angle * Math.PI / 180.0;
                         st1_diff_degree = Base.toCanonicalRange(current_angle - 90.0);
                         let current_radius: number = this._pairingStartRadius * (1 - pairing_prog) + (reference_base_size * 0.45) * pairing_prog;
-                        st1_x = Math.cos(current_radian) * current_radius + off_x;
-                        st1_y = Math.sin(current_radian) * current_radius + off_y;
+                        st1_x = Math.cos(current_radian) * current_radius + offX;
+                        st1_y = Math.sin(current_radian) * current_radius + offY;
                         this._lastSatellite1Radius = current_radius;
                     }
 
@@ -434,13 +436,13 @@ export class Base extends ContainerObject implements LateUpdatable {
                     let pair_r: number = 0;
 
                     if (this._pairingCompleteTime >= 0) {
-                        pair_r = (Math.cos((current_time - this._pairingCompleteTime) / 250.0 + Math.PI / 2)) * 2 + reference_base_size * 0.45;
+                        pair_r = (Math.cos((currentTime - this._pairingCompleteTime) / 250.0 + Math.PI / 2)) * 2 + reference_base_size * 0.45;
                     } else {
                         pair_r = pairing_prog * (reference_base_size * 0.45) + (1 - pairing_prog) * this._pairingStartRadius;
                     }
 
-                    st1_x = Math.cos(current_radian) * pair_r + off_x;
-                    st1_y = Math.sin(current_radian) * pair_r + off_y;
+                    st1_x = Math.cos(current_radian) * pair_r + offX;
+                    st1_y = Math.sin(current_radian) * pair_r + offY;
 
                     this._lastSatellite1Radius = pair_r;
                 }
@@ -454,7 +456,7 @@ export class Base extends ContainerObject implements LateUpdatable {
                     st1_diff_degree = 0;
                 }
 
-                satellite_body_data = BaseAssets.getSatellite1Bitmap(zoom_level, st1_diff_degree, this._pairType);
+                satellite_body_data = BaseAssets.getSatellite1Bitmap(zoomLevel, st1_diff_degree, this._pairType);
 
                 this._lastSatellite1AbsDegree = st1_diff_degree + 90.0;
 
@@ -478,62 +480,56 @@ export class Base extends ContainerObject implements LateUpdatable {
 
             let out_dist: number = Math.sqrt(this._outX * this._outX + this._outY * this._outY);
             if (out_dist > Constants.EPSILON) {
-                let numberPos: Point = new Point(off_x + this._outX * desired_dist / out_dist, off_y + this._outY * desired_dist / out_dist);
+                let numberPos: Point = new Point(offX + this._outX * desired_dist / out_dist, offY + this._outY * desired_dist / out_dist);
                 Base.showSprite(this._number, numberBitmap);
                 this._number.x = numberPos.x;
                 this._number.y = numberPos.y;
             }
         }
+
+        this.updateSparkAnim(zoomLevel, offX, offY, currentTime);
     }
 
-    // public bit_blit_after_effect (zoom_level: number, canvas: Texture, off_x: number, off_y: number, current_time: number): Rectangle {
-    //     if (!this._sparking) {
-    //         return null;
-    //     }
-    //
-    //     let dirty: Rectangle = null;
-    //     let r: Rectangle;
-    //
-    //     if (this._spark_start_time < 0) {
-    //         this._spark_start_time = current_time;
-    //     }
-    //
-    //     let duration: number = 1000;
-    //
-    //     let sparkProgress: number = (current_time - this._spark_start_time) / duration;
-    //
-    //     if (sparkProgress >= 1) {
-    //         this._sparking = false;
-    //         this._spark_start_time = -1;
-    //         // prog = 1;
-    //         return dirty;
-    //     } else if (sparkProgress < 0) {
-    //         sparkProgress = 0;
-    //     }
-    //
-    //     let spark_bitmap: Texture = BaseAssets.getSparkBitmap(sparkProgress);
-    //
-    //     let flying_dist: number = 70;
-    //     if (zoom_level < Base.NUM_ZOOM_LEVELS) {
-    //         flying_dist = 100;
-    //     }
-    //
-    //
-    //     let sp_rect: Rectangle = new Rectangle(0, 0, spark_bitmap.width, spark_bitmap.height);
-    //     let sp_point: Point = new Point(this.display.x + off_x - spark_bitmap.width / 2 + this._spark_dir.x * flying_dist * sparkProgress, this.display.y + off_y - spark_bitmap.height / 2 + this._spark_dir.y * flying_dist * sparkProgress);
-    //     let sp_point2: Point = new Point(this.display.x + off_x - spark_bitmap.width / 2 - this._spark_dir.x * flying_dist * sparkProgress, this.display.y + off_y - spark_bitmap.height / 2 - this._spark_dir.y * flying_dist * sparkProgress);
-    //
-    //     canvas.copyPixels(spark_bitmap, sp_rect, sp_point, null, null, true);
-    //     r = sp_rect.clone();
-    //     r.offsetPoint(sp_point);
-    //     dirty = (dirty == null ? r.clone() : dirty.union(r));
-    //     canvas.copyPixels(spark_bitmap, sp_rect, sp_point2, null, null, true);
-    //     r = sp_rect.clone();
-    //     r.offsetPoint(sp_point2);
-    //     dirty = (dirty == null ? r.clone() : dirty.union(r));
-    //
-    //     return dirty;
-    // }
+    private updateSparkAnim(zoomLevel: number, offX: number, offY: number, currentTime: number): void {
+        this._spark1.visible = false;
+        this._spark2.visible = false;
+
+        if (!this._sparking) {
+            return;
+        }
+
+        if (this._sparkStartTime < 0) {
+            this._sparkStartTime = currentTime;
+        }
+
+        const DURATION: number = 1;
+        let animProgress = (currentTime - this._sparkStartTime) / DURATION;
+
+        if (animProgress >= 1) {
+            this._sparking = false;
+            this._sparkStartTime = -1;
+            return;
+        } else if (animProgress < 0) {
+            animProgress = 0;
+        }
+
+        let tex = BaseAssets.getSparkBitmap(animProgress);
+        Base.showSprite(this._spark1, tex);
+        Base.showSprite(this._spark2, tex);
+
+        let flying_dist: number = 70;
+        if (zoomLevel < Base.NUM_ZOOM_LEVELS) {
+            flying_dist = 100;
+        }
+
+        this._spark1.position = new Point(
+            offX + this._sparkDir.x * flying_dist * animProgress,
+            offY + this._sparkDir.y * flying_dist * animProgress);
+
+        this._spark2.position = new Point(
+            offX - this._sparkDir.x * flying_dist * animProgress,
+            offY - this._sparkDir.y * flying_dist * animProgress);
+    }
 
     public getLastDrawnPos(): Point {
         return new Point(this._lastCenterX, this._lastCenterY);
@@ -600,6 +596,8 @@ export class Base extends ContainerObject implements LateUpdatable {
     private readonly _sat0: Sprite = new Sprite();
     private readonly _sat1: Sprite = new Sprite();
     private readonly _number: Sprite = new Sprite();
+    private readonly _spark1: Sprite = new Sprite();
+    private readonly _spark2: Sprite = new Sprite();
 
     private _baseType: number = -1;
     // The index of the base in the base array.

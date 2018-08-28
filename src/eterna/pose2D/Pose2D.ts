@@ -1842,8 +1842,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let fullSeq: number[] = this.fullSequence;
         let center: Point;
-        let prog: number;
-        let locked: boolean;
 
         // Hide bases that aren't part of our current sequence
         for (let ii = 0; ii < this._bases.length; ++ii) {
@@ -1879,7 +1877,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this._foldStartTime = current_time;
             }
 
-            prog = (current_time - this._foldStartTime) / (this._foldDuration);
+            let prog = (current_time - this._foldStartTime) / (this._foldDuration);
             let done: boolean = false;
 
             if (prog >= 1) {
@@ -1974,15 +1972,6 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                 this._bases[ii].setDrawParams(this._zoomLevel, this._offX, this._offY, current_time, drawFlags, numberBitmap, hl_state);
             }
-
-            // TODO: bit_blit_after_effect
-            // for (ii = 0; ii < fullSeq.length; ii++) {
-            //     locked = this.is_locked(ii);
-            //     r = this._bases[ii].bit_blit_after_effect(this._zoom_level, this._canvas_data, this._off_x, this._off_y, current_time);
-            //     if (r != null) {
-            //         this._base_dirty = this._base_dirty == null ? r.clone() : this._base_dirty.union(r);
-            //     }
-            // }
 
             if (this._displayAuxInfo) {
                 this.renderAuxInfo();
@@ -2113,7 +2102,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._offY = this._origOffsetY + (Math.random() * 2 - 1) * 5;
             this._redraw = true;
 
-            prog = (current_time - this._explosionStartTime) * 5;
+            let prog = (current_time - this._explosionStartTime) * 5;
 
             if (this._explosionRays.length >= fullSeq.length) {
                 for (let ii = 0; ii < Math.min(prog, fullSeq.length); ii++) {
