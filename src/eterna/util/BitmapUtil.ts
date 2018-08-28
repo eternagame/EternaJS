@@ -1,6 +1,6 @@
 import {Matrix, Sprite, Texture} from "pixi.js";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {ColorUtil} from "./ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {MathUtil} from "../../flashbang/util/MathUtil";
 
 export class BitmapUtil {

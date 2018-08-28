@@ -1,5 +1,5 @@
 ﻿import {MathUtil} from "../../flashbang/util/MathUtil";
-import {ColorUtil} from "../util/ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 
 export enum ScoreDisplayNodeType {
     STACK = 0, LOOP
