@@ -1202,7 +1202,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             for (let ii: number = 0; ii < this._sequence.length; ii++) {
                 const ray = this._explosionRays[ii];
                 ray.display.visible = false;
-                ray.draw_ray(
+                ray.draw(
                     Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
                     this._sequence[ii]);
 
@@ -1220,7 +1220,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                     const ray = this._explosionRays[ray_walker];
                     ray.display.visible = false;
-                    ray.draw_ray(
+                    ray.draw(
                         Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
                         this._sequence[ii]);
 
