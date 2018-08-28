@@ -685,7 +685,7 @@ export class PuzzleEditMode extends GameMode {
                 this._poses[ii].pairs = best_pairs;
             }
 
-            this._constraintBoxes[ii].set_content(ConstraintType.SHAPE, {
+            this._constraintBoxes[ii].setContent(ConstraintType.SHAPE, {
                 target: target_pairs,
                 native: best_pairs
             }, EPars.are_pairs_same(best_pairs, target_pairs), 0);

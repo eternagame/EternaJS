@@ -145,7 +145,7 @@ export class MissionIntroMode extends AppMode {
         for (let constraintBox of this._constraintBoxes) {
             this.addObject(constraintBox, this._constraintsLayer);
 
-            constraintBox.show_big_text(false);
+            constraintBox.showBigText = false;
             constraintBox.flare(false);
             constraintBox.display.position = new Point(
                 (Flashbang.stageWidth * 0.5) - 420.5 + this._goalsBG.width + 82,
