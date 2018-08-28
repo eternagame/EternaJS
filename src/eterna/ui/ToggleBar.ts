@@ -81,7 +81,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
                 new LocationTask(this._selectedState * ToggleBar.BUTTON_SIZE, 0, 0.5, Easing.easeInOut, this._selectedHilite));
             this._labels[this._selectedState].style.fill = ToggleBar.COLOR_HIGH;
 
-            Eterna.sound.play_se(Sounds.SoundSwitch);
+            Eterna.sound.playSound(Sounds.SoundSwitch);
             this.stateChanged.emit(new_state);
         }
     }

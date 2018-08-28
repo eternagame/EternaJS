@@ -17,14 +17,14 @@ export class SoundManager {
         }));
     }
 
-    public play_se(name: string, start_time: number = 0): void {
+    public playSound(name: string, startTime: number = 0): void {
         if (this._settings.soundMute.value) {
             return;
         }
 
         try {
             let sound = this.getSound(name);
-            sound.play({volume: this._settings.soundVolume.value, start: start_time});
+            sound.play({volume: this._settings.soundVolume.value, start: startTime});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);
         }

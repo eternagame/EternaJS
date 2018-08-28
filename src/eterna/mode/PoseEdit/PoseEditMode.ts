@@ -1662,7 +1662,7 @@ export class PoseEditMode extends GameMode {
         this.disableTools(true);
         this.setPuzzleState(PuzzleState.CLEARED);
 
-        Eterna.sound.play_se(Sounds.SoundPuzzleClear);
+        Eterna.sound.playSound(Sounds.SoundPuzzleClear);
         let explosionCompletePromise: Promise<void> = null;
         for (let pose of this._poses) {
             pose.setZoomLevel(0, true, true);
@@ -2790,14 +2790,14 @@ export class PoseEditMode extends GameMode {
 
         if (allAreSatisfied && !allWereSatisfied) {
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                Eterna.sound.play_se(Sounds.SoundAllConditions);
+                Eterna.sound.playSound(Sounds.SoundAllConditions);
             } else if (this._puzState !== PuzzleState.GAME) {
-                Eterna.sound.play_se(Sounds.SoundCondition);
+                Eterna.sound.playSound(Sounds.SoundCondition);
             }
         } else if (play_condition_music) {
-            Eterna.sound.play_se(Sounds.SoundCondition);
+            Eterna.sound.playSound(Sounds.SoundCondition);
         } else if (play_decondition_music) {
-            Eterna.sound.play_se(Sounds.SoundDecondition);
+            Eterna.sound.playSound(Sounds.SoundDecondition);
         }
 
         return allAreSatisfied;
@@ -3037,7 +3037,7 @@ export class PoseEditMode extends GameMode {
                         for (let jj = segments[2]; jj <= segments[3]; jj++) {
                             this._targetPairs[xx][jj] = -1;
                         }
-                        Eterna.sound.play_se(Sounds.SoundRY);
+                        Eterna.sound.playSound(Sounds.SoundRY);
                         this.flashConstraintForTarget(xx);
                         this._poses[target_index].clearDesignStruct();
                     } else if (num_unpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
@@ -3045,7 +3045,7 @@ export class PoseEditMode extends GameMode {
                         if (EPars.validate_parenthesis(EPars.pairs_array_to_parenthesis(this._targetPairs[xx]).slice(segments[1] + 1, segments[2]), false) == null) {
                             for (let jj = segments[0]; jj <= segments[1]; jj++) this._targetPairs[xx][jj] = segments[3] - (jj - segments[0]);
                             for (let jj = segments[2]; jj <= segments[3]; jj++) this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
-                            Eterna.sound.play_se(Sounds.SoundGB);
+                            Eterna.sound.playSound(Sounds.SoundGB);
                             this.flashConstraintForTarget(xx);
                             this._poses[target_index].clearDesignStruct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
@@ -3077,7 +3077,7 @@ export class PoseEditMode extends GameMode {
                                     for (let jj = segments[2]; jj <= segments[3]; jj++) {
                                         this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
                                     }
-                                    Eterna.sound.play_se(Sounds.SoundGB);
+                                    Eterna.sound.playSound(Sounds.SoundGB);
                                     this.flashConstraintForTarget(xx);
                                     this._poses[target_index].clearDesignStruct();
                                     more = false;

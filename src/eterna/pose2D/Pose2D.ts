@@ -1136,11 +1136,11 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (play_sound) {
             if (play_gc) {
-                Eterna.sound.play_se(Sounds.SoundRG);
+                Eterna.sound.playSound(Sounds.SoundRG);
             } else if (play_ua) {
-                Eterna.sound.play_se(Sounds.SoundYB);
+                Eterna.sound.playSound(Sounds.SoundYB);
             } else if (play_gu) {
-                Eterna.sound.play_se(Sounds.SoundRB);
+                Eterna.sound.playSound(Sounds.SoundRB);
             }
         }
     }
