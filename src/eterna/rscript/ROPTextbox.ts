@@ -66,15 +66,15 @@ export class ROPTextbox extends RScriptOp {
         };
 
         if (this._fixedSize) {
-            textBox.set_fixed_width(215);
+            textBox.fixedWidth = 215;
             textStyle.wordWrap = true;
             textStyle.wordWrapWidth = 185;
         }
 
-        textBox.set_styled_text(new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text));
+        textBox.styledText = new StyledTextBuilder(textStyle).appendHTMLStyledText(this._text);
 
         if (this._title.length > 0) {
-            textBox.set_title(this._title);
+            textBox.title = this._title;
         }
 
         if (this._buttonText !== "") {

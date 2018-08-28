@@ -1118,7 +1118,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         }
 
         let balloon = new TextBalloon("", 0x0, 0.8);
-        balloon.set_styled_text(styledText);
+        balloon.styledText = styledText;
         this.setMouseOverObject(balloon);
     }
 

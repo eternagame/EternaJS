@@ -612,10 +612,10 @@ export class Pose2D extends ContainerObject implements Updatable {
 
             let strandName: string = this.getStrandName(closest_index);
             if (strandName != null) {
-                this._strandLabel.set_text(strandName);
-                if (mouseX + 16 + this._strandLabel.balloon_width() > this._width) {
+                this._strandLabel.setText(strandName);
+                if (mouseX + 16 + this._strandLabel.width > this._width) {
                     this._strandLabel.display.position = new Point(
-                        mouseX - 16 - this._strandLabel.balloon_width(),
+                        mouseX - 16 - this._strandLabel.width,
                         mouseY + 16);
                 } else {
                     this._strandLabel.display.position = new Point(mouseX + 16, mouseY + 16);
@@ -1190,7 +1190,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (this._auxInfo != null && this._auxInfo[Pose2D.CLEAVING_SITE] != null) {
             this._auxTextballoon.display.visible = true;
-            this._auxTextballoon.set_text("Ribozyme cleaving site");
+            this._auxTextballoon.setText("Ribozyme cleaving site");
         }
     }
 

@@ -40,13 +40,13 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
         this._button.display.visible = false;
 
         if (this._initialText != null) {
-            this.set_styled_text(this._initialText);
+            this.styledText = this._initialText;
         }
 
         this.updateView();
     }
 
-    public set_fixed_width(in_width: number): void {
+    public set fixedWidth(in_width: number) {
         this._fixed_width = in_width;
         this._has_fixed_width = true;
 
@@ -56,17 +56,17 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
     }
 
     /* override */
-    public balloon_width(): number {
-        return this._has_fixed_width ? this._fixed_width : super.balloon_width();
+    public get width(): number {
+        return this._has_fixed_width ? this._fixed_width : super.width;
     }
 
     /* override */
-    public balloon_height(): number {
-        return super.balloon_height() + this._button.container.height;
+    public get height(): number {
+        return super.height + this._button.container.height;
     }
 
     /* override */
-    public set_title(title: string): void {
+    public set title(title: string) {
         this._panel.title = title;
         this._hasTitle = title != null;
     }
@@ -77,10 +77,10 @@ export class FancyTextBalloon extends TextBalloon implements Updatable {
 
     /* override */
     protected updateView(): void {
-        this._panel.setSize(this.balloon_width(), this.balloon_height());
+        this._panel.setSize(this.width, this.height);
 
-        let innerWidth = this.balloon_width() - 2 * TextBalloon.W_MARGIN;
-        let outerWidth = this.balloon_width();
+        let innerWidth = this.width - 2 * TextBalloon.W_MARGIN;
+        let outerWidth = this.width;
 
         if (!this._centered) {
             if (this._text != null) {
