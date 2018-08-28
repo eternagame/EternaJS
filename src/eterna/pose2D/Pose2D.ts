@@ -2877,7 +2877,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null) {
                 this._scoreNodeHighlight.lineStyle(0, 0, 0);
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
-                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].get_base_indices();
+                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices;
 
                 for (let ii: number = 0; ii < indices.length; ii++) {
                     let p: Point = this.getBaseXY(indices[ii]);
@@ -2895,7 +2895,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (this._scoreTexts != null) {
             for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                let indices: number[] = this._scoreNodes[ii].get_base_indices();
+                let indices: number[] = this._scoreNodes[ii].baseIndices;
                 let x_avg: number = 0;
                 let y_avg: number = 0;
 
@@ -2939,19 +2939,19 @@ export class Pose2D extends ContainerObject implements Updatable {
             let node_score: string = "";
 
             for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                let base_indices: number[] = this._scoreNodes[ii].get_base_indices();
+                let base_indices: number[] = this._scoreNodes[ii].baseIndices;
                 let node_points: Point[] = [];
 
                 for (let jj: number = 0; jj < base_indices.length; jj++) {
                     node_points.push(base_xys[base_indices[jj]]);
                 }
 
-                total_score += this._scoreNodes[ii].get_score();
+                total_score += this._scoreNodes[ii].score;
 
                 if (!node_found && Utility.is_point_within(mouse_p, node_points)) {
-                    node_txt = this._scoreNodes[ii].get_text();
-                    node_label = this._scoreNodes[ii].get_text_label();
-                    node_score = this._scoreNodes[ii].get_text_score();
+                    node_txt = this._scoreNodes[ii].text;
+                    node_label = this._scoreNodes[ii].textLabel;
+                    node_score = this._scoreNodes[ii].textScore;
                     node_found = true;
                     this._scoreNodeIndex = ii;
                 }
@@ -3074,7 +3074,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._displayScoreTexts) {
             this._scoreTexts = [];
             for (let scoreNode of this._scoreNodes) {
-                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.getScoreString(), scoreNode.getScoreColor()));
+                let scoreText = new Sprite(BitmapManager.get_text_bitmap(scoreNode.scoreString, scoreNode.scoreColor));
                 scoreText.visible = false;
                 this._scoreTexts.push(scoreText);
                 this.container.addChild(scoreText);
@@ -3118,7 +3118,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
                     let newnode = new ScoreDisplayNode();
                     nodes.push(newnode);
-                    newnode.set_type(ScoreDisplayNodeType.STACK, child_coords, root.score);
+                    newnode.setType(ScoreDisplayNodeType.STACK, child_coords, root.score);
 
                     this.generateScoreNodesRecursive(root.children[0], null, nodes);
                 } else {
@@ -3140,7 +3140,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 let newnode = new ScoreDisplayNode();
                 nodes.push(newnode);
 
-                newnode.set_type(ScoreDisplayNodeType.LOOP, coords, root.score);
+                newnode.setType(ScoreDisplayNodeType.LOOP, coords, root.score);
             }
         }
     }
