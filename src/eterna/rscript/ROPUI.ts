@@ -14,7 +14,7 @@ export class ROPUI extends RScriptOp {
     }
 
     /* override */
-    protected ParseArgument(arg: string, i: number): void {
+    protected parseArgument(arg: string, i: number): void {
         if (i > 0) {
             throw new Error(`Invalid number of arguments for ROP UI: ${i}`);
         }
