@@ -91,7 +91,7 @@ export class ROPTextbox extends RScriptOp {
                 );
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
-                let p: Point = this._env.GetRNA().get_base_xy(this._nuc_idx);
+                let p: Point = this._env.GetRNA().getBaseXY(this._nuc_idx);
                 let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._x_offset_specified) {
                     offset.x = this._x_offset;
@@ -102,7 +102,7 @@ export class ROPTextbox extends RScriptOp {
                 }
 
                 textBox.display.position = new Point(p.x + offset.x, p.y + offset.y);
-                this._env.GetRNA().add_anchored_object(new RNAAnchorObject(textBox, this._nuc_idx, offset));
+                this._env.GetRNA().addAnchoredObject(new RNAAnchorObject(textBox, this._nuc_idx, offset));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
                 this._env.SetTextboxVisible(this._id, true);
                 return;
@@ -138,7 +138,7 @@ export class ROPTextbox extends RScriptOp {
                     Flashbang.stageHeight * this._y_pos + this._y_rel
                 );
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                newArrow.display.position = this._env.GetRNA().get_base_xy(this._nuc_idx);
+                newArrow.display.position = this._env.GetRNA().getBaseXY(this._nuc_idx);
             }
 
             // Determine where we want to draw the tip of the arrow
@@ -194,7 +194,7 @@ export class ROPTextbox extends RScriptOp {
                 } else {
                     offset.length = this._x_offset;
                 }
-                let p = this._env.GetRNA().get_base_xy(this._nuc_idx);
+                let p = this._env.GetRNA().getBaseXY(this._nuc_idx);
                 newArrow.display.position = new Point(p.x + offset.x, p.y + offset.y);
                 log.debug("TODO: set_anchor_nucleotide?");
                 // TSC - I'm not sure if this is ever called or what it should do

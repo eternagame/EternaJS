@@ -109,7 +109,7 @@ export class ROPWait extends RScriptOp {
         }
 
         for (let i: number = 0; i < this._previous_color_idx.length; ++i) {
-            this._env.GetRNA().set_base_color(this._previous_color_idx[i],
+            this._env.GetRNA().setBaseColor(this._previous_color_idx[i],
                 RScriptEnv.ConvertNucleotideStringToInt(this._previous_colors[i]));
         }
 
@@ -138,23 +138,23 @@ export class ROPWait extends RScriptOp {
     /* override */
     public IsPaused(): boolean {
         if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-            let paired: number = this._env.GetRNA().get_pairs()[this._start_idx];
+            let paired: number = this._env.GetRNA().pairs[this._start_idx];
             if (paired < 0) {
                 return true;
             }
 
             let t1: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(this._start_idx).type
+                this._env.GetRNA().getBase(this._start_idx).type
             ).toUpperCase();
             let t2: string = RScriptEnv.ConvertNucleotideIntToString(
-                this._env.GetRNA().get_base(paired).type
+                this._env.GetRNA().getBase(paired).type
             ).toUpperCase();
 
             return !((t1 === this._color1 && t2 === this._color2) || (t2 === this._color1 && t1 === this._color2));
         } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
                 if (RScriptEnv.ConvertNucleotideIntToString(
-                    this._env.GetRNA().get_base(ii).type
+                    this._env.GetRNA().getBase(ii).type
                 ).toUpperCase() !== this._expected_color) {
                     return true;
                 }
@@ -168,14 +168,14 @@ export class ROPWait extends RScriptOp {
             this.ClearCondition();
         } else if (this._waitType === ROPWaitType.BLACKMARK && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
-                if (!this._env.GetRNA().is_tracked_index(ii)) {
+                if (!this._env.GetRNA().isTrackedIndex(ii)) {
                     return true;
                 }
             }
             this.ClearCondition();
         } else if (this._waitType === ROPWaitType.BLUEMARK && !this._condition_clear) {
             for (let ii = this._start_idx; ii <= this._end_idx; ++ii) {
-                if (!this._env.GetRNA().is_design_structure_highlighted(ii)) {
+                if (!this._env.GetRNA().isDesignStructureHighlighted(ii)) {
                     return true;
                 }
             }

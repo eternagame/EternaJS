@@ -54,7 +54,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
             .drawRect(0, 0, width, height)
             .endFill();
 
-        this._pose.set_offset(this._width * 0.5, this._height * 0.5);
+        this._pose.setOffset(this._width * 0.5, this._height * 0.5);
         this._pose.setSize(width, height);
 
         // If we're in PIP mode, we mask our view
@@ -72,25 +72,25 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
     }
 
     public set_zoom(zoom: number): void {
-        this._pose.set_zoom_level(zoom);
+        this._pose.setZoomLevel(zoom);
     }
 
     public zoom_in(): void {
-        let prev_zoom: number = this._pose.get_zoom_level();
+        let prev_zoom: number = this._pose.zoomLevel;
 
         if (prev_zoom === 0)
             return;
 
-        this._pose.set_zoom_level(prev_zoom - 1);
+        this._pose.setZoomLevel(prev_zoom - 1);
     }
 
     public zoom_out(): void {
-        let prev_zoom: number = this._pose.get_zoom_level();
+        let prev_zoom: number = this._pose.zoomLevel;
 
         if (prev_zoom === Pose2D.ZOOM_SPACINGS.length - 1)
             return;
 
-        this._pose.set_zoom_level(prev_zoom + 1);
+        this._pose.setZoomLevel(prev_zoom + 1);
     }
 
     public get_pose(): Pose2D {
@@ -104,10 +104,10 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
             let dragger = new Dragger();
             this._poseDraggerRef = this.addObject(dragger);
 
-            let dragPoseStart = new Point(this._pose.get_x_offset(), this._pose.get_y_offset());
+            let dragPoseStart = new Point(this._pose.xOffset, this._pose.yOffset);
             dragger.dragged.connect(() => {
                 ROPWait.NotifyMoveCamera();
-                this._pose.set_offset(dragPoseStart.x + dragger.offsetX, dragPoseStart.y + dragger.offsetY);
+                this._pose.setOffset(dragPoseStart.x + dragger.offsetX, dragPoseStart.y + dragger.offsetY);
             });
 
             e.stopPropagation();
@@ -116,8 +116,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
     private onMouseUp(): void {
         this.cancelDrag();
-        this._pose.done_coloring();
-        this._pose.pose_mouse_moved();
+        this._pose.doneColoring();
+        this._pose.onMouseMoved();
     }
 
     private cancelDrag(): void {
@@ -153,30 +153,30 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
         if (!e.ctrlKey && e.code === KeyCode.ArrowDown) {
             if (e.shiftKey) {
-                this._pose.shift_5prime();
+                this._pose.shift5Prime();
             } else {
-                this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() + Y_OFFSET);
+                this._pose.setOffset(this._pose.xOffset, this._pose.yOffset + Y_OFFSET);
             }
             return true;
         } else if (!e.ctrlKey && e.code === KeyCode.ArrowUp) {
             if (e.shiftKey) {
-                this._pose.shift_3prime();
+                this._pose.shift3Prime();
             } else {
-                this._pose.set_offset(this._pose.get_x_offset(), this._pose.get_y_offset() - Y_OFFSET);
+                this._pose.setOffset(this._pose.xOffset, this._pose.yOffset - Y_OFFSET);
             }
             return true;
         } else if (!e.ctrlKey && e.code === KeyCode.ArrowRight) {
             if (e.shiftKey) {
-                this._pose.shift_3prime();
+                this._pose.shift3Prime();
             } else {
-                this._pose.set_offset(this._pose.get_x_offset() + X_OFFSET, this._pose.get_y_offset());
+                this._pose.setOffset(this._pose.xOffset + X_OFFSET, this._pose.yOffset);
             }
             return true;
         } else if (!e.ctrlKey && e.code === KeyCode.ArrowLeft) {
             if (e.shiftKey) {
-                this._pose.shift_5prime();
+                this._pose.shift5Prime();
             } else {
-                this._pose.set_offset(this._pose.get_x_offset() - X_OFFSET, this._pose.get_y_offset());
+                this._pose.setOffset(this._pose.xOffset - X_OFFSET, this._pose.yOffset);
             }
             return true;
         }

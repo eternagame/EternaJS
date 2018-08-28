@@ -75,7 +75,7 @@ export class Booster {
 
         for (let ii = 0; ii < this._view.numPoseFields; ii++) {
             let pose: Pose2D = this._view.getPose(ii);
-            pose.register_paint_tool(tool_color, this);
+            pose.registerPaintTool(tool_color, this);
         }
     }
 
@@ -143,13 +143,13 @@ export class Booster {
             }
 
             if (this._type == BoosterType.PAINTER && pose) {
-                pose.set_mutated(seq_arr);
+                pose.setMutated(seq_arr);
             } else {
                 let force_sync: boolean = this._view.isForcedSynch;
                 this._view.isForcedSynch = true;
                 for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
                     pose = this._view.getPose(ii);
-                    pose.paste_sequence(seq_arr);
+                    pose.pasteSequence(seq_arr);
                 }
                 this._view.isForcedSynch = force_sync;
             }
@@ -159,9 +159,9 @@ export class Booster {
         ExternalInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
             for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
                 let pose: Pose2D = this._view.getPose(ii);
-                pose.clear_tracking();
+                pose.clearTracking();
                 for (let k: number = 0; k < marks.length; k++) {
-                    pose.black_mark(marks[k]);
+                    pose.addBlackMark(marks[k]);
                 }
             }
         });

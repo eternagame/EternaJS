@@ -47,7 +47,7 @@ export class StructureInput extends GamePanel implements Updatable {
         // Update the cursor highlight when our caret position changes
         if (this._prevCaretPostion != this._textInput.caretPosition) {
             this._prevCaretPostion = this._textInput.caretPosition;
-            this._pose.track_cursor(this._textInput.caretPosition);
+            this._pose.trackCursor(this._textInput.caretPosition);
         }
     }
 
@@ -69,12 +69,12 @@ export class StructureInput extends GamePanel implements Updatable {
         this.setWarning(error || "");
         this._textInput.text = input;
 
-        let sequence = this._pose.get_sequence();
-        let locks = this._pose.get_puzzle_locks();
-        let binding_site = this._pose.get_molecular_binding_site();
-        let sequence_backup = this._pose.get_sequence();
-        let locks_backup = this._pose.get_puzzle_locks();
-        let binding_site_backup = this._pose.get_molecular_binding_site();
+        let sequence = this._pose.sequence;
+        let locks = this._pose.puzzleLocks;
+        let binding_site = this._pose.molecularBindingSite;
+        let sequence_backup = this._pose.sequence;
+        let locks_backup = this._pose.puzzleLocks;
+        let binding_site_backup = this._pose.molecularBindingSite;
 
         if (sequence.length > input.length) {
             sequence = sequence.slice(0, input.length);
@@ -105,7 +105,7 @@ export class StructureInput extends GamePanel implements Updatable {
             }
         } else if (op == PuzzleEditOp.ADD_PAIR) {
             // Add a pair
-            let pindex: number = (this._pose.get_pairs())[index];
+            let pindex: number = (this._pose.pairs)[index];
             if (index > pindex) {
                 let temp: number = index;
                 index = pindex;
@@ -167,7 +167,7 @@ export class StructureInput extends GamePanel implements Updatable {
 
         } else if (op == PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
-            let pindex = (this._pose.get_pairs())[index];
+            let pindex = (this._pose.pairs)[index];
             if (index > pindex) {
                 let temp = index;
                 index = pindex;
@@ -201,13 +201,13 @@ export class StructureInput extends GamePanel implements Updatable {
                 binding_site[ii + index] = after_binding_site_index[ii];
             }
         }
-        this._pose.set_sequence(sequence);
-        this._pose.set_puzzle_locks(locks);
-        this._pose.set_molecular_structure(EPars.parenthesis_to_pair_array(this.structureString));
-        this._pose.set_molecular_binding_site(binding_site);
-        this._pose.call_pose_edit_callback();
+        this._pose.sequence = sequence;
+        this._pose.puzzleLocks = locks;
+        this._pose.molecularStructure = EPars.parenthesis_to_pair_array(this.structureString);
+        this._pose.molecularBindingSite = binding_site;
+        this._pose.callPoseEditCallback();
 
-        this._pose.track_cursor(this._textInput.caretPosition);
+        this._pose.trackCursor(this._textInput.caretPosition);
     }
 
     public get structureString(): string {

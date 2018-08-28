@@ -100,14 +100,14 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
-            this.showDialog(new CopySequenceDialog(EPars.sequence_array_to_string(this._poses[0].get_sequence())));
+            this.showDialog(new CopySequenceDialog(EPars.sequence_array_to_string(this._poses[0].sequence)));
         });
 
         this._toolbar.pasteButton.clicked.connect(() => {
             this.showDialog(new PasteSequenceDialog()).closed.then(sequence => {
                 if (sequence != null) {
                     for (let pose of this._poses) {
-                        pose.paste_sequence(EPars.string_to_sequence_array(sequence));
+                        pose.pasteSequence(EPars.string_to_sequence_array(sequence));
                     }
                 }
             });
@@ -141,8 +141,8 @@ export class PuzzleEditMode extends GameMode {
         let objs: any[] = [];
         for (let pose of this._poses) {
             objs.push({
-                sequence: EPars.sequence_array_to_string(pose.get_sequence()),
-                structure: EPars.pairs_array_to_parenthesis(pose.get_molecular_structure()),
+                sequence: EPars.sequence_array_to_string(pose.sequence),
+                structure: EPars.pairs_array_to_parenthesis(pose.molecularStructure),
             });
         }
 
@@ -171,31 +171,29 @@ export class PuzzleEditMode extends GameMode {
         this._structureInputs = [];
 
         let set_cb = (kk: number): void  => {
-            this._poses[kk].set_add_base_callback((parenthesis: string, op: PuzzleEditOp, index: number): void => {
+            this._poses[kk].addBaseCallback = (parenthesis: string, op: PuzzleEditOp, index: number): void => {
                 let secInput: StructureInput = this._structureInputs[kk];
                 secInput.structureString = parenthesis;
                 secInput.setPose(op, index);
-            });
+            };
         };
 
         let pose_edit_setter = (index: number, pose_to_set: Pose2D): void => {
-            pose_to_set.set_pose_edit_callback(() => {
-                this.poseEditByTarget(index);
-            });
+            pose_to_set.poseEditCallback = () => this.poseEditByTarget(index);
         };
 
         let bind_mousedown_event = (pose: Pose2D, index: number): void => {
-            pose.set_start_mousedown_callback((e: InteractionEvent, closest_dist: number, closest_index: number): void => {
+            pose.startMousedownCallback = (e: InteractionEvent, closest_dist: number, closest_index: number): void => {
                 for (let ii: number = 0; ii < this._numTargets; ++ii) {
                     let pose_field: PoseField = pose_fields[ii];
                     let pose: Pose2D = pose_field.get_pose();
                     if (ii == index) {
-                        pose.on_pose_mouse_down(e, closest_index);
+                        pose.onPoseMouseDown(e, closest_index);
                     } else {
-                        pose.on_pose_mouse_down_propagate(e, closest_index);
+                        pose.onPoseMouseDownPropagate(e, closest_index);
                     }
                 }
-            });
+            };
         };
 
         let states: any[] = this.loadSavedData();
@@ -212,10 +210,10 @@ export class PuzzleEditMode extends GameMode {
             let pose_field: PoseField = new PoseField(true);
             this.addObject(pose_field, this.poseLayer);
             let pose: Pose2D = pose_field.get_pose();
-            pose.set_score_visualization(this._folder);
-            pose.set_molecular_structure(default_pairs);
-            pose.set_molecular_binding_bonus(-4.86);
-            pose.set_sequence(EPars.string_to_sequence_array(default_sequence));
+            pose.scoreFolder = this._folder;
+            pose.molecularStructure = default_pairs;
+            pose.molecularBindingBonus = -4.86;
+            pose.sequence = EPars.string_to_sequence_array(default_sequence);
             pose_fields.push(pose_field);
 
             let structureInput = new StructureInput(pose);
@@ -247,7 +245,7 @@ export class PuzzleEditMode extends GameMode {
             pose_edit_setter(ii, this._poses[ii]);
 
             if (this._embedded) {
-                this._poses[ii].set_zoom_level(2, true, true);
+                this._poses[ii].setZoomLevel(2, true, true);
             }
 
             bind_mousedown_event(this._poses[ii], ii);
@@ -265,12 +263,12 @@ export class PuzzleEditMode extends GameMode {
     }
 
     public get sequence(): string {
-        return EPars.sequence_array_to_string(this._poses[0].get_sequence());
+        return EPars.sequence_array_to_string(this._poses[0].sequence);
     }
 
     public getLockString(): string {
         let locks: boolean[] = this.getCurrentLock(0);
-        let len: number = this._poses[0].get_sequence().length;
+        let len: number = this._poses[0].sequence.length;
         let lock_string: string = "";
         for (let ii: number = 0; ii < len; ii++) {
             if (locks[ii]) {
@@ -289,7 +287,7 @@ export class PuzzleEditMode extends GameMode {
 
     public getThumbnailBase64(): string {
         let img = PoseThumbnail.createFramedBitmap(
-            this._poses[0].get_sequence(), this._poses[0].get_pairs(), 6, PoseThumbnailType.WHITE);
+            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE);
         return Base64.encodeDisplayObjectPNG(img);
     }
 
@@ -346,10 +344,10 @@ export class PuzzleEditMode extends GameMode {
         let trackedCursorIdx: number[] = [];
         for (let pose of this._poses) {
             energyVisible.push(pose.showTotalEnergy);
-            pose.set_show_total_energy(false);
+            pose.showTotalEnergy = false;
 
             trackedCursorIdx.push(pose.trackedCursorIdx);
-            pose.track_cursor(-1);
+            pose.trackCursor(-1);
         }
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
@@ -371,8 +369,8 @@ export class PuzzleEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ++ii) {
-            this._poses[ii].set_show_total_energy(energyVisible[ii]);
-            this._poses[ii].track_cursor(trackedCursorIdx[ii]);
+            this._poses[ii].showTotalEnergy = energyVisible[ii];
+            this._poses[ii].trackCursor(trackedCursorIdx[ii]);
         }
 
         return pngData;
@@ -384,16 +382,16 @@ export class PuzzleEditMode extends GameMode {
         this.showConfirmDialog(PROMPT).closed.then(confirmed => {
             if (confirmed) {
                 for (let pose of this._poses) {
-                    let sequence = pose.get_sequence();
+                    let sequence = pose.sequence;
                     for (let ii: number = 0; ii < sequence.length; ii++) {
-                        if (!pose.is_locked(ii)) {
+                        if (!pose.isLocked(ii)) {
                             sequence[ii] = EPars.RNABASE_ADENINE;
                         }
                     }
 
-                    pose.set_puzzle_locks(null);
-                    pose.set_sequence(sequence);
-                    pose.set_molecular_binding_site(null);
+                    pose.puzzleLocks = null;
+                    pose.sequence = sequence;
+                    pose.molecularBindingSite = null;
                 }
                 this.poseEditByTarget(0);
             }
@@ -427,7 +425,7 @@ export class PuzzleEditMode extends GameMode {
                 return;
             }
 
-            if (this._poses[ii].check_overlap() && !Eterna.is_dev_mode) {
+            if (this._poses[ii].checkOverlap() && !Eterna.is_dev_mode) {
                 this.showNotification("Some bases overlapped too much!");
                 return;
             }
@@ -454,7 +452,7 @@ export class PuzzleEditMode extends GameMode {
             constraints += "SHAPE," + ii;
         }
 
-        let len: number = this._poses[0].get_sequence().length;
+        let len: number = this._poses[0].sequence.length;
 
         let locks = this.getCurrentLock(0);
         let lock_string: string = "";
@@ -466,7 +464,7 @@ export class PuzzleEditMode extends GameMode {
             }
         }
 
-        let sequence: string = EPars.sequence_array_to_string(this._poses[0].get_sequence());
+        let sequence: string = EPars.sequence_array_to_string(this._poses[0].sequence);
         let beginning_sequence: string = "";
         for (let ii = 0; ii < len; ii++) {
             if (locks[ii]) {
@@ -536,10 +534,10 @@ export class PuzzleEditMode extends GameMode {
 
         // Render pose thumbnail images
         let midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
-            this._poses[0].get_sequence(), this._poses[0].get_pairs(), 4, PoseThumbnailType.WHITE));
+            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE));
 
         let bigImageString: string = Base64.encodeDisplayObjectPNG(
-            PoseThumbnail.createFramedBitmap(this._poses[0].get_sequence(), this._poses[0].get_pairs(), 2, PoseThumbnailType.WHITE));
+            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2, PoseThumbnailType.WHITE));
 
         post_params["title"] = params_title;
         post_params["secstruct"] = EPars.pairs_array_to_parenthesis(this.getCurrentTargetPairs(0));
@@ -584,7 +582,7 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey(null);
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_pairs(EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString));
+            this._poses[ii].pairs = EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString);
         }
         this._paused = true;
 
@@ -601,14 +599,11 @@ export class PuzzleEditMode extends GameMode {
         this._folderButton.label(this._folder.name);
 
         for (let pose of this._poses) {
-            pose.set_score_visualization(this._folder);
+            pose.scoreFolder = this._folder;
         }
 
         this.clearUndoStack();
         this.poseEditByTarget(0);
-        for (let pose of this._poses) {
-            pose.setDisplayScoreTexts(pose.is_displaying_score_texts());
-        }
     }
 
     private clearUndoStack(): void {
@@ -644,10 +639,10 @@ export class PuzzleEditMode extends GameMode {
         this._stackLevel++;
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_sequence(this._seqStack[this._stackLevel][ii].get_sequence());
-            this._poses[ii].set_puzzle_locks(this._lockStack[this._stackLevel][ii]);
-            this._poses[ii].set_molecular_structure(this._targetPairsStack[this._stackLevel][ii]);
-            this._poses[ii].set_molecular_binding_site(this._bindingSiteStack[this._stackLevel][ii]);
+            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].get_sequence();
+            this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
+            this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
+            this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._structureInputs[ii].structureString =
                 EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
@@ -662,10 +657,10 @@ export class PuzzleEditMode extends GameMode {
 
         this._stackLevel--;
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].set_sequence(this._seqStack[this._stackLevel][ii].get_sequence());
-            this._poses[ii].set_puzzle_locks(this._lockStack[this._stackLevel][ii]);
-            this._poses[ii].set_molecular_structure(this._targetPairsStack[this._stackLevel][ii]);
-            this._poses[ii].set_molecular_binding_site(this._bindingSiteStack[this._stackLevel][ii]);
+            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].get_sequence();
+            this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
+            this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
+            this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._structureInputs[ii].structureString =
                 EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
@@ -679,15 +674,15 @@ export class PuzzleEditMode extends GameMode {
             let undoblock: UndoBlock = this.getCurrentUndoBlock(ii);
             let target_pairs = this.getCurrentTargetPairs(ii);
             let best_pairs = undoblock.get_pairs(EPars.DEFAULT_TEMPERATURE);
-            let sequence = this._poses[ii].get_sequence();
+            let sequence = this._poses[ii].sequence;
             if (sequence.length != target_pairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
             }
 
             if (this._paused) {
-                this._poses[ii].set_pairs(target_pairs);
+                this._poses[ii].pairs = target_pairs;
             } else {
-                this._poses[ii].set_pairs(best_pairs);
+                this._poses[ii].pairs = best_pairs;
             }
 
             this._constraintBoxes[ii].set_content(ConstraintType.SHAPE, {
@@ -711,13 +706,13 @@ export class PuzzleEditMode extends GameMode {
 
         let baseType: number = GetPaletteTargetBaseType(type);
         for (let pose of this._poses) {
-            pose.set_current_color(baseType);
+            pose.currentColor = baseType;
         }
     }
 
     private onEditButtonClicked(button: GameButton, poseColor: number): void {
         for (let pose of this._poses) {
-            pose.set_current_color(poseColor);
+            pose.currentColor = poseColor;
         }
 
         this._toolbar.deselectAllColorings();
@@ -731,15 +726,15 @@ export class PuzzleEditMode extends GameMode {
         let current_lock: boolean[][] = [];
         let current_binding_sites: boolean[][] = [];
 
-        let force_sequence = this._poses[index].get_sequence();
-        let force_lock = this._poses[index].get_puzzle_locks();
+        let force_sequence = this._poses[index].sequence;
+        let force_lock = this._poses[index].puzzleLocks;
 
         let different_structures: boolean = false;
         for (let ii = 0; ii < this._poses.length; ii++) {
             if (ii != index) {
-                if (this._poses[ii].get_sequence().length == force_sequence.length) {
-                    this._poses[ii].set_sequence(force_sequence);
-                    this._poses[ii].set_puzzle_locks(force_lock);
+                if (this._poses[ii].sequence.length == force_sequence.length) {
+                    this._poses[ii].sequence = force_sequence;
+                    this._poses[ii].puzzleLocks = force_lock;
                 } else {
                     different_structures = true;
                 }
@@ -752,7 +747,7 @@ export class PuzzleEditMode extends GameMode {
                 if (ii > 0) {
                     lengths += ",";
                 }
-                lengths += this._poses[ii].get_sequence().length.toString();
+                lengths += this._poses[ii].sequence.length.toString();
             }
             lengths += "]";
 
@@ -767,9 +762,9 @@ export class PuzzleEditMode extends GameMode {
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             let target_pairs: number[] = EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString);
-            let seq = this._poses[ii].get_sequence();
-            let lock = this._poses[ii].get_puzzle_locks();
-            let binding_site = this._poses[ii].get_molecular_binding_site();
+            let seq = this._poses[ii].sequence;
+            let lock = this._poses[ii].puzzleLocks;
+            let binding_site = this._poses[ii].molecularBindingSite;
 
             if (this._stackLevel >= 0) {
                 if (this._structureInputs[ii].structureString != EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii])) {
