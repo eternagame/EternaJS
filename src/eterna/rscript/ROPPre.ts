@@ -32,11 +32,11 @@ export class ROPPre extends RScriptOp {
             this._type = ROPPreType.DISABLE_RNA_CHANGE;
         } else if ((regResult = modeRegex.exec(command)) != null) {
             this._type = ROPPreType.SET_DEFAULT_FOLD_MODE;
-            this._fold_mode = (regResult[1].toUpperCase() === "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
+            this._foldMode = (regResult[1].toUpperCase() === "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
         }
     }
 
-    public InitArgs(args: string): void {
+    public initArgs(args: string): void {
         this._allArgs = args.split(",");
         for (let i: number = 0; i < this._allArgs.length; ++i) {
             this._allArgs[i] = this._allArgs[i].replace(/^\s*/, "");
@@ -86,7 +86,7 @@ export class ROPPre extends RScriptOp {
             // no-op. What was this for?
             break;
         case ROPPreType.SET_DEFAULT_FOLD_MODE:
-            this._env.GetPuzzle().defaultMode = this._fold_mode;
+            this._env.GetPuzzle().defaultMode = this._foldMode;
             break;
         default:
             throw new Error(`Invalid Preprocessing Command: ${this._type}`);
@@ -96,7 +96,7 @@ export class ROPPre extends RScriptOp {
     private readonly _type: ROPPreType;
     private readonly _doVisible: boolean;
     private readonly _doDisable: boolean;
-    private readonly _fold_mode: PoseState;
+    private readonly _foldMode: PoseState;
     private _allArgs: string[];
 }
 
