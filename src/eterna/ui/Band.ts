@@ -5,7 +5,7 @@ import {MathUtil} from "../../flashbang/util/MathUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
-import {ColorUtil} from "../util/ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {Fonts} from "../util/Fonts";
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;

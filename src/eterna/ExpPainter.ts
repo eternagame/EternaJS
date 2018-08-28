@@ -1,5 +1,5 @@
 import {Constants} from "./Constants";
-import {ColorUtil} from "./util/ColorUtil";
+import {ColorUtil} from "../flashbang/util/ColorUtil";
 import {MathUtil} from "../flashbang/util/MathUtil";
 
 export class ExpPainter {

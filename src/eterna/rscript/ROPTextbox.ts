@@ -8,7 +8,7 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
 import {FancyTextBalloon} from "../ui/FancyTextBalloon";
-import {ColorUtil} from "../util/ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {Fonts} from "../util/Fonts";
 import {ROPWait} from "./ROPWait";
 import {RScriptArrow} from "./RScriptArrow";

@@ -9,7 +9,7 @@ import {Easing} from "../../flashbang/util/Easing";
 import {RNAHighlightState} from "../pose2D/Pose2D";
 import {ConstraintBox} from "../ui/ConstraintBox";
 import {EternaMenu} from "../ui/EternaMenu";
-import {ColorUtil} from "../util/ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {RScriptEnv} from "./RScriptEnv";
 import {RScriptOp} from "./RScriptOp";
 import {GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";

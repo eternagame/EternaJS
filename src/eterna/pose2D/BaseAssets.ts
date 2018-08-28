@@ -7,7 +7,7 @@ import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
 import {Sounds} from "../resources/Sounds";
 import {BitmapUtil} from "../util/BitmapUtil";
-import {ColorUtil} from "../util/ColorUtil";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {Base} from "./Base";
 import {BaseBitmaps} from "./BaseBitmaps";
 import {BaseDrawFlags} from "./BaseDrawFlags";

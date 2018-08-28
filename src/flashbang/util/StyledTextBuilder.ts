@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import {default as MultiStyleText, ExtendedTextStyle, TextStyleSet} from "pixi-multistyle-text";
-import {ColorUtil} from "../../eterna/util/ColorUtil";
+import {ColorUtil} from "./ColorUtil";
 
 export class StyledTextBuilder {
     public constructor(defaultStyle?: ExtendedTextStyle) {

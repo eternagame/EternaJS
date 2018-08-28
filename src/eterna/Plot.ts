@@ -1,5 +1,5 @@
 import {Graphics, Text, Container} from "pixi.js";
-import {ColorUtil} from "./util/ColorUtil";
+import {ColorUtil} from "../flashbang/util/ColorUtil";
 import {Fonts} from "./util/Fonts";
 
 export enum PlotType {
