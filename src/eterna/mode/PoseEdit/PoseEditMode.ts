@@ -1648,7 +1648,6 @@ export class PoseEditMode extends GameMode {
                 new SelfDestructTask()
             ));
 
-            this.setShowMenu(false);
             for (let pose of this._poses) {
                 pose.showTotalEnergy = false;
                 pose.clearExplosion();
@@ -2911,13 +2910,6 @@ export class PoseEditMode extends GameMode {
                 this.submitCurrentPose();
             }
         }
-
-        //when constaints are satisfied, trigger publish hint animation
-        if (constraints_satisfied && !was_satisfied && this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            log.debug("TODO: submit_button.respond()")
-            // this._submit_button.respond(150, 160);
-        }
-
     }
 
     private flashConstraintForTarget(target_index: number): void {
@@ -3522,20 +3514,12 @@ export class PoseEditMode extends GameMode {
         this._stackLevel = stack_level;
     }
 
-    private setShowMenu(show_menu: boolean): void {
-        log.debug("TODO: set_show_menu");
-        // let m: GameObject = (<GameObject>Application.instance.get_application_gui("Menu"));
-        // if (m) m.visible = show_menu;
-    }
-
-    private hide_end_curtain(): void {
+    private hideEndCurtain(): void {
         for (let pose of this._poses) {
             pose.showTotalEnergy = true;
             pose.clearExplosion();
         }
-        // this._mission_cleared.set_animator(new GameAnimatorFader(1, 0, 0.3, true));
         this.disableTools(false);
-        this.setShowMenu(true);
     }
 
     private clearUndoStack(): void {
