@@ -59,7 +59,7 @@ export class Vienna2 extends Folder {
             }
         }
 
-        let temp_array: string[] = CSVParser.parse_into_array_with_white_spaces(probabilitiesString);
+        let temp_array: string[] = CSVParser.splitOnWhitespace(probabilitiesString);
         ret_array = [];
 
         if (temp_array.length % 4 !== 0) {
