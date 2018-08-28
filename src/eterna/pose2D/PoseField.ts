@@ -45,7 +45,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         return this._height;
     }
 
-    public set_size(width: number, height: number, useMask: boolean): void {
+    public setSize(width: number, height: number, useMask: boolean): void {
         this._width = width;
         this._height = height;
 
@@ -71,11 +71,11 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         }
     }
 
-    public set_zoom(zoom: number): void {
+    public set zoom(zoom: number) {
         this._pose.setZoomLevel(zoom);
     }
 
-    public zoom_in(): void {
+    public zoomIn(): void {
         let prev_zoom: number = this._pose.zoomLevel;
 
         if (prev_zoom === 0)
@@ -84,7 +84,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this._pose.setZoomLevel(prev_zoom - 1);
     }
 
-    public zoom_out(): void {
+    public zoomOut(): void {
         let prev_zoom: number = this._pose.zoomLevel;
 
         if (prev_zoom === Pose2D.ZOOM_SPACINGS.length - 1)
@@ -93,7 +93,7 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         this._pose.setZoomLevel(prev_zoom + 1);
     }
 
-    public get_pose(): Pose2D {
+    public get pose(): Pose2D {
         return this._pose;
     }
 
@@ -133,10 +133,10 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         }
 
         if (e.deltaY < 0) {
-            this.zoom_in();
+            this.zoomIn();
             return true;
         } else if (e.deltaY > 0) {
-            this.zoom_out();
+            this.zoomOut();
             return true;
         }
 
@@ -148,8 +148,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
             return false;
         }
 
-        const X_OFFSET: number = 5;
-        const Y_OFFSET: number = 5;
+        const X_OFFSET = 5;
+        const Y_OFFSET = 5;
 
         if (!e.ctrlKey && e.code === KeyCode.ArrowDown) {
             if (e.shiftKey) {
