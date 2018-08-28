@@ -35,13 +35,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._boxType = type;
         this.container.interactive = true;
 
-        this._puz_small_clear_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
-        this._puz_small_fail_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
-        this._puz_large_clear_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeMet);
-        this._puz_large_fail_bg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeFail);
+        this._puzSmallClearBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
+        this._puzSmallFailBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
+        this._puzLargeClearBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeMet);
+        this._puzLargeFailBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeFail);
 
-        this._success_outline = BitmapManager.getBitmap(Bitmaps.NovaPassOutline);
-        this._fail_outline = BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
+        this._successOutline = BitmapManager.getBitmap(Bitmaps.NovaPassOutline);
+        this._failOutline = BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
 
         if (ConstraintBox._A == null) {
             ConstraintBox._A = BitmapManager.getBitmap(Bitmaps.BaseAMid);
@@ -100,7 +100,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         this._enlarged = false;
 
-        this._val_text = new MultiStyleText("", {
+        this._valText = new MultiStyleText("", {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 18,
@@ -109,10 +109,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 letterSpacing: -0.5
             }
         });
-        this._val_text.visible = false;
-        this.container.addChild(this._val_text);
+        this._valText.visible = false;
+        this.container.addChild(this._valText);
 
-        this._big_text = new MultiStyleText("", {
+        this._bigText = new MultiStyleText("", {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 23,
@@ -121,22 +121,22 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 letterSpacing: -0.5
             }
         });
-        this._big_text.visible = false;
-        this.container.addChild(this._big_text);
+        this._bigText.visible = false;
+        this.container.addChild(this._bigText);
 
-        this._no_text = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5)
+        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5)
             .build();
-        this._no_text.position = new Point(35, 0);
-        this._no_text.visible = false;
-        this.container.addChild(this._no_text);
+        this._noText.position = new Point(35, 0);
+        this._noText.visible = false;
+        this.container.addChild(this._noText);
 
-        this._state_text = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5)
+        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5)
             .build();
-        this._state_text.position = new Point(3, 45);
-        this._state_text.visible = false;
-        this.container.addChild(this._state_text);
+        this._stateText.position = new Point(3, 45);
+        this._stateText.visible = false;
+        this.container.addChild(this._stateText);
 
-        this._req_clarify_text = new MultiStyleText("", {
+        this._reqClarifyText = new MultiStyleText("", {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 11,
@@ -144,11 +144,11 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 letterSpacing: -0.5
             }
         });
-        this._req_clarify_text.position = new Point(50, 30);
-        this._req_clarify_text.visible = false;
-        this.container.addChild(this._req_clarify_text);
+        this._reqClarifyText.position = new Point(50, 30);
+        this._reqClarifyText.visible = false;
+        this.container.addChild(this._reqClarifyText);
 
-        this._req_stat_txt = new MultiStyleText("", {
+        this._reqStatTxt = new MultiStyleText("", {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 11,
@@ -156,18 +156,18 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 letterSpacing: -0.5
             }
         });
-        this._req_stat_txt.position = new Point(50, 50);
-        this._req_stat_txt.visible = false;
-        this.container.addChild(this._req_stat_txt);
+        this._reqStatTxt.position = new Point(50, 50);
+        this._reqStatTxt.visible = false;
+        this.container.addChild(this._reqStatTxt);
 
-        this._small_thumbnail = new Sprite();
-        this._small_thumbnail.position = new Point(6, 6);
-        this.container.addChild(this._small_thumbnail);
+        this._smallThumbnail = new Sprite();
+        this._smallThumbnail.position = new Point(6, 6);
+        this.container.addChild(this._smallThumbnail);
 
-        this._big_thumbnail = new Sprite();
-        this._big_thumbnail.position = new Point(6, 6);
-        this._big_thumbnail.scale = new Point(0.5, 0.5);
-        this.container.addChild(this._big_thumbnail);
+        this._bigThumbnail = new Sprite();
+        this._bigThumbnail.position = new Point(6, 6);
+        this._bigThumbnail.scale = new Point(0.5, 0.5);
+        this.container.addChild(this._bigThumbnail);
 
         this._flag = new Graphics();
         this._flag.clear();
@@ -178,7 +178,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this.container.addChild(this._flag);
 
         if (this._boxType === ConstraintBoxType.MISSION_SCREEN) {
-            this._side_txt = new MultiStyleText("", {
+            this._sideTxt = new MultiStyleText("", {
                 default: {
                     fontFamily: Fonts.STDFONT_REGULAR,
                     fontSize: 16,
@@ -186,7 +186,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                     letterSpacing: -0.5
                 }
             });
-            this.container.addChild(this._side_txt);
+            this.container.addChild(this._sideTxt);
         }
 
         this._check = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaGreenCheck));
@@ -223,21 +223,21 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this.display.visible = value;
     }
 
-    public show_big_text(show_txt: boolean): void {
-        if (!show_txt) {
+    public set showBigText(show: boolean) {
+        if (!show) {
             this.replaceNamedObject(
                 ConstraintBox.BIG_TEXT_FADE_ANIM,
-                new AlphaTask(0, 0.3, Easing.linear, this._big_text)
+                new AlphaTask(0, 0.3, Easing.linear, this._bigText)
             );
         } else {
             this.removeNamedObjects(ConstraintBox.BIG_TEXT_FADE_ANIM);
-            this._big_text.alpha = 1;
-            this._big_text.visible = true;
+            this._bigText.alpha = 1;
+            this._bigText.visible = true;
             this.display.alpha = 1;
         }
     }
 
-    public is_satisfied(): boolean {
+    public get isSatisfied(): boolean {
         return this._satisfied;
     }
 
@@ -245,7 +245,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         return this._constraintType;
     }
 
-    public get_wrong_pairs(native_pairs: number[], target_pairs: number[], structure_constraints: any[], satisfied: boolean): number[] {
+    public getWrongPairs(native_pairs: number[], target_pairs: number[], structure_constraints: any[], satisfied: boolean): number[] {
         let wrong_pairs: number[] = new Array(native_pairs.length);
 
         if (this._constraintType === ConstraintType.SHAPE) {
@@ -282,21 +282,21 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         return wrong_pairs;
     }
 
-    public set_flagged(vis: boolean): void {
+    public set flagged(vis: boolean) {
         this._flag.visible = vis;
     }
 
-    public refresh_content(): void {
-        this.set_content(this._constraintType, this._val, this._satisfied, this._stat);
+    public refreshContent(): void {
+        this.setContent(this._constraintType, this._val, this._satisfied, this._stat);
     }
 
-    public set_content(constraintType: ConstraintType, val: any, satisfied: boolean, stat: number): void {
+    public setContent(constraintType: ConstraintType, val: any, satisfied: boolean, stat: number): void {
         this._constraintType = constraintType;
         this._val = val;
         this._satisfied = satisfied;
         this._stat = stat;
 
-        this._big_text.position = new Point(85, 17);
+        this._bigText.position = new Point(85, 17);
 
         this._bases.visible = false;
         this._base1.visible = false;
@@ -305,12 +305,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._base4.visible = false;
         this._bond.display.visible = false;
         this._bond2.display.visible = false;
-        this._val_text.visible = false;
-        this._no_text.visible = false;
-        this._state_text.visible = false;
+        this._valText.visible = false;
+        this._noText.visible = false;
+        this._stateText.visible = false;
         this._icon.visible = false;
-        this._small_thumbnail.visible = false;
-        this._big_thumbnail.visible = false;
+        this._smallThumbnail.visible = false;
+        this._bigThumbnail.visible = false;
         this._flag.visible = false;
         this._check.visible = satisfied && this._boxType === ConstraintBoxType.DEFAULT;
         this._req.visible = false;
@@ -318,24 +318,24 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         if (constraintType === ConstraintType.SHAPE || constraintType === ConstraintType.ANTISHAPE) {
             if (this._enlarged) {
                 this._check.position = new Point(144, 144);
-                this._no_text.position = new Point(124, 1);
-                this._state_text.position = new Point(1, 132);
+                this._noText.position = new Point(124, 1);
+                this._stateText.position = new Point(1, 132);
             } else {
                 this._check.position = new Point(55, 55);
-                this._no_text.position = new Point(35, 1);
-                this._state_text.position = new Point(3, 45);
+                this._noText.position = new Point(35, 1);
+                this._stateText.position = new Point(3, 45);
             }
         }
 
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
-        this._outline.texture = satisfied ? this._success_outline : this._fail_outline;
+        this._outline.texture = satisfied ? this._successOutline : this._failOutline;
         const isMissionScreen: boolean = this._boxType === ConstraintBoxType.MISSION_SCREEN;
 
         if (constraintType === ConstraintType.BOOST) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -354,8 +354,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = `${(Number(val)).toString()} OR MORE`;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = `${(Number(val)).toString()} OR MORE`;
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaBoostMissionReq)
@@ -364,9 +364,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.NOGU) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -385,8 +385,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = "NO UG PAIRS";
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = "NO UG PAIRS";
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaNoGUMissionReq)
@@ -395,9 +395,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.GU) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -415,8 +415,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = `${(Number(val)).toString()} OR MORE`;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = `${(Number(val)).toString()} OR MORE`;
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
@@ -427,9 +427,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         } else if (constraintType === ConstraintType.GC
             || constraintType === ConstraintType.GCMIN
             || constraintType === ConstraintType.NOGC) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -454,8 +454,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = newClarifyText;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = newClarifyText;
+            this._reqStatTxt.text = stat.toString();
 
             if (constraintType === ConstraintType.NOGC) {
                 this._req.texture = isMissionScreen
@@ -470,9 +470,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.AU || constraintType === ConstraintType.AUMAX) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -492,8 +492,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = newClarifyText;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = newClarifyText;
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
@@ -507,8 +507,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             if (val.index != null) {
                 tooltip.append(`In state ${val.index + 1}, your RNA must fold into the outlined structure.`);
-                this._state_text.visible = true;
-                this._state_text.text = val.index + 1;
+                this._stateText.visible = true;
+                this._stateText.text = val.index + 1;
             } else {
                 tooltip.append("Your RNA must fold into the outlined structure.");
             }
@@ -516,33 +516,33 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let target_pairs: number[] = val.target;
             let native_pairs: number[] = val.native;
             let structure_constraints: any[] = val.structure_constraints;
-            let wrong_pairs: number[] = this.get_wrong_pairs(native_pairs, target_pairs, structure_constraints, satisfied);
+            let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
 
             let sequence: number[] = new Array(native_pairs.length);
             for (let ii = 0; ii < wrong_pairs.length; ii++) {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
 
             if (this._enlarged) {
-                this._small_thumbnail.visible = false;
-                this._big_thumbnail.visible = true;
+                this._smallThumbnail.visible = false;
+                this._bigThumbnail.visible = true;
             } else {
-                this._small_thumbnail.visible = true;
-                this._big_thumbnail.visible = false;
+                this._smallThumbnail.visible = true;
+                this._bigThumbnail.visible = false;
             }
 
-            tooltip.apply(this._big_text);
+            tooltip.apply(this._bigText);
         } else if (constraintType === ConstraintType.ANTISHAPE) {
             this.changeShapeThumbnailBG();
             this._bg.visible = true;
 
             if (val.index != null) {
                 tooltip.append(`In state ${val.index + 1}, your RNA must NOT have the structure in white outline.`);
-                this._state_text.visible = true;
-                this._state_text.text = val.index + 1;
+                this._stateText.visible = true;
+                this._stateText.text = val.index + 1;
             } else {
                 tooltip.append("Your RNA must NOT have the structure in white outline.");
             }
@@ -550,29 +550,29 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let target_pairs: number[] = val.target;
             let native_pairs: number[] = val.native;
             let structure_constraints: any[] = val.structure_constraints;
-            let wrong_pairs: number[] = this.get_wrong_pairs(native_pairs, target_pairs, structure_constraints, satisfied);
+            let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
 
             let sequence: number[] = new Array(native_pairs.length);
             for (let ii = 0; ii < wrong_pairs.length; ii++) {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._big_thumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._small_thumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+            PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
 
             if (this._enlarged) {
-                this._small_thumbnail.visible = false;
-                this._big_thumbnail.visible = true;
+                this._smallThumbnail.visible = false;
+                this._bigThumbnail.visible = true;
             } else {
-                this._small_thumbnail.visible = true;
-                this._big_thumbnail.visible = false;
+                this._smallThumbnail.visible = true;
+                this._bigThumbnail.visible = false;
             }
 
-            this._no_text.visible = true;
+            this._noText.visible = true;
 
-            tooltip.apply(this._big_text);
+            tooltip.apply(this._bigText);
         } else if (constraintType === ConstraintType.BINDINGS) {
-            this._req_clarify_text.visible = true;
+            this._reqClarifyText.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -580,7 +580,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             tooltip.append(`In state ${(Number(val.index) + 1).toString()}, your RNA must:\n`);
 
-            let clarifyTextBuilder = new StyledTextBuilder(this._req_clarify_text.style);
+            let clarifyTextBuilder = new StyledTextBuilder(this._reqClarifyText.style);
             for (let ii = 0; ii < val.bind.length; ii++) {
                 tooltip.append("- ");
                 if (isMissionScreen) {
@@ -603,7 +603,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            clarifyTextBuilder.apply(this._req_clarify_text);
+            clarifyTextBuilder.apply(this._reqClarifyText);
 
             let tw: number = Math.min(101, 15 * (2 * val.bind.length - 1));
             let step: number = tw / (2 * val.bind.length - 1);
@@ -626,8 +626,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             }
             this._bg.visible = true;
 
-            this._state_text.visible = true;
-            this._state_text.text = val.index + 1;
+            this._stateText.visible = true;
+            this._stateText.text = val.index + 1;
 
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.A || constraintType === ConstraintType.AMAX
@@ -654,12 +654,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 ? `${(Number(val)).toString()} OR MORE`
                 : `${(Number(val)).toString()} OR FEWER`;
 
-            this._req_clarify_text.text = newClarifyText;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = newClarifyText;
+            this._reqStatTxt.text = stat.toString();
 
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmapNamed(`Nova${letter}MissionReq`)
@@ -668,8 +668,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.PAIRS) {
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -679,9 +679,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = `${(Number(val)).toString()} OR MORE`;
+            this._reqClarifyText.text = `${(Number(val)).toString()} OR MORE`;
 
-            this._req_stat_txt.text = stat.toString();
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaPairsMissionReq)
@@ -711,15 +711,15 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._base4.x = 27;
             this._base4.y = 7;
 
-            this._val_text.visible = true;
+            this._valText.visible = true;
 
             ConstraintBox.createTextStyle()
                 .append(stat.toString(), {fill: (satisfied ? 0x00aa00 : 0xaa0000)})
                 .append(val.toString())
-                .apply(this._val_text);
+                .apply(this._valText);
 
             tooltip.append(`You can only mutate up to ${val.toString()} bases`);
-            tooltip.apply(this._big_text);
+            tooltip.apply(this._bigText);
         } else if (constraintType === ConstraintType.STACK) {
             this._base1.texture = ConstraintBox._W;
             this._base2.texture = ConstraintBox._W;
@@ -750,19 +750,19 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bond2.display.visible = true;
             this._bond2.strength = 1;
 
-            this._val_text.visible = true;
+            this._valText.visible = true;
 
             ConstraintBox.createTextStyle()
                 .append(`${stat}`, {fill: satisfied ? 0x00aa00 : 0xaa0000})
                 .append(`${val}`)
-                .apply(this._val_text);
+                .apply(this._valText);
 
             tooltip.append(`You must have a stack with ${val.toString()} or more pairs.`);
-            tooltip.apply(this._big_text);
+            tooltip.apply(this._bigText);
         } else if (constraintType.lastIndexOf("CONSECUTIVE_") >= 0) {
-            this._val_text.visible = true;
-            this._req_clarify_text.visible = true;
-            this._req_stat_txt.visible = true;
+            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -776,8 +776,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = `AT MOST ${(Number(val) - 1).toString()} IN A ROW`;
-            this._req_stat_txt.text = stat.toString();
+            this._reqClarifyText.text = `AT MOST ${(Number(val) - 1).toString()} IN A ROW`;
+            this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmapNamed(`Nova${letter}RowMissionReq`)
@@ -817,14 +817,14 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                     noGoodBuilder.append((val.a_count).toString(), "redText").append("A");
                 }
 
-                this._req_stat_txt.visible = true;
+                this._reqStatTxt.visible = true;
                 if (noGoodBuilder.text.length > 0) {
-                    noGoodBuilder.apply(this._req_stat_txt);
+                    noGoodBuilder.apply(this._reqStatTxt);
                 } else {
-                    this._req_stat_txt.text = "OK";
+                    this._reqStatTxt.text = "OK";
                 }
             } else {
-                this._req_stat_txt.visible = false;
+                this._reqStatTxt.visible = false;
             }
 
             if (isMissionScreen) {
@@ -847,7 +847,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.BARCODE) {
-            this._req_clarify_text.visible = true;
+            this._reqClarifyText.visible = true;
 
             if (isMissionScreen) {
                 tooltip.pushStyle("altTextMain");
@@ -865,7 +865,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = "MUST BE UNIQUE";
+            this._reqClarifyText.text = "MUST BE UNIQUE";
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaBarcodeMissionReq)
@@ -874,7 +874,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType.lastIndexOf("OLIGO_") >= 0) {
-            this._req_clarify_text.visible = true;
+            this._reqClarifyText.visible = true;
 
             let binder: boolean = (constraintType.lastIndexOf("UNBOUND") < 0);
 
@@ -894,7 +894,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 tooltip.popStyle();
             }
 
-            this._req_clarify_text.text = binder ? "MUST BIND" : "MAY NOT BIND";
+            this._reqClarifyText.text = binder ? "MUST BIND" : "MAY NOT BIND";
 
             const ico = binder ? "Bound" : "Unbound";
             this._req.texture = isMissionScreen
@@ -929,23 +929,23 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             }
 
             if (name != null && name.length > 0) {
-                this._no_text.visible = true;
-                this._no_text.text = name;
-                this._no_text.position = new Point(30 - this._no_text.width * 0.5, 10);
+                this._noText.visible = true;
+                this._noText.text = name;
+                this._noText.position = new Point(30 - this._noText.width * 0.5, 10);
             } else {
-                this._no_text.visible = false;
+                this._noText.visible = false;
             }
 
             if (val.index != null) {
-                this._state_text.visible = true;
-                this._state_text.text = val.index;
+                this._stateText.visible = true;
+                this._stateText.text = val.index;
             }
 
             if (!isMissionScreen && value != null && value.length > 0) {
-                this._req_stat_txt.visible = true;
-                this._req_stat_txt.text = value;
+                this._reqStatTxt.visible = true;
+                this._reqStatTxt.text = value;
             } else {
-                this._req_stat_txt.visible = false;
+                this._reqStatTxt.visible = false;
             }
 
             tooltip.append(goal != null && goal.length > 0 ? goal : `Your puzzle must satisfy script ${nid}`);
@@ -954,16 +954,16 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         this.setTooltip(tooltip, satisfied);
 
-        this._val_text.position = new Point(30 - this._val_text.width * 0.5, 37);
-        this._req_stat_txt.visible = !isMissionScreen;
+        this._valText.position = new Point(30 - this._valText.width * 0.5, 37);
+        this._reqStatTxt.visible = !isMissionScreen;
         if (isMissionScreen) {
             this._outline.visible = false;
-            tooltip.apply(this._side_txt);
+            tooltip.apply(this._sideTxt);
             // this._side_txt.set_autosize(false, false, 250);
             if (this._req.visible) {
-                this._side_txt.position = new Point(this._req.width + 18, this._req.height / 2 - this._side_txt.height / 2);
+                this._sideTxt.position = new Point(this._req.width + 18, this._req.height / 2 - this._sideTxt.height / 2);
             } else {
-                this._side_txt.position = new Point(111 + 18, 55 / 2 - this._side_txt.height / 2);
+                this._sideTxt.position = new Point(111 + 18, 55 / 2 - this._sideTxt.height / 2);
             }
         }
 
@@ -979,19 +979,19 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         //     this._req_clarify_text.GetTextBox().setTextFormat(bf, 0, 2);
         // }
 
-        this._req_clarify_text.position = new Point(55 - this._req_clarify_text.width * 0.5, 32);
-        this._req_stat_txt.position = new Point(55 - this._req_stat_txt.width * 0.5, 50);
+        this._reqClarifyText.position = new Point(55 - this._reqClarifyText.width * 0.5, 32);
+        this._reqStatTxt.position = new Point(55 - this._reqStatTxt.width * 0.5, 50);
     }
 
     public scale(): void {
-        if (this._small_thumbnail.visible) {
-            this.enlarge_thumbnail_scale();
+        if (this._smallThumbnail.visible) {
+            this.enlargeThumbnailScale();
         } else {
-            this.shrink_thumbnail_scale();
+            this.shrinkThumbnailScale();
         }
     }
 
-    public enlarge_thumbnail_scale(): void {
+    public enlargeThumbnailScale(): void {
         // / Don't do this while the constraint box is moving around
         if (this.hasNamedObject(ConstraintBox.LOCATION_ANIM)) {
             return;
@@ -999,37 +999,37 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         this._enlarged = true;
 
-        this._small_thumbnail.visible = false;
-        this._big_thumbnail.visible = true;
+        this._smallThumbnail.visible = false;
+        this._bigThumbnail.visible = true;
         this.changeShapeThumbnailBG();
 
         this._outline.width = 165;
         this._outline.height = 165;
 
         this._check.position = new Point(144, 144);
-        this._no_text.position = new Point(124, 1);
-        this._state_text.position = new Point(1, 132);
+        this._noText.position = new Point(124, 1);
+        this._stateText.position = new Point(1, 132);
     }
 
-    public shrink_thumbnail_scale(): void {
+    public shrinkThumbnailScale(): void {
         if (this.hasNamedObject(ConstraintBox.LOCATION_ANIM)) {
             return;
         }
 
         this._enlarged = false;
 
-        this._small_thumbnail.visible = true;
-        this._big_thumbnail.visible = false;
+        this._smallThumbnail.visible = true;
+        this._bigThumbnail.visible = false;
         this.changeShapeThumbnailBG();
         this._check.position = new Point(55, 55);
-        this._no_text.position = new Point(35, 1);
-        this._state_text.position = new Point(3, 45);
+        this._noText.position = new Point(35, 1);
+        this._stateText.position = new Point(3, 45);
 
         this._outline.width = 75;
         this._outline.height = 75;
     }
 
-    public real_width(): number {
+    public get width(): number {
         return this._outline.visible ? 111 : 75;
     }
 
@@ -1102,13 +1102,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
     private changeShapeThumbnailBG(): void {
         if (this._satisfied && this._enlarged) {
-            this._bg.texture = this._puz_large_clear_bg;
+            this._bg.texture = this._puzLargeClearBg;
         } else if (!this._satisfied && this._enlarged) {
-            this._bg.texture = this._puz_large_fail_bg;
+            this._bg.texture = this._puzLargeFailBg;
         } else if (this._satisfied && !this._enlarged) {
-            this._bg.texture = this._puz_small_clear_bg;
+            this._bg.texture = this._puzSmallClearBg;
         } else if (!this._satisfied && !this._enlarged) {
-            this._bg.texture = this._puz_small_fail_bg;
+            this._bg.texture = this._puzSmallFailBg;
         }
     }
 
@@ -1119,15 +1119,15 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         let balloon = new TextBalloon("", 0x0, 0.8);
         balloon.set_styled_text(styledText);
-        this.set_mouse_over_object(balloon);
+        this.setMouseOverObject(balloon);
     }
 
-    private set_mouse_over_object(obj: SceneObject): void {
+    private setMouseOverObject(obj: SceneObject): void {
         const FADE_IN_DELAY: number = 1.0;
 
-        if (this._mouse_over_object != null) {
-            this._mouse_over_object.destroySelf();
-            this._mouse_over_object = null;
+        if (this._mouseOverObject != null) {
+            this._mouseOverObject.destroySelf();
+            this._mouseOverObject = null;
             this._mouseOverRegs.close();
             this._mouseOverRegs = null;
         }
@@ -1138,7 +1138,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             obj.display.visible = false;
             this.addObject(obj, this.container);
 
-            this._mouse_over_object = obj;
+            this._mouseOverObject = obj;
 
             const MOUSE_OVER_ANIM: string = "MouseOverAnim";
 
@@ -1195,29 +1195,29 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     private readonly _base3: Sprite;
     private readonly _base4: Sprite;
     private readonly _bond2: Band;
-    private readonly _val_text: MultiStyleText;
-    private readonly _big_text: MultiStyleText;
-    private readonly _small_thumbnail: Sprite;
-    private readonly _big_thumbnail: Sprite;
+    private readonly _valText: MultiStyleText;
+    private readonly _bigText: MultiStyleText;
+    private readonly _smallThumbnail: Sprite;
+    private readonly _bigThumbnail: Sprite;
     private readonly _flag: Graphics;
-    private readonly _no_text: Text;
-    private readonly _state_text: Text;
+    private readonly _noText: Text;
+    private readonly _stateText: Text;
     private readonly _bgGraphics: Graphics;
     private readonly _bg: Sprite;
-    private readonly _puz_small_clear_bg: Texture;
-    private readonly _puz_small_fail_bg: Texture;
-    private readonly _puz_large_clear_bg: Texture;
-    private readonly _puz_large_fail_bg: Texture;
+    private readonly _puzSmallClearBg: Texture;
+    private readonly _puzSmallFailBg: Texture;
+    private readonly _puzLargeClearBg: Texture;
+    private readonly _puzLargeFailBg: Texture;
     private readonly _fglow: Graphics;
     private readonly _backlight: Graphics;
     private readonly _check: Sprite;
     private readonly _req: Sprite;
     private readonly _outline: Sprite;
-    private readonly _fail_outline: Texture;
-    private readonly _success_outline: Texture;
-    private readonly _req_clarify_text: MultiStyleText;
-    private readonly _req_stat_txt: MultiStyleText;
-    private readonly _side_txt: MultiStyleText;
+    private readonly _failOutline: Texture;
+    private readonly _successOutline: Texture;
+    private readonly _reqClarifyText: MultiStyleText;
+    private readonly _reqStatTxt: MultiStyleText;
+    private readonly _sideTxt: MultiStyleText;
 
     private _enlarged: boolean = false;
     private _satisfied: boolean = false;
@@ -1226,7 +1226,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     private _stat: number = 0;
 
     private _mouseOverRegs: RegistrationGroup;
-    private _mouse_over_object: SceneObject;
+    private _mouseOverObject: SceneObject;
 
     private static _A: Texture;
     private static _G: Texture;
@@ -1234,8 +1234,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     private static _C: Texture;
     private static _W: Texture;
 
-    private static readonly LOCATION_ANIM: string = "AnimateLocation";
-    private static readonly BIG_TEXT_FADE_ANIM: string = "BigTextFadeAnim";
-    private static readonly BACKLIGHT_ANIM: string = "BacklightAnim";
-    private static readonly FGLOW_ANIM: string = "FGlowAnim";
+    private static readonly LOCATION_ANIM = "AnimateLocation";
+    private static readonly BIG_TEXT_FADE_ANIM = "BigTextFadeAnim";
+    private static readonly BACKLIGHT_ANIM = "BacklightAnim";
+    private static readonly FGLOW_ANIM = "FGlowAnim";
 }

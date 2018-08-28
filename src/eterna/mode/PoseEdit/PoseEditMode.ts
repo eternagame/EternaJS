@@ -777,7 +777,7 @@ export class PoseEditMode extends GameMode {
             this.checkConstraints(true);
             if (idx >= 0 && idx < this.constraintCount) {
                 let o: ConstraintBox = this.getConstraint(idx);
-                return o.is_satisfied();
+                return o.isSatisfied;
             } else {
                 return false;
             }
@@ -1878,7 +1878,7 @@ export class PoseEditMode extends GameMode {
                     let cpos = new Point(w_walker, 35);
                     w_walker += 119;
                     box.setLocation(cpos, animate);
-                    box.show_big_text(false);
+                    box.showBigText = false;
                     box.display.visible = display;
                 }
                 if (w_walker > 17) {
@@ -1898,7 +1898,7 @@ export class PoseEditMode extends GameMode {
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
                 box.setLocation(cpos, animate);
-                box.show_big_text(false);
+                box.showBigText = false;
                 box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
             }
 
@@ -1911,7 +1911,7 @@ export class PoseEditMode extends GameMode {
                 let cpos = new Point(w_walker, 35);
                 w_walker += 77;
                 box.setLocation(cpos, animate);
-                box.show_big_text(false);
+                box.showBigText = false;
                 box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
             }
         }
@@ -1936,7 +1936,7 @@ export class PoseEditMode extends GameMode {
         for (let ii = 0; ii < constraints.length / 2; ii++) {
             let box: ConstraintBox = this._constraintBoxes[ii];
             box.display.visible = true;
-            box.show_big_text(true);
+            box.showBigText = true;
 
             box.setLocation(new Point(
                 (Flashbang.stageWidth * 0.3),
@@ -2205,25 +2205,25 @@ export class PoseEditMode extends GameMode {
             const count: number = undoBlock.get_param(UndoBlockParam.GU);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.GU, value, isSatisfied, count);
+                box.setContent(ConstraintType.GU, value, isSatisfied, count);
             }
         } else if (type === ConstraintType.AU) {
             const count: number = undoBlock.get_param(UndoBlockParam.AU);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.AU, value, isSatisfied, count)
+                box.setContent(ConstraintType.AU, value, isSatisfied, count)
             }
         } else if (type === ConstraintType.GC) {
             const count: number = undoBlock.get_param(UndoBlockParam.GC);
             isSatisfied = (count <= Number(value));
             if (render) {
-                box.set_content(ConstraintType.GC, value, isSatisfied, count);
+                box.setContent(ConstraintType.GC, value, isSatisfied, count);
             }
         } else if (type === ConstraintType.MUTATION) {
             const sequence_diff: number = EPars.sequence_diff(this._puzzle.getSubsequenceWithoutBarcode(sequence), this._puzzle.getSubsequenceWithoutBarcode(this._puzzle.getBeginningSequence()));
             isSatisfied = sequence_diff <= Number(value);
             if (render) {
-                box.set_content(ConstraintType.MUTATION, value, isSatisfied, sequence_diff);
+                box.setContent(ConstraintType.MUTATION, value, isSatisfied, sequence_diff);
             }
 
         } else if (type === ConstraintType.SHAPE) {
@@ -2260,32 +2260,32 @@ export class PoseEditMode extends GameMode {
             }
 
             if (render) {
-                box.set_content(ConstraintType.SHAPE, {
+                box.setContent(ConstraintType.SHAPE, {
                     target: this._targetPairs[target_index],
                     index: input_index,
                     native: native_pairs,
                     structure_constraints: structure_constraints
                 }, isSatisfied, 0);
-                box.set_flagged(this._unstableIndex === ii);
+                box.flagged = this._unstableIndex === ii;
                 // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
                 //     set_callback(this, box, ii);
                 // }
 
                 if (this._unstableIndex === ii) {
-                    outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, this._targetPairs[target_index], structure_constraints, isSatisfied);
+                    outInfo.wrong_pairs = box.getWrongPairs(native_pairs, this._targetPairs[target_index], structure_constraints, isSatisfied);
                 }
             }
 
             if (target_index > 0) {
                 if (this._constraintShapeBoxes != null) {
                     if (this._constraintShapeBoxes[target_index] != null) {
-                        this._constraintShapeBoxes[target_index].set_content(ConstraintType.SHAPE, {
+                        this._constraintShapeBoxes[target_index].setContent(ConstraintType.SHAPE, {
                             target: this._targetPairs[target_index],
                             index: input_index,
                             native: native_pairs,
                             structure_constraints: structure_constraints
                         }, isSatisfied, 0);
-                        this._constraintShapeBoxes[target_index].set_flagged(this._unstableIndex === ii);
+                        this._constraintShapeBoxes[target_index].flagged = this._unstableIndex === ii;
                         // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
                         //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
                         // }
@@ -2322,32 +2322,32 @@ export class PoseEditMode extends GameMode {
             }
 
             if (render) {
-                box.set_content(ConstraintType.ANTISHAPE, {
+                box.setContent(ConstraintType.ANTISHAPE, {
                     target: anti_pairs,
                     native: native_pairs,
                     index: input_index,
                     structure_constraints: anti_structure_constraints
                 }, isSatisfied, 0);
-                box.set_flagged(this._unstableIndex === ii);
+                box.flagged = this._unstableIndex === ii;
                 // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
                 //     set_callback(this, box, ii);
                 // }
 
                 if (this._unstableIndex === ii) {
-                    outInfo.wrong_pairs = box.get_wrong_pairs(native_pairs, anti_pairs, anti_structure_constraints, isSatisfied);
+                    outInfo.wrong_pairs = box.getWrongPairs(native_pairs, anti_pairs, anti_structure_constraints, isSatisfied);
                 }
             }
 
             if (target_index > 0) {
                 if (this._constraintAntishapeBoxes != null) {
                     if (this._constraintAntishapeBoxes[target_index] != null) {
-                        this._constraintAntishapeBoxes[target_index].set_content(ConstraintType.ANTISHAPE, {
+                        this._constraintAntishapeBoxes[target_index].setContent(ConstraintType.ANTISHAPE, {
                             target: anti_pairs,
                             native: native_pairs,
                             index: input_index,
                             structure_constraints: anti_structure_constraints
                         }, isSatisfied, 0);
-                        this._constraintAntishapeBoxes[target_index].set_flagged(this._unstableIndex === ii);
+                        this._constraintAntishapeBoxes[target_index].flagged = this._unstableIndex === ii;
                         // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
                         //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
                         // }
@@ -2413,7 +2413,7 @@ export class PoseEditMode extends GameMode {
             }
 
             if (render) {
-                box.set_content(ConstraintType.BINDINGS, {
+                box.setContent(ConstraintType.BINDINGS, {
                     index: target_index,
                     bind: bind,
                     label: label,
@@ -2425,56 +2425,56 @@ export class PoseEditMode extends GameMode {
             const count: number = Constraints.count(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.G, value, isSatisfied, count);
+                box.setContent(ConstraintType.G, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.GMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (count <= Number(value));
             if (render) {
-                box.set_content(ConstraintType.GMAX, value, isSatisfied, count);
+                box.setContent(ConstraintType.GMAX, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.A) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_ADENINE);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.A, value, isSatisfied, count);
+                box.setContent(ConstraintType.A, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.AMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_ADENINE);
             isSatisfied = (count <= Number(value));
             if (render) {
-                box.set_content(ConstraintType.AMAX, value, isSatisfied, count);
+                box.setContent(ConstraintType.AMAX, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.U) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_URACIL);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.U, value, isSatisfied, count);
+                box.setContent(ConstraintType.U, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.UMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_URACIL);
             isSatisfied = (count <= Number(value));
             if (render) {
-                box.set_content(ConstraintType.UMAX, value, isSatisfied, count);
+                box.setContent(ConstraintType.UMAX, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.C) {
             const count: number = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
             isSatisfied = (count >= Number(value));
             if (render) {
-                box.set_content(ConstraintType.C, value, isSatisfied, count);
+                box.setContent(ConstraintType.C, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.CMAX) {
             const count = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
             isSatisfied = (count <= Number(value));
             if (render) {
-                box.set_content(ConstraintType.CMAX, value, isSatisfied, count);
+                box.setContent(ConstraintType.CMAX, value, isSatisfied, count);
             }
 
         } else if (type === ConstraintType.PAIRS) {
@@ -2484,7 +2484,7 @@ export class PoseEditMode extends GameMode {
             isSatisfied = (num_gc + num_gu + num_ua >= Number(value));
 
             if (render) {
-                box.set_content(ConstraintType.PAIRS, value, isSatisfied, num_gc + num_gu + num_ua);
+                box.setContent(ConstraintType.PAIRS, value, isSatisfied, num_gc + num_gu + num_ua);
             }
 
         } else if (type === ConstraintType.STACK) {
@@ -2492,14 +2492,14 @@ export class PoseEditMode extends GameMode {
             isSatisfied = (stack_len >= Number(value));
 
             if (render) {
-                box.set_content(ConstraintType.STACK, value, isSatisfied, stack_len);
+                box.setContent(ConstraintType.STACK, value, isSatisfied, stack_len);
             }
         } else if (type === ConstraintType.CONSECUTIVE_G) {
             let consecutive_g_count: number = EPars.count_consecutive(sequence, EPars.RNABASE_GUANINE);
             isSatisfied = (consecutive_g_count < Number(value));
 
             if (render) {
-                box.set_content(ConstraintType.CONSECUTIVE_G, value, isSatisfied, consecutive_g_count);
+                box.setContent(ConstraintType.CONSECUTIVE_G, value, isSatisfied, consecutive_g_count);
             }
 
             outInfo.max_allowed_guanine = Number(value);
@@ -2509,7 +2509,7 @@ export class PoseEditMode extends GameMode {
             isSatisfied = (consecutive_c_count < Number(value));
 
             if (render) {
-                box.set_content(ConstraintType.CONSECUTIVE_C, value, isSatisfied, consecutive_c_count);
+                box.setContent(ConstraintType.CONSECUTIVE_C, value, isSatisfied, consecutive_c_count);
             }
 
             outInfo.max_allowed_cytosine = Number(value);
@@ -2519,7 +2519,7 @@ export class PoseEditMode extends GameMode {
             isSatisfied = (consecutive_a_count < Number(value));
 
             if (render) {
-                box.set_content(ConstraintType.CONSECUTIVE_A, value, isSatisfied, consecutive_a_count);
+                box.setContent(ConstraintType.CONSECUTIVE_A, value, isSatisfied, consecutive_a_count);
             }
 
             outInfo.max_allowed_adenine = Number(value);
@@ -2537,7 +2537,7 @@ export class PoseEditMode extends GameMode {
             isSatisfied = isSatisfied && (consecutive_a_count < outInfo.max_allowed_adenine);
 
             if (render) {
-                box.set_content(ConstraintType.LAB_REQUIREMENTS, {
+                box.setContent(ConstraintType.LAB_REQUIREMENTS, {
                     "g_count": consecutive_g_count, "g_max": outInfo.max_allowed_guanine,
                     "c_count": consecutive_c_count, "c_max": outInfo.max_allowed_cytosine,
                     "a_count": consecutive_a_count, "a_max": outInfo.max_allowed_adenine
@@ -2547,7 +2547,7 @@ export class PoseEditMode extends GameMode {
         } else if (type === ConstraintType.BARCODE) {
             isSatisfied = !SolutionManager.instance.checkRedundancyByHairpin(EPars.sequence_array_to_string(sequence));
             if (render) {
-                box.set_content(ConstraintType.BARCODE, 0, isSatisfied, 0);
+                box.setContent(ConstraintType.BARCODE, 0, isSatisfied, 0);
             }
 
         } else if (type === ConstraintType.OLIGO_BOUND) {
@@ -2580,7 +2580,7 @@ export class PoseEditMode extends GameMode {
             label.push(lbl);
 
             if (render) {
-                box.set_content(ConstraintType.BINDINGS, {
+                box.setContent(ConstraintType.BINDINGS, {
                     index: target_index,
                     bind: bind,
                     label: label,
@@ -2618,7 +2618,7 @@ export class PoseEditMode extends GameMode {
             label.push(lbl);
 
             if (render) {
-                box.set_content(ConstraintType.BINDINGS, {
+                box.setContent(ConstraintType.BINDINGS, {
                     index: target_index,
                     bind: bind,
                     label: label,
@@ -2663,7 +2663,7 @@ export class PoseEditMode extends GameMode {
                 }
 
                 if (render) {
-                    this._constraintBoxes[ii / 2].set_content(ConstraintType.SCRIPT, {
+                    this._constraintBoxes[ii / 2].setContent(ConstraintType.SCRIPT, {
                         "nid": nid,
                         "goal": goal,
                         "name": name,
@@ -2718,7 +2718,7 @@ export class PoseEditMode extends GameMode {
             const value = constraints[ii + 1];
             const box: ConstraintBox = this._constraintBoxes[ii / 2];
 
-            const wasSatisfied: boolean = box.is_satisfied();
+            const wasSatisfied: boolean = box.isSatisfied;
             const isSatisfied: boolean = this.updateConstraint(type, value, ii, box, render, constraintsInfo);
 
             allAreSatisfied = allAreSatisfied && isSatisfied;
@@ -2929,7 +2929,7 @@ export class PoseEditMode extends GameMode {
 
         let was_satisfied: boolean = true;
         for (let ii = 0; ii < this._puzzle.constraints.length; ii += 2) {
-            was_satisfied = was_satisfied && this._constraintBoxes[ii / 2].is_satisfied();
+            was_satisfied = was_satisfied && this._constraintBoxes[ii / 2].isSatisfied;
         }
 
         let constraints_satisfied: boolean = this.checkConstraints();
