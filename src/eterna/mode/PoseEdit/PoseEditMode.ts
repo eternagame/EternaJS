@@ -1655,7 +1655,7 @@ export class PoseEditMode extends GameMode {
         // Kick off a BubbleSweep animation
         let bubbles = new BubbleSweep(800);
         this.addObject(bubbles, this.bgLayer);
-        bubbles.start_sweep();
+        bubbles.start();
 
         // Show an explosion animation
         this.disableTools(true);
@@ -1677,7 +1677,7 @@ export class PoseEditMode extends GameMode {
 
         // Wait for explosion completion
         explosionCompletePromise.then(() => {
-            bubbles.decay_sweep();
+            bubbles.decay();
             bubbles.addObject(new SerialTask(
                 new AlphaTask(0, 5, Easing.easeIn),
                 new SelfDestructTask()

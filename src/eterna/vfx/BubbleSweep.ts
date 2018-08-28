@@ -2,36 +2,36 @@ import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Bubble} from "./Bubble";
 
 export class BubbleSweep extends ContainerObject {
-    public constructor(bubblen: number) {
+    public constructor(numBubbles: number) {
         super();
         this._bubbles = [];
-        for (let ii: number = 0; ii < bubblen; ii++) {
+        for (let ii: number = 0; ii < numBubbles; ii++) {
             let bub: Bubble = new Bubble(true);
             this.addObject(bub, this.container);
             this._bubbles.push(bub);
         }
     }
 
-    public start_sweep(): void {
+    public start(): void {
         for (let bubble of this._bubbles) {
             bubble.autoHide = false;
             bubble.init();
         }
     }
 
-    public stop_sweep(): void {
+    public stop(): void {
         for (let bubble of this._bubbles) {
             bubble.isPaused = true;
         }
     }
 
-    public pause_sweep(): void {
+    public pause(): void {
         for (let bubble of this._bubbles) {
             bubble.isPaused = true;
         }
     }
 
-    public decay_sweep(): void {
+    public decay(): void {
         for (let bubble of this._bubbles) {
             bubble.autoHide = true;
         }
