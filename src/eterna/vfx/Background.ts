@@ -13,7 +13,7 @@ export class Background extends ContainerObject {
     protected added(): void {
         super.added();
 
-        this.render_background();
+        this.renderBackground();
 
         this._bubbles = [];
         for (let ii: number = 0; ii < this._bubbleCount; ii++) {
@@ -27,7 +27,7 @@ export class Background extends ContainerObject {
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
     }
 
-    public disable_bubbles(disable: boolean): void {
+    public disableBubbles(disable: boolean): void {
         for (let bubble of this._bubbles) {
             if (!disable && !bubble.sprite.visible) {
                 bubble.init();
@@ -36,13 +36,13 @@ export class Background extends ContainerObject {
         }
     }
 
-    private freeze_bubbles(freeze: boolean): void {
+    private freezeBubbles(freeze: boolean): void {
         for (let bubble of this._bubbles) {
             bubble.is_paused = freeze;
         }
     }
 
-    private render_background(): void {
+    private renderBackground(): void {
         let light_blue: number = this._isFrozen ? 0x435d92 : 0x32456d;
         let dark_blue: number = this._isFrozen ? 0x0a2b57 : 0x061A34;
 
@@ -96,14 +96,14 @@ export class Background extends ContainerObject {
         // this._bgGradientBitmap.bitmapData = this.BitmapManager.draw_as_bitmap(bg_sprite,this.offscreen_width_,this.offscreen_height_);
     }
 
-    public freeze_background(freeze: boolean): void {
+    public freezeBackground(freeze: boolean): void {
         this._isFrozen = freeze;
-        this.freeze_bubbles(freeze);
-        this.render_background();
+        this.freezeBubbles(freeze);
+        this.renderBackground();
     }
 
     private onResized(): void {
-        this.render_background();
+        this.renderBackground();
         for (let bubble of this._bubbles) {
             bubble.init();
         }
