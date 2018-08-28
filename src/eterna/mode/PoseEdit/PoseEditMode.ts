@@ -99,8 +99,8 @@ export class PoseEditMode extends GameMode {
             // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this.puzzle.get_node_id()]);
         });
         this._toolbar.retryButton.clicked.connect(() => this.askRetry());
-        this._toolbar.nativeButton.clicked.connect(() => this.togglePosestate());
-        this._toolbar.targetButton.clicked.connect(() => this.togglePosestate());
+        this._toolbar.nativeButton.clicked.connect(() => this.togglePoseState());
+        this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.pasteButton.clicked.connect(() =>  this.showPasteSequenceDialog());
         this._toolbar.viewOptionsButton.clicked.connect(() => {
@@ -221,23 +221,23 @@ export class PoseEditMode extends GameMode {
         });
     }
 
-    public set_next_design_cb(cb: () => void): void {
-        this._next_design_cb = cb;
+    public set nextDesignCallback(cb: () => void) {
+        this._nextDesignCallback = cb;
     }
 
-    public set_prev_design_cb(cb: () => void): void {
-        this._prev_design_cb = cb;
+    public set prevDesignCallback(cb: () => void) {
+        this._prevDesignCallback = cb;
     }
 
     public setPuzzleState(newstate: PuzzleState): void {
         this._puzState = newstate;
     }
 
-    public set_puzzle_default_mode(default_mode: PoseState): void {
+    public set puzzleDefaultMode(default_mode: PoseState) {
         this._puzzle.defaultMode = default_mode;
     }
 
-    public rop_change_target(target_index: number): void {
+    public ropChangeTarget(target_index: number): void {
         this.changeTarget(target_index);
         if (this._toolbar.puzzleStateToggle != null) {
             this._toolbar.puzzleStateToggle.state = target_index;
@@ -248,7 +248,7 @@ export class PoseEditMode extends GameMode {
         this.setToNativeMode();
     }
 
-    public rop_set_to_target_mode(): void {
+    public ropSetToTargetMode(): void {
         this.setToTargetMode();
     }
 
@@ -258,12 +258,8 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    public ropSetDisplayScoreTexts(dis: boolean): void {
-        let that: PoseEditMode = this;
-        let pre = () => {
-            that.setDisplayScoreTexts(dis);
-        };
-        this._ropPresets.push(pre);
+    public ropSetDisplayScoreTexts(display: boolean): void {
+        this._ropPresets.push(() => this.setDisplayScoreTexts(display));
     }
 
     public setShowNumbering(show: boolean): void {
@@ -273,10 +269,7 @@ export class PoseEditMode extends GameMode {
     }
 
     public ropSetShowNumbering(show: boolean): void {
-        let pre = () => {
-            this.setShowNumbering(show);
-        };
-        this._ropPresets.push(pre);
+        this._ropPresets.push(() => this.setShowNumbering(show));
     }
 
     public setShowTotalEnergy(show: boolean): void {
@@ -286,11 +279,7 @@ export class PoseEditMode extends GameMode {
     }
 
     public ropSetShowTotalEnergy(show: boolean): void {
-        let that: PoseEditMode = this;
-        let pre = () => {
-            that.setShowTotalEnergy(show);
-        };
-        this._ropPresets.push(pre);
+        this._ropPresets.push(() => this.setShowTotalEnergy(show));
     }
 
     public selectFolder(folder_name: string): boolean {
@@ -985,11 +974,11 @@ export class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyD && this._next_design_cb != null) {
-                this._next_design_cb();
+            } else if (this._stackLevel === 0 && key === KeyCode.KeyD && this._nextDesignCallback != null) {
+                this._nextDesignCallback();
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyU && this._prev_design_cb != null) {
-                this._prev_design_cb();
+            } else if (this._stackLevel === 0 && key === KeyCode.KeyU && this._prevDesignCallback != null) {
+                this._prevDesignCallback();
                 handled = true;
             }
         }
@@ -1385,7 +1374,7 @@ export class PoseEditMode extends GameMode {
         this.transformPosesMarkers();
     }
 
-    private togglePosestate(): void {
+    private togglePoseState(): void {
         if (this._poseState === PoseState.TARGET) {
             this.setToNativeMode();
         } else if (this._poseState === PoseState.NATIVE) {
@@ -1430,8 +1419,8 @@ export class PoseEditMode extends GameMode {
 
     private ropPresets(): void {
         while (this._ropPresets.length) {
-            let pre = this._ropPresets.pop();
-            pre();
+            let func = this._ropPresets.pop();
+            func();
         }
     }
 
@@ -3659,7 +3648,6 @@ export class PoseEditMode extends GameMode {
     private _constraintsOffset: number;
 
     private _dockedSpecBox: SpecBox;
-    /// Exit button
     private _exitButton: GameButton;
 
     private _constraintsHead: number = 0;
@@ -3668,7 +3656,6 @@ export class PoseEditMode extends GameMode {
     private _constraintsBottom: number = 0;
     private _uiHighlight: SpriteObject;
 
-    private _menuitem: GameButton = null;
     /// Context menu items
     // private _view_options_cmi: ContextMenuItem = null;
     // private _view_solutions_cmi: ContextMenuItem = null;
@@ -3689,8 +3676,8 @@ export class PoseEditMode extends GameMode {
     /// ROP presets
     private _ropPresets: (() => void)[] = [];
     // Design browser hooks
-    private _next_design_cb: () => void = null;
-    private _prev_design_cb: () => void = null;
+    private _nextDesignCallback: () => void = null;
+    private _prevDesignCallback: () => void = null;
     private _isPlaying: boolean = false;
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;

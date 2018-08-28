@@ -29,7 +29,7 @@ export class ROPRNA extends RScriptOp {
             if (this._foldMode === 0) {
                 this._env.ui.ropSetToNativeMode();
             } else {
-                this._env.ui.rop_set_to_target_mode();
+                this._env.ui.ropSetToTargetMode();
             }
         } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
             this._env.pose.forceEditable(this._enabled, this._scope);
@@ -44,7 +44,7 @@ export class ROPRNA extends RScriptOp {
                 }
             }
         } else if (this._type === ROPRNAType.CHANGESTATE) {
-            this._env.ui.rop_change_target(this._state);
+            this._env.ui.ropChangeTarget(this._state);
         } else if (this._type === ROPRNAType.SETZOOM) {
             this._env.pose.setZoomLevel(this._zoomLevel, this._animate, this._center);
         } else if (this._type === ROPRNAType.SETPIP) {
