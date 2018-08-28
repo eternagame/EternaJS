@@ -1769,7 +1769,7 @@ export class PoseEditMode extends GameMode {
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
         let nextPuzzle: Puzzle = null;
         if (nextPuzzleData) {
-            nextPuzzle = PuzzleManager.instance.parse_puzzle(nextPuzzleData);
+            nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
             log.info(`Loaded next puzzle [id=${nextPuzzle.nodeID}]`);
         }
 

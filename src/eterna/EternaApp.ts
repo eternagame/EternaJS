@@ -151,7 +151,7 @@ export class EternaApp extends FlashbangApp {
 
     public loadPoseEdit(puzzleID: number, folderName: string): Promise<void> {
         this.setLoadingText(`Loading puzzle ${this._params.puzzleID}...`);
-        return PuzzleManager.instance.get_puzzle_by_nid(puzzleID)
+        return PuzzleManager.instance.getPuzzleByID(puzzleID)
             .then(puzzle => {
                 let folder: Folder = null;
                 if (folderName != null) {
