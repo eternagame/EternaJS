@@ -7,11 +7,13 @@ export enum PlotType {
 }
 
 export class Plot extends Container {
-    public constructor() {
+    public type: PlotType = PlotType.BAR;
+
+    public constructor(type: PlotType = PlotType.BAR) {
         super();
+        this.type = type;
         this._graphics = new Graphics();
         this.addChild(this._graphics);
-        this._type = PlotType.BAR;
     }
 
     public setSize(width: number, height: number) {
@@ -19,31 +21,27 @@ export class Plot extends Container {
         this._height = height;
     }
 
-    public set_type(type: number): void {
-        this._type = type;
-    }
-
-    public set_data(data: number[], maxvals: number[], labels: string[] = null, ghost_data: number[] = null): void {
+    public setData(data: number[], maxvals: number[], labels: string[] = null, ghost_data: number[] = null): void {
         this._data = (data != null ? data.slice() : null);
         this._labels = (labels != null ? labels.slice() : null);
-        this._upper_bounds = (maxvals != null ? maxvals.slice() : null);
+        this._upperBounds = (maxvals != null ? maxvals.slice() : null);
 
         if (ghost_data != null) {
             if (ghost_data.length !== data.length) {
                 throw new Error("Data lengths don't match");
             }
-            this._ghost_data = ghost_data.slice();
+            this._ghostData = ghost_data.slice();
         } else {
-            this._ghost_data = null;
+            this._ghostData = null;
         }
     }
 
-    public set_2d_data(data_2d: number[], num_bases: number): void {
+    public set2DData(data_2d: number[], num_bases: number): void {
         if (data_2d) {
-            this._data_2d = data_2d;
+            this._data2D = data_2d;
         }
 
-        this._num_bases = num_bases;
+        this._numBases = num_bases;
     }
 
     public replot(): void {
@@ -53,19 +51,19 @@ export class Plot extends Container {
     public replotWithBase(x: number, y: number): void {
         this._graphics.clear();
 
-        if (this._data == null && this._data_2d == null) {
+        if (this._data == null && this._data2D == null) {
             return;
         }
 
-        if (this._num_bases === 0) {
+        if (this._numBases === 0) {
             if (this._data != null && this._data.length === 0) {
                 return;
             }
-            this._num_bases = this._data.length;
+            this._numBases = this._data.length;
         }
 
-        const horizontal_space: number = this._width / this._num_bases;
-        const vertical_space: number = this._height / this._num_bases;
+        const horizontal_space: number = this._width / this._numBases;
+        const vertical_space: number = this._height / this._numBases;
 
         this._graphics.clear();
         this._graphics.lineStyle(1, 0);
@@ -73,23 +71,23 @@ export class Plot extends Container {
         this._graphics.drawRect(0, 0, this._width, this._height);
         this._graphics.endFill();
 
-        if (this._type === PlotType.BAR) {
+        if (this.type === PlotType.BAR) {
             this._graphics.lineStyle(0, 0xFFFFFF);
             for (let ii = 0; ii < this._data.length; ii++) {
-                let len: number = (this._data[ii] / this._upper_bounds[ii]) * this._height;
+                let len: number = (this._data[ii] / this._upperBounds[ii]) * this._height;
 
-                if (this._ghost_data == null) {
+                if (this._ghostData == null) {
                     this._graphics.beginFill(0x00AA00);
                     this._graphics.drawRect(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, Plot.H_MARGIN + this._height - len, horizontal_space / 2.0, len);
                 } else {
-                    let ghostlen: number = (this._ghost_data[ii] / this._upper_bounds[ii]) * this._height;
+                    let ghostlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
                     this._graphics.beginFill(0x00AA00);
                     this._graphics.drawRect(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, Plot.H_MARGIN + this._height - len, horizontal_space / 4.0, len);
                     this._graphics.beginFill(0xAA0000);
                     this._graphics.drawRect(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 4.0, Plot.H_MARGIN + this._height - ghostlen, horizontal_space / 4.0, ghostlen);
                 }
             }
-        } else if (this._type === PlotType.LINE) {
+        } else if (this.type === PlotType.LINE) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let x_coord = Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0 + x;
@@ -105,7 +103,7 @@ export class Plot extends Container {
 
             this._graphics.lineStyle(2, 0x00AA00);
             for (let ii = 0; ii < this._data.length; ii++) {
-                let hlen: number = (this._data[ii] / (this._upper_bounds[ii])) * (this._height - Plot.H_MARGIN);
+                let hlen: number = (this._data[ii] / (this._upperBounds[ii])) * (this._height - Plot.H_MARGIN);
                 if (ii === 0) {
                     this._graphics.moveTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, this._height - hlen);
                 } else {
@@ -113,10 +111,10 @@ export class Plot extends Container {
                 }
             }
 
-            if (this._ghost_data != null) {
+            if (this._ghostData != null) {
                 this._graphics.lineStyle(2, 0xAA0000);
-                for (let ii = 0; ii < this._ghost_data.length; ii++) {
-                    let ghosthlen: number = (this._ghost_data[ii] / this._upper_bounds[ii]) * this._height;
+                for (let ii = 0; ii < this._ghostData.length; ii++) {
+                    let ghosthlen: number = (this._ghostData[ii] / this._upperBounds[ii]) * this._height;
                     if (ii === 0) {
                         this._graphics.moveTo(Plot.W_MARGIN + (ii + 1) * horizontal_space - horizontal_space / 2.0, Plot.H_MARGIN + this._height - ghosthlen);
                     } else {
@@ -124,11 +122,11 @@ export class Plot extends Container {
                     }
                 }
             }
-        } else if (this._type === PlotType.SCATTER) {
+        } else if (this.type === PlotType.SCATTER) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
-            for (let ii = 10; ii < this._num_bases; ii += 10) {
-                let x_coord = (ii / this._num_bases) * this._width + x;
-                let y_coord = (ii / this._num_bases) * this._height + y;
+            for (let ii = 10; ii < this._numBases; ii += 10) {
+                let x_coord = (ii / this._numBases) * this._width + x;
+                let y_coord = (ii / this._numBases) * this._height + y;
 
                 this._graphics.moveTo(x_coord, 0);
                 this._graphics.lineTo(x_coord, this._height);
@@ -137,14 +135,14 @@ export class Plot extends Container {
                 this._graphics.lineTo(this._width, y_coord);
             }
 
-            for (let ii = 0; ii < this._data_2d.length; ii += 3) {
-                let x_coord = ((this._data_2d[ii + 1])) * horizontal_space + x;
-                let y_coord = ((this._data_2d[ii])) * vertical_space - 1 + y;
+            for (let ii = 0; ii < this._data2D.length; ii += 3) {
+                let x_coord = ((this._data2D[ii + 1])) * horizontal_space + x;
+                let y_coord = ((this._data2D[ii])) * vertical_space - 1 + y;
 
                 let min_col: number = 0.1;
-                let prob_r: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
-                let prob_g: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
-                let prob_b: number = 1.0 - ((this._data_2d[ii + 2]) * (1 - min_col) + min_col);
+                let prob_r: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);
+                let prob_g: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);
+                let prob_b: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);
 
                 let prob_color: number = ColorUtil.compose(prob_r, prob_g, prob_b);
 
@@ -162,15 +160,15 @@ export class Plot extends Container {
         this._graphics.lineStyle(1, 0);
         this._graphics.drawRect(0, 0, this._width, this._height);
 
-        if (this._label_fields != null) {
-            for (let label of this._label_fields) {
+        if (this._labelFields != null) {
+            for (let label of this._labelFields) {
                 this.removeChild(label);
             }
-            this._label_fields = null;
+            this._labelFields = null;
         }
 
         if (this._labels) {
-            this._label_fields = [];
+            this._labelFields = [];
 
             for (let ii = 0; ii < this._labels.length; ii++) {
                 let labelString: string = this._labels[ii];
@@ -180,25 +178,24 @@ export class Plot extends Container {
                     label.x = Plot.W_MARGIN + (ii + 0.5) * horizontal_space;
                     label.y = Plot.H_MARGIN + this._height;
                     this.addChild(label);
-                    this._label_fields.push(label);
+                    this._labelFields.push(label);
                 }
             }
         }
     }
 
     private readonly _graphics: Graphics;
-    private _type: PlotType = PlotType.BAR;
     private _data: number[];
-    private _data_2d: number[];
-    private _num_bases: number = 0;
-    private _ghost_data: number[];
+    private _data2D: number[];
+    private _numBases: number = 0;
+    private _ghostData: number[];
     private _labels: string[];
-    private _upper_bounds: number[];
-    private _label_fields: Text[];
+    private _upperBounds: number[];
+    private _labelFields: Text[];
 
     private _width: number = 100;
     private _height: number = 100;
 
-    private static readonly W_MARGIN: number = 0;
-    private static readonly H_MARGIN: number = 20;
+    private static readonly W_MARGIN = 0;
+    private static readonly H_MARGIN = 20;
 }

@@ -307,16 +307,14 @@ export class UndoBlock {
     }
 
     public create_dotplot(): Plot {
-        let plot = new Plot();
-        plot.set_type(PlotType.SCATTER);
-        plot.set_2d_data(this._dotplot_data, this._sequence.length);
+        let plot = new Plot(PlotType.SCATTER);
+        plot.set2DData(this._dotplot_data, this._sequence.length);
         return plot;
     }
 
     public create_meltplot(): Plot {
-        let plot = new Plot();
-        plot.set_type(PlotType.LINE);
-        plot.set_data(this._meltplot_pairscores, this._meltplot_maxpairscores);
+        let plot = new Plot(PlotType.LINE);
+        plot.setData(this._meltplot_pairscores, this._meltplot_maxpairscores);
         return plot;
     }
 
