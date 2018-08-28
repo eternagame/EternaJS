@@ -12,7 +12,7 @@ export enum EternaMenuStyle {
 export class EternaMenu extends GamePanel implements Enableable {
     public constructor(menu_style: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
         super();
-        this._menu_style = menu_style;
+        this._style = menu_style;
     }
 
     protected added() {
@@ -20,7 +20,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this.needsLayout();
     }
 
-    public add_item(label: string, url: string): void {
+    public addItem(label: string, url: string): void {
         let menuButton: GameButton = new GameButton();
 
         if (url != null && url.length > 0) {
@@ -36,7 +36,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this.needsLayout();
     }
 
-    public add_menu_button(menuButton: GameButton): number {
+    public addMenuButton(menuButton: GameButton): number {
         let existingIdx = _.findIndex(this._menus, (menu): boolean => menu.menuButton === menuButton);
         if (existingIdx >= 0) {
             return existingIdx;
@@ -47,7 +47,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         return this._menus.length - 1;
     }
 
-    public add_sub_menu_button(menuIdx: number, itemButton: GameButton, at_top: boolean = false): void {
+    public addSubMenuButton(menuIdx: number, itemButton: GameButton, at_top: boolean = false): void {
         let menu: Menu = this._menus[menuIdx];
         if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
@@ -66,7 +66,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this.needsLayout();
     }
 
-    public add_sub_menu_button_at(menuIdx: number, itemButton: GameButton, pos: number): void {
+    public addSubMenuButtonAt(menuIdx: number, itemButton: GameButton, pos: number): void {
         let menu: Menu = this._menus[menuIdx];
         if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
@@ -81,7 +81,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this.needsLayout();
     }
 
-    public remove_button(itemButton: GameButton): void {
+    public removeButton(itemButton: GameButton): void {
         for (let menu of this._menus) {
             let idx = menu.itemButtons.indexOf(itemButton);
             if (idx >= 0) {
@@ -93,12 +93,16 @@ export class EternaMenu extends GamePanel implements Enableable {
         }
     }
 
-    public get_width(use_margin: boolean = true): number {
-        return this._menu_width + (use_margin ? this._right_margin : 0);
+    public getWidth(use_margin: boolean = true): number {
+        return this._menuWidth + (use_margin ? this._rightMargin : 0);
     }
 
-    public get_height(): number {
-        return this._menu_height;
+    public get width(): number {
+        return this.getWidth();
+    }
+
+    public get height(): number {
+        return this._menuHeight;
     }
 
     public get enabled(): boolean {
@@ -119,7 +123,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this._menus.push(menu);
 
         menu.panel = new GamePanel(0, 0.85);
-        if (this._menu_style === EternaMenuStyle.PULLUP) {
+        if (this._style === EternaMenuStyle.PULLUP) {
             menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
         }
         menu.panel.display.visible = false;
@@ -133,11 +137,11 @@ export class EternaMenu extends GamePanel implements Enableable {
 
     private needsLayout() {
         if (this.isLiveObject) {
-            this.do_layout();
+            this.doLayout();
         }
     }
 
-    private do_layout(): void {
+    private doLayout(): void {
         for (let menu of this._menus) {
             if (menu.itemButtons.length === 0) {
                 menu.panel.setSize(0, 0);
@@ -160,42 +164,42 @@ export class EternaMenu extends GamePanel implements Enableable {
             menu.panel.setSize(width_walker, height_walker);
         }
 
-        let space: number = (this._menu_style === EternaMenuStyle.PULLUP ? 1 : 10);
+        let space: number = (this._style === EternaMenuStyle.PULLUP ? 1 : 10);
         let width_offset: number = space;
-        this._menu_height = 0;
+        this._menuHeight = 0;
 
         for (let menu of this._menus) {
             let buttonWidth: number = menu.menuButton.container.width;
             let buttonHeight: number = menu.menuButton.container.height;
 
             menu.menuButton.display.position = new Point(width_offset, 0);
-            if (this._menu_style === EternaMenuStyle.DEFAULT) {
+            if (this._style === EternaMenuStyle.DEFAULT) {
                 menu.panel.display.position = new Point(0, buttonHeight - 1);
-            } else if (this._menu_style === EternaMenuStyle.PULLUP) {
+            } else if (this._style === EternaMenuStyle.PULLUP) {
                 menu.panel.display.position = new Point(0, -menu.panel.get_panel_height() - 1);
             }
             width_offset += buttonWidth + space;
-            this._menu_height = Math.max(this._menu_height, buttonHeight);
+            this._menuHeight = Math.max(this._menuHeight, buttonHeight);
         }
 
         let lastIdx = this._menus.length - 1;
         let lastButtonWidth = this._menus[lastIdx].menuButton.container.width;
-        this._menu_width = (width_offset + space);
-        this._right_margin = Math.max(
+        this._menuWidth = (width_offset + space);
+        this._rightMargin = Math.max(
             lastButtonWidth,
             this._menus[lastIdx].panel.get_panel_width()
         ) - lastButtonWidth;
 
-        this.setSize(width_offset, this._menu_height + 1);
+        this.setSize(width_offset, this._menuHeight + 1);
     }
 
-    private readonly _menu_style: EternaMenuStyle;
+    private readonly _style: EternaMenuStyle;
 
     private _enabled: boolean = true;
     private _menus: Menu[] = [];
-    private _menu_width: number = 0;
-    private _right_margin: number = 0;
-    private _menu_height: number = 0;
+    private _menuWidth: number = 0;
+    private _rightMargin: number = 0;
+    private _menuHeight: number = 0;
 }
 
 class Menu {

@@ -147,8 +147,8 @@ export class ROPHighlight extends RScriptOp {
             break;
         case RScriptUIElementID.ACTION_MENU:
             size = new Point(
-                (uiObj as EternaMenu).get_width(false) + 2 * padding.x,
-                (uiObj as EternaMenu).get_height() + 2 * padding.y
+                (uiObj as EternaMenu).getWidth(false) + 2 * padding.x,
+                (uiObj as EternaMenu).height + 2 * padding.y
             );
             // no break statement, intentional!
         case RScriptUIElementID.ZOOMIN:
