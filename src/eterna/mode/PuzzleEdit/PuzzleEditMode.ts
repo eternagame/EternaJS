@@ -420,7 +420,7 @@ export class PuzzleEditMode extends GameMode {
                 return;
             }
 
-            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.isDevMode) {
+            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).getPairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.isDevMode) {
                 this.showNotification("You should first solve your puzzle before submitting it!");
                 return;
             }
@@ -639,7 +639,7 @@ export class PuzzleEditMode extends GameMode {
         this._stackLevel++;
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].get_sequence();
+            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].sequence;
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
@@ -657,7 +657,7 @@ export class PuzzleEditMode extends GameMode {
 
         this._stackLevel--;
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].get_sequence();
+            this._poses[ii].sequence = this._seqStack[this._stackLevel][ii].sequence;
             this._poses[ii].puzzleLocks = this._lockStack[this._stackLevel][ii];
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
@@ -673,7 +673,7 @@ export class PuzzleEditMode extends GameMode {
         for (let ii: number = 0; ii < this._poses.length; ii++) {
             let undoblock: UndoBlock = this.getCurrentUndoBlock(ii);
             let target_pairs = this.getCurrentTargetPairs(ii);
-            let best_pairs = undoblock.get_pairs(EPars.DEFAULT_TEMPERATURE);
+            let best_pairs = undoblock.getPairs(EPars.DEFAULT_TEMPERATURE);
             let sequence = this._poses[ii].sequence;
             if (sequence.length != target_pairs.length) {
                 throw new Error("sequence and design pairs lengths don't match");
@@ -694,9 +694,9 @@ export class PuzzleEditMode extends GameMode {
         }
 
         let undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
-        let num_AU: number = undoblock.get_param(UndoBlockParam.AU);
-        let num_GU: number = undoblock.get_param(UndoBlockParam.GU);
-        let num_GC: number = undoblock.get_param(UndoBlockParam.GC);
+        let num_AU: number = undoblock.getParam(UndoBlockParam.AU);
+        let num_GU: number = undoblock.getParam(UndoBlockParam.GU);
+        let num_GC: number = undoblock.getParam(UndoBlockParam.GC);
 
         this._toolbar.palette.setPairCounts(num_AU, num_GU, num_GC);
     }
@@ -770,7 +770,7 @@ export class PuzzleEditMode extends GameMode {
                 if (this._structureInputs[ii].structureString != EPars.pairsToParenthesis(this._targetPairsStack[this._stackLevel][ii])) {
                     no_change = false;
                 }
-                if (EPars.sequenceToString(seq) != EPars.sequenceToString(this._seqStack[this._stackLevel][ii].get_sequence())) {
+                if (EPars.sequenceToString(seq) != EPars.sequenceToString(this._seqStack[this._stackLevel][ii].sequence)) {
                     no_change = false;
                 }
 
@@ -832,8 +832,8 @@ export class PuzzleEditMode extends GameMode {
             }
 
             let undo_block = new UndoBlock(seq);
-            undo_block.set_pairs(best_pairs);
-            undo_block.set_basics(this._folder);
+            undo_block.setPairs(best_pairs);
+            undo_block.setBasics(this._folder);
             current_undo_blocks.push(undo_block);
             current_lock.push(lock);
             current_binding_sites.push(binding_site);

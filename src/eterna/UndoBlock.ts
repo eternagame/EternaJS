@@ -27,229 +27,229 @@ export class UndoBlock {
         this._sequence = seq.slice();
     }
 
-    public toJson(): any {
+    public toJSON(): any {
         return {
             sequence_: this._sequence,
-            pairs_array_: this._pairs_array,
-            params_array_: this._params_array,
+            pairs_array_: this._pairsArray,
+            params_array_: this._paramsArray,
             stable_: this._stable,
-            target_oligo_: this._target_oligo,
-            target_oligos_: this._target_oligos,
-            oligo_order_: this._oligo_order,
-            oligos_paired_: this._oligos_paired,
-            target_pairs_: this._target_pairs,
-            target_oligo_order_: this._target_oligo_order,
-            puzzle_locks_: this._puzzle_locks,
-            forced_struct_: this._forced_struct,
-            target_conditions_: this._target_conditions
+            target_oligo_: this._targetOligo,
+            target_oligos_: this._targetOligos,
+            oligo_order_: this._oligoOrder,
+            oligos_paired_: this._oligosPaired,
+            target_pairs_: this._targetPairs,
+            target_oligo_order_: this._targetOligoOrder,
+            puzzle_locks_: this._puzzleLocks,
+            forced_struct_: this._forcedStruct,
+            target_conditions_: this._targetConditions
         };
     }
 
-    public fromJson(json: any): void {
+    public fromJSON(json: any): void {
         try {
             this._sequence = JSONUtil.require(json, "sequence_");
-            this._pairs_array = JSONUtil.require(json, "pairs_array_");
-            this._params_array = JSONUtil.require(json, "params_array_");
+            this._pairsArray = JSONUtil.require(json, "pairs_array_");
+            this._paramsArray = JSONUtil.require(json, "params_array_");
             this._stable = JSONUtil.require(json, "stable_");
-            this._target_oligo = JSONUtil.require(json, "target_oligo_");
-            this._target_oligos = JSONUtil.require(json, "target_oligos_");
-            this._oligo_order = JSONUtil.require(json, "oligo_order_");
-            this._oligos_paired = JSONUtil.require(json, "oligos_paired_");
-            this._target_pairs = JSONUtil.require(json, "target_pairs_");
-            this._target_oligo_order = JSONUtil.require(json, "target_oligo_order_");
-            this._puzzle_locks = JSONUtil.require(json, "puzzle_locks_");
-            this._forced_struct = JSONUtil.require(json, "forced_struct_");
-            this._target_conditions = JSONUtil.require(json, "target_conditions_");
+            this._targetOligo = JSONUtil.require(json, "target_oligo_");
+            this._targetOligos = JSONUtil.require(json, "target_oligos_");
+            this._oligoOrder = JSONUtil.require(json, "oligo_order_");
+            this._oligosPaired = JSONUtil.require(json, "oligos_paired_");
+            this._targetPairs = JSONUtil.require(json, "target_pairs_");
+            this._targetOligoOrder = JSONUtil.require(json, "target_oligo_order_");
+            this._puzzleLocks = JSONUtil.require(json, "puzzle_locks_");
+            this._forcedStruct = JSONUtil.require(json, "forced_struct_");
+            this._targetConditions = JSONUtil.require(json, "target_conditions_");
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
     }
 
-    public get_target_oligos(): Oligo[] {
-        return this._target_oligos;
+    public get targetOligos(): Oligo[] {
+        return this._targetOligos;
     }
 
-    public get_target_oligo(): number[] {
-        return this._target_oligo;
+    public set targetOligos(target_oligos: Oligo[]) {
+        this._targetOligos = target_oligos == null ? null : JSON.parse(JSON.stringify(target_oligos));
     }
 
-    public get_oligo_mode(): number {
-        let tc: any = this.get_target_conditions();
+    public get targetOligo(): number[] {
+        return this._targetOligo;
+    }
+
+    public set targetOligo(target_oligo: number[]) {
+        this._targetOligo = target_oligo == null ? null : target_oligo.slice();
+    }
+
+    public get oligoMode(): number {
+        let tc: any = this.targetConditions;
         if (tc == null) return 0;
         return tc["fold_mode"] == null ? Pose2D.OLIGO_MODE_DIMER : tc["fold_mode"];
     }
 
-    public get_oligo_name(): string {
-        let tc: any = this.get_target_conditions();
+    public get oligoName(): string {
+        let tc: any = this.targetConditions;
         if (tc == null) {
             return null;
         }
         return tc.hasOwnProperty("oligo_name") ? tc["oligo_name"] : null;
     }
 
-    public set_target_oligos(target_oligos: Oligo[]): void {
-        this._target_oligos = target_oligos == null ? null : JSON.parse(JSON.stringify(target_oligos));
+    public get oligoOrder(): number[] {
+        return this._oligoOrder;
     }
 
-    public set_target_oligo(target_oligo: number[]): void {
-        this._target_oligo = target_oligo == null ? null : target_oligo.slice();
+    public set oligoOrder(oligo_order: number[]) {
+        this._oligoOrder = oligo_order == null ? null : oligo_order.slice();
     }
 
-    public get_oligo_order(): number[] {
-        return this._oligo_order;
+    public get oligosPaired(): number {
+        return this._oligosPaired;
     }
 
-    public set_oligo_order(oligo_order: number[]): void {
-        this._oligo_order = oligo_order == null ? null : oligo_order.slice();
+    public set oligosPaired(oligos_paired: number) {
+        this._oligosPaired = oligos_paired;
     }
 
-    public get_oligos_paired(): number {
-        return this._oligos_paired;
+    public get targetPairs(): number[] {
+        return this._targetPairs;
     }
 
-    public set_oligos_paired(oligos_paired: number): void {
-        this._oligos_paired = oligos_paired;
+    public set targetPairs(target_pairs: number[]) {
+        this._targetPairs = target_pairs.slice();
     }
 
-    public get_target_pairs(): number[] {
-        return this._target_pairs;
+    public get targetOligoOrder(): number[] {
+        return this._targetOligoOrder;
     }
 
-    public set_target_pairs(target_pairs: number[]): void {
-        this._target_pairs = target_pairs.slice();
+    public set targetOligoOrder(oligo_order: number[]) {
+        this._targetOligoOrder = oligo_order == null ? null : oligo_order.slice();
     }
 
-    public get_target_oligo_order(): number[] {
-        return this._target_oligo_order;
-    }
-
-    public set_target_oligo_order(oligo_order: number[]): void {
-        this._target_oligo_order = oligo_order == null ? null : oligo_order.slice();
-    }
-
-    public get_sequence(): number[] {
+    public get sequence(): number[] {
         return this._sequence;
     }
 
-    public set_sequence(seq: number[]): void {
+    public set sequence(seq: number[]) {
         this._sequence = seq.slice();
     }
 
-    public get_puzzle_locks(): boolean[] {
-        return this._puzzle_locks;
+    public get puzzleLocks(): boolean[] {
+        return this._puzzleLocks;
     }
 
-    public set_puzzle_locks(locks: boolean[]): void {
-        this._puzzle_locks = locks;
+    public set puzzleLocks(locks: boolean[]) {
+        this._puzzleLocks = locks;
     }
 
-    public get_forced_struct(): number[] {
-        return this._forced_struct;
+    public get forcedStruct(): number[] {
+        return this._forcedStruct;
     }
 
-    public set_forced_struct(forced: number[]): void {
-        this._forced_struct = forced;
+    public set forcedStruct(forced: number[]) {
+        this._forcedStruct = forced;
     }
 
-    public set_target_conditions(target_conditions: any): void {
-        this._target_conditions = JSON.stringify(target_conditions);
+    public get targetConditions(): any {
+        return (this._targetConditions == null ? null : JSON.parse(this._targetConditions));
     }
 
-    public get_target_conditions(): any {
-        return (this._target_conditions == null ? null : JSON.parse(this._target_conditions));
+    public set targetConditions(conditions: any) {
+        this._targetConditions = JSON.stringify(conditions);
     }
 
-    public get_pairs(temp: number = 37): number[] {
-        return this._pairs_array[temp];
-    }
-
-    public get_stable(): boolean {
+    public get stable(): boolean {
         return this._stable;
     }
 
-    public get_param(index: UndoBlockParam, temp: number = 37): any {
-        if (this._params_array[temp] != null) {
-            return this._params_array[temp][index];
+    public set stable(stable: boolean) {
+        this._stable = stable;
+    }
+
+    public getPairs(temp: number = 37): number[] {
+        return this._pairsArray[temp];
+    }
+
+    public getParam(index: UndoBlockParam, temp: number = 37): any {
+        if (this._paramsArray[temp] != null) {
+            return this._paramsArray[temp][index];
         } else {
             return undefined;
         }
     }
 
-    public set_pairs(pairs: number[], temp: number = 37): void {
-        this._pairs_array[temp] = pairs.slice();
+    public setPairs(pairs: number[], temp: number = 37): void {
+        this._pairsArray[temp] = pairs.slice();
     }
 
-    public set_stable(stable: boolean): void {
-        this._stable = stable;
-    }
-
-    public set_param(index: UndoBlockParam, val: any, temp: number = 37): void {
-        if (this._params_array[temp] == null) {
-            this._params_array[temp] = [];
+    public setParam(index: UndoBlockParam, val: any, temp: number = 37): void {
+        if (this._paramsArray[temp] == null) {
+            this._paramsArray[temp] = [];
         }
-        this._params_array[temp][index] = val;
+        this._paramsArray[temp][index] = val;
     }
 
-    public set_basics(folder: Folder, temp: number = 37): void {
-        let best_pairs: number[] = this.get_pairs(temp);
+    public setBasics(folder: Folder, temp: number = 37): void {
+        let best_pairs: number[] = this.getPairs(temp);
         let seq: number[] = this._sequence;
 
-        this.set_param(UndoBlockParam.GU, EPars.numGUPairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.GC, EPars.numGCPairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.AU, EPars.numUAPairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.STACK, EPars.getLongestStackLength(best_pairs), temp);
-        this.set_param(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(EPars.sequenceToString(seq), 5), temp);
+        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, best_pairs), temp);
+        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, best_pairs), temp);
+        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, best_pairs), temp);
+        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(best_pairs), temp);
+        this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(EPars.sequenceToString(seq), 5), temp);
         let full_seq: number[] = seq.slice();
-        if (this._target_oligo) {
-            if (this.get_oligo_mode() === Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
-            if (this.get_oligo_mode() === Pose2D.OLIGO_MODE_EXT5P) {
-                full_seq = this._target_oligo.concat(full_seq);
+        if (this._targetOligo) {
+            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
+            if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
+                full_seq = this._targetOligo.concat(full_seq);
             } else {
-                full_seq = full_seq.concat(this._target_oligo);
+                full_seq = full_seq.concat(this._targetOligo);
             }
-        } else if (this._target_oligos) {
-            for (let ii: number = 0; ii < this._target_oligos.length; ii++) {
+        } else if (this._targetOligos) {
+            for (let ii: number = 0; ii < this._targetOligos.length; ii++) {
                 full_seq.push(EPars.RNABASE_CUT);
-                full_seq = full_seq.concat(this._target_oligos[this._oligo_order[ii]].sequence);
+                full_seq = full_seq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
             }
         }
         let nnfe: number[] = [];
         let total_fe: number = folder.scoreStructures(full_seq, best_pairs, temp, nnfe);
-        this.set_param(UndoBlockParam.FE, total_fe, temp);
-        this.set_param(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
+        this.setParam(UndoBlockParam.FE, total_fe, temp);
+        this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
 
-    public set_meltingpoint_and_dotplot(folder: Folder): void {
-        if (this.get_param(UndoBlockParam.DOTPLOT, 37) == null) {
-            let dot_array: number[] = folder.getDotPlot(this.get_sequence(), this.get_pairs(37), 37);
-            this.set_param(UndoBlockParam.DOTPLOT, dot_array, 37);
-            this._dotplot_data = dot_array.slice();
+    public updateMeltingPointAndDotPlot(folder: Folder): void {
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37) == null) {
+            let dot_array: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37);
+            this.setParam(UndoBlockParam.DOTPLOT, dot_array, 37);
+            this._dotPlotData = dot_array.slice();
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.get_pairs(ii) == null) {
-                this.set_pairs(folder.foldSequence(this.get_sequence(), null, null, ii), ii);
+            if (this.getPairs(ii) == null) {
+                this.setPairs(folder.foldSequence(this.sequence, null, null, ii), ii);
             }
 
-            if (this.get_param(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dot_temp_array: number[] = folder.getDotPlot(this.get_sequence(), this.get_pairs(ii), ii);
-                this.set_param(UndoBlockParam.DOTPLOT, dot_temp_array, ii);
+            if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
+                let dot_temp_array: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii);
+                this.setParam(UndoBlockParam.DOTPLOT, dot_temp_array, ii);
             }
         }
 
-        let ref_pairs: number[] = this.get_pairs(37);
+        let ref_pairs: number[] = this.getPairs(37);
 
         let pair_scores: number[] = [];
         let max_pair_scores: number[] = [];
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.get_param(UndoBlockParam.PROB_SCORE, ii)) {
-                pair_scores.push(1 - this.get_param(UndoBlockParam.PAIR_SCORE, ii));
+            if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
+                pair_scores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii));
                 max_pair_scores.push(1.0);
                 continue;
             }
-            let cur_dat: number[] = this.get_param(UndoBlockParam.DOTPLOT, ii);
-            let cur_pairs: number[] = this.get_pairs(ii);
+            let cur_dat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii);
+            let cur_pairs: number[] = this.getPairs(ii);
             let prob_score: number = 0;
             let score_count: number = 0;
 
@@ -285,55 +285,55 @@ export class UndoBlock {
             pair_scores.push(1 - pair_score);
             max_pair_scores.push(1.0);
 
-            this.set_param(UndoBlockParam.PROB_SCORE, prob_score, ii);
-            this.set_param(UndoBlockParam.PAIR_SCORE, pair_score, ii);
+            this.setParam(UndoBlockParam.PROB_SCORE, prob_score, ii);
+            this.setParam(UndoBlockParam.PAIR_SCORE, pair_score, ii);
         }
 
-        this._meltplot_pairscores = pair_scores;
-        this._meltplot_maxpairscores = max_pair_scores;
+        this._meltPlotPairScores = pair_scores;
+        this._meltPlotMaxPairScores = max_pair_scores;
 
-        let init_score: number = this.get_param(UndoBlockParam.PROB_SCORE, 37);
+        let init_score: number = this.getParam(UndoBlockParam.PROB_SCORE, 37);
 
         let meltpoint: number = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let current_score: number = this.get_param(UndoBlockParam.PROB_SCORE, ii);
+            let current_score: number = this.getParam(UndoBlockParam.PROB_SCORE, ii);
             if (current_score < init_score * 0.5) {
                 meltpoint = ii;
                 break;
             }
         }
 
-        this.set_param(UndoBlockParam.MELTING_POINT, meltpoint, 37);
+        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
     }
 
-    public create_dotplot(): Plot {
+    public createDotPlot(): Plot {
         let plot = new Plot(PlotType.SCATTER);
-        plot.set2DData(this._dotplot_data, this._sequence.length);
+        plot.set2DData(this._dotPlotData, this._sequence.length);
         return plot;
     }
 
-    public create_meltplot(): Plot {
+    public createMeltPlot(): Plot {
         let plot = new Plot(PlotType.LINE);
-        plot.setData(this._meltplot_pairscores, this._meltplot_maxpairscores);
+        plot.setData(this._meltPlotPairScores, this._meltPlotMaxPairScores);
         return plot;
     }
 
-    public get_order_map(other_order: number[]): number[] {
-        if (this._target_oligos == null) return null;
+    public getOrderMap(other_order: number[]): number[] {
+        if (this._targetOligos == null) return null;
 
         let idx_map: number[] = [];
         let ofs: number[] = [];
         let ii: number = this._sequence.length;
-        for (let jj = 0; jj < this._target_oligos.length; jj++) {
+        for (let jj = 0; jj < this._targetOligos.length; jj++) {
             let kk = (other_order == null ? jj : other_order[jj]);
             ofs[kk] = ii;
-            ii += 1 + this._target_oligos[kk].sequence.length;
+            ii += 1 + this._targetOligos[kk].sequence.length;
         }
         for (let ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
-        for (let jj = 0; jj < this._target_oligos.length; jj++) {
+        for (let jj = 0; jj < this._targetOligos.length; jj++) {
             let kk = ofs[jj];
             let xx: number;
-            for (xx = 0; xx <= this._target_oligos[jj].sequence.length; xx++) {
+            for (xx = 0; xx <= this._targetOligos[jj].sequence.length; xx++) {
                 idx_map[ii + xx] = kk + xx;
             }
             ii += xx;
@@ -342,20 +342,20 @@ export class UndoBlock {
     }
 
     private _sequence: number[];
-    private _pairs_array: number[][] = [];
-    private _params_array: any[][] = [];
+    private _pairsArray: number[][] = [];
+    private _paramsArray: any[][] = [];
     private _stable: boolean = false;
-    private _target_oligo: number[] = null;
-    private _target_oligos: Oligo[] = null;
-    private _oligo_order: number[] = null;
-    private _oligos_paired: number = 0;
-    private _target_pairs: number[] = [];
-    private _target_oligo_order: number[] = null;
-    private _puzzle_locks: boolean[] = [];
-    private _forced_struct: number[] = [];
-    private _target_conditions: string = null;
+    private _targetOligo: number[] = null;
+    private _targetOligos: Oligo[] = null;
+    private _oligoOrder: number[] = null;
+    private _oligosPaired: number = 0;
+    private _targetPairs: number[] = [];
+    private _targetOligoOrder: number[] = null;
+    private _puzzleLocks: boolean[] = [];
+    private _forcedStruct: number[] = [];
+    private _targetConditions: string = null;
 
-    private _dotplot_data: number[];
-    private _meltplot_pairscores: number[];
-    private _meltplot_maxpairscores: number[];
+    private _dotPlotData: number[];
+    private _meltPlotPairScores: number[];
+    private _meltPlotMaxPairScores: number[];
 }
