@@ -380,7 +380,7 @@ export class PoseEditMode extends GameMode {
             this.clearMoveTracking(seq);
         };
 
-        let sol: Solution = SolutionManager.instance.get_solution_by_sequence(seq);
+        let sol: Solution = SolutionManager.instance.getSolutionBySequence(seq);
         if (sol != null && this._puzzle.hasTargetType("multistrand")) {
             this._asynchText.text = "retrieving...";
             // Application.instance.set_blocker_opacity(0.2);
@@ -786,7 +786,7 @@ export class PoseEditMode extends GameMode {
         ExternalInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices);
         ExternalInterface.addCallback("get_barcode_indices", (): number[] => puz.barcodeIndices);
         ExternalInterface.addCallback("is_barcode_available",
-            (seq: string): boolean => SolutionManager.instance.check_redundancy_by_hairpin(seq));
+            (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
         ExternalInterface.addCallback("current_folder", (): string => this._folder.name);
 
@@ -1726,7 +1726,7 @@ export class PoseEditMode extends GameMode {
                     dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
                     let hairpin: string = EPars.get_barcode_hairpin(seqString);
                     if (hairpin != null) {
-                        SolutionManager.instance.add_hairpins([hairpin]);
+                        SolutionManager.instance.addHairpins([hairpin]);
                         this.checkConstraints();
                     }
                 } else {
@@ -1742,7 +1742,7 @@ export class PoseEditMode extends GameMode {
                     if (this._puzzle.useBarcode) {
                         let hairpin: string = EPars.get_barcode_hairpin(seqString);
                         if (hairpin != null) {
-                            SolutionManager.instance.add_hairpins([hairpin]);
+                            SolutionManager.instance.addHairpins([hairpin]);
                             this.checkConstraints();
                         }
                     }
@@ -2545,7 +2545,7 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type === ConstraintType.BARCODE) {
-            isSatisfied = !SolutionManager.instance.check_redundancy_by_hairpin(EPars.sequence_array_to_string(sequence));
+            isSatisfied = !SolutionManager.instance.checkRedundancyByHairpin(EPars.sequence_array_to_string(sequence));
             if (render) {
                 box.set_content(ConstraintType.BARCODE, 0, isSatisfied, 0);
             }
@@ -3209,7 +3209,7 @@ export class PoseEditMode extends GameMode {
             this.poseEditByTargetDoFold(target_index);
         };
 
-        let sol: Solution = SolutionManager.instance.get_solution_by_sequence(this._poses[target_index].getSequenceString());
+        let sol: Solution = SolutionManager.instance.getSolutionBySequence(this._poses[target_index].getSequenceString());
         if (sol != null && this._puzzle.hasTargetType("multistrand")) {
             this._asynchText.text = "retrieving...";
             // Application.instance.set_blocker_opacity(0.2);
@@ -3458,7 +3458,7 @@ export class PoseEditMode extends GameMode {
         }
 
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType("multistrand")) {
-            let sol: Solution = SolutionManager.instance.get_solution_by_sequence(this._poses[target_index].getSequenceString());
+            let sol: Solution = SolutionManager.instance.getSolutionBySequence(this._poses[target_index].getSequenceString());
             if (sol != null && !sol.hasFoldData) {
                 let fd: any[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {

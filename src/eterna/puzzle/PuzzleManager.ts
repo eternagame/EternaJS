@@ -199,7 +199,7 @@ export class PuzzleManager {
             .then((json: any) => {
                 let data: any = json["data"];
                 if (data["hairpins"]) {
-                    SolutionManager.instance.add_hairpins(data["hairpins"]);
+                    SolutionManager.instance.addHairpins(data["hairpins"]);
                 }
 
                 let puzzle = this.parsePuzzle(data["puzzle"]);

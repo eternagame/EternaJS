@@ -12,25 +12,25 @@ export class SolutionManager {
         return SolutionManager._instance;
     }
 
-    public get_solutions_by_puzzle_nid(puznid: number): Promise<Solution[]> {
+    public getSolutionsByPuzzleNid(puznid: number): Promise<Solution[]> {
         return Eterna.client.getSolutions(puznid).then((json) => {
             let data: any = json["data"];
             let solutions: any[] = data["solutions"];
             this._solutions = [];
 
             for (let ii: number = 0; ii < solutions.length; ii++) {
-                this._solutions.push(SolutionManager.process_data(solutions[ii]));
+                this._solutions.push(SolutionManager.processData(solutions[ii]));
             }
 
             return this._solutions;
         });
     }
 
-    public get_solutions(): any[] {
+    public get solutions(): Solution[] {
         return this._solutions;
     }
 
-    public get_solution_by_sequence(seq: string): Solution {
+    public getSolutionBySequence(seq: string): Solution {
         for (let solution of this._solutions) {
             if (solution.sequence === seq) {
                 return solution;
@@ -40,30 +40,34 @@ export class SolutionManager {
         return null;
     }
 
-    public add_hairpins(hairpins: any[]): void {
-        if (hairpins == null) return;
-        for (let ii: number = 0; ii < hairpins.length; ii++) {
-            this._hairpins.push(hairpins[ii]);
+    public addHairpins(hairpins: string[]): void {
+        if (hairpins == null) {
+            return;
+        }
+
+        for (let hairpin of hairpins) {
+            this._hairpins.push(hairpin);
         }
     }
 
-    public check_redundancy_by_hairpin(seq: string): boolean {
-        let hairpin: string = EPars.get_barcode_hairpin(seq);
-        if (hairpin == null) return true;
+    public checkRedundancyByHairpin(seq: string): boolean {
+        let seqHairpin: string = EPars.get_barcode_hairpin(seq);
+        if (seqHairpin == null) {
+            return true;
+        }
 
-        for (let ii: number = 0; ii < this._hairpins.length; ii++) {
-            if (this._hairpins[ii] === hairpin) {
+        for (let hairpin of this._hairpins) {
+            if (hairpin === seqHairpin) {
                 return true;
             }
         }
         return false;
     }
 
-    public my_current_solutions(round: number): any[] {
-        let titles: any[] = [];
-        let myid: number = Eterna.player_id;
+    public myCurrentSolutions(round: number): string[] {
+        let titles: string[] = [];
         for (let solution of this._solutions) {
-            if (solution.getProperty("Round") === round && solution.playerID === myid) {
+            if (solution.getProperty("Round") === round && solution.playerID === Eterna.player_id) {
                 titles.push(solution.title);
             }
         }
@@ -71,7 +75,7 @@ export class SolutionManager {
         return titles;
     }
 
-    private static process_data(obj: any): Solution {
+    private static processData(obj: any): Solution {
         let newsol: Solution = new Solution(obj["id"], obj["puznid"]);
         newsol.sequence = obj["sequence"];
         newsol.title = obj["title"];
@@ -174,7 +178,7 @@ export class SolutionManager {
     }
 
     private _solutions: Solution[] = [];
-    private _hairpins: any[] = [];
+    private _hairpins: string[] = [];
 
     private static _instance: SolutionManager;
 }
