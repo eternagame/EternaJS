@@ -79,7 +79,7 @@ export class PoseEditToolbar extends ContainerObject {
 
         // MENU
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.actionMenu.add_menu_button(new GameButton().allStates(Bitmaps.NovaMenu));
+        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu));
         this.addObject(this.actionMenu, this._toolbarLayout);
 
         // SUBMIT BUTTON
@@ -195,13 +195,13 @@ export class PoseEditToolbar extends ContainerObject {
 
             if (boostersData.actions != null) {
                 this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters);
-                let idx: number = this.actionMenu.add_menu_button(this.boostersMenu);
+                let idx: number = this.actionMenu.addMenuButton(this.boostersMenu);
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
                     Booster.create(mode, data).then(booster => {
                         let button: GameButton = booster.createButton(14);
                         button.clicked.connect(() => booster.onRun());
-                        this.actionMenu.add_sub_menu_button_at(idx, button, ii);
+                        this.actionMenu.addSubMenuButtonAt(idx, button, ii);
                         this.dynActionTools.push(button);
                     });
                 }
@@ -262,14 +262,14 @@ export class PoseEditToolbar extends ContainerObject {
             .label("Screenshot", 14)
             .scaleBitmapToLabel()
             .tooltip("Screenshot");
-        this.actionMenu.add_sub_menu_button(0, this.screenshotButton);
+        this.actionMenu.addSubMenuButton(0, this.screenshotButton);
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
             .label("Settings", 14)
             .scaleBitmapToLabel()
             .tooltip("Game options");
-        this.actionMenu.add_sub_menu_button(0, this.viewOptionsButton);
+        this.actionMenu.addSubMenuButton(0, this.viewOptionsButton);
 
         this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
@@ -285,8 +285,8 @@ export class PoseEditToolbar extends ContainerObject {
             .hotkey(KeyCode.KeyS);
 
         if (isExperimental) {
-            this.actionMenu.add_sub_menu_button(0, this.viewSolutionsButton);
-            this.actionMenu.add_sub_menu_button(0, this.specButton);
+            this.actionMenu.addSubMenuButton(0, this.viewSolutionsButton);
+            this.actionMenu.addSubMenuButton(0, this.specButton);
         }
 
         this.retryButton = new GameButton()
@@ -295,7 +295,7 @@ export class PoseEditToolbar extends ContainerObject {
             .scaleBitmapToLabel()
             .tooltip("Reset and try this puzzle again.")
             .rscriptID(RScriptUIElementID.RESET);
-        this.actionMenu.add_sub_menu_button(0, this.retryButton);
+        this.actionMenu.addSubMenuButton(0, this.retryButton);
 
         this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
@@ -310,8 +310,8 @@ export class PoseEditToolbar extends ContainerObject {
             .tooltip("Type in a sequence");
 
         if (this._puzzle.puzzleType !== PuzzleType.BASIC) {
-            this.actionMenu.add_sub_menu_button(0, this.copyButton);
-            this.actionMenu.add_sub_menu_button(0, this.pasteButton);
+            this.actionMenu.addSubMenuButton(0, this.copyButton);
+            this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
         this.hintButton = new GameButton()
