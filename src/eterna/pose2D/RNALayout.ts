@@ -3,19 +3,19 @@ import {Folder} from "../folding/Folder";
 import {RNATreeNode} from "./RNATreeNode";
 
 export class RNALayout {
-    public constructor(prim_space: number = 45, pair_space: number = 45, exception_indices: number[] = null) {
-        this._primarySpace = prim_space;
-        this._pairSpace = pair_space;
-        if (exception_indices != null) {
-            this._exception_indices = exception_indices.slice();
+    public constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
+        this._primarySpace = primSpace;
+        this._pairSpace = pairSpace;
+        if (exceptionIndices != null) {
+            this._exceptionIndices = exceptionIndices.slice();
         }
     }
 
-    public get_root(): RNATreeNode {
+    public get root(): RNATreeNode {
         return this._root;
     }
 
-    public setup_tree(pairs: number[]): void {
+    public setupTree(pairs: number[]): void {
         let dangling_start: number = 0;
         let dangling_end: number = 0;
         let ii: number;
@@ -24,7 +24,7 @@ export class RNALayout {
         /// Delete old tree
         this._root = null;
         /// save for later
-        this._orig_pairs = pairs.slice();
+        this._origPairs = pairs.slice();
 
         for (ii = 0; ii < pairs.length; ii++) {
             bi_pairs[ii] = -1;
@@ -54,11 +54,11 @@ export class RNALayout {
         }
 
         /// Array that will be used for scoring
-        this._bi_pairs = new Array(bi_pairs.length + 1);
+        this._biPairs = new Array(bi_pairs.length + 1);
         for (ii = 0; ii < bi_pairs.length; ii++) {
-            this._bi_pairs[ii + 1] = bi_pairs[ii] + 1;
+            this._biPairs[ii + 1] = bi_pairs[ii] + 1;
         }
-        this._bi_pairs[0] = bi_pairs.length;
+        this._biPairs[0] = bi_pairs.length;
 
         if (dangling_start === bi_pairs.length) {
             return;
@@ -68,7 +68,7 @@ export class RNALayout {
 
         for (let jj: number = 0; jj < bi_pairs.length; jj++) {
             if (bi_pairs[jj] >= 0) {
-                this.add_nodes_recursive(bi_pairs, this._root, jj, bi_pairs[jj]);
+                this.addNodesRecursive(bi_pairs, this._root, jj, bi_pairs[jj]);
                 jj = bi_pairs[jj];
             } else {
                 let newsubnode: RNATreeNode = new RNATreeNode;
@@ -79,9 +79,9 @@ export class RNALayout {
         }
     }
 
-    public get_coords(xarray: number[], yarray: number[]): void {
+    public getCoords(xarray: number[], yarray: number[]): void {
         if (this._root != null) {
-            this.get_coords_recursive(this._root, xarray, yarray);
+            this.getCoordsRecursive(this._root, xarray, yarray);
         } else {
             // there is no structure (no pairs)
             if (xarray.length < 3) {
@@ -105,7 +105,7 @@ export class RNALayout {
                 let oligo_displacement: number = 0;
 
                 for (let ii = 0; ii < xarray.length; ii++) {
-                    if (this._exception_indices != null && this._exception_indices.indexOf(ii) >= 0) {
+                    if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
                         oligo_displacement += 2 * this._primarySpace;
                     }
                 }
@@ -113,7 +113,7 @@ export class RNALayout {
 
                 for (let ii = 0; ii < xarray.length; ii++) {
                     length_walker += this._primarySpace;
-                    if (this._exception_indices != null && this._exception_indices.indexOf(ii) >= 0) {
+                    if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
                         length_walker += 2 * this._primarySpace;
                     }
 
@@ -125,24 +125,24 @@ export class RNALayout {
         }
     }
 
-    public draw_tree(): void {
+    public drawTree(): void {
         if (this._root != null) {
-            this.draw_tree_recursive(this._root, null, 0, 0, 0, 1);
+            this.drawTreeRecursive(this._root, null, 0, 0, 0, 1);
         }
     }
 
-    public get_total_score(): number {
+    public get totalScore(): number {
         if (this._root == null) {
             return 0;
         }
 
-        return this.get_total_score_recursive(this._root);
+        return this.getTotalScoreRecursive(this._root);
     }
 
     /// DO NOT remove these _old methods until the new ones (below) are fully validated
-    public score_tree_old(seq: number[], folder: Folder): void {
-        if (this._bi_pairs == null || seq.length !== (this._bi_pairs.length - 1)) {
-            throw new Error("Layout tree is not properly setup for scoring " + this._bi_pairs.length + " " + seq.length);
+    public scoreTreeOld(seq: number[], folder: Folder): void {
+        if (this._biPairs == null || seq.length !== (this._biPairs.length - 1)) {
+            throw new Error("Layout tree is not properly setup for scoring " + this._biPairs.length + " " + seq.length);
         }
 
         if (this._root == null) {
@@ -156,11 +156,11 @@ export class RNALayout {
             S[ii + 1] = seq[ii];
         }
 
-        this.score_tree_recursive_old(S, folder, this._root, null)
+        this.scoreTreeRecursiveOld(S, folder, this._root, null)
     }
 
-    public score_tree(seq: number[], folder: Folder): void {
-        if (this._bi_pairs == null) {
+    public scoreTree(seq: number[], folder: Folder): void {
+        if (this._biPairs == null) {
             throw new Error("Layout tree is not properly setup for scoring");
         }
 
@@ -170,11 +170,11 @@ export class RNALayout {
 
         let nnfe: number[] = [];
 
-        folder.scoreStructures(seq, this._orig_pairs, EPars.DEFAULT_TEMPERATURE, nnfe);
-        this.score_tree_recursive(nnfe, this._root, null);
+        folder.scoreStructures(seq, this._origPairs, EPars.DEFAULT_TEMPERATURE, nnfe);
+        this.scoreTreeRecursive(nnfe, this._root, null);
     }
 
-    private add_nodes_recursive(bi_pairs: number[], rootnode: RNATreeNode, start_index: number, end_index: number): void {
+    private addNodesRecursive(bi_pairs: number[], rootnode: RNATreeNode, start_index: number, end_index: number): void {
         if (start_index > end_index) {
             throw new Error("Error occured while drawing RNA");
         }
@@ -186,14 +186,14 @@ export class RNALayout {
             newnode._index_a = start_index;
             newnode._index_b = end_index;
 
-            this.add_nodes_recursive(bi_pairs, newnode, start_index + 1, end_index - 1);
+            this.addNodesRecursive(bi_pairs, newnode, start_index + 1, end_index - 1);
 
         } else {
             newnode = new RNATreeNode;
 
             for (let jj = start_index; jj <= end_index; jj++) {
                 if (bi_pairs[jj] >= 0) {
-                    this.add_nodes_recursive(bi_pairs, newnode, jj, bi_pairs[jj]);
+                    this.addNodesRecursive(bi_pairs, newnode, jj, bi_pairs[jj]);
                     jj = bi_pairs[jj];
                 } else {
                     let newsubnode: RNATreeNode = new RNATreeNode;
@@ -208,7 +208,7 @@ export class RNALayout {
 
     }
 
-    private get_coords_recursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
+    private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode._is_pair) {
             let cross_x: number = -rootnode._go_y;
             let cross_y: number = rootnode._go_x;
@@ -224,12 +224,12 @@ export class RNALayout {
         }
 
         for (let ii: number = 0; ii < rootnode._children.length; ii++) {
-            this.get_coords_recursive(rootnode._children[ii], xarray, yarray);
+            this.getCoordsRecursive(rootnode._children[ii], xarray, yarray);
         }
 
     }
 
-    private draw_tree_recursive(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, go_x: number, go_y: number): void {
+    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, go_x: number, go_y: number): void {
         let cross_x: number = -go_y;
         let cross_y: number = go_x;
 
@@ -244,11 +244,11 @@ export class RNALayout {
             rootnode._y = start_y;
 
             if (rootnode._children[0]._is_pair) {
-                this.draw_tree_recursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
+                this.drawTreeRecursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
             } else if (!rootnode._children[0]._is_pair && rootnode._children[0]._index_a < 0) {
-                this.draw_tree_recursive(rootnode._children[0], rootnode, start_x, start_y, go_x, go_y);
+                this.drawTreeRecursive(rootnode._children[0], rootnode, start_x, start_y, go_x, go_y);
             } else {
-                this.draw_tree_recursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
+                this.drawTreeRecursive(rootnode._children[0], rootnode, start_x + go_x * this._primarySpace, start_y + go_y * this._primarySpace, go_x, go_y);
             }
         } else if (rootnode._children.length > 1) {
 
@@ -258,7 +258,7 @@ export class RNALayout {
                 if (rootnode._children[ii]._is_pair) {
                     npairs++;
                 }
-                if (this._exception_indices != null && (this._exception_indices.indexOf(rootnode._children[ii]._index_a) >= 0 || this._exception_indices.indexOf(rootnode._children[ii]._index_b) >= 0)) {
+                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode._children[ii]._index_a) >= 0 || this._exceptionIndices.indexOf(rootnode._children[ii]._index_b) >= 0)) {
                     oligo_displacement += 2 * this._primarySpace;
                 }
             }
@@ -279,7 +279,7 @@ export class RNALayout {
             for (ii = 0; ii < rootnode._children.length; ii++) {
 
                 length_walker += this._primarySpace;
-                if (this._exception_indices != null && (this._exception_indices.indexOf(rootnode._children[ii]._index_a) >= 0 || this._exception_indices.indexOf(rootnode._children[ii]._index_b) >= 0)) {
+                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode._children[ii]._index_a) >= 0 || this._exceptionIndices.indexOf(rootnode._children[ii]._index_b) >= 0)) {
                     length_walker += 2 * this._primarySpace;
                 }
 
@@ -295,7 +295,7 @@ export class RNALayout {
                 let child_go_y: number = child_y - rootnode._y;
                 let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
 
-                this.draw_tree_recursive(rootnode._children[ii], rootnode, child_x, child_y,
+                this.drawTreeRecursive(rootnode._children[ii], rootnode, child_x, child_y,
                     child_go_x / child_go_len, child_go_y / child_go_len);
 
                 if (rootnode._children[ii]._is_pair) {
@@ -309,15 +309,15 @@ export class RNALayout {
 
     }
 
-    private get_total_score_recursive(rootnode: RNATreeNode): number {
+    private getTotalScoreRecursive(rootnode: RNATreeNode): number {
         let score: number = rootnode._score;
         for (let ii: number = 0; ii < rootnode._children.length; ii++) {
-            score += this.get_total_score_recursive(rootnode._children[ii]);
+            score += this.getTotalScoreRecursive(rootnode._children[ii]);
         }
         return score;
     }
 
-    private score_tree_recursive_old(S: number[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
+    private scoreTreeRecursiveOld(S: number[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
 
         let type1: number, type2: number;
 
@@ -339,7 +339,7 @@ export class RNALayout {
                     S[rootnode._children[0]._index_a + 1 + 1], S[rootnode._children[0]._index_b - 1 + 1], true, true);
             }
 
-            this.score_tree_recursive_old(S, folder, rootnode._children[0], rootnode);
+            this.scoreTreeRecursiveOld(S, folder, rootnode._children[0], rootnode);
 
         } else if (!rootnode._is_pair && rootnode._index_a >= 0) {
             /// Single residue node
@@ -350,7 +350,7 @@ export class RNALayout {
             /// Top root case
             if (parentnode == null) {
                 /// initial ml scoring
-                rootnode._score = folder.mlEnergy(this._bi_pairs, S, 0, true);
+                rootnode._score = folder.mlEnergy(this._biPairs, S, 0, true);
             } else {
                 if (!parentnode._is_pair) {
                     throw new Error("Parent node must be a pair");
@@ -394,19 +394,18 @@ export class RNALayout {
 
                 i = parentnode._index_a + 1;
                 let cuti: number = folder.cutInLoop(i);
-                rootnode._score = (cuti === 0) ? folder.mlEnergy(this._bi_pairs, S, i, false) : folder.mlEnergy(this._bi_pairs, S, cuti, true);
+                rootnode._score = (cuti === 0) ? folder.mlEnergy(this._biPairs, S, i, false) : folder.mlEnergy(this._biPairs, S, cuti, true);
             }
 
             for (ii = 0; ii < rootnode._children.length; ii++) {
-                this.score_tree_recursive_old(S, folder, rootnode._children[ii], rootnode);
+                this.scoreTreeRecursiveOld(S, folder, rootnode._children[ii], rootnode);
             }
 
         }
 
     }
 
-    private score_tree_recursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
-
+    private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
         if (rootnode._is_pair) {
             /// Pair node
             if (rootnode._children.length > 1) {
@@ -418,10 +417,10 @@ export class RNALayout {
             }
 
             if (rootnode._children[0]._is_pair) {
-                rootnode._score = RNALayout.lookup_fe(nnfe, rootnode._index_a);
+                rootnode._score = RNALayout.lookupFe(nnfe, rootnode._index_a);
             }
 
-            this.score_tree_recursive(nnfe, rootnode._children[0], rootnode);
+            this.scoreTreeRecursive(nnfe, rootnode._children[0], rootnode);
 
         } else if (!rootnode._is_pair && rootnode._index_a >= 0) {
             /// Single residue node
@@ -433,7 +432,7 @@ export class RNALayout {
             /// Top root case
             if (parentnode == null) {
                 /// initial ml scoring
-                rootnode._score = RNALayout.lookup_fe(nnfe, -1);
+                rootnode._score = RNALayout.lookupFe(nnfe, -1);
             } else {
                 if (!parentnode._is_pair) {
                     throw new Error("Parent node must be a pair");
@@ -457,21 +456,21 @@ export class RNALayout {
             let i: number, j: number, p: number, q: number;
 
             if (num_stacks === 1 && parentnode != null) {
-                rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
+                rootnode._score = RNALayout.lookupFe(nnfe, parentnode._index_a);
             } else if (num_stacks === 0) {
-                rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
+                rootnode._score = RNALayout.lookupFe(nnfe, parentnode._index_a);
             } else if (num_stacks > 1 && parentnode != null) {
-                rootnode._score = RNALayout.lookup_fe(nnfe, parentnode._index_a);
+                rootnode._score = RNALayout.lookupFe(nnfe, parentnode._index_a);
             }
 
             for (ii = 0; ii < rootnode._children.length; ii++) {
-                this.score_tree_recursive(nnfe, rootnode._children[ii], rootnode);
+                this.scoreTreeRecursive(nnfe, rootnode._children[ii], rootnode);
             }
         }
     }
 
     /// FIXME: there's surely a smarter way to do this...
-    private static lookup_fe(nnfe: number[], index: number): number {
+    private static lookupFe(nnfe: number[], index: number): number {
         for (let ii: number = 0; ii < nnfe.length - 1; ii += 2) {
             if (nnfe[ii] === index) return nnfe[ii + 1];
         }
@@ -480,14 +479,14 @@ export class RNALayout {
 
     private readonly _primarySpace: number;
     private readonly _pairSpace: number;
+    // indices that need to be streched (e.g., connectors for oligos)
+    private readonly _exceptionIndices: number[];
 
     private _root: RNATreeNode;
-    private _orig_pairs: number[];
+    private _origPairs: number[];
 
     /// "New" method to gather NN free energies, just use the folding engine
-    private _bi_pairs: number[];
-    //indices that need to be streched (e.g., connectors for oligos)
-    private _exception_indices: number[];
+    private _biPairs: number[];
 
-    private static readonly NODE_R: number = 10;
+    private static readonly NODE_R = 10;
 }
