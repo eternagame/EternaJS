@@ -38,25 +38,25 @@ export class SpecBox extends ContainerObject {
         this._h0 = Fonts.arial("A", 12).color(0xffffff).build();
 
         // / Meltplot h0
-        this._h0_melt = Fonts.arial("37°C", 12).color(0xffffff).build();
-        this._hn_melt = Fonts.arial("97°C", 12).color(0xffffff).build();
+        this._h0Melt = Fonts.arial("37°C", 12).color(0xffffff).build();
+        this._hnMelt = Fonts.arial("97°C", 12).color(0xffffff).build();
         this._v0 = Fonts.arial("1", 12).color(0xffffff).build();
-        this._v0_melt = Fonts.arial("0%", 12).color(0xffffff).build();
-        this._vn_melt = Fonts.arial("100%", 12).color(0xffffff).build();
+        this._v0Melt = Fonts.arial("0%", 12).color(0xffffff).build();
+        this._vnMelt = Fonts.arial("100%", 12).color(0xffffff).build();
 
         this.container.addChild(this._h0);
-        this.container.addChild(this._h0_melt);
-        this.container.addChild(this._hn_melt);
+        this.container.addChild(this._h0Melt);
+        this.container.addChild(this._hnMelt);
 
         this.container.addChild(this._v0);
-        this.container.addChild(this._v0_melt);
-        this.container.addChild(this._vn_melt);
+        this.container.addChild(this._v0Melt);
+        this.container.addChild(this._vnMelt);
 
-        this._dotplot_canvas = new Sprite();
-        this.container.addChild(this._dotplot_canvas);
+        this._dotPlotSprite = new Sprite();
+        this.container.addChild(this._dotPlotSprite);
 
-        this._meltplot_canvas = new Sprite();
-        this.container.addChild(this._meltplot_canvas);
+        this._meltPlotSprite = new Sprite();
+        this.container.addChild(this._meltPlotSprite);
 
         this._stattext = new MultiStyleText("", {
             default: {
@@ -78,22 +78,22 @@ export class SpecBox extends ContainerObject {
         this._meltplottext = Fonts.arial("Melt plot (% of unpaired bases)", 12).color(0xffffff).build();
         this.container.addChild(this._meltplottext);
 
-        this._zoom_in = new GameButton()
+        this._zoomInButton = new GameButton()
             .allStates(Bitmaps.PlusImg)
             .tooltip("Zoom In")
             .hotkey(KeyCode.KeyI);
-        this._zoom_in.clicked.connect(() => this.dotPlotZoomIn());
-        this.addObject(this._zoom_in, this.container);
+        this._zoomInButton.clicked.connect(() => this.dotPlotZoomIn());
+        this.addObject(this._zoomInButton, this.container);
 
-        this._zoom_out = new GameButton()
+        this._zoomOutButton = new GameButton()
             .allStates(Bitmaps.MinusImg)
             .tooltip("Zoom out")
             .hotkey(KeyCode.KeyO);
-        this._zoom_out.clicked.connect(() => this.dotPlotZoomOut());
-        this.addObject(this._zoom_out, this.container);
+        this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
+        this.addObject(this._zoomOutButton, this.container);
 
         if (docked) {
-            let pointerTarget = new DisplayObjectPointerTarget(this._dotplot_canvas);
+            let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOut.connect(e => this.onDotPlotMouseOut(e));
             pointerTarget.pointerDown.filter(IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
@@ -114,7 +114,7 @@ export class SpecBox extends ContainerObject {
         return this._height;
     }
 
-    public set_size(width: number, height: number): void {
+    public setSize(width: number, height: number): void {
         if (this._width !== width || this._height !== height) {
             this._width = width;
             this._height = height;
@@ -124,7 +124,7 @@ export class SpecBox extends ContainerObject {
         }
     }
 
-    public set_spec(datablock: UndoBlock): void {
+    public setSpec(datablock: UndoBlock): void {
         const temperature: number = 37;
 
         this._datasize = datablock.get_sequence().length;
@@ -203,7 +203,7 @@ export class SpecBox extends ContainerObject {
         this.scaleDotPlot(this._dotplotScaleLevel);
     }
 
-    public getPlotSize(): number {
+    public get plotSize(): number {
         let plot_w: number;
         let plot_h: number;
 
@@ -226,26 +226,26 @@ export class SpecBox extends ContainerObject {
         if (Number.isNaN(this._dotplotOriginX)) this._dotplotOriginX = 0;
         if (Number.isNaN(this._dotplotOriginY)) this._dotplotOriginY = 0;
 
-        let plot_size: number = this.getPlotSize();
-        let plot_size_level: number = plot_size * level;
-        if (this._dotplot != null && plot_size > 0 && plot_size_level > 0) {
+        let plotSize: number = this.plotSize;
+        let plot_size_level: number = plotSize * level;
+        if (this._dotplot != null && plotSize > 0 && plot_size_level > 0) {
             this._dotplotOriginX += (-this._dotplotOriginX) / level;
             this._dotplotOriginY += (-this._dotplotOriginY) / level;
             this._dotplot.setSize(plot_size_level, plot_size_level);
             this._dotplot.replotWithBase(this._dotplotOriginX, this._dotplotOriginY);
 
-            if (this._dotplot_canvas.mask != null) {
-                this._dotplot_canvas.mask.destroy();
-                this._dotplot_canvas.mask = null;
+            if (this._dotPlotSprite.mask != null) {
+                this._dotPlotSprite.mask.destroy();
+                this._dotPlotSprite.mask = null;
             }
 
-            if (plot_size_level > plot_size) {
-                let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plot_size, plot_size).endFill();
-                this._dotplot_canvas.addChild(mask);
-                this._dotplot_canvas.mask = mask;
+            if (plot_size_level > plotSize) {
+                let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plotSize, plotSize).endFill();
+                this._dotPlotSprite.addChild(mask);
+                this._dotPlotSprite.mask = mask;
             }
 
-            this._dotplot_canvas.addChild(this._dotplot);
+            this._dotPlotSprite.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotOriginX, this._dotplotOriginY);
         }
     }
@@ -254,26 +254,26 @@ export class SpecBox extends ContainerObject {
         this._panel.setSize(this._width, this._height);
 
         if (this._docked) {
-            this._dotplot_canvas.position = new Point(20, 15);
-            this._meltplot_canvas.position = new Point(20, (this._height * 0.5) + 8);
+            this._dotPlotSprite.position = new Point(20, 15);
+            this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
 
             this._stattext.visible = false;
             this._helpText.display.visible = false;
             this._dotplottext.visible = false;
             this._meltplottext.visible = false;
 
-            this._zoom_in.display.visible = false;
-            this._zoom_out.display.visible = false;
+            this._zoomInButton.display.visible = false;
+            this._zoomOutButton.display.visible = false;
         } else {
             this._panel.title = "RNA Spec";
 
             this._v0.position = new Point(40 - this._v0.width - 3, 70);
 
-            this._vn_melt.position.x = (this._width * 0.5) + 25 - this._vn_melt.width - 3;
-            this._vn_melt.position.y = 70;
+            this._vnMelt.position.x = (this._width * 0.5) + 25 - this._vnMelt.width - 3;
+            this._vnMelt.position.y = 70;
 
-            this._dotplot_canvas.position = new Point(40, 70);
-            this._meltplot_canvas.position = new Point((this._width * 0.5) + 20, 70);
+            this._dotPlotSprite.position = new Point(40, 70);
+            this._meltPlotSprite.position = new Point((this._width * 0.5) + 20, 70);
 
             this._stattext.visible = true;
             this._stattext.position = new Point(20, this._height - 100);
@@ -286,13 +286,13 @@ export class SpecBox extends ContainerObject {
             this._meltplottext.visible = true;
             this._meltplottext.position = new Point((this._width * 0.5) + 10, 50);
 
-            this._zoom_in.display.visible = true;
-            this._zoom_out.display.visible = true;
-            this._zoom_in.display.position = new Point(40, this._height - 125);
-            this._zoom_out.display.position = new Point(70, this._height - 130);
+            this._zoomInButton.display.visible = true;
+            this._zoomOutButton.display.visible = true;
+            this._zoomInButton.display.position = new Point(40, this._height - 125);
+            this._zoomOutButton.display.position = new Point(70, this._height - 130);
         }
 
-        let plot_size: number = this.getPlotSize();
+        let plot_size: number = this.plotSize;
 
         this.scaleDotPlot(1);
 
@@ -300,30 +300,30 @@ export class SpecBox extends ContainerObject {
             this._meltplot.setSize(plot_size, plot_size);
             this._meltplot.replot();
             // this._meltplot.cacheAsBitmap = true;
-            this._meltplot_canvas.addChild(this._meltplot);
+            this._meltPlotSprite.addChild(this._meltplot);
 
             if (this._docked) {
-                this._h0_melt.position = new Point(15, (this._height * 0.5) + plot_size + 10);
-                this._hn_melt.position = new Point(
-                    25 + plot_size - this._hn_melt.width,
+                this._h0Melt.position = new Point(15, (this._height * 0.5) + plot_size + 10);
+                this._hnMelt.position = new Point(
+                    25 + plot_size - this._hnMelt.width,
                     (this._height * 0.5) + plot_size + 10
                 );
-                this._v0_melt.position = new Point(
-                    25 - this._v0_melt.width - 3,
+                this._v0Melt.position = new Point(
+                    25 - this._v0Melt.width - 3,
                     (this._height * 0.5) + plot_size - 10
                 );
-                this._vn_melt.position = new Point(
-                    25 - this._vn_melt.width - 3,
+                this._vnMelt.position = new Point(
+                    25 - this._vnMelt.width - 3,
                     (this._height * 0.5) + 5
                 );
             } else {
-                this._h0_melt.position = new Point((this._width * 0.5) + 15, plot_size + 75);
-                this._hn_melt.position = new Point(
-                    (this._width * 0.5) + 25 + plot_size - this._hn_melt.width,
+                this._h0Melt.position = new Point((this._width * 0.5) + 15, plot_size + 75);
+                this._hnMelt.position = new Point(
+                    (this._width * 0.5) + 25 + plot_size - this._hnMelt.width,
                     plot_size + 75
                 );
-                this._v0_melt.position = new Point(
-                    (this._width * 0.5) + 25 - this._v0_melt.width - 3,
+                this._v0Melt.position = new Point(
+                    (this._width * 0.5) + 25 - this._v0Melt.width - 3,
                     55 + plot_size
                 );
             }
@@ -363,7 +363,7 @@ export class SpecBox extends ContainerObject {
             let diff_x: number = e.data.global.x - this._dragBeginX;
             let diff_y: number = e.data.global.y - this._dragBeginY;
 
-            let plot_size: number = this.getPlotSize();
+            let plot_size: number = this.plotSize;
             let plot_size_level: number = plot_size * this._dotplotScaleLevel;
 
             this._dotplotX = this._dotplotOriginX + diff_x;
@@ -376,11 +376,11 @@ export class SpecBox extends ContainerObject {
 
             this._dotplot.replotWithBase(this._dotplotX, this._dotplotY);
             // this._dotplot.cacheAsBitmap = true;
-            this._dotplot_canvas.addChild(this._dotplot);
+            this._dotPlotSprite.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotX, this._dotplotY);
         } else {
-            let localPoint = e.data.getLocalPosition(this._dotplot_canvas);
-            let block_length: number = this.getDotplotOffsetSize();
+            let localPoint = e.data.getLocalPosition(this._dotPlotSprite);
+            let block_length: number = this.dotplotOffsetSize;
             let x: number = (localPoint.x - this._dotplotOriginX) / block_length;
             let y: number = (localPoint.y - this._dotplotOriginY) / block_length;
             if (y === 0 || Number.isNaN(y)) {
@@ -410,8 +410,8 @@ export class SpecBox extends ContainerObject {
         this.saveAndResetDragPoint();
     }
 
-    private getDotplotOffsetSize(): number {
-        let plot_size: number = this.getPlotSize();
+    private get dotplotOffsetSize(): number {
+        let plot_size: number = this.plotSize;
         return plot_size / (this._datasize / 10) * this._dotplotScaleLevel;
     }
 
@@ -419,8 +419,8 @@ export class SpecBox extends ContainerObject {
     private calculateCoordPosition(from: Text, index: number, d: number): Point {
         let pos_from: Point = new Point();
         pos_from.copy(from.position);
-        let diff_x: number = this.getDotplotOffsetSize();
-        let diff_y: number = this.getDotplotOffsetSize();
+        let diff_x: number = this.dotplotOffsetSize;
+        let diff_y: number = this.dotplotOffsetSize;
         if (d === SpecBox.HORIZONTAL) {
             return new Point(pos_from.x + diff_x * (index + 1), pos_from.y);
         } else {
@@ -429,7 +429,7 @@ export class SpecBox extends ContainerObject {
     }
 
     private updateDotplotLabel(ref_x: number, ref_y: number): void {
-        let plot_size: number = this.getPlotSize();
+        let plot_size: number = this.plotSize;
         let h0_default_x: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
         let h0_default_y: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
 
@@ -467,16 +467,16 @@ export class SpecBox extends ContainerObject {
     private readonly _docked: boolean;
 
     private readonly _panel: GamePanel;
-    private readonly _zoom_in: GameButton;
-    private readonly _zoom_out: GameButton;
-    private readonly _dotplot_canvas: Sprite;
-    private readonly _meltplot_canvas: Sprite;
+    private readonly _zoomInButton: GameButton;
+    private readonly _zoomOutButton: GameButton;
+    private readonly _dotPlotSprite: Sprite;
+    private readonly _meltPlotSprite: Sprite;
     private readonly _h0: Text;
-    private readonly _h0_melt: Text;
-    private readonly _hn_melt: Text;
+    private readonly _h0Melt: Text;
+    private readonly _hnMelt: Text;
     private readonly _v0: Text;
-    private readonly _v0_melt: Text;
-    private readonly _vn_melt: Text;
+    private readonly _v0Melt: Text;
+    private readonly _vnMelt: Text;
     private readonly _stattext: MultiStyleText;
     private readonly _helpText: HTMLTextObject;
     private readonly _dotplottext: Text;
@@ -502,12 +502,12 @@ export class SpecBox extends ContainerObject {
     private _width: number = 0;
     private _height: number = 0;
 
-    private static readonly HORIZONTAL: number = 0;
-    private static readonly VERTICAL: number = 1;
-    private static readonly DOTPLOT_SCALE_STEP: number = 0.2;
-    private static readonly H0_DEFAULT_X: number = 42;
-    private static readonly H0_DEFAULT_Y: number = 55;
-    private static readonly V0_DEFAULT_X: number = 30;
-    private static readonly V0_DEFAULT_Y: number = 70;
-    private static readonly OFFSET: number = 10;    // coord offset
+    private static readonly HORIZONTAL = 0;
+    private static readonly VERTICAL = 1;
+    private static readonly DOTPLOT_SCALE_STEP = 0.2;
+    private static readonly H0_DEFAULT_X = 42;
+    private static readonly H0_DEFAULT_Y = 55;
+    private static readonly V0_DEFAULT_X = 30;
+    private static readonly V0_DEFAULT_Y = 70;
+    private static readonly OFFSET = 10;    // coord offset
 }
