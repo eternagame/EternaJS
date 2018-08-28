@@ -1,6 +1,4 @@
-import {
-    Graphics, Matrix, Point, Sprite, Text, Texture
-} from "pixi.js";
+import {Graphics, Matrix, Point, Sprite, Text, Texture} from "pixi.js";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {MathUtil} from "../../flashbang/util/MathUtil";
@@ -13,15 +11,15 @@ import {Fonts} from "../util/Fonts";
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
 export class Band extends ContainerObject implements Updatable {
-    constructor(far_dist: number, close_dist: number, strength: number) {
+    constructor(farDist: number, closeDist: number, strength: number) {
         super();
 
         Band.initTextures();
 
-        this._mid_dist = (far_dist + close_dist) * 0.5;
-        this._mov_dist = (far_dist - close_dist) * 0.5;
+        this._midDist = (farDist + closeDist) * 0.5;
+        this._movDist = (farDist - closeDist) * 0.5;
 
-        this._start_time = -1;
+        this._startTime = -1;
 
         this._st0 = new Sprite();
         this.container.addChild(this._st0);
@@ -33,29 +31,29 @@ export class Band extends ContainerObject implements Updatable {
         score_text.position = new Point(2, 19);
         this.container.addChild(score_text);
 
-        this.set_strength(strength);
+        this.strength = strength;
     }
 
-    public set_strength(strength: number): void {
+    public set strength(strength: number) {
         if (strength === 1) {
-            this._st0.texture = Band._satellite_bitmap;
-            this._st1.texture = Band._satellite_invert;
+            this._st0.texture = Band._satelliteBitmap;
+            this._st1.texture = Band._satelliteInvert;
         } else if (strength === 2) {
-            this._st0.texture = Band._satellite_stronger_bitmap;
-            this._st1.texture = Band._satellite_stronger_invert;
+            this._st0.texture = Band._satelliteStrongerBitmap;
+            this._st1.texture = Band._satelliteStrongerInvert;
         } else {
-            this._st0.texture = Band._satellite_weaker_bitmap;
-            this._st1.texture = Band._satellite_weaker_invert;
+            this._st0.texture = Band._satelliteWeakerBitmap;
+            this._st1.texture = Band._satelliteWeakerInvert;
         }
     }
 
     /* override */
     public update(dt: number): void {
-        if (this._start_time < 0) {
-            this._start_time = dt;
+        if (this._startTime < 0) {
+            this._startTime = dt;
         }
 
-        let pair_r: number = Math.cos((dt - this._start_time) * 4) * this._mov_dist + this._mid_dist;
+        let pair_r: number = Math.cos((dt - this._startTime) * 4) * this._movDist + this._midDist;
 
         this._st0.x = -pair_r;
         this._st0.y = 0;
@@ -72,7 +70,7 @@ export class Band extends ContainerObject implements Updatable {
     }
 
     private static initTextures() {
-        if (Band._satellite_bitmap != null) {
+        if (Band._satelliteBitmap != null) {
             return;
         }
 
@@ -93,25 +91,25 @@ export class Band extends ContainerObject implements Updatable {
             return TextureUtil.renderToTexture(disp);
         };
 
-        Band._satellite_bitmap = render(-90);
-        Band._satellite_invert = render(90);
-        Band._satellite_stronger_bitmap = render(-90, ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
-        Band._satellite_stronger_invert = render(90, ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
-        Band._satellite_weaker_bitmap = render(-90, ColorUtil.colorTransform(1, 1, 1, 0.4, 0, 0, 0, 0));
-        Band._satellite_weaker_invert = render(90, ColorUtil.colorTransform(1, 1, 1, 0.4, 0, 0, 0, 0));
+        Band._satelliteBitmap = render(-90);
+        Band._satelliteInvert = render(90);
+        Band._satelliteStrongerBitmap = render(-90, ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
+        Band._satelliteStrongerInvert = render(90, ColorUtil.colorTransform(3, 3, 3, 3, 0, 0, 0, 0));
+        Band._satelliteWeakerBitmap = render(-90, ColorUtil.colorTransform(1, 1, 1, 0.4, 0, 0, 0, 0));
+        Band._satelliteWeakerInvert = render(90, ColorUtil.colorTransform(1, 1, 1, 0.4, 0, 0, 0, 0));
     }
 
     private readonly _st0: Sprite;
     private readonly _st1: Sprite;
-    private readonly _mov_dist: number;
-    private readonly _mid_dist: number;
+    private readonly _movDist: number;
+    private readonly _midDist: number;
 
-    private _start_time: number;
+    private _startTime: number;
 
-    private static _satellite_bitmap: Texture;
-    private static _satellite_invert: Texture;
-    private static _satellite_stronger_bitmap: Texture;
-    private static _satellite_stronger_invert: Texture;
-    private static _satellite_weaker_bitmap: Texture;
-    private static _satellite_weaker_invert: Texture;
+    private static _satelliteBitmap: Texture;
+    private static _satelliteInvert: Texture;
+    private static _satelliteStrongerBitmap: Texture;
+    private static _satelliteStrongerInvert: Texture;
+    private static _satelliteWeakerBitmap: Texture;
+    private static _satelliteWeakerInvert: Texture;
 }

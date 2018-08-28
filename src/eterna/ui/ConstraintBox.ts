@@ -744,11 +744,11 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._bond.display.position = new Point(22, 3);
             this._bond.display.visible = true;
-            this._bond.set_strength(1);
+            this._bond.strength = 1;
 
             this._bond2.display.position = new Point(22, 17);
             this._bond2.display.visible = true;
-            this._bond2.set_strength(1);
+            this._bond2.strength = 1;
 
             this._val_text.visible = true;
 
