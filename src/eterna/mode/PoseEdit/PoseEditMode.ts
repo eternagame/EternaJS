@@ -1409,7 +1409,7 @@ export class PoseEditMode extends GameMode {
             this.poseEditByTarget(this._curTargetIndex);
         }
 
-        this._background.freeze_background(this._isFrozen);
+        this._background.freezeBackground(this._isFrozen);
     }
 
     /// This mode is strictly for internal use, not to be used by users
