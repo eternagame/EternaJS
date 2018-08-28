@@ -1808,7 +1808,7 @@ export class PoseEditMode extends GameMode {
     }
 
     public deselectAllColorings(): void {
-        this._toolbar.palette.clear_selection();
+        this._toolbar.palette.clearSelection();
         this._toolbar.pairSwapButton.toggled.value = false;
         for (let button of this._toolbar.dynPaintTools) {
             button.toggled.value = false;
@@ -2140,8 +2140,8 @@ export class PoseEditMode extends GameMode {
         this._showMissionScreen = true;
         this.showConstraints(true);
 
-        this._toolbar.palette.reset_overrides();
-        this._toolbar.palette.change_default_mode();
+        this._toolbar.palette.resetOverrides();
+        this._toolbar.palette.changeDefaultMode();
     }
 
     private moveHistoryAddMutations(before: number[], after: number[]): void {
@@ -2916,7 +2916,7 @@ export class PoseEditMode extends GameMode {
         let num_AU: number = undo_block.get_param(UndoBlockParam.AU);
         let num_GU: number = undo_block.get_param(UndoBlockParam.GU);
         let num_GC: number = undo_block.get_param(UndoBlockParam.GC);
-        this._toolbar.palette.set_pair_counts(num_AU, num_GU, num_GC);
+        this._toolbar.palette.setPairCounts(num_AU, num_GU, num_GC);
 
         if (!this._isFrozen) {
             if (this._toolbar.undoButton.display.visible) {

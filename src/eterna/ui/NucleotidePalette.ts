@@ -58,23 +58,23 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         this.display.interactive = true;
 
-        this._palette_image = BitmapManager.getBitmap(Bitmaps.ImgPalette);
-        this._palette_image_nopairs = BitmapManager.getBitmap(Bitmaps.ImgPaletteNoPairs);
-        this._select_pair_data = BitmapManager.getBitmap(Bitmaps.ImgSelectPair);
-        this._select_base_data = BitmapManager.getBitmap(Bitmaps.ImgSelectBase);
+        this._paletteImage = BitmapManager.getBitmap(Bitmaps.ImgPalette);
+        this._paletteImageNopairs = BitmapManager.getBitmap(Bitmaps.ImgPaletteNoPairs);
+        this._selectPairData = BitmapManager.getBitmap(Bitmaps.ImgSelectPair);
+        this._selectBaseData = BitmapManager.getBitmap(Bitmaps.ImgSelectBase);
 
-        this._palette_display = new Sprite(this._palette_image);
-        this.container.addChild(this._palette_display);
+        this._paletteDisplay = new Sprite(this._paletteImage);
+        this.container.addChild(this._paletteDisplay);
 
         this._selection = new Sprite();
         this.container.addChild(this._selection);
 
-        this._num_au = Fonts.arial("", 12).color(0xffffff).bold().build();
-        this.container.addChild(this._num_au);
-        this._num_ug = Fonts.arial("", 12).color(0xffffff).bold().build();
-        this.container.addChild(this._num_ug);
-        this._num_gc = Fonts.arial("", 12).color(0xffffff).bold().build();
-        this.container.addChild(this._num_gc);
+        this._numAU = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this.container.addChild(this._numAU);
+        this._numUG = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this.container.addChild(this._numUG);
+        this._numGC = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this.container.addChild(this._numGC);
 
         this._targets = new Array(7);
 
@@ -121,47 +121,47 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         );
 
         this._enabled = true;
-        this._last_tooltip = null;
+        this._lastTooltip = null;
     }
 
     protected added(): void {
         super.added();
 
-        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(e => this.on_click(e)));
-        this.regs.add(this.pointerMove.connect(e => this.on_move_mouse(e)));
+        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(e => this.onClick(e)));
+        this.regs.add(this.pointerMove.connect(e => this.onMoveMouse(e)));
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 
-    public set_override_default(): void {
-        this._override_default_mode = true;
-        this._override_no_pair_mode = false;
+    public setOverrideDefault(): void {
+        this._overrideDefaultMode = true;
+        this._overrideNoPairMode = false;
     }
 
-    public set_override_no_pair(): void {
-        this._override_no_pair_mode = true;
-        this._override_default_mode = false;
+    public setOverrideNoPair(): void {
+        this._overrideNoPairMode = true;
+        this._overrideDefaultMode = false;
     }
 
-    public reset_overrides(): void {
-        this._override_default_mode = false;
-        this._override_no_pair_mode = false;
+    public resetOverrides(): void {
+        this._overrideDefaultMode = false;
+        this._overrideNoPairMode = false;
     }
 
-    public change_default_mode(): void {
-        if (this._override_no_pair_mode) {
+    public changeDefaultMode(): void {
+        if (this._overrideNoPairMode) {
             return;
         }
-        this._palette_display.texture = this._palette_image;
+        this._paletteDisplay.texture = this._paletteImage;
         this._targets[PaletteTargetType.AU].enabled = true;
         this._targets[PaletteTargetType.UG].enabled = true;
         this._targets[PaletteTargetType.GC].enabled = true;
     }
 
-    public change_no_pair_mode(): void {
-        if (this._override_default_mode) {
+    public changeNoPairMode(): void {
+        if (this._overrideDefaultMode) {
             return;
         }
-        this._palette_display.texture = this._palette_image_nopairs;
+        this._paletteDisplay.texture = this._paletteImageNopairs;
         this._targets[PaletteTargetType.AU].enabled = false;
         this._targets[PaletteTargetType.UG].enabled = false;
         this._targets[PaletteTargetType.GC].enabled = false;
@@ -176,8 +176,8 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         this._enabled = value;
     }
 
-    public get_bar_width(): number {
-        return this._palette_display.width;
+    public get width(): number {
+        return this._paletteDisplay.width;
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
@@ -225,45 +225,45 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         }
 
         this.targetClicked.emit(type);
-        this.show_selection(target.hitboxes[0], target.isPair, true);
+        this.showSelection(target.hitboxes[0], target.isPair, true);
         ROPWait.notifyClickUi(target.id);
     }
 
-    public clear_selection(): void {
+    public clearSelection(): void {
         this._selection.visible = false;
     }
 
-    public set_pair_counts(au: number, ug: number, gc: number): void {
+    public setPairCounts(au: number, ug: number, gc: number): void {
         if (this._targets[PaletteTargetType.AU].enabled) {
-            this._num_au.text = au.toString();
-            this._num_au.position = new Point(57 - this._num_au.width, 1);
+            this._numAU.text = au.toString();
+            this._numAU.position = new Point(57 - this._numAU.width, 1);
         }
         if (this._targets[PaletteTargetType.UG].enabled) {
-            this._num_ug.text = ug.toString();
-            this._num_ug.position = new Point(103 - this._num_ug.width, 1);
+            this._numUG.text = ug.toString();
+            this._numUG.position = new Point(103 - this._numUG.width, 1);
         }
         if (this._targets[PaletteTargetType.GC].enabled) {
-            this._num_gc.text = gc.toString();
-            this._num_gc.position = new Point(155 - this._num_gc.width, 1);
+            this._numGC.text = gc.toString();
+            this._numGC.position = new Point(155 - this._numGC.width, 1);
         }
     }
 
-    private show_selection(selected_box: Rectangle, is_pair: boolean, do_show: boolean): void {
+    private showSelection(selected_box: Rectangle, is_pair: boolean, do_show: boolean): void {
         if (selected_box == null) {
             return;
         }
 
         if (!do_show) {
-            this.clear_selection();
+            this.clearSelection();
         } else {
-            this._selection.texture = is_pair ? this._select_pair_data : this._select_base_data;
+            this._selection.texture = is_pair ? this._selectPairData : this._selectBaseData;
             this._selection.position = new Point(selected_box.x, selected_box.y);
             this._selection.visible = true;
         }
     }
 
     // Handle Click - Need to map position within the gameobject to action
-    private on_click(e: InteractionEvent): void {
+    private onClick(e: InteractionEvent): void {
         if (!this._enabled) {
             return;
         }
@@ -292,7 +292,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         return null;
     }
 
-    private on_move_mouse(e: InteractionEvent): void {
+    private onMoveMouse(e: InteractionEvent): void {
         if (!this._enabled) {
             return;
         }
@@ -301,8 +301,8 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         let tooltip: string = (target != null ? target.tooltip : null);
 
-        if (tooltip !== this._last_tooltip) {
-            this._last_tooltip = tooltip;
+        if (tooltip !== this._lastTooltip) {
+            this._lastTooltip = tooltip;
             log.debug(`TODO: show tooltip: ${tooltip}`);
             // if (tooltip == null) {
             //     this.set_mouse_over_object(null, 1.0);
@@ -312,22 +312,22 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         }
     }
 
-    private readonly _palette_image: Texture;
-    private readonly _palette_image_nopairs: Texture;
-    private readonly _select_base_data: Texture;
-    private readonly _select_pair_data: Texture;
+    private readonly _paletteImage: Texture;
+    private readonly _paletteImageNopairs: Texture;
+    private readonly _selectBaseData: Texture;
+    private readonly _selectPairData: Texture;
 
-    private readonly _palette_display: Sprite;
+    private readonly _paletteDisplay: Sprite;
     private readonly _selection: Sprite;
 
-    private readonly _num_au: Text;
-    private readonly _num_ug: Text;
-    private readonly _num_gc: Text;
+    private readonly _numAU: Text;
+    private readonly _numUG: Text;
+    private readonly _numGC: Text;
 
     private _enabled: boolean;
-    private _override_default_mode: boolean = false;
-    private _override_no_pair_mode: boolean = false;
-    private _last_tooltip: string;
+    private _overrideDefaultMode: boolean = false;
+    private _overrideNoPairMode: boolean = false;
+    private _lastTooltip: string;
 
     private readonly _targets: PaletteTarget[];
 

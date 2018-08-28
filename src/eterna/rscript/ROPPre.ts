@@ -51,8 +51,8 @@ export class ROPPre extends RScriptOp {
             this._env.ui.showMissionScreen(false);
             break;
         case ROPPreType.USE_ALTERNATE_PALETTE:
-            this._env.ui.toolbar.palette.set_override_no_pair();
-            this._env.ui.toolbar.palette.change_no_pair_mode();
+            this._env.ui.toolbar.palette.setOverrideNoPair();
+            this._env.ui.toolbar.palette.changeNoPairMode();
             break;
         case ROPPreType.DISABLE_HINTS:
             // _env.GetUI().remove_hint_system(true);

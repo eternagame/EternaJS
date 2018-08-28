@@ -148,11 +148,11 @@ export class RScriptEnv extends ContainerObject {
             (this.getUIElementFromID(elementID)[0] as ToggleBar).display.visible = visible;
         } else {
             if (visible && elementID === RScriptUIElementID.PALETTE) {
-                this.ui.toolbar.palette.set_override_default();
-                this.ui.toolbar.palette.change_default_mode();
+                this.ui.toolbar.palette.setOverrideDefault();
+                this.ui.toolbar.palette.changeDefaultMode();
             } else if (visible && elementID === RScriptUIElementID.PALETTEALT) {
-                this.ui.toolbar.palette.set_override_no_pair();
-                this.ui.toolbar.palette.change_no_pair_mode();
+                this.ui.toolbar.palette.setOverrideNoPair();
+                this.ui.toolbar.palette.changeNoPairMode();
             }
 
             let obj: RScriptUIElement = this.getUIElementFromID(elementID)[0];
