@@ -197,11 +197,18 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setTexture(state: ButtonState, tex: Texture | string) :GameButton {
+    private setTexture(state: ButtonState, tex?: Texture | string) :GameButton {
         if (this._buttonStateTextures == null) {
             this._buttonStateTextures = [];
         }
-        this._buttonStateTextures[state] = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
+
+        if (tex instanceof Texture) {
+            this._buttonStateTextures[state] = tex;
+        } else if (typeof(tex) === "string") {
+            this._buttonStateTextures[state] = Texture.fromImage(tex);
+        } else {
+            this._buttonStateTextures[state] = null;
+        }
 
         this.needsRedraw();
 
@@ -215,7 +222,7 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     private getTexture(state: ButtonState, selected: boolean): Texture {
-        if (selected && this._selectedTexture != null) {
+        if (state != ButtonState.DISABLED && selected && this._selectedTexture != null) {
             return this._selectedTexture;
         } else {
             return this._buttonStateTextures != null && this._buttonStateTextures.length > state
