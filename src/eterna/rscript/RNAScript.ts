@@ -29,9 +29,9 @@ export class RNAScript {
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
         for (let instruction of instructions) {
-            this._ops.AddNode(this.createOpFromInstruction(instruction));
+            this._ops.addNode(this.createOpFromInstruction(instruction));
         }
-        this._ops.FinishCreation();
+        this._ops.finishCreation();
     }
 
     /** Notify us when RNA is completed (or puzzle finishes). */
