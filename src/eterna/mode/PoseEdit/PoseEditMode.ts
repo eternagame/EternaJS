@@ -43,7 +43,6 @@ import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
-import {UDim} from "../../util/UDim";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
