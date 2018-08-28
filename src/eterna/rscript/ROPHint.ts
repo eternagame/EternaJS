@@ -6,13 +6,13 @@ import {RScriptOp} from "./RScriptOp";
 export class ROPHint extends RScriptOp {
     public constructor(isVisible: boolean, env: RScriptEnv) {
         super(env);
-        this._op_visible = isVisible;
+        this._opVisible = isVisible;
     }
 
     /* override */
     public initialize(op: string, args: string): void {
         super.initialize(op, args);
-        this._id = ROPHint.ProcessId(this._id);
+        this._id = ROPHint.processId(this._id);
     }
 
     /* override */
@@ -22,15 +22,15 @@ export class ROPHint extends RScriptOp {
             this._env.DeleteVar(this._id);
         }
 
-        if (!this._op_visible) {
+        if (!this._opVisible) {
             return;
         }
 
-        let startPoint: Point = this._env.GetRNA().getBaseXY(this._start_idx);
-        let endPoint: Point = this._env.GetRNA().getBaseXY(this._end_idx);
+        let startPoint: Point = this._env.GetRNA().getBaseXY(this._startIdx);
+        let endPoint: Point = this._env.GetRNA().getBaseXY(this._endIdx);
 
         let hint: NovaPaintHint = new NovaPaintHint(startPoint, endPoint, this._loop);
-        hint.setAnchorNucleotide(this._env.GetRNA(), this._start_idx);
+        hint.setAnchorNucleotide(this._env.GetRNA(), this._startIdx);
         hint.initialize();
         this._env.GetUI().addObject(hint, this._env.GetUI().container);
         this._env.StoreVar(this._id, hint, this._env.GetUI());
@@ -40,14 +40,14 @@ export class ROPHint extends RScriptOp {
     protected parseArgument(arg: string, i: number): void {
         switch (i) {
         case 0:
-            if (!this._op_visible) {
+            if (!this._opVisible) {
                 this._id = this._env.GetStringRef(arg);
             } else {
-                this._start_idx = Number(arg) - 1;
+                this._startIdx = Number(arg) - 1;
             }
             break;
         case 1:
-            this._end_idx = Number(arg);
+            this._endIdx = Number(arg);
             break;
         case 2:
             this._id = this._env.GetStringRef(arg);
@@ -60,15 +60,14 @@ export class ROPHint extends RScriptOp {
         }
     }
 
-    private static ProcessId(inId: string): string {
-        if (!inId) return ROPHint.id_postfix;
-        return inId + ROPHint.id_postfix;
+    private static processId(inId: string): string {
+        return inId ? inId + ROPHint.id_postfix : ROPHint.id_postfix;
     }
 
-    private readonly _op_visible: boolean;
+    private readonly _opVisible: boolean;
     private _id: string = "";
-    private _start_idx: number = 0;
-    private _end_idx: number = 0;
+    private _startIdx: number = 0;
+    private _endIdx: number = 0;
     private _loop: boolean;
 
     private static readonly id_postfix: string = "_hint_";
