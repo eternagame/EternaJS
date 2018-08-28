@@ -67,7 +67,7 @@ export class RNAFoldBasic extends Folder {
                 let current_val: number = 0;
 
                 if (ii_walker < n - 1 && jj_walker > 0 && ii_walker < jj_walker - 1) {
-                    if (EPars.pair_type(seq[ii_walker], seq[jj_walker])) {
+                    if (EPars.pairType(seq[ii_walker], seq[jj_walker])) {
                         current_val = dp_array[(ii_walker + 1) * n + jj_walker - 1] + 1;
 
                         if (current_val < 1) {

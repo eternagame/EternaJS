@@ -100,14 +100,14 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
-            this.showDialog(new CopySequenceDialog(EPars.sequence_array_to_string(this._poses[0].sequence)));
+            this.showDialog(new CopySequenceDialog(EPars.sequenceToString(this._poses[0].sequence)));
         });
 
         this._toolbar.pasteButton.clicked.connect(() => {
             this.showDialog(new PasteSequenceDialog()).closed.then(sequence => {
                 if (sequence != null) {
                     for (let pose of this._poses) {
-                        pose.pasteSequence(EPars.string_to_sequence_array(sequence));
+                        pose.pasteSequence(EPars.stringToSequence(sequence));
                     }
                 }
             });
@@ -141,8 +141,8 @@ export class PuzzleEditMode extends GameMode {
         let objs: any[] = [];
         for (let pose of this._poses) {
             objs.push({
-                sequence: EPars.sequence_array_to_string(pose.sequence),
-                structure: EPars.pairs_array_to_parenthesis(pose.molecularStructure),
+                sequence: EPars.sequenceToString(pose.sequence),
+                structure: EPars.pairsToParenthesis(pose.molecularStructure),
             });
         }
 
@@ -199,13 +199,13 @@ export class PuzzleEditMode extends GameMode {
         let states: any[] = this.loadSavedData();
         for (let ii = 0; ii < this._numTargets; ii++) {
             let default_structure: string = ".....((((((((....)))))))).....";
-            let default_pairs: number[] = EPars.parenthesis_to_pair_array(default_structure);
+            let default_pairs: number[] = EPars.parenthesisToPairs(default_structure);
             let default_sequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
             if (states != null && states[ii] != null && states[ii]['sequence'] != null && states[ii]['structure'] != null && states[ii]['structure'] != "") {
                 default_structure = states[ii]['structure'];
                 default_sequence = states[ii]['sequence'];
-                default_pairs = EPars.parenthesis_to_pair_array(default_structure);
+                default_pairs = EPars.parenthesisToPairs(default_structure);
             }
             let pose_field: PoseField = new PoseField(true);
             this.addObject(pose_field, this.poseLayer);
@@ -213,7 +213,7 @@ export class PuzzleEditMode extends GameMode {
             pose.scoreFolder = this._folder;
             pose.molecularStructure = default_pairs;
             pose.molecularBindingBonus = -4.86;
-            pose.sequence = EPars.string_to_sequence_array(default_sequence);
+            pose.sequence = EPars.stringToSequence(default_sequence);
             pose_fields.push(pose_field);
 
             let structureInput = new StructureInput(pose);
@@ -263,7 +263,7 @@ export class PuzzleEditMode extends GameMode {
     }
 
     public get sequence(): string {
-        return EPars.sequence_array_to_string(this._poses[0].sequence);
+        return EPars.sequenceToString(this._poses[0].sequence);
     }
 
     public getLockString(): string {
@@ -409,7 +409,7 @@ export class PuzzleEditMode extends GameMode {
                 length_limit = -1;
             }
 
-            let error: string = EPars.validate_parenthesis(secstruct, false, length_limit);
+            let error: string = EPars.validateParenthesis(secstruct, false, length_limit);
             if (error != null) {
                 this.showNotification(error);
                 return;
@@ -420,7 +420,7 @@ export class PuzzleEditMode extends GameMode {
                 return;
             }
 
-            if (!EPars.are_pairs_same(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.is_dev_mode) {
+            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).get_pairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.is_dev_mode) {
                 this.showNotification("You should first solve your puzzle before submitting it!");
                 return;
             }
@@ -464,7 +464,7 @@ export class PuzzleEditMode extends GameMode {
             }
         }
 
-        let sequence: string = EPars.sequence_array_to_string(this._poses[0].sequence);
+        let sequence: string = EPars.sequenceToString(this._poses[0].sequence);
         let beginning_sequence: string = "";
         for (let ii = 0; ii < len; ii++) {
             if (locks[ii]) {
@@ -475,7 +475,7 @@ export class PuzzleEditMode extends GameMode {
         }
 
         if (this._poses.length == 1) {
-            let num_pairs: number = EPars.num_pairs(this.getCurrentTargetPairs(0));
+            let num_pairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
 
             if (details.minGU && details.minGU > 0) {
                 constraints += ",GU," + details.minGU.toString();
@@ -540,7 +540,7 @@ export class PuzzleEditMode extends GameMode {
             PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2, PoseThumbnailType.WHITE));
 
         post_params["title"] = params_title;
-        post_params["secstruct"] = EPars.pairs_array_to_parenthesis(this.getCurrentTargetPairs(0));
+        post_params["secstruct"] = EPars.pairsToParenthesis(this.getCurrentTargetPairs(0));
         post_params["constraints"] = constraints;
         post_params["body"] = details.description;
         post_params["midimgdata"] = midImageString;
@@ -582,7 +582,7 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.targetButton.hotkey(null);
 
         for (let ii: number = 0; ii < this._poses.length; ii++) {
-            this._poses[ii].pairs = EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString);
+            this._poses[ii].pairs = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
         }
         this._paused = true;
 
@@ -644,7 +644,7 @@ export class PuzzleEditMode extends GameMode {
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._structureInputs[ii].structureString =
-                EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
+                EPars.pairsToParenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
 
         this.updateScore();
@@ -662,7 +662,7 @@ export class PuzzleEditMode extends GameMode {
             this._poses[ii].molecularStructure = this._targetPairsStack[this._stackLevel][ii];
             this._poses[ii].molecularBindingSite = this._bindingSiteStack[this._stackLevel][ii];
             this._structureInputs[ii].structureString =
-                EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii]);
+                EPars.pairsToParenthesis(this._targetPairsStack[this._stackLevel][ii]);
         }
         this.updateScore();
     }
@@ -688,7 +688,7 @@ export class PuzzleEditMode extends GameMode {
             this._constraintBoxes[ii].setContent(ConstraintType.SHAPE, {
                 target: target_pairs,
                 native: best_pairs
-            }, EPars.are_pairs_same(best_pairs, target_pairs), 0);
+            }, EPars.arePairsSame(best_pairs, target_pairs), 0);
             this._constraintBoxes[ii].display.scale.x = 1;
             this._constraintBoxes[ii].display.scale.y = 1;
         }
@@ -761,16 +761,16 @@ export class PuzzleEditMode extends GameMode {
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
-            let target_pairs: number[] = EPars.parenthesis_to_pair_array(this._structureInputs[ii].structureString);
+            let target_pairs: number[] = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
             let seq = this._poses[ii].sequence;
             let lock = this._poses[ii].puzzleLocks;
             let binding_site = this._poses[ii].molecularBindingSite;
 
             if (this._stackLevel >= 0) {
-                if (this._structureInputs[ii].structureString != EPars.pairs_array_to_parenthesis(this._targetPairsStack[this._stackLevel][ii])) {
+                if (this._structureInputs[ii].structureString != EPars.pairsToParenthesis(this._targetPairsStack[this._stackLevel][ii])) {
                     no_change = false;
                 }
-                if (EPars.sequence_array_to_string(seq) != EPars.sequence_array_to_string(this._seqStack[this._stackLevel][ii].get_sequence())) {
+                if (EPars.sequenceToString(seq) != EPars.sequenceToString(this._seqStack[this._stackLevel][ii].get_sequence())) {
                     no_change = false;
                 }
 

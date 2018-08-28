@@ -194,11 +194,11 @@ export class UndoBlock {
         let best_pairs: number[] = this.get_pairs(temp);
         let seq: number[] = this._sequence;
 
-        this.set_param(UndoBlockParam.GU, EPars.num_gu_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.GC, EPars.num_gc_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.AU, EPars.num_ua_pairs(seq, best_pairs), temp);
-        this.set_param(UndoBlockParam.STACK, EPars.get_longest_stack_length(best_pairs), temp);
-        this.set_param(UndoBlockParam.REPETITION, EPars.get_sequence_repetition(EPars.sequence_array_to_string(seq), 5), temp);
+        this.set_param(UndoBlockParam.GU, EPars.numGUPairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.GC, EPars.numGCPairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.AU, EPars.numUAPairs(seq, best_pairs), temp);
+        this.set_param(UndoBlockParam.STACK, EPars.getLongestStackLength(best_pairs), temp);
+        this.set_param(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(EPars.sequenceToString(seq), 5), temp);
         let full_seq: number[] = seq.slice();
         if (this._target_oligo) {
             if (this.get_oligo_mode() === Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);

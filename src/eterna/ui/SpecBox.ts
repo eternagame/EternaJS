@@ -142,11 +142,11 @@ export class SpecBox extends ContainerObject {
         EPars.addLetterStyles(statstring);
 
         statstring
-            .append(`${EPars.get_colored_letter("A")}-${EPars.get_colored_letter("U")} pairs : `, "bold")
+            .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
             .append(`${datablock.get_param(UndoBlockParam.AU, temperature)}   `)
-            .append(`${EPars.get_colored_letter("G")}-${EPars.get_colored_letter("C")} pairs : `, "bold")
+            .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
             .append(`${datablock.get_param(UndoBlockParam.GC, temperature)}   `)
-            .append(`${EPars.get_colored_letter("G")}-${EPars.get_colored_letter("U")} pairs : `, "bold")
+            .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
             .append(`${datablock.get_param(UndoBlockParam.GU, temperature)}\n`)
             .append("Melting point : ", "bold")
             .append(`${datablock.get_param(UndoBlockParam.MELTING_POINT, temperature)}°C\n`)

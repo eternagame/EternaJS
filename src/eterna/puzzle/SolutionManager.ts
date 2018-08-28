@@ -51,7 +51,7 @@ export class SolutionManager {
     }
 
     public checkRedundancyByHairpin(seq: string): boolean {
-        let seqHairpin: string = EPars.get_barcode_hairpin(seq);
+        let seqHairpin: string = EPars.getBarcodeHairpin(seq);
         if (seqHairpin == null) {
             return true;
         }
