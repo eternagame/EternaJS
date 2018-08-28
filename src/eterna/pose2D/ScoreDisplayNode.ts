@@ -6,37 +6,37 @@ export enum ScoreDisplayNodeType {
 }
 
 export class ScoreDisplayNode {
-    public get_base_indices(): number[] {
-        return this._base_indices;
+    public get baseIndices(): number[] {
+        return this._baseIndices;
     }
 
-    public set_type(type: number, base_indices: number[], score: number): void {
+    public setType(type: number, base_indices: number[], score: number): void {
         this._type = type;
-        this._base_indices = base_indices.slice();
+        this._baseIndices = base_indices.slice();
         this._score = score;
     }
 
-    public get_score(): number {
+    public get score(): number {
         return this._score;
     }
 
     public clean(): void {
-        this._base_indices = null;
+        this._baseIndices = null;
     }
 
-    public get_text_label(): string {
+    public get textLabel(): string {
         return (this._type === ScoreDisplayNodeType.STACK ? "Stack" : "Loop");
     }
 
-    public get_text_score(): string {
+    public get textScore(): string {
         return (this._score / 100).toString() + " kcal";
     }
 
-    public get_text(): string {
-        return this.get_text_label() + "\n" + (this._score / 100).toString() + " kcal";
+    public get text(): string {
+        return this.textLabel + "\n" + (this._score / 100).toString() + " kcal";
     }
 
-    public getScoreColor(): number {
+    public get scoreColor(): number {
         let r: number = 0;
         let g: number = 0;
         let b: number = 0;
@@ -60,12 +60,12 @@ export class ScoreDisplayNode {
         return ColorUtil.compose(r, g, b);
     }
 
-    public getScoreString(): string {
+    public get scoreString(): string {
         return (this._score / 100.0).toString();
 
     }
 
     private _type: number;
-    private _base_indices: number[];
+    private _baseIndices: number[];
     private _score: number;
 }
