@@ -29,14 +29,14 @@ export class FolderManager {
         return false;
     }
 
-    public getFolder(name: string): Folder {
+    public getFolder(name: string): Folder | null {
         for (let folder of this._folders) {
             if (folder.name.toLowerCase() === name.toLowerCase()) {
                 return folder;
             }
         }
 
-        throw new Error(`No such folder '${name}'`);
+        return null;
     }
 
     public getNextFolder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
