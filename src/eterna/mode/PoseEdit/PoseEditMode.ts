@@ -32,12 +32,14 @@ import {Sounds} from "../../resources/Sounds";
 import {RNAScript} from "../../rscript/RNAScript";
 import {ActionBar} from "../../ui/ActionBar";
 import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
+import {ContextMenu} from "../../ui/ContextMenu";
 import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
 import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
+import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
@@ -48,7 +50,6 @@ import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
 import {MissionClearedPanel} from "./MissionClearedPanel";
 import {MissionIntroMode} from "./MissionIntroMode";
-import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseEditToolbar} from "./PoseEditToolbar";
 import {SubmitPoseDetails} from "./SubmitPoseDetails";
 import {SubmitPoseDialog} from "./SubmitPoseDialog";
@@ -98,23 +99,14 @@ export class PoseEditMode extends GameMode {
             log.debug("TODO: viewSolutions");
             // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this.puzzle.get_node_id()]);
         });
-        this._toolbar.retryButton.clicked.connect(() => this.askRetry());
+        this._toolbar.retryButton.clicked.connect(() => this.showResetPrompt());
         this._toolbar.nativeButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
+        this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
         this._toolbar.pasteButton.clicked.connect(() =>  this.showPasteSequenceDialog());
-        this._toolbar.viewOptionsButton.clicked.connect(() => {
-            let mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ?
-                EternaViewOptionsMode.LAB :
-                EternaViewOptionsMode.PUZZLE;
-            this.showDialog(new EternaViewOptionsDialog(mode));
-        });
+        this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
-
-        this._toolbar.copyButton.clicked.connect(() => {
-            let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
-            this.showDialog(new CopySequenceDialog(sequenceString));
-        });
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
 
@@ -211,7 +203,7 @@ export class PoseEditMode extends GameMode {
         return this._constraintsLayer;
     }
 
-    protected showPasteSequenceDialog(): void {
+    private showPasteSequenceDialog(): void {
         this.showDialog(new PasteSequenceDialog()).closed.then(sequence => {
             if (sequence != null) {
                 for (let pose of this._poses) {
@@ -219,6 +211,18 @@ export class PoseEditMode extends GameMode {
                 }
             }
         });
+    }
+
+    private showViewOptionsDialog(): void {
+        let mode = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ?
+            EternaViewOptionsMode.LAB :
+            EternaViewOptionsMode.PUZZLE;
+        this.showDialog(new EternaViewOptionsDialog(mode));
+    }
+
+    private showCopySequenceDialog(): void {
+        let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
+        this.showDialog(new CopySequenceDialog(sequenceString));
     }
 
     public set nextDesignCallback(cb: () => void) {
@@ -1098,58 +1102,26 @@ export class PoseEditMode extends GameMode {
     }
 
     /*override*/
-    protected enter(): void {
-        log.debug("TODO: enter()");
-        // if (this._puzzle.get_puzzle_type() !== PuzzleType.EXPERIMENTAL) {
-        //     Application.instance.get_application_gui("View options").set_advanced(0);
-        // }
-        // //let _this:PoseEditMode = this;
-        // //_menuitem = Application.instance.get_application_gui("Menu").add_sub_item_cb("Beam to puzzlemaker", "Puzzle", function () :void {
-        // //	_this.transferToPuzzlemaker();
-        // //});
-        //
-        // // Context menus
-        //
-        // let my_menu: ContextMenu = new ContextMenu();
-        // my_menu.hideBuiltInItems();
-        //
-        // this._view_options_cmi = new ContextMenuItem("Preferences");
-        // my_menu.customItems.push(this._view_options_cmi);
-        // this._view_options_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        // if (this._puzzle.get_puzzle_type() === PuzzleType.EXPERIMENTAL) {
-        //     this._view_solutions_cmi = new ContextMenuItem("Design browser");
-        //     my_menu.customItems.push(this._view_solutions_cmi);
-        //     this._view_solutions_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        //     this._submit_cmi = new ContextMenuItem("Submit");
-        //     my_menu.customItems.push(this._submit_cmi);
-        //     this._submit_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        //     this._spec_cmi = new ContextMenuItem("Specs");
-        //     my_menu.customItems.push(this._spec_cmi);
-        //     this._spec_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        // }
-        //
-        // this._reset_cmi = new ContextMenuItem("Reset");
-        // my_menu.customItems.push(this._reset_cmi);
-        // this._reset_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        // this._copy_cmi = new ContextMenuItem("Copy sequence");
-        // my_menu.customItems.push(this._copy_cmi);
-        // this._copy_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        // this._paste_cmi = new ContextMenuItem("Paste sequence");
-        // my_menu.customItems.push(this._paste_cmi);
-        // this._paste_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        // this._beam_cmi = new ContextMenuItem("Beam to puzzlemaker");
-        // my_menu.customItems.push(this._beam_cmi);
-        // this._beam_cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, this.onCtxMenuItem);
-        //
-        // this.contextMenu = my_menu;
+    protected createContextMenu(): ContextMenu {
+        if (this.isDialogOrNotifShowing || this.hasUILock) {
+            return null;
+        }
 
-        super.enter();
+        let menu = new ContextMenu();
+
+        menu.addItem("Preferences").clicked.connect(() => this.showViewOptionsDialog());
+        if (this._puzzle.puzzleType == PuzzleType.EXPERIMENTAL) {
+            menu.addItem("Design Browser").enabled = false;
+            menu.addItem("Submit").clicked.connect(() => this.submitCurrentPose());
+            menu.addItem("Specs").clicked.connect(() => this.showSpec());
+        }
+
+        menu.addItem("Reset").clicked.connect(() => this.showResetPrompt());
+        menu.addItem("Copy Sequence").clicked.connect(() => this.showCopySequenceDialog());
+        menu.addItem("Paste Sequence").clicked.connect(() => this.showPasteSequenceDialog());
+        menu.addItem("Beam to PuzzleMaker").clicked.connect(() => log.debug("TODO: Beam to PuzzleMaker"));
+
+        return menu;
     }
 
     private createScreenshot(): ArrayBuffer {
@@ -1195,7 +1167,7 @@ export class PoseEditMode extends GameMode {
         this.showMissionClearedPanel(this._submitSolutionRspData);
     }
 
-    private askRetry(): void {
+    private showResetPrompt(): void {
         const PROMPT = "Do you really want to reset?\nResetting will clear your undo stack.";
         this.showConfirmDialog(PROMPT).closed.then(confirmed => {
             if (confirmed) {
@@ -3534,27 +3506,6 @@ export class PoseEditMode extends GameMode {
             Flashbang.stageHeight - 129);
     }
 
-    // private on_ctx_menu_item(event: ContextMenuEvent): void {
-    //     if (event.target === this._view_options_cmi) {
-    //         Application.instance.get_application_gui("View options").open_view_options();
-    //     } else if (event.target === this._view_solutions_cmi) {
-    //         Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this._puzzle.get_node_id()]);
-    //     } else if (event.target === this._submit_cmi) {
-    //         this.submit_current_pose();
-    //     } else if (event.target === this._spec_cmi) {
-    //         this.show_spec();
-    //     } else if (event.target === this._reset_cmi) {
-    //         this.ask_retry();
-    //     } else if (event.target === this._copy_cmi) {
-    //         Application.instance.copy_to_clipboard(EPars.sequence_array_to_string(this._poses[0].get_sequence()), "Copied the current sequence to the clipboard");
-    //     } else if (event.target === this._paste_cmi) {
-    //          this.showPasteSequenceDialog();
-    //     } else if (event.target === this._beam_cmi) {
-    //         let _this: PoseEditMode = this;
-    //         _this.transfer_to_puzzlemaker();
-    //     }
-    // }
-
     private readonly _puzzle: Puzzle;
     private readonly _initSeq: number[];
     private readonly _isReset: boolean;
@@ -3616,16 +3567,6 @@ export class PoseEditMode extends GameMode {
     private _constraintsBottom: number = 0;
     private _uiHighlight: SpriteObject;
 
-    /// Context menu items
-    // private _view_options_cmi: ContextMenuItem = null;
-    // private _view_solutions_cmi: ContextMenuItem = null;
-    // private _submit_cmi: ContextMenuItem = null;
-    // private _spec_cmi: ContextMenuItem = null;
-    // private _reset_cmi: ContextMenuItem = null;
-    // private _copy_cmi: ContextMenuItem = null;
-    // private _paste_cmi: ContextMenuItem = null;
-    // private _beam_cmi: ContextMenuItem = null;
-    /// Scripts
     private _scriptbar: ActionBar;
     private _xButton: GameButton;
     private _nidField: Text;
@@ -3633,12 +3574,13 @@ export class PoseEditMode extends GameMode {
     private _runStatus: Text;
     private _scriptHooks: boolean = false;
     private _setterHooks: boolean = false;
-    /// ROP presets
     private _ropPresets: (() => void)[] = [];
+
     // Design browser hooks
     private _nextDesignCallback: () => void = null;
     private _prevDesignCallback: () => void = null;
     private _isPlaying: boolean = false;
+
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;
     private _overrideShowConstraints: boolean = true;
