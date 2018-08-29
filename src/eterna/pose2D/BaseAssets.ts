@@ -160,8 +160,6 @@ export class BaseAssets {
         }
         BaseAssets._inited = true;
 
-        log.debug("INIT GRAPHICS");
-
         // SPHERE TEXTURES
 
         BaseAssets._sphereData = [];
