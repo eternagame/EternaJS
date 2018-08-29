@@ -3202,7 +3202,6 @@ export class PoseEditMode extends GameMode {
         if (this._targetConditions[ii]) force_struct = this._targetConditions[ii]['force_struct'];
 
         if (this._targetConditions[ii] == null || this._targetConditions[ii]['type'] === "single") {
-            log.debug("folding");
             best_pairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, force_struct);
 
         } else if (this._targetConditions[ii]['type'] === "aptamer") {
