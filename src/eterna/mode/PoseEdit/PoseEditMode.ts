@@ -1486,7 +1486,7 @@ export class PoseEditMode extends GameMode {
                 "synthesized properly";
 
             if (!this.checkConstraints(false)) {
-                if (this._puzzle.isSoftConstraint || Eterna.isDevMode) {
+                if (this._puzzle.isSoftConstraint || Eterna.DEV_MODE) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
                         .then(confirmed => {
                             if (confirmed) {

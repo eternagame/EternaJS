@@ -111,7 +111,7 @@ export class EternaApp extends FlashbangApp {
     /* override */
     protected setup(): void {
         Eterna.settings = new EternaSettings();
-        Eterna.client = new GameClient(Eterna.serverURL);
+        Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.sound = new SoundManager(Eterna.settings);
 
         this.setLoadingText("Authenticating...");
@@ -172,7 +172,7 @@ export class EternaApp extends FlashbangApp {
     }
 
     private authenticate(): Promise<void> {
-        if (!Eterna.isDebugMode) {
+        if (!Eterna.DEV_MODE) {
             return Eterna.client.authenticate()
                 .then(([username, uid]) => {
                     log.debug(`Authenticated as [name=${username}, uid=${uid}]`);

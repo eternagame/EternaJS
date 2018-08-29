@@ -9,13 +9,13 @@ export class Eterna {
     public static readonly OVERLAY_DIV_ID = "overlay";
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
 
+    public static readonly DEV_MODE: boolean = parseBool(process.env["DEBUG"]);
+    public static readonly SERVER_URL: string = process.env["APP_SERVER_URL"];
+
     public static settings: EternaSettings;
 
     public static playerID: number;
     public static playerName: string;
-    public static readonly isDevMode: boolean = true; // TODO: what does this mean?
-    public static readonly isDebugMode: boolean = parseBool(process.env["DEBUG"]);
-    public static readonly serverURL: string = process.env["APP_SERVER_URL"];
 
     public static client: GameClient;
     public static sound: SoundManager;
