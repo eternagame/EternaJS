@@ -56,15 +56,15 @@ export class MissionClearedPanel extends ContainerObject {
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
         this._tfPlayer = Fonts.std_bold("PLAYER", 14).bold().color(0xffffff).build();
-        this._tfPlayer.position = new Point(10, 0);
+        this._tfPlayer.position = new Point(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
         let tfRank: Text = Fonts.std_bold("RANK", 14).bold().color(0xffffff).build();
-        tfRank.position = new Point(10 + 130, 0);
+        tfRank.position = new Point(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
         let tfCoin: Text = Fonts.std_bold("POINTS", 14).bold().color(0xffffff).build();
-        tfCoin.position = new Point(10 + 130 + 85, 0);
+        tfCoin.position = new Point(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
         this.closeButton = new GameButton()
@@ -130,7 +130,7 @@ export class MissionClearedPanel extends ContainerObject {
         );
 
         if (this._rankScroll != null) {
-            this._rankScrollHeading.setSize(310, this._tfPlayer.height);
+            this._rankScrollHeading.setSize(310, this._tfPlayer.height + 6);
             this._rankScrollHeading.display.position = new Point(
                 ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
                 0
@@ -138,7 +138,7 @@ export class MissionClearedPanel extends ContainerObject {
 
             this._rankScroll.display.position = new Point(
                 ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
-                10 + this._tfPlayer.height
+                12 + this._tfPlayer.height
             );
         }
 

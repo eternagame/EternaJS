@@ -251,12 +251,11 @@ export class RankScroll extends ContainerObject {
 
         // Set current player's row as center position
         this._playerRow = new RankRowLayout(startRank, this._playerRank, max_width, 20, 100, 0xEBA800);
-        // this._player_row.set_size(new UDim(0, 0, RankBoard.ROW_WIDTH, RankBoard.PLAYER_ROW_HEIGHT));
-        this._playerRow.display.position = new Point(0, size_indicator * RankBoard.ROW_HEIGHT);
+        this._playerRow.display.position = new Point(0, size_indicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
         this._tfRankOffset = Fonts.std_regular(`+${this._rankOffset}`, 20).color(0xffffff).bold().build();
-        this._tfRankOffset.position = new Point(-this._tfRankOffset.width - 10, size_indicator * RankBoard.ROW_HEIGHT);
+        this._tfRankOffset.position = new Point(-this._tfRankOffset.width - 10, size_indicator * RankBoard.ROW_HEIGHT + 4);
         this._tfRankOffset.visible = true;
         this.container.addChild(this._tfRankOffset);
     }
