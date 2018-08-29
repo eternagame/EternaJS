@@ -277,18 +277,20 @@ export class GameButton extends Button implements KeyboardListener {
     private _hotkeyReg: Registration;
     private _tooltipReg: Registration;
 
-    private static TEXT_COLORS: Map<ButtonState, number> = new Map([
+    private static readonly TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],
         [ButtonState.OVER, 0xFFFFFF],
-        [ButtonState.DOWN, 0x333333]
+        [ButtonState.DOWN, 0x333333],
+        [ButtonState.DISABLED, 0x999999],
     ]);
 
-    private static STYLEBOX_COLORS: Map<ButtonState, number> = new Map([
+    private static readonly STYLEBOX_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0x2D4159],
         [ButtonState.OVER, 0x2D4159],
-        [ButtonState.DOWN, 0xFFCC00]
+        [ButtonState.DOWN, 0xFFCC00],
+        [ButtonState.DISABLED, 0x2D4159],
     ]);
 
-    private static readonly WMARGIN: number = 5;
-    private static readonly HMARGIN: number = 4;
+    private static readonly WMARGIN = 5;
+    private static readonly HMARGIN = 4;
 }
