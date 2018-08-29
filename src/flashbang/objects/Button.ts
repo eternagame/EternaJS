@@ -191,7 +191,7 @@ export abstract class Button extends ContainerObject implements Enableable {
     }
 
     protected hitTest(globalLoc: Point): boolean {
-        return DisplayUtil.hitTest(this.display, globalLoc);
+        return this.isLiveObject && DisplayUtil.hitTest(this.display, globalLoc);
     }
 
     /**
