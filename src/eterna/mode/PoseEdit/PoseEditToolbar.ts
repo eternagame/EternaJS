@@ -77,10 +77,115 @@ export class PoseEditToolbar extends ContainerObject {
 
         const isExperimental = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL;
 
-        // MENU
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
-        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(null));
         this.addObject(this.actionMenu, this._toolbarLayout);
+
+        // ACTION MENU
+        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(null));
+
+        this.screenshotButton = new GameButton()
+            .allStates(Bitmaps.ImgScreenshot)
+            .disabled(null)
+            .label("Screenshot", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Screenshot");
+        this.actionMenu.addSubMenuButton(0, this.screenshotButton);
+
+        this.viewOptionsButton = new GameButton()
+            .allStates(Bitmaps.ImgSettings)
+            .disabled(null)
+            .label("Settings", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Game options");
+        this.actionMenu.addSubMenuButton(0, this.viewOptionsButton);
+
+        this.viewSolutionsButton = new GameButton()
+            .allStates(Bitmaps.ImgFile)
+            .disabled(null)
+            .label("Designs", 14)
+            .scaleBitmapToLabel()
+            .tooltip("View all submitted designs for this puzzle.");
+
+        this.specButton = new GameButton()
+            .allStates(Bitmaps.ImgSpec)
+            .disabled(null)
+            .label("Specs", 14)
+            .scaleBitmapToLabel()
+            .tooltip("View RNA's melting point, dotplot and other specs")
+            .hotkey(KeyCode.KeyS);
+
+        if (isExperimental) {
+            this.actionMenu.addSubMenuButton(0, this.viewSolutionsButton);
+            this.actionMenu.addSubMenuButton(0, this.specButton);
+        }
+
+        this.retryButton = new GameButton()
+            .allStates(Bitmaps.ImgReset)
+            .disabled(null)
+            .label("Reset", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Reset and try this puzzle again.")
+            .rscriptID(RScriptUIElementID.RESET);
+        this.actionMenu.addSubMenuButton(0, this.retryButton);
+
+        this.copyButton = new GameButton()
+            .allStates(Bitmaps.ImgCopy)
+            .disabled(null)
+            .label("Copy", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Copy the current sequence");
+
+        this.pasteButton = new GameButton()
+            .allStates(Bitmaps.ImgPaste)
+            .disabled(null)
+            .label("Paste", 14)
+            .scaleBitmapToLabel()
+            .tooltip("Type in a sequence");
+
+        if (this._puzzle.puzzleType !== PuzzleType.BASIC) {
+            this.actionMenu.addSubMenuButton(0, this.copyButton);
+            this.actionMenu.addSubMenuButton(0, this.pasteButton);
+        }
+
+        // BOOSTERS
+        let boostersData: BoostersData = this._puzzle.boosters;
+        if (boostersData) {
+            let mode: PoseEditMode = this.mode as PoseEditMode;
+
+            if (boostersData.paint_tools != null) {
+                let boosterPaintToolsLayout = new HLayoutContainer();
+                this._toolbarLayout.addHSpacer(SPACE_NARROW);
+                this._toolbarLayout.addChild(boosterPaintToolsLayout);
+                for (let data of boostersData.paint_tools) {
+                    Booster.create(mode, data).then(booster => {
+                        booster.onLoad();
+                        let button: GameButton = booster.createButton();
+                        button.clicked.connect(() => {
+                            mode.setPosesColor(booster.toolColor);
+                            mode.deselectAllColorings();
+                            button.toggled.value = true;
+                        });
+                        this.dynPaintTools.push(button);
+                        this.addObject(button, boosterPaintToolsLayout);
+                        this.updateLayout();
+                    });
+                }
+            }
+
+            if (boostersData.actions != null) {
+                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
+                let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
+                for (let ii = 0; ii < boostersData.actions.length; ii++) {
+                    let data = boostersData.actions[ii];
+                    Booster.create(mode, data).then(booster => {
+                        let button: GameButton = booster.createButton(14);
+                        button.clicked.connect(() => booster.onRun());
+                        this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
+                        this.dynActionTools.push(button);
+                    });
+                }
+            }
+        }
 
         // SUBMIT BUTTON
         this.submitButton = new GameButton()
@@ -172,47 +277,6 @@ export class PoseEditToolbar extends ContainerObject {
             this.palette.enabled = false;
         }
 
-        // BOOSTERS
-        let boostersData: BoostersData = this._puzzle.boosters;
-        if (boostersData) {
-            let mode: PoseEditMode = this.mode as PoseEditMode;
-
-            if (boostersData.paint_tools != null) {
-                let boosterPaintToolsLayout = new HLayoutContainer();
-                this._toolbarLayout.addHSpacer(SPACE_NARROW);
-                this._toolbarLayout.addChild(boosterPaintToolsLayout);
-                for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, data).then(booster => {
-                        booster.onLoad();
-                        let button: GameButton = booster.createButton();
-                        button.clicked.connect(() => {
-                            mode.setPosesColor(booster.toolColor);
-                            mode.deselectAllColorings();
-                            button.toggled.value = true;
-                        });
-                        this.dynPaintTools.push(button);
-                        this.addObject(button, boosterPaintToolsLayout);
-                        this.updateLayout();
-                    });
-                }
-            }
-
-            if (boostersData.actions != null) {
-                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
-                let idx: number = this.actionMenu.addMenuButton(this.boostersMenu);
-                for (let ii = 0; ii < boostersData.actions.length; ii++) {
-                    let data = boostersData.actions[ii];
-                    Booster.create(mode, data).then(booster => {
-                        let button: GameButton = booster.createButton(14);
-                        button.clicked.connect(() => booster.onRun());
-                        this.actionMenu.addSubMenuButtonAt(idx, button, ii);
-                        this.dynActionTools.push(button);
-                    });
-                }
-            }
-        }
-
-
         // ZOOM IN, ZOOM OUT, UNDO, REDO
         this.zoomInButton = new GameButton()
             .up(Bitmaps.ImgZoomIn)
@@ -258,71 +322,6 @@ export class PoseEditToolbar extends ContainerObject {
             this.addObject(this.redoButton, this._toolbarLayout);
         }
 
-        // MENU BUTTONS
-        this.screenshotButton = new GameButton()
-            .allStates(Bitmaps.ImgScreenshot)
-            .disabled(null)
-            .label("Screenshot", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Screenshot");
-        this.actionMenu.addSubMenuButton(0, this.screenshotButton);
-
-        this.viewOptionsButton = new GameButton()
-            .allStates(Bitmaps.ImgSettings)
-            .disabled(null)
-            .label("Settings", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Game options");
-        this.actionMenu.addSubMenuButton(0, this.viewOptionsButton);
-
-        this.viewSolutionsButton = new GameButton()
-            .allStates(Bitmaps.ImgFile)
-            .disabled(null)
-            .label("Designs", 14)
-            .scaleBitmapToLabel()
-            .tooltip("View all submitted designs for this puzzle.");
-
-        this.specButton = new GameButton()
-            .allStates(Bitmaps.ImgSpec)
-            .disabled(null)
-            .label("Specs", 14)
-            .scaleBitmapToLabel()
-            .tooltip("View RNA's melting point, dotplot and other specs")
-            .hotkey(KeyCode.KeyS);
-
-        if (isExperimental) {
-            this.actionMenu.addSubMenuButton(0, this.viewSolutionsButton);
-            this.actionMenu.addSubMenuButton(0, this.specButton);
-        }
-
-        this.retryButton = new GameButton()
-            .allStates(Bitmaps.ImgReset)
-            .disabled(null)
-            .label("Reset", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Reset and try this puzzle again.")
-            .rscriptID(RScriptUIElementID.RESET);
-        this.actionMenu.addSubMenuButton(0, this.retryButton);
-
-        this.copyButton = new GameButton()
-            .allStates(Bitmaps.ImgCopy)
-            .disabled(null)
-            .label("Copy", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Copy the current sequence");
-
-        this.pasteButton = new GameButton()
-            .allStates(Bitmaps.ImgPaste)
-            .disabled(null)
-            .label("Paste", 14)
-            .scaleBitmapToLabel()
-            .tooltip("Type in a sequence");
-
-        if (this._puzzle.puzzleType !== PuzzleType.BASIC) {
-            this.actionMenu.addSubMenuButton(0, this.copyButton);
-            this.actionMenu.addSubMenuButton(0, this.pasteButton);
-        }
-
         this.hintButton = new GameButton()
             .up(Bitmaps.ImgHint)
             .over(Bitmaps.ImgHintOver)
@@ -356,9 +355,16 @@ export class PoseEditToolbar extends ContainerObject {
                 this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5);
         }
 
+        // If we have no boosters menu, we offset our entire layout by the .5 width of
+        // the boosters button. The tutorial hardcodes screen locations for its
+        // point-at-toolbar-buttons tips, so everything needs to be laid out *just so*,
+        // unfortunately.
+        let hOffset = (this.boostersMenu == null ? 27 : 0);
+
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
+            hOffset, 0);
     }
 
     public setToolbarAutohide(enabled: boolean): void {
