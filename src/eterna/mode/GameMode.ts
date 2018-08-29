@@ -179,7 +179,7 @@ export abstract class GameMode extends AppMode {
 
         Eterna.client.postScreenshot(screenshot)
             .then(filename => {
-                let url = new URL(filename, Eterna.serverURL);
+                let url = new URL(filename, Eterna.SERVER_URL);
                 let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
                 this.showConfirmDialog(prompt, true).closed.then(confirmed => {
                     if (confirmed) {

@@ -405,7 +405,7 @@ export class PuzzleEditMode extends GameMode {
             let secstruct: string = this._structureInputs[ii].structureString;
 
             let length_limit: number = 400;
-            if (Eterna.isDevMode) {
+            if (Eterna.DEV_MODE) {
                 length_limit = -1;
             }
 
@@ -420,12 +420,12 @@ export class PuzzleEditMode extends GameMode {
                 return;
             }
 
-            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).getPairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.isDevMode) {
+            if (!EPars.arePairsSame(this.getCurrentTargetPairs(ii), this.getCurrentUndoBlock(ii).getPairs(EPars.DEFAULT_TEMPERATURE)) && !Eterna.DEV_MODE) {
                 this.showNotification("You should first solve your puzzle before submitting it!");
                 return;
             }
 
-            if (this._poses[ii].checkOverlap() && !Eterna.isDevMode) {
+            if (this._poses[ii].checkOverlap() && !Eterna.DEV_MODE) {
                 this.showNotification("Some bases overlapped too much!");
                 return;
             }
