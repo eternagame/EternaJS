@@ -1,7 +1,7 @@
 ﻿import {Container, Point, Sprite, Texture} from "pixi.js";
 import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
-import {BitmapUtil} from "../util/BitmapUtil";
+import {EternaTextureUtil} from "../util/EternaTextureUtil";
 
 export class Molecule extends Container {
     public constructor() {
@@ -70,18 +70,18 @@ export class Molecule extends Container {
             let body_bitmaps_in_zoom: Texture[] = [];
 
             let zoom_factor: number = 1.0 - zz * 0.1;
-            let base_glow_data: Texture = BitmapUtil.scaleBy(original_glow_data, zoom_factor);
-            let base_body_data: Texture = BitmapUtil.scaleBy(original_body_data, zoom_factor);
+            let base_glow_data: Texture = EternaTextureUtil.scaleBy(original_glow_data, zoom_factor);
+            let base_body_data: Texture = EternaTextureUtil.scaleBy(original_body_data, zoom_factor);
 
             for (let ii: number = 0; ii < Molecule.NUM_ANIMATION_STEPS; ii++) {
-                let new_glow_data: Texture = BitmapUtil.colorTransformAlpha(
+                let new_glow_data: Texture = EternaTextureUtil.colorTransformAlpha(
                     base_glow_data, 255, 255, 255, 1.0 - (ii / Molecule.NUM_ANIMATION_STEPS) * 0.5, 0, 0, 0, 0);
                 bitmaps_in_zoom.push(new_glow_data);
 
-                let wrong_glow_data: Texture = BitmapUtil.colorTransform(new_glow_data, 255, 0, 0, 0, 0, 0);
+                let wrong_glow_data: Texture = EternaTextureUtil.colorTransform(new_glow_data, 255, 0, 0, 0, 0, 0);
                 wrong_bitmaps_in_zoom.push(wrong_glow_data);
 
-                let body_data: Texture = BitmapUtil.rotate(base_body_data, 360 * ii / Molecule.NUM_ANIMATION_STEPS);
+                let body_data: Texture = EternaTextureUtil.rotate(base_body_data, 360 * ii / Molecule.NUM_ANIMATION_STEPS);
                 body_bitmaps_in_zoom.push(body_data);
             }
 

@@ -13,8 +13,8 @@ import {Pose2D, RNAHighlightState} from "./Pose2D";
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
 export class Base extends ContainerObject implements LateUpdatable {
-    public static NUM_ZOOM_LEVELS: number = 2;
-    public static ZOOM_SCALE_FACTOR: number = 0.75;
+    public static NUM_ZOOM_LEVELS = 2;
+    public static ZOOM_SCALE_FACTOR = 0.75;
 
     constructor(pose: Pose2D, type: number) {
         super();
@@ -225,25 +225,25 @@ export class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
-    public setDrawParams(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null) {
+    public setDrawParams(zoom_level: number, off_x: number, off_y: number, current_time: number, drawFlags: number, numberTexture: Texture, highlight_state: RNAHighlightState = null) {
         this._zoomLevel = zoom_level;
         this._offX = off_x;
         this._offY = off_y;
         this._currentTime = current_time;
         this._drawFlags = drawFlags;
         this._highlightState = highlight_state;
-        this._numberBitmap = numberBitmap;
+        this._numberTexture = numberTexture;
         this._needsRedraw = true;
     }
 
     public lateUpdate(dt: number): void {
         if (this._needsRedraw && this.display.visible && this._baseType !== EPars.RNABASE_CUT) {
-            this.redraw(this._zoomLevel, this._offX, this._offY, this._currentTime, this._drawFlags, this._numberBitmap, this._highlightState);
+            this.redraw(this._zoomLevel, this._offX, this._offY, this._currentTime, this._drawFlags, this._numberTexture, this._highlightState);
             this._needsRedraw = false;
         }
     }
 
-    private redraw(zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number, numberBitmap: Texture, highlight_state: RNAHighlightState = null): void {
+    private redraw(zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number, numberTexture: Texture, highlight_state: RNAHighlightState = null): void {
         this._body.visible = false;
         this._backbone.visible = false;
         this._barcode.visible = false;
@@ -258,8 +258,8 @@ export class Base extends ContainerObject implements LateUpdatable {
 
         const lowperform: boolean = (drawFlags & BaseDrawFlags.LOW_PERFORM) !== 0;
 
-        let body_data: Texture = BaseAssets.getBodyBitmap(this._baseType, this._colorLevel, zoomLevel, drawFlags);
-        const barcode_data: Texture = BaseAssets.getBarcodeBitmap(zoomLevel, drawFlags);
+        let body_data: Texture = BaseAssets.getBodyTexture(this._baseType, this._colorLevel, zoomLevel, drawFlags);
+        const barcode_data: Texture = BaseAssets.getBarcodeTexture(zoomLevel, drawFlags);
 
         let random_x: number = 0;
         let random_y: number = 0;
@@ -331,7 +331,7 @@ export class Base extends ContainerObject implements LateUpdatable {
                 this._body.x = random_x + offX;
                 this._body.y = random_y + offY;
 
-                let letterdata: Texture = BaseAssets.getLetterBitmap(this._baseType, zoomLevel, drawFlags);
+                let letterdata: Texture = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
                 if (letterdata != null) {
                     Base.showSprite(this._letter, letterdata);
                     this._letter.x = random_x + offX;
@@ -342,7 +342,7 @@ export class Base extends ContainerObject implements LateUpdatable {
 
         if (Math.abs(this._goX) > 0 || Math.abs(this._goY) > 0) {
             if (zoomLevel < 2 * Base.NUM_ZOOM_LEVELS && !this._isLast && !lowperform) {
-                const backbone_data: Texture = BaseAssets.getBackboneBitmap(zoomLevel, drawFlags);
+                const backbone_data: Texture = BaseAssets.getBackboneTexture(zoomLevel);
                 Base.showSprite(this._backbone, backbone_data);
                 this._backbone.x = random_x + offX + this._goX / 2;
                 this._backbone.y = random_y + offY + this._goY / 2;
@@ -369,9 +369,9 @@ export class Base extends ContainerObject implements LateUpdatable {
                     st0_diff_degree = 0;
                 }
 
-                satellite_body_data = BaseAssets.getSatellite0Bitmap(zoomLevel, st0_diff_degree);
+                satellite_body_data = BaseAssets.getSatellite0Texture(zoomLevel, st0_diff_degree);
                 if (satellite_body_data == null) {
-                    satellite_body_data = BaseAssets.getSatellite0Bitmap(zoomLevel, st0_diff_degree);
+                    satellite_body_data = BaseAssets.getSatellite0Texture(zoomLevel, st0_diff_degree);
                 }
 
                 let draw_st0: boolean = !this._forceUnpaired;
@@ -456,7 +456,7 @@ export class Base extends ContainerObject implements LateUpdatable {
                     st1_diff_degree = 0;
                 }
 
-                satellite_body_data = BaseAssets.getSatellite1Bitmap(zoomLevel, st1_diff_degree, this._pairType);
+                satellite_body_data = BaseAssets.getSatellite1Texture(zoomLevel, st1_diff_degree, this._pairType);
 
                 this._lastSatellite1AbsDegree = st1_diff_degree + 90.0;
 
@@ -473,15 +473,15 @@ export class Base extends ContainerObject implements LateUpdatable {
             this._unpairing = false;
         }
 
-        if (numberBitmap != null && body_data != null && draw_body) {
-            let desired_dist: number = Math.sqrt((numberBitmap.width / 2) * (numberBitmap.width / 2) + (numberBitmap.height / 2) * (numberBitmap.height / 2));
+        if (numberTexture != null && body_data != null && draw_body) {
+            let desired_dist: number = Math.sqrt((numberTexture.width / 2) * (numberTexture.width / 2) + (numberTexture.height / 2) * (numberTexture.height / 2));
             desired_dist += Math.sqrt((this._outX / 2) * (this._outX / 2) + (this._outY / 2) * (this._outY / 2));
             desired_dist *= 0.8;
 
             let out_dist: number = Math.sqrt(this._outX * this._outX + this._outY * this._outY);
             if (out_dist > Constants.EPSILON) {
                 let numberPos: Point = new Point(offX + this._outX * desired_dist / out_dist, offY + this._outY * desired_dist / out_dist);
-                Base.showSprite(this._number, numberBitmap);
+                Base.showSprite(this._number, numberTexture);
                 this._number.x = numberPos.x;
                 this._number.y = numberPos.y;
             }
@@ -513,7 +513,7 @@ export class Base extends ContainerObject implements LateUpdatable {
             animProgress = 0;
         }
 
-        let tex = BaseAssets.getSparkBitmap(animProgress);
+        let tex = BaseAssets.getSparkTexture(animProgress);
         Base.showSprite(this._spark1, tex);
         Base.showSprite(this._spark2, tex);
 
@@ -637,5 +637,5 @@ export class Base extends ContainerObject implements LateUpdatable {
     private _currentTime: number = 0;
     private _drawFlags: number = 0;
     private _highlightState: RNAHighlightState;
-    private _numberBitmap: Texture;
+    private _numberTexture: Texture;
 }
