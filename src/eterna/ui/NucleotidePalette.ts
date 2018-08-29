@@ -1,4 +1,3 @@
-import * as log from "loglevel";
 import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
 import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
@@ -6,6 +5,7 @@ import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Enableable} from "../../flashbang/objects/Enableable";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Signal} from "../../signals/Signal";
 import {EPars} from "../EPars";
 import {BitmapManager} from "../resources/BitmapManager";
@@ -13,6 +13,7 @@ import {Bitmaps} from "../resources/Bitmaps";
 import {ROPWait} from "../rscript/ROPWait";
 import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
+import {Tooltips} from "./Tooltips";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -53,6 +54,13 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     /** Emitted when a palette target is clicked */
     public readonly targetClicked: Signal<PaletteTargetType> = new Signal();
 
+    private static createTooltip(text: string): StyledTextBuilder {
+        let builder = new StyledTextBuilder(Tooltips.DEFAULT_STYLE);
+        EPars.addLetterStyles(builder);
+        builder.append(text);
+        return builder;
+    }
+
     public constructor() {
         super();
 
@@ -81,47 +89,44 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
             [new Rectangle(9, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#FFFF33'>A (Adenine)</FONT>. (1)"
+            NucleotidePalette.createTooltip("Mutate to <A>A (Adenine)</A>. (1)")
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
             [new Rectangle(58, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#7777FF'>U (Uracil)</FONT>. (2)"
+            NucleotidePalette.createTooltip("Mutate to <U>U (Uracil)</U>. (2)")
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
             [new Rectangle(107, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#FF3333'>G (Guanine)</FONT>. (3)"
+            NucleotidePalette.createTooltip("Mutate to <G>G (Guanine)</G>. (3)")
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
             [new Rectangle(156, 7, 25, 25)],
-            "Mutate to <FONT COLOR='#33FF33'>C (Cytosine)</FONT>. (4)"
+            NucleotidePalette.createTooltip("Mutate to <C>C (Cytosine)</C>. (4)")
         );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
             [new Rectangle(31, 29, 30, 20), new Rectangle(37, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FFFF33'>A</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (Q)"
+            NucleotidePalette.createTooltip("Mutate to pair (<A>A</A>, <U>U</U>). (Q)")
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
             [new Rectangle(80, 29, 30, 20), new Rectangle(87, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#7777FF'>U</FONT>). (W)"
+            NucleotidePalette.createTooltip("Mutate to pair (<G>G</G>, <U>U</U>). (W)")
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
             [new Rectangle(129, 29, 30, 20), new Rectangle(137, 15, 22, 20)],
-            "Mutate to pair (<FONT COLOR='#FF3333'>G</FONT>, <FONT COLOR='#33FF33'>C</FONT>). (E)"
+            NucleotidePalette.createTooltip("Mutate to pair (<G>G</G>, <C>C</C>). (E)")
         );
-
-        this._enabled = true;
-        this._lastTooltip = null;
     }
 
     protected added(): void {
@@ -299,16 +304,17 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
         let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
-        let tooltip: string = (target != null ? target.tooltip : null);
 
-        if (tooltip !== this._lastTooltip) {
-            this._lastTooltip = tooltip;
-            log.debug(`TODO: show tooltip: ${tooltip}`);
-            // if (tooltip == null) {
-            //     this.set_mouse_over_object(null, 1.0);
-            // } else {
-            //     this.set_mouse_over_object(new TextBalloon(tooltip, 0x0, 0.8), 1.0);
-            // }
+        if (target !== this._lastTooltipTarget) {
+            if (this._lastTooltipTarget != null) {
+                Tooltips.instance.removeTooltip(this._lastTooltipTarget);
+            }
+
+            if (target != null) {
+                Tooltips.instance.showTooltip(target, e.data.global, target.tooltip);
+            }
+
+            this._lastTooltipTarget = target;
         }
     }
 
@@ -324,14 +330,15 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     private readonly _numUG: Text;
     private readonly _numGC: Text;
 
-    private _enabled: boolean;
+    private _enabled: boolean = true;
     private _overrideDefaultMode: boolean = false;
     private _overrideNoPairMode: boolean = false;
-    private _lastTooltip: string;
+    private _lastTooltipTarget: PaletteTarget;
 
     private readonly _targets: PaletteTarget[];
 
-    private static readonly P: Point = new Point();
+    private static readonly P = new Point();
+    private static readonly R = new Rectangle();
 }
 
 class PaletteTarget {
@@ -340,10 +347,10 @@ class PaletteTarget {
     public readonly isPair: boolean;
     public readonly keyCode: string;
     public readonly hitboxes: Rectangle[];
-    public readonly tooltip: string;
+    public readonly tooltip: StyledTextBuilder;
     public enabled: boolean = true;
 
-    public constructor(type: PaletteTargetType, id: RScriptUIElementID, isPair: boolean, keyCode: string, hitboxes: Rectangle[], tooltip: string) {
+    public constructor(type: PaletteTargetType, id: RScriptUIElementID, isPair: boolean, keyCode: string, hitboxes: Rectangle[], tooltip: StyledTextBuilder) {
         this.type = type;
         this.id = id;
         this.isPair = isPair;
