@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import {Point} from "pixi.js";
 import {Assert} from "../util/Assert";
+import {AppMode} from "./AppMode";
 import {FlashbangApp} from "./FlashbangApp";
 
 type InteractionManager = PIXI.interaction.InteractionManager;
@@ -8,6 +9,10 @@ type InteractionManager = PIXI.interaction.InteractionManager;
 export class Flashbang {
     public static get app(): FlashbangApp {
         return Flashbang._app;
+    }
+
+    public static get curMode(): AppMode {
+        return Flashbang._app.modeStack.topMode;
     }
 
     public static get pixi(): PIXI.Application {

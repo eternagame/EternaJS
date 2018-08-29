@@ -71,7 +71,7 @@ export class AppMode {
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
-    public destroyObjectWithId(id: Object): void {
+    public destroyObjectWithId(id: any): void {
         let obj: GameObject = this.getObjectWithId(id);
         if (obj != null) {
             obj.destroySelf();
@@ -79,7 +79,7 @@ export class AppMode {
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId(id: Object): any {
+    public getObjectWithId(id: any): any {
         return this._idObjects.get(id);
     }
 
