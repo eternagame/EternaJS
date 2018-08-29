@@ -112,14 +112,18 @@ export class PoseEditToolbar extends ContainerObject {
         this.freezeButton = new GameButton()
             .up(Bitmaps.ImgFreeze)
             .over(Bitmaps.ImgFreezeOver)
+            .down(Bitmaps.ImgFreezeSelected)
             .selected(Bitmaps.ImgFreezeSelected)
             .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
-        if (Eterna.settings.freezeButtonAlwaysVisible.value) {
-            this.addObject(this.freezeButton, this._toolbarLayout);
-            this._toolbarLayout.addHSpacer(SPACE_NARROW);
-        }
+        this.addObject(this.freezeButton, this._toolbarLayout);
+        this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
+        this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect(visible => {
+            this.freezeButton.display.visible = visible;
+            this.updateLayout();
+        }));
 
         // NATIVE
         this.nativeButton = new GameButton()
