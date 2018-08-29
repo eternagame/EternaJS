@@ -89,25 +89,6 @@ export class EternaApp extends FlashbangApp {
         ExternalInterface.init(eternaContainer);
     }
 
-    protected createPixi(): PIXI.Application {
-        // When roundPixels is true, the renderer floor()s pixel locations
-        // to avoid pixel interpolation. This makes our text look much better,
-        // though slow movement animation will end up looking a bit worse.
-        // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
-
-        return new PIXI.Application(this._params.width, this._params.height, {
-            backgroundColor: 0x061A34,
-            antialias: true,
-            roundPixels: true,
-            autoResize: true,
-            resolution: devicePixelRatio
-        });
-    }
-
-    protected get pixiParent(): HTMLElement {
-        return document.getElementById(EternaApp.PIXI_CONTAINER_ID);
-    }
-
     /* override */
     protected setup(): void {
         Eterna.settings = new EternaSettings();
@@ -138,18 +119,6 @@ export class EternaApp extends FlashbangApp {
             .catch(err => Eterna.onFatalError(err));
     }
 
-    protected onUncaughtError(err: any): void {
-        Eterna.onFatalError(err);
-    }
-
-    private setLoadingText(text: string): void {
-        if (this._modeStack.topMode instanceof LoadingMode) {
-            (this._modeStack.topMode as LoadingMode).text = text;
-        } else {
-            this._modeStack.pushMode(new LoadingMode(text));
-        }
-    }
-
     public loadPoseEdit(puzzleID: number, folderName: string): Promise<void> {
         this.setLoadingText(`Loading puzzle ${this._params.puzzleID}...`);
         return PuzzleManager.instance.getPuzzleByID(puzzleID)
@@ -169,6 +138,37 @@ export class EternaApp extends FlashbangApp {
     public loadPuzzleEditor(numTargets: number): Promise<void> {
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets));
         return Promise.resolve();
+    }
+
+    protected onUncaughtError(err: any): void {
+        Eterna.onFatalError(err);
+    }
+
+    protected createPixi(): PIXI.Application {
+        // When roundPixels is true, the renderer floor()s pixel locations
+        // to avoid pixel interpolation. This makes our text look much better,
+        // though slow movement animation will end up looking a bit worse.
+        // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
+
+        return new PIXI.Application(this._params.width, this._params.height, {
+            backgroundColor: 0x061A34,
+            antialias: true,
+            roundPixels: true,
+            autoResize: true,
+            resolution: devicePixelRatio
+        });
+    }
+
+    protected get pixiParent(): HTMLElement {
+        return document.getElementById(EternaApp.PIXI_CONTAINER_ID);
+    }
+
+    private setLoadingText(text: string): void {
+        if (this._modeStack.topMode instanceof LoadingMode) {
+            (this._modeStack.topMode as LoadingMode).text = text;
+        } else {
+            this._modeStack.pushMode(new LoadingMode(text));
+        }
     }
 
     private authenticate(): Promise<void> {

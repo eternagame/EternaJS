@@ -45,4 +45,8 @@ export class TestMode extends AppMode {
             return "Started!";
         });
     }
+
+    public onContextMenuEvent(e: Event): void {
+        e.preventDefault();
+    }
 }

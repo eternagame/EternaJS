@@ -79,12 +79,20 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public label(text: string | TextBuilder, fontSize?: number): GameButton {
-        if (typeof (text) === "string") {
+        if (typeof(text) === "string") {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
         this.needsRedraw();
+        return this;
+    }
+
+    public fixedLabelWidth(width: number): GameButton {
+        if (this._fixedLabelWidth != width) {
+            this._fixedLabelWidth = width;
+            this.needsRedraw();
+        }
         return this;
     }
 
@@ -165,10 +173,12 @@ export class GameButton extends Button implements KeyboardListener {
                 this.container.addChildAt(this._styleBox, 1);
             }
 
+            let labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : this._label.width;
+
             this._styleBox.clear();
             this._styleBox.beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0);
             this._styleBox.drawRoundedRect(0, 0,
-                this._label.width + (GameButton.WMARGIN * 2),
+                labelWidth + (GameButton.WMARGIN * 2),
                 this._label.height + (GameButton.HMARGIN * 2),
                 3);
             this._styleBox.endFill();
@@ -253,6 +263,7 @@ export class GameButton extends Button implements KeyboardListener {
     private _styleBox: Graphics;
 
     private _labelBuilder: TextBuilder;
+    private _fixedLabelWidth: number = 0;
     private _scaleBitmapToLabel: boolean = false;
     private _tooltip: string;
     private _hotkey: string;
