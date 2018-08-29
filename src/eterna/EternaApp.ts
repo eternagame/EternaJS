@@ -26,6 +26,7 @@ import "assets/styles.css";
 
 enum PuzzleID {
     FunAndEasy = 4350940,
+    Tulip2 = 467887,
     TryptophanASameState = 8787266,
     NandosZippers = 3562529,
     TheRealXORChallenge = 6096060, // multi-state
@@ -68,7 +69,7 @@ export class EternaApp extends FlashbangApp {
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
+        params.puzzleID = params.puzzleID || PuzzleID.Tutorial8;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
         this._params = params;
