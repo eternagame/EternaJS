@@ -48,6 +48,7 @@ import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
+import {PuzzleEditPoseData} from "../PuzzleEdit/PuzzleEditMode";
 import {MissionClearedPanel} from "./MissionClearedPanel";
 import {MissionIntroMode} from "./MissionIntroMode";
 import {PoseEditToolbar} from "./PoseEditToolbar";
@@ -1119,7 +1120,7 @@ export class PoseEditMode extends GameMode {
         menu.addItem("Reset").clicked.connect(() => this.showResetPrompt());
         menu.addItem("Copy Sequence").clicked.connect(() => this.showCopySequenceDialog());
         menu.addItem("Paste Sequence").clicked.connect(() => this.showPasteSequenceDialog());
-        menu.addItem("Beam to PuzzleMaker").clicked.connect(() => log.debug("TODO: Beam to PuzzleMaker"));
+        menu.addItem("Beam to PuzzleMaker").clicked.connect(() => this.transferToPuzzlemaker());
 
         return menu;
     }
@@ -1964,19 +1965,16 @@ export class PoseEditMode extends GameMode {
     }
 
     private transferToPuzzlemaker(): void {
-        log.debug("TODO: transfer_to_puzzlemaker");
-        // let cookie: string = "puzedit_" + this._poses.length + "_" + Eterna.player_id;
-        // let objs: any[] = [];
-        // for (let ii: number = 0; ii < this._poses.length; ++ii) {
-        //     let obj: any = {};
-        //     let pose: Pose2D = this._poses[ii];
-        //     obj['sequence'] = EPars.sequence_array_to_string(pose.get_sequence());
-        //     obj['structure'] = EPars.pairs_array_to_parenthesis(pose.get_pairs());
-        //     objs.push(obj);
-        // }
-        // AutosaveManager.saveObjects(objs, cookie);
-        //
-        // Application.instance.transit_game_mode(Eterna.GAMESTATE_PUZZLE_MAKER, [this._poses.length]);
+        let poseData: PuzzleEditPoseData[] = [];
+        for (let pose of this._poses) {
+            poseData.push({
+                sequence: EPars.sequenceToString(pose.sequence),
+                structure: EPars.pairsToParenthesis(pose.pairs)
+            });
+        }
+
+        Eterna.app.loadPuzzleEditor(1, poseData)
+            .catch(err => Eterna.onFatalError(err));
     }
 
     private loadSavedData(): boolean {

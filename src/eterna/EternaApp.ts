@@ -12,7 +12,7 @@ import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
-import {PuzzleEditMode} from "./mode/PuzzleEdit/PuzzleEditMode";
+import {PuzzleEditMode, PuzzleEditPoseData} from "./mode/PuzzleEdit/PuzzleEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {Bitmaps} from "./resources/Bitmaps";
@@ -69,7 +69,7 @@ export class EternaApp extends FlashbangApp {
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || PuzzleID.Tutorial8;
+        params.puzzleID = params.puzzleID || PuzzleID.NandosZippers;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
         this._params = params;
@@ -91,6 +91,7 @@ export class EternaApp extends FlashbangApp {
 
     /* override */
     protected setup(): void {
+        Eterna.app = this;
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.sound = new SoundManager(Eterna.settings);
@@ -135,8 +136,8 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    public loadPuzzleEditor(numTargets: number): Promise<void> {
-        this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets));
+    public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+        this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initialPoseData));
         return Promise.resolve();
     }
 
