@@ -10,15 +10,17 @@ import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
+import {Tooltips} from "../ui/Tooltips";
 import {UILockDialog} from "../ui/UILockDialog";
 
 export abstract class GameMode extends AppMode {
-    public readonly bgLayer: Container = new Container();
-    public readonly poseLayer: Container = new Container();
-    public readonly uiLayer: Container = new Container();
-    public readonly dialogLayer: Container = new Container();
-    public readonly notifLayer: Container = new Container();
-    public readonly achievementsLayer: Container = new Container();
+    public readonly bgLayer = new Container();
+    public readonly poseLayer = new Container();
+    public readonly uiLayer = new Container();
+    public readonly dialogLayer = new Container();
+    public readonly notifLayer = new Container();
+    public readonly tooltipLayer = new Container();
+    public readonly achievementsLayer = new Container();
 
     protected setup(): void {
         super.setup();
@@ -28,10 +30,12 @@ export abstract class GameMode extends AppMode {
         this.container.addChild(this.uiLayer);
         this.container.addChild(this.dialogLayer);
         this.container.addChild(this.notifLayer);
+        this.container.addChild(this.tooltipLayer);
         this.container.addChild(this.achievementsLayer);
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
+        this.addObject(new Tooltips(this.tooltipLayer));
     }
 
     public getPose(i: number): Pose2D {

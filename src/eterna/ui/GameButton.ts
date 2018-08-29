@@ -9,6 +9,7 @@ import {Value} from "../../signals/Value";
 import {ROPWait} from "../rscript/ROPWait";
 import {RScriptUIElementID} from "../rscript/RScriptUIElement";
 import {Fonts} from "../util/Fonts";
+import {Tooltips} from "./Tooltips";
 
 export class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value(false);
@@ -30,7 +31,8 @@ export class GameButton extends Button implements KeyboardListener {
             }
         });
 
-        this.installHotkeyListener();
+        this.setupHotkey();
+        this.setupTooltip();
     }
 
     public up(tex: Texture | string): GameButton {
@@ -93,8 +95,12 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public tooltip(text: string): GameButton {
-        // TODO
-        this._tooltip = text;
+        if (this._tooltip != text) {
+            this._tooltip = text;
+            if (this.isLiveObject) {
+                this.setupTooltip();
+            }
+        }
         return this;
     }
 
@@ -103,7 +109,7 @@ export class GameButton extends Button implements KeyboardListener {
             this._hotkey = keycode;
             this._hotkeyCtrl = ctrl;
             if (this.isLiveObject) {
-                this.installHotkeyListener();
+                this.setupHotkey();
             }
         }
 
@@ -186,7 +192,7 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private installHotkeyListener(): void {
+    private setupHotkey(): void {
         if (this._hotkeyReg != null) {
             this._hotkeyReg.close();
             this._hotkeyReg = null;
@@ -194,6 +200,17 @@ export class GameButton extends Button implements KeyboardListener {
 
         if (this._hotkey != null) {
             this._hotkeyReg = this.regs.add(this.mode.keyboardInput.pushListener(this));
+        }
+    }
+
+    private setupTooltip(): void {
+        if (this._tooltipReg != null) {
+            this._tooltipReg.close();
+            this._tooltipReg = null;
+        }
+
+        if (this._tooltip != null) {
+            this._tooltipReg = this.regs.add(Tooltips.instance.addButtonTooltip(this, this._tooltip));
         }
     }
 
@@ -247,6 +264,7 @@ export class GameButton extends Button implements KeyboardListener {
     private _rscriptClickReg: Registration = Registrations.Null();
 
     private _hotkeyReg: Registration;
+    private _tooltipReg: Registration;
 
     private static TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],
