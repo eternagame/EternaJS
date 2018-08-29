@@ -103,6 +103,7 @@ export class Tooltips extends GameObject {
         let regs = new RegistrationGroup();
 
         regs.add(button.pointerDown.connect(show));
+        regs.add(button.clicked.connect(hide));
         regs.add(button.clickCanceled.connect(hide));
 
         regs.add(button.pointerOver.connect(show));
