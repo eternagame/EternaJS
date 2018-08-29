@@ -1,4 +1,5 @@
-import {Container, DisplayObject, Graphics, Point, Rectangle} from "pixi.js";
+import {ExtendedTextStyle} from "pixi-multistyle-text";
+import {Container, DisplayObject, Graphics, Point, Rectangle, Text} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
@@ -7,22 +8,21 @@ import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {DelayTask} from "../../flashbang/tasks/DelayTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Easing} from "../../flashbang/util/Easing";
+import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {Registration} from "../../signals/Registration";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Fonts} from "../util/Fonts";
 
+/** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
+export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
+
 export class Tooltips extends GameObject {
-    public static createTextTooltip(text: string): DisplayObject {
-        let textField = Fonts.arial(text).fontSize(15).color(0xC0DCE7).build();
-        let tooltip = new Graphics()
-            .beginFill(0x0, 0.8)
-            .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
-            .endFill();
-        textField.x = 10;
-        textField.y = 10;
-        tooltip.addChild(textField);
-        return tooltip;
-    }
+    /** Default text style for tooltips */
+    public static readonly DEFAULT_STYLE: ExtendedTextStyle = {
+        fontFamily: Fonts.ARIAL,
+        fontSize: 15,
+        fill: 0xC0DCE7
+    };
 
     public static get instance(): Tooltips {
         return Flashbang.curMode.getObjectWithId(Tooltips);
@@ -42,7 +42,7 @@ export class Tooltips extends GameObject {
         super.removed();
     }
 
-    public showTooltip(key: any, loc: Point, tooltipCreator: () => DisplayObject): void {
+    public showTooltip(key: any, loc: Point, tooltip: Tooltip): void {
         if (this._curTooltipKey == key) {
             return;
         }
@@ -50,7 +50,7 @@ export class Tooltips extends GameObject {
         this.removeCurTooltip();
 
         this._curTooltipKey = key;
-        this._curTooltip = tooltipCreator();
+        this._curTooltip = Tooltips.createTooltip(tooltip);
 
         let layerLoc = this._layer.toLocal(loc);
         this._curTooltip.x = layerLoc.x;
@@ -65,7 +65,7 @@ export class Tooltips extends GameObject {
         ));
     }
 
-    public showTooltipFor(target: DisplayObject, key: any, tooltipCreator: () => DisplayObject): void {
+    public showTooltipFor(target: DisplayObject, key: any, tooltip: Tooltip): void {
         if (this._curTooltipKey == key) {
             return;
         }
@@ -73,7 +73,7 @@ export class Tooltips extends GameObject {
         let r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
         let p = Tooltips.P;
         p.set(r.x + (r.width * 0.5), r.y + (r.height * 0.5));
-        this.showTooltip(key, p, tooltipCreator);
+        this.showTooltip(key, p, tooltip);
     }
 
     public removeTooltip(key: any): void {
@@ -91,17 +91,10 @@ export class Tooltips extends GameObject {
         }
     }
 
-    public addButtonTooltip(button: Button, tooltip: (() => DisplayObject) | string): Registration {
-        let tooltipCreator: () => DisplayObject;
-        if (typeof(tooltip) === "string") {
-            tooltipCreator = () => Tooltips.createTextTooltip(tooltip);
-        } else {
-            tooltipCreator = tooltip;
-        }
-
+    public addButtonTooltip(button: Button, tooltip: Tooltip): Registration {
         let show = (): void => {
             if (button.enabled ) {
-                this.showTooltipFor(button.display, button, tooltipCreator);
+                this.showTooltipFor(button.display, button, tooltip);
             }
         };
 
@@ -116,6 +109,29 @@ export class Tooltips extends GameObject {
         regs.add(button.pointerOut.connect(hide));
 
         return regs;
+    }
+
+    private static createTooltip(tooltip: Tooltip): DisplayObject {
+        if (typeof(tooltip) === "string" || tooltip instanceof StyledTextBuilder) {
+            let textField: Container;
+            if (typeof(tooltip) === "string") {
+                textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
+            } else {
+                textField = tooltip.build();
+            }
+
+            let disp = new Graphics()
+                .beginFill(0x0, 0.8)
+                .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
+                .endFill();
+            textField.x = 10;
+            textField.y = 10;
+            disp.addChild(textField);
+            return disp;
+
+        } else {
+            return tooltip();
+        }
     }
 
     private readonly _layer: Container;
