@@ -1,0 +1,131 @@
+import {Container, DisplayObject, Graphics, Point, Rectangle} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
+import {GameObject} from "../../flashbang/core/GameObject";
+import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
+import {Button} from "../../flashbang/objects/Button";
+import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
+import {DelayTask} from "../../flashbang/tasks/DelayTask";
+import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {Easing} from "../../flashbang/util/Easing";
+import {Registration} from "../../signals/Registration";
+import {RegistrationGroup} from "../../signals/RegistrationGroup";
+import {Fonts} from "../util/Fonts";
+
+export class Tooltips extends GameObject {
+    public static createTextTooltip(text: string): DisplayObject {
+        let textField = Fonts.arial(text).fontSize(15).color(0xC0DCE7).build();
+        let tooltip = new Graphics()
+            .beginFill(0x0, 0.8)
+            .drawRoundedRect(0, 0, textField.width + 20, textField.height + 20, 5)
+            .endFill();
+        textField.x = 10;
+        textField.y = 10;
+        tooltip.addChild(textField);
+        return tooltip;
+    }
+
+    public static get instance(): Tooltips {
+        return Flashbang.curMode.getObjectWithId(Tooltips);
+    }
+
+    public constructor(layer: Container) {
+        super();
+        this._layer = layer;
+    }
+
+    public get ids(): any[] {
+        return [Tooltips];
+    }
+
+    protected removed(): void {
+        this.removeCurTooltip();
+        super.removed();
+    }
+
+    public showTooltip(key: any, loc: Point, tooltipCreator: () => DisplayObject): void {
+        if (this._curTooltipKey == key) {
+            return;
+        }
+
+        this.removeCurTooltip();
+
+        this._curTooltipKey = key;
+        this._curTooltip = tooltipCreator();
+
+        let layerLoc = this._layer.toLocal(loc);
+        this._curTooltip.x = layerLoc.x;
+        this._curTooltip.y = layerLoc.y;
+        this._curTooltip.alpha = 0;
+
+        this._layer.addChild(this._curTooltip);
+
+        this._curTooltipFader = this.addObject(new SerialTask(
+            new DelayTask(Tooltips.TOOLTIP_DELAY),
+            new AlphaTask(1, 0.1, Easing.linear, this._curTooltip),
+        ));
+    }
+
+    public showTooltipFor(target: DisplayObject, key: any, tooltipCreator: () => DisplayObject): void {
+        if (this._curTooltipKey == key) {
+            return;
+        }
+
+        let r = target.getBounds(false, Tooltips.TARGET_BOUNDS);
+        let p = Tooltips.P;
+        p.set(r.x + (r.width * 0.5), r.y + (r.height * 0.5));
+        this.showTooltip(key, p, tooltipCreator);
+    }
+
+    public removeTooltip(key: any): void {
+        if (this._curTooltipKey == key) {
+            this.removeCurTooltip();
+        }
+    }
+
+    public removeCurTooltip(): void {
+        if (this._curTooltip != null) {
+            this._curTooltip.destroy();
+            this._curTooltip = null;
+            this._curTooltipKey = null;
+            this._curTooltipFader.destroyObject();
+        }
+    }
+
+    public addButtonTooltip(button: Button, tooltip: (() => DisplayObject) | string): Registration {
+        let tooltipCreator: () => DisplayObject;
+        if (typeof(tooltip) === "string") {
+            tooltipCreator = () => Tooltips.createTextTooltip(tooltip);
+        } else {
+            tooltipCreator = tooltip;
+        }
+
+        let show = (): void => {
+            if (button.enabled ) {
+                this.showTooltipFor(button.display, button, tooltipCreator);
+            }
+        };
+
+        let hide = (): void => this.removeTooltip(button);
+
+        let regs = new RegistrationGroup();
+
+        regs.add(button.pointerDown.connect(show));
+        regs.add(button.clickCanceled.connect(hide));
+
+        regs.add(button.pointerOver.connect(show));
+        regs.add(button.pointerOut.connect(hide));
+
+        return regs;
+    }
+
+    private readonly _layer: Container;
+
+    private _curTooltipKey: any;
+    private _curTooltip: DisplayObject;
+    private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
+
+    private static readonly TARGET_BOUNDS = new Rectangle();
+    private static readonly P = new Point();
+
+    private static readonly TOOLTIP_DELAY = 0.5;
+}
