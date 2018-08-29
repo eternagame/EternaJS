@@ -35,11 +35,25 @@ import {SubmitPuzzleDetails, SubmitPuzzleDialog} from "./SubmitPuzzleDialog";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
+export interface PuzzleEditPoseData {
+    sequence: string;
+    structure: string;
+}
+
 export class PuzzleEditMode extends GameMode {
-    constructor(embedded: boolean, numTargets: number = 1) {
+    constructor(embedded: boolean, numTargets?: number, poses?: PuzzleEditPoseData[]) {
         super();
         this._embedded = embedded;
-        this._numTargets = Math.max(numTargets, 1);
+
+        if (poses != null && poses.length > 0) {
+            this._initialPoseData = poses;
+            this._numTargets = this._initialPoseData.length;
+        } else {
+            if (!numTargets) {
+                numTargets = 1;
+            }
+            this._numTargets = Math.max(numTargets, 1);
+        }
     }
 
     protected setup(): void {
@@ -130,41 +144,7 @@ export class PuzzleEditMode extends GameMode {
             ExternalInterface.addCallback("get_shift_limit", () => this.shiftLimitString);
         }
 
-        this.initialize();
-    }
 
-    private loadSavedData(): any[] {
-        return Eterna.settings.loadObject(this.savedDataTokenName);
-    }
-
-    private saveData(): void {
-        let objs: any[] = [];
-        for (let pose of this._poses) {
-            objs.push({
-                sequence: EPars.sequenceToString(pose.sequence),
-                structure: EPars.pairsToParenthesis(pose.molecularStructure),
-            });
-        }
-
-        Eterna.settings.saveObject(this.savedDataTokenName, objs);
-    }
-
-    private resetSavedData(): void {
-        Eterna.settings.removeObject(this.savedDataTokenName);
-    }
-
-    private get savedDataTokenName(): string {
-        return `puzedit_${this._numTargets}`;
-    }
-
-    public setFolder(engine_name: string): void {
-        let newFolder: Folder = FolderManager.instance.getFolder(engine_name);
-        if (newFolder) {
-            this._folder = newFolder;
-        }
-    }
-
-    private initialize(): void {
         this.clearUndoStack();
 
         let pose_fields: PoseField[] = [];
@@ -196,40 +176,46 @@ export class PuzzleEditMode extends GameMode {
             };
         };
 
-        let states: any[] = this.loadSavedData();
+        let initialPoseData = this._initialPoseData || this.loadSavedData();
         for (let ii = 0; ii < this._numTargets; ii++) {
-            let default_structure: string = ".....((((((((....)))))))).....";
-            let default_pairs: number[] = EPars.parenthesisToPairs(default_structure);
-            let default_sequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+            let defaultStructure: string = ".....((((((((....)))))))).....";
+            let defaultPairs: number[] = EPars.parenthesisToPairs(defaultStructure);
+            let defaultSequence: string = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-            if (states != null && states[ii] != null && states[ii]['sequence'] != null && states[ii]['structure'] != null && states[ii]['structure'] != "") {
-                default_structure = states[ii]['structure'];
-                default_sequence = states[ii]['sequence'];
-                default_pairs = EPars.parenthesisToPairs(default_structure);
+            if (initialPoseData != null &&
+                initialPoseData[ii] != null &&
+                initialPoseData[ii]['sequence'] != null &&
+                initialPoseData[ii]['structure'] != null &&
+                initialPoseData[ii]['structure'] != "") {
+
+                defaultStructure = initialPoseData[ii]['structure'];
+                defaultSequence = initialPoseData[ii]['sequence'];
+                defaultPairs = EPars.parenthesisToPairs(defaultStructure);
             }
-            let pose_field: PoseField = new PoseField(true);
-            this.addObject(pose_field, this.poseLayer);
-            let pose: Pose2D = pose_field.pose;
+
+            let poseField: PoseField = new PoseField(true);
+            this.addObject(poseField, this.poseLayer);
+            let pose: Pose2D = poseField.pose;
             pose.scoreFolder = this._folder;
-            pose.molecularStructure = default_pairs;
+            pose.molecularStructure = defaultPairs;
             pose.molecularBindingBonus = -4.86;
-            pose.sequence = EPars.stringToSequence(default_sequence);
-            pose_fields.push(pose_field);
+            pose.sequence = EPars.stringToSequence(defaultSequence);
+            pose_fields.push(poseField);
 
             let structureInput = new StructureInput(pose);
-            pose_field.addObject(structureInput, pose_field.container);
+            poseField.addObject(structureInput, poseField.container);
             if (!this._embedded) {
                 structureInput.setSize(700 / this._numTargets, 50);
             } else {
                 structureInput.setSize(500 / this._numTargets, 50);
             }
 
-            structureInput.structureString = default_structure;
+            structureInput.structureString = defaultStructure;
             this._structureInputs.push(structureInput);
 
             let constraint_box = new ConstraintBox();
             constraint_box.display.position = new Point(17, 35);
-            pose_field.addObject(constraint_box, pose_field.container);
+            poseField.addObject(constraint_box, poseField.container);
             if (this._embedded) {
                 constraint_box.display.visible = false;
             }
@@ -256,6 +242,37 @@ export class PuzzleEditMode extends GameMode {
         this.setPip(true);
 
         this.updateLayout();
+    }
+
+    private loadSavedData(): PuzzleEditPoseData[] {
+        return Eterna.settings.loadObject(this.savedDataTokenName);
+    }
+
+    private saveData(): void {
+        let objs: PuzzleEditPoseData[] = [];
+        for (let pose of this._poses) {
+            objs.push({
+                sequence: EPars.sequenceToString(pose.sequence),
+                structure: EPars.pairsToParenthesis(pose.molecularStructure),
+            });
+        }
+
+        Eterna.settings.saveObject(this.savedDataTokenName, objs);
+    }
+
+    private resetSavedData(): void {
+        Eterna.settings.removeObject(this.savedDataTokenName);
+    }
+
+    private get savedDataTokenName(): string {
+        return `puzedit_${this._numTargets}`;
+    }
+
+    public setFolder(engine_name: string): void {
+        let newFolder: Folder = FolderManager.instance.getFolder(engine_name);
+        if (newFolder) {
+            this._folder = newFolder;
+        }
     }
 
     public get structure(): string {
@@ -856,6 +873,7 @@ export class PuzzleEditMode extends GameMode {
 
     private readonly _embedded: boolean;
     private readonly _numTargets: number;
+    private readonly _initialPoseData: PuzzleEditPoseData[];
 
     private _structureInputs: StructureInput[];
     private _folder: Folder;

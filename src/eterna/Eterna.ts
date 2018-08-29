@@ -1,5 +1,6 @@
 import * as log from "loglevel";
 import {ErrorUtil} from "../flashbang/util/ErrorUtil";
+import {EternaApp} from "./EternaApp";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
 import {SoundManager} from "./resources/SoundManager";
@@ -12,13 +13,13 @@ export class Eterna {
     public static readonly DEV_MODE: boolean = parseBool(process.env["DEBUG"]);
     public static readonly SERVER_URL: string = process.env["APP_SERVER_URL"];
 
+    public static app: EternaApp;
     public static settings: EternaSettings;
+    public static client: GameClient;
+    public static sound: SoundManager;
 
     public static playerID: number;
     public static playerName: string;
-
-    public static client: GameClient;
-    public static sound: SoundManager;
 
     public static setPlayer(name: string, id: number): void {
         this.playerName = name;
