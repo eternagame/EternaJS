@@ -153,6 +153,11 @@ export class EternaMenu extends GamePanel implements Enableable {
     }
 
     private doLayout(): void {
+        if (this._menus.length == 0) {
+            this.setSize(0, 0);
+            return;
+        }
+
         for (let menu of this._menus) {
             if (menu.itemButtons.length === 0) {
                 menu.panel.setSize(0, 0);
