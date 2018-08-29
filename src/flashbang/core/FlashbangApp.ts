@@ -1,12 +1,12 @@
+import * as log from "loglevel";
 import {RegistrationGroup} from "../../signals/RegistrationGroup";
 import {Value} from "../../signals/Value";
+import {KeyboardEventType} from "../input/KeyboardEventType";
 import {KeyCode} from "../input/KeyCode";
 import {ErrorUtil} from "../util/ErrorUtil";
 import {Flashbang} from "./Flashbang";
 import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
-import {KeyboardEventType} from "../input/KeyboardEventType";
-import * as log from "loglevel";
 
 export class FlashbangApp {
     /** True if the app is foregrounded */
@@ -35,9 +35,10 @@ export class FlashbangApp {
 
         this._pixi.ticker.add(delta => this.update(delta));
 
-        window.addEventListener(KeyboardEventType.KEY_DOWN, (e: KeyboardEvent) => this.onKeyboardEvent(e));
-        window.addEventListener(KeyboardEventType.KEY_UP, (e: KeyboardEvent) => this.onKeyboardEvent(e));
-        window.addEventListener("wheel", (e: WheelEvent) => this.onMouseWheelEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_DOWN, e => this.onKeyboardEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_UP, e => this.onKeyboardEvent(e));
+        window.addEventListener("wheel", e => this.onMouseWheelEvent(e));
+        window.addEventListener("contextmenu", e => this.onContextMenuEvent(e));
         window.addEventListener("focus", () => this.isActive.value = true);
         window.addEventListener("blur", () => this.isActive.value = false);
 
@@ -164,6 +165,13 @@ export class FlashbangApp {
         let topMode = this._modeStack.topMode;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
+        }
+    }
+
+    protected onContextMenuEvent(e: Event): void {
+        let topMode = this._modeStack.topMode;
+        if (topMode != null) {
+            topMode.onContextMenuEvent(e);
         }
     }
 

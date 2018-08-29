@@ -167,6 +167,10 @@ export class AppMode {
         this.mouseWheelInput.handleMouseWheelEvent(e);
     }
 
+    /** Called when a ContextMenu event is fired while this mode is active */
+    public onContextMenuEvent(e: Event): void {
+    }
+
     /** Called when the app is resized while this mode is active */
     public onResized(): void {
         this._resized.emit();
