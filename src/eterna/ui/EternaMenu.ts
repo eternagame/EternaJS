@@ -125,7 +125,7 @@ export class EternaMenu extends GamePanel implements Enableable {
         this.addObject(menuButton, this.container);
         this._menus.push(menu);
 
-        menu.panel = new GamePanel(0, 0.85);
+        menu.panel = new GamePanel(GamePanelType.NORMAL, 0.85);
         if (this._style === EternaMenuStyle.PULLUP) {
             menu.panel.setup(GamePanelType.NORMAL, 1.0, 0x152843, 1.0, 0xffffff);
         }

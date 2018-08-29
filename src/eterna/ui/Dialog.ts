@@ -1,5 +1,6 @@
 import {Graphics} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
+import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
@@ -25,10 +26,12 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
 
         // eat clicks on our BG
         let capture = new PointerCapture(bg);
-        capture.beginCapture((e) => {
-            e.stopPropagation();
-            if (e.type === "pointerdown") {
-                this.onBGClicked();
+        capture.beginCapture(e => {
+            if (IsLeftMouse(e)) {
+                e.stopPropagation();
+                if (e.type === "pointerdown") {
+                    this.onBGClicked();
+                }
             }
         });
 

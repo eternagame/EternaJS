@@ -9,6 +9,8 @@ import {Eterna} from "../Eterna";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
+import {ContextMenu} from "../ui/ContextMenu";
+import {Dialog} from "../ui/Dialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
 import {Tooltips} from "../ui/Tooltips";
 import {UILockDialog} from "../ui/UILockDialog";
@@ -21,6 +23,7 @@ export abstract class GameMode extends AppMode {
     public readonly notifLayer = new Container();
     public readonly tooltipLayer = new Container();
     public readonly achievementsLayer = new Container();
+    public readonly contextMenuLayer = new Container();
 
     protected setup(): void {
         super.setup();
@@ -32,6 +35,7 @@ export abstract class GameMode extends AppMode {
         this.container.addChild(this.notifLayer);
         this.container.addChild(this.tooltipLayer);
         this.container.addChild(this.achievementsLayer);
+        this.container.addChild(this.contextMenuLayer);
 
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
@@ -195,14 +199,75 @@ export abstract class GameMode extends AppMode {
             });
     }
 
+    public onContextMenuEvent(e: Event): void {
+        let handled = false;
+        if (this._contextMenuDialogRef.isLive) {
+            this._contextMenuDialogRef.destroyObject();
+            handled = true;
+        } else {
+            let menu = this.createContextMenu();
+            if (menu != null) {
+                this._contextMenuDialogRef = this.addObject(
+                    new ContextMenuDialog(menu, Flashbang.globalMouse),
+                    this.contextMenuLayer);
+                handled = true;
+            }
+        }
+
+        if (handled) {
+            e.preventDefault();
+        }
+    }
+
+    /** Subclasses can override to create a ContextMenu that will be shown when the user right-clicks */
+    protected createContextMenu(): ContextMenu {
+        return null;
+    }
+
+    protected get isDialogOrNotifShowing(): boolean {
+        return this._dialogRef.isLive || this._notifRef.isLive;
+    }
+
+    protected get hasUILock(): boolean {
+        return this._uiLockRef.isLive;
+    }
+
     protected _achievements: AchievementManager;
 
     protected _dialogRef: GameObjectRef = GameObjectRef.NULL;
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
+    protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
 
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!
     protected _isPipMode: boolean = false;
     protected _forceSynch: boolean = false;
+}
+
+class ContextMenuDialog extends Dialog<void> {
+    public constructor(menu: ContextMenu, menuLoc: Point) {
+        super();
+        this._menu = menu;
+        this._menuLoc = menuLoc;
+    }
+
+    protected added(): void {
+        super.added();
+        this.addObject(this._menu, this.container);
+
+        this._menu.display.position = this._menuLoc;
+        this._menu.menuItemSelected.connect(() => this.close(null));
+    }
+
+    protected onBGClicked(): void {
+        this.close(null);
+    }
+
+    protected get bgAlpha(): number {
+        return 0;
+    }
+
+    private readonly _menu: ContextMenu;
+    private readonly _menuLoc: Point;
 }
