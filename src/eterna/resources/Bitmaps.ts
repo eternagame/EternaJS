@@ -85,7 +85,7 @@ export class Bitmaps {
     public static readonly ImgEstimate: string = require("assets/NOVA/Estimate/estimate_normal.png");
     public static readonly ImgEstimateSelected: string = require("assets/NOVA/Estimate/estimate_selected.png");
     public static readonly ImgFb: string = require("assets/TangoIcons/evolver-32x32.png");
-    public static readonly ImgFileOver: string = require("assets/Stamps/failed.png");
+    public static readonly ImgFileOver: string = require("assets/NOVA/File/file_active.png");
     public static readonly ImgFileHit: string = require("assets/NOVA/File/file_hit.png");
     public static readonly ImgFile: string = require("assets/NOVA/File/file_normal.png");
     public static readonly NovaFingerClick: string = require("assets/NOVA/Hint/finger-click.png");
