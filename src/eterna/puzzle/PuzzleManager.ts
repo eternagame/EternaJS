@@ -203,7 +203,7 @@ export class PuzzleManager {
                 }
 
                 let puzzle = this.parsePuzzle(data["puzzle"]);
-                log.info(`Loaded puzzle [name=${puzzle.getPuzzleName()}]`);
+                log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
                 return puzzle;
             });
     }
