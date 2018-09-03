@@ -936,10 +936,6 @@ export class PoseEditMode extends GameMode {
         log.info("launched");
     }
 
-    public rop_layout_bars(): void {
-        this.layoutBars();
-    }
-
     public layoutConstraints(): void {
         let min_x: number = this._constraintsOffset + 17;
         let rel_x: number;
@@ -991,21 +987,6 @@ export class PoseEditMode extends GameMode {
         if (handled) {
             e.stopPropagation();
         }
-    }
-
-    /*override*/
-    public set_multi_engines(multi: boolean): void {
-        if (multi) {
-            this._folderButton.label(this._puzzle.folderName);
-            this._folderButton.display.visible = true;
-        } else {
-            this._folderButton.display.visible = false;
-        }
-    }
-
-    /*override*/
-    public set_toolbar_autohide(auto: boolean): void {
-        this._toolbar.setToolbarAutohide(auto);
     }
 
     /*override*/
