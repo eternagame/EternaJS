@@ -14,9 +14,10 @@ import {SpecBox} from "./SpecBox";
  * should display a docked SpecBox.
  */
 export class SpecBoxDialog extends Dialog<boolean> {
-    public constructor(datablock: UndoBlock) {
+    public constructor(datablock: UndoBlock, showMinimizeButton: boolean = true) {
         super();
         this._datablock = datablock;
+        this._showMinimizeButton = showMinimizeButton;
     }
 
     protected added(): void {
@@ -27,27 +28,29 @@ export class SpecBoxDialog extends Dialog<boolean> {
         specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
         this.addObject(specBox, this.container);
 
-        let cancel_button: GameButton = new GameButton().label("Ok", 14).hotkey(KeyCode.KeyS);
-        specBox.addObject(cancel_button, specBox.container);
-        cancel_button.display.position = new Point(
-            specBox.width - cancel_button.container.width - 20,
-            specBox.height - cancel_button.container.height - 20
+        let cancelButton = new GameButton().label("Ok", 14).hotkey(KeyCode.KeyS);
+        specBox.addObject(cancelButton, specBox.container);
+        cancelButton.display.position = new Point(
+            specBox.width - cancelButton.container.width - 20,
+            specBox.height - cancelButton.container.height - 20
         );
 
-        cancel_button.clicked.connect(() => this.close(false));
+        cancelButton.clicked.connect(() => this.close(false));
 
-        let add_thumbnail_button: GameButton = new GameButton()
-            .label("Minimize Window", 14)
-            .tooltip("Minimize")
-            .hotkey(KeyCode.KeyM);
-        specBox.addObject(add_thumbnail_button, specBox.container);
-        DisplayUtil.positionRelative(
-            add_thumbnail_button.display, HAlign.RIGHT, VAlign.CENTER,
-            cancel_button.display, HAlign.LEFT, VAlign.CENTER,
-            -20, 0
-        );
+        if (this._showMinimizeButton) {
+            let minimizeButton = new GameButton()
+                .label("Minimize Window", 14)
+                .tooltip("Minimize")
+                .hotkey(KeyCode.KeyM);
+            specBox.addObject(minimizeButton, specBox.container);
+            DisplayUtil.positionRelative(
+                minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
+                cancelButton.display, HAlign.LEFT, VAlign.CENTER,
+                -20, 0
+            );
 
-        add_thumbnail_button.clicked.connect(() => this.close(true));
+            minimizeButton.clicked.connect(() => this.close(true));
+        }
 
         let updateLocation = () => {
             specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
@@ -58,4 +61,5 @@ export class SpecBoxDialog extends Dialog<boolean> {
     }
 
     private readonly _datablock: UndoBlock;
+    private readonly _showMinimizeButton: boolean;
 }
