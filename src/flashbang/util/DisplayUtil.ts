@@ -9,7 +9,11 @@ const UPNG = require("upng-js");
 export class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
         let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
-        return UPNG.encode([pixels.buffer], DisplayUtil.width(target), DisplayUtil.height(target));
+        // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
+        return UPNG.encode(
+            [pixels.buffer],
+            Math.floor(DisplayUtil.width(target)),
+            Math.floor(DisplayUtil.height(target)));
     }
 
     /**
