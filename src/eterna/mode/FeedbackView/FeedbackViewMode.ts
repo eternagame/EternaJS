@@ -11,6 +11,7 @@ import {Feedback} from "../../Feedback";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {Vienna} from "../../folding/Vienna";
+import {EternaURL} from "../../net/EternaURL";
 import {PoseField} from "../../pose2D/PoseField";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
@@ -485,9 +486,7 @@ export class FeedbackViewMode extends GameMode {
         // if (true) {
         //     Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this._puzzle.get_node_id()]);
         // } else {
-        //     let req: URLRequest = new URLRequest;
-        //     req.url = EternaURL.generate_url({"page": "lab_browser", "nid": this._puzzle.get_node_id()});
-        //     this.navigateToURL(req, "_blank");
+            window.open(EternaURL.createURL({"page": "lab_browser", "nid": this._puzzle.nodeID}), "_blank");
         // }
     }
 
