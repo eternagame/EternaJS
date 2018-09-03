@@ -42,12 +42,12 @@ export class Feedback {
         return this._brentTheoData;
     }
 
-    public setShapeData(dat: any[], index: number, threshold: any, max: any, min: any, failed: string): void {
+    public setShapeData(dat: number[], index: number, threshold: any, max: any, min: any, failed: string): void {
         if (dat != null) {
             this._shapeStarts[index] = dat[0] - 1;
             dat.splice(0, 1);
             this._shapeData[index] = dat.slice();
-            let shape_data: any[] = this._shapeData[index];
+            let shape_data: number[] = this._shapeData[index];
 
             let smax: number = shape_data[0];
             let smin: number = shape_data[0];
