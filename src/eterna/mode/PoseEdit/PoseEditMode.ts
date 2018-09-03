@@ -486,7 +486,7 @@ export class PoseEditMode extends GameMode {
         puzzleIcon.position = new Point(11, 8);
         this.uiLayer.addChild(puzzleIcon);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getPuzzleName(true))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
             .font(Fonts.ARIAL)
             .fontSize(14)
             .bold()
@@ -1125,7 +1125,7 @@ export class PoseEditMode extends GameMode {
         let info =
             `Player: ${Eterna.playerName}\n` +
             `Puzzle ID: ${this._puzzle.nodeID}\n` +
-            `Puzzle Title: ${this._puzzle.getPuzzleName()}\n` +
+            `Puzzle Title: ${this._puzzle.getName()}\n` +
             `Mode: ${this.toolbar.nativeButton.isSelected ? "NativeMode" : "TargetMode"}`;
         let infoText = Fonts.arial(info).color(0xffffff).build();
         this.container.addChild(infoText);
@@ -1900,7 +1900,7 @@ export class PoseEditMode extends GameMode {
         }
 
         let introMode = new MissionIntroMode(
-            this._puzzle.getPuzzleName(true),
+            this._puzzle.getName(true),
             missionText,
             this._targetPairs,
             introConstraintBoxes);

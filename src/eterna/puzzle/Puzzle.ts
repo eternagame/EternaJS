@@ -470,7 +470,7 @@ export class Puzzle {
         return secstructs;
     }
 
-    public getPuzzleName(linked: boolean = false): string {
+    public getName(linked: boolean = false): string {
         if (linked && this._puzzleType !== PuzzleType.EXPERIMENTAL) {
             let url: string = EternaURL.createURL({page: "puzzle", nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
