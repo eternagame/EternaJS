@@ -38,11 +38,11 @@ export class FeedbackViewMode extends GameMode {
 
         this._puzzleTitle = Fonts.arial(this._puzzle.getName(false), 14).color(0xffffff).bold().build();
         this._puzzleTitle.position = new Point(33, 8);
-        this.container.addChild(this._puzzleTitle);
+        this.uiLayer.addChild(this._puzzleTitle);
 
         this._title = Fonts.arial("", 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
-        this.container.addChild(this._title);
+        this.uiLayer.addChild(this._title);
 
         this._toolbar = new FeedbackViewToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
@@ -59,6 +59,7 @@ export class FeedbackViewMode extends GameMode {
             }
         });
 
+        this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
         this._toolbar.viewSolutionsButton.clicked.connect(() => this.loadDesignBrowser());
         this._toolbar.viewOptionsButton.clicked.connect(() => this.showViewOptionsDialog());
         this._toolbar.letterColorButton.clicked.connect(() => this.showBaseColors());
@@ -218,8 +219,7 @@ export class FeedbackViewMode extends GameMode {
         }
     }
 
-    /*override*/
-    protected get_screenshot(): ArrayBuffer {
+    protected createScreenshot(): ArrayBuffer {
         let visibleState: Map<DisplayObject, boolean> = new Map();
         let pushVisibleState = (disp: DisplayObject) => {
             visibleState.set(disp, disp.visible);
@@ -230,6 +230,12 @@ export class FeedbackViewMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
+
+        let energyVisible: boolean[] = [];
+        for (let pose of this._poses) {
+            energyVisible.push(pose.showTotalEnergy);
+            pose.showTotalEnergy = false;
+        }
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
@@ -252,6 +258,10 @@ export class FeedbackViewMode extends GameMode {
 
         for (let [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
+        }
+
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            this._poses[ii].showTotalEnergy = energyVisible[ii];
         }
 
         return pngData;
