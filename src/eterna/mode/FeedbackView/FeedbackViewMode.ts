@@ -15,7 +15,7 @@ import {PoseField} from "../../pose2D/PoseField";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
-import {SpecBox} from "../../ui/SpecBox";
+import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock} from "../../UndoBlock";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
@@ -68,10 +68,6 @@ export class FeedbackViewMode extends GameMode {
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
         this._toolbar.showEstimateButton.clicked.connect(() => this.setToEstimateMode());
         this._toolbar.showTargetButton.clicked.connect(() => this.setToTargetMode());
-
-        // this._specBox = new SpecBox;
-        // this._specBox.set_size(new UDim(0.7, 0.7, 0, 0));
-        // this._specBox.set_pos(new UDim(0.15, 0.15, 0, 0));
 
         this._feedback = this._solution.expFeedback;
         this._targetConditions = this._puzzle.targetConditions;
@@ -496,25 +492,9 @@ export class FeedbackViewMode extends GameMode {
     }
 
     private showSpec(): void {
-        log.debug("TODO: show_spec");
-        // this._datablocks[this._current_index].set_meltingpoint_and_dotplot(FolderManager.instance.getFolder(Vienna.NAME));
-        // this._specBox.set_spec(this._datablocks[this._current_index]);
-        //
-        // let cancel_button: GameButton = new GameButton(14);
-        // cancel_button.set_text("Cancel");
-        // cancel_button.set_use_response_animation(false);
-        // cancel_button.set_states();
-        // cancel_button.set_style("nova");
-        // cancel_button.set_pos(new UDim(1, 1, -cancel_button.button_width() - 10, -cancel_button.button_height() - 10));
-        // this._specBox.add_object(cancel_button);
-        //
-        // cancel_button.set_click_callback(function (): void {
-        //     Application.instance.get_modal_container().remove_object(this._specBox);
-        //     Application.instance.remove_lock("SPEC");
-        // });
-        //
-        // Application.instance.add_lock("SPEC");
-        // Application.instance.get_modal_container().add_object(this._specBox);
+        let puzzleState = this._undoBlocks[this._currentIndex];
+        puzzleState.updateMeltingPointAndDotPlot(FolderManager.instance.getFolder(Vienna.NAME));
+        this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 
     private readonly _solution: Solution;
@@ -524,7 +504,6 @@ export class FeedbackViewMode extends GameMode {
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;
-    private _specBox: SpecBox;
 
     private _foldMode: PoseFoldMode;
     private _puzzleTitle: Text;
