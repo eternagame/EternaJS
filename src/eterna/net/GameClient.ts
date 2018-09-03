@@ -84,33 +84,33 @@ export class GameClient {
             });
     }
 
-    public getSolutions(puznid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "solutions", puznid})
+    public getSolutions(puzzleID: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {type: "solutions", "puznid": puzzleID})
             .then(rsp => rsp.json());
     }
 
-    public getSolutionInfo(solutionid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "solution_info", solid: solutionid, round: "1"})
+    public getSolutionInfo(solutionID: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {type: "solution_info", solid: solutionID, round: "1"})
             .then(rsp => rsp.json());
     }
 
-    public getSolutionComments(solution_nid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {nid: solution_nid, type: "comments"})
+    public getSolutionComments(solutionID: number): Promise<JSONData> {
+        return this.get(GameClient.GET_URI, {nid: solutionID, type: "comments"})
             .then(rsp => rsp.json());
     }
 
-    public submitSolutionComment(solution_nid: number, body: string): Promise<JSONData> {
-        return this.post(GameClient.POST_URI, {type: "post_comment", nid: solution_nid, body})
+    public submitSolutionComment(solutionID: number, body: string): Promise<JSONData> {
+        return this.post(GameClient.POST_URI, {type: "post_comment", nid: solutionID, body})
             .then(rsp => rsp.json());
     }
 
-    public deleteSolution(solution_nid: number): Promise<JSONData> {
-        return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solution_nid})
+    public deleteSolution(solutionID: number): Promise<JSONData> {
+        return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solutionID})
             .then(rsp => rsp.json());
     }
 
-    public toggleSolutionVote(solution_nid: number, puznid: number, myVotes: number): Promise<JSONData> {
-        let post_params: any = {solnid: solution_nid, puznid};
+    public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<JSONData> {
+        let post_params: any = {solnid: solutionID, puznid};
         if (myVotes === 1) {
             post_params["type"] = "unvote";
         } else if (myVotes === 0) {
@@ -122,11 +122,11 @@ export class GameClient {
         return this.post(GameClient.POST_URI, post_params).then(rsp => rsp.json());
     }
 
-    public updateSolutionFoldData(solution_nid: number, fold_data: any): Promise<string> {
+    public updateSolutionFoldData(solutionID: number, fold_data: any): Promise<string> {
         let dataString: string = JSON.stringify(fold_data);
         return this.post(GameClient.POST_URI, {
             type: "update_solution_fold_data",
-            nid: solution_nid,
+            nid: solutionID,
             "fold-data": dataString
         }).then(rsp => rsp.text());
     }
