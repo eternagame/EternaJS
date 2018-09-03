@@ -128,15 +128,15 @@ export class PoseEditMode extends GameMode {
         this._dockedSpecBox.display.visible = false;
         this.addObject(this._dockedSpecBox, this.uiLayer);
 
-        this._xButton = new GameButton()
+        this._undockSpecBoxButton = new GameButton()
             .allStates(Bitmaps.ImgMaximize)
             .tooltip("Re-maximize")
             .hotkey(KeyCode.KeyM);
-        this._xButton.clicked.connect(() => {
+        this._undockSpecBoxButton.clicked.connect(() => {
             this._dockedSpecBox.display.visible = false;
             this.showSpec();
         });
-        this._dockedSpecBox.addObject(this._xButton, this._dockedSpecBox.container);
+        this._dockedSpecBox.addObject(this._undockSpecBoxButton, this._dockedSpecBox.container);
 
         this._uiHighlight = new SpriteObject();
         this.addObject(this._uiHighlight, this.uiLayer);
@@ -186,9 +186,12 @@ export class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
         this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
-        this._xButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
+        this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
 
-        this.layoutBars();
+        this._scriptbar.display.position = new Point(
+            Flashbang.stageWidth - 20 - this._scriptbar.width,
+            Flashbang.stageHeight - 129);
+
         this.layoutConstraints();
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
@@ -582,9 +585,6 @@ export class PoseEditMode extends GameMode {
         //         this._run_button.set_click_callback(null);
         //     }
         // }
-
-        this.layoutBars();
-        this.layoutConstraints();
 
         this._folder = this._initialFolder != null ?
             this._initialFolder :
@@ -1401,12 +1401,12 @@ export class PoseEditMode extends GameMode {
 
     private showSpec(): void {
         this.updateCurrentBlockWithDotAndMeltingPlot();
-        let datablock: UndoBlock = this.getCurrentUndoBlock();
+        let puzzleState = this.getCurrentUndoBlock();
 
-        let dialog = this.showDialog(new SpecBoxDialog(datablock));
+        let dialog = this.showDialog(new SpecBoxDialog(puzzleState));
         dialog.closed.then(showDocked => {
             if (showDocked) {
-                this._dockedSpecBox.setSpec(datablock);
+                this._dockedSpecBox.setSpec(puzzleState);
                 this._dockedSpecBox.display.visible = true;
             }
         });
@@ -3478,12 +3478,6 @@ export class PoseEditMode extends GameMode {
         this._seqStacks = [];
     }
 
-    private layoutBars(): void {
-        this._scriptbar.display.position = new Point(
-            Flashbang.stageWidth - 20 - this._scriptbar.width,
-            Flashbang.stageHeight - 129);
-    }
-
     private readonly _puzzle: Puzzle;
     private readonly _initSeq: number[];
     private readonly _isReset: boolean;
@@ -3546,7 +3540,7 @@ export class PoseEditMode extends GameMode {
     private _uiHighlight: SpriteObject;
 
     private _scriptbar: ActionBar;
-    private _xButton: GameButton;
+    private _undockSpecBoxButton: GameButton;
     private _nidField: Text;
     private _runButton: GameButton;
     private _runStatus: Text;
