@@ -15,7 +15,7 @@ export enum BoosterType {
 }
 
 export class Booster {
-    public static create(view: GameMode, data: any): Promise<Booster> {
+    public static create(mode: GameMode, data: any): Promise<Booster> {
         if (!data['type']) {
             return Promise.reject("Invalid booster definition (missing 'type')");
         } else if (!data["icons_b64"] || data["icons_b64"].length != 5) {
@@ -37,23 +37,25 @@ export class Booster {
                 }));
         }
 
-        return Promise.all(imageLoaders).then(() => {
-            let type: BoosterType = Number(data['type']);
-            let tool_color: number = -1;
-            if (type == BoosterType.PAINTER) {
-                tool_color = Booster._toolColorCounter++;
-                log.info("color_num=" + tool_color);
-            }
+        return Promise.all(imageLoaders)
+            .then(() => mode.waitTillActive())
+            .then(() => {
+                let type: BoosterType = Number(data['type']);
+                let tool_color: number = -1;
+                if (type == BoosterType.PAINTER) {
+                    tool_color = Booster._toolColorCounter++;
+                    log.info("color_num=" + tool_color);
+                }
 
-            return new Booster(
-                view,
-                type,
-                tool_color,
-                data['label'],
-                data['tooltip'],
-                data['script'],
-                buttonStateTextures);
-        });
+                return new Booster(
+                    mode,
+                    type,
+                    tool_color,
+                    data['label'],
+                    data['tooltip'],
+                    data['script'],
+                    buttonStateTextures);
+            });
     }
 
     private constructor(
