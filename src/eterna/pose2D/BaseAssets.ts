@@ -173,9 +173,9 @@ export class BaseAssets {
 
         for (let ii: number = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             const color: number = ExpPainter.getColorByLevel(ii);
-            const r: number = ColorUtil.getRed(color);
-            const g: number = ColorUtil.getGreen(color);
-            const b: number = ColorUtil.getBlue(color);
+            const r: number = ColorUtil.getRed(color) / 255;
+            const g: number = ColorUtil.getGreen(color) / 255;
+            const b: number = ColorUtil.getBlue(color) / 255;
 
             const colorTransform = ColorUtil.colorTransform(0, 0, 0, 1, r, g, b, 0);
 
