@@ -1,5 +1,5 @@
-import * as log from "loglevel";
 import {Container, Graphics, Sprite, Texture} from "pixi.js";
+import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {EPars} from "../EPars";
 import {ExpPainter} from "../ExpPainter";
@@ -7,10 +7,9 @@ import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
 import {Sounds} from "../resources/Sounds";
 import {EternaTextureUtil} from "../util/EternaTextureUtil";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
 import {Base} from "./Base";
-import {BaseTextures} from "./BaseTextures";
 import {BaseDrawFlags} from "./BaseDrawFlags";
+import {BaseTextures} from "./BaseTextures";
 
 /** Handles initialization and management of Base-related assets */
 export class BaseAssets {
