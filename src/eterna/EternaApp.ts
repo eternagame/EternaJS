@@ -1,7 +1,7 @@
+import "assets/styles.css"; // css-loader will pick up on this and embed our stylesheet
 import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
-import {TestMode} from "./debug/TestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
@@ -10,19 +10,19 @@ import {NuPACK} from "./folding/NuPACK";
 import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
+import {FeedbackViewMode} from "./mode/FeedbackView/FeedbackViewMode";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
 import {PuzzleEditMode, PuzzleEditPoseData} from "./mode/PuzzleEdit/PuzzleEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
+import {Solution} from "./puzzle/Solution";
+import {SolutionManager} from "./puzzle/SolutionManager";
 import {Bitmaps} from "./resources/Bitmaps";
+import {SoundManager} from "./resources/SoundManager";
 import {EternaSettings} from "./settings/EternaSettings";
 import {ExternalInterface} from "./util/ExternalInterface";
 import {Fonts} from "./util/Fonts";
-import {SoundManager} from "./resources/SoundManager";
-
-// css-loader will pick up on this and embed our stylesheet
-import "assets/styles.css";
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -44,9 +44,20 @@ enum PuzzleID {
     TemporalAnomaly = 7796345,          // Really big!
 }
 
+interface SolutionAndPuzzleID {
+    puzzleID: number;
+    solutionID: number;
+}
+
+let CloudLab19Solution: SolutionAndPuzzleID = {
+    puzzleID: 2333436,
+    solutionID: 2694684
+};
+
 export enum InitialAppMode {
     POSE_EDIT = "puzzle",
     PUZZLE_EDIT = "puzzlemaker",
+    SOLUTION = "solution",
 }
 
 export interface EternaAppParameters {
@@ -55,6 +66,7 @@ export interface EternaAppParameters {
     width?: number,
     height?: number,
     puzzleID?: number,
+    solutionID?: number,
     puzzleEditNumTargets?: number;
     folderName?: string,
 }
@@ -65,17 +77,17 @@ export class EternaApp extends FlashbangApp {
         super();
 
         // Default param values
-        params.initialAppMode = params.initialAppMode || InitialAppMode.POSE_EDIT;
+        params.initialAppMode = params.initialAppMode || InitialAppMode.SOLUTION;
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || PuzzleID.NandosZippers;
+        params.puzzleID = params.puzzleID || CloudLab19Solution.puzzleID;
+        params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
         this._params = params;
 
-        const containerID = params.containerID || "maingame";
-        let eternaContainer: HTMLElement = document.getElementById(containerID);
+        let eternaContainer: HTMLElement = document.getElementById(params.containerID);
         eternaContainer.style.position = "relative";
 
         let pixiContainer: HTMLElement = document.createElement("div");
@@ -112,6 +124,8 @@ export class EternaApp extends FlashbangApp {
                     return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                 case InitialAppMode.POSE_EDIT:
                     return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
+                case InitialAppMode.SOLUTION:
+                    return this.loadFeedbackView(this._params.puzzleID, this._params.solutionID);
                 default:
                     log.warn(`Unrecognized mode '${this._params.initialAppMode}'`);
                     return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
@@ -121,7 +135,7 @@ export class EternaApp extends FlashbangApp {
     }
 
     public loadPoseEdit(puzzleID: number, folderName: string): Promise<void> {
-        this.setLoadingText(`Loading puzzle ${this._params.puzzleID}...`);
+        this.setLoadingText(`Loading puzzle ${puzzleID}...`);
         return PuzzleManager.instance.getPuzzleByID(puzzleID)
             .then(puzzle => {
                 let folder: Folder = null;
@@ -139,6 +153,28 @@ export class EternaApp extends FlashbangApp {
     public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initialPoseData));
         return Promise.resolve();
+    }
+
+    public loadFeedbackView(puzzleID: number, solutionID: number): Promise<void> {
+        this.setLoadingText(`Loading solution ${solutionID}...`);
+        let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
+        let loadSolutions = SolutionManager.instance.getSolutionsByPuzzleNid(puzzleID);
+        return Promise.all([loadPuzzle, loadSolutions])
+            .then(([puzzle, solutions]) => {
+                let requestedSolution: Solution;
+                for (let solution of solutions) {
+                    if (solution.nodeID === solutionID) {
+                        requestedSolution = solution;
+                        break;
+                    }
+                }
+
+                if (requestedSolution == null) {
+                    throw new Error(`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`);
+                }
+
+                this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
+            });
     }
 
     protected onUncaughtError(err: any): void {
