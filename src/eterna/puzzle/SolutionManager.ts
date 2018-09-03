@@ -13,13 +13,13 @@ export class SolutionManager {
     }
 
     public getSolutionsByPuzzleNid(puznid: number): Promise<Solution[]> {
-        return Eterna.client.getSolutions(puznid).then((json) => {
+        return Eterna.client.getSolutions(puznid).then(json => {
             let data: any = json["data"];
-            let solutions: any[] = data["solutions"];
+            let solutionsData: any[] = data["solutions"];
             this._solutions = [];
 
-            for (let ii: number = 0; ii < solutions.length; ii++) {
-                this._solutions.push(SolutionManager.processData(solutions[ii]));
+            for (let data of solutionsData) {
+                this._solutions.push(SolutionManager.processData(data));
             }
 
             return this._solutions;
@@ -76,7 +76,7 @@ export class SolutionManager {
     }
 
     private static processData(obj: any): Solution {
-        let newsol: Solution = new Solution(obj["id"], obj["puznid"]);
+        let newsol: Solution = new Solution(Number(obj["id"]), Number(obj["puznid"]));
         newsol.sequence = obj["sequence"];
         newsol.title = obj["title"];
 
@@ -90,16 +90,16 @@ export class SolutionManager {
         }
 
         if (obj["uid"] != null) {
-            player_id = obj["uid"];
+            player_id = Number(obj["uid"]);
         }
 
         newsol.setPlayer(player_name, player_id);
-        newsol.setNumPairs(obj["gc"], obj["gu"], obj["au"]);
-        newsol.meltingPoint(obj["meltpoint"]);
-        newsol.freeEnergy = obj["energy"];
+        newsol.setNumPairs(Number(obj["gc"]), Number(obj["gu"]), Number(obj["au"]));
+        newsol.meltingPoint(Number(obj["meltpoint"]));
+        newsol.freeEnergy = Number(obj["energy"]);
         newsol.desc = obj["body"];
-        newsol.round = obj["submitted-round"];
-        newsol.setSynthesis(obj["synthesis-round"], obj["synthesis-score"]);
+        newsol.round = Number(obj["submitted-round"]);
+        newsol.setSynthesis(Number(obj["synthesis-round"]), Number(obj["synthesis-score"]));
 
         if (obj["synthesis-data"] && obj["synthesis-data"].length > 0) {
             let synthesis_data_raw: any = JSON.parse(obj["synthesis-data"]);
@@ -109,18 +109,24 @@ export class SolutionManager {
                 for (let ii: number = 0; ii < synthesis_data.length; ii++) {
                     let synthesis: any = synthesis_data[ii];
                     if (synthesis["reactive"] === "SHAPE") {
-                        let peaks: any[] = [];
-                        peaks.push(synthesis["start_index"]);
+                        let peaks: number[] = [];
+                        peaks.push(Number(synthesis["start_index"]));
 
                         for (let ss: number = 0; ss < synthesis["peaks"].length; ss++) {
-                            peaks.push(synthesis["peaks"][ss]);
+                            peaks.push(Number(synthesis["peaks"][ss]));
                         }
 
                         if (newfb == null) {
                             newfb = new Feedback();
                         }
 
-                        newfb.setShapeData(peaks, synthesis["target_index"], synthesis["threshold"], synthesis["max"], synthesis["min"], null);
+                        newfb.setShapeData(
+                            peaks,
+                            Number(synthesis["target_index"]),
+                            Number(synthesis["threshold"]),
+                            Number(synthesis["max"]),
+                            Number(synthesis["min"]),
+                            null);
                     }
                 }
                 // / Ad-hoc handling for different exp types : Brent's theophylline puzzle
@@ -148,15 +154,15 @@ export class SolutionManager {
                 let threshold: any = null;
 
                 if (obj["SHAPE-threshold"] != null && obj["SHAPE-threshold"] !== "") {
-                    threshold = (obj["SHAPE-threshold"]);
+                    threshold = Number(obj["SHAPE-threshold"]);
                 }
 
                 if (obj["SHAPE-max"] != null && obj["SHAPE-max"] !== "") {
-                    max = (obj["SHAPE-max"]);
+                    max = Number(obj["SHAPE-max"]);
                 }
 
                 if (obj["SHAPE-min"] != null && obj["SHAPE-min"] !== "") {
-                    min = (obj["SHAPE-min"]);
+                    min = Number(obj["SHAPE-min"]);
                 }
 
                 newfb.setShapeData(shape_array, 0, threshold, max, min, null);
