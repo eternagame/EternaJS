@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {EPars} from "../EPars";
 import {Eterna} from "../Eterna";
 import {Feedback} from "../Feedback";
@@ -12,8 +13,9 @@ export class SolutionManager {
         return SolutionManager._instance;
     }
 
-    public getSolutionsByPuzzleNid(puznid: number): Promise<Solution[]> {
-        return Eterna.client.getSolutions(puznid).then(json => {
+    public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
+        log.info(`Loading solutions for puzzle ${puzzleID}...`);
+        return Eterna.client.getSolutions(puzzleID).then(json => {
             let data: any = json["data"];
             let solutionsData: any[] = data["solutions"];
             this._solutions = [];

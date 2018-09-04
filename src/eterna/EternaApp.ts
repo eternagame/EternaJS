@@ -2,6 +2,7 @@ import "assets/styles.css"; // css-loader will pick up on this and embed our sty
 import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
+import {EPars} from "./EPars";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
@@ -55,16 +56,19 @@ let CloudLab19Solution: SolutionAndPuzzleID = {
 };
 
 export enum InitialAppMode {
-    POSE_EDIT = "puzzle",
-    PUZZLE_EDIT = "puzzlemaker",
-    SOLUTION = "solution",
+    PUZZLE = "puzzle",                                  // load a puzzle
+    PUZZLEMAKER = "puzzlemaker",                        // load the puzzlemaker
+    SOLUTION_SEE_RESULT = "solution_see_result",        // load a solution into FeedbackViewMode
+    SOLUTION_COPY_AND_VIEW = "solution_copy_and_view",  // load a solution into PoseEditMode
 }
 
 export interface EternaAppParameters {
-    initialAppMode?: InitialAppMode;
     containerID?: string,
     width?: number,
     height?: number,
+
+    // initialization options
+    initialAppMode?: InitialAppMode;
     puzzleID?: number,
     solutionID?: number,
     puzzleEditNumTargets?: number;
@@ -77,11 +81,11 @@ export class EternaApp extends FlashbangApp {
         super();
 
         // Default param values
-        params.initialAppMode = params.initialAppMode || InitialAppMode.POSE_EDIT;
+        params.initialAppMode = params.initialAppMode || InitialAppMode.PUZZLE;
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || CloudLab19Solution.puzzleID;
+        params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
@@ -121,12 +125,14 @@ export class EternaApp extends FlashbangApp {
             // })
             .then(() => {
                 switch (this._params.initialAppMode) {
-                case InitialAppMode.PUZZLE_EDIT:
+                case InitialAppMode.PUZZLEMAKER:
                     return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
-                case InitialAppMode.POSE_EDIT:
+                case InitialAppMode.PUZZLE:
                     return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
-                case InitialAppMode.SOLUTION:
-                    return this.loadFeedbackView(this._params.puzzleID, this._params.solutionID);
+                case InitialAppMode.SOLUTION_SEE_RESULT:
+                case InitialAppMode.SOLUTION_COPY_AND_VIEW:
+                    return this.loadSolution(this._params.puzzleID, this._params.solutionID,
+                        this._params.initialAppMode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                 default:
                     log.warn(`Unrecognized mode '${this._params.initialAppMode}'`);
                     return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
@@ -159,10 +165,10 @@ export class EternaApp extends FlashbangApp {
         return Promise.resolve();
     }
 
-    public loadFeedbackView(puzzleID: number, solutionID: number): Promise<void> {
+    public loadSolution(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
         this.setLoadingText(`Loading solution ${solutionID}...`);
         let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
-        let loadSolutions = SolutionManager.instance.getSolutionsByPuzzleNid(puzzleID);
+        let loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
         return Promise.all([loadPuzzle, loadSolutions])
             .then(([puzzle, solutions]) => {
                 let requestedSolution: Solution;
@@ -177,7 +183,12 @@ export class EternaApp extends FlashbangApp {
                     throw new Error(`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`);
                 }
 
-                this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
+                if (loadInPoseEdit) {
+                    this._modeStack.unwindToMode(
+                        new PoseEditMode(puzzle, EPars.stringToSequence(requestedSolution.sequence), false, null));
+                } else {
+                    this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
+                }
             });
     }
 
