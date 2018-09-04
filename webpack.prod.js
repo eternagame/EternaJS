@@ -10,7 +10,7 @@ module.exports = merge(common, {
 
     output: {
         path: path.resolve(__dirname + "/dist/prod"),
-        publicPath: '/rnapuz/dist/prod/'
+        publicPath: '/eternajs/dist/prod/'
     },
 
     plugins: [
