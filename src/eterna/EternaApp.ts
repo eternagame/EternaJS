@@ -13,7 +13,7 @@ import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
 import {FeedbackViewMode} from "./mode/FeedbackView/FeedbackViewMode";
 import {LoadingMode} from "./mode/LoadingMode";
-import {PoseEditMode} from "./mode/PoseEdit/PoseEditMode";
+import {PoseEditMode, PoseEditParams} from "./mode/PoseEdit/PoseEditMode";
 import {PuzzleEditMode, PuzzleEditPoseData} from "./mode/PuzzleEdit/PuzzleEditMode";
 import {GameClient} from "./net/GameClient";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
@@ -62,26 +62,27 @@ export enum InitialAppMode {
     SOLUTION_COPY_AND_VIEW = "solution_copy_and_view",  // load a solution into PoseEditMode
 }
 
-export interface EternaAppParameters {
-    containerID?: string,
-    width?: number,
-    height?: number,
+export interface EternaAppParams {
+    containerID?: string;
+    width?: number;
+    height?: number;
 
     // initialization options
-    initialAppMode?: InitialAppMode;
-    puzzleID?: number,
-    solutionID?: number,
+    mode?: InitialAppMode;
+    puzzleID?: number;
+    solutionID?: number;
     puzzleEditNumTargets?: number;
-    folderName?: string,
+    folderName?: string;
+    sequence?: string;
 }
 
 /** Entry point for the game */
 export class EternaApp extends FlashbangApp {
-    public constructor(params: EternaAppParameters) {
+    public constructor(params: EternaAppParams) {
         super();
 
         // Default param values
-        params.initialAppMode = params.initialAppMode || InitialAppMode.PUZZLE;
+        params.mode = params.mode || InitialAppMode.PUZZLE;
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
@@ -124,39 +125,30 @@ export class EternaApp extends FlashbangApp {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
             .then(() => {
-                switch (this._params.initialAppMode) {
+                switch (this._params.mode) {
                 case InitialAppMode.PUZZLEMAKER:
                     return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                 case InitialAppMode.PUZZLE:
-                    return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
+                    return this.loadPoseEdit(this._params.puzzleID, {
+                        initialFolder: this._params.folderName,
+                        initialSequence: this._params.sequence,
+                    });
                 case InitialAppMode.SOLUTION_SEE_RESULT:
                 case InitialAppMode.SOLUTION_COPY_AND_VIEW:
                     return this.loadSolution(this._params.puzzleID, this._params.solutionID,
-                        this._params.initialAppMode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
+                        this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                 default:
-                    log.warn(`Unrecognized mode '${this._params.initialAppMode}'`);
-                    return this.loadPoseEdit(this._params.puzzleID, this._params.folderName);
+                    return Promise.reject(`Unrecognized mode '${this._params.mode}'`);
                 }
             })
             .catch(err => Eterna.onFatalError(err));
     }
 
-    public loadPoseEdit(puzzleID: number, folderName?: string, rscript?: string): Promise<void> {
+    public loadPoseEdit(puzzleID: number, params: PoseEditParams): Promise<void> {
         this.setLoadingText(`Loading puzzle ${puzzleID}...`);
         return PuzzleManager.instance.getPuzzleByID(puzzleID)
             .then(puzzle => {
-                let folder: Folder = null;
-                if (folderName != null) {
-                    if (FolderManager.instance.isFolder(folderName)) {
-                        folder = FolderManager.instance.getFolder(folderName)
-                    } else {
-                        log.warn(`No such folder '${folderName}'`);
-                    }
-                }
-                if (rscript != null) {
-                    puzzle.rscript = rscript;
-                }
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
+                this._modeStack.unwindToMode(new PoseEditMode(puzzle, params));
             });
     }
 
@@ -184,8 +176,9 @@ export class EternaApp extends FlashbangApp {
                 }
 
                 if (loadInPoseEdit) {
-                    this._modeStack.unwindToMode(
-                        new PoseEditMode(puzzle, EPars.stringToSequence(requestedSolution.sequence), false, null));
+                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {
+                        initialSequence: requestedSolution.sequence
+                    }));
                 } else {
                     this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
                 }
@@ -270,12 +263,12 @@ export class EternaApp extends FlashbangApp {
 
     private initScriptInterface(): void {
         this._scriptInterface.addCallback("test_tutorial", (puzzleID: number, rscript: string): void => {
-            this.loadPoseEdit(puzzleID, null, rscript)
+            this.loadPoseEdit(puzzleID, {rscript: rscript, isReset: true})
                 .catch(e => Eterna.onFatalError(e));
         });
 
         this._scriptInterface.addCallback("load_puzzle", (puzzleID: number, doneCallback: string): void => {
-            this.loadPoseEdit(puzzleID)
+            this.loadPoseEdit(puzzleID, {isReset: true})
                 .then(() => {
                     ExternalInterface.call(doneCallback);
                 })
@@ -285,7 +278,7 @@ export class EternaApp extends FlashbangApp {
         ExternalInterface.pushContext(this._scriptInterface);
     }
 
-    private readonly _params: EternaAppParameters;
+    private readonly _params: EternaAppParams;
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
