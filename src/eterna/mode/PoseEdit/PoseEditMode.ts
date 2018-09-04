@@ -65,13 +65,22 @@ export enum PuzzleState {
     CLEARED = 2,
 }
 
+export interface PoseEditParams {
+    isReset?: boolean;
+    initialSequence?: string;
+    initialFolder?: string;
+    rscript?: string;
+}
+
 export class PoseEditMode extends GameMode {
-    public constructor(puz: Puzzle, initSeq?: number[], isReset?: boolean, initialFolder?: Folder) {
+    public constructor(puzzle: Puzzle, params: PoseEditParams) {
         super();
-        this._puzzle = puz;
-        this._initSeq = initSeq;
-        this._isReset = isReset;
-        this._initialFolder = initialFolder;
+        this._puzzle = puzzle;
+        this._params = params;
+
+        if (this._params.rscript != null) {
+            puzzle.rscript = this._params.rscript;
+        }
     }
 
     protected setup(): void {
@@ -589,9 +598,15 @@ export class PoseEditMode extends GameMode {
         //     }
         // }
 
-        this._folder = this._initialFolder != null ?
-            this._initialFolder :
-            FolderManager.instance.getFolder(this._puzzle.folderName);
+        let initialFolder: Folder = null;
+        if (this._params.initialFolder != null) {
+            initialFolder = FolderManager.instance.getFolder(this._params.initialFolder);
+            if (initialFolder == null) {
+                log.warn(`No such folder '${this._params.initialFolder}'`);
+            }
+        }
+
+        this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
 
         this._folderButton = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -619,12 +634,16 @@ export class PoseEditMode extends GameMode {
             }
         }
 
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            let seq: number[] = this._initSeq;
+        let initialSequence: number[] = null;
+        if (this._params.initialSequence != null) {
+            initialSequence = EPars.stringToSequence(this._params.initialSequence);
+        }
 
+        for (let ii = 0; ii < this._poses.length; ii++) {
+            let seq = initialSequence;
             if (seq == null) {
                 seq = this._puzzle.getBeginningSequence(ii);
-                if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._isReset) {
+                if (this._puzzle.puzzleType === PuzzleType.CHALLENGE && !this._params.isReset) {
                     let saved_seq: number[] = this._puzzle.savedSequence;
                     if (saved_seq != null) {
                         if (saved_seq.length === seq.length) {
@@ -663,17 +682,17 @@ export class PoseEditMode extends GameMode {
 
         let autoloaded: boolean = false;
 
-        if (!this._isReset) {
+        if (!this._params.isReset) {
             this.loadSavedData();
         }
 
         this._poseEditByTargetCb = () => {
             if (this._forceSynch) {
-                this.setPuzzleEpilog(this._initSeq, this._isReset);
+                this.setPuzzleEpilog(initialSequence, this._params.isReset);
             } else {
                 this._opQueue.push(new PoseOp(
                     this._targetPairs.length,
-                    () => this.setPuzzleEpilog(this._initSeq, this._isReset)));
+                    () => this.setPuzzleEpilog(initialSequence, this._params.isReset)));
             }
             this._poseEditByTargetCb = null;
         };
@@ -1135,7 +1154,7 @@ export class PoseEditMode extends GameMode {
             if (confirmed) {
                 this.resetAutosaveData();
                 this._puzzle.temporaryConstraints = null;
-                this.modeStack.changeMode(new PoseEditMode(this._puzzle, null, false));
+                this.modeStack.changeMode(new PoseEditMode(this._puzzle, {isReset: true}));
             }
         });
     }
@@ -1692,7 +1711,7 @@ export class PoseEditMode extends GameMode {
 
         if (nextPuzzle != null) {
             missionClearedPanel.nextButton.clicked.connect(() => {
-                this.modeStack.changeMode(new PoseEditMode(nextPuzzle));
+                this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
             });
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
@@ -3452,9 +3471,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private readonly _puzzle: Puzzle;
-    private readonly _initSeq: number[];
-    private readonly _isReset: boolean;
-    private readonly _initialFolder: Folder;
+    private readonly _params: PoseEditParams;
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _constraintsLayer: Container;
