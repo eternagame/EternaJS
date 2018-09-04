@@ -25,7 +25,7 @@ import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePa
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {ExternalInterface} from "../../util/ExternalInterface";
+import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
 import {GameMode} from "../GameMode";
@@ -137,13 +137,12 @@ export class PuzzleEditMode extends GameMode {
         this._toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
 
         if (this._embedded) {
-            ExternalInterface.addCallback("get_secstruct", () => this.structure);
-            ExternalInterface.addCallback("get_sequence", () => this.sequence);
-            ExternalInterface.addCallback("get_locks", () => this.getLockString());
-            ExternalInterface.addCallback("get_thumbnail", () => this.getThumbnailBase64);
-            ExternalInterface.addCallback("get_shift_limit", () => this.shiftLimitString);
+            this._scriptInterface.addCallback("get_secstruct", () => this.structure);
+            this._scriptInterface.addCallback("get_sequence", () => this.sequence);
+            this._scriptInterface.addCallback("get_locks", () => this.getLockString());
+            this._scriptInterface.addCallback("get_thumbnail", () => this.getThumbnailBase64);
+            this._scriptInterface.addCallback("get_shift_limit", () => this.shiftLimitString);
         }
-
 
         this.clearUndoStack();
 
@@ -240,6 +239,8 @@ export class PuzzleEditMode extends GameMode {
         this.setToTargetMode();
         this.onPaletteTargetSelected(PaletteTargetType.A);
         this.setPip(true);
+
+        this.registerScriptInterface(this._scriptInterface);
 
         this.updateLayout();
     }
@@ -874,6 +875,8 @@ export class PuzzleEditMode extends GameMode {
     private readonly _embedded: boolean;
     private readonly _numTargets: number;
     private readonly _initialPoseData: PuzzleEditPoseData[];
+
+    private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _structureInputs: StructureInput[];
     private _folder: Folder;

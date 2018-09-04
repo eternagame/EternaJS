@@ -14,6 +14,7 @@ import {Dialog} from "../ui/Dialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
 import {Tooltips} from "../ui/Tooltips";
 import {UILockDialog} from "../ui/UILockDialog";
+import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
 
 export abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -40,6 +41,20 @@ export abstract class GameMode extends AppMode {
         this._achievements = new AchievementManager();
         this.addObject(this._achievements);
         this.addObject(new Tooltips(this.tooltipLayer));
+    }
+
+    public enter(): void {
+        super.enter();
+        if (this._modeScriptInterface != null) {
+            ExternalInterface.pushContext(this._modeScriptInterface);
+        }
+    }
+
+    public exit(): void {
+        if (this._modeScriptInterface != null) {
+            ExternalInterface.popContext(this._modeScriptInterface);
+        }
+        super.exit();
     }
 
     public getPose(i: number): Pose2D {
@@ -115,10 +130,15 @@ export abstract class GameMode extends AppMode {
         this._forceSynch = forced;
     }
 
-    public registerScriptCallbacks(): void {
-    }
+    protected registerScriptInterface(ctx: ExternalInterfaceCtx): void {
+        if (this._modeScriptInterface != null) {
+            throw new Error("ExternalInterfaceCtx already registered for this mode");
+        }
 
-    public registerSetterCallbacks(): void {
+        this._modeScriptInterface = ctx;
+        if (this._isActive) {
+            ExternalInterface.pushContext(ctx);
+        }
     }
 
     public onResized(): void {
@@ -238,6 +258,8 @@ export abstract class GameMode extends AppMode {
     protected _uiLockRef: GameObjectRef = GameObjectRef.NULL;
     protected _notifRef: GameObjectRef = GameObjectRef.NULL;
     protected _contextMenuDialogRef: GameObjectRef = GameObjectRef.NULL;
+
+    private _modeScriptInterface: ExternalInterfaceCtx;
 
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!
