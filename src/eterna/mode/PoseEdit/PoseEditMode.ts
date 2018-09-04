@@ -932,7 +932,6 @@ export class PoseEditMode extends GameMode {
         // run
         log.info("running script " + nid);
         ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null);
-        log.info("launched");
     }
 
     public layoutConstraints(): void {
@@ -2586,7 +2585,6 @@ export class PoseEditMode extends GameMode {
             isSatisfied = false;
             log.info("running script " + nid);
             ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
-            log.info("launched");
         }
 
         return isSatisfied;
