@@ -72,7 +72,7 @@ export class PuzzleEditMode extends GameMode {
         this._folderButton.display.position = new Point(17, 160);
         this.addObject(this._folderButton, this.uiLayer);
 
-        this._folderButton.clicked.connect(() => this.changeFolder);
+        this._folderButton.clicked.connect(() => this.changeFolder());
 
         this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
             this._folderButton.display.visible = value;
