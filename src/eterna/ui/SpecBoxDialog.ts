@@ -24,40 +24,42 @@ export class SpecBoxDialog extends Dialog<boolean> {
         super.added();
 
         let specBox = new SpecBox();
-        specBox.setSpec(this._datablock);
-        specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
         this.addObject(specBox, this.container);
+
+        specBox.setSpec(this._datablock);
 
         let cancelButton = new GameButton().label("Ok", 14).hotkey(KeyCode.KeyS);
         specBox.addObject(cancelButton, specBox.container);
-        cancelButton.display.position = new Point(
-            specBox.width - cancelButton.container.width - 20,
-            specBox.height - cancelButton.container.height - 20
-        );
-
         cancelButton.clicked.connect(() => this.close(false));
 
+        let minimizeButton: GameButton;
         if (this._showMinimizeButton) {
-            let minimizeButton = new GameButton()
+            minimizeButton = new GameButton()
                 .label("Minimize Window", 14)
                 .tooltip("Minimize")
                 .hotkey(KeyCode.KeyM);
             specBox.addObject(minimizeButton, specBox.container);
-            DisplayUtil.positionRelative(
-                minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
-                cancelButton.display, HAlign.LEFT, VAlign.CENTER,
-                -20, 0
-            );
-
             minimizeButton.clicked.connect(() => this.close(true));
         }
 
-        let updateLocation = () => {
+        let updateBounds = () => {
+            specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
             specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
             specBox.display.position.y = (Flashbang.stageHeight - specBox.height) * 0.5;
+
+            cancelButton.display.position = new Point(
+                specBox.width - cancelButton.container.width - 20,
+                specBox.height - cancelButton.container.height - 20);
+
+            if (minimizeButton != null) {
+                DisplayUtil.positionRelative(
+                    minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
+                    cancelButton.display, HAlign.LEFT, VAlign.CENTER,
+                    -20, 0);
+            }
         };
-        updateLocation();
-        this.regs.add(this.mode.resized.connect(updateLocation));
+        updateBounds();
+        this.regs.add(this.mode.resized.connect(updateBounds));
     }
 
     private readonly _datablock: UndoBlock;
