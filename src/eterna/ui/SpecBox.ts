@@ -23,13 +23,15 @@ export class SpecBox extends ContainerObject {
     constructor(docked: boolean = false) {
         super();
 
+        this._docked = docked;
+    }
+
+    protected added(): void {
         this._panel = new GamePanel();
-        if (!docked) {
+        if (!this._docked) {
             this._panel.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
         }
         this.addObject(this._panel, this.container);
-
-        this._docked = docked;
         this._dotplotOriginX = 0;
         this._dotplotOriginY = 0;
         this._dotplotScaleLevel = 1;
@@ -92,17 +94,16 @@ export class SpecBox extends ContainerObject {
         this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
         this.addObject(this._zoomOutButton, this.container);
 
-        if (docked) {
+        if (!this._docked) {
+            this._dotPlotSprite.interactive = true;
             let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
-            pointerTarget.pointerOut.connect(e => this.onDotPlotMouseOut(e));
+            pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());
+            pointerTarget.pointerOut.connect(() => this.onDotPlotMouseExit());
             pointerTarget.pointerDown.filter(IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
-            pointerTarget.pointerUp.filter(IsLeftMouse).connect(e => this.onDotPlotMouseUp(e));
+            pointerTarget.pointerUp.filter(IsLeftMouse).connect(() => this.onDotPlotMouseUp());
         }
-    }
 
-    protected added(): void {
-        super.added();
         this.updateLayout();
     }
 
@@ -132,16 +133,16 @@ export class SpecBox extends ContainerObject {
         this._dotplot = datablock.createDotPlot();
         this._meltplot = datablock.createMeltPlot();
 
-        let statstring: StyledTextBuilder = new StyledTextBuilder({
+        let statString: StyledTextBuilder = new StyledTextBuilder({
             fontFamily: Fonts.ARIAL,
             fontSize: 14,
             fill: 0xffffff
         }).addStyle("bold", {
             fontStyle: "bold"
         });
-        EPars.addLetterStyles(statstring);
+        EPars.addLetterStyles(statString);
 
-        statstring
+        statString
             .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
             .append(`${datablock.getParam(UndoBlockParam.AU, temperature)}   `)
             .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
@@ -153,7 +154,7 @@ export class SpecBox extends ContainerObject {
             .append("Free energy : ", "bold")
             .append(`${Number(datablock.getParam(UndoBlockParam.FE, temperature) / 100).toFixed(1)}kcal\n`);
 
-        statstring.apply(this._stattext);
+        statString.apply(this._stattext);
 
         if (this._hvec != null) {
             for (let disp of this._hvec) {
@@ -223,15 +224,19 @@ export class SpecBox extends ContainerObject {
             log.warn("scale dotplot level under 1");
             return;
         }
-        if (Number.isNaN(this._dotplotOriginX)) this._dotplotOriginX = 0;
-        if (Number.isNaN(this._dotplotOriginY)) this._dotplotOriginY = 0;
+        if (Number.isNaN(this._dotplotOriginX)) {
+            this._dotplotOriginX = 0;
+        }
+        if (Number.isNaN(this._dotplotOriginY)) {
+            this._dotplotOriginY = 0;
+        }
 
         let plotSize: number = this.plotSize;
-        let plot_size_level: number = plotSize * level;
-        if (this._dotplot != null && plotSize > 0 && plot_size_level > 0) {
+        let plotSizeLevel: number = plotSize * level;
+        if (this._dotplot != null && plotSize > 0 && plotSizeLevel > 0) {
             this._dotplotOriginX += (-this._dotplotOriginX) / level;
             this._dotplotOriginY += (-this._dotplotOriginY) / level;
-            this._dotplot.setSize(plot_size_level, plot_size_level);
+            this._dotplot.setSize(plotSizeLevel, plotSizeLevel);
             this._dotplot.replotWithBase(this._dotplotOriginX, this._dotplotOriginY);
 
             if (this._dotPlotSprite.mask != null) {
@@ -239,7 +244,7 @@ export class SpecBox extends ContainerObject {
                 this._dotPlotSprite.mask = null;
             }
 
-            if (plot_size_level > plotSize) {
+            if (plotSizeLevel > plotSize) {
                 let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plotSize, plotSize).endFill();
                 this._dotPlotSprite.addChild(mask);
                 this._dotPlotSprite.mask = mask;
@@ -292,39 +297,39 @@ export class SpecBox extends ContainerObject {
             this._zoomOutButton.display.position = new Point(70, this._height - 130);
         }
 
-        let plot_size: number = this.plotSize;
+        let plotSize: number = this.plotSize;
 
         this.scaleDotPlot(1);
 
-        if (this._meltplot != null && plot_size > 0) {
-            this._meltplot.setSize(plot_size, plot_size);
+        if (this._meltplot != null && plotSize > 0) {
+            this._meltplot.setSize(plotSize, plotSize);
             this._meltplot.replot();
             // this._meltplot.cacheAsBitmap = true;
             this._meltPlotSprite.addChild(this._meltplot);
 
             if (this._docked) {
-                this._h0Melt.position = new Point(15, (this._height * 0.5) + plot_size + 10);
+                this._h0Melt.position = new Point(15, (this._height * 0.5) + plotSize + 10);
                 this._hnMelt.position = new Point(
-                    25 + plot_size - this._hnMelt.width,
-                    (this._height * 0.5) + plot_size + 10
+                    25 + plotSize - this._hnMelt.width,
+                    (this._height * 0.5) + plotSize + 10
                 );
                 this._v0Melt.position = new Point(
                     25 - this._v0Melt.width - 3,
-                    (this._height * 0.5) + plot_size - 10
+                    (this._height * 0.5) + plotSize - 10
                 );
                 this._vnMelt.position = new Point(
                     25 - this._vnMelt.width - 3,
                     (this._height * 0.5) + 5
                 );
             } else {
-                this._h0Melt.position = new Point((this._width * 0.5) + 15, plot_size + 75);
+                this._h0Melt.position = new Point((this._width * 0.5) + 15, plotSize + 75);
                 this._hnMelt.position = new Point(
-                    (this._width * 0.5) + 25 + plot_size - this._hnMelt.width,
-                    plot_size + 75
+                    (this._width * 0.5) + 25 + plotSize - this._hnMelt.width,
+                    plotSize + 75
                 );
                 this._v0Melt.position = new Point(
                     (this._width * 0.5) + 25 - this._v0Melt.width - 3,
-                    55 + plot_size
+                    55 + plotSize
                 );
             }
         }
@@ -337,112 +342,108 @@ export class SpecBox extends ContainerObject {
         this._dragBeginY = 0;
     }
 
-    private onDotPlotMouseUp(e: InteractionEvent): void {
-        this._drag = false;
+    private onDotPlotMouseEnter(): void {
+        this._mouseOverDotPlot = true;
+    }
+
+    private onDotPlotMouseExit(): void {
+        this._mouseOverDotPlot = false;
+        if (this._coordBalloon != null) {
+            this._coordBalloon.display.visible = false;
+        }
+    }
+
+    private onDotPlotMouseUp(): void {
+        this._isDragging = false;
         this.saveAndResetDragPoint();
     }
 
     private onDotPlotMouseDown(e: InteractionEvent): void {
-        this._drag = true;
+        this._isDragging = true;
         this._dotplotX = this._dotplotOriginX;
         this._dotplotY = this._dotplotOriginY;
         this._dragBeginX = e.data.global.x;
         this._dragBeginY = e.data.global.y;
     }
 
-    private isDragging(): boolean {
-        return this._drag;
-    }
-
     private onDotPlotMouseMove(e: InteractionEvent): void {
-        if (this.isDragging()) {
+        if (this._isDragging) {
             if (this._coordBalloon != null) {
                 this._coordBalloon.display.visible = false;
             }
 
-            let diff_x: number = e.data.global.x - this._dragBeginX;
-            let diff_y: number = e.data.global.y - this._dragBeginY;
+            let diffX: number = e.data.global.x - this._dragBeginX;
+            let diffY: number = e.data.global.y - this._dragBeginY;
 
-            let plot_size: number = this.plotSize;
-            let plot_size_level: number = plot_size * this._dotplotScaleLevel;
+            let plotSize: number = this.plotSize;
+            let plotSizeLevel: number = plotSize * this._dotplotScaleLevel;
 
-            this._dotplotX = this._dotplotOriginX + diff_x;
-            this._dotplotY = this._dotplotOriginY + diff_y;
+            this._dotplotX = this._dotplotOriginX + diffX;
+            this._dotplotY = this._dotplotOriginY + diffY;
 
             if (this._dotplotX >= 0) this._dotplotX = 0;
             if (this._dotplotY >= 0) this._dotplotY = 0;
-            if (this._dotplotX + plot_size_level <= plot_size) this._dotplotX = plot_size - plot_size_level;
-            if (this._dotplotY + plot_size_level <= plot_size) this._dotplotY = plot_size - plot_size_level;
+            if (this._dotplotX + plotSizeLevel <= plotSize) this._dotplotX = plotSize - plotSizeLevel;
+            if (this._dotplotY + plotSizeLevel <= plotSize) this._dotplotY = plotSize - plotSizeLevel;
 
             this._dotplot.replotWithBase(this._dotplotX, this._dotplotY);
-            // this._dotplot.cacheAsBitmap = true;
             this._dotPlotSprite.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotX, this._dotplotY);
-        } else {
+        } else if (this._mouseOverDotPlot) {
             let localPoint = e.data.getLocalPosition(this._dotPlotSprite);
-            let block_length: number = this.dotplotOffsetSize;
-            let x: number = (localPoint.x - this._dotplotOriginX) / block_length;
-            let y: number = (localPoint.y - this._dotplotOriginY) / block_length;
+            let blockLength: number = this.dotplotOffsetSize;
+            let x: number = (localPoint.x - this._dotplotOriginX) / blockLength;
+            let y: number = (localPoint.y - this._dotplotOriginY) / blockLength;
             if (y === 0 || Number.isNaN(y)) {
                 y = 1;
             }
 
-            let msg: string = `${String.fromCharCode(65 + x)},${y * 10} - (${x * 10}, ${y * 10})`;
+            let msg: string =
+                `${String.fromCharCode(65 + x)},${Math.floor(y * 10)}` +
+                ` - (${Math.floor(x * 10)}, ${Math.floor(y * 10)})`;
             if (this._coordBalloon != null) {
                 this._coordBalloon.setText(msg);
                 this._coordBalloon.display.visible = true;
             } else {
                 this._coordBalloon = new TextBalloon(msg, 0x0, 0.8);
                 this.addObject(this._coordBalloon, this.container);
-                // this.set_mouse_over_object(this._coordBalloon, 1.0);
             }
-            this._coordBalloon.display.position = e.data.global;
+            this._coordBalloon.display.position = this._coordBalloon.display.parent.toLocal(e.data.global);
         }
-    }
-
-    private onDotPlotMouseOut(e: InteractionEvent): void {
-        // this.set_mouse_over_object(null, 1.0);
-        if (this._coordBalloon != null) {
-            this._coordBalloon.destroySelf();
-            this._coordBalloon = null;
-        }
-        this._drag = false;
-        this.saveAndResetDragPoint();
     }
 
     private get dotplotOffsetSize(): number {
-        let plot_size: number = this.plotSize;
-        return plot_size / (this._datasize / 10) * this._dotplotScaleLevel;
+        return this.plotSize / (this._datasize / 10) * this._dotplotScaleLevel;
     }
 
     // calculate it's origin and axis by from and to
     private calculateCoordPosition(from: Text, index: number, d: number): Point {
-        let pos_from: Point = new Point();
-        pos_from.copy(from.position);
-        let diff_x: number = this.dotplotOffsetSize;
-        let diff_y: number = this.dotplotOffsetSize;
+        let posFrom: Point = new Point();
+        posFrom.copy(from.position);
+        let diffX: number = this.dotplotOffsetSize;
+        let diffY: number = this.dotplotOffsetSize;
         if (d === SpecBox.HORIZONTAL) {
-            return new Point(pos_from.x + diff_x * (index + 1), pos_from.y);
+            return new Point(posFrom.x + diffX * (index + 1), posFrom.y);
         } else {
-            return new Point(pos_from.x + from.width, pos_from.y + diff_y * (index + 1));
+            return new Point(posFrom.x + from.width, posFrom.y + diffY * (index + 1));
         }
     }
 
     private updateDotplotLabel(ref_x: number, ref_y: number): void {
-        let plot_size: number = this.plotSize;
-        let h0_default_x: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
-        let h0_default_y: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
+        let plotSize: number = this.plotSize;
+        let h0DefaultX: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
+        let h0DefaultY: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
 
-        let h0_x_start: number = h0_default_x + ref_x;
-        let h0_y_start: number = h0_default_y;
+        let h0XStart: number = h0DefaultX + ref_x;
+        let h0YStart: number = h0DefaultY;
 
-        this._h0.position = new Point(h0_x_start, h0_y_start);
-        this._h0.visible = !(h0_x_start < h0_default_x);
+        this._h0.position = new Point(h0XStart, h0YStart);
+        this._h0.visible = !(h0XStart < h0DefaultX);
 
         for (let ii = 0; ii < this._hvec.length; ++ii) {
             let pos = this.calculateCoordPosition(this._h0, ii, SpecBox.HORIZONTAL);
             this._hvec[ii].position = pos;
-            this._hvec[ii].visible = !(pos.x >= plot_size + h0_default_x - this._hvec[ii].width || pos.x < h0_default_x);
+            this._hvec[ii].visible = !(pos.x >= plotSize + h0DefaultX - this._hvec[ii].width || pos.x < h0DefaultX);
         }
 
         let v0_default_x: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
@@ -459,28 +460,28 @@ export class SpecBox extends ContainerObject {
             let pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
             this._vvec[ii].position = pos;
-            this._vvec[ii].visible = !((pos.y >= plot_size + v0_default_y - this._vvec[ii].height || pos.y < v0_default_y));
+            this._vvec[ii].visible = !((pos.y >= plotSize + v0_default_y - this._vvec[ii].height || pos.y < v0_default_y));
         }
     }
 
 
     private readonly _docked: boolean;
 
-    private readonly _panel: GamePanel;
-    private readonly _zoomInButton: GameButton;
-    private readonly _zoomOutButton: GameButton;
-    private readonly _dotPlotSprite: Sprite;
-    private readonly _meltPlotSprite: Sprite;
-    private readonly _h0: Text;
-    private readonly _h0Melt: Text;
-    private readonly _hnMelt: Text;
-    private readonly _v0: Text;
-    private readonly _v0Melt: Text;
-    private readonly _vnMelt: Text;
-    private readonly _stattext: MultiStyleText;
-    private readonly _helpText: HTMLTextObject;
-    private readonly _dotplottext: Text;
-    private readonly _meltplottext: Text;
+    private _panel: GamePanel;
+    private _zoomInButton: GameButton;
+    private _zoomOutButton: GameButton;
+    private _dotPlotSprite: Sprite;
+    private _meltPlotSprite: Sprite;
+    private _h0: Text;
+    private _h0Melt: Text;
+    private _hnMelt: Text;
+    private _v0: Text;
+    private _v0Melt: Text;
+    private _vnMelt: Text;
+    private _stattext: MultiStyleText;
+    private _helpText: HTMLTextObject;
+    private _dotplottext: Text;
+    private _meltplottext: Text;
 
     private _coordBalloon: TextBalloon;
     private _dotplot: Plot;
@@ -491,13 +492,14 @@ export class SpecBox extends ContainerObject {
 
     private _dotplotScaleLevel: number;
 
-    private _drag: boolean;
-    private _dragBeginX: number;
-    private _dragBeginY: number;
-    private _dotplotX: number;
-    private _dotplotY: number;
-    private _dotplotOriginX: number;
-    private _dotplotOriginY: number;
+    private _isDragging: boolean;
+    private _mouseOverDotPlot: boolean;
+    private _dragBeginX: number = 0;
+    private _dragBeginY: number = 0;
+    private _dotplotX: number = 0;
+    private _dotplotY: number = 0;
+    private _dotplotOriginX: number = 0;
+    private _dotplotOriginY: number = 0;
 
     private _width: number = 0;
     private _height: number = 0;
