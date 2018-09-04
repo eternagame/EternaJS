@@ -43,7 +43,7 @@ import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {ExternalInterface} from "../../util/ExternalInterface";
+import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
@@ -80,7 +80,7 @@ export class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
-        this._toolbar = new PoseEditToolbar(this._puzzle);
+        this._toolbar = new PoseEditToolbar(this._puzzle, this._scriptInterface);
         this.addObject(this._toolbar, this.uiLayer);
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
@@ -171,6 +171,9 @@ export class PoseEditMode extends GameMode {
         this._asynchText.position = new Point(16, 200);
 
         this.setPuzzle();
+
+        this.buildScriptInterface();
+        this.registerScriptInterface(this._scriptInterface);
 
         this.updateLayout();
     }
@@ -662,9 +665,6 @@ export class PoseEditMode extends GameMode {
 
         if (!this._isReset) {
             this.loadSavedData();
-            // re-register script APIs
-            this._scriptHooks = false;
-            this._setterHooks = false;
         }
 
         this._poseEditByTargetCb = () => {
@@ -694,20 +694,17 @@ export class PoseEditMode extends GameMode {
         return this._folder;
     }
 
-    public registerScriptCallbacks(): void {
-        if (this._scriptHooks) {
-            return;
-        }
-        this._scriptHooks = true;
+    private buildScriptInterface(): void {
+        this._scriptInterface.addCallback("set_script_status", (txt: string): void => {
+            this._runStatus.style.fill = 0xC0C0C0;
+            this._runStatus.text = txt;
+        });
 
-        let puz: Puzzle = this._puzzle;
-        let folder: Folder = this._folder;
-
-        ExternalInterface.addCallback("get_sequence_string", (): string => {
+        this._scriptInterface.addCallback("get_sequence_string", (): string => {
             return this.getPose(0).getSequenceString();
         });
 
-        ExternalInterface.addCallback("get_full_sequence", (indx: number): string => {
+        this._scriptInterface.addCallback("get_full_sequence", (indx: number): string => {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             } else {
@@ -715,13 +712,13 @@ export class PoseEditMode extends GameMode {
             }
         });
 
-        ExternalInterface.addCallback("get_locks", (): boolean[] => {
+        this._scriptInterface.addCallback("get_locks", (): boolean[] => {
             let pose: Pose2D = this.getPose(0);
             return pose.puzzleLocks.slice(0, pose.sequence.length);
         });
 
-        ExternalInterface.addCallback("get_targets", (): any[] => {
-            let conditions = puz.targetConditions;
+        this._scriptInterface.addCallback("get_targets", (): any[] => {
+            let conditions = this._puzzle.targetConditions;
             if (conditions.length === 0) {
                 conditions.push(null);
             }
@@ -729,19 +726,19 @@ export class PoseEditMode extends GameMode {
                 if (conditions[ii] == null) {
                     conditions[ii] = {};
                     conditions[ii]['type'] = "single";
-                    conditions[ii]['secstruct'] = puz.getSecstruct(ii);
+                    conditions[ii]['secstruct'] = this._puzzle.getSecstruct(ii);
                 }
             }
             return JSON.parse(JSON.stringify(conditions));
         });
 
-        ExternalInterface.addCallback("get_native_structure", (indx: number): string => {
+        this._scriptInterface.addCallback("get_native_structure", (indx: number): string => {
             if (indx < 0 || indx >= this._poses.length) return null;
             let native_pairs = this.getCurrentUndoBlock(indx).getPairs();
             return EPars.pairsToParenthesis(native_pairs);
         });
 
-        ExternalInterface.addCallback("get_full_structure", (indx: number): string => {
+        this._scriptInterface.addCallback("get_full_structure", (indx: number): string => {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             }
@@ -751,22 +748,22 @@ export class PoseEditMode extends GameMode {
             return EPars.pairsToParenthesis(native_pairs, seq_arr);
         });
 
-        ExternalInterface.addCallback("get_free_energy", (indx: number): number => {
+        this._scriptInterface.addCallback("get_free_energy", (indx: number): number => {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
             return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
         });
 
-        ExternalInterface.addCallback("get_constraints", (): any[] => {
-            return JSON.parse(JSON.stringify(puz.constraints));
+        this._scriptInterface.addCallback("get_constraints", (): any[] => {
+            return JSON.parse(JSON.stringify(this._puzzle.constraints));
         });
 
-        ExternalInterface.addCallback("check_constraints", (): boolean => {
+        this._scriptInterface.addCallback("check_constraints", (): boolean => {
             return this.checkConstraints(false);
         });
 
-        ExternalInterface.addCallback("constraint_satisfied", (idx: number): boolean => {
+        this._scriptInterface.addCallback("constraint_satisfied", (idx: number): boolean => {
             this.checkConstraints(true);
             if (idx >= 0 && idx < this.constraintCount) {
                 let o: ConstraintBox = this.getConstraint(idx);
@@ -776,61 +773,59 @@ export class PoseEditMode extends GameMode {
             }
         });
 
-        ExternalInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices);
-        ExternalInterface.addCallback("get_barcode_indices", (): number[] => puz.barcodeIndices);
-        ExternalInterface.addCallback("is_barcode_available",
+        this._scriptInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices);
+        this._scriptInterface.addCallback("get_barcode_indices", (): number[] => this._puzzle.barcodeIndices);
+        this._scriptInterface.addCallback("is_barcode_available",
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
-        ExternalInterface.addCallback("current_folder", (): string => this._folder.name);
+        this._scriptInterface.addCallback("current_folder", (): string => this._folder.name);
 
-        ExternalInterface.addCallback("fold", (seq: string, constraint: string = null): string => {
+        this._scriptInterface.addCallback("fold", (seq: string, constraint: string = null): string => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
-            let folded: number[] = folder.foldSequence(seq_arr, null, constraint);
+            let folded: number[] = this._folder.foldSequence(seq_arr, null, constraint);
             return EPars.pairsToParenthesis(folded);
         });
 
-        ExternalInterface.addCallback("fold_with_binding_site", (seq: string, site: number[], bonus: number): string => {
+        this._scriptInterface.addCallback("fold_with_binding_site", (seq: string, site: number[], bonus: number): string => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
-            let folded: number[] = folder.foldSequenceWithBindingSite(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
+            let folded: number[] = this._folder.foldSequenceWithBindingSite(seq_arr, null, site, Math.floor(bonus * 100), 2.5);
             return EPars.pairsToParenthesis(folded);
         });
 
-        ExternalInterface.addCallback("energy_of_structure", (seq: string, secstruct: string): number => {
+        this._scriptInterface.addCallback("energy_of_structure", (seq: string, secstruct: string): number => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
             let struct_arr: number[] = EPars.parenthesisToPairs(secstruct);
-            let free_energy: number = folder.scoreStructures(seq_arr, struct_arr);
+            let free_energy: number = this._folder.scoreStructures(seq_arr, struct_arr);
             return 0.01 * free_energy;
         });
 
-        ExternalInterface.addCallback("pairing_probabilities", (seq: string, secstruct: string = null): number[] => {
+        this._scriptInterface.addCallback("pairing_probabilities", (seq: string, secstruct: string = null): number[] => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
             let folded: number[];
             if (secstruct) {
                 folded = EPars.parenthesisToPairs(secstruct);
             } else {
-                folded = folder.foldSequence(seq_arr, null, null);
+                folded = this._folder.foldSequence(seq_arr, null, null);
             }
-            let pp: number[] = folder.getDotPlot(seq_arr, folded);
+            let pp: number[] = this._folder.getDotPlot(seq_arr, folded);
             return pp.slice();
         });
 
-        ExternalInterface.addCallback("cofold", (seq: string, oligo: string, malus: number = 0., constraint: string = null): string => {
+        this._scriptInterface.addCallback("cofold", (seq: string, oligo: string, malus: number = 0., constraint: string = null): string => {
             let len: number = seq.length;
             let cseq: string = seq + "&" + oligo;
             let seq_arr: number[] = EPars.stringToSequence(cseq);
-            let folded: number[] = folder.cofoldSequence(seq_arr, null, Math.floor(malus * 100), constraint);
+            let folded: number[] = this._folder.cofoldSequence(seq_arr, null, Math.floor(malus * 100), constraint);
             return EPars.pairsToParenthesis(folded.slice(0, len))
                 + "&" + EPars.pairsToParenthesis(folded.slice(len));
         });
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-            ExternalInterface.addCallback("select_folder", (folder_name: string): boolean => {
-                let ok: boolean = this.selectFolder(folder_name);
-                folder = this.folder;
-                return ok;
+            this._scriptInterface.addCallback("select_folder", (folder_name: string): boolean => {
+                return this.selectFolder(folder_name);
             });
 
-            ExternalInterface.addCallback("load_parameters_from_buffer", (str: string): boolean => {
+            this._scriptInterface.addCallback("load_parameters_from_buffer", (str: string): boolean => {
                 log.info("TODO: load_parameters_from_buffer");
                 return false;
                 // let buf: ByteArray = new ByteArray;
@@ -844,22 +839,16 @@ export class PoseEditMode extends GameMode {
         }
 
         // Miscellanous
-        ExternalInterface.addCallback("sparks_effect", (from: number, to: number): void => {
+        this._scriptInterface.addCallback("sparks_effect", (from: number, to: number): void => {
             // FIXME: check PiP mode and handle accordingly
             for (let ii: number = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.praiseSequence(from, to);
             }
         });
-    }
 
-    public registerSetterCallbacks(): void {
-        if (this._setterHooks) {
-            return;
-        }
-        this._setterHooks = true;
-
-        ExternalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
+        // Setters
+        this._scriptInterface.addCallback("set_sequence_string", (seq: string): boolean => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
             if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info("Invalid characters in " + seq);
@@ -876,7 +865,7 @@ export class PoseEditMode extends GameMode {
             return true;
         });
 
-        ExternalInterface.addCallback("set_tracked_indices", (marks: number[]): void => {
+        this._scriptInterface.addCallback("set_tracked_indices", (marks: number[]): void => {
             for (let ii: number = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.clearTracking();
@@ -886,7 +875,7 @@ export class PoseEditMode extends GameMode {
             }
         });
 
-        ExternalInterface.addCallback("set_design_title", (design_title: string): void => {
+        this._scriptInterface.addCallback("set_design_title", (design_title: string): void => {
             log.info("TODO: set_design_title");
             // Application.instance.get_application_gui("Design Name").set_text(design_title);
             // Application.instance.get_application_gui("Design Name").visible = true;
@@ -906,16 +895,7 @@ export class PoseEditMode extends GameMode {
 
         this.pushUILock();
 
-        // register callbacks
-        this.registerScriptCallbacks();
-        this.registerSetterCallbacks();
-
-        ExternalInterface.addCallback("set_script_status", (txt: string): void => {
-            this._runStatus.style.fill = 0xC0C0C0;
-            this._runStatus.text = txt;
-        });
-
-        ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
+        this._scriptInterface.addCallback("end_" + nid, (ret: any): void => {
             log.info("end_" + nid + "() called");
             log.info(ret);
             if (typeof(ret['cause']) === "string") {
@@ -2086,11 +2066,6 @@ export class PoseEditMode extends GameMode {
             this._startingPoint = EPars.sequenceToString(this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0));
         }
 
-        if (this._isDatabrowserMode) {
-            this.registerScriptCallbacks();
-            this.registerSetterCallbacks();
-        }
-
         if (is_reset || this._isDatabrowserMode) {
             this.startPlaying(false);
         } else if (init_seq == null) {
@@ -2542,9 +2517,7 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.SCRIPT) {
             let nid: string = value;
-            this.registerScriptCallbacks();
-
-            ExternalInterface.addCallback("end_" + nid, (ret: any): void => {
+            this._scriptInterface.addCallback("end_" + nid, (ret: any): void => {
                 let goal: string = "";
                 let name: string = "...";
                 let value: string = "";
@@ -3482,6 +3455,7 @@ export class PoseEditMode extends GameMode {
     private readonly _initSeq: number[];
     private readonly _isReset: boolean;
     private readonly _initialFolder: Folder;
+    private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _constraintsLayer: Container;
 
@@ -3544,8 +3518,6 @@ export class PoseEditMode extends GameMode {
     private _nidField: Text;
     private _runButton: GameButton;
     private _runStatus: Text;
-    private _scriptHooks: boolean = false;
-    private _setterHooks: boolean = false;
     private _ropPresets: (() => void)[] = [];
 
     // Design browser hooks

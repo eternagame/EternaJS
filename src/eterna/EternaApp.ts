@@ -77,7 +77,7 @@ export class EternaApp extends FlashbangApp {
         super();
 
         // Default param values
-        params.initialAppMode = params.initialAppMode || InitialAppMode.SOLUTION;
+        params.initialAppMode = params.initialAppMode || InitialAppMode.POSE_EDIT;
         params.containerID = params.containerID || "maingame";
         params.width = params.width || 1280;
         params.height = params.height || 1024;

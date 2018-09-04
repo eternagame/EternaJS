@@ -16,6 +16,7 @@ import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
 import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
+import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Booster} from "./Booster";
 import {PoseEditMode} from "./PoseEditMode";
 
@@ -50,9 +51,10 @@ export class PoseEditToolbar extends ContainerObject {
     public submitButton: GameButton;
     public viewSolutionsButton: GameButton;
 
-    public constructor(puz: Puzzle) {
+    public constructor(puz: Puzzle, scriptInterface: ExternalInterfaceCtx) {
         super();
         this._puzzle = puz;
+        this._scriptInterface = scriptInterface;
     }
 
     protected added(): void {
@@ -157,7 +159,7 @@ export class PoseEditToolbar extends ContainerObject {
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
                 this._toolbarLayout.addChild(boosterPaintToolsLayout);
                 for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, data).then(booster => {
+                    Booster.create(mode, this._scriptInterface, data).then(booster => {
                         booster.onLoad();
                         let button: GameButton = booster.createButton();
                         button.clicked.connect(() => {
@@ -177,7 +179,7 @@ export class PoseEditToolbar extends ContainerObject {
                 let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
-                    Booster.create(mode, data).then(booster => {
+                    Booster.create(mode, this._scriptInterface, data).then(booster => {
                         let button: GameButton = booster.createButton(14);
                         button.clicked.connect(() => booster.onRun());
                         this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
@@ -471,6 +473,7 @@ export class PoseEditToolbar extends ContainerObject {
     }
 
     private readonly _puzzle: Puzzle;
+    private readonly _scriptInterface: ExternalInterfaceCtx;
 
     private _invisibleBackground: Graphics;
     private _content: Container;

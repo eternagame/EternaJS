@@ -5,7 +5,7 @@ import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {ExternalInterface} from "../util/ExternalInterface";
+import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
 import {Background} from "../vfx/Background";
 
 export class TestMode extends AppMode {
@@ -25,7 +25,8 @@ export class TestMode extends AppMode {
         tf.y = (Flashbang.stageHeight - tf.height) * 0.5;
         this.container.addChild(tf);
 
-        ExternalInterface.addCallback("Animate", (time?: number) => {
+        let ctx = new ExternalInterfaceCtx();
+        ctx.addCallback("Animate", (time?: number) => {
             if (this.hasNamedObject("Animate")) {
                 this.removeNamedObjects("Animate");
                 return "Stopped!";
@@ -42,8 +43,12 @@ export class TestMode extends AppMode {
                 }));
             }
 
+            ExternalInterface.popContext(ctx);
+
             return "Started!";
         });
+
+        ExternalInterface.pushContext(ctx);
     }
 
     public onContextMenuEvent(e: Event): void {
