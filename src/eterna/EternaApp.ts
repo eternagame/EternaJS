@@ -21,7 +21,7 @@ import {SolutionManager} from "./puzzle/SolutionManager";
 import {Bitmaps} from "./resources/Bitmaps";
 import {SoundManager} from "./resources/SoundManager";
 import {EternaSettings} from "./settings/EternaSettings";
-import {ExternalInterface} from "./util/ExternalInterface";
+import {ExternalInterface, ExternalInterfaceCtx} from "./util/ExternalInterface";
 import {Fonts} from "./util/Fonts";
 
 enum PuzzleID {
@@ -115,6 +115,7 @@ export class EternaApp extends FlashbangApp {
                 this.setLoadingText("Loading assets...");
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
+            .then(() => this.initScriptInterface())
             // .then(() => {
             //     this._modeStack.unwindToMode(new TestMode());
             // })
@@ -134,7 +135,7 @@ export class EternaApp extends FlashbangApp {
             .catch(err => Eterna.onFatalError(err));
     }
 
-    public loadPoseEdit(puzzleID: number, folderName: string): Promise<void> {
+    public loadPoseEdit(puzzleID: number, folderName?: string, rscript?: string): Promise<void> {
         this.setLoadingText(`Loading puzzle ${puzzleID}...`);
         return PuzzleManager.instance.getPuzzleByID(puzzleID)
             .then(puzzle => {
@@ -145,6 +146,9 @@ export class EternaApp extends FlashbangApp {
                     } else {
                         log.warn(`No such folder '${folderName}'`);
                     }
+                }
+                if (rscript != null) {
+                    puzzle.rscript = rscript;
                 }
                 this._modeStack.unwindToMode(new PoseEditMode(puzzle, null, false, folder));
             });
@@ -221,7 +225,8 @@ export class EternaApp extends FlashbangApp {
             // allowing for testing as a nonauthenticated user
             if (playerID.length === 0) {
                 return Eterna.client.logout()
-                    .then(() => {})
+                    .then(() => {
+                    })
                     .catch((err) => {
                         log.debug(`Logout error: ${err}`);
                     });
@@ -252,7 +257,25 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
+    private initScriptInterface(): void {
+        this._scriptInterface.addCallback("test_tutorial", (puzzleID: number, rscript: string): void => {
+            this.loadPoseEdit(puzzleID, null, rscript)
+                .catch(e => Eterna.onFatalError(e));
+        });
+
+        this._scriptInterface.addCallback("load_puzzle", (puzzleID: number, doneCallback: string): void => {
+            this.loadPoseEdit(puzzleID)
+                .then(() => {
+                    ExternalInterface.call(doneCallback);
+                })
+                .catch(e => Eterna.onFatalError(e));
+        });
+
+        ExternalInterface.pushContext(this._scriptInterface);
+    }
+
     private readonly _params: EternaAppParameters;
+    private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }
