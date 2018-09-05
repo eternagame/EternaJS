@@ -929,9 +929,7 @@ export class PoseEditMode extends GameMode {
             this.popUILock();
         });
 
-        // run
-        log.info("running script " + nid);
-        ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null);
+        ExternalInterface.runScript(nid);
     }
 
     public layoutConstraints(): void {
@@ -2534,42 +2532,42 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type === ConstraintType.SCRIPT) {
-            let nid: string = value;
-            this._scriptInterface.addCallback("end_" + nid, (ret: any): void => {
+            let scriptID: string = value;
+            this._scriptInterface.addCallback("end_" + scriptID, (returnValue: any): void => {
                 let goal: string = "";
                 let name: string = "...";
                 let value: string = "";
                 let index: string = null;
                 let data_png: string = "";
                 let satisfied: boolean = false;
-                log.info("end_" + nid + "() called");
-                if (ret && ret.cause) {
-                    if (ret.cause.satisfied) satisfied = ret.cause.satisfied;
-                    if (ret.cause.goal != null) goal = ret.cause.goal;
-                    if (ret.cause.name != null) name = ret.cause.name;
-                    if (ret.cause.value != null) value = ret.cause.value;
-                    if (ret.cause.index != null) {
-                        index = (ret.cause.index + 1).toString();
+                log.info("end_" + scriptID + "() called");
+                if (returnValue && returnValue.cause) {
+                    if (returnValue.cause.satisfied) satisfied = returnValue.cause.satisfied;
+                    if (returnValue.cause.goal != null) goal = returnValue.cause.goal;
+                    if (returnValue.cause.name != null) name = returnValue.cause.name;
+                    if (returnValue.cause.value != null) value = returnValue.cause.value;
+                    if (returnValue.cause.index != null) {
+                        index = (returnValue.cause.index + 1).toString();
                         let ll: number = this._isPipMode ?
-                            ret.cause.index :
-                            (ret.cause.index === this._curTargetIndex ? 0 : -1);
+                            returnValue.cause.index :
+                            (returnValue.cause.index === this._curTargetIndex ? 0 : -1);
                         if (ll >= 0) {
-                            if (ret.cause.highlight != null) {
-                                this._poses[ll].highlightUserDefinedSequence(ret.cause.highlight);
+                            if (returnValue.cause.highlight != null) {
+                                this._poses[ll].highlightUserDefinedSequence(returnValue.cause.highlight);
                             } else {
                                 this._poses[ll].clearUserDefinedHighlight();
                             }
                         }
                     }
 
-                    if (ret.cause.icon_b64) {
-                        data_png = ret.cause.icon_b64;
+                    if (returnValue.cause.icon_b64) {
+                        data_png = returnValue.cause.icon_b64;
                     }
                 }
 
                 if (render) {
-                    this._constraintBoxes[ii / 2].setContent(ConstraintType.SCRIPT, {
-                        "nid": nid,
+                    box.setContent(ConstraintType.SCRIPT, {
+                        "nid": scriptID,
                         "goal": goal,
                         "name": name,
                         "value": value,
@@ -2581,10 +2579,8 @@ export class PoseEditMode extends GameMode {
                 isSatisfied = satisfied;
             });
 
-            // run
             isSatisfied = false;
-            log.info("running script " + nid);
-            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", nid, {}, null, true);
+            ExternalInterface.runScript(scriptID, {}, true);
         }
 
         return isSatisfied;

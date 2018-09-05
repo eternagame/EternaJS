@@ -58,6 +58,11 @@ export class ExternalInterface {
         }
     }
 
+    public static runScript(scriptID: string | number, params: any = {}, sync: boolean = false): void {
+        log.info(`Running script ${scriptID}...`);
+        return ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", "" + scriptID, params, null, sync);
+    }
+
     public static call(name: string, ...args: any[]): any {
         try {
             let [thisVal, f] = getDeepProperty(window as any, name);
