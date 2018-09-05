@@ -183,7 +183,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                     fontFamily: Fonts.STDFONT_REGULAR,
                     fontSize: 16,
                     fill: 0xffffff,
-                    letterSpacing: -0.5
+                    letterSpacing: -0.5,
+                    wordWrap: true,
+                    wordWrapWidth: 250
                 }
             });
             this.container.addChild(this._sideTxt);
@@ -959,7 +961,6 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         if (isMissionScreen) {
             this._outline.visible = false;
             tooltip.apply(this._sideTxt);
-            // this._side_txt.set_autosize(false, false, 250);
             if (this._req.visible) {
                 this._sideTxt.position = new Point(this._req.width + 18, this._req.height / 2 - this._sideTxt.height / 2);
             } else {
@@ -1172,13 +1173,15 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             fontFamily: Fonts.STDFONT_REGULAR,
             fontSize: 16,
             fill: 0xffffff,
-            letterSpacing: -0.5
+            letterSpacing: -0.5,
+            wordWrap: true,
+            wordWrapWidth: 250,
         }).addStyle("altText", {
             fontFamily: Fonts.STDFONT_MEDIUM,
-            leading: 10
+            leading: 10,
         }).addStyle("altTextMain", {
             fontFamily: Fonts.STDFONT_REGULAR,
-            leading: 5
+            leading: 5,
         });
 
         EPars.addLetterStyles(style);
