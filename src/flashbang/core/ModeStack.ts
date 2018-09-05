@@ -111,8 +111,8 @@ export class ModeStack {
 
     /** Called when the app is resized */
     public onResized(): void {
-        if (this.topMode != null) {
-            this.topMode.onResized();
+        for (let mode of this._modeStack) {
+            mode.resizeInternal();
         }
     }
 
