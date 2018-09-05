@@ -5,6 +5,7 @@ const path = require('path');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const packageJson = require('./package.json');
 const vendorDependencies = Object.keys(packageJson['dependencies']);
@@ -94,5 +95,11 @@ module.exports = {
 
         // Generate an index.html that includes our webpack bundles
         new HtmlWebpackPlugin({template: 'src/index.html.tmpl', inject: false}),
+
+        // Generate a manifest.json file containing our entry point file names:
+        // https://github.com/danethurber/webpack-manifest-plugin#hooks-options
+        new ManifestPlugin({
+            filter: (item) => item.isInitial
+        }),
     ]
 };
