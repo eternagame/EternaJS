@@ -920,10 +920,6 @@ export class PoseEditMode extends GameMode {
                 if (typeof(ret['cause']) === "string") {
                     this._runStatus.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
                     this._runStatus.text = ret['cause'];
-                    // restore
-                    // FIXME: other clean-ups? should unregister callbacks?
-                } else {
-                    // leave the script running asynchronously
                 }
 
                 this.popUILock();
