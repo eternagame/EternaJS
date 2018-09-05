@@ -43,14 +43,14 @@ export abstract class GameMode extends AppMode {
         this.addObject(new Tooltips(this.tooltipLayer));
     }
 
-    public enter(): void {
+    protected enter(): void {
         super.enter();
         if (this._modeScriptInterface != null) {
             ExternalInterface.pushContext(this._modeScriptInterface);
         }
     }
 
-    public exit(): void {
+    protected exit(): void {
         if (this._modeScriptInterface != null) {
             ExternalInterface.popContext(this._modeScriptInterface);
         }
