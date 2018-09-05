@@ -159,7 +159,7 @@ export class PoseEditToolbar extends ContainerObject {
                 this._toolbarLayout.addHSpacer(SPACE_NARROW);
                 this._toolbarLayout.addChild(boosterPaintToolsLayout);
                 for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, this._scriptInterface, data).then(booster => {
+                    Booster.create(mode, data).then(booster => {
                         booster.onLoad();
                         let button: GameButton = booster.createButton();
                         button.clicked.connect(() => {
@@ -179,7 +179,7 @@ export class PoseEditToolbar extends ContainerObject {
                 let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
                 for (let ii = 0; ii < boostersData.actions.length; ii++) {
                     let data = boostersData.actions[ii];
-                    Booster.create(mode, this._scriptInterface, data).then(booster => {
+                    Booster.create(mode, data).then(booster => {
                         let button: GameButton = booster.createButton(14);
                         button.clicked.connect(() => booster.onRun());
                         this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
