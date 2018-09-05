@@ -15,7 +15,7 @@ export enum BoosterType {
 }
 
 export class Booster {
-    public static create(mode: GameMode, externalInterface: ExternalInterfaceCtx, data: any): Promise<Booster> {
+    public static create(mode: GameMode, data: any): Promise<Booster> {
         if (!data['type']) {
             return Promise.reject("Invalid booster definition (missing 'type')");
         } else if (!data["icons_b64"] || data["icons_b64"].length != 5) {
@@ -49,7 +49,6 @@ export class Booster {
 
                 return new Booster(
                     mode,
-                    externalInterface,
                     type,
                     tool_color,
                     data['label'],
@@ -61,7 +60,6 @@ export class Booster {
 
     private constructor(
         view: GameMode,
-        externalInterface: ExternalInterfaceCtx,
         type: BoosterType,
         tool_color: number,
         label: string,
@@ -70,7 +68,6 @@ export class Booster {
         buttonStateTextures: Texture[]) {
 
         this._view = view;
-        this._externalInterface = externalInterface;
         this._type = type;
         this._toolColor = tool_color;
         this._label = label;
@@ -133,11 +130,13 @@ export class Booster {
     }
 
     private executeScript(pose: Pose2D, cmd: string, base_num: number): void {
+        let scriptInterface = new ExternalInterfaceCtx();
+
         if (this._type == BoosterType.ACTION) {
             this._view.pushUILock();
         }
 
-        this._externalInterface.addCallback("set_sequence_string", (seq: string): boolean => {
+        scriptInterface.addCallback("set_sequence_string", (seq: string): boolean => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
             if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info("Invalid characters in " + seq);
@@ -158,7 +157,7 @@ export class Booster {
             return true;
         });
 
-        this._externalInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
+        scriptInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
             for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
                 let pose: Pose2D = this._view.getPose(ii);
                 pose.clearTracking();
@@ -168,16 +167,20 @@ export class Booster {
             }
         });
 
-        this._externalInterface.addCallback("set_script_status", (txt: string): void => {
+        scriptInterface.addCallback("set_script_status", (txt: string): void => {
         });
 
-        this._externalInterface.addCallback("end_" + this._scriptID, (ret: any): void => {
+        scriptInterface.addCallback("end_" + this._scriptID, (ret: any): void => {
             log.info("end_" + this._scriptID + "() called");
             if (typeof(ret['cause']) === "string" && this._type === BoosterType.ACTION) {
                 this._view.popUILock();
                 Eterna.sound.playSound(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
             }
+
+            ExternalInterface.popContext(scriptInterface);
         });
+
+        ExternalInterface.pushContext(scriptInterface);
 
         // run
         log.info("running script " + this._scriptID);
@@ -192,7 +195,6 @@ export class Booster {
     }
 
     private readonly _view: GameMode;
-    private readonly _externalInterface: ExternalInterfaceCtx;
     private readonly _toolColor: number;
     private readonly _type: BoosterType;
     private readonly _label: string;
