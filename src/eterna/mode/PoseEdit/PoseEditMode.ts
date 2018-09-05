@@ -1836,29 +1836,28 @@ export class PoseEditMode extends GameMode {
 
         const constraints: string[] = this._puzzle.curConstraints;
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
-            this.startPlaying(false);
-            return;
+            this.startPlaying();
+
+        } else {
+            this.setPuzzleState(PuzzleState.COUNTDOWN);
+
+            this._constraintsHead = this._constraintsTop;
+            this._constraintsFoot = this._constraintsBottom;
+
+            for (let ii = 0; ii < constraints.length / 2; ii++) {
+                let box: ConstraintBox = this._constraintBoxes[ii];
+                box.display.visible = true;
+                box.showBigText = true;
+
+                box.setLocation(new Point(
+                    (Flashbang.stageWidth * 0.3),
+                    (Flashbang.stageHeight * 0.4) + (ii * 77)));
+            }
+
+            this._startSolvingTime = new Date().getTime();
+            this.startPlaying();
+            this.showIntroScreen();
         }
-
-        this.setPuzzleState(PuzzleState.COUNTDOWN);
-
-        this._constraintsHead = this._constraintsTop;
-        this._constraintsFoot = this._constraintsBottom;
-
-        for (let ii = 0; ii < constraints.length / 2; ii++) {
-            let box: ConstraintBox = this._constraintBoxes[ii];
-            box.display.visible = true;
-            box.showBigText = true;
-
-            box.setLocation(new Point(
-                (Flashbang.stageWidth * 0.3),
-                (Flashbang.stageHeight * 0.4) + (ii * 77)));
-        }
-
-        this._startSolvingTime = new Date().getTime();
-        this.startPlaying(true);
-
-        this.showIntroScreen();
     }
 
     private showIntroScreen() {
@@ -1894,16 +1893,18 @@ export class PoseEditMode extends GameMode {
             introConstraintBoxes.push(box);
         }
 
-        let introMode = new MissionIntroMode(
-            this._puzzle.getName(true),
-            missionText,
-            this._targetPairs,
-            introConstraintBoxes);
-
-        this.modeStack.pushMode(introMode);
+        // Don't show our intro screen till scripts have completed running,
+        // so that our introConstraintBoxes are properly populated
+        ExternalInterface.waitForScriptCompletion().then(() => {
+            this.modeStack.pushMode(new MissionIntroMode(
+                this._puzzle.getName(true),
+                missionText,
+                this._targetPairs,
+                introConstraintBoxes));
+        });
     }
 
-    private startPlaying(animate_constraints: boolean): void {
+    private startPlaying(): void {
         this._isPlaying = true;
         this.disableTools(false);
 
@@ -2082,13 +2083,13 @@ export class PoseEditMode extends GameMode {
         }
 
         if (is_reset || this._isDatabrowserMode) {
-            this.startPlaying(false);
+            this.startPlaying();
         } else if (init_seq == null) {
             this.startCountdown();
         } else {
             /// Given init sequence (solution) in the lab, don't show mission animation - go straight to game
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                this.startPlaying(false);
+                this.startPlaying();
             } else {
                 this.startCountdown();
             }
@@ -2534,13 +2535,6 @@ export class PoseEditMode extends GameMode {
             let scriptID: string = value;
             isSatisfied = false;
             ExternalInterface.runScript(scriptID)
-                .then(returnValue => {
-                    if (!box.isLiveObject) {
-                        return Promise.reject("ConstraintBox not live");
-                    } else {
-                        return box.mode.waitTillActive().then(() => returnValue);
-                    }
-                })
                 .then(returnValue => {
                     let goal: string = "";
                     let name: string = "...";
