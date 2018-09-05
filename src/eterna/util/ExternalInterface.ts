@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import * as log from "loglevel";
 import {Assert} from "../../flashbang/util/Assert";
 import {Registration} from "../../signals/Registration";
@@ -24,6 +25,12 @@ export class ExternalInterfaceCtx {
             log.warn(`No such callback '${name}'`);
         }
     }
+}
+
+export interface RunScriptOptions {
+    params?: any;
+    ctx?: ExternalInterfaceCtx;
+    checkValid?: () => boolean;
 }
 
 /**
@@ -58,9 +65,24 @@ export class ExternalInterface {
         }
     }
 
-    public static runScript(scriptID: string | number, params: any = {}, sync: boolean = false): void {
-        log.info(`Running script ${scriptID}...`);
-        return ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", "" + scriptID, params, null, sync);
+    /**
+     * Requests execution of an external script.
+     * runScript requests are processed in order, and only one script can run at a time, except for
+     * scripts that indicate that they're asynchronous.
+     *
+     * @return a Promise that will resolve with the results of the script.
+     */
+    public static runScript(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            this._pendingScripts.push({
+                scriptID: "" + scriptID,
+                options: options,
+                resolve: resolve,
+                reject: reject,
+            });
+
+            this.maybeRunNextScript();
+        });
     }
 
     public static call(name: string, ...args: any[]): any {
@@ -71,6 +93,99 @@ export class ExternalInterface {
             log.error(`ExternalInterface: error calling '${name}': ${e}`);
             return undefined;
         }
+    }
+
+    private static maybeRunNextScript(): void {
+        while (this._pendingScripts.length > 0 && this._curSyncScript == null) {
+            let nextScript = this._pendingScripts.shift();
+            if (nextScript.options.checkValid != null && !nextScript.options.checkValid()) {
+                log.info(`Not running stale request for script ${nextScript.scriptID}`);
+            } else {
+                this.runPendingScript(nextScript);
+            }
+        }
+    }
+
+    private static runPendingScript(script: PendingScript): void {
+        let ctx = script.options.ctx;
+        if (ctx == null) {
+            ctx = new ExternalInterfaceCtx();
+        }
+
+        let isComplete = false;
+        let isAsync = false;
+
+        const complete = (successValue: any, error: any) => {
+            if (isComplete) {
+                return;
+            }
+            isComplete = true;
+
+            this.popContext(ctx);
+
+            if (this._curSyncScript === script) {
+                this._curSyncScript = null;
+            }
+
+            if (error !== undefined) {
+                log.warn(`Script ${script.scriptID}: error: ${error}`);
+                script.reject(error);
+            } else {
+                log.info(`Completed ${isAsync ? "async" : ""} script ${script.scriptID}`);
+                script.resolve(successValue);
+            }
+
+            this.maybeRunNextScript();
+        };
+
+        // Create a new "end_" callback
+        ctx.addCallback(`end_${script.scriptID}`, (returnValue: any) => {
+            if (!this.isAsync(returnValue)) {
+                complete(returnValue, undefined);
+            } else if (!isAsync) {
+                // Scripts can indicate that they run asynchronously by calling their end_
+                // function with { "cause": { "async": "true" } }. (They must later
+                // call the end_ function normally, when they've actually completed.)
+                // If the script indicates that it's async, we immediately relinquish
+                // our lock on curSyncScript, and allow other scripts to run.
+
+                log.info(`Script ${script.scriptID} is async. Allowing other scripts to run.`);
+                isAsync = true;
+                if (this._curSyncScript === script) {
+                    this._curSyncScript = null;
+                    this.maybeRunNextScript();
+                }
+            }
+        });
+
+        this.pushContext(ctx);
+
+        log.info(`Running script ${script.scriptID}...`);
+        this._curSyncScript = script;
+
+        try {
+            this.call(
+                "ScriptInterface.evaluate_script_with_nid",
+                script.scriptID,
+                script.options.params,
+                null,
+                false);
+        } catch (err) {
+            complete(undefined, err || `Unknown error in script ${script.scriptID}`);
+        }
+    }
+
+    private static isAsync(returnValue: any): boolean {
+        if (returnValue == null) {
+            return false;
+        }
+
+        let async = _.propertyOf(returnValue)("cause.async");
+        if (async == null) {
+            return false;
+        }
+
+        return (Boolean(async) === true || (typeof(async) === "string" && async.toLowerCase() === "true"));
     }
 
     private static updateCallbacks(): void {
@@ -88,9 +203,19 @@ export class ExternalInterface {
         }
     }
 
-    private static _scriptRoot: any;
     private static readonly _registeredContexts: RegisteredCtx[] = [];
     private static readonly _currentCallbackNames = new Set<string>();
+    private static readonly _pendingScripts: PendingScript[] = [];
+
+    private static _scriptRoot: any;
+    private static _curSyncScript: PendingScript;
+}
+
+interface PendingScript {
+    scriptID: string;
+    options: RunScriptOptions;
+    resolve: (returnValue: any) => void;
+    reject: (err: any) => void;
 }
 
 interface RegisteredCtx {
