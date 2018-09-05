@@ -182,12 +182,12 @@ export class Booster {
         // run
         log.info("running script " + this._scriptID);
         if (this._type == BoosterType.ACTION) {
-            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._scriptID, {}, null);
+            ExternalInterface.runScript(this._scriptID);
         } else {
-            ExternalInterface.call("ScriptInterface.evaluate_script_with_nid", this._scriptID, {
+            ExternalInterface.runScript(this._scriptID, {
                 command: cmd,
                 param: base_num.toString()
-            }, null);
+            });
         }
     }
 
