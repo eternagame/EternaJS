@@ -4,7 +4,7 @@
 const path = require('path');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const packageJson = require('./package.json');
 const vendorDependencies = Object.keys(packageJson['dependencies']);
@@ -16,8 +16,8 @@ module.exports = {
     },
 
     output: {
-        filename: '[name].js',
-        chunkFilename: '[chunkhash].js'
+        filename: '[name].[chunkhash].js',
+        chunkFilename: 'bundles/[chunkhash].js'
     },
 
     resolve: {
@@ -42,14 +42,15 @@ module.exports = {
             {
                 test: /\.(png|jpg|gif|mp3|ttf)$/,
                 use: [
-                  {
-                    loader: 'file-loader',
-                  }
+                    {
+                        loader: 'file-loader',
+                        options: {name: 'assets/[name].[hash].[ext]'},
+                    }
                 ]
             },
             {
                 test: /\.css$/,
-                use: [ 'style-loader', 'css-loader' ]
+                use: ['style-loader', 'css-loader']
             }
         ],
     },
@@ -91,6 +92,7 @@ module.exports = {
             systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
         }),
 
-        new CopyWebpackPlugin([ 'index.html' ])
+        // Generate an index.html that includes our webpack bundles
+        new HtmlWebpackPlugin({template: 'src/index.html.tmpl', inject: false}),
     ]
 };
