@@ -65,6 +65,26 @@ export class ExternalInterface {
         }
     }
 
+    /** True if there are any running or pending synchronous scripts */
+    public static get hasRunningScripts(): boolean {
+        return this._curSyncScript != null || this._pendingScripts.length > 0;
+    }
+
+    /** @return A promise that will resolve when there are no running or pending synchronous scripts */
+    public static waitForScriptCompletion(): Promise<void> {
+        if (this.hasRunningScripts) {
+            if (this._noPendingScriptsPromise == null) {
+                this._noPendingScriptsPromise = new Promise(resolve => {
+                    this._noPendingScriptsResolver = resolve;
+                });
+            }
+            return this._noPendingScriptsPromise;
+
+        } else {
+            return Promise.resolve();
+        }
+    }
+
     /**
      * Requests execution of an external script.
      * runScript requests are processed in order, and only one script can run at a time, except for
@@ -103,6 +123,13 @@ export class ExternalInterface {
             } else {
                 this.runPendingScript(nextScript);
             }
+        }
+
+        if (!this.hasRunningScripts && this._noPendingScriptsPromise != null) {
+            let resolver = this._noPendingScriptsResolver;
+            this._noPendingScriptsResolver = null;
+            this._noPendingScriptsPromise = null;
+            resolver();
         }
     }
 
@@ -209,6 +236,8 @@ export class ExternalInterface {
 
     private static _scriptRoot: any;
     private static _curSyncScript: PendingScript;
+    private static _noPendingScriptsPromise: Promise<void>;
+    private static _noPendingScriptsResolver: () => void;
 }
 
 interface PendingScript {
