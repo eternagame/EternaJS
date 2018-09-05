@@ -172,10 +172,11 @@ export class MissionIntroMode extends AppMode {
         const updateLayout = () => {
             let yLoc = 367 + 60;
             for (let constraintBox of this._constraintBoxes) {
+                let bounds = constraintBox.container.getLocalBounds();
                 constraintBox.display.position = new Point(
                     (Flashbang.stageWidth * 0.5) - 420.5 + this._goalsBG.width + 82,
-                    yLoc);
-                yLoc += constraintBox.container.height + 10;
+                    -bounds.top + yLoc);
+                yLoc += bounds.height + 10;
             }
 
             this._constraintsHeight = yLoc;
