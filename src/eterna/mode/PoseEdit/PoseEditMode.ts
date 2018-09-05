@@ -914,22 +914,21 @@ export class PoseEditMode extends GameMode {
 
         this.pushUILock();
 
-        this._scriptInterface.addCallback("end_" + nid, (ret: any): void => {
-            log.info("end_" + nid + "() called");
-            log.info(ret);
-            if (typeof(ret['cause']) === "string") {
-                this._runStatus.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
-                this._runStatus.text = ret['cause'];
-                // restore
-                // FIXME: other clean-ups? should unregister callbacks?
-            } else {
-                // leave the script running asynchronously
-            }
+        ExternalInterface.runScript(nid)
+            .then(ret => {
+                log.info(ret);
+                if (typeof(ret['cause']) === "string") {
+                    this._runStatus.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
+                    this._runStatus.text = ret['cause'];
+                    // restore
+                    // FIXME: other clean-ups? should unregister callbacks?
+                } else {
+                    // leave the script running asynchronously
+                }
 
-            this.popUILock();
-        });
-
-        ExternalInterface.runScript(nid);
+                this.popUILock();
+            })
+            .catch(() => this.popUILock());
     }
 
     public layoutConstraints(): void {
@@ -2533,54 +2532,60 @@ export class PoseEditMode extends GameMode {
 
         } else if (type === ConstraintType.SCRIPT) {
             let scriptID: string = value;
-            this._scriptInterface.addCallback("end_" + scriptID, (returnValue: any): void => {
-                let goal: string = "";
-                let name: string = "...";
-                let value: string = "";
-                let index: string = null;
-                let data_png: string = "";
-                let satisfied: boolean = false;
-                log.info("end_" + scriptID + "() called");
-                if (returnValue && returnValue.cause) {
-                    if (returnValue.cause.satisfied) satisfied = returnValue.cause.satisfied;
-                    if (returnValue.cause.goal != null) goal = returnValue.cause.goal;
-                    if (returnValue.cause.name != null) name = returnValue.cause.name;
-                    if (returnValue.cause.value != null) value = returnValue.cause.value;
-                    if (returnValue.cause.index != null) {
-                        index = (returnValue.cause.index + 1).toString();
-                        let ll: number = this._isPipMode ?
-                            returnValue.cause.index :
-                            (returnValue.cause.index === this._curTargetIndex ? 0 : -1);
-                        if (ll >= 0) {
-                            if (returnValue.cause.highlight != null) {
-                                this._poses[ll].highlightUserDefinedSequence(returnValue.cause.highlight);
-                            } else {
-                                this._poses[ll].clearUserDefinedHighlight();
+            isSatisfied = false;
+            ExternalInterface.runScript(scriptID)
+                .then(returnValue => {
+                    if (!box.isLiveObject) {
+                        return Promise.reject("ConstraintBox not live");
+                    } else {
+                        return box.mode.waitTillActive().then(() => returnValue);
+                    }
+                })
+                .then(returnValue => {
+                    let goal: string = "";
+                    let name: string = "...";
+                    let value: string = "";
+                    let index: string = null;
+                    let data_png: string = "";
+                    let satisfied: boolean = false;
+                    if (returnValue && returnValue.cause) {
+                        if (returnValue.cause.satisfied) satisfied = returnValue.cause.satisfied;
+                        if (returnValue.cause.goal != null) goal = returnValue.cause.goal;
+                        if (returnValue.cause.name != null) name = returnValue.cause.name;
+                        if (returnValue.cause.value != null) value = returnValue.cause.value;
+                        if (returnValue.cause.index != null) {
+                            index = (returnValue.cause.index + 1).toString();
+                            let ll: number = this._isPipMode ?
+                                returnValue.cause.index :
+                                (returnValue.cause.index === this._curTargetIndex ? 0 : -1);
+                            if (ll >= 0) {
+                                if (returnValue.cause.highlight != null) {
+                                    this._poses[ll].highlightUserDefinedSequence(returnValue.cause.highlight);
+                                } else {
+                                    this._poses[ll].clearUserDefinedHighlight();
+                                }
                             }
+                        }
+
+                        if (returnValue.cause.icon_b64) {
+                            data_png = returnValue.cause.icon_b64;
                         }
                     }
 
-                    if (returnValue.cause.icon_b64) {
-                        data_png = returnValue.cause.icon_b64;
+                    if (render) {
+                        box.setContent(ConstraintType.SCRIPT, {
+                            "nid": scriptID,
+                            "goal": goal,
+                            "name": name,
+                            "value": value,
+                            "index": index,
+                            "data_png": data_png
+                        }, satisfied, 0);
                     }
-                }
 
-                if (render) {
-                    box.setContent(ConstraintType.SCRIPT, {
-                        "nid": scriptID,
-                        "goal": goal,
-                        "name": name,
-                        "value": value,
-                        "index": index,
-                        "data_png": data_png
-                    }, satisfied, 0);
-                }
-
-                isSatisfied = satisfied;
-            });
-
-            isSatisfied = false;
-            ExternalInterface.runScript(scriptID, {}, true);
+                    isSatisfied = satisfied;
+                })
+                .catch(err => log.error(err));
         }
 
         return isSatisfied;

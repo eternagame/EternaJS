@@ -132,10 +132,6 @@ export class Booster {
     private executeScript(pose: Pose2D, cmd: string, base_num: number): void {
         let scriptInterface = new ExternalInterfaceCtx();
 
-        if (this._type == BoosterType.ACTION) {
-            this._view.pushUILock();
-        }
-
         scriptInterface.addCallback("set_sequence_string", (seq: string): boolean => {
             let seq_arr: number[] = EPars.stringToSequence(seq);
             if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
@@ -167,31 +163,31 @@ export class Booster {
             }
         });
 
-        scriptInterface.addCallback("set_script_status", (txt: string): void => {
-        });
+        scriptInterface.addCallback("set_script_status", (): void => {});
 
-        scriptInterface.addCallback("end_" + this._scriptID, (ret: any): void => {
-            log.info("end_" + this._scriptID + "() called");
-            if (typeof(ret['cause']) === "string" && this._type === BoosterType.ACTION) {
-                this._view.popUILock();
-                Eterna.sound.playSound(ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
-            }
-
-            ExternalInterface.popContext(scriptInterface);
-        });
-
-        ExternalInterface.pushContext(scriptInterface);
-
-        // run
-        log.info("running script " + this._scriptID);
+        const useUILock = this._type === BoosterType.ACTION;
         if (this._type == BoosterType.ACTION) {
-            ExternalInterface.runScript(this._scriptID);
-        } else {
-            ExternalInterface.runScript(this._scriptID, {
-                command: cmd,
-                param: base_num.toString()
-            });
+            this._view.pushUILock();
         }
+
+        const scriptParams = this._type === BoosterType.ACTION ? {} : {
+            command: cmd,
+            param: base_num.toString()
+        };
+
+        ExternalInterface.runScript(this._scriptID, {params: scriptParams})
+            .then(ret => {
+                if (useUILock) {
+                    this._view.popUILock();
+                    Eterna.sound.playSound(ret != null && ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
+                }
+            })
+            .catch(() => {
+                if (useUILock) {
+                    this._view.popUILock();
+                    Eterna.sound.playSound(Sounds.SoundScriptFail);
+                }
+            });
     }
 
     private readonly _view: GameMode;
