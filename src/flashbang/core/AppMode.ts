@@ -242,6 +242,11 @@ export class AppMode {
         this.container.interactiveChildren = true;
         this.enter();
         this._entered.emit();
+
+        if (this._hasPendingResize) {
+            this._hasPendingResize = false;
+            this.onResized();
+        }
     }
 
     /* internal */
@@ -291,6 +296,14 @@ export class AppMode {
         this.registerObject(obj);
     }
 
+    resizeInternal(): void {
+        if (this._isActive) {
+            this.onResized();
+        } else {
+            this._hasPendingResize = true;
+        }
+    }
+
     protected readonly _updateBegan: Signal<number> = new Signal();
     protected readonly _lateUpdate: Signal<number> = new Signal();
     protected readonly _updateComplete: UnitSignal = new UnitSignal();
@@ -312,6 +325,7 @@ export class AppMode {
 
     protected _isActive: boolean;
     protected _isDiposed: boolean;
+    protected _hasPendingResize: boolean;
 }
 
 class RootObject extends GameObject {
