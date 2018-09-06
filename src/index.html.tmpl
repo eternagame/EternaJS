@@ -69,10 +69,6 @@
     <script src="./frontend/jscripts/eterna/builder-about.js"></script>
     <script src="./frontend/jscripts/eterna/builder-browser.js"></script>
     <script src="./frontend/jscripts/eterna/builder-tutscripts.js"></script>
-
-    <% for (var css in htmlWebpackPlugin.files.css) { %>
-    <link href="<%= htmlWebpackPlugin.files.css[css] %>" rel="stylesheet">
-    <% } %>
 </head>
 <body>
 <!-- Scripts expect that an element with "maingame" will exist, so this name shouldn't be changed -->
