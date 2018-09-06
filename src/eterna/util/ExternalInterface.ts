@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import * as log from "loglevel";
 import {Assert} from "../../flashbang/util/Assert";
+import {Deferred} from "../../flashbang/util/Deferred";
 import {Registration} from "../../signals/Registration";
 import {UnitSignal} from "../../signals/UnitSignal";
 
@@ -73,12 +74,10 @@ export class ExternalInterface {
     /** @return A promise that will resolve when there are no running or pending synchronous scripts */
     public static waitForScriptCompletion(): Promise<void> {
         if (this.hasRunningScripts) {
-            if (this._noPendingScriptsPromise == null) {
-                this._noPendingScriptsPromise = new Promise(resolve => {
-                    this._noPendingScriptsResolver = resolve;
-                });
+            if (this._noPendingScripts == null) {
+                this._noPendingScripts = new Deferred();
             }
-            return this._noPendingScriptsPromise;
+            return this._noPendingScripts.promise;
 
         } else {
             return Promise.resolve();
@@ -125,11 +124,10 @@ export class ExternalInterface {
             }
         }
 
-        if (!this.hasRunningScripts && this._noPendingScriptsPromise != null) {
-            let resolver = this._noPendingScriptsResolver;
-            this._noPendingScriptsResolver = null;
-            this._noPendingScriptsPromise = null;
-            resolver();
+        if (!this.hasRunningScripts && this._noPendingScripts != null) {
+            let promise = this._noPendingScripts;
+            this._noPendingScripts = null;
+            promise.resolve();
         }
     }
 
@@ -236,15 +234,14 @@ export class ExternalInterface {
 
     private static _scriptRoot: any;
     private static _curSyncScript: PendingScript;
-    private static _noPendingScriptsPromise: Promise<void>;
-    private static _noPendingScriptsResolver: () => void;
+    private static _noPendingScripts: Deferred<void>;
 }
 
 interface PendingScript {
     scriptID: string;
     options: RunScriptOptions;
-    resolve: (returnValue: any) => void;
-    reject: (err: any) => void;
+    resolve: (value?: any) => void;
+    reject: (reason?: any) => void;
 }
 
 interface RegisteredCtx {
