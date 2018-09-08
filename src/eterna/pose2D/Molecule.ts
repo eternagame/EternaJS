@@ -52,7 +52,7 @@ export class Molecule extends Container {
         this.y = y;
     }
 
-    private static initTextures(): void {
+    public static initTextures(): void {
         if (Molecule._glowTex != null) {
             return;
         }

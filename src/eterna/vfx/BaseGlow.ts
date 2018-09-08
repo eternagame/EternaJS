@@ -6,7 +6,7 @@ import {EternaTextureUtil} from "../util/EternaTextureUtil";
 export class BaseGlow extends Sprite {
     public constructor() {
         super();
-        BaseGlow.initBitmapData();
+        BaseGlow.initTextures();
     }
 
     public set isWrong(wrong: boolean) {
@@ -29,21 +29,21 @@ export class BaseGlow extends Sprite {
         let prog_ind: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
         if (this._backward) prog_ind = BaseGlow.NUM_ANIMATION_STEPS - 1 - prog_ind;
 
-        let body_data: Texture = this._isWrong
-            ? BaseGlow._bitmapWrongData[zoom_level][prog_ind]
-            : BaseGlow._bitmapData[zoom_level][prog_ind];
+        let bodyTex: Texture = this._isWrong
+            ? BaseGlow._texturesWrong[zoom_level][prog_ind]
+            : BaseGlow._textures[zoom_level][prog_ind];
 
-        this.texture = body_data;
-        this.position = new Point(x - body_data.width / 2, y - body_data.height / 2);
+        this.texture = bodyTex;
+        this.position = new Point(x - bodyTex.width / 2, y - bodyTex.height / 2);
     }
 
-    private static initBitmapData(): void {
-        if (BaseGlow._bitmapData != null) {
+    public static initTextures(): void {
+        if (BaseGlow._textures != null) {
             return;
         }
 
-        BaseGlow._bitmapData = [];
-        BaseGlow._bitmapWrongData = [];
+        BaseGlow._textures = [];
+        BaseGlow._texturesWrong = [];
         let original_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz: number = 0; zz < 5; zz++) {
@@ -62,8 +62,8 @@ export class BaseGlow extends Sprite {
                 let wrong_new_base_data: Texture = EternaTextureUtil.colorTransform(new_base_data, 255, 0, 0, 0, 0, 0);
                 wrong_bitmaps_in_zoom.push(wrong_new_base_data);
             }
-            BaseGlow._bitmapData.push(bitmaps_in_zoom);
-            BaseGlow._bitmapWrongData.push(wrong_bitmaps_in_zoom);
+            BaseGlow._textures.push(bitmaps_in_zoom);
+            BaseGlow._texturesWrong.push(wrong_bitmaps_in_zoom);
         }
     }
 
@@ -71,8 +71,8 @@ export class BaseGlow extends Sprite {
     private _isWrong: boolean = false;
     private _backward: boolean = false;
 
-    private static _bitmapData: Texture[][];
-    private static _bitmapWrongData: Texture[][];
+    private static _textures: Texture[][];
+    private static _texturesWrong: Texture[][];
 
     private static readonly NUM_ANIMATION_STEPS = 60;
     private static readonly ANIMATION_SPAN = 1.1;

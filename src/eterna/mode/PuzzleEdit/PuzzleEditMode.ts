@@ -10,6 +10,7 @@ import {FolderManager} from "../../folding/FolderManager";
 import {NuPACK} from "../../folding/NuPACK";
 import {Vienna} from "../../folding/Vienna";
 import {Vienna2} from "../../folding/Vienna2";
+import {Molecule} from "../../pose2D/Molecule";
 import {Pose2D} from "../../pose2D/Pose2D";
 import {PoseField} from "../../pose2D/PoseField";
 import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
@@ -28,6 +29,7 @@ import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
+import {BaseGlow} from "../../vfx/BaseGlow";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
@@ -61,6 +63,12 @@ export class PuzzleEditMode extends GameMode {
 
         let background = new Background();
         this.addObject(background, this.bgLayer);
+
+        // Initialize Molecule and BaseGlow textures if they're not already inited.
+        // This prevents them from being lazily created when a new molecule is
+        // created in the puzzle editor, which can cause a noticeable hitch in framerate
+        Molecule.initTextures();
+        BaseGlow.initTextures();
 
         this._folder = FolderManager.instance.getFolder(Vienna.NAME);
 
