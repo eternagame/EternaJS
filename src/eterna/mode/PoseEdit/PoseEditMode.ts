@@ -477,7 +477,10 @@ export class PoseEditMode extends GameMode {
             this._oligoName.push(null);
             if (target_conditions[ii] && target_conditions[ii]['oligo_sequence']) {
                 this._targetOligo[ii] = EPars.stringToSequence(target_conditions[ii]['oligo_sequence']);
-                this._oligoMode[ii] = target_conditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : target_conditions[ii]['fold_mode'];
+                this._oligoMode[ii] =
+                    target_conditions[ii]["fold_mode"] == null ?
+                        Pose2D.OLIGO_MODE_DIMER :
+                        Number(target_conditions[ii]["fold_mode"]);
                 this._oligoName[ii] = target_conditions[ii]['oligo_name'];
             }
             if (target_conditions[ii] && target_conditions[ii]['oligos']) {
@@ -1221,7 +1224,9 @@ export class PoseEditMode extends GameMode {
             }
 
             if (Puzzle.isOligoType(tc_type)) {
-                let fold_mode: number = this._targetConditions[target_index]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._targetConditions[target_index]['fold_mode'];
+                let fold_mode: number = this._targetConditions[target_index]["fold_mode"] == null ?
+                    Pose2D.OLIGO_MODE_DIMER :
+                    Number(this._targetConditions[target_index]["fold_mode"]);
                 this._poses[pose_index].setOligo(EPars.stringToSequence(this._targetConditions[target_index]['oligo_sequence']), fold_mode,
                     this._targetConditions[target_index]['oligo_name']);
                 this._poses[pose_index].oligoMalus = this._targetConditions[target_index]['malus'];
@@ -1966,7 +1971,7 @@ export class PoseEditMode extends GameMode {
 
         if (this._targetConditions[0] && Puzzle.isOligoType(this._targetConditions[0]['type'])) {
             oligo_len = this._targetConditions[0]['oligo_sequence'].length;
-            if (this._targetConditions[0]['fold_mode'] === Pose2D.OLIGO_MODE_DIMER) oligo_len++;
+            if (Number(this._targetConditions[0]["fold_mode"]) === Pose2D.OLIGO_MODE_DIMER) oligo_len++;
         } else if (this._targetConditions[0] && this._targetConditions[0]['type'] === "multistrand") {
             let oligos: OligoDef[] = this._targetConditions[0]['oligos'];
             for (let ii = 0; ii < oligos.length; ii++) {
@@ -3172,7 +3177,9 @@ export class PoseEditMode extends GameMode {
             best_pairs = this._folder.foldSequenceWithBindingSite(this._puzzle.transformSequence(seq, ii), this._targetPairs[ii], sites, Number(bonus), this._targetConditions[ii]['fold_version']);
 
         } else if (this._targetConditions[ii]['type'] === "oligo") {
-            fold_mode = this._targetConditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._targetConditions[ii]['fold_mode'];
+            fold_mode = this._targetConditions[ii]["fold_mode"] == null ?
+                Pose2D.OLIGO_MODE_DIMER :
+                Number(this._targetConditions[ii]["fold_mode"]);
             if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.stringToSequence("&" + this._targetConditions[ii]['oligo_sequence']));
@@ -3189,7 +3196,9 @@ export class PoseEditMode extends GameMode {
         } else if (this._targetConditions[ii]['type'] === "aptamer+oligo") {
             bonus = this._targetConditions[ii]['bonus'];
             sites = this._targetConditions[ii]['site'];
-            fold_mode = this._targetConditions[ii]['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : this._targetConditions[ii]['fold_mode'];
+            fold_mode = this._targetConditions[ii]["fold_mode"] == null ?
+                Pose2D.OLIGO_MODE_DIMER :
+                Number(this._targetConditions[ii]["fold_mode"]);
             if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.stringToSequence("&" + this._targetConditions[ii]['oligo_sequence']));

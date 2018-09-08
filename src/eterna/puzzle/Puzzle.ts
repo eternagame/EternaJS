@@ -281,7 +281,7 @@ export class Puzzle {
             // Simple oligos
 
             if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii].hasOwnProperty("fold_mode") === false) {
-                this._targetConditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER;
+                this._targetConditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER.toString();
             }
 
             if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii]["oligo_sequence"] != null) {

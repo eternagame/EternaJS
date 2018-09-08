@@ -84,7 +84,7 @@ export class UndoBlock {
     public get oligoMode(): number {
         let tc: any = this.targetConditions;
         if (tc == null) return 0;
-        return tc["fold_mode"] == null ? Pose2D.OLIGO_MODE_DIMER : tc["fold_mode"];
+        return tc["fold_mode"] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc["fold_mode"]);
     }
 
     public get oligoName(): string {

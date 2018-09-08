@@ -1607,15 +1607,17 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.updateDesignHighlight();
     }
 
-    public setOligo(oligo: number[], mode: number = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
+    public setOligo(oligo: number[], mode: number | string = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
         if (oligo == null) {
             this._oligo = null;
             return;
         }
 
         this._oligo = oligo.slice();
-        this._oligoMode = mode;
         this._oligoName = o_name;
+
+        // Puzzle JSON encodes oligoMode as a string, for some reason
+        this._oligoMode = typeof(mode) === "number" ? mode : Number(mode);
 
         let seq: number[] = this.fullSequence;
         if (seq.length > this._bases.length) {
