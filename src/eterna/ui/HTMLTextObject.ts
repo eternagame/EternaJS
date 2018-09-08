@@ -10,10 +10,13 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         if (width) {
             this.width = width;
         } else {
-            // width: max-content doesn't seem to work on Firefox, so we set multiple width values
-            this._obj.style.cssText +=
-                "width: max-content;" +
-                "width: -moz-max-content;";
+            // If a width isn't specified, we want the element's width to match its content.
+            // I'm using `white-space=pre`, which seems to work across browsers. "width: max-content"
+            // works on Firefox, Safari, and Chrome, but Edge doesn't have support for it.
+            this._obj.style.whiteSpace = "pre";
+            // this._obj.style.cssText +=
+            //     "width: max-content;" +
+            //     "width: -moz-max-content;";
         }
     }
 
