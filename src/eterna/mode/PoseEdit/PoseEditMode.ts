@@ -45,6 +45,7 @@ import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
+import {int} from "../../util/int";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
 import {GameMode} from "../GameMode";
@@ -1229,7 +1230,7 @@ export class PoseEditMode extends GameMode {
                     Number(this._targetConditions[target_index]["fold_mode"]);
                 this._poses[pose_index].setOligo(EPars.stringToSequence(this._targetConditions[target_index]['oligo_sequence']), fold_mode,
                     this._targetConditions[target_index]['oligo_name']);
-                this._poses[pose_index].oligoMalus = this._targetConditions[target_index]['malus'];
+                this._poses[pose_index].oligoMalus = this._targetConditions[target_index]["malus"];
             } else {
                 this._poses[pose_index].setOligo(null);
             }
@@ -2796,7 +2797,7 @@ export class PoseEditMode extends GameMode {
                 this._poses[ii].setMolecularBinding(null, null, 0);
             }
             if (Puzzle.isOligoType(this._targetConditions[jj]['type'])) {
-                this._poses[ii].oligoMalus = this._targetConditions[jj]['malus'];
+                this._poses[ii].oligoMalus = this._targetConditions[jj]["malus"];
                 nnfe = this.getCurrentUndoBlock(jj).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].oligoPaired = true;
@@ -3183,7 +3184,7 @@ export class PoseEditMode extends GameMode {
             if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.stringToSequence("&" + this._targetConditions[ii]['oligo_sequence']));
-                malus = Number(this._targetConditions[ii]['malus'] * 100);
+                malus = int(this._targetConditions[ii]["malus"] * 100);
                 best_pairs = this._folder.cofoldSequence(full_seq, null, malus, force_struct);
             } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.stringToSequence(this._targetConditions[ii]['oligo_sequence']).concat(seq);
@@ -3202,7 +3203,7 @@ export class PoseEditMode extends GameMode {
             if (fold_mode === Pose2D.OLIGO_MODE_DIMER) {
                 log.debug("cofold");
                 full_seq = seq.concat(EPars.stringToSequence("&" + this._targetConditions[ii]['oligo_sequence']));
-                malus = Number(this._targetConditions[ii]['malus'] * 100);
+                malus = int(this._targetConditions[ii]["malus"] * 100);
                 best_pairs = this._folder.cofoldSequenceWithBindingSite(full_seq, sites, bonus, force_struct, malus);
             } else if (fold_mode === Pose2D.OLIGO_MODE_EXT5P) {
                 full_seq = EPars.stringToSequence(this._targetConditions[ii]['oligo_sequence']).concat(seq);
@@ -3217,7 +3218,7 @@ export class PoseEditMode extends GameMode {
             for (let jj: number = 0; jj < this._targetConditions[ii]['oligos'].length; jj++) {
                 oligos.push({
                     seq: EPars.stringToSequence(this._targetConditions[ii]['oligos'][jj]['sequence']),
-                    malus: Number(this._targetConditions[ii]['oligos'][jj]['malus'] * 100.0)
+                    malus: int(this._targetConditions[ii]['oligos'][jj]["malus"] * 100.0)
                 });
             }
             log.debug("multifold");
