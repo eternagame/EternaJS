@@ -17,6 +17,7 @@ import {GameButton} from "../../ui/GameButton";
 import {NucleotidePalette} from "../../ui/NucleotidePalette";
 import {ToggleBar} from "../../ui/ToggleBar";
 import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
+import {GameMode} from "../GameMode";
 import {Booster} from "./Booster";
 import {PoseEditMode} from "./PoseEditMode";
 
@@ -149,43 +150,19 @@ export class PoseEditToolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
-        // BOOSTERS
+        // BOOSTERS - ACTIONS
         let boostersData: BoostersData = this._puzzle.boosters;
-        if (boostersData) {
-            let mode: PoseEditMode = this.mode as PoseEditMode;
-
-            if (boostersData.paint_tools != null) {
-                let boosterPaintToolsLayout = new HLayoutContainer();
-                this._toolbarLayout.addHSpacer(SPACE_NARROW);
-                this._toolbarLayout.addChild(boosterPaintToolsLayout);
-                for (let data of boostersData.paint_tools) {
-                    Booster.create(mode, data).then(booster => {
-                        booster.onLoad();
-                        let button: GameButton = booster.createButton();
-                        button.clicked.connect(() => {
-                            mode.setPosesColor(booster.toolColor);
-                            mode.deselectAllColorings();
-                            button.toggled.value = true;
-                        });
-                        this.dynPaintTools.push(button);
-                        this.addObject(button, boosterPaintToolsLayout);
-                        this.updateLayout();
-                    });
-                }
-            }
-
-            if (boostersData.actions != null) {
-                this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
-                let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
-                for (let ii = 0; ii < boostersData.actions.length; ii++) {
-                    let data = boostersData.actions[ii];
-                    Booster.create(mode, data).then(booster => {
-                        let button: GameButton = booster.createButton(14);
-                        button.clicked.connect(() => booster.onRun());
-                        this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
-                        this.dynActionTools.push(button);
-                    });
-                }
+        if (boostersData != null && boostersData.actions != null) {
+            this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
+            let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
+            for (let ii = 0; ii < boostersData.actions.length; ii++) {
+                let data = boostersData.actions[ii];
+                Booster.create(this.mode as GameMode, data).then(booster => {
+                    let button: GameButton = booster.createButton(14);
+                    button.clicked.connect(() => booster.onRun());
+                    this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
+                    this.dynActionTools.push(button);
+                });
             }
         }
 
@@ -277,6 +254,28 @@ export class PoseEditToolbar extends ContainerObject {
             }
         } else {
             this.palette.enabled = false;
+        }
+
+        // BOOSTERS - PAINT TOOLS
+        if (boostersData != null && boostersData.paint_tools != null) {
+            let mode: PoseEditMode = this.mode as PoseEditMode;
+            let boosterPaintToolsLayout = new HLayoutContainer();
+            this._toolbarLayout.addHSpacer(SPACE_NARROW);
+            this._toolbarLayout.addChild(boosterPaintToolsLayout);
+            for (let data of boostersData.paint_tools) {
+                Booster.create(mode, data).then(booster => {
+                    booster.onLoad();
+                    let button: GameButton = booster.createButton();
+                    button.clicked.connect(() => {
+                        mode.setPosesColor(booster.toolColor);
+                        mode.deselectAllColorings();
+                        button.toggled.value = true;
+                    });
+                    this.dynPaintTools.push(button);
+                    this.addObject(button, boosterPaintToolsLayout);
+                    this.updateLayout();
+                });
+            }
         }
 
         // ZOOM IN, ZOOM OUT, UNDO, REDO
