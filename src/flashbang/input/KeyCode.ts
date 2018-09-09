@@ -6,6 +6,7 @@
  * See: https://www.w3.org/TR/uievents-code/#keyboard-key-codes
  *
  * NB: as of 9/8/2018, Edge doesn't support KeyboardEvent.code
+ * For Edge, use the keyboard.js polyfill here: https://github.com/inexorabletash/polyfill
  */
 export enum KeyCode {
     // 3.1.1.1. Writing System Keys
