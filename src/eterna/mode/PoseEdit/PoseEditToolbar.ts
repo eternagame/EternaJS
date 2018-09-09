@@ -269,7 +269,6 @@ export class PoseEditToolbar extends ContainerObject {
                     button.clicked.connect(() => {
                         mode.setPosesColor(booster.toolColor);
                         mode.deselectAllColorings();
-                        button.toggled.value = true;
                     });
                     this.dynPaintTools.push(button);
                     this.addObject(button, boosterPaintToolsLayout);
