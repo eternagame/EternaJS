@@ -13,9 +13,10 @@ export class CopySequenceDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        let inputPanel = new TextInputPanel();
+        let inputPanel = new TextInputPanel(18);
+        inputPanel.okButtonLabel = "Copy";
         inputPanel.title = "Current sequence";
-        let sequenceField = inputPanel.addField("Sequence", 200, true);
+        let sequenceField = inputPanel.addField("Sequence", Math.min(500, Math.max(200, Flashbang.stageWidth - 200)), false);
         sequenceField.text = this._sequence;
         sequenceField.readOnly = true;
         this.addObject(inputPanel, this.container);
@@ -25,7 +26,11 @@ export class CopySequenceDialog extends Dialog<void> {
         inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect(() => this.close(null));
+        inputPanel.okClicked.connect(() => {
+            sequenceField.setFocus(true);
+            document.execCommand("copy");
+            this.close(null);
+        });
 
         let updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;

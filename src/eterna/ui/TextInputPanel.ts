@@ -10,8 +10,10 @@ export class TextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();
     public readonly okClicked: Signal<Map<string, string>> = new Signal();
 
-    public constructor() {
+    public constructor(inputFontSize: number = 14) {
         super();
+
+        this._fontSize = inputFontSize;
 
         this.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
 
@@ -28,6 +30,10 @@ export class TextInputPanel extends GamePanel {
             this.cancelClicked.emit();
             this.resetHotkeys();
         });
+    }
+
+    public set okButtonLabel(text: string) {
+        this._okButton.label(text, 14);
     }
 
     protected added(): void {
@@ -76,10 +82,10 @@ export class TextInputPanel extends GamePanel {
             throw new Error("Add all fields before adding object to mode");
         }
 
-        let input = new TextInputObject(14, width, multiline ? 3 : 1).font(Fonts.ARIAL);
+        let input = new TextInputObject(this._fontSize, width, multiline ? 3 : 1).font(Fonts.ARIAL);
         this.addObject(input, this.container);
 
-        let label: Text = Fonts.arial(name, 14).color(0xC0DCE7).build();
+        let label: Text = Fonts.arial(name, this._fontSize).color(0xC0DCE7).build();
         this.container.addChild(label);
 
         this._fields.push({input, label, name});
@@ -113,6 +119,8 @@ export class TextInputPanel extends GamePanel {
 
     private readonly _okButton: GameButton;
     private readonly _cancelButton: GameButton;
+    private readonly _fontSize: number = 14;
+
     private _fields: InputField[] = [];
 
     private static readonly W_MARGIN = 20;
