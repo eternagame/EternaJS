@@ -707,7 +707,7 @@ export class PoseEditMode extends GameMode {
         }
 
         this._poseEditByTargetCb = () => {
-            if (this._forceSynch) {
+            if (this.forceSync) {
                 this.setPuzzleEpilog(initialSequence, this._params.isReset);
             } else {
                 this._opQueue.push(new PoseOp(
@@ -880,8 +880,7 @@ export class PoseEditMode extends GameMode {
         // Miscellanous
         this._scriptInterface.addCallback("sparks_effect", (from: number, to: number): void => {
             // FIXME: check PiP mode and handle accordingly
-            for (let ii: number = 0; ii < this.numPoseFields; ii++) {
-                let pose: Pose2D = this.getPose(ii);
+            for (let pose of this._poses) {
                 pose.praiseSequence(from, to);
             }
         });
@@ -893,13 +892,12 @@ export class PoseEditMode extends GameMode {
                 log.info("Invalid characters in " + seq);
                 return false;
             }
-            let force_sync: boolean = this._forceSynch;
-            this._forceSynch = true;
-            for (let ii: number = 0; ii < this.numPoseFields; ii++) {
-                let pose: Pose2D = this.getPose(ii);
+            let prevForceSync = this.forceSync;
+            this.forceSync = true;
+            for (let pose of this._poses) {
                 pose.pasteSequence(seq_arr);
             }
-            this._forceSynch = force_sync;
+            this.forceSync = prevForceSync;
             this.moveHistoryAddSequence("paste", seq);
             return true;
         });
@@ -3140,7 +3138,7 @@ export class PoseEditMode extends GameMode {
         this.showAsyncText("folding...");
         this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
-        if (this._forceSynch) {
+        if (this.forceSync) {
             for (let ii: number = 0; ii < this._targetPairs.length; ii++) {
                 this.poseEditByTargetFoldTarget(ii);
             }
@@ -3248,7 +3246,7 @@ export class PoseEditMode extends GameMode {
             };
             let mfold: any = this._folder.getCache(key);
 
-            if (mfold == null && this._forceSynch === false) {
+            if (mfold == null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
                 let ops: PoseOp[] = this._folder.multifoldUnroll(this._puzzle.transformSequence(seq, ii), null, oligos);
