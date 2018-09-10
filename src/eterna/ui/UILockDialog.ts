@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {Dialog} from "./Dialog";
 
@@ -9,19 +10,35 @@ export class UILockDialog extends Dialog<void> {
         this.addObject(new AlphaTask(1, 0.2));
     }
 
-    public addRef(): void {
-        this._refCount++;
+    public addRef(name?: string): void {
+        if (name != null) {
+            this._namedRefs.push(name);
+        } else {
+            this._anonymousRefs++;
+        }
     }
 
-    public releaseRef(): void {
-        if (--this._refCount === 0) {
+    public releaseRef(name?: string): void {
+        if (name != null) {
+            let idx = this._namedRefs.indexOf(name);
+            if (idx >= 0) {
+                this._namedRefs.splice(idx, 1);
+            } else {
+                log.warn(`No such named ref '${name}'`);
+            }
+        } else {
+            this._anonymousRefs--;
+        }
+
+        if (this._anonymousRefs === 0 && this._namedRefs.length === 0) {
             this.destroySelf();
         }
     }
 
     protected get bgAlpha(): number {
-        return 0.35;
+        return 0.2;
     }
 
-    private _refCount: number = 1;
+    private _anonymousRefs: number = 0;
+    private _namedRefs: string[] = [];
 }
