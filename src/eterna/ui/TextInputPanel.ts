@@ -33,39 +33,42 @@ export class TextInputPanel extends GamePanel {
     protected added(): void {
         super.added();
 
-        let field_start: number = 0;
-        let max_w: number = 0;
-        let height_walker: number = 0;
+        let fieldStart: number = 0;
+        let maxWidth: number = 0;
+        let heightWalker: number = 0;
 
         if (this._fields.length > 0) {
             for (let field of this._fields) {
-                field_start = Math.max(field_start, field.label.width);
-                max_w = Math.max(max_w, field.input.width);
+                fieldStart = Math.max(fieldStart, field.label.width);
+                maxWidth = Math.max(maxWidth, field.input.width);
             }
 
-            const FIELD_H_OFFSET = 28;
+            heightWalker = 26 + TextInputPanel.H_MARGIN;
 
-            for (let ii = 0; ii < this._fields.length; ii++) {
-                let field = this._fields[ii];
-                field.input.display.x = field_start + (TextInputPanel.W_MARGIN * 2);
-                field.input.display.y = (ii + 1) * FIELD_H_OFFSET + TextInputPanel.H_MARGIN;
+            for (let field of this._fields) {
+                heightWalker += 4;
+
+                field.input.display.x = fieldStart + (TextInputPanel.W_MARGIN * 2);
+                field.input.display.y = heightWalker;
+
                 field.label.x = TextInputPanel.W_MARGIN;
-                field.label.y = (ii + 1) * FIELD_H_OFFSET + TextInputPanel.H_MARGIN;
+                field.label.y = heightWalker;
+
+                heightWalker += field.input.height;
             }
 
-            let lastInput = this._fields[this._fields.length - 1].input;
-            height_walker = lastInput.display.y + lastInput.height + 35;
+            heightWalker += 35;
         }
 
-        let width = TextInputPanel.W_MARGIN + field_start + TextInputPanel.W_MARGIN + max_w + TextInputPanel.W_MARGIN;
-        let height = height_walker + 20 + TextInputPanel.H_MARGIN;
+        let width = TextInputPanel.W_MARGIN + fieldStart + TextInputPanel.W_MARGIN + maxWidth + TextInputPanel.W_MARGIN;
+        let height = heightWalker + 20 + TextInputPanel.H_MARGIN;
         this.setSize(width, height);
 
         this._okButton.display.position = new Point(
             (width * 0.5) - 30 - this._okButton.container.width,
-            height_walker
+            heightWalker
         );
-        this._cancelButton.display.position = new Point((width * 0.5) + 30, height_walker);
+        this._cancelButton.display.position = new Point((width * 0.5) + 30, heightWalker);
     }
 
     public addField(name: string, width: number, multiline: boolean = false): TextInputObject {
