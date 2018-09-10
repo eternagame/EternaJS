@@ -97,18 +97,20 @@ export abstract class GameMode extends AppMode {
     }
 
     /** Draws a dimrect over the game + UI (but below the achievements layer.) */
-    public pushUILock(): void {
-        if (this._uiLockRef.isLive) {
-            (this._uiLockRef.object as UILockDialog).addRef();
-        } else {
-            this._uiLockRef = this.addObject(new UILockDialog(), this.dialogLayer, 0);
+    public pushUILock(name?: string): void {
+        let lockDialog = this._uiLockRef.object as UILockDialog;
+        if (lockDialog == null) {
+            lockDialog = new UILockDialog();
+            this._uiLockRef = this.addObject(lockDialog, this.dialogLayer, 0);
         }
+
+        lockDialog.addRef(name);
     }
 
     /** Removes the currently-active ui lock */
-    public popUILock(): void {
+    public popUILock(name?: string): void {
         if (this._uiLockRef.isLive) {
-            (this._uiLockRef.object as UILockDialog).releaseRef();
+            (this._uiLockRef.object as UILockDialog).releaseRef(name);
         } else {
             log.warn("UILockDialog not currently active");
         }
@@ -199,7 +201,7 @@ export abstract class GameMode extends AppMode {
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
-        this.pushUILock();
+        this.pushUILock("Screenshot");
 
         Eterna.client.postScreenshot(screenshot)
             .then(filename => {
@@ -215,7 +217,7 @@ export abstract class GameMode extends AppMode {
                 this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
             ./*finally*/then(() => {
-                this.popUILock();
+                this.popUILock("Screenshot");
             });
     }
 

@@ -48,7 +48,7 @@ export class AchievementManager extends GameObject {
             return;
         }
 
-        (this.mode as GameMode).pushUILock();
+        (this.mode as GameMode).pushUILock("ShowAchievement");
 
         let nextData: AchievementData = this._pending.shift();
         let view = new AchievementBox(nextData.image, nextData.past);
@@ -59,7 +59,7 @@ export class AchievementManager extends GameObject {
 
         view.destroyed.connect(() => {
             this.maybeShowNextAchievement();
-            (this.mode as GameMode).popUILock();
+            (this.mode as GameMode).popUILock("ShowAchievement");
         });
 
         let updateLoc = () => {

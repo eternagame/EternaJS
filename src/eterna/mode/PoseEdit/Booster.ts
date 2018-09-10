@@ -166,8 +166,10 @@ export class Booster {
         scriptInterface.addCallback("set_script_status", (): void => {});
 
         const useUILock = this._type === BoosterType.ACTION;
+        const LOCK_NAME = "BoosterScript";
+
         if (this._type == BoosterType.ACTION) {
-            this._view.pushUILock();
+            this._view.pushUILock(LOCK_NAME);
         }
 
         const scriptParams = this._type === BoosterType.ACTION ? {} : {
@@ -178,13 +180,13 @@ export class Booster {
         ExternalInterface.runScript(this._scriptID, {params: scriptParams})
             .then(ret => {
                 if (useUILock) {
-                    this._view.popUILock();
+                    this._view.popUILock(LOCK_NAME);
                     Eterna.sound.playSound(ret != null && ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
                 }
             })
             .catch(() => {
                 if (useUILock) {
-                    this._view.popUILock();
+                    this._view.popUILock(LOCK_NAME);
                     Eterna.sound.playSound(Sounds.SoundScriptFail);
                 }
             });

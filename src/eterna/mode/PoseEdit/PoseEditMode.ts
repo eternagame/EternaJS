@@ -177,8 +177,11 @@ export class PoseEditMode extends GameMode {
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
-        this._asynchText = Fonts.arial("folding...", 12).build();
+        // Async text shows above our UI lock, and right below all dialogs
+        this._asynchText = Fonts.arial("folding...", 12).bold().color(0xffffff).build();
         this._asynchText.position = new Point(16, 200);
+        this.dialogLayer.addChild(this._asynchText);
+        this.hideAsyncText();
 
         this.setPuzzle();
 
@@ -188,9 +191,23 @@ export class PoseEditMode extends GameMode {
         this.updateLayout();
     }
 
+    protected enter(): void {
+        super.enter();
+        this.hideAsyncText();
+    }
+
     public onResized(): void {
         this.updateLayout();
         super.onResized();
+    }
+
+    private showAsyncText(text: string): void {
+        this._asynchText.text = text;
+        this._asynchText.visible = true;
+    }
+
+    private hideAsyncText(): void {
+        this._asynchText.visible = false;
     }
 
     private updateLayout(): void {
@@ -359,10 +376,11 @@ export class PoseEditMode extends GameMode {
     public restart_from(seq: string): void {
         this.clearUndoStack();
 
+        const LOCK_NAME = "Restarting";
+
         let restart_cb = (fd: any[]) => {
-            // Application.instance.get_modal_container().removeObject(this._asynch_text);
-            // Application.instance.remove_lock("FOLDING");
-            // Application.instance.set_blocker_opacity(0.35);
+            this.hideAsyncText();
+            this.popUILock(LOCK_NAME);
 
             if (fd != null) {
                 this._stackLevel++;
@@ -391,10 +409,8 @@ export class PoseEditMode extends GameMode {
 
         let sol: Solution = SolutionManager.instance.getSolutionBySequence(seq);
         if (sol != null && this._puzzle.hasTargetType("multistrand")) {
-            this._asynchText.text = "retrieving...";
-            // Application.instance.set_blocker_opacity(0.2);
-            // Application.instance.add_lock("FOLDING");
-            // Application.instance.get_modal_container().addObject(this._asynch_text);
+            this.showAsyncText("retrieving...");
+            this.pushUILock(LOCK_NAME);
 
             sol.queryFoldData().then((result) => restart_cb(result));
         } else {
@@ -916,7 +932,8 @@ export class PoseEditMode extends GameMode {
         this._runStatus.style.fill = 0xC0C0C0;
         this._runStatus.text = "running...";
 
-        this.pushUILock();
+        const LOCK_NAME = "RunScript";
+        this.pushUILock(LOCK_NAME);
 
         ExternalInterface.runScript(nid)
             .then(ret => {
@@ -926,9 +943,9 @@ export class PoseEditMode extends GameMode {
                     this._runStatus.text = ret['cause'];
                 }
 
-                this.popUILock();
+                this.popUILock(LOCK_NAME);
             })
-            .catch(() => this.popUILock());
+            .catch(() => this.popUILock(LOCK_NAME));
     }
 
     public layoutConstraints(): void {
@@ -993,13 +1010,14 @@ export class PoseEditMode extends GameMode {
             let op: PoseOp = this._opQueue.shift();
             op.fn();
             if (op.sn) {
-                this._asynchText.text =
-                    "folding " + op.sn +
-                    " of " + this._targetPairs.length +
-                    " (" + this._opQueue.length + ")";
+                this.showAsyncText(`folding ${op.sn} of ${this._targetPairs.length} (${this._opQueue.length})`);
             }
 
             elapsed = new Date().getTime() - startTime;
+        }
+
+        if (this._opQueue.length === 0) {
+            this.hideAsyncText();
         }
 
         this._rscript.tick();
@@ -1863,6 +1881,8 @@ export class PoseEditMode extends GameMode {
     }
 
     private showIntroScreen() {
+        this.hideAsyncText();
+
         let missionText = this._puzzle.missionText;
         let boosters: BoostersData = this._puzzle.boosters;
         if (boosters && boosters.mission != null) {
@@ -3073,10 +3093,11 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
+        const LOCK_NAME = "ExecFold";
+
         let execfold_cb = (fd: any[]) => {
-            // Application.instance.get_modal_container().removeObject(this._asynch_text);
-            // Application.instance.remove_lock("FOLDING");
-            // Application.instance.set_blocker_opacity(0.35);
+            this.hideAsyncText();
+            this.popUILock(LOCK_NAME);
 
             if (fd != null) {
                 this._stackLevel++;
@@ -3103,13 +3124,10 @@ export class PoseEditMode extends GameMode {
             this.poseEditByTargetDoFold(target_index);
         };
 
+        this.pushUILock(LOCK_NAME);
         let sol: Solution = SolutionManager.instance.getSolutionBySequence(this._poses[target_index].getSequenceString());
         if (sol != null && this._puzzle.hasTargetType("multistrand")) {
-            this._asynchText.text = "retrieving...";
-            // Application.instance.set_blocker_opacity(0.2);
-            // Application.instance.add_lock("FOLDING");
-            // Application.instance.get_modal_container().addObject(this._asynch_text);
-
+            this.showAsyncText("retrieving...");
             sol.queryFoldData().then((result) => execfold_cb(result));
         } else {
             execfold_cb(null);
@@ -3119,11 +3137,8 @@ export class PoseEditMode extends GameMode {
     private poseEditByTargetDoFold(target_index: number): void {
         this._foldStartTime = new Date().getTime();
 
-        this._asynchText.text = "folding...";
-
-        // Application.instance.set_blocker_opacity(0.2);
-        // Application.instance.add_lock("FOLDING");
-        // Application.instance.get_modal_container().addObject(this._asynch_text);
+        this.showAsyncText("folding...");
+        this.pushUILock(PoseEditMode.FOLDING_LOCK);
 
         if (this._forceSynch) {
             for (let ii: number = 0; ii < this._targetPairs.length; ii++) {
@@ -3270,9 +3285,8 @@ export class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetEpilog(target_index: number): void {
-        // Application.instance.get_modal_container().removeObject(this._asynch_text);
-        // Application.instance.remove_lock("FOLDING");
-        // Application.instance.set_blocker_opacity(0.35);
+        this.hideAsyncText();
+        this.popUILock(PoseEditMode.FOLDING_LOCK);
 
         // this._fold_total_time = new Date().getTime() - this._fold_start_time;
         // if (!this._tools_container.contains(this._freeze_button) && this._fold_total_time >= 1000.0) { // FIXME: a bit arbitrary...
@@ -3549,6 +3563,8 @@ export class PoseEditMode extends GameMode {
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: any;
+
+    private static readonly FOLDING_LOCK = "Folding";
 }
 
 interface ConstraintInfo {
