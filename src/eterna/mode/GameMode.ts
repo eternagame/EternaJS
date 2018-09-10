@@ -162,6 +162,8 @@ export abstract class GameMode extends AppMode {
             this._poseFields.push(newPoseField);
             this._poses.push(newPoseField.pose);
         }
+
+        this.layoutPoseFields();
     }
 
     protected togglePip(): void {
