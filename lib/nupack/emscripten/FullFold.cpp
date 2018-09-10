@@ -190,10 +190,10 @@ FullFoldResult* CoFoldSequence (const std::string& seqString) {
         if (pc) (*pc) = '+';
     } while(pc);
 
-    int tmpLength = strlen(string);
-    convertSeq(string, seqNum, tmpLength);
+    int seqLength = strlen(string);
+    convertSeq(string, seqNum, seqLength);
 
-    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+    mfeFullWithSym(seqNum, seqLength, &mfeStructs, 3, RNA,
                    DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
@@ -208,12 +208,13 @@ FullFoldResult* CoFoldSequence (const std::string& seqString) {
         }
     }
 
-    std::string structureCopy = outStructure;
-    for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
-        if ((*pc) == '+') {
-            outStructure[j++] = '&';
+    std::string constraints = outStructure;
+    for (pc = string, i = 0, j = 0; (*pc); pc++, j++) {
+        auto value = ((*pc) == '+' ? '&' : constraints[i++]);
+        if (j < outStructure.length()) {
+            outStructure[j] = value;
         } else {
-            outStructure[j++] = structureCopy[i++];
+            outStructure.push_back(value);
         }
     }
 
@@ -240,8 +241,8 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int
         if (pc) (*pc) = '+';
     } while(pc);
 
-    int tmpLength = strlen(string);
-    convertSeq(string, seqNum, tmpLength);
+    int seqLength = strlen(string);
+    convertSeq(string, seqNum, seqLength);
 
     // activate binding site callbacks
     binding_cb = _binding_cb;
@@ -251,7 +252,7 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int
     g_site_j = site_j;
     g_site_q = site_q;
     g_site_bonus = site_bonus;
-    mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
+    mfeFullWithSym(seqNum, seqLength, &mfeStructs, 3, RNA,
                    DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
     // clean up
@@ -269,12 +270,13 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int
         }
     }
 
-    std::string structureCopy = outStructure;
-    for (pc = string, i = 0, j = 0; (*pc); pc++ ) {
-        if ((*pc) == '+') {
-            outStructure[j++] = '&';
+    std::string constraints = outStructure;
+    for (pc = string, i = 0, j = 0; (*pc); pc++, j++) {
+        auto value = ((*pc) == '+' ? '&' : constraints[i++]);
+        if (j < outStructure.length()) {
+            outStructure[j] = value;
         } else {
-            outStructure[j++] = structureCopy[i++];
+            outStructure.push_back(value);
         }
     }
 
