@@ -177,7 +177,7 @@ export class Booster {
             param: base_num.toString()
         };
 
-        ExternalInterface.runScript(this._scriptID, {params: scriptParams})
+        ExternalInterface.runScript(this._scriptID, {params: scriptParams, ctx: scriptInterface})
             .then(ret => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
