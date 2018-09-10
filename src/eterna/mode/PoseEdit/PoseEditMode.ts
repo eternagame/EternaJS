@@ -189,7 +189,6 @@ export class PoseEditMode extends GameMode {
         this.registerScriptInterface(this._scriptInterface);
 
         this.updateUILayout();
-        this.layoutPoseFields();
     }
 
     protected enter(): void {
