@@ -188,7 +188,8 @@ export class PoseEditMode extends GameMode {
         this.buildScriptInterface();
         this.registerScriptInterface(this._scriptInterface);
 
-        this.updateLayout();
+        this.updateUILayout();
+        this.layoutPoseFields();
     }
 
     protected enter(): void {
@@ -197,7 +198,7 @@ export class PoseEditMode extends GameMode {
     }
 
     public onResized(): void {
-        this.updateLayout();
+        this.updateUILayout();
         super.onResized();
     }
 
@@ -210,7 +211,7 @@ export class PoseEditMode extends GameMode {
         this._asynchText.visible = false;
     }
 
-    private updateLayout(): void {
+    private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
