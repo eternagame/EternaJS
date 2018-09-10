@@ -2,6 +2,7 @@ import * as log from "loglevel";
 import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
 import {EPars} from "../EPars";
 import {PoseOp} from "../pose2D/PoseOp";
+import {int} from "../util/int";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
 import {Folder} from "./Folder";
@@ -159,12 +160,10 @@ export class NuPACK extends Folder {
 
         this.putCache(key, cache);
 
-        let energy: number = cache.energy * 100;
         if (outNodes != null) {
             FoldUtil.arrayCopy(outNodes, cache.nodes);
         }
-
-        return energy;
+        return int(cache.energy * 100);
     }
 
     /* override */
@@ -261,7 +260,7 @@ export class NuPACK extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs, temp);
+        co_pairs = this.cofoldSequenceImpl(seq);
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
@@ -503,7 +502,7 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: number[], str: string = null, temp: number = 37): number[] {
+    private cofoldSequenceImpl(seq: number[]): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
 
         let result: FullFoldResult = null;
@@ -555,7 +554,7 @@ export class NuPACK extends Folder {
             return co_pairs.slice();
         }
 
-        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs, temp);
+        co_pairs = this.cofoldSequenceImpl(seq);
 
         this.putCache(key, co_pairs.slice());
         return co_pairs;
