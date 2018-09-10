@@ -26,6 +26,9 @@ export abstract class GameMode extends AppMode {
     public readonly achievementsLayer = new Container();
     public readonly contextMenuLayer = new Container();
 
+    /** Controls whether certain folding operations are run synchronously or queued up */
+    public forceSync: boolean = false;
+
     protected setup(): void {
         super.setup();
 
@@ -122,14 +125,6 @@ export abstract class GameMode extends AppMode {
 
     public ropSetPip(pip_mode: boolean): void {
         this.setPip(pip_mode);
-    }
-
-    public get isForcedSynch(): boolean {
-        return this._forceSynch;
-    }
-
-    public set isForcedSynch(forced: boolean) {
-        this._forceSynch = forced;
     }
 
     protected registerScriptInterface(ctx: ExternalInterfaceCtx): void {
@@ -268,7 +263,6 @@ export abstract class GameMode extends AppMode {
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!
     protected _isPipMode: boolean = false;
-    protected _forceSynch: boolean = false;
 }
 
 class ContextMenuDialog extends Dialog<void> {
