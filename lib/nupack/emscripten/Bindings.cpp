@@ -1,6 +1,3 @@
-#include <emscripten.h>
-#include <emscripten/bind.h>
-
 #include "FullEval.h"
 #include "FullFold.h"
 
@@ -25,6 +22,11 @@ int main() {
 
     return 0;
 }
+
+#ifdef __EMSCRIPTEN__
+
+#include <emscripten.h>
+#include <emscripten/bind.h>
 
 using namespace emscripten;
 
@@ -55,3 +57,5 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
 
     function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
 }
+
+#endif
