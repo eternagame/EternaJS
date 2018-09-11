@@ -6,10 +6,24 @@ export class ChatManager {
         this._chatbox = document.getElementById(chatboxID);
         if (this._chatbox == null) {
             log.warn(`Missing chatbox (id=${chatboxID})`);
+        } else {
+            let iframe: HTMLIFrameElement = this._chatbox.getElementsByTagName("iframe")[0];
+            if (iframe == null) {
+                log.warn(`No iframe in chatbox (id=${chatboxID}`);
+            } else {
+                this._chatIFrame = iframe.contentWindow;
+            }
         }
 
         this._settings = settings;
         settings.showChat.connectNotify(() => this.updateChatVisibility());
+    }
+
+    /** Posts a message to the chat */
+    public postText(text: string): void {
+        if (this._chatIFrame != null) {
+            this._chatIFrame.postMessage({type: "chat-message", content: text}, "*");
+        }
     }
 
     /** Increases the hideChat counter. Chat is visible if the counter is 0. */
@@ -38,6 +52,7 @@ export class ChatManager {
     }
 
     private readonly _chatbox: HTMLElement;
+    private readonly _chatIFrame: Window;
     private readonly _settings: EternaSettings;
 
     private _hideChat: number = 0;
