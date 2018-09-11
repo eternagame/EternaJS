@@ -543,25 +543,29 @@ export class PoseEditMode extends GameMode {
             this._toolbar.palette.clickTarget(PaletteTargetType.A);
         }
 
-        let num_constraints: number = 0;
+        let numConstraints: number = 0;
         let constraints: string[] = [];
         if (this._puzzle.constraints != null) {
-            num_constraints = this._puzzle.constraints.length;
+            numConstraints = this._puzzle.constraints.length;
             constraints = this._puzzle.constraints;
         }
 
         this._constraintBoxes = [];
-        this._unstableIndex = -1;
+        this._unstableShapeConstraintIdx = -1;
 
-        if (num_constraints > 0) {
-            if (num_constraints % 2 !== 0) {
+        if (numConstraints > 0) {
+            if (numConstraints % 2 !== 0) {
                 throw new Error("Wrong constraints length");
             }
 
-            for (let ii = 0; ii < num_constraints / 2; ii++) {
-                let newbox: ConstraintBox = new ConstraintBox(ConstraintBoxType.DEFAULT);
+            for (let constraintIdx = 0; constraintIdx < numConstraints; constraintIdx += 2) {
+                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
                 this._constraintBoxes.push(newbox);
                 this.addObject(newbox, this._constraintsLayer);
+
+                newbox.pointerDown.connect(() => {
+                    this.onConstraintBoxClicked(constraintIdx);
+                });
             }
 
             this._constraintShapeBoxes = [];
@@ -570,21 +574,29 @@ export class PoseEditMode extends GameMode {
             this._constraintAntishapeBoxes = [];
             this._constraintAntishapeBoxes.push(null);
             if (this._targetPairs.length > 1) {
-                for (let ii = 1; ii < this._targetPairs.length; ii++) {
-                    this._constraintShapeBoxes[ii] = null;
-                    this._constraintAntishapeBoxes[ii] = null;
-                    for (let jj = 0; jj < num_constraints; jj += 2) {
-                        if (constraints[jj] === ConstraintType.SHAPE) {
-                            if (Number(constraints[jj + 1]) === ii) {
+                for (let pairsIdx = 1; pairsIdx < this._targetPairs.length; pairsIdx++) {
+                    this._constraintShapeBoxes[pairsIdx] = null;
+                    this._constraintAntishapeBoxes[pairsIdx] = null;
+                    for (let constraintIdx = 0; constraintIdx < numConstraints; constraintIdx += 2) {
+                        if (constraints[constraintIdx] === ConstraintType.SHAPE) {
+                            if (int(constraints[constraintIdx + 1]) === pairsIdx) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
-                                this._constraintShapeBoxes[ii] = newbox;
+                                this._constraintShapeBoxes[pairsIdx] = newbox;
                                 this.addObject(newbox, this._constraintsLayer);
+
+                                newbox.pointerDown.connect(() => {
+                                    this.onConstraintBoxClicked(constraintIdx);
+                                });
                             }
-                        } else if (constraints[jj] === ConstraintType.ANTISHAPE) {
-                            if (Number(constraints[jj + 1]) === ii) {
+                        } else if (constraints[constraintIdx] === ConstraintType.ANTISHAPE) {
+                            if (int(constraints[constraintIdx + 1]) === pairsIdx) {
                                 let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
-                                this._constraintAntishapeBoxes[ii] = newbox;
+                                this._constraintAntishapeBoxes[pairsIdx] = newbox;
                                 this.addObject(newbox, this._constraintsLayer);
+
+                                newbox.pointerDown.connect(() => {
+                                    this.onConstraintBoxClicked(constraintIdx);
+                                });
                             }
                         }
                     }
@@ -1822,7 +1834,7 @@ export class PoseEditMode extends GameMode {
             // scan for SHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
                 const box = this._constraintBoxes[ii];
-                if (box.constraintType !== ConstraintType.SHAPE || Number(constraints[2 * ii + 1]) !== xx) {
+                if (box.constraintType !== ConstraintType.SHAPE || int(constraints[2 * ii + 1]) !== xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
@@ -1835,7 +1847,7 @@ export class PoseEditMode extends GameMode {
             // scan for ANTISHAPE
             for (let ii = 0; ii < num_constraints / 2; ii++) {
                 const box = this._constraintBoxes[ii];
-                if (box.constraintType !== ConstraintType.ANTISHAPE || Number(constraints[2 * ii + 1]) !== xx) {
+                if (box.constraintType !== ConstraintType.ANTISHAPE || int(constraints[2 * ii + 1]) !== xx) {
                     continue;
                 }
                 let cpos = new Point(w_walker, 35);
@@ -2120,7 +2132,7 @@ export class PoseEditMode extends GameMode {
         this.ropPresets();
     }
 
-    private updateConstraint(type: ConstraintType, value: string, ii: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
+    private updateConstraint(type: ConstraintType, value: string, constraintIdx: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
         let isSatisfied: boolean = true;
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
@@ -2191,12 +2203,8 @@ export class PoseEditMode extends GameMode {
                     native: native_pairs,
                     structure_constraints: structure_constraints
                 }, isSatisfied, 0);
-                box.flagged = this._unstableIndex === ii;
-                // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                //     set_callback(this, box, ii);
-                // }
-
-                if (this._unstableIndex === ii) {
+                box.flagged = this._unstableShapeConstraintIdx === constraintIdx;
+                if (this._unstableShapeConstraintIdx === constraintIdx) {
                     outInfo.wrong_pairs = box.getWrongPairs(native_pairs, this._targetPairs[target_index], structure_constraints, isSatisfied);
                 }
             }
@@ -2210,11 +2218,7 @@ export class PoseEditMode extends GameMode {
                             native: native_pairs,
                             structure_constraints: structure_constraints
                         }, isSatisfied, 0);
-                        this._constraintShapeBoxes[target_index].flagged = this._unstableIndex === ii;
-                        // if (!this._constraint_shape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                        //     set_callback(this, this._constraint_shape_boxes[target_index], ii);
-                        // }
-
+                        this._constraintShapeBoxes[target_index].flagged = this._unstableShapeConstraintIdx === constraintIdx;
                         this._constraintShapeBoxes[target_index].display.visible = this._isPipMode;
                     }
                 }
@@ -2253,12 +2257,9 @@ export class PoseEditMode extends GameMode {
                     index: input_index,
                     structure_constraints: anti_structure_constraints
                 }, isSatisfied, 0);
-                box.flagged = this._unstableIndex === ii;
-                // if (!box.hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                //     set_callback(this, box, ii);
-                // }
+                box.flagged = this._unstableShapeConstraintIdx === constraintIdx;
 
-                if (this._unstableIndex === ii) {
+                if (this._unstableShapeConstraintIdx === constraintIdx) {
                     outInfo.wrong_pairs = box.getWrongPairs(native_pairs, anti_pairs, anti_structure_constraints, isSatisfied);
                 }
             }
@@ -2272,10 +2273,7 @@ export class PoseEditMode extends GameMode {
                             index: input_index,
                             structure_constraints: anti_structure_constraints
                         }, isSatisfied, 0);
-                        this._constraintAntishapeBoxes[target_index].flagged = this._unstableIndex === ii;
-                        // if (!this._constraint_antishape_boxes[target_index].hasEventListener(MouseEvent.MOUSE_DOWN)) {
-                        //     set_callback(this, this._constraint_antishape_boxes[target_index], ii);
-                        // }
+                        this._constraintAntishapeBoxes[target_index].flagged = this._unstableShapeConstraintIdx === constraintIdx;
 
                         this._constraintAntishapeBoxes[target_index].display.visible = this._isPipMode;
                     }
@@ -2610,13 +2608,6 @@ export class PoseEditMode extends GameMode {
         if (constraints == null || constraints.length === 0) {
             return false;
         }
-
-        // let set_callback = function (pose: PoseEditMode, cb: ConstraintBox, kk: number): void {
-        //     cb.addEventListener(MouseEvent.MOUSE_DOWN, function (e: any): void {
-        //         pose._unstable_index = (pose._unstable_index === kk) ? -1 : kk;
-        //         pose.checkConstraints();
-        //     });
-        // };
 
         let constraintsInfo: ConstraintInfo = {
             wrong_pairs: null,
@@ -3481,9 +3472,20 @@ export class PoseEditMode extends GameMode {
         this._seqStacks = [];
     }
 
+    /**
+     * When a structure constraint box is clicked, we hilite the bases that are misfolding.
+     * The _unstableShapeConstraintIdx indicates which constraint's misfolded bases should be hilited.
+     */
+    private onConstraintBoxClicked(idx: number): void {
+        if (this._puzzle.curConstraints[idx] == ConstraintType.SHAPE || this._puzzle.curConstraints[idx] == ConstraintType.ANTISHAPE) {
+            this._unstableShapeConstraintIdx = (this._unstableShapeConstraintIdx == idx ? -1 : idx);
+            this.checkConstraints();
+        }
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
-    private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
+    private readonly _scriptInterface = new ExternalInterfaceCtx();
 
     private _constraintsLayer: Container;
 
@@ -3529,7 +3531,7 @@ export class PoseEditMode extends GameMode {
     private _constraintBoxes: ConstraintBox[];
     private _constraintShapeBoxes: ConstraintBox[];
     private _constraintAntishapeBoxes: ConstraintBox[];
-    private _unstableIndex: number;
+    private _unstableShapeConstraintIdx: number;
     private _constraintsOffset: number;
 
     private _dockedSpecBox: SpecBox;
