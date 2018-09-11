@@ -8,6 +8,7 @@ import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Easing} from "../../flashbang/util/Easing";
+import {Eterna} from "../Eterna";
 import {Fonts} from "../util/Fonts";
 
 /** Displays a simple animation while we're loading assets */
@@ -57,6 +58,16 @@ export class LoadingMode extends AppMode {
         };
         updateLoc();
         this.resized.connect(updateLoc);
+    }
+
+    protected enter(): void {
+        super.enter();
+        Eterna.chat.pushHideChat();
+    }
+
+    protected exit(): void {
+        Eterna.chat.popHideChat();
+        super.exit();
     }
 
     private _text: string;

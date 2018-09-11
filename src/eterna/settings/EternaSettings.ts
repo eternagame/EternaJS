@@ -2,6 +2,7 @@ import {Setting} from "../../flashbang/settings/Setting";
 import {Settings} from "../../flashbang/settings/Settings";
 
 export class EternaSettings extends Settings {
+    public readonly showChat: Setting<boolean>;
     public readonly showNumbers: Setting<boolean>;
     public readonly showLetters: Setting<boolean>;
     public readonly displayFreeEnergies: Setting<boolean>;
@@ -21,6 +22,7 @@ export class EternaSettings extends Settings {
     public constructor() {
         super("EternaSettings");
 
+        this.showChat = this.setting("showChat", true);
         this.showNumbers = this.setting("showNumbers", true);
         this.showLetters = this.setting("showLetters", false);
         this.displayFreeEnergies = this.setting("displayFreeEnergies", false);

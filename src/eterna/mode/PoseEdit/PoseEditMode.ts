@@ -1703,6 +1703,7 @@ export class PoseEditMode extends GameMode {
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
         }
+        Eterna.chat.pushHideChat();
 
         // Show the panel
         let infoText: string = null;
@@ -1728,6 +1729,8 @@ export class PoseEditMode extends GameMode {
 
         const keepPlaying = () => {
             if (missionClearedPanel != null) {
+                Eterna.chat.popHideChat();
+
                 missionClearedPanel.destroySelf();
                 missionClearedPanel = null;
 
@@ -1747,6 +1750,7 @@ export class PoseEditMode extends GameMode {
 
         if (nextPuzzle != null) {
             missionClearedPanel.nextButton.clicked.connect(() => {
+                Eterna.chat.popHideChat();
                 this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
             });
         } else {
