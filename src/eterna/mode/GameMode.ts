@@ -206,7 +206,7 @@ export abstract class GameMode extends AppMode {
                 let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
                 this.showConfirmDialog(prompt, true).closed.then(confirmed => {
                     if (confirmed) {
-                        log.info("TODO: post to chat!");
+                        Eterna.chat.postText(url.href);
                     }
                 });
             })
