@@ -139,8 +139,8 @@ export abstract class GameMode extends AppMode {
     }
 
     public onResized(): void {
-        this.layoutPoseFields();
         super.onResized();
+        this.layoutPoseFields();
     }
 
     protected setPoseFields(newPoseFields: PoseField[]): void {
