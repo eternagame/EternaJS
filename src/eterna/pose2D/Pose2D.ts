@@ -2963,8 +2963,9 @@ export class Pose2D extends ContainerObject implements Updatable {
                     factor++;
                     if (this._moleculeIsBoundReal) {
                         label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
-                        let molecule_bonus: number = Math.round(this._molecularBindingBonus);
-                        score_elems.push(EnergyScoreDisplay.green(` ${molecule_bonus} kcal`));
+                        // Round to 2 decimal places
+                        let bonus = Math.round(this._molecularBindingBonus * 1e2) / 1e2;
+                        score_elems.push(EnergyScoreDisplay.green(` ${bonus} kcal`));
                     } else {
                         label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
                         score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
