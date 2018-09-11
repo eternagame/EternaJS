@@ -2,6 +2,8 @@ import "assets/styles.css"; // css-loader will pick up on this and embed our sty
 import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
+import {ChatManager} from "./ChatManager";
+import {TestMode} from "./debug/TestMode";
 import {EPars} from "./EPars";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
@@ -64,6 +66,7 @@ export enum InitialAppMode {
 
 export interface EternaAppParams {
     containerID?: string;
+    chatboxID?: string;
     width?: number;
     height?: number;
 
@@ -84,6 +87,7 @@ export class EternaApp extends FlashbangApp {
         // Default param values
         params.mode = params.mode || InitialAppMode.PUZZLE;
         params.containerID = params.containerID || "maingame";
+        params.chatboxID = params.chatboxID || "chat-container";
         params.width = params.width || 1280;
         params.height = params.height || 1024;
         params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
@@ -112,6 +116,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.sound = new SoundManager(Eterna.settings);
+        Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
 
         this.setLoadingText("Authenticating...");
 

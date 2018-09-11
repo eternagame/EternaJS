@@ -6,6 +6,7 @@ import {IsLeftMouse} from "../../../flashbang/input/InputUtil";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../../EPars";
+import {Eterna} from "../../Eterna";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {ConstraintBox} from "../../ui/ConstraintBox";
 import {GameButton} from "../../ui/GameButton";
@@ -160,6 +161,16 @@ export class MissionIntroMode extends AppMode {
 
         this.addPuzzleThumbnails();
         this.addConstraintBoxes();
+    }
+
+    protected enter(): void {
+        super.enter();
+        Eterna.chat.pushHideChat();
+    }
+
+    protected exit(): void {
+        Eterna.chat.popHideChat();
+        super.exit();
     }
 
     private addConstraintBoxes(): void {

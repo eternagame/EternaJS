@@ -1,5 +1,6 @@
 import * as log from "loglevel";
 import {ErrorUtil} from "../flashbang/util/ErrorUtil";
+import {ChatManager} from "./ChatManager";
 import {EternaApp} from "./EternaApp";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
@@ -17,6 +18,7 @@ export class Eterna {
     public static settings: EternaSettings;
     public static client: GameClient;
     public static sound: SoundManager;
+    public static chat: ChatManager;
 
     public static playerID: number;
     public static playerName: string;
