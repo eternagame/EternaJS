@@ -2181,7 +2181,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._secondaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
+        this._secondaryScoreEnergyDisplay.visible =
+            (show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText);
     }
 
     public set scoreFolder(folder: Folder) {
