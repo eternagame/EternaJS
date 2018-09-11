@@ -197,8 +197,8 @@ export class PoseEditMode extends GameMode {
     }
 
     public onResized(): void {
-        this.updateUILayout();
         super.onResized();
+        this.updateUILayout();
     }
 
     private showAsyncText(text: string): void {

@@ -318,8 +318,8 @@ export class PuzzleEditMode extends GameMode {
     }
 
     public onResized(): void {
-        this.updateLayout();
         super.onResized();
+        this.updateLayout();
     }
 
     private updateLayout(): void {
@@ -327,8 +327,7 @@ export class PuzzleEditMode extends GameMode {
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
 
-        let toolbarBounds = this._toolbar.display.getBounds(false);
-
+        let toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
             let structureInput = this._structureInputs[ii];
             let poseField = this._poseFields[ii];
