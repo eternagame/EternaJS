@@ -1696,10 +1696,15 @@ export class PoseEditMode extends GameMode {
     private showMissionClearedPanel(submitSolutionRspData: any): void {
         this._submitSolutionRspData = submitSolutionRspData;
 
+        // Hide some UI
         this.disableTools(true);
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
+        for (let pose of this._poses) {
+            pose.showTotalEnergy = false;
+        }
 
+        // Show the panel
         let infoText: string = null;
         let moreText: string = null;
         let boostersData = this._puzzle.boosters;
@@ -1726,8 +1731,13 @@ export class PoseEditMode extends GameMode {
                 missionClearedPanel.destroySelf();
                 missionClearedPanel = null;
 
+                // Restore UI
                 this._constraintsLayer.visible = true;
                 this.disableTools(false);
+
+                for (let pose of this._poses) {
+                    pose.showTotalEnergy = true;
+                }
 
                 this._exitButton.display.alpha = 0;
                 this._exitButton.display.visible = true;

@@ -60,6 +60,11 @@ export class EnergyScoreDisplay extends Container {
         this.setEnergyText("", "");
     }
 
+    public get hasText(): boolean {
+        return (this._labelText.text.length > 0 && this._labelText.text != " ") ||
+            (this._energyText.text.length > 0 && this._energyText.text != " ");
+    }
+
     public setEnergyText(label: string, energy: string): void {
         this._labelText.text = label;
         this._energyText.text = energy;
