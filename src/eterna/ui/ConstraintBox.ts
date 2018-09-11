@@ -1,5 +1,6 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Enableable} from "../../flashbang/objects/Enableable";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
@@ -10,6 +11,7 @@ import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
 import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Easing} from "../../flashbang/util/Easing";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
@@ -975,8 +977,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         //     this._req_clarify_text.GetTextBox().setTextFormat(bf, 0, 2);
         // }
 
-        this._reqClarifyText.position = new Point(55 - this._reqClarifyText.width * 0.5, 32);
-        this._reqStatTxt.position = new Point(55 - this._reqStatTxt.width * 0.5, 50);
+        DisplayUtil.positionRelative(
+            this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
+            this._outline, HAlign.CENTER, VAlign.TOP, 2, 32);
+
+        DisplayUtil.positionRelative(
+            this._reqStatTxt, HAlign.CENTER, VAlign.TOP,
+            this._outline, HAlign.CENTER, VAlign.TOP, 0, 50);
     }
 
     public get width(): number {
