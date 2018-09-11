@@ -8,6 +8,18 @@ import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Pose2D} from "./Pose2D";
 
+export enum HighlightType {
+    STACK = 0,
+    LOOP = 1,
+    RESTRICTED = 2,
+    FORCED = 3,
+    DESIGN = 4,
+    UNSTABLE = 5,
+    SHIFT = 6,
+    USER_DEFINED = 7,
+}
+
+
 /** A class for highlighting groups of bases in a Pose2D */
 export class HighlightBox extends GameObject implements LateUpdatable {
     public constructor(pose: Pose2D) {
@@ -328,15 +340,4 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private _prevZoomLevel: number = -1;
 
     private static readonly ANIM = "anim";
-}
-
-export enum HighlightType {
-    STACK = 0,
-    LOOP = 1,
-    RESTRICTED = 2,
-    FORCED = 3,
-    DESIGN = 4,
-    UNSTABLE = 5,
-    SHIFT = 6,
-    USER_DEFINED = 7,
 }
