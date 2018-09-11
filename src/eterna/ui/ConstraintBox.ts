@@ -35,23 +35,8 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._boxType = type;
         this.container.interactive = true;
 
-        this._puzSmallClearBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
-        this._puzSmallFailBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
-        this._puzLargeClearBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeMet);
-        this._puzLargeFailBg = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeFail);
-
-        this._successOutline = BitmapManager.getBitmap(Bitmaps.NovaPassOutline);
-        this._failOutline = BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
-
-        if (ConstraintBox._A == null) {
-            ConstraintBox._A = BitmapManager.getBitmap(Bitmaps.BaseAMid);
-            ConstraintBox._G = BitmapManager.getBitmap(Bitmaps.BaseGMid);
-            ConstraintBox._U = BitmapManager.getBitmap(Bitmaps.BaseUMid);
-            ConstraintBox._C = BitmapManager.getBitmap(Bitmaps.BaseCMid);
-            ConstraintBox._W = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
-        }
-
         this._bgGraphics = new Graphics();
+        this._bgGraphics.interactiveChildren = false;
         this.container.addChild(this._bgGraphics);
 
         this._backlight = new Graphics();
@@ -124,14 +109,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._bigText.visible = false;
         this.container.addChild(this._bigText);
 
-        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5)
-            .build();
+        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._noText.position = new Point(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
-        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5)
-            .build();
+        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5).build();
         this._stateText.position = new Point(3, 45);
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
@@ -300,6 +283,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         this._bigText.position = new Point(85, 17);
 
+        this._bg.visible = false;
+        this._outline.visible = false;
+        this._icon.visible = false;
         this._bases.visible = false;
         this._base1.visible = false;
         this._base2.visible = false;
@@ -307,13 +293,18 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._base4.visible = false;
         this._bond.display.visible = false;
         this._bond2.display.visible = false;
-        this._valText.visible = false;
-        this._noText.visible = false;
-        this._stateText.visible = false;
-        this._icon.visible = false;
         this._smallThumbnail.visible = false;
         this._bigThumbnail.visible = false;
+
+        this._valText.visible = false;
+        this._bigText.visible = false;
+        this._reqClarifyText.visible = false;
+        this._reqStatTxt.visible = false;
+        this._noText.visible = false;
+        this._stateText.visible = false;
+
         this._flag.visible = false;
+        this._bgGraphics.visible = false;
         this._check.visible = satisfied && this._boxType === ConstraintBoxType.DEFAULT;
         this._req.visible = false;
 
@@ -331,7 +322,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
-        this._outline.texture = satisfied ? this._successOutline : this._failOutline;
+        this._outline.texture = satisfied ?
+            BitmapManager.getBitmap(Bitmaps.NovaPassOutline) :
+            BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         const isMissionScreen: boolean = this._boxType === ConstraintBoxType.MISSION_SCREEN;
 
         if (constraintType === ConstraintType.BOOST) {
@@ -503,8 +496,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
+
         } else if (constraintType === ConstraintType.SHAPE) {
-            this.changeShapeThumbnailBG();
+            this.updateBG();
             this._bg.visible = true;
 
             if (val.index != null) {
@@ -538,7 +532,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             tooltip.apply(this._bigText);
         } else if (constraintType === ConstraintType.ANTISHAPE) {
-            this.changeShapeThumbnailBG();
+            this.updateBG();
             this._bg.visible = true;
 
             if (val.index != null) {
@@ -692,10 +686,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.MUTATION) {
-            this._base1.texture = ConstraintBox._A;
-            this._base2.texture = ConstraintBox._G;
-            this._base3.texture = ConstraintBox._U;
-            this._base4.texture = ConstraintBox._C;
+            this._base1.texture = BitmapManager.getBitmap(Bitmaps.BaseAMid);
+            this._base2.texture = BitmapManager.getBitmap(Bitmaps.BaseGMid);
+            this._base3.texture = BitmapManager.getBitmap(Bitmaps.BaseUMid);
+            this._base4.texture = BitmapManager.getBitmap(Bitmaps.BaseCMid);
             this._base1.visible = true;
             this._base2.visible = true;
             this._base3.visible = true;
@@ -723,10 +717,11 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             tooltip.append(`You can only mutate up to ${val.toString()} bases`);
             tooltip.apply(this._bigText);
         } else if (constraintType === ConstraintType.STACK) {
-            this._base1.texture = ConstraintBox._W;
-            this._base2.texture = ConstraintBox._W;
-            this._base3.texture = ConstraintBox._W;
-            this._base4.texture = ConstraintBox._W;
+            let baseTexture = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
+            this._base1.texture = baseTexture;
+            this._base2.texture = baseTexture;
+            this._base3.texture = baseTexture;
+            this._base4.texture = baseTexture;
             this._base1.visible = true;
             this._base2.visible = true;
             this._base3.visible = true;
@@ -984,52 +979,6 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._reqStatTxt.position = new Point(55 - this._reqStatTxt.width * 0.5, 50);
     }
 
-    public scale(): void {
-        if (this._smallThumbnail.visible) {
-            this.enlargeThumbnailScale();
-        } else {
-            this.shrinkThumbnailScale();
-        }
-    }
-
-    public enlargeThumbnailScale(): void {
-        // / Don't do this while the constraint box is moving around
-        if (this.hasNamedObject(ConstraintBox.LOCATION_ANIM)) {
-            return;
-        }
-
-        this._enlarged = true;
-
-        this._smallThumbnail.visible = false;
-        this._bigThumbnail.visible = true;
-        this.changeShapeThumbnailBG();
-
-        this._outline.width = 165;
-        this._outline.height = 165;
-
-        this._check.position = new Point(144, 144);
-        this._noText.position = new Point(124, 1);
-        this._stateText.position = new Point(1, 132);
-    }
-
-    public shrinkThumbnailScale(): void {
-        if (this.hasNamedObject(ConstraintBox.LOCATION_ANIM)) {
-            return;
-        }
-
-        this._enlarged = false;
-
-        this._smallThumbnail.visible = true;
-        this._bigThumbnail.visible = false;
-        this.changeShapeThumbnailBG();
-        this._check.position = new Point(55, 55);
-        this._noText.position = new Point(35, 1);
-        this._stateText.position = new Point(3, 45);
-
-        this._outline.width = 75;
-        this._outline.height = 75;
-    }
-
     public get width(): number {
         return this._outline.visible ? 111 : 75;
     }
@@ -1101,15 +1050,15 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         ));
     }
 
-    private changeShapeThumbnailBG(): void {
+    private updateBG(): void {
         if (this._satisfied && this._enlarged) {
-            this._bg.texture = this._puzLargeClearBg;
+            this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeMet);
         } else if (!this._satisfied && this._enlarged) {
-            this._bg.texture = this._puzLargeFailBg;
+            this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbLargeFail);
         } else if (this._satisfied && !this._enlarged) {
-            this._bg.texture = this._puzSmallClearBg;
+            this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallMet);
         } else if (!this._satisfied && !this._enlarged) {
-            this._bg.texture = this._puzSmallFailBg;
+            this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
         }
     }
 
@@ -1137,11 +1086,12 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             obj.display.x = 0;
             obj.display.y = 78;
             obj.display.visible = false;
+            obj.display.interactive = false;
             this.addObject(obj, this.container);
 
             this._mouseOverObject = obj;
 
-            const MOUSE_OVER_ANIM: string = "MouseOverAnim";
+            const MOUSE_OVER_ANIM = "MouseOverAnim";
 
             let isMouseOver: boolean = false;
             this._mouseOverRegs = new RegistrationGroup();
@@ -1190,37 +1140,36 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     }
 
     private readonly _boxType: ConstraintBoxType;
+
+    private readonly _bg: Sprite;
+    private readonly _outline: Sprite;
     private readonly _icon: Sprite;
     private readonly _bases: Container;
     private readonly _base1: Sprite;
     private readonly _base2: Sprite;
-    private readonly _bond: Band;
     private readonly _base3: Sprite;
     private readonly _base4: Sprite;
+    private readonly _bond: Band;
     private readonly _bond2: Band;
-    private readonly _valText: MultiStyleText;
-    private readonly _bigText: MultiStyleText;
     private readonly _smallThumbnail: Sprite;
     private readonly _bigThumbnail: Sprite;
-    private readonly _flag: Graphics;
-    private readonly _noText: Text;
-    private readonly _stateText: Text;
-    private readonly _bgGraphics: Graphics;
-    private readonly _bg: Sprite;
-    private readonly _puzSmallClearBg: Texture;
-    private readonly _puzSmallFailBg: Texture;
-    private readonly _puzLargeClearBg: Texture;
-    private readonly _puzLargeFailBg: Texture;
-    private readonly _fglow: Graphics;
-    private readonly _backlight: Graphics;
-    private readonly _check: Sprite;
-    private readonly _req: Sprite;
-    private readonly _outline: Sprite;
-    private readonly _failOutline: Texture;
-    private readonly _successOutline: Texture;
+
+    private readonly _valText: MultiStyleText;
+    private readonly _bigText: MultiStyleText;
     private readonly _reqClarifyText: MultiStyleText;
     private readonly _reqStatTxt: MultiStyleText;
+    private readonly _noText: Text;
+    private readonly _stateText: Text;
+
     private readonly _sideTxt: MultiStyleText;
+
+    private readonly _flag: Graphics;
+    private readonly _bgGraphics: Graphics;
+    private readonly _check: Sprite;
+    private readonly _req: Sprite;
+
+    private readonly _fglow: Graphics;
+    private readonly _backlight: Graphics;
 
     private _enlarged: boolean = false;
     private _satisfied: boolean = false;
@@ -1230,12 +1179,6 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
     private _mouseOverRegs: RegistrationGroup;
     private _mouseOverObject: SceneObject;
-
-    private static _A: Texture;
-    private static _G: Texture;
-    private static _U: Texture;
-    private static _C: Texture;
-    private static _W: Texture;
 
     private static readonly LOCATION_ANIM = "AnimateLocation";
     private static readonly BIG_TEXT_FADE_ANIM = "BigTextFadeAnim";
