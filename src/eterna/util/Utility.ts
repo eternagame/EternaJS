@@ -1,41 +1,10 @@
 import {Point} from "pixi.js";
 
 export class Utility {
-    public static byte2hex(byte: number): string {
-        let hex: string = "";
-        let arr: string = "FEDCBA";
-
-        for (let i: number = 0; i < 2; i++) {
-            if (((byte & (0xF0 >> (i * 4))) >> (4 - (i * 4))) > 9) {
-                hex += arr.charAt(15 - ((byte & (0xF0 >> (i * 4))) >> (4 - (i * 4))));
-            } else {
-                hex += String((byte & (0xF0 >> (i * 4))) >> (4 - (i * 4)));
-            }
-        }
-
-        return hex;
-    }
-
     public static roundTo(num: number, floating: number): number {
         let div: number = Math.pow(10, floating);
         let temp: number = num * div;
         return Number(temp) / div;
-    }
-
-    public static stripHtmlTags(str: string): string {
-        let newlinereg: RegExp = /</g;
-        str = str.replace(newlinereg, "&lt;");
-        newlinereg = />/g;
-        str = str.replace(newlinereg, "&gt;");
-        return str;
-    }
-
-    public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg: RegExp = /\n/g;
-        str = str.replace(newlinereg, " ");
-        newlinereg = /"/g;
-        str = str.replace(newlinereg, "'");
-        return str;
     }
 
     public static generateParameterString(obj: any): string {
