@@ -155,7 +155,7 @@ export class DisplayUtil {
     public static getBoundsRelative(disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle = null): Rectangle {
         if (out == null) out = new Rectangle();
 
-        if (targetSpace === disp) {
+        if (targetSpace === disp || targetSpace === null) {
             disp.getLocalBounds(out);
         } else if (targetSpace === disp.parent && !DisplayUtil.isRotated(disp)) {
             // optimization
