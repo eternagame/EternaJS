@@ -61,7 +61,7 @@ export class HLayoutContainer extends LayoutContainer {
         if (this._vAlign !== VAlign.TOP) {
             for (let child of this.children) {
                 if (child.visible) {
-                    maxHeight = Math.max(child.getLocalBounds(HLayoutContainer.R).height, maxHeight);
+                    maxHeight = Math.max(child.getBounds(false, HLayoutContainer.R).height, maxHeight);
                 }
             }
         }
@@ -85,7 +85,7 @@ export class HLayoutContainer extends LayoutContainer {
             if (child.visible) {
                 child.x = 0;
                 child.y = 0;
-                let bounds: Rectangle = child.getLocalBounds(HLayoutContainer.R);
+                let bounds: Rectangle = child.getBounds(false, HLayoutContainer.R);
                 child.x = -bounds.left + x;
                 child.y = -bounds.top;
                 if (this._vAlign === VAlign.CENTER) {
