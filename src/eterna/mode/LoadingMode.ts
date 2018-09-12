@@ -10,6 +10,7 @@ import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Easing} from "../../flashbang/util/Easing";
 import {Eterna} from "../Eterna";
 import {Fonts} from "../util/Fonts";
+import {Background} from "../vfx/Background";
 
 /** Displays a simple animation while we're loading assets */
 export class LoadingMode extends AppMode {
@@ -35,6 +36,8 @@ export class LoadingMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+
+        this.addObject(new Background(0), this._container);
 
         this._textField = Fonts.arial(this._text, 36).bold().color(0xffffff).build();
         this._textField.x = -this._textField.width * 0.5;
