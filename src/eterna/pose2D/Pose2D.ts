@@ -707,16 +707,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get puzzleLocks(): boolean[] {
-        if (this._locks != null) {
-            return this._locks.slice();
+        if (this._locks == null) {
+            this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }
-
-        let temp: boolean[] = [];
-        for (let ii: number = 0; ii < this._sequence.length; ii++) {
-            temp.push(false);
-        }
-
-        return temp;
+        return this._locks.slice();
     }
 
     public isLocked(seqnum: number): boolean {
@@ -1328,7 +1322,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (this._locks == null) {
-            this._locks = [];
+            this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }
 
         this._sequence = sequence.slice();
@@ -3152,6 +3146,14 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
+    }
+
+    private static createDefaultLocks(sequenceLength: number): boolean[] {
+        let locks: boolean[] = new Array<boolean>(sequenceLength);
+        for (let ii = 0; ii < sequenceLength; ++ii) {
+            locks[ii] = false;
+        }
+        return locks;
     }
 
     private static getPairStrength(s1: number, s2: number): number {
