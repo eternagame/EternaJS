@@ -1,6 +1,5 @@
-import {Graphics} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {Eterna} from "../Eterna";
 import {Bubble} from "./Bubble";
 
 export class Background extends ContainerObject {
@@ -13,7 +12,7 @@ export class Background extends ContainerObject {
     protected added(): void {
         super.added();
 
-        this.renderBackground();
+        this.updateBackground();
 
         this._bubbles = [];
         for (let ii: number = 0; ii < this._bubbleCount; ii++) {
@@ -42,68 +41,27 @@ export class Background extends ContainerObject {
         }
     }
 
-    private renderBackground(): void {
-        let light_blue: number = this._isFrozen ? 0x435d92 : 0x32456d;
-        let dark_blue: number = this._isFrozen ? 0x0a2b57 : 0x061A34;
-
-        if (this._bgImage != null) {
-            this._bgImage.destroy();
-        }
-
-        this._bgImage = new Graphics()
-            .beginFill(dark_blue)
-            .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
-            .endFill();
-
-        this.container.addChildAt(this._bgImage, 0);
-
-        // let bg_sprite:Sprite = new Sprite;
-        // bg_sprite.graphics.clear();
-        //
-        // if (!this._foreground && this._bubbles.length > 0) {
-        //
-        //     //Type of Gradient we will be using
-        //     let fType:string = GradientType.RADIAL;
-        //     //Colors of our gradient in the form of an array
-        //     let colors:any[] = [ light_blue, dark_blue ];
-        //     //Store the Alpha Values in the form of an array
-        //     let alphas:any[] = [ 1, 1 ];
-        //     //Array of color distribution ratios.
-        //     //The value defines percentage of the width where the color is sampled at 100%
-        //     let ratios:any[] = [ 0, 255 ];
-        //     //Create a Matrix instance and assign the Gradient Box
-        //     let matr:Matrix = new Matrix();
-        //     matr.createGradientBox( this.offscreen_width_, this.offscreen_height_, 0, 0, 0 );
-        //     //SpreadMethod will define how the gradient is spread. Note!!! Flash uses CONSTANTS to represent String literals
-        //     let sprMethod:string = SpreadMethod.PAD;
-        //     //Start the Gradietn and pass our letiables to it
-        //
-        //     bg_sprite.graphics.beginFill(dark_blue);
-        //     bg_sprite.graphics.drawRect(0,0,this.offscreen_width_,this.offscreen_height_);
-        //     bg_sprite.graphics.endFill();
-        //
-        //     bg_sprite.graphics.beginGradientFill( fType, colors, alphas, ratios, matr, sprMethod );
-        //     bg_sprite.graphics.drawRect( 0, 0, this.offscreen_width_, this.offscreen_height_ );
-        //     bg_sprite.graphics.endFill();
-        //
-        // } else {
-        //
-        //     bg_sprite.graphics.beginFill(dark_blue);
-        //     bg_sprite.graphics.drawRect(0,0,this.offscreen_width_,this.offscreen_height_);
-        //     bg_sprite.graphics.endFill();
-        // }
-        //
-        // this._bgGradientBitmap.bitmapData = this.BitmapManager.draw_as_bitmap(bg_sprite,this.offscreen_width_,this.offscreen_height_);
-    }
-
     public freezeBackground(freeze: boolean): void {
         this._isFrozen = freeze;
         this.freezeBubbles(freeze);
-        this.renderBackground();
+        this.updateBackground();
+    }
+
+    private updateBackground(): void {
+        if (Eterna.gameDiv != null) {
+            let lightBlue: string, darkBlue :string;
+            if (this._isFrozen) {
+                lightBlue = "rgb(67, 93, 146) 0%";
+                darkBlue = "rgb(10, 43, 87) 75%";
+            } else {
+                lightBlue = "rgb(50, 69, 109) 0%";
+                darkBlue = "rgb(6, 26, 52) 75%";
+            }
+            Eterna.gameDiv.style.backgroundImage = `radial-gradient(circle, ${lightBlue}, ${darkBlue})`;
+        }
     }
 
     private onResized(): void {
-        this.renderBackground();
         for (let bubble of this._bubbles) {
             bubble.init();
         }
@@ -113,6 +71,5 @@ export class Background extends ContainerObject {
     private readonly _foreground: boolean;
 
     private _bubbles: Bubble[];
-    private _bgImage: Graphics = null;
     private _isFrozen: boolean = false;
 }

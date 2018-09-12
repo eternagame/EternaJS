@@ -45,6 +45,8 @@ enum PuzzleID {
     EternaCon2018 = 8952159,
     SameState_TryptophanB = 7656242,    // Booster paint tool
     TemporalAnomaly = 7796345,          // Really big!
+    Switch2pt5_left_Right = 8984178,    // molecule
+    JieuxAppetit_2 = 8980331,           // unbound molecule
 }
 
 interface SolutionAndPuzzleID {
@@ -117,6 +119,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.sound = new SoundManager(Eterna.settings);
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
+        Eterna.gameDiv = document.getElementById(this._params.containerID);
 
         this.setLoadingText("Authenticating...");
 
@@ -201,7 +204,8 @@ export class EternaApp extends FlashbangApp {
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
 
         return new PIXI.Application(this._params.width, this._params.height, {
-            backgroundColor: 0x061A34,
+            backgroundColor: 0x0,
+            transparent: true,
             antialias: true,
             roundPixels: true,
             autoResize: true,

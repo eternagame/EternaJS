@@ -14,6 +14,8 @@ export class Eterna {
     public static readonly DEV_MODE: boolean = ParseBool(process.env["DEBUG"]);
     public static readonly SERVER_URL: string = GetServerURL();
 
+    public static gameDiv: HTMLElement;
+
     public static app: EternaApp;
     public static settings: EternaSettings;
     public static client: GameClient;
