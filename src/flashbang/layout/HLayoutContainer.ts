@@ -1,5 +1,6 @@
 import {Rectangle} from "pixi.js";
 import {VAlign} from "../core/Align";
+import {DisplayUtil} from "../util/DisplayUtil";
 import {LayoutContainer} from "./LayoutContainer";
 
 /**
@@ -61,7 +62,8 @@ export class HLayoutContainer extends LayoutContainer {
         if (this._vAlign !== VAlign.TOP) {
             for (let child of this.children) {
                 if (child.visible) {
-                    maxHeight = Math.max(child.getBounds(false, HLayoutContainer.R).height, maxHeight);
+                    let bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
+                    maxHeight = Math.max(bounds.height, maxHeight);
                 }
             }
         }
@@ -85,7 +87,7 @@ export class HLayoutContainer extends LayoutContainer {
             if (child.visible) {
                 child.x = 0;
                 child.y = 0;
-                let bounds: Rectangle = child.getBounds(false, HLayoutContainer.R);
+                let bounds = DisplayUtil.getBoundsRelative(child, this, HLayoutContainer.R);
                 child.x = -bounds.left + x;
                 child.y = -bounds.top;
                 if (this._vAlign === VAlign.CENTER) {
