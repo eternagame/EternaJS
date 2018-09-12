@@ -61,7 +61,7 @@ export class VLayoutContainer extends LayoutContainer {
         if (this._hAlign !== HAlign.LEFT) {
             for (let child of this.children) {
                 if (child.visible) {
-                    maxWidth = Math.max(child.getLocalBounds(VLayoutContainer.R).width, maxWidth);
+                    maxWidth = Math.max(child.getBounds(false, VLayoutContainer.R).width, maxWidth);
                 }
             }
         }
@@ -85,7 +85,7 @@ export class VLayoutContainer extends LayoutContainer {
             if (child.visible) {
                 child.x = 0;
                 child.y = 0;
-                let bounds: Rectangle = child.getLocalBounds(VLayoutContainer.R);
+                let bounds: Rectangle = child.getBounds(false, VLayoutContainer.R);
                 child.y = -bounds.top + y;
                 child.x = -bounds.left;
                 if (this._hAlign === HAlign.CENTER) {
