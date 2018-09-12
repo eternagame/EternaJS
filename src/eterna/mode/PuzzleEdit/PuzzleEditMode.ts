@@ -25,6 +25,7 @@ import {GameButton} from "../../ui/GameButton";
 import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
+import {URLButton} from "../../ui/URLButton";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
@@ -85,6 +86,9 @@ export class PuzzleEditMode extends GameMode {
         this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
             this._folderButton.display.visible = value;
         }));
+
+        this._homeButton = GameMode.createHomeButton();
+        this.addObject(this._homeButton, this.uiLayer);
 
         this._toolbar = new PuzzleEditToolbar(this._embedded);
         this.addObject(this._toolbar, this.uiLayer);
@@ -250,7 +254,17 @@ export class PuzzleEditMode extends GameMode {
 
         this.registerScriptInterface(this._scriptInterface);
 
-        this.updateLayout();
+        this.updateUILayout();
+    }
+
+    protected enter(): void {
+        super.enter();
+        this._homeButton.display.visible = true;
+    }
+
+    protected exit(): void {
+        this._homeButton.display.visible = false;
+        super.exit();
     }
 
     private loadSavedData(): PuzzleEditPoseData[] {
@@ -319,13 +333,17 @@ export class PuzzleEditMode extends GameMode {
 
     public onResized(): void {
         super.onResized();
-        this.updateLayout();
+        this.updateUILayout();
     }
 
-    private updateLayout(): void {
+    private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        DisplayUtil.positionRelativeToStage(
+            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0, 5);
 
         let toolbarBounds = this._toolbar.display.getBounds();
         for (let ii = 0; ii < this._numTargets; ++ii) {
@@ -897,5 +915,6 @@ export class PuzzleEditMode extends GameMode {
 
     private _toolbar: PuzzleEditToolbar;
     private _folderButton: GameButton;
+    private _homeButton: URLButton;
     private _constraintBoxes: ConstraintBox[] = [];
 }

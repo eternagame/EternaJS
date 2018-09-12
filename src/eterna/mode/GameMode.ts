@@ -6,6 +6,7 @@ import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {AchievementManager} from "../achievements/AchievementManager";
 import {Eterna} from "../Eterna";
+import {EternaURL} from "../net/EternaURL";
 import {Pose2D} from "../pose2D/Pose2D";
 import {PoseField} from "../pose2D/PoseField";
 import {ConfirmDialog} from "../ui/ConfirmDialog";
@@ -14,6 +15,7 @@ import {Dialog} from "../ui/Dialog";
 import {NotificationDialog} from "../ui/NotificationDialog";
 import {Tooltips} from "../ui/Tooltips";
 import {UILockDialog} from "../ui/UILockDialog";
+import {URLButton} from "../ui/URLButton";
 import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
 
 export abstract class GameMode extends AppMode {
@@ -249,6 +251,10 @@ export abstract class GameMode extends AppMode {
 
     protected get hasUILock(): boolean {
         return this._uiLockRef.isLive;
+    }
+
+    protected static createHomeButton(): URLButton {
+        return new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
     }
 
     protected _achievements: AchievementManager;

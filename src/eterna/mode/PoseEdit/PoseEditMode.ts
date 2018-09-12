@@ -42,6 +42,7 @@ import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePa
 import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
 import {SpecBox} from "../../ui/SpecBox";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
+import {URLButton} from "../../ui/URLButton";
 import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
 import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
@@ -177,6 +178,9 @@ export class PoseEditMode extends GameMode {
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
+        this._homeButton = GameMode.createHomeButton();
+        this.addObject(this._homeButton, this.uiLayer);
+
         // Async text shows above our UI lock, and right below all dialogs
         this._asynchText = Fonts.arial("folding...", 12).bold().color(0xffffff).build();
         this._asynchText.position = new Point(16, 200);
@@ -194,6 +198,12 @@ export class PoseEditMode extends GameMode {
     protected enter(): void {
         super.enter();
         this.hideAsyncText();
+        this._homeButton.display.visible = true;
+    }
+
+    protected exit(): void {
+        this._homeButton.display.visible = false;
+        super.exit();
     }
 
     public onResized(): void {
@@ -214,6 +224,10 @@ export class PoseEditMode extends GameMode {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        DisplayUtil.positionRelativeToStage(
+            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0, 5);
 
         this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
@@ -1700,6 +1714,7 @@ export class PoseEditMode extends GameMode {
         this.disableTools(true);
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
+        this._homeButton.display.visible = false;
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
         }
@@ -1741,6 +1756,8 @@ export class PoseEditMode extends GameMode {
                 for (let pose of this._poses) {
                     pose.showTotalEnergy = true;
                 }
+
+                this._homeButton.display.visible = true;
 
                 this._exitButton.display.alpha = 0;
                 this._exitButton.display.visible = true;
@@ -3557,6 +3574,7 @@ export class PoseEditMode extends GameMode {
     private _constraintsBottom: number = 0;
     private _uiHighlight: SpriteObject;
 
+    private _homeButton: URLButton;
     private _scriptbar: ActionBar;
     private _undockSpecBoxButton: GameButton;
     private _nidField: Text;
