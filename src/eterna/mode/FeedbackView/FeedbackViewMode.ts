@@ -17,6 +17,7 @@ import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
+import {URLButton} from "../../ui/URLButton";
 import {UndoBlock} from "../../UndoBlock";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
@@ -44,6 +45,9 @@ export class FeedbackViewMode extends GameMode {
         this._title = Fonts.arial("", 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
+
+        this._homeButton = GameMode.createHomeButton();
+        this.addObject(this._homeButton, this.uiLayer);
 
         this._toolbar = new FeedbackViewToolbar(this._puzzle);
         this.addObject(this._toolbar, this.uiLayer);
@@ -124,18 +128,32 @@ export class FeedbackViewMode extends GameMode {
         this.changeTarget(0);
         this.setPip(false);
 
-        this.updateLayout();
+        this.updateUILayout();
+    }
+
+    protected enter(): void {
+        super.enter();
+        this._homeButton.display.visible = true;
+    }
+
+    protected exit(): void {
+        this._homeButton.display.visible = false;
+        super.exit();
     }
 
     public onResized(): void {
-        this.updateLayout();
+        this.updateUILayout();
         super.onResized();
     }
 
-    private updateLayout(): void {
+    private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+
+        DisplayUtil.positionRelativeToStage(
+            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0, 5);
     }
 
     private showViewOptionsDialog(): void {
@@ -500,6 +518,7 @@ export class FeedbackViewMode extends GameMode {
     private readonly _puzzle: Puzzle;
 
     private _toolbar: FeedbackViewToolbar;
+    private _homeButton: URLButton;
 
     private _undoBlocks: UndoBlock[] = [];
     private _currentIndex: number;

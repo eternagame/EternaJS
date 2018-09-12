@@ -1,10 +1,14 @@
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {Easing} from "../../flashbang/util/Easing";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
+import {EternaURL} from "../net/EternaURL";
+import {URLButton} from "../ui/URLButton";
 import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
 import {Background} from "../vfx/Background";
 
@@ -13,6 +17,12 @@ export class TestMode extends AppMode {
         super.setup();
 
         this.addObject(new Background(), this.container);
+
+        let homeButton = new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
+        this.addObject(homeButton, this.container);
+        DisplayUtil.positionRelativeToStage(
+            homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0, 5);
 
         const text = "Make 5 or more <font color = \"#00BFF9\">BLUE</font> bases";
         let builder = new StyledTextBuilder({
