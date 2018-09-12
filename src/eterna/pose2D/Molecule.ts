@@ -2,6 +2,7 @@
 import {BitmapManager} from "../resources/BitmapManager";
 import {Bitmaps} from "../resources/Bitmaps";
 import {EternaTextureUtil} from "../util/EternaTextureUtil";
+import {int} from "../util/int";
 
 export class Molecule extends Container {
     public constructor() {
@@ -20,30 +21,30 @@ export class Molecule extends Container {
         return new Point(this._lastDrawnX, this._lastDrawnY);
     }
 
-    public updateView(zoom_level: number, x: number, y: number, current_time: number): void {
+    public updateView(zoomLevel: number, x: number, y: number, currentTime: number): void {
         if (this._animStartTime < 0) {
-            this._animStartTime = current_time;
+            this._animStartTime = currentTime;
         }
 
-        let diff: number = current_time - this._animStartTime;
-        let prog: number = Math.sin(diff * Math.PI / (Molecule.ANIMATION_SPAN)) + 0.95;
+        let elapsedTime = currentTime - this._animStartTime;
+        let prog = Math.sin(elapsedTime * Math.PI / (Molecule.ANIMATION_SPAN)) + 0.95;
         prog = Math.max(0, prog);
-        let prog_ind: number = Math.floor(prog / 2.0 * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS;
+        let progInd = int(int(prog / 2.0 * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
 
-        let glow_data: Texture = this._isWrong ?
-            Molecule._glowWrongTex[zoom_level][prog_ind] :
-            Molecule._glowTex[zoom_level][prog_ind];
+        let glowTex = this._isWrong ?
+            Molecule._glowWrongTex[zoomLevel][progInd] :
+            Molecule._glowTex[zoomLevel][progInd];
 
-        this._glow.texture = glow_data;
-        this._glow.pivot.x = glow_data.width * 0.5;
-        this._glow.pivot.y = glow_data.height * 0.5;
+        this._glow.texture = glowTex;
+        this._glow.pivot.x = glowTex.width * 0.5;
+        this._glow.pivot.y = glowTex.height * 0.5;
 
-        prog_ind = Math.floor(diff / Molecule.BODY_ANIMATION_SPAN * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS;
-        let body_data: Texture = Molecule._bodyTex[zoom_level][prog_ind];
+        progInd = int(int(elapsedTime / Molecule.BODY_ANIMATION_SPAN * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
+        let bodyTex = Molecule._bodyTex[zoomLevel][progInd];
 
-        this._body.texture = body_data;
-        this._body.pivot.x = body_data.width * 0.5;
-        this._body.pivot.y = body_data.height * 0.5;
+        this._body.texture = bodyTex;
+        this._body.pivot.x = bodyTex.width * 0.5;
+        this._body.pivot.y = bodyTex.height * 0.5;
 
         this._lastDrawnX = x;
         this._lastDrawnY = y;
@@ -61,33 +62,33 @@ export class Molecule extends Container {
         Molecule._glowWrongTex = [];
         Molecule._bodyTex = [];
 
-        let original_glow_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgMoleculeOuter);
-        let original_body_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgMoleculeInner);
+        let originalGlowTex = BitmapManager.getBitmap(Bitmaps.ImgMoleculeOuter);
+        let originalBodyTex = BitmapManager.getBitmap(Bitmaps.ImgMoleculeInner);
 
-        for (let zz: number = 0; zz < 5; zz++) {
-            let bitmaps_in_zoom: Texture[] = [];
-            let wrong_bitmaps_in_zoom: Texture[] = [];
-            let body_bitmaps_in_zoom: Texture[] = [];
+        for (let zoomStep = 0; zoomStep < 5; zoomStep++) {
+            let texturesInZoom: Texture[] = [];
+            let wrongTexturesInZoom: Texture[] = [];
+            let bodyTexturesInZoom: Texture[] = [];
 
-            let zoom_factor: number = 1.0 - zz * 0.1;
-            let base_glow_data: Texture = EternaTextureUtil.scaleBy(original_glow_data, zoom_factor);
-            let base_body_data: Texture = EternaTextureUtil.scaleBy(original_body_data, zoom_factor);
+            let scaleFactor = 1.0 - zoomStep * 0.1;
+            let scaledGlowTex = EternaTextureUtil.scaleBy(originalGlowTex, scaleFactor);
+            let scaledBodyTex = EternaTextureUtil.scaleBy(originalBodyTex, scaleFactor);
 
-            for (let ii: number = 0; ii < Molecule.NUM_ANIMATION_STEPS; ii++) {
-                let new_glow_data: Texture = EternaTextureUtil.colorTransformAlpha(
-                    base_glow_data, 255, 255, 255, 1.0 - (ii / Molecule.NUM_ANIMATION_STEPS) * 0.5, 0, 0, 0, 0);
-                bitmaps_in_zoom.push(new_glow_data);
+            for (let ii = 0; ii < Molecule.NUM_ANIMATION_STEPS; ii++) {
+                let glowTex = EternaTextureUtil.colorTransformAlpha(
+                    scaledGlowTex, 255, 255, 255, 1.0 - (ii / Molecule.NUM_ANIMATION_STEPS) * 0.5, 0, 0, 0, 0);
+                texturesInZoom.push(glowTex);
 
-                let wrong_glow_data: Texture = EternaTextureUtil.colorTransform(new_glow_data, 255, 0, 0, 0, 0, 0);
-                wrong_bitmaps_in_zoom.push(wrong_glow_data);
+                let wrongGlowTex = EternaTextureUtil.colorTransform(glowTex, 255, 0, 0, 0, 0, 0);
+                wrongTexturesInZoom.push(wrongGlowTex);
 
-                let body_data: Texture = EternaTextureUtil.rotate(base_body_data, 360 * ii / Molecule.NUM_ANIMATION_STEPS);
-                body_bitmaps_in_zoom.push(body_data);
+                let bodyTex = EternaTextureUtil.rotate(scaledBodyTex, 360 * ii / Molecule.NUM_ANIMATION_STEPS);
+                bodyTexturesInZoom.push(bodyTex);
             }
 
-            Molecule._glowTex.push(bitmaps_in_zoom);
-            Molecule._glowWrongTex.push(wrong_bitmaps_in_zoom);
-            Molecule._bodyTex.push(body_bitmaps_in_zoom);
+            Molecule._glowTex.push(texturesInZoom);
+            Molecule._glowWrongTex.push(wrongTexturesInZoom);
+            Molecule._bodyTex.push(bodyTexturesInZoom);
         }
     }
 
