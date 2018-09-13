@@ -2164,7 +2164,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private updateConstraint(type: ConstraintType, value: string, constraintIdx: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
-        let isSatisfied: boolean = true;
+        let isSatisfied = true;
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
         const sequence = undoBlock.sequence;
@@ -2581,54 +2581,50 @@ export class PoseEditMode extends GameMode {
             }
 
         } else if (type === ConstraintType.SCRIPT) {
-            let scriptID: string = value;
             isSatisfied = false;
-            ExternalInterface.runScript(scriptID)
-                .then(returnValue => {
-                    let goal: string = "";
-                    let name: string = "...";
-                    let value: string = "";
-                    let index: string = null;
-                    let data_png: string = "";
-                    let satisfied: boolean = false;
-                    if (returnValue && returnValue.cause) {
-                        if (returnValue.cause.satisfied) satisfied = returnValue.cause.satisfied;
-                        if (returnValue.cause.goal != null) goal = returnValue.cause.goal;
-                        if (returnValue.cause.name != null) name = returnValue.cause.name;
-                        if (returnValue.cause.value != null) value = returnValue.cause.value;
-                        if (returnValue.cause.index != null) {
-                            index = (returnValue.cause.index + 1).toString();
-                            let ll: number = this._isPipMode ?
-                                returnValue.cause.index :
-                                (returnValue.cause.index === this._curTargetIndex ? 0 : -1);
-                            if (ll >= 0) {
-                                if (returnValue.cause.highlight != null) {
-                                    this._poses[ll].highlightUserDefinedSequence(returnValue.cause.highlight);
-                                } else {
-                                    this._poses[ll].clearUserDefinedHighlight();
-                                }
+
+            const scriptID = value;
+            ExternalInterface.runScriptMaybeSynchronously(scriptID, {}, scriptResult => {
+                let goal = "";
+                let name = "...";
+                let resultValue = "";
+                let index = null;
+                let dataPNG = "";
+                if (scriptResult && scriptResult.cause) {
+                    if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
+                    if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
+                    if (scriptResult.cause.name != null) name = scriptResult.cause.name;
+                    if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
+                    if (scriptResult.cause.index != null) {
+                        index = (scriptResult.cause.index + 1).toString();
+                        let ll: number = this._isPipMode ?
+                            scriptResult.cause.index :
+                            (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
+                        if (ll >= 0) {
+                            if (scriptResult.cause.highlight != null) {
+                                this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
+                            } else {
+                                this._poses[ll].clearUserDefinedHighlight();
                             }
                         }
-
-                        if (returnValue.cause.icon_b64) {
-                            data_png = returnValue.cause.icon_b64;
-                        }
                     }
 
-                    if (render) {
-                        box.setContent(ConstraintType.SCRIPT, {
-                            "nid": scriptID,
-                            "goal": goal,
-                            "name": name,
-                            "value": value,
-                            "index": index,
-                            "data_png": data_png
-                        }, satisfied, 0);
+                    if (scriptResult.cause.icon_b64) {
+                        dataPNG = scriptResult.cause.icon_b64;
                     }
+                }
 
-                    isSatisfied = satisfied;
-                })
-                .catch(err => log.error(err));
+                if (render) {
+                    box.setContent(ConstraintType.SCRIPT, {
+                        "nid": scriptID,
+                        "goal": goal,
+                        "name": name,
+                        "value": resultValue,
+                        "index": index,
+                        "data_png": dataPNG
+                    }, isSatisfied, 0);
+                }
+            });
         }
 
         return isSatisfied;
@@ -3615,4 +3611,3 @@ interface OligoDef {
     concentration?: string;
     label?: string;
 }
-
