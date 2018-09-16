@@ -3,6 +3,7 @@ import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
+import {DOMObject} from "../../../flashbang/objects/DOMObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {RankScroll} from "../../rank/RankScroll";
@@ -42,6 +43,8 @@ export class MissionClearedPanel extends ContainerObject {
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
+        // Images should be centered, even if the HTML doesn't specify it
+        DOMObject.applyStyleRecursive(infoObj.element, {"display": "block", "margin": "auto"}, false, ["img"]);
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
