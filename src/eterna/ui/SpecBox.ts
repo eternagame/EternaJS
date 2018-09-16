@@ -1,10 +1,12 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
 import {Graphics, Point, Sprite, Text} from "pixi.js";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
@@ -244,11 +246,9 @@ export class SpecBox extends ContainerObject {
                 this._dotPlotSprite.mask = null;
             }
 
-            if (plotSizeLevel > plotSize) {
-                let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plotSize, plotSize).endFill();
-                this._dotPlotSprite.addChild(mask);
-                this._dotPlotSprite.mask = mask;
-            }
+            let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plotSize, plotSize).endFill();
+            this._dotPlotSprite.addChild(mask);
+            this._dotPlotSprite.mask = mask;
 
             this._dotPlotSprite.addChild(this._dotplot);
             this.updateDotplotLabel(this._dotplotOriginX, this._dotplotOriginY);
@@ -297,41 +297,31 @@ export class SpecBox extends ContainerObject {
             this._zoomOutButton.display.position = new Point(70, this._height - 130);
         }
 
-        let plotSize: number = this.plotSize;
+        // Redraw our dotplot
+        this.scaleDotPlot(this._dotplotScaleLevel);
 
-        this.scaleDotPlot(1);
-
+        let plotSize = this.plotSize;
         if (this._meltplot != null && plotSize > 0) {
             this._meltplot.setSize(plotSize, plotSize);
             this._meltplot.replot();
             // this._meltplot.cacheAsBitmap = true;
             this._meltPlotSprite.addChild(this._meltplot);
 
-            if (this._docked) {
-                this._h0Melt.position = new Point(15, (this._height * 0.5) + plotSize + 10);
-                this._hnMelt.position = new Point(
-                    25 + plotSize - this._hnMelt.width,
-                    (this._height * 0.5) + plotSize + 10
-                );
-                this._v0Melt.position = new Point(
-                    25 - this._v0Melt.width - 3,
-                    (this._height * 0.5) + plotSize - 10
-                );
-                this._vnMelt.position = new Point(
-                    25 - this._vnMelt.width - 3,
-                    (this._height * 0.5) + 5
-                );
-            } else {
-                this._h0Melt.position = new Point((this._width * 0.5) + 15, plotSize + 75);
-                this._hnMelt.position = new Point(
-                    (this._width * 0.5) + 25 + plotSize - this._hnMelt.width,
-                    plotSize + 75
-                );
-                this._v0Melt.position = new Point(
-                    (this._width * 0.5) + 25 - this._v0Melt.width - 3,
-                    55 + plotSize
-                );
-            }
+            DisplayUtil.positionRelative(
+                this._v0Melt, HAlign.RIGHT, VAlign.BOTTOM,
+                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, -1, 0);
+
+            DisplayUtil.positionRelative(
+                this._vnMelt, HAlign.RIGHT, VAlign.TOP,
+                this._meltPlotSprite, HAlign.LEFT, VAlign.TOP, -1, 0);
+
+            DisplayUtil.positionRelative(
+                this._h0Melt, HAlign.LEFT, VAlign.TOP,
+                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, 0, 1);
+
+            DisplayUtil.positionRelative(
+                this._hnMelt, HAlign.RIGHT, VAlign.TOP,
+                this._meltPlotSprite, HAlign.RIGHT, VAlign.BOTTOM, 0, 1);
         }
     }
 
@@ -464,7 +454,6 @@ export class SpecBox extends ContainerObject {
         }
     }
 
-
     private readonly _docked: boolean;
 
     private _panel: GamePanel;
@@ -490,7 +479,7 @@ export class SpecBox extends ContainerObject {
     private _hvec: Text[];
     private _vvec: Text[];
 
-    private _dotplotScaleLevel: number;
+    private _dotplotScaleLevel: number = 1;
 
     private _isDragging: boolean;
     private _mouseOverDotPlot: boolean;
