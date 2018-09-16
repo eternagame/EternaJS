@@ -24,11 +24,12 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 export class SpecBox extends ContainerObject {
     constructor(docked: boolean = false) {
         super();
-
         this._docked = docked;
     }
 
     protected added(): void {
+        this.container.interactive = true;
+
         this._panel = new GamePanel();
         if (!this._docked) {
             this._panel.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
@@ -62,41 +63,41 @@ export class SpecBox extends ContainerObject {
         this._meltPlotSprite = new Sprite();
         this.container.addChild(this._meltPlotSprite);
 
-        this._stattext = new MultiStyleText("", {
-            default: {
-                fontFamily: Fonts.ARIAL,
-                fontSize: 14,
-                fill: 0xffffff
-            }
-        });
-        this.container.addChild(this._stattext);
-
-        let url = EternaURL.createURL({page: "manual"});
-        let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>`;
-        this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
-        this.addObject(this._helpText, this.container);
-
-        this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
-        this.container.addChild(this._dotplottext);
-
-        this._meltplottext = Fonts.arial("Melt plot (% of unpaired bases)", 12).color(0xffffff).build();
-        this.container.addChild(this._meltplottext);
-
-        this._zoomInButton = new GameButton()
-            .allStates(Bitmaps.PlusImg)
-            .tooltip("Zoom In")
-            .hotkey(KeyCode.KeyI);
-        this._zoomInButton.clicked.connect(() => this.dotPlotZoomIn());
-        this.addObject(this._zoomInButton, this.container);
-
-        this._zoomOutButton = new GameButton()
-            .allStates(Bitmaps.MinusImg)
-            .tooltip("Zoom out")
-            .hotkey(KeyCode.KeyO);
-        this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
-        this.addObject(this._zoomOutButton, this.container);
-
         if (!this._docked) {
+            this._stattext = new MultiStyleText("", {
+                default: {
+                    fontFamily: Fonts.ARIAL,
+                    fontSize: 14,
+                    fill: 0xffffff
+                }
+            });
+            this.container.addChild(this._stattext);
+
+            let url = EternaURL.createURL({page: "manual"});
+            let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>`;
+            this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
+            this.addObject(this._helpText, this.container);
+
+            this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
+            this.container.addChild(this._dotplottext);
+
+            this._meltplottext = Fonts.arial("Melt plot (% of unpaired bases)", 12).color(0xffffff).build();
+            this.container.addChild(this._meltplottext);
+
+            this._zoomInButton = new GameButton()
+                .allStates(Bitmaps.PlusImg)
+                .tooltip("Zoom In")
+                .hotkey(KeyCode.KeyI);
+            this._zoomInButton.clicked.connect(() => this.dotPlotZoomIn());
+            this.addObject(this._zoomInButton, this.container);
+
+            this._zoomOutButton = new GameButton()
+                .allStates(Bitmaps.MinusImg)
+                .tooltip("Zoom out")
+                .hotkey(KeyCode.KeyO);
+            this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
+            this.addObject(this._zoomOutButton, this.container);
+
             this._dotPlotSprite.interactive = true;
             let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
@@ -128,35 +129,37 @@ export class SpecBox extends ContainerObject {
     }
 
     public setSpec(datablock: UndoBlock): void {
-        const temperature: number = 37;
+        const TEMPERATURE = 37;
 
         this._datasize = datablock.sequence.length;
 
         this._dotplot = datablock.createDotPlot();
         this._meltplot = datablock.createMeltPlot();
 
-        let statString: StyledTextBuilder = new StyledTextBuilder({
-            fontFamily: Fonts.ARIAL,
-            fontSize: 14,
-            fill: 0xffffff
-        }).addStyle("bold", {
-            fontStyle: "bold"
-        });
-        EPars.addLetterStyles(statString);
+        if (this._stattext != null) {
+            let statString: StyledTextBuilder = new StyledTextBuilder({
+                fontFamily: Fonts.ARIAL,
+                fontSize: 14,
+                fill: 0xffffff
+            }).addStyle("bold", {
+                fontStyle: "bold"
+            });
+            EPars.addLetterStyles(statString);
 
-        statString
-            .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
-            .append(`${datablock.getParam(UndoBlockParam.AU, temperature)}   `)
-            .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
-            .append(`${datablock.getParam(UndoBlockParam.GC, temperature)}   `)
-            .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
-            .append(`${datablock.getParam(UndoBlockParam.GU, temperature)}\n`)
-            .append("Melting point : ", "bold")
-            .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, temperature)}°C\n`)
-            .append("Free energy : ", "bold")
-            .append(`${Number(datablock.getParam(UndoBlockParam.FE, temperature) / 100).toFixed(1)}kcal\n`);
+            statString
+                .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
+                .append(`${datablock.getParam(UndoBlockParam.AU, TEMPERATURE)}   `)
+                .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
+                .append(`${datablock.getParam(UndoBlockParam.GC, TEMPERATURE)}   `)
+                .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
+                .append(`${datablock.getParam(UndoBlockParam.GU, TEMPERATURE)}\n`)
+                .append("Melting point : ", "bold")
+                .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
+                .append("Free energy : ", "bold")
+                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) / 100).toFixed(1)}kcal\n`);
 
-        statString.apply(this._stattext);
+            statString.apply(this._stattext);
+        }
 
         if (this._hvec != null) {
             for (let disp of this._hvec) {
@@ -261,14 +264,6 @@ export class SpecBox extends ContainerObject {
         if (this._docked) {
             this._dotPlotSprite.position = new Point(20, 15);
             this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
-
-            this._stattext.visible = false;
-            this._helpText.display.visible = false;
-            this._dotplottext.visible = false;
-            this._meltplottext.visible = false;
-
-            this._zoomInButton.display.visible = false;
-            this._zoomOutButton.display.visible = false;
         } else {
             this._panel.title = "RNA Spec";
 
@@ -286,13 +281,9 @@ export class SpecBox extends ContainerObject {
 
             this._helpText.display.visible = true;
             this._helpText.display.position = new Point(20, this._height - 35);
-            this._dotplottext.visible = true;
             this._dotplottext.position = new Point(30, 40);
-            this._meltplottext.visible = true;
             this._meltplottext.position = new Point((this._width * 0.5) + 10, 50);
 
-            this._zoomInButton.display.visible = true;
-            this._zoomOutButton.display.visible = true;
             this._zoomInButton.display.position = new Point(40, this._height - 125);
             this._zoomOutButton.display.position = new Point(70, this._height - 130);
         }
