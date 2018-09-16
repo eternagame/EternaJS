@@ -34,11 +34,7 @@ export class LightRay extends SceneObject {
         this._graphics.clear();
         this._graphics.lineStyle(0, 0, 0);
 
-        // let matrix: Matrix = new Matrix;
-        // matrix.createGradientBox(len + 37, 40);
-        // this.beginGradientFill("linear", [0xFFFFFF, 0xFFFFFF], [1, 0], [0, 255], matrix);
-
-        this._graphics.beginFill(color, 0.4);
+        this._graphics.beginFill(color, 0.8);
         this._graphics.moveTo(0, 2);
         this._graphics.lineTo(len, 30);
         for (let ii: number = 1; ii <= 7; ii++) {
@@ -51,25 +47,17 @@ export class LightRay extends SceneObject {
         this._graphics.endFill();
 
         this._graphics.rotation = v.angle;
-
-        const distance = 5;
-        const outerStrength = 3;
-        const innerStrength = 0;
-        const quality = 1;
-        this._graphics.filters = [
-            new GlowFilter(distance, outerStrength, innerStrength, 0xffffff, quality)
-        ];
     }
 
     private static getColor(baseType: number): number {
         if (baseType === EPars.RNABASE_ADENINE) {
-            return 0xFFFF00;
+            return 0xFFFFAF;
         } else if (baseType === EPars.RNABASE_URACIL) {
-            return 0x0000FF;
+            return 0xA5A6FF;
         } else if (baseType === EPars.RNABASE_GUANINE) {
-            return 0xFF0000;
+            return 0xFFB8B8;
         } else if (baseType === EPars.RNABASE_CYTOSINE) {
-            return 0x00FF00;
+            return 0xAFFFAF;
         } else {
             return 0xFFFFFF;
         }
@@ -77,5 +65,5 @@ export class LightRay extends SceneObject {
 
     private readonly _graphics: Graphics;
 
-    private static readonly ANIM: string = "Anim";
+    private static readonly ANIM = "Anim";
 }
