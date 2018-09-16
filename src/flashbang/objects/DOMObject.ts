@@ -8,6 +8,49 @@ import {MatrixUtil} from "../util/MatrixUtil";
  * Contains a "dummy" that mirrors the element's transform.
  */
 export abstract class DOMObject<T extends HTMLElement> extends GameObject {
+    /**
+     * Applies the given style to the DOM object and all children who do not already have the given style property set.
+     * This will not overrwrite existing properties, unless replaceIfExists is true.
+     *
+     * If elementNames is non-null, the style will only be applied to elements with the given names.
+     */
+    public static applyStyleRecursive(element: HTMLElement, styles: any, replaceIfExists: boolean = false, elementNames: string[] = null): void {
+        let isValidElement = true;
+        if (elementNames != null) {
+            isValidElement = false;
+            let thisName = element.nodeName.toUpperCase();
+            for (let allowedName of elementNames) {
+                if (allowedName.toUpperCase() === thisName) {
+                    isValidElement = true;
+                    break;
+                }
+            }
+        }
+
+        if (isValidElement) {
+            for (let styleName in styles) {
+                let applyStyle = true;
+                if (!replaceIfExists) {
+                    let cur = element.style.getPropertyValue(styleName);
+                    if (cur != null && cur.length > 0) {
+                        applyStyle = false;
+                    }
+                }
+
+                if (applyStyle) {
+                    element.style.setProperty(styleName, styles[styleName]);
+                }
+            }
+        }
+
+        for (let ii = 0; ii < element.children.length; ++ii) {
+            let child = <HTMLElement> (element.children[ii] as any);
+            if (child.accessKey !== undefined) {
+                this.applyStyleRecursive(child, styles, replaceIfExists, elementNames);
+            }
+        }
+    }
+
     protected constructor(domParentID: string, obj: T) {
         super();
 
@@ -112,45 +155,6 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
                 .endFill();
 
             this._obj.style.transform = transfom;
-        }
-    }
-
-    /**
-     * Applies the given style to the DOM object and all children who do not already have the given style property set.
-     * This will not overrwrite existing properties, unless replaceIfExists is true.
-     *
-     * If elementNames is non-null, the style will only be applied to elements with the given names.
-     */
-    protected static applyStyleRecursive(element: HTMLElement, name: string, value: string,
-        replaceIfExists: boolean = false, elementNames: string[] = null): void {
-        let apply = true;
-        if (elementNames != null) {
-            apply = false;
-            let thisName = element.nodeName.toUpperCase();
-            for (let allowedName of elementNames) {
-                if (allowedName.toUpperCase() === thisName) {
-                    apply = true;
-                    break;
-                }
-            }
-        }
-
-        if (apply && !replaceIfExists) {
-            let cur = element.style.getPropertyValue(name);
-            if (cur != null && cur.length > 0) {
-                apply = false;
-            }
-        }
-
-        if (apply) {
-            element.style.setProperty(name, value);
-        }
-
-        for (let ii = 0; ii < element.children.length; ++ii) {
-            let child = <HTMLElement> (element.children[ii] as any);
-            if (child.accessKey !== undefined) {
-                this.applyStyleRecursive(child, name, value, replaceIfExists, elementNames);
-            }
         }
     }
 

@@ -24,7 +24,7 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
         let lineHeight: string = (typeof (percentOrString) === "number")
             ? `${Math.floor(percentOrString * 100)}%`
             : percentOrString;
-        DOMObject.applyStyleRecursive(this._obj, "line-height", lineHeight, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"line-height": lineHeight}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
@@ -37,25 +37,25 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public color(color: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "color", `#${color.toString(16)}`, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"color": `#${color.toString(16)}`}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public font(fontFamily: string): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-family", fontFamily, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"font-family": fontFamily}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public fontSize(size: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-size", `${size}px`, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"font-size": `${size}px`}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
 
     public fontWeight(weight: string): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "font-weight", weight, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"font-weight": weight}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
@@ -65,7 +65,7 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public hAlign(align: "left" | "center" | "right" | "justify"): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, "text-align", align, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {"text-align": align}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
