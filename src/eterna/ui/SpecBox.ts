@@ -8,6 +8,7 @@ import {KeyCode} from "../../flashbang/input/KeyCode";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
+import {UnitSignal} from "../../signals/UnitSignal";
 import {EPars} from "../EPars";
 import {EternaURL} from "../net/EternaURL";
 import {Plot} from "../Plot";
@@ -22,6 +23,9 @@ import {TextBalloon} from "./TextBalloon";
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export class SpecBox extends ContainerObject {
+    /** Emitted when a docked SpecBox's maximize button is clicked */
+    public readonly shouldMaximize = new UnitSignal();
+
     constructor(docked: boolean = false) {
         super();
         this._docked = docked;
@@ -63,7 +67,15 @@ export class SpecBox extends ContainerObject {
         this._meltPlotSprite = new Sprite();
         this.container.addChild(this._meltPlotSprite);
 
-        if (!this._docked) {
+        if (this._docked) {
+            this._maximizeButton = new GameButton()
+                .allStates(Bitmaps.ImgMaximize)
+                .tooltip("Re-maximize")
+                .hotkey(KeyCode.KeyM);
+            this.addObject(this._maximizeButton, this.container);
+            this._maximizeButton.clicked.connect(() => this.shouldMaximize.emit());
+
+        } else {
             this._stattext = new MultiStyleText("", {
                 default: {
                     fontFamily: Fonts.ARIAL,
@@ -264,6 +276,8 @@ export class SpecBox extends ContainerObject {
         if (this._docked) {
             this._dotPlotSprite.position = new Point(20, 15);
             this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
+            this._maximizeButton.display.position = new Point(this._width - 22, 5);
+
         } else {
             this._panel.title = "RNA Spec";
 
@@ -450,6 +464,7 @@ export class SpecBox extends ContainerObject {
     private _panel: GamePanel;
     private _zoomInButton: GameButton;
     private _zoomOutButton: GameButton;
+    private _maximizeButton: GameButton;
     private _dotPlotSprite: Sprite;
     private _meltPlotSprite: Sprite;
     private _h0: Text;
