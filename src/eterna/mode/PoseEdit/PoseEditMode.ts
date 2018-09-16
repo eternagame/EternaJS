@@ -133,11 +133,13 @@ export class PoseEditMode extends GameMode {
             this._toolbar.setToolbarAutohide(value);
         }));
 
+        // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
         this._dockedSpecBox.display.position = new Point(15, 190);
         this._dockedSpecBox.setSize(155, 251);
         this._dockedSpecBox.display.visible = false;
-        this.addObject(this._dockedSpecBox, this.uiLayer);
+        this.addObject(this._dockedSpecBox, this.uiLayer, 0);
+        this._dockedSpecBox.shouldMaximize.connect(() => this.showSpec());
 
         this._undockSpecBoxButton = new GameButton()
             .allStates(Bitmaps.ImgMaximize)
@@ -1439,6 +1441,8 @@ export class PoseEditMode extends GameMode {
     }
 
     private showSpec(): void {
+        this._dockedSpecBox.display.visible = false;
+
         this.updateCurrentBlockWithDotAndMeltingPlot();
         let puzzleState = this.getCurrentUndoBlock();
 
