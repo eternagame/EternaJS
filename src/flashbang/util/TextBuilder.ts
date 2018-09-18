@@ -41,8 +41,13 @@ export class TextBuilder {
         return this;
     }
 
-    public bold(): TextBuilder {
-        return this.fontWeight("bold");
+    public bold(value: boolean = true): TextBuilder {
+        if (value) {
+            this.fontWeight("bold");
+        } else if (this._style.fontWeight === "bold") {
+            this._style.fontWeight = undefined;
+        }
+        return this;
     }
 
     /** The text color @default 0x0 (black) */
