@@ -15,6 +15,14 @@ export class Utility {
         return str;
     }
 
+    public static stripQuotationsAndNewlines(str: string): string {
+        let newlinereg: RegExp = /\n/g;
+        str = str.replace(newlinereg, " ");
+        newlinereg = /"/g;
+        str = str.replace(newlinereg, "'");
+        return str;
+    }
+
     public static generateParameterString(obj: any): string {
         if (obj == null) {
             return "";
