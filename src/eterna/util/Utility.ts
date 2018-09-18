@@ -7,6 +7,14 @@ export class Utility {
         return Number(temp) / div;
     }
 
+    public static stripHtmlTags(str: string): string {
+        let newlinereg = /</g;
+        str = str.replace(newlinereg, "&lt;");
+        newlinereg = />/g;
+        str = str.replace(newlinereg, "&gt;");
+        return str;
+    }
+
     public static generateParameterString(obj: any): string {
         if (obj == null) {
             return "";
