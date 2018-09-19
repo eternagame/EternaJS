@@ -20,8 +20,8 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 * Create a .env file:
     - `$ cp .env.example .env` and fill in the values
 * Compile:
-    - `$ npm run build:dev` or
-    - `$ npm run build:prod`
+    - `$ npm run typecheck && npm run build:dev` or
+    - `$ npm run typecheck && npm run build:prod`
 * Run:
     - Serve up dist/dev or dist/prod
 
