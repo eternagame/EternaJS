@@ -1407,8 +1407,7 @@ export class PoseEditMode extends GameMode {
         this.clearUndoStack();
         this.poseEditByTarget(0);
         for (let pose of this._poses) {
-            // force a score-node update
-            pose.displayScoreTexts = pose.displayScoreTexts;
+            pose.updateHighlightsAndScores();
         }
     }
 
