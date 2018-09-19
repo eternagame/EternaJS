@@ -3,8 +3,6 @@ import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {ChatManager} from "./ChatManager";
-import {TestMode} from "./debug/TestMode";
-import {EPars} from "./EPars";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";

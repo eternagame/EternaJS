@@ -38,12 +38,12 @@ export class Eterna {
             return;
         }
 
-        log.error("Uncaught error", errstring);
+        log.error("Uncaught error", ErrorUtil.getErrorObj(err) || errstring);
         if (process.env.NODE_ENV !== "production") {
             try {
-                alert(errstring);
-            } catch (e) {
-                log.error("An error occurred while trying to display an error", e);
+                alert(ErrorUtil.getErrorObj(err) || errstring);
+            } catch (alertError) {
+                log.error("An error occurred while trying to display an error", alertError);
             }
         }
     }
