@@ -1002,6 +1002,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.generateScoreNodes();
     }
 
+    public updateHighlightsAndScores(): void {
+        this._prevOffsetX = -1;
+        this._prevOffsetY = -1;
+        this.generateScoreNodes();
+    }
+
     public set showEnergyHighlight(display: boolean) {
         this._highlightEnergyText = display;
         this.generateScoreNodes();
@@ -2850,6 +2856,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private updateScoreNodeVisualization(offsetChanged: boolean): void {
         if (this._scoreNodes == null) {
+            this._scoreNodeHighlight.clear();
             return;
         }
 
@@ -3032,6 +3039,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private generateScoreNodes(): void {
         this._scoreNodes = null;
+        this._scoreNodeHighlight.clear();
         this.clearEnergyHighlights();
 
         if (this._scoreFolder == null ||
