@@ -4,9 +4,11 @@ import {Base64} from "../../flashbang/util/Base64";
 type JSONData = any;
 
 export class GameClient {
+    public readonly baseURL: string;
+
     public constructor(baseURL: string) {
         log.info(`GameClient baseURL=${baseURL}`);
-        this._baseURL = baseURL;
+        this.baseURL = baseURL;
     }
 
     // / ACCOUNT
@@ -216,10 +218,8 @@ export class GameClient {
     }
 
     private makeURL(urlString: string): URL {
-        return new URL(urlString, this._baseURL);
+        return new URL(urlString, this.baseURL);
     }
-
-    private readonly _baseURL: string;
 
     private static GET_URI: string = "/get/";
     private static POST_URI: string = "/post/";
