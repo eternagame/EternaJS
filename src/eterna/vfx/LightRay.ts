@@ -7,11 +7,9 @@ import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
 import {EPars} from "../EPars";
 
-export class LightRay extends SceneObject {
+export class LightRay extends SceneObject<Graphics> {
     constructor() {
-        let graphics = new Graphics();
-        super(graphics);
-        this._graphics = graphics;
+        super(new Graphics());
     }
 
     public fadeIn(): void {
@@ -31,22 +29,22 @@ export class LightRay extends SceneObject {
 
         const len: number = v.length;
 
-        this._graphics.clear();
-        this._graphics.lineStyle(0, 0, 0);
+        this._display.clear();
+        this._display.lineStyle(0, 0, 0);
 
-        this._graphics.beginFill(color, 0.8);
-        this._graphics.moveTo(0, 2);
-        this._graphics.lineTo(len, 30);
+        this._display.beginFill(color, 0.8);
+        this._display.moveTo(0, 2);
+        this._display.lineTo(len, 30);
         for (let ii: number = 1; ii <= 7; ii++) {
             let lineAngle: number = Math.PI * (ii - 4) / 8;
-            this._graphics.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
+            this._display.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
         }
 
-        this._graphics.lineTo(len, -30);
-        this._graphics.lineTo(0, -2);
-        this._graphics.endFill();
+        this._display.lineTo(len, -30);
+        this._display.lineTo(0, -2);
+        this._display.endFill();
 
-        this._graphics.rotation = v.angle;
+        this._display.rotation = v.angle;
     }
 
     private static getColor(baseType: number): number {
@@ -62,8 +60,6 @@ export class LightRay extends SceneObject {
             return 0xFFFFFF;
         }
     }
-
-    private readonly _graphics: Graphics;
 
     private static readonly ANIM = "Anim";
 }

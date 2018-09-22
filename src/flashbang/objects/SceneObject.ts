@@ -6,19 +6,19 @@ import {DisplayObjectPointerTarget} from "../input/DisplayObjectPointerTarget";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-/** A convenience class that manages a displayObject directly. */
-export class SceneObject extends GameObject implements PointerTarget {
-    constructor(displayObject: DisplayObject) {
+/** A convenience class that manages a DisplayObject directly. */
+export class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {
+    constructor(displayObject: T) {
         super();
-        this._displayObject = displayObject;
+        this._display = displayObject;
     }
 
-    public /* final */ get display(): DisplayObject {
-        return this._displayObject;
+    public /* final */ get display(): T {
+        return this._display;
     }
 
-    public get target(): DisplayObject {
-        return this._displayObject;
+    public get target(): T {
+        return this._display;
     }
 
     public get pointerOver(): SignalView<InteractionEvent> {
@@ -47,11 +47,11 @@ export class SceneObject extends GameObject implements PointerTarget {
 
     protected getPointerTarget(): PointerTarget {
         if (this._pointerTarget == null) {
-            this._pointerTarget = new DisplayObjectPointerTarget(this._displayObject);
+            this._pointerTarget = new DisplayObjectPointerTarget(this._display);
         }
         return this._pointerTarget;
     }
 
-    protected _displayObject: DisplayObject;
-    protected _pointerTarget: PointerTarget; // lazily instantiated
+    protected readonly _display: T;
+    private _pointerTarget: PointerTarget; // lazily instantiated
 }

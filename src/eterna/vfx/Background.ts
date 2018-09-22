@@ -28,10 +28,10 @@ export class Background extends ContainerObject {
 
     public disableBubbles(disable: boolean): void {
         for (let bubble of this._bubbles) {
-            if (!disable && !bubble.sprite.visible) {
+            if (!disable && !bubble.display.visible) {
                 bubble.init();
             }
-            bubble.sprite.visible = !disable;
+            bubble.display.visible = !disable;
         }
     }
 
