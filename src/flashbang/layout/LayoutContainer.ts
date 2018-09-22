@@ -13,9 +13,9 @@ export abstract class LayoutContainer extends Container {
     }
 
     /* override */
-    public addChild<T extends DisplayObject>(child: T, ...additionalChildren: DisplayObject[]): T {
+    public addChild<T extends DisplayObject>(...children: T[]): T {
         this._needsLayout = true;
-        return super.addChild(child, ...additionalChildren);
+        return super.addChild(...children);
     }
 
     /* override */
