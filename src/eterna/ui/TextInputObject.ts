@@ -36,6 +36,11 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         return this.fontWeight("bold");
     }
 
+    public placeholderText(value: string): TextInputObject {
+        this._obj.placeholder = value;
+        return this;
+    }
+
     public set readOnly(value: boolean) {
         this._obj.readOnly = value;
     }

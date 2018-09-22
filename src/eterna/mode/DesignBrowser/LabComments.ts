@@ -7,7 +7,7 @@ export class LabComments {
         this._comments_data = [];
     }
 
-    public update(): Promise<any> {
+    public update(): Promise<any[]> {
         return Eterna.client.getSolutionComments(this._solution_nid)
             .then(data => {
                 this._comments_data = data["data"]["comments"];
@@ -15,7 +15,7 @@ export class LabComments {
             });
     }
 
-    public submit_comment(body: string): Promise<any> {
+    public submit_comment(body: string): Promise<any[]> {
         body = Utility.stripHtmlTags(body);
         body = Utility.stripQuotationsAndNewlines(body);
 
