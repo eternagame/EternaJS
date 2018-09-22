@@ -35,7 +35,7 @@ export class MissionIntroMode extends AppMode {
         let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.container.addChild(moleculeImg);
 
-        let missionText = Fonts.std_light("MISSION", 48).color(0xFFCC00).build();
+        let missionText = Fonts.stdLight("MISSION", 48).color(0xFFCC00).build();
         this.container.addChild(missionText);
 
         const descriptionStyle = {
@@ -67,7 +67,7 @@ export class MissionIntroMode extends AppMode {
             .maxWidth(Flashbang.stageWidth);
         this.addObject(nameLabel, this.container);
 
-        let goalsLabel = Fonts.std_light("GOAL", 24).color(0xffcc00).build();
+        let goalsLabel = Fonts.stdLight("GOAL", 24).color(0xffcc00).build();
         this.container.addChild(goalsLabel);
 
         this._goalsBG = Sprite.fromImage(Bitmaps.MissionPuzzleThumbnailImage);

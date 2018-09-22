@@ -254,7 +254,7 @@ export class RankScroll extends ContainerObject {
         this._playerRow.display.position = new Point(0, size_indicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
-        this._tfRankOffset = Fonts.std_regular(`+${this._rankOffset}`, 20).color(0xffffff).bold().build();
+        this._tfRankOffset = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0xffffff).bold().build();
         this._tfRankOffset.position = new Point(-this._tfRankOffset.width - 10, size_indicator * RankBoard.ROW_HEIGHT + 4);
         this._tfRankOffset.visible = true;
         this.container.addChild(this._tfRankOffset);

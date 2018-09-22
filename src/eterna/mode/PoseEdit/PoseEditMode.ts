@@ -176,7 +176,7 @@ export class PoseEditMode extends GameMode {
         this._runStatus.width = 200;
         this._runStatus.height = 20;
 
-        this._targetName = Fonts.std_regular("", 18).build();
+        this._targetName = Fonts.stdRegular("", 18).build();
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
