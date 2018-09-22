@@ -29,7 +29,7 @@ export class GameCheckbox extends ToggleButton {
         this._check.visible = false;
         this.container.addChild(this._check);
 
-        let label = Fonts.std_regular(txt, size).color(0xC0DCE7).build();
+        let label = Fonts.stdRegular(txt, size).color(0xC0DCE7).build();
         this.container.addChild(label);
         DisplayUtil.positionRelative(
             label, HAlign.LEFT, VAlign.CENTER,

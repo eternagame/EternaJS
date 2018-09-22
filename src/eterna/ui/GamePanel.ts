@@ -67,7 +67,7 @@ export class GamePanel extends BaseGamePanel {
 
             if (this._title != null) {
                 if (this._titleText == null) {
-                    this._titleText = Fonts.std_medium().fontSize(16).color(0xffffff).build();
+                    this._titleText = Fonts.stdMedium().fontSize(16).color(0xffffff).build();
                     this._titleText.position = new Point(7, 6);
                     this.container.addChild(this._titleText);
                 }

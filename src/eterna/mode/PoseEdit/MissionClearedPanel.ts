@@ -34,7 +34,7 @@ export class MissionClearedPanel extends ContainerObject {
         this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
         this.container.addChild(this._contentLayout);
 
-        this._contentLayout.addChild(Fonts.std_light("Mission Accomplished!", 36).color(0xFFCC00).build());
+        this._contentLayout.addChild(Fonts.stdLight("Mission Accomplished!", 36).color(0xFFCC00).build());
 
         const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
         const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
@@ -48,7 +48,7 @@ export class MissionClearedPanel extends ContainerObject {
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
-            this._contentLayout.addChild(Fonts.std_regular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
+            this._contentLayout.addChild(Fonts.stdRegular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
         }
 
         this._rankScrollContainer = new Container();
@@ -58,15 +58,15 @@ export class MissionClearedPanel extends ContainerObject {
         this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
-        this._tfPlayer = Fonts.std_bold("PLAYER", 14).bold().color(0xffffff).build();
+        this._tfPlayer = Fonts.stdBold("PLAYER", 14).bold().color(0xffffff).build();
         this._tfPlayer.position = new Point(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
-        let tfRank: Text = Fonts.std_bold("RANK", 14).bold().color(0xffffff).build();
+        let tfRank: Text = Fonts.stdBold("RANK", 14).bold().color(0xffffff).build();
         tfRank.position = new Point(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
-        let tfCoin: Text = Fonts.std_bold("POINTS", 14).bold().color(0xffffff).build();
+        let tfCoin: Text = Fonts.stdBold("POINTS", 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
