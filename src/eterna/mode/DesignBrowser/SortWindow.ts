@@ -6,7 +6,6 @@ import {Solution} from "../../puzzle/Solution";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
-import {SingleStateButton} from "../../ui/SingleStateButton";
 import {Fonts} from "../../util/Fonts";
 import {SortOrder} from "./SortOrder";
 
@@ -31,7 +30,7 @@ export class SortWindow extends GamePanel {
         this._add_button.clicked.connect(() => this.addCurrentCriteria());
         this.addObject(this._add_button, this.container);
 
-        this._sort_category_left = new SingleStateButton(
+        this._sort_category_left = new GameButton().allStates(
             new Graphics()
             .beginFill(0xFFFFFF, 0.8)
             .moveTo(0, 5)
@@ -41,7 +40,7 @@ export class SortWindow extends GamePanel {
         this._sort_category_left.clicked.connect(() => this.sortSelectionLeft());
         this.addObject(this._sort_category_left, this.container);
 
-        this._sort_category_right = new SingleStateButton(
+        this._sort_category_right = new GameButton().allStates(
             new Graphics()
             .beginFill(0xFFFFFF, 0.8)
             .moveTo(0, 5)
@@ -387,8 +386,8 @@ export class SortWindow extends GamePanel {
 
     private readonly _sort_names: string[];
     private readonly _sort_category_selection: Text;
-    private readonly _sort_category_left: SingleStateButton;
-    private readonly _sort_category_right: SingleStateButton;
+    private readonly _sort_category_left: GameButton;
+    private readonly _sort_category_right: GameButton;
     private readonly _sort_order_selection: GameButton;
     private readonly _add_button: GameButton;
     private readonly _ok_button: GameButton;
