@@ -6,7 +6,6 @@ import {VisibleTask} from "../../../flashbang/tasks/VisibleTask";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
-import {SingleStateButton} from "../../ui/SingleStateButton";
 import {Fonts} from "../../util/Fonts";
 
 export class CustomWin extends GamePanel {
@@ -40,7 +39,7 @@ export class CustomWin extends GamePanel {
         this._add_all_btn.clicked.connect(() => this.on_add_all());
         this.addObject(this._add_all_btn, this.container);
 
-        this._sort_category_left = new SingleStateButton(new Graphics()
+        this._sort_category_left = new GameButton().allStates(new Graphics()
             .beginFill(0xFFFFFF, 0.8)
             .moveTo(0, 5)
             .lineTo(-7, 0)
@@ -49,7 +48,7 @@ export class CustomWin extends GamePanel {
         this._sort_category_left.clicked.connect(() => this.on_sort_selection_left());
         this.addObject(this._sort_category_left, this.container);
 
-        this._sort_category_right = new SingleStateButton(new Graphics()
+        this._sort_category_right = new GameButton().allStates(new Graphics()
             .beginFill(0xFFFFFF, 0.8)
             .moveTo(0, 5)
             .lineTo(7, 0)
