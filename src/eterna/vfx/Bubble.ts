@@ -40,7 +40,7 @@ export class Bubble extends SpriteObject implements Updatable {
         else if (this._bubbleSize === 2) bubbleType = 6;
         else bubbleType = 7;
 
-        this.sprite.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
+        this.display.texture = Texture.fromImage(Bubble.BUBBLE_NAMES[bubbleType]);
 
         this.autoHide = false;
     }
@@ -50,19 +50,19 @@ export class Bubble extends SpriteObject implements Updatable {
         this._accY = 0;
 
         if (!this._foreground) {
-            this.sprite.scale.x = 0;
-            this.sprite.scale.y = 0;
-            this.sprite.alpha = 0;
-            this.sprite.x = Math.random() * Flashbang.stageWidth;
-            this.sprite.y = Math.random() * Flashbang.stageHeight;
+            this.display.scale.x = 0;
+            this.display.scale.y = 0;
+            this.display.alpha = 0;
+            this.display.x = Math.random() * Flashbang.stageWidth;
+            this.display.y = Math.random() * Flashbang.stageHeight;
 
             this.replaceNamedObject("InitAnim", new ParallelTask(
                 new ScaleTask(1, 1, 1),
                 new AlphaTask(1, 1, Easing.easeOut)
             ));
         } else {
-            this.sprite.x = Math.random() * Flashbang.stageWidth;
-            this.sprite.y = (Math.random() * (Flashbang.stageHeight + 200)) + Flashbang.stageHeight;
+            this.display.x = Math.random() * Flashbang.stageWidth;
+            this.display.y = (Math.random() * (Flashbang.stageHeight + 200)) + Flashbang.stageHeight;
         }
 
         this._lastTime = -1;
@@ -79,19 +79,19 @@ export class Bubble extends SpriteObject implements Updatable {
 
     /* override */
     public update(dt: number): void {
-        if (this.sprite.texture == null) {
+        if (this.display.texture == null) {
             return;
         }
 
         const current_time = this._lastTime + dt;
-        const tex = this.sprite.texture;
+        const tex = this.display.texture;
 
-        if (this.isPaused || (this.sprite.y < -tex.height)) {
+        if (this.isPaused || (this.display.y < -tex.height)) {
             this._lastTime = current_time;
             return;
         }
 
-        let mouseLoc = this.sprite.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
+        let mouseLoc = this.display.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
         let m_x = mouseLoc.x - tex.width / 2.0;
         let m_y = mouseLoc.y - tex.height / 2.0;
         let dist = Math.max(m_x * m_x + m_y * m_y, 0.01);
@@ -124,12 +124,12 @@ export class Bubble extends SpriteObject implements Updatable {
         let dvx: number = dt * this._accX;
         let dvy: number = dt * this._accY;
 
-        this.sprite.y += dvy;
-        this.sprite.x += dvx;
+        this.display.y += dvy;
+        this.display.x += dvx;
 
         this._lastTime = current_time;
 
-        if (this.sprite.y < -tex.height && (this._hideTime < 0 || this._hideTime >= current_time)) {
+        if (this.display.y < -tex.height && (this._hideTime < 0 || this._hideTime >= current_time)) {
             this.init();
         }
 
