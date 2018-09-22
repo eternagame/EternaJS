@@ -1,4 +1,4 @@
-import {Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {Container, DisplayObject, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
@@ -17,16 +17,16 @@ export class GameButton extends Button implements KeyboardListener {
     public constructor() {
         super();
 
-        this._img = new Sprite();
-        this.container.addChild(this._img);
+        this._stateDispParent = new Container();
+        this.container.addChild(this._stateDispParent);
     }
 
     protected added(): void {
         super.added();
 
-        this.toggled.connect((toggled: boolean) => this.onToggledChanged(toggled));
+        this.toggled.connect(toggled => this.onToggledChanged(toggled));
         this.clicked.connect(() => {
-            if (this._selectedTexture != null) {
+            if (this._selectedState != null) {
                 this.toggle();
             }
         });
@@ -35,25 +35,30 @@ export class GameButton extends Button implements KeyboardListener {
         this.setupTooltip();
     }
 
-    public up(tex: Texture | string): GameButton {
-        return this.setTexture(ButtonState.UP, tex);
+    public up(display: DisplayObject | Texture | string): GameButton {
+        return this.setStateDisplay(ButtonState.UP, display);
     }
 
-    public over(tex: Texture | string): GameButton {
-        return this.setTexture(ButtonState.OVER, tex);
+    public over(display: DisplayObject | Texture | string): GameButton {
+        return this.setStateDisplay(ButtonState.OVER, display);
     }
 
-    public down(tex: Texture | string): GameButton {
-        return this.setTexture(ButtonState.DOWN, tex);
+    public down(display: DisplayObject | Texture | string): GameButton {
+        return this.setStateDisplay(ButtonState.DOWN, display);
     }
 
-    public disabled(tex: Texture | string): GameButton {
-        return this.setTexture(ButtonState.DISABLED, tex);
+    public disabled(display: DisplayObject | Texture | string): GameButton {
+        return this.setStateDisplay(ButtonState.DISABLED, display);
     }
 
-    /** Sets a single texture for all states */
-    public allStates(tex: Texture | string): GameButton {
-        return this.up(tex).over(tex).down(tex).disabled(tex);
+    /** Sets a single DisplayObect for all states */
+    public allStates(display: DisplayObject | Texture | string): GameButton {
+        return this.up(display).over(display).down(display).disabled(display);
+    }
+
+    public selected(display: DisplayObject | Texture | string): GameButton {
+        this._selectedState = GameButton.getDisplayObject(display);
+        return this;
     }
 
     public rscriptID(value: RScriptUIElementID): GameButton {
@@ -66,11 +71,6 @@ export class GameButton extends Button implements KeyboardListener {
                 });
             }
         }
-        return this;
-    }
-
-    public selected(tex: Texture | string): GameButton {
-        this._selectedTexture = (tex instanceof Texture ? tex as Texture : Texture.fromImage(tex as string));
         return this;
     }
 
@@ -146,14 +146,19 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     protected showState(state: ButtonState): void {
-        this._img.alpha = 1;
-        let tex: Texture = this.getTexture(state, this.isSelected);
-        if (tex == null && state == ButtonState.DISABLED) {
-            // If we're missing the disabled texture, use the UP texture at 50% alpha
-            tex = this.getTexture(ButtonState.UP, this.isSelected);
-            this._img.alpha = 0.5;
+        this._stateDispParent.removeChildren();
+        this._stateDispParent.alpha = 1;
+
+        let stateDisp = this.getStateDisplay(state, this.isSelected);
+        if (stateDisp == null && state == ButtonState.DISABLED) {
+            // If we're missing the disabled state, use the UP state at 50% alpha
+            stateDisp = this.getStateDisplay(ButtonState.UP, this.isSelected);
+            this._stateDispParent.alpha = 0.5;
         }
-        this._img.texture = tex || Texture.EMPTY;
+
+        if (stateDisp != null) {
+            this._stateDispParent.addChild(stateDisp);
+        }
 
         // Create label
         if (this._label != null) {
@@ -166,7 +171,7 @@ export class GameButton extends Button implements KeyboardListener {
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox: boolean = tex == null && this._label != null;
+        const drawStyleBox: boolean = stateDisp == null && this._label != null;
         if (drawStyleBox) {
             if (this._styleBox == null) {
                 this._styleBox = new Graphics();
@@ -188,16 +193,16 @@ export class GameButton extends Button implements KeyboardListener {
         }
 
         // Position label
-        this._img.scale = new Point(1, 1);
+        this._stateDispParent.scale = new Point(1, 1);
         if (this._label != null) {
             if (this._scaleBitmapToLabel) {
-                let scale: number = 1.5 * this._label.height / this._img.height;
-                this._img.scale = new Point(scale, scale);
+                let scale: number = 1.5 * this._label.height / this._stateDispParent.height;
+                this._stateDispParent.scale = new Point(scale, scale);
             }
 
-            this._label.position = tex == null
+            this._label.position = stateDisp == null
                 ? new Point(GameButton.WMARGIN, GameButton.HMARGIN)
-                : new Point(this._img.width + 5, (this._img.height - this._label.height) * 0.5);
+                : new Point(this._stateDispParent.width + 5, (this._stateDispParent.height - this._label.height) * 0.5);
             this.container.addChild(this._label);
         }
     }
@@ -224,41 +229,45 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setTexture(state: ButtonState, tex?: Texture | string) :GameButton {
-        if (this._buttonStateTextures == null) {
-            this._buttonStateTextures = [];
-        }
-
-        if (tex instanceof Texture) {
-            this._buttonStateTextures[state] = tex;
-        } else if (typeof(tex) === "string") {
-            this._buttonStateTextures[state] = Texture.fromImage(tex);
-        } else {
-            this._buttonStateTextures[state] = null;
-        }
-
-        this.needsRedraw();
-
-        return this;
-    }
-
     private needsRedraw() {
         if (this.isLiveObject) {
             this.showState(this._state);
         }
     }
 
-    private getTexture(state: ButtonState, selected: boolean): Texture {
-        if (state != ButtonState.DISABLED && selected && this._selectedTexture != null) {
-            return this._selectedTexture;
+    private setStateDisplay(state: ButtonState, displayOrTex?: DisplayObject | Texture | string) :GameButton {
+        if (this._buttonStates == null) {
+            this._buttonStates = [];
+        }
+
+        this._buttonStates[state] = GameButton.getDisplayObject(displayOrTex);
+        this.needsRedraw();
+        return this;
+    }
+
+    private getStateDisplay(state: ButtonState, selected: boolean): DisplayObject {
+        if (state != ButtonState.DISABLED && selected && this._selectedState != null) {
+            return this._selectedState;
         } else {
-            return this._buttonStateTextures != null && this._buttonStateTextures.length > state
-                ? this._buttonStateTextures[state]
+            return this._buttonStates != null && this._buttonStates.length > state
+                ? this._buttonStates[state]
                 : null;
         }
     }
 
-    private readonly _img: Sprite;
+    private static getDisplayObject(displayOrTex: DisplayObject | Texture | string): DisplayObject {
+        if (displayOrTex instanceof DisplayObject) {
+            return displayOrTex;
+        } else if (displayOrTex instanceof Texture) {
+            return new Sprite(displayOrTex);
+        } else if (typeof(displayOrTex) === "string") {
+            return Sprite.fromImage(displayOrTex);
+        } else {
+            return null;
+        }
+    }
+
+    private readonly _stateDispParent: Container;
     private _label: Text;
     private _styleBox: Graphics;
 
@@ -268,8 +277,8 @@ export class GameButton extends Button implements KeyboardListener {
     private _tooltip: string;
     private _hotkey: string;
     private _hotkeyCtrl: boolean;
-    private _buttonStateTextures: Texture[];
-    private _selectedTexture: Texture;
+    private _buttonStates: DisplayObject[];
+    private _selectedState: DisplayObject;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
