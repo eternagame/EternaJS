@@ -1,11 +1,12 @@
-﻿import {DisplayObject, Graphics, Point, Text} from "pixi.js";
-import {Button, ButtonState} from "../../../flashbang/objects/Button";
+﻿import {Graphics, Point, Text} from "pixi.js";
+import {Button} from "../../../flashbang/objects/Button";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../../flashbang/tasks/VisibleTask";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
+import {SingleStateButton} from "../../ui/SingleStateButton";
 import {Fonts} from "../../util/Fonts";
 
 export class CustomWin extends GamePanel {
@@ -317,15 +318,4 @@ export class CustomWin extends GamePanel {
     private _reorganize: Function;
 
     private static readonly ROW_HEIGHT = 20;
-}
-
-class SingleStateButton extends Button {
-    public constructor(disp: DisplayObject) {
-        super();
-        this.container.addChild(disp);
-    }
-
-    protected showState(state: ButtonState): void {
-        // do nothing!
-    }
 }
