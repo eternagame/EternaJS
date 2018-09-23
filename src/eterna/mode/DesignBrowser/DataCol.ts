@@ -24,15 +24,13 @@ export class DataCol extends ContainerObject {
         this._graphics = new Graphics();
         this.container.addChild(this._graphics);
 
-        this._data_display = new TextBuilder().font(fonttype).fontSize(size).bold(bold).build();
+        let dataDisplayBuilder = new TextBuilder().font(fonttype).fontSize(size).bold(bold);
+        this._line_height = dataDisplayBuilder.computeLineHeight();
 
+        this._data_display = dataDisplayBuilder.build();
         // this._data_display.set_text("A\nA");
         // let metr: TextLineMetrics = this._data_display.GetTextBox().getLineMetrics(0);
         // this._line_height = metr.height + metr.leading / 2;
-        this._data_display.text = "A";
-        this._line_height = this._data_display.height;
-
-        this._data_display.text = "";
         this._data_display.position = new Point(11, DataCol.DATA_H);
         this.container.addChild(this._data_display);
 
