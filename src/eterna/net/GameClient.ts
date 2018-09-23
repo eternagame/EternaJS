@@ -106,12 +106,21 @@ export class GameClient {
             .then(rsp => rsp.json());
     }
 
-    public deleteSolution(solutionID: number): Promise<JSONData> {
+    /** Deletes a solution. Returns nothing on success, and an error string if there was a problem. */
+    public deleteSolution(solutionID: number): Promise<void> {
         return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solutionID})
-            .then(rsp => rsp.json());
+            .then(rsp => rsp.json())
+            .then(json => {
+                let data = json["data"];
+                if (data["success"]) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(data["error"]);
+                }
+            });
     }
 
-    public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<JSONData> {
+    public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<any> {
         let post_params: any = {solnid: solutionID, puznid};
         if (myVotes === 1) {
             post_params["type"] = "unvote";
@@ -121,7 +130,16 @@ export class GameClient {
             throw new Error("Wrong vote value - can't submit");
         }
 
-        return this.post(GameClient.POST_URI, post_params).then(rsp => rsp.json());
+        return this.post(GameClient.POST_URI, post_params)
+            .then(rsp => rsp.json())
+            .then(json => {
+                let data = json["data"];
+                if (data["success"]) {
+                    return data;
+                } else {
+                    return Promise.reject(data["error"]);
+                }
+            });
     }
 
     public updateSolutionFoldData(solutionID: number, fold_data: any): Promise<string> {
