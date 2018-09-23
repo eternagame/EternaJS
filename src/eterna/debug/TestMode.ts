@@ -1,64 +1,25 @@
-import {HAlign, VAlign} from "../../flashbang/core/Align";
+import {Point} from "pixi.js";
 import {AppMode} from "../../flashbang/core/AppMode";
 import {Flashbang} from "../../flashbang/core/Flashbang";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Easing} from "../../flashbang/util/Easing";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {EternaURL} from "../net/EternaURL";
-import {URLButton} from "../ui/URLButton";
-import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
-import {Background} from "../vfx/Background";
+import {GridLines} from "../mode/DesignBrowser/GridLines";
+import {Fonts} from "../util/Fonts";
 
 export class TestMode extends AppMode {
     protected setup(): void {
         super.setup();
 
-        this.addObject(new Background(), this.container);
+        let line_height = Fonts.arial("", 14).computeLineHeight();
+        let gridlines = new GridLines(2, 0x4A5F73, 5 * line_height);
+        gridlines.position = new Point(10, 168);
+        this.container.addChild(gridlines);
 
-        let homeButton = new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
-        this.addObject(homeButton, this.container);
-        DisplayUtil.positionRelativeToStage(
-            homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5);
-
-        const text = "Make 5 or more <font color = \"#00BFF9\">BLUE</font> bases";
-        let builder = new StyledTextBuilder({
-            fill: 0xffffff
-        });
-        builder.appendHTMLStyledText(text);
-
-        let tf = builder.build();
-        tf.x = (Flashbang.stageWidth - tf.width) * 0.5;
-        tf.y = (Flashbang.stageHeight - tf.height) * 0.5;
-        this.container.addChild(tf);
-
-        let ctx = new ExternalInterfaceCtx();
-        ctx.addCallback("Animate", (time?: number) => {
-            if (this.hasNamedObject("Animate")) {
-                this.removeNamedObjects("Animate");
-                return "Stopped!";
-            } else {
-                if (time === undefined) {
-                    time = 0.25;
-                }
-
-                this.addNamedObject("Animate", new RepeatingTask(() => {
-                    return new SerialTask(
-                        new AlphaTask(0, time, Easing.easeInOut, tf),
-                        new AlphaTask(1, time, Easing.easeInOut, tf),
-                    );
-                }));
-            }
-
-            ExternalInterface.popContext(ctx);
-
-            return "Started!";
-        });
-
-        ExternalInterface.pushContext(ctx);
+        const updateLayout = () => {
+            gridlines.setSize(
+                Flashbang.stageWidth - 20,
+                Flashbang.stageHeight - gridlines.position.y);
+        };
+        updateLayout();
+        this.resized.connect(updateLayout);
     }
 
     public onContextMenuEvent(e: Event): void {
