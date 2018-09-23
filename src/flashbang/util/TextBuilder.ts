@@ -13,6 +13,12 @@ export class TextBuilder {
         return text;
     }
 
+    public computeLineHeight(): number {
+        let dummy = this.build();
+        dummy.text = "A";
+        return dummy.height;
+    }
+
     /** @return the current TextStyle */
     public get style(): TextStyle {
         return new TextStyle(this._style);
