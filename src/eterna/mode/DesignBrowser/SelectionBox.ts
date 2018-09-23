@@ -6,7 +6,13 @@ export class SelectionBox extends Graphics {
         this._color = color;
     }
 
-    public redraw(width: number, height: number): void {
+    public setSize(width: number, height: number): void {
+        if (this._width === width && this._height === height) {
+            return;
+        }
+        this._width = width;
+        this._height = height;
+
         this.clear();
         this.beginFill(this._color, 0.3);
         this.drawRect(0, 0, width, height);
@@ -14,4 +20,6 @@ export class SelectionBox extends Graphics {
     }
 
     protected readonly _color: number;
+    private _width: number = 0;
+    private _height: number = 0;
 }

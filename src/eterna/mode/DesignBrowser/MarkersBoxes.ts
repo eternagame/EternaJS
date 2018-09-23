@@ -2,7 +2,7 @@ import {Container, Point} from "pixi.js";
 import {SelectionBox} from "./SelectionBox";
 
 export class MarkersBoxes extends Container {
-    constructor(color: number, initPosX: number, initPosY: number, size: Point, verticle_offset: number) {
+    constructor(color: number, initPosX: number, initPosY: number, verticalOffset: number) {
         super();
 
         this._markers = [];
@@ -10,11 +10,14 @@ export class MarkersBoxes extends Container {
         this._color = color;
         this._initPosX = initPosX;
         this._initPosY = initPosY;
-        this._size = size.clone();
-        this._verticalOffset = verticle_offset;
+        this._verticalOffset = verticalOffset;
     }
 
     public setSize(width: number, height: number): void {
+        if (this._width === width && this._height === height) {
+            return;
+        }
+
         this._width = width;
         this._height = height;
     }
@@ -36,7 +39,7 @@ export class MarkersBoxes extends Container {
         }
 
         let sel = new MarkerBox(this._color, id);
-        sel.redraw(this._size.x, this._size.y);
+        sel.setSize(this._width, this._height);
         sel.position = new Point(this._initPosX, this._initPosY + index * this._verticalOffset);
         sel.visible = false;
         this._markers.push(sel);
@@ -84,7 +87,7 @@ export class MarkersBoxes extends Container {
                 if (y_pos + this._verticalOffset < this._height) {
                     sel.visible = true;
                     sel.position = new Point(this._initPosX, y_pos);
-                    sel.redraw(this._size.x, this._size.y);
+                    sel.setSize(this._width, this._height);
                 }
             }
         }
@@ -94,7 +97,6 @@ export class MarkersBoxes extends Container {
     private readonly _initPosX: number;
     private readonly _initPosY: number;
     private readonly _verticalOffset: number;
-    private readonly _size: Point;
 
     private _width: number = 0;
     private _height: number = 0;
