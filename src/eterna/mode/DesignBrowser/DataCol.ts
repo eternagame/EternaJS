@@ -11,6 +11,10 @@ import {int} from "../../util/int";
 import {Utility} from "../../util/Utility";
 import {DesignBrowserColumnName, DesignBrowserDataType} from "./DesignBrowserMode";
 import {SequenceBoard} from "./SequenceBoard";
+import {SortOrder} from "./SortOrder";
+
+export type SortFunction = (sortCategory: string, sortOrder: SortOrder, sortArgs?: any[]) => void;
+export type ReorganizeFunction = (sort: boolean) => void;
 
 export class DataCol extends ContainerObject {
     constructor(data_type: DesignBrowserDataType, exp: string,
@@ -120,20 +124,17 @@ export class DataCol extends ContainerObject {
     }
 
     public get_current_mouse_index(): number[] {
-        let index: number[] = [];
         let mouseLoc = this.mouseLoc;
-
         if (mouseLoc.y < DataCol.DATA_H) {
             return [0, DataCol.DATA_H - mouseLoc.y];
         }
 
         let ii = (mouseLoc.y - DataCol.DATA_H) / this._line_height;
-
         if (ii >= this._num_display) {
             return [this._num_display - 1, DataCol.DATA_H + (this._num_display - 1) * this._line_height - mouseLoc.y];
         }
 
-        return [ii, DataCol.DATA_H + (ii) * this._line_height - mouseLoc.y];
+        return [ii, DataCol.DATA_H + (ii * this._line_height) - mouseLoc.y];
     }
 
     public set_filter(filter1: string, filter2: string): void {
@@ -143,20 +144,18 @@ export class DataCol extends ContainerObject {
         }
     }
 
-    public set_sort_state(sort_state: number): void {
-        this._sort_state = sort_state;
+    public set_sort_state(sortOrder: SortOrder): void {
+        this._sortOrder = sortOrder;
 
         this._labelArrow.clear();
-        if (this._sort_state == -1) {
+        if (this._sortOrder == SortOrder.DECREASING) {
             this._labelArrow.beginFill(0xFFFFFF, 0.8);
             this._labelArrow.moveTo(this._label.container.width + 4, 8);
             this._labelArrow.lineTo(this._label.container.width + 14, 8);
             this._labelArrow.lineTo(this._label.container.width + 9, 18);
             this._labelArrow.lineTo(this._label.container.width + 4, 8);
             this._labelArrow.endFill();
-        } else if (this._sort_state == 0) {
-
-        } else {
+        } else if (this._sortOrder == SortOrder.INCREASING) {
             this._labelArrow.beginFill(0xFFFFFF, 0.8);
             this._labelArrow.moveTo(this._label.container.width + 4, 18);
             this._labelArrow.lineTo(this._label.container.width + 14, 18);
@@ -195,11 +194,11 @@ export class DataCol extends ContainerObject {
         }
     }
 
-    public set_reorganize_callback(reorganize: Function): void {
+    public set_reorganize_callback(reorganize: ReorganizeFunction): void {
         this._reorganize = reorganize;
     }
 
-    public set_update_sort_callback(update_sort: Function): void {
+    public set_update_sort_callback(update_sort: SortFunction): void {
         this._update_sort = update_sort;
     }
 
@@ -284,16 +283,16 @@ export class DataCol extends ContainerObject {
     }
 
     private toggle_sort_state(): void {
-        if (this._sort_state == 1) {
-            this._sort_state = -1;
-        } else if (this._sort_state == -1) {
-            this._sort_state = 0;
+        if (this._sortOrder == SortOrder.INCREASING) {
+            this._sortOrder = SortOrder.DECREASING;
+        } else if (this._sortOrder == SortOrder.DECREASING) {
+            this._sortOrder = SortOrder.NONE;
         } else {
-            this._sort_state = 1;
+            this._sortOrder = SortOrder.INCREASING;
         }
 
         if (this._update_sort != null) {
-            this._update_sort(this._columnName, this._sort_state, null);
+            this._update_sort(this._columnName, this._sortOrder, null);
         }
     }
 
@@ -460,9 +459,9 @@ export class DataCol extends ContainerObject {
     private _offset: number = 0;
 
     private _num_display: number;
-    private _reorganize: Function;
-    private _update_sort: Function;
-    private _sort_state: number = 0;
+    private _reorganize: ReorganizeFunction;
+    private _update_sort: SortFunction;
+    private _sortOrder: SortOrder = 0;
     private _exp_data: Feedback[];
     private _show_exp_data: boolean = false;
     private _pairs_array: number[];
