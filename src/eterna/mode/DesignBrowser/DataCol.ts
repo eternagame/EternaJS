@@ -238,7 +238,7 @@ export class DataCol extends ContainerObject {
         this.display_data();
     }
 
-    public set_exp_data(exp_data: any[]): void {
+    public set_exp_data(exp_data: Feedback[]): void {
         this._exp_data = exp_data;
     }
 
@@ -463,7 +463,7 @@ export class DataCol extends ContainerObject {
     private _reorganize: Function;
     private _update_sort: Function;
     private _sort_state: number = 0;
-    private _exp_data: any[];
+    private _exp_data: Feedback[];
     private _show_exp_data: boolean = false;
     private _pairs_array: number[];
     private _col: number = 0;
