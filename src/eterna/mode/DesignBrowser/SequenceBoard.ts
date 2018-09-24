@@ -5,6 +5,7 @@ import {TextureUtil} from "../../../flashbang/util/TextureUtil";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {ExpPainter} from "../../ExpPainter";
+import {Feedback} from "../../Feedback";
 import {EternaTextureUtil} from "../../util/EternaTextureUtil";
 
 export class SequenceBoard extends ContainerObject {
@@ -33,7 +34,7 @@ export class SequenceBoard extends ContainerObject {
         this._height = height;
     }
 
-    public set_sequences(sequences: string[], exp_data: any[], pairs: number[]): void {
+    public set_sequences(sequences: string[], exp_data: Feedback[], pairs: number[]): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -51,7 +52,7 @@ export class SequenceBoard extends ContainerObject {
 
         for (let ii = 0; ii < sequences.length; ii++) {
             let seq: string = sequences[ii];
-            let shape_data: any[] = null;
+            let shape_data: number[] = null;
             let shape_data_start: number = 0;
             let exp_painter: ExpPainter = null;
             let is_there_shape_threshold: boolean = false;
@@ -59,15 +60,15 @@ export class SequenceBoard extends ContainerObject {
             let shape_max: number = 0;
 
             if (exp_data != null && exp_data[ii] != null) {
-                shape_data = exp_data[ii].get_shape_data();
-                shape_data_start = exp_data[ii].get_shape_start_index();
+                shape_data = exp_data[ii].getShapeData();
+                shape_data_start = exp_data[ii].getShapeStartIndex();
             }
 
             if (shape_data != null) {
-                shape_data = ExpPainter.transformData(exp_data[ii].get_shape_data(), exp_data[ii].get_shape_max(), exp_data[ii].get_shape_min());
+                shape_data = ExpPainter.transformData(exp_data[ii].getShapeData(), exp_data[ii].getShapeMax(), exp_data[ii].getShapeMin());
                 is_there_shape_threshold = true;
-                shape_threshold = exp_data[ii].get_shape_threshold();
-                shape_max = exp_data[ii].get_shape_max();
+                shape_threshold = exp_data[ii].getShapeThreshold();
+                shape_max = exp_data[ii].getShapeMax();
 
                 exp_painter = new ExpPainter(shape_data, shape_data_start);
                 exp_painter.continuous = Eterna.settings.useContinuousColors.value;
