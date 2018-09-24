@@ -260,8 +260,11 @@ export class DataCol extends ContainerObject {
     }
 
     public set_progress(offset: number): void {
-        this._offset = offset;
-        this.display_data();
+        offset = int(offset);
+        if (this._offset != offset) {
+            this._offset = offset;
+            this.display_data();
+        }
     }
 
     public set_column_color(col: number): void {
