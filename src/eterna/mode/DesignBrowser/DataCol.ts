@@ -7,38 +7,46 @@ import {Solution} from "../../puzzle/Solution";
 import {GameButton} from "../../ui/GameButton";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
+import {int} from "../../util/int";
 import {Utility} from "../../util/Utility";
-import {DesignBrowserDataType} from "./DesignBrowserMode";
+import {DesignBrowserColumnName, DesignBrowserDataType} from "./DesignBrowserMode";
 import {SequenceBoard} from "./SequenceBoard";
 
 export class DataCol extends ContainerObject {
-    constructor(data_type: number, exp: string,
+    constructor(data_type: DesignBrowserDataType, exp: string,
                 data_width: number, fonttype: string,
-                size: number, bold: boolean, click_sortable: boolean) {
+                fontSize: number, sortable: boolean) {
         super();
 
         this._data_type = data_type;
+        this._columnName = exp;
         this._data_width = data_width;
-        this._exp = exp;
+        this._fontType = fonttype;
+        this._fontSize = fontSize;
+        this._sortable = sortable;
+    }
+
+    protected added(): void {
+        super.added();
 
         this._graphics = new Graphics();
         this.container.addChild(this._graphics);
 
-        let dataDisplayBuilder = new TextBuilder().font(fonttype).fontSize(size).bold(bold);
+        let dataDisplayBuilder = new TextBuilder().font(this._fontType).fontSize(this._fontSize).color(0xffffff);
         this._line_height = dataDisplayBuilder.computeLineHeight();
 
-        this._data_display = dataDisplayBuilder.build();
-        // this._data_display.set_text("A\nA");
-        // let metr: TextLineMetrics = this._data_display.GetTextBox().getLineMetrics(0);
+        this._dataDisplay = dataDisplayBuilder.build();
+        // this._dataDisplay.set_text("A\nA");
+        // let metr: TextLineMetrics = this._dataDisplay.GetTextBox().getLineMetrics(0);
         // this._line_height = metr.height + metr.leading / 2;
-        this._data_display.position = new Point(11, DataCol.DATA_H);
-        this.container.addChild(this._data_display);
+        this._dataDisplay.position = new Point(11, DataCol.DATA_H);
+        this.container.addChild(this._dataDisplay);
 
-        this._sequence_board = new SequenceBoard(fonttype, size, true, size, this._line_height);
+        this._sequence_board = new SequenceBoard(this._fontType, this._fontSize, true, this._fontSize, this._line_height);
         this._sequence_board.display.position = new Point(0, DataCol.DATA_H);
         this.addObject(this._sequence_board, this.container);
 
-        this._label = new GameButton().label(exp, 14);
+        this._label = new GameButton().label(this._columnName, 14);
         this._label.display.position = new Point(11, 7);
         this.addObject(this._label, this.container);
 
@@ -46,44 +54,61 @@ export class DataCol extends ContainerObject {
         this._labelArrow.position = this._label.display.position;
         this.container.addChild(this._labelArrow);
 
-        if (click_sortable) {
+        if (this._sortable) {
             this._label.clicked.connect(() => this.toggle_sort_state());
         }
 
-        if (data_type == DesignBrowserDataType.STRING) {
-            this._input_field = new TextInputObject(17, this._data_width - 22);
+        const TEXT_INPUT_SIZE = 13;
+
+        if (this._data_type == DesignBrowserDataType.STRING) {
+            this._input_field = new TextInputObject(TEXT_INPUT_SIZE, this._data_width - 22);
             this._input_field.display.position = new Point(11, 54);
             this.addObject(this._input_field, this.container);
             // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
 
-            this._field_string = Fonts.arial("search", 14).bold().build();
+            this._field_string = Fonts.arial("search", 14).color(0xffffff).build();
             this._field_string.position = new Point(11, 33);
             this.container.addChild(this._field_string);
 
         } else {
-            this._input_field = new TextInputObject(17, (this._data_width - 29) * 0.5);
+            this._input_field = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
             this._input_field.display.position = new Point(11, 54);
             this.addObject(this._input_field, this.container);
             // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
 
-            this._field_string = Fonts.arial("min", 14).build();
+            this._field_string = Fonts.arial("min", 14).color(0xffffff).build();
             this._field_string.position = new Point(11, 33);
             this.container.addChild(this._field_string);
 
-            this._input_field2 = new TextInputObject(17, (this._data_width - 29) * 0.5);
+            this._input_field2 = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
             this._input_field2.display.position = new Point(11 + (this._data_width - 29) / 2 + 7, 54);
             this.addObject(this._input_field2, this.container);
             // this._input_field2.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
 
-            this._field_string2 = Fonts.arial("max", 14).build();
+            this._field_string2 = Fonts.arial("max", 14).color(0xffffff).build();
             this._field_string2.position = new Point((this._data_width - 7) / 2 + 7, 33);
             this.container.addChild(this._field_string2);
         }
+
+        this.updateLayout();
     }
 
     public setSize(width: number, height: number): void {
+        if (this._width === width && this._height === height) {
+            return;
+        }
+
         this._width = width;
         this._height = height;
+        if (this.isLiveObject) {
+            this.updateLayout();
+        }
+    }
+
+    private updateLayout(): void {
+        this._num_display = int((this._height - 70 - 20) / this._line_height);
+        this.display_data();
+        this.set_column_color(this._col);
     }
 
     public set_pairs(pairs: number[]): void {
@@ -109,7 +134,6 @@ export class DataCol extends ContainerObject {
         }
 
         return [ii, DataCol.DATA_H + (ii) * this._line_height - mouseLoc.y];
-
     }
 
     public set_filter(filter1: string, filter2: string): void {
@@ -149,20 +173,20 @@ export class DataCol extends ContainerObject {
                 return true;
             }
 
-            let target_low: string = sol.getProperty(this._exp).toLowerCase();
+            let target_low: string = sol.getProperty(this._columnName).toLowerCase();
 
             return (target_low.search(query_string.toLowerCase()) >= 0);
         } else {
             let query_min: string = this._input_field.text;
             if (query_min.length > 0) {
-                if (sol.getProperty(this._exp) < Number(query_min)) {
+                if (sol.getProperty(this._columnName) < Number(query_min)) {
                     return false;
                 }
             }
 
             let query_max: string = this._input_field2.text;
             if (query_max.length > 0) {
-                if (sol.getProperty(this._exp) > Number(query_max)) {
+                if (sol.getProperty(this._columnName) > Number(query_max)) {
                     return false;
                 }
             }
@@ -180,7 +204,7 @@ export class DataCol extends ContainerObject {
     }
 
     public get_exp(): string {
-        return this._exp;
+        return this._columnName;
     }
 
     public set_width(w: number): void {
@@ -224,7 +248,7 @@ export class DataCol extends ContainerObject {
 
         for (let ii = 0; ii < raw.length; ii++) {
             if (this._data_type == DesignBrowserDataType.INT) {
-                this._raw_col_data.push(Number(raw[ii]));
+                this._raw_col_data.push(int(raw[ii]));
             } else if (this._data_type == DesignBrowserDataType.STRING) {
                 this._raw_col_data.push(raw[ii]);
             } else if (this._data_type == DesignBrowserDataType.NUMBER) {
@@ -250,20 +274,13 @@ export class DataCol extends ContainerObject {
         this._graphics.drawRect(0, 0, this._data_width, this._height);
         this._graphics.endFill();
 
-        if (this._exp == "Sequence") {
+        if (this._columnName == "Sequence") {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             for (let ii = 0; ii < this._data_width / 70 + 1; ii++) {
                 this._graphics.moveTo(ii * 70 + 90, 85);
                 this._graphics.lineTo(ii * 70 + 90, this._height - 5);
             }
         }
-    }
-
-    /*override*/
-    protected on_resize(): void {
-        this._num_display = Number((this._height - 70 - 20) / this._line_height);
-        this.display_data();
-        this.set_column_color(this._col);
     }
 
     private toggle_sort_state(): void {
@@ -276,7 +293,7 @@ export class DataCol extends ContainerObject {
         }
 
         if (this._update_sort != null) {
-            this._update_sort(this._exp, this._sort_state, null);
+            this._update_sort(this._columnName, this._sort_state, null);
         }
     }
 
@@ -288,149 +305,149 @@ export class DataCol extends ContainerObject {
     }
 
     private display_data(): void {
-
-        let data_string: string = "<span class='altColText'>";
-        let board_data: string[] = [];
+        let dataString = "";
+        let boardData: string[] = [];
         let board_exp_data: any[] = [];
 
         let pairs_length: number = 0;
         if (this._pairs_array != null) {
-            for (let jj: number = 0; jj < this._pairs_array.length; jj++) {
-                if (this._pairs_array[jj] >= 0) {
+            for (let pair of this._pairs_array) {
+                if (pair >= 0) {
                     pairs_length++;
                 }
             }
-
             pairs_length /= 2;
         }
 
         for (let ii = this._offset; ii < this._offset + this._num_display; ii++) {
             if (ii >= this._raw_col_data.length) {
-                data_string += "\n";
+                dataString += "\n";
             } else {
-                let rawstr: string = Utility.stripHtmlTags(this._raw_col_data[ii]);
+                let rawstr = Utility.stripHtmlTags("" + this._raw_col_data[ii]);
 
                 //trace(rawstr);
-                switch (this._exp) {
-                case "Sequence":
-                    board_data.push(rawstr);
+                switch (this._columnName) {
+                case DesignBrowserColumnName.Sequence:
+                    boardData.push(rawstr);
                     board_exp_data.push(this._exp_data[ii]);
 
                     break;
 
-                case "Votes":
+                case DesignBrowserColumnName.Votes:
                     if (this._raw_col_data[ii] >= 0) {
-                        data_string += rawstr + "\n";
+                        dataString += rawstr + "\n";
                     } else {
-                        data_string += "-\n";
+                        dataString += "-\n";
                     }
                     break;
 
-                case "My Votes":
+                case DesignBrowserColumnName.My_Votes:
                     if (this._raw_col_data[ii] >= 0) {
-                        data_string += rawstr + "\n";
+                        dataString += rawstr + "\n";
                     } else {
-                        data_string += "-\n";
+                        dataString += "-\n";
                     }
 
                     break;
 
-                case "Synthesis score":
+                case DesignBrowserColumnName.Synthesis_score:
                     let exp: Feedback = null;
                     if (this._exp_data != null) {
                         exp = this._exp_data[ii];
                     }
 
                     if (exp == null) {
-                        data_string += "-\n";
+                        dataString += "-\n";
                     } else {
 
                         let brent_data: any = exp.brentTheoData;
                         if (brent_data != null) {
-                            data_string += Utility.roundTo(brent_data['score'], 3) + "x";
-                            data_string += " (" + Utility.roundTo(brent_data['ribo_without_theo'], 3) + " / " + Utility.roundTo(brent_data['ribo_with_theo'], 3) + ")\n";
+                            dataString += Utility.roundTo(brent_data['score'], 3) + "x";
+                            dataString += " (" + Utility.roundTo(brent_data['ribo_without_theo'], 3) + " / " + Utility.roundTo(brent_data['ribo_with_theo'], 3) + ")\n";
                         } else {
                             if (this._raw_col_data[ii] >= 0) {
-                                data_string += rawstr + " / 100\n";
+                                dataString += rawstr + " / 100\n";
                             } else if (this._raw_col_data[ii] < 0) {
-                                data_string += Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._raw_col_data[ii])] + "\n";
+                                dataString += Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._raw_col_data[ii])] + "\n";
                             } else {
-                                data_string += "-\n";
+                                dataString += "-\n";
                             }
                         }
                     }
                     break;
 
-                case "Title":
-                    data_string += rawstr + "\n";
+                case DesignBrowserColumnName.Title:
+                    dataString += rawstr + "\n";
                     break;
 
-                case "Melting Point":
-                    data_string += rawstr + " 'C\n";
+                case DesignBrowserColumnName.Melting_Point:
+                    dataString += rawstr + " 'C\n";
                     break;
 
-                case "Free Energy":
-                    data_string += rawstr + " kcal\n";
+                case DesignBrowserColumnName.Free_Energy:
+                    dataString += rawstr + " kcal\n";
                     break;
 
-                case "GU Pairs":
+                case DesignBrowserColumnName.GU_Pairs:
                     if (pairs_length > 0) {
-                        data_string += rawstr + " (" + Math.round(this._raw_col_data[ii] / pairs_length * 100) + "%)\n";
+                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        data_string += rawstr + "\n";
+                        dataString += rawstr + "\n";
                     }
                     break;
 
-                case "GC Pairs":
+                case DesignBrowserColumnName.GC_Pairs:
                     if (pairs_length > 0) {
-                        data_string += rawstr + " (" + Math.round(this._raw_col_data[ii] / pairs_length * 100) + "%)\n";
+                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        data_string += rawstr + "\n";
+                        dataString += rawstr + "\n";
                     }
                     break;
 
-                case "UA Pairs":
+                case DesignBrowserColumnName.UA_Pairs:
                     if (pairs_length > 0) {
-                        data_string += rawstr + " (" + Math.round(this._raw_col_data[ii] / pairs_length * 100) + "%)\n";
+                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        data_string += rawstr + "\n";
+                        dataString += rawstr + "\n";
                     }
                     break;
 
                 default:
-                    data_string += rawstr + "\n";
+                    dataString += rawstr + "\n";
                     break;
-
                 }
             }
         }
 
-        data_string += "</span>";
-        this._data_display.text = data_string;
+        this._dataDisplay.text = dataString;
 
-        if (board_data.length > 0) {
+        if (boardData.length > 0) {
             if (this._show_exp_data) {
-                this._sequence_board.set_sequences(board_data, board_exp_data, this._pairs_array);
+                this._sequence_board.set_sequences(boardData, board_exp_data, this._pairs_array);
             } else {
-                this._sequence_board.set_sequences(board_data, null, this._pairs_array);
+                this._sequence_board.set_sequences(boardData, null, this._pairs_array);
             }
 
-            this._sequence_board.display.position = new Point(11 + this._data_display.width + 5, DataCol.DATA_H);
+            this._sequence_board.display.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
         } else {
             this._sequence_board.set_sequences(null, null, null);
         }
     }
 
+    private readonly _fontType: string;
+    private readonly _fontSize: number;
+    private readonly _sortable: boolean;
+    private readonly _columnName: string;
+    private readonly _data_type: DesignBrowserDataType;
+
     private _graphics: Graphics;
 
-    private _width: number;
-    private _height: number;
+    private _width: number = 0;
+    private _height: number = 0;
 
-    private _data_display: Text;
+    private _dataDisplay: Text;
 
     private _raw_col_data: any[] = [];
-    private _exp: string;
-    private _data_type: number;
     private _data_width: number;
     private _line_height: number;
     private _label: GameButton;

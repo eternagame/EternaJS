@@ -91,7 +91,7 @@ export class DesignBrowserMode extends GameMode {
         this._votesText = new MultiStyleText("You have...", {
             default: {
                 fontFamily: Fonts.ARIAL,
-                fontSize: 14,
+                fontSize: 12,
                 fill: 0xffffff
             },
             bold: {
@@ -275,7 +275,7 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private get contentWidth(): number {
-        return Flashbang.stageWidth - 280;
+        return Flashbang.stageWidth - 40;
     }
 
     private get contentHeight(): number {
@@ -296,7 +296,11 @@ export class DesignBrowserMode extends GameMode {
         this._marker_boxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._selection_box.setSize(this.contentWidth - 14, 20);
 
-        this._toolbarLayout.position = new Point(20, this.contentHeight - 25);
+        this._toolbarLayout.position = new Point(20, this.contentHeight + 25);
+
+        for (let col of this._dataCols) {
+            col.setSize(this.contentWidth, this.contentHeight);
+        }
     }
 
     // public load_puzzle(puzid: number): void {
@@ -760,47 +764,48 @@ export class DesignBrowserMode extends GameMode {
                 continue;
             }
 
-            let data_col: DataCol;
+            let column: DataCol;
             switch (columnName) {
             case DesignBrowserColumnName.Title:
-                data_col = new DataCol(DesignBrowserDataType.STRING, columnName, 250, FONT, FONT_SIZE, false, false);
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 250, FONT, FONT_SIZE, false);
                 break;
             case DesignBrowserColumnName.Designer:
-                data_col = new DataCol(DesignBrowserDataType.STRING, columnName, 220, FONT, FONT_SIZE, false, false);
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 220, FONT, FONT_SIZE, false);
                 break;
             case DesignBrowserColumnName.Description:
-                data_col = new DataCol(DesignBrowserDataType.STRING, columnName, 300, FONT, FONT_SIZE, false, false);
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 300, FONT, FONT_SIZE, false);
                 break;
             case DesignBrowserColumnName.Sequence:
-                data_col = new DataCol(DesignBrowserDataType.STRING, columnName, 0, FONT, FONT_SIZE, false, false);
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 0, FONT, FONT_SIZE, false);
                 break;
             case DesignBrowserColumnName.Synthesized:
-                data_col = new DataCol(DesignBrowserDataType.STRING, columnName, 100, FONT, FONT_SIZE, false, false);
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 100, FONT, FONT_SIZE, false);
                 break;
             case DesignBrowserColumnName.Votes:
-                data_col = new DataCol(DesignBrowserDataType.NUMBER, columnName, 100, FONT, FONT_SIZE, false, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 100, FONT, FONT_SIZE, true);
                 break;
             case DesignBrowserColumnName.Synthesis_score:
-                data_col = new DataCol(DesignBrowserDataType.NUMBER, columnName, 170, FONT, FONT_SIZE, false, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 170, FONT, FONT_SIZE, true);
                 break;
             default:
-                data_col = new DataCol(DesignBrowserDataType.NUMBER, columnName, 125, FONT, FONT_SIZE, false, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 125, FONT, FONT_SIZE, true);
                 break;
             }
 
-            data_col.set_reorganize_callback(this.reorganize);
-            data_col.set_update_sort_callback(this.update_sort_option);
+            column.setSize(this.contentWidth, this.contentHeight);
+            column.set_reorganize_callback(this.reorganize);
+            column.set_update_sort_callback(this.update_sort_option);
 
             // if (this.root.loaderInfo.parameters.filter1 == columnName) {
-            //     data_col.set_filter(this.root.loaderInfo.parameters.filter1_arg1, this.root.loaderInfo.parameters.filter1_arg2);
+            //     column.set_filter(this.root.loaderInfo.parameters.filter1_arg1, this.root.loaderInfo.parameters.filter1_arg2);
             // } else if (this.root.loaderInfo.parameters.filter2 == columnName) {
-            //     data_col.set_filter(this.root.loaderInfo.parameters.filter2_arg1, this.root.loaderInfo.parameters.filter2_arg2);
+            //     column.set_filter(this.root.loaderInfo.parameters.filter2_arg1, this.root.loaderInfo.parameters.filter2_arg2);
             // } else if (this.root.loaderInfo.parameters.filter3 == columnName) {
-            //     data_col.set_filter(this.root.loaderInfo.parameters.filter3_arg1, this.root.loaderInfo.parameters.filter3_arg2);
+            //     column.set_filter(this.root.loaderInfo.parameters.filter3_arg1, this.root.loaderInfo.parameters.filter3_arg2);
             // }
 
-            this._dataCols.push(data_col);
-            this._dataColParent.addObject(data_col, this._dataColParent.container);
+            this._dataCols.push(column);
+            this._dataColParent.addObject(column, this._dataColParent.container);
         }
 
         this.layout_columns(false);
@@ -928,6 +933,8 @@ export class DesignBrowserMode extends GameMode {
         this._all_solutions = solutions;
         this.update_votes();
         this.set_scroll_vertical(-1);
+
+        this.updateLayout();
     }
 
     private static return_to_game(): void {
