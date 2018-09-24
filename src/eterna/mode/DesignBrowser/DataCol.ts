@@ -110,7 +110,7 @@ export class DataCol extends ContainerObject {
     }
 
     private updateLayout(): void {
-        this._num_display = int((this._height - 70 - 20) / this._line_height);
+        this._num_display = Math.ceil((this._height - 70 - 20) / this._line_height);
         this.display_data();
         this.set_column_color(this._col);
     }
@@ -241,22 +241,21 @@ export class DataCol extends ContainerObject {
         this._exp_data = exp_data;
     }
 
-    //Set Raw Data for each Column
     public set_data_and_display(raw: any[]): void {
-        this._raw_col_data = [];
+        this._rawData = [];
 
         for (let ii = 0; ii < raw.length; ii++) {
             if (this._data_type == DesignBrowserDataType.INT) {
-                this._raw_col_data.push(int(raw[ii]));
+                this._rawData.push(int(raw[ii]));
             } else if (this._data_type == DesignBrowserDataType.STRING) {
-                this._raw_col_data.push(raw[ii]);
+                this._rawData.push("" + raw[ii]);
             } else if (this._data_type == DesignBrowserDataType.NUMBER) {
-                this._raw_col_data.push(Number(raw[ii]));
+                this._rawData.push(Number(raw[ii]));
             } else {
                 throw new Error("Unrecognized data type " + this._data_type);
             }
         }
-        //Initial Display
+
         this.display_data();
     }
 
@@ -319,10 +318,10 @@ export class DataCol extends ContainerObject {
         }
 
         for (let ii = this._offset; ii < this._offset + this._num_display; ii++) {
-            if (ii >= this._raw_col_data.length) {
+            if (ii >= this._rawData.length) {
                 dataString += "\n";
             } else {
-                let rawstr = Utility.stripHtmlTags("" + this._raw_col_data[ii]);
+                let rawstr = Utility.stripHtmlTags("" + this._rawData[ii]);
 
                 //trace(rawstr);
                 switch (this._columnName) {
@@ -333,7 +332,7 @@ export class DataCol extends ContainerObject {
                     break;
 
                 case DesignBrowserColumnName.Votes:
-                    if (this._raw_col_data[ii] >= 0) {
+                    if (this._rawData[ii] >= 0) {
                         dataString += rawstr + "\n";
                     } else {
                         dataString += "-\n";
@@ -341,7 +340,7 @@ export class DataCol extends ContainerObject {
                     break;
 
                 case DesignBrowserColumnName.My_Votes:
-                    if (this._raw_col_data[ii] >= 0) {
+                    if (this._rawData[ii] >= 0) {
                         dataString += rawstr + "\n";
                     } else {
                         dataString += "-\n";
@@ -364,10 +363,10 @@ export class DataCol extends ContainerObject {
                             dataString += Utility.roundTo(brent_data['score'], 3) + "x";
                             dataString += " (" + Utility.roundTo(brent_data['ribo_without_theo'], 3) + " / " + Utility.roundTo(brent_data['ribo_with_theo'], 3) + ")\n";
                         } else {
-                            if (this._raw_col_data[ii] >= 0) {
+                            if (this._rawData[ii] >= 0) {
                                 dataString += rawstr + " / 100\n";
-                            } else if (this._raw_col_data[ii] < 0) {
-                                dataString += Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._raw_col_data[ii])] + "\n";
+                            } else if (this._rawData[ii] < 0) {
+                                dataString += Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii])] + "\n";
                             } else {
                                 dataString += "-\n";
                             }
@@ -389,7 +388,7 @@ export class DataCol extends ContainerObject {
 
                 case DesignBrowserColumnName.GU_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
+                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
                         dataString += rawstr + "\n";
                     }
@@ -397,7 +396,7 @@ export class DataCol extends ContainerObject {
 
                 case DesignBrowserColumnName.GC_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
+                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
                         dataString += rawstr + "\n";
                     }
@@ -405,7 +404,7 @@ export class DataCol extends ContainerObject {
 
                 case DesignBrowserColumnName.UA_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._raw_col_data[ii] / pairs_length * 100)}%)\n`;
+                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
                         dataString += rawstr + "\n";
                     }
@@ -446,7 +445,7 @@ export class DataCol extends ContainerObject {
 
     private _dataDisplay: Text;
 
-    private _raw_col_data: any[] = [];
+    private _rawData: any[] = [];
     private _data_width: number;
     private _line_height: number;
     private _label: GameButton;

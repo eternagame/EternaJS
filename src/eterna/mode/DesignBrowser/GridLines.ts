@@ -21,7 +21,7 @@ export class GridLines extends Graphics {
         this.clear();
 
         this.lineStyle(this._thickness, this._color);
-        for (let ii = 0; ii < Math.round(height / this._intervalSpacing); ii++) {
+        for (let ii = 0; ii < Math.ceil(height / this._intervalSpacing); ii++) {
             this.moveTo(5, ii * this._intervalSpacing);
             this.lineTo(width - 5, ii * this._intervalSpacing);
         }
