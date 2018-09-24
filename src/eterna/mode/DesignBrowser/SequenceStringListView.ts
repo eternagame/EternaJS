@@ -77,16 +77,18 @@ export class SequenceStringListView extends Container {
 
             for (let jj = 0; jj < seq.length; jj++) {
                 if (ii == 0 && exp_data != null) {
-                    let color: number = 0x0;
                     if (pairs[jj] < 0) {
-                        color = 0xCCCC00;
-                        this._graphics.beginFill(color, 0.5);
+                        this._graphics.beginFill(0xCCCC00, 0.5);
                     } else {
-                        color = 0x0000FF;
-                        this._graphics.beginFill(color, 0.2);
+                        this._graphics.beginFill(0x0000FF, 0.2);
                     }
 
-                    this._graphics.drawRect(jj * this._letterWidth, 0, this._letterWidth, Math.min(this._height, sequences.length * this._letterHeight));
+                    const x = jj * this._letterWidth;
+                    const y  = 0;
+                    const w = this._letterWidth;
+                    const h = Math.min(this._height, sequences.length * this._letterHeight);
+
+                    this._graphics.drawRect(x, y, w, h);
                     this._graphics.endFill();
                 }
 
