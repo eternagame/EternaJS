@@ -18,10 +18,11 @@ export class SequenceBoard extends ContainerObject {
         this._graphics = new Graphics();
         this.container.addChild(this._graphics);
 
-        let textBuilder = new TextBuilder().font(fontname).fontSize(fontsize);
-        if (fontbold) {
-            textBuilder.bold();
-        }
+        let textBuilder = new TextBuilder()
+            .font(fontname)
+            .fontSize(fontsize)
+            .color(0xffffff)
+            .bold(fontbold);
 
         this._letterTextures = SequenceBoard.createLetterBitmaps(textBuilder, "A")
             .concat(SequenceBoard.createLetterBitmaps(textBuilder, "U"))
