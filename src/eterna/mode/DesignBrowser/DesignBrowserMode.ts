@@ -1,3 +1,4 @@
+import MultiStyleText from "pixi-multistyle-text";
 import {Container, Point, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
@@ -87,11 +88,21 @@ export class DesignBrowserMode extends GameMode {
         // Measure the actual height of a line of text in the DataCol objects
         let line_height = Fonts.arial("", 14).computeLineHeight();
 
-        this._vote_left = Fonts.arial("You have...", 12).color(0xffffff).build();
-        this._vote_left.position = new Point(WMARGIN, HMARGIN);
-        this._ins_panel.container.addChild(this._vote_left);
+        this._votesText = new MultiStyleText("You have...", {
+            default: {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 14,
+                fill: 0xffffff
+            },
+            bold: {
+                fontStyle: "bold",
+                fill: 0xffcc00
+            }
+        });
+        this._votesText.position = new Point(WMARGIN, HMARGIN);
+        this._ins_panel.container.addChild(this._votesText);
 
-        this._ins_panel.setSize(this._vote_left.width + 2 * WMARGIN, this._vote_left.height + 2 * HMARGIN);
+        this._ins_panel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
         this._ins_panel.display.position = new Point(0, -this._ins_panel.height - 2);
 
         this._vSlider = new SliderBar(true);
@@ -721,13 +732,14 @@ export class DesignBrowserMode extends GameMode {
         let mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
 
         if (!this._novote) {
-            this._vote_left.text = "You have <B><FONT COLOR=\"#FFCC00\">" + votesLeft + "</FONT></B> votes and <B><FONT COLOR=\"#FFCC00\">" + (available - mySolutionTitles.length) + "</FONT></B> solution slots left.\n";
+            this._votesText.text = `You have <bold>${votesLeft}</bold> votes and ` +
+                `<bold>${available - mySolutionTitles.length}</bold> solution slots left.`;
         } else {
-            this._vote_left.text = "This puzzle has been cleared.";
+            this._votesText.text = "This puzzle has been cleared.";
         }
         let w_margin: number = 22;
         let h_walker: number = 17;
-        this._ins_panel.setSize(this._vote_left.width + 2 * w_margin, this._vote_left.height + 2 * h_walker);
+        this._ins_panel.setSize(this._votesText.width + 2 * w_margin, this._votesText.height + 2 * h_walker);
 
         this.reorganize(true);
     }
@@ -949,7 +961,7 @@ export class DesignBrowserMode extends GameMode {
     private _return_to_game_button: GameButton;
     private _letter_color_button: GameButton;
     private _exp_color_button: GameButton;
-    private _vote_left: Text;
+    private _votesText: MultiStyleText;
     private _ins_panel: GamePanel;
     private _selected_solution_index: number = -1;
     private _selected_solution: Solution;
