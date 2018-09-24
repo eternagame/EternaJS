@@ -1,5 +1,4 @@
 ﻿import {Container, Graphics, Sprite, Texture} from "pixi.js";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {TextBuilder} from "../../../flashbang/util/TextBuilder";
 import {TextureUtil} from "../../../flashbang/util/TextureUtil";
 import {EPars} from "../../EPars";
@@ -8,7 +7,7 @@ import {ExpPainter} from "../../ExpPainter";
 import {Feedback} from "../../Feedback";
 import {EternaTextureUtil} from "../../util/EternaTextureUtil";
 
-export class SequenceBoard extends ContainerObject {
+export class SequenceStringListView extends Container {
     public constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {
         super();
 
@@ -16,7 +15,7 @@ export class SequenceBoard extends ContainerObject {
         this._letterHeight = letterHeight;
 
         this._graphics = new Graphics();
-        this.container.addChild(this._graphics);
+        this.addChild(this._graphics);
 
         let textBuilder = new TextBuilder()
             .font(fontname)
@@ -24,10 +23,10 @@ export class SequenceBoard extends ContainerObject {
             .color(0xffffff)
             .bold(fontbold);
 
-        this._letterTextures = SequenceBoard.createLetterBitmaps(textBuilder, "A")
-            .concat(SequenceBoard.createLetterBitmaps(textBuilder, "U"))
-            .concat(SequenceBoard.createLetterBitmaps(textBuilder, "G"))
-            .concat(SequenceBoard.createLetterBitmaps(textBuilder, "C"));
+        this._letterTextures = SequenceStringListView.createLetterBitmaps(textBuilder, "A")
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "U"))
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "G"))
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "C"));
     }
 
     public setSize(width: number, height: number): void {
@@ -47,7 +46,7 @@ export class SequenceBoard extends ContainerObject {
         }
 
         this._content = new Container();
-        this.container.addChild(this._content);
+        this.addChild(this._content);
 
         let use_exp: boolean = exp_data != null;
 
@@ -95,22 +94,22 @@ export class SequenceBoard extends ContainerObject {
                 let letter: string = seq.charAt(jj);
 
                 if (letter == "A") {
-                    letter_index = SequenceBoard.A_INDEX;
+                    letter_index = SequenceStringListView.A_INDEX;
                 } else if (letter == "U") {
-                    letter_index = SequenceBoard.U_INDEX;
+                    letter_index = SequenceStringListView.U_INDEX;
                 } else if (letter == "G") {
-                    letter_index = SequenceBoard.G_INDEX;
+                    letter_index = SequenceStringListView.G_INDEX;
                 } else if (letter == "C") {
-                    letter_index = SequenceBoard.C_INDEX;
+                    letter_index = SequenceStringListView.C_INDEX;
                 }
 
                 let bd_index: number = 0;
 
                 if (!use_exp) {
-                    bd_index = letter_index * SequenceBoard.NUM_DATA_PER_LETTER;
+                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER;
                 } else {
                     if (shape_data == null || jj < shape_data_start || jj >= shape_data.length + shape_data_start) {
-                        bd_index = letter_index * SequenceBoard.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1;
+                        bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1;
                     } else {
                         let color_index: number = 0;
 
@@ -120,7 +119,7 @@ export class SequenceBoard extends ContainerObject {
                             color_index = exp_painter.getColorLevel(jj);
                         }
 
-                        bd_index = letter_index * SequenceBoard.NUM_DATA_PER_LETTER + 1 + color_index;
+                        bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + color_index;
                     }
                 }
 
@@ -160,8 +159,8 @@ export class SequenceBoard extends ContainerObject {
     private readonly _letterWidth: number;
     private readonly _letterHeight: number;
     private readonly _letterTextures: Texture[];
+    private readonly _graphics: Graphics;
 
-    private _graphics: Graphics;
     private _content: Container;
 
     private _width: number;

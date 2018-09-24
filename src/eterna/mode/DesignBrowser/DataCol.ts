@@ -10,7 +10,7 @@ import {Fonts} from "../../util/Fonts";
 import {int} from "../../util/int";
 import {Utility} from "../../util/Utility";
 import {DesignBrowserColumnName, DesignBrowserDataType} from "./DesignBrowserMode";
-import {SequenceBoard} from "./SequenceBoard";
+import {SequenceStringListView} from "./SequenceStringListView";
 import {SortOrder} from "./SortOrder";
 
 export type SortFunction = (sortCategory: string, sortOrder: SortOrder, sortArgs?: any[]) => void;
@@ -46,9 +46,9 @@ export class DataCol extends ContainerObject {
         this._dataDisplay.position = new Point(11, DataCol.DATA_H);
         this.container.addChild(this._dataDisplay);
 
-        this._sequence_board = new SequenceBoard(this._fontType, this._fontSize, true, this._fontSize, this._line_height);
-        this._sequence_board.display.position = new Point(0, DataCol.DATA_H);
-        this.addObject(this._sequence_board, this.container);
+        this._sequencesView = new SequenceStringListView(this._fontType, this._fontSize, true, this._fontSize, this._line_height);
+        this._sequencesView.position = new Point(0, DataCol.DATA_H);
+        this.container.addChild(this._sequencesView);
 
         this._label = new GameButton().label(this._columnName, 14);
         this._label.display.position = new Point(11, 7);
@@ -424,14 +424,14 @@ export class DataCol extends ContainerObject {
 
         if (boardData.length > 0) {
             if (this._show_exp_data) {
-                this._sequence_board.set_sequences(boardData, board_exp_data, this._pairs_array);
+                this._sequencesView.set_sequences(boardData, board_exp_data, this._pairs_array);
             } else {
-                this._sequence_board.set_sequences(boardData, null, this._pairs_array);
+                this._sequencesView.set_sequences(boardData, null, this._pairs_array);
             }
 
-            this._sequence_board.display.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
+            this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
         } else {
-            this._sequence_board.set_sequences(null, null, null);
+            this._sequencesView.set_sequences(null, null, null);
         }
     }
 
@@ -469,7 +469,7 @@ export class DataCol extends ContainerObject {
     private _pairs_array: number[];
     private _col: number = 0;
 
-    private _sequence_board: SequenceBoard;
+    private _sequencesView: SequenceStringListView;
 
     private static readonly DATA_H = 88;
 }
