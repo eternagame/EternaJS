@@ -8,7 +8,7 @@ import {GameButton} from "../../ui/GameButton";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
-import {DesignBrowserDataType} from "./DesignBrowserDataType";
+import {DesignBrowserDataType} from "./DesignBrowserMode";
 import {SequenceBoard} from "./SequenceBoard";
 
 export class DataCol extends ContainerObject {
