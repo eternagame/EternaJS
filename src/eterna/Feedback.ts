@@ -122,7 +122,7 @@ export class Feedback {
     }
 
     public isFailed(index: number = 0): number {
-        return this._faileds[index];
+        return index < this._faileds.length ? this._faileds[index] : 0;
     }
 
     private _shapeData: number[][] = [];
