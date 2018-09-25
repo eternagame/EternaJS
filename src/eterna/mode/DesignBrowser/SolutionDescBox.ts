@@ -1,4 +1,8 @@
+import MultiStyleText from "pixi-multistyle-text";
 import {Point, Text} from "pixi.js";
+import {HAlign} from "../../../flashbang/core/Align";
+import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
+import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
 import {SceneObject} from "../../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
@@ -9,9 +13,9 @@ import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {GameTextBox} from "../../ui/GameTextBox";
 import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {TextInputObject} from "../../ui/TextInputObject";
+import {VScrollBox} from "../../ui/VScrollBox";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
 import {GameMode} from "../GameMode";
@@ -34,13 +38,9 @@ export class SolutionDescBox extends GamePanel {
             EternaURL.createURL({"page": "player", "uid": this._solution.playerID}) +
             "\" TARGET=\"_PLAYER\"><U>" + Utility.stripHtmlTags(this._solution.playerName) + "</U></A>";
 
-        this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).bold();
+        this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).selectable(false).bold();
         this._boxTitle.display.position = new Point(20, 20);
         this.addObject(this._boxTitle, this.container);
-
-        this._descBox = new GameTextBox([1]);
-        this._descBox.display.position = new Point(10, 40);
-        this.addObject(this._descBox, this.container);
 
         this._copySolutionButton = new GameButton().label("Get URL for this design", 10);
         this._copySolutionButton.display.position = new Point(20, 45);
@@ -80,8 +80,7 @@ export class SolutionDescBox extends GamePanel {
         //     Application.instance.copy_url(host + playerurl);
         // });
 
-        this._descBox.set_scroll_to(0);
-        this._descBox.set_text([SolutionDescBox.getSolutionText(this._solution, this._puzzle)]);
+        this.updateDescriptionAndComments();
 
         this._commentInput.display.visible = false;
         this._commentButton.display.visible = false;
@@ -99,9 +98,7 @@ export class SolutionDescBox extends GamePanel {
             this._commentButton.display.visible = true;
             this._commentInput.text = "";
 
-            this._descBox.set_text([
-                SolutionDescBox.getSolutionText(this._solution, this._puzzle) + "\n\n" +
-                SolutionDescBox.getCommentsText(commentsData)]);
+            this.updateDescriptionAndComments(commentsData);
         });
 
         this.updateView();
@@ -112,13 +109,56 @@ export class SolutionDescBox extends GamePanel {
 
         if (this.isLiveObject) {
             this._boxTitle.width = this._width - 40;
-            this._descBox.setSize(this._width - 20, this._height - 50);
+            this._descriptionAndComments.setSize(this._width - 30, this._height - 130);
 
             this._commentInput.width = this._width - 90;
             this._commentInput.display.position = new Point(20, this._height - 30);
 
             this._commentButton.display.position = new Point(this._width - 50, this._height - 30);
         }
+    }
+
+    private updateDescriptionAndComments(commentsData?: any[]): void {
+        let prevScroll = 0;
+        if (this._descriptionAndComments != null) {
+            prevScroll = this._descriptionAndComments.scrollProgress;
+            this._descriptionAndComments.destroySelf();
+        }
+
+        this._descriptionAndComments = new VScrollBox(this._width - 30, this._height - 130);
+        this._descriptionAndComments.scrollProgress = prevScroll;
+        this._descriptionAndComments.display.position = new Point(20, 80);
+        this.addObject(this._descriptionAndComments, this.container);
+
+        let layout = new VLayoutContainer(0, HAlign.LEFT);
+        layout.addChild(SolutionDescBox.getSolutionText(this._solution, this._puzzle));
+
+        if (commentsData !== undefined) {
+            layout.addVSpacer(45);
+
+            let commentsCount = commentsData != null ? commentsData.length : 0;
+            layout.addChild(Fonts.arial(`Comments (${commentsCount})`, 13)
+                .color(0xffffff).bold().build());
+
+            if (commentsData != null) {
+                layout.addVSpacer(15);
+
+                for (let comment of commentsData) {
+                    let commentLayout = new HLayoutContainer(4);
+                    layout.addChild(commentLayout);
+
+                    let url = EternaURL.createURL({page: "player", uid: comment['uid']});
+                    let userButton = new GameButton().label(comment["name"], 10);
+                    userButton.clicked.connect(() => window.open(url, "_blank"));
+
+                    this._descriptionAndComments.addObject(userButton, commentLayout);
+                    commentLayout.addChild(Fonts.arial(comment["comment"], 13).color(0xffffff).build());
+                }
+            }
+        }
+
+        layout.layout();
+        this._descriptionAndComments.content.addChild(layout);
     }
 
     private submitComment(): void {
@@ -137,18 +177,14 @@ export class SolutionDescBox extends GamePanel {
             this._height - 30);
 
         this._comments.submit_comment(this._commentInput.text)
-            .then((commentsData) => {
+            .then(commentsData => {
                 submittingText.destroySelf();
 
                 this._commentInput.display.visible = true;
                 this._commentButton.display.visible = true;
                 this._commentInput.text = "";
 
-                this._descBox.set_text([
-                    SolutionDescBox.getSolutionText(this._solution, this._puzzle) + "\n\n" +
-                    SolutionDescBox.getCommentsText(commentsData)]);
-
-                this._descBox.set_scroll_to(1);
+                this.updateDescriptionAndComments(commentsData);
             });
     }
 
@@ -163,54 +199,51 @@ export class SolutionDescBox extends GamePanel {
         return loadingText;
     }
 
-    private static getCommentsText(comments_data: any[]): string {
-        let comments_count: number = 0;
-        if (comments_data) {
-            comments_count = comments_data.length;
-        }
-
-        let comments_str = `\n\n<B>Comments (${comments_count})</B>\n\n`;
-
-        if (comments_data) {
-            for (let ii = 0; ii < comments_data.length; ii++) {
-                let comment: any = comments_data[ii];
-                let url = EternaURL.createURL({page: "player", uid: comment['uid']});
-                comments_str += `<A HREF="${url}" TARGET="_BLANK"><U><B>${comment['name']}</B></U></A> : `;
-                comments_str += comment['comment'] + "\n";
-            }
-        }
-        return comments_str;
-    }
-
-    private static getSolutionText(solution: Solution, puzzle: Puzzle): string {
+    private static getSolutionText(solution: Solution, puzzle: Puzzle): MultiStyleText {
         let text = "";
 
         if (solution.expFeedback != null) {
             if (solution.expFeedback.isFailed() == 0) {
-                text += "<B>[SYNTHESIZED!]</B>\n<FONT COLOR=\"#FFCC00\">This design was synthesized with score </FONT><B>" + solution.getProperty("Synthesis score") + " / 100</B>\n\n";
+                text += `<bold>[SYNTHESIZED!]</bold>\n` +
+                    `<orange>This design was synthesized with score </orange>` +
+                    `<bold>${solution.getProperty("Synthesis score")} / 100</bold>\n\n`;
             } else {
-                let failure_index: number = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
-                text += Feedback.EXPDISPLAYS_LONG[failure_index] + " Score : <B>" + Feedback.EXPSCORES[failure_index] + " / 100</B>\n\n";
+                let failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
+                text += Feedback.EXPDISPLAYS_LONG[failureIdx] +
+                    ` Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n\n`;
             }
         } else {
             if (solution.getProperty("Synthesized") == "y") {
-                text += "<B>[WAITING]</B>\n<FONT COLOR=\"#FFCC00\">This design is being synthesized and waiting for results. </FONT>\n\n"
+                text += `<bold>[WAITING]</bold>\n` +
+                    `<orange>This design is being synthesized and waiting for results. </orange>\n\n`;
             } else if (solution.getProperty("Round") < puzzle.round) {
-                text += "<B>[OLD]</B>\n<FONT COLOR=\"#FFCC00\">This design was submitted in round </FONT><B>" + solution.getProperty("Round") + ".</B><FONT COLOR=\"#FFCC00\"> You can't vote on designs from previous rounds. But you can use or resubmit this design by clicking on </FONT><B>\"Modify\".</B>\n\n"
+                text += `<bold>[OLD]</bold>\n` +
+                    `<orange>This design was submitted in round </orange>` +
+                    `<bold>${solution.getProperty("Round")}.</bold>` +
+                    `<orange> You can't vote on designs from previous rounds. But you can use or resubmit this design by clicking on </orange>` +
+                    `<bold>"Modify".</bold>\n\n`;
             }
-
         }
 
-        text += "<B>Design description</B>\n\n";
+        text += "<bold>Design description</bold>\n\n";
         text += Utility.stripHtmlTags(solution.fullDescription);
-        return text;
+
+        return new MultiStyleText(text, {
+            default: {
+                fontFamily: Fonts.ARIAL,
+                fontSize: 13,
+                fill: 0xffffff,
+            },
+            bold: { fontStyle: "bold" },
+            orange: { fill: 0xffcc00 },
+        });
     }
 
     private readonly _solution: Solution;
     private readonly _puzzle: Puzzle;
     private readonly _comments: LabComments;
 
-    private _descBox: GameTextBox;
+    private _descriptionAndComments: VScrollBox;
     private _boxTitle: HTMLTextObject;
     private _copySolutionButton: GameButton;
     private _copyPlayerButton: GameButton;
