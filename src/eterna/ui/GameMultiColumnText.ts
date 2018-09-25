@@ -106,7 +106,8 @@ class ScrollableTextField extends ScrollContainer {
 
     public constructor(tf: Text, width: number, height: number) {
         super(width, height);
-        this.content.addChild(tf);
+        this.tf = tf;
+        this.content.addChild(this.tf);
     }
 
 }
