@@ -57,16 +57,6 @@ export class ActionBox extends Dialog<void> {
         // this._playButton.clicked.connect(() => this.start_game_with_sequence());
         this.addObject(playButton, this._actionButtonsLayout);
 
-        let sortImage = Sprite.fromImage(Bitmaps.ImgNextInside);
-        sortImage.scale = new Point(0.3, 0.3);
-        let sortButton = new ThumbnailAndTextButton()
-            .text("Sort")
-            .thumbnail(sortImage)
-            .tooltip("Sort based on similarity to this design.");
-        sortButton.clicked.connect(() => this.sortClicked.emit());
-        // this._sortButton.clicked.connect(() => this.set_anchor());
-        this.addObject(sortButton, this._actionButtonsLayout);
-
         if (this._solution.expFeedback != null && this._solution.expFeedback.isFailed() === 0) {
             // SEE RESULT (allowed if the solution is synthesized)
             let expdata = this._solution.expFeedback;
@@ -102,6 +92,16 @@ export class ActionBox extends Dialog<void> {
                 this.addObject(voteButton, this._actionButtonsLayout);
             }
         }
+
+        let sortImage = Sprite.fromImage(Bitmaps.ImgNextInside);
+        sortImage.scale = new Point(0.3, 0.3);
+        let sortButton = new ThumbnailAndTextButton()
+            .text("Sort")
+            .thumbnail(sortImage)
+            .tooltip("Sort based on similarity to this design.");
+        sortButton.clicked.connect(() => this.sortClicked.emit());
+        // this._sortButton.clicked.connect(() => this.set_anchor());
+        this.addObject(sortButton, this._actionButtonsLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
         if (this._solution.getProperty("Round") == this._puzzle.round &&
@@ -197,7 +197,9 @@ class ThumbnailAndTextButton extends GameButton {
 
         this._bgFrame = new Graphics()
             .lineStyle(2, 0xC0DCE7)
-            .drawRoundedRect(0, 0, 75, 75, 10);
+            .beginFill(0x0, 0)
+            .drawRoundedRect(0, 0, 75, 75, 10)
+            .endFill();
         this._view.addChild(this._bgFrame);
 
         this._textField = Fonts.arial("", 14).bold().color(0xffffff).build();
