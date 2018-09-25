@@ -24,6 +24,9 @@ export class PoseThumbnail {
         sprite.removeChildren();
         let graphics: Graphics = new Graphics();
         PoseThumbnail.create(sequence, pairs, size, type, exp_start_index, wrong_pairs, exp_use_threshold, exp_threshold, graphics);
+        let bounds = graphics.getLocalBounds();
+        graphics.x = -bounds.left;
+        graphics.y = -bounds.top;
         sprite.addChild(graphics);
     }
 
