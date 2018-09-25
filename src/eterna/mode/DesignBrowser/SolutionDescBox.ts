@@ -108,13 +108,15 @@ export class SolutionDescBox extends GamePanel {
     protected updateView(): void {
         super.updateView();
 
-        this._boxTitle.width = this._width - 40;
-        this._descBox.setSize(this._width - 20, this._height - 50);
+        if (this.isLiveObject) {
+            this._boxTitle.width = this._width - 40;
+            this._descBox.setSize(this._width - 20, this._height - 50);
 
-        this._commentInput.width = this._width - 90;
-        this._commentInput.display.position = new Point(20, this._height - 30);
+            this._commentInput.width = this._width - 90;
+            this._commentInput.display.position = new Point(20, this._height - 30);
 
-        this._commentButton.display.position = new Point(this._width - 50, this._height - 30);
+            this._commentButton.display.position = new Point(this._width - 50, this._height - 30);
+        }
     }
 
     private submitComment(): void {
