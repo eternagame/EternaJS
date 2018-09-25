@@ -3,6 +3,7 @@ import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {ChatManager} from "./ChatManager";
+import {TestMode} from "./debug/TestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
@@ -11,6 +12,7 @@ import {NuPACK} from "./folding/NuPACK";
 import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
+import {DesignBrowserMode} from "./mode/DesignBrowser/DesignBrowserMode";
 import {FeedbackViewMode} from "./mode/FeedbackView/FeedbackViewMode";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode, PoseEditParams} from "./mode/PoseEdit/PoseEditMode";
@@ -62,6 +64,8 @@ export enum InitialAppMode {
     PUZZLEMAKER = "puzzlemaker",                        // load the puzzlemaker
     SOLUTION_SEE_RESULT = "solution_see_result",        // load a solution into FeedbackViewMode
     SOLUTION_COPY_AND_VIEW = "solution_copy_and_view",  // load a solution into PoseEditMode
+    DESIGN_BROWSER = "design_browser",                  // load a puzzle into DesignBrowserMode
+    TEST = "test",                                      // load the debugging test mode
 }
 
 export interface EternaAppParams {
@@ -127,11 +131,11 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
-            // .then(() => {
-            //     this._modeStack.unwindToMode(new TestMode());
-            // })
             .then(() => {
                 switch (this._params.mode) {
+                case InitialAppMode.TEST:
+                    this._modeStack.unwindToMode(new TestMode());
+                    return Promise.resolve();
                 case InitialAppMode.PUZZLEMAKER:
                     return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                 case InitialAppMode.PUZZLE:
@@ -143,6 +147,8 @@ export class EternaApp extends FlashbangApp {
                 case InitialAppMode.SOLUTION_COPY_AND_VIEW:
                     return this.loadSolution(this._params.puzzleID, this._params.solutionID,
                         this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
+                case InitialAppMode.DESIGN_BROWSER:
+                    return this.loadDesignBrowser(this._params.puzzleID);
                 default:
                     return Promise.reject(`Unrecognized mode '${this._params.mode}'`);
                 }
@@ -189,6 +195,12 @@ export class EternaApp extends FlashbangApp {
                     this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
                 }
             });
+    }
+
+    public loadDesignBrowser(puzzleID: number): Promise<void> {
+        this.setLoadingText(`Loading puzzle ${puzzleID}...`);
+        return PuzzleManager.instance.getPuzzleByID(puzzleID)
+            .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle)));
     }
 
     protected onUncaughtError(err: any): void {
