@@ -21,7 +21,7 @@ export class GameTextBox extends ContainerObject {
         this._textWrapperBG = new Graphics();
         textWrapper.container.addChild(this._textWrapperBG);
 
-        this._textfield = new GameMultiColumnText(Fonts.arial("", 13), this._sizes);
+        this._textfield = new GameMultiColumnText(Fonts.arial("", 13).color(0xffffff), this._sizes);
         this._textfield.position = new Point(GameTextBox.W_MARGIN, GameTextBox.H_MARGIN);
         textWrapper.container.addChild(this._textfield);
 
