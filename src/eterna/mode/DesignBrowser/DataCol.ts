@@ -124,18 +124,18 @@ export class DataCol extends ContainerObject {
         return this.container.toLocal(Flashbang.globalMouse);
     }
 
-    public get_current_mouse_index(): number[] {
+    public get_current_mouse_index(): [number, number] {
         let mouseLoc = this.mouseLoc;
         if (mouseLoc.y < DataCol.DATA_H) {
             return [0, DataCol.DATA_H - mouseLoc.y];
         }
 
-        let ii = (mouseLoc.y - DataCol.DATA_H) / this._line_height;
+        let ii = int((mouseLoc.y - DataCol.DATA_H) / this._line_height);
         if (ii >= this._num_display) {
             return [this._num_display - 1, DataCol.DATA_H + (this._num_display - 1) * this._line_height - mouseLoc.y];
         }
 
-        return [ii, DataCol.DATA_H + (ii * this._line_height) - mouseLoc.y];
+        return [ii, int(DataCol.DATA_H + (ii * this._line_height) - mouseLoc.y)];
     }
 
     public set_filter(filter1: string, filter2: string): void {
