@@ -3,7 +3,6 @@ import {Container, Point, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
-import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../../flashbang/objects/SceneObject";
@@ -36,8 +35,6 @@ import {GridLines} from "./GridLines";
 import {MarkersBoxes} from "./MarkersBoxes";
 import {SelectionBox} from "./SelectionBox";
 import {VoteProcessor} from "./VoteProcessor";
-
-type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export enum DesignBrowserDataType {
     INT = 0,
@@ -77,7 +74,7 @@ export class DesignBrowserMode extends GameMode {
         super.setup();
 
         this._content.position = new Point(10, 86);
-        this.container.addChild(this._content);
+        this.uiLayer.addChild(this._content);
 
         /// Instruction panel
         this._ins_panel = new GamePanel();

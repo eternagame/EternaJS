@@ -1,5 +1,6 @@
-import {Container, Text, Graphics, Sprite, Point} from "pixi.js";
+import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
+import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
@@ -92,7 +93,15 @@ export class ActionBox extends Dialog<void> {
     }
 
     private updateLayout(): void {
+        let width = Flashbang.stageWidth - 90;
+        let height = Flashbang.stageHeight - 220;
+
+        this._actionbox.setSize(width, height);
         this._solution_desc.setSize(this._actionbox.width - 20, this._actionbox.height - 120);
+
+        DisplayUtil.positionRelativeToStage(
+            this._actionbox.display, HAlign.CENTER, VAlign.CENTER,
+            HAlign.CENTER, VAlign.CENTER);
     }
 
     private readonly _solution: Solution;
