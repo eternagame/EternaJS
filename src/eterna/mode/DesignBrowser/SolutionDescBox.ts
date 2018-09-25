@@ -10,6 +10,7 @@ import {Solution} from "../../puzzle/Solution";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
 import {GameTextBox} from "../../ui/GameTextBox";
+import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
@@ -22,19 +23,20 @@ export class SolutionDescBox extends GamePanel {
         this._solution = solution;
         this._puzzle = puzzle;
         this._comments = new LabComments(this._solution.nodeID);
+        this.setSize(200, 200);
     }
 
     protected added(): void {
         super.added();
 
         let boxTitleText =
-            "<B><FONT COLOR=\"#FFCC00\">" + Utility.stripHtmlTags(this._solution.title) + "</FONT></B> by <A HREF=\"" +
+            "<FONT COLOR=\"#FFCC00\">" + Utility.stripHtmlTags(this._solution.title) + "</FONT> by <A HREF=\"" +
             EternaURL.createURL({"page": "player", "uid": this._solution.playerID}) +
             "\" TARGET=\"_PLAYER\"><U>" + Utility.stripHtmlTags(this._solution.playerName) + "</U></A>";
 
-        this._boxTitle = Fonts.arial(boxTitleText, 16).bold().build();
-        this._boxTitle.position = new Point(20, 20);
-        this.container.addChild(this._boxTitle);
+        this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).bold();
+        this._boxTitle.display.position = new Point(20, 20);
+        this.addObject(this._boxTitle, this.container);
 
         this._descBox = new GameTextBox([1]);
         this._descBox.display.position = new Point(10, 40);
@@ -151,7 +153,7 @@ export class SolutionDescBox extends GamePanel {
     }
 
     private static createLoadingText(text: string): SceneObject<Text> {
-        let loadingText = new SceneObject(Fonts.arial(text, 14).build());
+        let loadingText = new SceneObject(Fonts.arial(text, 14).color(0xffffff).build());
         loadingText.addObject(new RepeatingTask(() => {
             return new SerialTask(
                 new AlphaTask(0, 0.7),
@@ -209,7 +211,7 @@ export class SolutionDescBox extends GamePanel {
     private readonly _comments: LabComments;
 
     private _descBox: GameTextBox;
-    private _boxTitle: Text;
+    private _boxTitle: HTMLTextObject;
     private _copySolutionButton: GameButton;
     private _copyPlayerButton: GameButton;
     private _commentInput: TextInputObject;

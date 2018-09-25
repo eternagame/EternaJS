@@ -1,25 +1,26 @@
-import {Point} from "pixi.js";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GridLines} from "../mode/DesignBrowser/GridLines";
-import {Fonts} from "../util/Fonts";
+import {ActionBox} from "../mode/DesignBrowser/ActionBox";
+import {GameMode} from "../mode/GameMode";
+import {Puzzle} from "../puzzle/Puzzle";
+import {PuzzleManager} from "../puzzle/PuzzleManager";
+import {Solution} from "../puzzle/Solution";
+import {SolutionManager} from "../puzzle/SolutionManager";
 
-export class TestMode extends AppMode {
+export class TestMode extends GameMode {
     protected setup(): void {
         super.setup();
 
-        let line_height = Fonts.arial("", 14).computeLineHeight();
-        let gridlines = new GridLines(2, 0x4A5F73, 5 * line_height);
-        gridlines.position = new Point(10, 168);
-        this.container.addChild(gridlines);
+        let puzzleID = 7656242;
+        let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
+        let loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
+        Promise.all([loadPuzzle, loadSolutions])
+            .then(([puzzle, solutions]) => {
+                this.showActionBox(puzzle, solutions[0]);
+            });
+    }
 
-        const updateLayout = () => {
-            gridlines.setSize(
-                Flashbang.stageWidth - 20,
-                Flashbang.stageHeight - gridlines.position.y);
-        };
-        updateLayout();
-        this.resized.connect(updateLayout);
+    private showActionBox(puzzle: Puzzle, solution: Solution): void {
+        let actionBox = new ActionBox(solution, puzzle, false);
+        this.showDialog(actionBox);
     }
 
     public onContextMenuEvent(e: Event): void {
