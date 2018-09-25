@@ -18,6 +18,7 @@ import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode, PoseEditParams} from "./mode/PoseEdit/PoseEditMode";
 import {PuzzleEditMode, PuzzleEditPoseData} from "./mode/PuzzleEdit/PuzzleEditMode";
 import {GameClient} from "./net/GameClient";
+import {Puzzle} from "./puzzle/Puzzle";
 import {PuzzleManager} from "./puzzle/PuzzleManager";
 import {Solution} from "./puzzle/Solution";
 import {SolutionManager} from "./puzzle/SolutionManager";
@@ -156,12 +157,18 @@ export class EternaApp extends FlashbangApp {
             .catch(err => Eterna.onFatalError(err));
     }
 
-    public loadPoseEdit(puzzleID: number, params: PoseEditParams): Promise<void> {
-        this.setLoadingText(`Loading puzzle ${puzzleID}...`);
-        return PuzzleManager.instance.getPuzzleByID(puzzleID)
-            .then(puzzle => {
-                this._modeStack.unwindToMode(new PoseEditMode(puzzle, params));
-            });
+    public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
+        if (puzzleOrID instanceof Puzzle) {
+            this._modeStack.unwindToMode(new PoseEditMode(puzzleOrID, params));
+            return Promise.resolve();
+
+        } else {
+            this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
+            return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
+                .then(puzzle => {
+                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, params));
+                });
+        }
     }
 
     public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
