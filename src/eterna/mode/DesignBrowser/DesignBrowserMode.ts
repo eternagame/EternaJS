@@ -116,7 +116,7 @@ export class DesignBrowserMode extends GameMode {
         this._dataColParent = new ContainerObject();
         this.addObject(this._dataColParent, this._content);
 
-        this._offset = 0;
+        this._firstVisSolutionIdx = 0;
 
         this._divider1 = new DotLine(2, 0x788891);
         this._divider1.position = new Point(5, 34);
@@ -344,32 +344,28 @@ export class DesignBrowserMode extends GameMode {
         }
     }
 
-    private start_game_with_sequence(): void {
-        // let sol: Solution = this._selected_solution;
-        //
+    private startGameWithSolution(solution: Solution): void {
+        Eterna.app.loadPoseEdit(this._puzzle, {initialSequence: solution.sequence});
+
         // PuzzleManager.instance.get_puzzle_by_nid(sol.get_puzzle_nid(), function (puz: Puzzle): void {
         //     Application.instance.transit_game_mode(Eterna.GAMESTATE_DEVGAME,
-        //         [puz, EPars.string_to_sequence_array(sol.sequence), sol, this._filtered_solutions]);
+        //         [puz, EPars.string_to_sequence_array(sol.sequence), sol, this._filteredSolutions]);
         // });
     }
 
-    private review_exp(): void {
-        this.modeStack.changeMode(new FeedbackViewMode(this._selected_solution, this._puzzle));
+    private reviewExp(solution: Solution): void {
+        this.modeStack.changeMode(new FeedbackViewMode(solution, this._puzzle));
     }
 
-    private navigate_to_solution(): void {
-        this.on_close_actionbox();
-
-        let url = `/node/${this._selected_solution.nodeID}/edit`;
-        window.open(url, "soleditwindow");
+    private navigateToSolution(solution: Solution): void {
+        this.closeActionBox();
+        window.open(`/node/${solution.nodeID}/edit`, "soleditwindow");
     }
 
-    private set_anchor(): void {
-        // let sol: Solution = this._selected_solution;
-        // let sequence: string = sol.sequence;
-        // this._sort_window.on_add_criteria("Sequence", 1, sequence);
+    private set_anchor(solution: Solution): void {
+        // this._sort_window.on_add_criteria("Sequence", 1, solution.sequence);
         // this.openSortWindow();
-        // this.on_close_actionbox();
+        // this.closeActionBox();
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
@@ -383,7 +379,7 @@ export class DesignBrowserMode extends GameMode {
         return statusText;
     }
 
-    private unpublish(): void {
+    private unpublish(solution: Solution): void {
         this.pushUILock();
 
         let statusText = DesignBrowserMode.createStatusText("Deleting...");
@@ -395,11 +391,11 @@ export class DesignBrowserMode extends GameMode {
         const cleanup = () => {
             this.popUILock();
             statusText.destroySelf();
-            this.on_close_actionbox();
+            this.closeActionBox();
             this.refresh_browser();
         };
 
-        Eterna.client.deleteSolution(this._selected_solution.nodeID)
+        Eterna.client.deleteSolution(solution.nodeID)
             .then(() => SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID))
             .then(cleanup)
             .catch(err => {
@@ -408,7 +404,7 @@ export class DesignBrowserMode extends GameMode {
             });
     }
 
-    private vote(): void {
+    private vote(solution: Solution): void {
         this.pushUILock();
 
         let statusText = DesignBrowserMode.createStatusText("Submitting...");
@@ -420,10 +416,9 @@ export class DesignBrowserMode extends GameMode {
         const cleanup = () => {
             this.popUILock();
             statusText.destroySelf();
-            this.on_close_actionbox();
+            this.closeActionBox();
         };
 
-        let solution = this._selected_solution;
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty("My Votes"))
             .then(data => {
                 this._vote_processor.process_data(data["votes"]);
@@ -447,139 +442,46 @@ export class DesignBrowserMode extends GameMode {
             return;
         }
 
-        if (this._filtered_solutions == null) {
+        if (this._filteredSolutions == null) {
             return;
         }
 
-        if (this._selected_solution_index < 0 || this._selected_solution_index >= this._filtered_solutions.length) {
-            return;
+        let [index, yOffset] = this._dataCols[0].getMouseIndex();
+        if (index >= 0) {
+            this.showActionBox(this._filteredSolutions[index + this._firstVisSolutionIdx]);
         }
-
-        this.showActionBox(this._filtered_solutions[this._selected_solution_index]);
-
-        // this._selection_box.removeEventListener(MouseEvent.CLICK, this.onEntryClicked);
-
-        // let puz: Puzzle = this._puzzle;
-        // let sol: Solution = this._filtered_solutions[this._selected_solution_index];
-        //
-        // if (sol.getProperty("My Votes") == 0) {
-        //     this._vote_bitmap.set_bitmap(this._vote_bitmapdata);
-        //     this._vote_text.set_text("Vote");
-        //     this._vote_button.set_tooltip("Vote on this design.");
-        // } else {
-        //     this._vote_bitmap.set_bitmap(this._unvote_bitmapdata);
-        //     this._vote_text.set_text("Unvote");
-        //     this._vote_button.set_tooltip("Take back your vote on this design.");
-        // }
-        //
-        // /// Save this for the case of _filtered_solutios chaning while the actionbox is open
-        // this._selected_solution = sol;
-        //
-        // let h_walker: number = -105;
-        //
-        // this._play_button.set_pos(new UDim(0, 1, 37, h_walker));
-        // this._play_thumbnail.set_bitmap(PoseThumbnail.createFramedBitmap(EPars.string_to_sequence_array(sol.sequence), EPars.parenthesis_to_pair_array(puz.get_secstruct()), 3, PoseThumbnail.THUMBNAIL_BASE_COLORED));
-        // this._play_thumbnail.set_pos(new UDim(0.5, 0.5, -this._play_thumbnail.width / 2, -this._play_thumbnail.height / 2));
-        //
-        // this._exp_button.set_pos(new UDim(0, 1, 140, h_walker));
-        // this._vote_button.set_pos(new UDim(0, 1, 140, h_walker));
-        // this._vote_text.set_pos(new UDim(0, 1, 140, h_walker + 80));
-        // this._sort_button.set_pos(new UDim(0, 1, 240, h_walker));
-        // this._delete_button.set_pos(new UDim(0, 1, 340, h_walker));
-        //
-        // this._delete_button.visible = false;
-        // if (sol.getProperty("Round") == this._puzzle.get_current_round()) {
-        //     if (sol.get_player_id() == Eterna.playerID) {
-        //         if (sol.getProperty("Votes") == 0) {
-        //             this._delete_button.visible = true;
-        //         }
-        //     }
-        // }
-        //
-        // h_walker = -65;
-        //
-        // this._actionbox_cancel.set_text("Cancel");
-        // this._actionbox_cancel.set_pos(new UDim(1, 1, -this._actionbox_cancel.button_width() - 14, -33));
-        //
-        // if (Eterna.DEV_MODE) {
-        //     this._actionbox_edit.visible = true;
-        //     this._actionbox_edit.set_pos(new UDim(0.5, 1, -this._actionbox_cancel.button_width() / 2 + 50, h_walker));
-        // } else {
-        //     this._actionbox_edit.visible = false;
-        // }
-        //
-        // this._actionbox.set_size(new UDim(1, 1, -50, -50));
-        //
-        // this._actionbox.alpha = 0;
-        // this._actionbox.visible = true;
-        // this._actionbox.set_animator(new GameAnimatorFader(0, 1, 0.3, false));
-        // this._actionbox.set_pos(new UDim(0, 0, 25, 25));
-        //
-        // this._solution_desc.set_solution(sol, puz);
-        //
-        // /// Don't allow voting if solution is already synthesized or it is old
-        // if (sol.get_exp_feedback() != null && sol.get_exp_feedback().is_failed() == 0) {
-        //     this._vote_button.visible = false;
-        //     this._vote_text.visible = false;
-        //     this._exp_button.visible = true;
-        //     let expdata: Feedback = sol.get_exp_feedback();
-        //     let shape_data: any[] = ExpPainter.transform_data(expdata.get_shape_data(), expdata.get_shape_max(), expdata.get_shape_min());
-        //     this._exp_thumbnail.set_bitmap(PoseThumbnail.createFramedBitmap(shape_data, EPars.parenthesis_to_pair_array(puz.get_secstruct()), 3, PoseThumbnail.THUMBNAIL_EXP_COLORED, sol.get_exp_feedback().get_shape_start_index(), null, true, sol.get_exp_feedback().get_shape_threshold()));
-        //     this._exp_thumbnail.set_pos(new UDim(0.5, 0.5, -this._exp_thumbnail.width / 2, -this._exp_thumbnail.height / 2));
-        // } else {
-        //     if (sol.getProperty("Synthesized") == "n" && sol.getProperty("Round") == this._puzzle.get_current_round()) {
-        //         this._vote_button.visible = true;
-        //         this._vote_text.visible = true;
-        //
-        //     } else {
-        //
-        //         this._vote_button.visible = false;
-        //         this._vote_text.visible = false;
-        //     }
-        //     this._exp_button.visible = false;
-        // }
-        //
-        // if (this._novote) {
-        //     this._vote_button.visible = false;
-        //     this._vote_text.visible = false;
-        // }
     }
 
     private showActionBox(solution: Solution): void {
-        this._actionBoxRef.destroyObject();
+        this.closeActionBox();
 
         let actionBox = this.showDialog(new ActionBox(solution, this._puzzle, this._novote));
         this._actionBoxRef = actionBox.ref;
+
+        actionBox.playClicked.connect(() => this.startGameWithSolution(solution));
+        actionBox.seeResultClicked.connect(() => this.reviewExp(solution));
+        actionBox.voteClicked.connect(() => this.vote(solution));
+        actionBox.sortClicked.connect(() => this.set_anchor(solution));
+        actionBox.editClicked.connect(() => this.navigateToSolution(solution));
+        actionBox.deleteClicked.connect(() => this.unpublish(solution));
     }
 
-    private on_close_actionbox(): void {
-        //	Application.instance.remove_lock("LOCK_ACTIONBOX");
-        //	Application.instance.get_modal_container().remove_object(_actionbox);
+    private closeActionBox(): void {
         this._actionBoxRef.destroyObject();
-        // this._selection_box.addEventListener(MouseEvent.CLICK, this.onEntryClicked);
-        // this._actionbox.visible = false;
     }
 
     private onMouseMove(): void {
-        if (this._dataCols == null) {
-            this._selection_box.visible = false;
+        this._selection_box.visible = false;
+
+        if (this._dataCols == null || this._actionBoxRef.isLive) {
             return;
         }
 
-        if (this._actionBoxRef.isLive) {
-            return;
+        let [index, yOffset] = this._dataCols[0].getMouseIndex();
+        if (index >= 0) {
+            this._selection_box.visible = true;
+            this._selection_box.position = new Point(7, this._content.toLocal(Flashbang.globalMouse).y + yOffset);
         }
-
-        let mouse = this._content.toLocal(Flashbang.globalMouse);
-        if (mouse.x < 0 || mouse.x > this.contentWidth ||
-            mouse.y < 0 || mouse.y > this.contentHeight) {
-            return;
-        }
-
-        this._selection_box.visible = true;
-        let res: [number, number] = this._dataCols[0].get_current_mouse_index();
-        this._selected_solution_index = res[0] + this._offset;
-        this._selection_box.position = new Point(7, mouse.y + res[1]);
     }
 
     private mark(): void {
@@ -599,7 +501,7 @@ export class DesignBrowserMode extends GameMode {
         //
         // this._marker_boxes.visible = true;
         // let res: any[] = DataCol(this._dataCols[0]).get_current_mouse_index();
-        // let index: number = res[0] + this._offset;
+        // let index: number = res[0] + this._firstVisSolutionIdx;
         // let rawId: number = this.get_solution_id_from_index(index);
         //
         // if (!this._marker_boxes.is_selected(index)) {
@@ -620,7 +522,7 @@ export class DesignBrowserMode extends GameMode {
         //     this._selection_group.splice(removeIndex, 1);
         // }
         //
-        // this._marker_boxes.on_draw(this._offset);
+        // this._marker_boxes.on_draw(this._firstVisSolutionIdx);
         //
         // //trace(_selection_group);
         // AutosaveManager.instance.saveObjects(this._selection_group, DesignBrowserMode.SELTOKEN);
@@ -670,25 +572,22 @@ export class DesignBrowserMode extends GameMode {
         // }
 
         let solutions: Solution[] = [];
-
-        for (let ii = 0; ii < this._all_solutions.length; ii++) {
-            let sol: Solution = this._all_solutions[ii];
-            let need_to_add: boolean = true;
-
+        for (let sol of this._all_solutions) {
+            let shouldAdd = true;
             for (dataCol of this._dataCols) {
                 if (!dataCol.is_qualified(sol)) {
-                    need_to_add = false;
+                    shouldAdd = false;
                     break;
                 }
             }
 
-            if (need_to_add) {
+            if (shouldAdd) {
                 solutions.push(sol);
             }
 
         }
 
-        this._filtered_solutions = solutions;
+        this._filteredSolutions = solutions;
 
         this.set_data(solutions, false, false);
 
@@ -698,34 +597,33 @@ export class DesignBrowserMode extends GameMode {
         // }
 
         this.set_scroll_vertical(-1);
-
     }
 
-    private set_scroll_horizontal(prog: number): void {
+    private set_scroll_horizontal(progress: number): void {
         this._dataColParent.display.x = (this._whole_row_width > this.contentWidth) ?
-            (this.contentWidth - this._whole_row_width) * this._hSlider.get_progress() :
+            (this.contentWidth - this._whole_row_width) * progress :
             0;
     }
 
-    private set_scroll_vertical(prog: number): void {
-        this._offset = 0;
+    private set_scroll_vertical(progress: number): void {
+        this._firstVisSolutionIdx = 0;
         if (this._dataCols == null) {
             return;
         }
 
-        if (prog < 0) {
-            prog = this._vSlider.get_progress();
+        if (progress < 0) {
+            progress = this._vSlider.get_progress();
         }
 
-        if (this._filtered_solutions != null) {
-            this._offset = this._filtered_solutions.length * prog;
+        if (this._filteredSolutions != null) {
+            this._firstVisSolutionIdx = this._filteredSolutions.length * progress;
         }
 
         for (let dataCol of this._dataCols) {
-            dataCol.set_progress(this._offset);
+            dataCol.set_progress(this._firstVisSolutionIdx);
         }
 
-        this._marker_boxes.on_draw(this._offset);
+        this._marker_boxes.on_draw(this._firstVisSolutionIdx);
     }
 
     private refreshSolutions(): void {
@@ -750,9 +648,10 @@ export class DesignBrowserMode extends GameMode {
         } else {
             this._votesText.text = "This puzzle has been cleared.";
         }
-        let w_margin: number = 22;
-        let h_walker: number = 17;
-        this._ins_panel.setSize(this._votesText.width + 2 * w_margin, this._votesText.height + 2 * h_walker);
+
+        const WMARGIN = 22;
+        const HMARGIN = 17;
+        this._ins_panel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
 
         this.reorganize(true);
     }
@@ -847,20 +746,20 @@ export class DesignBrowserMode extends GameMode {
                 //single row of raw data
                 let singleLineRawData: Solution = solutions[ii];
 
-                if (exp == "Sequence") {
+                if (exp == DesignBrowserColumnName.Sequence) {
                     data_array.push(singleLineRawData.sequence);
                     if (ii == 0) {
                         dataCol.set_width(singleLineRawData.sequence.length * 16);
                         dataCol.draw_grid_text();
                     }
-                } else if (exp == "Description") {
+                } else if (exp == DesignBrowserColumnName.Description) {
                     des = singleLineRawData.getProperty("Description");
                     if (des.length < 45) {
                         data_array.push(des);
                     } else {
                         data_array.push(des.substr(0, 40) + "...");
                     }
-                } else if (exp == "Title") {
+                } else if (exp == DesignBrowserColumnName.Title) {
                     des = singleLineRawData.getProperty("Title");
                     if (des.length < 30) {
                         data_array.push(des);
@@ -873,7 +772,7 @@ export class DesignBrowserMode extends GameMode {
                 }
             }
 
-            if (exp == "Sequence" || exp == "Synthesis score") {
+            if (exp == DesignBrowserColumnName.Sequence || exp == DesignBrowserColumnName.Synthesis_score) {
                 dataCol.set_exp_data(exp_array);
             }
             dataCol.set_pairs(EPars.parenthesisToPairs(puz.getSecstruct()));
@@ -887,8 +786,8 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private get_solution_index_from_id(id: number): number {
-        for (let ii = 0; ii < this._filtered_solutions.length; ii++) {
-            let rawId: any = this._filtered_solutions[ii].getProperty("Id");
+        for (let ii = 0; ii < this._filteredSolutions.length; ii++) {
+            let rawId: any = this._filteredSolutions[ii].getProperty("Id");
             if (rawId == id) {
                 return ii;
             }
@@ -906,7 +805,8 @@ export class DesignBrowserMode extends GameMode {
         for (let ii = 0; ii < this._dataCols.length; ii++) {
             let data_col: DataCol = this._dataCols[ii];
             if (animate) {
-                data_col.replaceNamedObject("AnimateLocation", new LocationTask(this._whole_row_width, 0, 0.5, Easing.easeOut));
+                data_col.replaceNamedObject("AnimateLocation",
+                    new LocationTask(this._whole_row_width, 0, 0.5, Easing.easeOut));
             } else {
                 data_col.display.position = new Point(this._whole_row_width, 0);
             }
@@ -927,7 +827,7 @@ export class DesignBrowserMode extends GameMode {
             let index: number = this.get_solution_index_from_id(this._selection_group[ii]);
             this._marker_boxes.add_marker(index, this._selection_group[ii]);
         }
-        this._marker_boxes.on_draw(this._offset);
+        this._marker_boxes.on_draw(this._firstVisSolutionIdx);
     }
 
     private refresh_browser(): void {
@@ -965,11 +865,11 @@ export class DesignBrowserMode extends GameMode {
     private _vSlider: SliderBar;
     private _hSlider: SliderBar;
     private _dataColParent: ContainerObject;
-    private _offset: number;
+    private _firstVisSolutionIdx: number;
     private _whole_row_width: number;
     private _dataCols: DataCol[];
     private _all_solutions: Solution[];
-    private _filtered_solutions: Solution[];
+    private _filteredSolutions: Solution[];
     // private _sort_window: SortWindow;
     // private _customize_win: CustomWin;
     private _toolbarLayout: HLayoutContainer;
@@ -979,8 +879,6 @@ export class DesignBrowserMode extends GameMode {
     private _exp_color_button: GameButton;
     private _votesText: MultiStyleText;
     private _ins_panel: GamePanel;
-    private _selected_solution_index: number = -1;
-    private _selected_solution: Solution;
     // private _submit_status_text: Text;
     // private _loading_text: Text;
     private _selection_box: SelectionBox;
