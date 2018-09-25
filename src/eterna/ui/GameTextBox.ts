@@ -1,9 +1,8 @@
-import {Point} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Fonts} from "../util/Fonts";
 import {GameMultiColumnText} from "./GameMultiColumnText";
 import {SliderBar} from "./SliderBar";
-import Graphics = PIXI.Graphics;
 
 export class GameTextBox extends ContainerObject {
     public constructor(sizes: number[], boxname: string = "Default name") {
