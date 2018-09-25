@@ -40,6 +40,7 @@ export class ScrollContainer extends Container {
         this.content.y = -MathUtil.clamp(scrollY, 0, this.maxScrollY);
     }
 
+    /** Sets the size of the container's content viewport */
     public setSize(width: number, height: number): void {
         if (this._width === width || this._height === height) {
             return;
@@ -50,7 +51,7 @@ export class ScrollContainer extends Container {
 
         this._width = width;
         this._height = height;
-        this.mask = new Graphics().beginFill(0x00ff00, 0).drawRect(0, 0, this._width, this._height).endFill();
+        this.content.mask = new Graphics().beginFill(0x00ff00, 0).drawRect(0, 0, this._width, this._height).endFill();
 
         this.setScroll(prevScrollX, prevScrollY);
     }
