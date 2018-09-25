@@ -7,6 +7,9 @@ import {Dragger} from "../../flashbang/util/Dragger";
 import {Signal} from "../../signals/Signal";
 
 export class SliderBar extends ContainerObject {
+    // The width (or height, for a horizontal SliderBar) of the thumb
+    public static readonly THUMB_SIZE = 15;
+
     public readonly scrollChanged = new Signal<number>();
 
     constructor(vertical: boolean) {
