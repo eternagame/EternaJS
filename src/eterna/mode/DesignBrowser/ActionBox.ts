@@ -54,7 +54,6 @@ export class ActionBox extends Dialog<void> {
             .thumbnail(playThumbnail)
             .tooltip("Click to view this design in the game.\nYou can also modify the design and create a new one.");
         playButton.clicked.connect(() => this.playClicked.emit());
-        // this._playButton.clicked.connect(() => this.start_game_with_sequence());
         this.addObject(playButton, this._actionButtonsLayout);
 
         if (this._solution.expFeedback != null && this._solution.expFeedback.isFailed() === 0) {
@@ -78,7 +77,6 @@ export class ActionBox extends Dialog<void> {
                 .thumbnail(resultThumbnail)
                 .tooltip("Click to see the experimental result!");
             seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
-            // this._seeResultButton.clicked.connect(() => this.review_exp());
             this.addObject(seeResultButton, this._actionButtonsLayout);
 
         } else {
@@ -88,7 +86,6 @@ export class ActionBox extends Dialog<void> {
                     .text("Vote")
                     .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes));
                 voteButton.clicked.connect(() => this.voteClicked.emit());
-                // this._voteButton.clicked.connect(() => this.vote());
                 this.addObject(voteButton, this._actionButtonsLayout);
             }
         }
@@ -100,7 +97,6 @@ export class ActionBox extends Dialog<void> {
             .thumbnail(sortImage)
             .tooltip("Sort based on similarity to this design.");
         sortButton.clicked.connect(() => this.sortClicked.emit());
-        // this._sortButton.clicked.connect(() => this.set_anchor());
         this.addObject(sortButton, this._actionButtonsLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
@@ -121,7 +117,6 @@ export class ActionBox extends Dialog<void> {
                     .lineTo(10, 65))
                 .tooltip("Delete this design to retrieve your slots for this round");
             deleteButton.clicked.connect(() => this.deleteClicked.emit);
-            // this._deleteButton.clicked.connect(() => this.unpublish());
             this.addObject(deleteButton, this._actionButtonsLayout);
         }
 
@@ -135,7 +130,6 @@ export class ActionBox extends Dialog<void> {
             this._editButton = new GameButton().label("Edit", 12);
             this.addObject(this._editButton, this._content);
             this._editButton.clicked.connect(() => this.editClicked.emit());
-            // this._editButton.clicked.connect(() => this.navigate_to_solution());
         }
 
         this._solutionDescBox = new SolutionDescBox(this._solution, this._puzzle);
