@@ -115,20 +115,6 @@ export class EternaViewOptionsDialog extends Dialog<void> {
 
         updateLocation();
         this.regs.add(this._mode.resized.connect(updateLocation));
-
-        // Eterna.sound.get_mute_button().set_pos(new UDim(0, 1, 20, -85));
-        // Eterna.sound.get_volume_button(1).set_pos(new UDim(0, 1, 45, -82));
-        // Eterna.sound.get_volume_button(2).set_pos(new UDim(0, 1, 85, -82));
-        // Eterna.sound.get_volume_button(3).set_pos(new UDim(0, 1, 125, -82));
-        // Eterna.sound.get_volume_button(4).set_pos(new UDim(0, 1, 165, -82));
-        // Eterna.sound.get_volume_button(5).set_pos(new UDim(0, 1, 205, -82));
-        //
-        // this.add_object(Eterna.sound.get_mute_button());
-        // this.add_object(Eterna.sound.get_volume_button(1));
-        // this.add_object(Eterna.sound.get_volume_button(2));
-        // this.add_object(Eterna.sound.get_volume_button(3));
-        // this.add_object(Eterna.sound.get_volume_button(4));
-        // this.add_object(Eterna.sound.get_volume_button(5));
     }
 
     protected onBGClicked(): void {
