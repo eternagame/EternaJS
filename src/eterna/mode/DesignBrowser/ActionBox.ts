@@ -19,10 +19,11 @@ export class ActionBox extends Dialog<void> {
     public editButton: GameButton;
     public deleteButton: GameButton;
 
-    public constructor(solution: Solution, puzzle: Puzzle) {
+    public constructor(solution: Solution, puzzle: Puzzle, voteDisabled: boolean) {
         super();
         this._solution = solution;
         this._puzzle = puzzle;
+        this._voteDisabled = voteDisabled;
     }
 
     protected added(): void {
@@ -96,6 +97,7 @@ export class ActionBox extends Dialog<void> {
 
     private readonly _solution: Solution;
     private readonly _puzzle: Puzzle;
+    private readonly _voteDisabled: boolean;
 
     private _actionbox: GamePanel;
     private _solution_desc: SolutionDescBox;
@@ -105,15 +107,18 @@ class ThumbnailAndTextButton extends GameButton {
     public constructor() {
         super();
 
+        this._view = new Container();
+        this.container.addChild(this._view);
+
         this._bgFrame = new Graphics()
             .lineStyle(2, 0xC0DCE7)
             .drawRoundedRect(0, 0, 75, 75, 20);
-        this._container.addChild(this._bgFrame);
+        this._view.addChild(this._bgFrame);
 
         this._textField = Fonts.arial("", 14).bold().build();
-        this._container.addChild(this._textField);
+        this._view.addChild(this._textField);
 
-        this.allStates(this._container);
+        this.allStates(this._view);
     }
 
     public text(value: string): ThumbnailAndTextButton {
@@ -130,7 +135,7 @@ class ThumbnailAndTextButton extends GameButton {
         }
         this._thumbnail = disp;
         if (this._thumbnail != null) {
-            this._container.addChildAt(this._thumbnail, 1);
+            this._view.addChildAt(this._thumbnail, 1);
             DisplayUtil.positionRelative(
                 this._thumbnail, HAlign.CENTER, VAlign.CENTER,
                 this._bgFrame, HAlign.CENTER, VAlign.CENTER);
@@ -143,7 +148,7 @@ class ThumbnailAndTextButton extends GameButton {
         return this;
     }
 
-    private readonly _container: Container;
+    private readonly _view: Container;
     private readonly _bgFrame: Graphics;
     private readonly _textField: Text;
     private _thumbnail: Container;

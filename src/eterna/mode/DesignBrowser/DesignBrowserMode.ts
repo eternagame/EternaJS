@@ -29,6 +29,7 @@ import {Fonts} from "../../util/Fonts";
 import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
 import {GameMode} from "../GameMode";
 import {MaskBox} from "../MaskBox";
+import {ActionBox} from "./ActionBox";
 import {DataCol} from "./DataCol";
 import {DotLine} from "./DotLine";
 import {GridLines} from "./GridLines";
@@ -145,11 +146,11 @@ export class DesignBrowserMode extends GameMode {
         this._selection_box = new SelectionBox(0xFFFFFF);
         this._selection_box.position = new Point(7, 0);
         this._selection_box.visible = false;
-        new DisplayObjectPointerTarget(this._selection_box).pointerDown.connect(e => this.on_click_selectbox(e));
         this._content.addChild(this._selection_box);
 
-        // this._dataColParent.addEventListener(MouseEvent.MOUSE_MOVE, this.move_selection_box);
-        // this.addEventListener(MouseEvent.MOUSE_MOVE, this.move_selection_box);
+        this._dataColParent.display.interactive = true;
+        this._dataColParent.pointerMove.connect(() => this.onMouseMove());
+        this._dataColParent.pointerDown.connect(() => this.onEntryClicked());
 
         this._columnNames = Eterna.settings.designBrowserColumnNames.value;
         if (this._columnNames == null) {
@@ -443,22 +444,24 @@ export class DesignBrowserMode extends GameMode {
             });
     }
 
-    private on_click_selectbox(e: InteractionEvent): void {
-        // if (e.ctrlKey) {
-        //     this.mark(e);
-        //     return;
-        // }
-        //
-        // if (this._filtered_solutions == null) {
-        //     return;
-        // }
-        //
-        // if (this._selected_solution_index < 0 || this._selected_solution_index >= this._filtered_solutions.length) {
-        //     return;
-        // }
-        //
-        // this._selection_box.removeEventListener(MouseEvent.CLICK, this.on_click_selectbox);
-        //
+    private onEntryClicked(): void {
+        if (Flashbang.app.isControlKeyDown) {
+            this.mark();
+            return;
+        }
+
+        if (this._filtered_solutions == null) {
+            return;
+        }
+
+        if (this._selected_solution_index < 0 || this._selected_solution_index >= this._filtered_solutions.length) {
+            return;
+        }
+
+        this.showActionBox(this._filtered_solutions[this._selected_solution_index]);
+
+        // this._selection_box.removeEventListener(MouseEvent.CLICK, this.onEntryClicked);
+
         // let puz: Puzzle = this._puzzle;
         // let sol: Solution = this._filtered_solutions[this._selected_solution_index];
         //
@@ -528,7 +531,6 @@ export class DesignBrowserMode extends GameMode {
         //     this._exp_thumbnail.set_pos(new UDim(0.5, 0.5, -this._exp_thumbnail.width / 2, -this._exp_thumbnail.height / 2));
         // } else {
         //     if (sol.getProperty("Synthesized") == "n" && sol.getProperty("Round") == this._puzzle.get_current_round()) {
-        //
         //         this._vote_button.visible = true;
         //         this._vote_text.visible = true;
         //
@@ -546,45 +548,55 @@ export class DesignBrowserMode extends GameMode {
         // }
     }
 
+    private showActionBox(solution: Solution): void {
+        this._actionBoxRef.destroyObject();
+
+        let actionBox = this.showDialog(new ActionBox(solution, this._puzzle, this._novote));
+        this._actionBoxRef = actionBox.ref;
+    }
+
     private on_close_actionbox(): void {
         //	Application.instance.remove_lock("LOCK_ACTIONBOX");
         //	Application.instance.get_modal_container().remove_object(_actionbox);
         this._actionBoxRef.destroyObject();
-        // this._selection_box.addEventListener(MouseEvent.CLICK, this.on_click_selectbox);
+        // this._selection_box.addEventListener(MouseEvent.CLICK, this.onEntryClicked);
         // this._actionbox.visible = false;
     }
 
-    private move_selection_box(e: Event): void {
-        // if (this._dataCols == null) {
-        //     this._selection_box.visible = false;
-        //     return;
-        // }
-        //
-        // if (this._actionbox.visible) {
-        //     return;
-        // }
-        //
-        // if (this.mouseX < 0 || this.mouseX > this._offscreen_width ||
-        //     this.mouseY < 0 || this.mouseY > this._offscreen_height) {
-        //     return;
-        // }
-        // this._selection_box.visible = true;
-        // let res: any[] = DataCol(this._dataCols[0]).get_current_mouse_index();
-        // this._selected_solution_index = res[0] + this._offset;
-        // this._selection_box.set_pos(new UDim(0, 0, 7, this.mouseY + res[1]));
+    private onMouseMove(): void {
+        if (this._dataCols == null) {
+            this._selection_box.visible = false;
+            return;
+        }
+
+        if (this._actionBoxRef.isLive) {
+            return;
+        }
+
+        let mouse = this._content.toLocal(Flashbang.globalMouse);
+        if (mouse.x < 0 || mouse.x > this.contentWidth ||
+            mouse.y < 0 || mouse.y > this.contentHeight) {
+            return;
+        }
+
+        this._selection_box.visible = true;
+        let res: [number, number] = this._dataCols[0].get_current_mouse_index();
+        this._selected_solution_index = res[0] + this._offset;
+        this._selection_box.position = new Point(7, mouse.y + res[1]);
     }
 
-    private mark(e: MouseEvent): void {
+    private mark(): void {
         // if (this._dataCols == null) {
         //     this._marker_boxes.visible = false;
         //     return;
         // }
         //
-        // if (this._actionbox.visible) {
+        // if (this._actionBoxRef.isLive) {
         //     return;
         // }
         //
-        // if (this.mouseX < 0 || this.mouseX > this._offscreen_width || this.mouseY < 0 || this.mouseY > this._offscreen_height) {
+        // if (this.mouseX < 0 || this.mouseX > this._offscreen_width ||
+        //     this.mouseY < 0 || this.mouseY > this._offscreen_height) {
         //     return;
         // }
         //
