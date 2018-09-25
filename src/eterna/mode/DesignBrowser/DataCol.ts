@@ -111,7 +111,7 @@ export class DataCol extends ContainerObject {
 
     private updateLayout(): void {
         this._sequencesView.setSize(this._width, this._height);
-        this._num_display = Math.ceil((this._height - 70 - 20) / this._line_height);
+        this._num_display = Math.floor((this._height - 70 - 20) / this._line_height);
         this.display_data();
         this.set_column_color(this._col);
     }
