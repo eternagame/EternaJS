@@ -8,6 +8,9 @@ export class ScrollContainer extends Container {
         super();
 
         this.addChild(this.content);
+        this.addChild(this._contentMask);
+        this.content.mask = this._contentMask;
+
         this.setSize(width, height);
     }
 
@@ -42,7 +45,7 @@ export class ScrollContainer extends Container {
 
     /** Sets the size of the container's content viewport */
     public setSize(width: number, height: number): void {
-        if (this._width === width || this._height === height) {
+        if (this._width === width && this._height === height) {
             return;
         }
 
@@ -51,10 +54,12 @@ export class ScrollContainer extends Container {
 
         this._width = width;
         this._height = height;
-        this.content.mask = new Graphics().beginFill(0x00ff00, 0).drawRect(0, 0, this._width, this._height).endFill();
 
+        this._contentMask.clear().beginFill(0x00ff00, 0).drawRect(0, 0, this._width, this._height).endFill();
         this.setScroll(prevScrollX, prevScrollY);
     }
+
+    private readonly _contentMask = new Graphics();
 
     private _width: number;
     private _height: number;
