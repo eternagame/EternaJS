@@ -2,6 +2,7 @@ import {Container, Graphics, Point, Text} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {TextBuilder} from "../../../flashbang/util/TextBuilder";
+import {Signal} from "../../../signals/Signal";
 import {Feedback} from "../../Feedback";
 import {Solution} from "../../puzzle/Solution";
 import {GameButton} from "../../ui/GameButton";
@@ -11,23 +12,27 @@ import {int} from "../../util/int";
 import {Utility} from "../../util/Utility";
 import {DesignBrowserColumnName, DesignBrowserDataType} from "./DesignBrowserMode";
 import {SequenceStringListView} from "./SequenceStringListView";
-import {SortOrder} from "./SortOrder";
-
-export type SortFunction = (sortCategory: string, sortOrder: SortOrder, sortArgs?: any[]) => void;
-export type ReorganizeFunction = (sort: boolean) => void;
+import {SortOrder} from "./SortOptions";
 
 export class DataCol extends ContainerObject {
+    public readonly sortOrderChanged = new Signal<SortOrder>();
+    public readonly columnName: string;
+
     constructor(data_type: DesignBrowserDataType, exp: string,
                 data_width: number, fonttype: string,
                 fontSize: number, sortable: boolean) {
         super();
 
+        this.columnName = exp;
         this._data_type = data_type;
-        this._columnName = exp;
         this._data_width = data_width;
         this._fontType = fonttype;
         this._fontSize = fontSize;
         this._sortable = sortable;
+    }
+
+    public get sortOrder(): SortOrder {
+        return this._sortOrder;
     }
 
     protected added(): void {
@@ -50,7 +55,7 @@ export class DataCol extends ContainerObject {
         this._sequencesView.position = new Point(0, DataCol.DATA_H);
         this.container.addChild(this._sequencesView);
 
-        this._label = new GameButton().label(this._columnName, 14);
+        this._label = new GameButton().label(this.columnName, 14);
         this._label.display.position = new Point(11, 7);
         this.addObject(this._label, this.container);
 
@@ -173,20 +178,20 @@ export class DataCol extends ContainerObject {
                 return true;
             }
 
-            let target_low: string = sol.getProperty(this._columnName).toLowerCase();
+            let target_low: string = sol.getProperty(this.columnName).toLowerCase();
 
             return (target_low.search(query_string.toLowerCase()) >= 0);
         } else {
             let query_min: string = this._input_field.text;
             if (query_min.length > 0) {
-                if (sol.getProperty(this._columnName) < Number(query_min)) {
+                if (sol.getProperty(this.columnName) < Number(query_min)) {
                     return false;
                 }
             }
 
             let query_max: string = this._input_field2.text;
             if (query_max.length > 0) {
-                if (sol.getProperty(this._columnName) > Number(query_max)) {
+                if (sol.getProperty(this.columnName) > Number(query_max)) {
                     return false;
                 }
             }
@@ -195,16 +200,8 @@ export class DataCol extends ContainerObject {
         }
     }
 
-    public set_reorganize_callback(reorganize: ReorganizeFunction): void {
-        this._reorganize = reorganize;
-    }
-
-    public set_update_sort_callback(update_sort: SortFunction): void {
-        this._update_sort = update_sort;
-    }
-
     public get_exp(): string {
-        return this._columnName;
+        return this.columnName;
     }
 
     public set_width(w: number): void {
@@ -276,7 +273,7 @@ export class DataCol extends ContainerObject {
         this._graphics.drawRect(0, 0, this._data_width, this._height);
         this._graphics.endFill();
 
-        if (this._columnName == "Sequence") {
+        if (this.columnName == "Sequence") {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             for (let ii = 0; ii < this._data_width / 70 + 1; ii++) {
                 this._graphics.moveTo(ii * 70 + 90, 85);
@@ -294,16 +291,7 @@ export class DataCol extends ContainerObject {
             this._sortOrder = SortOrder.INCREASING;
         }
 
-        if (this._update_sort != null) {
-            this._update_sort(this._columnName, this._sortOrder, null);
-        }
-    }
-
-    private handle_key_down(e: KeyboardEvent): void {
-        if (this._reorganize != null) {
-            this._reorganize(false);
-        }
-        e.stopPropagation();
+        this.sortOrderChanged.emit(this._sortOrder);
     }
 
     private display_data(): void {
@@ -328,7 +316,7 @@ export class DataCol extends ContainerObject {
                 let rawstr = Utility.stripHtmlTags("" + this._rawData[ii]);
 
                 //trace(rawstr);
-                switch (this._columnName) {
+                switch (this.columnName) {
                 case DesignBrowserColumnName.Sequence:
                     boardData.push(rawstr);
                     board_exp_data.push(this._exp_data[ii]);
@@ -439,7 +427,6 @@ export class DataCol extends ContainerObject {
     private readonly _fontType: string;
     private readonly _fontSize: number;
     private readonly _sortable: boolean;
-    private readonly _columnName: string;
     private readonly _data_type: DesignBrowserDataType;
 
     private _graphics: Graphics;
@@ -462,8 +449,6 @@ export class DataCol extends ContainerObject {
     private _offset: number = 0;
 
     private _num_display: number;
-    private _reorganize: ReorganizeFunction;
-    private _update_sort: SortFunction;
     private _sortOrder: SortOrder = 0;
     private _exp_data: Feedback[];
     private _show_exp_data: boolean = false;
