@@ -10,6 +10,7 @@ import {FixedWidthTextField} from "../../ui/FixedWidthTextField";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
 import {Fonts} from "../../util/Fonts";
+import {GraphicsUtil} from "../../util/GraphicsUtil";
 import {DesignCategory} from "./DesignBrowserMode";
 import {SortOptions, SortOrder} from "./SortOptions";
 
@@ -37,7 +38,7 @@ export class SortOptionsDialog extends Dialog<void> {
         this._panelContent.addChild(addCriterionLayout);
 
         // ADD CRITERION LAYOUT
-        this._prevCategoryButton = new GameButton().allStates(SortOptionsDialog.drawLeftArrow());
+        this._prevCategoryButton = new GameButton().allStates(GraphicsUtil.drawLeftTriangle(2));
         this._prevCategoryButton.clicked.connect(() => this.offsetCurCategoryIdx(-1));
         this.addObject(this._prevCategoryButton, addCriterionLayout);
 
@@ -47,7 +48,7 @@ export class SortOptionsDialog extends Dialog<void> {
             140, HAlign.CENTER);
         addCriterionLayout.addChild(this._curCategoryText);
 
-        this._nextCategoryButton = new GameButton().allStates(SortOptionsDialog.drawRightArrow());
+        this._nextCategoryButton = new GameButton().allStates(GraphicsUtil.drawRightTriangle(2));
         this._nextCategoryButton.clicked.connect(() => this.offsetCurCategoryIdx(1));
         this.addObject(this._nextCategoryButton, addCriterionLayout);
 
@@ -253,28 +254,6 @@ export class SortOptionsDialog extends Dialog<void> {
         DisplayUtil.positionRelative(
             this._panelContent, HAlign.CENTER, VAlign.CENTER,
             this._bg.display, HAlign.CENTER, VAlign.CENTER);
-    }
-
-    private static drawLeftArrow(): Graphics {
-        let g = new Graphics()
-            .beginFill(0xFFFFFF, 0.8)
-            .moveTo(0, 5)
-            .lineTo(-7, 0)
-            .lineTo(0, -5)
-            .lineTo(0, 5);
-        g.scale = new Point(2, 2);
-        return g;
-    }
-
-    private static drawRightArrow(): Graphics {
-        let g = new Graphics()
-            .beginFill(0xFFFFFF, 0.8)
-            .moveTo(0, 5)
-            .lineTo(7, 0)
-            .lineTo(0, -5)
-            .lineTo(0, 5);
-        g.scale = new Point(2, 2);
-        return g;
     }
 
     private _bg: GamePanel;

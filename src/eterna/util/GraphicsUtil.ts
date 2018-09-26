@@ -1,4 +1,4 @@
-import {Graphics} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {Vector2} from "../../flashbang/geom/Vector2";
 
 export class GraphicsUtil {
@@ -37,5 +37,27 @@ export class GraphicsUtil {
         graphics.endFill();
 
         return graphics;
+    }
+
+    public static drawLeftTriangle(scale: number = 1): Graphics {
+        let g = new Graphics()
+            .beginFill(0xFFFFFF, 0.8)
+            .moveTo(0, 5)
+            .lineTo(-7, 0)
+            .lineTo(0, -5)
+            .lineTo(0, 5);
+        g.scale = new Point(scale, scale);
+        return g;
+    }
+
+    public static drawRightTriangle(scale: number = 1): Graphics {
+        let g = new Graphics()
+            .beginFill(0xFFFFFF, 0.8)
+            .moveTo(0, 5)
+            .lineTo(7, 0)
+            .lineTo(0, -5)
+            .lineTo(0, 5);
+        g.scale = new Point(scale, scale);
+        return g;
     }
 }
