@@ -3,6 +3,7 @@ import {Button} from "../../../flashbang/objects/Button";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {VisibleTask} from "../../../flashbang/tasks/VisibleTask";
+import {Arrays} from "../../../flashbang/util/Arrays";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
@@ -254,12 +255,12 @@ export class CustomWin extends GamePanel {
             return;
         }
 
-        CustomWin.swap(this._customized_categories, cur_index, target_index);
-        CustomWin.swap(this._sort_arguments, cur_index, target_index);
-        CustomWin.swap(this._sort_categories_texts, cur_index, target_index);
-        CustomWin.swap(this._remove_buttons, cur_index, target_index);
-        CustomWin.swap(this._move_up_buttons, cur_index, target_index);
-        CustomWin.swap(this._move_down_buttons, cur_index, target_index);
+        Arrays.swap(this._customized_categories, cur_index, target_index);
+        Arrays.swap(this._sort_arguments, cur_index, target_index);
+        Arrays.swap(this._sort_categories_texts, cur_index, target_index);
+        Arrays.swap(this._remove_buttons, cur_index, target_index);
+        Arrays.swap(this._move_up_buttons, cur_index, target_index);
+        Arrays.swap(this._move_down_buttons, cur_index, target_index);
 
         this.layout();
 
@@ -290,12 +291,6 @@ export class CustomWin extends GamePanel {
         let new_height = 20 + this._customized_categories.length * CustomWin.ROW_HEIGHT + 80;
         this.setSize(355, new_height);
 
-    }
-
-    private static swap<T>(array: T[], i: number, j: number): void {
-        let temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
     }
 
     private _sort_names: string[];

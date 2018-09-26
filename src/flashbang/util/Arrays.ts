@@ -15,4 +15,20 @@ export class Arrays {
 
         return true;
     }
+
+    public static swap<T>(array: T[], i: number, j: number): void {
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+    public static addAt<T>(array: T[], element: T, idx: number): void {
+        if (idx === 0) {
+            array.unshift(element);
+        } else if (idx === array.length) {
+            array.push(element);
+        } else {
+            array.splice(idx, 0, element);
+        }
+    }
 }
