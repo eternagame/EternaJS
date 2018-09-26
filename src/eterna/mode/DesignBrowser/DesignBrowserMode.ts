@@ -34,6 +34,8 @@ import {DotLine} from "./DotLine";
 import {GridLines} from "./GridLines";
 import {MarkersBoxes} from "./MarkersBoxes";
 import {SelectionBox} from "./SelectionBox";
+import {SortOptions, SortOrder} from "./SortOptions";
+import {SortOptionsDialog} from "./SortOptionsDialog";
 import {VoteProcessor} from "./VoteProcessor";
 
 export enum DesignBrowserDataType {
@@ -172,6 +174,8 @@ export class DesignBrowserMode extends GameMode {
         }
         sortableColumns.push("Synthesis score");
 
+        this._sortOptions = new SortOptions(sortableColumns);
+        this._sortOptions.sortChanged.connect(() => this.reorganize(true));
         // this._sort_window = new SortWindow(sortableColumns);
         // this._sort_window.visible = false;
         // this._sort_window.set_pos(new UDim(0.5, 0, -170, 50));
@@ -243,12 +247,6 @@ export class DesignBrowserMode extends GameMode {
         // this._customize_win.set_pos(new UDim(0.5, 0, -170, 50));
         // this._customize_win.set_reorganize_callback(this.customizeCategory);
         // this.add_object(this._customize_win);
-
-        // this._submit_status_text = new GameText(Fonts.arial(22, true));
-        // this._submit_status_text.set_text("Submitting your vote...");
-        // this._submit_status_text.set_pos(new UDim(0.5, 0.5, -this._submit_status_text.width / 2, -11));
-        // this._submit_status_text.visible = false;
-        // this.add_object(this._submit_status_text);
         //
         // this._loading_text = new GameText(Fonts.helvetica(17, true));
         // this._loading_text.set_text("Loading...");
@@ -300,11 +298,6 @@ export class DesignBrowserMode extends GameMode {
             col.setSize(this.contentWidth, this.contentHeight);
         }
     }
-
-    // public load_puzzle(puzid: number): void {
-    //     this._puzzle_to_load = puzid;
-    //     this.update_whole(null);
-    // }
 
     /*override*/
     protected on_enter(): void {
@@ -362,7 +355,8 @@ export class DesignBrowserMode extends GameMode {
         window.open(`/node/${solution.nodeID}/edit`, "soleditwindow");
     }
 
-    private set_anchor(solution: Solution): void {
+    private sortOnSolution(solution: Solution): void {
+        this.closeActionBox();
         // this._sort_window.on_add_criteria("Sequence", 1, solution.sequence);
         // this.openSortWindow();
         // this.closeActionBox();
@@ -446,7 +440,7 @@ export class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let [index, yOffset] = this._dataCols[0].getMouseIndex();
+        let [index] = this._dataCols[0].getMouseIndex();
         if (index >= 0) {
             this.showActionBox(this._filteredSolutions[index + this._firstVisSolutionIdx]);
         }
@@ -461,7 +455,7 @@ export class DesignBrowserMode extends GameMode {
         actionBox.playClicked.connect(() => this.startGameWithSolution(solution));
         actionBox.seeResultClicked.connect(() => this.reviewExp(solution));
         actionBox.voteClicked.connect(() => this.vote(solution));
-        actionBox.sortClicked.connect(() => this.set_anchor(solution));
+        actionBox.sortClicked.connect(() => this.sortOnSolution(solution));
         actionBox.editClicked.connect(() => this.navigateToSolution(solution));
         actionBox.deleteClicked.connect(() => this.unpublish(solution));
     }
@@ -529,11 +523,7 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private openSortWindow(): void {
-        // if (!this._sort_window.visible) {
-        //     this._sort_window.alpha = 0;
-        //     this._sort_window.visible = true;
-        //     this._sort_window.set_animator(new GameAnimatorFader(0, 1, 0.5, false));
-        // }
+        this.showDialog(new SortOptionsDialog(this._sortOptions));
     }
 
     private openCustomizeWindow(): void {
@@ -544,12 +534,12 @@ export class DesignBrowserMode extends GameMode {
         // }
     }
 
-    private update_sort_option(sort_category: string, sort_order: number, sort_arguments: any[]): void {
-        // if (sort_order != 0) {
-        //     this._sort_window.on_add_criteria(sort_category, sort_order, sort_arguments);
-        // } else {
-        //     this._sort_window.on_remove_criteria(sort_category);
-        // }
+    private updateSortOption(category: string, sortOrder: SortOrder, sortArgs: any[] = null): void {
+        if (sortOrder != SortOrder.NONE) {
+            this._sortOptions.addCriteria(category, sortOrder, sortArgs);
+        } else {
+            this._sortOptions.removeCriteria(category);
+        }
     }
 
     private customizeCategory(names: DesignBrowserColumnName[]): void {
@@ -561,20 +551,18 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private reorganize(sort: boolean): void {
-        let dataCol: DataCol;
+        if (sort) {
+            this._all_solutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
-        // if (sort) {
-        //     this._all_solutions.sort(this._sort_window.compare_solutions);
-        //
-        //     for (dataCol of this._dataCols) {
-        //         dataCol.set_sort_state(this._sort_window.get_sort_order(dataCol.get_exp()));
-        //     }
-        // }
+            for (let dataCol of this._dataCols) {
+                dataCol.set_sort_state(this._sortOptions.getSortOrder(dataCol.get_exp()));
+            }
+        }
 
         let solutions: Solution[] = [];
         for (let sol of this._all_solutions) {
             let shouldAdd = true;
-            for (dataCol of this._dataCols) {
+            for (let dataCol of this._dataCols) {
                 if (!dataCol.is_qualified(sol)) {
                     shouldAdd = false;
                     break;
@@ -584,18 +572,10 @@ export class DesignBrowserMode extends GameMode {
             if (shouldAdd) {
                 solutions.push(sol);
             }
-
         }
 
         this._filteredSolutions = solutions;
-
         this.set_data(solutions, false, false);
-
-        // if (this._loading_text != null) {
-        //     this.remove_object(this._loading_text);
-        //     this._loading_text = null;
-        // }
-
         this.set_scroll_vertical(-1);
     }
 
@@ -701,8 +681,7 @@ export class DesignBrowserMode extends GameMode {
             }
 
             column.setSize(this.contentWidth, this.contentHeight);
-            column.set_reorganize_callback(this.reorganize);
-            column.set_update_sort_callback(this.update_sort_option);
+            column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.columnName, sortOrder));
 
             // if (this.root.loaderInfo.parameters.filter1 == columnName) {
             //     column.set_filter(this.root.loaderInfo.parameters.filter1_arg1, this.root.loaderInfo.parameters.filter1_arg2);
@@ -870,6 +849,8 @@ export class DesignBrowserMode extends GameMode {
     private _dataCols: DataCol[];
     private _all_solutions: Solution[];
     private _filteredSolutions: Solution[];
+
+    private _sortOptions: SortOptions;
     // private _sort_window: SortWindow;
     // private _customize_win: CustomWin;
     private _toolbarLayout: HLayoutContainer;
