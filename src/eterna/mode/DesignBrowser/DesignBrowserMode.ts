@@ -2,7 +2,6 @@ import MultiStyleText from "pixi-multistyle-text";
 import {Container, Point, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {SceneObject} from "../../../flashbang/objects/SceneObject";
@@ -28,7 +27,6 @@ import {Fonts} from "../../util/Fonts";
 import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
 import {GameMode} from "../GameMode";
 import {MaskBox} from "../MaskBox";
-import {ActionBox} from "./ActionBox";
 import {DataCol} from "./DataCol";
 import {DotLine} from "./DotLine";
 import {GridLines} from "./GridLines";
@@ -36,6 +34,7 @@ import {MarkersBoxes} from "./MarkersBoxes";
 import {SelectionBox} from "./SelectionBox";
 import {SortOptions, SortOrder} from "./SortOptions";
 import {SortOptionsDialog} from "./SortOptionsDialog";
+import {ViewSolutionDialog} from "./ViewSolutionDialog";
 import {VoteProcessor} from "./VoteProcessor";
 
 export enum DesignBrowserDataType {
@@ -355,12 +354,12 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private navigateToSolution(solution: Solution): void {
-        this.closeActionBox();
+        this.closeCurDialog();
         window.open(`/node/${solution.nodeID}/edit`, "soleditwindow");
     }
 
     private sortOnSolution(solution: Solution): void {
-        this.closeActionBox();
+        this.closeCurDialog();
         this._sortOptions.addCriteria(DesignCategory.Sequence, SortOrder.INCREASING, solution.sequence);
         this.openSortWindow();
     }
@@ -388,7 +387,7 @@ export class DesignBrowserMode extends GameMode {
         const cleanup = () => {
             this.popUILock();
             statusText.destroySelf();
-            this.closeActionBox();
+            this.closeCurDialog();
             this.refresh_browser();
         };
 
@@ -413,7 +412,7 @@ export class DesignBrowserMode extends GameMode {
         const cleanup = () => {
             this.popUILock();
             statusText.destroySelf();
-            this.closeActionBox();
+            this.closeCurDialog();
         };
 
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty("My Votes"))
@@ -450,27 +449,20 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private showActionBox(solution: Solution): void {
-        this.closeActionBox();
+        let dialog = this.showDialog(new ViewSolutionDialog(solution, this._puzzle, this._novote));
 
-        let actionBox = this.showDialog(new ActionBox(solution, this._puzzle, this._novote));
-        this._actionBoxRef = actionBox.ref;
-
-        actionBox.playClicked.connect(() => this.startGameWithSolution(solution));
-        actionBox.seeResultClicked.connect(() => this.reviewExp(solution));
-        actionBox.voteClicked.connect(() => this.vote(solution));
-        actionBox.sortClicked.connect(() => this.sortOnSolution(solution));
-        actionBox.editClicked.connect(() => this.navigateToSolution(solution));
-        actionBox.deleteClicked.connect(() => this.unpublish(solution));
-    }
-
-    private closeActionBox(): void {
-        this._actionBoxRef.destroyObject();
+        dialog.playClicked.connect(() => this.startGameWithSolution(solution));
+        dialog.seeResultClicked.connect(() => this.reviewExp(solution));
+        dialog.voteClicked.connect(() => this.vote(solution));
+        dialog.sortClicked.connect(() => this.sortOnSolution(solution));
+        dialog.editClicked.connect(() => this.navigateToSolution(solution));
+        dialog.deleteClicked.connect(() => this.unpublish(solution));
     }
 
     private onMouseMove(): void {
         this._selection_box.visible = false;
 
-        if (this._dataCols == null || this._actionBoxRef.isLive) {
+        if (this._dataCols == null || this._dialogRef.isLive) {
             return;
         }
 
@@ -487,7 +479,7 @@ export class DesignBrowserMode extends GameMode {
         //     return;
         // }
         //
-        // if (this._actionBoxRef.isLive) {
+        // if (this._viewSolutionActionBoxRef.isLive) {
         //     return;
         // }
         //
@@ -833,8 +825,6 @@ export class DesignBrowserMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private readonly _novote: boolean;
     private readonly _content = new Container();
-
-    private _actionBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     private _divider1: DotLine;
     private _divider2: DotLine;
