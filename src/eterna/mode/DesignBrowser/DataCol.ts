@@ -10,20 +10,20 @@ import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 import {int} from "../../util/int";
 import {Utility} from "../../util/Utility";
-import {DesignBrowserColumnName, DesignBrowserDataType} from "./DesignBrowserMode";
+import {DesignBrowserDataType, DesignCategory} from "./DesignBrowserMode";
 import {SequenceStringListView} from "./SequenceStringListView";
 import {SortOrder} from "./SortOptions";
 
 export class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
-    public readonly columnName: string;
+    public readonly category: DesignCategory;
 
-    constructor(data_type: DesignBrowserDataType, exp: string,
+    constructor(data_type: DesignBrowserDataType, category: DesignCategory,
                 data_width: number, fonttype: string,
                 fontSize: number, sortable: boolean) {
         super();
 
-        this.columnName = exp;
+        this.category = category;
         this._data_type = data_type;
         this._data_width = data_width;
         this._fontType = fonttype;
@@ -55,7 +55,7 @@ export class DataCol extends ContainerObject {
         this._sequencesView.position = new Point(0, DataCol.DATA_H);
         this.container.addChild(this._sequencesView);
 
-        this._label = new GameButton().label(this.columnName, 14);
+        this._label = new GameButton().label(this.category, 14);
         this._label.display.position = new Point(11, 7);
         this.addObject(this._label, this.container);
 
@@ -178,30 +178,26 @@ export class DataCol extends ContainerObject {
                 return true;
             }
 
-            let target_low: string = sol.getProperty(this.columnName).toLowerCase();
+            let target_low: string = sol.getProperty(this.category).toLowerCase();
 
             return (target_low.search(query_string.toLowerCase()) >= 0);
         } else {
             let query_min: string = this._input_field.text;
             if (query_min.length > 0) {
-                if (sol.getProperty(this.columnName) < Number(query_min)) {
+                if (sol.getProperty(this.category) < Number(query_min)) {
                     return false;
                 }
             }
 
             let query_max: string = this._input_field2.text;
             if (query_max.length > 0) {
-                if (sol.getProperty(this.columnName) > Number(query_max)) {
+                if (sol.getProperty(this.category) > Number(query_max)) {
                     return false;
                 }
             }
 
             return true;
         }
-    }
-
-    public get_exp(): string {
-        return this.columnName;
     }
 
     public set_width(w: number): void {
@@ -273,7 +269,7 @@ export class DataCol extends ContainerObject {
         this._graphics.drawRect(0, 0, this._data_width, this._height);
         this._graphics.endFill();
 
-        if (this.columnName == "Sequence") {
+        if (this.category == "Sequence") {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             for (let ii = 0; ii < this._data_width / 70 + 1; ii++) {
                 this._graphics.moveTo(ii * 70 + 90, 85);
@@ -316,14 +312,14 @@ export class DataCol extends ContainerObject {
                 let rawstr = Utility.stripHtmlTags("" + this._rawData[ii]);
 
                 //trace(rawstr);
-                switch (this.columnName) {
-                case DesignBrowserColumnName.Sequence:
+                switch (this.category) {
+                case DesignCategory.Sequence:
                     boardData.push(rawstr);
                     board_exp_data.push(this._exp_data[ii]);
 
                     break;
 
-                case DesignBrowserColumnName.Votes:
+                case DesignCategory.Votes:
                     if (this._rawData[ii] >= 0) {
                         dataString += rawstr + "\n";
                     } else {
@@ -331,7 +327,7 @@ export class DataCol extends ContainerObject {
                     }
                     break;
 
-                case DesignBrowserColumnName.My_Votes:
+                case DesignCategory.My_Votes:
                     if (this._rawData[ii] >= 0) {
                         dataString += rawstr + "\n";
                     } else {
@@ -340,7 +336,7 @@ export class DataCol extends ContainerObject {
 
                     break;
 
-                case DesignBrowserColumnName.Synthesis_score:
+                case DesignCategory.Synthesis_score:
                     let exp: Feedback = null;
                     if (this._exp_data != null) {
                         exp = this._exp_data[ii];
@@ -366,19 +362,19 @@ export class DataCol extends ContainerObject {
                     }
                     break;
 
-                case DesignBrowserColumnName.Title:
+                case DesignCategory.Title:
                     dataString += rawstr + "\n";
                     break;
 
-                case DesignBrowserColumnName.Melting_Point:
+                case DesignCategory.Melting_Point:
                     dataString += rawstr + " 'C\n";
                     break;
 
-                case DesignBrowserColumnName.Free_Energy:
+                case DesignCategory.Free_Energy:
                     dataString += rawstr + " kcal\n";
                     break;
 
-                case DesignBrowserColumnName.GU_Pairs:
+                case DesignCategory.GU_Pairs:
                     if (pairs_length > 0) {
                         dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
@@ -386,7 +382,7 @@ export class DataCol extends ContainerObject {
                     }
                     break;
 
-                case DesignBrowserColumnName.GC_Pairs:
+                case DesignCategory.GC_Pairs:
                     if (pairs_length > 0) {
                         dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
@@ -394,7 +390,7 @@ export class DataCol extends ContainerObject {
                     }
                     break;
 
-                case DesignBrowserColumnName.UA_Pairs:
+                case DesignCategory.UA_Pairs:
                     if (pairs_length > 0) {
                         dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
@@ -449,7 +445,7 @@ export class DataCol extends ContainerObject {
     private _offset: number = 0;
 
     private _num_display: number;
-    private _sortOrder: SortOrder = 0;
+    private _sortOrder: SortOrder = SortOrder.NONE;
     private _exp_data: Feedback[];
     private _show_exp_data: boolean = false;
     private _pairs_array: number[];

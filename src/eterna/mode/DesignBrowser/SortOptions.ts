@@ -1,5 +1,6 @@
 import {UnitSignal} from "../../../signals/UnitSignal";
 import {Solution} from "../../puzzle/Solution";
+import {DesignCategory} from "./DesignBrowserMode";
 
 export enum SortOrder {
     INCREASING = 1,
@@ -8,11 +9,11 @@ export enum SortOrder {
 }
 
 export class SortCriterion {
-    public readonly category: string;
+    public readonly category: DesignCategory;
     public sortOrder: SortOrder;
     public arg: string;
 
-    public constructor(category: string, order: SortOrder, arg: string = null) {
+    public constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -23,26 +24,26 @@ export class SortOptions {
     /** Emitted when any of our sort options have changed */
     public readonly sortChanged = new UnitSignal();
 
-    public constructor(sortNames: string[]) {
-        if (sortNames == null || sortNames.length == 0) {
+    public constructor(validCategories: DesignCategory[]) {
+        if (validCategories == null || validCategories.length == 0) {
             throw new Error("Sort names length can't be 0");
         }
 
-        this._sortNames = sortNames.slice();
+        this._validCategories = validCategories.slice();
     }
 
-    public get sortNames(): ReadonlyArray<string> { return this._sortNames; }
+    public get validCategories(): ReadonlyArray<DesignCategory> { return this._validCategories; }
     public get sortCriteria(): ReadonlyArray<SortCriterion> { return this._criteria; }
 
-    public getCriterion(category: string): SortCriterion | null {
+    public getCriterion(category: DesignCategory): SortCriterion | null {
         return this._criteria.find(value => value.category === category);
     }
 
-    public getCriterionIdx(category: string): number {
+    public getCriterionIdx(category: DesignCategory): number {
         return this._criteria.findIndex(value => value.category === category);
     }
 
-    public getSortOrder(category: string): SortOrder {
+    public getSortOrder(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
         return criterion != null ? criterion.sortOrder : SortOrder.NONE;
     }
@@ -52,7 +53,7 @@ export class SortOptions {
             let aProperty: any;
             let bProperty: any;
 
-            if (criterion.category.indexOf("Sequence") >= 0) {
+            if (criterion.category == DesignCategory.Sequence) {
                 let anchor_sequence: string = criterion.arg;
                 let a_string: string = a.sequence;
                 if (a_string == null) throw new Error("solution " + a.nodeID + " invalid");
@@ -109,7 +110,7 @@ export class SortOptions {
         return 0;
     }
 
-    public addCriteria(category: string, sortOrder: SortOrder, sortArgs: any = null): void {
+    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
         let cur = this.getCriterion(category);
         if (cur != null) {
             cur.sortOrder = sortOrder;
@@ -123,7 +124,7 @@ export class SortOptions {
         this.sortChanged.emit();
     }
 
-    public removeCriteria(category: string): void {
+    public removeCriteria(category: DesignCategory): void {
         let idx = this.getCriterionIdx(category);
         if (idx < 0) {
             throw new Error("Can't find sort_category " + category);
@@ -134,7 +135,7 @@ export class SortOptions {
         this.sortChanged.emit();
     }
 
-    public toggleSort(category: string): SortOrder {
+    public toggleSort(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
         if (criterion == null) {
             throw new Error("Can't find category " + category);
@@ -146,7 +147,7 @@ export class SortOptions {
         return criterion.sortOrder;
     }
 
-    public setCriteriaIdx(category: string, newIdx: number): void {
+    public setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.getCriterionIdx(category);
         if (curIdx < 0) {
             throw new Error("Can't find sort_category " + category);
@@ -167,6 +168,6 @@ export class SortOptions {
         array[j] = temp;
     }
 
-    private readonly _sortNames: string[];
+    private readonly _validCategories: DesignCategory[];
     private readonly _criteria: SortCriterion[] = [];
 }
