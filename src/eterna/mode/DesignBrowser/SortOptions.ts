@@ -1,3 +1,4 @@
+import {Arrays} from "../../../flashbang/util/Arrays";
 import {UnitSignal} from "../../../signals/UnitSignal";
 import {Solution} from "../../puzzle/Solution";
 import {DesignCategory} from "./DesignBrowserMode";
@@ -35,8 +36,16 @@ export class SortOptions {
     public get validCategories(): ReadonlyArray<DesignCategory> { return this._validCategories; }
     public get sortCriteria(): ReadonlyArray<SortCriterion> { return this._criteria; }
 
+    public getUnusedCategories(): DesignCategory[] {
+        return this._validCategories.filter(category => !this.hasCriterion(category));
+    }
+
     public getCriterion(category: DesignCategory): SortCriterion | null {
         return this._criteria.find(value => value.category === category);
+    }
+
+    public hasCriterion(category: DesignCategory): boolean {
+        return this.getCriterionIdx(category) >= 0;
     }
 
     public getCriterionIdx(category: DesignCategory): number {
@@ -157,15 +166,9 @@ export class SortOptions {
             return;
         }
 
-        SortOptions.swap(this._criteria, curIdx, newIdx);
+        Arrays.swap(this._criteria, curIdx, newIdx);
 
         this.sortChanged.emit();
-    }
-
-    private static swap<T>(array: T[], i: number, j: number): void {
-        let temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
     }
 
     private readonly _validCategories: DesignCategory[];
