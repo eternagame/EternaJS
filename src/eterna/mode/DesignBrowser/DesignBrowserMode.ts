@@ -160,22 +160,23 @@ export class DesignBrowserMode extends GameMode {
             this._selection_group = [];
         }
 
-        let sortableCategories: DesignCategory[] = [
+        let sortableCategories = [
             DesignCategory.Id,
             DesignCategory.Title,
             DesignCategory.Designer,
             DesignCategory.Description,
+            DesignCategory.Round,
             DesignCategory.GC_Pairs,
             DesignCategory.UA_Pairs,
             DesignCategory.GU_Pairs,
             DesignCategory.Melting_Point,
             DesignCategory.Free_Energy,
+            DesignCategory.Synthesis_score,
         ];
         if (!this._novote) {
             sortableCategories.push(DesignCategory.Votes);
             sortableCategories.push(DesignCategory.My_Votes)
         }
-        sortableCategories.push(DesignCategory.Synthesis_score);
 
         this._sortOptions = new SortOptions(sortableCategories);
         this._sortOptions.sortChanged.connect(() => this.reorganize(true));

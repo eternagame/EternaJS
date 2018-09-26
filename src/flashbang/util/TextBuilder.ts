@@ -7,7 +7,7 @@ export class TextBuilder {
 
     /** Creates the Text object */
     public build(): Text {
-        let text = new Text(this._text, new TextStyle(this._style));
+        let text = new Text(this._text, this.style);
         text.scale.x = this._scale;
         text.scale.y = this._scale;
         return text;
