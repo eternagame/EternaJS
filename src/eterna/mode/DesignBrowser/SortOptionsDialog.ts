@@ -6,6 +6,7 @@ import {Dialog} from "../../ui/Dialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel, GamePanelType} from "../../ui/GamePanel";
 import {Fonts} from "../../util/Fonts";
+import {DesignCategory} from "./DesignBrowserMode";
 import {SortOptions, SortOrder} from "./SortOptions";
 
 export class SortOptionsDialog extends Dialog<void> {
@@ -20,10 +21,10 @@ export class SortOptionsDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        this._panel = new GamePanel(GamePanelType.NORMAL, 0.89, 0x0);
+        this._panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
         this.addObject(this._panel, this.container);
 
-        this._sortCategorySelection = Fonts.arial(this.options.sortNames[0], 17).color(0xffffff).bold().build();
+        this._sortCategorySelection = Fonts.arial(this.options.validCategories[0], 17).color(0xffffff).bold().build();
         this._panel.container.addChild(this._sortCategorySelection);
 
         this._sortOrderSelection = new GameButton().label("increasing", 17);
@@ -65,16 +66,16 @@ export class SortOptionsDialog extends Dialog<void> {
 
         this.layout();
 
-        const centerDialog = () => {
+        const repositionDialog = () => {
             DisplayUtil.positionRelativeToStage(
-                this._panel.container, HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER);
+                this._panel.container, HAlign.CENTER, VAlign.TOP,
+                HAlign.CENTER, VAlign.TOP, 0, 145);
         };
-        centerDialog();
-        this.regs.add(this.mode.resized.connect(centerDialog));
+        repositionDialog();
+        this.regs.add(this.mode.resized.connect(repositionDialog));
     }
 
-    private addCriteriaUI(category: string, sortOrder: SortOrder, idx: number): void {
+    private addCriteriaUI(category: DesignCategory, sortOrder: SortOrder, idx: number): void {
         let sortCategoryText = Fonts.arial(category, 14).color(0xffffff).build();
         this._panel.container.addChild(sortCategoryText);
         SortOptionsDialog.addAt(this._sortCategoryTexts, sortCategoryText, idx);
@@ -101,7 +102,7 @@ export class SortOptionsDialog extends Dialog<void> {
         SortOptionsDialog.addAt(this._moveDownButtons, moveDownButton, idx);
     }
 
-    private addCriteria(category: string, order: SortOrder, args: any = null): void {
+    private addCriteria(category: DesignCategory, order: SortOrder, args: any = null): void {
         let curIdx = this.options.getCriterionIdx(category);
         this.options.addCriteria(category, order, args);
 
@@ -119,7 +120,7 @@ export class SortOptionsDialog extends Dialog<void> {
         } else {
             this.addCriteriaUI(category, order, 0);
 
-            if (this.options.sortNames[this._sortCategoryID] == category) {
+            if (this.options.validCategories[this._sortCategoryID] == category) {
                 if (!this.sortSelectionRight()) {
                     this._addButton.display.alpha = 0.3;
                     this._sortOrderSelection.display.alpha = 0.3;
@@ -138,7 +139,7 @@ export class SortOptionsDialog extends Dialog<void> {
         }
     }
 
-    private removeCriteria(category: string): void {
+    private removeCriteria(category: DesignCategory): void {
         let idx = this.options.getCriterionIdx(category);
         if (idx < 0) {
             throw new Error("Can't find sort_category " + category);
@@ -172,7 +173,7 @@ export class SortOptionsDialog extends Dialog<void> {
         this._sortOrderSelection.enabled = true;
         this._addButton.enabled = true;
 
-        if (this.options.getCriterionIdx(this.options.sortNames[this._sortCategoryID]) >= 0) {
+        if (this.options.getCriterionIdx(this.options.validCategories[this._sortCategoryID]) >= 0) {
             this.sortSelectionRight();
         }
 
@@ -190,11 +191,11 @@ export class SortOptionsDialog extends Dialog<void> {
     }
 
     private sortSelectionLeft(): boolean {
-        for (let ii = this._sortCategoryID - 1; ii > this._sortCategoryID - this.options.sortNames.length; ii--) {
-            let index: number = (ii + this.options.sortNames.length) % this.options.sortNames.length;
-            if (this.options.getCriterionIdx(this.options.sortNames[index]) < 0) {
+        for (let ii = this._sortCategoryID - 1; ii > this._sortCategoryID - this.options.validCategories.length; ii--) {
+            let index: number = (ii + this.options.validCategories.length) % this.options.validCategories.length;
+            if (this.options.getCriterionIdx(this.options.validCategories[index]) < 0) {
                 this._sortCategoryID = index;
-                this._sortCategorySelection.text = this.options.sortNames[index];
+                this._sortCategorySelection.text = this.options.validCategories[index];
                 return true;
             }
         }
@@ -203,11 +204,11 @@ export class SortOptionsDialog extends Dialog<void> {
     }
 
     private sortSelectionRight(): boolean {
-        for (let ii = this._sortCategoryID + 1; ii < this._sortCategoryID + this.options.sortNames.length; ii++) {
-            let index: number = (ii) % this.options.sortNames.length;
-            if (this.options.getCriterionIdx(this.options.sortNames[index]) < 0) {
+        for (let ii = this._sortCategoryID + 1; ii < this._sortCategoryID + this.options.validCategories.length; ii++) {
+            let index: number = (ii) % this.options.validCategories.length;
+            if (this.options.getCriterionIdx(this.options.validCategories[index]) < 0) {
                 this._sortCategoryID = index;
-                this._sortCategorySelection.text = this.options.sortNames[index];
+                this._sortCategorySelection.text = this.options.validCategories[index];
                 return true;
             }
         }
@@ -216,10 +217,10 @@ export class SortOptionsDialog extends Dialog<void> {
     }
 
     private addCurrentCriteria(): void {
-        this.addCriteria(this.options.sortNames[this._sortCategoryID], this._sortOrder);
+        this.addCriteria(this.options.validCategories[this._sortCategoryID], this._sortOrder);
     }
 
-    private toggleSort(category: string): void {
+    private toggleSort(category: DesignCategory): void {
         let index = this.options.getCriterionIdx(category);
         if (index < 0) {
             throw new Error("Can't find sort_category " + category);
@@ -233,12 +234,12 @@ export class SortOptionsDialog extends Dialog<void> {
         }
     }
 
-    private moveCriteria(category: string, displacement: number): void {
+    private moveCriteria(category: DesignCategory, displacement: number): void {
         let curIdx = this.options.getCriterionIdx(category);
         this.setCriteriaIdx(category, curIdx + displacement);
     }
 
-    private setCriteriaIdx(category: string, newIdx: number): void {
+    private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.options.getCriterionIdx(category);
         if (curIdx < 0) {
             throw new Error("Can't find sort_category " + category);
@@ -277,7 +278,16 @@ export class SortOptionsDialog extends Dialog<void> {
         this._sortCategoryRight.display.position = new Point(150, 20 + ii * SortOptionsDialog.ROW_HEIGHT + 22);
         this._sortOrderSelection.display.position = new Point(180, 20 + ii * SortOptionsDialog.ROW_HEIGHT + 10);
         this._addButton.display.position = new Point(280, 20 + ii * SortOptionsDialog.ROW_HEIGHT + 10);
+
+        DisplayUtil.positionRelative(
+            this._okButton.display, HAlign.CENTER, VAlign.BOTTOM,
+            this._panel.display, HAlign.CENTER, VAlign.BOTTOM, 0, -15);
+
         this._okButton.display.position = new Point(120, 20 + ii * SortOptionsDialog.ROW_HEIGHT + 37);
+    }
+
+    protected get bgAlpha(): number {
+        return 0;
     }
 
     private static swap<T>(array: T[], i: number, j: number): void {

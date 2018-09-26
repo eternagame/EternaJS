@@ -1,6 +1,6 @@
 import {Setting} from "../../flashbang/settings/Setting";
 import {Settings} from "../../flashbang/settings/Settings";
-import {DesignBrowserColumnName} from "../mode/DesignBrowser/DesignBrowserMode";
+import {DesignCategory} from "../mode/DesignBrowser/DesignBrowserMode";
 
 export class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
@@ -20,7 +20,7 @@ export class EternaSettings extends Settings {
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
 
-    public readonly designBrowserColumnNames: Setting<DesignBrowserColumnName[]>;
+    public readonly designBrowserColumnNames: Setting<DesignCategory[]>;
     public readonly designBrowserSortValues: Setting<number[]>;
 
     public constructor() {

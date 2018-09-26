@@ -44,7 +44,7 @@ export enum DesignBrowserDataType {
     NUMBER = 2,
 }
 
-export enum DesignBrowserColumnName {
+export enum DesignCategory {
     Id = "Id",
     Title = "Title",
     Designer = "Designer",
@@ -160,23 +160,26 @@ export class DesignBrowserMode extends GameMode {
             this._selection_group = [];
         }
 
-        let sortableColumns: string[] = [
-            "Id",
-            "GC Pairs",
-            "UA Pairs",
-            "GU Pairs",
-            "Melting Point",
-            "Free Energy",
+        let sortableCategories: DesignCategory[] = [
+            DesignCategory.Id,
+            DesignCategory.Title,
+            DesignCategory.Designer,
+            DesignCategory.Description,
+            DesignCategory.GC_Pairs,
+            DesignCategory.UA_Pairs,
+            DesignCategory.GU_Pairs,
+            DesignCategory.Melting_Point,
+            DesignCategory.Free_Energy,
         ];
         if (!this._novote) {
-            sortableColumns.push("Votes");
-            sortableColumns.push("My Votes")
+            sortableCategories.push(DesignCategory.Votes);
+            sortableCategories.push(DesignCategory.My_Votes)
         }
-        sortableColumns.push("Synthesis score");
+        sortableCategories.push(DesignCategory.Synthesis_score);
 
-        this._sortOptions = new SortOptions(sortableColumns);
+        this._sortOptions = new SortOptions(sortableCategories);
         this._sortOptions.sortChanged.connect(() => this.reorganize(true));
-        // this._sort_window = new SortWindow(sortableColumns);
+        // this._sort_window = new SortWindow(sortableCategories);
         // this._sort_window.visible = false;
         // this._sort_window.set_pos(new UDim(0.5, 0, -170, 50));
         // this._sort_window.set_reorganize_callback(this.reorganize);
@@ -320,7 +323,7 @@ export class DesignBrowserMode extends GameMode {
         this._exp_color_button.toggled.value = false;
 
         for (let dataCol of this._dataCols) {
-            if (dataCol.get_exp() == "Sequence") {
+            if (dataCol.category == DesignCategory.Sequence) {
                 dataCol.set_show_exp(false);
             }
         }
@@ -331,7 +334,7 @@ export class DesignBrowserMode extends GameMode {
         this._exp_color_button.toggled.value = true;
 
         for (let dataCol of this._dataCols) {
-            if (dataCol.get_exp() == "Sequence") {
+            if (dataCol.category == DesignCategory.Sequence) {
                 dataCol.set_show_exp(true);
             }
         }
@@ -357,9 +360,8 @@ export class DesignBrowserMode extends GameMode {
 
     private sortOnSolution(solution: Solution): void {
         this.closeActionBox();
-        // this._sort_window.on_add_criteria("Sequence", 1, solution.sequence);
-        // this.openSortWindow();
-        // this.closeActionBox();
+        this._sortOptions.addCriteria(DesignCategory.Sequence, SortOrder.INCREASING, solution.sequence);
+        this.openSortWindow();
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
@@ -534,7 +536,7 @@ export class DesignBrowserMode extends GameMode {
         // }
     }
 
-    private updateSortOption(category: string, sortOrder: SortOrder, sortArgs: any[] = null): void {
+    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] = null): void {
         if (sortOrder != SortOrder.NONE) {
             this._sortOptions.addCriteria(category, sortOrder, sortArgs);
         } else {
@@ -542,7 +544,7 @@ export class DesignBrowserMode extends GameMode {
         }
     }
 
-    private customizeCategory(names: DesignBrowserColumnName[]): void {
+    private customizeCategory(names: DesignCategory[]): void {
         this._columnNames = names;
         Eterna.settings.designBrowserColumnNames.value = names;
         this._dataCols = null;
@@ -555,7 +557,7 @@ export class DesignBrowserMode extends GameMode {
             this._all_solutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
             for (let dataCol of this._dataCols) {
-                dataCol.set_sort_state(this._sortOptions.getSortOrder(dataCol.get_exp()));
+                dataCol.set_sort_state(this._sortOptions.getSortOrder(dataCol.category));
             }
         }
 
@@ -575,7 +577,7 @@ export class DesignBrowserMode extends GameMode {
         }
 
         this._filteredSolutions = solutions;
-        this.set_data(solutions, false, false);
+        this.setData(solutions, false, false);
         this.set_scroll_vertical(-1);
     }
 
@@ -648,31 +650,31 @@ export class DesignBrowserMode extends GameMode {
 
         this._dataCols = [];
         for (let columnName of this._columnNames) {
-            if (this._novote && (columnName == DesignBrowserColumnName.Votes || columnName == DesignBrowserColumnName.My_Votes)) {
+            if (this._novote && (columnName == DesignCategory.Votes || columnName == DesignCategory.My_Votes)) {
                 continue;
             }
 
             let column: DataCol;
             switch (columnName) {
-            case DesignBrowserColumnName.Title:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 250, FONT, FONT_SIZE, false);
+            case DesignCategory.Title:
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 250, FONT, FONT_SIZE, true);
                 break;
-            case DesignBrowserColumnName.Designer:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 220, FONT, FONT_SIZE, false);
+            case DesignCategory.Designer:
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 220, FONT, FONT_SIZE, true);
                 break;
-            case DesignBrowserColumnName.Description:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 300, FONT, FONT_SIZE, false);
+            case DesignCategory.Description:
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 300, FONT, FONT_SIZE, true);
                 break;
-            case DesignBrowserColumnName.Sequence:
+            case DesignCategory.Sequence:
                 column = new DataCol(DesignBrowserDataType.STRING, columnName, 0, FONT, FONT_SIZE, false);
                 break;
-            case DesignBrowserColumnName.Synthesized:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 100, FONT, FONT_SIZE, false);
+            case DesignCategory.Synthesized:
+                column = new DataCol(DesignBrowserDataType.STRING, columnName, 100, FONT, FONT_SIZE, true);
                 break;
-            case DesignBrowserColumnName.Votes:
+            case DesignCategory.Votes:
                 column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 100, FONT, FONT_SIZE, true);
                 break;
-            case DesignBrowserColumnName.Synthesis_score:
+            case DesignCategory.Synthesis_score:
                 column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 170, FONT, FONT_SIZE, true);
                 break;
             default:
@@ -681,7 +683,7 @@ export class DesignBrowserMode extends GameMode {
             }
 
             column.setSize(this.contentWidth, this.contentHeight);
-            column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.columnName, sortOrder));
+            column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.category, sortOrder));
 
             // if (this.root.loaderInfo.parameters.filter1 == columnName) {
             //     column.set_filter(this.root.loaderInfo.parameters.filter1_arg1, this.root.loaderInfo.parameters.filter1_arg2);
@@ -698,9 +700,7 @@ export class DesignBrowserMode extends GameMode {
         this.layout_columns(false);
     }
 
-    private set_data(solutions: Solution[], animate: boolean, initialize_only: boolean = false): void {
-        let des: string;
-
+    private setData(solutions: Solution[], animate: boolean, initialize_only: boolean = false): void {
         if (this._dataCols == null) {
             this.setup_data_cols();
         }
@@ -714,7 +714,7 @@ export class DesignBrowserMode extends GameMode {
         for (let dataCol of this._dataCols) {
             let data_array: any[] = [];
 
-            let exp: string = dataCol.get_exp();
+            let category: DesignCategory = dataCol.category;
             let exp_array: Feedback[] = [];
 
             for (let solution of solutions) {
@@ -725,33 +725,33 @@ export class DesignBrowserMode extends GameMode {
                 //single row of raw data
                 let singleLineRawData: Solution = solutions[ii];
 
-                if (exp == DesignBrowserColumnName.Sequence) {
+                if (category == DesignCategory.Sequence) {
                     data_array.push(singleLineRawData.sequence);
                     if (ii == 0) {
                         dataCol.set_width(singleLineRawData.sequence.length * 16);
                         dataCol.draw_grid_text();
                     }
-                } else if (exp == DesignBrowserColumnName.Description) {
-                    des = singleLineRawData.getProperty("Description");
+                } else if (category == DesignCategory.Description) {
+                    let des = singleLineRawData.getProperty("Description");
                     if (des.length < 45) {
                         data_array.push(des);
                     } else {
                         data_array.push(des.substr(0, 40) + "...");
                     }
-                } else if (exp == DesignBrowserColumnName.Title) {
-                    des = singleLineRawData.getProperty("Title");
+                } else if (category == DesignCategory.Title) {
+                    let des = singleLineRawData.getProperty("Title");
                     if (des.length < 30) {
                         data_array.push(des);
                     } else {
                         data_array.push(des.substr(0, 25) + "...");
                     }
                 } else {
-                    let rawdata: any = singleLineRawData.getProperty(exp);
+                    let rawdata: any = singleLineRawData.getProperty(category);
                     data_array.push(rawdata);
                 }
             }
 
-            if (exp == DesignBrowserColumnName.Sequence || exp == DesignBrowserColumnName.Synthesis_score) {
+            if (category == DesignCategory.Sequence || category == DesignCategory.Synthesis_score) {
                 dataCol.set_exp_data(exp_array);
             }
             dataCol.set_pairs(EPars.parenthesisToPairs(puz.getSecstruct()));
@@ -816,7 +816,7 @@ export class DesignBrowserMode extends GameMode {
         /// Set puzzle title
         // Application.instance.get_application_gui("Puzzle Title").set_text(puz.get_puzzle_name());
 
-        this.set_data(solutions, false, true);
+        this.setData(solutions, false, true);
 
         this._all_solutions = solutions;
         this.update_votes();
@@ -864,24 +864,24 @@ export class DesignBrowserMode extends GameMode {
     // private _loading_text: Text;
     private _selection_box: SelectionBox;
     private _marker_boxes: MarkersBoxes;
-    private _columnNames: DesignBrowserColumnName[];
+    private _columnNames: DesignCategory[];
     private _vote_processor: VoteProcessor;
 
-    private static readonly DEFAULT_COLUMNS: DesignBrowserColumnName[] = [
-        DesignBrowserColumnName.Id,
-        DesignBrowserColumnName.Title,
-        DesignBrowserColumnName.Designer,
-        DesignBrowserColumnName.Votes,
-        DesignBrowserColumnName.My_Votes,
-        DesignBrowserColumnName.Description,
-        DesignBrowserColumnName.Round,
-        DesignBrowserColumnName.GC_Pairs,
-        DesignBrowserColumnName.UA_Pairs,
-        DesignBrowserColumnName.GU_Pairs,
-        DesignBrowserColumnName.Melting_Point,
-        DesignBrowserColumnName.Free_Energy,
-        DesignBrowserColumnName.Synthesized,
-        DesignBrowserColumnName.Synthesis_score,
-        DesignBrowserColumnName.Sequence,
+    private static readonly DEFAULT_COLUMNS: DesignCategory[] = [
+        DesignCategory.Id,
+        DesignCategory.Title,
+        DesignCategory.Designer,
+        DesignCategory.Votes,
+        DesignCategory.My_Votes,
+        DesignCategory.Description,
+        DesignCategory.Round,
+        DesignCategory.GC_Pairs,
+        DesignCategory.UA_Pairs,
+        DesignCategory.GU_Pairs,
+        DesignCategory.Melting_Point,
+        DesignCategory.Free_Energy,
+        DesignCategory.Synthesized,
+        DesignCategory.Synthesis_score,
+        DesignCategory.Sequence,
     ];
 }
