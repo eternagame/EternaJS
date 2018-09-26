@@ -81,6 +81,10 @@ export abstract class GameMode extends AppMode {
         return dialog;
     }
 
+    public closeCurDialog(): void {
+        this._dialogRef.destroyObject();
+    }
+
     /**
      * Show a notification. Removes any existing notification. Dialogs will be hidden while the notification exists.
      * Returns a Promise that will resolve when the notification is dismissed.

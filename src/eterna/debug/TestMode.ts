@@ -1,4 +1,4 @@
-import {ActionBox} from "../mode/DesignBrowser/ActionBox";
+import {ViewSolutionDialog} from "../mode/DesignBrowser/ViewSolutionDialog";
 import {GameMode} from "../mode/GameMode";
 import {Puzzle} from "../puzzle/Puzzle";
 import {PuzzleManager} from "../puzzle/PuzzleManager";
@@ -19,7 +19,7 @@ export class TestMode extends GameMode {
     }
 
     private showActionBox(puzzle: Puzzle, solution: Solution): void {
-        let actionBox = new ActionBox(solution, puzzle, false);
+        let actionBox = new ViewSolutionDialog(solution, puzzle, false);
         this.showDialog(actionBox);
     }
 

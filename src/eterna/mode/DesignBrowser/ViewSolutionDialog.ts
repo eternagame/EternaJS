@@ -17,7 +17,7 @@ import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
 import {Fonts} from "../../util/Fonts";
 import {SolutionDescBox} from "./SolutionDescBox";
 
-export class ActionBox extends Dialog<void> {
+export class ViewSolutionDialog extends Dialog<void> {
     public readonly playClicked = new UnitSignal();
     public readonly seeResultClicked = new UnitSignal();
     public readonly sortClicked = new UnitSignal();
