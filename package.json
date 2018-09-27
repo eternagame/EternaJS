@@ -71,10 +71,10 @@
     "jest": "^23.6.0",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.0",
-    "ts-jest": "^23.10.1",
+    "ts-jest": "^23.10.2",
     "typescript": "^3.0.3",
     "typescript-eslint-parser": "^18.0.0",
-    "webpack": "^4.20.1",
+    "webpack": "^4.20.2",
     "webpack-cli": "^3.1.1",
     "webpack-manifest-plugin": "^2.0.4",
     "webpack-merge": "^4.1.4"
