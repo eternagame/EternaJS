@@ -24,6 +24,7 @@ import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
 import {SliderBar} from "../../ui/SliderBar";
 import {Fonts} from "../../util/Fonts";
+import {int} from "../../util/int";
 import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
 import {GameMode} from "../GameMode";
 import {MaskBox} from "../MaskBox";
@@ -72,8 +73,8 @@ export class DesignBrowserMode extends GameMode {
 
         this._puzzle = puzzle;
         this._novote = novote;
-        this._whole_row_width = 0;
-        this._vote_processor = new VoteProcessor();
+        this._wholeRowWidth = 0;
+        this._voteProcessor = new VoteProcessor();
     }
 
     protected setup(): void {
@@ -83,8 +84,8 @@ export class DesignBrowserMode extends GameMode {
         this.uiLayer.addChild(this._content);
 
         /// Instruction panel
-        this._ins_panel = new GamePanel();
-        this.addObject(this._ins_panel, this._content);
+        this._votesPanel = new GamePanel();
+        this.addObject(this._votesPanel, this._content);
 
         const WMARGIN = 22;
         const HMARGIN = 17;
@@ -104,14 +105,14 @@ export class DesignBrowserMode extends GameMode {
             }
         });
         this._votesText.position = new Point(WMARGIN, HMARGIN);
-        this._ins_panel.container.addChild(this._votesText);
+        this._votesPanel.container.addChild(this._votesText);
 
-        this._ins_panel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
-        this._ins_panel.display.position = new Point(0, -this._ins_panel.height - 2);
+        this._votesPanel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
+        this._votesPanel.display.position = new Point(0, -this._votesPanel.height - 2);
 
         this._vSlider = new SliderBar(true);
         this._vSlider.set_progress(0);
-        this._vSlider.scrollChanged.connect(scrollValue => this.set_scroll_vertical(scrollValue));
+        this._vSlider.scrollChanged.connect(scrollValue => this.setScrollVertical(scrollValue));
         this.addObject(this._vSlider, this._content);
 
         this._hSlider = new SliderBar(false);
@@ -142,14 +143,14 @@ export class DesignBrowserMode extends GameMode {
 
         this._dataColParent.display.mask = this._maskBox;
 
-        this._marker_boxes = new MarkersBoxes(0xFF0000, 7, 88, line_height);
-        this._marker_boxes.position = new Point(7, 0);
-        this._content.addChild(this._marker_boxes);
+        this._markerBoxes = new MarkersBoxes(0xFF0000, 7, 88, line_height);
+        this._markerBoxes.position = new Point(7, 0);
+        this._content.addChild(this._markerBoxes);
 
-        this._selection_box = new SelectionBox(0xFFFFFF);
-        this._selection_box.position = new Point(7, 0);
-        this._selection_box.visible = false;
-        this._content.addChild(this._selection_box);
+        this._selectionBox = new SelectionBox(0xFFFFFF);
+        this._selectionBox.position = new Point(7, 0);
+        this._selectionBox.visible = false;
+        this._content.addChild(this._selectionBox);
 
         this._dataColParent.display.interactive = true;
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
@@ -159,9 +160,9 @@ export class DesignBrowserMode extends GameMode {
         if (this._columnNames == null) {
             this._columnNames = DesignBrowserMode.DEFAULT_COLUMNS.slice();
         }
-        this._selection_group = Eterna.settings.designBrowserSortValues.value;
-        if (this._selection_group == null) {
-            this._selection_group = [];
+        this._selectionGroup = Eterna.settings.designBrowserSelectedSolutionIDs.value;
+        if (this._selectionGroup == null) {
+            this._selectionGroup = [];
         }
 
         let sortableCategories = [
@@ -188,25 +189,25 @@ export class DesignBrowserMode extends GameMode {
         this._toolbarLayout = new HLayoutContainer();
         this._content.addChild(this._toolbarLayout);
 
-        this._letter_color_button = new GameButton()
+        this._letterColorButton = new GameButton()
             .up(Bitmaps.ImgColoring)
             .over(Bitmaps.ImgColoringOver)
             .down(Bitmaps.ImgColoringOver)
             .selected(Bitmaps.ImgColoringSelected)
             .tooltip("Color sequences based on base colors as in the game.");
-        this._letter_color_button.toggled.value = true;
-        this.addObject(this._letter_color_button, this._toolbarLayout);
-        this._letter_color_button.clicked.connect(() => this.set_sequence_letter_color());
+        this._letterColorButton.toggled.value = true;
+        this.addObject(this._letterColorButton, this._toolbarLayout);
+        this._letterColorButton.clicked.connect(() => this.setSequenceLetterColor());
 
-        this._exp_color_button = new GameButton()
+        this._expColorButton = new GameButton()
             .up(Bitmaps.ImgFlask)
             .over(Bitmaps.ImgFlaskOver)
             .down(Bitmaps.ImgFlaskOver)
             .selected(Bitmaps.ImgFlaskSelected)
             .tooltip("Color sequences based on experimental data.");
-        this._exp_color_button.toggled.value = false;
-        this.addObject(this._exp_color_button, this._toolbarLayout);
-        this._exp_color_button.clicked.connect(() => this.set_sequence_exp_color());
+        this._expColorButton.toggled.value = false;
+        this.addObject(this._expColorButton, this._toolbarLayout);
+        this._expColorButton.clicked.connect(() => this.setSequenceExpColor());
 
         this._toolbarLayout.addHSpacer(20);
 
@@ -239,12 +240,6 @@ export class DesignBrowserMode extends GameMode {
         this._return_to_game_button.clicked.connect(() => DesignBrowserMode.return_to_game());
 
         this._toolbarLayout.layout();
-        //
-        // this._loading_text = new GameText(Fonts.helvetica(17, true));
-        // this._loading_text.set_text("Loading...");
-        // this._loading_text.set_pos(new UDim(0.5, 0.5, -this._loading_text.width / 2, -this._loading_text.height / 2));
-        // this._loading_text.set_animator(new GameAnimatorFader(0, 1, 0.4, false, true));
-        // this.add_object(this._loading_text);
 
         // Refresh immediately, and then every 300 seconds
         this.refreshSolutions();
@@ -255,6 +250,8 @@ export class DesignBrowserMode extends GameMode {
                 new CallbackTask(() => this.refreshSolutions()),
             );
         }));
+
+        this.updateLayout();
     }
 
     public onResized(): void {
@@ -281,13 +278,15 @@ export class DesignBrowserMode extends GameMode {
         this._divider2.length = this.contentWidth - 10;
         this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._marker_boxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._selection_box.setSize(this.contentWidth - 14, 20);
+        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._selectionBox.setSize(this.contentWidth - 14, 20);
 
         this._toolbarLayout.position = new Point(20, this.contentHeight + 25);
 
-        for (let col of this._dataCols) {
-            col.setSize(this.contentWidth, this.contentHeight);
+        if (this._dataCols != null) {
+            for (let col of this._dataCols) {
+                col.setSize(this.contentWidth, this.contentHeight);
+            }
         }
     }
 
@@ -307,9 +306,9 @@ export class DesignBrowserMode extends GameMode {
         // }
     }
 
-    private set_sequence_letter_color(): void {
-        this._letter_color_button.toggled.value = true;
-        this._exp_color_button.toggled.value = false;
+    private setSequenceLetterColor(): void {
+        this._letterColorButton.toggled.value = true;
+        this._expColorButton.toggled.value = false;
 
         for (let dataCol of this._dataCols) {
             if (dataCol.category == DesignCategory.Sequence) {
@@ -318,9 +317,9 @@ export class DesignBrowserMode extends GameMode {
         }
     }
 
-    private set_sequence_exp_color(): void {
-        this._letter_color_button.toggled.value = false;
-        this._exp_color_button.toggled.value = true;
+    private setSequenceExpColor(): void {
+        this._letterColorButton.toggled.value = false;
+        this._expColorButton.toggled.value = true;
 
         for (let dataCol of this._dataCols) {
             if (dataCol.category == DesignCategory.Sequence) {
@@ -406,7 +405,7 @@ export class DesignBrowserMode extends GameMode {
 
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty("My Votes"))
             .then(data => {
-                this._vote_processor.process_data(data["votes"]);
+                this._voteProcessor.process_data(data["votes"]);
                 this.sync_votes();
 
                 let cheevs: any = data["new_achievements"];
@@ -433,11 +432,11 @@ export class DesignBrowserMode extends GameMode {
 
         let [index] = this._dataCols[0].getMouseIndex();
         if (index >= 0) {
-            this.showActionBox(this._filteredSolutions[index + this._firstVisSolutionIdx]);
+            this.showSolutionDetailsDialog(this._filteredSolutions[index + this._firstVisSolutionIdx]);
         }
     }
 
-    private showActionBox(solution: Solution): void {
+    private showSolutionDetailsDialog(solution: Solution): void {
         let dialog = this.showDialog(new ViewSolutionDialog(solution, this._puzzle, this._novote));
 
         dialog.playClicked.connect(() => this.startGameWithSolution(solution));
@@ -449,7 +448,7 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private onMouseMove(): void {
-        this._selection_box.visible = false;
+        this._selectionBox.visible = false;
 
         if (this._dataCols == null || this._dialogRef.isLive) {
             return;
@@ -457,14 +456,14 @@ export class DesignBrowserMode extends GameMode {
 
         let [index, yOffset] = this._dataCols[0].getMouseIndex();
         if (index >= 0) {
-            this._selection_box.visible = true;
-            this._selection_box.position = new Point(7, this._content.toLocal(Flashbang.globalMouse).y + yOffset);
+            this._selectionBox.visible = true;
+            this._selectionBox.position = new Point(7, this._content.toLocal(Flashbang.globalMouse).y + yOffset);
         }
     }
 
     private mark(): void {
         // if (this._dataCols == null) {
-        //     this._marker_boxes.visible = false;
+        //     this._markerBoxes.visible = false;
         //     return;
         // }
         //
@@ -477,33 +476,33 @@ export class DesignBrowserMode extends GameMode {
         //     return;
         // }
         //
-        // this._marker_boxes.visible = true;
+        // this._markerBoxes.visible = true;
         // let res: any[] = DataCol(this._dataCols[0]).get_current_mouse_index();
         // let index: number = res[0] + this._firstVisSolutionIdx;
         // let rawId: number = this.get_solution_id_from_index(index);
         //
-        // if (!this._marker_boxes.is_selected(index)) {
-        //     this._marker_boxes.add_marker(index, rawId);
-        //     this._selection_group.push(rawId);
+        // if (!this._markerBoxes.is_selected(index)) {
+        //     this._markerBoxes.add_marker(index, rawId);
+        //     this._selectionGroup.push(rawId);
         // } else {
-        //     this._marker_boxes.del_marker(index);
-        //     //trace(_selection_group);
+        //     this._markerBoxes.del_marker(index);
+        //     //trace(_selectionGroup);
         //     let removeIndex: number = -1;
         //
-        //     for (let ii = 0; ii < this._selection_group.length; ii++) {
-        //         if (this._selection_group[ii] == rawId) {
+        //     for (let ii = 0; ii < this._selectionGroup.length; ii++) {
+        //         if (this._selectionGroup[ii] == rawId) {
         //             removeIndex = ii;
         //             break;
         //         }
         //     }
         //     //trace("REMOVING",rawId,removeIndex);
-        //     this._selection_group.splice(removeIndex, 1);
+        //     this._selectionGroup.splice(removeIndex, 1);
         // }
         //
-        // this._marker_boxes.on_draw(this._firstVisSolutionIdx);
+        // this._markerBoxes.on_draw(this._firstVisSolutionIdx);
         //
-        // //trace(_selection_group);
-        // AutosaveManager.instance.saveObjects(this._selection_group, DesignBrowserMode.SELTOKEN);
+        // //trace(_selectionGroup);
+        // AutosaveManager.instance.saveObjects(this._selectionGroup, DesignBrowserMode.SELTOKEN);
     }
 
     private showSortDialog(): void {
@@ -536,7 +535,7 @@ export class DesignBrowserMode extends GameMode {
 
     private reorganize(sort: boolean): void {
         if (sort) {
-            this._all_solutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
+            this._allSolutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
             for (let dataCol of this._dataCols) {
                 dataCol.set_sort_state(this._sortOptions.getSortOrder(dataCol.category));
@@ -544,7 +543,7 @@ export class DesignBrowserMode extends GameMode {
         }
 
         let solutions: Solution[] = [];
-        for (let sol of this._all_solutions) {
+        for (let sol of this._allSolutions) {
             let shouldAdd = true;
             for (let dataCol of this._dataCols) {
                 if (!dataCol.is_qualified(sol)) {
@@ -560,16 +559,16 @@ export class DesignBrowserMode extends GameMode {
 
         this._filteredSolutions = solutions;
         this.setData(solutions, false, false);
-        this.set_scroll_vertical(-1);
+        this.setScrollVertical(-1);
     }
 
     private set_scroll_horizontal(progress: number): void {
-        this._dataColParent.display.x = (this._whole_row_width > this.contentWidth) ?
-            (this.contentWidth - this._whole_row_width) * progress :
+        this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth) ?
+            (this.contentWidth - this._wholeRowWidth) * progress :
             0;
     }
 
-    private set_scroll_vertical(progress: number): void {
+    private setScrollVertical(progress: number): void {
         this._firstVisSolutionIdx = 0;
         if (this._dataCols == null) {
             return;
@@ -580,14 +579,14 @@ export class DesignBrowserMode extends GameMode {
         }
 
         if (this._filteredSolutions != null) {
-            this._firstVisSolutionIdx = this._filteredSolutions.length * progress;
+            this._firstVisSolutionIdx = int(this._filteredSolutions.length * progress);
         }
 
         for (let dataCol of this._dataCols) {
             dataCol.set_progress(this._firstVisSolutionIdx);
         }
 
-        this._marker_boxes.on_draw(this._firstVisSolutionIdx);
+        this._markerBoxes.on_draw(this._firstVisSolutionIdx);
     }
 
     private refreshSolutions(): void {
@@ -595,13 +594,13 @@ export class DesignBrowserMode extends GameMode {
             .then(() => this.updateDataColumns());
     }
 
-    private update_votes(): void {
-        this._vote_processor.update_votes(this._puzzle.nodeID, this._puzzle.round)
+    private updateVotes(): void {
+        this._voteProcessor.update_votes(this._puzzle.nodeID, this._puzzle.round)
             .then(() => this.sync_votes());
     }
 
     private sync_votes(): void {
-        let votesLeft: number = this._vote_processor.votesLeft;
+        let votesLeft: number = this._voteProcessor.votesLeft;
         let round: number = this._puzzle.round;
         let available: number = this._puzzle.numSubmissions;
         let mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
@@ -615,7 +614,7 @@ export class DesignBrowserMode extends GameMode {
 
         const WMARGIN = 22;
         const HMARGIN = 17;
-        this._ins_panel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
+        this._votesPanel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
 
         this.reorganize(true);
     }
@@ -742,7 +741,7 @@ export class DesignBrowserMode extends GameMode {
             dataCol.set_data_and_display(data_array);
         }
 
-        this.refresh_marking_boxes();
+        this.refreshMarkingBoxes();
         this.layout_columns(animate);
     }
 
@@ -757,22 +756,22 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private get_solution_id_from_index(index: number): number {
-        return this._all_solutions[index].getProperty("Id");
+        return this._allSolutions[index].getProperty("Id");
     }
 
     private layout_columns(animate: boolean): void {
-        this._whole_row_width = 0;
+        this._wholeRowWidth = 0;
 
         for (let ii = 0; ii < this._dataCols.length; ii++) {
             let data_col: DataCol = this._dataCols[ii];
             if (animate) {
                 data_col.replaceNamedObject("AnimateLocation",
-                    new LocationTask(this._whole_row_width, 0, 0.5, Easing.easeOut));
+                    new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut));
             } else {
-                data_col.display.position = new Point(this._whole_row_width, 0);
+                data_col.display.position = new Point(this._wholeRowWidth, 0);
             }
 
-            this._whole_row_width += data_col.get_width();
+            this._wholeRowWidth += data_col.get_width();
 
             if (ii % 2 == 0) {
                 data_col.set_column_color(0x012034);
@@ -782,13 +781,13 @@ export class DesignBrowserMode extends GameMode {
         }
     }
 
-    private refresh_marking_boxes(): void {
-        this._marker_boxes.clear();
-        for (let ii = 0; ii < this._selection_group.length; ii++) {
-            let index: number = this.get_solution_index_from_id(this._selection_group[ii]);
-            this._marker_boxes.add_marker(index, this._selection_group[ii]);
+    private refreshMarkingBoxes(): void {
+        this._markerBoxes.clear();
+        for (let ii = 0; ii < this._selectionGroup.length; ii++) {
+            let index: number = this.get_solution_index_from_id(this._selectionGroup[ii]);
+            this._markerBoxes.add_marker(index, this._selectionGroup[ii]);
         }
-        this._marker_boxes.on_draw(this._firstVisSolutionIdx);
+        this._markerBoxes.on_draw(this._firstVisSolutionIdx);
     }
 
     private updateDataColumns(): void {
@@ -800,9 +799,9 @@ export class DesignBrowserMode extends GameMode {
 
         this.setData(solutions, false, true);
 
-        this._all_solutions = solutions;
-        this.update_votes();
-        this.set_scroll_vertical(-1);
+        this._allSolutions = solutions;
+        this.updateVotes();
+        this.setScrollVertical(-1);
 
         this.updateLayout();
     }
@@ -820,32 +819,28 @@ export class DesignBrowserMode extends GameMode {
     private _gridLines: GridLines;
     private _maskBox: MaskBox;
 
-    private _selection_group: number[];
+    private _selectionGroup: number[];
     private _vSlider: SliderBar;
     private _hSlider: SliderBar;
     private _dataColParent: ContainerObject;
     private _firstVisSolutionIdx: number;
-    private _whole_row_width: number;
+    private _wholeRowWidth: number;
     private _dataCols: DataCol[];
-    private _all_solutions: Solution[];
+    private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
     private _sortOptions: SortOptions;
-    // private _sort_window: SortWindow;
-    // private _customize_win: CustomWin;
     private _toolbarLayout: HLayoutContainer;
     private _customizeButton: GameButton;
     private _return_to_game_button: GameButton;
-    private _letter_color_button: GameButton;
-    private _exp_color_button: GameButton;
+    private _letterColorButton: GameButton;
+    private _expColorButton: GameButton;
     private _votesText: MultiStyleText;
-    private _ins_panel: GamePanel;
-    // private _submit_status_text: Text;
-    // private _loading_text: Text;
-    private _selection_box: SelectionBox;
-    private _marker_boxes: MarkersBoxes;
+    private _votesPanel: GamePanel;
+    private _selectionBox: SelectionBox;
+    private _markerBoxes: MarkersBoxes;
     private _columnNames: DesignCategory[];
-    private _vote_processor: VoteProcessor;
+    private _voteProcessor: VoteProcessor;
 
     private static readonly DEFAULT_COLUMNS: DesignCategory[] = [
         DesignCategory.Id,

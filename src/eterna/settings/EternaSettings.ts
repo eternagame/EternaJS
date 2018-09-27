@@ -21,7 +21,7 @@ export class EternaSettings extends Settings {
     public readonly soundVolume: Setting<number>;
 
     public readonly designBrowserColumnNames: Setting<DesignCategory[]>;
-    public readonly designBrowserSortValues: Setting<number[]>;
+    public readonly designBrowserSelectedSolutionIDs: Setting<number[]>;
 
     public constructor() {
         super("EternaSettings");
@@ -43,6 +43,6 @@ export class EternaSettings extends Settings {
         this.pipEnabled = this.setting("pipEnabled", false);
 
         this.designBrowserColumnNames = this.setting("designBrowserColumnNames", null);
-        this.designBrowserSortValues = this.setting("designBrowserSelection", null);
+        this.designBrowserSelectedSolutionIDs = this.setting("designBrowserSelectedSolutionIDs", null);
     }
 }
