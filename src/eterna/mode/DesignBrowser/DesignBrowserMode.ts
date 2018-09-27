@@ -27,6 +27,7 @@ import {Fonts} from "../../util/Fonts";
 import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
 import {GameMode} from "../GameMode";
 import {MaskBox} from "../MaskBox";
+import {CustomizeColumnOrderDialog} from "./CustomizeColumnOrderDialog";
 import {DataCol} from "./DataCol";
 import {DotLine} from "./DotLine";
 import {GridLines} from "./GridLines";
@@ -59,6 +60,10 @@ export enum DesignCategory {
     Synthesized = "Synthesized",
     Synthesis_score = "Synthesis score",
     Sequence = "Sequence",
+}
+
+function AllCategories(): DesignCategory[] {
+    return Object.keys(DesignCategory).map(key => DesignCategory[key as any] as DesignCategory);
 }
 
 export class DesignBrowserMode extends GameMode {
@@ -179,11 +184,6 @@ export class DesignBrowserMode extends GameMode {
 
         this._sortOptions = new SortOptions(sortableCategories);
         this._sortOptions.sortChanged.connect(() => this.reorganize(true));
-        // this._sort_window = new SortWindow(sortableCategories);
-        // this._sort_window.visible = false;
-        // this._sort_window.set_pos(new UDim(0.5, 0, -170, 50));
-        // this._sort_window.set_reorganize_callback(this.reorganize);
-        // this.add_object(this._sort_window);
 
         this._toolbarLayout = new HLayoutContainer();
         this._content.addChild(this._toolbarLayout);
@@ -216,7 +216,7 @@ export class DesignBrowserMode extends GameMode {
             .down(Bitmaps.ImgEditSortOptionsHit)
             .tooltip("Editor sort options.");
         this.addObject(edit_sort_Btn, this._toolbarLayout);
-        edit_sort_Btn.clicked.connect(() => this.openSortWindow());
+        edit_sort_Btn.clicked.connect(() => this.showSortDialog());
 
         this._toolbarLayout.addHSpacer(5);
 
@@ -226,7 +226,7 @@ export class DesignBrowserMode extends GameMode {
             .down(Bitmaps.ImgColumnsHit)
             .tooltip("Select and reorder columns.");
         this.addObject(this._customizeButton, this._toolbarLayout);
-        this._customizeButton.clicked.connect(() => this.openCustomizeWindow());
+        this._customizeButton.clicked.connect(() => this.showCustomizeColumnOrderDialog());
 
         this._toolbarLayout.addHSpacer(5);
 
@@ -239,17 +239,6 @@ export class DesignBrowserMode extends GameMode {
         this._return_to_game_button.clicked.connect(() => DesignBrowserMode.return_to_game());
 
         this._toolbarLayout.layout();
-
-        // let disabled_categories: any = null;
-        // if (this._novote) {
-        //     disabled_categories = {'Votes': true, 'My Votes': true};
-        // }
-        //
-        // this._customize_win = new CustomWin(DesignBrowserMode.DEFAULT_EXP_COL_NAMES, this._columnNames.slice(), disabled_categories);
-        // this._customize_win.visible = false;
-        // this._customize_win.set_pos(new UDim(0.5, 0, -170, 50));
-        // this._customize_win.set_reorganize_callback(this.customizeCategory);
-        // this.add_object(this._customize_win);
         //
         // this._loading_text = new GameText(Fonts.helvetica(17, true));
         // this._loading_text.set_text("Loading...");
@@ -262,7 +251,7 @@ export class DesignBrowserMode extends GameMode {
 
         this.addObject(new RepeatingTask(() => {
             return new SerialTask(
-                new DelayTask(Eterna.DEV_MODE ? 6 : 300),
+                new DelayTask(/*Eterna.DEV_MODE ? 6 :*/ 300),
                 new CallbackTask(() => this.refreshSolutions()),
             );
         }));
@@ -361,7 +350,7 @@ export class DesignBrowserMode extends GameMode {
     private sortOnSolution(solution: Solution): void {
         this.closeCurDialog();
         this._sortOptions.addCriteria(DesignCategory.Sequence, SortOrder.INCREASING, solution.sequence);
-        this.openSortWindow();
+        this.showSortDialog();
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
@@ -388,7 +377,7 @@ export class DesignBrowserMode extends GameMode {
             this.popUILock();
             statusText.destroySelf();
             this.closeCurDialog();
-            this.refresh_browser();
+            this.updateDataColumns();
         };
 
         Eterna.client.deleteSolution(solution.nodeID)
@@ -517,16 +506,24 @@ export class DesignBrowserMode extends GameMode {
         // AutosaveManager.instance.saveObjects(this._selection_group, DesignBrowserMode.SELTOKEN);
     }
 
-    private openSortWindow(): void {
+    private showSortDialog(): void {
         this.showDialog(new SortOptionsDialog(this._sortOptions));
     }
 
-    private openCustomizeWindow(): void {
-        // if (!this._customize_win.visible) {
-        //     this._customize_win.alpha = 0;
-        //     this._customize_win.visible = true;
-        //     this._customize_win.set_animator(new GameAnimatorFader(0, 1, 0.5, false));
-        // }
+    private showCustomizeColumnOrderDialog(): void {
+        let disabledCategories = new Set<DesignCategory>();
+        if (this._novote) {
+            disabledCategories.add(DesignCategory.Votes);
+            disabledCategories.add(DesignCategory.My_Votes);
+        }
+
+        let dialog = this.showDialog(new CustomizeColumnOrderDialog(AllCategories(), this._columnNames, disabledCategories));
+        dialog.columnsReorganized.connect(columnNames => {
+            this._columnNames = columnNames;
+            Eterna.settings.designBrowserColumnNames.value = columnNames;
+            this.rebuildDataColumns();
+            this.reorganize(true);
+        });
     }
 
     private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] = null): void {
@@ -535,14 +532,6 @@ export class DesignBrowserMode extends GameMode {
         } else {
             this._sortOptions.removeCriteria(category);
         }
-    }
-
-    private customizeCategory(names: DesignCategory[]): void {
-        this._columnNames = names;
-        Eterna.settings.designBrowserColumnNames.value = names;
-        this._dataCols = null;
-        this.setup_data_cols();
-        this.reorganize(true);
     }
 
     private reorganize(sort: boolean): void {
@@ -603,7 +592,7 @@ export class DesignBrowserMode extends GameMode {
 
     private refreshSolutions(): void {
         SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID)
-            .then(() => this.refresh_browser());
+            .then(() => this.updateDataColumns());
     }
 
     private update_votes(): void {
@@ -631,7 +620,7 @@ export class DesignBrowserMode extends GameMode {
         this.reorganize(true);
     }
 
-    private setup_data_cols(): void {
+    private rebuildDataColumns(): void {
         const FONT = "Arial";
         const FONT_SIZE = 14;
 
@@ -695,7 +684,7 @@ export class DesignBrowserMode extends GameMode {
 
     private setData(solutions: Solution[], animate: boolean, initialize_only: boolean = false): void {
         if (this._dataCols == null) {
-            this.setup_data_cols();
+            this.rebuildDataColumns();
         }
 
         if (initialize_only) {
@@ -802,7 +791,7 @@ export class DesignBrowserMode extends GameMode {
         this._marker_boxes.on_draw(this._firstVisSolutionIdx);
     }
 
-    private refresh_browser(): void {
+    private updateDataColumns(): void {
         let solutions: Solution[] = SolutionManager.instance.solutions;
         let puz: Puzzle = this._puzzle;
 
