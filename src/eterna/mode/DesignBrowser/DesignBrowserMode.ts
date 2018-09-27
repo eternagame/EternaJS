@@ -11,6 +11,7 @@ import {DelayTask} from "../../../flashbang/tasks/DelayTask";
 import {LocationTask} from "../../../flashbang/tasks/LocationTask";
 import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
+import {Arrays} from "../../../flashbang/util/Arrays";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {EPars} from "../../EPars";
@@ -154,15 +155,15 @@ export class DesignBrowserMode extends GameMode {
 
         this._dataColParent.display.interactive = true;
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
-        this._dataColParent.pointerDown.connect(() => this.onEntryClicked());
+        this._dataColParent.pointerDown.connect(() => this.onMouseDown());
 
         this._columnNames = Eterna.settings.designBrowserColumnNames.value;
         if (this._columnNames == null) {
             this._columnNames = DesignBrowserMode.DEFAULT_COLUMNS.slice();
         }
-        this._selectionGroup = Eterna.settings.designBrowserSelectedSolutionIDs.value;
-        if (this._selectionGroup == null) {
-            this._selectionGroup = [];
+        this._selectedSolutionIDs = Eterna.settings.designBrowserSelectedSolutionIDs.value;
+        if (this._selectedSolutionIDs == null) {
+            this._selectedSolutionIDs = [];
         }
 
         let sortableCategories = [
@@ -278,7 +279,7 @@ export class DesignBrowserMode extends GameMode {
         this._divider2.length = this.contentWidth - 10;
         this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
+        this._markerBoxes.setWidth(this.contentWidth - 14);
         this._selectionBox.setSize(this.contentWidth - 14, 20);
 
         this._toolbarLayout.position = new Point(20, this.contentHeight + 25);
@@ -420,8 +421,8 @@ export class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onEntryClicked(): void {
-        if (Flashbang.app.isControlKeyDown) {
+    private onMouseDown(): void {
+        if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark();
             return;
         }
@@ -462,47 +463,44 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private mark(): void {
-        // if (this._dataCols == null) {
-        //     this._markerBoxes.visible = false;
-        //     return;
-        // }
-        //
-        // if (this._viewSolutionActionBoxRef.isLive) {
-        //     return;
-        // }
-        //
-        // if (this.mouseX < 0 || this.mouseX > this._offscreen_width ||
-        //     this.mouseY < 0 || this.mouseY > this._offscreen_height) {
-        //     return;
-        // }
-        //
-        // this._markerBoxes.visible = true;
-        // let res: any[] = DataCol(this._dataCols[0]).get_current_mouse_index();
-        // let index: number = res[0] + this._firstVisSolutionIdx;
-        // let rawId: number = this.get_solution_id_from_index(index);
-        //
-        // if (!this._markerBoxes.is_selected(index)) {
-        //     this._markerBoxes.add_marker(index, rawId);
-        //     this._selectionGroup.push(rawId);
-        // } else {
-        //     this._markerBoxes.del_marker(index);
-        //     //trace(_selectionGroup);
-        //     let removeIndex: number = -1;
-        //
-        //     for (let ii = 0; ii < this._selectionGroup.length; ii++) {
-        //         if (this._selectionGroup[ii] == rawId) {
-        //             removeIndex = ii;
-        //             break;
-        //         }
-        //     }
-        //     //trace("REMOVING",rawId,removeIndex);
-        //     this._selectionGroup.splice(removeIndex, 1);
-        // }
-        //
-        // this._markerBoxes.on_draw(this._firstVisSolutionIdx);
-        //
-        // //trace(_selectionGroup);
-        // AutosaveManager.instance.saveObjects(this._selectionGroup, DesignBrowserMode.SELTOKEN);
+        if (this._dataCols == null) {
+            this._markerBoxes.visible = false;
+            return;
+        }
+
+        if (this.isDialogOrNotifShowing) {
+            return;
+        }
+
+        let [index] = this._dataCols[0].getMouseIndex();
+        if (index < 0) {
+            return;
+        }
+
+        index += this._firstVisSolutionIdx;
+
+        let solution = this.getSolutionAtIndex(index);
+        if (solution == null) {
+            return;
+        }
+
+        let solutionID = solution.nodeID;
+        this._markerBoxes.visible = true;
+
+        if (!this._markerBoxes.isSelected(index)) {
+            this._markerBoxes.addMarker(index);
+            this._selectedSolutionIDs.push(solutionID);
+        } else {
+            this._markerBoxes.removeMarker(index);
+            let removeIdx = this._selectedSolutionIDs.indexOf(solutionID);
+            if (removeIdx >= 0) {
+                this._selectedSolutionIDs.splice(removeIdx, 1);
+            }
+        }
+
+        this._markerBoxes.updateView(this._firstVisSolutionIdx);
+
+        Eterna.settings.designBrowserSelectedSolutionIDs.value = this._selectedSolutionIDs.slice();
     }
 
     private showSortDialog(): void {
@@ -586,7 +584,7 @@ export class DesignBrowserMode extends GameMode {
             dataCol.set_progress(this._firstVisSolutionIdx);
         }
 
-        this._markerBoxes.on_draw(this._firstVisSolutionIdx);
+        this._markerBoxes.updateView(this._firstVisSolutionIdx);
     }
 
     private refreshSolutions(): void {
@@ -678,7 +676,7 @@ export class DesignBrowserMode extends GameMode {
             this._dataColParent.addObject(column, this._dataColParent.container);
         }
 
-        this.layout_columns(false);
+        this.layoutColumns(false);
     }
 
     private setData(solutions: Solution[], animate: boolean, initialize_only: boolean = false): void {
@@ -742,24 +740,23 @@ export class DesignBrowserMode extends GameMode {
         }
 
         this.refreshMarkingBoxes();
-        this.layout_columns(animate);
+        this.layoutColumns(animate);
     }
 
-    private get_solution_index_from_id(id: number): number {
+    private getSolutionIndex(solutionID: number): number {
         for (let ii = 0; ii < this._filteredSolutions.length; ii++) {
-            let rawId: any = this._filteredSolutions[ii].getProperty("Id");
-            if (rawId == id) {
+            if (this._filteredSolutions[ii].nodeID == solutionID) {
                 return ii;
             }
         }
         return -1;
     }
 
-    private get_solution_id_from_index(index: number): number {
-        return this._allSolutions[index].getProperty("Id");
+    private getSolutionAtIndex(idx: number): Solution {
+        return idx >= 0 && idx < this._filteredSolutions.length ? this._filteredSolutions[idx] : null;
     }
 
-    private layout_columns(animate: boolean): void {
+    private layoutColumns(animate: boolean): void {
         this._wholeRowWidth = 0;
 
         for (let ii = 0; ii < this._dataCols.length; ii++) {
@@ -783,11 +780,13 @@ export class DesignBrowserMode extends GameMode {
 
     private refreshMarkingBoxes(): void {
         this._markerBoxes.clear();
-        for (let ii = 0; ii < this._selectionGroup.length; ii++) {
-            let index: number = this.get_solution_index_from_id(this._selectionGroup[ii]);
-            this._markerBoxes.add_marker(index, this._selectionGroup[ii]);
+        for (let solutionID of this._selectedSolutionIDs) {
+            let index = this.getSolutionIndex(solutionID);
+            if (index >= 0) {
+                this._markerBoxes.addMarker(index);
+            }
         }
-        this._markerBoxes.on_draw(this._firstVisSolutionIdx);
+        this._markerBoxes.updateView(this._firstVisSolutionIdx);
     }
 
     private updateDataColumns(): void {
@@ -819,7 +818,7 @@ export class DesignBrowserMode extends GameMode {
     private _gridLines: GridLines;
     private _maskBox: MaskBox;
 
-    private _selectionGroup: number[];
+    private _selectedSolutionIDs: number[];
     private _vSlider: SliderBar;
     private _hSlider: SliderBar;
     private _dataColParent: ContainerObject;

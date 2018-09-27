@@ -2,7 +2,7 @@ import {Container, Point} from "pixi.js";
 import {SelectionBox} from "./SelectionBox";
 
 export class MarkersBoxes extends Container {
-    constructor(color: number, initPosX: number, initPosY: number, verticalOffset: number) {
+    constructor(color: number, initPosX: number, initPosY: number, markerHeight: number) {
         super();
 
         this._markers = [];
@@ -10,16 +10,15 @@ export class MarkersBoxes extends Container {
         this._color = color;
         this._initPosX = initPosX;
         this._initPosY = initPosY;
-        this._verticalOffset = verticalOffset;
+        this._markerHeight = markerHeight;
     }
 
-    public setSize(width: number, height: number): void {
-        if (this._width === width && this._height === height) {
+    public setWidth(width: number): void {
+        if (this._width === width) {
             return;
         }
 
         this._width = width;
-        this._height = height;
     }
 
     public clear(): void {
@@ -31,33 +30,25 @@ export class MarkersBoxes extends Container {
         this._indices = [];
     }
 
-    public add_marker(index: number, id: number): void {
-        for (let ii = 0; ii < this._indices.length; ii++) {
-            if (index == this._indices[ii]) {
-                return;
-            }
+    public addMarker(index: number): void {
+        if (this._indices.indexOf(index) >= 0) {
+            return;
         }
 
-        let sel = new MarkerBox(this._color, id);
-        sel.setSize(this._width, this._height);
-        sel.position = new Point(this._initPosX, this._initPosY + index * this._verticalOffset);
-        sel.visible = false;
-        this._markers.push(sel);
+        let box = new SelectionBox(this._color);
+        box.setSize(this._width, this._markerHeight);
+        box.position = new Point(this._initPosX, this._initPosY + index * this._markerHeight);
+        this.addChild(box);
+
+        this._markers.push(box);
         this._indices.push(index);
-
-        this.addChild(sel);
     }
 
-    public is_selected(index: number): boolean {
-        for (let ii = 0; ii < this._indices.length; ii++) {
-            if (index == this._indices[ii]) {
-                return this._markers[ii].visible;
-            }
-        }
-        return false;
+    public isSelected(index: number): boolean {
+        return this._indices.indexOf(index) >= 0;
     }
 
-    public del_marker(index: number): void {
+    public removeMarker(index: number): void {
         let removeIndex = -1;
         for (let ii = 0; ii < this._indices.length; ii++) {
             if (index == this._indices[ii]) {
@@ -73,21 +64,21 @@ export class MarkersBoxes extends Container {
         this._indices.splice(removeIndex, 1);
     }
 
-    public on_draw(start: number): void {
+    public updateView(start: number): void {
         if (this._markers == null || this._markers.length == 0) {
             return;
         }
 
         for (let ii = 0; ii < this._indices.length; ii++) {
-            let sel: MarkerBox = this._markers[ii];
+            let box = this._markers[ii];
 
-            sel.visible = false;
+            box.visible = false;
             if (this._indices[ii] >= start) {
-                let y_pos: number = this._initPosY + (this._indices[ii] - start) * this._verticalOffset;
-                if (y_pos + this._verticalOffset < this._height) {
-                    sel.visible = true;
-                    sel.position = new Point(this._initPosX, y_pos);
-                    sel.setSize(this._width, this._height);
+                let y_pos: number = this._initPosY + (this._indices[ii] - start) * this._markerHeight;
+                if (y_pos + this._markerHeight < this._markerHeight) {
+                    box.visible = true;
+                    box.position = new Point(this._initPosX, y_pos);
+                    box.setSize(this._width, this._markerHeight);
                 }
             }
         }
@@ -96,21 +87,10 @@ export class MarkersBoxes extends Container {
     private readonly _color: number;
     private readonly _initPosX: number;
     private readonly _initPosY: number;
-    private readonly _verticalOffset: number;
+    private readonly _markerHeight: number;
 
     private _width: number = 0;
-    private _height: number = 0;
 
-    private _markers: MarkerBox[];
+    private _markers: SelectionBox[];
     private _indices: number[];
-}
-
-class MarkerBox extends SelectionBox {
-    public readonly id: number;
-
-    constructor(color: number, id: number) {
-        super(color);
-        this.id = id;
-        this.visible = false;
-    }
 }
