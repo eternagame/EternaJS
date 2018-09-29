@@ -71,6 +71,7 @@ export class DataCol extends ContainerObject {
 
         if (this._data_type == DesignBrowserDataType.STRING) {
             this._input_field = new TextInputObject(TEXT_INPUT_SIZE, this._data_width - 22);
+            this._input_field.tabIndex = -1; // prevent tab-selection
             this._input_field.display.position = new Point(11, 54);
             this.addObject(this._input_field, this.container);
             // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
@@ -81,6 +82,7 @@ export class DataCol extends ContainerObject {
 
         } else {
             this._input_field = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
+            this._input_field.tabIndex = -1; // prevent tab-selection
             this._input_field.display.position = new Point(11, 54);
             this.addObject(this._input_field, this.container);
             // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
@@ -90,6 +92,7 @@ export class DataCol extends ContainerObject {
             this.container.addChild(this._field_string);
 
             this._input_field2 = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
+            this._input_field2.tabIndex = -1; // prevent tab-selection
             this._input_field2.display.position = new Point(11 + (this._data_width - 29) / 2 + 7, 54);
             this.addObject(this._input_field2, this.container);
             // this._input_field2.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
