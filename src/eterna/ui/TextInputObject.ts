@@ -1,17 +1,52 @@
+import {Graphics, Point, Sprite} from "pixi.js";
 import {DOMObject} from "../../flashbang/objects/DOMObject";
+import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {Signal} from "../../signals/Signal";
 import {Eterna} from "../Eterna";
+import {Fonts} from "../util/Fonts";
+import {int} from "../util/int";
 
-/** A text input object in the DOM. Floats on top of the PIXI canvas. */
+/**
+ * A text input object in the DOM. Floats on top of the PIXI canvas.
+ * When it loses focus, it creates a fake text input display placeholder, and hides the DOM element.
+ */
 export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
 
     public constructor(fontSize: number, width: number = 100, rows: number = 1) {
         super(Eterna.OVERLAY_DIV_ID, rows === 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
 
+        this._fontSize = fontSize;
+        this._rows = rows;
+
         this.width = width;
+        this.font(Fonts.ARIAL);
+
         this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
         this._obj.oninput = () => this.onInput();
+
+        this._obj.onfocus = () => this.destroyFakeTextInput();
+        this._obj.onblur = () => this.createFakeTextInput();
+    }
+
+    protected added(): void {
+        super.added();
+        this.createFakeTextInput();
+    }
+
+    protected updateElementProperties(): void {
+        super.updateElementProperties();
+        if (this._fakeTextInput != null) {
+            this._obj.style.opacity = "0";
+        }
+    }
+
+    protected onSizeChanged(): void {
+        super.onSizeChanged();
+        if (this._fakeTextInput != null) {
+            // recreate our fake text input when our properties change
+            this.createFakeTextInput();
+        }
     }
 
     /** Remove all input that matches the given regexp */
@@ -21,6 +56,7 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     }
 
     public font(fontFamily: string): TextInputObject {
+        this._fontFamily = fontFamily;
         this._obj.style.fontFamily = fontFamily;
         this.onSizeChanged();
         return this;
@@ -89,6 +125,51 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         this.valueChanged.emit(this.text);
     }
 
+    private destroyFakeTextInput(): void {
+        if (this._fakeTextInput != null) {
+            this._fakeTextInput.destroy({children: true});
+            this._fakeTextInput = null;
+        }
+    }
+
+    private createFakeTextInput(): void {
+        this.destroyFakeTextInput();
+
+        this._fakeTextInput = new Sprite();
+
+        let bg = new Graphics()
+            .lineStyle(1, 0x0)
+            .beginFill(0xffffff)
+            .drawRect(0, 0, this.width, this.height)
+            .endFill();
+        this._fakeTextInput.addChild(bg);
+
+        let textMask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, this.width, this.height).endFill();
+        this._fakeTextInput.addChild(textMask);
+
+        let displayText = this.text;
+        let textColor = 0x0;
+        if (displayText.length == 0) {
+            displayText = this._obj.placeholder;
+            // This color is probably browser dependent!
+            textColor = 0x777777;
+        }
+
+        let text = new TextBuilder(displayText)
+            .font(this._fontFamily)
+            .fontSize(this._fontSize)
+            .color(textColor)
+            .wordWrap(this._rows > 1, this.width - 20)
+            .hAlignLeft()
+            .build();
+        text.mask = textMask;
+        // This offset is probably browser dependent!
+        text.position = new Point(int(5 * this._fontSize / 14.5), int(5 * this._fontSize / 14.5));
+        this._fakeTextInput.addChild(text);
+
+        this._dummyDisp.addChild(this._fakeTextInput);
+    }
+
     private static createTextArea(rows: number): HTMLTextAreaElement {
         let element = document.createElement("textarea");
         element.rows = rows;
@@ -106,4 +187,9 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     }
 
     private _disallow: RegExp;
+
+    private _fontFamily: string;
+    private _fontSize: number;
+    private _rows: number;
+    private _fakeTextInput: Sprite;
 }
