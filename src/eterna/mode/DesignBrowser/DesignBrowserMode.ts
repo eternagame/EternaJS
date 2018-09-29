@@ -687,6 +687,7 @@ export class DesignBrowserMode extends GameMode {
             }
 
             column.setSize(this.contentWidth, this.contentHeight);
+            column.filtersChanged.connect(() => this.reorganize(false));
             column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.category, sortOrder));
 
             // if (this.root.loaderInfo.parameters.filter1 == columnName) {
