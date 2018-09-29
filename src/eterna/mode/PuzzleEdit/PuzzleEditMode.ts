@@ -88,6 +88,7 @@ export class PuzzleEditMode extends GameMode {
         }));
 
         this._homeButton = GameMode.createHomeButton();
+        this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
         this._toolbar = new PuzzleEditToolbar(this._embedded);
@@ -255,16 +256,6 @@ export class PuzzleEditMode extends GameMode {
         this.registerScriptInterface(this._scriptInterface);
 
         this.updateUILayout();
-    }
-
-    protected enter(): void {
-        super.enter();
-        this._homeButton.display.visible = true;
-    }
-
-    protected exit(): void {
-        this._homeButton.display.visible = false;
-        super.exit();
     }
 
     private loadSavedData(): PuzzleEditPoseData[] {

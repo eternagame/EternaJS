@@ -181,6 +181,7 @@ export class PoseEditMode extends GameMode {
         this.uiLayer.addChild(this._targetName);
 
         this._homeButton = GameMode.createHomeButton();
+        this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
         // Async text shows above our UI lock, and right below all dialogs
@@ -200,12 +201,6 @@ export class PoseEditMode extends GameMode {
     protected enter(): void {
         super.enter();
         this.hideAsyncText();
-        this._homeButton.display.visible = true;
-    }
-
-    protected exit(): void {
-        this._homeButton.display.visible = false;
-        super.exit();
     }
 
     public onResized(): void {

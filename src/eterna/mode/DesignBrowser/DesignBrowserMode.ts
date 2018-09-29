@@ -252,6 +252,7 @@ export class DesignBrowserMode extends GameMode {
         }));
 
         this._homeButton = GameMode.createHomeButton();
+        this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
         this.updateLayout();
@@ -299,7 +300,6 @@ export class DesignBrowserMode extends GameMode {
 
     protected enter(): void {
         super.enter();
-        this._homeButton.display.visible = true;
 
         // this._return_to_game_button.visible = false;
         // if (Application.instance.get_previous_game_mode() >= 0) {
@@ -312,11 +312,6 @@ export class DesignBrowserMode extends GameMode {
         // } else {
         //     this.set_size(new UDim(1, 1, -40, -170));
         // }
-    }
-
-    protected exit(): void {
-        this._homeButton.display.visible = false;
-        super.exit();
     }
 
     private setSequenceLetterColor(): void {
