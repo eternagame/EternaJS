@@ -113,6 +113,14 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         return this._obj.selectionStart === this._obj.selectionEnd ? this._obj.selectionStart : -1;
     }
 
+    public get tabIndex(): number {
+        return this._obj.tabIndex;
+    }
+
+    public set tabIndex(value: number) {
+        this._obj.tabIndex = value;
+    }
+
     private onInput(): void {
         if (this._disallow != null) {
             let curValue = this.text;
