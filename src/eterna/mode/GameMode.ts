@@ -258,7 +258,9 @@ export abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        return new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
+        let button = new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
+        button.selectable(false);
+        return button;
     }
 
     protected _achievements: AchievementManager;
