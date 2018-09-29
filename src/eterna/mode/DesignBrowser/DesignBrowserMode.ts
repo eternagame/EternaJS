@@ -1,5 +1,5 @@
 import MultiStyleText from "pixi-multistyle-text";
-import {Container, Point, Text} from "pixi.js";
+import {Container, Point, Sprite, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
@@ -19,9 +19,11 @@ import {Feedback} from "../../Feedback";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
 import {SolutionManager} from "../../puzzle/SolutionManager";
+import {BitmapManager} from "../../resources/BitmapManager";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
+import {HTMLTextObject} from "../../ui/HTMLTextObject";
 import {SliderBar} from "../../ui/SliderBar";
 import {URLButton} from "../../ui/URLButton";
 import {Fonts} from "../../util/Fonts";
@@ -241,7 +243,27 @@ export class DesignBrowserMode extends GameMode {
 
         this._toolbarLayout.layout();
 
-        // Refresh immediately, and then every 300 seconds
+        this._homeButton = GameMode.createHomeButton();
+        this._homeButton.hideWhenModeInactive();
+        this.addObject(this._homeButton, this.uiLayer);
+
+        let puzzleIcon = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaPuzzleImg));
+        puzzleIcon.position = new Point(11, 8);
+        this.uiLayer.addChild(puzzleIcon);
+
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+            .font(Fonts.ARIAL)
+            .fontSize(14)
+            .bold()
+            .selectable(false)
+            .color(0xffffff);
+        puzzleTitle.hideWhenModeInactive();
+        this.addObject(puzzleTitle, this.uiLayer);
+        DisplayUtil.positionRelative(
+            puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
+            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0);
+
+        // Refresh our data immediately, and then every 300 seconds
         this.refreshSolutions();
 
         this.addObject(new RepeatingTask(() => {
@@ -250,10 +272,6 @@ export class DesignBrowserMode extends GameMode {
                 new CallbackTask(() => this.refreshSolutions()),
             );
         }));
-
-        this._homeButton = GameMode.createHomeButton();
-        this._homeButton.hideWhenModeInactive();
-        this.addObject(this._homeButton, this.uiLayer);
 
         this.updateLayout();
     }
