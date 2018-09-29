@@ -338,7 +338,7 @@ export class DesignBrowserMode extends GameMode {
 
         for (let dataCol of this._dataCols) {
             if (dataCol.category == DesignCategory.Sequence) {
-                dataCol.set_show_exp(false);
+                dataCol.showExp = false;
             }
         }
     }
@@ -349,7 +349,7 @@ export class DesignBrowserMode extends GameMode {
 
         for (let dataCol of this._dataCols) {
             if (dataCol.category == DesignCategory.Sequence) {
-                dataCol.set_show_exp(true);
+                dataCol.showExp = true;
             }
         }
     }
@@ -561,7 +561,7 @@ export class DesignBrowserMode extends GameMode {
             this._allSolutions.sort((a, b) => this._sortOptions.compareSolutions(a, b));
 
             for (let dataCol of this._dataCols) {
-                dataCol.set_sort_state(this._sortOptions.getSortOrder(dataCol.category));
+                dataCol.setSortState(this._sortOptions.getSortOrder(dataCol.category));
             }
         }
 
@@ -569,7 +569,7 @@ export class DesignBrowserMode extends GameMode {
         for (let sol of this._allSolutions) {
             let shouldAdd = true;
             for (let dataCol of this._dataCols) {
-                if (!dataCol.is_qualified(sol)) {
+                if (!dataCol.shouldDisplay(sol)) {
                     shouldAdd = false;
                     break;
                 }
@@ -606,7 +606,7 @@ export class DesignBrowserMode extends GameMode {
         }
 
         for (let dataCol of this._dataCols) {
-            dataCol.set_progress(this._firstVisSolutionIdx);
+            dataCol.scrollProgress = this._firstVisSolutionIdx;
         }
 
         this._markerBoxes.updateView(this._firstVisSolutionIdx);
@@ -719,10 +719,10 @@ export class DesignBrowserMode extends GameMode {
             let data_array: any[] = [];
 
             let category: DesignCategory = dataCol.category;
-            let exp_array: Feedback[] = [];
+            let feedbacks: Feedback[] = [];
 
             for (let solution of solutions) {
-                exp_array.push(solution.expFeedback);
+                feedbacks.push(solution.expFeedback);
             }
 
             for (let ii = 0; ii < solutions.length; ii++) {
@@ -732,8 +732,8 @@ export class DesignBrowserMode extends GameMode {
                 if (category == DesignCategory.Sequence) {
                     data_array.push(singleLineRawData.sequence);
                     if (ii == 0) {
-                        dataCol.set_width(singleLineRawData.sequence.length * 16);
-                        dataCol.draw_grid_text();
+                        dataCol.setWidth(singleLineRawData.sequence.length * 16);
+                        dataCol.drawGridText();
                     }
                 } else if (category == DesignCategory.Description) {
                     let des = singleLineRawData.getProperty("Description");
@@ -756,7 +756,7 @@ export class DesignBrowserMode extends GameMode {
             }
 
             if (category == DesignCategory.Sequence || category == DesignCategory.Synthesis_score) {
-                dataCol.set_exp_data(exp_array);
+                dataCol.expFeedback = feedbacks;
             }
             dataCol.set_pairs(EPars.parenthesisToPairs(puz.getSecstruct()));
 
@@ -785,20 +785,20 @@ export class DesignBrowserMode extends GameMode {
         this._wholeRowWidth = 0;
 
         for (let ii = 0; ii < this._dataCols.length; ii++) {
-            let data_col: DataCol = this._dataCols[ii];
+            let col: DataCol = this._dataCols[ii];
             if (animate) {
-                data_col.replaceNamedObject("AnimateLocation",
+                col.replaceNamedObject("AnimateLocation",
                     new LocationTask(this._wholeRowWidth, 0, 0.5, Easing.easeOut));
             } else {
-                data_col.display.position = new Point(this._wholeRowWidth, 0);
+                col.display.position = new Point(this._wholeRowWidth, 0);
             }
 
-            this._wholeRowWidth += data_col.get_width();
+            this._wholeRowWidth += col.width;
 
             if (ii % 2 == 0) {
-                data_col.set_column_color(0x012034);
+                col.bgColor = 0x012034;
             } else {
-                data_col.set_column_color(0x1A2F43);
+                col.bgColor = 0x1A2F43;
             }
         }
     }

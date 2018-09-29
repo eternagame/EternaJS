@@ -25,7 +25,7 @@ export class DataCol extends ContainerObject {
 
         this.category = category;
         this._data_type = data_type;
-        this._data_width = data_width;
+        this._dataWidth = data_width;
         this._fontType = fonttype;
         this._fontSize = fontSize;
         this._sortable = sortable;
@@ -64,42 +64,43 @@ export class DataCol extends ContainerObject {
         this.container.addChild(this._labelArrow);
 
         if (this._sortable) {
-            this._label.clicked.connect(() => this.toggle_sort_state());
+            this._label.clicked.connect(() => this.toggleSortState());
         }
 
         const TEXT_INPUT_SIZE = 13;
 
         if (this._data_type == DesignBrowserDataType.STRING) {
-            this._input_field = new TextInputObject(TEXT_INPUT_SIZE, this._data_width - 22);
-            this._input_field.tabIndex = -1; // prevent tab-selection
-            this._input_field.display.position = new Point(11, 54);
-            this.addObject(this._input_field, this.container);
-            // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, this._dataWidth - 22);
+            this._filterField1.tabIndex = -1; // prevent tab-selection
+            this._filterField1.display.position = new Point(11, 54);
+            this.addObject(this._filterField1, this.container);
 
-            this._field_string = Fonts.arial("search", 14).color(0xffffff).build();
-            this._field_string.position = new Point(11, 33);
-            this.container.addChild(this._field_string);
+            // this._filterField1.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+
+            this._filterLabel1 = Fonts.arial("search", 14).color(0xffffff).build();
+            this._filterLabel1.position = new Point(11, 33);
+            this.container.addChild(this._filterLabel1);
 
         } else {
-            this._input_field = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
-            this._input_field.tabIndex = -1; // prevent tab-selection
-            this._input_field.display.position = new Point(11, 54);
-            this.addObject(this._input_field, this.container);
-            // this._input_field.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5);
+            this._filterField1.tabIndex = -1; // prevent tab-selection
+            this._filterField1.display.position = new Point(11, 54);
+            this.addObject(this._filterField1, this.container);
+            // this._filterField1.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
 
-            this._field_string = Fonts.arial("min", 14).color(0xffffff).build();
-            this._field_string.position = new Point(11, 33);
-            this.container.addChild(this._field_string);
+            this._filterLabel1 = Fonts.arial("min", 14).color(0xffffff).build();
+            this._filterLabel1.position = new Point(11, 33);
+            this.container.addChild(this._filterLabel1);
 
-            this._input_field2 = new TextInputObject(TEXT_INPUT_SIZE, (this._data_width - 29) * 0.5);
-            this._input_field2.tabIndex = -1; // prevent tab-selection
-            this._input_field2.display.position = new Point(11 + (this._data_width - 29) / 2 + 7, 54);
-            this.addObject(this._input_field2, this.container);
-            // this._input_field2.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+            this._filterField2 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5);
+            this._filterField2.tabIndex = -1; // prevent tab-selection
+            this._filterField2.display.position = new Point(11 + (this._dataWidth - 29) / 2 + 7, 54);
+            this.addObject(this._filterField2, this.container);
+            // this._filterField2.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
 
-            this._field_string2 = Fonts.arial("max", 14).color(0xffffff).build();
-            this._field_string2.position = new Point((this._data_width - 7) / 2 + 7, 33);
-            this.container.addChild(this._field_string2);
+            this._filterLabel2 = Fonts.arial("max", 14).color(0xffffff).build();
+            this._filterLabel2.position = new Point((this._dataWidth - 7) / 2 + 7, 33);
+            this.container.addChild(this._filterLabel2);
         }
 
         this.updateLayout();
@@ -119,13 +120,13 @@ export class DataCol extends ContainerObject {
 
     private updateLayout(): void {
         this._sequencesView.setSize(this._width, this._height);
-        this._num_display = Math.floor((this._height - 70 - 20) / this._line_height);
-        this.display_data();
-        this.set_column_color(this._col);
+        this._numDisplay = Math.floor((this._height - 70 - 20) / this._line_height);
+        this.updateView();
+        this.bgColor = this._fillColor;
     }
 
     public set_pairs(pairs: number[]): void {
-        this._pairs_array = pairs.slice();
+        this._pairsArray = pairs.slice();
     }
 
     private get mouseLoc(): Point {
@@ -139,21 +140,21 @@ export class DataCol extends ContainerObject {
         }
 
         let ii = int((mouseLoc.y - DataCol.DATA_H) / this._line_height);
-        if (ii >= this._num_display) {
+        if (ii >= this._numDisplay) {
             return [-1, -1];
         }
 
         return [ii, int(DataCol.DATA_H + (ii * this._line_height) - mouseLoc.y)];
     }
 
-    public set_filter(filter1: string, filter2: string): void {
-        this._input_field.text = filter1;
+    public setFilter(filter1: string, filter2: string): void {
+        this._filterField1.text = filter1;
         if (filter2 != null) {
-            this._input_field2.text = filter2;
+            this._filterField2.text = filter2;
         }
     }
 
-    public set_sort_state(sortOrder: SortOrder): void {
+    public setSortState(sortOrder: SortOrder): void {
         this._sortOrder = sortOrder;
 
         this._labelArrow.clear();
@@ -174,9 +175,10 @@ export class DataCol extends ContainerObject {
         }
     }
 
-    public is_qualified(sol: Solution): boolean {
+    /** True if the solution passes our filter options */
+    public shouldDisplay(sol: Solution): boolean {
         if (this._data_type == DesignBrowserDataType.STRING) {
-            let query_string: string = this._input_field.text;
+            let query_string: string = this._filterField1.text;
             if (query_string.length == 0) {
                 return true;
             }
@@ -185,14 +187,14 @@ export class DataCol extends ContainerObject {
 
             return (target_low.search(query_string.toLowerCase()) >= 0);
         } else {
-            let query_min: string = this._input_field.text;
+            let query_min: string = this._filterField1.text;
             if (query_min.length > 0) {
                 if (sol.getProperty(this.category) < Number(query_min)) {
                     return false;
                 }
             }
 
-            let query_max: string = this._input_field2.text;
+            let query_max: string = this._filterField2.text;
             if (query_max.length > 0) {
                 if (sol.getProperty(this.category) > Number(query_max)) {
                     return false;
@@ -203,39 +205,39 @@ export class DataCol extends ContainerObject {
         }
     }
 
-    public set_width(w: number): void {
-        this._data_width = w;
-        this._input_field.width = this._data_width;
+    public setWidth(w: number): void {
+        this._dataWidth = w;
+        this._filterField1.width = this._dataWidth;
     }
 
     // Draws grid text if it hasn't been drawn already
-    public draw_grid_text(): void {
-        if (this._grid_numbers != null) {
+    public drawGridText(): void {
+        if (this._gridNumbers != null) {
             return;
         }
 
-        this._grid_numbers = new Container();
-        this.container.addChild(this._grid_numbers);
+        this._gridNumbers = new Container();
+        this.container.addChild(this._gridNumbers);
 
-        for (let ii = 0; ii < this._data_width / 280; ii++) {
+        for (let ii = 0; ii < this._dataWidth / 280; ii++) {
             let gridstring = `${ii * 20 + 20}`;
             let gridtext = Fonts.arial(gridstring, 10).bold().build();
             gridtext.position = new Point(300 + ii * 280 - gridstring.length * 3.5, 80);
-            this._grid_numbers.addChild(gridtext);
+            this._gridNumbers.addChild(gridtext);
         }
     }
 
-    public get_width(): number {
-        return this._data_width;
+    public get width(): number {
+        return this._dataWidth;
     }
 
-    public set_show_exp(show_exp_data: boolean): void {
-        this._show_exp_data = show_exp_data;
-        this.display_data();
+    public set showExp(value: boolean) {
+        this._showExp = value;
+        this.updateView();
     }
 
-    public set_exp_data(exp_data: Feedback[]): void {
-        this._exp_data = exp_data;
+    public set expFeedback(feedback: Feedback[]) {
+        this._feedback = feedback;
     }
 
     public set_data_and_display(raw: any[]): void {
@@ -253,35 +255,35 @@ export class DataCol extends ContainerObject {
             }
         }
 
-        this.display_data();
+        this.updateView();
     }
 
-    public set_progress(offset: number): void {
+    public set scrollProgress(offset: number) {
         offset = int(offset);
         if (this._offset != offset) {
             this._offset = offset;
-            this.display_data();
+            this.updateView();
         }
     }
 
-    public set_column_color(col: number): void {
-        this._col = col;
+    public set bgColor(color: number) {
+        this._fillColor = color;
 
         this._graphics.clear();
-        this._graphics.beginFill(col);
-        this._graphics.drawRect(0, 0, this._data_width, this._height);
+        this._graphics.beginFill(color);
+        this._graphics.drawRect(0, 0, this._dataWidth, this._height);
         this._graphics.endFill();
 
         if (this.category == "Sequence") {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
-            for (let ii = 0; ii < this._data_width / 70 + 1; ii++) {
+            for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
                 this._graphics.moveTo(ii * 70 + 90, 85);
                 this._graphics.lineTo(ii * 70 + 90, this._height - 5);
             }
         }
     }
 
-    private toggle_sort_state(): void {
+    private toggleSortState(): void {
         if (this._sortOrder == SortOrder.INCREASING) {
             this._sortOrder = SortOrder.DECREASING;
         } else if (this._sortOrder == SortOrder.DECREASING) {
@@ -293,14 +295,14 @@ export class DataCol extends ContainerObject {
         this.sortOrderChanged.emit(this._sortOrder);
     }
 
-    private display_data(): void {
+    private updateView(): void {
         let dataString = "";
         let boardData: string[] = [];
         let board_exp_data: any[] = [];
 
         let pairs_length: number = 0;
-        if (this._pairs_array != null) {
-            for (let pair of this._pairs_array) {
+        if (this._pairsArray != null) {
+            for (let pair of this._pairsArray) {
                 if (pair >= 0) {
                     pairs_length++;
                 }
@@ -308,7 +310,7 @@ export class DataCol extends ContainerObject {
             pairs_length /= 2;
         }
 
-        for (let ii = this._offset; ii < this._offset + this._num_display; ii++) {
+        for (let ii = this._offset; ii < this._offset + this._numDisplay; ii++) {
             if (ii >= this._rawData.length) {
                 dataString += "\n";
             } else {
@@ -318,7 +320,7 @@ export class DataCol extends ContainerObject {
                 switch (this.category) {
                 case DesignCategory.Sequence:
                     boardData.push(rawstr);
-                    board_exp_data.push(this._exp_data[ii]);
+                    board_exp_data.push(this._feedback[ii]);
 
                     break;
 
@@ -341,8 +343,8 @@ export class DataCol extends ContainerObject {
 
                 case DesignCategory.Synthesis_score:
                     let exp: Feedback = null;
-                    if (this._exp_data != null) {
-                        exp = this._exp_data[ii];
+                    if (this._feedback != null) {
+                        exp = this._feedback[ii];
                     }
 
                     if (exp == null) {
@@ -411,10 +413,10 @@ export class DataCol extends ContainerObject {
         this._dataDisplay.text = dataString;
 
         if (boardData.length > 0) {
-            if (this._show_exp_data) {
-                this._sequencesView.set_sequences(boardData, board_exp_data, this._pairs_array);
+            if (this._showExp) {
+                this._sequencesView.set_sequences(boardData, board_exp_data, this._pairsArray);
             } else {
-                this._sequencesView.set_sequences(boardData, null, this._pairs_array);
+                this._sequencesView.set_sequences(boardData, null, this._pairsArray);
             }
 
             this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
@@ -436,23 +438,23 @@ export class DataCol extends ContainerObject {
     private _dataDisplay: Text;
 
     private _rawData: any[] = [];
-    private _data_width: number;
+    private _dataWidth: number;
     private _line_height: number;
     private _label: GameButton;
     private _labelArrow: Graphics;
-    private _input_field: TextInputObject;
-    private _input_field2: TextInputObject;
-    private _field_string: Text;
-    private _field_string2: Text;
-    private _grid_numbers: Container;
+    private _filterField1: TextInputObject;
+    private _filterField2: TextInputObject;
+    private _filterLabel1: Text;
+    private _filterLabel2: Text;
+    private _gridNumbers: Container;
     private _offset: number = 0;
 
-    private _num_display: number;
+    private _numDisplay: number;
     private _sortOrder: SortOrder = SortOrder.NONE;
-    private _exp_data: Feedback[];
-    private _show_exp_data: boolean = false;
-    private _pairs_array: number[];
-    private _col: number = 0;
+    private _feedback: Feedback[];
+    private _showExp: boolean = false;
+    private _pairsArray: number[];
+    private _fillColor: number = 0;
 
     private _sequencesView: SequenceStringListView;
 
