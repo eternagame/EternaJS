@@ -1,4 +1,5 @@
 import {Graphics, Point, Sprite} from "pixi.js";
+import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {DOMObject} from "../../flashbang/objects/DOMObject";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {Signal} from "../../signals/Signal";
@@ -32,12 +33,23 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     protected added(): void {
         super.added();
         this.createFakeTextInput();
+
+        // When our fakeTextInput is clicked, show and focus our real textInput
+        new DisplayObjectPointerTarget(this._dummyDisp).pointerDown.connect(() => {
+            if (this._fakeTextInput != null) {
+                setTimeout(() => {
+                    this.destroyFakeTextInput();
+                    this._obj.style.visibility = "visible";
+                    this._obj.focus();
+                });
+            }
+        });
     }
 
     protected updateElementProperties(): void {
         super.updateElementProperties();
         if (this._fakeTextInput != null) {
-            this._obj.style.opacity = "0";
+            this._obj.style.visibility = "hidden";
         }
     }
 
@@ -137,11 +149,14 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         if (this._fakeTextInput != null) {
             this._fakeTextInput.destroy({children: true});
             this._fakeTextInput = null;
+            this._dummyDisp.interactive = false;
         }
     }
 
     private createFakeTextInput(): void {
         this.destroyFakeTextInput();
+
+        this._dummyDisp.interactive = true;
 
         this._fakeTextInput = new Sprite();
 
