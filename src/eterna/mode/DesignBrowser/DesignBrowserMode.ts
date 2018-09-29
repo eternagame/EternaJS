@@ -35,7 +35,7 @@ import {CustomizeColumnOrderDialog} from "./CustomizeColumnOrderDialog";
 import {DataCol} from "./DataCol";
 import {DotLine} from "./DotLine";
 import {GridLines} from "./GridLines";
-import {MarkersBoxes} from "./MarkersBoxes";
+import {MarkerBoxView} from "./MarkerBoxView";
 import {SelectionBox} from "./SelectionBox";
 import {SortOptions, SortOrder} from "./SortOptions";
 import {SortOptionsDialog} from "./SortOptionsDialog";
@@ -145,8 +145,8 @@ export class DesignBrowserMode extends GameMode {
 
         this._dataColParent.display.mask = this._maskBox;
 
-        this._markerBoxes = new MarkersBoxes(0xFF0000, 7, 88, lineHeight);
-        this._markerBoxes.position = new Point(7, 0);
+        this._markerBoxes = new MarkerBoxView(0xFF0000, lineHeight);
+        this._markerBoxes.position = new Point(7, 88);
         this._content.addChild(this._markerBoxes);
 
         this._selectionBox = new SelectionBox(0xFFFFFF);
@@ -300,7 +300,7 @@ export class DesignBrowserMode extends GameMode {
         this._divider2.length = this.contentWidth - 10;
         this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._markerBoxes.setWidth(this.contentWidth - 14);
+        this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._selectionBox.setSize(this.contentWidth - 14, 20);
 
         this._toolbarLayout.position = new Point(20, this.contentHeight + 25);
@@ -481,7 +481,7 @@ export class DesignBrowserMode extends GameMode {
     private onMouseMove(): void {
         this._selectionBox.visible = false;
 
-        if (this._dataCols == null || this._dialogRef.isLive) {
+        if (this._dataCols == null || this._dialogRef.isLive || this._filteredSolutions == null) {
             return;
         }
 
@@ -869,7 +869,7 @@ export class DesignBrowserMode extends GameMode {
     private _votesText: MultiStyleText;
     private _votesPanel: GamePanel;
     private _selectionBox: SelectionBox;
-    private _markerBoxes: MarkersBoxes;
+    private _markerBoxes: MarkerBoxView;
     private _columnNames: DesignCategory[];
     private _voteProcessor: VoteProcessor;
 

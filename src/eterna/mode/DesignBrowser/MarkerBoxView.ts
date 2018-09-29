@@ -1,24 +1,23 @@
 import {Container, Point} from "pixi.js";
 import {SelectionBox} from "./SelectionBox";
 
-export class MarkersBoxes extends Container {
-    constructor(color: number, initPosX: number, initPosY: number, markerHeight: number) {
+export class MarkerBoxView extends Container {
+    constructor(color: number, markerHeight: number) {
         super();
 
         this._markers = [];
         this._indices = [];
         this._color = color;
-        this._initPosX = initPosX;
-        this._initPosY = initPosY;
         this._markerHeight = markerHeight;
     }
 
-    public setWidth(width: number): void {
-        if (this._width === width) {
+    public setSize(width: number, height: number): void {
+        if (this._width === width && this._height === height) {
             return;
         }
 
         this._width = width;
+        this._height = height;
     }
 
     public clear(): void {
@@ -37,7 +36,7 @@ export class MarkersBoxes extends Container {
 
         let box = new SelectionBox(this._color);
         box.setSize(this._width, this._markerHeight);
-        box.position = new Point(this._initPosX, this._initPosY + index * this._markerHeight);
+        box.position = new Point(0, index * this._markerHeight);
         this.addChild(box);
 
         this._markers.push(box);
@@ -64,7 +63,7 @@ export class MarkersBoxes extends Container {
         this._indices.splice(removeIndex, 1);
     }
 
-    public updateView(start: number): void {
+    public updateView(firstVisIdx: number): void {
         if (this._markers == null || this._markers.length == 0) {
             return;
         }
@@ -73,11 +72,11 @@ export class MarkersBoxes extends Container {
             let box = this._markers[ii];
 
             box.visible = false;
-            if (this._indices[ii] >= start) {
-                let y_pos: number = this._initPosY + (this._indices[ii] - start) * this._markerHeight;
-                if (y_pos + this._markerHeight < this._markerHeight) {
+            if (this._indices[ii] >= firstVisIdx) {
+                let yPos = (this._indices[ii] - firstVisIdx) * this._markerHeight;
+                if (yPos + this._markerHeight < this._height) {
                     box.visible = true;
-                    box.position = new Point(this._initPosX, y_pos);
+                    box.position = new Point(0, yPos);
                     box.setSize(this._width, this._markerHeight);
                 }
             }
@@ -85,11 +84,10 @@ export class MarkersBoxes extends Container {
     }
 
     private readonly _color: number;
-    private readonly _initPosX: number;
-    private readonly _initPosY: number;
     private readonly _markerHeight: number;
 
     private _width: number = 0;
+    private _height: number = 0;
 
     private _markers: SelectionBox[];
     private _indices: number[];
