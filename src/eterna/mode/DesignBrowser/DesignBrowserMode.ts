@@ -456,9 +456,14 @@ export class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let [index] = this._dataCols[0].getMouseIndex();
-        if (index >= 0) {
-            this.showSolutionDetailsDialog(this._filteredSolutions[index + this._firstVisSolutionIdx]);
+        const [index] = this._dataCols[0].getMouseIndex();
+        if (index < 0) {
+            return;
+        }
+
+        const solution = this.getSolutionAtIndex(index + this._firstVisSolutionIdx);
+        if (solution != null) {
+            this.showSolutionDetailsDialog(solution);
         }
     }
 
@@ -480,8 +485,8 @@ export class DesignBrowserMode extends GameMode {
             return;
         }
 
-        let [index, yOffset] = this._dataCols[0].getMouseIndex();
-        if (index >= 0) {
+        const [index, yOffset] = this._dataCols[0].getMouseIndex();
+        if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
             this._selectionBox.position = new Point(7, this._content.toLocal(Flashbang.globalMouse).y + yOffset);
         }
@@ -808,7 +813,7 @@ export class DesignBrowserMode extends GameMode {
         this._markerBoxes.clear();
         for (let solutionID of this._selectedSolutionIDs) {
             let index = this.getSolutionIndex(solutionID);
-            if (index >= 0) {
+            if (index >= 0 && index < this._filteredSolutions.length) {
                 this._markerBoxes.addMarker(index);
             }
         }
