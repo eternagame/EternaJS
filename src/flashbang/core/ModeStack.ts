@@ -1,6 +1,7 @@
 import {Container} from "pixi.js";
 import {UnitSignal} from "../../signals/UnitSignal";
 import {Assert} from "../util/Assert";
+import {MathUtil} from "../util/MathUtil";
 import {AppMode} from "./AppMode";
 
 /**
@@ -11,7 +12,11 @@ export class ModeStack {
     public readonly topModeChanged: UnitSignal = new UnitSignal();
 
     constructor(parentSprite: Container) {
-        parentSprite.addChild(this._topSprite);
+        parentSprite.addChild(this._container);
+    }
+
+    public get modes(): ReadonlyArray<AppMode> {
+        return this._modeStack;
     }
 
     /**
@@ -37,6 +42,19 @@ export class ModeStack {
         transition.mode = mode;
         transition.index = index;
         this._pendingModeTransitionQueue.push(transition);
+    }
+
+    /**
+     * Sets the index of a mode that may or may not already be in the ModeStack.
+     * If the mode is already in the stack, it will be moved; otherwise it will be added.
+     *
+     * @param mode the AppMode to add or move
+     * @param index the stack position to move the mode to.
+     * You can use a negative integer to specify a position relative
+     * to the top of the stack (for example, -1 is the top of the stack).
+     */
+    public setModeIndex(mode: AppMode, index: number): void {
+        this.doModeTransition(ModeTransition.SET_INDEX, mode, index);
     }
 
     /**
@@ -136,7 +154,6 @@ export class ModeStack {
         }
 
         let initialTopMode: AppMode = this.topMode;
-        let self: ModeStack = this;
 
         const doPushMode = (newMode: AppMode) => {
             if (newMode == null) {
@@ -144,9 +161,9 @@ export class ModeStack {
             }
 
             this._modeStack.push(newMode);
-            this._topSprite.addChild(newMode.container);
+            this._container.addChild(newMode.container);
 
-            newMode.setupInternal(self);
+            newMode.setupInternal(this);
         };
 
         const doInsertMode = (newMode: AppMode, index: number) => {
@@ -157,13 +174,12 @@ export class ModeStack {
             if (index < 0) {
                 index = this._modeStack.length + index;
             }
-            index = Math.max(index, 0);
-            index = Math.min(index, this._modeStack.length);
+            index = MathUtil.clamp(index, 0, this._modeStack.length);
 
             this._modeStack.splice(index, 0, newMode);
-            this._topSprite.addChildAt(newMode.container, index);
+            this._container.addChildAt(newMode.container, index);
 
-            newMode.setupInternal(self);
+            newMode.setupInternal(this);
         };
 
         const doRemoveMode = (index: number) => {
@@ -174,9 +190,7 @@ export class ModeStack {
             if (index < 0) {
                 index = this._modeStack.length + index;
             }
-
-            index = Math.max(index, 0);
-            index = Math.min(index, this._modeStack.length - 1);
+            index = MathUtil.clamp(index, 0, this._modeStack.length - 1);
 
             // if the top mode is removed, make sure it's exited first
             let mode: AppMode = this._modeStack[index];
@@ -187,6 +201,30 @@ export class ModeStack {
 
             mode.disposeInternal();
             this._modeStack.splice(index, 1);
+        };
+
+        const doSetIndex = (mode: AppMode, newIdx: number) => {
+            if (mode == null) {
+                throw new Error("Can't insert a null mode in the mode stack");
+            }
+
+            let prevIdx = this._modeStack.indexOf(mode);
+            if (prevIdx < 0) {
+                doInsertMode(mode, newIdx);
+            } else {
+                if (newIdx < 0) {
+                    newIdx = this._modeStack.length + newIdx;
+                }
+                newIdx = MathUtil.clamp(newIdx, 0, this._modeStack.length - 1);
+                if (prevIdx != newIdx) {
+                    // Rearrange the modestack
+                    this._modeStack.splice(prevIdx, 1);
+                    this._modeStack.splice(newIdx, 0, mode);
+
+                    // Rearrange mode containers
+                    this._container.setChildIndex(mode.container, newIdx);
+                }
+            }
         };
 
         // create a new _pendingModeTransitionQueue right now
@@ -230,6 +268,10 @@ export class ModeStack {
                     doPushMode(mode);
                 }
                 break;
+
+            case ModeTransition.SET_INDEX:
+                doSetIndex(mode, transition.index);
+                break;
             }
         }
 
@@ -260,17 +302,17 @@ export class ModeStack {
         this.clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
-        this._topSprite.destroy();
-        this._topSprite = null;
+        this._container.destroy();
+        this._container = null;
     }
 
-    protected _topSprite: Container = new Container();
+    protected _container: Container = new Container();
     protected _modeStack: AppMode[] = [];
     protected _pendingModeTransitionQueue: PendingTransition[] = [];
 }
 
 export enum ModeTransition {
-    PUSH, UNWIND, INSERT, REMOVE, CHANGE
+    PUSH, UNWIND, INSERT, REMOVE, CHANGE, SET_INDEX,
 }
 
 class PendingTransition {
