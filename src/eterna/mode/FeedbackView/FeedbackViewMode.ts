@@ -47,6 +47,7 @@ export class FeedbackViewMode extends GameMode {
         this.uiLayer.addChild(this._title);
 
         this._homeButton = GameMode.createHomeButton();
+        this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
         this._toolbar = new FeedbackViewToolbar(this._puzzle);
@@ -129,16 +130,6 @@ export class FeedbackViewMode extends GameMode {
         this.setPip(false);
 
         this.updateUILayout();
-    }
-
-    protected enter(): void {
-        super.enter();
-        this._homeButton.display.visible = true;
-    }
-
-    protected exit(): void {
-        this._homeButton.display.visible = false;
-        super.exit();
     }
 
     public onResized(): void {
