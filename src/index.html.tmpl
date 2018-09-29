@@ -92,6 +92,20 @@
     const containerID = "maingame";
     const appContainer = document.getElementById(containerID);
 
+    let designBrowserFilters = [];
+    for (let ii = 1; ; ++ii) {
+        let filterName = "filter" + ii;
+        if (params.has(filterName)) {
+            designBrowserFilters.push({
+                category: params.get(filterName),
+                arg1: params.get(filterName + "_arg1"),
+                arg2: params.get(filterName + "_arg2"),
+            });
+        } else {
+            break;
+        }
+    }
+
     const app = new EternaApp({
         containerID: containerID,
         chatboxID: "chat-container",
@@ -104,6 +118,7 @@
         puzzleEditNumTargets: numberParam("puzzleEditNumTargets"),
         folderName: params.get("folder"),
         sequence: params.get("sequence"),
+        designBrowserFilters: designBrowserFilters,
     });
     window.app = app;
     app.run();
