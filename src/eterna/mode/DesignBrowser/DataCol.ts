@@ -3,6 +3,7 @@ import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {TextBuilder} from "../../../flashbang/util/TextBuilder";
 import {Signal} from "../../../signals/Signal";
+import {UnitSignal} from "../../../signals/UnitSignal";
 import {Feedback} from "../../Feedback";
 import {Solution} from "../../puzzle/Solution";
 import {GameButton} from "../../ui/GameButton";
@@ -16,6 +17,7 @@ import {SortOrder} from "./SortOptions";
 
 export class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
+    public readonly filtersChanged = new UnitSignal();
     public readonly category: DesignCategory;
 
     constructor(data_type: DesignBrowserDataType, category: DesignCategory,
@@ -75,7 +77,7 @@ export class DataCol extends ContainerObject {
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
 
-            // this._filterField1.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+            this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
 
             this._filterLabel1 = Fonts.arial("search", 14).color(0xffffff).build();
             this._filterLabel1.position = new Point(11, 33);
@@ -86,7 +88,8 @@ export class DataCol extends ContainerObject {
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
-            // this._filterField1.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+
+            this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
 
             this._filterLabel1 = Fonts.arial("min", 14).color(0xffffff).build();
             this._filterLabel1.position = new Point(11, 33);
@@ -96,7 +99,8 @@ export class DataCol extends ContainerObject {
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + (this._dataWidth - 29) / 2 + 7, 54);
             this.addObject(this._filterField2, this.container);
-            // this._filterField2.addEventListener(KeyboardEvent.KEY_UP, this.handle_key_down);
+
+            this._filterField2.valueChanged.connect(() => this.filtersChanged.emit());
 
             this._filterLabel2 = Fonts.arial("max", 14).color(0xffffff).build();
             this._filterLabel2.position = new Point((this._dataWidth - 7) / 2 + 7, 33);
