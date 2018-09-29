@@ -11,7 +11,6 @@ import {DelayTask} from "../../../flashbang/tasks/DelayTask";
 import {LocationTask} from "../../../flashbang/tasks/LocationTask";
 import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Arrays} from "../../../flashbang/util/Arrays";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {EPars} from "../../EPars";
@@ -24,6 +23,7 @@ import {Bitmaps} from "../../resources/Bitmaps";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
 import {SliderBar} from "../../ui/SliderBar";
+import {URLButton} from "../../ui/URLButton";
 import {Fonts} from "../../util/Fonts";
 import {int} from "../../util/int";
 import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
@@ -84,15 +84,14 @@ export class DesignBrowserMode extends GameMode {
         this._content.position = new Point(10, 86);
         this.uiLayer.addChild(this._content);
 
-        /// Instruction panel
         this._votesPanel = new GamePanel();
         this.addObject(this._votesPanel, this._content);
 
         const WMARGIN = 22;
         const HMARGIN = 17;
 
-        // Measure the actual height of a line of text in the DataCol objects
-        let line_height = Fonts.arial("", 14).computeLineHeight();
+        // the height of a line of text in the DataCol objects
+        let lineHeight = Fonts.arial("", 14).computeLineHeight();
 
         this._votesText = new MultiStyleText("You have...", {
             default: {
@@ -118,7 +117,7 @@ export class DesignBrowserMode extends GameMode {
 
         this._hSlider = new SliderBar(false);
         this._hSlider.set_progress(0);
-        this._hSlider.scrollChanged.connect(scrollValue => this.set_scroll_horizontal(scrollValue));
+        this._hSlider.scrollChanged.connect(scrollValue => this.setScrollHorizontal(scrollValue));
         this.addObject(this._hSlider, this._content);
 
         this._dataColParent = new ContainerObject();
@@ -134,7 +133,7 @@ export class DesignBrowserMode extends GameMode {
         this._divider2.position = new Point(5, 82);
         this._content.addChild(this._divider2);
 
-        this._gridLines = new GridLines(2, 0x4A5F73, 5 * line_height);
+        this._gridLines = new GridLines(2, 0x4A5F73, 5 * lineHeight);
         this._gridLines.position = new Point(10, 168);
         this._content.addChild(this._gridLines);
 
@@ -144,7 +143,7 @@ export class DesignBrowserMode extends GameMode {
 
         this._dataColParent.display.mask = this._maskBox;
 
-        this._markerBoxes = new MarkersBoxes(0xFF0000, 7, 88, line_height);
+        this._markerBoxes = new MarkersBoxes(0xFF0000, 7, 88, lineHeight);
         this._markerBoxes.position = new Point(7, 0);
         this._content.addChild(this._markerBoxes);
 
@@ -252,6 +251,9 @@ export class DesignBrowserMode extends GameMode {
             );
         }));
 
+        this._homeButton = GameMode.createHomeButton();
+        this.addObject(this._homeButton, this.uiLayer);
+
         this.updateLayout();
     }
 
@@ -289,22 +291,32 @@ export class DesignBrowserMode extends GameMode {
                 col.setSize(this.contentWidth, this.contentHeight);
             }
         }
+
+        DisplayUtil.positionRelativeToStage(
+            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, 0, 5);
     }
 
-    /*override*/
-    protected on_enter(): void {
+    protected enter(): void {
+        super.enter();
+        this._homeButton.display.visible = true;
+
         // this._return_to_game_button.visible = false;
         // if (Application.instance.get_previous_game_mode() >= 0) {
         //     this._return_to_game_button.visible = true;
         //     this._return_to_game_button.set_click_callback(DesignBrowserMode.return_to_game);
         // }
         //
-        // let options: any[] = AutosaveManager.instance.loadObjects("poseview-" + Eterna.playerID);
-        // if (options && options[10]) {
+        // if (Eterna.settings.showChat.value) {
         //     this.set_size(new UDim(1, 1, -280, -170));
         // } else {
         //     this.set_size(new UDim(1, 1, -40, -170));
         // }
+    }
+
+    protected exit(): void {
+        this._homeButton.display.visible = false;
+        super.exit();
     }
 
     private setSequenceLetterColor(): void {
@@ -560,7 +572,7 @@ export class DesignBrowserMode extends GameMode {
         this.setScrollVertical(-1);
     }
 
-    private set_scroll_horizontal(progress: number): void {
+    private setScrollHorizontal(progress: number): void {
         this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth) ?
             (this.contentWidth - this._wholeRowWidth) * progress :
             0;
@@ -828,6 +840,7 @@ export class DesignBrowserMode extends GameMode {
     private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
+    private _homeButton: URLButton;
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
     private _customizeButton: GameButton;
