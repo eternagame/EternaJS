@@ -70,12 +70,19 @@ function AllCategories(): DesignCategory[] {
     return Object.keys(DesignCategory).map(key => DesignCategory[key as any] as DesignCategory);
 }
 
+export interface DesignBrowserFilter {
+    category: DesignCategory;
+    arg1?: string;
+    arg2?: string;
+}
+
 export class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote: boolean = false) {
+    constructor(puzzle: Puzzle, novote: boolean = false, initialFilters: DesignBrowserFilter[] = null) {
         super();
 
         this._puzzle = puzzle;
         this._novote = novote;
+        this._initialDataFilters = initialFilters;
         this._wholeRowWidth = 0;
         this._voteProcessor = new VoteProcessor();
     }
@@ -158,9 +165,9 @@ export class DesignBrowserMode extends GameMode {
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerDown.connect(() => this.onMouseDown());
 
-        this._columnNames = Eterna.settings.designBrowserColumnNames.value;
-        if (this._columnNames == null) {
-            this._columnNames = DesignBrowserMode.DEFAULT_COLUMNS.slice();
+        this._categories = Eterna.settings.designBrowserColumnNames.value;
+        if (this._categories == null) {
+            this._categories = DesignBrowserMode.DEFAULT_COLUMNS.slice();
         }
         this._selectedSolutionIDs = Eterna.settings.designBrowserSelectedSolutionIDs.value;
         if (this._selectedSolutionIDs == null) {
@@ -544,11 +551,11 @@ export class DesignBrowserMode extends GameMode {
             disabledCategories.add(DesignCategory.My_Votes);
         }
 
-        let dialog = this.showDialog(new CustomizeColumnOrderDialog(AllCategories(), this._columnNames, disabledCategories));
+        let dialog = this.showDialog(new CustomizeColumnOrderDialog(AllCategories(), this._categories, disabledCategories));
         dialog.columnsReorganized.connect(columnNames => {
-            this._columnNames = columnNames;
+            this._categories = columnNames;
             Eterna.settings.designBrowserColumnNames.value = columnNames;
-            this.rebuildDataColumns();
+            this.rebuildDataColumns(this._initialDataFilters);
             this.reorganize(true);
         });
     }
@@ -647,7 +654,7 @@ export class DesignBrowserMode extends GameMode {
         this.reorganize(true);
     }
 
-    private rebuildDataColumns(): void {
+    private rebuildDataColumns(filters: DesignBrowserFilter[] = null): void {
         const FONT = "Arial";
         const FONT_SIZE = 14;
 
@@ -658,36 +665,36 @@ export class DesignBrowserMode extends GameMode {
         }
 
         this._dataCols = [];
-        for (let columnName of this._columnNames) {
-            if (this._novote && (columnName == DesignCategory.Votes || columnName == DesignCategory.My_Votes)) {
+        for (let category of this._categories) {
+            if (this._novote && (category == DesignCategory.Votes || category == DesignCategory.My_Votes)) {
                 continue;
             }
 
             let column: DataCol;
-            switch (columnName) {
+            switch (category) {
             case DesignCategory.Title:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 250, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.STRING, category, 250, FONT, FONT_SIZE, true);
                 break;
             case DesignCategory.Designer:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 220, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.STRING, category, 220, FONT, FONT_SIZE, true);
                 break;
             case DesignCategory.Description:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 300, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.STRING, category, 300, FONT, FONT_SIZE, true);
                 break;
             case DesignCategory.Sequence:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 0, FONT, FONT_SIZE, false);
+                column = new DataCol(DesignBrowserDataType.STRING, category, 0, FONT, FONT_SIZE, false);
                 break;
             case DesignCategory.Synthesized:
-                column = new DataCol(DesignBrowserDataType.STRING, columnName, 100, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.STRING, category, 100, FONT, FONT_SIZE, true);
                 break;
             case DesignCategory.Votes:
-                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 100, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, category, 100, FONT, FONT_SIZE, true);
                 break;
             case DesignCategory.Synthesis_score:
-                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 170, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, category, 170, FONT, FONT_SIZE, true);
                 break;
             default:
-                column = new DataCol(DesignBrowserDataType.NUMBER, columnName, 125, FONT, FONT_SIZE, true);
+                column = new DataCol(DesignBrowserDataType.NUMBER, category, 125, FONT, FONT_SIZE, true);
                 break;
             }
 
@@ -695,16 +702,17 @@ export class DesignBrowserMode extends GameMode {
             column.filtersChanged.connect(() => this.reorganize(false));
             column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.category, sortOrder));
 
-            // if (this.root.loaderInfo.parameters.filter1 == columnName) {
-            //     column.set_filter(this.root.loaderInfo.parameters.filter1_arg1, this.root.loaderInfo.parameters.filter1_arg2);
-            // } else if (this.root.loaderInfo.parameters.filter2 == columnName) {
-            //     column.set_filter(this.root.loaderInfo.parameters.filter2_arg1, this.root.loaderInfo.parameters.filter2_arg2);
-            // } else if (this.root.loaderInfo.parameters.filter3 == columnName) {
-            //     column.set_filter(this.root.loaderInfo.parameters.filter3_arg1, this.root.loaderInfo.parameters.filter3_arg2);
-            // }
-
             this._dataCols.push(column);
             this._dataColParent.addObject(column, this._dataColParent.container);
+
+            if (filters != null) {
+                for (let filter of filters) {
+                    if (filter.category == category) {
+                        column.setFilter(filter.arg1, filter.arg2);
+                        break;
+                    }
+                }
+            }
         }
 
         this.layoutColumns(false);
@@ -712,7 +720,7 @@ export class DesignBrowserMode extends GameMode {
 
     private setData(solutions: Solution[], animate: boolean, initialize_only: boolean = false): void {
         if (this._dataCols == null) {
-            this.rebuildDataColumns();
+            this.rebuildDataColumns(this._initialDataFilters);
         }
 
         if (initialize_only) {
@@ -842,6 +850,7 @@ export class DesignBrowserMode extends GameMode {
 
     private readonly _puzzle: Puzzle;
     private readonly _novote: boolean;
+    private readonly _initialDataFilters: DesignBrowserFilter[];
     private readonly _content = new Container();
 
     private _divider1: DotLine;
@@ -870,7 +879,7 @@ export class DesignBrowserMode extends GameMode {
     private _votesPanel: GamePanel;
     private _selectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;
-    private _columnNames: DesignCategory[];
+    private _categories: DesignCategory[];
     private _voteProcessor: VoteProcessor;
 
     private static readonly DEFAULT_COLUMNS: DesignCategory[] = [

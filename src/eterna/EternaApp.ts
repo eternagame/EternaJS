@@ -12,7 +12,7 @@ import {NuPACK} from "./folding/NuPACK";
 import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
 import {Vienna2} from "./folding/Vienna2";
-import {DesignBrowserMode} from "./mode/DesignBrowser/DesignBrowserMode";
+import {DesignBrowserFilter, DesignBrowserMode} from "./mode/DesignBrowser/DesignBrowserMode";
 import {FeedbackViewMode} from "./mode/FeedbackView/FeedbackViewMode";
 import {LoadingMode} from "./mode/LoadingMode";
 import {PoseEditMode, PoseEditParams} from "./mode/PoseEdit/PoseEditMode";
@@ -82,6 +82,7 @@ export interface EternaAppParams {
     puzzleEditNumTargets?: number;
     folderName?: string;
     sequence?: string;
+    designBrowserFilters?: DesignBrowserFilter[];
 }
 
 /** Entry point for the game */
@@ -149,7 +150,7 @@ export class EternaApp extends FlashbangApp {
                     return this.loadSolution(this._params.puzzleID, this._params.solutionID,
                         this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                 case InitialAppMode.DESIGN_BROWSER:
-                    return this.loadDesignBrowser(this._params.puzzleID);
+                    return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
                 default:
                     return Promise.reject(`Unrecognized mode '${this._params.mode}'`);
                 }
@@ -204,10 +205,10 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    public loadDesignBrowser(puzzleID: number): Promise<void> {
+    public loadDesignBrowser(puzzleID: number, initialFilters?: DesignBrowserFilter[]): Promise<void> {
         this.setLoadingText(`Loading puzzle ${puzzleID}...`);
         return PuzzleManager.instance.getPuzzleByID(puzzleID)
-            .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle)));
+            .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle, false, initialFilters)));
     }
 
     protected onUncaughtError(err: any): void {
