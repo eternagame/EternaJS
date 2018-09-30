@@ -87,9 +87,9 @@ export class DesignBrowserMode extends GameMode {
         this._voteProcessor = new VoteProcessor();
     }
 
-    public get puzzleID(): number {
-        return this._puzzle.nodeID;
-    }
+    public get puzzleID(): number { return this._puzzle.nodeID; }
+
+    public get isOpaque(): boolean { return true; }
 
     protected setup(): void {
         super.setup();

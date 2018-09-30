@@ -19,6 +19,8 @@ export class LoadingMode extends AppMode {
         this._text = text;
     }
 
+    public get isOpaque(): boolean { return true; }
+
     public get text(): string {
         return this._text;
     }
