@@ -230,7 +230,7 @@ export class ModeStack {
         // create a new _pendingModeTransitionQueue right now
         // so that we can properly handle mode transition requests
         // that occur during the processing of the current queue
-        let transitionQueue: PendingTransition[] = this._pendingModeTransitionQueue;
+        let transitionQueue = this._pendingModeTransitionQueue;
         this._pendingModeTransitionQueue = [];
 
         for (let transition of transitionQueue) {
@@ -275,14 +275,24 @@ export class ModeStack {
             }
         }
 
-        let topMode: AppMode = this.topMode;
-        if (topMode !== initialTopMode) {
+        // Update mode visibility. An opaque mode causes everything below it to be invisible.
+        let hasOpaqueMode = false;
+        for (let ii = this._modeStack.length - 1; ii >=0; --ii) {
+            let mode = this._modeStack[ii];
+            mode.container.visible = !hasOpaqueMode;
+            if (mode.isOpaque) {
+                hasOpaqueMode = true;
+            }
+        }
+
+        let newTopMode = this.topMode;
+        if (newTopMode !== initialTopMode) {
             if (initialTopMode != null) {
                 initialTopMode.exitInternal();
             }
 
-            if (topMode != null) {
-                topMode.enterInternal();
+            if (newTopMode != null) {
+                newTopMode.enterInternal();
             }
             this.topModeChanged.emit();
         }
