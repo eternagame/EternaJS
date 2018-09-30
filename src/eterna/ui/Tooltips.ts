@@ -109,6 +109,8 @@ export class Tooltips extends GameObject {
         regs.add(button.pointerOver.connect(show));
         regs.add(button.pointerOut.connect(hide));
 
+        regs.add(button.destroyed.connect(hide));
+
         return regs;
     }
 
