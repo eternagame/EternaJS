@@ -11,7 +11,6 @@ import {Feedback} from "../../Feedback";
 import {Folder} from "../../folding/Folder";
 import {FolderManager} from "../../folding/FolderManager";
 import {Vienna} from "../../folding/Vienna";
-import {EternaURL} from "../../net/EternaURL";
 import {PoseField} from "../../pose2D/PoseField";
 import {Puzzle} from "../../puzzle/Puzzle";
 import {Solution} from "../../puzzle/Solution";
@@ -33,6 +32,8 @@ export class FeedbackViewMode extends GameMode {
     }
 
     public get isOpaque(): boolean { return true; }
+    public get puzzleID(): number { return this._puzzle.nodeID; }
+    public get solutionID(): number { return this._solution.nodeID; }
 
     protected setup(): void {
         super.setup();
@@ -492,13 +493,13 @@ export class FeedbackViewMode extends GameMode {
     }
 
     private loadDesignBrowser(): void {
-        log.debug("TODO: load_design_browser");
-        // // FIXME: when do we want to open the web-based design browser?
-        // if (true) {
-        //     Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this._puzzle.get_node_id()]);
-        // } else {
-            window.open(EternaURL.createURL({"page": "lab_browser", "nid": this._puzzle.nodeID}), "_blank");
-        // }
+        this.pushUILock();
+        Eterna.app.switchToDesignBrowser(this._puzzle.nodeID)
+            .then(() => this.popUILock())
+            .catch(e => {
+                log.error(e);
+                this.popUILock();
+            });
     }
 
     private showSpec(): void {

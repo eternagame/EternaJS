@@ -172,29 +172,14 @@ export class EternaApp extends FlashbangApp {
 
     /** Creates a FeedbackViewMode (or a PoseEditMode, if loadInPoseEdit is true), and removes all other modes from the stack */
     public loadSolutionViewer(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
-        this.setLoadingText(`Loading solution ${solutionID}...`);
-        let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
-        let loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
-        return Promise.all([loadPuzzle, loadSolutions])
-            .then(([puzzle, solutions]) => {
-                let requestedSolution: Solution;
-                for (let solution of solutions) {
-                    if (solution.nodeID === solutionID) {
-                        requestedSolution = solution;
-                        break;
-                    }
-                }
-
-                if (requestedSolution == null) {
-                    throw new Error(`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`);
-                }
-
+        return this.loadSolution(puzzleID, solutionID)
+            .then(([puzzle, solution]) => {
                 if (loadInPoseEdit) {
                     this._modeStack.unwindToMode(new PoseEditMode(puzzle, {
-                        initialSequence: requestedSolution.sequence
+                        initialSequence: solution.sequence
                     }));
                 } else {
-                    this._modeStack.unwindToMode(new FeedbackViewMode(requestedSolution, puzzle));
+                    this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle));
                 }
             });
     }
@@ -249,9 +234,58 @@ export class EternaApp extends FlashbangApp {
         }
     }
 
+    public switchToFeedbackView(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<void> {
+        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
+
+        const existingMode = this.modeStack.modes.find(mode => mode instanceof FeedbackViewMode) as FeedbackViewMode;
+        if (existingMode != null && existingMode.puzzleID == puzzleID && existingMode.solutionID == solutionID) {
+            this.modeStack.setModeIndex(existingMode, -1);
+            return Promise.resolve();
+        } else {
+            return this.loadSolution(puzzleOrID, solutionOrID)
+                .then(([puzzle, solution]) => {
+                    if (existingMode != null) {
+                        this.modeStack.removeMode(existingMode);
+                    }
+                    this.modeStack.pushMode(new FeedbackViewMode(solution, puzzle));
+                });
+        }
+    }
+
     /** Returns an existing PoseEditMode, if there's one on the mode stack */
     public get existingPoseEditMode(): PoseEditMode {
         return this.modeStack.modes.find(mode => mode instanceof PoseEditMode) as PoseEditMode;
+    }
+
+    private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution]> {
+        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
+
+        const puzzlePromise: Promise<Puzzle> = (puzzleOrID instanceof Puzzle) ?
+            Promise.resolve(puzzleOrID) :
+            PuzzleManager.instance.getPuzzleByID(puzzleOrID);
+
+        const solutionPromise: Promise<Solution> = (solutionOrID instanceof Solution) ?
+            Promise.resolve(solutionOrID) :
+            SolutionManager.instance.getSolutionsForPuzzle(puzzleID)
+                .then(solutions => {
+                    for (let solution of solutions) {
+                        if (solution.nodeID === solutionID) {
+                            return Promise.resolve(solution);
+                        }
+                    }
+
+                    return Promise.reject(
+                        `No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`);
+                });
+
+        this.setLoadingText(`Loading solution ${solutionID}...`);
+        return Promise.all([puzzlePromise, solutionPromise])
+            .then(result => {
+                this.popLoadingMode();
+                return result;
+            });
     }
 
     private loadPuzzle(puzzleOrID: number | Puzzle): Promise<Puzzle> {
