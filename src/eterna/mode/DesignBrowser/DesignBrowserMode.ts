@@ -358,7 +358,7 @@ export class DesignBrowserMode extends GameMode {
     private switchToPoseEditForSolution(solution: Solution): void {
         this.pushUILock();
 
-        Eterna.app.switchToPoseEdit(this._puzzle, false, {initialSequence: solution.sequence})
+        Eterna.app.switchToPoseEdit(this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()})
             .then(() => this.popUILock())
             .catch(e => {
                 log.error(e);
