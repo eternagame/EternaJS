@@ -147,7 +147,7 @@ export class EternaApp extends FlashbangApp {
                     });
                 case InitialAppMode.SOLUTION_SEE_RESULT:
                 case InitialAppMode.SOLUTION_COPY_AND_VIEW:
-                    return this.loadSolution(this._params.puzzleID, this._params.solutionID,
+                    return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
                         this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                 case InitialAppMode.DESIGN_BROWSER:
                     return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
@@ -158,17 +158,20 @@ export class EternaApp extends FlashbangApp {
             .catch(err => Eterna.onFatalError(err));
     }
 
+    /** Creates a PoseEditMode and removes all other modes from the stack */
     public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
         return this.loadPuzzle(puzzleOrID)
             .then(puzzle => this._modeStack.unwindToMode(new PoseEditMode(puzzle, params)));
     }
 
+    /** Creates a PuzzleEditMode and removes all other modes from the stack */
     public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initialPoseData));
         return Promise.resolve();
     }
 
-    public loadSolution(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
+    /** Creates a FeedbackViewMode (or a PoseEditMode, if loadInPoseEdit is true), and removes all other modes from the stack */
+    public loadSolutionViewer(puzzleID: number, solutionID: number, loadInPoseEdit: boolean = false): Promise<void> {
         this.setLoadingText(`Loading solution ${solutionID}...`);
         let loadPuzzle = PuzzleManager.instance.getPuzzleByID(puzzleID);
         let loadSolutions = SolutionManager.instance.getSolutionsForPuzzle(puzzleID);
@@ -196,6 +199,7 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
+    /** Creates a DesignBrowser for the given puzzle, and removes all other modes from the stack. */
     public loadDesignBrowser(puzzleOrID: number | Puzzle, initialFilters?: DesignBrowserFilter[]): Promise<void> {
         return this.loadPuzzle(puzzleOrID)
             .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle, false, initialFilters)));
@@ -207,31 +211,41 @@ export class EternaApp extends FlashbangApp {
      */
     public switchToDesignBrowser(puzzleOrID: number | Puzzle): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
-        const existingMode = this.modeStack.modes.find(
-            mode => mode instanceof DesignBrowserMode && (mode as DesignBrowserMode).puzzleID == puzzleID);
-        if (existingMode != null) {
-            this.modeStack.setModeIndex(existingMode, -1);
+        const existingBrowser =
+            this.modeStack.modes.find(mode => mode instanceof DesignBrowserMode) as DesignBrowserMode;
+        if (existingBrowser != null && existingBrowser.puzzleID == puzzleID) {
+            this.modeStack.setModeIndex(existingBrowser, -1);
             return Promise.resolve();
         } else {
             return this.loadPuzzle(puzzleOrID)
-                .then(puzzle => this.modeStack.pushMode(new DesignBrowserMode(puzzle)));
+                .then(puzzle => {
+                    if (existingBrowser != null) {
+                        this.modeStack.removeMode(existingBrowser);
+                    }
+                    this.modeStack.pushMode(new DesignBrowserMode(puzzle))
+                });
         }
     }
 
     /**
-     * If a PoseEditMode for the given puzzle is already on the mode stack, push it to the top of the stack.
-     * Otherwise, push a new PoseEditMode to the stack, retaining any existing modes.
+     * If a PoseEditMode for the given puzzle is already on the mode stack, and `canSwitchToExisting` is true,
+     * move the existing PoseEditMode to the top of the stack. Otherwise, push a new PoseEditMode to the stack,
+     * retaining any existing modes.
      */
-    public switchToPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams = {}): Promise<void> {
+    public switchToPoseEdit(puzzleOrID: number | Puzzle, canSwitchToExisting: boolean, params: PoseEditParams = {}): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
-        const existingMode = this.modeStack.modes.find(
-            mode => mode instanceof PoseEditMode && (mode as PoseEditMode).puzzleID == puzzleID);
-        if (existingMode != null) {
-            this.modeStack.setModeIndex(existingMode, -1);
+        const existingPoseEdit = this.existingPoseEditMode;
+        if (existingPoseEdit != null && canSwitchToExisting && existingPoseEdit.puzzleID == puzzleID) {
+            this.modeStack.setModeIndex(existingPoseEdit, -1);
             return Promise.resolve();
         } else {
             return this.loadPuzzle(puzzleOrID)
-                .then(puzzle => this.modeStack.pushMode(new PoseEditMode(puzzle, params)));
+                .then(puzzle => {
+                    if (existingPoseEdit != null) {
+                        this.modeStack.removeMode(existingPoseEdit);
+                    }
+                    this.modeStack.pushMode(new PoseEditMode(puzzle, params))
+                });
         }
     }
 
