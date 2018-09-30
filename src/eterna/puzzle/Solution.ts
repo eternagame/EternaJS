@@ -24,8 +24,8 @@ export class Solution {
             newlinereg = /\r/g;
             this._shortDesc = this._shortDesc.replace(newlinereg, " ");
         } else {
-            this._shortDesc = "No descrption available";
-            this._desc = "No descrption available";
+            this._shortDesc = "No description available";
+            this._desc = "No description available";
         }
     }
 
