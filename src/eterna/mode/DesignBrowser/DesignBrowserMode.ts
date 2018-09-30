@@ -87,6 +87,10 @@ export class DesignBrowserMode extends GameMode {
         this._voteProcessor = new VoteProcessor();
     }
 
+    public get puzzleID(): number {
+        return this._puzzle.nodeID;
+    }
+
     protected setup(): void {
         super.setup();
 
@@ -220,13 +224,13 @@ export class DesignBrowserMode extends GameMode {
 
         this._toolbarLayout.addHSpacer(20);
 
-        let edit_sort_Btn = new GameButton()
+        let editSortBtn = new GameButton()
             .up(Bitmaps.ImgEditSortOptions)
             .over(Bitmaps.ImgEditSortOptionsOver)
             .down(Bitmaps.ImgEditSortOptionsHit)
             .tooltip("Editor sort options.");
-        this.addObject(edit_sort_Btn, this._toolbarLayout);
-        edit_sort_Btn.clicked.connect(() => this.showSortDialog());
+        this.addObject(editSortBtn, this._toolbarLayout);
+        editSortBtn.clicked.connect(() => this.showSortDialog());
 
         this._toolbarLayout.addHSpacer(5);
 
@@ -240,13 +244,13 @@ export class DesignBrowserMode extends GameMode {
 
         this._toolbarLayout.addHSpacer(5);
 
-        this._return_to_game_button = new GameButton()
+        this._returnToGameButton = new GameButton()
             .up(Bitmaps.ImgReturn)
             .over(Bitmaps.ImgReturnOver)
             .down(Bitmaps.ImgReturnHit)
             .tooltip("Return to game.");
-        this.addObject(this._return_to_game_button, this._toolbarLayout);
-        this._return_to_game_button.clicked.connect(() => DesignBrowserMode.return_to_game());
+        this.addObject(this._returnToGameButton, this._toolbarLayout);
+        this._returnToGameButton.clicked.connect(() => this.returnToGame());
 
         this._toolbarLayout.layout();
 
@@ -275,7 +279,7 @@ export class DesignBrowserMode extends GameMode {
 
         this.addObject(new RepeatingTask(() => {
             return new SerialTask(
-                new DelayTask(/*Eterna.DEV_MODE ? 6 :*/ 300),
+                new DelayTask(300),
                 new CallbackTask(() => this.refreshSolutions()),
             );
         }));
@@ -325,18 +329,9 @@ export class DesignBrowserMode extends GameMode {
 
     protected enter(): void {
         super.enter();
-
-        // this._return_to_game_button.visible = false;
-        // if (Application.instance.get_previous_game_mode() >= 0) {
-        //     this._return_to_game_button.visible = true;
-        //     this._return_to_game_button.set_click_callback(DesignBrowserMode.return_to_game);
-        // }
-        //
-        // if (Eterna.settings.showChat.value) {
-        //     this.set_size(new UDim(1, 1, -280, -170));
-        // } else {
-        //     this.set_size(new UDim(1, 1, -40, -170));
-        // }
+        const existingPoseEditMode = Eterna.app.existingPoseEditMode;
+        this._returnToGameButton.display.visible =
+            (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID);
     }
 
     private setSequenceLetterColor(): void {
@@ -830,10 +825,6 @@ export class DesignBrowserMode extends GameMode {
 
     private updateDataColumns(): void {
         let solutions: Solution[] = SolutionManager.instance.solutions;
-        let puz: Puzzle = this._puzzle;
-
-        /// Set puzzle title
-        // Application.instance.get_application_gui("Puzzle Title").set_text(puz.get_puzzle_name());
 
         this.setData(solutions, false, true);
 
@@ -844,8 +835,11 @@ export class DesignBrowserMode extends GameMode {
         this.updateLayout();
     }
 
-    private static return_to_game(): void {
-        // Application.instance.transit_game_mode(Application.instance.get_previous_game_mode(), null);
+    private returnToGame(): void {
+        const existingPoseEditMode = Eterna.app.existingPoseEditMode;
+        if (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID) {
+            Eterna.app.switchToPoseEdit(this._puzzle).then(() => {});
+        }
     }
 
     private readonly _puzzle: Puzzle;
@@ -872,7 +866,7 @@ export class DesignBrowserMode extends GameMode {
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
     private _customizeButton: GameButton;
-    private _return_to_game_button: GameButton;
+    private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;

@@ -85,6 +85,10 @@ export class PoseEditMode extends GameMode {
         }
     }
 
+    public get puzzleID(): number {
+        return this._puzzle.nodeID;
+    }
+
     protected setup(): void {
         super.setup();
 
@@ -1127,7 +1131,7 @@ export class PoseEditMode extends GameMode {
 
         menu.addItem("Preferences").clicked.connect(() => this.showViewOptionsDialog());
         if (this._puzzle.puzzleType == PuzzleType.EXPERIMENTAL) {
-            menu.addItem("Design Browser").enabled = false;
+            menu.addItem("Design Browser").clicked.connect(() => this.openDesignBrowserForOurPuzzle());
             menu.addItem("Submit").clicked.connect(() => this.submitCurrentPose());
             menu.addItem("Specs").clicked.connect(() => this.showSpec());
         }
@@ -1138,6 +1142,12 @@ export class PoseEditMode extends GameMode {
         menu.addItem("Beam to PuzzleMaker").clicked.connect(() => this.transferToPuzzlemaker());
 
         return menu;
+    }
+
+    private openDesignBrowserForOurPuzzle(): void {
+        if (this._puzzle.puzzleType == PuzzleType.EXPERIMENTAL) {
+            Eterna.app.switchToDesignBrowser(this._puzzle).then(() => {});
+        }
     }
 
     private createScreenshot(): ArrayBuffer {
