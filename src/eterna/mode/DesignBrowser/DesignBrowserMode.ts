@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {Container, Point, Sprite, Text} from "pixi.js";
+import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
@@ -29,9 +29,7 @@ import {SliderBar} from "../../ui/SliderBar";
 import {URLButton} from "../../ui/URLButton";
 import {Fonts} from "../../util/Fonts";
 import {int} from "../../util/int";
-import {FeedbackViewMode} from "../FeedbackView/FeedbackViewMode";
 import {GameMode} from "../GameMode";
-import {MaskBox} from "../MaskBox";
 import {CustomizeColumnOrderDialog} from "./CustomizeColumnOrderDialog";
 import {DataCol} from "./DataCol";
 import {DotLine} from "./DotLine";
@@ -909,4 +907,24 @@ export class DesignBrowserMode extends GameMode {
         DesignCategory.Synthesis_score,
         DesignCategory.Sequence,
     ];
+}
+
+
+class MaskBox extends Graphics {
+    public setSize(width: number, height: number): void {
+        if (this._width == width && this._height == height) {
+            return;
+        }
+
+        this._width = width;
+        this._height = height;
+
+        this.clear();
+        this.beginFill(0x18202b, 0.9);
+        this.drawRoundedRect(0, 0, this._width, this._height, 20);
+        this.endFill();
+    }
+
+    private _width: number = 0;
+    private _height :number = 0;
 }
