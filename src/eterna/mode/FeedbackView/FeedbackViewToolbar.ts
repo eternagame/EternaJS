@@ -18,13 +18,13 @@ export class FeedbackViewToolbar extends ContainerObject {
     public zoomInButton: GameButton;
 
     public specButton: GameButton;
+    public pipButton: GameButton;
     public showTargetButton: GameButton;
     public showEstimateButton: GameButton;
 
     public toggleBar: ToggleBar;
     public viewSolutionsButton: GameButton;
     public viewOptionsButton: GameButton;
-    public pipButton: GameButton;
     public letterColorButton: GameButton;
     public expColorButton: GameButton;
 
@@ -82,6 +82,19 @@ export class FeedbackViewToolbar extends ContainerObject {
         this.addObject(this.specButton, this._toolbarLayout);
 
         this._toolbarLayout.addHSpacer(SPACE_NARROW);
+
+        this.pipButton = new GameButton()
+            .up(Bitmaps.ImgPip)
+            .over(Bitmaps.ImgPipOver)
+            .down(Bitmaps.ImgPipHit)
+            .selected(Bitmaps.ImgPipHit)
+            .tooltip("Set PiP mode")
+            .hotkey(KeyCode.KeyP);
+
+        if (secstructs.length > 1) {
+            this.addObject(this.pipButton, this._toolbarLayout);
+            this._toolbarLayout.addHSpacer(SPACE_NARROW);
+        }
 
         this.zoomInButton = new GameButton()
             .up(Bitmaps.ImgZoomIn)
@@ -149,18 +162,6 @@ export class FeedbackViewToolbar extends ContainerObject {
             .down(Bitmaps.ImgFileHit)
             .tooltip("View all submitted designs for this puzzle.");
         this.addObject(this.viewSolutionsButton, this._toolbarLayout);
-
-        this.pipButton = new GameButton()
-            .up(Bitmaps.ImgPip)
-            .over(Bitmaps.ImgPipOver)
-            .down(Bitmaps.ImgPipHit)
-            .selected(Bitmaps.ImgPipHit)
-            .tooltip("Set PiP mode")
-            .hotkey(KeyCode.KeyP);
-
-        if (secstructs.length > 1) {
-            this.addObject(this.pipButton, this._toolbarLayout);
-        }
 
         // TOGGLE_BAR
         this.toggleBar = new ToggleBar(secstructs.length);
