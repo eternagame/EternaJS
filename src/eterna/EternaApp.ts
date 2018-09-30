@@ -143,7 +143,7 @@ export class EternaApp extends FlashbangApp {
                 case InitialAppMode.PUZZLE:
                     return this.loadPoseEdit(this._params.puzzleID, {
                         initialFolder: this._params.folderName,
-                        initialSequence: this._params.sequence,
+                        initSequence: this._params.sequence,
                     });
                 case InitialAppMode.SOLUTION_SEE_RESULT:
                 case InitialAppMode.SOLUTION_COPY_AND_VIEW:
@@ -175,9 +175,7 @@ export class EternaApp extends FlashbangApp {
         return this.loadSolution(puzzleID, solutionID)
             .then(([puzzle, solution]) => {
                 if (loadInPoseEdit) {
-                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {
-                        initialSequence: solution.sequence
-                    }));
+                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, {initSolution: solution}));
                 } else {
                     this._modeStack.unwindToMode(new FeedbackViewMode(solution, puzzle));
                 }

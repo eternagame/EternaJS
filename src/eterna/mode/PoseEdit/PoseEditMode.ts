@@ -9,6 +9,7 @@ import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
+import {Assert} from "../../../flashbang/util/Assert";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
 import {EPars} from "../../EPars";
@@ -69,9 +70,16 @@ export enum PuzzleState {
 
 export interface PoseEditParams {
     isReset?: boolean;
-    initialSequence?: string;
     initialFolder?: string;
     rscript?: string;
+
+    // A sequence to initialize our pose with. If initialSolution is set, this will be ignored.
+    initSequence?: string;
+
+    // A solution to initialize our pose with. If set, initSequence is ignored.
+    initSolution?: Solution;
+    // a list of solutions we can iterate through
+    solutions?: Solution[];
 }
 
 export class PoseEditMode extends GameMode {
@@ -112,8 +120,13 @@ export class PoseEditMode extends GameMode {
         });
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
         this._toolbar.viewSolutionsButton.clicked.connect(() => {
-            log.debug("TODO: viewSolutions");
-            // Application.instance.transit_game_mode(Eterna.GAMESTATE_DESIGN_BROWSER, [this.puzzle.get_node_id()]);
+            this.pushUILock();
+            Eterna.app.switchToDesignBrowser(this._puzzle)
+                .then(() => this.popUILock())
+                .catch(e => {
+                    log.error(e);
+                    this.popUILock();
+                });
         });
         this._toolbar.retryButton.clicked.connect(() => this.showResetPrompt());
         this._toolbar.nativeButton.clicked.connect(() => this.togglePoseState());
@@ -230,6 +243,10 @@ export class PoseEditMode extends GameMode {
             this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0, 5);
 
+        DisplayUtil.positionRelativeToStage(
+            this._solutionNameText, HAlign.CENTER, VAlign.TOP,
+            HAlign.CENTER, VAlign.TOP, 0, 8);
+
         this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
 
@@ -272,14 +289,6 @@ export class PoseEditMode extends GameMode {
     private showCopySequenceDialog(): void {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
         this.showDialog(new CopySequenceDialog(sequenceString));
-    }
-
-    public set nextDesignCallback(cb: () => void) {
-        this._nextDesignCallback = cb;
-    }
-
-    public set prevDesignCallback(cb: () => void) {
-        this._prevDesignCallback = cb;
     }
 
     public setPuzzleState(newstate: PuzzleState): void {
@@ -388,23 +397,22 @@ export class PoseEditMode extends GameMode {
         this.startCountdown();
     }
 
-    public restart_from(seq: string): void {
+    private showSolution(solution: Solution): void {
         this.clearUndoStack();
+        this.pushUILock();
 
-        const LOCK_NAME = "Restarting";
-
-        let restart_cb = (fd: any[]) => {
+        const setSolution = (foldData: any[]) => {
             this.hideAsyncText();
-            this.popUILock(LOCK_NAME);
+            this.popUILock();
 
-            if (fd != null) {
+            if (foldData != null) {
                 this._stackLevel++;
                 this._stackSize = this._stackLevel + 1;
                 this._seqStacks[this._stackLevel] = [];
 
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     let undo_block: UndoBlock = new UndoBlock([]);
-                    undo_block.fromJSON(fd[ii]);
+                    undo_block.fromJSON(foldData[ii]);
                     this._seqStacks[this._stackLevel][ii] = undo_block;
                 }
 
@@ -414,23 +422,32 @@ export class PoseEditMode extends GameMode {
                 this.transformPosesMarkers();
 
             } else {
-                let seq_arr: number[] = EPars.stringToSequence(seq);
+                const sequence = EPars.stringToSequence(solution.sequence);
                 for (let pose of this._poses) {
-                    pose.pasteSequence(seq_arr);
+                    pose.pasteSequence(sequence);
                 }
             }
-            this.clearMoveTracking(seq);
+            this.clearMoveTracking(solution.sequence);
+            this.setAncestorId(solution.nodeID);
+
+            this.updateSolutionNameText(solution);
+            this._curSolution = solution;
         };
 
-        let sol: Solution = SolutionManager.instance.getSolutionBySequence(seq);
-        if (sol != null && this._puzzle.hasTargetType("multistrand")) {
+        if (this._puzzle.hasTargetType("multistrand")) {
             this.showAsyncText("retrieving...");
-            this.pushUILock(LOCK_NAME);
-
-            sol.queryFoldData().then((result) => restart_cb(result));
+            solution.queryFoldData().then(result => setSolution(result));
         } else {
-            restart_cb(null);
+            setSolution(null);
         }
+    }
+
+    private updateSolutionNameText(solution: Solution): void {
+        this._solutionNameText.text = `${solution.title} (${solution.playerName})`;
+        this._solutionNameText.visible = true;
+        DisplayUtil.positionRelativeToStage(
+            this._solutionNameText, HAlign.CENTER, VAlign.TOP,
+            HAlign.CENTER, VAlign.TOP, 0, 8);
     }
 
     private setPuzzle(): void {
@@ -547,6 +564,9 @@ export class PoseEditMode extends GameMode {
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
             puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0);
+
+        this._solutionNameText = Fonts.arial("", 14).bold().color(0xc0c0c0).build();
+        this.uiLayer.addChild(this._solutionNameText);
 
         this._constraintsLayer.visible = true;
 
@@ -682,8 +702,12 @@ export class PoseEditMode extends GameMode {
         }
 
         let initialSequence: number[] = null;
-        if (this._params.initialSequence != null) {
-            initialSequence = EPars.stringToSequence(this._params.initialSequence);
+        if (this._params.initSolution != null) {
+            initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
+            this._curSolution = this._params.initSolution;
+            this.updateSolutionNameText(this._curSolution);
+        } else if (this._params.initSequence != null) {
+            initialSequence = EPars.stringToSequence(this._params.initSequence);
         }
 
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -1012,11 +1036,11 @@ export class PoseEditMode extends GameMode {
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyD && this._nextDesignCallback != null) {
-                this._nextDesignCallback();
+            } else if (this._stackLevel === 0 && key === KeyCode.KeyD && this._params.solutions != null) {
+                this.showNextSolution(1);
                 handled = true;
-            } else if (this._stackLevel === 0 && key === KeyCode.KeyU && this._prevDesignCallback != null) {
-                this._prevDesignCallback();
+            } else if (this._stackLevel === 0 && key === KeyCode.KeyU && this._params.solutions != null) {
+                this.showNextSolution(-1);
                 handled = true;
             }
         }
@@ -1024,6 +1048,23 @@ export class PoseEditMode extends GameMode {
         if (handled) {
             e.stopPropagation();
         }
+    }
+
+    private showNextSolution(indexOffset: number): void {
+        if (this._params.solutions == null || this._params.solutions.length == 0) {
+            return;
+        }
+
+        const curSolutionIdx = this._params.solutions.indexOf(this._curSolution);
+        let nextSolutionIdx =
+            (curSolutionIdx >= 0 ? curSolutionIdx + indexOffset : 0) % this._params.solutions.length;
+        if (nextSolutionIdx < 0) {
+            nextSolutionIdx = this._params.solutions.length + nextSolutionIdx;
+        }
+
+        const solution = this._params.solutions[nextSolutionIdx];
+        Assert.notNull(solution);
+        this.showSolution(solution);
     }
 
     /*override*/
@@ -3592,10 +3633,9 @@ export class PoseEditMode extends GameMode {
     private _runStatus: Text;
     private _ropPresets: (() => void)[] = [];
 
-    // Design browser hooks
-    private _nextDesignCallback: () => void = null;
-    private _prevDesignCallback: () => void = null;
     private _isPlaying: boolean = false;
+    private _curSolution: Solution;
+    private _solutionNameText: Text;
 
     // Tutorial Script Extra Functionality
     private _showMissionScreen: boolean = true;
