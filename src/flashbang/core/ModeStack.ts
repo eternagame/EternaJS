@@ -76,12 +76,17 @@ export class ModeStack {
      * modes above the specified index will move down in the stack.
      * (Mode changes take effect between game updates.)
      *
-     * @param index the stack position to add the mode at.
+     * @param index the stack position of the mode to remove.
      * You can use a negative integer to specify a position relative
      * to the top of the stack (for example, -1 is the top of the stack).
      */
-    public removeMode(index: number): void {
+    public removeModeAt(index: number): void {
         this.doModeTransition(ModeTransition.REMOVE, null, index);
+    }
+
+    /** Removes a mode from the stack. Mode changes take effect between game updates. */
+    public removeMode(mode: AppMode): void {
+        this.doModeTransition(ModeTransition.REMOVE, mode);
     }
 
     /**
@@ -153,7 +158,7 @@ export class ModeStack {
             return;
         }
 
-        let initialTopMode: AppMode = this.topMode;
+        let initialTopMode = this.topMode;
 
         const doPushMode = (newMode: AppMode) => {
             if (newMode == null) {
@@ -182,7 +187,17 @@ export class ModeStack {
             newMode.setupInternal(this);
         };
 
-        const doRemoveMode = (index: number) => {
+        const doRemoveMode = (modeOrIndex: AppMode | number) => {
+            let index: number;
+            if (modeOrIndex instanceof AppMode) {
+                index = this._modeStack.indexOf(modeOrIndex);
+                if (index < 0) {
+                    return;
+                }
+            } else {
+                index = modeOrIndex;
+            }
+
             if (this._modeStack.length === 0) {
                 throw new Error("Can't remove a mode from an empty stack");
             }
@@ -245,7 +260,7 @@ export class ModeStack {
                 break;
 
             case ModeTransition.REMOVE:
-                doRemoveMode(transition.index);
+                doRemoveMode(transition.mode != null ? transition.mode : transition.index);
                 break;
 
             case ModeTransition.CHANGE:
