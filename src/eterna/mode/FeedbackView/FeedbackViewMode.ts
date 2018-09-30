@@ -32,6 +32,8 @@ export class FeedbackViewMode extends GameMode {
         this._puzzle = puzzle;
     }
 
+    public get isOpaque(): boolean { return true; }
+
     protected setup(): void {
         super.setup();
 

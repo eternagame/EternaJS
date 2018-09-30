@@ -59,6 +59,8 @@ export class PuzzleEditMode extends GameMode {
         }
     }
 
+    public get isOpaque(): boolean { return true; }
+
     protected setup(): void {
         super.setup();
 

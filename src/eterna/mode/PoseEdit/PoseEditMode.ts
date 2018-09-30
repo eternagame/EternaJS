@@ -85,9 +85,9 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    public get puzzleID(): number {
-        return this._puzzle.nodeID;
-    }
+    public get puzzleID(): number { return this._puzzle.nodeID; }
+
+    public get isOpaque(): boolean { return true; }
 
     protected setup(): void {
         super.setup();
