@@ -357,7 +357,7 @@ export class DesignBrowserMode extends GameMode {
         }
     }
 
-    private startGameWithSolution(solution: Solution): void {
+    private switchToPoseEditForSolution(solution: Solution): void {
         this.pushUILock();
 
         Eterna.app.switchToPoseEdit(this._puzzle, false, {initialSequence: solution.sequence})
@@ -368,8 +368,15 @@ export class DesignBrowserMode extends GameMode {
             });
     }
 
-    private reviewExp(solution: Solution): void {
-        this.modeStack.changeMode(new FeedbackViewMode(solution, this._puzzle));
+    private switchToFeedbackViewForSolution(solution: Solution): void {
+        this.pushUILock();
+
+        Eterna.app.switchToFeedbackView(this._puzzle, solution)
+            .then(() => this.popUILock())
+            .catch(e => {
+                log.error(e);
+                this.popUILock();
+            });
     }
 
     private navigateToSolution(solution: Solution): void {
@@ -384,7 +391,7 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private static createStatusText(text: string): SceneObject<Text> {
-        let statusText = new SceneObject<Text>(Fonts.arial("Deleting...", 22).color(0xffffff).bold().build());
+        let statusText = new SceneObject<Text>(Fonts.arial(text, 22).color(0xffffff).bold().build());
         statusText.addObject(new RepeatingTask(() => {
             return new SerialTask(
                 new AlphaTask(0, 0.3),
@@ -475,8 +482,8 @@ export class DesignBrowserMode extends GameMode {
     private showSolutionDetailsDialog(solution: Solution): void {
         let dialog = this.showDialog(new ViewSolutionDialog(solution, this._puzzle, this._novote));
 
-        dialog.playClicked.connect(() => this.startGameWithSolution(solution));
-        dialog.seeResultClicked.connect(() => this.reviewExp(solution));
+        dialog.playClicked.connect(() => this.switchToPoseEditForSolution(solution));
+        dialog.seeResultClicked.connect(() => this.switchToFeedbackViewForSolution(solution));
         dialog.voteClicked.connect(() => this.vote(solution));
         dialog.sortClicked.connect(() => this.sortOnSolution(solution));
         dialog.editClicked.connect(() => this.navigateToSolution(solution));
