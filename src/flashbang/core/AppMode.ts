@@ -88,6 +88,11 @@ export class AppMode {
         return this._runningTime;
     }
 
+    /** True if the mode is opaque. Opaque modes hide all modes below them in the stack. */
+    public get isOpaque(): boolean {
+        return false;
+    }
+
     /**
      * Returns a Promise that will succeed when the mode is active.
      * If the mode is currently active, the Promise will immediately resolve.
