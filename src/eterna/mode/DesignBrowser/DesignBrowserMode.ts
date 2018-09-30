@@ -1,3 +1,4 @@
+import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
 import {Container, Point, Sprite, Text} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
@@ -357,12 +358,14 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private startGameWithSolution(solution: Solution): void {
-        Eterna.app.loadPoseEdit(this._puzzle, {initialSequence: solution.sequence});
+        this.pushUILock();
 
-        // PuzzleManager.instance.get_puzzle_by_nid(sol.get_puzzle_nid(), function (puz: Puzzle): void {
-        //     Application.instance.transit_game_mode(Eterna.GAMESTATE_DEVGAME,
-        //         [puz, EPars.string_to_sequence_array(sol.sequence), sol, this._filteredSolutions]);
-        // });
+        Eterna.app.switchToPoseEdit(this._puzzle, false, {initialSequence: solution.sequence})
+            .then(() => this.popUILock())
+            .catch(e => {
+                log.error(e);
+                this.popUILock()
+            });
     }
 
     private reviewExp(solution: Solution): void {
@@ -838,7 +841,13 @@ export class DesignBrowserMode extends GameMode {
     private returnToGame(): void {
         const existingPoseEditMode = Eterna.app.existingPoseEditMode;
         if (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID) {
-            Eterna.app.switchToPoseEdit(this._puzzle).then(() => {});
+            this.pushUILock();
+            Eterna.app.switchToPoseEdit(this._puzzle, true)
+                .then(() => this.popUILock())
+                .catch(e => {
+                    log.error(e);
+                    this.popUILock();
+                });
         }
     }
 
