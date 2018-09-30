@@ -159,17 +159,8 @@ export class EternaApp extends FlashbangApp {
     }
 
     public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
-        if (puzzleOrID instanceof Puzzle) {
-            this._modeStack.unwindToMode(new PoseEditMode(puzzleOrID, params));
-            return Promise.resolve();
-
-        } else {
-            this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
-            return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
-                .then(puzzle => {
-                    this._modeStack.unwindToMode(new PoseEditMode(puzzle, params));
-                });
-        }
+        return this.loadPuzzle(puzzleOrID)
+            .then(puzzle => this._modeStack.unwindToMode(new PoseEditMode(puzzle, params)));
     }
 
     public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
@@ -205,10 +196,61 @@ export class EternaApp extends FlashbangApp {
             });
     }
 
-    public loadDesignBrowser(puzzleID: number, initialFilters?: DesignBrowserFilter[]): Promise<void> {
-        this.setLoadingText(`Loading puzzle ${puzzleID}...`);
-        return PuzzleManager.instance.getPuzzleByID(puzzleID)
+    public loadDesignBrowser(puzzleOrID: number | Puzzle, initialFilters?: DesignBrowserFilter[]): Promise<void> {
+        return this.loadPuzzle(puzzleOrID)
             .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle, false, initialFilters)));
+    }
+
+    /**
+     * If a DesignBrowserMode for the given puzzle is already on the mode stack, move it to the top of the stack.
+     * Otherwise, push a new DesignBrowserMode to the stack, retaining any existing modes.
+     */
+    public switchToDesignBrowser(puzzleOrID: number | Puzzle): Promise<void> {
+        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const existingMode = this.modeStack.modes.find(
+            mode => mode instanceof DesignBrowserMode && (mode as DesignBrowserMode).puzzleID == puzzleID);
+        if (existingMode != null) {
+            this.modeStack.setModeIndex(existingMode, -1);
+            return Promise.resolve();
+        } else {
+            return this.loadPuzzle(puzzleOrID)
+                .then(puzzle => this.modeStack.pushMode(new DesignBrowserMode(puzzle)));
+        }
+    }
+
+    /**
+     * If a PoseEditMode for the given puzzle is already on the mode stack, push it to the top of the stack.
+     * Otherwise, push a new PoseEditMode to the stack, retaining any existing modes.
+     */
+    public switchToPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams = {}): Promise<void> {
+        const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        const existingMode = this.modeStack.modes.find(
+            mode => mode instanceof PoseEditMode && (mode as PoseEditMode).puzzleID == puzzleID);
+        if (existingMode != null) {
+            this.modeStack.setModeIndex(existingMode, -1);
+            return Promise.resolve();
+        } else {
+            return this.loadPuzzle(puzzleOrID)
+                .then(puzzle => this.modeStack.pushMode(new PoseEditMode(puzzle, params)));
+        }
+    }
+
+    /** Returns an existing PoseEditMode, if there's one on the mode stack */
+    public get existingPoseEditMode(): PoseEditMode {
+        return this.modeStack.modes.find(mode => mode instanceof PoseEditMode) as PoseEditMode;
+    }
+
+    private loadPuzzle(puzzleOrID: number | Puzzle): Promise<Puzzle> {
+        if (puzzleOrID instanceof Puzzle) {
+            return Promise.resolve(puzzleOrID);
+        } else {
+            this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
+            return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
+                .then(puzzle => {
+                    this.popLoadingMode();
+                    return puzzle;
+                });
+        }
     }
 
     protected onUncaughtError(err: any): void {
@@ -240,6 +282,12 @@ export class EternaApp extends FlashbangApp {
             (this._modeStack.topMode as LoadingMode).text = text;
         } else {
             this._modeStack.pushMode(new LoadingMode(text));
+        }
+    }
+
+    private popLoadingMode(): void {
+        if (this._modeStack.topMode instanceof LoadingMode) {
+            this._modeStack.popMode();
         }
     }
 
