@@ -178,7 +178,7 @@ export class FeedbackViewMode extends GameMode {
     }
 
     /*override*/
-    protected on_set_pip(pip_mode: boolean): void {
+    protected onSetPip(pip_mode: boolean): void {
         if (pip_mode) {
             if (this._toolbar.toggleBar != null) {
                 this._toolbar.toggleBar.display.visible = false;
