@@ -18,7 +18,6 @@ import {ConstraintType} from "../../puzzle/Constraints";
 import {Bitmaps} from "../../resources/Bitmaps";
 import {AsyncProcessDialog} from "../../ui/AsyncProcessDialog";
 import {ConstraintBox} from "../../ui/ConstraintBox";
-import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {DialogCanceledError} from "../../ui/Dialog";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
@@ -31,6 +30,7 @@ import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
 import {Fonts} from "../../util/Fonts";
 import {Background} from "../../vfx/Background";
 import {BaseGlow} from "../../vfx/BaseGlow";
+import {CopyTextDialogMode} from "../CopyTextDialogMode";
 import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
@@ -129,7 +129,9 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
-            this.showDialog(new CopySequenceDialog(EPars.sequenceToString(this._poses[0].sequence)));
+            this.modeStack.pushMode(new CopyTextDialogMode(
+                EPars.sequenceToString(this._poses[0].sequence),
+                "Current Sequence"));
         });
 
         this._toolbar.pasteButton.clicked.connect(() => {

@@ -34,7 +34,6 @@ import {RNAScript} from "../../rscript/RNAScript";
 import {ActionBar} from "../../ui/ActionBar";
 import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
 import {ContextMenu} from "../../ui/ContextMenu";
-import {CopySequenceDialog} from "../../ui/CopySequenceDialog";
 import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
 import {GameButton} from "../../ui/GameButton";
 import {GamePanel} from "../../ui/GamePanel";
@@ -50,6 +49,7 @@ import {Fonts} from "../../util/Fonts";
 import {int} from "../../util/int";
 import {Background} from "../../vfx/Background";
 import {BubbleSweep} from "../../vfx/BubbleSweep";
+import {CopyTextDialogMode} from "../CopyTextDialogMode";
 import {GameMode} from "../GameMode";
 import {PuzzleEditPoseData} from "../PuzzleEdit/PuzzleEditMode";
 import {MissionClearedPanel} from "./MissionClearedPanel";
@@ -288,7 +288,7 @@ export class PoseEditMode extends GameMode {
 
     private showCopySequenceDialog(): void {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
-        this.showDialog(new CopySequenceDialog(sequenceString));
+        this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, "Current Sequence"));
     }
 
     public setPuzzleState(newstate: PuzzleState): void {
