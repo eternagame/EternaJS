@@ -7,6 +7,7 @@ import {SceneObject} from "../../../flashbang/objects/SceneObject";
 import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
+import {Eterna} from "../../Eterna";
 import {Feedback} from "../../Feedback";
 import {EternaURL} from "../../net/EternaURL";
 import {Puzzle} from "../../puzzle/Puzzle";
@@ -18,6 +19,7 @@ import {TextInputObject} from "../../ui/TextInputObject";
 import {VScrollBox} from "../../ui/VScrollBox";
 import {Fonts} from "../../util/Fonts";
 import {Utility} from "../../util/Utility";
+import {CopyTextDialogMode} from "../CopyTextDialogMode";
 import {GameMode} from "../GameMode";
 import {LabComments} from "./LabComments";
 
@@ -33,7 +35,7 @@ export class SolutionDescBox extends GamePanel {
     protected added(): void {
         super.added();
 
-        let boxTitleText =
+        const boxTitleText =
             "<FONT COLOR=\"#FFCC00\">" + Utility.stripHtmlTags(this._solution.title) + "</FONT> by <A HREF=\"" +
             EternaURL.createURL({"page": "player", "uid": this._solution.playerID}) +
             "\" TARGET=\"_PLAYER\"><U>" + Utility.stripHtmlTags(this._solution.playerName) + "</U></A>";
@@ -46,31 +48,28 @@ export class SolutionDescBox extends GamePanel {
         this._copySolutionButton.display.position = new Point(20, 45);
         this.addObject(this._copySolutionButton, this.container);
 
-        this._copyPlayerButton = new GameButton().label("Get URL for all designs by this player", 10);
-        this._copyPlayerButton.display.position = new Point(20 + this._copySolutionButton.container.width + 10, 45);
-        this.addObject(this._copyPlayerButton, this.container);
-
-        this._commentInput = new TextInputObject(14).placeholderText("Enter your comment here");
-        this.addObject(this._commentInput, this.container);
-
-        this._commentButton = new GameButton().label("Post", 14);
-        this._commentButton.clicked.connect(() => this.submitComment());
-        this.addObject(this._commentButton, this.container);
-
-        let solutionurl: string = EternaURL.createURL({
+        const solutionURL = Eterna.SERVER_URL + EternaURL.createURL({
             "page": "browse_solution",
             "puznid": this._puzzle.nodeID,
             "filter1": "Id",
             "filter1_arg1": this._solution.nodeID,
             "filter1_arg2": this._solution.nodeID
         });
+        this._copySolutionButton.clicked.connect(
+            () => this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, "Solution URL")));
 
-        let playerurl: string = EternaURL.createURL({
+        this._copyPlayerButton = new GameButton().label("Get URL for all designs by this player", 10);
+        this._copyPlayerButton.display.position = new Point(20 + this._copySolutionButton.container.width + 10, 45);
+        this.addObject(this._copyPlayerButton, this.container);
+
+        const playerURL = Eterna.SERVER_URL + EternaURL.createURL({
             "page": "browse_player",
             "puznid": this._puzzle.nodeID,
             "filter1": "Designer",
             "filter1_arg1": this._solution.playerName
         });
+        this._copyPlayerButton.clicked.connect(
+            () => this.modeStack.pushMode(new CopyTextDialogMode(playerURL, "Player URL")));
 
         this._commentInput = new TextInputObject(14)
             .placeholderText("Enter your comment here")
