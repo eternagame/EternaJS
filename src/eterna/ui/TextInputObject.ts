@@ -26,13 +26,16 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
         this._obj.oninput = () => this.onInput();
 
-        this._obj.onfocus = () => this.destroyFakeTextInput();
-        this._obj.onblur = () => this.createFakeTextInput();
+        this._obj.onfocus = () => this.onFocusChanged(true);
+        this._obj.onblur = () => this.onFocusChanged(false);
     }
 
     protected added(): void {
         super.added();
-        this.createFakeTextInput();
+
+        if (this._showFakeTextInputWhenNotFocused) {
+            this.onFocusChanged(this._hasFocus);
+        }
 
         // When our fakeTextInput is clicked, show and focus our real textInput
         new DisplayObjectPointerTarget(this._dummyDisp).pointerDown.connect(() => {
@@ -44,6 +47,17 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
                 });
             }
         });
+    }
+
+    private onFocusChanged(focused: boolean): void {
+        this._hasFocus = focused;
+        if (this.isLiveObject && this._showFakeTextInputWhenNotFocused) {
+            if (focused) {
+                this.destroyFakeTextInput();
+            } else {
+                this.createFakeTextInput();
+            }
+        }
     }
 
     protected updateElementProperties(): void {
@@ -59,6 +73,19 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
             // recreate our fake text input when our properties change
             this.createFakeTextInput();
         }
+    }
+
+    /**
+     * If true, the TextInput DOM element will be hidden when the TextInput doesn't have focus,
+     * and a fake text input object will be show in its place. This allows the TextInputObject to play better
+     * with WebGL: we can pretend that the object is properly layered in our scene, and use masks and whatnot.
+     */
+    public showFakeTextInputWhenNotFocused(value: boolean = true): TextInputObject {
+        if (this._showFakeTextInputWhenNotFocused !== value) {
+            this._showFakeTextInputWhenNotFocused = value;
+            this.onFocusChanged(this._hasFocus);
+        }
+        return this;
     }
 
     /** Remove all input that matches the given regexp */
@@ -209,10 +236,12 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         return element;
     }
 
-    private _disallow: RegExp;
+    private readonly _fontSize: number;
 
+    private _disallow: RegExp;
     private _fontFamily: string;
-    private _fontSize: number;
     private _rows: number;
+    private _hasFocus: boolean;
     private _fakeTextInput: Sprite;
+    private _showFakeTextInputWhenNotFocused: boolean = false;
 }

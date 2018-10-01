@@ -72,7 +72,8 @@ export class DataCol extends ContainerObject {
         const TEXT_INPUT_SIZE = 13;
 
         if (this._data_type == DesignBrowserDataType.STRING) {
-            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, this._dataWidth - 22);
+            this._filterField1 =
+                new TextInputObject(TEXT_INPUT_SIZE, this._dataWidth - 22).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
@@ -84,7 +85,8 @@ export class DataCol extends ContainerObject {
             this.container.addChild(this._filterLabel1);
 
         } else {
-            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5);
+            this._filterField1 =
+                new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
@@ -95,7 +97,8 @@ export class DataCol extends ContainerObject {
             this._filterLabel1.position = new Point(11, 33);
             this.container.addChild(this._filterLabel1);
 
-            this._filterField2 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5);
+            this._filterField2 =
+                new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + (this._dataWidth - 29) / 2 + 7, 54);
             this.addObject(this._filterField2, this.container);
