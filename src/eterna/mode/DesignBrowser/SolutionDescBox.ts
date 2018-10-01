@@ -72,13 +72,14 @@ export class SolutionDescBox extends GamePanel {
             "filter1_arg1": this._solution.playerName
         });
 
-        // let host: string = Eterna.SERVER_URL;
-        // this._copy_this._solution_button.set_click_callback(function (): void {
-        //     Application.instance.copy_url(host + this._solutionurl);
-        // });
-        // this._copy_player_button.set_click_callback(function (): void {
-        //     Application.instance.copy_url(host + playerurl);
-        // });
+        this._commentInput = new TextInputObject(14)
+            .placeholderText("Enter your comment here")
+            .showFakeTextInputWhenNotFocused();
+        this.addObject(this._commentInput, this.container);
+
+        this._commentButton = new GameButton().label("Post", 14);
+        this._commentButton.clicked.connect(() => this.submitComment());
+        this.addObject(this._commentButton, this.container);
 
         this.updateDescriptionAndComments();
 
