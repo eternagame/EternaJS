@@ -52,12 +52,12 @@ export class Background extends ContainerObject {
             let lightBlue: string, darkBlue :string;
             if (this._isFrozen) {
                 lightBlue = "rgb(67, 93, 146) 0%";
-                darkBlue = "rgb(10, 43, 87) 75%";
+                darkBlue = "rgb(10, 43, 87) 70%";
             } else {
-                lightBlue = "rgb(50, 69, 109) 0%";
-                darkBlue = "rgb(6, 26, 52) 75%";
+                lightBlue = "rgb(45, 64, 102) 0%";
+                darkBlue = "rgb(6, 26, 52) 70%";
             }
-            Eterna.gameDiv.style.backgroundImage = `radial-gradient(circle, ${lightBlue}, ${darkBlue})`;
+            Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }
     }
 
