@@ -21,13 +21,13 @@
     ],
     "rootDir": "src",
     "transform": {
-      "\\.(ts|tsx)$": "<rootDir>/../node_modules/ts-jest/preprocessor.js"
+      "\\.(ts|tsx)$": "ts-jest"
     },
     "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
     "globals": {
       "ts-jest": {
-        "skipBabel": true,
-        "tsConfigFile": "../tsconfig.jest.json"
+        "babelConfig": false,
+        "tsConfig": "./tsconfig.jest.json"
       }
     }
   },
