@@ -58,7 +58,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
         const TOTAL_FE: Map<string, number> = new Map([
             [Vienna.NAME, -1080],
             [Vienna2.NAME, -1019.999],
-            [NuPACK.NAME, -1110]
+            [NuPACK.NAME, -1111]
         ]);
 
         const NNFE: Map<string, number[]> = new Map([
