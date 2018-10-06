@@ -60,7 +60,7 @@ export class GamePanel extends BaseGamePanel {
             this._background.drawRect(0, 0, this._width, this._height);
             this._background.endFill();
         } else {
-            this._background.lineStyle(2, this._borderColor, this._borderAlpha);
+            this._background.lineStyle(1.5, this._borderColor, this._borderAlpha);
             this._background.beginFill(this._color, this._alpha);
             this._background.drawRoundedRect(0, 0, this._width, this._height, 5);
             this._background.endFill();
