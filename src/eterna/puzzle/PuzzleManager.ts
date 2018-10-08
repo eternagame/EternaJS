@@ -115,11 +115,11 @@ export class PuzzleManager {
         }
 
         if (newpuz.nodeID === 877668) {
-            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_877668);
+            newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_877668);
         } else if (newpuz.nodeID === 885046) {
-            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_885046);
+            newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_885046);
         } else if (newpuz.nodeID === 1420804) {
-            newpuz.objective =JSON.parse(PuzzleManager.OBJECTIVE_1420804);
+            newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_1420804);
         }
 
         let target_conditions: any[] = newpuz.targetConditions;
