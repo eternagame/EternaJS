@@ -2277,7 +2277,7 @@ export class PoseEditMode extends GameMode {
 
             isSatisfied = EPars.arePairsSame(native_pairs, this._targetPairs[target_index], structure_constraints);
 
-            let input_index = 0;
+            let input_index: number = undefined;
             if (this._targetPairs.length > 1) {
                 input_index = target_index;
             }
@@ -2331,7 +2331,7 @@ export class PoseEditMode extends GameMode {
             let anti_pairs: number[] = EPars.parenthesisToPairs(anti_structure_string);
             isSatisfied = !EPars.arePairsSame(native_pairs, anti_pairs, anti_structure_constraints);
 
-            let input_index = 0;
+            let input_index: number = undefined;
             if (this._targetPairs.length > 1) {
                 input_index = target_index;
             }
