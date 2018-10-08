@@ -81,7 +81,7 @@ export class EnergyScoreDisplay extends Container {
     private updateBG(): void {
         this._bg.clear();
         this._bg.beginFill(0x33465F);
-        this._bg.drawRoundedRect(0, 0, this._width, this._height, 15);
+        this._bg.drawRoundedRect(0, 0, this._width, this._height, 10);
         this._bg.endFill();
         this._bg.alpha = 0.5;
     }
