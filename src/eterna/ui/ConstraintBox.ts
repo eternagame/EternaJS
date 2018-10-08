@@ -608,6 +608,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let orig: number = (111 - tw) * 0.5;
             if (val.bind.length === 1) tw = 45;
 
+            this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
             this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
@@ -786,6 +787,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.LAB_REQUIREMENTS) {
             this._bg.visible = true;
+            this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
             this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
@@ -910,6 +912,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             let value: string = val.value;
 
             this._bg.visible = true;
+            this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
             this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
