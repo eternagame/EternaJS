@@ -1,6 +1,7 @@
 import "assets/styles.css"; // css-loader will pick up on this and embed our stylesheet
 import * as log from "loglevel";
 import {FlashbangApp} from "../flashbang/core/FlashbangApp";
+import {ErrorUtil} from "../flashbang/util/ErrorUtil";
 import {TextureUtil} from "../flashbang/util/TextureUtil";
 import {ChatManager} from "./ChatManager";
 import {TestMode} from "./debug/TestMode";
@@ -155,7 +156,10 @@ export class EternaApp extends FlashbangApp {
                     return Promise.reject(`Unrecognized mode '${this._params.mode}'`);
                 }
             })
-            .catch(err => Eterna.onFatalError(err));
+            .catch(err => {
+                this.popLoadingMode();
+                Eterna.onFatalError(err)
+            });
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
@@ -300,7 +304,12 @@ export class EternaApp extends FlashbangApp {
     }
 
     protected onUncaughtError(err: any): void {
-        Eterna.onFatalError(err);
+        let errstring = ErrorUtil.getErrString(err);
+        if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
+            log.debug("pixi-sound is misbehaving again");
+        } else {
+            Eterna.onFatalError(err);
+        }
     }
 
     protected createPixi(): PIXI.Application {
@@ -333,7 +342,7 @@ export class EternaApp extends FlashbangApp {
 
     private popLoadingMode(): void {
         if (this._modeStack.topMode instanceof LoadingMode) {
-            this._modeStack.popMode();
+            this._modeStack.removeMode(this._modeStack.topMode);
         }
     }
 
