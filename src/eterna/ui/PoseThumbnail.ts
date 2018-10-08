@@ -22,7 +22,7 @@ export class PoseThumbnail {
 
     public static drawToSprite(sprite: Sprite, sequence: number[], pairs: number[], size: number = 1, type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED, exp_start_index: number = 0, wrong_pairs: number[] = null, exp_use_threshold: boolean = false, exp_threshold: number = 0): void {
         sprite.removeChildren();
-        let graphics: Graphics = new Graphics();
+        const graphics = new Graphics();
         PoseThumbnail.create(sequence, pairs, size, type, exp_start_index, wrong_pairs, exp_use_threshold, exp_threshold, graphics);
         let bounds = graphics.getLocalBounds();
         graphics.x = -bounds.left;
