@@ -521,15 +521,16 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-
             if (this._enlarged) {
                 this._smallThumbnail.visible = false;
                 this._bigThumbnail.visible = true;
+                PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                DisplayUtil.center(this._bigThumbnail, this._bg);
             } else {
-                this._smallThumbnail.visible = true;
                 this._bigThumbnail.visible = false;
+                this._smallThumbnail.visible = true;
+                PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                DisplayUtil.center(this._smallThumbnail, this._bg);
             }
 
             tooltip.apply(this._bigText);
@@ -555,15 +556,16 @@ export class ConstraintBox extends ContainerObject implements Enableable {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
-            PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-            PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
-
             if (this._enlarged) {
                 this._smallThumbnail.visible = false;
                 this._bigThumbnail.visible = true;
+                PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                DisplayUtil.center(this._bigThumbnail, this._bg);
             } else {
-                this._smallThumbnail.visible = true;
                 this._bigThumbnail.visible = false;
+                this._smallThumbnail.visible = true;
+                PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                DisplayUtil.center(this._smallThumbnail, this._bg);
             }
 
             this._noText.visible = true;

@@ -4,6 +4,7 @@ import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
 import {IsLeftMouse} from "../../../flashbang/input/InputUtil";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
+import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
@@ -263,7 +264,9 @@ export class MissionIntroMode extends AppMode {
         for (let ii = 0; ii < targetPairs.length; ii++) {
             sequence[ii] = EPars.RNABASE_ADENINE;
         }
-        PoseThumbnail.drawToSprite(this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0);
+        PoseThumbnail.drawToSprite(
+            this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0);
+        DisplayUtil.center(this._goalsThumbnail, this._goalsBG);
     }
 
     private setupConstraintScrollMask(): void {

@@ -235,8 +235,17 @@ export class DisplayUtil {
         return out;
     }
 
-    private static readonly POSITION_RELATIVE_RECT: Rectangle = new Rectangle();
+    /** Centers a DisplayObject on another DisplayObject */
+    public static center(disp: DisplayObject, relativeTo: DisplayObject,
+                         xOffset: number = 0, yOffset: number = 0): void {
+        this.positionRelative(
+            disp, HAlign.CENTER, VAlign.CENTER,
+            relativeTo, HAlign.CENTER, VAlign.CENTER,
+            xOffset, yOffset);
+    }
 
+
+    private static readonly POSITION_RELATIVE_RECT: Rectangle = new Rectangle();
     /** Positions a DisplayObject in relation to another DisplayObject */
     public static positionRelative(
         disp: DisplayObject,
