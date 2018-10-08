@@ -11,14 +11,14 @@ export class ErrorUtil {
     }
 
     /** Returns a reasonable string value for an error object, if possible */
-    public static getErrString(e: any): string {
+    public static getErrString(e: any, includeStack: boolean = true): string {
         try {
             if (e == null) {
                 return "Unknown error";
             } else if (e instanceof Error) {
-                return e.stack;
+                return includeStack ? e.stack : e.message;
             } else if (e instanceof ErrorEvent) {
-                return e.error != null ? this.getErrString(e.error) : e.message;
+                return e.error != null ? this.getErrString(e.error, includeStack) : e.message;
             } else {
                 return e.toString();
             }

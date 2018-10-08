@@ -1,7 +1,9 @@
 import * as log from "loglevel";
+import {Flashbang} from "../flashbang/core/Flashbang";
 import {ErrorUtil} from "../flashbang/util/ErrorUtil";
 import {ChatManager} from "./ChatManager";
 import {EternaApp} from "./EternaApp";
+import {ErrorDialogMode} from "./mode/ErrorDialogMode";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
 import {SoundManager} from "./resources/SoundManager";
@@ -31,17 +33,16 @@ export class Eterna {
     }
 
     public static onFatalError(err: any): void {
-        let errstring = ErrorUtil.getErrString(err);
+        log.error("Fatal error error", ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
+        if (Flashbang.app != null &&
+            Flashbang.app.modeStack != null &&
+            !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)) {
 
-        if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
-            log.debug("pixi-sound is misbehaving again");
-            return;
-        }
+            Flashbang.app.modeStack.pushMode(new ErrorDialogMode(err));
 
-        log.error("Uncaught error", ErrorUtil.getErrorObj(err) || errstring);
-        if (process.env.NODE_ENV !== "production") {
+        } else if (process.env.NODE_ENV !== "production") {
             try {
-                alert(ErrorUtil.getErrorObj(err) || errstring);
+                alert(ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
             } catch (alertError) {
                 log.error("An error occurred while trying to display an error", alertError);
             }
