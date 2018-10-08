@@ -331,6 +331,12 @@ export class DesignBrowserMode extends GameMode {
         const existingPoseEditMode = Eterna.app.existingPoseEditMode;
         this._returnToGameButton.display.visible =
             (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID);
+        Eterna.chat.pushHideChat();
+    }
+
+    protected exit(): void {
+        Eterna.chat.popHideChat();
+        super.exit();
     }
 
     private setSequenceLetterColor(): void {
