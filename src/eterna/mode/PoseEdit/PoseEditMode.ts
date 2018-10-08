@@ -1787,8 +1787,12 @@ export class PoseEditMode extends GameMode {
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
         let nextPuzzle: Puzzle = null;
         if (nextPuzzleData) {
-            nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
-            log.info(`Loaded next puzzle [id=${nextPuzzle.nodeID}]`);
+            try {
+                nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
+                log.info(`Loaded next puzzle [id=${nextPuzzle.nodeID}]`);
+            } catch (err) {
+                log.error(`Failed to load next puzzle`, err);
+            }
         }
 
         let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
