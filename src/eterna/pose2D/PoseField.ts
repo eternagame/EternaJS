@@ -17,7 +17,7 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 export class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     constructor(edit: boolean) {
         super();
-        this._pose = new Pose2D(edit);
+        this._pose = new Pose2D(this, edit);
 
         // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
         this._clickTargetDisp = new Graphics();
@@ -69,6 +69,19 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
             this.container.addChild(this._mask);
             this.container.mask = this._mask;
         }
+    }
+
+    public containsEvent(e: InteractionEvent): boolean {
+        return this.containsPoint(e.data.global.x, e.data.global.y);
+    }
+
+    /** true if our bounds contains the given global point */
+    public containsPoint(screenX: number, screenY: number): boolean {
+        PoseField.P.set(screenX, screenY);
+        this.container.toLocal(PoseField.P, null, PoseField.P);
+        const x = PoseField.P.x;
+        const y = PoseField.P.y;
+        return (x >= 0 && x < this._width && y >= 0 && y < this._height);
     }
 
     public set zoom(zoom: number) {
@@ -182,15 +195,6 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
         }
 
         return false;
-    }
-
-    /** true if our bounds contains the given global point */
-    private containsPoint(screenX: number, screenY: number): boolean {
-        PoseField.P.set(screenX, screenY);
-        this.container.toLocal(PoseField.P, null, PoseField.P);
-        const x = PoseField.P.x;
-        const y = PoseField.P.y;
-        return (x >= 0 && x < this._width && y >= 0 && y < this._height);
     }
 
     private readonly _pose: Pose2D;
