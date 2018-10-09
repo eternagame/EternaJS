@@ -115,8 +115,11 @@ export class ExternalInterface {
      * cached. In fact, the entire premise is folly, ScriptInterface cannot make the guarantee that it claims
      * to, and this function is only here because PoseEditMode.checkConstraint was designed to resolve its
      * constraints synchronously. Use the async version of this function if possible!
+     *
+     * @return true if the script ran to completion, and false if it couldn't run synchronously and is instead
+     * queued to be executed asynchronously.
      */
-    public static runScriptMaybeSynchronously(scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void): void {
+    public static runScriptMaybeSynchronously(scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void): boolean {
         let completed = false;
         const complete = (result: any, error: any) => {
             if (completed) {
@@ -143,6 +146,8 @@ export class ExternalInterface {
         // if (!completed) {
         //     log.warn(`Script did not complete synchronously, but it was supposed to! [scriptID=${scriptID}]`);
         // }
+
+        return completed;
     }
 
     public static call(name: string, ...args: any[]): any {
