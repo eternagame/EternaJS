@@ -3,6 +3,7 @@ import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
+import {MathUtil} from "../../../flashbang/util/MathUtil";
 import {UnitSignal} from "../../../signals/UnitSignal";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
@@ -82,9 +83,23 @@ export class ViewSolutionDialog extends Dialog<void> {
         } else {
             // VOTE (disallowed is solution is synthesized or old)
             if (this._solution.getProperty("Synthesized") === "n" && this._solution.getProperty("Round") == this._puzzle.round) {
-                let voteButton = new ThumbnailAndTextButton()
-                    .text("Vote")
-                    .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes));
+                let voteButton = new ThumbnailAndTextButton();
+                if (this._solution.getProperty("My Votes") == 0) {
+                    voteButton
+                        .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes))
+                        .text("Vote")
+                        .tooltip("Vote on this design.");
+                } else {
+                    let rotatedSprite = Sprite.fromImage(Bitmaps.ImgVotes);
+                    rotatedSprite.rotation = MathUtil.deg2Rad * 180;
+                    let thumbnail = new Container();
+                    thumbnail.addChild(rotatedSprite);
+                    voteButton
+                        .thumbnail(thumbnail)
+                        .text("Unvote")
+                        .tooltip("Take back your vote on this design.");
+
+                }
                 voteButton.clicked.connect(() => this.voteClicked.emit());
                 this.addObject(voteButton, this._actionButtonsLayout);
             }
