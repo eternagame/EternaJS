@@ -11,7 +11,7 @@ export class SubmittingDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        let text = Fonts.arial("Submitting...", 20).bold().build();
+        let text = Fonts.arial("Submitting...", 20).color(0xffffff).bold().build();
         this.container.addChild(text);
 
         text.alpha = 0;
