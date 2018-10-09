@@ -37,6 +37,7 @@ import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
 import {Molecule} from "./Molecule";
+import {PoseField} from "./PoseField";
 import {PoseUtil} from "./PoseUtil";
 import {PuzzleEditOp} from "./PuzzleEditOp";
 import {RNAAnchorObject} from "./RNAAnchorObject";
@@ -57,8 +58,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
-    constructor(editable: boolean) {
+    constructor(poseField: PoseField, editable: boolean) {
         super();
+        this._poseField = poseField;
         this._editable = editable;
     }
 
@@ -131,7 +133,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.display.interactive = true;
         this.pointerMove.connect(() => this.onMouseMoved());
         this.pointerDown.filter(IsLeftMouse).connect(e => this.callStartMousedownCallback(e));
-        this.pointerOut.connect((e) => this.onMouseOut(e));
+        this.pointerOut.connect(() => this.onMouseOut());
 
         // handle view settings
         this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
@@ -579,6 +581,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public onMouseMoved(): void {
+        if (!this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+            this.onMouseOut();
+            return;
+        }
+
         if (!this._coloring) {
             this.clearMouse();
         }
@@ -2477,10 +2484,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         // }
     }
 
-    private onMouseOut(e: InteractionEvent): void {
+    private onMouseOut(): void {
         this.clearMouse();
         this.updateScoreNodeGui();
-        e.stopPropagation();
     }
 
     private deleteBaseWithIndex(index: number): any[] {
@@ -2918,35 +2924,36 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodeIndex = -1;
 
         if (this._scoreNodes != null) {
-            let base_xys: Point[] = [];
-            let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
-
-            for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
-                base_xys.push(this.getBaseXY(ii));
-            }
-
             let total_score: number = 0;
             let node_found: boolean = false;
             let node_txt: string = "";
             let node_label: string = "";
             let node_score: string = "";
 
-            for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                let base_indices: number[] = this._scoreNodes[ii].baseIndices;
-                let node_points: Point[] = [];
+            if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+                let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+                let base_xys: Point[] = [];
 
-                for (let jj: number = 0; jj < base_indices.length; jj++) {
-                    node_points.push(base_xys[base_indices[jj]]);
+                for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
+                    base_xys.push(this.getBaseXY(ii));
                 }
+                for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+                    let base_indices: number[] = this._scoreNodes[ii].baseIndices;
+                    let node_points: Point[] = [];
 
-                total_score += this._scoreNodes[ii].score;
+                    for (let jj: number = 0; jj < base_indices.length; jj++) {
+                        node_points.push(base_xys[base_indices[jj]]);
+                    }
 
-                if (!node_found && Utility.isPointWithin(mouse_p, node_points)) {
-                    node_txt = this._scoreNodes[ii].text;
-                    node_label = this._scoreNodes[ii].textLabel;
-                    node_score = this._scoreNodes[ii].textScore;
-                    node_found = true;
-                    this._scoreNodeIndex = ii;
+                    total_score += this._scoreNodes[ii].score;
+
+                    if (!node_found && Utility.isPointWithin(mouse_p, node_points)) {
+                        node_txt = this._scoreNodes[ii].text;
+                        node_label = this._scoreNodes[ii].textLabel;
+                        node_score = this._scoreNodes[ii].textScore;
+                        node_found = true;
+                        this._scoreNodeIndex = ii;
+                    }
                 }
             }
 
@@ -3181,6 +3188,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private readonly _baseLayer: Container = new Container();
+    private readonly _poseField: PoseField;
 
     private _width: number = 0;
     private _height: number = 0;
