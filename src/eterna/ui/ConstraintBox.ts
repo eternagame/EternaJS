@@ -995,13 +995,14 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         return this._outline.visible ? 111 : 75;
     }
 
-    public flash(color: number): void {
-        let sx: number = (this._outline.visible ? 111 : 75);
-        let sy: number = 75;
+    public get height(): number {
+        return 75;
+    }
 
+    public flash(color: number): void {
         this._backlight.clear();
         this._backlight.beginFill(color, 0.9);
-        this._backlight.drawRoundedRect(0, 0, sx, sy, 10);
+        this._backlight.drawRoundedRect(0, 0, this.width, this.height, 10);
         this._backlight.endFill();
         this._backlight.alpha = 0;
         this._backlight.visible = true;
@@ -1027,12 +1028,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         }
 
         let lineWidth: number = 6;
-        let sizeX: number = (this._outline.visible ? 111 : 75);
-        let sizeY: number = 75;
 
         this._fglow.clear();
         this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);
-        this._fglow.drawRoundedRect(lineWidth / 2, lineWidth / 2, sizeX - lineWidth, sizeY - lineWidth, 10);
+        this._fglow.drawRoundedRect(lineWidth / 2, lineWidth / 2, this.width - lineWidth, this.height - lineWidth, 10);
         this._fglow.scale.x = 1;
         this._fglow.scale.y = 1;
         this._fglow.alpha = 0;
@@ -1040,7 +1039,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._fglow.position = new Point(0, 0);
         this.replaceNamedObject(ConstraintBox.FGLOW_ANIM, new ParallelTask(
             new LocationTask(0, -lineWidth, 1.6, Easing.easeIn, this._fglow),
-            new ScaleTask(1.0, 1.0 + 2 * (lineWidth + 1) / sizeX, 1.6, Easing.easeIn, this._fglow),
+            new ScaleTask(1.0, 1.0 + 2 * (lineWidth + 1) / this.width, 1.6, Easing.easeIn, this._fglow),
             new SerialTask(
                 new AlphaTask(1, 0.8, Easing.linear, this._fglow),
                 new AlphaTask(0, 0.8, Easing.linear, this._fglow),
@@ -1050,7 +1049,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         this._backlight.clear();
         this._backlight.beginFill(satisfied ? 0x00FF00 : 0xFF0000, 0.7);
-        this._backlight.drawRoundedRect(0, 0, sizeX, sizeY, 10);
+        this._backlight.drawRoundedRect(0, 0, this.width, this.height, 10);
         this._backlight.endFill();
         this._backlight.alpha = 0;
         this._backlight.visible = true;
