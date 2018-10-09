@@ -2230,8 +2230,9 @@ export class PoseEditMode extends GameMode {
         this.ropPresets();
     }
 
-    private updateConstraint(type: ConstraintType, value: string, constraintIdx: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): boolean {
+    private updateConstraint(type: ConstraintType, value: string, constraintIdx: number, box: ConstraintBox, render: boolean, outInfo: ConstraintInfo): ConstraintStatus {
         let isSatisfied = true;
+        let isPending = false;
 
         const undoBlock: UndoBlock = this.getCurrentUndoBlock();
         const sequence = undoBlock.sequence;
@@ -2696,10 +2697,17 @@ export class PoseEditMode extends GameMode {
             if (!scriptCompleted) {
                 log.warn(`Constraint script wasn't able to run synchronously [scriptID=${scriptID}]`);
                 isSatisfied = false;
+                isPending = true;
             }
         }
 
-        return isSatisfied;
+        if (isPending) {
+            return ConstraintStatus.PENDING;
+        } else if (isSatisfied) {
+            return ConstraintStatus.SATISFIED;
+        } else {
+            return ConstraintStatus.UNSATISFIED;
+        }
     }
 
     private checkConstraints(render: boolean = true): boolean {
@@ -2716,11 +2724,12 @@ export class PoseEditMode extends GameMode {
             max_allowed_guanine: -1,
         };
 
-        let allAreSatisfied: boolean = true;
-        let allWereSatisfied: boolean = true;
+        let allAreSatisfied = true;
+        let allWereSatisfied = true;
+        let hasPendingConstraints = false;
 
-        let play_condition_music: boolean = false;
-        let play_decondition_music: boolean = false;
+        let playConstraintSatisfiedSFX = false;
+        let playConstraintUnsatisfiedSFX = false;
 
         for (let ii = 0; ii < constraints.length; ii += 2) {
             const type: ConstraintType = constraints[ii] as ConstraintType;
@@ -2728,10 +2737,11 @@ export class PoseEditMode extends GameMode {
             const box: ConstraintBox = this._constraintBoxes[ii / 2];
 
             const wasSatisfied: boolean = box.isSatisfied;
-            const isSatisfied: boolean = this.updateConstraint(type, value, ii, box, render, constraintsInfo);
+            const status = this.updateConstraint(type, value, ii, box, render, constraintsInfo);
 
-            allAreSatisfied = allAreSatisfied && isSatisfied;
+            allAreSatisfied = allAreSatisfied && status === ConstraintStatus.SATISFIED;
             allWereSatisfied = allWereSatisfied && wasSatisfied;
+            hasPendingConstraints = hasPendingConstraints || status === ConstraintStatus.PENDING;
 
             if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
                 const target_index = Number(value);
@@ -2749,12 +2759,12 @@ export class PoseEditMode extends GameMode {
             }
 
             if (render) {
-                if (isSatisfied && !wasSatisfied) {
-                    play_condition_music = true;
-                    box.flare(isSatisfied);
-                } else if (!isSatisfied && wasSatisfied) {
-                    play_decondition_music = true;
-                    box.flare(isSatisfied);
+                if (status === ConstraintStatus.SATISFIED && !wasSatisfied) {
+                    playConstraintSatisfiedSFX = true;
+                    box.flare(true);
+                } else if (status === ConstraintStatus.UNSATISFIED && wasSatisfied) {
+                    playConstraintUnsatisfiedSFX = true;
+                    box.flare(false);
                 }
             }
         }
@@ -2797,15 +2807,15 @@ export class PoseEditMode extends GameMode {
             this._poses[ii].highlightUnstableSequence(unstable);
         }
 
-        if (allAreSatisfied && !allWereSatisfied) {
+        if (allAreSatisfied && !allWereSatisfied && !hasPendingConstraints) {
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
                 Eterna.sound.playSound(Sounds.SoundAllConditions);
             } else if (this._puzState !== PuzzleState.GAME) {
                 Eterna.sound.playSound(Sounds.SoundCondition);
             }
-        } else if (play_condition_music) {
+        } else if (playConstraintSatisfiedSFX) {
             Eterna.sound.playSound(Sounds.SoundCondition);
-        } else if (play_decondition_music) {
+        } else if (playConstraintUnsatisfiedSFX) {
             Eterna.sound.playSound(Sounds.SoundDecondition);
         }
 
@@ -3681,4 +3691,8 @@ interface OligoDef {
     bind?: boolean;
     concentration?: string;
     label?: string;
+}
+
+enum ConstraintStatus {
+    SATISFIED = "satisfied", UNSATISFIED = "unsatisfied", PENDING = "pending"
 }
