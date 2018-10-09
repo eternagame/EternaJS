@@ -14,6 +14,7 @@ import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../../flashbang/tasks/SerialTask";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
 import {Easing} from "../../../flashbang/util/Easing";
+import {MathUtil} from "../../../flashbang/util/MathUtil";
 import {EPars} from "../../EPars";
 import {Eterna} from "../../Eterna";
 import {Feedback} from "../../Feedback";
@@ -289,6 +290,15 @@ export class DesignBrowserMode extends GameMode {
     public onResized(): void {
         super.onResized();
         this.updateLayout();
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): void {
+        if (!this.isDialogOrNotifShowing && e.deltaY != 0 && this._filteredSolutions != null) {
+            const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
+            this._vSlider.set_progress(MathUtil.clamp(progress, 0, 1));
+        } else {
+            super.onMouseWheelEvent(e);
+        }
     }
 
     private get contentWidth(): number {
