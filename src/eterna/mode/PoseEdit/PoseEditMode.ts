@@ -2651,7 +2651,7 @@ export class PoseEditMode extends GameMode {
             isSatisfied = false;
 
             const scriptID = value;
-            ExternalInterface.runScriptMaybeSynchronously(scriptID, {}, scriptResult => {
+            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID, {}, scriptResult => {
                 let goal = "";
                 let name = "...";
                 let resultValue = "";
@@ -2692,6 +2692,11 @@ export class PoseEditMode extends GameMode {
                     }, isSatisfied, 0);
                 }
             });
+
+            if (!scriptCompleted) {
+                log.warn(`Constraint script wasn't able to run synchronously [scriptID=${scriptID}]`);
+                isSatisfied = false;
+            }
         }
 
         return isSatisfied;
