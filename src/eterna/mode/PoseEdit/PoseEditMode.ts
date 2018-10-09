@@ -1660,28 +1660,44 @@ export class PoseEditMode extends GameMode {
             return;
         }
 
-        // Show a "Submitting now!" dialog
         let submittingRef: GameObjectRef = GameObjectRef.NULL;
+        let fxComplete: Promise<void> = null;
+
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
+            // Show a "Submitting now!" dialog
             submittingRef = this.showDialog(new SubmittingDialog()).ref;
-        }
+            fxComplete = Promise.resolve();
 
-        // Kick off a BubbleSweep animation
-        let bubbles = new BubbleSweep(800);
-        this.addObject(bubbles, this.bgLayer);
-        bubbles.start();
+        } else {
+            // Kick off a BubbleSweep animation
+            let bubbles = new BubbleSweep(800);
+            this.addObject(bubbles, this.bgLayer);
+            bubbles.start();
 
-        // Show an explosion animation
-        this.disableTools(true);
-        this.setPuzzleState(PuzzleState.CLEARED);
+            // Show an explosion animation
+            this.disableTools(true);
+            this.setPuzzleState(PuzzleState.CLEARED);
 
-        Eterna.sound.playSound(Sounds.SoundPuzzleClear);
-        let explosionCompletePromise: Promise<void> = null;
-        for (let pose of this._poses) {
-            pose.setZoomLevel(0, true, true);
-            let p = pose.startExplosion();
-            if (explosionCompletePromise == null) {
-                explosionCompletePromise = p;
+            Eterna.sound.playSound(Sounds.SoundPuzzleClear);
+            for (let pose of this._poses) {
+                pose.setZoomLevel(0, true, true);
+                let p = pose.startExplosion();
+                if (fxComplete == null) {
+                    fxComplete = p.then(() => {
+                        bubbles.decay();
+                        bubbles.addObject(new SerialTask(
+                            new AlphaTask(0, 5, Easing.easeIn),
+                            new SelfDestructTask()
+                        ));
+
+                        for (let pose of this._poses) {
+                            pose.showTotalEnergy = false;
+                            pose.clearExplosion();
+                        }
+
+                        this._constraintsLayer.visible = false;
+                    });
+                }
             }
         }
 
@@ -1690,21 +1706,7 @@ export class PoseEditMode extends GameMode {
         let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
         // Wait for explosion completion
-        explosionCompletePromise.then(() => {
-            bubbles.decay();
-            bubbles.addObject(new SerialTask(
-                new AlphaTask(0, 5, Easing.easeIn),
-                new SelfDestructTask()
-            ));
-
-            for (let pose of this._poses) {
-                pose.showTotalEnergy = false;
-                pose.clearExplosion();
-            }
-
-            this._constraintsLayer.visible = false;
-
-        }).then(() => {
+        fxComplete.then(() => {
             // Wait for the submission to the server, and for the mode to be active.
             // 'waitTillActive' is probably not necessary in practice, but if another mode is pushed onto this one
             // during submission, we want to wait till we're the top-most mode before executing more view logic.
@@ -1727,12 +1729,15 @@ export class PoseEditMode extends GameMode {
 
             let data: any = submissionResponse['data'];
 
-            this.showMissionClearedPanel(data);
+            if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
+                this.showMissionClearedPanel(data);
+            }
 
             const seqString = EPars.sequenceToString(
                 this._puzzle.transformSequence(undoBlock.sequence, 0));
 
             if (data['error'] != null) {
+                log.debug(`Got solution submission error: ${data["error"]}`);
                 if (data['error'].indexOf('barcode') >= 0) {
                     let dialog = this.showNotification(data['error'], "More Information");
                     dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, "_blank"));
@@ -1746,6 +1751,8 @@ export class PoseEditMode extends GameMode {
                 }
 
             } else {
+                log.debug("Solution submitted");
+
                 if (data['solution-id'] != null) {
                     this.setAncestorId(data['solution-id']);
                 }
