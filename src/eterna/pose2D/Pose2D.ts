@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Graphics, Point, Rectangle, Sprite, Texture} from "pixi.js";
+import {Container, Graphics, Point, Sprite, Texture} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {Vector2} from "../../flashbang/geom/Vector2";
