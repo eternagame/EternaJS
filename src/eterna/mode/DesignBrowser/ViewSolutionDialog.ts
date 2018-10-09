@@ -116,7 +116,7 @@ export class ViewSolutionDialog extends Dialog<void> {
                     .moveTo(65, 10)
                     .lineTo(10, 65))
                 .tooltip("Delete this design to retrieve your slots for this round");
-            deleteButton.clicked.connect(() => this.deleteClicked.emit);
+            deleteButton.clicked.connect(() => this.deleteClicked.emit());
             this.addObject(deleteButton, this._actionButtonsLayout);
         }
 
