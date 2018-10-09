@@ -751,8 +751,6 @@ export class PoseEditMode extends GameMode {
         // reset lineage for experimental targets
         this.setAncestorId(0);
 
-        let autoloaded: boolean = false;
-
         if (!this._params.isReset) {
             this.loadSavedData();
         }
@@ -768,9 +766,7 @@ export class PoseEditMode extends GameMode {
             this._poseEditByTargetCb = null;
         };
 
-        if (!autoloaded) {
-            this.poseEditByTarget(0);
-        }
+        this.poseEditByTarget(0);
 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
