@@ -1,7 +1,9 @@
-import {Container, DisplayObject, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {Button, ButtonState} from "../../flashbang/objects/Button";
+import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
 import {Registration} from "../../signals/Registration";
 import {Registrations} from "../../signals/Registrations";
@@ -17,8 +19,8 @@ export class GameButton extends Button implements KeyboardListener {
     public constructor() {
         super();
 
-        this._stateDispParent = new Container();
-        this.container.addChild(this._stateDispParent);
+        this._content = new Container();
+        this.container.addChild(this._content);
     }
 
     protected added(): void {
@@ -36,19 +38,19 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public up(display: DisplayObject | Texture | string): GameButton {
-        return this.setStateDisplay(ButtonState.UP, display);
+        return this.setIconForState(ButtonState.UP, display);
     }
 
     public over(display: DisplayObject | Texture | string): GameButton {
-        return this.setStateDisplay(ButtonState.OVER, display);
+        return this.setIconForState(ButtonState.OVER, display);
     }
 
     public down(display: DisplayObject | Texture | string): GameButton {
-        return this.setStateDisplay(ButtonState.DOWN, display);
+        return this.setIconForState(ButtonState.DOWN, display);
     }
 
     public disabled(display: DisplayObject | Texture | string): GameButton {
-        return this.setStateDisplay(ButtonState.DISABLED, display);
+        return this.setIconForState(ButtonState.DISABLED, display);
     }
 
     /** Sets a single DisplayObect for all states */
@@ -97,7 +99,7 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public scaleBitmapToLabel(): GameButton {
-        this._scaleBitmapToLabel = true;
+        this._scaleIconToLabel = true;
         this.needsRedraw();
         return this;
     }
@@ -146,64 +148,72 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     protected showState(state: ButtonState): void {
-        this._stateDispParent.removeChildren();
-        this._stateDispParent.alpha = 1;
+        this._content.removeChildren();
+        this._content.alpha = 1;
 
-        let stateDisp = this.getStateDisplay(state, this.isSelected);
-        if (stateDisp == null && state == ButtonState.DISABLED) {
+        let icon = this.getIconForState(state, this.isSelected);
+        if (icon == null && state == ButtonState.DISABLED) {
             // If we're missing the disabled state, use the UP state at 50% alpha
-            stateDisp = this.getStateDisplay(ButtonState.UP, this.isSelected);
-            this._stateDispParent.alpha = 0.5;
+            icon = this.getIconForState(ButtonState.UP, this.isSelected);
+            this._content.alpha = 0.5;
         }
 
-        if (stateDisp != null) {
-            this._stateDispParent.addChild(stateDisp);
+        if (icon != null) {
+            icon.x = 0;
+            icon.y = 0;
+            icon.scale.x = 1;
+            icon.scale.y = 1;
+            this._content.addChild(icon);
         }
 
         // Create label
-        if (this._label != null) {
-            this._label.destroy({children: true});
-            this._label = null;
-        }
-
+        let label: Text;
         if (this._labelBuilder != null) {
-            this._label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
+            label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
+            this._content.addChild(label);
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox: boolean = stateDisp == null && this._label != null;
+        const drawStyleBox = icon == null && label != null;
         if (drawStyleBox) {
-            if (this._styleBox == null) {
-                this._styleBox = new Graphics();
-                this.container.addChildAt(this._styleBox, 1);
-            }
-
-            let labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : this._label.width;
-
-            this._styleBox.clear();
-            this._styleBox.beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0);
-            this._styleBox.drawRoundedRect(0, 0,
-                labelWidth + (GameButton.WMARGIN * 2),
-                this._label.height + (GameButton.HMARGIN * 2),
-                3);
-            this._styleBox.endFill();
-        } else if (this._styleBox != null) {
-            this._styleBox.destroy({children: true});
-            this._styleBox = null;
+            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
+            let styleBox = new Graphics()
+                .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
+                .drawRoundedRect(0, 0,
+                    labelWidth + (GameButton.WMARGIN * 2),
+                    label.height + (GameButton.HMARGIN * 2),
+                    3)
+                .endFill();
+            this._content.addChildAt(styleBox, 0);
         }
 
         // Position label
-        this._stateDispParent.scale = new Point(1, 1);
-        if (this._label != null) {
-            if (this._scaleBitmapToLabel) {
-                let scale: number = 1.5 * this._label.height / this._stateDispParent.height;
-                this._stateDispParent.scale = new Point(scale, scale);
+        if (label != null) {
+            if (this._scaleIconToLabel && icon != null) {
+                let scale: number = 1.5 * label.height / this._content.height;
+                icon.scale = new Point(scale, scale);
             }
 
-            this._label.position = stateDisp == null
-                ? new Point(GameButton.WMARGIN, GameButton.HMARGIN)
-                : new Point(this._stateDispParent.width + 5, (this._stateDispParent.height - this._label.height) * 0.5);
-            this.container.addChild(this._label);
+            this._content.addChild(label);
+            if (icon == null) {
+                label.position = new Point(GameButton.WMARGIN, GameButton.HMARGIN);
+            } else {
+                DisplayUtil.positionRelative(
+                    label, HAlign.LEFT, VAlign.CENTER,
+                    icon, HAlign.RIGHT, VAlign.CENTER,
+                    5, 0);
+            }
+
+            if (icon != null) {
+                // if we have an icon, add an invisible hitbox to prevent unclickable pixels
+                // between the icon and the label
+                let bounds = this._content.getLocalBounds(GameButton.SCRATCH_RECT);
+                let hitbox = new Graphics()
+                    .beginFill(0xff0000, 0)
+                    .drawRect(bounds.x, bounds.y, bounds.width, bounds.height)
+                    .endFill();
+                this._content.addChildAt(hitbox, 0);
+            }
         }
     }
 
@@ -235,22 +245,22 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setStateDisplay(state: ButtonState, displayOrTex?: DisplayObject | Texture | string) :GameButton {
-        if (this._buttonStates == null) {
-            this._buttonStates = [];
+    private setIconForState(state: ButtonState, displayOrTex?: DisplayObject | Texture | string) :GameButton {
+        if (this._buttonIcons == null) {
+            this._buttonIcons = [];
         }
 
-        this._buttonStates[state] = GameButton.getDisplayObject(displayOrTex);
+        this._buttonIcons[state] = GameButton.getDisplayObject(displayOrTex);
         this.needsRedraw();
         return this;
     }
 
-    private getStateDisplay(state: ButtonState, selected: boolean): DisplayObject {
+    private getIconForState(state: ButtonState, selected: boolean): DisplayObject {
         if (state != ButtonState.DISABLED && selected && this._selectedState != null) {
             return this._selectedState;
         } else {
-            return this._buttonStates != null && this._buttonStates.length > state
-                ? this._buttonStates[state]
+            return this._buttonIcons != null && this._buttonIcons.length > state
+                ? this._buttonIcons[state]
                 : null;
         }
     }
@@ -267,17 +277,15 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private readonly _stateDispParent: Container;
-    private _label: Text;
-    private _styleBox: Graphics;
+    private readonly _content: Container;
 
     private _labelBuilder: TextBuilder;
     private _fixedLabelWidth: number = 0;
-    private _scaleBitmapToLabel: boolean = false;
+    private _scaleIconToLabel: boolean = false;
     private _tooltip: string;
     private _hotkey: string;
     private _hotkeyCtrl: boolean;
-    private _buttonStates: DisplayObject[];
+    private _buttonIcons: DisplayObject[];
     private _selectedState: DisplayObject;
 
     private _rscriptID: RScriptUIElementID;
@@ -302,4 +310,6 @@ export class GameButton extends Button implements KeyboardListener {
 
     private static readonly WMARGIN = 5;
     private static readonly HMARGIN = 4;
+
+    private static readonly SCRATCH_RECT = new Rectangle();
 }
