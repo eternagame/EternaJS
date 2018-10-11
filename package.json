@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
-    "start": "concurrently \"npm run build:dev -- --watch\" \"http-server dist/dev -p 63342\"",
+    "start": "npm run postbuild:dev && concurrently \"npm run build:dev -- --watch\" \"http-server dist/dev -p 63342\"",
     "clean": "rm -rf dist && rm -rf node_modules/.cache",
     "typecheck": "tsc --noEmit",
     "build:dev": "webpack --config webpack.dev.js",
