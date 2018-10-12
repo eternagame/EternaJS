@@ -303,6 +303,14 @@ export class EternaApp extends FlashbangApp {
         }
     }
 
+    protected onKeyboardEvent(e: KeyboardEvent): void {
+        // if a form element is focused, don't trigger hotkeys
+        let selected = document.body.querySelectorAll(':focus')[0];
+        if (selected && (['INPUT','TEXTAREA', 'OPTION', 'SELECT', 'BUTTON'].includes(selected.tagName))) return;
+
+        super.onKeyboardEvent(e);
+    }
+
     protected onUncaughtError(err: any): void {
         let errstring = ErrorUtil.getErrString(err);
         if (errstring.startsWith("Error: Failed to set the 'buffer' property on 'AudioBufferSourceNode'")) {
