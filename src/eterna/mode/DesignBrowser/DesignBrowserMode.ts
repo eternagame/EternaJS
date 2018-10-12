@@ -338,6 +338,7 @@ export class DesignBrowserMode extends GameMode {
 
     protected enter(): void {
         super.enter();
+        this.refreshSolutions();
         const existingPoseEditMode = Eterna.app.existingPoseEditMode;
         this._returnToGameButton.display.visible =
             (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID);
