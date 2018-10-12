@@ -11,6 +11,7 @@ import {SoundManager} from "./resources/SoundManager";
 /** Constants and global managers */
 export class Eterna {
     public static readonly OVERLAY_DIV_ID = "overlay";
+    public static readonly PIXI_CONTAINER_ID = "pixi-container";
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
 
     public static readonly DEV_MODE: boolean = ParseBool(process.env["DEBUG"]);

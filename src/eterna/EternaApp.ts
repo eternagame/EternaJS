@@ -107,7 +107,7 @@ export class EternaApp extends FlashbangApp {
         eternaContainer.style.position = "relative";
 
         let pixiContainer: HTMLElement = document.createElement("div");
-        pixiContainer.id = EternaApp.PIXI_CONTAINER_ID;
+        pixiContainer.id = Eterna.PIXI_CONTAINER_ID;
         eternaContainer.appendChild(pixiContainer);
 
         let overlay: HTMLElement = document.createElement("div");
@@ -337,7 +337,7 @@ export class EternaApp extends FlashbangApp {
     }
 
     protected get pixiParent(): HTMLElement {
-        return document.getElementById(EternaApp.PIXI_CONTAINER_ID);
+        return document.getElementById(Eterna.PIXI_CONTAINER_ID);
     }
 
     private setLoadingText(text: string): void {
@@ -418,6 +418,4 @@ export class EternaApp extends FlashbangApp {
 
     private readonly _params: EternaAppParams;
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
-
-    private static readonly PIXI_CONTAINER_ID = "pixi-container";
 }

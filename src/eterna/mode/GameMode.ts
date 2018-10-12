@@ -225,17 +225,20 @@ export abstract class GameMode extends AppMode {
     }
 
     public onContextMenuEvent(e: Event): void {
+        
         let handled = false;
-        if (this._contextMenuDialogRef.isLive) {
-            this._contextMenuDialogRef.destroyObject();
-            handled = true;
-        } else {
-            let menu = this.createContextMenu();
-            if (menu != null) {
-                this._contextMenuDialogRef = this.addObject(
-                    new ContextMenuDialog(menu, Flashbang.globalMouse),
-                    this.contextMenuLayer);
+        if (e.target.parentNode.id === Eterna.PIXI_CONTAINER_ID) {
+            if (this._contextMenuDialogRef.isLive) {
+                this._contextMenuDialogRef.destroyObject();
                 handled = true;
+            } else {
+                let menu = this.createContextMenu();
+                if (menu != null) {
+                    this._contextMenuDialogRef = this.addObject(
+                        new ContextMenuDialog(menu, Flashbang.globalMouse),
+                        this.contextMenuLayer);
+                    handled = true;
+                }
             }
         }
 
