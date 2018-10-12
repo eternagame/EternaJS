@@ -37,6 +37,7 @@ import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
 import {Molecule} from "./Molecule";
+import {PaintCursor} from "./PaintCursor"
 import {PoseField} from "./PoseField";
 import {PoseUtil} from "./PoseUtil";
 import {PuzzleEditOp} from "./PuzzleEditOp";
@@ -85,9 +86,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.container.addChild(this._moleculeLayer);
         this._moleculeLayer.visible = false;
 
-        // this._paint_cursor = new PaintCursor;
-        // this._paint_cursor.display.visible = false;
-        // this.addObject(this._paint_cursor);
+        this._paintCursor = new PaintCursor();
+        this._paintCursor.display.visible = false;
+        this.addObject(this._paintCursor, this.container);
 
         this._explosionRays = [];
         for (let ii: number = 0; ii < 10; ii++) {
@@ -436,9 +437,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public clearMouse(): void {
-        // this._paint_cursor.visible = false;
-        // this._paint_cursor.startDrag(false);
-        // this._strand_label.visible = false;
+        //document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = '';
+        this._paintCursor.display.visible = false;
+        //this._strand_label.visible = false;
     }
 
     public parseCommand(command: number, closest_index: number): any[] {
@@ -593,6 +594,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
+        
+        this._paintCursor.display.x = mouseX;
+        this._paintCursor.display.y = mouseY;
 
         let closest_dist: number = -1;
         let closest_index: number = -1;
@@ -608,10 +612,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         if (closest_index >= 0 && this._currentColor >= 0) {
             this.onBaseMouseMove(closest_index);
-            //Mouse.hide();
-            // this._paint_cursor.visible = true;
-            // this._paint_cursor.startDrag(true);
-            // this._paint_cursor.set_shape(this._current_color);
+            //document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
+            this._paintCursor.display.visible = true;
+            this._paintCursor.setShape(this._currentColor);
 
             let strandName: string = this.getStrandName(closest_index);
             if (strandName != null) {
@@ -3279,7 +3282,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _baseToY: number[];
     private _foldStartTime: number;
     private _foldDuration: number;
-    // private _paint_cursor: PaintCursor;
+    private _paintCursor: PaintCursor;
 
     private _zoomLevel: number = 0;
     private _desiredAngle: number = 0;
