@@ -4,7 +4,7 @@ import {GameObject} from "../../flashbang/core/GameObject";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {EPars} from "../EPars";
 
-class PaintCursor extends GameObject implements Updatable {
+export class PaintCursor extends GameObject implements Updatable {
     public constructor() {
         super();
         this._graphics = new Graphics();
@@ -89,16 +89,16 @@ class PaintCursor extends GameObject implements Updatable {
         if (oc !== PaintCursor.NULL) {
             this._graphics.beginFill(ic, 0);
             this._graphics.lineStyle(4, oc, 0.5);
-            this._graphics.drawCircle(0, 0, 8 + 3 * Math.cos(this.mode.time / 300.0));
+            this._graphics.drawCircle(0, 0, 8 + 3 * Math.cos(new Date().getTime() / 300.0));
             this._graphics.endFill();
 
             this._graphics.beginFill(ic, 0.5);
             this._graphics.lineStyle(0, 0x0, 0.0);
-            this._graphics.drawCircle(0, 0, 6 + 3 * Math.cos(this.mode.time / 300.0));
+            this._graphics.drawCircle(0, 0, 6 + 3 * Math.cos(new Date().getTime() / 300.0));
             this._graphics.endFill();
         } else {
             this._graphics.beginFill(ic, 0.5);
-            this._graphics.drawCircle(0, 0, 10 + 3 * Math.cos(this.mode.time / 300.0));
+            this._graphics.drawCircle(0, 0, 10 + 3 * Math.cos(new Date().getTime() / 300.0));
             this._graphics.endFill();
         }
     }
