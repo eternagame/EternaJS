@@ -230,6 +230,10 @@ export class StructureInput extends GamePanel implements Updatable {
         }
     }
 
+    public setTextInputVisibility(visible: boolean): void {
+        this._textInput.display.visible = visible;
+    }
+
     private readonly _pose: Pose2D;
     private _textInput: TextInputObject;
     private _prevCaretPostion: number = -1;

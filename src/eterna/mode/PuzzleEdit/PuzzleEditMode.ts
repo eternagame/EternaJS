@@ -145,7 +145,18 @@ export class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.viewOptionsButton.clicked.connect(() => {
-            this.showDialog(new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER));
+            let dialog:EternaViewOptionsDialog = new EternaViewOptionsDialog(EternaViewOptionsMode.PUZZLEMAKER);
+            this.showDialog(dialog);
+            for (let input of this._structureInputs) {
+                // The inputs could overlap with the menu, so hide them
+                input.setTextInputVisibility(false);
+            }
+            dialog.closed.then(() => {
+                for (let input of this._structureInputs) {
+                    // Show the inputs again
+                    input.setTextInputVisibility(true);
+                }
+            });
         });
 
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
