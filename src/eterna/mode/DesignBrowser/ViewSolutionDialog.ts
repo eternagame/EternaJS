@@ -156,7 +156,7 @@ export class ViewSolutionDialog extends Dialog<void> {
 
     private updateLayout(): void {
         let width = Flashbang.stageWidth - 90;
-        let height = Flashbang.stageHeight - 220;
+        let height = Flashbang.stageHeight - MathUtil.clamp(Flashbang.stageHeight * 0.23, 80, 220);
 
         this._panelBG.setSize(width, height);
 
