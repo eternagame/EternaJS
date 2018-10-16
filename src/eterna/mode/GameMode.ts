@@ -227,7 +227,7 @@ export abstract class GameMode extends AppMode {
     public onContextMenuEvent(e: Event): void {
         
         let handled = false;
-        if (e.target.parentNode.id === Eterna.PIXI_CONTAINER_ID) {
+        if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
                 this._contextMenuDialogRef.destroyObject();
                 handled = true;

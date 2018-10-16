@@ -5,6 +5,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "lib": ["dom", "es6", "scripthost", "es2016.array.include"],
     "module": "esnext",
     "target": "es2015",
     "allowJs": true,
