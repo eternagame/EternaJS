@@ -2948,8 +2948,6 @@ export class Pose2D extends ContainerObject implements Updatable {
                         node_points.push(base_xys[base_indices[jj]]);
                     }
 
-                    total_score += this._scoreNodes[ii].score;
-
                     if (!node_found && Utility.isPointWithin(mouse_p, node_points)) {
                         node_txt = this._scoreNodes[ii].text;
                         node_label = this._scoreNodes[ii].textLabel;
@@ -2958,6 +2956,10 @@ export class Pose2D extends ContainerObject implements Updatable {
                         this._scoreNodeIndex = ii;
                     }
                 }
+            }
+
+            for (let scoreNode of this._scoreNodes) {
+                total_score += scoreNode.score;
             }
 
             let score_label = "Total";
