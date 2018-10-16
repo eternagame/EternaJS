@@ -1,3 +1,3 @@
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export const IsLeftMouse = (e: InteractionEvent) => e.data.button === 0;
+export const IsLeftMouse = (e: InteractionEvent) => e.data.isPrimary;
