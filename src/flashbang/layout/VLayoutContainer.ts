@@ -4,7 +4,7 @@ import {DisplayUtil} from "../util/DisplayUtil";
 import {LayoutContainer} from "./LayoutContainer";
 
 /**
- * A Container that arranges its children horizontally.
+ * A Container that arranges its children vertically.
  * Call layout() after adding or removing children to update the sprite's layout.
  */
 export class VLayoutContainer extends LayoutContainer {
