@@ -1591,7 +1591,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public transformMarkers(): void {
-        if (this._prevOligosOrder == null || this._prevOligosOrder.length !== this._oligosOrder.length) {
+        if (this._prevOligosOrder == null || this._oligosOrder == null || this._prevOligosOrder.length !== this._oligosOrder.length) {
             this._prevOligosOrder = null;
             return;
         }
