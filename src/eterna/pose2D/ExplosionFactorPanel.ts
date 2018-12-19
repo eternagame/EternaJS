@@ -40,6 +40,7 @@ export class ExplosionFactorPanel extends GamePanel {
         this.addObject(decreaseButton, this.container);
         decreaseButton.clicked.connect(() => {
             input.text = (Math.round((parseFloat(input.text) - 0.05)*1000)/1000).toString();
+            this.factorUpdated.emit(parseFloat(input.text));
         });
 
         widthWalker += /*decreaseButton.container.width*/20 + 5;
@@ -49,6 +50,7 @@ export class ExplosionFactorPanel extends GamePanel {
         this.addObject(increaseButton, this.container);
         increaseButton.clicked.connect(() => {
             input.text = (Math.round((parseFloat(input.text)+ 0.05)*1000)/1000).toString();
+            this.factorUpdated.emit(parseFloat(input.text));
         });
 
         // Prevent PoseField from adding a drag surface over our buttons when we're trying to click, not drag
