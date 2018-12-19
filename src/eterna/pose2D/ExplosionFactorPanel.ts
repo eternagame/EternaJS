@@ -12,6 +12,10 @@ export class ExplosionFactorPanel extends GamePanel {
         super();
 
         this.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
+    }
+
+    protected added() {
+        super.added();
 
         let heightWalker: number = ExplosionFactorPanel.HMARGIN;
 
@@ -46,6 +50,10 @@ export class ExplosionFactorPanel extends GamePanel {
         increaseButton.clicked.connect(() => {
             input.text = (Math.round((parseFloat(input.text)+ 0.05)*1000)/1000).toString();
         });
+
+        // Prevent PoseField from adding a drag surface over our buttons when we're trying to click, not drag
+        decreaseButton.pointerDown.connect((e) => e.stopPropagation());
+        increaseButton.pointerDown.connect((e) => e.stopPropagation());
 
         widthWalker += /*increaseButton.container.width*/20;
         heightWalker += /*increaseButton.container.height*/26;
