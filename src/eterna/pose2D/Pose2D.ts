@@ -44,6 +44,7 @@ import {PuzzleEditOp} from "./PuzzleEditOp";
 import {RNAAnchorObject} from "./RNAAnchorObject";
 import {RNALayout, RNATreeNode} from "./RNALayout";
 import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
+import {ExplosionFactorPanel} from "./ExplosionFactorPanel";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -81,6 +82,17 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._secondaryScoreEnergyDisplay.position = new Point(17 + 119, 118);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
+
+        this._explosionFactorPanel = new ExplosionFactorPanel();
+        this._explosionFactorPanel.display.position = new Point(17, 200);
+        this._explosionFactorPanel.display.visible = false;
+        this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
+            this._explosionFactor = factor;
+            this.computeLayout(true);
+            this._redraw = true;
+        });
+        this.addObject(this._explosionFactorPanel, this.container);
+
 
         this._moleculeLayer = new Container();
         this.container.addChild(this._moleculeLayer);
@@ -594,7 +606,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
-        
+
         this._paintCursor.display.x = mouseX;
         this._paintCursor.display.y = mouseY;
 
@@ -1921,6 +1933,17 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this._baseFromY = null;
 
                 this.updateScoreNodeGui();
+
+                if (this.checkOverlap()) {
+                    // If overlaps have been introduced, make sure the explosion factor input is shown
+                    this._explosionFactorPanel.display.visible = true;
+                } else if (this._explosionFactorPanel.display.visible == true) {
+                    // If all overlaps have been removed, remove the explosion
+                    this._explosionFactor = 1;
+                    this._explosionFactorPanel.display.visible = false;
+                    this.computeLayout(true);
+                    this._redraw = true;
+                }
             }
 
         } else {
@@ -2404,7 +2427,11 @@ export class Pose2D extends ContainerObject implements Updatable {
                 exception_indices.push(oligo_index);
             }
         }
-        rna_drawer = new RNALayout(Pose2D.ZOOM_SPACINGS[this._zoomLevel], Pose2D.ZOOM_SPACINGS[this._zoomLevel], exception_indices);
+        rna_drawer = new RNALayout(
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel],
+            Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
+            exception_indices
+        );
 
         rna_drawer.setupTree(this._pairs);
         rna_drawer.drawTree();
@@ -3325,6 +3352,10 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _showTotalEnergy: boolean = true;
+
+    // Explosion Factor (RNALayout pairSpace multiplier)
+    private _explosionFactor: number = 1;
+    private _explosionFactorPanel: ExplosionFactorPanel;
 
     /// For tracking a base
     private _trackedIndices: number[] = [];
