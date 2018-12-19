@@ -146,7 +146,6 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
 
     public set text(value: string) {
         this._obj.value = value;
-        this.valueChanged.emit(value);
     }
 
     public get caretPosition(): number {
