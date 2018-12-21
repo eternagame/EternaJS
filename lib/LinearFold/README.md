@@ -1,53 +1,121 @@
-LinearFold: Linear-Time Prediction for RNA Secondary Structures
-============================================
+This codebase replaces the now deprecated version: https://github.com/abentu0101/LinearFold.
+This version fixes many bugs and design problems in the old version.
 
-This repository contains the C++ source code for the LinearFold project,
-the first linear-time prediction algorithm/software for RNA secondary structures.
+# LinearFold: Linear-Time Prediction for RNA Secondary Structures
 
-Preprint:
-LinearFold: Linear-Time Prediction of RNA Secondary Structures
+This repository contains the C++ source code for the LinearFold project, the first linear-time prediction algorithm/software for RNA secondary structures.
 
-Dezhong Deng, Kai Zhao, David Hendrix, David Mathews, and Liang Huang*
+Preprint: LinearFold: Linear-Time Prediction of RNA Secondary Structures
 
-*corresponding author
+Liang Huang*, He Zhang**, Dezhong Deng**, Kai Zhao, Kaibo Liu, David Hendrix, David Mathews
 
-doi: https://doi.org/10.1101/263509
+\* corresponding author
+
+** contributed equally
 
 Web server: http://linearfold.eecs.oregonstate.edu
 
-#### To Compile
-LinearFold can be compiled with ```cmake``` with following commands:
 
+## Dependencies
+gcc 4.8.5 or above; 
+python2.7
+
+## To Compile
 ```
-mkdir build
-cd build
-cmake ..
-make linearfold
+make
 ```
 
-Note that there are two external libraries stated in ```CMakeLists.txt``` file:
-
-1. ```-lprofiler``` is from Google Performance Tools, and is used to profile the parser, which is turned __off__ by default.
-2. ```-ltcmalloc``` is also from Google Performance Tools, which replaces the default ```malloc``` from ```glibc``` and can bring ~5% speedup.
-
-A minimum gcc version of 4.9.0 is required. 
-
-#### To Run
+## To Run
 The LinearFold parser can be run with:
 ```
-echo "SEQUENCE" | linearfold [-b beam_size] [-v]
+echo SEQUENCE | ./linearfold [OPTIONS]
 
 OR
 
-cat SEQ_OR_FASTA_FILE | linearfold [-b beam_size] [-v]
+cat SEQ_OR_FASTA_FILE | ./linearfold [OPTIONS]
+```
+Both FASTA format and pure-sequence format are supported for input.
+
+OPTIONS:
+```
+-b BEAM_SIZE
+```
+The beam size (default 100). Use 0 for infinite beam.
+```
+-V
+```
+Switches LinearFold-C (by default) to LinearFold-V.
+```
+--verbose
+```
+Prints out energy of each loop in the structure. (default False)
+```
+--sharpturn
+```
+Enable sharpturn in prediction. (default False)
+```
+--eval
+```
+Enable eval mode, which can calculate free energy for a given structure of a sequence. (default False)
+
+## Example Run Predict
+```
+cat testseq | ./linearfold
+UGAGUUCUCGAUCUCUAAAAUCG
+....................... (-0.22)
+AAAACGGUCCUUAUCAGGACCAAACA
+.....((((((....))))))..... (4.91)
+AUUCUUGCUUCAACAGUGUUUGAACGGAAU
+.............................. (-0.29)
+UCGGCCACAAACACACAAUCUACUGUUGGUCGA
+(((((((...................))))))) (0.99)
+GUUUUUAUCUUACACACGCUUGUGUAAGAUAGUUA
+.....(((((((((((....))))))))))).... (6.66)
+
+echo GGGCUCGUAGAUCAGCGGUAGAUCGCUUCCUUCGCAAGGAAGCCCUGGGUUCAAAUCCCAGCGAGUCCACCA | ./linearfold -V -b 20
+GGGCUCGUAGAUCAGCGGUAGAUCGCUUCCUUCGCAAGGAAGCCCUGGGUUCAAAUCCCAGCGAGUCCACCA
+(((((((..((((.......))))((((((((...)))))))).(((((.......)))))))))))).... (-31.50)
 ```
 
-1. -v switches LinearFold-C (by default) to LinearFold-V. 
-2. The default beam_size is 100; use 0 for infinite beam. 
-3. Both FASTA format and pure-sequence format are supported. 
-
-For example:
-#### Example Run
+## Example Run Eval
 ```
-cat ../testseq | ./linearfold 
+cat testeval | ./linearfold --eval
+UGAGUUCUCGAUCUCUAAAAUCG
+.(((........)))........ (-1.80)
+AAAACGGUCCUUAUCAGGACCAAACA
+.....((((((....))))))..... (-9.30)
+AUUCUUGCUUCAACAGUGUUUGAACGGAAU
+(((((...(((((......))))).))))) (-6.80)
+UCGGCCACAAACACACAAUCUACUGUUGGUCGA
+(((((((((..............))).)))))) (-7.80)
+GUUUUUAUCUUACACACGCUUGUGUAAGAUAGUUA
+....((((((((((((....))))))))))))... (-13.00)
+
+echo -e "GGGCUCGUAGAUCAGCGGUAGAUCGCUUCCUUCGCAAGGAAGCCCUGGGUUCAAAUCCCAGCGAGUCCACCA\n(((((((..((((.......))))((((((((...)))))))).(((((.......))))))))))))....\n" | ./linearfold --eval --verbose
+Hairpin loop ( 13, 21) CG : 4.50
+Interior loop ( 12, 22) UA; ( 13, 21) CG : -2.40
+Interior loop ( 11, 23) AU; ( 12, 22) UA : -1.10
+Interior loop ( 10, 24) GC; ( 11, 23) AU : -2.40
+Hairpin loop ( 32, 36) UA : 5.90
+Interior loop ( 31, 37) UA; ( 32, 36) UA : -0.90
+Interior loop ( 30, 38) CG; ( 31, 37) UA : -2.10
+Interior loop ( 29, 39) CG; ( 30, 38) CG : -3.30
+Interior loop ( 28, 40) UA; ( 29, 39) CG : -2.40
+Interior loop ( 27, 41) UA; ( 28, 40) UA : -0.90
+Interior loop ( 26, 42) CG; ( 27, 41) UA : -2.10
+Interior loop ( 25, 43) GC; ( 26, 42) CG : -3.40
+Hairpin loop ( 49, 57) GC : 4.40
+Interior loop ( 48, 58) GC; ( 49, 57) GC : -3.30
+Interior loop ( 47, 59) GC; ( 48, 58) GC : -3.30
+Interior loop ( 46, 60) UA; ( 47, 59) GC : -2.10
+Interior loop ( 45, 61) CG; ( 46, 60) UA : -2.10
+Multi loop ( 7, 62) GC : 1.40
+Interior loop ( 6, 63) CG; ( 7, 62) GC : -2.40
+Interior loop ( 5, 64) UA; ( 6, 63) CG : -2.40
+Interior loop ( 4, 65) CG; ( 5, 64) UA : -2.10
+Interior loop ( 3, 66) GU; ( 4, 65) CG : -2.50
+Interior loop ( 2, 67) GC; ( 3, 66) GU : -1.50
+Interior loop ( 1, 68) GC; ( 2, 67) GC : -3.30
+GGGCUCGUAGAUCAGCGGUAGAUCGCUUCCUUCGCAAGGAAGCCCUGGGUUCAAAUCCCAGCGAGUCCACCA
+(((((((..((((.......))))((((((((...)))))))).(((((.......)))))))))))).... (-31.50)
 ```

@@ -18,7 +18,7 @@
 #include <string.h>
 #include <cmath>
 
-#include "energy_par.h" // energy_par stuff
+#include "energy_parameter.h" // energy_parameter stuff
 #include "intl11.h"
 #include "intl21.h"
 #include "intl22.h"
@@ -42,7 +42,7 @@ inline int MAX2(int a, int b) {if (a >= b)return a;else return b;}
 inline void v_init_tetra_hex_tri(std::string& seq, int seq_length, std::vector<int>& if_tetraloops, std::vector<int>& if_hexaloops, std::vector<int>& if_triloops) {
 
     // TetraLoops
-    if_tetraloops.resize(seq_length-5, -1);
+    if_tetraloops.resize(seq_length-5<0?0:seq_length-5, -1);
     for (int i = 0; i < seq_length-5; ++i) {
         if (!(seq[i] == 'C' && seq[i+5] == 'G'))
             continue;
@@ -53,7 +53,7 @@ inline void v_init_tetra_hex_tri(std::string& seq, int seq_length, std::vector<i
     }
 
     // Triloops
-    if_triloops.resize(seq_length-4, -1);
+    if_triloops.resize(seq_length-4<0?0:seq_length-4, -1);
     for (int i = 0; i < seq_length-4; ++i) {
         if (!((seq[i] == 'C' && seq[i+4] == 'G') || (seq[i] == 'G' && seq[i+4] == 'C')))
             continue;
@@ -64,7 +64,7 @@ inline void v_init_tetra_hex_tri(std::string& seq, int seq_length, std::vector<i
     }
 
     // Hexaloops
-    if_hexaloops.resize(seq_length-7, -1);
+    if_hexaloops.resize(seq_length-7<0?0:seq_length-7, -1);
     for (int i = 0; i < seq_length-7; ++i) {
         if (!(seq[i] == 'A' && seq[i+7] == 'U'))
             continue;
