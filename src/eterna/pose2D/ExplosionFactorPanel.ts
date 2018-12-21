@@ -31,7 +31,10 @@ export class ExplosionFactorPanel extends GamePanel {
         input.text = '1';
         input.display.position = new Point(widthWalker, heightWalker);
         this.addObject(input, this.container);
-        input.valueChanged.connect(val => this.factorUpdated.emit(parseFloat(val)));
+        input.valueChanged.connect(val => {
+            if (isNaN(parseFloat(input.text))) return;
+            this.factorUpdated.emit(parseFloat(val))
+        });
 
         widthWalker += /*input.width*/ 50 + 5;
 
