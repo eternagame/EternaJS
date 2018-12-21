@@ -4,6 +4,7 @@ import {Signal} from "../../signals/Signal";
 import {GameButton} from "../ui/GameButton";
 import {TextInputObject} from "../ui/TextInputObject";
 import {Fonts} from "../util/Fonts";
+import {KeyCode} from "../../flashbang/input/KeyCode";
 
 export class ExplosionFactorPanel extends GamePanel {
     public readonly factorUpdated: Signal<number> = new Signal();
@@ -45,6 +46,8 @@ export class ExplosionFactorPanel extends GamePanel {
             input.text = (Math.round((parseFloat(input.text) - 0.25)*1000)/1000).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
+        decreaseButton.hotkey(KeyCode.BracketLeft);
+        decreaseButton.tooltip('Decrease space between paired bases ([)');
 
         widthWalker += /*decreaseButton.container.width*/20 + 5;
 
@@ -55,6 +58,8 @@ export class ExplosionFactorPanel extends GamePanel {
             input.text = (Math.round((parseFloat(input.text)+ 0.25)*1000)/1000).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
+        increaseButton.hotkey(KeyCode.BracketRight);
+        increaseButton.tooltip('Increase space between paired bases (])');
 
         // Prevent PoseField from adding a drag surface over our buttons when we're trying to click, not drag
         decreaseButton.pointerDown.connect((e) => e.stopPropagation());
