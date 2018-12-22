@@ -8,7 +8,8 @@ import {TestMode} from "./debug/TestMode";
 import {Eterna} from "./Eterna";
 import {Folder} from "./folding/Folder";
 import {FolderManager} from "./folding/FolderManager";
-import {LinearFold} from "./folding/LinearFold";
+import {LinearFoldC} from "./folding/LinearFoldC";
+import {LinearFoldV} from "./folding/LinearFoldV";
 import {NuPACK} from "./folding/NuPACK";
 import {RNAFoldBasic} from "./folding/RNAFoldBasic";
 import {Vienna} from "./folding/Vienna";
@@ -389,7 +390,8 @@ export class EternaApp extends FlashbangApp {
             Vienna.create(),
             Vienna2.create(),
             NuPACK.create(),
-            LinearFold.create(),
+            LinearFoldC.create(),
+            LinearFoldV.create(),
             RNAFoldBasic.create()])
             .then((folders: Folder[]) => {
                 log.info("Folding engines intialized");

@@ -5,20 +5,8 @@ import {FullFoldResult} from "./engines/LinearFold_lib";
 import * as LinearFold_lib from "./engines/LinearFold_lib/index";
 import {Folder} from "./Folder";
 
-export class LinearFold extends Folder {
-    public static readonly NAME = "LinearFold";
-
-    /**
-     * Asynchronously creates a new instance of the Vienna folder.
-     * @returns {Promise<LinearFold>}
-     */
-    public static create(): Promise<LinearFold> {
-        return import("./engines/LinearFold")
-            .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new LinearFold(program));
-    }
-
-    private constructor(lib: LinearFold_lib) {
+export abstract class LinearFoldBase extends Folder {
+    protected constructor(lib: LinearFold_lib) {
         super();
         this._lib = lib;
     }
@@ -30,10 +18,6 @@ export class LinearFold extends Folder {
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
         log.warn("LinearFold.get_dot_plot: unimplemented");
         return [];
-    }
-
-    public get name(): string {
-        return LinearFold.NAME;
     }
 
     public get isFunctional(): boolean {
