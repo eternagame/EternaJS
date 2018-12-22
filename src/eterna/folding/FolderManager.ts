@@ -1,7 +1,8 @@
 import {Eterna} from "../Eterna";
 import {Folder} from "./Folder";
 import {RNAFoldBasic} from "./RNAFoldBasic";
-import {LinearFold} from "./LinearFold";
+import {LinearFoldC} from "./LinearFoldC";
+import {LinearFoldV} from "./LinearFoldV";
 import {Vienna} from "./Vienna";
 
 export class FolderManager {
@@ -59,7 +60,8 @@ export class FolderManager {
 
             if (folder.name.length === 0
                 || folder.name === RNAFoldBasic.NAME
-                || folder.name === LinearFold.NAME
+                || folder.name === LinearFoldC.NAME
+                || folder.name === LinearFoldV.NAME
                 || !folder.isFunctional
                 || (filter_cb != null && filter_cb(folder))) {
                 continue;
