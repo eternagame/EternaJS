@@ -25,12 +25,12 @@ export abstract class LinearFoldBase extends Folder {
     }
 
     public get canScoreStructures(): boolean {
-        return false;
+        return true;
     }
 
     public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
-        log.warn("LinearFold.score_structures: unimplemented");
-        return 0;
+        // TODO: Properly implement everything per other implementations of this function in other folders
+        return this._lib.FullEval(EPars.sequenceToString(seq), EPars.pairsToParenthesis(pairs)).energy;
     }
 
     public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {

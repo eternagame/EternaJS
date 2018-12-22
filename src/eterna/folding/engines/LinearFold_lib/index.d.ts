@@ -19,11 +19,14 @@
  *~ is the exported object from the file
  */
 
+import * as stdcpp from "../../../emscripten/stdcpp";
+
 export = LinearFold_lib;
 
 /*~ Write your module's methods and properties in this class */
 declare class LinearFold_lib {
     FullFoldDefault(seqString: string): LinearFold_lib.FullFoldResult;
+    FullEval(seqString: string, structString: string): LinearFold_lib.FullEvalResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
@@ -32,6 +35,13 @@ declare class LinearFold_lib {
 declare namespace LinearFold_lib {
     export interface FullFoldResult {
         structure: string;
+
+        delete (): void;
+    }
+
+    export interface FullEvalResult {
+        nodes: stdcpp.vector<number>;
+        energy: number;
 
         delete (): void;
     }
