@@ -1,7 +1,5 @@
 /* eslint-disable max-len, global-require */
 
-import * as _ from "lodash";
-
 export class Bitmaps {
     public static readonly NovaAMissionReq: string = require("assets/NOVA/Mission/a-box.png");
     public static readonly NovaAReq: string = require("assets/NOVA/Constraints/a-requirement-box.png");
@@ -290,7 +288,7 @@ export class Bitmaps {
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
             Bitmaps.ALL_URLS = [];
-            for (let value of _.values(Bitmaps)) {
+            for (let value of Object.values(Bitmaps)) {
                 if (typeof (value) === "string") {
                     Bitmaps.ALL_URLS.push(value);
                 }
