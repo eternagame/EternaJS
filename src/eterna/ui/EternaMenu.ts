@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import {Point} from "pixi.js";
 import {Enableable} from "../../flashbang/objects/Enableable";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
@@ -37,7 +36,7 @@ export class EternaMenu extends GamePanel implements Enableable {
     }
 
     public addMenuButton(menuButton: GameButton): number {
-        let existingIdx = _.findIndex(this._menus, (menu): boolean => menu.menuButton === menuButton);
+        let existingIdx = this._menus.findIndex((menu): boolean => menu.menuButton === menuButton);
         if (existingIdx >= 0) {
             return existingIdx;
         }
