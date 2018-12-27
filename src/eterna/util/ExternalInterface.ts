@@ -246,18 +246,14 @@ export class ExternalInterface {
     }
 
     private static isAsync(returnValue: any): boolean {
-        if (returnValue == null) {
+        if (returnValue == null || returnValue.cause == null || returnValue.cause.async == null) {
             return false;
         }
 
-        try {
-            let async = returnValue.cause.async;
-            if (async != null) return (Boolean(async) === true || (typeof(async) === "string" && async.toLowerCase() === "true"));
-        } finally {
-            // Fall through
-        }
-
-        return false;
+        return (
+            Boolean(returnValue.cause.async) === true
+            || (typeof returnValue.cause.async === "string" && returnValue.cause.async.toLowerCase() === "true")
+        );
     }
 
     private static updateCallbacks(): void {
