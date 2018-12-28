@@ -24,6 +24,8 @@ SET(LINEARFOLD_FILES
     emscripten/Bindings.cpp
     emscripten/FullFold.cpp
     emscripten/FullFold.h
+    emscripten/FullEval.cpp
+    emscripten/FullEval.h
     ../emscripten_common/EmscriptenUtils.cpp
     ../emscripten_common/EmscriptenUtils.h
 )

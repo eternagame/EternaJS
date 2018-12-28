@@ -1,5 +1,5 @@
-#ifndef FASTCKY_FULLFOLD_H
-#define FASTCKY_FULLFOLD_H
+#ifndef LINEARFOLD_FULLFOLD_H
+#define LINEARFOLD_FULLFOLD_H
 
 #include <string>
 
@@ -10,4 +10,4 @@ struct FullFoldResult {
 FullFoldResult* FullFoldDefault (std::string seqString);
 
 
-#endif //FASTCKY_FULLFOLD_H
+#endif //LINEARFOLD_FULLFOLD_H

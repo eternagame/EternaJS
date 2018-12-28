@@ -24,6 +24,10 @@
 
 #define SPECIAL_HP
 
+#ifdef __EMSCRIPTEN__
+#define printf(...)
+#endif
+
 using namespace std;
 
 
@@ -37,7 +41,7 @@ using namespace std;
         for(auto &kv : map) {
             sorted_keys.push_back(kv);
         }
-        sort(sorted_keys.begin(), sorted_keys.end(), comparefunc);    
+        sort(sorted_keys.begin(), sorted_keys.end(), comparefunc);
     }
 #endif
 
@@ -127,7 +131,7 @@ void BeamCKYParser::get_parentheses(char* result, string& seq) {
                     }
                 }
                 break;
-            case MANNER_MULTI: 
+            case MANNER_MULTI:
                 p = i + state.trace.paddings.l1;
                 q = j - state.trace.paddings.l2;
                 stk.push(make_tuple(p, q, bestM2[q][p]));
@@ -167,7 +171,7 @@ void BeamCKYParser::get_parentheses(char* result, string& seq) {
                 k = j - 1;
                 if (k != -1)
                     stk.push(make_tuple(0, k, bestC[k]));
-                if (is_verbose) 
+                if (is_verbose)
                     external_energy += - v_score_external_unpaired(0, 0); // zero at this moment
                 break;
             case MANNER_C_eq_C_plus_P:
@@ -541,7 +545,7 @@ BeamCKYParser::DecoderResult BeamCKYParser::parse(string& seq) {
                                     && beamstepP.size() > MIN_CUBE_PRUNING_SIZE;
 #else
             bool use_cube_pruning = false;
-#endif               
+#endif
 
 #ifdef lv
             sort_keys(beamstepP, keys);
@@ -938,8 +942,8 @@ BeamCKYParser::DecoderResult BeamCKYParser::parse(string& seq) {
 BeamCKYParser::BeamCKYParser(int beam_size,
                              bool nosharpturn,
                              bool verbose)
-    : beam(beam_size), 
-      no_sharp_turn(nosharpturn), 
+    : beam(beam_size),
+      no_sharp_turn(nosharpturn),
       is_verbose(verbose) {
 #ifdef lv
         initialize();
@@ -951,6 +955,7 @@ BeamCKYParser::BeamCKYParser(int beam_size,
 
 
 // -------------------------------------------------------------
+#ifndef __EMSCRIPTEN__
 
 int main(int argc, char** argv){
 
@@ -1020,7 +1025,7 @@ int main(int argc, char** argv){
                     printf("sequence length is not equal to structure length!\n");
                     lineIndex ++;
                     continue;
-                } 
+                }
 
                 // remove peudoknots
                 char r;
@@ -1057,7 +1062,7 @@ int main(int argc, char** argv){
             }
 
             printf("%s\n", seq.c_str());
-            
+
             // convert to uppercase
             transform(seq.begin(), seq.end(), seq.begin(), ::toupper);
 
@@ -1084,7 +1089,7 @@ int main(int argc, char** argv){
         }
 
         // lhuang: TODO add --time switch
-        // printf("beam %d\tlen %d\ttime %.5f\tscore %.2f\n", beamsize, seq.length(), result.time, printscore); 
+        // printf("beam %d\tlen %d\ttime %.5f\tscore %.2f\n", beamsize, seq.length(), result.time, printscore);
 
         // ++num;
         // total_len += seq.length();
@@ -1095,3 +1100,5 @@ int main(int argc, char** argv){
 
     return 0;
 }
+
+#endif
