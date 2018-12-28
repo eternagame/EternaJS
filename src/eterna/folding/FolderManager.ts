@@ -60,8 +60,6 @@ export class FolderManager {
 
             if (folder.name.length === 0
                 || folder.name === RNAFoldBasic.NAME
-                || folder.name === LinearFoldC.NAME
-                || folder.name === LinearFoldV.NAME
                 || !folder.isFunctional
                 || (filter_cb != null && filter_cb(folder))) {
                 continue;
