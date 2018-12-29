@@ -691,6 +691,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.MUTATION) {
+            this._bg.visible = true;
+            this._bgGraphics.visible = true;
+            this._bgGraphics.clear();
+            this._bgGraphics.beginFill(0x1E314B, 0.5);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
+            this._bgGraphics.endFill();
+
             this._base1.texture = BitmapManager.getBitmap(Bitmaps.BaseAMid);
             this._base2.texture = BitmapManager.getBitmap(Bitmaps.BaseGMid);
             this._base3.texture = BitmapManager.getBitmap(Bitmaps.BaseUMid);
@@ -700,27 +707,31 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._base3.visible = true;
             this._base4.visible = true;
 
-            this._base1.x = 3;
+            this._base1.x = 28;
             this._base1.y = 8;
 
-            this._base2.x = 11;
+            this._base2.x = 36;
             this._base2.y = 8;
 
-            this._base3.x = 19;
+            this._base3.x = 44;
             this._base3.y = 8;
 
-            this._base4.x = 27;
+            this._base4.x = 52;
             this._base4.y = 7;
 
-            this._valText.visible = true;
+            this._reqClarifyText.visible = true;
+            this._reqClarifyText.text = `AT MOST ${val} CHANGES`;
+            this._reqStatTxt.visible = true;
 
             ConstraintBox.createTextStyle()
                 .append(stat.toString(), {fill: (satisfied ? 0x00aa00 : 0xaa0000)})
-                .append(val.toString())
-                .apply(this._valText);
+                .append('/' + val.toString())
+                .apply(this._reqStatTxt);
 
             tooltip.append(`You can only mutate up to ${val.toString()} bases`);
             tooltip.apply(this._bigText);
+
+            this._outline.visible = true;
         } else if (constraintType === ConstraintType.STACK) {
             let baseTexture = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);
             this._base1.texture = baseTexture;
