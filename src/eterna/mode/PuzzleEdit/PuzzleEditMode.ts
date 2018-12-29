@@ -35,6 +35,8 @@ import {GameMode} from "../GameMode";
 import {PuzzleEditToolbar} from "./PuzzleEditToolbar";
 import {StructureInput} from "./StructureInput";
 import {SubmitPuzzleDetails, SubmitPuzzleDialog} from "./SubmitPuzzleDialog";
+import {LinearFoldC} from "../../folding/LinearFoldC";
+import {LinearFoldV} from "../../folding/LinearFoldV";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -572,7 +574,11 @@ export class PuzzleEditMode extends GameMode {
             params_title = "[VRNA_2]";
         } else if (this._folder.name == NuPACK.NAME) {
             params_title = "[NuPACK]";
-        } else {
+        } else if (this._folder.name == LinearFoldC.NAME) {
+            params_title = "[LFC]";
+        } else if (this._folder.name == LinearFoldV.NAME) {
+            params_title = "[LFV]";
+        }else {
             params_title = "";
         }
         if (this._poses.length > 1) {
