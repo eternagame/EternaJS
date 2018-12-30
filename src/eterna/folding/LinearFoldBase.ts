@@ -140,6 +140,10 @@ export abstract class LinearFoldBase extends Folder {
         }
     }
 
+    public get canFoldWithBindingSite(): boolean {
+        return false;
+    }
+
     public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         log.warn("LinearFold.fold_sequence_with_binding_site: unimplemented");
         return this.foldSequence(seq, null);

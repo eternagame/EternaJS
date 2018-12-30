@@ -192,6 +192,10 @@ export class Vienna2 extends Folder {
         return pairs;
     }
 
+    public get canFoldWithBindingSite(): boolean {
+        return true;
+    }
+
     /* override */
     public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         let key: any = {
