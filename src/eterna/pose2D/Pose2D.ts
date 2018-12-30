@@ -3071,7 +3071,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             let attemptSetDelta = () => {
                 try {
                     this._deltaScoreEnergyDisplay.setEnergyText(
-                        "Native/Target Delta",
+                        "Natural/Target Delta",
                         Math.round(this._getEnergyDelta()) / 100 + " kcal"
                     );
                 } catch (e) {
