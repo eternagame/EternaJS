@@ -78,13 +78,17 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._primaryScoreEnergyDisplay.position = new Point(17, 118);
         this.container.addChild(this._primaryScoreEnergyDisplay);
 
+        this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this.container.addChild(this._deltaScoreEnergyDisplay);
+
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119*2, 118);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
 
         this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position = new Point(17, 200);
+        this._explosionFactorPanel.display.position = new Point(17, 118 + 82);
         this._explosionFactorPanel.display.visible = false;
         this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
             this._explosionFactor = factor;
@@ -2214,6 +2218,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
+        this._deltaScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
         this._secondaryScoreEnergyDisplay.visible =
             (show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText);
     }
@@ -2949,121 +2954,130 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public set getEnergyDelta(cb: () => number) {
+        this._getEnergyDelta = cb;
+    }
+
     private static readonly MOUSE_LOC: Point = new Point();
     private updateScoreNodeGui(): void {
-        this._scoreNodeIndex = -1;
+        // This is because the undo stack isn't populated yet when this is run on puzzle boot, which is needed for
+        // the delta - TODO: Handle this in a less hacky way
+        setTimeout(() => {
+            this._scoreNodeIndex = -1;
 
-        if (this._scoreNodes != null) {
-            let total_score: number = 0;
-            let node_found: boolean = false;
-            let node_txt: string = "";
-            let node_label: string = "";
-            let node_score: string = "";
+            if (this._scoreNodes != null) {
+                let totalScore: number = 0;
+                let nodeFound: boolean = false;
+                let nodeTxt: string = "";
+                let nodeLabel: string = "";
+                let nodeScore: string = "";
 
-            if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
-                let base_xys: Point[] = [];
+                if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+                    let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+                    let base_xys: Point[] = [];
 
-                for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
-                    base_xys.push(this.getBaseXY(ii));
-                }
-                for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                    let base_indices: number[] = this._scoreNodes[ii].baseIndices;
-                    let node_points: Point[] = [];
-
-                    for (let jj: number = 0; jj < base_indices.length; jj++) {
-                        node_points.push(base_xys[base_indices[jj]]);
+                    for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
+                        base_xys.push(this.getBaseXY(ii));
                     }
+                    for (let ii = 0; ii < this._scoreNodes.length; ii++) {
+                        let base_indices: number[] = this._scoreNodes[ii].baseIndices;
+                        let node_points: Point[] = [];
 
-                    if (!node_found && Utility.isPointWithin(mouse_p, node_points)) {
-                        node_txt = this._scoreNodes[ii].text;
-                        node_label = this._scoreNodes[ii].textLabel;
-                        node_score = this._scoreNodes[ii].textScore;
-                        node_found = true;
-                        this._scoreNodeIndex = ii;
-                    }
-                }
-            }
+                        for (let jj: number = 0; jj < base_indices.length; jj++) {
+                            node_points.push(base_xys[base_indices[jj]]);
+                        }
 
-            for (let scoreNode of this._scoreNodes) {
-                total_score += scoreNode.score;
-            }
-
-            let score_label = "Total";
-            let score_score = "";
-            let factor: number = 0;
-            if ((this._molecularBindingBases != null) ||
-                (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) ||
-                (this._oligos != null)) {
-
-                let label_elems: string[] = [];
-                let score_elems: string[] = [];
-
-                if (this._molecularBindingBases != null) {
-                    factor++;
-                    if (this._moleculeIsBoundReal) {
-                        label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
-                        // Round to 2 decimal places
-                        let bonus = Math.round(this._molecularBindingBonus * 1e2) / 1e2;
-                        score_elems.push(EnergyScoreDisplay.green(` ${bonus} kcal`));
-                    } else {
-                        label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
-                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
+                        if (!nodeFound && Utility.isPointWithin(mouse_p, node_points)) {
+                            nodeTxt = this._scoreNodes[ii].text;
+                            nodeLabel = this._scoreNodes[ii].textLabel;
+                            nodeScore = this._scoreNodes[ii].textScore;
+                            nodeFound = true;
+                            this._scoreNodeIndex = ii;
+                        }
                     }
                 }
-                if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
-                    factor++;
-                    let malus: number = this._duplexCost + Math.round(this._oligoMalus);
-                    if (this._oligoPaired) {
-                        label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
-                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
-                    } else {
-                        label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
-                        score_elems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
-                    }
+
+                for (let scoreNode of this._scoreNodes) {
+                    totalScore += scoreNode.score;
                 }
-                if (this._oligos != null) {
-                    factor++;
-                    if (this._oligosPaired === 0) {
-                        if (this._oligos.length > 1) {
-                            label_elems.push(EnergyScoreDisplay.grey("No Oligo Bound"));
+
+                let scoreLabel = "Total";
+                let scoreScore = "";
+                let factor: number = 0;
+                if ((this._molecularBindingBases != null) ||
+                    (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) ||
+                    (this._oligos != null)) {
+
+                    let label_elems: string[] = [];
+                    let score_elems: string[] = [];
+
+                    if (this._molecularBindingBases != null) {
+                        factor++;
+                        if (this._moleculeIsBoundReal) {
+                            label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
+                            // Round to 2 decimal places
+                            let bonus = Math.round(this._molecularBindingBonus * 1e2) / 1e2;
+                            score_elems.push(EnergyScoreDisplay.green(` ${bonus} kcal`));
+                        } else {
+                            label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
+                            score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
+                        }
+                    }
+                    if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
+                        factor++;
+                        let malus: number = this._duplexCost + Math.round(this._oligoMalus);
+                        if (this._oligoPaired) {
+                            label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
+                            score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                         } else {
                             label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
+                            score_elems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
                         }
-                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
-                    } else {
-                        let malus = this._duplexCost;
-                        for (let ii = 0; ii < this._oligosPaired; ii++) {
-                            malus += Math.round(this._oligos[this._oligosOrder[ii]].malus);
-                        }
-                        if (this._oligosPaired > 1) {
-                            label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
-                        } else {
-                            label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
-                        }
-                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     }
+                    if (this._oligos != null) {
+                        factor++;
+                        if (this._oligosPaired === 0) {
+                            if (this._oligos.length > 1) {
+                                label_elems.push(EnergyScoreDisplay.grey("No Oligo Bound"));
+                            } else {
+                                label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
+                            }
+                            score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
+                        } else {
+                            let malus = this._duplexCost;
+                            for (let ii = 0; ii < this._oligosPaired; ii++) {
+                                malus += Math.round(this._oligos[this._oligosOrder[ii]].malus);
+                            }
+                            if (this._oligosPaired > 1) {
+                                label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
+                            } else {
+                                label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
+                            }
+                            score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
+                        }
+                    }
+
+                    scoreLabel += EnergyScoreDisplay.grey(" (") + label_elems.join(", ") + EnergyScoreDisplay.grey(")");
+                    scoreScore = (totalScore / 100).toString() + score_elems.join("");
+
+                } else {
+                    scoreScore = (totalScore / 100).toString() + " kcal";
                 }
+                this.updateEnergyDisplaySizeLocation(factor);
 
-                score_label += EnergyScoreDisplay.grey(" (") + label_elems.join(", ") + EnergyScoreDisplay.grey(")");
-                score_score = (total_score / 100).toString() + score_elems.join("");
-
-            } else {
-                score_score = (total_score / 100).toString() + " kcal";
+                this._primaryScoreEnergyDisplay.setEnergyText(scoreLabel, scoreScore);
+                this._deltaScoreEnergyDisplay.setEnergyText("Native/Target Delta", Math.round(this._getEnergyDelta())/100 + " kcal");
+                this._secondaryScoreEnergyDisplay.setEnergyText(nodeLabel, nodeScore);
+                this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && nodeFound);
             }
-            this.updateEnergyDisplaySizeLocation(factor);
-
-            this._primaryScoreEnergyDisplay.setEnergyText(score_label, score_score);
-            this._secondaryScoreEnergyDisplay.setEnergyText(node_label, node_score);
-            this._secondaryScoreEnergyDisplay.visible = (this._showTotalEnergy && node_found);
-        }
+        });
     }
 
     private updateEnergyDisplaySizeLocation(factor: number): void {
         this._primaryScoreEnergyDisplay.position = new Point(17, 118);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119*2 + factor * 59, 118);
         this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
@@ -3285,6 +3299,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
 
+    /// Pointer to function that needs to be called in a GameMode to have access to appropriate state
+    private _getEnergyDelta: () => number;
+
     private _lettermode: boolean = false;
     private _displayScoreTexts: boolean;
 
@@ -3351,6 +3368,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     // New Score Display panels
     private _primaryScoreEnergyDisplay: EnergyScoreDisplay;
     private _secondaryScoreEnergyDisplay: EnergyScoreDisplay;
+    private _deltaScoreEnergyDisplay: EnergyScoreDisplay;
     private _showTotalEnergy: boolean = true;
 
     // Explosion Factor (RNALayout pairSpace multiplier)

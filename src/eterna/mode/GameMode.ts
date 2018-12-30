@@ -17,6 +17,9 @@ import {Tooltips} from "../ui/Tooltips";
 import {UILockDialog} from "../ui/UILockDialog";
 import {URLButton} from "../ui/URLButton";
 import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
+import {Folder} from "../folding/Folder";
+import {UndoBlock} from "../UndoBlock";
+import {EPars} from "../EPars";
 
 export abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
@@ -159,10 +162,23 @@ export abstract class GameMode extends AppMode {
         this._poseFields = [];
         this._poses = [];
 
-        for (let newPoseField of newPoseFields) {
+        newPoseFields.forEach((newPoseField, idx) => {
             this._poseFields.push(newPoseField);
             this._poses.push(newPoseField.pose);
-        }
+            newPoseField.pose.getEnergyDelta = () => {
+                // Sanity check
+                if (this._folder) {
+                    let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.sequence, pairs);
+
+                    // This changes between PoseEdit mode and PuzzleEditMode
+                    let targetPairs: number[] = this._targetPairs[idx] || this.getCurrentTargetPairs(idx);
+                    let nativePairs: number[] = this.getCurrentUndoBlock(idx).getPairs();
+
+                    return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.sequence)) - score(nativePairs);
+                }
+                return -1;
+            }
+        })
 
         this.layoutPoseFields();
     }
@@ -225,7 +241,7 @@ export abstract class GameMode extends AppMode {
     }
 
     public onContextMenuEvent(e: Event): void {
-        
+
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -278,6 +294,12 @@ export abstract class GameMode extends AppMode {
     protected _poseFields: PoseField[] = [];
     protected _poses: Pose2D[] = [];    // TODO: remove me!
     protected _isPipMode: boolean = false;
+
+    // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
+    protected _folder: Folder;
+    protected abstract getCurrentUndoBlock(index: number): UndoBlock;
+    protected abstract getCurrentTargetPairs(index: number): number[];
+    protected _targetPairs: number[][];
 }
 
 class ContextMenuDialog extends Dialog<void> {
