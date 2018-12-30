@@ -24,6 +24,10 @@ export abstract class Folder {
         return null;
     }
 
+    public get canFoldWithBindingSite(): boolean {
+        return false;
+    }
+
     public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 2.0, temp: number = 37): number[] {
         return null;
     }

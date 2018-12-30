@@ -186,6 +186,10 @@ export class Vienna extends Folder {
         return pairs;
     }
 
+    public get canFoldWithBindingSite(): boolean {
+        return true;
+    }
+
     public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
         let key: any = {
             primitive: "fold_aptamer",
