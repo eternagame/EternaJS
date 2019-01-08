@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import {BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
 import {Flashbang} from "../core/Flashbang";
 import {Assert} from "./Assert";
@@ -59,7 +58,7 @@ export class TextureUtil {
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
     public static loadURLs(urls: string[]): Promise<Texture[]> {
-        return Promise.all(_.map(urls, url => this.loadURL(url)));
+        return Promise.all(urls.map( url => this.loadURL(url)));
     }
 
     /**
