@@ -3442,7 +3442,7 @@ export class PoseEditMode extends GameMode {
                 }
             }
 
-            if (!this._poses[target_index].useLowPerformance) {
+            if (!this._poses[target_index].useSimpleGraphics) {
                 let stack_start: number = -1;
                 let last_other_stack: number = -1;
                 for (let ii = 0; ii < best_pairs.length; ii++) {
@@ -3486,7 +3486,7 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    private getCurrentUndoBlock(target_index: number = -1): UndoBlock {
+    protected getCurrentUndoBlock(target_index: number = -1): UndoBlock {
         if (target_index < 0) {
             return this._seqStacks[this._stackLevel][this._curTargetIndex];
         } else {
@@ -3606,7 +3606,7 @@ export class PoseEditMode extends GameMode {
 
     private _toolbar: PoseEditToolbar;
 
-    private _folder: Folder;
+    protected  _folder: Folder;
     /// Asynch folding
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: () => void = null;
@@ -3625,7 +3625,7 @@ export class PoseEditMode extends GameMode {
     private _moves: any[] = [];
     private _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
-    private _targetPairs: number[][] = [];
+    protected _targetPairs: number[][] = [];
     private _targetConditions: any[] = [];
     private _targetOligo: number[][] = [];
     private _oligoMode: number[] = [];
