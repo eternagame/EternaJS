@@ -24,6 +24,7 @@ export class Background extends ContainerObject {
         }
 
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
+        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.disableBubbles(value)))
     }
 
     public disableBubbles(disable: boolean): void {
