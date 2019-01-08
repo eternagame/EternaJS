@@ -297,8 +297,12 @@ export abstract class GameMode extends AppMode {
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     protected _folder: Folder;
-    protected abstract getCurrentUndoBlock(index: number): UndoBlock;
-    protected abstract getCurrentTargetPairs(index: number): number[];
+    protected getCurrentUndoBlock(index: number): UndoBlock {
+        return undefined;
+    };
+    protected getCurrentTargetPairs(index: number): number[] {
+        return undefined;
+    };
     protected _targetPairs: number[][];
 }
 

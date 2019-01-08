@@ -670,11 +670,11 @@ export class PuzzleEditMode extends GameMode {
         this._bindingSiteStack = [];
     }
 
-    private getCurrentUndoBlock(index: number): UndoBlock {
+    protected getCurrentUndoBlock(index: number): UndoBlock {
         return this._seqStack[this._stackLevel][index];
     }
 
-    private getCurrentTargetPairs(index: number): number[] {
+    protected getCurrentTargetPairs(index: number): number[] {
         return this._targetPairsStack[this._stackLevel][index];
     }
 
@@ -916,7 +916,7 @@ export class PuzzleEditMode extends GameMode {
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 
     private _structureInputs: StructureInput[];
-    private _folder: Folder;
+    protected _folder: Folder;
     private _seqStack: UndoBlock[][];
     private _targetPairsStack: number[][][];
     private _lockStack: boolean[][][];
