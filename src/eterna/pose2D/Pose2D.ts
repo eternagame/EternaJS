@@ -3078,7 +3078,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                     setTimeout(attemptSetDelta, 1000);
                 }
             }
-            setTimeout(attemptSetDelta);
+            setTimeout(attemptSetDelta, 50);
         }
     }
 
