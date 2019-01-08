@@ -171,7 +171,7 @@ export abstract class GameMode extends AppMode {
                     let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.sequence, pairs);
 
                     // This changes between PoseEdit mode and PuzzleEditMode
-                    let targetPairs: number[] = this._targetPairs[idx] || this.getCurrentTargetPairs(idx);
+                    let targetPairs: number[] = this.getCurrentTargetPairs(idx) || this._targetPairs[idx];
                     let nativePairs: number[] = this.getCurrentUndoBlock(idx).getPairs();
 
                     return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.sequence)) - score(nativePairs);
