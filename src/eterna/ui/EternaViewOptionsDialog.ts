@@ -35,6 +35,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         bind(Eterna.settings.displayFreeEnergies, "Display free energies for all structures (G)");
         bind(Eterna.settings.highlightRestricted, "Highlight restricted sequences");
         bind(Eterna.settings.showChat, "In-game chat");
+        bind(Eterna.settings.simpleGraphics, "Use simpler, less animated graphics");
 
         if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
             bind(Eterna.settings.autohideToolbar, "Autohide toolbar");

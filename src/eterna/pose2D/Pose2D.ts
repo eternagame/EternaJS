@@ -160,6 +160,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify(value => this.displayScoreTexts = value));
         this.regs.add(Eterna.settings.highlightRestricted.connectNotify(value => this.highlightRestricted = value));
         this.regs.add(Eterna.settings.displayAuxInfo.connectNotify(value => this.displayAuxInfo = value));
+        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.useSimpleGraphics = value))
     }
 
     public setSize(width: number, height: number): void {
@@ -983,13 +984,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._numberingMode;
     }
 
-    public set useLowPerformance(lowperform: boolean) {
-        this._lowperformMode = lowperform;
+    public set useSimpleGraphics(simpleGraphics: boolean) {
+        this._simpleGraphicsMods = simpleGraphics;
         this._redraw = true;
     }
 
-    public get useLowPerformance(): boolean {
-        return this._lowperformMode;
+    public get useSimpleGraphics(): boolean {
+        return this._simpleGraphicsMods;
     }
 
     public set highlightRestricted(highlight: boolean) {
@@ -1955,7 +1956,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this.lastSampledTime = current_time;
 
                 for (let ii = 0; ii < fullSeq.length; ii++) {
-                    if (this._pairs[ii] < 0 && !this._lowperformMode && Math.random() > 0.7) {
+                    if (this._pairs[ii] < 0 && !this._simpleGraphicsMods && Math.random() > 0.7) {
                         this._bases[ii].animate();
                     }
                 }
@@ -1969,7 +1970,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let need_redraw: boolean = false;
 
         for (let ii = 0; ii < fullSeq.length && !need_redraw; ii++) {
-            need_redraw = need_redraw || this._bases[ii].needRedraw(this._lowperformMode);
+            need_redraw = need_redraw || this._bases[ii].needRedraw(this._simpleGraphicsMods);
         }
 
         if (need_redraw || this._redraw) {
@@ -2000,7 +2001,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 let drawFlags: number = BaseDrawFlags.builder()
                     .locked(this.isLocked(ii))
                     .letterMode(this._lettermode)
-                    .lowPerform(this._lowperformMode)
+                    .lowPerform(this._simpleGraphicsMods)
                     .useBarcode(use_barcode)
                     .result();
 
@@ -3394,7 +3395,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Rendering mode
     private _numberingMode: boolean = false;
-    private _lowperformMode: boolean = false;
+    private _simpleGraphicsMods: boolean = false;
 
     /// Last exp paint data
     private _expPainter: ExpPainter = null;
