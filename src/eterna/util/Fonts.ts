@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import * as log from "loglevel";
 import {FontLoader} from "../../flashbang/resources/FontLoader";
 import {TextBuilder} from "../../flashbang/util/TextBuilder";
@@ -14,7 +13,7 @@ export class Fonts {
 
     public static loadFonts(): Promise<any> {
         log.info("Loading fonts...");
-        let loaders = _.map(Fonts.LOCAL, fontFamily => FontLoader.load(fontFamily));
+        let loaders = Fonts.LOCAL.map(fontFamily => FontLoader.load(fontFamily));
 
         return Promise.all(loaders)
             .then(() => log.info("Fonts loaded"))

@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import * as log from "loglevel";
 import {Assert} from "../../flashbang/util/Assert";
 import {Deferred} from "../../flashbang/util/Deferred";
@@ -247,16 +246,14 @@ export class ExternalInterface {
     }
 
     private static isAsync(returnValue: any): boolean {
-        if (returnValue == null) {
+        if (returnValue == null || returnValue.cause == null || returnValue.cause.async == null) {
             return false;
         }
 
-        let async = _.propertyOf(returnValue)("cause.async");
-        if (async == null) {
-            return false;
-        }
-
-        return (Boolean(async) === true || (typeof(async) === "string" && async.toLowerCase() === "true"));
+        return (
+            Boolean(returnValue.cause.async) === true
+            || (typeof returnValue.cause.async === "string" && returnValue.cause.async.toLowerCase() === "true")
+        );
     }
 
     private static updateCallbacks(): void {
