@@ -5,6 +5,7 @@ import {Vienna} from "../folding/Vienna";
 import {EternaURL} from "../net/EternaURL";
 import {Pose2D} from "../pose2D/Pose2D";
 import {ConstraintType} from "./Constraints";
+import {Folder} from "../folding/Folder";
 
 export interface BoostersData {
     mission?: any;
@@ -67,6 +68,16 @@ export class Puzzle {
         } else {
             this._folder = Vienna.NAME;
         }
+    }
+
+    public canUseFolder(folder: Folder): boolean {
+        return !(
+            (this.hasTargetType("multistrand") && !folder.canMultifold) ||
+            (this.hasTargetType('aptamer') && !folder.canFoldWithBindingSite) ||
+            (this.hasTargetType('oligo') && !folder.canCofold) ||
+            (this.hasTargetType('aptamer+oligo') && !folder.canFoldWithBindingSite) ||
+            (this.hasTargetType('aptamer+oligo') && !folder.canCofold)
+        );
     }
 
     public get nodeID(): number {

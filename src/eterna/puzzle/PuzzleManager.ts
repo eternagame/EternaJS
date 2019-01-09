@@ -3,6 +3,8 @@ import {Eterna} from "../Eterna";
 import {CSVParser} from "../util/CSVParser";
 import {Puzzle} from "./Puzzle";
 import {SolutionManager} from "./SolutionManager";
+import {FolderManager} from "../folding/FolderManager";
+import {Folder} from "../folding/Folder";
 
 export class PuzzleManager {
     public static get instance(): PuzzleManager {
@@ -168,6 +170,10 @@ export class PuzzleManager {
             newpuz.constraints = constraints;
         } else if (json["check_hairpin"] && Number(json["check_hairpin"])) {
             newpuz.constraints = ["BARCODE", "0"];
+        }
+
+        if (!newpuz.canUseFolder(FolderManager.instance.getFolder(newpuz.folderName))) {
+            newpuz.folderName = FolderManager.instance.getNextFolder(newpuz.folderName, (folder: Folder) => !newpuz.canUseFolder(folder)).name;
         }
 
         let replace: boolean = false;
