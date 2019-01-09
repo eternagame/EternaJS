@@ -233,6 +233,11 @@ export class NuPACK extends Folder {
     }
 
     /* override */
+    public get canCofold(): boolean {
+        return true;
+    } 
+
+    /* override */
     public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
