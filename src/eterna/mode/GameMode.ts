@@ -168,13 +168,13 @@ export abstract class GameMode extends AppMode {
             newPoseField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder) {
-                    let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.sequence, pairs);
+                    let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.fullSequence, pairs);
 
                     // This changes between PoseEdit mode and PuzzleEditMode
                     let targetPairs: number[] = this._targetPairs ? this._targetPairs[idx] : this.getCurrentTargetPairs(idx);
                     let nativePairs: number[] = this.getCurrentUndoBlock(idx).getPairs();
 
-                    return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.sequence)) - score(nativePairs);
+                    return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.fullSequence)) - score(nativePairs);
                 }
                 return -1;
             }
