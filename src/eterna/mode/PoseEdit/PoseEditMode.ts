@@ -1484,13 +1484,7 @@ export class PoseEditMode extends GameMode {
 
     private changeFolder(): void {
         let curr_f: string = this._folder.name;
-        this._folder = FolderManager.instance.getNextFolder(curr_f, (folder: Folder): boolean => {
-            return (this._puzzle.hasTargetType("multistrand") && !folder.canMultifold) ||
-                (this._puzzle.hasTargetType('aptamer') && !folder.canFoldWithBindingSite) ||
-                (this._puzzle.hasTargetType('aptamer+oligo') && !folder.canFoldWithBindingSite) ||
-                (this._puzzle.hasTargetType('oligo') && !folder.canCofold) ||
-                (this._puzzle.hasTargetType('aptamer+oligo') && !folder.canCofold);
-        });
+        this._folder = FolderManager.instance.getNextFolder(curr_f, (folder: Folder) => !this._puzzle.canUseFolder(folder));
         if (this._folder.name === curr_f) return;
 
         this.onFolderUpdated();
