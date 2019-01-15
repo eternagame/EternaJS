@@ -10,6 +10,7 @@ import {GamePanel} from "../../ui/GamePanel";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 import {TextBalloon} from "../../ui/TextBalloon";
+import { Rectangle } from "pixi.js";
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight ||
@@ -22,6 +23,7 @@ export class StructureInput extends GamePanel implements Updatable {
     public constructor(pose: Pose2D) {
         super();
         this._pose = pose;
+        this.display.interactive = true;
     }
 
     protected added(): void {
@@ -80,6 +82,8 @@ export class StructureInput extends GamePanel implements Updatable {
         DisplayUtil.positionRelative(
             this._textInput.display, HAlign.CENTER, VAlign.CENTER,
             this.container, HAlign.CENTER, VAlign.CENTER);
+
+        this.display.hitArea = new Rectangle(0,0,width, height);
     }
 
     public setPose(op: PuzzleEditOp = null, index: number = -1): void {
