@@ -145,7 +145,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._strandLabel = new TextBalloon("", 0x0, 0.8);
         this._strandLabel.display.visible = false;
-        this.addObject(this._strandLabel, this._auxInfoCanvas);
+        this.addObject(this._strandLabel, this.container);
 
         this.display.interactive = true;
         this.pointerMove.connect(() => this.onMouseMoved());
