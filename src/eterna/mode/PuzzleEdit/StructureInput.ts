@@ -9,6 +9,7 @@ import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
 import {GamePanel} from "../../ui/GamePanel";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
+import {TextBalloon} from "../../ui/TextBalloon";
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight ||
@@ -30,7 +31,13 @@ export class StructureInput extends GamePanel implements Updatable {
             .font(Fonts.ARIAL)
             .disallow(/[^\.\(\)]/g)
             .bold();
+        this._textInput.showFakeTextInputWhenNotFocused();
         this.addObject(this._textInput, this.container);
+
+        this._errorText = new TextBalloon("", 0x0, 0.8);
+        this._errorText.display.visible = false;
+        this._errorText.display.position.y = -60;
+        this.addObject(this._errorText, this.container);
 
         this.setSize(100, 50);
 
@@ -41,6 +48,22 @@ export class StructureInput extends GamePanel implements Updatable {
                 e.stopPropagation();
             }
         };
+
+        let showError = () => {
+            if (this._errorText.text.text !== " ") this._errorText.display.visible = true;
+        };
+
+        let hideError = () => {
+            this._errorText.display.visible = false;
+        };
+
+        this.pointerOver.connect(showError);
+        this.pointerOut.connect(hideError);
+        this._textInput.element.onmouseover = showError;
+        this._textInput.element.onmouseleave = hideError;
+
+        // Prevent PoseField from adding a drag surface since we're not trying to drag
+        this.pointerDown.connect((e) => {e.stopPropagation()});
     }
 
     public update(dt: number): void {
@@ -203,11 +226,16 @@ export class StructureInput extends GamePanel implements Updatable {
         }
         this._pose.sequence = sequence;
         this._pose.puzzleLocks = locks;
-        this._pose.molecularStructure = EPars.parenthesisToPairs(this.structureString);
         this._pose.molecularBindingSite = binding_site;
-        this._pose.callPoseEditCallback();
-
         this._pose.trackCursor(this._textInput.caretPosition);
+        try {
+            this._pose.molecularStructure = EPars.parenthesisToPairs(this.structureString);
+        } catch (e) {
+            // Invalid parenthesis notation error will warn the user per the earlier validateParenthesis call
+            // Don't return to poseedit since it'll just break with the malformed structure
+            return
+        }
+        this._pose.callPoseEditCallback();
     }
 
     public get structureString(): string {
@@ -223,19 +251,16 @@ export class StructureInput extends GamePanel implements Updatable {
     public setWarning(warning: string): void {
         if (warning && warning.length > 0) {
             this.setup(0, 0.5, 0xAA0000, 0.0, 0);
-            // this.set_mouse_over_object(new TextBalloon(warning, 0x0, 0.8), 1.0);
+            this._errorText.setText(warning);
         } else {
             this.setup(0, 0.07, 0xFFFFFF, 0.0, 0);
-            // this.set_mouse_over_object(null, 0);
+            this._errorText.setText("");
         }
-    }
-
-    public setTextInputVisibility(visible: boolean): void {
-        this._textInput.display.visible = visible;
     }
 
     private readonly _pose: Pose2D;
     private _textInput: TextInputObject;
     private _prevCaretPostion: number = -1;
+    private _errorText: TextBalloon;
 
 }

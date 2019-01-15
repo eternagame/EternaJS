@@ -146,6 +146,10 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
 
     public set text(value: string) {
         this._obj.value = value;
+        if (this._fakeTextInput != null) {
+            // Recreate the text input since the text inside changed
+            this.createFakeTextInput();
+        }
     }
 
     public get caretPosition(): number {
@@ -208,13 +212,16 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
         let text = new TextBuilder(displayText)
             .font(this._fontFamily)
             .fontSize(this._fontSize)
+            .fontWeight(this._obj.style.fontWeight)
             .color(textColor)
             .wordWrap(this._rows > 1, this.width - 20)
             .hAlignLeft()
             .build();
         text.mask = textMask;
-        // This offset is probably browser dependent!
-        text.position = new Point(int(5 * this._fontSize / 14.5), int(5 * this._fontSize / 14.5));
+        text.position = new Point(
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'))
+        );
         this._fakeTextInput.addChild(text);
 
         this._dummyDisp.addChild(this._fakeTextInput);
