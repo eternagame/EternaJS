@@ -12,9 +12,7 @@ export class GamePanel extends BaseGamePanel {
 
         this._background = new Graphics();
         this.container.addChild(this._background);
-
-        this.display.interactive = true;
-
+        
         this.setup(type, alpha, color, borderAlpha, borderColor);
     }
 
@@ -30,7 +28,6 @@ export class GamePanel extends BaseGamePanel {
     public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
-        this.display.hitArea = new Rectangle(0, 0, width, height);
         
         this.updateView();
     }
