@@ -287,15 +287,11 @@ FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string&
     double energy = cofold(string, constraints);
     cut_point--; // back to 0-based
 
-    fprintf(stderr, "Tim: double-check suspicious string manipulation (%s:%d)\n", __FILE__, __LINE__);
-    strcpy(structure, constraints);
-    structure[cut_point] = 0;
-    strcat(structure, "&");
-    strcat(structure, constraints+cut_point);
-
     FullFoldResult* result = new FullFoldResult();
     result->mfe = energy;
-    result->structure = structure;
+
+    result->structure = constraints;
+    result->structure.insert(cut_point, "&");
 
     // clean-up
     cut_point = -1;
