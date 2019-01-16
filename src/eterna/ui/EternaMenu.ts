@@ -1,8 +1,11 @@
-import {Point} from "pixi.js";
+import {Point, Graphics, Rectangle} from "pixi.js";
+import {Flashbang} from "../../flashbang/core/Flashbang";
 import {Enableable} from "../../flashbang/objects/Enableable";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
+import { PointerCapture } from "../../flashbang/input/PointerCapture";
+import { Eterna } from "../Eterna";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
@@ -131,16 +134,38 @@ export class EternaMenu extends GamePanel implements Enableable {
         menu.panel.display.visible = false;
         menuButton.addObject(menu.panel, menuButton.container);
 
+        let showDialog = () => {
+            menu.panel.display.visible = true;
+            // Move the current menu button to the top layer so that other buttons don't overlap,
+            // since in order to not have a gap between the flyout and the button, that's likely
+            this.container.removeChild(menuButton.display);
+            this.container.addChild(menuButton.display);
+        }
+
         menuButton.pointerOver.connect(() => {
             if (this._enabled) {
-                menu.panel.display.visible = true
-                this.container.removeChild(menuButton.display);
-                this.container.addChild(menuButton.display);
+                showDialog();
             }
         });
+
         menuButton.pointerOut.connect(() => {
+            menu.panel.display.visible = false;
+        });
+
+        menuButton.pointerTap.connect(() => {
             if (this._enabled) {
-                menu.panel.display.visible = false
+                if (!menu.panel.display.visible) {
+                    showDialog();
+
+                    let removePanel = () => {
+                        // So if it's a tap on the button, we won't re-show the dialog
+                        setTimeout(() => menu.panel.display.visible = false, 100);
+                        // Not really a great way to do this, but https://github.com/pixijs/pixi.js/issues/2921
+                        Eterna.gameDiv.removeEventListener('pointerdown', removePanel);
+                    }
+
+                    Eterna.gameDiv.addEventListener('pointerdown', removePanel);
+                }
             }
         });
 
