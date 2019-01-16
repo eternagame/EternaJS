@@ -375,10 +375,9 @@ export class PoseEditMode extends GameMode {
             let hintBox = new GamePanel();
             hintBox.title = "Hint"; // by " + _puzzle.get_coauthor());
 
-            let hintText = Fonts.arial(this._puzzle.hint, 14).color(0xffffff).wordWrap(true, 400).build();
-            hintText.position = new Point(10, 38);
-            hintBox.container.addChild(hintText);
-            hintBox.setSize(420, hintText.height + 46);
+            let hintText = new HTMLTextObject(this._puzzle.hint, 400).font(Fonts.ARIAL).color(0xffffff);
+            hintText.display.position = new Point(10, 38);
+            hintBox.addObject(hintText, hintBox.container);
 
             this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
 
@@ -389,6 +388,7 @@ export class PoseEditMode extends GameMode {
             };
 
             updatePosition();
+            hintBox.setSize(420, hintText.height + 46)
             hintBox.regs.add(this.resized.connect(updatePosition));
         }
     }
