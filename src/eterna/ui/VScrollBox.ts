@@ -45,6 +45,10 @@ export class VScrollBox extends SceneObject<ScrollContainer> {
         this.display.setScroll(0, MathUtil.clamp(value, 0, 1) * this.display.maxScrollY);
     }
 
+    public scrollTo(value: number) {
+        this._sliderBar.set_progress(MathUtil.clamp(value, 0, 1));
+    }
+
     private readonly _sliderBar: SliderBar;
 
     private _width: number;

@@ -104,6 +104,26 @@ export class SolutionDescBox extends GamePanel {
         this.updateView();
     }
 
+    public updateScroll(e: WheelEvent) {
+        let pxdelta: number;
+        switch (e.deltaMode) {
+            case WheelEvent.DOM_DELTA_PIXEL:
+                pxdelta = e.deltaY;
+                break;
+            case WheelEvent.DOM_DELTA_LINE:
+                // 13 -> body font size
+                pxdelta = e.deltaY * 13;
+                break
+            case WheelEvent.DOM_DELTA_PAGE:
+                pxdelta = e.deltaY * this._height;
+                break;
+        }
+
+        this._descriptionAndComments.scrollTo(
+            this._descriptionAndComments.scrollProgress + pxdelta / this._descriptionAndComments.content.height
+        );
+    }
+
     protected updateView(): void {
         super.updateView();
 
