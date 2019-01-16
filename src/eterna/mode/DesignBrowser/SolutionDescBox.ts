@@ -115,6 +115,11 @@ export class SolutionDescBox extends GamePanel {
             this._commentInput.display.position = new Point(20, this._height - 30);
 
             this._commentButton.display.position = new Point(this._width - 50, this._height - 30);
+
+            for (let text of this._descriptionAndCommentsTexts) {
+                text.style.wordWrapWidth = this._width - 40;
+                text.dirty = true;
+            }
         }
     }
 
@@ -130,8 +135,12 @@ export class SolutionDescBox extends GamePanel {
         this._descriptionAndComments.display.position = new Point(20, 80);
         this.addObject(this._descriptionAndComments, this.container);
 
+        this._descriptionAndCommentsTexts = [];
+
         let layout = new VLayoutContainer(0, HAlign.LEFT);
-        layout.addChild(SolutionDescBox.getSolutionText(this._solution, this._puzzle));
+        let desc = this.getSolutionText(this._solution, this._puzzle);
+        this._descriptionAndCommentsTexts.push(desc);
+        layout.addChild(desc);
 
         if (commentsData !== undefined) {
             layout.addVSpacer(45);
@@ -152,13 +161,19 @@ export class SolutionDescBox extends GamePanel {
                     userButton.clicked.connect(() => window.open(url, "_blank"));
 
                     this._descriptionAndComments.addObject(userButton, commentLayout);
-                    commentLayout.addChild(Fonts.arial(comment["comment"], 13).color(0xffffff).build());
+                    let comm = Fonts.arial(comment["comment"], 13).color(0xffffff).wordWrap(true, this._width - 40).build();
+                    this._descriptionAndCommentsTexts.push(comm);
+                    commentLayout.addChild(comm);
                 }
             }
         }
 
         layout.layout();
         this._descriptionAndComments.content.addChild(layout);
+
+        // Force the scrollbox to recheck whether the scroll bar is needed
+        // Note that the v margin is 131 not 130, to force the scrollcontainer to recalculate
+        this._descriptionAndComments.setSize(this._width - 30, this._height - 131);
     }
 
     private submitComment(): void {
@@ -199,7 +214,7 @@ export class SolutionDescBox extends GamePanel {
         return loadingText;
     }
 
-    private static getSolutionText(solution: Solution, puzzle: Puzzle): MultiStyleText {
+    private getSolutionText(solution: Solution, puzzle: Puzzle): MultiStyleText {
         let text = "";
 
         if (solution.expFeedback != null) {
@@ -233,6 +248,8 @@ export class SolutionDescBox extends GamePanel {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 13,
                 fill: 0xffffff,
+                wordWrap: true,
+                wordWrapWidth: this._width - 40
             },
             bold: { fontStyle: "bold" },
             orange: { fill: 0xffcc00 },
@@ -244,6 +261,7 @@ export class SolutionDescBox extends GamePanel {
     private readonly _comments: LabComments;
 
     private _descriptionAndComments: VScrollBox;
+    private _descriptionAndCommentsTexts: Text[] = [];
     private _boxTitle: HTMLTextObject;
     private _copySolutionButton: GameButton;
     private _copyPlayerButton: GameButton;
