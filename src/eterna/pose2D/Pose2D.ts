@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {Container, Graphics, Point, Sprite, Texture} from "pixi.js";
+import {Container, Graphics, Point, Sprite, Texture, Rectangle} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {Vector2} from "../../flashbang/geom/Vector2";
@@ -166,6 +166,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
+
+        this.container.hitArea = new Rectangle(0, 0, width, height);
     }
 
     public get primaryScoreDisplay(): EnergyScoreDisplay {
