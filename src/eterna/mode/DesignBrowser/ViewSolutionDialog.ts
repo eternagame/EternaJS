@@ -154,6 +154,11 @@ export class ViewSolutionDialog extends Dialog<void> {
         this.updateLayout();
     }
 
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        this._solutionDescBox.updateScroll(e);
+        return true;
+    }
+
     private updateLayout(): void {
         let width = Flashbang.stageWidth - 90;
         let height = Flashbang.stageHeight - MathUtil.clamp(Flashbang.stageHeight * 0.23, 80, 220);
