@@ -751,11 +751,10 @@ export class PoseEditMode extends GameMode {
         // reset lineage for experimental targets
         this.setAncestorId(0);
 
-        // We don't load saved data if we're viewing someone else's solution, or if we
-        // have an initial sequence
+        // We don't load saved data if we're viewing someone else's solution
+        // If there's an initial solution, still autoload if we've previously played
         if (!this._params.isReset &&
-            this._params.initSolution == null &&
-            this._params.initSequence == null) {
+            this._params.initSolution == null) {
 
             this.loadSavedData();
         }
