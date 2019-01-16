@@ -134,6 +134,8 @@ export class EternaMenu extends GamePanel implements Enableable {
         menuButton.pointerOver.connect(() => {
             if (this._enabled) {
                 menu.panel.display.visible = true
+                this.container.removeChild(menuButton.display);
+                this.container.addChild(menuButton.display);
             }
         });
         menuButton.pointerOut.connect(() => {
@@ -191,7 +193,7 @@ export class EternaMenu extends GamePanel implements Enableable {
             if (this._style === EternaMenuStyle.DEFAULT) {
                 menu.panel.display.position = new Point(0, buttonHeight - 1);
             } else if (this._style === EternaMenuStyle.PULLUP) {
-                menu.panel.display.position = new Point(0, -menu.panel.height - 1);
+                menu.panel.display.position = new Point(0, -menu.panel.height);
             }
             width_offset += buttonWidth + space;
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
