@@ -457,7 +457,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public clearMouse(): void {
         //document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = '';
         this._paintCursor.display.visible = false;
-        //this._strand_label.visible = false;
+        this._strandLabel.display.visible = false;
     }
 
     public parseCommand(command: number, closest_index: number): any[] {
