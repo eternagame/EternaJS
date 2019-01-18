@@ -1875,7 +1875,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         // Hide bases that aren't part of our current sequence
         for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = ii < fullSeq.length;
+            this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
         }
 
         if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
