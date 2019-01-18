@@ -98,8 +98,6 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         panel.setSize(viewLayout.width + 40, viewLayout.height + 40 + panel.titleHeight);
         this.addObject(panel, this.container);
 
-        panel.display.interactive = true;
-
         this.container.addChild(viewLayout);
 
         let updateLocation = () => {

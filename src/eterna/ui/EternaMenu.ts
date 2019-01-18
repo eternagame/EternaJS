@@ -1,11 +1,9 @@
-import {Point, Graphics, Rectangle} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
+import {Point} from "pixi.js";
 import {Enableable} from "../../flashbang/objects/Enableable";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {GameButton} from "./GameButton";
 import {GamePanel, GamePanelType} from "./GamePanel";
-import { PointerCapture } from "../../flashbang/input/PointerCapture";
-import { Eterna } from "../Eterna";
+import {PointerCapture} from "../../flashbang/input/PointerCapture";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
@@ -62,8 +60,13 @@ export class EternaMenu extends GamePanel implements Enableable {
             menu.itemButtons.push(itemButton);
         }
 
-        // clicking a submenu item hides the panel
-        itemButton.clicked.connect(() => menu.panel.display.visible = false);
+        // Clicking a submenu item hides the panel
+        // The setTimeout is required since clicking a button could get registered as a pointerTap and reopen
+        // the panel if we close it immediately
+        itemButton.clicked.connect(() => setTimeout(() => {
+            menu.panel.display.visible = false;
+            if (this._activeCapture) this._activeCapture.endCapture();
+        }, 100));
 
         this.needsLayout();
     }
@@ -77,8 +80,12 @@ export class EternaMenu extends GamePanel implements Enableable {
         menu.panel.addObject(itemButton, menu.panel.container);
         menu.itemButtons.splice(pos, 0, itemButton);
 
-        // clicking a submenu item hides the panel
-        itemButton.clicked.connect(() => menu.panel.display.visible = false);
+        // The setTimeout is required since clicking a button could get registered as a pointerTap and reopen
+        // the panel if we close it immediately
+        itemButton.clicked.connect(() => setTimeout(() => {
+            menu.panel.display.visible = false;
+            if (this._activeCapture) this._activeCapture.endCapture();
+        }, 100));
 
         this.needsLayout();
     }
@@ -142,7 +149,7 @@ export class EternaMenu extends GamePanel implements Enableable {
             this.container.addChild(menuButton.display);
         }
 
-        menuButton.pointerOver.connect(() => {
+        menuButton.pointerOver.connect((e) => {
             if (this._enabled) {
                 showDialog();
             }
@@ -157,14 +164,15 @@ export class EternaMenu extends GamePanel implements Enableable {
                 if (!menu.panel.display.visible) {
                     showDialog();
 
-                    let removePanel = () => {
-                        // So if it's a tap on the button, we won't re-show the dialog
-                        setTimeout(() => menu.panel.display.visible = false, 100);
-                        // Not really a great way to do this, but https://github.com/pixijs/pixi.js/issues/2921
-                        Eterna.gameDiv.removeEventListener('pointerdown', removePanel);
-                    }
-
-                    Eterna.gameDiv.addEventListener('pointerdown', removePanel);
+                    this._activeCapture = new PointerCapture(menu.panel.display);
+                    this._activeCapture.beginCapture((e) => {
+                        if (e.type === 'pointerdown') {
+                            // Wait a bit before closing, so that if we tapped the button,
+                            // we don't just reopen the flyout
+                            setTimeout(() => {menu.panel.display.visible = false}, 100);
+                            this._activeCapture.endCapture();
+                        }
+                    });
                 }
             }
         });
@@ -239,6 +247,7 @@ export class EternaMenu extends GamePanel implements Enableable {
     private _menuWidth: number = 0;
     private _rightMargin: number = 0;
     private _menuHeight: number = 0;
+    private _activeCapture: PointerCapture;
 }
 
 class Menu {

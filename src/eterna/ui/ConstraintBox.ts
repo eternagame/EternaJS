@@ -35,7 +35,6 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         super();
 
         this._boxType = type;
-        this.container.interactive = true;
 
         this._bgGraphics = new Graphics();
         this._bgGraphics.interactiveChildren = false;

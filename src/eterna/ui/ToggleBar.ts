@@ -58,7 +58,6 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
 
         this.state = 0;
 
-        this.display.interactive = true;
         this.pointerOver.connect(() => this.onMouseOver());
         this.pointerOut.connect(() => this.onMouseOut());
         this.pointerTap.connect(event => this.onMouseClick(event));

@@ -31,7 +31,6 @@ export abstract class Button extends ContainerObject implements Enableable {
 
     protected constructor() {
         super();
-        this.container.interactive = true;
     }
 
     /* override */
@@ -43,6 +42,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
         this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(() => this.onPointerDown()));
+        this.regs.add(this.pointerUp.filter(IsLeftMouse).connect(() => this.onPointerUp(true)))
     }
 
     /* override */
@@ -107,27 +107,34 @@ export abstract class Button extends ContainerObject implements Enableable {
         }
     }
 
+    protected onPointerUp(wasClicked: boolean): void {
+        this._isPointerDown = false;
+        this._isPointerOver = wasClicked;
+
+        let emit = false;
+        if (wasClicked && this._state === ButtonState.DOWN) {
+            emit = true;
+        }
+
+        this.updateEnabledState();
+        this.endCapture();
+
+        if (emit) {
+            this.clicked.emit();
+        }
+    }
+
     protected beginCapture(): void {
         if (this._pointerCapture != null) {
             return;
         }
 
-        this._pointerCapture = new PointerCapture(this.mode.container);
+        this._pointerCapture = new PointerCapture(this.display);
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
             if (IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
-                // Pointer released. Were we clicked?
-                let wasClicked: boolean = this.hitTest(e.data.global);
-
-                this._isPointerDown = false;
-                this._isPointerOver = wasClicked;
-                this.updateEnabledState();
-                this.endCapture();
-
-                if (wasClicked) {
-                    this.clicked.emit();
-                }
+                this.onPointerUp(false);
             } else if (e.type === "pointercancel") {
                 this.endCapture(true);
             } else {

@@ -10,6 +10,7 @@ export class DisplayObjectPointerTarget implements PointerTarget {
 
     public constructor(disp: DisplayObject) {
         this.target = disp;
+        disp.interactive = true;
     }
 
     public get pointerOver(): SignalView<InteractionEvent> {
