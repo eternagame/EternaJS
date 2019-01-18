@@ -165,7 +165,6 @@ export class DesignBrowserMode extends GameMode {
         this._selectionBox.visible = false;
         this._content.addChild(this._selectionBox);
 
-        this._dataColParent.display.interactive = true;
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerDown.connect(() => this.onMouseDown());
 

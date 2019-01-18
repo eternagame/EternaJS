@@ -32,9 +32,6 @@ export class SliderBar extends ContainerObject {
 
         this._current_val = 1;
 
-        this._barRect.interactive = true;
-        this._sliderLine.interactive = true;
-
         let barPointerTarget = new DisplayObjectPointerTarget(this._barRect);
         let linePointerTarget = new DisplayObjectPointerTarget(this._sliderLine);
 

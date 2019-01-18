@@ -33,10 +33,6 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
     protected added(): void {
         super.added();
 
-        if (this._showFakeTextInputWhenNotFocused) {
-            this.onFocusChanged(this._hasFocus);
-        }
-
         // When our fakeTextInput is clicked, show and focus our real textInput
         new DisplayObjectPointerTarget(this._dummyDisp).pointerDown.connect(() => {
             if (this._fakeTextInput != null) {
@@ -47,6 +43,12 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
                 });
             }
         });
+
+        this._dummyDisp.interactive = false;
+
+        if (this._showFakeTextInputWhenNotFocused) {
+            this.onFocusChanged(this._hasFocus);
+        }
     }
 
     private onFocusChanged(focused: boolean): void {

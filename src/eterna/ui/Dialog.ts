@@ -3,8 +3,8 @@ import {Flashbang} from "../../flashbang/core/Flashbang";
 import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
 import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
-import {PointerCapture} from "../../flashbang/input/PointerCapture";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class DialogCanceledError extends Error {}
@@ -25,16 +25,19 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         let bg = new Graphics();
         this.container.addChild(bg);
 
-        // eat clicks on our BG
-        let capture = new PointerCapture(bg);
-        capture.beginCapture(e => {
+
+        // Eat mouse events - make sure any objects created within the dialog should set
+        // interactive to true and stop propogation if the event shouldn't be passed through to the bg
+        let bgTarget = new DisplayObjectPointerTarget(bg);
+
+        bgTarget.pointerDown.connect((e) => {
             if (IsLeftMouse(e)) {
-                e.stopPropagation();
-                if (e.type === "pointerdown") {
-                    this.onBGClicked();
-                }
+                this.onBGClicked();
             }
+            e.stopPropagation();
         });
+        bgTarget.pointerUp.connect((e) => e.stopPropagation());
+        bgTarget.pointerMove.connect((e) => e.stopPropagation());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));

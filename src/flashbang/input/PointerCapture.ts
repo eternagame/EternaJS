@@ -1,4 +1,5 @@
 import {DisplayObject} from "pixi.js";
+import {Flashbang} from "../core/Flashbang";
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -23,8 +24,22 @@ export class PointerCapture {
         this._root.interactive = true;
 
         this._onEvent = onEvent;
-        for (let eventType of PointerCapture.POINTER_EVENTS) {
-            this._root.addListener(eventType, this._onEvent);
+
+        PointerCapture._captures.push(this);
+
+        if (!PointerCapture._registeredEvents) {
+            for (let eventType of PointerCapture.POINTER_EVENTS) {
+                Flashbang.pixi.renderer.plugins.interaction.addListener(eventType, PointerCapture.handleEvent);
+            }
+        }
+    }
+
+    private static handleEvent(e: InteractionEvent) {
+        for (let capture of PointerCapture._captures.reverse()) {
+            if (!Flashbang.pixi.renderer.plugins.interaction.hitTest(e.data.global, capture._root)) {
+                capture._onEvent(e);
+                if (e.stopped) return;
+            }
         }
     }
 
@@ -33,12 +48,16 @@ export class PointerCapture {
             return;
         }
 
-        for (let eventType of PointerCapture.POINTER_EVENTS) {
-            this._root.removeListener(eventType, this._onEvent);
-        }
-
         this._onEvent = null;
         this._root.interactive = this._rootWasInteractive;
+
+        PointerCapture._captures.splice(PointerCapture._captures.indexOf(this), 1);
+
+        if (PointerCapture._captures.length === 0) {
+            for (let eventType of PointerCapture.POINTER_EVENTS) {
+                Flashbang.pixi.renderer.plugins.interaction.removeListener(eventType, PointerCapture.handleEvent);
+            }
+        }
     }
 
     private get hasCapture(): boolean {
@@ -48,6 +67,9 @@ export class PointerCapture {
     private readonly _root: DisplayObject;
     private _onEvent: (e: InteractionEvent) => void;
     private _rootWasInteractive: boolean;
+
+    private static _registeredEvents: boolean = false;
+    private static _captures: PointerCapture[] = [];
 
     private static readonly POINTER_EVENTS: InteractionPointerEvents[] = [
         "pointerdown", "pointercancel", "pointerup",

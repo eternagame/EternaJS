@@ -23,7 +23,6 @@ export class StructureInput extends GamePanel implements Updatable {
     public constructor(pose: Pose2D) {
         super();
         this._pose = pose;
-        this.display.interactive = true;
     }
 
     protected added(): void {

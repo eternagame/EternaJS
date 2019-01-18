@@ -10,6 +10,11 @@ export class GamePanel extends BaseGamePanel {
     public constructor(type: GamePanelType = GamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, borderAlpha: number = 0.0, borderColor: number = 0) {
         super();
 
+        // Clicks should not pass through the panel
+        this.pointerDown.connect((e) => {
+            e.stopPropagation();
+        })
+
         this._background = new Graphics();
         this.container.addChild(this._background);
         

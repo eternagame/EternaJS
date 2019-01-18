@@ -30,7 +30,6 @@ export class MissionIntroMode extends AppMode {
         let background = new Graphics();
         this.container.addChild(background);
 
-        background.interactive = true;
         new DisplayObjectPointerTarget(background).pointerDown.filter(IsLeftMouse).connect(() => this.play());
 
         let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);

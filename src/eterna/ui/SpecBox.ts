@@ -32,8 +32,6 @@ export class SpecBox extends ContainerObject {
     }
 
     protected added(): void {
-        this.container.interactive = true;
-
         this._panel = new GamePanel();
         if (!this._docked) {
             this._panel.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
@@ -110,7 +108,6 @@ export class SpecBox extends ContainerObject {
             this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
             this.addObject(this._zoomOutButton, this.container);
 
-            this._dotPlotSprite.interactive = true;
             let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());

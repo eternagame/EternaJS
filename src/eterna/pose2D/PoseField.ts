@@ -29,7 +29,6 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
         this.addObject(this._pose, this.container);
 
-        this.container.interactive = true;
         this.pointerDown.filter(IsLeftMouse).connect((e) => this.onMouseDown(e));
         this.pointerUp.filter(IsLeftMouse).connect(() => this.onMouseUp());
 
