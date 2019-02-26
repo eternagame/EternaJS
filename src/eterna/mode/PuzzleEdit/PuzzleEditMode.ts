@@ -518,15 +518,15 @@ export class PuzzleEditMode extends GameMode {
         if (this._poses.length == 1) {
             let num_pairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
 
-            if (details.minGU && details.minGU > 0) {
+            if (details.minGU != undefined && details.minGU > 0) {
                 constraints += ",GU," + details.minGU.toString();
             }
 
-            if (details.maxGC && details.maxGC <= num_pairs) {
+            if (details.maxGC != undefined && details.maxGC <= num_pairs) {
                 constraints += ",GC," + details.maxGC.toString();
             }
 
-            if (details.minAU && details.minAU > 0) {
+            if (details.minAU != undefined && details.minAU > 0) {
                 constraints += ",AU," + details.minAU.toString();
             }
         }
