@@ -29,6 +29,7 @@ import {SoundManager} from "./resources/SoundManager";
 import {EternaSettings} from "./settings/EternaSettings";
 import {ExternalInterface, ExternalInterfaceCtx} from "./util/ExternalInterface";
 import {Fonts} from "./util/Fonts";
+import {SaveGameManager} from "../flashbang/settings/SaveGameManager";
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -121,6 +122,7 @@ export class EternaApp extends FlashbangApp {
     /* override */
     protected setup(): void {
         Eterna.app = this;
+        Eterna.saveManager = new SaveGameManager("EternaSaveGame");
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.sound = new SoundManager(Eterna.settings);
@@ -135,7 +137,7 @@ export class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
-            .then(() => {
+            .then(async () => {
                 switch (this._params.mode) {
                 case InitialAppMode.TEST:
                     this._modeStack.unwindToMode(new TestMode());
@@ -166,12 +168,18 @@ export class EternaApp extends FlashbangApp {
     /** Creates a PoseEditMode and removes all other modes from the stack */
     public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
         return this.loadPuzzle(puzzleOrID)
-            .then(puzzle => this._modeStack.unwindToMode(new PoseEditMode(puzzle, params)));
+            .then(async puzzle => this._modeStack.unwindToMode(new PoseEditMode(
+                puzzle,
+                params,
+                await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
+            )));
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
-    public loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
-        this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initialPoseData));
+    public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+        const initPoseData = initialPoseData ||
+            await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets)) || null;
+        this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
         return Promise.resolve();
     }
 

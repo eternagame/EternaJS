@@ -83,10 +83,11 @@ export interface PoseEditParams {
 }
 
 export class PoseEditMode extends GameMode {
-    public constructor(puzzle: Puzzle, params: PoseEditParams) {
+    public constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] = null) {
         super();
         this._puzzle = puzzle;
         this._params = params;
+        this._autosaveData = autosaveData;
 
         if (this._params.rscript != null) {
             puzzle.rscript = this._params.rscript;
@@ -2040,7 +2041,7 @@ export class PoseEditMode extends GameMode {
     }
 
     private resetAutosaveData(): void {
-        Eterna.settings.removeObject(this.savedDataTokenName);
+        Eterna.saveManager.remove(this.savedDataTokenName);
     }
 
     private saveData(): void {
@@ -2061,11 +2062,15 @@ export class PoseEditMode extends GameMode {
             objs.push(JSON.stringify(this._seqStacks[this._stackLevel][ii].toJSON()));
         }
 
-        Eterna.settings.saveObject(this.savedDataTokenName, objs);
+        Eterna.saveManager.save(this.savedDataTokenName, objs);
+    }
+
+    public static savedDataTokenName(puzzleID: number): string {
+        return "puz_" + puzzleID;
     }
 
     private get savedDataTokenName(): string {
-        return "puz_" + this._puzzle.nodeID;
+        return PoseEditMode.savedDataTokenName(this._puzzle.nodeID);
     }
 
     private transferToPuzzlemaker(): void {
@@ -2110,7 +2115,7 @@ export class PoseEditMode extends GameMode {
         }
         this.clearUndoStack();
 
-        let json: any[] = Eterna.settings.loadObject(this.savedDataTokenName);
+        let json: any[] = this._autosaveData;
         // no saved data
         if (json == null) {
             // if (this.root.loaderInfo.parameters.inputsequence != null) {
@@ -3592,6 +3597,7 @@ export class PoseEditMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
+    private readonly _autosaveData: any[];
 
     private _constraintsLayer: Container;
 

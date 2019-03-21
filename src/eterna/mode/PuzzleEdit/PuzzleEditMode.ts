@@ -195,7 +195,7 @@ export class PuzzleEditMode extends GameMode {
             };
         };
 
-        let initialPoseData = this._initialPoseData || this.loadSavedData();
+        let initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
             let defaultStructure: string = ".....((((((((....)))))))).....";
             let defaultPairs: number[] = EPars.parenthesisToPairs(defaultStructure);
@@ -265,10 +265,6 @@ export class PuzzleEditMode extends GameMode {
         this.updateUILayout();
     }
 
-    private loadSavedData(): PuzzleEditPoseData[] {
-        return Eterna.settings.loadObject(this.savedDataTokenName);
-    }
-
     private saveData(): void {
         let objs: PuzzleEditPoseData[] = [];
         for (let pose of this._poses) {
@@ -278,15 +274,19 @@ export class PuzzleEditMode extends GameMode {
             });
         }
 
-        Eterna.settings.saveObject(this.savedDataTokenName, objs);
+        Eterna.saveManager.save(this.savedDataTokenName, objs);
     }
 
     private resetSavedData(): void {
-        Eterna.settings.removeObject(this.savedDataTokenName);
+        Eterna.saveManager.remove(this.savedDataTokenName);
     }
 
     private get savedDataTokenName(): string {
-        return `puzedit_${this._numTargets}`;
+        return PuzzleEditMode.savedDataTokenName(this._numTargets)
+    }
+
+    public static savedDataTokenName(numTargets: number): string {
+        return `puzedit_${numTargets}`;
     }
 
     public setFolder(engine_name: string): void {
