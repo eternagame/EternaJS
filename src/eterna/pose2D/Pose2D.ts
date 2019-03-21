@@ -558,13 +558,13 @@ export class Pose2D extends ContainerObject implements Updatable {
     public toggleBlackMark(closestIndex: number): void {
         let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
-            this.addBlackMark(closestIndex);
+            this.addBaseMark(closestIndex);
         } else {
             this.removeBlackMark(closestIndex);
         }
     }
 
-    public addBlackMark(closestIndex: number): void {
+    public addBaseMark(closestIndex: number, color:number = 0x000000): void {
         let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
             this._trackedIndices.push(closestIndex);
@@ -580,7 +580,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._baseBoxes[n - 1].y = center.y;
             this._baseBoxes[n - 1].visible = true;
             this._baseBoxes[n - 1].clear();
-            this._baseBoxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], 0x000000);
+            this._baseBoxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
             this._baseBoxes[n - 1].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
         }
     }
@@ -1623,7 +1623,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
             indices[ii] = idx_map[indices[ii]];
-            this.addBlackMark(indices[ii]);
+            this.addBaseMark(indices[ii]);
         }
 
         // blue highlights ("magic glue")
@@ -1881,11 +1881,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
             let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
+                const oldColor = this._baseBoxes[ii].lineColor;
                 center = this.getBaseXY(this._trackedIndices[ii]);
                 this._baseBoxes[ii].x = center.x;
                 this._baseBoxes[ii].y = center.y;
                 this._baseBoxes[ii].clear();
-                this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], 0x000000);
+                this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], oldColor);
                 this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
             }
         }
