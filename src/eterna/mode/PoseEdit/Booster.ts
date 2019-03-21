@@ -153,12 +153,12 @@ export class Booster {
             return true;
         });
 
-        scriptInterface.addCallback("set_tracked_indices", (marks: any[]): void => {
+        scriptInterface.addCallback("set_tracked_indices", (marks: any[], color: number = 0x000000): void => {
             for (let ii: number = 0; ii < this._view.numPoseFields; ii++) {
                 let pose: Pose2D = this._view.getPose(ii);
                 pose.clearTracking();
-                for (let k: number = 0; k < marks.length; k++) {
-                    pose.addBlackMark(marks[k]);
+                for (let mark of marks) {
+                    pose.addBaseMark(mark, color);
                 }
             }
         });

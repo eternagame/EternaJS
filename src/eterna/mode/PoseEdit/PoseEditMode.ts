@@ -954,12 +954,25 @@ export class PoseEditMode extends GameMode {
             return true;
         });
 
-        this._scriptInterface.addCallback("set_tracked_indices", (marks: number[]): void => {
+        this._scriptInterface.addCallback("set_tracked_indices", (marks: number[], colors?: number[]): void => {
             for (let ii: number = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.clearTracking();
-                for (let mark of marks) {
-                    pose.addBlackMark(mark);
+                let baseColors: number[] = [];
+                if (colors) {
+                    if (colors.length == marks.length) {
+                        baseColors = colors;
+                    } else {
+                        console.error("Mark array is not the same length as color array for set_tracked_indices - leaving as black");
+                    }
+                }
+
+                if (baseColors.length == 0) {
+                    baseColors = marks.map(idx => 0x000000);
+                }
+
+                for (let k: number = 0; k < marks.length; k++) {
+                    pose.addBaseMark(marks[k], baseColors[k]);
                 }
             }
         });
