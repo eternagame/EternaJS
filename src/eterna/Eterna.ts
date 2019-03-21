@@ -7,6 +7,7 @@ import {ErrorDialogMode} from "./mode/ErrorDialogMode";
 import {GameClient} from "./net/GameClient";
 import {EternaSettings} from "./settings/EternaSettings";
 import {SoundManager} from "./resources/SoundManager";
+import {SaveGameManager} from "../flashbang/settings/SaveGameManager";
 
 /** Constants and global managers */
 export class Eterna {
@@ -21,6 +22,7 @@ export class Eterna {
 
     public static app: EternaApp;
     public static settings: EternaSettings;
+    public static saveManager: SaveGameManager;
     public static client: GameClient;
     public static sound: SoundManager;
     public static chat: ChatManager;

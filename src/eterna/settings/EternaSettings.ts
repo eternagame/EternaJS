@@ -1,6 +1,7 @@
 import {Setting} from "../../flashbang/settings/Setting";
 import {Settings} from "../../flashbang/settings/Settings";
 import {DesignCategory} from "../mode/DesignBrowser/DesignBrowserMode";
+import {Eterna} from "../Eterna";
 
 export class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
@@ -24,6 +25,8 @@ export class EternaSettings extends Settings {
     public readonly designBrowserColumnNames: Setting<DesignCategory[]>;
     public readonly designBrowserSelectedSolutionIDs: Setting<number[]>;
 
+    public readonly saveGamesTransfered: Setting<boolean>;
+
     public constructor() {
         super("EternaSettings");
 
@@ -46,5 +49,21 @@ export class EternaSettings extends Settings {
 
         this.designBrowserColumnNames = this.setting("designBrowserColumnNames", null);
         this.designBrowserSelectedSolutionIDs = this.setting("designBrowserSelectedSolutionIDs", null);
+
+        // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
+        // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
+        // but anyone who hasn't run Eterna between the EternaJS launch and the time it was
+        // introduced will loose any autosaves
+        this.saveGamesTransfered = this.setting("saveGamesTransfered", false);
+
+        if (this.saveGamesTransfered.value == false) {
+            this._namespace.each((val, key) => {
+                if (key.match(/^(puz|puzedit)_.*$/)) {
+                    Eterna.saveManager.save(key, val);
+                    this.removeObject(key);
+                }
+            });
+            this.saveGamesTransfered.value = true;
+        }
     }
 }
