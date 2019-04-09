@@ -1956,12 +1956,12 @@ export class Pose2D extends ContainerObject implements Updatable {
             if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
                 let n: number = this._trackedIndices.length;
                 for (let ii = 0; ii < n; ii++) {
-                    const oldColor = this._baseBoxes[ii].lineColor;
                     center = this.getBaseXY(this._trackedIndices[ii]);
                     this._baseBoxes[ii].x = center.x;
                     this._baseBoxes[ii].y = center.y;
+                    const color = this._baseBoxes[ii].lineColor;
                     this._baseBoxes[ii].clear();
-                    this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], oldColor);
+                    this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
                     this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
                 }
             }
@@ -1975,7 +1975,7 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
                 this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
             }
-            
+
             // Create highlight state to pass to bases.
             let hl_state: RNAHighlightState = null;
             if (this._allNewHighlights.length > 0) {
