@@ -1878,7 +1878,9 @@ export class Pose2D extends ContainerObject implements Updatable {
             this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
         }
 
+        var basesMoved = false;
         if (this._baseToX) {
+            basesMoved = true;
             // Update base locations
 
             if (this._foldStartTime < 0) {
@@ -1953,29 +1955,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (need_redraw || this._redraw) {
-            if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
-                let n: number = this._trackedIndices.length;
-                for (let ii = 0; ii < n; ii++) {
-                    center = this.getBaseXY(this._trackedIndices[ii]);
-                    this._baseBoxes[ii].x = center.x;
-                    this._baseBoxes[ii].y = center.y;
-                    const color = this._baseBoxes[ii].lineColor;
-                    this._baseBoxes[ii].clear();
-                    this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
-                    this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
-                }
-            }
-    
-            if (this._cursorIndex > 0) {
-                center = this.getBaseXY(this._cursorIndex - 1);
-                this._cursorBox.x = center.x;
-                this._cursorBox.y = center.y;
-                this._cursorBox.visible = true;
-                this._cursorBox.clear();
-                this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
-                this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
-            }
-
             // Create highlight state to pass to bases.
             let hl_state: RNAHighlightState = null;
             if (this._allNewHighlights.length > 0) {
@@ -2019,12 +1998,37 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this.renderAuxInfo();
             }
 
-            this._redraw = false;
-
             if (this._feedbackObjs.length > 0) {
                 this.updatePrintFeedback(false);
             }
         }
+
+        if (this._redraw || basesMoved) {
+            if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
+                let n: number = this._trackedIndices.length;
+                for (let ii = 0; ii < n; ii++) {
+                    center = this.getBaseXY(this._trackedIndices[ii]);
+                    this._baseBoxes[ii].x = center.x;
+                    this._baseBoxes[ii].y = center.y;
+                    const color = this._baseBoxes[ii].lineColor;
+                    this._baseBoxes[ii].clear();
+                    this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
+                    this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
+                }
+            }
+    
+            if (this._cursorIndex > 0) {
+                center = this.getBaseXY(this._cursorIndex - 1);
+                this._cursorBox.x = center.x;
+                this._cursorBox.y = center.y;
+                this._cursorBox.visible = true;
+                this._cursorBox.clear();
+                this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
+                this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
+            }
+        }
+
+        this._redraw = false;
 
         this._moleculeLayer.visible = false;
         if (this._molecularBindingBases != null && this._molecule != null) {
