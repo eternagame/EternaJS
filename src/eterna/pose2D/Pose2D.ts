@@ -3101,6 +3101,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._primaryScoreEnergyDisplay.position = new Point(17, 118);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118)
+        this._deltaScoreEnergyDisplay.setSize(111, 40);
+
         this._secondaryScoreEnergyDisplay.position = new Point(17 + 119*2 + factor * 59, 118);
         this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
