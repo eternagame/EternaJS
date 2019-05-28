@@ -168,11 +168,13 @@ export abstract class GameMode extends AppMode {
             newPoseField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder) {
+                    let poseidx = this._isPipMode ? idx : this._curTargetIndex;
+
                     let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.fullSequence, pairs);
 
                     // This changes between PoseEdit mode and PuzzleEditMode
-                    let targetPairs: number[] = this._targetPairs ? this._targetPairs[idx] : this.getCurrentTargetPairs(idx);
-                    let nativePairs: number[] = this.getCurrentUndoBlock(idx).getPairs();
+                    let targetPairs: number[] = this._targetPairs ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
+                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
 
                     return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.fullSequence)) - score(nativePairs);
                 }
@@ -297,6 +299,7 @@ export abstract class GameMode extends AppMode {
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     protected _folder: Folder;
+    protected _curTargetIndex: number;
     protected getCurrentUndoBlock(index: number): UndoBlock {
         return undefined;
     };

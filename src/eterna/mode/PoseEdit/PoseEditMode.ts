@@ -3648,7 +3648,7 @@ export class PoseEditMode extends GameMode {
     private _startingPoint: string;
     private _moveCount: number = 0;
     private _moves: any[] = [];
-    private _curTargetIndex: number = 0;
+    protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
     private _targetConditions: any[] = [];
