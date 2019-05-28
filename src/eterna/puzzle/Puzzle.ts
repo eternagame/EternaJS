@@ -597,6 +597,35 @@ export class Puzzle {
         return seq;
     }
 
+    public toJSON(): string {
+        return JSON.stringify({
+            nodeID: this.nodeID,
+            reward: this.reward,
+            nextPuzzleID: this.nextPuzzleID,
+            rscript: this.rscript,
+            hint: this.hint,
+            puzzleType: this.puzzleType,
+            missionText: this.missionText,
+            folderName: this.folderName,
+            targetConditions: this.targetConditions,
+            constraints: this.constraints,
+            temporaryConstraints: this.temporaryConstraints,
+            curConstraints: this.curConstraints,
+            puzzleLocks: this.puzzleLocks,
+            shiftLimit: this.shiftLimit,
+            secstructs: this.getSecstructs(),
+            beginningSequence: this.getBeginningSequence(),
+            savedSequence: this.savedSequence,
+            boosters: this.boosters,
+            barcodeIndices: this.barcodeIndices,
+            isSoftConstraint: this.isSoftConstraint,
+            round: this.round,
+            numSubmissions: this.numSubmissions,
+            useBarcode: this.useBarcode,
+            isUsingTails: this.isUsingTails,
+        });
+    }
+
     private readonly _nid: number;
     private readonly _name: string;
     private readonly _puzzleType: PuzzleType;

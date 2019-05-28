@@ -2668,7 +2668,7 @@ export class PoseEditMode extends GameMode {
 
             const scriptID = value;
             const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID,
-                { params: { puzzleInfo: this._puzzle } },
+                { params: { puzzleInfo: this._puzzle.toJSON() } },
                 scriptResult => {
                     let goal = "";
                     let name = "...";
