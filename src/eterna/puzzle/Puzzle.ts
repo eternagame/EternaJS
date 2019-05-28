@@ -614,7 +614,7 @@ export class Puzzle {
             puzzleLocks: this.puzzleLocks,
             shiftLimit: this.shiftLimit,
             secstructs: this.getSecstructs(),
-            beginningSequence: this.getBeginningSequence(),
+            beginningSequence: EPars.sequenceToString(this.getBeginningSequence()),
             savedSequence: this.savedSequence,
             boosters: this.boosters,
             barcodeIndices: this.barcodeIndices,
