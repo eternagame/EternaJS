@@ -598,9 +598,7 @@ export class PuzzleEditMode extends GameMode {
         Eterna.client.submitPuzzle(post_params)
             .then(() => {
                 submitText.destroyObject();
-                this.showNotification(
-                    "Your puzzle has been successfully published.\n" +
-                    "It will show up in player puzzle pages within 5 minutes.");
+                this.showNotification("Your puzzle has been successfully published.\n");
             })
             .catch(err => {
                 submitText.destroyObject();
