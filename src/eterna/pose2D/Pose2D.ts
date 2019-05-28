@@ -2230,6 +2230,14 @@ export class Pose2D extends ContainerObject implements Updatable {
             (show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText);
     }
 
+    public get showExplosionFactor(): boolean {
+        return this._explosionFactorPanel.display.visible;
+    }
+
+    public set showExplosionFactor(show: boolean) {
+        this._explosionFactorPanel.display.visible = show;
+    }
+
     public set scoreFolder(folder: Folder) {
         if (this._scoreFolder != folder) {
             this._scoreFolder = folder;
