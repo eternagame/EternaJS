@@ -2667,47 +2667,50 @@ export class PoseEditMode extends GameMode {
             isSatisfied = false;
 
             const scriptID = value;
-            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID, {}, scriptResult => {
-                let goal = "";
-                let name = "...";
-                let resultValue = "";
-                let index = null;
-                let dataPNG = "";
-                if (scriptResult && scriptResult.cause) {
-                    if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
-                    if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
-                    if (scriptResult.cause.name != null) name = scriptResult.cause.name;
-                    if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
-                    if (scriptResult.cause.index != null) {
-                        index = (scriptResult.cause.index + 1).toString();
-                        let ll: number = this._isPipMode ?
-                            scriptResult.cause.index :
-                            (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
-                        if (ll >= 0) {
-                            if (scriptResult.cause.highlight != null) {
-                                this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
-                            } else {
-                                this._poses[ll].clearUserDefinedHighlight();
+            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID,
+                { params: { puzzleInfo: this._puzzle } },
+                scriptResult => {
+                    let goal = "";
+                    let name = "...";
+                    let resultValue = "";
+                    let index = null;
+                    let dataPNG = "";
+                    if (scriptResult && scriptResult.cause) {
+                        if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
+                        if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
+                        if (scriptResult.cause.name != null) name = scriptResult.cause.name;
+                        if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
+                        if (scriptResult.cause.index != null) {
+                            index = (scriptResult.cause.index + 1).toString();
+                            let ll: number = this._isPipMode ?
+                                scriptResult.cause.index :
+                                (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
+                            if (ll >= 0) {
+                                if (scriptResult.cause.highlight != null) {
+                                    this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
+                                } else {
+                                    this._poses[ll].clearUserDefinedHighlight();
+                                }
                             }
+                        }
+
+                        if (scriptResult.cause.icon_b64) {
+                            dataPNG = scriptResult.cause.icon_b64;
                         }
                     }
 
-                    if (scriptResult.cause.icon_b64) {
-                        dataPNG = scriptResult.cause.icon_b64;
+                    if (render) {
+                        box.setContent(ConstraintType.SCRIPT, {
+                            "nid": scriptID,
+                            "goal": goal,
+                            "name": name,
+                            "value": resultValue,
+                            "index": index,
+                            "data_png": dataPNG
+                        }, isSatisfied, 0);
                     }
                 }
-
-                if (render) {
-                    box.setContent(ConstraintType.SCRIPT, {
-                        "nid": scriptID,
-                        "goal": goal,
-                        "name": name,
-                        "value": resultValue,
-                        "index": index,
-                        "data_png": dataPNG
-                    }, isSatisfied, 0);
-                }
-            });
+            );
 
             if (!scriptCompleted) {
                 log.warn(`Constraint script wasn't able to run synchronously [scriptID=${scriptID}]`);
