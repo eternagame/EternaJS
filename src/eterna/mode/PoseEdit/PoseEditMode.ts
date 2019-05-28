@@ -1224,6 +1224,12 @@ export class PoseEditMode extends GameMode {
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
 
+        let explosionFactorVisible: boolean[] = [];
+        for (let pose of this._poses) {
+            explosionFactorVisible.push(pose.showExplosionFactor);
+            pose.showExplosionFactor = false;
+        }
+
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
@@ -1242,6 +1248,10 @@ export class PoseEditMode extends GameMode {
 
         for (let [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
+        }
+
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         return pngData;

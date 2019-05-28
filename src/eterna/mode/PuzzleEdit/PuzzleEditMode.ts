@@ -383,12 +383,16 @@ export class PuzzleEditMode extends GameMode {
 
         let energyVisible: boolean[] = [];
         let trackedCursorIdx: number[] = [];
+        let explosionFactorVisible: boolean[] = [];
         for (let pose of this._poses) {
             energyVisible.push(pose.showTotalEnergy);
             pose.showTotalEnergy = false;
 
             trackedCursorIdx.push(pose.trackedCursorIdx);
             pose.trackCursor(-1);
+
+            explosionFactorVisible.push(pose.showExplosionFactor);
+            pose.showExplosionFactor = false;
         }
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
@@ -412,6 +416,7 @@ export class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ++ii) {
             this._poses[ii].showTotalEnergy = energyVisible[ii];
             this._poses[ii].trackCursor(trackedCursorIdx[ii]);
+            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         return pngData;
