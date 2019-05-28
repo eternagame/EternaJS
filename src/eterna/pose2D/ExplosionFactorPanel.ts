@@ -45,7 +45,8 @@ export class ExplosionFactorPanel extends GamePanel {
         decreaseButton.display.position = new Point(widthWalker, heightWalker);
         this.addObject(decreaseButton, this.container);
         decreaseButton.clicked.connect(() => {
-            input.text = Math.max(0, Math.round((parseFloat(input.text) - 0.25)*1000)/1000).toString();
+            let factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25)*1000)/1000);
+            input.text = (isNaN(factor) ? 1 : factor).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
         decreaseButton.hotkey(KeyCode.BracketLeft);
@@ -57,7 +58,8 @@ export class ExplosionFactorPanel extends GamePanel {
         increaseButton.display.position = new Point(widthWalker, heightWalker);
         this.addObject(increaseButton, this.container);
         increaseButton.clicked.connect(() => {
-            input.text = Math.max(0, Math.round((parseFloat(input.text)+ 0.25)*1000)/1000).toString();
+            let factor = Math.max(0, Math.round((parseFloat(input.text)+ 0.25)*1000)/1000);
+            input.text = (isNaN(factor) ? 1 : factor).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
         increaseButton.hotkey(KeyCode.BracketRight);
