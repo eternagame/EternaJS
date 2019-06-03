@@ -47,7 +47,8 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
         this._curCategoryText = new FixedWidthTextField(
             this._allColumnCategories[0],
             Fonts.arial("", 17).color(0xffffff).style,
-            140, HAlign.CENTER);
+            140, HAlign.CENTER
+        );
         addCriterionLayout.addChild(this._curCategoryText);
 
         this._nextCategoryButton = new GameButton().allStates(GraphicsUtil.drawRightTriangle(2));
@@ -124,7 +125,6 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
         let curIdx = this.getColumnIdx(category);
         if (curIdx >= 0) {
             this.setCriteriaIdx(category, 0);
-
         } else {
             this.addColumnUI(category, 0);
             this.layout();
@@ -138,7 +138,7 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
     private removeColumn(category: DesignCategory): void {
         let idx = this.getColumnIdx(category);
         if (idx < 0) {
-            throw new Error("Can't find sort_category " + category);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         this._columnUIs[idx].destroy();
@@ -187,8 +187,6 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
             this._addCriterionButton.enabled = true;
             this._prevCategoryButton.enabled = true;
             this._nextCategoryButton.enabled = true;
-
-
         } else {
             this._addColumnCategoryIdx = 0;
             this._curCategoryText.alpha = 0.3;
@@ -213,7 +211,7 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
     private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.getColumnIdx(category);
         if (curIdx < 0) {
-            throw new Error("Can't find sort_category " + category);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         if (curIdx === newIdx || newIdx < 0 || newIdx >= this._columnUIs.length) {
@@ -240,11 +238,13 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
     private repositionDialog(): void {
         DisplayUtil.positionRelativeToStage(
             this._bg.display, HAlign.CENTER, VAlign.TOP,
-            HAlign.CENTER, VAlign.TOP, 0, 145);
+            HAlign.CENTER, VAlign.TOP, 0, 145
+        );
 
         DisplayUtil.positionRelative(
             this._panelContent, HAlign.CENTER, VAlign.CENTER,
-            this._bg.display, HAlign.CENTER, VAlign.CENTER);
+            this._bg.display, HAlign.CENTER, VAlign.CENTER
+        );
     }
 
     private readonly _allColumnCategories: DesignCategory[];

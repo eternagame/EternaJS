@@ -51,7 +51,7 @@ export class Puzzle {
         seq[1] = EPars.RNABASE_GUANINE;
 
         let offset: number = seq.length - 20;
-        for (let ii: number = 0; ii < 20; ii++) {
+        for (let ii = 0; ii < 20; ii++) {
             seq[offset + ii] = EPars.RNABASE_LAST20[ii];
         }
 
@@ -72,11 +72,11 @@ export class Puzzle {
 
     public canUseFolder(folder: Folder): boolean {
         return !(
-            (this.hasTargetType("multistrand") && !folder.canMultifold) ||
-            (this.hasTargetType('aptamer') && !folder.canFoldWithBindingSite) ||
-            (this.hasTargetType('oligo') && !folder.canCofold) ||
-            (this.hasTargetType('aptamer+oligo') && !folder.canFoldWithBindingSite) ||
-            (this.hasTargetType('aptamer+oligo') && !folder.canCofold)
+            (this.hasTargetType("multistrand") && !folder.canMultifold)
+            || (this.hasTargetType("aptamer") && !folder.canFoldWithBindingSite)
+            || (this.hasTargetType("oligo") && !folder.canCofold)
+            || (this.hasTargetType("aptamer+oligo") && !folder.canFoldWithBindingSite)
+            || (this.hasTargetType("aptamer+oligo") && !folder.canCofold)
         );
     }
 
@@ -139,7 +139,7 @@ export class Puzzle {
     public get targetConditions(): any[] {
         if (this._targetConditions == null) {
             let target_conditions: any[] = [];
-            for (let ii: number = 0; ii < this._secstructs.length; ii++) {
+            for (let ii = 0; ii < this._secstructs.length; ii++) {
                 target_conditions.push(null);
             }
             return target_conditions;
@@ -267,7 +267,7 @@ export class Puzzle {
         this._secstructs = [];
         let concentration: number;
 
-        for (let ii: number = 0; ii < this._targetConditions.length; ii++) {
+        for (let ii = 0; ii < this._targetConditions.length; ii++) {
             if (this._targetConditions[ii]["secstruct"] == null) {
                 throw new Error("Can't find secstruct from a target condition");
             }
@@ -334,7 +334,7 @@ export class Puzzle {
         this._defaultPoseState = null;
         this._useModes = 0;
 
-        for (let ii: number = 0; ii < ui_spec.length; ii++) {
+        for (let ii = 0; ii < ui_spec.length; ii++) {
             if (ui_spec[ii] === "NOMODES") {
                 this._useModes = Puzzle.BOOL_FALSE;
             } else if (ui_spec[ii] === "STARTSTATE") {
@@ -419,8 +419,8 @@ export class Puzzle {
 
     public get isPairBrushAllowed(): boolean {
         let is_basic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let has_target: boolean = false;
-        for (let ii: number = 0; ii < this._constraints.length; ii++) {
+        let has_target = false;
+        for (let ii = 0; ii < this._constraints.length; ii++) {
             if (this._constraints[ii] === ConstraintType.SHAPE) {
                 has_target = true;
             }
@@ -475,7 +475,7 @@ export class Puzzle {
 
     public getSecstructs(index: number = 0): string[] {
         let secstructs: string[] = [];
-        for (let ii: number = 0; ii < this._secstructs.length; ii++) {
+        for (let ii = 0; ii < this._secstructs.length; ii++) {
             secstructs.push(this.getSecstruct(ii));
         }
         return secstructs;
@@ -492,7 +492,7 @@ export class Puzzle {
 
     public hasTargetType(tc_type: string): boolean {
         if (this._targetConditions == null) return false;
-        for (let ii: number = 0; ii < this._targetConditions.length; ii++) {
+        for (let ii = 0; ii < this._targetConditions.length; ii++) {
             if (this._targetConditions[ii]["type"] === tc_type) {
                 return true;
             }
@@ -517,7 +517,7 @@ export class Puzzle {
 
         // FIXME: This needs revision, see PoseEditMode:2163
         let len: number = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
-        for (let ii: number = 0; ii < len; ii++) {
+        for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
                 seq.push(this._beginningSequence[ii]);
             } else {
@@ -538,7 +538,7 @@ export class Puzzle {
         if (!this._useBarcode) {
             return seq.slice();
         }
-        let minus: number = 19;
+        let minus = 19;
         if (this._useTails) {
             minus += 20;
         }
@@ -570,7 +570,7 @@ export class Puzzle {
                     }
                 }
 
-                for (let ii: number = 0; ii < target_seq_temp.length; ii++) {
+                for (let ii = 0; ii < target_seq_temp.length; ii++) {
                     target_seq.push(target_seq_temp[ii]);
                 }
 
@@ -622,7 +622,7 @@ export class Puzzle {
             round: this.round,
             numSubmissions: this.numSubmissions,
             useBarcode: this.useBarcode,
-            isUsingTails: this.isUsingTails,
+            isUsingTails: this.isUsingTails
         });
     }
 

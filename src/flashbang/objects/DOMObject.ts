@@ -90,8 +90,8 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     }
 
     private handleHideWhenModeInactive(): void {
-        let wasExited: boolean = false;
-        let wasVisible: boolean = false;
+        let wasExited = false;
+        let wasVisible = false;
 
         this.regs.add(this.mode.exited.connect(() => {
             wasExited = true;
@@ -167,7 +167,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         if (idx >= 0) {
             value = value.substr(0, idx);
         }
-        let size: number = Number(value);
+        let size = Number(value);
         return !Number.isNaN(size) ? size : 0;
     }
 

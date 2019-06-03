@@ -1,4 +1,4 @@
-﻿import {HAlign, VAlign} from "../../../flashbang/core/Align";
+import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Updatable} from "../../../flashbang/core/Updatable";
 import {KeyCode} from "../../../flashbang/input/KeyCode";
 import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
@@ -10,13 +10,13 @@ import {GamePanel} from "../../ui/GamePanel";
 import {TextInputObject} from "../../ui/TextInputObject";
 import {Fonts} from "../../util/Fonts";
 import {TextBalloon} from "../../ui/TextBalloon";
-import { Rectangle } from "pixi.js";
+import {Rectangle} from "pixi.js";
 
 function IsArrowKey(keyCode: string): boolean {
-    return keyCode === KeyCode.ArrowRight ||
-        keyCode === KeyCode.ArrowLeft ||
-        keyCode === KeyCode.ArrowUp ||
-        keyCode === KeyCode.ArrowDown;
+    return keyCode === KeyCode.ArrowRight
+        || keyCode === KeyCode.ArrowLeft
+        || keyCode === KeyCode.ArrowUp
+        || keyCode === KeyCode.ArrowDown;
 }
 
 export class StructureInput extends GamePanel implements Updatable {
@@ -64,7 +64,7 @@ export class StructureInput extends GamePanel implements Updatable {
         this._textInput.element.onmouseleave = hideError;
 
         // Prevent PoseField from adding a drag surface since we're not trying to drag
-        this.pointerDown.connect((e) => {e.stopPropagation()});
+        this.pointerDown.connect((e) => { e.stopPropagation(); });
     }
 
     public update(dt: number): void {
@@ -80,9 +80,10 @@ export class StructureInput extends GamePanel implements Updatable {
         this._textInput.width = width - 20;
         DisplayUtil.positionRelative(
             this._textInput.display, HAlign.CENTER, VAlign.CENTER,
-            this.container, HAlign.CENTER, VAlign.CENTER);
+            this.container, HAlign.CENTER, VAlign.CENTER
+        );
 
-        this.display.hitArea = new Rectangle(0,0,width, height);
+        this.display.hitArea = new Rectangle(0, 0, width, height);
     }
 
     public setPose(op: PuzzleEditOp = null, index: number = -1): void {
@@ -95,7 +96,7 @@ export class StructureInput extends GamePanel implements Updatable {
         this.setWarning(error || "");
         this._textInput.text = input;
 
-        let sequence = this._pose.sequence;
+        let {sequence} = this._pose;
         let locks = this._pose.puzzleLocks;
         let binding_site = this._pose.molecularBindingSite;
         let sequence_backup = this._pose.sequence;
@@ -158,9 +159,7 @@ export class StructureInput extends GamePanel implements Updatable {
                     locks[ii + index + 1] = after_lock_index[ii];
                     binding_site[ii + index + 1] = after_binding_site_index[ii];
                 }
-
             }
-
         } else if (op == PuzzleEditOp.ADD_CYCLE) {
             // Add a cycle of length 3
             let after_index = sequence.slice(index);
@@ -190,7 +189,6 @@ export class StructureInput extends GamePanel implements Updatable {
                 locks[ii + index + 5] = after_lock_index[ii];
                 binding_site[ii + index + 5] = after_binding_site_index[ii];
             }
-
         } else if (op == PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
             let pindex = (this._pose.pairs)[index];
@@ -214,7 +212,6 @@ export class StructureInput extends GamePanel implements Updatable {
                     binding_site[ii + index] = after_binding_site_index[ii];
                 }
             }
-
         } else if (op == PuzzleEditOp.DELETE_BASE) {
             // Delete a base
             let after_index = sequence_backup.slice(index + 1);
@@ -236,7 +233,7 @@ export class StructureInput extends GamePanel implements Updatable {
         } catch (e) {
             // Invalid parenthesis notation error will warn the user per the earlier validateParenthesis call
             // Don't return to poseedit since it'll just break with the malformed structure
-            return
+            return;
         }
         this._pose.callPoseEditCallback();
     }
@@ -265,5 +262,4 @@ export class StructureInput extends GamePanel implements Updatable {
     private _textInput: TextInputObject;
     private _prevCaretPostion: number = -1;
     private _errorText: TextBalloon;
-
 }

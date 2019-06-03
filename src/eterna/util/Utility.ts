@@ -16,7 +16,7 @@ export class Utility {
     }
 
     public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg: RegExp = /\n/g;
+        let newlinereg = /\n/g;
         str = str.replace(newlinereg, " ");
         newlinereg = /"/g;
         str = str.replace(newlinereg, "'");
@@ -28,8 +28,8 @@ export class Utility {
             return "";
         }
 
-        let res: string = "";
-        let first: boolean = true;
+        let res = "";
+        let first = true;
         let key: string;
         for (key in obj) {
             if (first) {
@@ -45,11 +45,11 @@ export class Utility {
     }
 
     public static isPointWithin(p: Point, polygon: Point[], stretch_length: number = 10000): boolean {
-        let hit_count: number = 0;
+        let hit_count = 0;
 
         let p_to: Point = new Point(p.x + stretch_length, p.y + stretch_length);
 
-        for (let ii: number = 0; ii < polygon.length; ii++) {
+        for (let ii = 0; ii < polygon.length; ii++) {
             let a: Point = polygon[ii];
             let b: Point = polygon[(ii + 1) % polygon.length];
 

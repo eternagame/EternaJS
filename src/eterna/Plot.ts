@@ -139,7 +139,7 @@ export class Plot extends Container {
                 let x_coord = ((this._data2D[ii + 1])) * horizontal_space + x;
                 let y_coord = ((this._data2D[ii])) * vertical_space - 1 + y;
 
-                let min_col: number = 0.1;
+                let min_col = 0.1;
                 let prob_r: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);
                 let prob_g: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);
                 let prob_b: number = 1.0 - ((this._data2D[ii + 2]) * (1 - min_col) + min_col);

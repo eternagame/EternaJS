@@ -18,13 +18,13 @@ export class RNAFoldBasic extends Folder {
     }
 
     public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
-        let score: number = 0;
+        let score = 0;
 
         if (pairs.length !== seq.length) {
             throw new Error("Sequence and pairs lengths don't match");
         }
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 score++;
             }
@@ -39,10 +39,10 @@ export class RNAFoldBasic extends Folder {
         let dp_array: number[] = new Array(n * n);
         let trace_array: number[] = new Array(n * n);
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             pairs[ii] = -1;
 
-            for (let jj: number = 0; jj < n; jj++) {
+            for (let jj = 0; jj < n; jj++) {
                 let index: number = ii * n + jj;
 
                 if (ii > jj + 1) {
@@ -57,14 +57,14 @@ export class RNAFoldBasic extends Folder {
             }
         }
 
-        for (let iter: number = 1; iter < n; iter++) {
-            let ii_walker: number = 0;
+        for (let iter = 1; iter < n; iter++) {
+            let ii_walker = 0;
             let jj_walker: number = iter;
 
             while (jj_walker < n) {
-                let max_case: number = 0;
-                let max_val: number = -1;
-                let current_val: number = 0;
+                let max_case = 0;
+                let max_val = -1;
+                let current_val = 0;
 
                 if (ii_walker < n - 1 && jj_walker > 0 && ii_walker < jj_walker - 1) {
                     if (EPars.pairType(seq[ii_walker], seq[jj_walker])) {

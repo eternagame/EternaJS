@@ -272,7 +272,8 @@ export class PuzzleEditToolbar extends ContainerObject {
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
-            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM);
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM
+        );
     }
 
     private readonly _embedded: boolean;

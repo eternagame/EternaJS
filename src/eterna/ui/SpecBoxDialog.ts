@@ -49,13 +49,15 @@ export class SpecBoxDialog extends Dialog<boolean> {
 
             cancelButton.display.position = new Point(
                 specBox.width - cancelButton.container.width - 20,
-                specBox.height - cancelButton.container.height - 20);
+                specBox.height - cancelButton.container.height - 20
+            );
 
             if (minimizeButton != null) {
                 DisplayUtil.positionRelative(
                     minimizeButton.display, HAlign.RIGHT, VAlign.CENTER,
                     cancelButton.display, HAlign.LEFT, VAlign.CENTER,
-                    -20, 0);
+                    -20, 0
+                );
             }
         };
         updateBounds();

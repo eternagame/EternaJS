@@ -5,9 +5,9 @@ export class StringUtil {
      * This hashes identically to Java's String.hashCode().
      */
     public static hashCode(str: string): number {
-        let code: number = 0;
+        let code = 0;
         if (str != null) {
-            for (let ii: number = 0; ii < str.length; ii++) {
+            for (let ii = 0; ii < str.length; ii++) {
                 code = 31 * code + str.charCodeAt(ii);
             }
         }
@@ -122,7 +122,7 @@ export class StringUtil {
 
     /** Format the specified number, nicely, with commas. */
     public static formatNumber(n: number): string {
-        let postfix: string = "";
+        let postfix = "";
         let s: string = n.toString(); // use standard to-stringing
 
         // move any fractional portion to the postfix
@@ -233,7 +233,7 @@ export class StringUtil {
         let len: number = args.length;
         // TODO: FIXME: this might be wrong, if your {0} replacement has a {1} in it, then
         // that'll get replaced next iteration.
-        for (let ii: number = 0; ii < len; ii++) {
+        for (let ii = 0; ii < len; ii++) {
             str = str.replace(new RegExp(`\\{${ii}\\}`, "g"), args[ii]);
         }
         return str;
@@ -250,7 +250,7 @@ export class StringUtil {
             return null;
         }
 
-        let startIdx: number = 0;
+        let startIdx = 0;
         // this works because charAt() with an invalid index returns "", which is not whitespace
         while (StringUtil.isWhitespace(str.charAt(startIdx))) {
             startIdx++;
@@ -343,7 +343,7 @@ export class StringUtil {
                 break;
             }
 
-            let index: number = result.index;
+            let {index} = result;
             let url: string = result[0];
             array.push(s.substring(0, index));
             s = s.substring(index + url.length);
@@ -405,7 +405,7 @@ export class StringUtil {
         }
 
         // now verify that str only contains valid chars for the radix
-        for (let ii: number = 0; ii < str.length; ii++) {
+        for (let ii = 0; ii < str.length; ii++) {
             let dex: number = StringUtil.HEX.indexOf(str.charAt(ii).toLowerCase());
             if (dex === -1 || dex >= radix) {
                 throw new Error(`Invalid characters in String [string=${arguments[0]}, radix=${radix}`);
@@ -431,6 +431,6 @@ export class StringUtil {
 
     /** A regular expression that finds URLs. */
     private static URL_REGEXP: RegExp = // new RegExp("(http|https|ftp)://\\S+", "i");
-        // from John Gruber: http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
-        new RegExp("\\b(([\\w-]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^!\\\"#$%&'()*+,\\-./:;<=>?@\\[\\\\\\]\\^_`{|}~\\s]|/)))", "i");
+    // from John Gruber: http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
+    new RegExp("\\b(([\\w-]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^!\\\"#$%&'()*+,\\-./:;<=>?@\\[\\\\\\]\\^_`{|}~\\s]|/)))", "i");
 }

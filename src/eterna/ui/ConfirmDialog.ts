@@ -23,13 +23,13 @@ export class ConfirmDialog extends Dialog<boolean> {
      */
     public get confirmed(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.closed.then(value => {
+            this.closed.then((value) => {
                 if (value) {
                     resolve();
                 } else {
                     reject(new DialogCanceledError());
                 }
-            })
+            });
         });
     }
 
@@ -51,7 +51,6 @@ export class ConfirmDialog extends Dialog<boolean> {
                 .color(0xC0DCE7)
                 .maxWidth(300);
             panel.addObject(text, panelLayout);
-
         } else {
             let text = Fonts.arial(this._prompt, 15).color(0xC0DCE7).wordWrap(true, 300).build();
             panelLayout.addChild(text);

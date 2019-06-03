@@ -1,4 +1,4 @@
-﻿import {Eterna} from "../../Eterna";
+import {Eterna} from "../../Eterna";
 import {Utility} from "../../util/Utility";
 
 export class LabComments {
@@ -9,7 +9,7 @@ export class LabComments {
 
     public update(): Promise<any[]> {
         return Eterna.client.getSolutionComments(this._solution_nid)
-            .then(data => {
+            .then((data) => {
                 this._comments_data = data["data"]["comments"];
                 return this._comments_data;
             });
@@ -20,7 +20,7 @@ export class LabComments {
         body = Utility.stripQuotationsAndNewlines(body);
 
         return Eterna.client.submitSolutionComment(this._solution_nid, body)
-            .then(data => {
+            .then((data) => {
                 this._comments_data = data["data"]["comments"];
                 return this._comments_data;
             });

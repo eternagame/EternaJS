@@ -1,6 +1,8 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
@@ -188,11 +190,11 @@ export class DesignBrowserMode extends GameMode {
             DesignCategory.GU_Pairs,
             DesignCategory.Melting_Point,
             DesignCategory.Free_Energy,
-            DesignCategory.Synthesis_score,
+            DesignCategory.Synthesis_score
         ];
         if (!this._novote) {
             sortableCategories.push(DesignCategory.Votes);
-            sortableCategories.push(DesignCategory.My_Votes)
+            sortableCategories.push(DesignCategory.My_Votes);
         }
 
         this._sortOptions = new SortOptions(sortableCategories);
@@ -271,17 +273,16 @@ export class DesignBrowserMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0);
+            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0
+        );
 
         // Refresh our data immediately, and then every 300 seconds
         this.refreshSolutions();
 
-        this.addObject(new RepeatingTask(() => {
-            return new SerialTask(
-                new DelayTask(300),
-                new CallbackTask(() => this.refreshSolutions()),
-            );
-        }));
+        this.addObject(new RepeatingTask(() => new SerialTask(
+            new DelayTask(300),
+            new CallbackTask(() => this.refreshSolutions()),
+        )));
 
         this.updateLayout();
     }
@@ -332,15 +333,15 @@ export class DesignBrowserMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5);
+            HAlign.RIGHT, VAlign.TOP, 0, 5
+        );
     }
 
     protected enter(): void {
         super.enter();
         this.refreshSolutions();
-        const existingPoseEditMode = Eterna.app.existingPoseEditMode;
-        this._returnToGameButton.display.visible =
-            (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID);
+        const {existingPoseEditMode} = Eterna.app;
+        this._returnToGameButton.display.visible = (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID);
         Eterna.chat.pushHideChat();
     }
 
@@ -376,9 +377,9 @@ export class DesignBrowserMode extends GameMode {
 
         Eterna.app.switchToPoseEdit(this._puzzle, false, {initSolution: solution, solutions: this._filteredSolutions.slice()})
             .then(() => this.popUILock())
-            .catch(e => {
+            .catch((e) => {
                 log.error(e);
-                this.popUILock()
+                this.popUILock();
             });
     }
 
@@ -387,7 +388,7 @@ export class DesignBrowserMode extends GameMode {
 
         Eterna.app.switchToFeedbackView(this._puzzle, solution)
             .then(() => this.popUILock())
-            .catch(e => {
+            .catch((e) => {
                 log.error(e);
                 this.popUILock();
             });
@@ -406,12 +407,10 @@ export class DesignBrowserMode extends GameMode {
 
     private static createStatusText(text: string): SceneObject<Text> {
         let statusText = new SceneObject<Text>(Fonts.arial(text, 22).color(0xffffff).bold().build());
-        statusText.addObject(new RepeatingTask(() => {
-            return new SerialTask(
-                new AlphaTask(0, 0.3),
-                new AlphaTask(1, 0.3),
-            );
-        }));
+        statusText.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(0, 0.3),
+            new AlphaTask(1, 0.3),
+        )));
         return statusText;
     }
 
@@ -434,7 +433,7 @@ export class DesignBrowserMode extends GameMode {
         Eterna.client.deleteSolution(solution.nodeID)
             .then(() => SolutionManager.instance.getSolutionsForPuzzle(this._puzzle.nodeID))
             .then(cleanup)
-            .catch(err => {
+            .catch((err) => {
                 this.showNotification(`Delete failed: ${err}`);
                 cleanup();
             });
@@ -456,7 +455,7 @@ export class DesignBrowserMode extends GameMode {
         };
 
         Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty("My Votes"))
-            .then(data => {
+            .then((data) => {
                 this._voteProcessor.process_data(data["votes"]);
                 this.sync_votes();
 
@@ -466,7 +465,7 @@ export class DesignBrowserMode extends GameMode {
                 }
                 cleanup();
             })
-            .catch(err => {
+            .catch((err) => {
                 this.showNotification(`Vote failed: ${err}`);
                 cleanup();
             });
@@ -571,7 +570,7 @@ export class DesignBrowserMode extends GameMode {
         }
 
         let dialog = this.showDialog(new CustomizeColumnOrderDialog(AllCategories(), this._categories, disabledCategories));
-        dialog.columnsReorganized.connect(columnNames => {
+        dialog.columnsReorganized.connect((columnNames) => {
             this._categories = columnNames;
             Eterna.settings.designBrowserColumnNames.value = columnNames;
             this.rebuildDataColumns(this._initialDataFilters);
@@ -617,9 +616,9 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private setScrollHorizontal(progress: number): void {
-        this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth) ?
-            (this.contentWidth - this._wholeRowWidth) * progress :
-            0;
+        this._dataColParent.display.x = (this._wholeRowWidth > this.contentWidth)
+            ? (this.contentWidth - this._wholeRowWidth) * progress
+            : 0;
     }
 
     private setScrollVertical(progress: number): void {
@@ -654,14 +653,14 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private sync_votes(): void {
-        let votesLeft: number = this._voteProcessor.votesLeft;
-        let round: number = this._puzzle.round;
+        let {votesLeft} = this._voteProcessor;
+        let {round} = this._puzzle;
         let available: number = this._puzzle.numSubmissions;
         let mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
 
         if (!this._novote) {
-            this._votesText.text = `You have <bold>${votesLeft}</bold> votes and ` +
-                `<bold>${available - mySolutionTitles.length}</bold> solution slots left.`;
+            this._votesText.text = `You have <bold>${votesLeft}</bold> votes and `
+                + `<bold>${available - mySolutionTitles.length}</bold> solution slots left.`;
         } else {
             this._votesText.text = "This puzzle has been cleared.";
         }
@@ -751,7 +750,7 @@ export class DesignBrowserMode extends GameMode {
         for (let dataCol of this._dataCols) {
             let data_array: any[] = [];
 
-            let category: DesignCategory = dataCol.category;
+            let {category} = dataCol;
             let feedbacks: Feedback[] = [];
 
             for (let solution of solutions) {
@@ -759,7 +758,7 @@ export class DesignBrowserMode extends GameMode {
             }
 
             for (let ii = 0; ii < solutions.length; ii++) {
-                //single row of raw data
+                // single row of raw data
                 let singleLineRawData: Solution = solutions[ii];
 
                 if (category == DesignCategory.Sequence) {
@@ -773,14 +772,14 @@ export class DesignBrowserMode extends GameMode {
                     if (des.length < 45) {
                         data_array.push(des);
                     } else {
-                        data_array.push(des.substr(0, 40) + "...");
+                        data_array.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category == DesignCategory.Title) {
                     let des = singleLineRawData.getProperty("Title");
                     if (des.length < 30) {
                         data_array.push(des);
                     } else {
-                        data_array.push(des.substr(0, 25) + "...");
+                        data_array.push(`${des.substr(0, 25)}...`);
                     }
                 } else {
                     let rawdata: any = singleLineRawData.getProperty(category);
@@ -793,7 +792,7 @@ export class DesignBrowserMode extends GameMode {
             }
             dataCol.set_pairs(EPars.parenthesisToPairs(puz.getSecstruct()));
 
-            //Setting and Displaying all raw data for each column
+            // Setting and Displaying all raw data for each column
             dataCol.set_data_and_display(data_array);
         }
 
@@ -848,7 +847,7 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private updateDataColumns(): void {
-        let solutions: Solution[] = SolutionManager.instance.solutions;
+        let {solutions} = SolutionManager.instance;
 
         this.setData(solutions, false, true);
 
@@ -860,12 +859,12 @@ export class DesignBrowserMode extends GameMode {
     }
 
     private returnToGame(): void {
-        const existingPoseEditMode = Eterna.app.existingPoseEditMode;
+        const {existingPoseEditMode} = Eterna.app;
         if (existingPoseEditMode != null && existingPoseEditMode.puzzleID == this.puzzleID) {
             this.pushUILock();
             Eterna.app.switchToPoseEdit(this._puzzle, true)
                 .then(() => this.popUILock())
-                .catch(e => {
+                .catch((e) => {
                     log.error(e);
                     this.popUILock();
                 });
@@ -921,7 +920,7 @@ export class DesignBrowserMode extends GameMode {
         DesignCategory.Free_Energy,
         DesignCategory.Synthesized,
         DesignCategory.Synthesis_score,
-        DesignCategory.Sequence,
+        DesignCategory.Sequence
     ];
 }
 
@@ -942,5 +941,5 @@ class MaskBox extends Graphics {
     }
 
     private _width: number = 0;
-    private _height :number = 0;
+    private _height: number = 0;
 }

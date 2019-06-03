@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
@@ -71,7 +73,8 @@ export class ViewSolutionDialog extends Dialog<void> {
                 expdata.getShapeStartIndex(),
                 null,
                 true,
-                expdata.getShapeThreshold());
+                expdata.getShapeThreshold()
+            );
 
             let seeResultButton = new ThumbnailAndTextButton()
                 .text("See Result")
@@ -79,7 +82,6 @@ export class ViewSolutionDialog extends Dialog<void> {
                 .tooltip("Click to see the experimental result!");
             seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
             this.addObject(seeResultButton, this._actionButtonsLayout);
-
         } else {
             // VOTE (disallowed is solution is synthesized or old)
             if (this._solution.getProperty("Synthesized") === "n" && this._solution.getProperty("Round") == this._puzzle.round) {
@@ -98,7 +100,6 @@ export class ViewSolutionDialog extends Dialog<void> {
                         .thumbnail(thumbnail)
                         .text("Unvote")
                         .tooltip("Take back your vote on this design.");
-
                 }
                 voteButton.clicked.connect(() => this.voteClicked.emit());
                 this.addObject(voteButton, this._actionButtonsLayout);
@@ -115,10 +116,9 @@ export class ViewSolutionDialog extends Dialog<void> {
         this.addObject(sortButton, this._actionButtonsLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
-        if (this._solution.getProperty("Round") == this._puzzle.round &&
-            this._solution.playerID == Eterna.playerID &&
-            this._solution.getProperty("Votes") === 0) {
-
+        if (this._solution.getProperty("Round") == this._puzzle.round
+            && this._solution.playerID == Eterna.playerID
+            && this._solution.getProperty("Votes") === 0) {
             let deleteButton = new ThumbnailAndTextButton()
                 .text("Delete")
                 .thumbnail(new Graphics()
@@ -168,25 +168,30 @@ export class ViewSolutionDialog extends Dialog<void> {
         this._solutionDescBox.setSize(width - 20, height - 120);
         DisplayUtil.positionRelative(
             this._solutionDescBox.display, HAlign.CENTER, VAlign.TOP,
-            this._panelBG.display, HAlign.CENTER, VAlign.TOP, 0, 10);
+            this._panelBG.display, HAlign.CENTER, VAlign.TOP, 0, 10
+        );
 
         if (this._editButton != null) {
             DisplayUtil.positionRelative(
                 this._editButton.display, HAlign.CENTER, VAlign.BOTTOM,
-                this._panelBG.display, HAlign.CENTER, VAlign.BOTTOM, 0, -12);
+                this._panelBG.display, HAlign.CENTER, VAlign.BOTTOM, 0, -12
+            );
         }
 
         DisplayUtil.positionRelative(
             this._cancelButton.display, HAlign.RIGHT, VAlign.BOTTOM,
-            this._panelBG.display, HAlign.RIGHT, VAlign.BOTTOM, -12, -12);
+            this._panelBG.display, HAlign.RIGHT, VAlign.BOTTOM, -12, -12
+        );
 
         DisplayUtil.positionRelative(
             this._actionButtonsLayout, HAlign.LEFT, VAlign.BOTTOM,
-            this._panelBG.container, HAlign.LEFT, VAlign.BOTTOM, 38, -12);
+            this._panelBG.container, HAlign.LEFT, VAlign.BOTTOM, 38, -12
+        );
 
         DisplayUtil.positionRelativeToStage(
             this._content, HAlign.CENTER, VAlign.CENTER,
-            HAlign.CENTER, VAlign.CENTER);
+            HAlign.CENTER, VAlign.CENTER
+        );
     }
 
     private readonly _solution: Solution;
@@ -226,7 +231,8 @@ class ThumbnailAndTextButton extends GameButton {
         this._textField.text = value;
         DisplayUtil.positionRelative(
             this._textField, HAlign.CENTER, VAlign.TOP,
-            this._bgFrame, HAlign.CENTER, VAlign.BOTTOM, 0, 3);
+            this._bgFrame, HAlign.CENTER, VAlign.BOTTOM, 0, 3
+        );
         return this;
     }
 
@@ -239,7 +245,8 @@ class ThumbnailAndTextButton extends GameButton {
             this._view.addChildAt(this._thumbnail, 1);
             DisplayUtil.positionRelative(
                 this._thumbnail, HAlign.CENTER, VAlign.CENTER,
-                this._bgFrame, HAlign.CENTER, VAlign.CENTER);
+                this._bgFrame, HAlign.CENTER, VAlign.CENTER
+            );
         }
         return this;
     }

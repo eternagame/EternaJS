@@ -36,7 +36,7 @@ export class RankBoard extends ContainerObject implements Updatable {
 
     public update(dt: number): void {
         let parentOffset: number = this.container.y - this._startingPosition;
-        for (let ii: number = 0; ii < this._rows.length; ii++) {
+        for (let ii = 0; ii < this._rows.length; ii++) {
             // pos_offset / RankBoard.ROW_HEIGHT = How many entries we have moved by
             let loopNum: number = Math.floor((parentOffset / RankBoard.ROW_HEIGHT - ii + 2) / 3); // How many times a row has looped
             let rankIdx: number = loopNum * this._rows.length + ii; // this row's player index in the data array

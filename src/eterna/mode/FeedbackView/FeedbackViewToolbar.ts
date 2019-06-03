@@ -180,13 +180,15 @@ export class FeedbackViewToolbar extends ContainerObject {
         if (this.toggleBar.isLiveObject) {
             DisplayUtil.positionRelative(
                 this.toggleBar.display, HAlign.CENTER, VAlign.BOTTOM,
-                this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5);
+                this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5
+            );
         }
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            0, 0);
+            0, 0
+        );
     }
 
     private readonly _puzzle: Puzzle;

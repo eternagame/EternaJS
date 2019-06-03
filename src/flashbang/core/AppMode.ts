@@ -273,7 +273,7 @@ export class AppMode {
         obj._mode = this;
 
         // Handle IDs
-        let ids: any[] = obj.ids;
+        let {ids} = obj;
         if (ids.length > 0) {
             this._regs.add(obj.destroyed.connect(() => {
                 for (let id of ids) {

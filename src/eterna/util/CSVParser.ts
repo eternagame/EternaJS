@@ -1,7 +1,7 @@
 export class CSVParser {
     public static splitOnComma(csl: string): string[] {
         let vals: string[] = [];
-        let last_comma: number = -1;
+        let last_comma = -1;
         let ii: number;
 
         for (ii = 0; ii < csl.length; ii++) {
@@ -20,7 +20,7 @@ export class CSVParser {
 
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
-        let last_comma: number = -1;
+        let last_comma = -1;
         let ii: number;
 
         for (ii = 0; ii < csl.length; ii++) {

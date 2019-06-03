@@ -1,4 +1,6 @@
-import {Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
+} from "pixi.js";
 import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
@@ -81,7 +83,7 @@ export class GameButton extends Button implements KeyboardListener {
     }
 
     public label(text: string | TextBuilder, fontSize?: number): GameButton {
-        if (typeof(text) === "string") {
+        if (typeof (text) === "string") {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
@@ -201,7 +203,8 @@ export class GameButton extends Button implements KeyboardListener {
                 DisplayUtil.positionRelative(
                     label, HAlign.LEFT, VAlign.CENTER,
                     icon, HAlign.RIGHT, VAlign.CENTER,
-                    5, 0);
+                    5, 0
+                );
             }
 
             if (icon != null) {
@@ -245,7 +248,7 @@ export class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private setIconForState(state: ButtonState, displayOrTex?: DisplayObject | Texture | string) :GameButton {
+    private setIconForState(state: ButtonState, displayOrTex?: DisplayObject | Texture | string): GameButton {
         if (this._buttonIcons == null) {
             this._buttonIcons = [];
         }
@@ -270,7 +273,7 @@ export class GameButton extends Button implements KeyboardListener {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
-        } else if (typeof(displayOrTex) === "string") {
+        } else if (typeof (displayOrTex) === "string") {
             return Sprite.fromImage(displayOrTex);
         } else {
             return null;
@@ -298,14 +301,14 @@ export class GameButton extends Button implements KeyboardListener {
         [ButtonState.UP, 0xC0DCE7],
         [ButtonState.OVER, 0xFFFFFF],
         [ButtonState.DOWN, 0x333333],
-        [ButtonState.DISABLED, 0x999999],
+        [ButtonState.DISABLED, 0x999999]
     ]);
 
     private static readonly STYLEBOX_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0x2D4159],
         [ButtonState.OVER, 0x2D4159],
         [ButtonState.DOWN, 0xFFCC00],
-        [ButtonState.DISABLED, 0x2D4159],
+        [ButtonState.DISABLED, 0x2D4159]
     ]);
 
     private static readonly WMARGIN = 5;

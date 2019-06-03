@@ -15,11 +15,11 @@ export class EternaTextureUtil {
         let size_scaler: number = scaleFactor;
         let scaler_mat: Matrix = new Matrix();
 
-        for (let ss: number = 1; ss < numScaleLevels; ss++) {
+        for (let ss = 1; ss < numScaleLevels; ss++) {
             scaler_mat.identity();
             scaler_mat.scale(size_scaler, size_scaler);
 
-            for (let ii: number = 0; ii < orig_length; ii++) {
+            for (let ii = 0; ii < orig_length; ii++) {
                 textures.push(EternaTextureUtil.scaleBy(textures[ii], size_scaler));
             }
 
@@ -35,7 +35,7 @@ export class EternaTextureUtil {
         let rotated: Texture[] = [texture];
         let end_index: number = 360 / step_size;
 
-        for (let ii: number = 1; ii < end_index; ii++) {
+        for (let ii = 1; ii < end_index; ii++) {
             let sprite: Sprite = new Sprite(texture);
             sprite.rotation = step_size * ii * MathUtil.deg2Rad;
             rotated.push(TextureUtil.renderToTexture(sprite));
@@ -51,7 +51,7 @@ export class EternaTextureUtil {
     public static createTransparent(texture: Texture, num_levels: number): Texture[] {
         let transparent: Texture[] = [texture];
 
-        for (let ss: number = 1; ss < num_levels; ss++) {
+        for (let ss = 1; ss < num_levels; ss++) {
             let col_trans = ColorUtil.colorTransform(1, 1, 1, 1 - (ss / num_levels), 0, 0, 0, 0);
             let sprite: Sprite = new Sprite(texture);
             sprite.filters = [col_trans];

@@ -1,4 +1,6 @@
-import {Graphics, Matrix, Point, Sprite, Text, Texture} from "pixi.js";
+import {
+    Graphics, Matrix, Point, Sprite, Text, Texture
+} from "pixi.js";
 import {Updatable} from "../../flashbang/core/Updatable";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {MathUtil} from "../../flashbang/util/MathUtil";

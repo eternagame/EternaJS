@@ -1,6 +1,6 @@
 export class FoldUtil {
     public static nextPerm(v: number[]): boolean {
-        let more: boolean = false;
+        let more = false;
         let ii: number = v.length;
         if (ii <= 1) return more;
         ii--;

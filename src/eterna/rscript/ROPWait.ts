@@ -6,14 +6,14 @@ import {RScriptUIElementID} from "./RScriptUIElement";
 export enum ROPWaitType {
     MOVECAMERA = "MOVECAMERA",
     CLICKUI = "CLICKUI",
-    NUCLEOTIDECHANGE = "NUCLEOTIDECHANGE",  // single range
+    NUCLEOTIDECHANGE = "NUCLEOTIDECHANGE", // single range
     PAINT = "PAINT",
     TEXTBOX = "TEXTBOX",
     NUCLEOTIDEPAIR = "NUCLEOTIDEPAIR",
-    MUTATION = "MUTATION",                  // list of indices
+    MUTATION = "MUTATION", // list of indices
     TIME = "TIME",
     BLACKMARK = "BLACKMARK",
-    BLUEMARK = "BLUEMARK",                  // 'magic glue'
+    BLUEMARK = "BLUEMARK", // 'magic glue'
 }
 
 export class ROPWait extends RScriptOp {
@@ -108,7 +108,7 @@ export class ROPWait extends RScriptOp {
             return;
         }
 
-        for (let i: number = 0; i < this._prevColorIndex.length; ++i) {
+        for (let i = 0; i < this._prevColorIndex.length; ++i) {
             this._env.pose.setBaseColor(this._prevColorIndex[i],
                 RScriptEnv.convertNucleotideStringToInt(this._prevColors[i]));
         }

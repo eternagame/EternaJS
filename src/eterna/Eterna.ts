@@ -37,12 +37,10 @@ export class Eterna {
 
     public static onFatalError(err: any): void {
         log.error("Fatal error error", ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));
-        if (Flashbang.app != null &&
-            Flashbang.app.modeStack != null &&
-            !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)) {
-
+        if (Flashbang.app != null
+            && Flashbang.app.modeStack != null
+            && !(Flashbang.app.modeStack.topMode instanceof ErrorDialogMode)) {
             Flashbang.app.modeStack.pushMode(new ErrorDialogMode(err));
-
         } else if (process.env.NODE_ENV !== "production") {
             try {
                 alert(ErrorUtil.getErrorObj(err) || ErrorUtil.getErrString(err));

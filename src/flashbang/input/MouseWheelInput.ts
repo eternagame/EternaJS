@@ -16,7 +16,7 @@ export class MouseWheelInput {
     }
 
     public handleMouseWheelEvent(e: WheelEvent): boolean {
-        let handled: boolean = false;
+        let handled = false;
         try {
             for (let elt: LinkedElement<MouseWheelListener> = this._listeners.beginIteration(); elt != null; elt = elt.next) {
                 handled = elt.data.onMouseWheelEvent(e);
