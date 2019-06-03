@@ -18,7 +18,7 @@ module.exports = {
     'rules': {
         // Don't bug out due to TypeScript
         'no-undef': 'off',
-        'typescript/no-unused-vars': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
         // These aren't really a big issue and used well keep our code cleaner
         'no-bitwise': 'off',
         'no-continue': 'off',
