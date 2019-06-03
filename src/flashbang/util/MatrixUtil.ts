@@ -131,19 +131,19 @@ export class MatrixUtil {
         precision: number, indent: string = "  "): string {
         let result: string = indent;
         let numValues: number = numCols * numRows;
-        let highestValue: number = 0.0;
+        let highestValue = 0.0;
         let valueString: string;
         let value: number;
 
-        for (let i: number = 0; i < numValues; ++i) {
+        for (let i = 0; i < numValues; ++i) {
             value = Math.abs(data[i]);
             if (value > highestValue) highestValue = value;
         }
 
         let numChars: number = highestValue.toFixed(precision).length + 1;
 
-        for (let y: number = 0; y < numRows; ++y) {
-            for (let x: number = 0; x < numCols; ++x) {
+        for (let y = 0; y < numRows; ++y) {
+            for (let x = 0; x < numCols; ++x) {
                 value = data[numCols * y + x];
                 valueString = value.toFixed(precision);
 
@@ -170,13 +170,13 @@ export class MatrixUtil {
         // multiples of 90 degrees. If that's the case can be found out by looking
         // at the modelview matrix.
 
-        const E: number = 0.0001;
+        const E = 0.0001;
 
-        let doSnap: boolean = false;
-        let aSq: number,
-            bSq: number,
-            cSq: number,
-            dSq: number;
+        let doSnap = false;
+        let aSq: number;
+        let bSq: number;
+        let cSq: number;
+        let dSq: number;
 
         if (matrix.b + E > 0 && matrix.b - E < 0 && matrix.c + E > 0 && matrix.c - E < 0) {
             // what we actually want is 'Math.abs(matrix.a)', but squaring

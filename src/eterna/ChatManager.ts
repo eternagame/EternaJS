@@ -35,7 +35,7 @@ export class ChatManager {
     /** Decreases the hideChat counter. Chat is visible if the counter is 0. */
     public popHideChat(): void {
         if (this._hideChat <= 0) {
-            log.warn("popHideChat, but no matching pushHideChat")
+            log.warn("popHideChat, but no matching pushHideChat");
         } else {
             this._hideChat--;
             this.updateChatVisibility();
@@ -49,7 +49,7 @@ export class ChatManager {
 
         let show = this._settings.showChat.value && this._hideChat <= 0;
         this._chatbox.style.display = show ? null : "none";
-        if (show) this._chatIFrame.postMessage({type: "chat-scroll"}, "*"); 
+        if (show) this._chatIFrame.postMessage({type: "chat-scroll"}, "*");
     }
 
     private readonly _chatbox: HTMLElement;

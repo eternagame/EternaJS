@@ -8,7 +8,7 @@ export class FunctionTask extends ObjectTask implements Updatable {
         this._callback = callback;
     }
 
-    public update(dt :number): void {
+    public update(dt: number): void {
         if (this._callback(dt)) {
             this.destroySelf();
         }

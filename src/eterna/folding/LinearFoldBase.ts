@@ -49,7 +49,8 @@ export abstract class LinearFoldBase extends Folder {
             try {
                 result = this._lib.FullEval(
                     EPars.sequenceToString(seq),
-                    EPars.pairsToParenthesis(pairs));
+                    EPars.pairsToParenthesis(pairs)
+                );
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error("FullEval error", e);

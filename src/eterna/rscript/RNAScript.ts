@@ -70,7 +70,7 @@ export class RNAScript {
             return null;
         }
 
-        const instRegex: RegExp = /(\#PRE\-)?(\w+)\s*(.*)/ig;
+        const instRegex = /(\#PRE\-)?(\w+)\s*(.*)/ig;
         let regResult: RegExpExecArray;
         if ((regResult = instRegex.exec(instruction)) != null) {
             let op: string = (regResult[1] ? regResult[1] : "") + regResult[2];
@@ -92,13 +92,13 @@ export class RNAScript {
         op = op.replace(/\s*$/, "");
 
         // Regex to detect the various commands
-        let textboxRegex: RegExp = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide)?/ig;
-        let highlightRegex: RegExp = /(Show|Hide)(UI)?Highlight/ig;
-        let uiRegex: RegExp = /(Show|Hide|Enable|Disable)UI$/ig;
-        let hintRegex: RegExp = /(Show|Hide)(Paint)?Hint/ig;
-        let waitRegex: RegExp = /WaitFor(.*)/ig;
-        let preRegex: RegExp = /#PRE-(.*)/g;
-        let rnaRegex: RegExp = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
+        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide)?/ig;
+        let highlightRegex = /(Show|Hide)(UI)?Highlight/ig;
+        let uiRegex = /(Show|Hide|Enable|Disable)UI$/ig;
+        let hintRegex = /(Show|Hide)(Paint)?Hint/ig;
+        let waitRegex = /WaitFor(.*)/ig;
+        let preRegex = /#PRE-(.*)/g;
+        let rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
 
         let regResult: any[];
         if ((regResult = preRegex.exec(op)) != null) {

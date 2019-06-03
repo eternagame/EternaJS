@@ -1,4 +1,4 @@
-﻿import {Graphics, Point} from "pixi.js";
+import {Graphics, Point} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
@@ -103,12 +103,10 @@ export class SliderBar extends ContainerObject {
                     this._current_val = 0;
                 } else if (mouse.y > this._height) {
                     this._current_val = 1;
+                } else if (this._height > 0) {
+                    this._current_val = mouse.y / this._height;
                 } else {
-                    if (this._height > 0) {
-                        this._current_val = mouse.y / this._height;
-                    } else {
-                        this._current_val = 1;
-                    }
+                    this._current_val = 1;
                 }
 
                 this._barRect.y = this._current_val * (this._height - 10) + 10;
@@ -117,12 +115,10 @@ export class SliderBar extends ContainerObject {
                     this._current_val = 0;
                 } else if (mouse.x > this._width) {
                     this._current_val = 1;
+                } else if (this._width > 0) {
+                    this._current_val = mouse.x / this._width;
                 } else {
-                    if (this._width > 0) {
-                        this._current_val = mouse.x / this._width;
-                    } else {
-                        this._current_val = 1;
-                    }
+                    this._current_val = 1;
                 }
 
                 this._barRect.x = this._current_val * (this._width - 10) + 10;
@@ -142,7 +138,6 @@ export class SliderBar extends ContainerObject {
                 this._current_val = 1;
             }
             this._barRect.y = this._current_val * (this._height - 10) + 10;
-
         } else {
             if (this._width > 0) {
                 this._current_val = mouse.x / this._width;

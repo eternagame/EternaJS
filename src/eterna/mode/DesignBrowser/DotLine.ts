@@ -1,4 +1,4 @@
-﻿import {Graphics} from "pixi.js";
+import {Graphics} from "pixi.js";
 
 export class DotLine extends Graphics {
     public constructor(thickness: number, color: number) {
@@ -23,7 +23,7 @@ export class DotLine extends Graphics {
         let w_walker = 0;
         let index = 0;
         while (1) {
-            let len_to_go: number = 0;
+            let len_to_go = 0;
             if (index % 3 == 0) {
                 len_to_go = DotLine.LONG_LEN;
             } else {

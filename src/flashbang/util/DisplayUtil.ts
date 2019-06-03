@@ -1,4 +1,6 @@
-import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
+import {
+    DisplayObject, Graphics, Matrix, Point, Rectangle
+} from "pixi.js";
 import {HAlign, VAlign} from "../core/Align";
 import {Flashbang} from "../core/Flashbang";
 import {RectangleUtil} from "./RectangleUtil";
@@ -13,7 +15,8 @@ export class DisplayUtil {
         return UPNG.encode(
             [pixels.buffer],
             Math.floor(DisplayUtil.width(target)),
-            Math.floor(DisplayUtil.height(target)));
+            Math.floor(DisplayUtil.height(target))
+        );
     }
 
     /**
@@ -237,11 +240,12 @@ export class DisplayUtil {
 
     /** Centers a DisplayObject on another DisplayObject */
     public static center(disp: DisplayObject, relativeTo: DisplayObject,
-                         xOffset: number = 0, yOffset: number = 0): void {
+        xOffset: number = 0, yOffset: number = 0): void {
         this.positionRelative(
             disp, HAlign.CENTER, VAlign.CENTER,
             relativeTo, HAlign.CENTER, VAlign.CENTER,
-            xOffset, yOffset);
+            xOffset, yOffset
+        );
     }
 
 

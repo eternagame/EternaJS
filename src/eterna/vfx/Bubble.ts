@@ -17,7 +17,7 @@ export class Bubble extends SpriteObject implements Updatable {
         this._foreground = foreground;
 
         let useBlueBubble: boolean;
-        let bubbleType: number = 0;
+        let bubbleType = 0;
         if (this._foreground) {
             this._bubbleSize = 3;
             useBlueBubble = (Math.random() < 0.75);
@@ -180,9 +180,9 @@ class NormalDistPRNG {
             return NormalDistPRNG.cache;
         }
 
-        let x: number,
-            y: number,
-            w: number;
+        let x: number;
+        let y: number;
+        let w: number;
         do {
             NormalDistPRNG.s = (NormalDistPRNG.s * 16807) % 2147483647;
             x = NormalDistPRNG.s / 1073741823.5 - 1;
@@ -195,7 +195,7 @@ class NormalDistPRNG {
         w = Math.sqrt(-2 * Math.log(w) / w);
 
         NormalDistPRNG.cached = true;
-        NormalDistPRNG.cache = x * w;           //  Cache one of the outputs
-        return y * w;           //  and return the other.
+        NormalDistPRNG.cache = x * w; //  Cache one of the outputs
+        return y * w; //  and return the other.
     }
 }

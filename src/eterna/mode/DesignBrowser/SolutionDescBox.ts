@@ -35,12 +35,12 @@ export class SolutionDescBox extends GamePanel {
     protected added(): void {
         super.added();
 
-        const boxTitleText =
-            "<FONT COLOR=\"#FFCC00\">" + Utility.stripHtmlTags(this._solution.title) + "</FONT> by <A HREF=\"" +
-            EternaURL.createURL({"page": "player", "uid": this._solution.playerID}) +
-            "\" TARGET=\"_PLAYER\"><U>" + Utility.stripHtmlTags(this._solution.playerName) + "</U></A>";
+        const boxTitleText = `<FONT COLOR="#FFCC00">${Utility.stripHtmlTags(this._solution.title)}</FONT> by <A HREF="${
+            EternaURL.createURL({page: "player", uid: this._solution.playerID})
+        }" TARGET="_PLAYER"><U>${Utility.stripHtmlTags(this._solution.playerName)}</U></A>`;
 
-        this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).selectable(false).bold();
+        this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).selectable(false)
+            .bold();
         this._boxTitle.display.position = new Point(20, 20);
         this.addObject(this._boxTitle, this.container);
 
@@ -49,27 +49,29 @@ export class SolutionDescBox extends GamePanel {
         this.addObject(this._copySolutionButton, this.container);
 
         const solutionURL = Eterna.SERVER_URL + EternaURL.createURL({
-            "page": "browse_solution",
-            "puznid": this._puzzle.nodeID,
-            "filter1": "Id",
-            "filter1_arg1": this._solution.nodeID,
-            "filter1_arg2": this._solution.nodeID
+            page: "browse_solution",
+            puznid: this._puzzle.nodeID,
+            filter1: "Id",
+            filter1_arg1: this._solution.nodeID,
+            filter1_arg2: this._solution.nodeID
         });
         this._copySolutionButton.clicked.connect(
-            () => this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, "Solution URL")));
+            () => this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, "Solution URL"))
+        );
 
         this._copyPlayerButton = new GameButton().label("Get URL for all designs by this player", 10);
         this._copyPlayerButton.display.position = new Point(20 + this._copySolutionButton.container.width + 10, 45);
         this.addObject(this._copyPlayerButton, this.container);
 
         const playerURL = Eterna.SERVER_URL + EternaURL.createURL({
-            "page": "browse_player",
-            "puznid": this._puzzle.nodeID,
-            "filter1": "Designer",
-            "filter1_arg1": this._solution.playerName
+            page: "browse_player",
+            puznid: this._puzzle.nodeID,
+            filter1: "Designer",
+            filter1_arg1: this._solution.playerName
         });
         this._copyPlayerButton.clicked.connect(
-            () => this.modeStack.pushMode(new CopyTextDialogMode(playerURL, "Player URL")));
+            () => this.modeStack.pushMode(new CopyTextDialogMode(playerURL, "Player URL"))
+        );
 
         this._commentInput = new TextInputObject(14)
             .placeholderText("Enter your comment here")
@@ -88,7 +90,8 @@ export class SolutionDescBox extends GamePanel {
         let loadingText = SolutionDescBox.createLoadingText("Loading comments...");
         loadingText.display.position = new Point(
             (this._width - loadingText.display.width) * 0.5,
-            this._height - 30);
+            this._height - 30
+        );
         this.addObject(loadingText, this.container);
 
         this._comments.update().then((commentsData: any[]) => {
@@ -111,9 +114,9 @@ export class SolutionDescBox extends GamePanel {
                 pxdelta = e.deltaY;
                 break;
             case WheelEvent.DOM_DELTA_LINE:
-                // 13 -> body font size
+            // 13 -> body font size
                 pxdelta = e.deltaY * 13;
-                break
+                break;
             case WheelEvent.DOM_DELTA_PAGE:
                 pxdelta = e.deltaY * this._height;
                 break;
@@ -176,7 +179,7 @@ export class SolutionDescBox extends GamePanel {
                     let commentLayout = new HLayoutContainer(4);
                     layout.addChild(commentLayout);
 
-                    let url = EternaURL.createURL({page: "player", uid: comment['uid']});
+                    let url = EternaURL.createURL({page: "player", uid: comment["uid"]});
                     let userButton = new GameButton().label(comment["name"], 10);
                     userButton.clicked.connect(() => window.open(url, "_blank"));
 
@@ -209,10 +212,11 @@ export class SolutionDescBox extends GamePanel {
         this.addObject(submittingText, this.container);
         submittingText.display.position = new Point(
             (this._width - submittingText.display.width) * 0.5,
-            this._height - 30);
+            this._height - 30
+        );
 
         this._comments.submit_comment(this._commentInput.text)
-            .then(commentsData => {
+            .then((commentsData) => {
                 submittingText.destroySelf();
 
                 this._commentInput.display.visible = true;
@@ -225,12 +229,10 @@ export class SolutionDescBox extends GamePanel {
 
     private static createLoadingText(text: string): SceneObject<Text> {
         let loadingText = new SceneObject(Fonts.arial(text, 14).color(0xffffff).build());
-        loadingText.addObject(new RepeatingTask(() => {
-            return new SerialTask(
-                new AlphaTask(0, 0.7),
-                new AlphaTask(1, 0.7),
-            );
-        }));
+        loadingText.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(0, 0.7),
+            new AlphaTask(1, 0.7),
+        )));
         return loadingText;
     }
 
@@ -239,25 +241,23 @@ export class SolutionDescBox extends GamePanel {
 
         if (solution.expFeedback != null) {
             if (solution.expFeedback.isFailed() == 0) {
-                text += `<bold>[SYNTHESIZED!]</bold>\n` +
-                    `<orange>This design was synthesized with score </orange>` +
-                    `<bold>${solution.getProperty("Synthesis score")} / 100</bold>\n\n`;
+                text += "<bold>[SYNTHESIZED!]</bold>\n"
+                    + "<orange>This design was synthesized with score </orange>"
+                    + `<bold>${solution.getProperty("Synthesis score")} / 100</bold>\n\n`;
             } else {
                 let failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
-                text += Feedback.EXPDISPLAYS_LONG[failureIdx] +
-                    ` Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n\n`;
+                text += `${Feedback.EXPDISPLAYS_LONG[failureIdx]
+                } Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n\n`;
             }
-        } else {
-            if (solution.getProperty("Synthesized") == "y") {
-                text += `<bold>[WAITING]</bold>\n` +
-                    `<orange>This design is being synthesized and waiting for results. </orange>\n\n`;
-            } else if (solution.getProperty("Round") < puzzle.round) {
-                text += `<bold>[OLD]</bold>\n` +
-                    `<orange>This design was submitted in round </orange>` +
-                    `<bold>${solution.getProperty("Round")}.</bold>` +
-                    `<orange> You can't vote on designs from previous rounds. But you can use or resubmit this design by clicking on </orange>` +
-                    `<bold>"Modify".</bold>\n\n`;
-            }
+        } else if (solution.getProperty("Synthesized") == "y") {
+            text += "<bold>[WAITING]</bold>\n"
+                    + "<orange>This design is being synthesized and waiting for results. </orange>\n\n";
+        } else if (solution.getProperty("Round") < puzzle.round) {
+            text += "<bold>[OLD]</bold>\n"
+                    + "<orange>This design was submitted in round </orange>"
+                    + `<bold>${solution.getProperty("Round")}.</bold>`
+                    + "<orange> You can't vote on designs from previous rounds. But you can use or resubmit this design by clicking on </orange>"
+                    + "<bold>\"Modify\".</bold>\n\n";
         }
 
         text += "<bold>Design description</bold>\n\n";
@@ -271,8 +271,8 @@ export class SolutionDescBox extends GamePanel {
                 wordWrap: true,
                 wordWrapWidth: this._width - 40
             },
-            bold: { fontStyle: "bold" },
-            orange: { fill: 0xffcc00 },
+            bold: {fontStyle: "bold"},
+            orange: {fill: 0xffcc00}
         });
     }
 
@@ -287,5 +287,4 @@ export class SolutionDescBox extends GamePanel {
     private _copyPlayerButton: GameButton;
     private _commentInput: TextInputObject;
     private _commentButton: GameButton;
-
 }

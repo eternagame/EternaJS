@@ -1,4 +1,4 @@
-﻿import {Eterna} from "../../Eterna";
+import {Eterna} from "../../Eterna";
 import {SolutionManager} from "../../puzzle/SolutionManager";
 import {int} from "../../util/int";
 
@@ -7,14 +7,14 @@ export class VoteProcessor {
         let solutionIDs: number[] = [];
         let voteCounts: number[] = [];
         let myVoteCounts: number[] = [];
-        let totalMyVotes: number = 0;
+        let totalMyVotes = 0;
 
         this._votesLeft = 0;
 
         for (let ii = data.length - 1; ii >= 0; ii--) {
             let obj: any = data[ii];
 
-            let nid: number = Number(obj["solnid"]);
+            let nid = Number(obj["solnid"]);
             let is_mine: boolean = Eterna.playerID == Number(obj["uid"]);
             let vote_count: number = int(obj["count"]);
 
@@ -29,7 +29,6 @@ export class VoteProcessor {
                 } else {
                     myVoteCounts.push(0);
                 }
-
             } else {
                 voteCounts[index] += vote_count;
                 if (is_mine) {
@@ -54,9 +53,9 @@ export class VoteProcessor {
     }
 
     public update_votes(puznid: number, round: number): Promise<void> {
-        return Eterna.client.getPuzzleVotes(puznid, round).then(json => {
-            let data: any = json['data'];
-            this.process_data(data['votes']);
+        return Eterna.client.getPuzzleVotes(puznid, round).then((json) => {
+            let data: any = json["data"];
+            this.process_data(data["votes"]);
         });
     }
 

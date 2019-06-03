@@ -9,7 +9,7 @@ import {ModeStack} from "./ModeStack";
 import {Updatable} from "./Updatable";
 
 // Adds KeyboardEvent.code support to Edge
-import 'js-polyfills/keyboard';
+import "js-polyfills/keyboard";
 
 export class FlashbangApp {
     /** True if the app is foregrounded */
@@ -158,21 +158,21 @@ export class FlashbangApp {
             this._keyDown.set(e.code, false);
         }
 
-        let topMode = this._modeStack.topMode;
+        let {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onKeyboardEvent(e);
         }
     }
 
     protected onMouseWheelEvent(e: WheelEvent): void {
-        let topMode = this._modeStack.topMode;
+        let {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onMouseWheelEvent(e);
         }
     }
 
     protected onContextMenuEvent(e: Event): void {
-        let topMode = this._modeStack.topMode;
+        let {topMode} = this._modeStack;
         if (topMode != null) {
             topMode.onContextMenuEvent(e);
         }

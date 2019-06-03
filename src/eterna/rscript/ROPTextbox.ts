@@ -104,7 +104,6 @@ export class ROPTextbox extends RScriptOp {
                 this._env.pose.addAnchoredObject(new RNAAnchorObject(textBox, this._nucIdx, offset));
             } else if (this._mode === ROPTextboxMode.TEXTBOX_DEFAULT) {
                 this._env.setTextboxVisible(this._id, true);
-                return;
             }
         };
 
@@ -233,7 +232,7 @@ export class ROPTextbox extends RScriptOp {
 
     /* override */
     protected parseArgument(arg: string, i: number): void {
-        let rx: RegExp = /^([^+-]*)((?:\+|-).+)$/g;
+        let rx = /^([^+-]*)((?:\+|-).+)$/g;
         let regResult: RegExpExecArray = null;
         switch (i) {
         case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.

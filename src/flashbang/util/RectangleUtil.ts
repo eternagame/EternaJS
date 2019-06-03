@@ -82,13 +82,13 @@ export class RectangleUtil {
     public static getBounds(rectangle: Rectangle, matrix: Matrix, out: Rectangle = null): Rectangle {
         if (out == null) out = new Rectangle();
 
-        let minX: number = Number.MAX_VALUE,
-            maxX: number = -Number.MAX_VALUE;
-        let minY: number = Number.MAX_VALUE,
-            maxY: number = -Number.MAX_VALUE;
+        let minX: number = Number.MAX_VALUE;
+        let maxX: number = -Number.MAX_VALUE;
+        let minY: number = Number.MAX_VALUE;
+        let maxY: number = -Number.MAX_VALUE;
         let positions: Point[] = RectangleUtil.getPositions(rectangle, RectangleUtil.sPositions);
 
-        for (let i: number = 0; i < 4; ++i) {
+        for (let i = 0; i < 4; ++i) {
             MatrixUtil.transformCoords(matrix, positions[i].x, positions[i].y, RectangleUtil.sPoint);
 
             if (minX > RectangleUtil.sPoint.x) minX = RectangleUtil.sPoint.x;
@@ -105,7 +105,7 @@ export class RectangleUtil {
     public static getPositions(rectangle: Rectangle, out: Point[] = null): Point[] {
         if (out == null) out = [];
 
-        for (let i: number = 0; i < 4; ++i) {
+        for (let i = 0; i < 4; ++i) {
             if (out[i] == null) out[i] = new Point();
         }
 

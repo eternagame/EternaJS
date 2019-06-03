@@ -1,5 +1,7 @@
 import {ExtendedTextStyle} from "pixi-multistyle-text";
-import {Container, DisplayObject, Graphics, Point, Rectangle, Text} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Point, Rectangle, Text
+} from "pixi.js";
 import {Flashbang} from "../../flashbang/core/Flashbang";
 import {GameObject} from "../../flashbang/core/GameObject";
 import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
@@ -93,7 +95,7 @@ export class Tooltips extends GameObject {
 
     public addButtonTooltip(button: Button, tooltip: Tooltip): Registration {
         let show = (): void => {
-            if (button.enabled ) {
+            if (button.enabled) {
                 this.showTooltipFor(button.display, button, tooltip);
             }
         };
@@ -115,9 +117,9 @@ export class Tooltips extends GameObject {
     }
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
-        if (typeof(tooltip) === "string" || tooltip instanceof StyledTextBuilder) {
+        if (typeof (tooltip) === "string" || tooltip instanceof StyledTextBuilder) {
             let textField: Container;
-            if (typeof(tooltip) === "string") {
+            if (typeof (tooltip) === "string") {
                 textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
             } else {
                 textField = tooltip.build();
@@ -131,7 +133,6 @@ export class Tooltips extends GameObject {
             textField.y = 10;
             disp.addChild(textField);
             return disp;
-
         } else {
             return tooltip();
         }

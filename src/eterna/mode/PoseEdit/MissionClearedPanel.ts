@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
@@ -44,7 +46,7 @@ export class MissionClearedPanel extends ContainerObject {
             .lineHeight(1.2)
             .selectable(false);
         // Images should be centered, even if the HTML doesn't specify it
-        DOMObject.applyStyleRecursive(infoObj.element, {"display": "block", "margin": "auto"}, false, ["img"]);
+        DOMObject.applyStyleRecursive(infoObj.element, {display: "block", margin: "auto"}, false, ["img"]);
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {

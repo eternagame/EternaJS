@@ -152,7 +152,7 @@ export class Vector2 {
 
     /** Normalizes the vector in place and returns its original length. */
     public normalizeLocalAndGetLength(): number {
-        const length: number = this.length;
+        const {length} = this;
 
         this.x /= length;
         this.y /= length;
@@ -272,7 +272,7 @@ export class Vector2 {
     }
 
     /** Returns true if this vector is exactly equal to v. */
-    public equals(obj: Object): boolean {
+    public equals(obj: Record<string, any>): boolean {
         const v: Vector2 = (<Vector2>obj);
         return (v != null && this.x === v.x && this.y === v.y);
     }

@@ -28,13 +28,13 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
      */
     public get confirmed(): Promise<SubmitPuzzleDetails> {
         return new Promise((resolve, reject) => {
-            this.closed.then(value => {
+            this.closed.then((value) => {
                 if (value != null) {
                     resolve(value);
                 } else {
                     reject(new DialogCanceledError());
                 }
-            })
+            });
         });
     }
 
@@ -73,7 +73,7 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
                 description: dict.get(DESCRIPTION),
                 minGU: GetNumber(dict, MIN_GU),
                 maxGC: GetNumber(dict, MAX_GC),
-                minAU: GetNumber(dict, MIN_AU),
+                minAU: GetNumber(dict, MIN_AU)
             };
 
             let errorString = this.validate(details);
@@ -107,20 +107,20 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
             if (details.minGU) {
                 let max_GU = (numAU + numGU + numGC) / 3;
                 if (details.minGU < 0 || details.minGU > numGU || details.minGU > max_GU) {
-                    return "Number of G-U pairs should be either blank or " +
-                        "an integer between 0 and " + numGU + " (number of GUs in your current solution) " +
-                        "and at most " + max_GU + " (a third of total number of pairs)";
+                    return `${"Number of G-U pairs should be either blank or "
+                        + "an integer between 0 and "}${numGU} (number of GUs in your current solution) `
+                        + `and at most ${max_GU} (a third of total number of pairs)`;
                 }
             }
 
             if (details.maxGC && details.maxGC < numGC) {
-                return "Number of G-C pairs should be either blank or " +
-                    "at least " + numGC + " (number GCs in your current solution)";
+                return `${"Number of G-C pairs should be either blank or "
+                    + "at least "}${numGC} (number GCs in your current solution)`;
             }
 
             if (details.minAU && (details.minAU < 0 || details.minAU > numAU)) {
-                return "Number of A-U pairs should be either blank or " +
-                    "an integer between 0 and " + numAU + " (number of AUs in your current solution)";
+                return `${"Number of A-U pairs should be either blank or "
+                    + "an integer between 0 and "}${numAU} (number of AUs in your current solution)`;
             }
         }
 

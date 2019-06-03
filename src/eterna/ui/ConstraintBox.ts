@@ -1,5 +1,7 @@
 import MultiStyleText from "pixi-multistyle-text";
-import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite, Text, Texture
+} from "pixi.js";
 import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {ContainerObject} from "../../flashbang/objects/ContainerObject";
 import {Enableable} from "../../flashbang/objects/Enableable";
@@ -110,12 +112,14 @@ export class ConstraintBox extends ContainerObject implements Enableable {
         this._bigText.visible = false;
         this.container.addChild(this._bigText);
 
-        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5).build();
+        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5)
+            .build();
         this._noText.position = new Point(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
-        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5).build();
+        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5)
+            .build();
         this._stateText.position = new Point(3, 45);
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
@@ -323,9 +327,9 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         let tooltip: StyledTextBuilder = ConstraintBox.createTextStyle();
 
-        this._outline.texture = satisfied ?
-            BitmapManager.getBitmap(Bitmaps.NovaPassOutline) :
-            BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
+        this._outline.texture = satisfied
+            ? BitmapManager.getBitmap(Bitmaps.NovaPassOutline)
+            : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         const isMissionScreen: boolean = this._boxType === ConstraintBoxType.MISSION_SCREEN;
 
         if (constraintType === ConstraintType.BOOST) {
@@ -497,7 +501,6 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             this._req.visible = true;
             this._outline.visible = true;
-
         } else if (constraintType === ConstraintType.SHAPE) {
             this.updateBG();
             this._bg.visible = true;
@@ -512,7 +515,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             let target_pairs: number[] = val.target;
             let native_pairs: number[] = val.native;
-            let structure_constraints: any[] = val.structure_constraints;
+            let {structure_constraints} = val;
             let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
 
             let sequence: number[] = new Array(native_pairs.length);
@@ -547,7 +550,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             let target_pairs: number[] = val.target;
             let native_pairs: number[] = val.native;
-            let structure_constraints: any[] = val.structure_constraints;
+            let {structure_constraints} = val;
             let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
 
             let sequence: number[] = new Array(native_pairs.length);
@@ -724,7 +727,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             ConstraintBox.createTextStyle()
                 .append(stat.toString(), {fill: (satisfied ? 0x00aa00 : 0xaa0000)})
-                .append('/' + val.toString())
+                .append(`/${val.toString()}`)
                 .apply(this._reqStatTxt);
 
             tooltip.append(`You can only mutate up to ${val.toString()} bases`);
@@ -917,11 +920,11 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._req.visible = true;
             this._outline.visible = true;
         } else if (constraintType === ConstraintType.SCRIPT) {
-            let nid: string = val.nid;
-            let goal: string = val.goal;
-            let name: string = val.name;
+            let {nid} = val;
+            let {goal} = val;
+            let {name} = val;
             if (name.length > 5) name = `${name.substr(0, 5)}..`;
-            let value: string = val.value;
+            let {value} = val;
 
             this._bg.visible = true;
             this._bgGraphics.visible = true;
@@ -930,10 +933,10 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
             this._bgGraphics.endFill();
 
-            let data_png: string = val.data_png;
+            let {data_png} = val;
             if (data_png != null) {
                 this._icon.visible = true;
-                TextureUtil.fromBase64PNG(data_png).then(tex => {
+                TextureUtil.fromBase64PNG(data_png).then((tex) => {
                     this._icon.texture = tex;
                     this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
                 });
@@ -994,11 +997,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
         DisplayUtil.positionRelative(
             this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
-            this._outline, HAlign.CENTER, VAlign.TOP, 2, 32);
+            this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
+        );
 
         DisplayUtil.positionRelative(
             this._reqStatTxt, HAlign.CENTER, VAlign.TOP,
-            this._outline, HAlign.CENTER, VAlign.TOP, 0, 50);
+            this._outline, HAlign.CENTER, VAlign.TOP, 0, 50
+        );
     }
 
     public get width(): number {
@@ -1037,7 +1042,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             return;
         }
 
-        let lineWidth: number = 6;
+        let lineWidth = 6;
 
         this._fglow.clear();
         this._fglow.lineStyle(lineWidth, satisfied ? 0x00FF00 : 0xFF0000, 1.0);
@@ -1094,7 +1099,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
     }
 
     private setMouseOverObject(obj: SceneObject): void {
-        const FADE_IN_DELAY: number = 1.0;
+        const FADE_IN_DELAY = 1.0;
 
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
@@ -1114,7 +1119,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
 
             const MOUSE_OVER_ANIM = "MouseOverAnim";
 
-            let isMouseOver: boolean = false;
+            let isMouseOver = false;
             this._mouseOverRegs = new RegistrationGroup();
             this._mouseOverRegs.add(this.pointerOver.connect(() => {
                 if (!isMouseOver) {
@@ -1146,13 +1151,13 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: 250,
+            wordWrapWidth: 250
         }).addStyle("altText", {
             fontFamily: Fonts.STDFONT_MEDIUM,
-            leading: 10,
+            leading: 10
         }).addStyle("altTextMain", {
             fontFamily: Fonts.STDFONT_REGULAR,
-            leading: 5,
+            leading: 5
         });
 
         EPars.addLetterStyles(style);
