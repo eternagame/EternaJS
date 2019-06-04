@@ -10,7 +10,10 @@ import {Connection} from "./Connection";
  * connection from the underlying signal.
  */
 export abstract class MappedSignal<T> extends AbstractSignal<T> {
-    public static create<TMapped, TSource>(source: SignalView<TSource>, f: (value: TSource) => TMapped): MappedSignal<TMapped> {
+    public static create<TMapped, TSource>(
+        source: SignalView<TSource>,
+        f: (value: TSource) => TMapped
+    ): MappedSignal<TMapped> {
         return new MappedSignalImpl(source, f);
     }
 
@@ -58,7 +61,7 @@ class MappedSignalImpl<TMapped, TSource> extends MappedSignal<TMapped> {
     }
 
     /* override */ protected connectToSource(): Connection {
-        return this._source.connect((value) => { this.notifyEmit(this._f(value)); });
+        return this._source.connect((value): void => { this.notifyEmit(this._f(value)); });
     }
 
     protected _source: SignalView<TSource>;

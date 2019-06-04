@@ -21,7 +21,7 @@ export abstract class Reactor {
 
     protected removeConnection(listener: RListener): void {
         if (this.isDispatching) {
-            this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
+            this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
                 this._listeners = Cons.removeAll(this._listeners, listener);
                 this.connectionRemoved();
             }));
@@ -79,6 +79,10 @@ export abstract class Reactor {
      * Called prior to mutating any underlying model; allows subclasses to reject mutation.
      */
     protected checkMutate(): void {
+        // noop
+    }
+
+    protected checkOtherMutate(): void {
         // noop
     }
 
