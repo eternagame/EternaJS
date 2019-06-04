@@ -59,7 +59,7 @@ class MappedValueImpl<TMapped, TSource> extends MappedValue<TMapped> {
 
     /* override */
     protected connectToSource(): Connection {
-        return this._source.connect((value: TSource, ovalue: TSource) => {
+        return this._source.connect((value: TSource, ovalue: TSource): void => {
             this.notifyChange(this._f(value), this._f(ovalue));
         });
     }
