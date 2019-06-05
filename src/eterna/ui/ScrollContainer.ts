@@ -1,7 +1,7 @@
 import {Container, Graphics} from "pixi.js";
-import {MathUtil} from "../../flashbang/util/MathUtil";
+import {MathUtil} from "flashbang/util";
 
-export class ScrollContainer extends Container {
+export default class ScrollContainer extends Container {
     public readonly content = new Container();
 
     public constructor(width: number, height: number) {

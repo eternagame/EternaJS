@@ -1,14 +1,11 @@
 import {Point, Texture} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {SpriteObject} from "../../flashbang/objects/SpriteObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {Bitmaps} from "../resources/Bitmaps";
+import {Flashbang, Updatable} from "flashbang/core";
+import {SpriteObject} from "flashbang/objects";
+import {AlphaTask, ParallelTask, ScaleTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
+import {Bitmaps} from "eterna/resources";
 
-export class Bubble extends SpriteObject implements Updatable {
+export default class Bubble extends SpriteObject implements Updatable {
     public isPaused: boolean = false;
 
     constructor(foreground: boolean) {
@@ -159,7 +156,6 @@ export class Bubble extends SpriteObject implements Updatable {
 
     private static readonly P = new Point();
 }
-
 
 class NormalDistPRNG {
     private static s: number = 0;

@@ -1,12 +1,12 @@
 import {Point, Sprite, Texture} from "pixi.js";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Pose2D} from "../pose2D/Pose2D";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
+import {Updatable} from "flashbang/core";
+import {Vector2} from "flashbang/geom";
+import {ContainerObject} from "flashbang/objects";
+import {Pose2D} from "eterna/pose2D";
+import {BitmapManager} from "eterna/resources";
+import {Bitmaps} from "eterna/resources";
 
-export class NovaPaintHint extends ContainerObject implements Updatable {
+export default class NovaPaintHint extends ContainerObject implements Updatable {
     constructor(start: Point, end: Point, loop: boolean) {
         super();
         this._active = false;

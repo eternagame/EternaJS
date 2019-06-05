@@ -1,27 +1,18 @@
 import * as log from "loglevel";
 import {Container, Point} from "pixi.js";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AchievementManager} from "../achievements/AchievementManager";
-import {Eterna} from "../Eterna";
-import {EternaURL} from "../net/EternaURL";
-import {Pose2D} from "../pose2D/Pose2D";
-import {PoseField} from "../pose2D/PoseField";
-import {ConfirmDialog} from "../ui/ConfirmDialog";
-import {ContextMenu} from "../ui/ContextMenu";
-import {Dialog} from "../ui/Dialog";
-import {NotificationDialog} from "../ui/NotificationDialog";
-import {Tooltips} from "../ui/Tooltips";
-import {UILockDialog} from "../ui/UILockDialog";
-import {URLButton} from "../ui/URLButton";
-import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
-import {Folder} from "../folding/Folder";
-import {UndoBlock} from "../UndoBlock";
-import {EPars} from "../EPars";
+import {Flashbang, AppMode, GameObjectRef} from "flashbang/core";
+import {SceneObject} from "flashbang/objects";
+import {AchievementManager} from "eterna/achievements";
+import Eterna from "eterna/Eterna";
+import {EternaURL} from "eterna/net";
+import {Pose2D, PoseField} from "eterna/pose2D";
+import {ConfirmDialog, ContextMenu, Dialog, NotificationDialog, Tooltips, UILockDialog, URLButton} from "eterna/ui";
+import {ExternalInterface, ExternalInterfaceCtx} from "eterna/util";
+import {Folder} from "eterna/folding";
+import UndoBlock from "eterna/UndoBlock";
+import EPars from "eterna/EPars";
 
-export abstract class GameMode extends AppMode {
+export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
     public readonly uiLayer = new Container();

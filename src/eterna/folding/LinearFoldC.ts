@@ -1,7 +1,7 @@
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {LinearFoldBase} from "./LinearFoldBase";
+import {EmscriptenUtil} from "eterna/emscripten";
+import {LinearFoldBase} from ".";
 
-export class LinearFoldC extends LinearFoldBase {
+export default class LinearFoldC extends LinearFoldBase {
     public static readonly NAME = "LinearFoldC";
 
     /**

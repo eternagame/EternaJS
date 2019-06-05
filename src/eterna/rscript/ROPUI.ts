@@ -1,7 +1,6 @@
-import {RScriptOp} from "./RScriptOp";
-import {RScriptEnv} from "./RScriptEnv";
+import {RScriptOp, RScriptEnv} from ".";
 
-export class ROPUI extends RScriptOp {
+export default class ROPUI extends RScriptOp {
     constructor(env: RScriptEnv, isVisible: boolean, isDisabled: boolean) {
         super(env);
         this._visible = isVisible;

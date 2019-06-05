@@ -1,4 +1,4 @@
-import {Registration} from "../../signals/Registration";
+import {Registration} from "signals";
 
 export interface LinkedElement<T> {
     next: LinkedElement<T>;
@@ -6,7 +6,7 @@ export interface LinkedElement<T> {
 }
 
 /** A singly-linked list. */
-export class LinkedList<T> {
+export default class LinkedList<T> {
     /** Return true if the list is empty. During iteration, isEmpty will always return false. */
     public get isEmpty(): boolean {
         return this._head == null;

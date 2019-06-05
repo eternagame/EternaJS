@@ -1,14 +1,11 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Point, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {Fonts} from "../util/Fonts";
-import {BaseGamePanel} from "./BaseGamePanel";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
+import {ContainerObject} from "flashbang/objects";
+import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
+import {Fonts} from "eterna/util";
+import {BaseGamePanel, GameButton, GamePanel, GamePanelType} from ".";
 
-export class TextBalloon extends ContainerObject {
+export default class TextBalloon extends ContainerObject {
     public constructor(text: string = "", balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07, borderColor: number = 0, borderAlpha: number = 0) {
         super();
 

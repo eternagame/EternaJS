@@ -1,10 +1,9 @@
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {EPars} from "../../EPars";
-import {Dialog, DialogCanceledError} from "../../ui/Dialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
-import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {GameMode} from "../GameMode";
+import {Flashbang} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import EPars from "eterna/EPars";
+import {Dialog, DialogCanceledError, TextInputPanel} from "eterna/ui";
+import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
+import {GameMode} from "eterna/mode";
 
 export interface SubmitPuzzleDetails {
     title: string;
@@ -15,7 +14,7 @@ export interface SubmitPuzzleDetails {
     minAU?: number;
 }
 
-export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
+export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
     public constructor(numPoses: number, puzzleState: UndoBlock) {
         super();
         this._numPoses = numPoses;

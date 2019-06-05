@@ -1,13 +1,11 @@
 import {Point} from "pixi.js";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Easing} from "../../../flashbang/util/Easing";
-import {Dialog} from "../../ui/Dialog";
-import {Fonts} from "../../util/Fonts";
+import {Flashbang} from "flashbang/core";
+import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
+import {Dialog} from "eterna/ui";
+import {Fonts} from "eterna/util";
 
-export class SubmittingDialog extends Dialog<void> {
+export default class SubmittingDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 

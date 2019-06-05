@@ -1,16 +1,13 @@
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Updatable} from "../../../flashbang/core/Updatable";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Pose2D} from "../../pose2D/Pose2D";
-import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
-import {GamePanel} from "../../ui/GamePanel";
-import {TextInputObject} from "../../ui/TextInputObject";
-import {Fonts} from "../../util/Fonts";
-import {TextBalloon} from "../../ui/TextBalloon";
 import {Rectangle} from "pixi.js";
+import {HAlign, VAlign, Updatable} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {DisplayUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import {Pose2D, PuzzleEditOp} from "eterna/pose2D";
+import {GamePanel, TextInputObject} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {TextBalloon} from "eterna/ui";
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight
@@ -19,7 +16,7 @@ function IsArrowKey(keyCode: string): boolean {
         || keyCode === KeyCode.ArrowDown;
 }
 
-export class StructureInput extends GamePanel implements Updatable {
+export default class StructureInput extends GamePanel implements Updatable {
     public constructor(pose: Pose2D) {
         super();
         this._pose = pose;

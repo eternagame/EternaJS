@@ -1,13 +1,12 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {EPars} from "../EPars";
+import {EmscriptenUtil} from "eterna/emscripten";
+import EPars from "eterna/EPars";
 import {FullFoldResult} from "./engines/LinearFold_lib";
 import * as LinearFold_lib from "./engines/LinearFold_lib/index";
-import {Folder} from "./Folder";
-import {FoldUtil} from "./FoldUtil";
 import {FullEvalResult} from "./engines/vienna_lib";
+import {Folder, FoldUtil} from ".";
 
-export abstract class LinearFoldBase extends Folder {
+export default abstract class LinearFoldBase extends Folder {
     protected constructor(lib: LinearFold_lib) {
         super();
         this._lib = lib;

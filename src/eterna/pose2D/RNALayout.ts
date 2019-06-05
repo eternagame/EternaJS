@@ -1,5 +1,5 @@
-import {EPars} from "../EPars";
-import {Folder} from "../folding/Folder";
+import EPars from "eterna/EPars";
+import {Folder} from "eterna/folding";
 
 export class RNATreeNode {
     public isPair: boolean = false;
@@ -17,7 +17,7 @@ export class RNATreeNode {
     public goY: number = 0;
 }
 
-export class RNALayout {
+export default class RNALayout {
     public constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
         this._primarySpace = primSpace;
         this._pairSpace = pairSpace;

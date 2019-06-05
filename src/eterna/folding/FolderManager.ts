@@ -1,10 +1,7 @@
-import {Eterna} from "../Eterna";
-import {Folder} from "./Folder";
-import {RNAFoldBasic} from "./RNAFoldBasic";
-import {LinearFoldC} from "./LinearFoldC";
-import {Vienna} from "./Vienna";
+import Eterna from "eterna/Eterna";
+import {Folder, LinearFoldC, RNAFoldBasic, Vienna} from ".";
 
-export class FolderManager {
+export default class FolderManager {
     public static get instance(): FolderManager {
         if (FolderManager._instance == null) {
             FolderManager._instance = new FolderManager();

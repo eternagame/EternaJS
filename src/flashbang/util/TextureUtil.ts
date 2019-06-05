@@ -1,10 +1,8 @@
-import {
-    BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
-} from "pixi.js";
-import {Flashbang} from "../core/Flashbang";
-import {Assert} from "./Assert";
+import {BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
+import {Flashbang} from "../core";
+import {Assert} from ".";
 
-export class TextureUtil {
+export default class TextureUtil {
     public static fromBase64PNG(base64PNG: string): Promise<Texture> {
         // <img> elements can be created from base64 strings.
         // We create an img, set its src data to the base64 string,

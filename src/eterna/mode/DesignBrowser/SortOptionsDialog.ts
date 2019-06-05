@@ -1,22 +1,13 @@
-import {
-    Container, Graphics, Point, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {Arrays} from "../../../flashbang/util/Arrays";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Dialog} from "../../ui/Dialog";
-import {FixedWidthTextField} from "../../ui/FixedWidthTextField";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {Fonts} from "../../util/Fonts";
-import {GraphicsUtil} from "../../util/GraphicsUtil";
-import {DesignCategory} from "./DesignBrowserMode";
-import {SortOptions, SortOrder} from "./SortOptions";
+import {Container, Graphics, Point, Text} from "pixi.js";
+import {HAlign, VAlign} from "flashbang/core";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {Arrays, DisplayUtil} from "flashbang/util";
+import {Bitmaps} from "eterna/resources";
+import {Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {Fonts, GraphicsUtil} from "eterna/util";
+import {DesignCategory, SortOptions, SortOrder} from ".";
 
-export class SortOptionsDialog extends Dialog<void> {
+export default class SortOptionsDialog extends Dialog<void> {
     public readonly options: SortOptions;
 
     constructor(options: SortOptions) {

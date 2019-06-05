@@ -1,6 +1,7 @@
-import {Registration} from "./Registration";
+//import Registration from "./Registration";
+import {Registration} from ".";
 
-export class Registrations {
+export default class Registrations {
     /** Returns a Registration that will call the given function when disconnected */
     public static createWithFunction(f: () => void): Registration {
         return new FunctionRegistration(f);

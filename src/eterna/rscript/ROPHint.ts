@@ -1,9 +1,7 @@
 import {Point} from "pixi.js";
-import {NovaPaintHint} from "./NovaPaintHint";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
+import {NovaPaintHint, RScriptEnv, RScriptOp} from ".";
 
-export class ROPHint extends RScriptOp {
+export default class ROPHint extends RScriptOp {
     public constructor(isVisible: boolean, env: RScriptEnv) {
         super(env);
         this._opVisible = isVisible;

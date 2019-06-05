@@ -1,8 +1,8 @@
 import {DisplayObject} from "pixi.js";
-import {EasingFunc} from "../util/Easing";
-import {DisplayObjectTask} from "./DisplayObjectTask";
+import {EasingFunc} from "../util";
+import {DisplayObjectTask} from ".";
 
-export class RotationTask extends DisplayObjectTask {
+export default class RotationTask extends DisplayObjectTask {
     constructor(radians: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {
         super(time, easingFn, target);
         this._to = radians;

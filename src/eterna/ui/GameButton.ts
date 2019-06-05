@@ -1,21 +1,14 @@
-import {
-    Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
-} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
-import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
-import {Button, ButtonState} from "../../flashbang/objects/Button";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {TextBuilder} from "../../flashbang/util/TextBuilder";
-import {Registration} from "../../signals/Registration";
-import {Registrations} from "../../signals/Registrations";
-import {Value} from "../../signals/Value";
-import {ROPWait} from "../rscript/ROPWait";
-import {RScriptUIElementID} from "../rscript/RScriptUIElement";
-import {Fonts} from "../util/Fonts";
-import {Tooltips} from "./Tooltips";
+import {Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {HAlign, VAlign} from "flashbang/core";
+import {KeyboardEventType, KeyboardListener} from "flashbang/input";
+import {Button, ButtonState} from "flashbang/objects";
+import {DisplayUtil, TextBuilder} from "flashbang/util";
+import {Registration, Registrations, Value} from "signals"
+import {ROPWait, RScriptUIElementID} from "eterna/rscript";
+import {Fonts} from "eterna/util";
+import {Tooltips} from ".";
 
-export class GameButton extends Button implements KeyboardListener {
+export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value(false);
 
     public constructor() {

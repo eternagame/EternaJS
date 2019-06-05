@@ -1,14 +1,13 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {EPars} from "../EPars";
-import {PoseOp} from "../pose2D/PoseOp";
-import {int} from "../util/int";
+import {EmscriptenUtil} from "eterna/emscripten";
+import EPars from "eterna/EPars";
+import {PoseOp} from "eterna/pose2D";
+import {int} from "eterna/util";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
-import {Folder} from "./Folder";
-import {FoldUtil} from "./FoldUtil";
+import {Folder, FoldUtil} from ".";
 
-export class NuPACK extends Folder {
+export default class NuPACK extends Folder {
     public static NAME = "NuPACK";
 
     /**

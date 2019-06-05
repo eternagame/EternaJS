@@ -1,8 +1,8 @@
 import {Graphics} from "pixi.js";
-import {HTMLTextObject} from "./HTMLTextObject";
+import {HTMLTextObject} from ".";
 
 /** A DOM-based underlined text link with some background styling. */
-export class URLButton extends HTMLTextObject {
+export default class URLButton extends HTMLTextObject {
     public constructor(text: string, url: string) {
         super(URLButton.createHTML(text, url));
     }

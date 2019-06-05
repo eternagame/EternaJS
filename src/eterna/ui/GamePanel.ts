@@ -1,14 +1,12 @@
-import {
-    Graphics, Point, Text, Rectangle
-} from "pixi.js";
-import {Fonts} from "../util/Fonts";
-import {BaseGamePanel} from "./BaseGamePanel";
+import {Graphics, Point, Text, Rectangle} from "pixi.js";
+import {Fonts} from "eterna/util";
+import {BaseGamePanel} from ".";
 
 export enum GamePanelType {
     NORMAL, INVISIBLE
 }
 
-export class GamePanel extends BaseGamePanel {
+export default class GamePanel extends BaseGamePanel {
     public constructor(type: GamePanelType = GamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, borderAlpha: number = 0.0, borderColor: number = 0) {
         super();
 

@@ -1,7 +1,7 @@
-import {Eterna} from "../Eterna";
-import {Feedback} from "../Feedback";
+import Eterna from "eterna/Eterna";
+import Feedback from "eterna/Feedback";
 
-export class Solution {
+export default class Solution {
     public constructor(nid: number, puzzle_nid: number) {
         this._nid = nid;
         this._puzzleNid = puzzle_nid;

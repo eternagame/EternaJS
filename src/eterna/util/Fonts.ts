@@ -1,8 +1,8 @@
 import * as log from "loglevel";
-import {FontLoader} from "../../flashbang/resources/FontLoader";
-import {TextBuilder} from "../../flashbang/util/TextBuilder";
+import {FontLoader} from "flashbang/resources";
+import {TextBuilder} from "flashbang/util";
 
-export class Fonts {
+export default class Fonts {
     public static readonly ARIAL = "Arial";
     public static readonly MONOSPACE = "monospace";
 

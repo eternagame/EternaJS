@@ -1,8 +1,7 @@
-import {Constants} from "./Constants";
-import {ColorUtil} from "../flashbang/util/ColorUtil";
-import {MathUtil} from "../flashbang/util/MathUtil";
+import Constants from "eterna/Constants";
+import {ColorUtil, MathUtil} from "flashbang/util";
 
-export class ExpPainter {
+export default class ExpPainter {
     public static readonly NUM_COLORS = 5;
 
     public static transformData(data: number[], data_max: number, data_min: number): number[] {

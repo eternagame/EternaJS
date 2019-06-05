@@ -1,30 +1,22 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {
-    Graphics, Point, Sprite, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {EPars} from "../EPars";
-import {EternaURL} from "../net/EternaURL";
-import {Plot} from "../Plot";
-import {Bitmaps} from "../resources/Bitmaps";
-import {UndoBlock, UndoBlockParam} from "../UndoBlock";
-import {Fonts} from "../util/Fonts";
-import {GameButton} from "./GameButton";
-import {GamePanel} from "./GamePanel";
-import {HTMLTextObject} from "./HTMLTextObject";
-import {TextBalloon} from "./TextBalloon";
+import {Graphics, Point, Sprite, Text} from "pixi.js";
+import {HAlign, VAlign} from "flashbang/core";
+import {DisplayObjectPointerTarget, InputUtil, KeyCode} from "flashbang/input";
+import {ContainerObject} from "flashbang/objects";
+import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
+import {UnitSignal} from "signals";
+import EPars from "eterna/EPars";
+import Plot from "eterna/Plot";
+import {EternaURL} from "eterna/net";
+import {Bitmaps} from "eterna/resources";
+import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
+import {Fonts} from "eterna/util";
+import {GameButton, GamePanel, HTMLTextObject, TextBalloon} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class SpecBox extends ContainerObject {
+export default class SpecBox extends ContainerObject {
     /** Emitted when a docked SpecBox's maximize button is clicked */
     public readonly shouldMaximize = new UnitSignal();
 
@@ -113,8 +105,8 @@ export class SpecBox extends ContainerObject {
             pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());
             pointerTarget.pointerOut.connect(() => this.onDotPlotMouseExit());
-            pointerTarget.pointerDown.filter(IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
-            pointerTarget.pointerUp.filter(IsLeftMouse).connect(() => this.onDotPlotMouseUp());
+            pointerTarget.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
+            pointerTarget.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onDotPlotMouseUp());
         }
 
         this.updateLayout();

@@ -1,30 +1,24 @@
 import * as log from "loglevel";
 import {DisplayObject, Point, Text} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Constants} from "../../Constants";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Feedback} from "../../Feedback";
-import {Folder} from "../../folding/Folder";
-import {FolderManager} from "../../folding/FolderManager";
-import {Vienna} from "../../folding/Vienna";
-import {PoseField} from "../../pose2D/PoseField";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
-import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
-import {URLButton} from "../../ui/URLButton";
-import {UndoBlock} from "../../UndoBlock";
-import {Fonts} from "../../util/Fonts";
-import {Utility} from "../../util/Utility";
-import {Background} from "../../vfx/Background";
-import {GameMode} from "../GameMode";
-import {FeedbackViewToolbar} from "./FeedbackViewToolbar";
+import {HAlign, VAlign} from "flashbang/core";
+import {KeyboardEventType, KeyCode} from "flashbang/input";
+import {DisplayUtil} from "flashbang/util";
+import Constants from "eterna/Constants";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import Feedback from "eterna/Feedback";
+import UndoBlock from "eterna/UndoBlock";
+import {Folder, FolderManager, Vienna} from "eterna/folding";
+import {PoseField} from "eterna/pose2D";
+import {Puzzle, Solution} from "eterna/puzzle";
+import {EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {Utility} from "eterna/util";
+import {Background} from "eterna/vfx";
+import {GameMode} from "eterna/mode";
+import {FeedbackViewToolbar} from ".";
 
-export class FeedbackViewMode extends GameMode {
+export default class FeedbackViewMode extends GameMode {
     public constructor(solution: Solution, puzzle: Puzzle) {
         super();
         this._solution = solution;

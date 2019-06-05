@@ -1,14 +1,12 @@
 import {Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {Fonts} from "../util/Fonts";
-import {Dialog} from "./Dialog";
+import {Flashbang} from "flashbang/core";
+import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
+import {Fonts} from "eterna/util";
+import {Dialog} from ".";
 
 /** Dims the screen and shows a notification text that fades in and out */
-export class AsyncProcessDialog extends Dialog<void> {
+export default class AsyncProcessDialog extends Dialog<void> {
     public constructor(text: string) {
         super();
         this._text = text;

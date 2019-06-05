@@ -1,5 +1,5 @@
-import {Registration} from "../../signals/Registration";
-import {LinkedElement, LinkedList} from "../util/LinkedList";
+import {Registration} from "signals";
+import {LinkedElement, LinkedList} from "../util";
 
 export interface KeyboardListener {
     /**
@@ -9,7 +9,7 @@ export interface KeyboardListener {
     onKeyboardEvent(e: KeyboardEvent): boolean;
 }
 
-export class KeyboardInput {
+export default class KeyboardInput {
     public dispose(): void {
         this._listeners.dispose();
         this._listeners = null;

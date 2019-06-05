@@ -1,9 +1,8 @@
 import {Point, Sprite, Texture} from "pixi.js";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {EternaTextureUtil} from "../util/EternaTextureUtil";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {EternaTextureUtil} from "eterna/util";
 
-export class BaseGlow extends Sprite {
+export default class BaseGlow extends Sprite {
     public constructor() {
         super();
         BaseGlow.initTextures();

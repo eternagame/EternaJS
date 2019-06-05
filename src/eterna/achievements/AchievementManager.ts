@@ -1,14 +1,10 @@
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {CallbackTask} from "../../flashbang/tasks/CallbackTask";
-import {FunctionTask} from "../../flashbang/tasks/FunctionTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {GameMode} from "../mode/GameMode";
-import {AchievementBox} from "./AchievementBox";
+import {HAlign, VAlign, GameObject, GameObjectRef} from "flashbang/core";
+import {CallbackTask, FunctionTask, SerialTask} from "flashbang/tasks";
+import {DisplayUtil} from "flashbang/util";
+import {GameMode} from "eterna/mode";
+import {AchievementBox} from ".";
 
-export class AchievementManager extends GameObject {
+export default class AchievementManager extends GameObject {
     /** True if there's an achievement animation playing, or about to play */
     public get hasPendingAchievements(): boolean {
         return this._cur.isLive || this._pending.length > 0;

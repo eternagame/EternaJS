@@ -1,6 +1,6 @@
 import {Point} from "pixi.js";
 
-export class Utility {
+export default class Utility {
     public static roundTo(num: number, floating: number): number {
         let div: number = Math.pow(10, floating);
         let temp: number = num * div;

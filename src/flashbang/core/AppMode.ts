@@ -1,19 +1,10 @@
 import {Container} from "pixi.js";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Signal} from "../../signals/Signal";
-import {SignalView} from "../../signals/SignalView";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {KeyboardInput} from "../input/KeyboardInput";
-import {MouseWheelInput} from "../input/MouseWheelInput";
-import {Assert} from "../util/Assert";
-import {GameObject} from "./GameObject";
-import {GameObjectBase} from "./GameObjectBase";
-import {GameObjectRef} from "./GameObjectRef";
-import {LateUpdatable} from "./LateUpdatable";
-import {ModeStack} from "./ModeStack";
-import {Updatable} from "./Updatable";
+import {RegistrationGroup, Signal, SignalView, UnitSignal} from "signals";
+import {KeyboardInput, MouseWheelInput} from "../input";
+import {Assert} from "../util";
+import {GameObject, GameObjectBase, GameObjectRef, LateUpdatable, ModeStack, Updatable} from ".";
 
-export class AppMode {
+export default class AppMode {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
     /** Default mouse wheel input processor */

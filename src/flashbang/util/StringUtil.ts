@@ -1,5 +1,5 @@
 /** Contains useful static function for performing operations on Strings. */
-export class StringUtil {
+export default class StringUtil {
     /**
      * Get a hashCode for the specified String. null returns 0.
      * This hashes identically to Java's String.hashCode().

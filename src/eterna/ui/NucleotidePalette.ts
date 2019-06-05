@@ -1,21 +1,13 @@
-import {
-    Point, Rectangle, Sprite, Text, Texture
-} from "pixi.js";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
-import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {Signal} from "../../signals/Signal";
-import {EPars} from "../EPars";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {ROPWait} from "../rscript/ROPWait";
-import {RScriptUIElementID} from "../rscript/RScriptUIElement";
-import {Fonts} from "../util/Fonts";
-import {Tooltips} from "./Tooltips";
+import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {InputUtil, KeyboardEventType, KeyboardListener, KeyCode} from "flashbang/input";
+import {ContainerObject, Enableable} from "flashbang/objects";
+import {StyledTextBuilder} from "flashbang/util";
+import {Signal} from "signals";
+import EPars from "eterna/EPars";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {ROPWait, RScriptUIElementID} from "eterna/rscript";
+import {Fonts} from "eterna/util";
+import {Tooltips} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -52,7 +44,7 @@ export function StringToPaletteTargetType(value: string): PaletteTargetType {
  * Nucleotide palette class. Handles the AUCG nucleotides options as well as the pairs.
  * Has the option to turn into a 'no pair' mode.
  */
-export class NucleotidePalette extends ContainerObject implements KeyboardListener, Enableable {
+export default class NucleotidePalette extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when a palette target is clicked */
     public readonly targetClicked: Signal<PaletteTargetType> = new Signal();
 
@@ -134,7 +126,7 @@ export class NucleotidePalette extends ContainerObject implements KeyboardListen
     protected added(): void {
         super.added();
 
-        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(e => this.onClick(e)));
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.onClick(e)));
         this.regs.add(this.pointerMove.connect(e => this.onMoveMouse(e)));
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }

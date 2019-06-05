@@ -1,4 +1,4 @@
-export class Feedback {
+export default class Feedback {
     public static readonly EXPCODES: number[] = [1, -100, -200];
     public static readonly EXPSTRINGS: string[] = ["NOT SYNTHESIZED", "FAILED", "NOT INTERPRETABLE"];
     public static readonly EXPDISPLAYS: string[] = ["-", "<FONT COLOR='#FF3333'>Failed</FONT>", "<FONT COLOR='#FF33FF'>Unreadable</FONT>"];

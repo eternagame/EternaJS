@@ -1,13 +1,14 @@
-import {Reactor} from "./Reactor";
-import {SignalView} from "./SignalView";
-import {Connection} from "./Connection";
+/*import Reactor from "./Reactor";
+import SignalView from "./SignalView";
+import Connection from "./Connection";*/
+import {Reactor, SignalView, Connection} from ".";
 
 /**
  * Handles the machinery of connecting slots to a signal and emitting events to them, without
  * exposing a public interface for emitting events. This can be used by entities which wish to
  * expose a signal-like interface for listening, without allowing external callers to emit signals.
  */
-export abstract class AbstractSignal<T> extends Reactor implements SignalView<T> {
+export default abstract class AbstractSignal<T> extends Reactor implements SignalView<T> {
     public abstract map<U>(func: (value: T) => U): SignalView<U>;
 
     public abstract filter(pred: (value: T) => boolean): SignalView<T>;

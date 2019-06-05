@@ -1,22 +1,19 @@
 import * as log from "loglevel";
 import {Container, DisplayObject} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {EPars} from "../EPars";
-import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
-import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
-import {Puzzle} from "../puzzle/Puzzle";
-import {PaletteTargetType} from "../ui/NucleotidePalette";
-import {TextBalloon} from "../ui/TextBalloon";
-import {ToggleBar} from "../ui/ToggleBar";
-import {RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
+import {GameObject} from "flashbang/core";
+import {ContainerObject, Enableable} from "flashbang/objects";
+import EPars from "eterna/EPars";
+import {PoseEditMode} from "eterna/mode";
+import {Pose2D, RNAHighlightState} from "eterna/pose2D";
+import {Puzzle} from "eterna/puzzle";
+import {PaletteTargetType, TextBalloon, ToggleBar} from "eterna/ui";
+import {RScriptUIElement, RScriptUIElementID} from ".";
 
 /**
  * RScript Environment.
  * Can take care of variables and scope and such.
  */
-export class RScriptEnv extends ContainerObject {
+export default class RScriptEnv extends ContainerObject {
     public static convertNucleotideStringToInt(s: string): number {
         return EPars.stringToNucleotide(s, true, false);
     }

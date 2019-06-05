@@ -1,7 +1,6 @@
-import {MathUtil} from "./MathUtil";
-import {StringUtil} from "./StringUtil";
+import {MathUtil, StringUtil} from ".";
 
-export class ColorUtil {
+export default class ColorUtil {
     public static fromString(str: string): number {
         if (str.length === 0 || str.charAt(0) !== "#") {
             throw new Error(`Invalid color string: ${str}`);

@@ -1,21 +1,15 @@
-import {
-    Container, Graphics, Point, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {DOMObject} from "../../../flashbang/objects/DOMObject";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {RankScroll} from "../../rank/RankScroll";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {Fonts} from "../../util/Fonts";
+import {Container, Graphics, Point, Text} from "pixi.js";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {VLayoutContainer} from "flashbang/layout";
+import {ContainerObject, DOMObject} from "flashbang/objects";
+import {AlphaTask} from "flashbang/tasks";
+import {DisplayUtil} from "flashbang/util";
+import {RankScroll} from "eterna/rank";
+import {Bitmaps} from "eterna/resources";
+import {GameButton, GamePanel, GamePanelType, HTMLTextObject} from "eterna/ui";
+import {Fonts} from "eterna/util";
 
-export class MissionClearedPanel extends ContainerObject {
+export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
     public closeButton: GameButton;
 

@@ -1,27 +1,21 @@
 import {Container, Graphics, Point} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {LocationTask} from "../../../flashbang/tasks/LocationTask";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Easing} from "../../../flashbang/util/Easing";
-import {RegistrationGroup} from "../../../signals/RegistrationGroup";
-import {Eterna} from "../../Eterna";
-import {BoostersData, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
-import {EternaMenu, EternaMenuStyle} from "../../ui/EternaMenu";
-import {GameButton} from "../../ui/GameButton";
-import {NucleotidePalette} from "../../ui/NucleotidePalette";
-import {ToggleBar} from "../../ui/ToggleBar";
-import {ExternalInterfaceCtx} from "../../util/ExternalInterface";
-import {GameMode} from "../GameMode";
-import {Booster} from "./Booster";
-import {PoseEditMode} from "./PoseEditMode";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {HLayoutContainer} from "flashbang/layout";
+import {ContainerObject} from "flashbang/objects";
+import {LocationTask} from "flashbang/tasks";
+import {DisplayUtil, Easing} from "flashbang/util";
+import {RegistrationGroup} from "signals";
+import Eterna from "eterna/Eterna";
+import {BoostersData, Puzzle, PuzzleType} from "eterna/puzzle";
+import {Bitmaps} from "eterna/resources";
+import {RScriptUIElementID} from "eterna/rscript";
+import {EternaMenu, EternaMenuStyle, GameButton, NucleotidePalette, ToggleBar} from "eterna/ui";
+import {ExternalInterfaceCtx} from "eterna/util";
+import {GameMode} from "eterna/mode";
+import {Booster, PoseEditMode} from ".";
 
-export class PoseEditToolbar extends ContainerObject {
+export default class PoseEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
 
     public nativeButton: GameButton;

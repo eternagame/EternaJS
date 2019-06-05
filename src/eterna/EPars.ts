@@ -1,7 +1,7 @@
-import {StyledTextBuilder} from "../flashbang/util/StyledTextBuilder";
-import {IntLoopPars} from "./IntLoopPars";
+import {StyledTextBuilder} from "flashbang/util";
+import IntLoopPars from "eterna/IntLoopPars";
 
-export class EPars {
+export default class EPars {
     public static readonly INF: number = 1000000;
     public static readonly NST: number = 0;
     public static readonly MAXLOOP: number = 30;

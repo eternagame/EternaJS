@@ -1,7 +1,7 @@
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Bubble} from "./Bubble";
+import {ContainerObject} from "flashbang/objects";
+import {Bubble} from ".";
 
-export class BubbleSweep extends ContainerObject {
+export default class BubbleSweep extends ContainerObject {
     public constructor(numBubbles: number) {
         super();
         this._bubbles = [];

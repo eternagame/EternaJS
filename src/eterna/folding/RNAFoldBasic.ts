@@ -1,7 +1,7 @@
-import {EPars} from "../EPars";
-import {Folder} from "./Folder";
+import EPars from "eterna/EPars";
+import {Folder} from ".";
 
-export class RNAFoldBasic extends Folder {
+export default class RNAFoldBasic extends Folder {
     public static readonly NAME = "Basic";
 
     /** Asynchronously creates a new instance of the RNAFoldBasic folder. */

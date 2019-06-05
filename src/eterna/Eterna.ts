@@ -1,16 +1,16 @@
 import * as log from "loglevel";
-import {Flashbang} from "../flashbang/core/Flashbang";
-import {ErrorUtil} from "../flashbang/util/ErrorUtil";
-import {ChatManager} from "./ChatManager";
-import {EternaApp} from "./EternaApp";
-import {ErrorDialogMode} from "./mode/ErrorDialogMode";
-import {GameClient} from "./net/GameClient";
-import {EternaSettings} from "./settings/EternaSettings";
-import {SoundManager} from "./resources/SoundManager";
-import {SaveGameManager} from "../flashbang/settings/SaveGameManager";
+import {Flashbang} from "flashbang/core";
+import {SaveGameManager} from "../flashbang/settings";
+import {ErrorUtil} from "flashbang/util";
+import ChatManager from "eterna/ChatManager";
+import EternaApp from "eterna/EternaApp";
+import {ErrorDialogMode} from "eterna/mode";
+import {GameClient} from "eterna/net";
+import {EternaSettings} from "eterna/settings";
+import {SoundManager} from "eterna/resources";
 
 /** Constants and global managers */
-export class Eterna {
+export default class Eterna {
     public static readonly OVERLAY_DIV_ID = "overlay";
     public static readonly PIXI_CONTAINER_ID = "pixi-container";
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input

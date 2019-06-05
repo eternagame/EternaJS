@@ -1,5 +1,5 @@
-import {Registration} from "../../signals/Registration";
-import {LinkedElement, LinkedList} from "../util/LinkedList";
+import {Registration} from "signals";
+import {LinkedElement, LinkedList} from "../util";
 
 export interface MouseWheelListener {
     /**
@@ -9,7 +9,7 @@ export interface MouseWheelListener {
     onMouseWheelEvent(e: WheelEvent): boolean;
 }
 
-export class MouseWheelInput {
+export default class MouseWheelInput {
     public dispose(): void {
         this._listeners.dispose();
         this._listeners = null;

@@ -1,6 +1,6 @@
 import * as stdcpp from "./stdcpp";
 
-export class EmscriptenUtil {
+export default class EmscriptenUtil {
     /**
      * Instantiates a program from an Emscripten module and calls its main() function if it has one.
      * @returns {Promise<any>} a promise that will resolve with the instantiated module.

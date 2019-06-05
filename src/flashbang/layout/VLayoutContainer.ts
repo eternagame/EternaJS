@@ -1,13 +1,13 @@
 import {Rectangle} from "pixi.js";
-import {HAlign} from "../core/Align";
-import {DisplayUtil} from "../util/DisplayUtil";
-import {LayoutContainer} from "./LayoutContainer";
+import {HAlign} from "../core";
+import {DisplayUtil} from "../util";
+import {LayoutContainer} from ".";
 
 /**
  * A Container that arranges its children vertically.
  * Call layout() after adding or removing children to update the sprite's layout.
  */
-export class VLayoutContainer extends LayoutContainer {
+export default class VLayoutContainer extends LayoutContainer {
     public constructor(vOffset: number = 0, hAlign: HAlign = HAlign.CENTER) {
         super();
         this._vOffset = vOffset;

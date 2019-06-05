@@ -1,26 +1,18 @@
-import {
-    Container, Graphics, Point, Sprite, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {MathUtil} from "../../../flashbang/util/MathUtil";
-import {UnitSignal} from "../../../signals/UnitSignal";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {ExpPainter} from "../../ExpPainter";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Dialog} from "../../ui/Dialog";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel} from "../../ui/GamePanel";
-import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
-import {Fonts} from "../../util/Fonts";
-import {SolutionDescBox} from "./SolutionDescBox";
+import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {HLayoutContainer} from "flashbang/layout";
+import {DisplayUtil, MathUtil} from "flashbang/util";
+import {UnitSignal} from "signals";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import ExpPainter from "eterna/ExpPainter";
+import {Puzzle, Solution} from "eterna/puzzle";
+import {Bitmaps} from "eterna/resources";
+import {Dialog, GameButton, GamePanel, PoseThumbnail, PoseThumbnailType} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {SolutionDescBox} from ".";
 
-export class ViewSolutionDialog extends Dialog<void> {
+export default class ViewSolutionDialog extends Dialog<void> {
     public readonly playClicked = new UnitSignal();
     public readonly seeResultClicked = new UnitSignal();
     public readonly sortClicked = new UnitSignal();

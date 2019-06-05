@@ -1,0 +1,15 @@
+export {default as InterpolatingTask} from "./InterpolatingTask";
+export {default as DisplayObjectTask} from "./DisplayObjectTask";
+export {default as AlphaTask} from "./AlphaTask";
+export {default as CallbackTask} from "./CallbackTask";
+export {default as DelayTask} from "./DelayTask";
+export {default as FrameDelayTask} from "./FrameDelayTask";
+export {default as FunctionTask} from "./FunctionTask";
+export {default as LocationTask} from "./LocationTask";
+export {default as ParallelTask} from "./ParallelTask";
+export {default as RepeatingTask, Repeat} from "./RepeatingTask";
+export {default as RotationTask} from "./RotationTask";
+export {default as ScaleTask} from "./ScaleTask";
+export {default as SelfDestructTask} from "./SelfDestructTask";
+export {default as SerialTask} from "./SerialTask";
+export {default as VisibleTask} from "./VisibleTask";

@@ -1,8 +1,8 @@
-import {PowerEaser} from "./PowerEaser";
+import {PowerEaser} from ".";
 
 export type EasingFunc = (from: number, to: number, dt: number, t: number) => number;
 
-export class Easing {
+export default class Easing {
     public static quadratic: PowerEaser = new PowerEaser(2);
     public static cubic: PowerEaser = new PowerEaser(3);
     public static quartic: PowerEaser = new PowerEaser(4);

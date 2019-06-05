@@ -1,8 +1,8 @@
-import {Eterna} from "../../Eterna";
-import {SolutionManager} from "../../puzzle/SolutionManager";
-import {int} from "../../util/int";
+import Eterna from "eterna/Eterna";
+import {SolutionManager} from "eterna/puzzle";
+import {int} from "eterna/util";
 
-export class VoteProcessor {
+export default class VoteProcessor {
     public process_data(data: any[]): void {
         let solutionIDs: number[] = [];
         let voteCounts: number[] = [];

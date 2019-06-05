@@ -1,12 +1,8 @@
 import {Container} from "pixi.js";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {AppMode} from "./AppMode";
-import {GameObject} from "./GameObject";
-import {GameObjectRef} from "./GameObjectRef";
-import {ModeStack} from "./ModeStack";
+import {RegistrationGroup, UnitSignal} from "signals";
+import {AppMode, ModeStack, GameObject, GameObjectRef} from ".";
 
-export class GameObjectBase {
+export default class GameObjectBase {
     public get destroyed(): UnitSignal {
         if (this._destroyed == null) {
             this._destroyed = new UnitSignal();

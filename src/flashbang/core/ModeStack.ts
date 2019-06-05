@@ -1,14 +1,13 @@
 import {Container} from "pixi.js";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {Assert} from "../util/Assert";
-import {MathUtil} from "../util/MathUtil";
-import {AppMode} from "./AppMode";
+import {UnitSignal} from "signals";
+import {Assert, MathUtil} from "../util";
+import {AppMode} from ".";
 
 /**
  * A stack of AppModes. Only the top-most mode in the stack gets updates
  * and other events - all other modes are inactive.
  */
-export class ModeStack {
+export default class ModeStack {
     public readonly topModeChanged: UnitSignal = new UnitSignal();
 
     constructor(parentSprite: Container) {

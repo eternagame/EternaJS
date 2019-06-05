@@ -1,22 +1,16 @@
 import {Graphics, Point, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {InterpolatingTask} from "../../flashbang/tasks/InterpolatingTask";
-import {LocationTask} from "../../flashbang/tasks/LocationTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
-import {Easing, EasingFunc} from "../../flashbang/util/Easing";
-import {Eterna} from "../Eterna";
-import {GamePanel} from "../ui/GamePanel";
-import {Fonts} from "../util/Fonts";
-import {VibrateTask} from "../vfx/VibrateTask";
-import {PlayerRank} from "./PlayerRank";
-import {RankBoard} from "./RankBoard";
-import {RankRowLayout} from "./RankRowLayout";
+import {ContainerObject} from "flashbang/objects";
+import {
+    AlphaTask, DelayTask, InterpolatingTask, LocationTask, ParallelTask, SerialTask, VisibleTask
+} from "flashbang/tasks";
+import {Easing, EasingFunc} from "flashbang/util";
+import Eterna from "eterna/Eterna";
+import {GamePanel} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {VibrateTask} from "eterna/vfx";
+import {PlayerRank, RankBoard, RankRowLayout} from ".";
 
-export class RankScroll extends ContainerObject {
+export default class RankScroll extends ContainerObject {
     public static hasRankScrollData(submissionRsp: any): boolean {
         return (submissionRsp["pointsrank-before"] != null && submissionRsp["pointsrank-after"] != null);
     }

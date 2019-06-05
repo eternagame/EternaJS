@@ -1,8 +1,8 @@
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Eterna} from "../Eterna";
-import {Bubble} from "./Bubble";
+import {ContainerObject} from "flashbang/objects";
+import Eterna from "eterna/Eterna";
+import {Bubble} from ".";
 
-export class Background extends ContainerObject {
+export default class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {
         super();
         this._bubbleCount = bubbleCount;

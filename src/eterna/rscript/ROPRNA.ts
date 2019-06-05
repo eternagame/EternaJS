@@ -1,8 +1,6 @@
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
-import {StringToPaletteTargetType} from "../ui/NucleotidePalette";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
+import {MathUtil} from "flashbang/util";
+import {StringToPaletteTargetType} from "eterna/ui";
+import {RScriptEnv, RScriptOp} from ".";
 
 export enum ROPRNAType {
     SETBASE = "SETBASE",
@@ -14,7 +12,7 @@ export enum ROPRNAType {
     SETPIP = "SETPIP",
 }
 
-export class ROPRNA extends RScriptOp {
+export default class ROPRNA extends RScriptOp {
     constructor(type: ROPRNAType, env: RScriptEnv) {
         super(env);
         this._type = type;

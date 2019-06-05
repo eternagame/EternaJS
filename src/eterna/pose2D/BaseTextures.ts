@@ -1,14 +1,12 @@
 import {Text, Texture} from "pixi.js";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {EPars} from "../EPars";
-import {BitmapManager} from "../resources/BitmapManager";
-import {EternaTextureUtil} from "../util/EternaTextureUtil";
-import {Fonts} from "../util/Fonts";
-import {Base} from "./Base";
-import {BaseDrawFlags} from "./BaseDrawFlags";
+import {TextureUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import {BitmapManager} from "eterna/resources";
+import {EternaTextureUtil, Fonts} from "eterna/util";
+import {Base, BaseDrawFlags} from ".";
 
 /** Encapsulates textures for a Base type */
-export class BaseTextures {
+export default class BaseTextures {
     public baseType: number;
 
     public letterData: Texture[];  // letters

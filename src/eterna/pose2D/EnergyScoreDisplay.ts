@@ -1,10 +1,10 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Container, Graphics, Point} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {Fonts} from "../util/Fonts";
+import {HAlign} from "flashbang/core";
+import {VLayoutContainer} from "flashbang/layout";
+import {Fonts} from "eterna/util";
 
-export class EnergyScoreDisplay extends Container {
+export default class EnergyScoreDisplay extends Container {
     public static grey(text: string): string {
         return `<grey>${text}</grey>`;
     }

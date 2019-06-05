@@ -1,7 +1,7 @@
-import {Eterna} from "../Eterna";
-import {Utility} from "../util/Utility";
+import Eterna from "eterna/Eterna";
+import {Utility} from "eterna/util";
 
-export class EternaURL {
+export default class EternaURL {
     public static readonly BARCODE_HELP: string = "/web/lab/manual/#barcode";
     public static readonly STRATEGY_GUIDE: string = "http://getsatisfaction.com/eternagame/topics/the_strategy_guide_to_solve_eterna_puzzles";
 

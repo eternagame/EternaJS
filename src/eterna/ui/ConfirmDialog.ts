@@ -1,16 +1,11 @@
 import {Point} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {Fonts} from "../util/Fonts";
-import {Dialog, DialogCanceledError} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
-import {HTMLTextObject} from "./HTMLTextObject";
+import {Flashbang, HAlign} from "flashbang/core";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {AlphaTask} from "flashbang/tasks";
+import {Fonts} from "eterna/util";
+import {Dialog, DialogCanceledError, GameButton,GamePanel, GamePanelType, HTMLTextObject } from ".";
 
-export class ConfirmDialog extends Dialog<boolean> {
+export default class ConfirmDialog extends Dialog<boolean> {
     public constructor(prompt: string, promptIsHTML: boolean = false) {
         super();
         this._prompt = prompt;

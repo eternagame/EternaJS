@@ -1,8 +1,9 @@
-import {AbstractValue} from "./AbstractValue";
-import {MappedValue} from "./MappedValue";
-import {ValueView} from "./ValueView";
+/*import AbstractValue from "./AbstractValue";
+import MappedValue from "./MappedValue";
+import ValueView from "./ValueView";*/
+import {AbstractValue, MappedValue, ValueView} from ".";
 
-export class Value<T> extends AbstractValue<T> implements ValueView<T> {
+export default class Value<T> extends AbstractValue<T> implements ValueView<T> {
     /** Creates an instance with the supplied starting value. */
     constructor(value: T) {
         super();

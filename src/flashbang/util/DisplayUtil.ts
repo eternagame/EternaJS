@@ -1,14 +1,11 @@
-import {
-    DisplayObject, Graphics, Matrix, Point, Rectangle
-} from "pixi.js";
-import {HAlign, VAlign} from "../core/Align";
-import {Flashbang} from "../core/Flashbang";
-import {RectangleUtil} from "./RectangleUtil";
+import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
+import {Flashbang, HAlign, VAlign} from "../core";
+import {RectangleUtil} from ".";
 
 // the @types file for upng-js is broken, so we just require it directly
 const UPNG = require("upng-js");
 
-export class DisplayUtil {
+export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
         let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes

@@ -1,19 +1,14 @@
 import {Text} from "pixi.js";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {ObjectTask} from "../../flashbang/core/ObjectTask";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {Eterna} from "../Eterna";
-import {Fonts} from "../util/Fonts";
-import {Background} from "../vfx/Background";
+import {Flashbang, AppMode, ObjectTask} from "flashbang/core";
+import {ContainerObject} from "flashbang/objects";
+import {DelayTask, RepeatingTask, ScaleTask, SerialTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
+import Eterna from "eterna/Eterna";
+import {Fonts} from "eterna/util";
+import {Background} from "eterna/vfx";
 
 /** Displays a simple animation while we're loading assets */
-export class LoadingMode extends AppMode {
+export default class LoadingMode extends AppMode {
     public constructor(text: string) {
         super();
         this._text = text;

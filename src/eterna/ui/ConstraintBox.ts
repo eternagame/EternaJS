@@ -1,38 +1,22 @@
 import MultiStyleText from "pixi-multistyle-text";
-import {
-    Container, Graphics, Point, Sprite, Text, Texture
-} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {LocationTask} from "../../flashbang/tasks/LocationTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Easing} from "../../flashbang/util/Easing";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {EPars} from "../EPars";
-import {ConstraintType} from "../puzzle/Constraints";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {Fonts} from "../util/Fonts";
-import {Band} from "./Band";
-import {PoseThumbnail, PoseThumbnailType} from "./PoseThumbnail";
-import {TextBalloon} from "./TextBalloon";
+import {Container, Graphics, Point, Sprite, Text, Texture} from "pixi.js";
+import {HAlign, VAlign} from "flashbang/core";
+import {ContainerObject, Enableable, SceneObject} from "flashbang/objects";
+import {AlphaTask, DelayTask, LocationTask, ParallelTask, ScaleTask, SerialTask, VisibleTask} from "flashbang/tasks";
+import {DisplayUtil, Easing, StyledTextBuilder, TextureUtil} from "flashbang/util";
+import {RegistrationGroup} from "signals";
+import EPars from "eterna/EPars";
+import {ConstraintType} from "eterna/puzzle";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {Fonts} from "eterna/util";
+import {Band, PoseThumbnail, PoseThumbnailType, TextBalloon} from ".";
 
 export enum ConstraintBoxType {
     DEFAULT = "DEFAULT",
     MISSION_SCREEN = "MISSION_SCREEN" // slightly minimized, requirements text on the right
 }
 
-export class ConstraintBox extends ContainerObject implements Enableable {
+export default class ConstraintBox extends ContainerObject implements Enableable {
     public constructor(type: ConstraintBoxType = ConstraintBoxType.DEFAULT) {
         super();
 

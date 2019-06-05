@@ -1,7 +1,7 @@
-import {Arrays} from "../../../flashbang/util/Arrays";
-import {UnitSignal} from "../../../signals/UnitSignal";
-import {Solution} from "../../puzzle/Solution";
-import {DesignCategory} from "./DesignBrowserMode";
+import {Arrays} from "flashbang/util";
+import {UnitSignal} from "signals";
+import {Solution} from "eterna/puzzle";
+import {DesignCategory} from ".";
 
 export enum SortOrder {
     INCREASING = 1,
@@ -21,7 +21,7 @@ export class SortCriterion {
     }
 }
 
-export class SortOptions {
+export default class SortOptions {
     /** Emitted when any of our sort options have changed */
     public readonly sortChanged = new UnitSignal();
 

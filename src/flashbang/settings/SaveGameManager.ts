@@ -1,6 +1,6 @@
 import * as localforage from "localforage";
 
-export class SaveGameManager {
+export default class SaveGameManager {
     constructor(namespace: string) {
         if (SaveGameManager.ALL_NAMESPACES.has(namespace)) {
             throw new Error(`SaveGameManager namespace '${namespace}' already taken`);

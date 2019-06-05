@@ -1,20 +1,14 @@
 import {Container, Point, Text} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {Arrays} from "../../../flashbang/util/Arrays";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Signal} from "../../../signals/Signal";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Dialog} from "../../ui/Dialog";
-import {FixedWidthTextField} from "../../ui/FixedWidthTextField";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {Fonts} from "../../util/Fonts";
-import {GraphicsUtil} from "../../util/GraphicsUtil";
-import {DesignCategory} from "./DesignBrowserMode";
+import {HAlign, VAlign} from "flashbang/core";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {Arrays, DisplayUtil} from "flashbang/util";
+import {Signal} from "signals";
+import {Bitmaps} from "eterna/resources";
+import {Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {Fonts, GraphicsUtil} from "eterna/util";
+import {DesignCategory} from ".";
 
-export class CustomizeColumnOrderDialog extends Dialog<void> {
+export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
     public constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> = null) {

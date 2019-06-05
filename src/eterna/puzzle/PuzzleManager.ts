@@ -1,12 +1,10 @@
 import * as log from "loglevel";
-import {Eterna} from "../Eterna";
-import {CSVParser} from "../util/CSVParser";
-import {Puzzle} from "./Puzzle";
-import {SolutionManager} from "./SolutionManager";
-import {FolderManager} from "../folding/FolderManager";
-import {Folder} from "../folding/Folder";
+import Eterna from "eterna/Eterna";
+import {CSVParser} from "eterna/util";
+import {Folder, FolderManager} from "../folding";
+import {Puzzle, SolutionManager} from ".";
 
-export class PuzzleManager {
+export default class PuzzleManager {
     public static get instance(): PuzzleManager {
         if (PuzzleManager._instance == null) {
             PuzzleManager._instance = new PuzzleManager();

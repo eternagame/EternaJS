@@ -1,11 +1,11 @@
 import {DisplayObject} from "pixi.js";
-import {SignalView} from "../../signals/SignalView";
-import {EventSignal} from "../util/EventSignal";
-import {PointerTarget} from "./PointerTarget";
+import {SignalView} from "signals";
+import {EventSignal} from "../util";
+import {PointerTarget} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class DisplayObjectPointerTarget implements PointerTarget {
+export default class DisplayObjectPointerTarget implements PointerTarget {
     public readonly target: DisplayObject;
 
     public constructor(disp: DisplayObject) {

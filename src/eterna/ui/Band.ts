@@ -1,18 +1,13 @@
-import {
-    Graphics, Matrix, Point, Sprite, Text, Texture
-} from "pixi.js";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {Fonts} from "../util/Fonts";
+import {Graphics, Matrix, Point, Sprite, Text, Texture} from "pixi.js";
+import {Updatable} from "flashbang/core";
+import {ContainerObject} from "flashbang/objects";
+import {ColorUtil, MathUtil, TextureUtil} from "flashbang/util";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {Fonts} from "eterna/util";
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
-export class Band extends ContainerObject implements Updatable {
+export default class Band extends ContainerObject implements Updatable {
     constructor(farDist: number, closeDist: number, strength: number) {
         super();
 

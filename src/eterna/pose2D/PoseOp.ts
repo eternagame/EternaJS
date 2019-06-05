@@ -1,4 +1,4 @@
-export class PoseOp {
+export default class PoseOp {
     public sn?: number;
     public fn: () => void;
 

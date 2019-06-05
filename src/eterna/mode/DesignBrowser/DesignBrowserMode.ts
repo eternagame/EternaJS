@@ -1,48 +1,23 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
+import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {HLayoutContainer} from "flashbang/layout";
+import {ContainerObject, SceneObject} from "flashbang/objects";
+import {AlphaTask, CallbackTask, DelayTask, LocationTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {DisplayUtil, Easing, MathUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import Feedback from "eterna/Feedback";
+import {Puzzle, Solution, SolutionManager} from "eterna/puzzle";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {GameButton, GamePanel, HTMLTextObject, SliderBar, URLButton} from "eterna/ui";
+import {Fonts, int} from "eterna/util";
+import {GameMode} from "eterna/mode";
 import {
-    Container, Graphics, Point, Sprite, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {SceneObject} from "../../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {CallbackTask} from "../../../flashbang/tasks/CallbackTask";
-import {DelayTask} from "../../../flashbang/tasks/DelayTask";
-import {LocationTask} from "../../../flashbang/tasks/LocationTask";
-import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Easing} from "../../../flashbang/util/Easing";
-import {MathUtil} from "../../../flashbang/util/MathUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Feedback} from "../../Feedback";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {SolutionManager} from "../../puzzle/SolutionManager";
-import {BitmapManager} from "../../resources/BitmapManager";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel} from "../../ui/GamePanel";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {SliderBar} from "../../ui/SliderBar";
-import {URLButton} from "../../ui/URLButton";
-import {Fonts} from "../../util/Fonts";
-import {int} from "../../util/int";
-import {GameMode} from "../GameMode";
-import {CustomizeColumnOrderDialog} from "./CustomizeColumnOrderDialog";
-import {DataCol} from "./DataCol";
-import {DotLine} from "./DotLine";
-import {GridLines} from "./GridLines";
-import {MarkerBoxView} from "./MarkerBoxView";
-import {SelectionBox} from "./SelectionBox";
-import {SortOptions, SortOrder} from "./SortOptions";
-import {SortOptionsDialog} from "./SortOptionsDialog";
-import {ViewSolutionDialog} from "./ViewSolutionDialog";
-import {VoteProcessor} from "./VoteProcessor";
+    CustomizeColumnOrderDialog, DataCol, DotLine, GridLines, MarkerBoxView,
+    SelectionBox, SortOptions, SortOrder, SortOptionsDialog, ViewSolutionDialog, VoteProcessor
+} from ".";
 
 export enum DesignBrowserDataType {
     INT = 0,
@@ -78,7 +53,7 @@ export interface DesignBrowserFilter {
     arg2?: string;
 }
 
-export class DesignBrowserMode extends GameMode {
+export default class DesignBrowserMode extends GameMode {
     constructor(puzzle: Puzzle, novote: boolean = false, initialFilters: DesignBrowserFilter[] = null) {
         super();
 

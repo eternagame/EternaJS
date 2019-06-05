@@ -1,23 +1,15 @@
-import {
-    Container, Graphics, Point, Text
-} from "pixi.js";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {TextBuilder} from "../../../flashbang/util/TextBuilder";
-import {Signal} from "../../../signals/Signal";
-import {UnitSignal} from "../../../signals/UnitSignal";
-import {Feedback} from "../../Feedback";
-import {Solution} from "../../puzzle/Solution";
-import {GameButton} from "../../ui/GameButton";
-import {TextInputObject} from "../../ui/TextInputObject";
-import {Fonts} from "../../util/Fonts";
-import {int} from "../../util/int";
-import {Utility} from "../../util/Utility";
-import {DesignBrowserDataType, DesignCategory} from "./DesignBrowserMode";
-import {SequenceStringListView} from "./SequenceStringListView";
-import {SortOrder} from "./SortOptions";
+import {Container, Graphics, Point, Text} from "pixi.js";
+import {Flashbang} from "flashbang/core";
+import {ContainerObject} from "flashbang/objects";
+import {TextBuilder} from "flashbang/util";
+import {Signal, UnitSignal} from "signals";
+import Feedback from "eterna/Feedback";
+import {Solution} from "eterna/puzzle";
+import {GameButton, TextInputObject} from "eterna/ui";
+import {Fonts, int, Utility} from "eterna/util";
+import {DesignBrowserDataType, DesignCategory, SequenceStringListView, SortOrder} from ".";
 
-export class DataCol extends ContainerObject {
+export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
     public readonly filtersChanged = new UnitSignal();
     public readonly category: DesignCategory;

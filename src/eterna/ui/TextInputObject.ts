@@ -1,17 +1,16 @@
 import {Graphics, Point, Sprite} from "pixi.js";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
-import {DOMObject} from "../../flashbang/objects/DOMObject";
-import {TextBuilder} from "../../flashbang/util/TextBuilder";
-import {Signal} from "../../signals/Signal";
-import {Eterna} from "../Eterna";
-import {Fonts} from "../util/Fonts";
-import {int} from "../util/int";
+import {DisplayObjectPointerTarget} from "flashbang/input";
+import {DOMObject} from "flashbang/objects";
+import {TextBuilder} from "flashbang/util";
+import {Signal} from "signals";
+import Eterna from "eterna/Eterna";
+import {Fonts} from "eterna/util";
 
 /**
  * A text input object in the DOM. Floats on top of the PIXI canvas.
  * When it loses focus, it creates a fake text input display placeholder, and hides the DOM element.
  */
-export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
+export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
 
     public constructor(fontSize: number, width: number = 100, rows: number = 1) {

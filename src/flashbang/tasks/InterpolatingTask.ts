@@ -1,8 +1,7 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Updatable} from "../core/Updatable";
-import {Easing, EasingFunc} from "../util/Easing";
+import {ObjectTask, Updatable} from "../core";
+import {Easing, EasingFunc} from "../util";
 
-export class InterpolatingTask extends ObjectTask implements Updatable {
+export default class InterpolatingTask extends ObjectTask implements Updatable {
     constructor(time: number = 0, easingFn: EasingFunc = null) {
         super();
         this._totalTime = Math.max(time, 0);

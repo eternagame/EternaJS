@@ -1,8 +1,7 @@
-import {PoseState} from "../puzzle/Puzzle";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
+import {PoseState} from "eterna/puzzle";
+import {RScriptEnv, RScriptOp} from ".";
 
-export class ROPPre extends RScriptOp {
+export default class ROPPre extends RScriptOp {
     constructor(command: string, env: RScriptEnv) {
         super(env);
         this._type = null;

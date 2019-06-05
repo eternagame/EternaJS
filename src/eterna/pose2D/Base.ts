@@ -1,18 +1,16 @@
 ﻿import * as log from "loglevel";
 import {Point, Sprite, Texture} from "pixi.js";
-import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Constants} from "../Constants";
-import {EPars} from "../EPars";
-import {Eterna} from "../Eterna";
-import {ROPWait} from "../rscript/ROPWait";
-import {BaseAssets} from "./BaseAssets";
-import {BaseDrawFlags} from "./BaseDrawFlags";
-import {Pose2D, RNAHighlightState} from "./Pose2D";
+import {LateUpdatable} from "flashbang/core";
+import {ContainerObject} from "flashbang/objects";
+import Constants from "eterna/Constants";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import {ROPWait} from "eterna/rscript";
+import {BaseAssets, BaseDrawFlags, Pose2D, RNAHighlightState} from ".";
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
-export class Base extends ContainerObject implements LateUpdatable {
+export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
     public static ZOOM_SCALE_FACTOR = 0.75;
 

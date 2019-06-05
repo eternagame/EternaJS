@@ -1,7 +1,7 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Assert} from "../util/Assert";
+import {ObjectTask} from "../core";
+import {Assert} from "../util";
 
-export class ParallelTask extends ObjectTask {
+export default class ParallelTask extends ObjectTask {
     constructor(...tasks: ObjectTask[]) {
         super();
         this._subtasks = tasks.concat();

@@ -1,19 +1,16 @@
 import {Point} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {UndoBlock} from "../UndoBlock";
-import {Dialog} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {SpecBox} from "./SpecBox";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {DisplayUtil} from "flashbang/util";
+import UndoBlock from "eterna/UndoBlock";
+import {Dialog, GameButton, SpecBox} from ".";
 
 /**
  * Displays a SpecBox in a modal dialog.
  * If the "Minimize Window" button is clicked, the dialog will be closed with "true". The owning mode
  * should display a docked SpecBox.
  */
-export class SpecBoxDialog extends Dialog<boolean> {
+export default class SpecBoxDialog extends Dialog<boolean> {
     public constructor(datablock: UndoBlock, showMinimizeButton: boolean = true) {
         super();
         this._datablock = datablock;

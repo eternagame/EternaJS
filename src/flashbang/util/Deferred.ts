@@ -1,5 +1,5 @@
 /** Wraps a Promise and allows it to be resolved or rejected later. */
-export class Deferred<T> {
+export default class Deferred<T> {
     public readonly promise: Promise<T>;
 
     public constructor() {

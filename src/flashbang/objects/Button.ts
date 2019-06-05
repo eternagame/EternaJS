@@ -1,20 +1,16 @@
 import {Point} from "pixi.js";
-import {Eterna} from "../../eterna/Eterna";
-import {Sounds} from "../../eterna/resources/Sounds";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {IsLeftMouse} from "../input/InputUtil";
-import {PointerCapture} from "../input/PointerCapture";
-import {CallbackTask} from "../tasks/CallbackTask";
-import {DelayTask} from "../tasks/DelayTask";
-import {SerialTask} from "../tasks/SerialTask";
-import {DisplayUtil} from "../util/DisplayUtil";
-import {ContainerObject} from "./ContainerObject";
-import {Enableable} from "./Enableable";
+import Eterna from "eterna/Eterna";
+import {Sounds} from "eterna/resources";
+import {UnitSignal} from "signals";
+import {InputUtil, PointerCapture} from "../input";
+import {CallbackTask, DelayTask, SerialTask} from "../tasks";
+import {DisplayUtil} from "../util";
+import {ContainerObject, Enableable} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** A button base class. */
-export abstract class Button extends ContainerObject implements Enableable {
+export default abstract class Button extends ContainerObject implements Enableable {
     public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
 
     /** Fired when the button is clicked */
@@ -41,8 +37,8 @@ export abstract class Button extends ContainerObject implements Enableable {
 
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
-        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(() => this.onPointerDown()));
-        this.regs.add(this.pointerUp.filter(IsLeftMouse).connect(() => this.onPointerUp(true)));
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(true)));
     }
 
     /* override */
@@ -133,7 +129,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
-            if (IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
+            if (InputUtil.IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
                 this.onPointerUp(false);
             } else if (e.type === "pointercancel") {
                 this.endCapture(true);

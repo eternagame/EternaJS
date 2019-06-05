@@ -1,8 +1,8 @@
-import {JSONUtil} from "../flashbang/util/JSONUtil";
-import {EPars} from "./EPars";
-import {Folder} from "./folding/Folder";
-import {Plot, PlotType} from "./Plot";
-import {Oligo, Pose2D} from "./pose2D/Pose2D";
+import {JSONUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import {Folder} from "eterna/folding";
+import {default as Plot, PlotType} from "eterna/Plot";
+import {Oligo, Pose2D} from "eterna/pose2D";
 
 export enum UndoBlockParam {
     GU = 0,
@@ -22,7 +22,7 @@ export enum UndoBlockParam {
     MAX = 14,
 }
 
-export class UndoBlock {
+export default class UndoBlock {
     public constructor(seq: number[]) {
         this._sequence = seq.slice();
     }
