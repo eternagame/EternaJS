@@ -8,7 +8,7 @@
  * NB: as of 9/8/2018, Edge doesn't support KeyboardEvent.code
  * For Edge, use the keyboard.js polyfill here: https://github.com/inexorabletash/polyfill
  */
-export enum KeyCode {
+enum KeyCode {
     // 3.1.1.1. Writing System Keys
     Backquote = "Backquote", // `~ on a US keyboard. This is the 半角/全角/漢字 (hankaku/zenkaku/kanji) key on Japanese keyboards
     Backslash = "Backslash", // Used for both the US \| (on the 101-key layout) and also for the key    located between the " and Enter keys on row C of the 102-, 104- and 106-key layouts. Labelled #~ on a UK (102) keyboard.
@@ -178,3 +178,5 @@ export enum KeyCode {
     AudioVolumeUp = "AudioVolumeUp",
     WakeUp = "WakeUp",
 }
+
+export default KeyCode;

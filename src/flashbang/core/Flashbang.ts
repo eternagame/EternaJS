@@ -1,12 +1,11 @@
 import * as PIXI from "pixi.js";
 import {Point} from "pixi.js";
-import {Assert} from "../util/Assert";
-import {AppMode} from "./AppMode";
-import {FlashbangApp} from "./FlashbangApp";
+import {Assert} from "../util";
+import {FlashbangApp, AppMode} from ".";
 
 type InteractionManager = PIXI.interaction.InteractionManager;
 
-export class Flashbang {
+export default class Flashbang {
     public static get app(): FlashbangApp {
         return Flashbang._app;
     }

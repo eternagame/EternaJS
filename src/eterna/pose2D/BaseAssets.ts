@@ -1,18 +1,13 @@
 import {Container, Graphics, Sprite, Texture} from "pixi.js";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {EPars} from "../EPars";
-import {ExpPainter} from "../ExpPainter";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {Sounds} from "../resources/Sounds";
-import {EternaTextureUtil} from "../util/EternaTextureUtil";
-import {Base} from "./Base";
-import {BaseDrawFlags} from "./BaseDrawFlags";
-import {BaseTextures} from "./BaseTextures";
+import {ColorUtil, TextureUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import ExpPainter from "eterna/ExpPainter";
+import {BitmapManager, Bitmaps, Sounds} from "eterna/resources";
+import {EternaTextureUtil} from "eterna/util";
+import {Base, BaseDrawFlags, BaseTextures} from ".";
 
 /** Handles initialization and management of Base-related assets */
-export class BaseAssets {
+export default class BaseAssets {
     public static getHitTestDistanceThreshold(zoomLevel: number): number {
         let bitmapWidth: number;
 

@@ -1,14 +1,11 @@
 import {Graphics, Point} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {ErrorUtil} from "../../flashbang/util/ErrorUtil";
-import {GameButton} from "../ui/GameButton";
-import {GamePanel, GamePanelType} from "../ui/GamePanel";
-import {Fonts} from "../util/Fonts";
+import {Flashbang, HAlign, AppMode} from "flashbang/core";
+import {VLayoutContainer} from "flashbang/layout";
+import {ErrorUtil} from "flashbang/util";
+import {GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {Fonts} from "eterna/util";
 
-export class ErrorDialogMode extends AppMode {
+export default class ErrorDialogMode extends AppMode {
     public readonly error: any;
 
     public constructor(error: any) {

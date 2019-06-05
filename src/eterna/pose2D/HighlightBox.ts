@@ -1,12 +1,8 @@
 import {DisplayObject, Graphics, Point} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
-import {ObjectTask} from "../../flashbang/core/ObjectTask";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Pose2D} from "./Pose2D";
+import {GameObject, LateUpdatable, ObjectTask} from "flashbang/core";
+import {Vector2} from "flashbang/geom";
+import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {Pose2D} from ".";
 
 export enum HighlightType {
     STACK = 0,
@@ -21,7 +17,7 @@ export enum HighlightType {
 
 
 /** A class for highlighting groups of bases in a Pose2D */
-export class HighlightBox extends GameObject implements LateUpdatable {
+export default class HighlightBox extends GameObject implements LateUpdatable {
     public constructor(pose: Pose2D) {
         super();
         this._pose = pose;

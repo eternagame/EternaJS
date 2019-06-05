@@ -1,5 +1,4 @@
-import {ROPWait} from "./ROPWait";
-import {RScriptOp} from "./RScriptOp";
+import {ROPWait, RScriptOp} from ".";
 
 /*
  * RScript Operation Tree.
@@ -7,7 +6,7 @@ import {RScriptOp} from "./RScriptOp";
  * :: Note - Use a tree so that we can support if conditionals easily in the near future.
  * :: Note - Only one entry point.
  */
-export class RScriptOpTree {
+export default class RScriptOpTree {
     public addNode(node: RScriptOp): void {
         if (!node) {
             return;

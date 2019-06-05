@@ -1,21 +1,17 @@
 import {Point} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {Setting} from "../../flashbang/settings/Setting";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Eterna} from "../Eterna";
-import {Bitmaps} from "../resources/Bitmaps";
-import {Dialog} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {GameCheckbox} from "./GameCheckbox";
-import {GamePanel, GamePanelType} from "./GamePanel";
+import {HAlign, VAlign} from "flashbang/core";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {Setting} from "flashbang/settings";
+import {DisplayUtil} from "flashbang/util";
+import Eterna from "eterna/Eterna";
+import {Bitmaps} from "eterna/resources";
+import {Dialog, GameButton, GameCheckbox, GamePanel, GamePanelType} from ".";
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export class EternaViewOptionsDialog extends Dialog<void> {
+export default class EternaViewOptionsDialog extends Dialog<void> {
     public constructor(mode: EternaViewOptionsMode) {
         super();
         this._optionsMode = mode;

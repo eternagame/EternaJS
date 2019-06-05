@@ -1,20 +1,20 @@
 import * as log from "loglevel";
 import {Texture} from "pixi.js";
-import {TextureUtil} from "../../../flashbang/util/TextureUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Pose2D} from "../../pose2D/Pose2D";
-import {Sounds} from "../../resources/Sounds";
-import {GameButton} from "../../ui/GameButton";
-import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
-import {GameMode} from "../GameMode";
+import {TextureUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import {Pose2D} from "eterna/pose2D";
+import {Sounds} from "eterna/resources";
+import {GameButton} from "eterna/ui";
+import {ExternalInterface, ExternalInterfaceCtx} from "eterna/util";
+import {GameMode} from "eterna/mode";
 
 export enum BoosterType {
     PAINTER = 1,
     ACTION = 2,
 }
 
-export class Booster {
+export default class Booster {
     public static create(mode: GameMode, data: any): Promise<Booster> {
         if (!data["type"]) {
             return Promise.reject("Invalid booster definition (missing 'type')");

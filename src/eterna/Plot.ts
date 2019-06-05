@@ -1,12 +1,12 @@
 import {Graphics, Text, Container} from "pixi.js";
-import {ColorUtil} from "../flashbang/util/ColorUtil";
-import {Fonts} from "./util/Fonts";
+import {ColorUtil} from "flashbang/util";
+import {Fonts} from "eterna/util";
 
 export enum PlotType {
     LINE, BAR, SCATTER
 }
 
-export class Plot extends Container {
+export default class Plot extends Container {
     public type: PlotType = PlotType.BAR;
 
     public constructor(type: PlotType = PlotType.BAR) {

@@ -1,5 +1,5 @@
 /** View state flags for Base.as rendering */
-export class BaseDrawFlags {
+export default class BaseDrawFlags {
     /** If set, the base will have a lock icon on it */
     public static LOCKED: number = 1 << 0;
 

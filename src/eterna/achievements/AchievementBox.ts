@@ -1,21 +1,14 @@
 import * as log from "loglevel";
 import {Point, Sprite, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {PlaySoundTask} from "../resources/PlaySoundTask";
-import {Sounds} from "../resources/Sounds";
-import {GameButton} from "../ui/GameButton";
-import {GamePanel, GamePanelType} from "../ui/GamePanel";
-import {Fonts} from "../util/Fonts";
-import {VibrateTask} from "../vfx/VibrateTask";
+import {ContainerObject} from "flashbang/objects";
+import {AlphaTask, DelayTask, ParallelTask, ScaleTask, SerialTask} from "flashbang/tasks";
+import {Easing, TextureUtil} from "flashbang/util";
+import {PlaySoundTask, Sounds} from "eterna/resources";
+import {GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {VibrateTask} from "eterna/vfx";
 
-export class AchievementBox extends ContainerObject {
+export default class AchievementBox extends ContainerObject {
     constructor(imageURL: string, text: string) {
         super();
         this._imageURL = imageURL;

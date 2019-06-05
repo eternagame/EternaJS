@@ -1,10 +1,8 @@
 import {Graphics, DisplayObject} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {EPars} from "../EPars";
+import {Flashbang, GameObject, Updatable} from "flashbang/core";
+import EPars from "eterna/EPars";
 
-export class PaintCursor extends GameObject implements Updatable {
+export default class PaintCursor extends GameObject implements Updatable {
     public constructor() {
         super();
         this._graphics = new Graphics();

@@ -1,8 +1,8 @@
 import {DisplayObject} from "pixi.js";
-import {ObjectTask} from "../core/ObjectTask";
-import {Assert} from "../util/Assert";
+import {ObjectTask} from "../core";
+import {Assert} from "../util";
 
-export class VisibleTask extends ObjectTask {
+export default class VisibleTask extends ObjectTask {
     constructor(visible: boolean, target: DisplayObject = null) {
         super();
         this._visible = visible;

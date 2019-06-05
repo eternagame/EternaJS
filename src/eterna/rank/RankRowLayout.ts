@@ -1,10 +1,10 @@
 import {Point, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {TextUtil} from "../../flashbang/util/TextUtil";
-import {Fonts} from "../util/Fonts";
-import {PlayerRank} from "./PlayerRank";
+import {ContainerObject} from "flashbang/objects";
+import {TextUtil} from "flashbang/util";
+import {Fonts} from "eterna/util";
+import {PlayerRank} from ".";
 
-export class RankRowLayout extends ContainerObject {
+export default class RankRowLayout extends ContainerObject {
     public constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
         fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
         super();

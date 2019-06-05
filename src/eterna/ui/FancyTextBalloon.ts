@@ -1,15 +1,12 @@
 import {Point} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Bitmaps} from "../resources/Bitmaps";
-import {RScriptArrow} from "../rscript/RScriptArrow";
-import {FancyGamePanel} from "./FancyGamePanel";
-import {GameButton} from "./GameButton";
-import {TextBalloon} from "./TextBalloon";
+import {HAlign, VAlign, Updatable} from "flashbang/core";
+import {Vector2} from "flashbang/geom";
+import {DisplayUtil} from "flashbang/util";
+import {Bitmaps} from "eterna/resources";
+import {RScriptArrow} from "eterna/rscript";
+import {FancyGamePanel, GameButton, TextBalloon} from ".";
 
-export class FancyTextBalloon extends TextBalloon implements Updatable {
+export default class FancyTextBalloon extends TextBalloon implements Updatable {
     public constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
         showOutline: boolean = false, outlineColor: number = 0xFFFFFF,
         outlineAlpha: number = 0.70) {

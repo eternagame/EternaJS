@@ -1,29 +1,19 @@
 import MultiStyleText from "pixi-multistyle-text";
 import {Point, Text} from "pixi.js";
-import {HAlign} from "../../../flashbang/core/Align";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {SceneObject} from "../../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Eterna} from "../../Eterna";
-import {Feedback} from "../../Feedback";
-import {EternaURL} from "../../net/EternaURL";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {TextInputObject} from "../../ui/TextInputObject";
-import {VScrollBox} from "../../ui/VScrollBox";
-import {Fonts} from "../../util/Fonts";
-import {Utility} from "../../util/Utility";
-import {CopyTextDialogMode} from "../CopyTextDialogMode";
-import {GameMode} from "../GameMode";
-import {LabComments} from "./LabComments";
+import {HAlign} from "flashbang/core";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {SceneObject} from "flashbang/objects";
+import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import Eterna from "eterna/Eterna";
+import Feedback from "eterna/Feedback";
+import {EternaURL} from "eterna/net";
+import {Puzzle, Solution} from "eterna/puzzle";
+import {GameButton, GamePanel, GamePanelType, HTMLTextObject, TextInputObject, VScrollBox} from "eterna/ui";
+import {Fonts, Utility} from "eterna/util";
+import {CopyTextDialogMode, GameMode} from "eterna/mode";
+import {LabComments} from ".";
 
-export class SolutionDescBox extends GamePanel {
+export default class SolutionDescBox extends GamePanel {
     constructor(solution: Solution, puzzle: Puzzle) {
         super(GamePanelType.INVISIBLE, 1.0, 0x152843, 0.27, 0xC0DCE7);
         this._solution = solution;

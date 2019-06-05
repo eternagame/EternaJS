@@ -1,7 +1,7 @@
-import {Eterna} from "../../Eterna";
-import {Utility} from "../../util/Utility";
+import Eterna from "eterna/Eterna";
+import {Utility} from "eterna/util";
 
-export class LabComments {
+export default class LabComments {
     constructor(nid: number) {
         this._solution_nid = nid;
         this._comments_data = [];

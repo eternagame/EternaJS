@@ -1,9 +1,9 @@
 import * as log from "loglevel";
-import {Base64} from "../../flashbang/util/Base64";
+import {Base64} from "flashbang/util";
 
 type JSONData = any;
 
-export class GameClient {
+export default class GameClient {
     public readonly baseURL: string;
 
     public constructor(baseURL: string) {

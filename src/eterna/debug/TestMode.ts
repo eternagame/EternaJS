@@ -1,11 +1,8 @@
-import {ViewSolutionDialog} from "../mode/DesignBrowser/ViewSolutionDialog";
-import {GameMode} from "../mode/GameMode";
-import {Puzzle} from "../puzzle/Puzzle";
-import {PuzzleManager} from "../puzzle/PuzzleManager";
-import {Solution} from "../puzzle/Solution";
-import {SolutionManager} from "../puzzle/SolutionManager";
+import {GameMode} from "../mode";
+import {ViewSolutionDialog} from "../mode/DesignBrowser";
+import {Puzzle, PuzzleManager, Solution, SolutionManager} from "../puzzle";
 
-export class TestMode extends GameMode {
+export default class TestMode extends GameMode {
     protected setup(): void {
         super.setup();
 

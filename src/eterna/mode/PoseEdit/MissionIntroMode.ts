@@ -1,23 +1,14 @@
-import {
-    Container, Graphics, Point, Sprite
-} from "pixi.js";
-import {AppMode} from "../../../flashbang/core/AppMode";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
-import {IsLeftMouse} from "../../../flashbang/input/InputUtil";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {ConstraintBox} from "../../ui/ConstraintBox";
-import {GameButton} from "../../ui/GameButton";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
-import {Fonts} from "../../util/Fonts";
+import {Container, Graphics, Point, Sprite} from "pixi.js";
+import {Flashbang, AppMode} from "flashbang/core";
+import {DisplayObjectPointerTarget, InputUtil, KeyCode} from "flashbang/input";
+import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import {Bitmaps} from "eterna/resources";
+import {ConstraintBox, GameButton, HTMLTextObject, PoseThumbnail, PoseThumbnailType} from "eterna/ui";
+import {Fonts} from "eterna/util";
 
-export class MissionIntroMode extends AppMode {
+export default class MissionIntroMode extends AppMode {
     public constructor(puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]) {
         super();
         this._puzzleName = puzzleName;
@@ -32,7 +23,7 @@ export class MissionIntroMode extends AppMode {
         let background = new Graphics();
         this.container.addChild(background);
 
-        new DisplayObjectPointerTarget(background).pointerDown.filter(IsLeftMouse).connect(() => this.play());
+        new DisplayObjectPointerTarget(background).pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.play());
 
         let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.container.addChild(moleculeImg);

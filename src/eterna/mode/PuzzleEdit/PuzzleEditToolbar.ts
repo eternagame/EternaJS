@@ -1,17 +1,14 @@
 import {Graphics} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
-import {GameButton} from "../../ui/GameButton";
-import {NucleotidePalette} from "../../ui/NucleotidePalette";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
+import {ContainerObject} from "flashbang/objects";
+import {DisplayUtil} from "flashbang/util";
+import {Bitmaps} from "eterna/resources";
+import {RScriptUIElementID} from "eterna/rscript";
+import {GameButton, NucleotidePalette} from "eterna/ui";
 
-export class PuzzleEditToolbar extends ContainerObject {
+export default class PuzzleEditToolbar extends ContainerObject {
     public palette: NucleotidePalette;
 
     public addbaseButton: GameButton;

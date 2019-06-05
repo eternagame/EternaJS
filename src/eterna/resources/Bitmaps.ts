@@ -1,6 +1,6 @@
 /* eslint-disable max-len, global-require */
 
-export class Bitmaps {
+export default class Bitmaps {
     public static readonly NovaAMissionReq: string = require("assets/NOVA/Mission/a-box.png");
     public static readonly NovaAReq: string = require("assets/NOVA/Constraints/a-requirement-box.png");
     public static readonly NovaARowMissionReq: string = require("assets/NOVA/Mission/a-row-box.png");

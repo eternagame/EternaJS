@@ -1,7 +1,7 @@
 import {Graphics, Point} from "pixi.js";
-import {Vector2} from "../../flashbang/geom/Vector2";
+import {Vector2} from "flashbang/geom";
 
-export class GraphicsUtil {
+export default class GraphicsUtil {
     /** Draw a left-facing arrow, with its tip anchored at (0, 0) */
     public static drawArrow(triSize: number, baseLength: number, outlineColor: number, fillColor: number, graphics: Graphics = null): Graphics {
         if (graphics == null) {

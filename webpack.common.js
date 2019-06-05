@@ -26,6 +26,9 @@ module.exports = {
         extensions: [".ts", ".tsx", ".js", ".json"],
         alias: {
             assets: path.resolve(__dirname, 'assets/'),
+            signals: path.resolve(__dirname, 'src/signals'),
+            flashbang: path.resolve(__dirname, 'src/flashbang'),
+            eterna: path.resolve(__dirname, 'src/eterna'),
         }
     },
 

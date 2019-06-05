@@ -1,9 +1,9 @@
 import * as log from "loglevel";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {Dialog} from "./Dialog";
+import {AlphaTask} from "flashbang/tasks";
+import {Dialog} from ".";
 
 /** A "dialog" that simply dims the screen and eats UI events */
-export class UILockDialog extends Dialog<void> {
+export default class UILockDialog extends Dialog<void> {
     protected added(): void {
         super.added();
         this.container.alpha = 0;

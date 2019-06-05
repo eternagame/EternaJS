@@ -1,6 +1,6 @@
 import {Graphics} from "pixi.js";
 
-export class DotLine extends Graphics {
+export default class DotLine extends Graphics {
     public constructor(thickness: number, color: number) {
         super();
         this._thickness = thickness;

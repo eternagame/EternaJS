@@ -1,13 +1,10 @@
-import {
-    Container, DisplayObject, Graphics, Sprite, Texture
-} from "pixi.js";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Constants} from "../Constants";
-import {EPars} from "../EPars";
-import {ExpPainter} from "../ExpPainter";
-import {RNALayout} from "../pose2D/RNALayout";
-import {Bitmaps} from "../resources/Bitmaps";
+import {Container, DisplayObject, Graphics, Sprite, Texture} from "pixi.js";
+import {DisplayUtil, TextureUtil} from "flashbang/util";
+import Constants from "eterna/Constants";
+import EPars from "eterna/EPars";
+import ExpPainter from "eterna/ExpPainter";
+import {RNALayout} from "eterna/pose2D";
+import {Bitmaps} from "eterna/resources";
 
 export enum PoseThumbnailType {
     BASE_COLORED = "BASE_COLORED",
@@ -16,7 +13,7 @@ export enum PoseThumbnailType {
     WRONG_COLORED = "WRONG_COLORED",
 }
 
-export class PoseThumbnail {
+export default class PoseThumbnail {
     public static createFramedBitmap(sequence: number[], pairs: number[], size: number = 1, type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED, exp_start_index: number = 0, wrong_pairs: number[] = null, exp_use_threshold: boolean = false, exp_threshold: number = 0): Texture {
         let disp: DisplayObject = PoseThumbnail.create(sequence, pairs, size, type, exp_start_index, wrong_pairs, exp_use_threshold, exp_threshold);
         return TextureUtil.renderToTexture(disp);

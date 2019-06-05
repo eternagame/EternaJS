@@ -1,12 +1,11 @@
 import {Graphics, Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Dragger} from "../../flashbang/util/Dragger";
-import {Signal} from "../../signals/Signal";
+import {Flashbang, GameObjectRef} from "flashbang/core";
+import {DisplayObjectPointerTarget} from "flashbang/input";
+import {ContainerObject} from "flashbang/objects";
+import {Dragger} from "flashbang/util";
+import {Signal} from "signals";
 
-export class SliderBar extends ContainerObject {
+export default class SliderBar extends ContainerObject {
     // The width (or height, for a horizontal SliderBar) of the thumb
     public static readonly THUMB_SIZE = 15;
 

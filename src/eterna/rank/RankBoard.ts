@@ -1,10 +1,9 @@
 import {Point} from "pixi.js";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {PlayerRank} from "./PlayerRank";
-import {RankRowLayout} from "./RankRowLayout";
+import {Updatable} from "flashbang/core";
+import {ContainerObject} from "flashbang/objects";
+import {PlayerRank, RankRowLayout} from ".";
 
-export class RankBoard extends ContainerObject implements Updatable {
+export default class RankBoard extends ContainerObject implements Updatable {
     public static readonly ROW_WIDTH = 400;
     public static readonly ROW_HEIGHT = 20;
     public static readonly PLAYER_ROW_HEIGHT = 32;

@@ -1,9 +1,7 @@
-import {
-    Container, Graphics, Text, TextStyle
-} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
+import {Container, Graphics, Text, TextStyle} from "pixi.js";
+import {HAlign} from "flashbang/core";
 
-export class FixedWidthTextField extends Container {
+export default class FixedWidthTextField extends Container {
     public constructor(text: string, style: TextStyle, width: number, hAlign: HAlign = HAlign.LEFT) {
         super();
 

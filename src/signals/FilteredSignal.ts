@@ -1,8 +1,9 @@
-import {MappedSignal} from "./MappedSignal";
-import {SignalView} from "./SignalView";
-import {Connection} from "./Connection";
+/*import MappedSignal from "./MappedSignal";
+import SignalView from "./SignalView";
+import Connection from "./Connection";*/
+import {MappedSignal, SignalView, Connection} from ".";
 
-export class FilteredSignal<T> extends MappedSignal<T> {
+export default class FilteredSignal<T> extends MappedSignal<T> {
     constructor(source: SignalView<T>, pred: (value: T) => boolean) {
         super();
         this._source = source;

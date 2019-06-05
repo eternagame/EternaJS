@@ -1,4 +1,4 @@
-export class PowerEaser {
+export default class PowerEaser {
     constructor(pow: number) {
         this._pow = pow;
     }

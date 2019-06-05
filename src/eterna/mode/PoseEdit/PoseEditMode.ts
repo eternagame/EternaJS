@@ -1,63 +1,32 @@
 import * as log from "loglevel";
 import {Container, DisplayObject, Point, Sprite, Text} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../../flashbang/core/GameObjectRef";
-import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {SpriteObject} from "../../../flashbang/objects/SpriteObject";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {SelfDestructTask} from "../../../flashbang/tasks/SelfDestructTask";
-import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Assert} from "../../../flashbang/util/Assert";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Easing} from "../../../flashbang/util/Easing";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Folder} from "../../folding/Folder";
-import {FolderManager} from "../../folding/FolderManager";
-import {FoldUtil} from "../../folding/FoldUtil";
-import {EternaURL} from "../../net/EternaURL";
-import {Oligo, Pose2D} from "../../pose2D/Pose2D";
-import {PoseField} from "../../pose2D/PoseField";
-import {PoseOp} from "../../pose2D/PoseOp";
-import {PuzzleEditOp} from "../../pose2D/PuzzleEditOp";
-import {Constraints, ConstraintType} from "../../puzzle/Constraints";
-import {BoostersData, PoseState, Puzzle, PuzzleType} from "../../puzzle/Puzzle";
-import {PuzzleManager} from "../../puzzle/PuzzleManager";
-import {Solution} from "../../puzzle/Solution";
-import {SolutionManager} from "../../puzzle/SolutionManager";
-import {BitmapManager} from "../../resources/BitmapManager";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Sounds} from "../../resources/Sounds";
-import {RNAScript} from "../../rscript/RNAScript";
-import {ActionBar} from "../../ui/ActionBar";
-import {ConstraintBox, ConstraintBoxType} from "../../ui/ConstraintBox";
-import {ContextMenu} from "../../ui/ContextMenu";
-import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel} from "../../ui/GamePanel";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {GetPaletteTargetBaseType, PaletteTargetType} from "../../ui/NucleotidePalette";
-import {PasteSequenceDialog} from "../../ui/PasteSequenceDialog";
-import {SpecBox} from "../../ui/SpecBox";
-import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
-import {URLButton} from "../../ui/URLButton";
-import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
-import {Fonts} from "../../util/Fonts";
-import {int} from "../../util/int";
-import {Background} from "../../vfx/Background";
-import {BubbleSweep} from "../../vfx/BubbleSweep";
-import {CopyTextDialogMode} from "../CopyTextDialogMode";
-import {GameMode} from "../GameMode";
-import {PuzzleEditPoseData} from "../PuzzleEdit/PuzzleEditMode";
-import {MissionClearedPanel} from "./MissionClearedPanel";
-import {MissionIntroMode} from "./MissionIntroMode";
-import {PoseEditToolbar} from "./PoseEditToolbar";
-import {SubmitPoseDetails} from "./SubmitPoseDetails";
-import {SubmitPoseDialog} from "./SubmitPoseDialog";
-import {SubmittingDialog} from "./SubmittingDialog";
+import {Flashbang, HAlign, VAlign, GameObjectRef} from "flashbang/core";
+import {KeyboardEventType, KeyCode} from "flashbang/input";
+import {SpriteObject} from "flashbang/objects";
+import {AlphaTask, SelfDestructTask, SerialTask} from "flashbang/tasks";
+import {Assert, DisplayUtil, Easing} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import {Folder, FolderManager, FoldUtil} from "eterna/folding";
+import {EternaURL} from "eterna/net";
+import {Oligo, Pose2D, PoseField, PoseOp, PuzzleEditOp} from "eterna/pose2D";
+import {
+    Constraints, ConstraintType, BoostersData, PoseState,
+    Puzzle, PuzzleType, PuzzleManager, Solution, SolutionManager
+} from "eterna/puzzle";
+import {BitmapManager, Bitmaps, Sounds} from "eterna/resources";
+import {RNAScript} from "eterna/rscript";
+import {
+    ActionBar, ConstraintBox, ConstraintBoxType, ContextMenu, EternaViewOptionsDialog, EternaViewOptionsMode,
+    GameButton, GamePanel, HTMLTextObject, GetPaletteTargetBaseType, PaletteTargetType,
+    PasteSequenceDialog, SpecBox, SpecBoxDialog, URLButton
+} from "eterna/ui";
+import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
+import {ExternalInterface, ExternalInterfaceCtx} from "eterna/util";
+import {Fonts, int} from "eterna/util";
+import {Background, BubbleSweep} from "eterna/vfx";
+import {CopyTextDialogMode, GameMode, PuzzleEditPoseData} from "eterna/mode";
+import {MissionClearedPanel, MissionIntroMode, PoseEditToolbar, SubmitPoseDetails, SubmitPoseDialog, SubmittingDialog} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -82,7 +51,7 @@ export interface PoseEditParams {
     solutions?: Solution[];
 }
 
-export class PoseEditMode extends GameMode {
+export default class PoseEditMode extends GameMode {
     public constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] = null) {
         super();
         this._puzzle = puzzle;

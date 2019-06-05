@@ -1,9 +1,8 @@
-import {Assert} from "../util/Assert";
-import {EasingFunc} from "../util/Easing";
-import {InterpolatingTask} from "./InterpolatingTask";
 import {DisplayObject} from "pixi.js";
+import {Assert, EasingFunc} from "../util";
+import {InterpolatingTask} from ".";
 
-export class DisplayObjectTask extends InterpolatingTask {
+export default class DisplayObjectTask extends InterpolatingTask {
     constructor(time: number, easing: EasingFunc, target: DisplayObject) {
         super(time, easing);
         this._target = target;

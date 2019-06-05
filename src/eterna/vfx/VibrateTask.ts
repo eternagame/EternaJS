@@ -1,8 +1,8 @@
-import {DisplayObjectTask} from "../../flashbang/tasks/DisplayObjectTask";
 import {DisplayObject, Point} from "pixi.js";
-import {Easing} from "../../flashbang/util/Easing";
+import {DisplayObjectTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
 
-export class VibrateTask extends DisplayObjectTask {
+export default class VibrateTask extends DisplayObjectTask {
     public constructor(duration: number, target: DisplayObject = null) {
         super(duration, Easing.linear, target);
     }

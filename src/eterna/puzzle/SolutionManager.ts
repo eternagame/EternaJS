@@ -1,11 +1,11 @@
 import * as log from "loglevel";
-import {EPars} from "../EPars";
-import {Eterna} from "../Eterna";
-import {Feedback} from "../Feedback";
-import {CSVParser} from "../util/CSVParser";
-import {Solution} from "./Solution";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import Feedback from "eterna/Feedback";
+import {CSVParser} from "eterna/util";
+import {Solution} from ".";
 
-export class SolutionManager {
+export default class SolutionManager {
     public static get instance(): SolutionManager {
         if (SolutionManager._instance == null) {
             SolutionManager._instance = new SolutionManager();

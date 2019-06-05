@@ -1,7 +1,7 @@
 import {Point} from "pixi.js";
 
 /** A 2D vector */
-export class Vector2 {
+export default class Vector2 {
     public x: number = 0;
     public y: number = 0;
 

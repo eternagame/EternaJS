@@ -1,10 +1,12 @@
-import {Connection} from "./Connection";
-import {Reactor, RListener} from "./Reactor";
+/*import Reactor from "./Reactor";
+import {RListener} from "./Reactor";
+import Connection from "./Connection";*/
+import {Reactor, RListener, Connection} from ".";
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.
  */
-export class Cons implements Connection {
+export default class Cons implements Connection {
     /** The next connection in our chain. */
     public next: Cons;
 

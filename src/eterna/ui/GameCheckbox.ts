@@ -1,11 +1,10 @@
 import {Graphics} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {ButtonState} from "../../flashbang/objects/Button";
-import {ToggleButton} from "../../flashbang/objects/ToggleButton";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Fonts} from "../util/Fonts";
+import {HAlign, VAlign} from "flashbang/core";
+import {ButtonState, ToggleButton} from "flashbang/objects";
+import {DisplayUtil} from "flashbang/util";
+import {Fonts} from "eterna/util";
 
-export class GameCheckbox extends ToggleButton {
+export default class GameCheckbox extends ToggleButton {
     constructor(size: number, txt: string) {
         super();
 

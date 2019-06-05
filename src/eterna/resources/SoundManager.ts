@@ -1,10 +1,10 @@
 import * as log from "loglevel";
 import "pixi-sound";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Eterna} from "../Eterna";
-import {EternaSettings} from "../settings/EternaSettings";
+import {RegistrationGroup} from "signals";
+import Eterna from "eterna/Eterna";
+import {EternaSettings} from "eterna/settings";
 
-export class SoundManager {
+export default class SoundManager {
     public constructor(settings: EternaSettings) {
         this._settings = settings;
 

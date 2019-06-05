@@ -1,9 +1,9 @@
-import {SceneObject} from "../../flashbang/objects/SceneObject";
 import {Graphics} from "pixi.js";
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {GraphicsUtil} from "../util/GraphicsUtil";
+import {SceneObject} from "flashbang/objects";
+import {MathUtil} from "flashbang/util";
+import {GraphicsUtil} from "eterna/util";
 
-export class RScriptArrow extends SceneObject {
+export default class RScriptArrow extends SceneObject {
     public constructor(triSize: number = 75, baseLength: number = 60, outlineColor: number = 0xDAE8F6, fillColor: number = 0xDAE8F6) {
         let graphics = new Graphics();
         super(graphics);

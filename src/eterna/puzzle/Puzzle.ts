@@ -1,11 +1,9 @@
-import {Constants} from "../Constants";
-import {EPars} from "../EPars";
-import {FolderManager} from "../folding/FolderManager";
-import {Vienna} from "../folding/Vienna";
-import {EternaURL} from "../net/EternaURL";
-import {Pose2D} from "../pose2D/Pose2D";
-import {ConstraintType} from "./Constraints";
-import {Folder} from "../folding/Folder";
+import Constants from "eterna/Constants";
+import EPars from "eterna/EPars";
+import {Folder, FolderManager, Vienna} from "eterna/folding";
+import {EternaURL} from "eterna/net";
+import {Pose2D} from "eterna/pose2D";
+import {ConstraintType} from ".";
 
 export interface BoostersData {
     mission?: any;
@@ -33,7 +31,7 @@ export enum PoseState {
     SECOND = "SECOND",
 }
 
-export class Puzzle {
+export default class Puzzle {
     public static isAptamerType(tc_type: string): boolean {
         return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
     }

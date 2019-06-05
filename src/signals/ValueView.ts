@@ -1,11 +1,12 @@
-import {Connection} from "./Connection";
+//import Connection from "./Connection";
+import {Connection} from ".";
 
 /**
  * A view of a {@link AbstractValue} subclass, to which listeners may be added, but which one
  * cannot update. Value consumers should require only a view on a value, rather than a
  * concrete value.
  */
-export interface ValueView<T> {
+export default interface ValueView<T> {
     /** Returns the current value. */
     value: T;
 

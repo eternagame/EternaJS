@@ -1,9 +1,8 @@
-import {Setting} from "../../flashbang/settings/Setting";
-import {Settings} from "../../flashbang/settings/Settings";
-import {DesignCategory} from "../mode/DesignBrowser/DesignBrowserMode";
-import {Eterna} from "../Eterna";
+import {Setting, Settings} from "flashbang/settings";
+import {DesignCategory} from "eterna/mode/DesignBrowser";
+import Eterna from "eterna/Eterna";
 
-export class EternaSettings extends Settings {
+export default class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
     public readonly showNumbers: Setting<boolean>;
     public readonly showLetters: Setting<boolean>;

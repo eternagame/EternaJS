@@ -1,8 +1,6 @@
 import * as log from "loglevel";
-import {Assert} from "../../flashbang/util/Assert";
-import {Deferred} from "../../flashbang/util/Deferred";
-import {Registration} from "../../signals/Registration";
-import {UnitSignal} from "../../signals/UnitSignal";
+import {Assert, Deferred} from "flashbang/util";
+import {Registration, UnitSignal} from "signals";
 
 /**
  * A collection of externally registered callbacks.
@@ -39,7 +37,7 @@ export interface RunScriptOptions {
  * app lives inside, and also calls into functions exposed by `script-interface.coffee`, a set of javascript functions
  * loaded by the page.
  */
-export class ExternalInterface {
+export default class ExternalInterface {
     public static init(scriptRoot: HTMLElement) {
         Assert.isTrue(this._scriptRoot === undefined, "Already initialized");
         this._scriptRoot = scriptRoot;

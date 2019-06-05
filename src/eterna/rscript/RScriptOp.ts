@@ -1,11 +1,11 @@
-import {RScriptEnv} from "./RScriptEnv";
+import {RScriptEnv} from ".";
 
 /**
  * RScript Operation.
  * One instruction in RScript.
  * A node in RScriptOpTree.
  */
-export abstract class RScriptOp {
+export default abstract class RScriptOp {
     protected constructor(env: RScriptEnv) {
         this._children = [];
         this._env = env;

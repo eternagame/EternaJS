@@ -1,24 +1,16 @@
 import {ExtendedTextStyle} from "pixi-multistyle-text";
-import {
-    Container, DisplayObject, Graphics, Point, Rectangle, Text
-} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {Button} from "../../flashbang/objects/Button";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {Registration} from "../../signals/Registration";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Fonts} from "../util/Fonts";
+import {Container, DisplayObject, Graphics, Point, Rectangle, Text} from "pixi.js";
+import {Flashbang, GameObject, GameObjectRef} from "flashbang/core";
+import {Button} from "flashbang/objects";
+import {AlphaTask, DelayTask, SerialTask} from "flashbang/tasks";
+import {Easing, StyledTextBuilder} from "flashbang/util";
+import {Registration, RegistrationGroup} from "signals";
+import {Fonts} from "eterna/util";
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
 export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
 
-export class Tooltips extends GameObject {
+export default class Tooltips extends GameObject {
     /** Default text style for tooltips */
     public static readonly DEFAULT_STYLE: ExtendedTextStyle = {
         fontFamily: Fonts.ARIAL,

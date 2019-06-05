@@ -1,7 +1,7 @@
 /**
  * An exception thrown to communicate multiple listener failures.
  */
-export class MultiFailureError extends Error {
+export default class MultiFailureError extends Error {
     public get failures(): any[] {
         return this._failures;
     }

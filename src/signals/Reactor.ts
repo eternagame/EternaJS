@@ -1,4 +1,5 @@
-import {Cons} from "./Cons";
+//import Cons from "./Cons";
+import {Cons} from ".";
 
 export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
 
@@ -6,7 +7,7 @@ export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
  * A base class for all reactive classes. This is an implementation detail, but is public so that
  * third parties may use it to create their own reactive classes, if desired.
  */
-export abstract class Reactor {
+export default abstract class Reactor {
     /** true if this reactor has at least one connection. */
     public get hasConnections(): boolean {
         return this._listeners != null;

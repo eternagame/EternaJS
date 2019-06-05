@@ -11,7 +11,7 @@
 import {Matrix, Point} from "pixi.js";
 
 /** A utility class containing methods related to the Matrix class. */
-export class MatrixUtil {
+export default class MatrixUtil {
     public static equals(a: Matrix, b: Matrix): boolean {
         return a.a === b.a && a.b === b.b && a.c === b.c && a.d === b.d && a.tx === b.tx && a.ty === b.ty;
     }

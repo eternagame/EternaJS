@@ -39,7 +39,7 @@ export enum ConstraintType {
     SCRIPT = "SCRIPT",
 }
 
-export class Constraints {
+export default class Constraints {
     public static count(sequence: number[], type: number): number {
         let total = 0;
         for (let value of sequence) {

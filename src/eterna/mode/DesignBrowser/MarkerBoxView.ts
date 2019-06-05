@@ -1,7 +1,7 @@
 import {Container, Point} from "pixi.js";
-import {SelectionBox} from "./SelectionBox";
+import {SelectionBox} from ".";
 
-export class MarkerBoxView extends Container {
+export default class MarkerBoxView extends Container {
     constructor(color: number, markerHeight: number) {
         super();
 

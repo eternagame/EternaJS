@@ -1,3 +1,4 @@
 type InteractionEvent = PIXI.interaction.InteractionEvent;
-
-export const IsLeftMouse = (e: InteractionEvent) => e.data.isPrimary;
+export default class InputUtil {
+    public static IsLeftMouse = (e: InteractionEvent): boolean => e.data.isPrimary;
+}

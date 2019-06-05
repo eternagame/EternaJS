@@ -1,20 +1,15 @@
 import {Graphics, Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
-import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Dragger} from "../../flashbang/util/Dragger";
-import {ROPWait} from "../rscript/ROPWait";
-import {Pose2D} from "./Pose2D";
+import {Flashbang, GameObjectRef} from "flashbang/core";
+import {InputUtil, KeyboardEventType, KeyboardListener, KeyCode, MouseWheelListener} from "flashbang/input";
+import {ContainerObject} from "flashbang/objects";
+import {Dragger} from "flashbang/util";
+import {ROPWait} from "eterna/rscript";
+import {Pose2D} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
-export class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
+export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
     constructor(edit: boolean) {
         super();
         this._pose = new Pose2D(this, edit);
@@ -29,8 +24,8 @@ export class PoseField extends ContainerObject implements KeyboardListener, Mous
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(IsLeftMouse).connect((e) => this.onMouseDown(e));
-        this.pointerUp.filter(IsLeftMouse).connect(() => this.onMouseUp());
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));

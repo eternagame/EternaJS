@@ -1,21 +1,17 @@
 import {Graphics, Point, Text} from "pixi.js";
-import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
-import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {LocationTask} from "../../flashbang/tasks/LocationTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {Signal} from "../../signals/Signal";
-import {Eterna} from "../Eterna";
-import {Sounds} from "../resources/Sounds";
-import {ROPWait} from "../rscript/ROPWait";
-import {RScriptUIElementID} from "../rscript/RScriptUIElement";
-import {Fonts} from "../util/Fonts";
+import {KeyboardEventType, KeyboardListener, KeyCode} from "flashbang/input";
+import {ContainerObject, Enableable} from "flashbang/objects";
+import {LocationTask} from "flashbang/tasks";
+import {Easing} from "flashbang/util";
+import {Signal} from "signals";
+import Eterna from "eterna/Eterna";
+import {Sounds} from "eterna/resources";
+import {ROPWait, RScriptUIElementID} from "eterna/rscript";
+import {Fonts} from "eterna/util";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
+export default class ToggleBar extends ContainerObject implements KeyboardListener, Enableable {
     /** Emitted when our state changes */
     public readonly stateChanged: Signal<number> = new Signal();
 

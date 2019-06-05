@@ -1,13 +1,12 @@
 import {DisplayObject, Graphics, Matrix} from "pixi.js";
-import {Flashbang} from "../core/Flashbang";
-import {GameObject} from "../core/GameObject";
-import {MatrixUtil} from "../util/MatrixUtil";
+import {Flashbang, GameObject} from "../core";
+import {MatrixUtil} from "../util";
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
  * Contains a "dummy" that mirrors the element's transform.
  */
-export abstract class DOMObject<T extends HTMLElement> extends GameObject {
+export default abstract class DOMObject<T extends HTMLElement> extends GameObject {
     /**
      * Applies the given style to the DOM object and all children who do not already have the given style property set.
      * This will not overrwrite existing properties, unless replaceIfExists is true.

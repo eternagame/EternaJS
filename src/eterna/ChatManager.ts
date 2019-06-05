@@ -1,7 +1,7 @@
-import {EternaSettings} from "./settings/EternaSettings";
+import {EternaSettings} from "eterna/settings";
 import * as log from "loglevel";
 
-export class ChatManager {
+export default class ChatManager {
     public constructor(chatboxID: string, settings: EternaSettings) {
         this._chatbox = document.getElementById(chatboxID);
         if (this._chatbox == null) {

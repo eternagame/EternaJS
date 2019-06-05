@@ -1,9 +1,9 @@
 import {Graphics, Text} from "pixi.js";
-import {TextBuilder} from "../util/TextBuilder";
-import {Button, ButtonState} from "./Button";
+import {TextBuilder} from "../util";
+import {Button, ButtonState} from ".";
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
-export class SimpleTextButton extends Button {
+export default class SimpleTextButton extends Button {
     constructor(text: string, fontSize: number = 24, fontName: string = "Arial") {
         super();
 

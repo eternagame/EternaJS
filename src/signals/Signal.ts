@@ -1,10 +1,11 @@
-import {AbstractSignal} from "./AbstractSignal";
-import {FilteredSignal} from "./FilteredSignal";
-import {MappedSignal} from "./MappedSignal";
-import {SignalView} from "./SignalView";
+/*import AbstractSignal from "./AbstractSignal";
+import FilteredSignal from "./FilteredSignal";
+import MappedSignal from "./MappedSignal";
+import SignalView from "./SignalView"; */
+import {AbstractSignal, FilteredSignal, MappedSignal, SignalView} from ".";
 
 /** A signal that emits events of type {@code T}. */
-export class Signal<T> extends AbstractSignal<T> {
+export default class Signal<T> extends AbstractSignal<T> {
     public map<U>(func: (value: T) => U): SignalView<U> {
         return MappedSignal.create(this, func);
     }

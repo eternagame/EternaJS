@@ -1,4 +1,4 @@
-export class ErrorUtil {
+export default class ErrorUtil {
     /** Returns an appropriate Error object, if e can be coerced to one */
     public static getErrorObj(e: any): Error | null {
         if (e instanceof Error) {

@@ -1,12 +1,10 @@
 import {Point, Text} from "pixi.js";
-import {Signal} from "../../signals/Signal";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {Fonts} from "../util/Fonts";
-import {GameButton} from "./GameButton";
-import {GamePanel} from "./GamePanel";
-import {TextInputObject} from "./TextInputObject";
+import {Signal} from "signals";
+import {UnitSignal} from "signals";
+import {Fonts} from "eterna/util";
+import {GameButton, GamePanel, TextInputObject} from ".";
 
-export class TextInputPanel extends GamePanel {
+export default class TextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();
     public readonly okClicked: Signal<Map<string, string>> = new Signal();
 

@@ -1,8 +1,8 @@
-import {DOMObject} from "../../flashbang/objects/DOMObject";
-import {Eterna} from "../Eterna";
+import {DOMObject} from "flashbang/objects";
+import Eterna from "eterna/Eterna";
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
-export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
+export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     public constructor(htmlText: string, width?: number) {
         super(Eterna.OVERLAY_DIV_ID, document.createElement("p"));
         this._obj.innerHTML = htmlText;

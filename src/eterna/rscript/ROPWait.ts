@@ -1,7 +1,4 @@
-import {ROPTextbox} from "./ROPTextbox";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
-import {RScriptUIElementID} from "./RScriptUIElement";
+import {ROPTextbox, RScriptEnv, RScriptOp, RScriptUIElementID} from ".";
 
 export enum ROPWaitType {
     MOVECAMERA = "MOVECAMERA",
@@ -16,7 +13,7 @@ export enum ROPWaitType {
     BLUEMARK = "BLUEMARK", // 'magic glue'
 }
 
-export class ROPWait extends RScriptOp {
+export default class ROPWait extends RScriptOp {
     public static clearRopWait(): void {
         ROPWait._allROPWaitOps = new Map();
     }

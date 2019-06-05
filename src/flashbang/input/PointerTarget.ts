@@ -1,10 +1,10 @@
 import {DisplayObject} from "pixi.js";
-import {SignalView} from "../../signals/SignalView";
+import {SignalView} from "signals";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** Exposes signals for an interactive object */
-export interface PointerTarget {
+export default interface PointerTarget {
     /** the DisplayObject associated with this PointerTarget */
     target: DisplayObject;
 

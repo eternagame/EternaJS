@@ -1,4 +1,4 @@
-export class PlayerRank {
+export default class PlayerRank {
     public name: string;
     public score: number;
     public rank: number;

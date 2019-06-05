@@ -1,9 +1,8 @@
 import {Graphics, Point} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {ContainerObject, SceneObject} from "flashbang/objects";
+import {DisplayUtil} from "flashbang/util";
 
-export class ActionBar extends ContainerObject {
+export default class ActionBar extends ContainerObject {
     public constructor(height: number = 0) {
         super();
 

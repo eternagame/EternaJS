@@ -1,15 +1,14 @@
 import {Point} from "pixi.js";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
-import {PointerCapture} from "../../flashbang/input/PointerCapture";
+import {PointerCapture} from "flashbang/input";
+import {Enableable} from "flashbang/objects";
+import {DisplayUtil} from "flashbang/util";
+import {GameButton, GamePanel, GamePanelType} from ".";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
 }
 
-export class EternaMenu extends GamePanel implements Enableable {
+export default class EternaMenu extends GamePanel implements Enableable {
     public constructor(menu_style: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
         super();
         this._style = menu_style;

@@ -1,11 +1,12 @@
-import {Connection} from "./Connection";
+//import Connection from "./Connection";
+import {Connection} from ".";
 
 /**
  * A view of a {@link Signal}, on which slots may listen, but to which one cannot emit events. This
  * is generally used to provide signal-like views of changing entities. See {@link AbstractValue}
  * for an example.
  */
-export interface SignalView<T> {
+export default interface SignalView<T> {
     /**
      * Creates a signal that maps this signal via a function. When this signal emits a value, the
      * mapped signal will emit that value as transformed by the supplied function. The mapped value

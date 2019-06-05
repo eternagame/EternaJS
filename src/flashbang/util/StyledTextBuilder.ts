@@ -1,8 +1,8 @@
 import * as log from "loglevel";
 import {default as MultiStyleText, ExtendedTextStyle, TextStyleSet} from "pixi-multistyle-text";
-import {ColorUtil} from "./ColorUtil";
+import {ColorUtil} from ".";
 
-export class StyledTextBuilder {
+export default class StyledTextBuilder {
     public constructor(defaultStyle?: ExtendedTextStyle) {
         if (defaultStyle !== undefined) {
             this.defaultStyle(defaultStyle);

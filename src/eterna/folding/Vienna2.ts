@@ -1,14 +1,13 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {EPars} from "../EPars";
-import {RNALayout} from "../pose2D/RNALayout";
-import {CSVParser} from "../util/CSVParser";
+import {EmscriptenUtil} from "eterna/emscripten";
+import EPars from "eterna/EPars";
+import {RNALayout} from "eterna/pose2D";
+import {CSVParser} from "eterna/util";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
-import {Folder} from "./Folder";
-import {FoldUtil} from "./FoldUtil";
+import {Folder, FoldUtil} from ".";
 
-export class Vienna2 extends Folder {
+export default class Vienna2 extends Folder {
     public static NAME = "Vienna2";
 
     /**

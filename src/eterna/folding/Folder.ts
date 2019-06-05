@@ -1,6 +1,6 @@
-import {PoseOp} from "../pose2D/PoseOp";
+import {PoseOp} from "eterna/pose2D";
 
-export abstract class Folder {
+export default abstract class Folder {
     protected constructor() {
     }
 

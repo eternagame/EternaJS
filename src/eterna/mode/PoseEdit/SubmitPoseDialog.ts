@@ -1,11 +1,10 @@
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {Dialog} from "../../ui/Dialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
-import {SubmitPoseDetails} from "./SubmitPoseDetails";
+import {Flashbang} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {Dialog, TextInputPanel} from "eterna/ui";
+import {SubmitPoseDetails} from ".";
 
 /** Prompts the player for a title and comment */
-export class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
+export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
     protected added(): void {
         super.added();
 

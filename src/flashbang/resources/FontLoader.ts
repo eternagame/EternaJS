@@ -1,6 +1,6 @@
 import * as WebFont from "webfontloader";
 
-export class FontLoader {
+export default class FontLoader {
     /**
      * Loads a font defined in a  @font-face element in a CSS file.
      * Return a Promise that will resolve when the given font is loaded

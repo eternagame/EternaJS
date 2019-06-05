@@ -1,8 +1,6 @@
-import {AbstractValue} from "../../signals/AbstractValue";
-import {MappedValue} from "../../signals/MappedValue";
-import {ValueView} from "../../signals/ValueView";
+import {AbstractValue, MappedValue, ValueView} from "signals";
 
-export class Setting<T> extends AbstractValue<T> {
+export default class Setting<T> extends AbstractValue<T> {
     public constructor(store: StoreJsAPI, name: string, defaultVal: T) {
         super();
         this._store = store;

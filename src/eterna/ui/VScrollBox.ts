@@ -1,11 +1,10 @@
 import {Container} from "pixi.js";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {ScrollContainer} from "./ScrollContainer";
-import {SliderBar} from "./SliderBar";
+import {SceneObject} from "flashbang/objects";
+import {MathUtil} from "flashbang/util";
+import {ScrollContainer, SliderBar} from ".";
 
 /** Contains scrollable content and a vertical sliderbar */
-export class VScrollBox extends SceneObject<ScrollContainer> {
+export default class VScrollBox extends SceneObject<ScrollContainer> {
     public constructor(width: number, height: number) {
         super(new ScrollContainer(width - SliderBar.THUMB_SIZE, height));
         this._width = width;

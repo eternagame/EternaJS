@@ -1,10 +1,11 @@
-import {Registration} from "./Registration";
+//import Registration from "./Registration";
+import {Registration} from ".";
 
 /**
  * Provides a mechanism to cancel a slot or listener registration, or to perform post-registration
  * adjustment like making the registration single-shot.
  */
-export interface Connection extends Registration {
+export default interface Connection extends Registration {
     /**
      * Converts this connection into a one-shot connection. After the first time the slot or
      * listener is notified, it will automatically be disconnected.

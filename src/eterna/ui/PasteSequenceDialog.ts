@@ -1,14 +1,13 @@
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {GameMode} from "../mode/GameMode";
-import {Dialog} from "./Dialog";
-import {TextInputPanel} from "./TextInputPanel";
+import {Flashbang} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {GameMode} from "eterna/mode";
+import {Dialog, TextInputPanel} from ".";
 
 /**
  * Prompts the user to paste a sequence.
  * If OK is pressed, the dialog will be closed with the sequence string.
  */
-export class PasteSequenceDialog extends Dialog<string> {
+export default class PasteSequenceDialog extends Dialog<string> {
     protected added(): void {
         super.added();
 

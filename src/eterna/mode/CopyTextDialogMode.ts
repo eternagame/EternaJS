@@ -1,11 +1,10 @@
 import {Graphics} from "pixi.js";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {TextInputPanel} from "../ui/TextInputPanel";
+import {Flashbang, AppMode} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {TextInputPanel} from "eterna/ui";
 
 /** Show a dialog with text that the user can copy */
-export class CopyTextDialogMode extends AppMode {
+export default class CopyTextDialogMode extends AppMode {
     public constructor(text: string, dialogTitle?: string) {
         super();
         this._text = text;

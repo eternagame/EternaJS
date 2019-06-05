@@ -1,19 +1,13 @@
 import * as log from "loglevel";
 import {ExtendedTextStyle} from "pixi-multistyle-text";
 import {Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {RNAAnchorObject} from "../pose2D/RNAAnchorObject";
-import {FancyTextBalloon} from "../ui/FancyTextBalloon";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {Fonts} from "../util/Fonts";
-import {ROPWait} from "./ROPWait";
-import {RScriptArrow} from "./RScriptArrow";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
+import {Flashbang, GameObject} from "flashbang/core";
+import {Vector2} from "flashbang/geom";
+import {ColorUtil, StyledTextBuilder} from "flashbang/util";
+import {RNAAnchorObject} from "eterna/pose2D";
+import {FancyTextBalloon} from "eterna/ui";
+import {Fonts} from "eterna/util";
+import {ROPWait, RScriptArrow, RScriptEnv, RScriptOp} from ".";
 
 export enum ROPTextboxMode {
     TEXTBOX_LOCATION = "TEXTBOX_LOCATION",
@@ -24,7 +18,7 @@ export enum ROPTextboxMode {
     ARROW_DEFAULT = "ARROW_DEFAULT",
 }
 
-export class ROPTextbox extends RScriptOp {
+export default class ROPTextbox extends RScriptOp {
     public static readonly ID_POSTFIX = "_textbox_";
 
     public constructor(env: RScriptEnv, show: boolean, mode: ROPTextboxMode) {

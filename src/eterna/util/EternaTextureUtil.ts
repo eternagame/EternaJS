@@ -1,9 +1,7 @@
 import {Matrix, Sprite, Texture} from "pixi.js";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {MathUtil} from "../../flashbang/util/MathUtil";
+import {ColorUtil, MathUtil, TextureUtil} from "flashbang/util";
 
-export class EternaTextureUtil {
+export default class EternaTextureUtil {
     /**
      * Creates scaled versions of each texture in the given array.
      * @param textures an Array of textures to append to

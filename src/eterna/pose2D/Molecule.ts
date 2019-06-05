@@ -1,10 +1,8 @@
 ﻿import {Container, Point, Sprite, Texture} from "pixi.js";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {EternaTextureUtil} from "../util/EternaTextureUtil";
-import {int} from "../util/int";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+import {EternaTextureUtil, int} from "eterna/util";
 
-export class Molecule extends Container {
+export default class Molecule extends Container {
     public constructor() {
         super();
         Molecule.initTextures();

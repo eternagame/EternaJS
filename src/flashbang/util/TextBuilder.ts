@@ -1,6 +1,6 @@
 import {Text, TextStyle, TextStyleOptions} from "pixi.js";
 
-export class TextBuilder {
+export default class TextBuilder {
     public constructor(text: string = "") {
         this.text(text);
     }

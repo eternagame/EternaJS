@@ -1,17 +1,15 @@
 import {Container, Graphics} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {RScriptUIElementID} from "../../rscript/RScriptUIElement";
-import {GameButton} from "../../ui/GameButton";
-import {ToggleBar} from "../../ui/ToggleBar";
+import {Flashbang, HAlign, VAlign} from "flashbang/core";
+import {KeyCode} from "flashbang/input";
+import {HLayoutContainer} from "flashbang/layout";
+import {ContainerObject} from "flashbang/objects";
+import {DisplayUtil} from "flashbang/util";
+import {Puzzle} from "eterna/puzzle";
+import {Bitmaps} from "eterna/resources";
+import {RScriptUIElementID} from "eterna/rscript";
+import {GameButton, ToggleBar} from "eterna/ui";
 
-export class FeedbackViewToolbar extends ContainerObject {
+export default class FeedbackViewToolbar extends ContainerObject {
     public screenshotButton: GameButton;
 
     public zoomOutButton: GameButton;

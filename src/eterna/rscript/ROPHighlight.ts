@@ -1,25 +1,19 @@
 import * as log from "loglevel";
 import {Graphics, Point} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {RNAHighlightState} from "../pose2D/Pose2D";
-import {ConstraintBox} from "../ui/ConstraintBox";
-import {EternaMenu} from "../ui/EternaMenu";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {RScriptEnv} from "./RScriptEnv";
-import {RScriptOp} from "./RScriptOp";
-import {GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
+import {GameObject} from "flashbang/core";
+import {SceneObject} from "flashbang/objects";
+import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {ColorUtil, Easing} from "flashbang/util";
+import {RNAHighlightState} from "eterna/pose2D";
+import {ConstraintBox, EternaMenu} from "eterna/ui";
+import {RScriptEnv, RScriptOp, GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID} from ".";
 
 export enum ROPHighlightMode {
     RNA = "RNA",
     UI = "UI"
 }
 
-export class ROPHighlight extends RScriptOp {
+export default class ROPHighlight extends RScriptOp {
     public static readonly ID_POSTFIX = "_highlight_";
 
     public constructor(isVisible: boolean, inMode: ROPHighlightMode, env: RScriptEnv) {

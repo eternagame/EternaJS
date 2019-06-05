@@ -1,11 +1,10 @@
-import {HAlign} from "../../flashbang/core/Align";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
+import {HAlign} from "flashbang/core";
+import {VLayoutContainer} from "flashbang/layout";
+import {ContainerObject} from "flashbang/objects";
+import {UnitSignal} from "signals";
+import {GameButton, GamePanel, GamePanelType} from ".";
 
-export class ContextMenu extends ContainerObject {
+export default class ContextMenu extends ContainerObject {
     /** Emitted when the user interacts with the menu. */
     public readonly menuItemSelected = new UnitSignal();
 

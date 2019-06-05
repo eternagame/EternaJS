@@ -1,6 +1,6 @@
 import {DisplayObject, Rectangle} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
+import {GameObject} from "flashbang/core";
+import {DisplayUtil} from "flashbang/util";
 
 export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
 

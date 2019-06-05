@@ -1,17 +1,12 @@
 import * as log from "loglevel";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Value} from "../../signals/Value";
-import {KeyboardEventType} from "../input/KeyboardEventType";
-import {KeyCode} from "../input/KeyCode";
-import {ErrorUtil} from "../util/ErrorUtil";
-import {Flashbang} from "./Flashbang";
-import {ModeStack} from "./ModeStack";
-import {Updatable} from "./Updatable";
+import {RegistrationGroup, Value} from "signals";
+import {KeyboardEventType, KeyCode} from "../input";
+import {Flashbang, ModeStack, Updatable} from ".";
 
 // Adds KeyboardEvent.code support to Edge
 import "js-polyfills/keyboard";
 
-export class FlashbangApp {
+export default class FlashbangApp {
     /** True if the app is foregrounded */
     public readonly isActive: Value<boolean> = new Value(true);
 

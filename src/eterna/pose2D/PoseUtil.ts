@@ -1,8 +1,8 @@
-import {EPars} from "../EPars";
-import {PuzzleEditOp} from "./PuzzleEditOp";
+import EPars from "eterna/EPars";
+import {PuzzleEditOp} from ".";
 
 /** Utility functions for pose data */
-export class PoseUtil {
+export default class PoseUtil {
     public static getPairStrength(s1: number, s2: number): number {
         if (PoseUtil.isPair(s1, s2, EPars.RNABASE_ADENINE, EPars.RNABASE_URACIL)) {
             return 2;

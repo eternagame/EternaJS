@@ -1,4 +1,4 @@
-export class MathUtil {
+export default class MathUtil {
     /** Degrees-to-radians */
     public static readonly deg2Rad: number = Math.PI / 180;
 

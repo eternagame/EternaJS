@@ -1,7 +1,7 @@
 import {Container, DisplayObject, Sprite} from "pixi.js";
 
 /** A base class for Containers that arrange their children automatically. */
-export abstract class LayoutContainer extends Container {
+export default abstract class LayoutContainer extends Container {
     public get needsLayout(): boolean {
         return this._needsLayout;
     }

@@ -1,7 +1,8 @@
-import {Connection} from "./Connection";
-import {Cons} from "./Cons";
-import {Reactor} from "./Reactor";
-import {ValueView} from "./ValueView";
+/*import Connection from "./Connection";
+import Cons from "./Cons";
+import Reactor from "./Reactor";
+import ValueView from "./ValueView";*/
+import {Connection, Cons, Reactor, ValueView} from ".";
 
 /**
  * Handles the machinery of connecting listeners to a value and notifying them, without exposing a
@@ -9,7 +10,7 @@ import {ValueView} from "./ValueView";
  * observable values, but must manage the maintenance and distribution of value updates themselves
  * (so that they may send them over the network, for example).
  */
-export abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
+export default abstract class AbstractValue<T> extends Reactor implements ValueView<T> {
     public abstract get value(): T;
 
     /** Returns a "slot" Function which simply calls through to the Value's setter function. */

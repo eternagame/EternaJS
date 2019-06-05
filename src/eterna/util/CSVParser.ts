@@ -1,4 +1,4 @@
-export class CSVParser {
+export default class CSVParser {
     public static splitOnComma(csl: string): string[] {
         let vals: string[] = [];
         let last_comma = -1;

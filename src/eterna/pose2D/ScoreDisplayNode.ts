@@ -1,11 +1,10 @@
-﻿import {MathUtil} from "../../flashbang/util/MathUtil";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
+﻿import {MathUtil, ColorUtil} from "flashbang/util";
 
 export enum ScoreDisplayNodeType {
     STACK = 0, LOOP
 }
 
-export class ScoreDisplayNode {
+export default class ScoreDisplayNode {
     public get baseIndices(): number[] {
         return this._baseIndices;
     }

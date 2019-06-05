@@ -1,11 +1,9 @@
 import {Texture} from "pixi.js";
-import {Assert} from "../../flashbang/util/Assert";
-import {TextBuilder} from "../../flashbang/util/TextBuilder";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Fonts} from "../util/Fonts";
-import {Bitmaps} from "./Bitmaps";
+import {Assert, TextBuilder, TextureUtil} from "flashbang/util";
+import {Fonts} from "eterna/util";
+import {Bitmaps} from ".";
 
-export class BitmapManager {
+export default class BitmapManager {
     public static getBitmap(url: string): Texture {
         return Texture.fromImage(url);
     }

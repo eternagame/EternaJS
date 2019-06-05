@@ -1,56 +1,36 @@
 import * as log from "loglevel";
 import {Container, Graphics, Point, Sprite, Texture, Rectangle} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {LocationTask} from "../../flashbang/tasks/LocationTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SelfDestructTask} from "../../flashbang/tasks/SelfDestructTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Arrays} from "../../flashbang/util/Arrays";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Dragger} from "../../flashbang/util/Dragger";
-import {Easing} from "../../flashbang/util/Easing";
-import {Registration} from "../../signals/Registration";
-import {EPars} from "../EPars";
-import {Eterna} from "../Eterna";
-import {ExpPainter} from "../ExpPainter";
-import {Folder} from "../folding/Folder";
-import {GameMode} from "../mode/GameMode";
-import {Booster} from "../mode/PoseEdit/Booster";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Sounds} from "../resources/Sounds";
-import {ROPWait} from "../rscript/ROPWait";
-import {TextBalloon} from "../ui/TextBalloon";
-import {Fonts} from "../util/Fonts";
-import {Utility} from "../util/Utility";
-import {BaseGlow} from "../vfx/BaseGlow";
-import {LightRay} from "../vfx/LightRay";
-import {Base} from "./Base";
-import {BaseDrawFlags} from "./BaseDrawFlags";
-import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
-import {HighlightBox, HighlightType} from "./HighlightBox";
-import {Molecule} from "./Molecule";
-import {PaintCursor} from "./PaintCursor"
-import {PoseField} from "./PoseField";
-import {PoseUtil} from "./PoseUtil";
-import {PuzzleEditOp} from "./PuzzleEditOp";
-import {RNAAnchorObject} from "./RNAAnchorObject";
-import {RNALayout, RNATreeNode} from "./RNALayout";
-import {ScoreDisplayNode, ScoreDisplayNodeType} from "./ScoreDisplayNode";
-import {ExplosionFactorPanel} from "./ExplosionFactorPanel";
+import {Flashbang, Updatable} from "flashbang/core";
+import {Vector2} from "flashbang/geom";
+import {InputUtil} from "flashbang/input";
+import {ContainerObject, SceneObject} from "flashbang/objects";
+import {
+    AlphaTask, DelayTask, LocationTask, ParallelTask, RepeatingTask, SelfDestructTask, SerialTask
+} from "flashbang/tasks";
+import {Arrays, DisplayUtil, Dragger, Easing} from "flashbang/util";
+import {Registration} from "signals";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import ExpPainter from "eterna/ExpPainter";
+import {Folder} from "eterna/folding";
+import {GameMode} from "eterna/mode";
+import {Booster} from "eterna/mode/PoseEdit";
+import {BitmapManager, Sounds} from "eterna/resources";
+import {ROPWait} from "eterna/rscript";
+import {TextBalloon} from "eterna/ui";
+import {Fonts, Utility} from "eterna/util";
+import {BaseGlow, LightRay} from "eterna/vfx";
+import {
+    Base, BaseDrawFlags, EnergyScoreDisplay, HighlightBox, HighlightType, Molecule, PaintCursor,
+    PoseField, PoseUtil, PuzzleEditOp, RNAAnchorObject, RNALayout, RNATreeNode,
+    ScoreDisplayNode, ScoreDisplayNodeType, ExplosionFactorPanel
+} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export type PoseMouseDownCallback = (e: InteractionEvent, closest_dist: number, closest_index: number) => void;
 
-export class Pose2D extends ContainerObject implements Updatable {
+export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
     public static readonly BASE_TRACK_THICKNESS: number[] = [5, 4, 3, 2, 2];
@@ -148,7 +128,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.addObject(this._strandLabel, this.container);
 
         this.pointerMove.connect(() => this.onMouseMoved());
-        this.pointerDown.filter(IsLeftMouse).connect(e => this.callStartMousedownCallback(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
         // handle view settings

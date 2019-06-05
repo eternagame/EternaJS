@@ -1,15 +1,12 @@
-import {
-    Container, Graphics, Sprite, Texture
-} from "pixi.js";
-import {TextBuilder} from "../../../flashbang/util/TextBuilder";
-import {TextureUtil} from "../../../flashbang/util/TextureUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {ExpPainter} from "../../ExpPainter";
-import {Feedback} from "../../Feedback";
-import {EternaTextureUtil} from "../../util/EternaTextureUtil";
+import {Container, Graphics, Sprite, Texture} from "pixi.js";
+import {TextBuilder, TextureUtil} from "flashbang/util";
+import EPars from "eterna/EPars";
+import Eterna from "eterna/Eterna";
+import ExpPainter from "eterna/ExpPainter";
+import Feedback from "eterna/Feedback";
+import {EternaTextureUtil} from "eterna/util";
 
-export class SequenceStringListView extends Container {
+export default class SequenceStringListView extends Container {
     public constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {
         super();
 
