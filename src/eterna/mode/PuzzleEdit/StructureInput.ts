@@ -5,9 +5,9 @@ import {DisplayUtil} from "flashbang/util";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
 import {Pose2D, PuzzleEditOp} from "eterna/pose2D";
-import {GamePanel, TextInputObject} from "eterna/ui";
+import {GamePanel, TextInputObject, TextBalloon} from "eterna/ui";
 import {Fonts} from "eterna/util";
-import {TextBalloon} from "eterna/ui";
+
 
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight

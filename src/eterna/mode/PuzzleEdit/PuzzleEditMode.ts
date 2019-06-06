@@ -4,8 +4,12 @@ import {KeyCode} from "flashbang/input";
 import {Base64, DisplayUtil} from "flashbang/util";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
-import {Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, Vienna, Vienna2} from "eterna/folding";
-import {Molecule, Pose2D, PoseField, PuzzleEditOp} from "eterna/pose2D";
+import {
+    Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, Vienna, Vienna2
+} from "eterna/folding";
+import {
+    Molecule, Pose2D, PoseField, PuzzleEditOp
+} from "eterna/pose2D";
 import {ConstraintType} from "eterna/puzzle";
 import {Bitmaps} from "eterna/resources";
 import {
@@ -17,7 +21,9 @@ import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
 import {ExternalInterfaceCtx, Fonts} from "eterna/util";
 import {Background, BaseGlow} from "eterna/vfx";
 import {CopyTextDialogMode, GameMode} from "eterna/mode";
-import {PuzzleEditToolbar, StructureInput, SubmitPuzzleDialog, SubmitPuzzleDetails} from ".";
+import {
+    PuzzleEditToolbar, StructureInput, SubmitPuzzleDialog, SubmitPuzzleDetails
+} from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

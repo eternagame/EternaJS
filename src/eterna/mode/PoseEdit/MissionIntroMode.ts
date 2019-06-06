@@ -1,11 +1,15 @@
-import {Container, Graphics, Point, Sprite} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite
+} from "pixi.js";
 import {Flashbang, AppMode} from "flashbang/core";
 import {DisplayObjectPointerTarget, InputUtil, KeyCode} from "flashbang/input";
 import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
 import {Bitmaps} from "eterna/resources";
-import {ConstraintBox, GameButton, HTMLTextObject, PoseThumbnail, PoseThumbnailType} from "eterna/ui";
+import {
+    ConstraintBox, GameButton, HTMLTextObject, PoseThumbnail, PoseThumbnailType
+} from "eterna/ui";
 import {Fonts} from "eterna/util";
 
 export default class MissionIntroMode extends AppMode {

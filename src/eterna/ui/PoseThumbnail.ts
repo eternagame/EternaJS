@@ -1,4 +1,6 @@
-import {Container, DisplayObject, Graphics, Sprite, Texture} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Sprite, Texture
+} from "pixi.js";
 import {DisplayUtil, TextureUtil} from "flashbang/util";
 import Constants from "eterna/Constants";
 import EPars from "eterna/EPars";

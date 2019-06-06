@@ -1,4 +1,6 @@
-import {AbstractSignal, FilteredSignal, MappedSignal, SignalView} from "signals";
+import {
+    AbstractSignal, FilteredSignal, MappedSignal, SignalView
+} from "signals";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 type EventEmitter = PIXI.utils.EventEmitter;

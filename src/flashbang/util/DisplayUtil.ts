@@ -1,4 +1,6 @@
-import {DisplayObject, Graphics, Matrix, Point, Rectangle} from "pixi.js";
+import {
+    DisplayObject, Graphics, Matrix, Point, Rectangle
+} from "pixi.js";
 import {Flashbang, HAlign, VAlign} from "../core";
 import {RectangleUtil} from ".";
 

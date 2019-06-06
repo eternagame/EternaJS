@@ -65,9 +65,9 @@ export default class SortOptions {
             if (criterion.category == DesignCategory.Sequence) {
                 let anchor_sequence: string = criterion.arg;
                 let a_string: string = a.sequence;
-                if (a_string == null) throw new Error(`solution ${  a.nodeID  } invalid`);
+                if (a_string == null) throw new Error(`solution ${a.nodeID} invalid`);
                 let b_string: string = b.sequence;
-                if (b_string == null) throw new Error(`solution ${  b.nodeID  } invalid`);
+                if (b_string == null) throw new Error(`solution ${b.nodeID} invalid`);
                 if (a_string.length != anchor_sequence.length || b_string.length != anchor_sequence.length) {
                     throw new Error("Wrong anchor sequence length");
                 }
@@ -99,11 +99,10 @@ export default class SortOptions {
                     return -1;
                 }
             } else if (aProperty < bProperty) {
-                    return -1;
-                } else if (aProperty > bProperty) {
-                    return 1;
-                }
-
+                return -1;
+            } else if (aProperty > bProperty) {
+                return 1;
+            }
         }
 
         if (a.nodeID < b.nodeID) {
@@ -131,7 +130,7 @@ export default class SortOptions {
     public removeCriteria(category: DesignCategory): void {
         let idx = this.getCriterionIdx(category);
         if (idx < 0) {
-            throw new Error(`Can't find sort_category ${  category}`);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         this._criteria.splice(idx, 1);
@@ -142,7 +141,7 @@ export default class SortOptions {
     public toggleSort(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
         if (criterion == null) {
-            throw new Error(`Can't find category ${  category}`);
+            throw new Error(`Can't find category ${category}`);
         }
 
         criterion.sortOrder *= -1;
@@ -154,7 +153,7 @@ export default class SortOptions {
     public setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.getCriterionIdx(category);
         if (curIdx < 0) {
-            throw new Error(`Can't find sort_category ${  category}`);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         if (newIdx === curIdx || newIdx < 0 || newIdx >= this._criteria.length) {

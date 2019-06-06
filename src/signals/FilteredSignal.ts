@@ -1,6 +1,6 @@
-/*import MappedSignal from "./MappedSignal";
+/* import MappedSignal from "./MappedSignal";
 import SignalView from "./SignalView";
-import Connection from "./Connection";*/
+import Connection from "./Connection"; */
 import {MappedSignal, SignalView, Connection} from ".";
 
 export default class FilteredSignal<T> extends MappedSignal<T> {

@@ -3,7 +3,9 @@ import {Flashbang, HAlign} from "flashbang/core";
 import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
 import {AlphaTask} from "flashbang/tasks";
 import {Fonts} from "eterna/util";
-import {Dialog, DialogCanceledError, GameButton,GamePanel, GamePanelType, HTMLTextObject } from ".";
+import {
+    Dialog, DialogCanceledError, GameButton, GamePanel, GamePanelType, HTMLTextObject
+} from ".";
 
 export default class ConfirmDialog extends Dialog<boolean> {
     public constructor(prompt: string, promptIsHTML: boolean = false) {

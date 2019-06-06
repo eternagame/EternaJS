@@ -1,7 +1,9 @@
 import * as log from "loglevel";
 import {Point, Sprite, Text} from "pixi.js";
 import {ContainerObject} from "flashbang/objects";
-import {AlphaTask, DelayTask, ParallelTask, ScaleTask, SerialTask} from "flashbang/tasks";
+import {
+    AlphaTask, DelayTask, ParallelTask, ScaleTask, SerialTask
+} from "flashbang/tasks";
 import {Easing, TextureUtil} from "flashbang/util";
 import {PlaySoundTask, Sounds} from "eterna/resources";
 import {GameButton, GamePanel, GamePanelType} from "eterna/ui";

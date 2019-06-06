@@ -6,13 +6,17 @@ import {ErrorUtil, TextureUtil} from "flashbang/util";
 import ChatManager from "eterna/ChatManager";
 import {TestMode} from "eterna/debug";
 import Eterna from "eterna/Eterna";
-import {Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, RNAFoldBasic, Vienna, Vienna2} from "eterna/folding";
+import {
+    Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, RNAFoldBasic, Vienna, Vienna2
+} from "eterna/folding";
 import {
     LoadingMode, FeedbackViewMode, DesignBrowserFilter, DesignBrowserMode,
     PoseEditMode, PoseEditParams, PuzzleEditMode, PuzzleEditPoseData
 } from "eterna/mode";
 import {GameClient} from "eterna/net";
-import {Puzzle, PuzzleManager, Solution, SolutionManager} from "eterna/puzzle";
+import {
+    Puzzle, PuzzleManager, Solution, SolutionManager
+} from "eterna/puzzle";
 import {Bitmaps, SoundManager} from "eterna/resources";
 import {EternaSettings} from "eterna/settings";
 import {ExternalInterface, ExternalInterfaceCtx, Fonts} from "eterna/util";

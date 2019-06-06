@@ -6,7 +6,9 @@ import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
 import {ColorUtil, Easing} from "flashbang/util";
 import {RNAHighlightState} from "eterna/pose2D";
 import {ConstraintBox, EternaMenu} from "eterna/ui";
-import {RScriptEnv, RScriptOp, GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID} from ".";
+import {
+    RScriptEnv, RScriptOp, GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID
+} from ".";
 
 export enum ROPHighlightMode {
     RNA = "RNA",

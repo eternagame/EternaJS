@@ -1,4 +1,4 @@
-//import Registration from "./Registration";
+// import Registration from "./Registration";
 import {Registration} from ".";
 
 export default class Registrations {

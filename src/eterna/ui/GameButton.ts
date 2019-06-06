@@ -1,9 +1,11 @@
-import {Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
+} from "pixi.js";
 import {HAlign, VAlign} from "flashbang/core";
 import {KeyboardEventType, KeyboardListener} from "flashbang/input";
 import {Button, ButtonState} from "flashbang/objects";
 import {DisplayUtil, TextBuilder} from "flashbang/util";
-import {Registration, Registrations, Value} from "signals"
+import {Registration, Registrations, Value} from "signals";
 import {ROPWait, RScriptUIElementID} from "eterna/rscript";
 import {Fonts} from "eterna/util";
 import {Tooltips} from ".";

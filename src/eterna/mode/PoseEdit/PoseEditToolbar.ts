@@ -10,7 +10,9 @@ import Eterna from "eterna/Eterna";
 import {BoostersData, Puzzle, PuzzleType} from "eterna/puzzle";
 import {Bitmaps} from "eterna/resources";
 import {RScriptUIElementID} from "eterna/rscript";
-import {EternaMenu, EternaMenuStyle, GameButton, NucleotidePalette, ToggleBar} from "eterna/ui";
+import {
+    EternaMenu, EternaMenuStyle, GameButton, NucleotidePalette, ToggleBar
+} from "eterna/ui";
 import {ExternalInterfaceCtx} from "eterna/util";
 import {GameMode} from "eterna/mode";
 import {Booster, PoseEditMode} from ".";

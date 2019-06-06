@@ -1,6 +1,6 @@
 import {Point, Text} from "pixi.js";
-import {Signal} from "signals";
-import {UnitSignal} from "signals";
+import {Signal, UnitSignal} from "signals";
+
 import {Fonts} from "eterna/util";
 import {GameButton, GamePanel, TextInputObject} from ".";
 

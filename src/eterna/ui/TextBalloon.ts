@@ -3,7 +3,9 @@ import {Point, Text} from "pixi.js";
 import {ContainerObject} from "flashbang/objects";
 import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
 import {Fonts} from "eterna/util";
-import {BaseGamePanel, GameButton, GamePanel, GamePanelType} from ".";
+import {
+    BaseGamePanel, GameButton, GamePanel, GamePanelType
+} from ".";
 
 export default class TextBalloon extends ContainerObject {
     public constructor(text: string = "", balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07, borderColor: number = 0, borderAlpha: number = 0) {

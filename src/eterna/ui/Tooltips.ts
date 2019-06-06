@@ -1,5 +1,7 @@
 import {ExtendedTextStyle} from "pixi-multistyle-text";
-import {Container, DisplayObject, Graphics, Point, Rectangle, Text} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Point, Rectangle, Text
+} from "pixi.js";
 import {Flashbang, GameObject, GameObjectRef} from "flashbang/core";
 import {Button} from "flashbang/objects";
 import {AlphaTask, DelayTask, SerialTask} from "flashbang/tasks";

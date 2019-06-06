@@ -7,7 +7,9 @@ import {ColorUtil, StyledTextBuilder} from "flashbang/util";
 import {RNAAnchorObject} from "eterna/pose2D";
 import {FancyTextBalloon} from "eterna/ui";
 import {Fonts} from "eterna/util";
-import {ROPWait, RScriptArrow, RScriptEnv, RScriptOp} from ".";
+import {
+    ROPWait, RScriptArrow, RScriptEnv, RScriptOp
+} from ".";
 
 export enum ROPTextboxMode {
     TEXTBOX_LOCATION = "TEXTBOX_LOCATION",
