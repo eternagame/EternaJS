@@ -6,7 +6,9 @@ import {AchievementManager} from "eterna/achievements";
 import Eterna from "eterna/Eterna";
 import {EternaURL} from "eterna/net";
 import {Pose2D, PoseField} from "eterna/pose2D";
-import {ConfirmDialog, ContextMenu, Dialog, NotificationDialog, Tooltips, UILockDialog, URLButton} from "eterna/ui";
+import {
+    ConfirmDialog, ContextMenu, Dialog, NotificationDialog, Tooltips, UILockDialog, URLButton
+} from "eterna/ui";
 import {ExternalInterface, ExternalInterfaceCtx} from "eterna/util";
 import {Folder} from "eterna/folding";
 import UndoBlock from "eterna/UndoBlock";

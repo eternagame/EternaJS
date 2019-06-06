@@ -1,7 +1,9 @@
 import {Text} from "pixi.js";
 import {Flashbang, AppMode, ObjectTask} from "flashbang/core";
 import {ContainerObject} from "flashbang/objects";
-import {DelayTask, RepeatingTask, ScaleTask, SerialTask} from "flashbang/tasks";
+import {
+    DelayTask, RepeatingTask, ScaleTask, SerialTask
+} from "flashbang/tasks";
 import {Easing} from "flashbang/util";
 import Eterna from "eterna/Eterna";
 import {Fonts} from "eterna/util";

@@ -1,8 +1,12 @@
 import {Container} from "pixi.js";
-import {RegistrationGroup, Signal, SignalView, UnitSignal} from "signals";
+import {
+    RegistrationGroup, Signal, SignalView, UnitSignal
+} from "signals";
 import {KeyboardInput, MouseWheelInput} from "../input";
 import {Assert} from "../util";
-import {GameObject, GameObjectBase, GameObjectRef, LateUpdatable, ModeStack, Updatable} from ".";
+import {
+    GameObject, GameObjectBase, GameObjectRef, LateUpdatable, ModeStack, Updatable
+} from ".";
 
 export default class AppMode {
     /** Default keyboard input processor */

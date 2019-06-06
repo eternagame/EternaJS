@@ -1,5 +1,5 @@
-/*import MultiFailureError from "./MultiFailureError";
-import Registration from "./Registration";*/
+/* import MultiFailureError from "./MultiFailureError";
+import Registration from "./Registration"; */
 import {MultiFailureError, Registration} from ".";
 
 /** Collects Registrations to allow mass operations on them. */

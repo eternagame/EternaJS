@@ -1,6 +1,8 @@
 import {Graphics} from "pixi.js";
 import {Flashbang} from "flashbang/core";
-import {InputUtil, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget} from "flashbang/input";
+import {
+    InputUtil, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget
+} from "flashbang/input";
 import {ContainerObject} from "flashbang/objects";
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */

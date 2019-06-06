@@ -1,17 +1,23 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite, Text
+} from "pixi.js";
 import {Flashbang, HAlign, VAlign} from "flashbang/core";
 import {HLayoutContainer} from "flashbang/layout";
 import {ContainerObject, SceneObject} from "flashbang/objects";
-import {AlphaTask, CallbackTask, DelayTask, LocationTask, RepeatingTask, SerialTask} from "flashbang/tasks";
+import {
+    AlphaTask, CallbackTask, DelayTask, LocationTask, RepeatingTask, SerialTask
+} from "flashbang/tasks";
 import {DisplayUtil, Easing, MathUtil} from "flashbang/util";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
 import Feedback from "eterna/Feedback";
 import {Puzzle, Solution, SolutionManager} from "eterna/puzzle";
 import {BitmapManager, Bitmaps} from "eterna/resources";
-import {GameButton, GamePanel, HTMLTextObject, SliderBar, URLButton} from "eterna/ui";
+import {
+    GameButton, GamePanel, HTMLTextObject, SliderBar, URLButton
+} from "eterna/ui";
 import {Fonts, int} from "eterna/util";
 import {GameMode} from "eterna/mode";
 import {

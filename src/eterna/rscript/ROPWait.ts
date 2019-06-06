@@ -1,4 +1,6 @@
-import {ROPTextbox, RScriptEnv, RScriptOp, RScriptUIElementID} from ".";
+import {
+    ROPTextbox, RScriptEnv, RScriptOp, RScriptUIElementID
+} from ".";
 
 export enum ROPWaitType {
     MOVECAMERA = "MOVECAMERA",

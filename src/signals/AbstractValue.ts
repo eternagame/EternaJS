@@ -1,8 +1,10 @@
-/*import Connection from "./Connection";
+/* import Connection from "./Connection";
 import Cons from "./Cons";
 import Reactor from "./Reactor";
-import ValueView from "./ValueView";*/
-import {Connection, Cons, Reactor, ValueView} from ".";
+import ValueView from "./ValueView"; */
+import {
+    Connection, Cons, Reactor, ValueView
+} from ".";
 
 /**
  * Handles the machinery of connecting listeners to a value and notifying them, without exposing a

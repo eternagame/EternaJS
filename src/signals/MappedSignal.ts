@@ -1,8 +1,10 @@
-/*import AbstractSignal from "./AbstractSignal";
+/* import AbstractSignal from "./AbstractSignal";
 import FilteredSignal from "./FilteredSignal";
 import SignalView from "./SignalView";
-import Connection from "./Connection";*/
-import {AbstractSignal, FilteredSignal, SignalView, Connection} from ".";
+import Connection from "./Connection"; */
+import {
+    AbstractSignal, FilteredSignal, SignalView, Connection
+} from ".";
 
 /**
  * Plumbing to implement mapped signals in such a way that they automatically manage a connection

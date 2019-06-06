@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Sprite, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite, Text
+} from "pixi.js";
 import {Flashbang, HAlign, VAlign} from "flashbang/core";
 import {HLayoutContainer} from "flashbang/layout";
 import {DisplayUtil, MathUtil} from "flashbang/util";
@@ -8,7 +10,9 @@ import Eterna from "eterna/Eterna";
 import ExpPainter from "eterna/ExpPainter";
 import {Puzzle, Solution} from "eterna/puzzle";
 import {Bitmaps} from "eterna/resources";
-import {Dialog, GameButton, GamePanel, PoseThumbnail, PoseThumbnailType} from "eterna/ui";
+import {
+    Dialog, GameButton, GamePanel, PoseThumbnail, PoseThumbnailType
+} from "eterna/ui";
 import {Fonts} from "eterna/util";
 import {SolutionDescBox} from ".";
 

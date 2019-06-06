@@ -1,5 +1,7 @@
 import Eterna from "eterna/Eterna";
-import {Folder, LinearFoldC, RNAFoldBasic, Vienna} from ".";
+import {
+    Folder, LinearFoldC, RNAFoldBasic, Vienna
+} from ".";
 
 export default class FolderManager {
     public static get instance(): FolderManager {

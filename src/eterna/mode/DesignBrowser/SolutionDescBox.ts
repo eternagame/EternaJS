@@ -8,7 +8,9 @@ import Eterna from "eterna/Eterna";
 import Feedback from "eterna/Feedback";
 import {EternaURL} from "eterna/net";
 import {Puzzle, Solution} from "eterna/puzzle";
-import {GameButton, GamePanel, GamePanelType, HTMLTextObject, TextInputObject, VScrollBox} from "eterna/ui";
+import {
+    GameButton, GamePanel, GamePanelType, HTMLTextObject, TextInputObject, VScrollBox
+} from "eterna/ui";
 import {Fonts, Utility} from "eterna/util";
 import {CopyTextDialogMode, GameMode} from "eterna/mode";
 import {LabComments} from ".";

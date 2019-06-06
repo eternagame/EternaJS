@@ -1,5 +1,9 @@
-import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
-import {InputUtil, KeyboardEventType, KeyboardListener, KeyCode} from "flashbang/input";
+import {
+    Point, Rectangle, Sprite, Text, Texture
+} from "pixi.js";
+import {
+    InputUtil, KeyboardEventType, KeyboardListener, KeyCode
+} from "flashbang/input";
 import {ContainerObject, Enableable} from "flashbang/objects";
 import {StyledTextBuilder} from "flashbang/util";
 import {Signal} from "signals";

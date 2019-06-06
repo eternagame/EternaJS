@@ -1,9 +1,13 @@
-import {Container, Graphics, Point, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "flashbang/core";
 import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
 import {Arrays, DisplayUtil} from "flashbang/util";
 import {Bitmaps} from "eterna/resources";
-import {Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {
+    Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
+} from "eterna/ui";
 import {Fonts, GraphicsUtil} from "eterna/util";
 import {DesignCategory, SortOptions, SortOrder} from ".";
 

@@ -11,9 +11,11 @@ import UndoBlock from "eterna/UndoBlock";
 import {Folder, FolderManager, Vienna} from "eterna/folding";
 import {PoseField} from "eterna/pose2D";
 import {Puzzle, Solution} from "eterna/puzzle";
-import {EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton} from "eterna/ui";
-import {Fonts} from "eterna/util";
-import {Utility} from "eterna/util";
+import {
+    EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton
+} from "eterna/ui";
+import {Fonts, Utility} from "eterna/util";
+
 import {Background} from "eterna/vfx";
 import {GameMode} from "eterna/mode";
 import {FeedbackViewToolbar} from ".";

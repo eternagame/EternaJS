@@ -1,4 +1,6 @@
-import {Container, Graphics, Text, TextStyle} from "pixi.js";
+import {
+    Container, Graphics, Text, TextStyle
+} from "pixi.js";
 import {HAlign} from "flashbang/core";
 
 export default class FixedWidthTextField extends Container {

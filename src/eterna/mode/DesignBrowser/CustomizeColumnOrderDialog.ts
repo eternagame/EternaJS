@@ -4,7 +4,9 @@ import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
 import {Arrays, DisplayUtil} from "flashbang/util";
 import {Signal} from "signals";
 import {Bitmaps} from "eterna/resources";
-import {Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType} from "eterna/ui";
+import {
+    Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
+} from "eterna/ui";
 import {Fonts, GraphicsUtil} from "eterna/util";
 import {DesignCategory} from ".";
 

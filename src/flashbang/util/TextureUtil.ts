@@ -1,4 +1,6 @@
-import {BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture} from "pixi.js";
+import {
+    BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
+} from "pixi.js";
 import {Flashbang} from "../core";
 import {Assert} from ".";
 

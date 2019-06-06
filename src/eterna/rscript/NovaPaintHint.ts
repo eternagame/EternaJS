@@ -3,8 +3,8 @@ import {Updatable} from "flashbang/core";
 import {Vector2} from "flashbang/geom";
 import {ContainerObject} from "flashbang/objects";
 import {Pose2D} from "eterna/pose2D";
-import {BitmapManager} from "eterna/resources";
-import {Bitmaps} from "eterna/resources";
+import {BitmapManager, Bitmaps} from "eterna/resources";
+
 
 export default class NovaPaintHint extends ContainerObject implements Updatable {
     constructor(start: Point, end: Point, loop: boolean) {
