@@ -206,7 +206,9 @@ export default class PoseEditMode extends GameMode {
 
         this._homeButton = GameMode.createHomeButton();
         this._homeButton.hideWhenModeInactive();
-        this.addObject(this._homeButton, this.uiLayer);
+        if (!Eterna.app.mercedStudy) {
+            this.addObject(this._homeButton, this.uiLayer);
+        }
 
         // Async text shows above our UI lock, and right below all dialogs
         this._asynchText = Fonts.arial('folding...', 12).bold().color(0xffffff).build();
@@ -576,7 +578,9 @@ export default class PoseEditMode extends GameMode {
             .selectable(false)
             .color(0xffffff);
         puzzleTitle.hideWhenModeInactive();
-        this.addObject(puzzleTitle, this.uiLayer);
+        if (!Eterna.app.mercedStudy) {
+            this.addObject(puzzleTitle, this.uiLayer);
+        }
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
             puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0

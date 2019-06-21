@@ -30,8 +30,10 @@ export default class EternaSettings extends Settings {
     constructor() {
         super('EternaSettings');
         this.showChat = this.setting<boolean>('showChat', true);
+        if (Eterna.app.mercedStudy) this.showChat.value = false;
         this.showNumbers = this.setting<boolean>('showNumbers', true);
         this.showLetters = this.setting<boolean>('showLetters', false);
+        if (Eterna.app.mercedStudy) this.showLetters.value = true;
         this.showRope = this.setting<boolean>('showRope', false);
         this.displayFreeEnergies = this.setting<boolean>('displayFreeEnergies', false);
         this.highlightRestricted = this.setting<boolean>('highlightRestricted', true);
@@ -48,7 +50,6 @@ export default class EternaSettings extends Settings {
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
         this.designBrowserColumnNames = this.setting('designBrowserColumnNames', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
-
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
         // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
         // but anyone who hasn't run Eterna between the EternaJS launch and the time it was

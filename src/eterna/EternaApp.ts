@@ -85,10 +85,15 @@ export interface EternaAppParams {
     folderName?: string;
     sequence?: string;
     designBrowserFilters?: DesignBrowserFilter[];
+
+    // Customization for Merced study
+    mercedStudy: boolean;
 }
 
 /** Entry point for the game */
 export default class EternaApp extends FlashbangApp {
+    public mercedStudy: boolean;
+    
     constructor(params: EternaAppParams) {
         super();
 
@@ -101,6 +106,8 @@ export default class EternaApp extends FlashbangApp {
         params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
+        
+        this.mercedStudy = params.mercedStudy || false;
 
         this._params = params;
 

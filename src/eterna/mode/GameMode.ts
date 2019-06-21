@@ -249,6 +249,8 @@ export default abstract class GameMode extends AppMode {
     }
 
     public onContextMenuEvent(e: Event): void {
+        if (Eterna.app.mercedStudy) {e.preventDefault(); return;}
+
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
