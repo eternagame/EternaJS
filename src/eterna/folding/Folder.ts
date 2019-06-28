@@ -1,4 +1,4 @@
-import {PoseOp} from "eterna/pose2D";
+import {PoseOp} from "eterna/diagram";
 
 export default abstract class Folder {
     protected constructor() {

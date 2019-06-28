@@ -1,7 +1,7 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "eterna/emscripten";
+import {EmscriptenUtil} from "eterna/folding/emscripten";
 import EPars from "eterna/EPars";
-import {PoseOp} from "eterna/pose2D";
+import {PoseOp} from "eterna/diagram";
 import {int} from "eterna/util";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";

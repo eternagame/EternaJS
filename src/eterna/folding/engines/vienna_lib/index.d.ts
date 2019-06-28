@@ -18,7 +18,7 @@
 /*~ This declaration specifies that the class constructor function
  *~ is the exported object from the file
  */
-import * as stdcpp from "../../../emscripten/stdcpp";
+import * as stdcpp from "../../emscripten/stdcpp";
 
 export = vienna_lib;
 

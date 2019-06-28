@@ -19,7 +19,7 @@
  *~ is the exported object from the file
  */
 
-import * as stdcpp from "../../../emscripten/stdcpp";
+import * as stdcpp from "../../emscripten/stdcpp";
 
 export = LinearFold_lib;
 

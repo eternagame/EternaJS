@@ -1,5 +1,5 @@
 import Eterna from "eterna/Eterna";
-import Feedback from "eterna/Feedback";
+import Feedback from "eterna/puzzle/Feedback";
 
 export default class Solution {
     public constructor(nid: number, puzzle_nid: number) {

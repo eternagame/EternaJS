@@ -4,7 +4,7 @@ import {Point} from "pixi.js";
 import {Flashbang, GameObject} from "flashbang/core";
 import {Vector2} from "flashbang/geom";
 import {ColorUtil, StyledTextBuilder} from "flashbang/util";
-import {RNAAnchorObject} from "eterna/pose2D";
+import {RNAAnchorObject} from "eterna/diagram";
 import {FancyTextBalloon} from "eterna/ui";
 import {Fonts} from "eterna/util";
 import {

@@ -4,7 +4,7 @@ import {GameObject} from "flashbang/core";
 import {SceneObject} from "flashbang/objects";
 import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
 import {ColorUtil, Easing} from "flashbang/util";
-import {RNAHighlightState} from "eterna/pose2D";
+import {RNAHighlightState} from "eterna/diagram";
 import {ConstraintBox, EternaMenu} from "eterna/ui";
 import {
     RScriptEnv, RScriptOp, GetRScriptUIElementBounds, RScriptUIElement, RScriptUIElementID

@@ -3,7 +3,7 @@ import {
 } from "flashbang/core";
 import {CallbackTask, FunctionTask, SerialTask} from "flashbang/tasks";
 import {DisplayUtil} from "flashbang/util";
-import {GameMode} from "eterna/mode";
+import {GameMode} from "eterna/mode-old";
 import {AchievementBox} from ".";
 
 export default class AchievementManager extends GameObject {

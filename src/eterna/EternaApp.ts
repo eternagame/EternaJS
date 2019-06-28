@@ -4,7 +4,6 @@ import {FlashbangApp} from "flashbang/core";
 import {SaveGameManager} from "flashbang/settings";
 import {ErrorUtil, TextureUtil} from "flashbang/util";
 import ChatManager from "eterna/ChatManager";
-import {TestMode} from "eterna/debug";
 import Eterna from "eterna/Eterna";
 import {
     Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, RNAFoldBasic, Vienna, Vienna2
@@ -12,7 +11,7 @@ import {
 import {
     LoadingMode, FeedbackViewMode, DesignBrowserFilter, DesignBrowserMode,
     PoseEditMode, PoseEditParams, PuzzleEditMode, PuzzleEditPoseData
-} from "eterna/mode";
+} from "eterna/mode-old";
 import {GameClient} from "eterna/net";
 import {
     Puzzle, PuzzleManager, Solution, SolutionManager
@@ -59,7 +58,6 @@ export enum InitialAppMode {
     SOLUTION_SEE_RESULT = "solution_see_result", // load a solution into FeedbackViewMode
     SOLUTION_COPY_AND_VIEW = "solution_copy_and_view", // load a solution into PoseEditMode
     DESIGN_BROWSER = "design_browser", // load a puzzle into DesignBrowserMode
-    TEST = "test", // load the debugging test mode
 }
 
 export interface EternaAppParams {
@@ -129,9 +127,6 @@ export default class EternaApp extends FlashbangApp {
             .then(() => this.initScriptInterface())
             .then(async () => {
                 switch (this._params.mode) {
-                case InitialAppMode.TEST:
-                    this._modeStack.unwindToMode(new TestMode());
-                    return Promise.resolve();
                 case InitialAppMode.PUZZLEMAKER:
                     return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                 case InitialAppMode.PUZZLE:

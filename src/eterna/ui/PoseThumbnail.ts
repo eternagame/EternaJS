@@ -5,7 +5,7 @@ import {DisplayUtil, TextureUtil} from "flashbang/util";
 import Constants from "eterna/Constants";
 import EPars from "eterna/EPars";
 import ExpPainter from "eterna/ExpPainter";
-import {RNALayout} from "eterna/pose2D";
+import {RNALayout} from "eterna/diagram";
 import {Bitmaps} from "eterna/resources";
 
 export enum PoseThumbnailType {

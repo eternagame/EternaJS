@@ -1,4 +1,4 @@
-import {PoseEditMode} from "eterna/mode";
+import {PoseEditMode} from "eterna/mode-old";
 import {Puzzle} from "eterna/puzzle";
 import {
     ROPHighlight, ROPHighlightMode, ROPHint, ROPPre, ROPRNA, ROPRNAType, ROPTextbox, ROPTextboxMode,

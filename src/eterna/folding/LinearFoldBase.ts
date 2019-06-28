@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "eterna/emscripten";
+import {EmscriptenUtil} from "eterna/folding/emscripten";
 import EPars from "eterna/EPars";
 import {FullFoldResult} from "./engines/LinearFold_lib";
 import * as LinearFold_lib from "./engines/LinearFold_lib/index";

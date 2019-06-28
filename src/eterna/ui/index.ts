@@ -33,3 +33,4 @@ export {default as Tooltips, Tooltip} from "./Tooltips";
 export {default as UILockDialog} from "./UILockDialog";
 export {default as URLButton} from "./URLButton";
 export {default as VScrollBox} from "./VScrollBox";
+export {default as Toolbar} from "./Toolbar";

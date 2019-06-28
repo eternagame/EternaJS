@@ -1,7 +1,7 @@
 import * as log from "loglevel";
-import {EmscriptenUtil} from "eterna/emscripten";
+import {EmscriptenUtil} from "eterna/folding/emscripten";
 import EPars from "eterna/EPars";
-import {RNALayout} from "eterna/pose2D";
+import {RNALayout} from "eterna/diagram";
 import {CSVParser} from "eterna/util";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";

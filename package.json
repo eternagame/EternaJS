@@ -86,6 +86,7 @@
     "js-polyfills": "^0.1.42",
     "localforage": "^1.7.3",
     "loglevel": "^1.6.2",
+    "mobx": "^5.10.1",
     "pixi-filters": "^2.7.1",
     "pixi-multistyle-text": "^0.7.0",
     "pixi-sound": "^2.1.0",

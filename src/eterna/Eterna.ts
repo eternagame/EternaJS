@@ -4,7 +4,7 @@ import {SaveGameManager} from "../flashbang/settings";
 import {ErrorUtil} from "flashbang/util";
 import ChatManager from "eterna/ChatManager";
 import EternaApp from "eterna/EternaApp";
-import {ErrorDialogMode} from "eterna/mode";
+import {ErrorDialogMode} from "eterna/mode-old";
 import {GameClient} from "eterna/net";
 import {EternaSettings} from "eterna/settings";
 import {SoundManager} from "eterna/resources";

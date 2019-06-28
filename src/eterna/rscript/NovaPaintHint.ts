@@ -2,7 +2,7 @@ import {Point, Sprite, Texture} from "pixi.js";
 import {Updatable} from "flashbang/core";
 import {Vector2} from "flashbang/geom";
 import {ContainerObject} from "flashbang/objects";
-import {Pose2D} from "eterna/pose2D";
+import {Pose2D} from "eterna/diagram";
 import {BitmapManager, Bitmaps} from "eterna/resources";
 
 

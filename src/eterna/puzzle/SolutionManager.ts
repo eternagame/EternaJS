@@ -1,7 +1,7 @@
 import * as log from "loglevel";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
-import Feedback from "eterna/Feedback";
+import Feedback from "eterna/puzzle/Feedback";
 import {CSVParser} from "eterna/util";
 import {Solution} from ".";
 

@@ -2,7 +2,7 @@ import {JSONUtil} from "flashbang/util";
 import EPars from "eterna/EPars";
 import {Folder} from "eterna/folding";
 import {default as Plot, PlotType} from "eterna/Plot";
-import {Oligo, Pose2D} from "eterna/pose2D";
+import {Oligo, Pose2D} from "eterna/diagram";
 
 export enum UndoBlockParam {
     GU = 0,
