@@ -513,7 +513,7 @@ export default class Puzzle {
             }
         }
 
-        // FIXME: This needs revision, see PoseEditMode:2163
+        // FIXME: This needs revision, see https://github.com/EteRNAgame/eterna/blob/1e537defaad17674b189df697ee6f1c7cca070c0/flash-rna/flash-rna/PoseEdit.as#L2163
         let len: number = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
         for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
