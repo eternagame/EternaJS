@@ -111,4 +111,14 @@ export default class Utility {
         }
         return ip;
     }
+
+    public static range(start: number, stop: number): number[];
+    public static range(length: number): number[];
+
+    public static range(a: number, b?: number): number[] {
+        let start = b ? a : 0;
+        let stop = b || a;
+
+        return new Array(stop - start).fill(0).map((_, i) => i + start);
+    }
 }
