@@ -3,6 +3,7 @@ import EPars from "eterna/EPars";
 import {Folder} from "eterna/folding";
 import {default as Plot, PlotType} from "eterna/Plot";
 import {Oligo, Pose2D} from "eterna/pose2D";
+import { Utility } from "./util";
 
 export enum UndoBlockParam {
     GU = 0,
@@ -318,27 +319,30 @@ export default class UndoBlock {
         return plot;
     }
 
-    public getOrderMap(other_order: number[]): number[] {
+    /**
+     * Return map of current base indices to adjusted base indices when oligos are rearranged
+     * according to otherorder
+     * @param otherOrder An array of indexes, where the index refers to the new index the oligo at the given position in the old
+     * array should be placed at. E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
+     * (oligo A, with the old index of 0, should be at new index 1)
+     */
+    public reorderedOligosIndexMap(otherOrder: number[]): number[] {
         if (this._targetOligos == null) return null;
 
-        let idx_map: number[] = [];
-        let ofs: number[] = [];
-        let ii: number = this._sequence.length;
-        for (let jj = 0; jj < this._targetOligos.length; jj++) {
-            let kk = (other_order == null ? jj : other_order[jj]);
-            ofs[kk] = ii;
-            ii += 1 + this._targetOligos[kk].sequence.length;
+        let originalIndices: number[][] = [];
+        let oligoFirstBaseIndex = this._sequence.length;
+        
+        for (let oligo of this._targetOligos) {
+            // The + 1 is used to account for the "cut" base denoting split points between strands
+            originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1))
+            oligoFirstBaseIndex += oligo.sequence.length;
         }
-        for (ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
-        for (let jj = 0; jj < this._targetOligos.length; jj++) {
-            let kk = ofs[jj];
-            let xx: number;
-            for (xx = 0; xx <= this._targetOligos[jj].sequence.length; xx++) {
-                idx_map[ii + xx] = kk + xx;
-            }
-            ii += xx;
-        }
-        return idx_map;
+
+        let newOrder = otherOrder || Utility.range(this._targetOligos.length);
+
+        return Utility.range(this._sequence.length).concat(
+            ...Utility.range(this._targetOligos.length).map(idx => originalIndices[newOrder.indexOf(idx)])
+        );
     }
 
     private _sequence: number[];

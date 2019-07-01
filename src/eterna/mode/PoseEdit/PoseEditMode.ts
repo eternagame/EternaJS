@@ -2255,7 +2255,6 @@ export default class PoseEditMode extends GameMode {
             if (render) {
                 box.setContent(ConstraintType.MUTATION, value, isSatisfied, sequence_diff);
             }
-
         } else if (type === ConstraintType.SHAPE) {
             const target_index = Number(value);
             const ublk: UndoBlock = this.getCurrentUndoBlock(target_index);
@@ -2265,8 +2264,8 @@ export default class PoseEditMode extends GameMode {
                 structure_constraints = this._targetConditions[target_index]['structure_constraints'];
 
                 if (ublk.oligoOrder != null) {
-                    let np_map: number[] = ublk.getOrderMap(ublk.oligoOrder);
-                    let tp_map: number[] = ublk.getOrderMap(ublk.targetOligoOrder);
+                    let np_map: number[] = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
+                    let tp_map: number[] = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
                     if (np_map != null) {
                         let new_pairs: number[] = [];
                         let new_sc: number[] = [];
