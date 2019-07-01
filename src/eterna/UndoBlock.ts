@@ -329,7 +329,7 @@ export default class UndoBlock {
             ofs[kk] = ii;
             ii += 1 + this._targetOligos[kk].sequence.length;
         }
-        for (let ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
+        for (ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
         for (let jj = 0; jj < this._targetOligos.length; jj++) {
             let kk = ofs[jj];
             let xx: number;
