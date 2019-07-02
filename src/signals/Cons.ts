@@ -1,4 +1,4 @@
-import {RListener} from Reactor from "./Reactor";
+import Reactor, {RListener} from "./Reactor";
 
 import Connection from "./Connection";
 
