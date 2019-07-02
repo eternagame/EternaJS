@@ -17,12 +17,13 @@ import {
     GameButton, GetPaletteTargetBaseType, PaletteTargetType, PasteSequenceDialog, PoseThumbnail, PoseThumbnailType,
     URLButton
 } from "eterna/ui";
+import {default as Toolbar, ToolbarType} from "eterna/ui/Toolbar";
 import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
 import {ExternalInterfaceCtx, Fonts} from "eterna/util";
 import {Background, BaseGlow} from "eterna/vfx";
 import {CopyTextDialogMode, GameMode} from "eterna/mode";
 import {
-    PuzzleEditToolbar, StructureInput, SubmitPuzzleDialog, SubmitPuzzleDetails
+    StructureInput, SubmitPuzzleDialog, SubmitPuzzleDetails
 } from ".";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -82,17 +83,18 @@ export default class PuzzleEditMode extends GameMode {
         this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
-        this._toolbar = new PuzzleEditToolbar(this._embedded);
+        let toolbarType = this._embedded ? ToolbarType.PUZZLEMAKER_EMBEDDED : ToolbarType.PUZZLEMAKER;
+        this._toolbar = new Toolbar(toolbarType, {states: this._numTargets});
         this.addObject(this._toolbar, this.uiLayer);
 
-        this._toolbar.addbaseButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.addbaseButton, EPars.RNABASE_ADD_BASE));
-        this._toolbar.addpairButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.addpairButton, EPars.RNABASE_ADD_PAIR));
-        this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.deleteButton, EPars.RNABASE_DELETE));
-        this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.lockButton, EPars.RNABASE_LOCK));
-        this._toolbar.siteButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.siteButton, EPars.RNABASE_BINDING_SITE));
-        this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(this._toolbar.pairSwapButton, EPars.RNABASE_PAIR));
+        this._toolbar.addbaseButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_ADD_BASE));
+        this._toolbar.addpairButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_ADD_PAIR));
+        this._toolbar.deleteButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_DELETE));
+        this._toolbar.lockButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_LOCK));
+        this._toolbar.moleculeButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_BINDING_SITE));
+        this._toolbar.pairSwapButton.clicked.connect(() => this.onEditButtonClicked(EPars.RNABASE_PAIR));
 
-        this._toolbar.nativeButton.clicked.connect(() => this.setToNativeMode());
+        this._toolbar.naturalButton.clicked.connect(() => this.setToNativeMode());
         this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
@@ -598,10 +600,10 @@ export default class PuzzleEditMode extends GameMode {
 
     private setToNativeMode(): void {
         this._toolbar.targetButton.toggled.value = false;
-        this._toolbar.nativeButton.toggled.value = true;
+        this._toolbar.naturalButton.toggled.value = true;
 
         this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.nativeButton.hotkey(null);
+        this._toolbar.naturalButton.hotkey(null);
 
         this._paused = false;
         this.updateScore();
@@ -609,9 +611,9 @@ export default class PuzzleEditMode extends GameMode {
 
     private setToTargetMode(): void {
         this._toolbar.targetButton.toggled.value = true;
-        this._toolbar.nativeButton.toggled.value = false;
+        this._toolbar.naturalButton.toggled.value = false;
 
-        this._toolbar.nativeButton.hotkey(KeyCode.Space);
+        this._toolbar.naturalButton.hotkey(KeyCode.Space);
         this._toolbar.targetButton.hotkey(null);
 
         for (let ii = 0; ii < this._poses.length; ii++) {
@@ -733,21 +735,16 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private onPaletteTargetSelected(type: PaletteTargetType): void {
-        this._toolbar.deselectAllColorings();
-
         let baseType: number = GetPaletteTargetBaseType(type);
         for (let pose of this._poses) {
             pose.currentColor = baseType;
         }
     }
 
-    private onEditButtonClicked(button: GameButton, poseColor: number): void {
+    private onEditButtonClicked(poseColor: number): void {
         for (let pose of this._poses) {
             pose.currentColor = poseColor;
         }
-
-        this._toolbar.deselectAllColorings();
-        button.toggled.value = true;
     }
 
     private poseEditByTarget(index: number): void {
@@ -900,7 +897,7 @@ export default class PuzzleEditMode extends GameMode {
     private _stackSize: number;
     private _paused: boolean;
 
-    private _toolbar: PuzzleEditToolbar;
+    private _toolbar: Toolbar;
     private _folderButton: GameButton;
     private _homeButton: URLButton;
     private _constraintBoxes: ConstraintBox[] = [];

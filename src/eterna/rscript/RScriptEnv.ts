@@ -176,7 +176,7 @@ export default class RScriptEnv extends ContainerObject {
         case RScriptUIElementID.OBJECTIVE:
             return this.ui.getConstraint(i);
         case RScriptUIElementID.SWITCH:
-            return this.ui.toolbar.puzzleStateToggle;
+            return this.ui.toolbar.stateToggle;
         case RScriptUIElementID.TOTALENERGY:
         case RScriptUIElementID.PRIMARY_ENERGY:
             return this.pose.primaryScoreDisplay;
@@ -186,12 +186,12 @@ export default class RScriptEnv extends ContainerObject {
         case RScriptUIElementID.PALETTEALT:
             return this.ui.toolbar.palette;
         case RScriptUIElementID.TOGGLENATURAL:
-            return this.ui.toolbar.nativeButton;
+            return this.ui.toolbar.naturalButton;
         case RScriptUIElementID.TOGGLETARGET:
             return this.ui.toolbar.targetButton;
         case RScriptUIElementID.TOGGLEBAR:
             // NOTE: There is no longer a toggle bar...
-            return this.ui.toolbar.nativeButton;
+            return this.ui.toolbar.naturalButton;
         case RScriptUIElementID.ZOOMIN:
             return this.ui.toolbar.zoomInButton;
         case RScriptUIElementID.ZOOMOUT:
@@ -200,7 +200,7 @@ export default class RScriptEnv extends ContainerObject {
             // NOTE: There is no longer an action bar...
             return this.ui.toolbar.zoomInButton;
         case RScriptUIElementID.RESET:
-            return this.ui.toolbar.retryButton;
+            return this.ui.toolbar.resetButton;
         case RScriptUIElementID.UNDO:
             return this.ui.toolbar.undoButton;
         case RScriptUIElementID.REDO:
