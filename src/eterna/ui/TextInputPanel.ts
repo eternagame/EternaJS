@@ -4,7 +4,7 @@ import {Signal, UnitSignal} from "signals";
 import {Fonts} from "eterna/util";
 import GameButton from "./GameButton";
 import GamePanel from "./GamePanel";
-import TextInputObject from "./TextInputObject"
+import TextInputObject from "./TextInputObject";
 
 export default class TextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();

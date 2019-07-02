@@ -8,7 +8,7 @@ import {RNAHighlightState} from "eterna/pose2D";
 import {ConstraintBox, EternaMenu} from "eterna/ui";
 import RScriptEnv from "./RScriptEnv";
 import RScriptOp from "./RScriptOp";
-import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from "./RScriptUIElement"
+import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from "./RScriptUIElement";
 
 export enum ROPHighlightMode {
     RNA = "RNA",
