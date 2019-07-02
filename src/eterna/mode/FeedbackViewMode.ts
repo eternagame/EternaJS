@@ -15,10 +15,9 @@ import {
     EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton
 } from "eterna/ui";
 import {Fonts, Utility} from "eterna/util";
-
 import {Background} from "eterna/vfx";
 import {GameMode} from "eterna/mode";
-import {FeedbackViewToolbar} from ".";
+import Toolbar, {ToolbarType} from "eterna/ui/Toolbar";
 
 export default class FeedbackViewMode extends GameMode {
     public constructor(solution: Solution, puzzle: Puzzle) {
@@ -49,7 +48,7 @@ export default class FeedbackViewMode extends GameMode {
         this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
-        this._toolbar = new FeedbackViewToolbar(this._puzzle);
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -71,8 +70,8 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
-        this._toolbar.showEstimateButton.clicked.connect(() => this.setToEstimateMode());
-        this._toolbar.showTargetButton.clicked.connect(() => this.setToTargetMode());
+        this._toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
+        this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
 
         this._feedback = this._solution.expFeedback;
         this._targetConditions = this._puzzle.targetConditions;
@@ -179,8 +178,8 @@ export default class FeedbackViewMode extends GameMode {
     /* override */
     protected onSetPip(pip_mode: boolean): void {
         if (pip_mode) {
-            if (this._toolbar.toggleBar != null) {
-                this._toolbar.toggleBar.display.visible = false;
+            if (this._toolbar.stateToggle != null) {
+                this._toolbar.stateToggle.display.visible = false;
             }
 
             if (this._foldMode == PoseFoldMode.ESTIMATE) {
@@ -215,8 +214,8 @@ export default class FeedbackViewMode extends GameMode {
                 this.showExperimentalColors();
             }
         } else {
-            if (this._toolbar.toggleBar != null) {
-                this._toolbar.toggleBar.display.visible = true;
+            if (this._toolbar.stateToggle != null) {
+                this._toolbar.stateToggle.display.visible = true;
             }
 
             this.changeTarget(this._currentIndex);
@@ -275,10 +274,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this._toolbar.showTargetButton.hotkey(null);
-        this._toolbar.showEstimateButton.hotkey(KeyCode.Space);
-        this._toolbar.showEstimateButton.toggled.value = false;
-        this._toolbar.showTargetButton.toggled.value = true;
+        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.estimateButton.hotkey(KeyCode.Space);
+        this._toolbar.estimateButton.toggled.value = false;
+        this._toolbar.targetButton.toggled.value = true;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._pairs[ii];
@@ -290,10 +289,10 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this._toolbar.showEstimateButton.hotkey(null);
-        this._toolbar.showTargetButton.hotkey(KeyCode.Space);
-        this._toolbar.showEstimateButton.toggled.value = true;
-        this._toolbar.showTargetButton.toggled.value = false;
+        this._toolbar.estimateButton.hotkey(null);
+        this._toolbar.targetButton.hotkey(KeyCode.Space);
+        this._toolbar.estimateButton.toggled.value = true;
+        this._toolbar.targetButton.toggled.value = false;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._shapePairs[ii];
@@ -510,7 +509,7 @@ export default class FeedbackViewMode extends GameMode {
     private readonly _solution: Solution;
     private readonly _puzzle: Puzzle;
 
-    private _toolbar: FeedbackViewToolbar;
+    private _toolbar: Toolbar;
     private _homeButton: URLButton;
 
     private _undoBlocks: UndoBlock[] = [];
