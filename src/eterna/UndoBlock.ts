@@ -3,7 +3,7 @@ import EPars from "eterna/EPars";
 import {Folder} from "eterna/folding";
 import {default as Plot, PlotType} from "eterna/Plot";
 import {Oligo, Pose2D} from "eterna/pose2D";
-import { Utility } from "./util";
+import {Utility} from "./util";
 
 export enum UndoBlockParam {
     GU = 0,
@@ -331,10 +331,10 @@ export default class UndoBlock {
 
         let originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;
-        
+
         for (let oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
-            originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1))
+            originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1));
             oligoFirstBaseIndex += oligo.sequence.length;
         }
 

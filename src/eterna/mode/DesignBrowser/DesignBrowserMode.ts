@@ -22,7 +22,7 @@ import {Fonts, int} from "eterna/util";
 import {GameMode} from "eterna/mode";
 import CustomizeColumnOrderDialog from "./CustomizeColumnOrderDialog";
 import DataCol from "./DataCol";
-import DotLine from "./DotLine"
+import DotLine from "./DotLine";
 import GridLines from "./GridLines";
 import MarkerBoxView from "./MarkerBoxView";
 import SelectionBox from "./SelectionBox";
