@@ -28,6 +28,8 @@ export {default as SpecBox} from "./SpecBox";
 export {default as SpecBoxDialog} from "./SpecBoxDialog";
 export {default as TextInputObject} from "./TextInputObject";
 export {default as TextInputPanel} from "./TextInputPanel";
+// TODO: Weird circular dependancy issue. Once importing from eterna/mode/PoseEdit is gone, we can bring this back
+// export {default as Toolbar} from "./Toolbar";
 export {default as ToggleBar} from "./ToggleBar";
 export {default as Tooltips, Tooltip} from "./Tooltips";
 export {default as UILockDialog} from "./UILockDialog";
