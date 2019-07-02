@@ -8,6 +8,7 @@ import {Assert, DisplayUtil, Easing} from "flashbang/util";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
 import {Folder, FolderManager, FoldUtil} from "eterna/folding";
+import {CopyTextDialogMode, GameMode, PuzzleEditPoseData} from "eterna/mode";
 import {EternaURL} from "eterna/net";
 import {Oligo, Pose2D, PoseField, PoseOp, PuzzleEditOp} from "eterna/pose2D";
 import {
@@ -22,11 +23,10 @@ import {
     PasteSequenceDialog, SpecBox, SpecBoxDialog, URLButton
 } from "eterna/ui";
 import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
-import {ExternalInterface, ExternalInterfaceCtx} from "eterna/util";
-import {Fonts, int} from "eterna/util";
+import {ExternalInterface, ExternalInterfaceCtx, Fonts, int} from "eterna/util";
 import {Background, BubbleSweep} from "eterna/vfx";
-import {CopyTextDialogMode, GameMode, PuzzleEditPoseData} from "eterna/mode";
-import {MissionClearedPanel, MissionIntroMode, PoseEditToolbar, SubmitPoseDetails, SubmitPoseDialog, SubmittingDialog} from ".";
+import {MissionClearedPanel, MissionIntroMode, SubmitPoseDetails, SubmitPoseDialog, SubmittingDialog} from ".";
+import Toolbar, { ToolbarType } from "eterna/ui/Toolbar";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -73,7 +73,12 @@ export default class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
-        this._toolbar = new PoseEditToolbar(this._puzzle, this._scriptInterface);
+        let toolbarType = this._puzzle.puzzleType == PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
+        this._toolbar = new Toolbar(toolbarType, {
+            states: this._puzzle.getSecstructs().length,
+            showHint: this._puzzle.hint != null,
+            boosters: this._puzzle.boosters
+        });
         this.addObject(this._toolbar, this.uiLayer);
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
@@ -98,8 +103,8 @@ export default class PoseEditMode extends GameMode {
                     this.popUILock();
                 });
         });
-        this._toolbar.retryButton.clicked.connect(() => this.showResetPrompt());
-        this._toolbar.nativeButton.clicked.connect(() => this.togglePoseState());
+        this._toolbar.resetButton.clicked.connect(() => this.showResetPrompt());
+        this._toolbar.naturalButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.targetButton.clicked.connect(() => this.togglePoseState());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.copyButton.clicked.connect(() => this.showCopySequenceDialog());
@@ -109,16 +114,12 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
 
-        this._toolbar.puzzleStateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
+        this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
 
         this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
         this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
-
-        this.regs.add(Eterna.settings.autohideToolbar.connectNotify((value) => {
-            this._toolbar.setToolbarAutohide(value);
-        }));
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
@@ -231,7 +232,7 @@ export default class PoseEditMode extends GameMode {
         this._dockedSpecBox.setSize(s + 55, s * 2 + 51);
     }
 
-    public get toolbar(): PoseEditToolbar {
+    public get toolbar(): Toolbar {
         return this._toolbar;
     }
 
@@ -271,8 +272,8 @@ export default class PoseEditMode extends GameMode {
 
     public ropChangeTarget(target_index: number): void {
         this.changeTarget(target_index);
-        if (this._toolbar.puzzleStateToggle != null) {
-            this._toolbar.puzzleStateToggle.state = target_index;
+        if (this._toolbar.stateToggle != null) {
+            this._toolbar.stateToggle.state = target_index;
         }
     }
 
@@ -329,13 +330,10 @@ export default class PoseEditMode extends GameMode {
     public onPaletteTargetSelected(type: PaletteTargetType): void {
         let baseType: number = GetPaletteTargetBaseType(type);
         this.setPosesColor(baseType);
-        this.deselectAllColorings();
     }
 
     public onSwapClicked(): void {
         this.setPosesColor(EPars.RNABASE_PAIR);
-        this.deselectAllColorings();
-        this._toolbar.pairSwapButton.toggled.value = true;
     }
 
     public onHintClicked(): void {
@@ -1110,7 +1108,7 @@ export default class PoseEditMode extends GameMode {
         Eterna.settings.pipEnabled.value = pip_mode;
 
         if (pip_mode) {
-            this._toolbar.puzzleStateToggle.display.visible = false;
+            this._toolbar.stateToggle.display.visible = false;
             this._targetName.visible = false;
 
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -1137,7 +1135,7 @@ export default class PoseEditMode extends GameMode {
             }
 
         } else {
-            this._toolbar.puzzleStateToggle.display.visible = true;
+            this._toolbar.stateToggle.display.visible = true;
             this._targetName.visible = true;
 
             this.changeTarget(this._curTargetIndex);
@@ -1206,7 +1204,7 @@ export default class PoseEditMode extends GameMode {
             `Player: ${Eterna.playerName}\n` +
             `Puzzle ID: ${this._puzzle.nodeID}\n` +
             `Puzzle Title: ${this._puzzle.getName()}\n` +
-            `Mode: ${this.toolbar.nativeButton.isSelected ? "NativeMode" : "TargetMode"}`;
+            `Mode: ${this.toolbar.naturalButton.isSelected ? "NativeMode" : "TargetMode"}`;
         let infoText = Fonts.arial(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
@@ -1371,9 +1369,9 @@ export default class PoseEditMode extends GameMode {
         this._poseState = PoseState.NATIVE;
 
         this._toolbar.targetButton.toggled.value = false;
-        this._toolbar.nativeButton.toggled.value = true;
+        this._toolbar.naturalButton.toggled.value = true;
         this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.nativeButton.hotkey(null);
+        this._toolbar.naturalButton.hotkey(null);
 
         this.savePosesMarkersContexts();
         this._paused = false;
@@ -1385,8 +1383,8 @@ export default class PoseEditMode extends GameMode {
         this._poseState = PoseState.TARGET;
 
         this._toolbar.targetButton.toggled.value = true;
-        this._toolbar.nativeButton.toggled.value = false;
-        this._toolbar.nativeButton.hotkey(KeyCode.Space);
+        this._toolbar.naturalButton.toggled.value = false;
+        this._toolbar.naturalButton.hotkey(KeyCode.Space);
         this._toolbar.targetButton.hotkey(null);
 
         this.savePosesMarkersContexts();
@@ -1835,14 +1833,6 @@ export default class PoseEditMode extends GameMode {
         }
 
         missionClearedPanel.closeButton.clicked.connect(() => keepPlaying());
-    }
-
-    public deselectAllColorings(): void {
-        this._toolbar.palette.clearSelection();
-        this._toolbar.pairSwapButton.toggled.value = false;
-        for (let button of this._toolbar.dynPaintTools) {
-            button.toggled.value = false;
-        }
     }
 
     public setPosesColor(paintColor: number): void {
@@ -3598,7 +3588,7 @@ export default class PoseEditMode extends GameMode {
 
     private _background: Background;
 
-    private _toolbar: PoseEditToolbar;
+    private _toolbar: Toolbar;
 
     protected  _folder: Folder;
     /// Asynch folding
