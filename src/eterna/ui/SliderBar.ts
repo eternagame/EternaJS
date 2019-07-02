@@ -1,8 +1,7 @@
 import {Graphics, Point} from "pixi.js";
 import {Flashbang, GameObjectRef} from "flashbang/core";
 import {DisplayObjectPointerTarget} from "flashbang/input";
-import {ContainerObject} from "flashbang/objects";
-import {Dragger} from "flashbang/util";
+import {ContainerObject, Dragger} from "flashbang/objects";
 import {Signal} from "signals";
 
 export default class SliderBar extends ContainerObject {

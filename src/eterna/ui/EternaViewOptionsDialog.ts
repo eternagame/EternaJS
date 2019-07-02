@@ -5,9 +5,10 @@ import {Setting} from "flashbang/settings";
 import {DisplayUtil} from "flashbang/util";
 import Eterna from "eterna/Eterna";
 import {Bitmaps} from "eterna/resources";
-import {
-    Dialog, GameButton, GameCheckbox, GamePanel, GamePanelType
-} from ".";
+import Dialog from "./Dialog";
+import GameButton from "./GameButton";
+import GameCheckbox from "./GameCheckbox";
+import GamePanel, {GamePanelType} from "./GamePanel";
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB

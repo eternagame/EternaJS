@@ -1,6 +1,7 @@
 import {MathUtil} from "flashbang/util";
 import {StringToPaletteTargetType} from "eterna/ui";
-import {RScriptEnv, RScriptOp} from ".";
+import RScriptEnv from "./RScriptEnv";
+import RScriptOp from "./RScriptOp";
 
 export enum ROPRNAType {
     SETBASE = "SETBASE",

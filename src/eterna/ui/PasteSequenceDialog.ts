@@ -1,7 +1,8 @@
 import {Flashbang} from "flashbang/core";
 import {KeyCode} from "flashbang/input";
 import {GameMode} from "eterna/mode";
-import {Dialog, TextInputPanel} from ".";
+import Dialog from "./Dialog";
+import TextInputPanel from "./TextInputPanel";
 
 /**
  * Prompts the user to paste a sequence.

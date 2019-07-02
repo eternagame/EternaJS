@@ -14,9 +14,10 @@ import {EternaURL} from "eterna/net";
 import {Bitmaps} from "eterna/resources";
 import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
 import {Fonts} from "eterna/util";
-import {
-    GameButton, GamePanel, HTMLTextObject, TextBalloon
-} from ".";
+import GameButton from "./GameButton";
+import GamePanel from "./GamePanel";
+import HTMLTextObject from "./HTMLTextObject";
+import TextBalloon from "./TextBalloon";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

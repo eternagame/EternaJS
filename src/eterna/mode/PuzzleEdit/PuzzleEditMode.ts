@@ -15,16 +15,14 @@ import {Bitmaps} from "eterna/resources";
 import {
     AsyncProcessDialog, ConstraintBox, DialogCanceledError, EternaViewOptionsDialog, EternaViewOptionsMode,
     GameButton, GetPaletteTargetBaseType, PaletteTargetType, PasteSequenceDialog, PoseThumbnail, PoseThumbnailType,
-    URLButton
+    URLButton, Toolbar, ToolbarType
 } from "eterna/ui";
-import {default as Toolbar, ToolbarType} from "eterna/ui/Toolbar";
 import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
 import {ExternalInterfaceCtx, Fonts} from "eterna/util";
 import {Background, BaseGlow} from "eterna/vfx";
 import {CopyTextDialogMode, GameMode} from "eterna/mode";
-import {
-    StructureInput, SubmitPuzzleDialog, SubmitPuzzleDetails
-} from ".";
+import StructureInput from "./StructureInput";
+import SubmitPuzzleDialog, {SubmitPuzzleDetails} from "./SubmitPuzzleDialog";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

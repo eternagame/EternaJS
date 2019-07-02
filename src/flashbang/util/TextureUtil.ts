@@ -2,7 +2,7 @@ import {
     BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
 } from "pixi.js";
 import {Flashbang} from "../core";
-import {Assert} from ".";
+import Assert from "./Assert";
 
 export default class TextureUtil {
     public static fromBase64PNG(base64PNG: string): Promise<Texture> {

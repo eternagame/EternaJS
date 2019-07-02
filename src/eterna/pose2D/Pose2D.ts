@@ -3,11 +3,11 @@ import {Container, Graphics, Point, Sprite, Texture, Rectangle} from "pixi.js";
 import {Flashbang, Updatable} from "flashbang/core";
 import {Vector2} from "flashbang/geom";
 import {InputUtil} from "flashbang/input";
-import {ContainerObject, SceneObject} from "flashbang/objects";
+import {ContainerObject, SceneObject, Dragger} from "flashbang/objects";
 import {
     AlphaTask, DelayTask, LocationTask, ParallelTask, RepeatingTask, SelfDestructTask, SerialTask
 } from "flashbang/tasks";
-import {Arrays, DisplayUtil, Dragger, Easing} from "flashbang/util";
+import {Arrays, DisplayUtil, Easing} from "flashbang/util";
 import {Registration} from "signals";
 import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
@@ -20,11 +20,19 @@ import {ROPWait} from "eterna/rscript";
 import {TextBalloon} from "eterna/ui";
 import {Fonts, Utility} from "eterna/util";
 import {BaseGlow, LightRay} from "eterna/vfx";
-import {
-    Base, BaseDrawFlags, EnergyScoreDisplay, HighlightBox, HighlightType, Molecule, PaintCursor,
-    PoseField, PoseUtil, PuzzleEditOp, RNAAnchorObject, RNALayout, RNATreeNode,
-    ScoreDisplayNode, ScoreDisplayNodeType, ExplosionFactorPanel
-} from ".";
+import Base from "./Base";
+import BaseDrawFlags from "./BaseDrawFlags";
+import EnergyScoreDisplay from "./EnergyScoreDisplay";
+import HighlightBox, {HighlightType} from "./HighlightBox";
+import Molecule from "./Molecule";
+import PaintCursor from "./PaintCursor";
+import PoseField from "./PoseField";
+import PoseUtil from "./PoseUtil";
+import PuzzleEditOp from "./PuzzleEditOp";
+import RNAAnchorObject from "./RNAAnchorObject";
+import RNALayout, {RNATreeNode} from "./RNALayout";
+import ScoreDisplayNode, {ScoreDisplayNodeType} from "./ScoreDisplayNode";
+import ExplosionFactorPanel from "./ExplosionFactorPanel";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

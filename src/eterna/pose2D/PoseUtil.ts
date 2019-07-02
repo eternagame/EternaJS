@@ -1,5 +1,5 @@
 import EPars from "eterna/EPars";
-import {PuzzleEditOp} from ".";
+import PuzzleEditOp from "./PuzzleEditOp";
 
 /** Utility functions for pose data */
 export default class PoseUtil {

@@ -9,15 +9,14 @@ import Eterna from "eterna/Eterna";
 import Feedback from "eterna/Feedback";
 import UndoBlock from "eterna/UndoBlock";
 import {Folder, FolderManager, Vienna} from "eterna/folding";
+import {GameMode} from "eterna/mode";
 import {PoseField} from "eterna/pose2D";
 import {Puzzle, Solution} from "eterna/puzzle";
 import {
-    EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton
+    EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton, Toolbar, ToolbarType
 } from "eterna/ui";
 import {Fonts, Utility} from "eterna/util";
 import {Background} from "eterna/vfx";
-import {GameMode} from "eterna/mode";
-import Toolbar, {ToolbarType} from "eterna/ui/Toolbar";
 
 export default class FeedbackViewMode extends GameMode {
     public constructor(solution: Solution, puzzle: Puzzle) {

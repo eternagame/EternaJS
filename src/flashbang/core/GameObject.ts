@@ -1,8 +1,8 @@
 import * as log from "loglevel";
 import {Container, DisplayObject} from "pixi.js";
-// Full path, not module path, has to be used here to prevent cyclic dependency/module load order issue
 import Assert from "../util/Assert";
-import {GameObjectBase, GameObjectRef} from ".";
+import GameObjectBase from "./GameObjectBase";
+import GameObjectRef from "./GameObjectRef";
 
 export default class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */

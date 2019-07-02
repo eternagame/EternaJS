@@ -14,7 +14,7 @@ import {
     Dialog, GameButton, GamePanel, PoseThumbnail, PoseThumbnailType
 } from "eterna/ui";
 import {Fonts} from "eterna/util";
-import {SolutionDescBox} from ".";
+import SolutionDescBox from "./SolutionDescBox";
 
 export default class ViewSolutionDialog extends Dialog<void> {
     public readonly playClicked = new UnitSignal();

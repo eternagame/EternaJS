@@ -1,5 +1,6 @@
 import {PoseState} from "eterna/puzzle";
-import {RScriptEnv, RScriptOp} from ".";
+import RScriptEnv from "./RScriptEnv";
+import RScriptOp from "./RScriptOp";
 
 export default class ROPPre extends RScriptOp {
     constructor(command: string, env: RScriptEnv) {

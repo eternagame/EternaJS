@@ -13,7 +13,7 @@ import {
 } from "eterna/ui";
 import {Fonts, Utility} from "eterna/util";
 import {CopyTextDialogMode, GameMode} from "eterna/mode";
-import {LabComments} from ".";
+import LabComments from "./LabComments";
 
 export default class SolutionDescBox extends GamePanel {
     constructor(solution: Solution, puzzle: Puzzle) {

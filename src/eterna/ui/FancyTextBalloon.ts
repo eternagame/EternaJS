@@ -4,7 +4,9 @@ import {Vector2} from "flashbang/geom";
 import {DisplayUtil} from "flashbang/util";
 import {Bitmaps} from "eterna/resources";
 import {RScriptArrow} from "eterna/rscript";
-import {FancyGamePanel, GameButton, TextBalloon} from ".";
+import FancyGamePanel from "./FancyGamePanel";
+import GameButton from "./GameButton";
+import TextBalloon from "./TextBalloon";
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
     public constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,

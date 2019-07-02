@@ -1,5 +1,4 @@
-// import Registration from "./Registration";
-import {Registration} from ".";
+import Registration from "./Registration";
 
 /**
  * Provides a mechanism to cancel a slot or listener registration, or to perform post-registration

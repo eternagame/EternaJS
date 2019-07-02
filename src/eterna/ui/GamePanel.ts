@@ -2,7 +2,7 @@ import {
     Graphics, Point, Text, Rectangle
 } from "pixi.js";
 import {Fonts} from "eterna/util";
-import {BaseGamePanel} from ".";
+import BaseGamePanel from "./BaseGamePanel";
 
 export enum GamePanelType {
     NORMAL, INVISIBLE

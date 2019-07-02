@@ -1,5 +1,4 @@
-// import Cons from "./Cons";
-import {Cons} from ".";
+import Cons from "./Cons";
 
 export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
 

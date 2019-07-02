@@ -1,6 +1,6 @@
 import {DisplayObject} from "pixi.js";
 import {Assert, EasingFunc} from "../util";
-import {InterpolatingTask} from ".";
+import InterpolatingTask from "./InterpolatingTask";
 
 export default class DisplayObjectTask extends InterpolatingTask {
     constructor(time: number, easing: EasingFunc, target: DisplayObject) {

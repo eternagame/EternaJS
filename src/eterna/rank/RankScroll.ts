@@ -8,7 +8,9 @@ import Eterna from "eterna/Eterna";
 import {GamePanel} from "eterna/ui";
 import {Fonts} from "eterna/util";
 import {VibrateTask} from "eterna/vfx";
-import {PlayerRank, RankBoard, RankRowLayout} from ".";
+import PlayerRank from "./PlayerRank";
+import RankBoard from "./RankBoard";
+import RankRowLayout from "./RankRowLayout";
 
 export default class RankScroll extends ContainerObject {
     public static hasRankScrollData(submissionRsp: any): boolean {

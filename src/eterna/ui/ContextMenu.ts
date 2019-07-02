@@ -2,7 +2,8 @@ import {HAlign} from "flashbang/core";
 import {VLayoutContainer} from "flashbang/layout";
 import {ContainerObject} from "flashbang/objects";
 import {UnitSignal} from "signals";
-import {GameButton, GamePanel, GamePanelType} from ".";
+import GameButton from "./GameButton";
+import GamePanel, {GamePanelType} from "./GamePanel";
 
 export default class ContextMenu extends ContainerObject {
     /** Emitted when the user interacts with the menu. */

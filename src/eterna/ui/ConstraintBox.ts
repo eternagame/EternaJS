@@ -15,9 +15,9 @@ import EPars from "eterna/EPars";
 import {ConstraintType} from "eterna/puzzle";
 import {BitmapManager, Bitmaps} from "eterna/resources";
 import {Fonts} from "eterna/util";
-import {
-    Band, PoseThumbnail, PoseThumbnailType, TextBalloon
-} from ".";
+import Band from "./Band";
+import PoseThumbnail, {PoseThumbnailType} from "./PoseThumbnail";
+import TextBalloon from "./TextBalloon";
 
 export enum ConstraintBoxType {
     DEFAULT = "DEFAULT",

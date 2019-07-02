@@ -4,7 +4,8 @@ import EPars from "eterna/EPars";
 import {FullFoldResult} from "./engines/LinearFold_lib";
 import * as LinearFold_lib from "./engines/LinearFold_lib/index";
 import {FullEvalResult} from "./engines/vienna_lib";
-import {Folder, FoldUtil} from ".";
+import Folder from "./Folder";
+import FoldUtil from "./FoldUtil";
 
 export default abstract class LinearFoldBase extends Folder {
     protected constructor(lib: LinearFold_lib) {

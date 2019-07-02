@@ -2,7 +2,7 @@ import {DisplayObject, Graphics, Point} from "pixi.js";
 import {GameObject, LateUpdatable, ObjectTask} from "flashbang/core";
 import {Vector2} from "flashbang/geom";
 import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
-import {Pose2D} from ".";
+import Pose2D from "./Pose2D";
 
 export enum HighlightType {
     STACK = 0,

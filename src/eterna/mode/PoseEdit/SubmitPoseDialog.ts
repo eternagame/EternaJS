@@ -1,7 +1,7 @@
 import {Flashbang} from "flashbang/core";
 import {KeyCode} from "flashbang/input";
 import {Dialog, TextInputPanel} from "eterna/ui";
-import {SubmitPoseDetails} from ".";
+import SubmitPoseDetails from "./SubmitPoseDetails";
 
 /** Prompts the player for a title and comment */
 export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {

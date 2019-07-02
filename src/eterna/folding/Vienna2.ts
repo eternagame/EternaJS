@@ -5,7 +5,8 @@ import {RNALayout} from "eterna/pose2D";
 import {CSVParser} from "eterna/util";
 import * as vrna2_lib from "./engines/vrna2_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
-import {Folder, FoldUtil} from ".";
+import Folder from "./Folder";
+import FoldUtil from "./FoldUtil";
 
 export default class Vienna2 extends Folder {
     public static NAME = "Vienna2";

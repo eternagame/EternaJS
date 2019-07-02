@@ -1,7 +1,7 @@
 import {Container} from "pixi.js";
 import {UnitSignal} from "signals";
 import {Assert, MathUtil} from "../util";
-import {AppMode} from ".";
+import AppMode from "./AppMode";
 
 /**
  * A stack of AppModes. Only the top-most mode in the stack gets updates

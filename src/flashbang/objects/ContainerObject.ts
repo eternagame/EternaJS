@@ -1,5 +1,5 @@
 import {Container} from "pixi.js";
-import {SceneObject} from ".";
+import SceneObject from "./SceneObject";
 
 /** A GameObject that manages a PIXI Container */
 export default class ContainerObject extends SceneObject<Container> {

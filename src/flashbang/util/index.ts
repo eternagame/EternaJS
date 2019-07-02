@@ -1,5 +1,4 @@
 export {default as Assert} from "./Assert";
-export {default as Dragger} from "./Dragger";
 export {default as Arrays} from "./Arrays";
 export {default as Base64} from "./Base64";
 export {default as ColorUtil} from "./ColorUtil";

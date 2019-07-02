@@ -2,7 +2,8 @@ import {Point} from "pixi.js";
 import {PointerCapture} from "flashbang/input";
 import {Enableable} from "flashbang/objects";
 import {DisplayUtil} from "flashbang/util";
-import {GameButton, GamePanel, GamePanelType} from ".";
+import GameButton from "./GameButton";
+import GamePanel, {GamePanelType} from "./GamePanel";
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP

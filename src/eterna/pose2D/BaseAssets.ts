@@ -4,7 +4,9 @@ import EPars from "eterna/EPars";
 import ExpPainter from "eterna/ExpPainter";
 import {BitmapManager, Bitmaps, Sounds} from "eterna/resources";
 import {EternaTextureUtil} from "eterna/util";
-import {Base, BaseDrawFlags, BaseTextures} from ".";
+import Base from "./Base";
+import BaseDrawFlags from "./BaseDrawFlags";
+import BaseTextures from "./BaseTextures";
 
 /** Handles initialization and management of Base-related assets */
 export default class BaseAssets {

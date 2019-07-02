@@ -5,7 +5,8 @@ import {PoseOp} from "eterna/pose2D";
 import {int} from "eterna/util";
 import * as nupack_lib from "./engines/nupack_lib/index";
 import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
-import {Folder, FoldUtil} from ".";
+import Folder from "./Folder";
+import FoldUtil from "./FoldUtil";
 
 export default class NuPACK extends Folder {
     public static NAME = "NuPACK";

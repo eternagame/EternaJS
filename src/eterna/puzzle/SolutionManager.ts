@@ -3,7 +3,7 @@ import EPars from "eterna/EPars";
 import Eterna from "eterna/Eterna";
 import Feedback from "eterna/Feedback";
 import {CSVParser} from "eterna/util";
-import {Solution} from ".";
+import Solution from "./Solution";
 
 export default class SolutionManager {
     public static get instance(): SolutionManager {

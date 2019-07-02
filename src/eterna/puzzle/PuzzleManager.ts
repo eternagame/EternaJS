@@ -2,7 +2,8 @@ import * as log from "loglevel";
 import Eterna from "eterna/Eterna";
 import {CSVParser} from "eterna/util";
 import {Folder, FolderManager} from "../folding";
-import {Puzzle, SolutionManager} from ".";
+import Puzzle from "./Puzzle";
+import SolutionManager from "./SolutionManager";
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {

@@ -1,8 +1,8 @@
+export {default as BaseGamePanel} from "./BaseGamePanel";
+export {default as GamePanel, GamePanelType} from "./GamePanel";
 export {default as ActionBar} from "./ActionBar";
 export {default as Dialog, DialogCanceledError} from "./Dialog";
 export {default as TextBalloon} from "./TextBalloon";
-export {default as BaseGamePanel} from "./BaseGamePanel";
-export {default as GamePanel, GamePanelType} from "./GamePanel";
 export {default as AsyncProcessDialog} from "./AsyncProcessDialog";
 export {default as Band} from "./Band";
 export {default as ConfirmDialog} from "./ConfirmDialog";
@@ -28,10 +28,9 @@ export {default as SpecBox} from "./SpecBox";
 export {default as SpecBoxDialog} from "./SpecBoxDialog";
 export {default as TextInputObject} from "./TextInputObject";
 export {default as TextInputPanel} from "./TextInputPanel";
-// TODO: Weird circular dependancy issue. Once importing from eterna/mode/PoseEdit is gone, we can bring this back
-// export {default as Toolbar} from "./Toolbar";
 export {default as ToggleBar} from "./ToggleBar";
 export {default as Tooltips, Tooltip} from "./Tooltips";
 export {default as UILockDialog} from "./UILockDialog";
 export {default as URLButton} from "./URLButton";
 export {default as VScrollBox} from "./VScrollBox";
+export {default as Toolbar, ToolbarType} from "./Toolbar";

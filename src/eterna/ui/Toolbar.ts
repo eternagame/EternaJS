@@ -7,13 +7,16 @@ import {ContainerObject} from "flashbang/objects";
 import {LocationTask} from "flashbang/tasks";
 import {Easing, DisplayUtil} from "flashbang/util";
 import Eterna from "eterna/Eterna";
-import {Booster, PoseEditMode} from "eterna/mode/PoseEdit";
+// Stupid cyclic dependancy - TODO: Fix later once this can get refactored
+import Booster from "eterna/mode/PoseEdit/Booster";
+import PoseEditMode from "eterna/mode/PoseEdit/PoseEditMode";
 import {Bitmaps} from "eterna/resources";
 import {RScriptUIElementID} from "eterna/rscript";
 import {BoostersData} from "eterna/puzzle";
-import {
-    NucleotidePalette, GameButton, ToggleBar, EternaMenu, EternaMenuStyle
-} from ".";
+import NucleotidePalette from "./NucleotidePalette";
+import GameButton from "./GameButton";
+import ToggleBar from "./ToggleBar";
+import EternaMenu, {EternaMenuStyle} from "./EternaMenu";
 
 export enum ToolbarType {
     PUZZLE,

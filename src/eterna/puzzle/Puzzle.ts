@@ -3,7 +3,7 @@ import EPars from "eterna/EPars";
 import {Folder, FolderManager, Vienna} from "eterna/folding";
 import {EternaURL} from "eterna/net";
 import {Pose2D} from "eterna/pose2D";
-import {ConstraintType} from ".";
+import {ConstraintType} from "./Constraints";
 
 export interface BoostersData {
     mission?: any;
