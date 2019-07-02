@@ -1,5 +1,5 @@
 import {ContainerObject} from "flashbang/objects";
-import {Bubble} from ".";
+import Bubble from "./Bubble";
 
 export default class BubbleSweep extends ContainerObject {
     public constructor(numBubbles: number) {

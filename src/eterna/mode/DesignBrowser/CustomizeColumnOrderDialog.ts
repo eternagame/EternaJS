@@ -8,7 +8,7 @@ import {
     Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
 } from "eterna/ui";
 import {Fonts, GraphicsUtil} from "eterna/util";
-import {DesignCategory} from ".";
+import {DesignCategory} from "./DesignBrowserMode";
 
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();

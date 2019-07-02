@@ -1,5 +1,5 @@
 import EPars from "eterna/EPars";
-import {Folder} from ".";
+import Folder from "./Folder";
 
 export default class RNAFoldBasic extends Folder {
     public static readonly NAME = "Basic";

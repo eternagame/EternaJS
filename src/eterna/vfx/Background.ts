@@ -1,6 +1,6 @@
 import {ContainerObject} from "flashbang/objects";
 import Eterna from "eterna/Eterna";
-import {Bubble} from ".";
+import Bubble from "./Bubble";
 
 export default class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {

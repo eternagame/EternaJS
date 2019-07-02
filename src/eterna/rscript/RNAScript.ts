@@ -1,9 +1,15 @@
 import {PoseEditMode} from "eterna/mode";
 import {Puzzle} from "eterna/puzzle";
-import {
-    ROPHighlight, ROPHighlightMode, ROPHint, ROPPre, ROPRNA, ROPRNAType, ROPTextbox, ROPTextboxMode,
-    ROPUI, ROPWait, ROPWaitType, RScriptEnv, RScriptOp, RScriptOpTree
-} from ".";
+import ROPHighlight, {ROPHighlightMode} from "./ROPHighlight";
+import ROPHint from "./ROPHint";
+import ROPPre from "./ROPPre";
+import ROPRNA, {ROPRNAType} from "./ROPRNA";
+import ROPTextbox, {ROPTextboxMode} from "./ROPTextbox";
+import ROPUI from "./ROPUI";
+import ROPWait, {ROPWaitType} from "./ROPWait";
+import RScriptEnv from "./RScriptEnv";
+import RScriptOp from "./RScriptOp";
+import RScriptOpTree from "./RScriptOpTree";
 
 export default class RNAScript {
     public constructor(puz: Puzzle, ui: PoseEditMode) {

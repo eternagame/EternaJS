@@ -5,7 +5,8 @@ import {UnitSignal} from "signals";
 import {InputUtil, PointerCapture} from "../input";
 import {CallbackTask, DelayTask, SerialTask} from "../tasks";
 import {DisplayUtil} from "../util";
-import {ContainerObject, Enableable} from ".";
+import ContainerObject from "./ContainerObject";
+import Enableable from "./Enableable";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

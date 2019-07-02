@@ -11,7 +11,7 @@ import EPars from "eterna/EPars";
 import {BitmapManager, Bitmaps} from "eterna/resources";
 import {ROPWait, RScriptUIElementID} from "eterna/rscript";
 import {Fonts} from "eterna/util";
-import {Tooltips} from ".";
+import Tooltips from "./Tooltips";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

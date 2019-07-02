@@ -3,7 +3,8 @@ import {TextureUtil} from "flashbang/util";
 import EPars from "eterna/EPars";
 import {BitmapManager} from "eterna/resources";
 import {EternaTextureUtil, Fonts} from "eterna/util";
-import {Base, BaseDrawFlags} from ".";
+import Base from "./Base";
+import BaseDrawFlags from "./BaseDrawFlags";
 
 /** Encapsulates textures for a Base type */
 export default class BaseTextures {

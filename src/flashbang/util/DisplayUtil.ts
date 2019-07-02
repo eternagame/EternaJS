@@ -2,7 +2,7 @@ import {
     DisplayObject, Graphics, Matrix, Point, Rectangle
 } from "pixi.js";
 import {Flashbang, HAlign, VAlign} from "../core";
-import {RectangleUtil} from ".";
+import RectangleUtil from "./RectangleUtil";
 
 // the @types file for upng-js is broken, so we just require it directly
 const UPNG = require("upng-js");

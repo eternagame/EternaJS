@@ -2,7 +2,9 @@ import {Point, Text} from "pixi.js";
 import {Signal, UnitSignal} from "signals";
 
 import {Fonts} from "eterna/util";
-import {GameButton, GamePanel, TextInputObject} from ".";
+import GameButton from "./GameButton";
+import GamePanel from "./GamePanel";
+import TextInputObject from "./TextInputObject"
 
 export default class TextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();

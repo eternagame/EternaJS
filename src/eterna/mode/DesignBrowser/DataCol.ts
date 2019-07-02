@@ -9,9 +9,9 @@ import Feedback from "eterna/Feedback";
 import {Solution} from "eterna/puzzle";
 import {GameButton, TextInputObject} from "eterna/ui";
 import {Fonts, int, Utility} from "eterna/util";
-import {
-    DesignBrowserDataType, DesignCategory, SequenceStringListView, SortOrder
-} from ".";
+import {DesignBrowserDataType, DesignCategory} from "./DesignBrowserMode";
+import SequenceStringListView from "./SequenceStringListView";
+import {SortOrder} from "./SortOptions";
 
 export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();

@@ -1,5 +1,5 @@
 import {Value} from "signals";
-import {Button} from ".";
+import Button from "./Button";
 
 /** A two-state Button whose value is toggled on click (e.g. a checkbox). */
 export default abstract class ToggleButton extends Button {

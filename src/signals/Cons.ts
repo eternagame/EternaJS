@@ -1,7 +1,6 @@
-/* import Reactor from "./Reactor";
+import Reactor from "./Reactor";
 import {RListener} from "./Reactor";
-import Connection from "./Connection"; */
-import {Reactor, RListener, Connection} from ".";
+import Connection from "./Connection";
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.

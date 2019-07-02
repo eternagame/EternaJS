@@ -1,7 +1,7 @@
 import {Arrays} from "flashbang/util";
 import {UnitSignal} from "signals";
 import {Solution} from "eterna/puzzle";
-import {DesignCategory} from ".";
+import {DesignCategory} from "./DesignBrowserMode";
 
 export enum SortOrder {
     INCREASING = 1,

@@ -1,5 +1,5 @@
 import {Graphics} from "pixi.js";
-import {HTMLTextObject} from ".";
+import HTMLTextObject from "./HTMLTextObject";
 
 /** A DOM-based underlined text link with some background styling. */
 export default class URLButton extends HTMLTextObject {

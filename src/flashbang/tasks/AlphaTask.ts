@@ -1,6 +1,6 @@
 import {DisplayObject} from "pixi.js";
 import {EasingFunc} from "../util";
-import {DisplayObjectTask} from ".";
+import DisplayObjectTask from "./DisplayObjectTask";
 
 export default class AlphaTask extends DisplayObjectTask {
     constructor(alpha: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {

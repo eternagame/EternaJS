@@ -1,4 +1,5 @@
-import {ROPWait, RScriptOp} from ".";
+import ROPWait from "./ROPWait";
+import RScriptOp from "./RScriptOp";
 
 /*
  * RScript Operation Tree.

@@ -1,7 +1,7 @@
 import {DisplayObject} from "pixi.js";
 import {SignalView} from "signals";
 import {EventSignal} from "../util";
-import {PointerTarget} from ".";
+import PointerTarget from "./PointerTarget";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

@@ -1,10 +1,9 @@
 import {Graphics, Point} from "pixi.js";
 import {Flashbang, GameObjectRef} from "flashbang/core";
 import {InputUtil, KeyboardEventType, KeyboardListener, KeyCode, MouseWheelListener} from "flashbang/input";
-import {ContainerObject} from "flashbang/objects";
-import {Dragger} from "flashbang/util";
+import {ContainerObject, Dragger} from "flashbang/objects";
 import {ROPWait} from "eterna/rscript";
-import {Pose2D} from ".";
+import Pose2D from "./Pose2D";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

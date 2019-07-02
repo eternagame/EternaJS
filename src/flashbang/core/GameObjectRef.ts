@@ -1,4 +1,5 @@
-import {GameObject, GameObjectBase} from ".";
+import GameObject from "./GameObject";
+import GameObjectBase from "./GameObjectBase";
 
 export default class GameObjectRef {
     public static readonly NULL: GameObjectRef = new GameObjectRef();

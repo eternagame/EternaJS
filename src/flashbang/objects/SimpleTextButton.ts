@@ -1,6 +1,6 @@
 import {Graphics, Text} from "pixi.js";
 import {TextBuilder} from "../util";
-import {Button, ButtonState} from ".";
+import Button, {ButtonState} from "./Button";
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
 export default class SimpleTextButton extends Button {

@@ -1,7 +1,7 @@
 import {Rectangle} from "pixi.js";
 import {HAlign} from "../core";
 import {DisplayUtil} from "../util";
-import {LayoutContainer} from ".";
+import LayoutContainer from "./LayoutContainer";
 
 /**
  * A Container that arranges its children vertically.

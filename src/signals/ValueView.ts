@@ -1,5 +1,4 @@
-// import Connection from "./Connection";
-import {Connection} from ".";
+import Connection from "./Connection";
 
 /**
  * A view of a {@link AbstractValue} subclass, to which listeners may be added, but which one

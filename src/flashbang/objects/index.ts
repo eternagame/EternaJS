@@ -7,3 +7,4 @@ export {default as ImageButton} from "./ImageButton";
 export {default as SimpleTextButton} from "./SimpleTextButton";
 export {default as SpriteObject} from "./SpriteObject";
 export {default as ToggleButton} from "./ToggleButton";
+export {default as Dragger} from "./Dragger";

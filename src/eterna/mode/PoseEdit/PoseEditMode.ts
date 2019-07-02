@@ -20,13 +20,16 @@ import {RNAScript} from "eterna/rscript";
 import {
     ActionBar, ConstraintBox, ConstraintBoxType, ContextMenu, EternaViewOptionsDialog, EternaViewOptionsMode,
     GameButton, GamePanel, HTMLTextObject, GetPaletteTargetBaseType, PaletteTargetType,
-    PasteSequenceDialog, SpecBox, SpecBoxDialog, URLButton
+    PasteSequenceDialog, SpecBox, SpecBoxDialog, URLButton, Toolbar, ToolbarType
 } from "eterna/ui";
 import {default as UndoBlock, UndoBlockParam} from "eterna/UndoBlock";
 import {ExternalInterface, ExternalInterfaceCtx, Fonts, int} from "eterna/util";
 import {Background, BubbleSweep} from "eterna/vfx";
-import {MissionClearedPanel, MissionIntroMode, SubmitPoseDetails, SubmitPoseDialog, SubmittingDialog} from ".";
-import Toolbar, { ToolbarType } from "eterna/ui/Toolbar";
+import MissionClearedPanel from "./MissionClearedPanel";
+import MissionIntroMode from "./MissionIntroMode";
+import SubmitPoseDetails from "./SubmitPoseDetails";
+import SubmitPoseDialog from "./SubmitPoseDialog";
+import SubmittingDialog from "./SubmittingDialog";
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

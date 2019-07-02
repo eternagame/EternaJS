@@ -20,10 +20,16 @@ import {
 } from "eterna/ui";
 import {Fonts, int} from "eterna/util";
 import {GameMode} from "eterna/mode";
-import {
-    CustomizeColumnOrderDialog, DataCol, DotLine, GridLines, MarkerBoxView,
-    SelectionBox, SortOptions, SortOrder, SortOptionsDialog, ViewSolutionDialog, VoteProcessor
-} from ".";
+import CustomizeColumnOrderDialog from "./CustomizeColumnOrderDialog";
+import DataCol from "./DataCol";
+import DotLine from "./DotLine"
+import GridLines from "./GridLines";
+import MarkerBoxView from "./MarkerBoxView";
+import SelectionBox from "./SelectionBox";
+import SortOptions, {SortOrder} from "./SortOptions";
+import SortOptionsDialog from "./SortOptionsDialog";
+import ViewSolutionDialog from "./ViewSolutionDialog";
+import VoteProcessor from "./VoteProcessor";
 
 export enum DesignBrowserDataType {
     INT = 0,

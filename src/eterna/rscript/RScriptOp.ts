@@ -1,4 +1,4 @@
-import {RScriptEnv} from ".";
+import RScriptEnv from "./RScriptEnv";
 
 /**
  * RScript Operation.

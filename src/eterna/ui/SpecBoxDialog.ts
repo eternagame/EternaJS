@@ -3,7 +3,9 @@ import {Flashbang, HAlign, VAlign} from "flashbang/core";
 import {KeyCode} from "flashbang/input";
 import {DisplayUtil} from "flashbang/util";
 import UndoBlock from "eterna/UndoBlock";
-import {Dialog, GameButton, SpecBox} from ".";
+import Dialog from "./Dialog";
+import GameButton from "./GameButton";
+import SpecBox from "./SpecBox";
 
 /**
  * Displays a SpecBox in a modal dialog.

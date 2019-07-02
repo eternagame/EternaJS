@@ -2,7 +2,7 @@ import {Point, Text} from "pixi.js";
 import {ContainerObject} from "flashbang/objects";
 import {TextUtil} from "flashbang/util";
 import {Fonts} from "eterna/util";
-import {PlayerRank} from ".";
+import PlayerRank from "./PlayerRank";
 
 export default class RankRowLayout extends ContainerObject {
     public constructor(rank: number, data: PlayerRank, rankScoreOffset: number,

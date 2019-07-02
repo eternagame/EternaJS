@@ -7,7 +7,7 @@ import {PoseEditMode} from "eterna/mode";
 import {Pose2D, RNAHighlightState} from "eterna/pose2D";
 import {Puzzle} from "eterna/puzzle";
 import {PaletteTargetType, TextBalloon, ToggleBar} from "eterna/ui";
-import {RScriptUIElement, RScriptUIElementID} from ".";
+import {RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
 
 /**
  * RScript Environment.

@@ -9,7 +9,8 @@ import {
     Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
 } from "eterna/ui";
 import {Fonts, GraphicsUtil} from "eterna/util";
-import {DesignCategory, SortOptions, SortOrder} from ".";
+import {DesignCategory} from "./DesignBrowserMode";
+import SortOptions, {SortOrder} from "./SortOptions";
 
 export default class SortOptionsDialog extends Dialog<void> {
     public readonly options: SortOptions;

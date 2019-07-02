@@ -4,7 +4,7 @@ import {
 import {CallbackTask, FunctionTask, SerialTask} from "flashbang/tasks";
 import {DisplayUtil} from "flashbang/util";
 import {GameMode} from "eterna/mode";
-import {AchievementBox} from ".";
+import AchievementBox from "./AchievementBox";
 
 export default class AchievementManager extends GameObject {
     /** True if there's an achievement animation playing, or about to play */

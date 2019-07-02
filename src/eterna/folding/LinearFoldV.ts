@@ -1,5 +1,5 @@
 import {EmscriptenUtil} from "eterna/emscripten";
-import {LinearFoldBase} from ".";
+import LinearFoldBase from "./LinearFoldBase";
 
 export default class LinearFoldV extends LinearFoldBase {
     public static readonly NAME = "LinearFoldV";

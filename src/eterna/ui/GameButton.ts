@@ -8,10 +8,10 @@ import {DisplayUtil, TextBuilder} from "flashbang/util";
 import {Registration, Registrations, Value} from "signals";
 import {ROPWait, RScriptUIElementID} from "eterna/rscript";
 import {Fonts} from "eterna/util";
-import {Tooltips} from ".";
+import Tooltips from "./Tooltips";
 
 export default class GameButton extends Button implements KeyboardListener {
-    public readonly toggled: Value<boolean> = new Value(false);
+    public readonly toggled: Value<boolean> = new Value<boolean>(false);
 
     public constructor() {
         super();

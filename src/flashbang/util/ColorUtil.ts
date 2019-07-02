@@ -1,4 +1,5 @@
-import {MathUtil, StringUtil} from ".";
+import MathUtil from "./MathUtil";
+import StringUtil from "./StringUtil";
 
 export default class ColorUtil {
     public static fromString(str: string): number {

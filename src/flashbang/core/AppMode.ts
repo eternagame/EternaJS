@@ -4,9 +4,12 @@ import {
 } from "signals";
 import {KeyboardInput, MouseWheelInput} from "../input";
 import {Assert} from "../util";
-import {
-    GameObject, GameObjectBase, GameObjectRef, LateUpdatable, ModeStack, Updatable
-} from ".";
+import GameObject from "./GameObject";
+import GameObjectBase from "./GameObjectBase";
+import GameObjectRef from "./GameObjectRef";
+import LateUpdatable from "./LateUpdatable";
+import ModeStack from "./ModeStack";
+import Updatable from "./Updatable";
 
 export default class AppMode {
     /** Default keyboard input processor */

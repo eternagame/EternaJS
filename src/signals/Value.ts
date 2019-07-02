@@ -1,7 +1,6 @@
-/* import AbstractValue from "./AbstractValue";
+import AbstractValue from "./AbstractValue";
 import MappedValue from "./MappedValue";
-import ValueView from "./ValueView"; */
-import {AbstractValue, MappedValue, ValueView} from ".";
+import ValueView from "./ValueView";
 
 export default class Value<T> extends AbstractValue<T> implements ValueView<T> {
     /** Creates an instance with the supplied starting value. */

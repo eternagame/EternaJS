@@ -1,7 +1,9 @@
 import {Point} from "pixi.js";
 import {Flashbang} from "flashbang/core";
 import {HLayoutContainer} from "flashbang/layout";
-import {Dialog, GameButton, TextBalloon} from ".";
+import Dialog from "./Dialog";
+import GameButton from "./GameButton";
+import TextBalloon from "./TextBalloon";
 
 export default class NotificationDialog extends Dialog<void> {
     /** Non-null if extraButtonTitle is specified */
