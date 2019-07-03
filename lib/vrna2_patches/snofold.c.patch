@@ -1,4 +1,0 @@
-14c14
-< #include <config.h>
----
-> #include "config.h"

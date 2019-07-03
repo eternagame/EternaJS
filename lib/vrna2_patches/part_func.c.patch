@@ -1,4 +1,0 @@
-58c58
-< #include <config.h>
----
-> #include "config.h"

@@ -1,4 +1,0 @@
-36c36
-< #include <config.h>
----
-> #include "config.h"

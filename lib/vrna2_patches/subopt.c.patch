@@ -1,4 +1,0 @@
-79c79
-< #include <config.h>
----
-> #include "config.h"
