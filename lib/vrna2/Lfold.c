@@ -16,7 +16,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
-#include <limits.h>
 #include "utils.h"
 #include "energy_par.h"
 #include "fold_vars.h"
@@ -42,10 +41,6 @@
 /*@unused@*/
 #define MAXSECTORS        500     /* dimension for a backtrack array */
 #define LOCALITY          0.      /* locality parameter for base-pairs */
-
-#define INT_CLOSE_TO_UNDERFLOW(i)   ((i) <= (INT_MIN/16))
-#define UNDERFLOW_CORRECTION        (INT_MIN/32)
-
 
 
 #define INT_CLOSE_TO_UNDERFLOW(i)   ((i) <= (INT_MIN/16))
@@ -80,6 +75,7 @@ PRIVATE char          *prev = NULL;
 PRIVATE struct svm_model  *avg_model = NULL;
 PRIVATE struct svm_model  *sd_model = NULL;
 #endif
+
 PRIVATE int           with_gquad  = 0;
 PRIVATE int           **ggg       = NULL;
 
@@ -202,8 +198,6 @@ Lfoldz( const char *string,
   with_gquad  = P->model_details.gquad;
   S           = encode_sequence(string, 0);
   S1          = encode_sequence(string, 1);
-  /* keep track of how many times we were close to an integer underflow */
-  underflow = 0;
 
   for (i=length; i>=(int)length-(int)maxdist-4 && i>0; i--)
     make_ptypes(S, i, maxdist, length);
@@ -414,11 +408,7 @@ fill_arrays(const char *string,
             decomp = MIN2(decomp,
                           c[i][k-i]+c[k+1][j-k-1]+P->stack[type][type_2]);
         }
-      
-      /* first case: i stays unpaired */
 
-      
-      /* next all cases where i is paired */
         decomp += 2*P->MLintern[1];          /* no TermAU penalty if coax stack */
 #if 0
         /* This is needed for Y shaped ML loops with coax stacking of
@@ -512,6 +502,7 @@ fill_arrays(const char *string,
                   }
                   if(length<=i+maxdist){
                     j     = length;
+
                     if(with_gquad){
                       f3[i] = MIN2(f3[i], ggg[i][j-i]);
                     }
@@ -653,9 +644,8 @@ fill_arrays(const char *string,
               /* ss does not contain prev */
               if (dangles==2){
                 printf(".%s (%6.2f) %4d\n", prev, (f3[prev_i]-f3[prev_i+strlen(prev)-1])/100., prev_i-1);
-              } else {
+              } else
                 printf("%s (%6.2f) %4d\n", prev, (f3[prev_i]-f3[prev_i+strlen(prev)])/100., prev_i);
-			  }
             }
             free(prev);
           }
@@ -769,17 +759,6 @@ fill_arrays(const char *string,
               double min_sd = minimal_sd(AUGC[0],AUGC[1],AUGC[2],AUGC[3],AUGC[4]);
               difference=(fij-f3[pairpartner+1])/100.-average_free_energy;
               if ( difference - ( min_z * min_sd ) <= 0.0001 ) {
-
-      /* check for values close to integer underflow */
-      if(INT_CLOSE_TO_UNDERFLOW(f3[i])){
-        /* correct f3 free energies and increase underflow counter */
-        int cnt, cnt2;
-        for(cnt=i; cnt <= length && cnt <= lind + maxdist + 2; cnt++) {
-          f3[cnt] -= UNDERFLOW_CORRECTION;
-        }
-        (*underflow)++;
-      }
-
                 sd_free_energy = sd_regression(AUGC[0],AUGC[1],AUGC[2],AUGC[3],AUGC[4],sd_model);
                 my_z=difference/sd_free_energy;
                 if (my_z<=min_z){
@@ -799,7 +778,6 @@ fill_arrays(const char *string,
               printf("%s (%6.2f) %4d\n", ss, (f3[lind]-f3[lind+strlen(ss)])/100., 1);
             free(ss);
           }
-
         }
         do_backtrack=0;
       }

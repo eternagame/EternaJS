@@ -1,4 +1,0 @@
-16c16
-< #include <config.h>
----
-> #include "config.h"
