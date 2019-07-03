@@ -1,0 +1,112 @@
+12c12
+< #include <config.h>
+---
+> #include "config.h"
+17a18
+> #include <limits.h>
+43a45,48
+> 
+> #define INT_CLOSE_TO_UNDERFLOW(i)   ((i) <= (INT_MIN/16))
+> #define UNDERFLOW_CORRECTION        (INT_MIN/32)
+> 
+77d81
+< 
+99c103
+< PRIVATE int   fill_arrays(const char *sequence, int maxdist, int zsc, double min_z);
+---
+> PRIVATE int   fill_arrays(const char *sequence, int maxdist, int zsc, double min_z, int *underflow);
+179,180c183,191
+< PUBLIC  float Lfoldz(const char *string, char *structure, int maxdist, int zsc, double min_z){
+<   int i, energy;
+---
+> PUBLIC  float
+> Lfoldz( const char *string,
+>         char *structure,
+>         int maxdist,
+>         int zsc,
+>         double min_z){
+> 
+>   int i, energy, underflow;
+>   float mfe_local;
+199a211,212
+>   /* keep track of how many times we were close to an integer underflow */
+>   underflow = 0;
+201c214
+<   energy = fill_arrays(string, maxdist, zsc, min_z);
+---
+>   energy = fill_arrays(string, maxdist, zsc, min_z, &underflow);
+213c226,229
+<   return (float) energy/100.;
+---
+>   mfe_local = (underflow > 0) ? ((float)underflow * (float)(UNDERFLOW_CORRECTION)) / 100. : 0.;
+> 
+>   mfe_local += (float)energy/100.;
+>   return mfe_local;
+216c232,238
+< PRIVATE int fill_arrays(const char *string, int maxdist, int zsc, double min_z) {
+---
+> PRIVATE int
+> fill_arrays(const char *string,
+>             int maxdist,
+>             int zsc,
+>             double min_z,
+>             int *underflow) {
+> 
+409a432,433
+>       
+>       /* first case: i stays unpaired */
+410a435,436
+>       
+>       /* next all cases where i is paired */
+495c521,523
+<       if (f3[i] < f3[i+1]) do_backtrack=1;
+---
+>       if (f3[i] < f3[i+1]){
+>         do_backtrack=1;
+>       }
+502d529
+< 
+506c533,534
+<         while(fij==f3[lind+1]) lind++;
+---
+>         while(fij==f3[lind+1])
+>           lind++;
+617c645
+<               if (dangles==2)
+---
+>               if (dangles==2){
+619c647
+<               else
+---
+>               } else
+758a787,797
+> 
+>       /* check for values close to integer underflow */
+>       if(INT_CLOSE_TO_UNDERFLOW(f3[i])){
+>         /* correct f3 free energies and increase underflow counter */
+>         int cnt, cnt2;
+>         for(cnt=i; cnt <= length && cnt <= lind + maxdist + 2; cnt++) {
+>           f3[cnt] -= UNDERFLOW_CORRECTION;
+>         }
+>         (*underflow)++;
+>       }
+> 
+761c800,802
+<       for (j=0; j< maxdist+5; j++) {cc[j]=Fmi[j]=DMLi[j]=INF; }
+---
+>       for (j=0; j< maxdist+5; j++){
+>         cc[j] = Fmi[j] = DMLi[j] = INF;
+>       }
+763,765c804,809
+<         c[i-1] = c[i+maxdist+4]; c[i+maxdist+4] = NULL;
+<         fML[i-1] = fML[i+maxdist+4]; fML[i+maxdist+4]=NULL;
+<         ptype[i-1] = ptype[i+maxdist+4]; ptype[i+maxdist+4] = NULL;
+---
+>         c[i-1] = c[i+maxdist+4];
+>         c[i+maxdist+4] = NULL;
+>         fML[i-1] = fML[i+maxdist+4];
+>         fML[i+maxdist+4]=NULL;
+>         ptype[i-1] = ptype[i+maxdist+4];
+>         ptype[i+maxdist+4] = NULL;
+777a822
+> 

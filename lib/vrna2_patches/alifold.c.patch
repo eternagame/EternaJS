@@ -1,0 +1,14 @@
+16c16
+< #include <config.h>
+---
+> #include "config.h"
+844,845c844,845
+<       for(s=0;s<n_seq;s++){
+<         tt = type[s];
+---
+>       for(ss=0;ss<n_seq;ss++){
+>         tt = type[ss];
+848c848
+<           mm += P->mismatchI[tt][S3[s][i]][S5[s][j]];
+---
+>           mm += P->mismatchI[tt][S3[ss][i]][S5[ss][j]];

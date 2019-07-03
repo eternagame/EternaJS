@@ -1,0 +1,17 @@
+14c14
+< #include "../config.h"
+---
+> #include "config.h"
+920c920
+<   int en[2], cc;
+---
+>   int j, en[2], cc;
+921a922,929
+> 
+>   for(j=0;j<3;j++){
+>     if(l[j] > VRNA_GQUAD_MAX_LINKER_LENGTH) return;
+>     if(l[j] < VRNA_GQUAD_MIN_LINKER_LENGTH) return;
+>   }
+>   if(L > VRNA_GQUAD_MAX_STACK_SIZE) return;
+>   if(L < VRNA_GQUAD_MIN_STACK_SIZE) return;
+> 
