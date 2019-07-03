@@ -1,0 +1,44 @@
+12c12
+< #include <config.h>
+---
+> #include "config.h"
+18a19
+> #include <limits.h>
+44a46,49
+> #define INT_CLOSE_TO_UNDERFLOW(i)   ((i) <= (INT_MIN/16))
+> #define UNDERFLOW_CORRECTION        (INT_MIN/32)
+> 
+> 
+78d82
+< 
+200a205,206
+>   /* keep track of how many times we were close to an integer underflow */
+>   underflow = 0;
+410a417,418
+>       
+>       /* first case: i stays unpaired */
+411a420,421
+>       
+>       /* next all cases where i is paired */
+505d514
+< 
+647c656
+<               } else
+---
+>               } else {
+648a658
+> 			  }
+761a772,782
+> 
+>       /* check for values close to integer underflow */
+>       if(INT_CLOSE_TO_UNDERFLOW(f3[i])){
+>         /* correct f3 free energies and increase underflow counter */
+>         int cnt, cnt2;
+>         for(cnt=i; cnt <= length && cnt <= lind + maxdist + 2; cnt++) {
+>           f3[cnt] -= UNDERFLOW_CORRECTION;
+>         }
+>         (*underflow)++;
+>       }
+> 
+780a802
+> 

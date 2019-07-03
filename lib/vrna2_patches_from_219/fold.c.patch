@@ -1,0 +1,153 @@
+16c16
+< #include <config.h>
+---
+> #include "config.h"
+56a57,65
+> PUBLIC  int estimate_mode = 0; /* EteRNA labs */
+> 
+> // JEEFIX binding site spec
+> PUBLIC int binding_site_i = -1;
+> PUBLIC int binding_site_j = -1;
+> PUBLIC int binding_site_p = -1;
+> PUBLIC int binding_site_q = -1;
+> PUBLIC int binding_site_bonus = 0;
+> 
+134a144,146
+> /* EteRNA (binding site) */
+> int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
+>                  int index_i, int index_p, int index_j, int index_q, paramT* P);
+372,386c384,400
+<   /* check constraints */
+<   for(i=1;i<=length;i++) {
+<     if((BP[i]<0)&&(BP[i]>-4)) {
+<       bonus_cnt++;
+<       if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
+<       if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
+<       if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
+<     }
+< 
+<     if(BP[i]>i) {
+<       int l;
+<       bonus_cnt++;
+<       for(l=1; l<=base_pair2[0].i; l++)
+<         if(base_pair2[l].i != base_pair2[l].j)
+<           if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
+---
+>   if (!estimate_mode) {
+>     /* check constraints */
+>     for(i=1;i<=length;i++) {
+>       if((BP[i]<0)&&(BP[i]>-4)) {
+>         bonus_cnt++;
+>         if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
+>         if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
+>         if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
+>       }
+> 
+>       if(BP[i]>i) {
+>         int l;
+>         bonus_cnt++;
+>         for(l=1; l<=base_pair2[0].i; l++)
+>           if(base_pair2[l].i != base_pair2[l].j)
+>             if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
+>       }
+404a419,435
+> /// JEEFIX
+> float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
+>   binding_site_i = i;
+>   binding_site_j = j;
+>   binding_site_p = p;
+>   binding_site_q = q;
+>   binding_site_bonus = bonus;
+> 
+>   float e = fold(string,structure);
+>   binding_site_i = -1;
+>   binding_site_j = -1;
+>   binding_site_p = -1;
+>   binding_site_q = -1;
+>   binding_site_bonus = 0;
+>   return e;
+> }
+>                         
+451,453c482,491
+<       if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+<       if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+<       if ((BP[i]==-4)||(BP[j]==-4)) type=0;
+---
+>       if (estimate_mode) {
+>         if(BP[i] < 0) bonus += BONUS * BP[i];
+>         if(BP[j] < 0) bonus += BONUS * BP[j];
+>         if(BP[i] > 0) bonus += BONUS * BP[i];
+>         if(BP[j] > 0) bonus += BONUS * BP[j];
+>       } else {
+>         if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+>         if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+>         if ((BP[i]==-4)||(BP[j]==-4)) type=0;
+>       }
+483,484c521,522
+<             energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+<                                 S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
+---
+>             energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
+>                                 S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+1043,1044c1081,1089
+<       if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+<       if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+---
+>       if (estimate_mode) {
+>         if(BP[i] < 0) bonus += BONUS * BP[i];
+>         if(BP[j] < 0) bonus += BONUS * BP[j];
+>         if(BP[i] > 0) bonus += BONUS * BP[i];
+>         if(BP[j] > 0) bonus += BONUS * BP[j];
+>       } else {
+>         if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+>         if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+>       }
+1081,1082c1126,1127
+<         energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+<                             S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
+---
+>         energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
+>                             S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+1236c1281
+<     asm("nop");
+---
+>     /*asm("nop")*/;
+1349a1395,1396
+> void (*eos_cb)(int index, int fe) = NULL;
+> 
+1598a1646
+>   if (eos_cb) (*eos_cb)(0, energy);
+1608a1657
+>       if (eos_cb) (*eos_cb)(-1, P->DuplexInit);
+1728a1778
+>   if (eos_cb) (*eos_cb)(0, en0);
+1769c1819
+<       ee = E_IntLoop(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1],P);
+---
+>       ee = E_IntLoopNew(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+1771a1822
+>     if (eos_cb) (*eos_cb)(i, ee);
+1786a1838
+>     if (eos_cb) (*eos_cb)(i, ee);
+1807a1860
+>   if (eos_cb) (*eos_cb)(i, ee);
+2214,2215c2267,2268
+<       energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+<                           S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
+---
+>       energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
+>                           S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+2450a2504,2516
+> int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1, 
+>                  int index_i, int index_p, int index_j, int index_q, paramT* P)
+> {
+>   int le = E_IntLoop(n1,n2,type,type_2,si1,sj1,sp1,sq1,P);
+>   if(index_p == binding_site_p && index_q == binding_site_q && index_i == binding_site_i && index_j == binding_site_j) {
+>     //fprintf(stderr,"MATCH!!!");
+>     le -= binding_site_bonus;
+>   } 
+>   return le;	
+> }
+>                           
+> /*---------------------------------------------------------------------------*/
+> 
