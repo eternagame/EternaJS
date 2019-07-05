@@ -1,7 +1,7 @@
-import {Graphics} from "pixi.js";
+import {Graphics} from 'pixi.js';
 
 export default class SelectionBox extends Graphics {
-    public constructor(color: number) {
+    constructor(color: number) {
         super();
         this._color = color;
     }

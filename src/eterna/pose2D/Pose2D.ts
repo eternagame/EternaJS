@@ -1,42 +1,44 @@
-import * as log from "loglevel";
-import {Container, Graphics, Point, Sprite, Texture, Rectangle} from "pixi.js";
-import {Flashbang, Updatable} from "flashbang/core";
-import {Vector2} from "flashbang/geom";
-import {InputUtil} from "flashbang/input";
-import {ContainerObject, SceneObject, Dragger} from "flashbang/objects";
+import * as log from 'loglevel';
+import {
+    Container, Graphics, Point, Sprite, Texture, Rectangle
+} from 'pixi.js';
+import {Flashbang, Updatable} from 'flashbang/core';
+import {Vector2} from 'flashbang/geom';
+import {InputUtil} from 'flashbang/input';
+import {ContainerObject, SceneObject, Dragger} from 'flashbang/objects';
 import {
     AlphaTask, DelayTask, LocationTask, ParallelTask, RepeatingTask, SelfDestructTask, SerialTask
-} from "flashbang/tasks";
-import {Arrays, DisplayUtil, Easing} from "flashbang/util";
-import {Registration} from "signals";
-import EPars from "eterna/EPars";
-import Eterna from "eterna/Eterna";
-import ExpPainter from "eterna/ExpPainter";
-import {Folder} from "eterna/folding";
-import {GameMode} from "eterna/mode";
-import {Booster} from "eterna/mode/PoseEdit";
-import {BitmapManager, Sounds} from "eterna/resources";
-import {ROPWait} from "eterna/rscript";
-import {TextBalloon} from "eterna/ui";
-import {Fonts, Utility} from "eterna/util";
-import {BaseGlow, LightRay} from "eterna/vfx";
-import Base from "./Base";
-import BaseDrawFlags from "./BaseDrawFlags";
-import EnergyScoreDisplay from "./EnergyScoreDisplay";
-import HighlightBox, {HighlightType} from "./HighlightBox";
-import Molecule from "./Molecule";
-import PaintCursor from "./PaintCursor";
-import PoseField from "./PoseField";
-import PoseUtil from "./PoseUtil";
-import PuzzleEditOp from "./PuzzleEditOp";
-import RNAAnchorObject from "./RNAAnchorObject";
-import RNALayout, {RNATreeNode} from "./RNALayout";
-import ScoreDisplayNode, {ScoreDisplayNodeType} from "./ScoreDisplayNode";
-import ExplosionFactorPanel from "./ExplosionFactorPanel";
+} from 'flashbang/tasks';
+import {Arrays, DisplayUtil, Easing} from 'flashbang/util';
+import {Registration} from 'signals';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import ExpPainter from 'eterna/ExpPainter';
+import {Folder} from 'eterna/folding';
+import {GameMode} from 'eterna/mode';
+import {Booster} from 'eterna/mode/PoseEdit';
+import {BitmapManager, Sounds} from 'eterna/resources';
+import {ROPWait} from 'eterna/rscript';
+import {TextBalloon} from 'eterna/ui';
+import {Fonts, Utility} from 'eterna/util';
+import {BaseGlow, LightRay} from 'eterna/vfx';
+import Base from './Base';
+import BaseDrawFlags from './BaseDrawFlags';
+import EnergyScoreDisplay from './EnergyScoreDisplay';
+import HighlightBox, {HighlightType} from './HighlightBox';
+import Molecule from './Molecule';
+import PaintCursor from './PaintCursor';
+import PoseField from './PoseField';
+import PoseUtil from './PoseUtil';
+import PuzzleEditOp from './PuzzleEditOp';
+import RNAAnchorObject from './RNAAnchorObject';
+import RNALayout, {RNATreeNode} from './RNALayout';
+import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
+import ExplosionFactorPanel from './ExplosionFactorPanel';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export type PoseMouseDownCallback = (e: InteractionEvent, closest_dist: number, closest_index: number) => void;
+export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, closestIndex: number) => void;
 
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
@@ -71,7 +73,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119*2, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, 118);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
 
@@ -95,7 +97,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.addObject(this._paintCursor, this.container);
 
         this._explosionRays = [];
-        for (let ii: number = 0; ii < 10; ii++) {
+        for (let ii = 0; ii < 10; ii++) {
             let ray = new LightRay();
             this._explosionRays.push(ray);
             this.addObject(ray, this.container);
@@ -127,11 +129,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._auxInfoCanvas.visible = false;
         this.container.addChild(this._auxInfoCanvas);
 
-        this._auxTextballoon = new TextBalloon("", 0x0, 0.9);
+        this._auxTextballoon = new TextBalloon('', 0x0, 0.9);
         this._auxTextballoon.display.visible = false;
         this.addObject(this._auxTextballoon, this._auxInfoCanvas);
 
-        this._strandLabel = new TextBalloon("", 0x0, 0.8);
+        this._strandLabel = new TextBalloon('', 0x0, 0.8);
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
@@ -140,14 +142,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.pointerOut.connect(() => this.onMouseOut());
 
         // handle view settings
-        this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
-        this.regs.add(Eterna.settings.showLetters.connectNotify(value => this.lettermode = value));
-        this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => this.useContinuousExpColors = value));
-        this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => this.useExtendedScale = value));
-        this.regs.add(Eterna.settings.displayFreeEnergies.connectNotify(value => this.displayScoreTexts = value));
-        this.regs.add(Eterna.settings.highlightRestricted.connectNotify(value => this.highlightRestricted = value));
-        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify(value => this.displayAuxInfo = value));
-        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.useSimpleGraphics = value))
+        this.regs.add(Eterna.settings.showNumbers.connectNotify((value) => { this.showNumbering = value; }));
+        this.regs.add(Eterna.settings.showLetters.connectNotify((value) => { this.lettermode = value; }));
+        this.regs.add(
+            Eterna.settings.useContinuousColors.connectNotify((value) => { this.useContinuousExpColors = value; })
+        );
+        this.regs.add(Eterna.settings.useExtendedColors.connectNotify((value) => { this.useExtendedScale = value; }));
+        this.regs.add(
+            Eterna.settings.displayFreeEnergies.connectNotify((value) => { this.displayScoreTexts = value; })
+        );
+        this.regs.add(
+            Eterna.settings.highlightRestricted.connectNotify((value) => { this.highlightRestricted = value; })
+        );
+        this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => { this.displayAuxInfo = value; }));
+        this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
     }
 
     public setSize(width: number, height: number): void {
@@ -170,7 +178,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public removeAnchoredObject(obj: RNAAnchorObject): void {
-        for (let ii: number = 0; ii < this._anchoredObjects.length; ++ii) {
+        for (let ii = 0; ii < this._anchoredObjects.length; ++ii) {
             if (obj === this._anchoredObjects[ii]) {
                 this._anchoredObjects.splice(ii, 1);
                 break;
@@ -186,21 +194,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return (this.lastSampledTime - this._foldStartTime < this._foldDuration);
     }
 
-    public visualizeFeedback(dat: number[], mid: number, lo: number, hi: number, start_index: number): void {
+    public visualizeFeedback(dat: number[], mid: number, lo: number, hi: number, startIndex: number): void {
         // coloring
         let newdat: number[] = ExpPainter.transformData(dat, hi, lo);
-        this._expPainter = new ExpPainter(newdat, start_index);
+        this._expPainter = new ExpPainter(newdat, startIndex);
         this._expMid = mid;
         this._expHi = hi;
         this.paintFeedback();
 
         // print feedback score
-        for (let ii: number = 0; ii < this._feedbackObjs.length; ii++) {
+        for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
             this.removeObject(this._feedbackObjs[ii]);
         }
 
         this._feedbackObjsNum = dat.length;
-        this._feedbackObjsStartInd = start_index;
+        this._feedbackObjsStartInd = startIndex;
         this.printFeedback(dat);
         this.updatePrintFeedback();
     }
@@ -213,14 +221,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._expPainter.continuous = this._expContinuous;
         this._expPainter.extendedScale = this._expExtendedScale;
 
-        for (let ii: number = 0; ii < this._sequence.length; ii++) {
-            this._bases[ii].setColorLevel(true, this._expPainter.getColorLevelWithMidpoint(ii, this._expMid, this._expHi));
+        for (let ii = 0; ii < this._sequence.length; ii++) {
+            this._bases[ii].setColorLevel(
+                true, this._expPainter.getColorLevelWithMidpoint(ii, this._expMid, this._expHi)
+            );
         }
         this._redraw = true;
     }
 
     public clearFeedback(): void {
-        for (let ii: number = 0; ii < this._sequence.length; ii++) {
+        for (let ii = 0; ii < this._sequence.length; ii++) {
             this._bases[ii].setColorLevel(false, -1);
         }
         this._redraw = true;
@@ -230,9 +240,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._zoomLevel;
     }
 
-    public setZoomLevel(zoom_level: number, animate: boolean = true, center: boolean = false): void {
-        if ((this._zoomLevel !== zoom_level || center) && animate) {
-            if (this._zoomLevel === zoom_level && center) {
+    public setZoomLevel(zoomLevel: number, animate: boolean = true, center: boolean = false): void {
+        if ((this._zoomLevel !== zoomLevel || center) && animate) {
+            if (this._zoomLevel === zoomLevel && center) {
                 if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
                     return;
                 }
@@ -241,9 +251,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._startOffsetX = this._offX;
             this._startOffsetY = this._offY;
 
-            let scaler: number = 1;
-            if (zoom_level > this._zoomLevel) {
-                scaler = Pose2D.ZOOM_SPACINGS[zoom_level] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+            let scaler = 1;
+            if (zoomLevel > this._zoomLevel) {
+                scaler = Pose2D.ZOOM_SPACINGS[zoomLevel] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
             }
 
             if (!this._offsetTranslating && !center) {
@@ -259,12 +269,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             this._offsetTranslating = true;
 
-            this._zoomLevel = zoom_level;
+            this._zoomLevel = zoomLevel;
             this.computeLayout(true);
             this._redraw = true;
-
-        } else if (this._zoomLevel !== zoom_level) {
-            this._zoomLevel = zoom_level;
+        } else if (this._zoomLevel !== zoomLevel) {
+            this._zoomLevel = zoomLevel;
             this.computeLayout(true);
             this._redraw = true;
         }
@@ -275,18 +284,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let xarray: number[] = new Array(n);
         let yarray: number[] = new Array(n);
 
-        let rna_coords: RNALayout;
-        rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-        rna_coords.setupTree(this._pairs);
-        rna_coords.drawTree();
-        rna_coords.getCoords(xarray, yarray);
+        let rnaCoords: RNALayout;
+        rnaCoords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
+        rnaCoords.setupTree(this._pairs);
+        rnaCoords.drawTree();
+        rnaCoords.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
         let xmax: number = xarray[0];
         let ymin: number = yarray[0];
         let ymax: number = yarray[0];
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             if (xarray[ii] < xmin) {
                 xmin = xarray[ii];
             }
@@ -334,7 +343,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public doneColoring(): void {
         this._coloring = false;
 
-        let need_update: boolean = false;
+        let needUpdate = false;
 
         if (this._mutatedSequence == null) {
             return;
@@ -344,14 +353,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             throw new Error("Mutated sequence and original sequence lengths don't match");
         }
 
-        let num_mut: number = 0;
+        let numMut = 0;
         let muts: any[] = [];
-        let div: number = 1;
+        let div = 1;
         if (this._currentColor === EPars.RNABASE_PAIR
             || this._currentColor === EPars.RNABASE_GC_PAIR
             || this._currentColor === EPars.RNABASE_AU_PAIR
             || this._currentColor === EPars.RNABASE_GU_PAIR) {
-
             div = 2;
         }
 
@@ -359,17 +367,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let ii: number;
         for (ii = 0; ii < this._sequence.length; ii++) {
             if (this._sequence[ii] !== this._mutatedSequence[ii + ofs]) {
-                num_mut++;
+                numMut++;
                 this._sequence[ii] = this._mutatedSequence[ii + ofs];
                 muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence[ii]])});
-                need_update = true;
+                needUpdate = true;
             }
         }
-        if (need_update) {
-            this.callTrackMovesCallback(num_mut / div, muts);
+        if (needUpdate) {
+            this.callTrackMovesCallback(numMut / div, muts);
         }
 
-        if (need_update || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
+        if (needUpdate || this._lockUpdated || this._bindingSiteUpdated || this._designStructUpdated) {
             this.checkPairs();
             this.updateMolecule();
             this.generateScoreNodes();
@@ -382,14 +390,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._designStructUpdated = false;
     }
 
-    public setMutated(seq_arr: number[]): void {
-        let n: number = Math.min(this._mutatedSequence.length, seq_arr.length);
+    public setMutated(seqArr: number[]): void {
+        let n: number = Math.min(this._mutatedSequence.length, seqArr.length);
         let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
-        for (let ii: number = 0; ii < n; ii++) {
-            if (this._mutatedSequence[ii] !== seq_arr[ii] && !this.isLocked(ofs + ii)) {
-                this._mutatedSequence[ii] = seq_arr[ii];
-                this._bases[ofs + ii].setType(seq_arr[ii]);
+        for (let ii = 0; ii < n; ii++) {
+            if (this._mutatedSequence[ii] !== seqArr[ii] && !this.isLocked(ofs + ii)) {
+                this._mutatedSequence[ii] = seqArr[ii];
+                this._bases[ofs + ii].setType(seqArr[ii]);
             }
         }
     }
@@ -399,25 +407,25 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let num_mut: number = 0;
+        let numMut = 0;
         let muts: any[] = [];
 
         let n: number = Math.min(sequence.length, this._sequence.length);
-        let need_update: boolean = false;
+        let needUpdate = false;
         let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             if (this._sequence[ii] !== sequence[ii] && !this.isLocked(ofs + ii)) {
-                num_mut++;
+                numMut++;
                 this._sequence[ii] = sequence[ii];
                 muts.push({pos: ii + 1, base: EPars.sequenceToString([this._sequence[ii]])});
                 this._bases[ofs + ii].setType(sequence[ii]);
-                need_update = true;
+                needUpdate = true;
             }
         }
 
-        if (need_update) {
-            this.callTrackMovesCallback(num_mut, muts);
+        if (needUpdate) {
+            this.callTrackMovesCallback(numMut, muts);
 
             this.checkPairs();
             this.updateMolecule();
@@ -426,7 +434,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getBaseXY(seq: number, out: Point = null): Point {
+    public getBaseLoc(seq: number, out: Point = null): Point {
         if (out == null) {
             out = new Point();
         }
@@ -443,67 +451,67 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public clearMouse(): void {
-        //document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = '';
+        // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = '';
         this._paintCursor.display.visible = false;
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: number, closest_index: number): any[] {
+    public parseCommand(command: number, closestIndex: number): any[] {
         switch (command) {
-        case EPars.RNABASE_ADD_BASE:
-            return PoseUtil.addBaseWithIndex(closest_index, this._pairs);
+            case EPars.RNABASE_ADD_BASE:
+                return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
 
-        case EPars.RNABASE_ADD_PAIR:
-            return PoseUtil.addPairWithIndex(closest_index, this._pairs);
+            case EPars.RNABASE_ADD_PAIR:
+                return PoseUtil.addPairWithIndex(closestIndex, this._pairs);
 
-        case EPars.RNABASE_DELETE:
-            return this.deleteBaseWithIndex(closest_index);
+            case EPars.RNABASE_DELETE:
+                return this.deleteBaseWithIndex(closestIndex);
 
-        default:
-            return null;
+            default:
+                return null;
         }
     }
 
-    public parseCommandWithPairs(command: number, closest_index: number, pairs: number[]): any[] {
+    public parseCommandWithPairs(command: number, closestIndex: number, pairs: number[]): any[] {
         switch (command) {
-        case EPars.RNABASE_ADD_BASE:
-            return PoseUtil.addBaseWithIndex(closest_index, pairs);
+            case EPars.RNABASE_ADD_BASE:
+                return PoseUtil.addBaseWithIndex(closestIndex, pairs);
 
-        case EPars.RNABASE_DELETE:
-            return this.deleteBaseWithIndexPairs(closest_index, pairs);
+            case EPars.RNABASE_DELETE:
+                return this.deleteBaseWithIndexPairs(closestIndex, pairs);
 
-        default:
-            return null;
+            default:
+                return null;
         }
     }
 
-    public onPoseMouseDownPropagate(e: InteractionEvent, closest_index: number): void {
+    public onPoseMouseDownPropagate(e: InteractionEvent, closestIndex: number): void {
         let altDown: boolean = Flashbang.app.isAltKeyDown;
         let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
         if ((this._coloring && !altDown) || ctrlDown) {
-            if (ctrlDown && closest_index >= this.sequence.length) {
+            if (ctrlDown && closestIndex >= this.sequence.length) {
                 return;
             }
-            this.onPoseMouseDown(e, closest_index);
+            this.onPoseMouseDown(e, closestIndex);
         }
     }
 
-    public onPoseMouseDown(e: InteractionEvent, closest_index: number): void {
+    public onPoseMouseDown(e: InteractionEvent, closestIndex: number): void {
         let altDown: boolean = Flashbang.app.isAltKeyDown;
         let shiftDown: boolean = Flashbang.app.isShiftKeyDown;
         let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
 
-        if (closest_index >= 0) {
+        if (closestIndex >= 0) {
             this._mouseDownAltKey = altDown;
-            if (ctrlDown && closest_index < this.fullSequenceLength) {
-                this.toggleBlackMark(closest_index);
+            if (ctrlDown && closestIndex < this.fullSequenceLength) {
+                this.toggleBlackMark(closestIndex);
                 return;
             }
             if (shiftDown) {
-                if (closest_index < this.sequenceLength) {
-                    this._shiftStart = closest_index;
-                    this._shiftEnd = closest_index;
+                if (closestIndex < this.sequenceLength) {
+                    this._shiftStart = closestIndex;
+                    this._shiftEnd = closestIndex;
                     this.updateShiftHighlight();
 
                     let reg: Registration = null;
@@ -518,28 +526,26 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
             this._lastShiftedCommand = -1;
             this._lastShiftedIndex = -1;
-            let cmd: any[] = this.parseCommand(this._currentColor, closest_index);
+            let cmd: any[] = this.parseCommand(this._currentColor, closestIndex);
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
                 dragger.dragged.connect(() => this.onMouseMoved());
                 dragger.dragComplete.connect(() => this.onMouseUp());
 
-                this.onBaseMouseDown(closest_index, ctrlDown);
+                this.onBaseMouseDown(closestIndex, ctrlDown);
             } else {
                 this._lastShiftedCommand = this._currentColor;
-                this._lastShiftedIndex = closest_index;
+                this._lastShiftedIndex = closestIndex;
 
-                this.callAddBaseCallback(cmd[0], cmd[1], closest_index);
+                this.callAddBaseCallback(cmd[0], cmd[1], closestIndex);
             }
 
             e.stopPropagation();
-        } else {
-            if (shiftDown) {
-                this._shiftStart = -1;
-                this._shiftEnd = -1;
-                this.updateShiftHighlight();
-            }
+        } else if (shiftDown) {
+            this._shiftStart = -1;
+            this._shiftEnd = -1;
+            this.updateShiftHighlight();
         }
     }
 
@@ -552,18 +558,18 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public addBaseMark(closestIndex: number, color:number = 0x000000): void {
+    public addBaseMark(closestIndex: number, color: number = 0x000000): void {
         let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index === -1) {
             this._trackedIndices.push(closestIndex);
             ROPWait.notifyBlackMark(closestIndex, true);
 
-            let base_box: Graphics = new Graphics();
-            this._baseBoxes.push(base_box);
-            this.container.addChild(base_box);
+            let baseBox: Graphics = new Graphics();
+            this._baseBoxes.push(baseBox);
+            this.container.addChild(baseBox);
 
             let n: number = this._trackedIndices.length;
-            let center: Point = this.getBaseXY(this._trackedIndices[n - 1]);
+            let center: Point = this.getBaseLoc(this._trackedIndices[n - 1]);
             this._baseBoxes[n - 1].x = center.x;
             this._baseBoxes[n - 1].y = center.y;
             this._baseBoxes[n - 1].visible = true;
@@ -573,13 +579,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public removeBlackMark(closest_index: number): void {
-        let index: number = this._trackedIndices.indexOf(closest_index);
+    public removeBlackMark(closestIndex: number): void {
+        let index: number = this._trackedIndices.indexOf(closestIndex);
         if (index !== -1) {
             this._baseBoxes[index].visible = false;
             this._trackedIndices.splice(index, 1);
             this._baseBoxes.splice(index, 1);
-            ROPWait.notifyBlackMark(closest_index, false);
+            ROPWait.notifyBlackMark(closestIndex, false);
         }
     }
 
@@ -604,37 +610,39 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._paintCursor.display.x = mouseX;
         this._paintCursor.display.y = mouseY;
 
-        let closest_dist: number = -1;
-        let closest_index: number = -1;
+        let closestDist = -1;
+        let closestIndex = -1;
         for (let ii = 0; ii < this.fullSequenceLength; ii++) {
-            let mouseDist: number = this._bases[ii].isClicked(mouseX - this._offX, mouseY - this._offY, this._zoomLevel, this._coloring);
+            let mouseDist: number = this._bases[ii].isClicked(
+                mouseX - this._offX, mouseY - this._offY, this._zoomLevel, this._coloring
+            );
             if (mouseDist >= 0) {
-                if (closest_index < 0 || mouseDist < closest_dist) {
-                    closest_index = ii;
-                    closest_dist = mouseDist;
+                if (closestIndex < 0 || mouseDist < closestDist) {
+                    closestIndex = ii;
+                    closestDist = mouseDist;
                 }
             }
         }
 
-        if (closest_index >= 0 && this._currentColor >= 0) {
-            this.onBaseMouseMove(closest_index);
-            //document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
+        if (closestIndex >= 0 && this._currentColor >= 0) {
+            this.onBaseMouseMove(closestIndex);
+            // document.getElementById(Eterna.PIXI_CONTAINER_ID).style.cursor = 'none';
             this._paintCursor.display.visible = true;
             this._paintCursor.setShape(this._currentColor);
 
-            let strandName: string = this.getStrandName(closest_index);
+            let strandName: string = this.getStrandName(closestIndex);
             if (strandName != null) {
                 this._strandLabel.setText(strandName);
                 if (mouseX + 16 + this._strandLabel.width > this._width) {
                     this._strandLabel.display.position = new Point(
                         mouseX - 16 - this._strandLabel.width,
-                        mouseY + 16);
+                        mouseY + 16
+                    );
                 } else {
                     this._strandLabel.display.position = new Point(mouseX + 16, mouseY + 16);
                 }
                 this._strandLabel.display.visible = true;
             }
-
         } else {
             this._lastColoredIndex = -1;
         }
@@ -643,13 +651,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.updateScoreNodeGui();
             if (this._feedbackObjs.length > 0) {
                 for (let ii = 0; ii < this._feedbackObjs.length; ii++) {
-                    if (ii === closest_index) {
+                    if (ii === closestIndex) {
                         continue;
                     }
                     this._feedbackObjs[ii].display.visible = false;
                 }
-                if (closest_index >= 0) {
-                    this._feedbackObjs[closest_index].display.visible = true;
+                if (closestIndex >= 0) {
+                    this._feedbackObjs[closestIndex].display.visible = true;
                 }
             }
         }
@@ -694,9 +702,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._offY;
     }
 
-    public setOffset(off_x: number, off_y: number): void {
-        this._offX = off_x;
-        this._offY = off_y;
+    public setOffset(offX: number, offY: number): void {
+        this._offX = offX;
+        this._offY = offY;
         this._redraw = true;
     }
 
@@ -747,13 +755,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._forcedStruct = null;
         } else {
             if (forced.length !== len) {
-                throw new Error("Forced structure length does not match sequence length " + forced.length + " " + this._sequence.length + " " + this._pairs.length);
+                throw new Error(`Forced structure length does not match sequence length ${forced.length} ${this._sequence.length} ${this._pairs.length}`);
             }
 
             this._forcedStruct = forced.slice();
         }
 
-        for (let ii: number = 0; ii < len; ii++) {
+        for (let ii = 0; ii < len; ii++) {
             this._bases[ii].forced = this._forcedStruct != null && this._forcedStruct[ii] !== EPars.FORCE_IGNORE;
         }
     }
@@ -764,7 +772,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let temp: number[] = [];
-        for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
+        for (let ii = 0; ii < this.fullSequenceLength; ii++) {
             temp.push(EPars.FORCE_IGNORE);
         }
 
@@ -779,14 +787,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set structConstraints(do_care: boolean[]) {
+    public set structConstraints(doCare: boolean[]) {
         let ii: number;
         let len: number = this.fullSequenceLength;
-        let dc: boolean[] = (do_care == null ? null : do_care.slice());
+        let dc: boolean[] = (doCare == null ? null : doCare.slice());
         if (dc != null && this._oligosOrder != null) {
-            let idx_map: number[] = this.getOrderMap(null);
+            let idxMap: number[] = this.getOrderMap(null);
             for (ii = 0; ii < len; ii++) {
-                dc[ii] = do_care[idx_map.indexOf(ii)];
+                dc[ii] = doCare[idxMap.indexOf(ii)];
             }
         }
         for (ii = 0; ii < len; ii++) {
@@ -795,7 +803,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public clearDesignStruct(): void {
-        for (let jj: number = 0; jj < this.fullSequenceLength; jj++) {
+        for (let jj = 0; jj < this.fullSequenceLength; jj++) {
             this._designStruct[jj] = false;
         }
         this.updateDesignHighlight();
@@ -818,8 +826,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get designSegments(): number[] {
         let elems: number[] = [];
-        let curr: number = 0;
-        for (let jj: number = 0; jj < this.fullSequenceLength; jj++) {
+        let curr = 0;
+        for (let jj = 0; jj < this.fullSequenceLength; jj++) {
             let stat: number = this._designStruct[jj] ? 1 : 0;
             if ((curr ^ stat) !== 0) {
                 elems.push(jj - curr);
@@ -849,7 +857,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         // find the next acceptable spot
-        let ofs: number = 1;
+        let ofs = 1;
         let len: number = this.sequenceLength;
         while (last + ofs < len) {
             for (ii = first + ofs; ii <= last + ofs; ii++) {
@@ -906,7 +914,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
         // find the next acceptable spot
-        let ofs: number = -1;
+        let ofs = -1;
         while (first + ofs >= 0) {
             for (ii = first + ofs; ii <= last + ofs; ii++) {
                 if (this._locks[ii]) {
@@ -955,7 +963,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get satisfied(): boolean {
-        for (let ii: number = 0; ii < this._pairs.length; ii++) {
+        for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs[ii] > ii && !this.isPairSatisfied(ii, this._pairs[ii])) {
                 return false;
             }
@@ -1041,7 +1049,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._selectionHighlightBox.setHighlight(HighlightType.LOOP, action.slice(1));
     }
 
-    /// For restricted queue
+    // / For restricted queue
     public clearRestrictedHighlight(): void {
         this._restrictedHighlightBox.clear();
     }
@@ -1062,96 +1070,95 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._userDefinedHighlightBox.clear();
     }
 
-    public highlightUserDefinedSequence(user_defined: number[]): void {
-        this._userDefinedHighlightBox.setHighlight(HighlightType.USER_DEFINED, user_defined);
+    public highlightUserDefinedSequence(userDefined: number[]): void {
+        this._userDefinedHighlightBox.setHighlight(HighlightType.USER_DEFINED, userDefined);
     }
 
     public clearShiftHighlight(): void {
         this._shiftHighlightBox.clear();
     }
 
-    public praiseStack(stack_start: number, stack_end: number): void {
-        this._praiseQueue.push(stack_start);
-        this._praiseQueue.push(stack_end);
+    public praiseStack(stackStart: number, stackEnd: number): void {
+        this._praiseQueue.push(stackStart);
+        this._praiseQueue.push(stackEnd);
     }
 
-    public praiseSequence(seq_start: number, seq_end: number): void {
-        this._praiseSeq.push(seq_start);
-        this._praiseSeq.push(seq_end);
+    public praiseSequence(seqStart: number, seqEnd: number): void {
+        this._praiseSeq.push(seqStart);
+        this._praiseSeq.push(seqEnd);
     }
 
-    private onPraiseStack(stack_start: number, stack_end: number, play_sound: boolean): void {
-        let x_pos: number = 0;
-        let y_pos: number = 0;
+    private onPraiseStack(stackStart: number, stackEnd: number, playSound: boolean): void {
+        let xPos = 0;
+        let yPos = 0;
 
-        let play_ua: boolean = false;
-        let play_gc: boolean = false;
-        let play_gu: boolean = false;
+        let playUA = false;
+        let playGC = false;
+        let playGU = false;
 
-        for (let kk: number = stack_start; kk <= stack_end; kk++) {
+        for (let kk: number = stackStart; kk <= stackEnd; kk++) {
             if (this._pairs[kk] < 0) {
                 return;
             }
         }
 
-        for (let ii: number = stack_start; ii <= stack_end; ii++) {
-
+        for (let ii: number = stackStart; ii <= stackEnd; ii++) {
             let aa: number = ii;
             let bb: number = this._pairs[ii];
 
-            if ((this._sequence[aa] === EPars.RNABASE_ADENINE && this._sequence[bb] === EPars.RNABASE_URACIL) ||
-                (this._sequence[bb] === EPars.RNABASE_ADENINE && this._sequence[aa] === EPars.RNABASE_URACIL)) {
-                play_ua = true;
-            } else if ((this._sequence[aa] === EPars.RNABASE_GUANINE && this._sequence[bb] === EPars.RNABASE_CYTOSINE) ||
-                (this._sequence[bb] === EPars.RNABASE_GUANINE && this._sequence[aa] === EPars.RNABASE_CYTOSINE)) {
-                play_gc = true;
-            } else if ((this._sequence[aa] === EPars.RNABASE_GUANINE && this._sequence[bb] === EPars.RNABASE_URACIL) ||
-                (this._sequence[bb] === EPars.RNABASE_GUANINE && this._sequence[aa] === EPars.RNABASE_URACIL)) {
-                play_gu = true;
+            if ((this._sequence[aa] === EPars.RNABASE_ADENINE && this._sequence[bb] === EPars.RNABASE_URACIL)
+                || (this._sequence[bb] === EPars.RNABASE_ADENINE && this._sequence[aa] === EPars.RNABASE_URACIL)) {
+                playUA = true;
+            } else if ((this._sequence[aa] === EPars.RNABASE_GUANINE && this._sequence[bb] === EPars.RNABASE_CYTOSINE)
+                || (this._sequence[bb] === EPars.RNABASE_GUANINE && this._sequence[aa] === EPars.RNABASE_CYTOSINE)) {
+                playGC = true;
+            } else if ((this._sequence[aa] === EPars.RNABASE_GUANINE && this._sequence[bb] === EPars.RNABASE_URACIL)
+                || (this._sequence[bb] === EPars.RNABASE_GUANINE && this._sequence[aa] === EPars.RNABASE_URACIL)) {
+                playGU = true;
             }
 
             this._bases[ii].startSparking();
             this._bases[this._pairs[ii]].startSparking();
-            let p: Point = this.getBaseXY(ii);
-            let p2: Point = this.getBaseXY(this._pairs[ii]);
+            let p: Point = this.getBaseLoc(ii);
+            let p2: Point = this.getBaseLoc(this._pairs[ii]);
 
-            x_pos += p.x;
-            y_pos += p.y;
+            xPos += p.x;
+            yPos += p.y;
 
-            x_pos += p2.x;
-            y_pos += p2.y;
+            xPos += p2.x;
+            yPos += p2.y;
         }
 
-        let stack_len: number = (stack_end - stack_start) + 1;
+        let stackLen: number = (stackEnd - stackStart) + 1;
 
-        x_pos /= stack_len * 2;
-        y_pos /= stack_len * 2;
+        xPos /= stackLen * 2;
+        yPos /= stackLen * 2;
 
-        let praiseText = stack_len > 1 ? "Great Pairings!" : "Great Pairing!";
-        let praise_obj = new SceneObject(Fonts.arial(praiseText, 20).bold().color(0xffffff).build());
-        praise_obj.display.position = new Point(x_pos - DisplayUtil.width(praise_obj.display) * 0.5, y_pos);
-        this.addObject(praise_obj, this.container);
+        let praiseText = stackLen > 1 ? 'Great Pairings!' : 'Great Pairing!';
+        let praiseObj = new SceneObject(Fonts.arial(praiseText, 20).bold().color(0xffffff).build());
+        praiseObj.display.position = new Point(xPos - DisplayUtil.width(praiseObj.display) * 0.5, yPos);
+        this.addObject(praiseObj, this.container);
 
-        praise_obj.display.alpha = 0;
-        praise_obj.addObject(new SerialTask(
+        praiseObj.display.alpha = 0;
+        praiseObj.addObject(new SerialTask(
             new ParallelTask(
                 new AlphaTask(0.85, 0.33, Easing.easeOut),
-                new LocationTask(praise_obj.display.x, praise_obj.display.y - 80, 0.33, Easing.easeOut)
+                new LocationTask(praiseObj.display.x, praiseObj.display.y - 80, 0.33, Easing.easeOut)
             ),
             new DelayTask(1),
             new ParallelTask(
                 new AlphaTask(0, 0.33, Easing.easeOut),
-                new LocationTask(praise_obj.display.x, praise_obj.display.y - 120, 0.33, Easing.easeOut)
+                new LocationTask(praiseObj.display.x, praiseObj.display.y - 120, 0.33, Easing.easeOut)
             ),
             new SelfDestructTask()
         ));
 
-        if (play_sound) {
-            if (play_gc) {
+        if (playSound) {
+            if (playGC) {
                 Eterna.sound.playSound(Sounds.SoundRG);
-            } else if (play_ua) {
+            } else if (playUA) {
                 Eterna.sound.playSound(Sounds.SoundYB);
-            } else if (play_gu) {
+            } else if (playGU) {
                 Eterna.sound.playSound(Sounds.SoundRB);
             }
         }
@@ -1162,7 +1169,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // If any of the nucleotides are part of a stack, highlight its pair as well.
         let addition: number[] = [];
-        for (let i: number = 0; i < nucleotides.length; ++i) {
+        for (let i = 0; i < nucleotides.length; ++i) {
             if (this._pairs[nucleotides[i]] !== -1) {
                 addition.push(this._pairs[nucleotides[i]]);
             }
@@ -1184,8 +1191,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    private onPraiseSeq(seq_start: number, seq_end: number): void {
-        for (let ii: number = seq_start; ii <= seq_end; ii++) {
+    private onPraiseSeq(seqStart: number, seqEnd: number): void {
+        for (let ii: number = seqStart; ii <= seqEnd; ii++) {
             if (ii >= 0 && ii < this.fullSequenceLength) {
                 this._bases[ii].startSparking();
             }
@@ -1197,12 +1204,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._auxInfoCanvas.visible = display;
     }
 
-    public set auxInfo(aux_info: any) {
-        this._auxInfo = aux_info;
+    public set auxInfo(auxInfo: any) {
+        this._auxInfo = auxInfo;
 
         if (this._auxInfo != null && this._auxInfo[Pose2D.CLEAVING_SITE] != null) {
             this._auxTextballoon.display.visible = true;
-            this._auxTextballoon.setText("Ribozyme cleaving site");
+            this._auxTextballoon.setText('Ribozyme cleaving site');
         }
     }
 
@@ -1211,36 +1218,36 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._explosionStartTime = -1;
 
         if (this._explosionRays.length >= this._sequence.length) {
-            for (let ii: number = 0; ii < this._sequence.length; ii++) {
+            for (let ii = 0; ii < this._sequence.length; ii++) {
                 const ray = this._explosionRays[ii];
                 ray.display.visible = false;
                 ray.draw(
                     Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
-                    this._sequence[ii]);
-
+                    this._sequence[ii]
+                );
             }
         } else {
             let diff: number = (this._sequence.length - this._explosionRays.length) / this._explosionRays.length;
-            let diff_walker: number = 0;
-            let ray_walker: number = 0;
+            let diffWalker = 0;
+            let rayWalker = 0;
 
             for (let ii = 0; ii < this._sequence.length; ii++) {
-                if (diff_walker < 1) {
-                    if (ray_walker >= this._explosionRays.length) {
+                if (diffWalker < 1) {
+                    if (rayWalker >= this._explosionRays.length) {
                         continue;
                     }
 
-                    const ray = this._explosionRays[ray_walker];
+                    const ray = this._explosionRays[rayWalker];
                     ray.display.visible = false;
                     ray.draw(
                         Vector2.fromPolar(Math.max(this._width, this._height), Math.random() * 2 * Math.PI),
-                        this._sequence[ii]);
+                        this._sequence[ii]
+                    );
 
-                    ray_walker++;
-                    diff_walker += diff;
-
+                    rayWalker++;
+                    diffWalker += diff;
                 } else {
-                    diff_walker -= 1;
+                    diffWalker -= 1;
                 }
             }
         }
@@ -1250,7 +1257,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callExplosionCompleteCallback();
         }
 
-        return new Promise((resolve) => this._onExplosionComplete = resolve);
+        return new Promise((resolve) => { this._onExplosionComplete = resolve; });
     }
 
     private callExplosionCompleteCallback(): void {
@@ -1315,65 +1322,29 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let mouseX: number = Pose2D.P.x;
         let mouseY: number = Pose2D.P.y;
 
-        let closest_dist: number = -1;
-        let closest_index: number = -1;
+        let closestDist = -1;
+        let closestIndex = -1;
 
         if (this._startMousedownCallback != null) {
-            for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
-                let mouseDist: number = this._bases[ii].isClicked(mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false);
+            for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+                let mouseDist: number = this._bases[ii].isClicked(
+                    mouseX - this._offX, mouseY - this._offY, this._zoomLevel, false
+                );
                 if (mouseDist >= 0) {
-                    if (closest_index < 0 || mouseDist < closest_dist) {
-                        closest_index = ii;
-                        closest_dist = mouseDist;
+                    if (closestIndex < 0 || mouseDist < closestDist) {
+                        closestIndex = ii;
+                        closestDist = mouseDist;
                     }
                 }
             }
-            this._startMousedownCallback(e, closest_dist, closest_index);
+            this._startMousedownCallback(e, closestDist, closestIndex);
         } else {
-            this.onPoseMouseDown(e, closest_index);
+            this.onPoseMouseDown(e, closestIndex);
         }
     }
 
     public get satisfiedPairs(): number[] {
         return EPars.getSatisfiedPairs(this._pairs, this.fullSequence);
-    }
-
-    public set sequence(sequence: number[]) {
-        if (Arrays.shallowEqual(this._sequence, sequence)) {
-            return;
-        }
-
-        if (this._locks == null) {
-            this._locks = Pose2D.createDefaultLocks(this._sequence.length);
-        }
-
-        this._sequence = sequence.slice();
-        if (this._sequence.length > this._bases.length) {
-            let diff: number = (this._sequence.length - this._bases.length);
-            for (let ii: number = 0; ii < diff; ii++) {
-                this.createBase();
-                this._locks.push(false);
-            }
-
-        } else if (this._sequence.length < this._bases.length) {
-            for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
-                if (this.isTrackedIndex(ii)) {
-                    this.removeBlackMark(ii);
-                }
-            }
-        }
-
-        let n: number = this.fullSequenceLength;
-        for (let ii: number = 0; ii < n; ii++) {
-            if (ii < this._sequence.length) {
-                this._bases[ii].setType(this._sequence[ii]);
-            }
-            this._bases[ii].baseIndex = ii;
-        }
-
-        this.checkPairs();
-        this.updateMolecule();
-        this.generateScoreNodes();
     }
 
     public set molecularBindingBonus(bonus: number) {
@@ -1401,20 +1372,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let target_pairs: number[] = this._moleculeTargetPairs.slice();
-        if (!target_pairs) {
+        let targetPairs: number[] = this._moleculeTargetPairs.slice();
+        if (!targetPairs) {
             throw new Error("Can't find molecular target structure");
         }
 
-        let binding_bases: number[] = [];
-        let binding_pairs: number[] = [];
-        for (let ii: number = 0; ii < bindingSite.length; ii++) {
+        let bindingBases: number[] = [];
+        let bindingPairs: number[] = [];
+        for (let ii = 0; ii < bindingSite.length; ii++) {
             if (bindingSite[ii]) {
-                binding_bases.push(ii);
-                binding_pairs.push(target_pairs[ii]);
+                bindingBases.push(ii);
+                bindingPairs.push(targetPairs[ii]);
             }
         }
-        this.setMolecularBinding(binding_bases, binding_pairs, this._molecularBindingBonus);
+        this.setMolecularBinding(bindingBases, bindingPairs, this._molecularBindingBonus);
     }
 
     public get molecularBindingSite(): boolean[] {
@@ -1423,13 +1394,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let temp: boolean[] = [];
-        for (let ii: number = 0; ii < this._sequence.length; ii++) {
+        for (let ii = 0; ii < this._sequence.length; ii++) {
             temp.push(false);
         }
         return temp;
     }
 
-    public setMolecularBinding(binding_sites: number[], binding_pairs: number[], binding_bonus: number): void {
+    public setMolecularBinding(bindingSites: number[], bindingPairs: number[], bindingBonus: number): void {
         if (this._molecule != null) {
             this._molecule.destroy({children: true});
             this._molecule = null;
@@ -1446,24 +1417,24 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._molecularBindingPairs = null;
 
-        if (binding_sites == null || binding_sites.length === 0) {
+        if (bindingSites == null || bindingSites.length === 0) {
             return;
         }
 
         this._molecularBindingBases = new Array(this._sequence.length);
         this._molecularBindingPairs = new Array(this._sequence.length);
-        this._molecularBindingBonus = binding_bonus;
+        this._molecularBindingBonus = bindingBonus;
 
         this._molecule = new Molecule();
         this._moleculeLayer.addChild(this._molecule);
 
-        for (let ii: number = 0; ii < binding_sites.length; ii++) {
-            let idx = binding_sites[ii];
+        for (let ii = 0; ii < bindingSites.length; ii++) {
+            let idx = bindingSites[ii];
             let baseGlow = new BaseGlow();
             this._moleculeLayer.addChild(baseGlow);
 
             this._molecularBindingBases[idx] = baseGlow;
-            this._molecularBindingPairs[idx] = binding_pairs[ii];
+            this._molecularBindingPairs[idx] = bindingPairs[ii];
         }
 
         this.updateMolecule();
@@ -1474,31 +1445,31 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let bound_render: boolean = true;
-        let bound_real: boolean = true;
-        let satisfied_pairs: number[] = this.satisfiedPairs;
+        let boundRender = true;
+        let boundReal = true;
+        let satisfiedPairs: number[] = this.satisfiedPairs;
 
-        for (let ii: number = 0; ii < this._molecularBindingPairs.length; ii++) {
+        for (let ii = 0; ii < this._molecularBindingPairs.length; ii++) {
             if (this._molecularBindingBases[ii] == null) {
                 continue;
             }
             if (this._molecularBindingPairs[ii] !== this._pairs[ii]) {
-                bound_render = false;
+                boundRender = false;
             }
 
-            if (this._molecularBindingPairs[ii] !== satisfied_pairs[ii]) {
-                bound_real = false;
+            if (this._molecularBindingPairs[ii] !== satisfiedPairs[ii]) {
+                boundReal = false;
                 this._molecularBindingBases[ii].isWrong = true;
             } else {
                 this._molecularBindingBases[ii].isWrong = false;
             }
         }
-        this._molecule.isWrong = !bound_real;
-        this._moleculeIsBound = bound_render;
-        this._moleculeIsBoundReal = bound_real;
+        this._molecule.isWrong = !boundReal;
+        this._moleculeIsBound = boundRender;
+        this._moleculeIsBoundReal = boundReal;
     }
 
-    public setOligos(oligos: Oligo[], order: number[] = null, num_paired: number = 0): void {
+    public setOligos(oligos: Oligo[], order: number[] = null, numPaired: number = 0): void {
         if (oligos == null) {
             this._oligos = null;
             this._oligosOrder = null;
@@ -1516,7 +1487,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let prev_order: number[] = this._oligosOrder;
+        let prevOrder: number[] = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
             this._oligosOrder = [];
@@ -1526,7 +1497,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             this._oligosOrder = order.slice();
         }
-        this._oligosPaired = num_paired;
+        this._oligosPaired = numPaired;
 
         let seq: number[] = this.fullSequence;
         if (seq.length > this._bases.length) {
@@ -1544,16 +1515,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         // if possible, maintain visual consistency
         // (strands "fly" from their previous location in the previous oligo order)
-        if (same && JSON.stringify(prev_order) !== JSON.stringify(this._oligosOrder)) {
-            let old_x: number[] = [];
-            let old_y: number[] = [];
-            let idx_map: number[] = this.getOrderMap(prev_order);
+        if (same && JSON.stringify(prevOrder) !== JSON.stringify(this._oligosOrder)) {
+            let oldX: number[] = [];
+            let oldY: number[] = [];
+            let idxMap: number[] = this.getOrderMap(prevOrder);
             for (let k = 0; k < seq.length; k++) {
-                old_x[k] = this._bases[k].x;
-                old_y[k] = this._bases[k].y;
+                oldX[k] = this._bases[k].x;
+                oldY[k] = this._bases[k].y;
             }
             for (let k = 0; k < seq.length; k++) {
-                this._bases[idx_map[k]].setXY(old_x[k], old_y[k]);
+                this._bases[idxMap[k]].setXY(oldX[k], oldY[k]);
             }
         }
     }
@@ -1562,12 +1533,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
     }
 
-    public getOrderMap(other_order: number[]): number[] {
+    public getOrderMap(otherOrder: number[]): number[] {
         if (this._oligos == null) {
             return null;
         }
 
-        let idx_map: number[] = [];
+        let idxMap: number[] = [];
         let ofs: number[] = [];
         let ii: number = this._sequence.length;
         let jj: number;
@@ -1575,17 +1546,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
             ofs[this._oligosOrder[jj]] = ii;
             ii += 1 + this._oligos[this._oligosOrder[jj]].sequence.length;
         }
-        for (ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
+        for (ii = 0; ii < this._sequence.length; ii++) idxMap[ii] = ii;
         for (jj = 0; jj < this._oligos.length; jj++) {
-            let zz: number = (other_order == null ? jj : other_order[jj]);
+            let zz: number = (otherOrder == null ? jj : otherOrder[jj]);
             let kk: number = ofs[zz];
             let xx: number;
             for (xx = 0; xx <= this._oligos[zz].sequence.length; xx++) {
-                idx_map[ii + xx] = kk + xx;
+                idxMap[ii + xx] = kk + xx;
             }
             ii += xx;
         }
-        return idx_map;
+        return idxMap;
     }
 
     public saveMarkersContext(): void {
@@ -1597,12 +1568,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public transformMarkers(): void {
-        if (this._prevOligosOrder == null || this._oligosOrder == null || this._prevOligosOrder.length !== this._oligosOrder.length) {
+        if (
+            this._prevOligosOrder == null
+            || this._oligosOrder == null
+            || this._prevOligosOrder.length !== this._oligosOrder.length
+        ) {
             this._prevOligosOrder = null;
             return;
         }
 
-        let idx_map: number[] = this.getOrderMap(this._prevOligosOrder);
+        let idxMap: number[] = this.getOrderMap(this._prevOligosOrder);
         this._prevOligosOrder = null;
 
         // black marks
@@ -1610,41 +1585,41 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.clearTracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
-            indices[ii] = idx_map[indices[ii]];
+            indices[ii] = idxMap[indices[ii]];
             this.addBaseMark(indices[ii]);
         }
 
         // blue highlights ("magic glue")
-        let new_design: boolean[] = [];
+        let newDesign: boolean[] = [];
         for (ii = 0; ii < this.fullSequenceLength; ii++) {
-            new_design[idx_map[ii]] = this._designStruct[ii];
+            newDesign[idxMap[ii]] = this._designStruct[ii];
         }
-        this._designStruct = new_design;
+        this._designStruct = newDesign;
         this.updateDesignHighlight();
     }
 
-    public setOligo(oligo: number[], mode: number | string = Pose2D.OLIGO_MODE_DIMER, o_name: string = null): void {
+    public setOligo(oligo: number[], mode: number | string = Pose2D.OLIGO_MODE_DIMER, oName: string = null): void {
         if (oligo == null) {
             this._oligo = null;
             return;
         }
 
         this._oligo = oligo.slice();
-        this._oligoName = o_name;
+        this._oligoName = oName;
 
         // Puzzle JSON encodes oligoMode as a string, for some reason
-        this._oligoMode = typeof(mode) === "number" ? mode : Number(mode);
+        this._oligoMode = typeof (mode) === 'number' ? mode : Number(mode);
 
         let seq: number[] = this.fullSequence;
         if (seq.length > this._bases.length) {
             let diff: number = (seq.length - this._bases.length);
-            for (let i: number = 0; i < diff; i++) {
+            for (let i = 0; i < diff; i++) {
                 this.createBase();
             }
         }
 
         let n: number = seq.length;
-        for (let k: number = 0; k < n; k++) {
+        for (let k = 0; k < n; k++) {
             this._bases[k].setType(seq[k]);
             this._bases[k].baseIndex = k;
         }
@@ -1679,7 +1654,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return seq;
         }
         // _oligos != null, we have a multistrand target
-        for (let ii: number = 0; ii < this._oligos.length; ii++) {
+        for (let ii = 0; ii < this._oligos.length; ii++) {
             seq.push(EPars.RNABASE_CUT);
             seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
         }
@@ -1696,7 +1671,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._oligoMode === Pose2D.OLIGO_MODE_DIMER) len++;
             return len;
         }
-        for (let ii: number = 0; ii < this._oligos.length; ii++) {
+        for (let ii = 0; ii < this._oligos.length; ii++) {
             len += 1 + this._oligos[ii].sequence.length;
         }
         return len;
@@ -1705,13 +1680,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public getStrandName(seqnum: number): string {
         if (this._oligos != null && seqnum >= this._sequence.length) {
             let seq: number[] = this._sequence.slice();
-            for (let ii: number = 0; ii < this._oligos.length; ii++) {
+            for (let ii = 0; ii < this._oligos.length; ii++) {
                 seq.push(EPars.RNABASE_CUT);
                 seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
                 if (seqnum < seq.length) {
-                    let o_name: string = this._oligos[this._oligosOrder[ii]]['name'];
-                    if (o_name == null) o_name = "Oligo " + (this._oligosOrder[ii] + 1).toString();
-                    return o_name;
+                    let oName: string = this._oligos[this._oligosOrder[ii]]['name'];
+                    if (oName == null) oName = `Oligo ${(this._oligosOrder[ii] + 1).toString()}`;
+                    return oName;
                 }
             }
         }
@@ -1726,37 +1701,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return this._sequence;
         }
         let seq: number[] = this._sequence.slice();
-        for (let ii: number = 0; ii < this._oligosPaired; ii++) {
+        for (let ii = 0; ii < this._oligosPaired; ii++) {
             seq.push(EPars.RNABASE_CUT);
             seq = seq.concat(this._oligos[this._oligosOrder[ii]].sequence);
         }
         return seq;
-    }
-
-    public set pairs(pairs: number[]) {
-        let seq: number[] = this.fullSequence;
-        if (pairs.length !== seq.length) {
-            log.debug(pairs.length, seq.length);
-            throw new Error("Pair length doesn't match sequence length");
-        }
-
-        if (EPars.arePairsSame(pairs, this._pairs)) {
-            return;
-        }
-
-        this._pairs = pairs.slice();
-
-        for (let ii: number = 0; ii < this._pairs.length; ii++) {
-            if (this._pairs[ii] > ii) {
-                this._pairs[this._pairs[ii]] = ii;
-            }
-        }
-
-        /// Recompute sequence layout
-        this.computeLayout(false);
-        this.checkPairs();
-        this.updateMolecule();
-        this.generateScoreNodes();
     }
 
     public isPairSatisfied(a: number, b: number): boolean {
@@ -1778,6 +1727,43 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._sequence.length;
     }
 
+    public set sequence(sequence: number[]) {
+        if (Arrays.shallowEqual(this._sequence, sequence)) {
+            return;
+        }
+
+        if (this._locks == null) {
+            this._locks = Pose2D.createDefaultLocks(this._sequence.length);
+        }
+
+        this._sequence = sequence.slice();
+        if (this._sequence.length > this._bases.length) {
+            let diff: number = (this._sequence.length - this._bases.length);
+            for (let ii = 0; ii < diff; ii++) {
+                this.createBase();
+                this._locks.push(false);
+            }
+        } else if (this._sequence.length < this._bases.length) {
+            for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
+                if (this.isTrackedIndex(ii)) {
+                    this.removeBlackMark(ii);
+                }
+            }
+        }
+
+        let n: number = this.fullSequenceLength;
+        for (let ii = 0; ii < n; ii++) {
+            if (ii < this._sequence.length) {
+                this._bases[ii].setType(this._sequence[ii]);
+            }
+            this._bases[ii].baseIndex = ii;
+        }
+
+        this.checkPairs();
+        this.updateMolecule();
+        this.generateScoreNodes();
+    }
+
     public get sequence(): number[] {
         return this._sequence.slice();
     }
@@ -1790,19 +1776,45 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[seq];
     }
 
+    public set pairs(pairs: number[]) {
+        let seq: number[] = this.fullSequence;
+        if (pairs.length !== seq.length) {
+            log.debug(pairs.length, seq.length);
+            throw new Error("Pair length doesn't match sequence length");
+        }
+
+        if (EPars.arePairsSame(pairs, this._pairs)) {
+            return;
+        }
+
+        this._pairs = pairs.slice();
+
+        for (let ii = 0; ii < this._pairs.length; ii++) {
+            if (this._pairs[ii] > ii) {
+                this._pairs[this._pairs[ii]] = ii;
+            }
+        }
+
+        // / Recompute sequence layout
+        this.computeLayout(false);
+        this.checkPairs();
+        this.updateMolecule();
+        this.generateScoreNodes();
+    }
+
     public get pairs(): number[] {
         return this._pairs.slice();
     }
 
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
-        let rna_drawer: RNALayout = new RNALayout(radius, radius);
-        rna_drawer.setupTree(this._pairs);
-        rna_drawer.drawTree();
+        let rnaDrawer: RNALayout = new RNALayout(radius, radius);
+        rnaDrawer.setupTree(this._pairs);
+        rnaDrawer.drawTree();
         let xarray: number[] = new Array(this._bases.length);
         let yarray: number[] = new Array(this._bases.length);
-        rna_drawer.getCoords(xarray, yarray);
-        for (let ii: number = 0; ii < this._bases.length; ii++) {
+        rnaDrawer.getCoords(xarray, yarray);
+        for (let ii = 0; ii < this._bases.length; ii++) {
             let ax: number = xarray[ii];
             let ay: number = yarray[ii];
             for (let jj: number = ii + 2; jj < this._bases.length; jj++) {
@@ -1818,11 +1830,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return false;
     }
 
-    //highlight the base before the cursor
+    // highlight the base before the cursor
     public trackCursor(index: number): void {
         this._cursorIndex = index;
         if (this._cursorIndex > 0) {
-            let center: Point = this.getBaseXY(this._cursorIndex - 1);
+            let center: Point = this.getBaseLoc(this._cursorIndex - 1);
             if (this._cursorBox == null) {
                 this._cursorBox = new Graphics();
                 this.container.addChild(this._cursorBox);
@@ -1843,17 +1855,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._cursorIndex;
     }
 
-    /*override*/
+    /* override */
     public update(dt: number): void {
         if (!this.display.worldVisible) {
             // update is expensive, so don't bother doing it if we're not visible
             return;
         }
 
-        let current_time: number = this.mode.time;
+        let currentTime: number = this.mode.time;
         for (let anchor of this._anchoredObjects) {
             if (anchor.isLive) {
-                let p: Point = this.getBaseXY(anchor.base);
+                let p: Point = this.getBaseLoc(anchor.base);
                 anchor.object.display.position = new Point(p.x + anchor.offset.x, p.y + anchor.offset.y);
             }
         }
@@ -1866,17 +1878,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
         }
 
-        var basesMoved = false;
+        let basesMoved = false;
         if (this._baseToX) {
             basesMoved = true;
             // Update base locations
 
             if (this._foldStartTime < 0) {
-                this._foldStartTime = current_time;
+                this._foldStartTime = currentTime;
             }
 
-            let prog = (current_time - this._foldStartTime) / (this._foldDuration);
-            let done: boolean = false;
+            let prog = (currentTime - this._foldStartTime) / (this._foldDuration);
+            let done = false;
 
             if (prog >= 1) {
                 prog = 1;
@@ -1894,10 +1906,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 let vx: number = this._baseToX[ii] - this._baseFromX[ii];
                 let vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-                let current_x: number = this._baseFromX[ii] + (vx + (vx * prog)) / 2 * prog;
-                let current_y: number = this._baseFromY[ii] + (vy + (vy * prog)) / 2 * prog;
+                let currentX: number = this._baseFromX[ii] + (vx + (vx * prog)) / 2 * prog;
+                let currentY: number = this._baseFromY[ii] + (vy + (vy * prog)) / 2 * prog;
 
-                this._bases[ii].setXY(current_x, current_y);
+                this._bases[ii].setXY(currentX, currentY);
             }
 
             if (done) {
@@ -1911,7 +1923,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 if (this.checkOverlap()) {
                     // If overlaps have been introduced, make sure the explosion factor input is shown
                     this._explosionFactorPanel.display.visible = true;
-                } else if (this._explosionFactorPanel.display.visible == true) {
+                } else if (this._explosionFactorPanel.display.visible === true) {
                     // If all overlaps have been removed, remove the explosion
                     this._explosionFactor = 1;
                     this._explosionFactorPanel.display.visible = false;
@@ -1919,38 +1931,35 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._redraw = true;
                 }
             }
+        } else if (currentTime - this.lastSampledTime > 2 && !this._isExploding) {
+            this.lastSampledTime = currentTime;
 
-        } else {
-            if (current_time - this.lastSampledTime > 2 && !this._isExploding) {
-                this.lastSampledTime = current_time;
-
-                for (let ii = 0; ii < fullSeq.length; ii++) {
-                    if (this._pairs[ii] < 0 && !this._simpleGraphicsMods && Math.random() > 0.7) {
-                        this._bases[ii].animate();
-                    }
+            for (let ii = 0; ii < fullSeq.length; ii++) {
+                if (this._pairs[ii] < 0 && !this._simpleGraphicsMods && Math.random() > 0.7) {
+                    this._bases[ii].animate();
                 }
             }
         }
 
-        /// Update score node
+        // / Update score node
         this.updateScoreNodeVisualization(this._offX !== this._prevOffsetX || this._offY !== this._prevOffsetY);
 
-        /// Bitblt rendering
-        let need_redraw: boolean = false;
+        // / Bitblt rendering
+        let needRedraw = false;
 
-        for (let ii = 0; ii < fullSeq.length && !need_redraw; ii++) {
-            need_redraw = need_redraw || this._bases[ii].needRedraw(this._simpleGraphicsMods);
+        for (let ii = 0; ii < fullSeq.length && !needRedraw; ii++) {
+            needRedraw = needRedraw || this._bases[ii].needRedraw(this._simpleGraphicsMods);
         }
 
-        if (need_redraw || this._redraw) {
+        if (needRedraw || this._redraw) {
             // Create highlight state to pass to bases.
-            let hl_state: RNAHighlightState = null;
+            let hlState: RNAHighlightState = null;
             if (this._allNewHighlights.length > 0) {
-                hl_state = new RNAHighlightState();
-                hl_state.nuc = [];
-                hl_state.isOn = true;
+                hlState = new RNAHighlightState();
+                hlState.nuc = [];
+                hlState.isOn = true;
                 for (let existingHighlight of this._allNewHighlights) {
-                    hl_state.nuc = hl_state.nuc.concat(existingHighlight.nuc);
+                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
                 }
             }
 
@@ -1960,18 +1969,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     continue;
                 }
 
-                let use_barcode: boolean = false;
+                let useBarcode = false;
                 if (this._barcodes != null && this._barcodes.indexOf(ii) >= 0) {
-                    use_barcode = true;
+                    useBarcode = true;
                 }
 
-                this._bases[ii].forceUnpaired = (this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED);
+                this._bases[ii].forceUnpaired = (
+                    this._forcedStruct != null && this._forcedStruct[ii] === EPars.FORCE_UNPAIRED
+                );
 
                 let drawFlags: number = BaseDrawFlags.builder()
                     .locked(this.isLocked(ii))
                     .letterMode(this._lettermode)
                     .lowPerform(this._simpleGraphicsMods)
-                    .useBarcode(use_barcode)
+                    .useBarcode(useBarcode)
                     .result();
 
                 let numberBitmap: Texture = null;
@@ -1979,7 +1990,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     numberBitmap = BitmapManager.getNumberBitmap(ii + 1);
                 }
 
-                this._bases[ii].setDrawParams(this._zoomLevel, this._offX, this._offY, current_time, drawFlags, numberBitmap, hl_state);
+                this._bases[ii].setDrawParams(
+                    this._zoomLevel, this._offX, this._offY, currentTime, drawFlags, numberBitmap, hlState
+                );
             }
 
             if (this._displayAuxInfo) {
@@ -1995,7 +2008,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
                 let n: number = this._trackedIndices.length;
                 for (let ii = 0; ii < n; ii++) {
-                    center = this.getBaseXY(this._trackedIndices[ii]);
+                    center = this.getBaseLoc(this._trackedIndices[ii]);
                     this._baseBoxes[ii].x = center.x;
                     this._baseBoxes[ii].y = center.y;
                     const color = this._baseBoxes[ii].lineColor;
@@ -2004,9 +2017,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
                 }
             }
-    
+
             if (this._cursorIndex > 0) {
-                center = this.getBaseXY(this._cursorIndex - 1);
+                center = this.getBaseLoc(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
                 this._cursorBox.y = center.y;
                 this._cursorBox.visible = true;
@@ -2020,31 +2033,31 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._moleculeLayer.visible = false;
         if (this._molecularBindingBases != null && this._molecule != null) {
-            let mol_x: number = 0;
-            let mol_y: number = 0;
-            let nbases: number = 0;
+            let molX = 0;
+            let molY = 0;
+            let nbases = 0;
             for (let ii = 0; ii < fullSeq.length; ii++) {
                 let baseglow: BaseGlow = this._molecularBindingBases[ii];
                 if (baseglow != null) {
                     let pos: Point = this._bases[ii].getLastDrawnPos();
-                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, current_time);
-                    mol_x += pos.x;
-                    mol_y += pos.y;
+                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, currentTime);
+                    molX += pos.x;
+                    molY += pos.y;
                     nbases += 1;
                 }
             }
 
             if (nbases > 0) {
-                mol_x /= nbases;
-                mol_y /= nbases;
+                molX /= nbases;
+                molY /= nbases;
             }
 
             if (!this._moleculeIsBound) {
-                mol_x = 30;
-                mol_y = 200;
+                molX = 30;
+                molY = 200;
             }
 
-            this._molecule.updateView(this._zoomLevel, mol_x, mol_y, current_time);
+            this._molecule.updateView(this._zoomLevel, molX, molY, currentTime);
             this._moleculeLayer.visible = true;
         }
 
@@ -2053,68 +2066,67 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._oligoBases = new Array(fullSeq.length);
             }
 
-            let bound_len: number = this.getBoundSequence().length;
+            let boundLen: number = this.getBoundSequence().length;
             for (let ii = fullSeq.indexOf(EPars.RNABASE_CUT) + 1; ii < fullSeq.length; ii++) {
                 let baseglow = this._oligoBases[ii];
                 if (baseglow == null) {
                     baseglow = new BaseGlow();
                     this._oligoBases[ii] = baseglow;
                 }
-                if ((this._oligoPaired || (this._oligosPaired > 0 && ii < bound_len)) && this._pairs[ii] >= 0) {
+                if ((this._oligoPaired || (this._oligosPaired > 0 && ii < boundLen)) && this._pairs[ii] >= 0) {
                     baseglow.isWrong = this._restrictedHighlightBox.isInQueue(ii);
                     let pos = this._bases[ii].getLastDrawnPos();
-                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, current_time);
+                    baseglow.updateView(this._zoomLevel, pos.x, pos.y, currentTime);
                     this._moleculeLayer.visible = true;
                 }
             }
         }
 
-        let go_x: number = 0;
-        let go_y: number = 0;
+        let goX = 0;
+        let goY = 0;
 
         for (let ii = 0; ii < fullSeq.length - 1; ii++) {
-            let out_x: number = go_x;
-            let out_y: number = go_y;
+            let outX: number = goX;
+            let outY: number = goY;
 
             if (this._sequence.length < fullSeq.length && ii === this._sequence.length - 1) {
-                this._bases[ii].setGoDir(go_x, go_y);
-                this._bases[ii].setOutDir(-go_y, go_x);
+                this._bases[ii].setGoDir(goX, goY);
+                this._bases[ii].setOutDir(-goY, goX);
                 this._bases[ii].setLast(true);
                 continue;
             }
 
-            go_x = this._bases[ii + 1].x - this._bases[ii].x;
-            go_y = this._bases[ii + 1].y - this._bases[ii].y;
+            goX = this._bases[ii + 1].x - this._bases[ii].x;
+            goY = this._bases[ii + 1].y - this._bases[ii].y;
 
-            out_x += go_x;
-            out_y += go_y;
+            outX += goX;
+            outY += goY;
 
             if (ii > 0) {
-                out_x /= 2.0;
-                out_y /= 2.0;
+                outX /= 2.0;
+                outY /= 2.0;
             }
 
-            this._bases[ii].setGoDir(go_x, go_y);
-            this._bases[ii].setOutDir(-out_y, out_x);
+            this._bases[ii].setGoDir(goX, goY);
+            this._bases[ii].setOutDir(-outY, outX);
             this._bases[ii].setLast(false);
         }
 
         if (fullSeq.length >= 1) {
-
-            this._bases[fullSeq.length - 1].setGoDir(go_x, go_y);
-            this._bases[fullSeq.length - 1].setOutDir(-go_y, go_x);
+            this._bases[fullSeq.length - 1].setGoDir(goX, goY);
+            this._bases[fullSeq.length - 1].setOutDir(-goY, goX);
             this._bases[fullSeq.length - 1].setLast(true);
-
         }
 
-        /// Praise stacks when RNA is not moving
+        // / Praise stacks when RNA is not moving
         if (!this._offsetTranslating && this._baseToX == null) {
             if (this._praiseQueue.length > 0) {
                 for (let ii = 0; ii < this._praiseQueue.length; ii += 2) {
                     this.onPraiseStack(
                         this._praiseQueue[ii],
                         this._praiseQueue[ii + 1],
-                        (ii + 1) === (this._praiseQueue.length - 1));
+                        (ii + 1) === (this._praiseQueue.length - 1)
+                    );
                 }
                 this._praiseQueue = [];
             } else if (this._praiseSeq.length > 0) {
@@ -2127,7 +2139,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (this._isExploding && !this._offsetTranslating && this._baseToX == null) {
             if (this._explosionStartTime < 0) {
-                this._explosionStartTime = current_time;
+                this._explosionStartTime = currentTime;
                 this._origOffsetX = this._offX;
                 this._origOffsetY = this._offY;
             }
@@ -2136,7 +2148,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._offY = this._origOffsetY + (Math.random() * 2 - 1) * 5;
             this._redraw = true;
 
-            let prog = (current_time - this._explosionStartTime) * 5;
+            let prog = (currentTime - this._explosionStartTime) * 5;
 
             if (this._explosionRays.length >= fullSeq.length) {
                 for (let ii = 0; ii < Math.min(prog, fullSeq.length); ii++) {
@@ -2148,32 +2160,31 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         ray.fadeIn();
                     }
 
-                    ray.display.position = this.getBaseXY(ii);
+                    ray.display.position = this.getBaseLoc(ii);
                 }
             } else {
                 let diff: number = (fullSeq.length - this._explosionRays.length) / this._explosionRays.length;
-                let diff_walker: number = 0;
-                let ray_walker: number = 0;
+                let diffWalker = 0;
+                let rayWalker = 0;
 
                 for (let ii = 0; ii < fullSeq.length; ii++) {
-                    if (diff_walker < 1) {
-                        if (ray_walker >= this._explosionRays.length || ray_walker >= prog) {
+                    if (diffWalker < 1) {
+                        if (rayWalker >= this._explosionRays.length || rayWalker >= prog) {
                             continue;
                         }
 
-                        const ray = this._explosionRays[ray_walker];
+                        const ray = this._explosionRays[rayWalker];
                         if (!ray.display.visible) {
                             ray.display.alpha = 0;
                             ray.display.visible = true;
                             ray.fadeIn();
                         }
 
-                        ray.display.position = this.getBaseXY(ii);
-                        ray_walker++;
-                        diff_walker += diff;
-
+                        ray.display.position = this.getBaseLoc(ii);
+                        rayWalker++;
+                        diffWalker += diff;
                     } else {
-                        diff_walker -= 1;
+                        diffWalker -= 1;
                     }
                 }
             }
@@ -2188,8 +2199,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public numPairs(satisfied: boolean): number {
-        let n: number = 0;
-        for (let ii: number = 0; ii < this._pairs.length; ii++) {
+        let n = 0;
+        for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs[ii] > ii && (!satisfied || this.isPairSatisfied(ii, this._pairs[ii]))) {
                 n++;
             }
@@ -2214,8 +2225,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
         this._deltaScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._secondaryScoreEnergyDisplay.visible =
-            (show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText);
+        this._secondaryScoreEnergyDisplay.visible = (
+            show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
+        );
     }
 
     public get showExplosionFactor(): boolean {
@@ -2227,7 +2239,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set scoreFolder(folder: Folder) {
-        if (this._scoreFolder != folder) {
+        if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
             this.showTotalEnergy = this._showTotalEnergy;
             this.generateScoreNodes();
@@ -2246,71 +2258,69 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public baseShift(parenthesis: string, op: PuzzleEditOp, index: number): void {
         let sequence: number[] = this.sequence;
         let locks: boolean[] = this.puzzleLocks;
-        let binding_site: boolean[] = this.molecularBindingSite;
-        let sequence_backup: number[] = this.sequence;
-        let locks_backup: boolean[] = this.puzzleLocks;
-        let binding_site_backup: boolean[] = this.molecularBindingSite;
+        let bindingSite: boolean[] = this.molecularBindingSite;
+        let sequenceBackup: number[] = this.sequence;
+        let locksBackup: boolean[] = this.puzzleLocks;
+        let bindingSiteBackup: boolean[] = this.molecularBindingSite;
         let pindex: number;
 
         if (sequence.length > parenthesis.length) {
             sequence = sequence.slice(0, parenthesis.length);
             locks = locks.slice(0, parenthesis.length);
-            binding_site = binding_site.slice(0, parenthesis.length);
+            bindingSite = bindingSite.slice(0, parenthesis.length);
         }
 
         for (let ii: number = sequence.length; ii < parenthesis.length; ii++) {
             sequence.push(EPars.RNABASE_ADENINE);
             locks.push(false);
-            binding_site.push(false);
+            bindingSite.push(false);
         }
         // BASE SHIFTING MODIFIED HERE. Delete comments to apply the changes
         if (op === PuzzleEditOp.ADD_BASE) {
             // Add a base
-            let after_index: number[] = sequence.slice(index);
-            let after_lock_index: boolean[] = locks.slice(index);
-            let after_binding_site_index: boolean[] = binding_site.slice(index);
+            let afterIndex: number[] = sequence.slice(index);
+            let afterLockIndex: boolean[] = locks.slice(index);
+            let afterBindingSiteIndex: boolean[] = bindingSite.slice(index);
 
             sequence[index] = EPars.RNABASE_ADENINE;
             locks[index] = false;
-            binding_site[index] = false;
+            bindingSite[index] = false;
 
-            for (let ii = 0; ii < after_index.length - 1; ii++) {
-                sequence[ii + index + 1] = after_index[ii];
-                locks[ii + index + 1] = after_lock_index[ii];
-                binding_site[ii + index + 1] = after_binding_site_index[ii];
+            for (let ii = 0; ii < afterIndex.length - 1; ii++) {
+                sequence[ii + index + 1] = afterIndex[ii];
+                locks[ii + index + 1] = afterLockIndex[ii];
+                bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
             pindex = this.pairs[index];
-            let after_index = sequence.slice(index);
-            let after_lock_index = locks.slice(index);
-            let after_binding_site_index = binding_site.slice(index);
+            let afterIndex = sequence.slice(index);
+            let afterLockIndex = locks.slice(index);
+            let afterBindingSiteIndex = bindingSite.slice(index);
 
             sequence[index] = EPars.RNABASE_ADENINE;
             sequence[pindex + 2] = EPars.RNABASE_ADENINE;
             locks[index] = false;
             locks[pindex + 2] = false;
-            binding_site[index] = false;
-            binding_site[pindex + 2] = false;
+            bindingSite[index] = false;
+            bindingSite[pindex + 2] = false;
 
-            for (let ii = 0; ii < after_index.length - 2; ii++) {
+            for (let ii = 0; ii < afterIndex.length - 2; ii++) {
                 if (ii + index > pindex) {
-                    sequence[ii + index + 2] = after_index[ii];
-                    locks[ii + index + 2] = after_lock_index[ii];
-                    binding_site[ii + index + 2] = after_binding_site_index[ii];
+                    sequence[ii + index + 2] = afterIndex[ii];
+                    locks[ii + index + 2] = afterLockIndex[ii];
+                    bindingSite[ii + index + 2] = afterBindingSiteIndex[ii];
                 } else {
-                    sequence[ii + index + 1] = after_index[ii];
-                    locks[ii + index + 1] = after_lock_index[ii];
-                    binding_site[ii + index + 1] = after_binding_site_index[ii];
+                    sequence[ii + index + 1] = afterIndex[ii];
+                    locks[ii + index + 1] = afterLockIndex[ii];
+                    bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
                 }
-
             }
-
         } else if (op === PuzzleEditOp.ADD_CYCLE) {
             // Add a cycle of length 3
-            let after_index = sequence.slice(index);
-            let after_lock_index = locks.slice(index);
-            let after_binding_site_index = binding_site.slice(index);
+            let afterIndex = sequence.slice(index);
+            let afterLockIndex = locks.slice(index);
+            let afterBindingSiteIndex = bindingSite.slice(index);
 
             sequence[index] = EPars.RNABASE_ADENINE;
             sequence[index + 1] = EPars.RNABASE_ADENINE;
@@ -2324,59 +2334,57 @@ export default class Pose2D extends ContainerObject implements Updatable {
             locks[index + 3] = false;
             locks[index + 4] = false;
 
-            binding_site[index] = false;
-            binding_site[index + 1] = false;
-            binding_site[index + 2] = false;
-            binding_site[index + 3] = false;
-            binding_site[index + 4] = false;
+            bindingSite[index] = false;
+            bindingSite[index + 1] = false;
+            bindingSite[index + 2] = false;
+            bindingSite[index + 3] = false;
+            bindingSite[index + 4] = false;
 
-            for (let ii = 0; ii < after_index.length - 5; ii++) {
-                sequence[ii + index + 5] = after_index[ii];
-                locks[ii + index + 5] = after_lock_index[ii];
-                binding_site[ii + index + 5] = after_binding_site_index[ii];
+            for (let ii = 0; ii < afterIndex.length - 5; ii++) {
+                sequence[ii + index + 5] = afterIndex[ii];
+                locks[ii + index + 5] = afterLockIndex[ii];
+                bindingSite[ii + index + 5] = afterBindingSiteIndex[ii];
             }
-
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
             pindex = this.pairs[index];
-            let after_index = sequence_backup.slice(index + 1);
-            let after_lock_index = locks_backup.slice(index + 1);
-            let after_binding_site_index = binding_site_backup.slice(index + 1);
+            let afterIndex = sequenceBackup.slice(index + 1);
+            let afterLockIndex = locksBackup.slice(index + 1);
+            let afterBindingSiteIndex = bindingSiteBackup.slice(index + 1);
 
-            for (let ii = 0; ii < after_index.length - 1; ii++) {
+            for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 if (ii + index >= pindex - 1) {
-                    sequence[ii + index] = after_index[ii + 1];
-                    locks[ii + index] = after_lock_index[ii + 1];
-                    binding_site[ii + index] = after_binding_site_index[ii + 1];
+                    sequence[ii + index] = afterIndex[ii + 1];
+                    locks[ii + index] = afterLockIndex[ii + 1];
+                    bindingSite[ii + index] = afterBindingSiteIndex[ii + 1];
                 } else {
-                    sequence[ii + index] = after_index[ii];
-                    locks[ii + index] = after_lock_index[ii];
-                    binding_site[ii + index] = after_binding_site_index[ii];
+                    sequence[ii + index] = afterIndex[ii];
+                    locks[ii + index] = afterLockIndex[ii];
+                    bindingSite[ii + index] = afterBindingSiteIndex[ii];
                 }
             }
-
         } else if (op === PuzzleEditOp.DELETE_BASE) {
             // Delete a base
-            let after_index = sequence_backup.slice(index + 1);
-            let after_lock_index = locks_backup.slice(index + 1);
-            let after_binding_site_index = binding_site_backup.slice(index + 1);
+            let afterIndex = sequenceBackup.slice(index + 1);
+            let afterLockIndex = locksBackup.slice(index + 1);
+            let afterBindingSiteIndex = bindingSiteBackup.slice(index + 1);
 
-            for (let ii = 0; ii < after_index.length; ii++) {
-                sequence[ii + index] = after_index[ii];
-                locks[ii + index] = after_lock_index[ii];
-                binding_site[ii + index] = after_binding_site_index[ii];
+            for (let ii = 0; ii < afterIndex.length; ii++) {
+                sequence[ii + index] = afterIndex[ii];
+                locks[ii + index] = afterLockIndex[ii];
+                bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
 
         this.sequence = sequence;
         this.puzzleLocks = locks;
         this.molecularStructure = EPars.parenthesisToPairs(parenthesis);
-        this.molecularBindingSite = binding_site;
+        this.molecularBindingSite = bindingSite;
         this.parenthesis = parenthesis;
     }
 
-    public registerPaintTool(paint_color: number, tool: Booster): void {
-        this._dynPaintColors.push(paint_color);
+    public registerPaintTool(paintColor: number, tool: Booster): void {
+        this._dynPaintColors.push(paintColor);
         this._dynPaintTools.push(tool);
     }
 
@@ -2402,9 +2410,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.doneColoring();
     }
 
-    public forceEditable(b: boolean, edit_list: number[] = null): void {
+    public forceEditable(b: boolean, editList: number[] = null): void {
         this._editable = b;
-        this._editable_indices = edit_list;
+        this._editableIndices = editList;
     }
 
     private computeLayout(fast: boolean = false): void {
@@ -2416,34 +2424,34 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let n: number = fullSeq.length;
-        let x_mid: number = 0;
-        let y_mid: number = 0;
+        let xMid = 0;
+        let yMid = 0;
 
         let xarray: number[] = new Array(n);
         let yarray: number[] = new Array(n);
 
-        let rna_drawer: RNALayout;
+        let rnaDrawer: RNALayout;
 
-        let exception_indices: number[] = null;
+        let exceptionIndices: number[] = null;
         if (fullSeq.indexOf(EPars.RNABASE_CUT) >= 0) {
-            exception_indices = [];
-            exception_indices.push(0);
-            let oligo_index: number = -1;
+            exceptionIndices = [];
+            exceptionIndices.push(0);
+            let oligoIndex = -1;
             // array of positions of connectors "&"
-            while (fullSeq.indexOf(EPars.RNABASE_CUT, oligo_index + 1) >= 0) {
-                oligo_index = fullSeq.indexOf(EPars.RNABASE_CUT, oligo_index + 1);
-                exception_indices.push(oligo_index);
+            while (fullSeq.indexOf(EPars.RNABASE_CUT, oligoIndex + 1) >= 0) {
+                oligoIndex = fullSeq.indexOf(EPars.RNABASE_CUT, oligoIndex + 1);
+                exceptionIndices.push(oligoIndex);
             }
         }
-        rna_drawer = new RNALayout(
+        rnaDrawer = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
             Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
-            exception_indices
+            exceptionIndices
         );
 
-        rna_drawer.setupTree(this._pairs);
-        rna_drawer.drawTree();
-        rna_drawer.getCoords(xarray, yarray);
+        rnaDrawer.setupTree(this._pairs);
+        rnaDrawer.drawTree();
+        rnaDrawer.getCoords(xarray, yarray);
 
         if (this._desiredAngle === 90) {
             let tmp = xarray;
@@ -2456,7 +2464,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let ymin: number = yarray[0];
         let ymax: number = yarray[0];
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             if (xarray[ii] < xmin) {
                 xmin = xarray[ii];
             }
@@ -2474,20 +2482,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        x_mid = (xmax + xmin) / 2.0;
-        y_mid = (ymax + ymin) / 2.0;
+        xMid = (xmax + xmin) / 2.0;
+        yMid = (ymax + ymin) / 2.0;
 
         this._baseFromX = new Array(n);
         this._baseFromY = new Array(n);
         this._baseToX = new Array(n);
         this._baseToY = new Array(n);
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             this._baseFromX[ii] = this._bases[ii].x;
             this._baseFromY[ii] = this._bases[ii].y;
 
-            this._baseToX[ii] = xarray[ii] - x_mid;
-            this._baseToY[ii] = yarray[ii] - y_mid;
+            this._baseToX[ii] = xarray[ii] - xMid;
+            this._baseToY[ii] = yarray[ii] - yMid;
         }
 
         this._foldStartTime = -1;
@@ -2518,7 +2526,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         //     this._feedback_objs[ii].set_pos(new UDim(0, 0, obj_p.x, obj_p.y));
         //     this._feedback_objs[ii].graphics.clear();
         //     this._feedback_objs[ii].graphics.beginFill(0x000000, 0.35);
-        //     this._feedback_objs[ii].graphics.drawRoundRect(0, 0, this._feedback_objs[ii].text_width(), this._feedback_objs[ii].text_height(), 12);
+        //     this._feedback_objs[ii].graphics.drawRoundRect(
+        //         0, 0, this._feedback_objs[ii].text_width(), this._feedback_objs[ii].text_height(), 12
+        //     );
         // }
     }
 
@@ -2556,7 +2566,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._locks[seqnum] = !this._locks[seqnum];
                 this._bases[seqnum].setDirty();
                 this._lockUpdated = true;
-
             } else if (this._currentColor === EPars.RNABASE_BINDING_SITE) {
                 if (this._bindingSite != null && this._bindingSite[seqnum]) {
                     this._bindingSite = [];
@@ -2566,165 +2575,52 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this.molecularBindingSite = this._bindingSite;
                     this._bindingSiteUpdated = true;
                 } else {
-                    let binding_bases: number[] = EPars.isInternal(seqnum, this._pairs);
-                    if (binding_bases != null && binding_bases.length > 4) {
+                    let bindingBases: number[] = EPars.isInternal(seqnum, this._pairs);
+                    if (bindingBases != null && bindingBases.length > 4) {
                         this._bindingSite = [];
                         for (let ii = 0; ii < this._sequence.length; ii++) {
                             this._bindingSite.push(false);
                         }
 
-                        for (let ii = 0; ii < binding_bases.length; ii++) {
-                            this._bindingSite[binding_bases[ii]] = true;
+                        for (let ii = 0; ii < bindingBases.length; ii++) {
+                            this._bindingSite[bindingBases[ii]] = true;
                         }
                         this.molecularBindingSite = this._bindingSite;
                         this._bindingSiteUpdated = true;
                     } else {
                         (this.mode as GameMode).showNotification(
-                            "Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)");
+                            'Binding site can be only formed at loops between 2 stacks\n(Internal loops and Bulges)'
+                        );
                     }
                 }
-
             } else if (this._mouseDownAltKey) {
                 if (this.toggleDesignStruct(seqnum)) {
                     this._designStructUpdated = true;
                 }
-            } else {
-
-                if (!this.isLocked(seqnum)) {
-
-                    if (this._currentColor >= 1 && this._currentColor <= 4) {
-                        this._mutatedSequence[seqnum] = this._currentColor;
-                        ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
-                        this._bases[seqnum].setType(this._currentColor, true);
-                    } else if (this._currentColor === EPars.RNABASE_RANDOM) {
-                        let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
-                        this._mutatedSequence[seqnum] = randbase;
-                        this._bases[seqnum].setType(randbase, true)
-                    } else if (this._currentColor === EPars.RNABASE_PAIR) {
-                        if (this._pairs[seqnum] >= 0) {
-                            let pi = this._pairs[seqnum];
-
-                            if (this.isLocked(pi)) {
-                                return;
-                            }
-
-                            let click_base: number = this._mutatedSequence[seqnum];
-
-                            this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
-                            this._mutatedSequence[pi] = click_base;
-
-                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                            this._bases[pi].setType(this._mutatedSequence[pi], true);
-                        }
-                    } else if (this._currentColor === EPars.RNABASE_MAGIC) {
-                        this._mutatedSequence[seqnum] = this._currentColor;
-                        this._bases[seqnum].setType(this._currentColor);
-                    } else if (this._currentColor === EPars.RNABASE_AU_PAIR) {
-                        if (this._pairs[seqnum] >= 0) {
-                            let pi = this._pairs[seqnum];
-
-                            if (this.isLocked(pi)) {
-                                return;
-                            }
-
-                            this._mutatedSequence[seqnum] = EPars.RNABASE_ADENINE;
-                            this._mutatedSequence[pi] = EPars.RNABASE_URACIL;
-
-                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                            this._bases[pi].setType(this._mutatedSequence[pi], true);
-                        }
-                    } else if (this._currentColor === EPars.RNABASE_GC_PAIR) {
-                        if (this._pairs[seqnum] >= 0) {
-                            let pi = this._pairs[seqnum];
-
-                            if (this.isLocked(pi)) {
-                                return;
-                            }
-
-                            this._mutatedSequence[seqnum] = EPars.RNABASE_GUANINE;
-                            this._mutatedSequence[pi] = EPars.RNABASE_CYTOSINE;
-
-                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                            this._bases[pi].setType(this._mutatedSequence[pi], true);
-                        }
-                    } else if (this._currentColor === EPars.RNABASE_GU_PAIR) {
-                        if (this._pairs[seqnum] >= 0) {
-                            let pi = this._pairs[seqnum];
-
-                            if (this.isLocked(pi)) {
-                                return;
-                            }
-
-                            this._mutatedSequence[seqnum] = EPars.RNABASE_URACIL;
-                            this._mutatedSequence[pi] = EPars.RNABASE_GUANINE;
-
-                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                            this._bases[pi].setType(this._mutatedSequence[pi], true);
-                        }
-                    } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
-                        let index: number = this._dynPaintColors.indexOf(this._currentColor);
-                        this._dynPaintTools[index].onPaint(this, seqnum);
-                    }
-                }
-            }
-        }
-    }
-
-    private onBaseMouseMove(seqnum: number): void {
-        if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
-            this._shiftEnd = seqnum;
-            this.updateShiftHighlight();
-        }
-
-        if (!this._coloring || (seqnum === this._lastColoredIndex)) {
-            return;
-        }
-
-        if (this._currentColor === EPars.RNABASE_LOCK) {
-            if (!this._locks) {
-                this._locks = [];
-                for (let ii: number = 0; ii < this._sequence.length; ii++) {
-                    this._locks.push(false);
-                }
-            }
-            this._locks[seqnum] = !this._locks[seqnum];
-            this._bases[seqnum].setDirty();
-            this._lockUpdated = true;
-
-        } else if (this._mouseDownAltKey) {
-            if (this.toggleDesignStruct(seqnum)) {
-                this._designStructUpdated = true;
-            }
-
-        } else {
-            if (!this.isLocked(seqnum)) {
+            } else if (!this.isLocked(seqnum)) {
                 if (this._currentColor >= 1 && this._currentColor <= 4) {
                     this._mutatedSequence[seqnum] = this._currentColor;
                     ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
                     this._bases[seqnum].setType(this._currentColor, true);
-
                 } else if (this._currentColor === EPars.RNABASE_RANDOM) {
-                    let randbase: number = Math.floor(Math.random() * 4) % 4 + 1;
+                    let randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
                     this._mutatedSequence[seqnum] = randbase;
-                    this._bases[seqnum].setType(randbase, true)
+                    this._bases[seqnum].setType(randbase, true);
                 } else if (this._currentColor === EPars.RNABASE_PAIR) {
                     if (this._pairs[seqnum] >= 0) {
                         let pi = this._pairs[seqnum];
-                        if (this._pairs[seqnum] >= 0) {
-                            pi = this._pairs[seqnum];
 
-                            if (this.isLocked(pi)) {
-                                return;
-                            }
-
-                            let click_base: number = this._mutatedSequence[seqnum];
-
-                            this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
-                            this._mutatedSequence[pi] = click_base;
-
-                            this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
-                            this._bases[pi].setType(this._mutatedSequence[pi], true);
+                        if (this.isLocked(pi)) {
+                            return;
                         }
+
+                        let clickBase: number = this._mutatedSequence[seqnum];
+
+                        this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
+                        this._mutatedSequence[pi] = clickBase;
+
+                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence[pi], true);
                     }
                 } else if (this._currentColor === EPars.RNABASE_MAGIC) {
                     this._mutatedSequence[seqnum] = this._currentColor;
@@ -2773,8 +2669,112 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     }
                 } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
                     let index: number = this._dynPaintColors.indexOf(this._currentColor);
-                    this._dynPaintTools[index].onPainting(this, seqnum);
+                    this._dynPaintTools[index].onPaint(this, seqnum);
                 }
+            }
+        }
+    }
+
+    private onBaseMouseMove(seqnum: number): void {
+        if (!this._coloring && this._shiftStart >= 0 && seqnum < this.sequenceLength) {
+            this._shiftEnd = seqnum;
+            this.updateShiftHighlight();
+        }
+
+        if (!this._coloring || (seqnum === this._lastColoredIndex)) {
+            return;
+        }
+
+        if (this._currentColor === EPars.RNABASE_LOCK) {
+            if (!this._locks) {
+                this._locks = [];
+                for (let ii = 0; ii < this._sequence.length; ii++) {
+                    this._locks.push(false);
+                }
+            }
+            this._locks[seqnum] = !this._locks[seqnum];
+            this._bases[seqnum].setDirty();
+            this._lockUpdated = true;
+        } else if (this._mouseDownAltKey) {
+            if (this.toggleDesignStruct(seqnum)) {
+                this._designStructUpdated = true;
+            }
+        } else if (!this.isLocked(seqnum)) {
+            if (this._currentColor >= 1 && this._currentColor <= 4) {
+                this._mutatedSequence[seqnum] = this._currentColor;
+                ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
+                this._bases[seqnum].setType(this._currentColor, true);
+            } else if (this._currentColor === EPars.RNABASE_RANDOM) {
+                let randbase: number = (Math.floor(Math.random() * 4) % 4) + 1;
+                this._mutatedSequence[seqnum] = randbase;
+                this._bases[seqnum].setType(randbase, true);
+            } else if (this._currentColor === EPars.RNABASE_PAIR) {
+                if (this._pairs[seqnum] >= 0) {
+                    let pi = this._pairs[seqnum];
+                    if (this._pairs[seqnum] >= 0) {
+                        pi = this._pairs[seqnum];
+
+                        if (this.isLocked(pi)) {
+                            return;
+                        }
+
+                        let clickBase: number = this._mutatedSequence[seqnum];
+
+                        this._mutatedSequence[seqnum] = this._mutatedSequence[pi];
+                        this._mutatedSequence[pi] = clickBase;
+
+                        this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                        this._bases[pi].setType(this._mutatedSequence[pi], true);
+                    }
+                }
+            } else if (this._currentColor === EPars.RNABASE_MAGIC) {
+                this._mutatedSequence[seqnum] = this._currentColor;
+                this._bases[seqnum].setType(this._currentColor);
+            } else if (this._currentColor === EPars.RNABASE_AU_PAIR) {
+                if (this._pairs[seqnum] >= 0) {
+                    let pi = this._pairs[seqnum];
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    this._mutatedSequence[seqnum] = EPars.RNABASE_ADENINE;
+                    this._mutatedSequence[pi] = EPars.RNABASE_URACIL;
+
+                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                }
+            } else if (this._currentColor === EPars.RNABASE_GC_PAIR) {
+                if (this._pairs[seqnum] >= 0) {
+                    let pi = this._pairs[seqnum];
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    this._mutatedSequence[seqnum] = EPars.RNABASE_GUANINE;
+                    this._mutatedSequence[pi] = EPars.RNABASE_CYTOSINE;
+
+                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                }
+            } else if (this._currentColor === EPars.RNABASE_GU_PAIR) {
+                if (this._pairs[seqnum] >= 0) {
+                    let pi = this._pairs[seqnum];
+
+                    if (this.isLocked(pi)) {
+                        return;
+                    }
+
+                    this._mutatedSequence[seqnum] = EPars.RNABASE_URACIL;
+                    this._mutatedSequence[pi] = EPars.RNABASE_GUANINE;
+
+                    this._bases[seqnum].setType(this._mutatedSequence[seqnum], true);
+                    this._bases[pi].setType(this._mutatedSequence[pi], true);
+                }
+            } else if (this._dynPaintColors.indexOf(this._currentColor) >= 0) {
+                let index: number = this._dynPaintColors.indexOf(this._currentColor);
+                this._dynPaintTools[index].onPainting(this, seqnum);
             }
         }
         this._lastColoredIndex = seqnum;
@@ -2795,7 +2795,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._shiftStart < 0) {
             this._shiftHighlightBox.clear();
         } else {
-            this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, this._shiftEnd < this._shiftStart ? [this._shiftEnd, this._shiftStart] : [this._shiftStart, this._shiftEnd]);
+            this._shiftHighlightBox.setHighlight(
+                HighlightType.SHIFT,
+                this._shiftEnd < this._shiftStart
+                    ? [this._shiftEnd, this._shiftStart] : [this._shiftStart, this._shiftEnd]
+            );
             this._shiftHighlightBox.isOn = false;
         }
     }
@@ -2803,12 +2807,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private static drawEnergyHighlight(hilite: Graphics, energy: Sprite): Graphics {
         // Draw highlight around the energy reading.
         // Give it a bit of padding so the highlight isn't so tight.
-        const PADDING: number = 2;
+        const PADDING = 2;
         return hilite.clear()
             .lineStyle(1, 0xFFFFFF, 0.7)
             .drawRoundedRect(
                 energy.x - PADDING, energy.y - PADDING,
-                energy.width + PADDING, energy.height + PADDING, 10);
+                energy.width + PADDING, energy.height + PADDING, 10
+            );
     }
 
     private updateEnergyHighlight(energy: Sprite, idx: number, vis: boolean): void {
@@ -2819,16 +2824,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             let obj = new SceneObject(Pose2D.drawEnergyHighlight(new Graphics(), energy));
             obj.display.alpha = 0;
-            obj.addObject(new RepeatingTask((): SerialTask => {
-                return new SerialTask(
-                    new AlphaTask(1, 0.5),
-                    new AlphaTask(0, 0.5)
-                )
-            }));
+            obj.addObject(new RepeatingTask((): SerialTask => new SerialTask(
+                new AlphaTask(1, 0.5),
+                new AlphaTask(0, 0.5)
+            )));
 
             this.addObject(obj, this.container);
             this._energyHighlights.push(obj);
-
         } else {
             let obj = this._energyHighlights[idx];
             obj.display.visible = vis;
@@ -2851,46 +2853,45 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let cleaving_site: number = this._auxInfo[Pose2D.CLEAVING_SITE];
-        if (cleaving_site < this._bases.length - 1) {
-            let b_x: number = this._bases[cleaving_site].x + this._offX;
-            let b_y: number = this._bases[cleaving_site].y + this._offY;
+        let cleavingSite: number = this._auxInfo[Pose2D.CLEAVING_SITE];
+        if (cleavingSite < this._bases.length - 1) {
+            let bX: number = this._bases[cleavingSite].x + this._offX;
+            let bY: number = this._bases[cleavingSite].y + this._offY;
 
-            let b_next_x: number = this._bases[cleaving_site + 1].x + this._offX;
-            let b_next_y: number = this._bases[cleaving_site + 1].y + this._offY;
+            let bNextX: number = this._bases[cleavingSite + 1].x + this._offX;
+            let bNextY: number = this._bases[cleavingSite + 1].y + this._offY;
 
-            let c_x: number = (b_x + b_next_x) / 2.0;
-            let c_y: number = (b_y + b_next_y) / 2.0;
+            let cX: number = (bX + bNextX) / 2.0;
+            let cY: number = (bY + bNextY) / 2.0;
 
-            let go_x: number = b_next_y - b_y;
-            let go_y: number = -(b_next_x - b_x);
+            let goX: number = bNextY - bY;
+            let goY: number = -(bNextX - bX);
 
             this._auxInfoCanvas.lineStyle(3, 0xFF0000, 0.9);
-            this._auxInfoCanvas.moveTo(c_x + go_x / 2.0, c_y + go_y / 2.0);
-            this._auxInfoCanvas.lineTo(c_x - go_x / 2.0, c_y - go_y / 2.0);
+            this._auxInfoCanvas.moveTo(cX + goX / 2.0, cY + goY / 2.0);
+            this._auxInfoCanvas.lineTo(cX - goX / 2.0, cY - goY / 2.0);
 
-            this._auxTextballoon.display.position = new Point(c_x + go_x / 2.0, c_y + go_y / 2.0);
+            this._auxTextballoon.display.position = new Point(cX + goX / 2.0, cY + goY / 2.0);
         }
     }
 
     private checkPairs(): void {
         let fullSeq: number[] = this.fullSequence;
 
-        for (let ii: number = 0; ii < this._pairs.length; ii++) {
+        for (let ii = 0; ii < this._pairs.length; ii++) {
             if (this._pairs[ii] >= 0 && this.isPairSatisfied(ii, this._pairs[ii])) {
-
-                let pair_str: number = Pose2D.getPairStrength(fullSeq[ii], fullSeq[this._pairs[ii]]);
+                let pairStr: number = Pose2D.getPairStrength(fullSeq[ii], fullSeq[this._pairs[ii]]);
 
                 if (this._baseToX) {
                     this._bases[ii].setPairing(true,
                         this._baseToX[this._pairs[ii]] - this._baseToX[ii],
                         this._baseToY[this._pairs[ii]] - this._baseToY[ii],
-                        0.5, pair_str);
+                        0.5, pairStr);
                 } else {
                     this._bases[ii].setPairing(true,
                         this._bases[this._pairs[ii]].x - this._bases[ii].x,
                         this._bases[this._pairs[ii]].y - this._bases[ii].y,
-                        0.5, pair_str);
+                        0.5, pairStr);
                 }
             } else {
                 this._bases[ii].setPairing(false, -1, -1, 0.5, -1);
@@ -2916,8 +2917,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
                 let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices;
 
-                for (let ii: number = 0; ii < indices.length; ii++) {
-                    let p: Point = this.getBaseXY(indices[ii]);
+                for (let ii = 0; ii < indices.length; ii++) {
+                    let p: Point = this.getBaseLoc(indices[ii]);
 
                     if (ii === 0) {
                         this._scoreNodeHighlight.moveTo(p.x, p.y);
@@ -2933,24 +2934,24 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._scoreTexts != null) {
             for (let ii = 0; ii < this._scoreNodes.length; ii++) {
                 let indices: number[] = this._scoreNodes[ii].baseIndices;
-                let x_avg: number = 0;
-                let y_avg: number = 0;
+                let xAvg = 0;
+                let yAvg = 0;
 
-                for (let jj: number = 0; jj < indices.length; jj++) {
-                    let p: Point = this.getBaseXY(indices[jj]);
-                    x_avg += p.x;
-                    y_avg += p.y;
+                for (let jj = 0; jj < indices.length; jj++) {
+                    let p: Point = this.getBaseLoc(indices[jj]);
+                    xAvg += p.x;
+                    yAvg += p.y;
                 }
 
                 if (indices.length > 0) {
-                    x_avg /= indices.length;
-                    y_avg /= indices.length;
+                    xAvg /= indices.length;
+                    yAvg /= indices.length;
                 }
 
-                x_avg -= this._scoreTexts[ii].width / 2;
-                y_avg -= this._scoreTexts[ii].height / 2;
+                xAvg -= this._scoreTexts[ii].width / 2;
+                yAvg -= this._scoreTexts[ii].height / 2;
 
-                this._scoreTexts[ii].position = new Point(x_avg, y_avg);
+                this._scoreTexts[ii].position = new Point(xAvg, yAvg);
                 this._scoreTexts[ii].visible = (this._zoomLevel < 4);
                 this.updateEnergyHighlight(this._scoreTexts[ii], ii, this._scoreTexts[ii].visible);
             }
@@ -2966,28 +2967,28 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodeIndex = -1;
 
         if (this._scoreNodes != null) {
-            let totalScore: number = 0;
-            let nodeFound: boolean = false;
-            let nodeTxt: string = "";
-            let nodeLabel: string = "";
-            let nodeScore: string = "";
+            let totalScore = 0;
+            let nodeFound = false;
+            let nodeTxt = '';
+            let nodeLabel = '';
+            let nodeScore = '';
 
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                let mouse_p: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
-                let base_xys: Point[] = [];
+                let mouseP: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+                let baseXys: Point[] = [];
 
-                for (let ii: number = 0; ii < this.fullSequenceLength; ii++) {
-                    base_xys.push(this.getBaseXY(ii));
+                for (let ii = 0; ii < this.fullSequenceLength; ii++) {
+                    baseXys.push(this.getBaseLoc(ii));
                 }
                 for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                    let base_indices: number[] = this._scoreNodes[ii].baseIndices;
-                    let node_points: Point[] = [];
+                    let baseIndices: number[] = this._scoreNodes[ii].baseIndices;
+                    let nodePoints: Point[] = [];
 
-                    for (let jj: number = 0; jj < base_indices.length; jj++) {
-                        node_points.push(base_xys[base_indices[jj]]);
+                    for (let jj = 0; jj < baseIndices.length; jj++) {
+                        nodePoints.push(baseXys[baseIndices[jj]]);
                     }
 
-                    if (!nodeFound && Utility.isPointWithin(mouse_p, node_points)) {
+                    if (!nodeFound && Utility.isPointWithin(mouseP, nodePoints)) {
                         nodeTxt = this._scoreNodes[ii].text;
                         nodeLabel = this._scoreNodes[ii].textLabel;
                         nodeScore = this._scoreNodes[ii].textScore;
@@ -3001,67 +3002,65 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 totalScore += scoreNode.score;
             }
 
-            let scoreLabel = "Total";
-            let scoreScore = "";
-            let factor: number = 0;
-            if ((this._molecularBindingBases != null) ||
-                (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) ||
-                (this._oligos != null)) {
-
-                let label_elems: string[] = [];
-                let score_elems: string[] = [];
+            let scoreLabel = 'Total';
+            let scoreScore = '';
+            let factor = 0;
+            if ((this._molecularBindingBases != null)
+                || (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER)
+                || (this._oligos != null)) {
+                let labelElems: string[] = [];
+                let scoreElems: string[] = [];
 
                 if (this._molecularBindingBases != null) {
                     factor++;
                     if (this._moleculeIsBoundReal) {
-                        label_elems.push(EnergyScoreDisplay.green("Molecule Bound"));
+                        labelElems.push(EnergyScoreDisplay.green('Molecule Bound'));
                         // Round to 2 decimal places
                         let bonus = Math.round(this._molecularBindingBonus * 1e2) / 1e2;
-                        score_elems.push(EnergyScoreDisplay.green(` ${bonus} kcal`));
+                        scoreElems.push(EnergyScoreDisplay.green(` ${bonus} kcal`));
                     } else {
-                        label_elems.push(EnergyScoreDisplay.grey("Molecule Not Bound"));
-                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
+                        labelElems.push(EnergyScoreDisplay.grey('Molecule Not Bound'));
+                        scoreElems.push(EnergyScoreDisplay.grey(' (0 kcal)'));
                     }
                 }
                 if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
                     factor++;
                     let malus: number = this._duplexCost + Math.round(this._oligoMalus);
                     if (this._oligoPaired) {
-                        label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
-                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
+                        labelElems.push(EnergyScoreDisplay.green('Oligo Bound'));
+                        scoreElems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     } else {
-                        label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
-                        score_elems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
+                        labelElems.push(EnergyScoreDisplay.grey('Oligo Not Bound'));
+                        scoreElems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
                     }
                 }
                 if (this._oligos != null) {
                     factor++;
                     if (this._oligosPaired === 0) {
                         if (this._oligos.length > 1) {
-                            label_elems.push(EnergyScoreDisplay.grey("No Oligo Bound"));
+                            labelElems.push(EnergyScoreDisplay.grey('No Oligo Bound'));
                         } else {
-                            label_elems.push(EnergyScoreDisplay.grey("Oligo Not Bound"));
+                            labelElems.push(EnergyScoreDisplay.grey('Oligo Not Bound'));
                         }
-                        score_elems.push(EnergyScoreDisplay.grey(" (0 kcal)"));
+                        scoreElems.push(EnergyScoreDisplay.grey(' (0 kcal)'));
                     } else {
                         let malus = this._duplexCost;
                         for (let ii = 0; ii < this._oligosPaired; ii++) {
                             malus += Math.round(this._oligos[this._oligosOrder[ii]].malus);
                         }
                         if (this._oligosPaired > 1) {
-                            label_elems.push(EnergyScoreDisplay.green("Oligos Bound"));
+                            labelElems.push(EnergyScoreDisplay.green('Oligos Bound'));
                         } else {
-                            label_elems.push(EnergyScoreDisplay.green("Oligo Bound"));
+                            labelElems.push(EnergyScoreDisplay.green('Oligo Bound'));
                         }
-                        score_elems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
+                        scoreElems.push(EnergyScoreDisplay.red(` ${malus.toFixed(2)} kcal`));
                     }
                 }
 
-                scoreLabel += EnergyScoreDisplay.grey(" (") + label_elems.join(", ") + EnergyScoreDisplay.grey(")");
-                scoreScore = (totalScore / 100).toString() + score_elems.join("");
-
+                scoreLabel += EnergyScoreDisplay.grey(' (') + labelElems.join(', ') + EnergyScoreDisplay.grey(')');
+                scoreScore = (totalScore / 100).toString() + scoreElems.join('');
             } else {
-                scoreScore = (totalScore / 100).toString() + " kcal";
+                scoreScore = `${(totalScore / 100).toString()} kcal`;
             }
             this.updateEnergyDisplaySizeLocation(factor);
 
@@ -3074,13 +3073,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             let attemptSetDelta = () => {
                 try {
                     this._deltaScoreEnergyDisplay.setEnergyText(
-                        "Natural/Target Delta",
-                        Math.round(this._getEnergyDelta()) / 100 + " kcal"
+                        'Natural/Target Delta',
+                        `${Math.round(this._getEnergyDelta()) / 100} kcal`
                     );
                 } catch (e) {
                     setTimeout(attemptSetDelta, 1000);
                 }
-            }
+            };
             setTimeout(attemptSetDelta, 50);
         }
     }
@@ -3089,17 +3088,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._primaryScoreEnergyDisplay.position = new Point(17, 118);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118)
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118);
         this._deltaScoreEnergyDisplay.setSize(111, 40);
 
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119*2 + factor * 59, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, 118);
         this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
     private clearScoreTexts(): void {
         if (this._scoreTexts != null) {
-            for (let score_text of this._scoreTexts) {
-                score_text.destroy({children: true});
+            for (let scoreText of this._scoreTexts) {
+                scoreText.destroy({children: true});
             }
             this._scoreTexts = null;
         }
@@ -3110,28 +3109,27 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodeHighlight.clear();
         this.clearEnergyHighlights();
 
-        if (this._scoreFolder == null ||
-            this._sequence == null ||
-            this._sequence.length === 0 ||
-            this._pairs == null ||
-            this._pairs.length !== this.fullSequenceLength) {
-
+        if (this._scoreFolder == null
+            || this._sequence == null
+            || this._sequence.length === 0
+            || this._pairs == null
+            || this._pairs.length !== this.fullSequenceLength) {
             this.clearScoreTexts();
             return;
         }
 
-        /// JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
-        /// But this is cheap, so it shouldn't matter too much
-        let score_tree: RNALayout = new RNALayout;
-        score_tree.setupTree(this.satisfiedPairs);
+        // / JEE : It's a bit of waste to generate RNALayout twice (once here, once when drawing rna)
+        // / But this is cheap, so it shouldn't matter too much
+        let scoreTree: RNALayout = new RNALayout();
+        scoreTree.setupTree(this.satisfiedPairs);
 
-        let treeroot: RNATreeNode = score_tree.root;
-        score_tree.scoreTree(this.fullSequence, this._scoreFolder);
+        let treeroot: RNATreeNode = scoreTree.root;
+        scoreTree.scoreTree(this.fullSequence, this._scoreFolder);
 
-        let score_nodes: ScoreDisplayNode[] = [];
-        let root_coords: number[] = [];
-        this.generateScoreNodesRecursive(treeroot, root_coords, score_nodes);
-        this._scoreNodes = score_nodes;
+        let scoreNodes: ScoreDisplayNode[] = [];
+        let rootCoords: number[] = [];
+        this.generateScoreNodesRecursive(treeroot, rootCoords, scoreNodes);
+        this._scoreNodes = scoreNodes;
 
         this.clearScoreTexts();
         if (this._displayScoreTexts) {
@@ -3162,7 +3160,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let child_coords: number[];
+        let childCoords: number[];
 
         if (root.isPair) {
             if (root.children.length > 1) {
@@ -3171,29 +3169,28 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (root.children.length !== 0) {
                 if (root.children[0].isPair) {
-                    child_coords = [];
+                    childCoords = [];
 
-                    child_coords.push(root.indexA);
-                    child_coords.push(root.indexB);
+                    childCoords.push(root.indexA);
+                    childCoords.push(root.indexB);
 
-                    child_coords.push(root.children[0].indexB);
-                    child_coords.push(root.children[0].indexA);
+                    childCoords.push(root.children[0].indexB);
+                    childCoords.push(root.children[0].indexA);
 
                     let newnode = new ScoreDisplayNode();
                     nodes.push(newnode);
-                    newnode.setType(ScoreDisplayNodeType.STACK, child_coords, root.score);
+                    newnode.setType(ScoreDisplayNodeType.STACK, childCoords, root.score);
 
                     this.generateScoreNodesRecursive(root.children[0], null, nodes);
                 } else {
-                    child_coords = [];
+                    childCoords = [];
 
-                    child_coords.push(root.indexB);
-                    child_coords.push(root.indexA);
+                    childCoords.push(root.indexB);
+                    childCoords.push(root.indexA);
 
-                    this.generateScoreNodesRecursive(root.children[0], child_coords, nodes);
+                    this.generateScoreNodesRecursive(root.children[0], childCoords, nodes);
                 }
             }
-
         } else {
             for (let child of root.children) {
                 this.generateScoreNodesRecursive(child, coords, nodes);
@@ -3209,9 +3206,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private isEditable(seqnum: number): boolean {
-        if (this._editable_indices != null) {
-            let in_list: boolean = (this._editable_indices.indexOf(seqnum) !== -1);
-            return this._editable ? in_list : !in_list;
+        if (this._editableIndices != null) {
+            let inList: boolean = (this._editableIndices.indexOf(seqnum) !== -1);
+            return this._editable ? inList : !inList;
         } else {
             return this._editable;
         }
@@ -3254,7 +3251,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _width: number = 0;
     private _height: number = 0;
 
-    /// Array of sequence/pairs
+    // / Array of sequence/pairs
     private _sequence: number[] = [];
     private _mutatedSequence: number[];
     private _pairs: number[] = [];
@@ -3273,7 +3270,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _parenthesis: string;
     private _shiftLimit: number;
 
-    /// Oligos
+    // / Oligos
     private _oligo: number[] = null;
     private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
     private _oligoName: string = null;
@@ -3282,7 +3279,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _oligoBases: BaseGlow[] = null; // for glows
     private _oligoPaired: boolean = false;
 
-    /// Multistrands
+    // / Multistrands
     private _oligos: Oligo[] = null;
     private _oligosOrder: number[] = null;
     private _prevOligosOrder: number[];
@@ -3299,22 +3296,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
 
-    /// Scripted painters
+    // / Scripted painters
     private _dynPaintColors: number[] = [];
     private _dynPaintTools: Booster[] = [];
 
-    /// Is this pose editable?
+    // / Is this pose editable?
     private _editable: boolean;
-    private _editable_indices: number[] = null;
+    private _editableIndices: number[] = null;
 
-    /// Pointer to callback function to be called after change in pose
+    // / Pointer to callback function to be called after change in pose
     private _poseEditCallback: () => void = null;
     private _trackMovesCallback: (count: number, moves: any[]) => void = null;
     private _addBaseCallback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
 
-    /// Pointer to function that needs to be called in a GameMode to have access to appropriate state
+    // / Pointer to function that needs to be called in a GameMode to have access to appropriate state
     private _getEnergyDelta: () => number;
 
     private _lettermode: boolean = false;
@@ -3322,10 +3319,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private _redraw: boolean = true;
 
-    /// Time which we sampled bases to animate last time;
+    // / Time which we sampled bases to animate last time;
     private lastSampledTime: number = -1;
 
-    /// Pose position offset
+    // / Pose position offset
     private _offX: number = 0;
     private _offY: number = 0;
     private _prevOffsetX: number = 0;
@@ -3336,7 +3333,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _endOffsetX: number;
     private _endOffsetY: number;
 
-    /// For base moving animation
+    // / For base moving animation
     private _baseFromX: number[];
     private _baseFromY: number[];
     private _baseToX: number[];
@@ -3348,7 +3345,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _zoomLevel: number = 0;
     private _desiredAngle: number = 0;
 
-    /// Is explosion animation on going?
+    // / Is explosion animation on going?
     private _isExploding: boolean = false;
     private _explosionStartTime: number = -1;
     private _explosionRays: LightRay[];
@@ -3357,7 +3354,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private _onExplosionComplete: () => void;
 
-    /// Selection box
+    // / Selection box
     private _selectionHighlightBox: HighlightBox;
     private _restrictedHighlightBox: HighlightBox;
     private _highlightRestricted: boolean = false;
@@ -3368,11 +3365,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _shiftStart: number = -1;
     private _shiftEnd: number = -1;
 
-    /// For praising stacks
+    // / For praising stacks
     private _praiseQueue: number[] = [];
     private _praiseSeq: number[] = [];
 
-    /// Score display nodes
+    // / Score display nodes
     private _scoreNodes: ScoreDisplayNode[];
     private _scoreTexts: Sprite[];
     private _scoreFolder: Folder;
@@ -3390,7 +3387,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _explosionFactor: number = 1;
     private _explosionFactorPanel: ExplosionFactorPanel;
 
-    /// For tracking a base
+    // / For tracking a base
     private _trackedIndices: number[] = [];
     private _baseBoxes: Graphics[] = [];
     private _cursorIndex: number = 0;
@@ -3398,11 +3395,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
 
-    /// Rendering mode
+    // / Rendering mode
     private _numberingMode: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
-    /// Last exp paint data
+    // / Last exp paint data
     private _expPainter: ExpPainter = null;
     private _expMid: number = 0;
     private _expHi: number = 0;
@@ -3421,14 +3418,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
     /*
-	 * NEW HIGHLIGHT.
-	 * 	- Input: List of nucleotides that we wish to highlight.
-	 * 	- Unhighlighted Nucleotides: Draw at 65% opacity.
-	 *	- Highlight Nucleotides: Brighten glow around the nucleotide.
-	 */
+     * NEW HIGHLIGHT.
+     *  - Input: List of nucleotides that we wish to highlight.
+     *  - Unhighlighted Nucleotides: Draw at 65% opacity.
+     *  - Highlight Nucleotides: Brighten glow around the nucleotide.
+     */
     private _allNewHighlights: RNAHighlightState[] = [];
 
-    private static readonly CLEAVING_SITE = "cleaving_site";
+    private static readonly CLEAVING_SITE = 'cleavingSite';
 
     private static readonly P: Point = new Point();
 }
@@ -3440,6 +3437,6 @@ export interface Oligo {
 }
 
 export class RNAHighlightState {
-    public nuc: number[] = null;  // nucleotides
+    public nuc: number[] = null; // nucleotides
     public isOn: boolean = false;
 }

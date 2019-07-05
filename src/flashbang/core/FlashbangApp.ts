@@ -1,12 +1,12 @@
-import * as log from "loglevel";
-import {RegistrationGroup, Value} from "signals";
-import {KeyboardEventType, KeyCode} from "../input";
-import Flashbang from "./Flashbang";
-import ModeStack from "./ModeStack";
-import Updatable from "./Updatable";
+import * as log from 'loglevel';
+import {RegistrationGroup, Value} from 'signals';
+import {KeyboardEventType, KeyCode} from '../input';
+import Flashbang from './Flashbang';
+import ModeStack from './ModeStack';
+import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
-import "js-polyfills/keyboard";
+import 'js-polyfills/keyboard';
 
 export default class FlashbangApp {
     /** True if the app is foregrounded */
@@ -21,7 +21,7 @@ export default class FlashbangApp {
     }
 
     public run(): void {
-        window.addEventListener("error", (e: ErrorEvent) => this.onUncaughtError(e));
+        window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
         this.pixiParent.appendChild(this._pixi.view);
@@ -37,10 +37,10 @@ export default class FlashbangApp {
 
         window.addEventListener(KeyboardEventType.KEY_DOWN, e => this.onKeyboardEvent(e));
         window.addEventListener(KeyboardEventType.KEY_UP, e => this.onKeyboardEvent(e));
-        window.addEventListener("wheel", e => this.onMouseWheelEvent(e));
-        window.addEventListener("contextmenu", e => this.onContextMenuEvent(e));
-        window.addEventListener("focus", () => this.isActive.value = true);
-        window.addEventListener("blur", () => this.isActive.value = false);
+        window.addEventListener('wheel', e => this.onMouseWheelEvent(e));
+        window.addEventListener('contextmenu', e => this.onContextMenuEvent(e));
+        window.addEventListener('focus', () => { this.isActive.value = true; });
+        window.addEventListener('blur', () => { this.isActive.value = false; });
 
         this.isActive.connect(value => this.onIsActiveChanged(value));
     }
@@ -50,7 +50,7 @@ export default class FlashbangApp {
     }
 
     public resize(width: number, height: number): void {
-        if (width != this._pixi.renderer.screen.width || height != this._pixi.renderer.screen.height) {
+        if (width !== this._pixi.renderer.screen.width || height !== this._pixi.renderer.screen.height) {
             this._pixi.renderer.resize(width, height);
             this._modeStack.onResized();
         }

@@ -14,7 +14,7 @@ export default class ErrorUtil {
     public static getErrString(e: any, includeStack: boolean = true): string {
         try {
             if (e == null) {
-                return "Unknown error";
+                return 'Unknown error';
             } else if (e instanceof Error) {
                 return includeStack ? e.stack : e.message;
             } else if (e instanceof ErrorEvent) {
@@ -23,7 +23,7 @@ export default class ErrorUtil {
                 return e.toString();
             }
         } catch (errStringError) {
-            return "Unknown error";
+            return 'Unknown error';
         }
     }
 }

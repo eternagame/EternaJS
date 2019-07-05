@@ -1,5 +1,5 @@
-import {StyledTextBuilder} from "flashbang/util";
-import IntLoopPars from "eterna/IntLoopPars";
+import {StyledTextBuilder} from 'flashbang/util';
+import IntLoopPars from 'eterna/IntLoopPars';
 
 export default class EPars {
     public static readonly INF: number = 1000000;
@@ -56,10 +56,12 @@ export default class EPars {
     /* only F[2] used */
 
     public static readonly RNABASE_LAST20: number[] = [
-        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_GUANINE, EPars.RNABASE_ADENINE,
-        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE,
-        EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
-        EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE];
+        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_GUANINE,
+        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE,
+        EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE,
+        EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE,
+        EPars.RNABASE_CYTOSINE, EPars.RNABASE_ADENINE, EPars.RNABASE_ADENINE, EPars.RNABASE_CYTOSINE
+    ];
 
     public static readonly HAIRPIN_37: number[] = [
         EPars.INF, EPars.INF, EPars.INF, 570, 560, 560, 540, 590, 560, 640, 650,
@@ -85,49 +87,49 @@ export default class EPars {
     }
 
     public static getBarcodeHairpin(seq: string): string {
-        let hairpin_match: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
-        if (hairpin_match == null) {
+        let hairpinMatch: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
+        if (hairpinMatch == null) {
             return null;
         }
-        return hairpin_match[1];
+        return hairpinMatch[1];
     }
 
     public static getLongestStackLength(pairs: number[]): number {
         let longlen = 0;
 
-        let stack_start = -1;
-        let last_stack_other = -1;
+        let stackStart = -1;
+        let lastStackOther = -1;
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                if (stack_start < 0) {
-                    stack_start = ii;
+                if (stackStart < 0) {
+                    stackStart = ii;
                 }
 
-                let is_continued = false;
-                if (last_stack_other < 0) {
-                    is_continued = true;
-                } else if (pairs[ii] === last_stack_other - 1) {
-                    is_continued = true;
+                let isContinued = false;
+                if (lastStackOther < 0) {
+                    isContinued = true;
+                } else if (pairs[ii] === lastStackOther - 1) {
+                    isContinued = true;
                 }
 
-                if (is_continued) {
-                    last_stack_other = pairs[ii];
+                if (isContinued) {
+                    lastStackOther = pairs[ii];
                 } else {
-                    if (stack_start >= 0 && ii - stack_start > longlen) {
-                        longlen = ii - stack_start;
+                    if (stackStart >= 0 && ii - stackStart > longlen) {
+                        longlen = ii - stackStart;
                     }
 
-                    last_stack_other = -1;
-                    stack_start = -1;
+                    lastStackOther = -1;
+                    stackStart = -1;
                 }
             } else {
-                if (stack_start >= 0 && ii - stack_start > longlen) {
-                    longlen = ii - stack_start;
+                if (stackStart >= 0 && ii - stackStart > longlen) {
+                    longlen = ii - stackStart;
                 }
 
-                stack_start = -1;
-                last_stack_other = -1;
+                stackStart = -1;
+                lastStackOther = -1;
             }
         }
 
@@ -135,13 +137,13 @@ export default class EPars {
     }
 
     public static getLetterColor(letter: string): number {
-        if (letter === "G") {
+        if (letter === 'G') {
             return 0xFF3333;
-        } else if (letter === "A") {
+        } else if (letter === 'A') {
             return 0xFFFF33;
-        } else if (letter === "U") {
+        } else if (letter === 'U') {
             return 0x7777FF;
-        } else if (letter === "C") {
+        } else if (letter === 'C') {
             return 0x33FF33;
         }
 
@@ -149,59 +151,59 @@ export default class EPars {
     }
 
     public static addLetterStyles(builder: StyledTextBuilder): void {
-        builder.addStyle("G", {fill: this.getLetterColor("G")});
-        builder.addStyle("A", {fill: this.getLetterColor("A")});
-        builder.addStyle("U", {fill: this.getLetterColor("U")});
-        builder.addStyle("C", {fill: this.getLetterColor("C")});
+        builder.addStyle('G', {fill: this.getLetterColor('G')});
+        builder.addStyle('A', {fill: this.getLetterColor('A')});
+        builder.addStyle('U', {fill: this.getLetterColor('U')});
+        builder.addStyle('C', {fill: this.getLetterColor('C')});
     }
 
     public static getColoredLetter(letter: string): string {
-        if (letter === "G") {
-            return "<G>G</G>";
-        } else if (letter === "A") {
-            return "<A>A</A>";
-        } else if (letter === "U") {
-            return "<U>U</U>";
-        } else if (letter === "C") {
-            return "<C>C</C>";
+        if (letter === 'G') {
+            return '<G>G</G>';
+        } else if (letter === 'A') {
+            return '<A>A</A>';
+        } else if (letter === 'U') {
+            return '<U>U</U>';
+        } else if (letter === 'C') {
+            return '<C>C</C>';
         }
 
-        return "";
+        return '';
     }
 
     public static getColoredSequence(seq: string): string {
-        let res = "";
+        let res = '';
         for (let ii = 0; ii < seq.length; ii++) {
             res += EPars.getColoredLetter(seq.charAt(ii));
         }
         return res;
     }
 
-    public static getExpColoredSequence(seq: string, exp_data: number[]): string {
-        if (exp_data == null) {
+    public static getExpColoredSequence(seq: string, expData: number[]): string {
+        if (expData == null) {
             return seq;
         }
 
-        let offset: number = exp_data[0];
-        let maxmax: number = exp_data[1];
-        let minmin: number = exp_data[1];
-        for (let ii = 1; ii < exp_data.length; ii++) {
-            if (exp_data[ii] > maxmax) {
-                maxmax = exp_data[ii];
+        let offset: number = expData[0];
+        let maxmax: number = expData[1];
+        let minmin: number = expData[1];
+        for (let ii = 1; ii < expData.length; ii++) {
+            if (expData[ii] > maxmax) {
+                maxmax = expData[ii];
             }
 
-            if (exp_data[ii] < minmin) {
-                minmin = exp_data[ii];
+            if (expData[ii] < minmin) {
+                minmin = expData[ii];
             }
         }
 
         let avg: number = (maxmax + minmin) / 2.0;
 
-        let res = "";
+        let res = '';
         for (let ii = 0; ii < seq.length; ii++) {
-            if (ii < offset - 1 || ii >= exp_data.length) {
+            if (ii < offset - 1 || ii >= expData.length) {
                 res += seq.charAt(ii);
-            } else if (exp_data[ii] < avg) {
+            } else if (expData[ii] < avg) {
                 res += `<FONT COLOR='#7777FF'>${seq.charAt(ii)}</FONT>`;
             } else {
                 res += `<FONT COLOR='#FF7777'>${seq.charAt(ii)}</FONT>`;
@@ -212,83 +214,85 @@ export default class EPars {
     }
 
     public static countConsecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
-        let max_consecutive = 0;
+        let maxConsecutive = 0;
 
         let ii = 0;
-        let start_index = -1;
+        let startIndex = -1;
         for (ii = 0; ii < sequence.length; ii++) {
             if (sequence[ii] === letter) {
-                if (start_index < 0) {
-                    start_index = ii;
+                if (startIndex < 0) {
+                    startIndex = ii;
                 }
-            } else if (start_index >= 0) {
-                if (max_consecutive < ii - start_index) {
+            } else if (startIndex >= 0) {
+                if (maxConsecutive < ii - startIndex) {
                     if (locks == null) {
-                        max_consecutive = ii - start_index;
+                        maxConsecutive = ii - startIndex;
                     } else {
-                        let all_locked = true;
+                        let allLocked = true;
                         let jj: number;
-                        for (jj = start_index; jj < ii; jj++) {
-                            all_locked = all_locked && locks[jj];
+                        for (jj = startIndex; jj < ii; jj++) {
+                            allLocked = allLocked && locks[jj];
                         }
-                        if (all_locked === false) {
-                            max_consecutive = ii - start_index;
+                        if (allLocked === false) {
+                            maxConsecutive = ii - startIndex;
                         }
                     }
                 }
-                start_index = -1;
+                startIndex = -1;
             }
         }
 
-        if (start_index >= 0) {
-            if (max_consecutive < ii - start_index) {
-                max_consecutive = ii - start_index;
+        if (startIndex >= 0) {
+            if (maxConsecutive < ii - startIndex) {
+                maxConsecutive = ii - startIndex;
             }
         }
 
-        return max_consecutive;
+        return maxConsecutive;
     }
 
-    public static getRestrictedConsecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] | null = null): number[] {
+    public static getRestrictedConsecutive(
+        sequence: number[], letter: number, maxAllowed: number, locks: boolean[] | null = null
+    ): number[] {
         let restricted: number[] = [];
 
         let ii = 0;
-        let start_index = -1;
+        let startIndex = -1;
 
-        if (max_allowed <= 0) {
+        if (maxAllowed <= 0) {
             return restricted;
         }
 
         for (ii = 0; ii < sequence.length; ii++) {
             if (sequence[ii] === letter) {
-                if (start_index < 0) {
-                    start_index = ii;
+                if (startIndex < 0) {
+                    startIndex = ii;
                 }
-            } else if (start_index >= 0) {
-                if (max_allowed < ii - start_index) {
+            } else if (startIndex >= 0) {
+                if (maxAllowed < ii - startIndex) {
                     if (locks == null) {
-                        restricted.push(start_index);
+                        restricted.push(startIndex);
                         restricted.push(ii - 1);
                     } else {
-                        let all_locked = true;
+                        let allLocked = true;
                         let jj: number;
-                        for (jj = start_index; jj < ii; jj++) {
-                            all_locked = all_locked && locks[jj];
+                        for (jj = startIndex; jj < ii; jj++) {
+                            allLocked = allLocked && locks[jj];
                         }
-                        if (all_locked === false) {
-                            restricted.push(start_index);
+                        if (allLocked === false) {
+                            restricted.push(startIndex);
                             restricted.push(ii - 1);
                         }
                     }
                 }
-                start_index = -1;
+                startIndex = -1;
             }
         }
 
-        // gotta check if we found a start_index without an end...
-        if (start_index >= 0) {
-            if (max_allowed < ii - start_index) {
-                restricted.push(start_index);
+        // gotta check if we found a startIndex without an end...
+        if (startIndex >= 0) {
+            if (maxAllowed < ii - startIndex) {
+                restricted.push(startIndex);
                 restricted.push(ii - 1);
             }
         }
@@ -296,54 +300,54 @@ export default class EPars {
         return restricted;
     }
 
-    public static getSequenceRepetition(seq_str: string, n: number): number {
+    public static getSequenceRepetition(seqStr: string, n: number): number {
         let dict: Set<string> = new Set<string>();
-        let num_repeats = 0;
+        let numRepeats = 0;
 
-        for (let ii = 0; ii < seq_str.length - n; ii++) {
-            let substr: string = seq_str.substr(ii, n);
+        for (let ii = 0; ii < seqStr.length - n; ii++) {
+            let substr: string = seqStr.substr(ii, n);
             if (dict.has(substr)) {
-                num_repeats++;
+                numRepeats++;
             } else {
                 dict.add(substr);
             }
         }
 
-        return num_repeats++;
+        return numRepeats++;
     }
 
     public static nucleotideToString(value: number, allowCut: boolean, allowUnknown: boolean): string {
         if (value === EPars.RNABASE_ADENINE) {
-            return "A";
+            return 'A';
         } else if (value === EPars.RNABASE_URACIL) {
-            return "U";
+            return 'U';
         } else if (value === EPars.RNABASE_GUANINE) {
-            return "G";
+            return 'G';
         } else if (value === EPars.RNABASE_CYTOSINE) {
-            return "C";
+            return 'C';
         } else if (value === EPars.RNABASE_CUT) {
             if (allowCut) {
-                return "&";
+                return '&';
             } else {
                 throw new Error(`Bad nucleotide '${value}`);
             }
         } else if (allowUnknown) {
-            return "?";
+            return '?';
         } else {
             throw new Error(`Bad nucleotide '${value}`);
         }
     }
 
     public static stringToNucleotide(value: string, allowCut: boolean, allowUnknown: boolean): number {
-        if (value === "A" || value === "a") {
+        if (value === 'A' || value === 'a') {
             return EPars.RNABASE_ADENINE;
-        } else if (value === "G" || value === "g") {
+        } else if (value === 'G' || value === 'g') {
             return EPars.RNABASE_GUANINE;
-        } else if (value === "U" || value === "u") {
+        } else if (value === 'U' || value === 'u') {
             return EPars.RNABASE_URACIL;
-        } else if (value === "C" || value === "c") {
+        } else if (value === 'C' || value === 'c') {
             return EPars.RNABASE_CYTOSINE;
-        } else if (value === "&" || value === "-" || value === "+") {
+        } else if (value === '&' || value === '-' || value === '+') {
             if (allowCut) {
                 return EPars.RNABASE_CUT;
             } else {
@@ -366,7 +370,7 @@ export default class EPars {
     }
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
-        let str = "";
+        let str = '';
         for (let value of sequence) {
             str += EPars.nucleotideToString(value, allowCut, allowUnknown);
         }
@@ -374,10 +378,10 @@ export default class EPars {
     }
 
     public static isInternal(index: number, pairs: number[]): number[] | null {
-        let pair_start_here = -1;
-        let pair_end_here = -1;
-        let pair_start_there = -1;
-        let pair_end_there = -1;
+        let pairStartHere = -1;
+        let pairEndHere = -1;
+        let pairStartThere = -1;
+        let pairEndThere = -1;
 
         if (pairs[index] >= 0) {
             return null;
@@ -386,8 +390,8 @@ export default class EPars {
         let walker: number = index;
         while (walker >= 0) {
             if (pairs[walker] >= 0) {
-                pair_start_here = walker;
-                pair_start_there = pairs[walker];
+                pairStartHere = walker;
+                pairStartThere = pairs[walker];
                 break;
             }
             walker--;
@@ -396,25 +400,25 @@ export default class EPars {
         walker = index;
         while (walker < pairs.length) {
             if (pairs[walker] >= 0) {
-                pair_end_here = walker;
-                pair_end_there = pairs[walker];
+                pairEndHere = walker;
+                pairEndThere = pairs[walker];
                 break;
             }
             walker++;
         }
 
-        if (pair_start_here < 0 || pair_end_here < 0) {
+        if (pairStartHere < 0 || pairEndHere < 0) {
             return null;
         }
 
-        let there_start: number = Math.min(pair_start_there, pair_end_there);
-        let there_end: number = Math.max(pair_start_there, pair_end_there);
+        let thereStart: number = Math.min(pairStartThere, pairEndThere);
+        let thereEnd: number = Math.max(pairStartThere, pairEndThere);
 
-        if (pair_start_here === there_start) {
+        if (pairStartHere === thereStart) {
             return null;
         }
 
-        for (let ii: number = there_start + 1; ii < there_end; ii++) {
+        for (let ii: number = thereStart + 1; ii < thereEnd; ii++) {
             if (pairs[ii] >= 0) {
                 return null;
             }
@@ -422,54 +426,54 @@ export default class EPars {
 
         let bases: number[] = [];
 
-        for (let ii = pair_start_here; ii <= pair_end_here; ii++) {
+        for (let ii = pairStartHere; ii <= pairEndHere; ii++) {
             bases.push(ii);
         }
 
-        for (let ii = there_start; ii <= there_end; ii++) {
+        for (let ii = thereStart; ii <= thereEnd; ii++) {
             bases.push(ii);
         }
 
         return bases;
     }
 
-    public static validateParenthesis(parenthesis: string, letteronly: boolean = true, length_limit: number = -1): string | null {
-        let pair_stack: number[] = [];
+    public static validateParenthesis(
+        parenthesis: string, letteronly: boolean = true, lengthLimit: number = -1
+    ): string | null {
+        let pairStack: number[] = [];
 
-        if (length_limit >= 0 && parenthesis.length > length_limit) {
-            return `Structure length limit is ${length_limit}`;
+        if (lengthLimit >= 0 && parenthesis.length > lengthLimit) {
+            return `Structure length limit is ${lengthLimit}`;
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === "(") {
-                pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) === ")") {
-                if (pair_stack.length === 0) {
-                    return "Unbalanced parenthesis notation";
+            if (parenthesis.charAt(jj) === '(') {
+                pairStack.push(jj);
+            } else if (parenthesis.charAt(jj) === ')') {
+                if (pairStack.length === 0) {
+                    return 'Unbalanced parenthesis notation';
                 }
 
-                pair_stack.pop();
-            } else if (parenthesis.charAt(jj) === ".") {
-
-            } else {
+                pairStack.pop();
+            } else if (parenthesis.charAt(jj) !== '.') {
                 return `Unrecognized character ${parenthesis.charAt(jj)}`;
             }
         }
 
-        if (pair_stack.length !== 0) {
-            return "Unbalanced parenthesis notation";
+        if (pairStack.length !== 0) {
+            return 'Unbalanced parenthesis notation';
         }
 
         if (letteronly) {
             return null;
         }
 
-        let index: number = parenthesis.indexOf("(.)");
+        let index: number = parenthesis.indexOf('(.)');
         if (index >= 0) {
             return `There is a length 1 hairpin loop which is impossible at base ${index + 2}`;
         }
 
-        index = parenthesis.indexOf("(..)");
+        index = parenthesis.indexOf('(..)');
 
         if (index >= 0) {
             return `There is a length 2 hairpin loop which is impossible at base ${index + 2}`;
@@ -480,22 +484,22 @@ export default class EPars {
 
     public static parenthesisToPairs(parenthesis: string): number[] {
         let pairs: number[] = [];
-        let pair_stack: number[] = [];
+        let pairStack: number[] = [];
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             pairs.push(-1);
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === "(") {
-                pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) === ")") {
-                if (pair_stack.length === 0) {
-                    throw new Error("Invalid parenthesis notation");
+            if (parenthesis.charAt(jj) === '(') {
+                pairStack.push(jj);
+            } else if (parenthesis.charAt(jj) === ')') {
+                if (pairStack.length === 0) {
+                    throw new Error('Invalid parenthesis notation');
                 }
 
-                pairs[pair_stack[pair_stack.length - 1]] = jj;
-                pair_stack.pop();
+                pairs[pairStack[pairStack.length - 1]] = jj;
+                pairStack.pop();
             }
         }
 
@@ -507,50 +511,50 @@ export default class EPars {
     }
 
     public static getSatisfiedPairs(pairs: number[], seq: number[]): number[] {
-        let ret_pairs: number[] = new Array(pairs.length);
+        let retPairs: number[] = new Array(pairs.length);
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] < 0) {
-                ret_pairs[ii] = -1;
+                retPairs[ii] = -1;
             } else if (pairs[ii] > ii) {
                 if (EPars.pairType(seq[ii], seq[pairs[ii]]) !== 0) {
-                    ret_pairs[ii] = pairs[ii];
-                    ret_pairs[pairs[ii]] = ii;
+                    retPairs[ii] = pairs[ii];
+                    retPairs[pairs[ii]] = ii;
                 } else {
-                    ret_pairs[ii] = -1;
-                    ret_pairs[pairs[ii]] = -1;
+                    retPairs[ii] = -1;
+                    retPairs[pairs[ii]] = -1;
                 }
             }
         }
 
-        return ret_pairs;
+        return retPairs;
     }
 
     public static pairsToParenthesis(pairs: number[], seq: number[] | null = null): string {
-        let bi_pairs: number[] = new Array(pairs.length);
+        let biPairs: number[] = new Array(pairs.length);
 
         for (let ii = 0; ii < pairs.length; ii++) {
-            bi_pairs[ii] = -1;
+            biPairs[ii] = -1;
         }
 
         for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
-                bi_pairs[ii] = pairs[ii];
-                bi_pairs[pairs[ii]] = ii;
+                biPairs[ii] = pairs[ii];
+                biPairs[pairs[ii]] = ii;
             }
         }
 
-        let str = "";
+        let str = '';
 
-        for (let ii = 0; ii < bi_pairs.length; ii++) {
-            if (bi_pairs[ii] > ii) {
-                str += "(";
-            } else if (bi_pairs[ii] >= 0) {
-                str += ")";
+        for (let ii = 0; ii < biPairs.length; ii++) {
+            if (biPairs[ii] > ii) {
+                str += '(';
+            } else if (biPairs[ii] >= 0) {
+                str += ')';
             } else if (seq != null && seq[ii] === EPars.RNABASE_CUT) {
-                str += "&";
+                str += '&';
             } else {
-                str += ".";
+                str += '.';
             }
         }
 
@@ -559,32 +563,32 @@ export default class EPars {
 
     public static parenthesisToForcedArray(parenthesis: string): number[] {
         let forced: number[] = [];
-        let pair_stack: number[] = [];
+        let pairStack: number[] = [];
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
             forced.push(EPars.FORCE_IGNORE);
         }
 
         for (let jj = 0; jj < parenthesis.length; jj++) {
-            if (parenthesis.charAt(jj) === ".") {
+            if (parenthesis.charAt(jj) === '.') {
                 continue;
-            } else if (parenthesis.charAt(jj) === "|") {
+            } else if (parenthesis.charAt(jj) === '|') {
                 forced[jj] = EPars.FORCE_PAIRED;
-            } else if (parenthesis.charAt(jj) === "<") {
+            } else if (parenthesis.charAt(jj) === '<') {
                 forced[jj] = EPars.FORCE_PAIRED3P;
-            } else if (parenthesis.charAt(jj) === ">") {
+            } else if (parenthesis.charAt(jj) === '>') {
                 forced[jj] = EPars.FORCE_PAIRED5P;
-            } else if (parenthesis.charAt(jj) === "x") {
+            } else if (parenthesis.charAt(jj) === 'x') {
                 forced[jj] = EPars.FORCE_UNPAIRED;
-            } else if (parenthesis.charAt(jj) === "(") {
-                pair_stack.push(jj);
-            } else if (parenthesis.charAt(jj) === ")") {
-                if (pair_stack.length === 0) {
-                    throw new Error("Invalid parenthesis notation");
+            } else if (parenthesis.charAt(jj) === '(') {
+                pairStack.push(jj);
+            } else if (parenthesis.charAt(jj) === ')') {
+                if (pairStack.length === 0) {
+                    throw new Error('Invalid parenthesis notation');
                 }
 
-                forced[pair_stack[pair_stack.length - 1]] = jj;
-                pair_stack.pop();
+                forced[pairStack[pairStack.length - 1]] = jj;
+                pairStack.pop();
             }
         }
 
@@ -596,23 +600,23 @@ export default class EPars {
     }
 
     public static forcedArrayToParenthesis(forced: number[]): string {
-        let str = "";
+        let str = '';
 
         for (let ii = 0; ii < forced.length; ii++) {
             if (forced[ii] > ii) {
-                str = str.concat("(");
+                str = str.concat('(');
             } else if (forced[ii] >= 0) {
-                str = str.concat(")");
+                str = str.concat(')');
             } else if (forced[ii] === EPars.FORCE_PAIRED) {
-                str = str.concat("|");
+                str = str.concat('|');
             } else if (forced[ii] === EPars.FORCE_PAIRED3P) {
-                str = str.concat("<");
+                str = str.concat('<');
             } else if (forced[ii] === EPars.FORCE_PAIRED5P) {
-                str = str.concat(">");
+                str = str.concat('>');
             } else if (forced[ii] === EPars.FORCE_UNPAIRED) {
-                str = str.concat("x");
+                str = str.concat('x');
             } else {
-                str = str.concat(".");
+                str = str.concat('.');
             }
         }
 
@@ -691,22 +695,22 @@ export default class EPars {
         return diff;
     }
 
-    public static arePairsSame(a_pairs: number[], b_pairs: number[], constraints: any[] | null = null): boolean {
-        if (a_pairs.length !== b_pairs.length) {
+    public static arePairsSame(aPairs: number[], bPairs: number[], constraints: any[] | null = null): boolean {
+        if (aPairs.length !== bPairs.length) {
             return false;
         }
 
-        for (let ii = 0; ii < a_pairs.length; ii++) {
-            if (b_pairs[ii] >= 0) {
-                if (b_pairs[ii] !== a_pairs[ii]) {
+        for (let ii = 0; ii < aPairs.length; ii++) {
+            if (bPairs[ii] >= 0) {
+                if (bPairs[ii] !== aPairs[ii]) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }
                 }
             }
 
-            if (a_pairs[ii] >= 0) {
-                if (b_pairs[ii] !== a_pairs[ii]) {
+            if (aPairs[ii] >= 0) {
+                if (bPairs[ii] !== aPairs[ii]) {
                     if (constraints == null || constraints[ii]) {
                         return false;
                     }
@@ -729,7 +733,7 @@ export default class EPars {
         return EPars.PAIR_TYPE_MAT[a * (EPars.NBPAIRS + 1) + b];
     }
 
-    public static get_bulge(i: number): number {
+    public static getBulge(i: number): number {
         return EPars.BULGE_37[30] + (Number)(EPars.LXC * Math.log((Number)(i) / 30.0));
     }
 
@@ -965,7 +969,7 @@ export default class EPars {
         -150, -150, -150, -150, -150, -150];
 
     private static readonly TETRA_LOOPS: string[] = [
-        "GGGGAC", "GGUGAC", "CGAAAG", "GGAGAC", "CGCAAG", "GGAAAC", "CGGAAG", "CUUCGG", "CGUGAG", "CGAAGG",
-        "CUACGG", "GGCAAC", "CGCGAG", "UGAGAG", "CGAGAG", "AGAAAU", "CGUAAG", "CUAACG", "UGAAAG", "GGAAGC",
-        "GGGAAC", "UGAAAA", "AGCAAU", "AGUAAU", "CGGGAG", "AGUGAU", "GGCGAC", "GGGAGC", "GUGAAC", "UGGAAA"];
+        'GGGGAC', 'GGUGAC', 'CGAAAG', 'GGAGAC', 'CGCAAG', 'GGAAAC', 'CGGAAG', 'CUUCGG', 'CGUGAG', 'CGAAGG',
+        'CUACGG', 'GGCAAC', 'CGCGAG', 'UGAGAG', 'CGAGAG', 'AGAAAU', 'CGUAAG', 'CUAACG', 'UGAAAG', 'GGAAGC',
+        'GGGAAC', 'UGAAAA', 'AGCAAU', 'AGUAAU', 'CGGGAG', 'AGUGAU', 'GGCGAC', 'GGGAGC', 'GUGAAC', 'UGGAAA'];
 }

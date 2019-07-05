@@ -1,6 +1,16 @@
-import {PoseState} from "eterna/puzzle";
-import RScriptEnv from "./RScriptEnv";
-import RScriptOp from "./RScriptOp";
+import {PoseState} from 'eterna/puzzle';
+import RScriptEnv from './RScriptEnv';
+import RScriptOp from './RScriptOp';
+
+enum ROPPreType {
+    DISABLE_MISSION_SCREEN = 'DISABLE_MISSION_SCREEN',
+    USE_ALTERNATE_PALETTE = 'USE_ALTERNATE_PALETTE',
+    DISABLE_HINTS = 'DISABLE_HINTS',
+    DISABLE_OBJECTIVES = 'DISABLE_OBJECTIVES',
+    DISABLE_UI_ELEMENT = 'DISABLE_UI_ELEMENT',
+    DISABLE_RNA_CHANGE = 'DISABLE_RNA_CHANGE',
+    SET_DEFAULT_FOLD_MODE = 'SET_DEFAULT_FOLD_MODE',
+}
 
 export default class ROPPre extends RScriptOp {
     constructor(command: string, env: RScriptEnv) {
@@ -26,70 +36,70 @@ export default class ROPPre extends RScriptOp {
             this._type = ROPPreType.DISABLE_OBJECTIVES;
         } else if ((regResult = hideUIRegex.exec(command)) != null) {
             this._type = ROPPreType.DISABLE_UI_ELEMENT;
-            this._doVisible = (regResult[1].toUpperCase() !== "HIDE");
-            this._doDisable = (regResult[1].toUpperCase() === "DISABLE");
+            this._doVisible = (regResult[1].toUpperCase() !== 'HIDE');
+            this._doDisable = (regResult[1].toUpperCase() === 'DISABLE');
         } else if ((regResult = disableRNAMod.exec(command))) {
             this._type = ROPPreType.DISABLE_RNA_CHANGE;
         } else if ((regResult = modeRegex.exec(command)) != null) {
             this._type = ROPPreType.SET_DEFAULT_FOLD_MODE;
-            this._foldMode = (regResult[1].toUpperCase() === "NATIVE" ? PoseState.NATIVE : PoseState.TARGET);
+            this._foldMode = (regResult[1].toUpperCase() === 'NATIVE' ? PoseState.NATIVE : PoseState.TARGET);
         }
     }
 
     public initArgs(args: string): void {
-        this._allArgs = args.split(",");
+        this._allArgs = args.split(',');
         for (let i = 0; i < this._allArgs.length; ++i) {
-            this._allArgs[i] = this._allArgs[i].replace(/^\s*/, "");
-            this._allArgs[i] = this._allArgs[i].replace(/\s*$/, "");
+            this._allArgs[i] = this._allArgs[i].replace(/^\s*/, '');
+            this._allArgs[i] = this._allArgs[i].replace(/\s*$/, '');
         }
     }
 
     /* override */
     public exec(): void {
         switch (this._type) {
-        case ROPPreType.DISABLE_MISSION_SCREEN:
-            this._env.ui.showMissionScreen(false);
-            break;
-        case ROPPreType.USE_ALTERNATE_PALETTE:
-            this._env.ui.toolbar.palette.setOverrideNoPair();
-            this._env.ui.toolbar.palette.changeNoPairMode();
-            break;
-        case ROPPreType.DISABLE_HINTS:
-            // _env.GetUI().remove_hint_system(true);
-            break;
-        case ROPPreType.DISABLE_OBJECTIVES:
-            this._env.ui.showConstraints(false);
-            break;
-        case ROPPreType.DISABLE_UI_ELEMENT:
-            for (let i = 0; i < this._allArgs.length; ++i) {
-                if (this._allArgs[i].toUpperCase() === "ENERGY") {
-                    this._env.ui.ropSetDisplayScoreTexts(this._doVisible);
-                    continue;
-                }
-                if (this._allArgs[i].toUpperCase() === "BASENUMBERING") {
-                    this._env.ui.ropSetShowNumbering(this._doVisible);
-                    continue;
-                }
-                if (this._allArgs[i].toUpperCase() === "TOTALENERGY") {
-                    this._env.ui.ropSetShowTotalEnergy(this._doVisible);
-                    continue;
-                }
-                this._env.showHideUI(this._allArgs[i], this._doVisible, this._doDisable);
-                if (!this._doVisible) {
-                    if (this._allArgs[i].toUpperCase() === "OBJECTIVES") {
-                        this._env.ui.showConstraints(false);
+            case ROPPreType.DISABLE_MISSION_SCREEN:
+                this._env.ui.showMissionScreen(false);
+                break;
+            case ROPPreType.USE_ALTERNATE_PALETTE:
+                this._env.ui.toolbar.palette.setOverrideNoPair();
+                this._env.ui.toolbar.palette.changeNoPairMode();
+                break;
+            case ROPPreType.DISABLE_HINTS:
+                // _env.GetUI().remove_hint_system(true);
+                break;
+            case ROPPreType.DISABLE_OBJECTIVES:
+                this._env.ui.showConstraints(false);
+                break;
+            case ROPPreType.DISABLE_UI_ELEMENT:
+                for (let i = 0; i < this._allArgs.length; ++i) {
+                    if (this._allArgs[i].toUpperCase() === 'ENERGY') {
+                        this._env.ui.ropSetDisplayScoreTexts(this._doVisible);
+                        continue;
+                    }
+                    if (this._allArgs[i].toUpperCase() === 'BASENUMBERING') {
+                        this._env.ui.ropSetShowNumbering(this._doVisible);
+                        continue;
+                    }
+                    if (this._allArgs[i].toUpperCase() === 'TOTALENERGY') {
+                        this._env.ui.ropSetShowTotalEnergy(this._doVisible);
+                        continue;
+                    }
+                    this._env.showHideUI(this._allArgs[i], this._doVisible, this._doDisable);
+                    if (!this._doVisible) {
+                        if (this._allArgs[i].toUpperCase() === 'OBJECTIVES') {
+                            this._env.ui.showConstraints(false);
+                        }
                     }
                 }
-            }
-            break;
-        case ROPPreType.DISABLE_RNA_CHANGE:
-            // no-op. What was this for?
-            break;
-        case ROPPreType.SET_DEFAULT_FOLD_MODE:
-            this._env.puzzle.defaultMode = this._foldMode;
-            break;
-        default:
-            throw new Error(`Invalid Preprocessing Command: ${this._type}`);
+                break;
+            case ROPPreType.DISABLE_RNA_CHANGE:
+                // no-op. What was this for?
+                break;
+            case ROPPreType.SET_DEFAULT_FOLD_MODE:
+                this._env.puzzle.defaultMode = this._foldMode;
+                break;
+            default:
+                throw new Error(`Invalid Preprocessing Command: ${this._type}`);
         }
     }
 
@@ -98,14 +108,4 @@ export default class ROPPre extends RScriptOp {
     private readonly _doDisable: boolean;
     private readonly _foldMode: PoseState;
     private _allArgs: string[];
-}
-
-enum ROPPreType {
-    DISABLE_MISSION_SCREEN = "DISABLE_MISSION_SCREEN",
-    USE_ALTERNATE_PALETTE = "USE_ALTERNATE_PALETTE",
-    DISABLE_HINTS = "DISABLE_HINTS",
-    DISABLE_OBJECTIVES = "DISABLE_OBJECTIVES",
-    DISABLE_UI_ELEMENT = "DISABLE_UI_ELEMENT",
-    DISABLE_RNA_CHANGE = "DISABLE_RNA_CHANGE",
-    SET_DEFAULT_FOLD_MODE = "SET_DEFAULT_FOLD_MODE",
 }

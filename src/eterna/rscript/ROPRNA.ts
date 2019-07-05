@@ -1,16 +1,16 @@
-import {MathUtil} from "flashbang/util";
-import {StringToPaletteTargetType} from "eterna/ui";
-import RScriptEnv from "./RScriptEnv";
-import RScriptOp from "./RScriptOp";
+import {MathUtil} from 'flashbang/util';
+import {StringToPaletteTargetType} from 'eterna/ui';
+import RScriptEnv from './RScriptEnv';
+import RScriptOp from './RScriptOp';
 
 export enum ROPRNAType {
-    SETBASE = "SETBASE",
-    CHANGEMODE = "CHANGEMODE",
-    ENABLEMODIFICATION = "ENABLEMODIFICATION",
-    SETPAINTER = "SETPAINTER",
-    CHANGESTATE = "CHANGESTATE",
-    SETZOOM = "SETZOOM",
-    SETPIP = "SETPIP",
+    SETBASE = 'SETBASE',
+    CHANGEMODE = 'CHANGEMODE',
+    ENABLEMODIFICATION = 'ENABLEMODIFICATION',
+    SETPAINTER = 'SETPAINTER',
+    CHANGESTATE = 'CHANGESTATE',
+    SETZOOM = 'SETZOOM',
+    SETPIP = 'SETPIP',
 }
 
 export default class ROPRNA extends RScriptOp {
@@ -34,7 +34,7 @@ export default class ROPRNA extends RScriptOp {
             this._env.pose.forceEditable(this._enabled, this._scope);
         } else if (this._type === ROPRNAType.SETPAINTER) {
             let {ui} = this._env;
-            if (this._color === "SWAP") {
+            if (this._color === 'SWAP') {
                 ui.toolbar.pairSwapButton.click();
             } else {
                 let paletteTargetType = StringToPaletteTargetType(this._color);
@@ -54,40 +54,40 @@ export default class ROPRNA extends RScriptOp {
     /* override */
     protected parseArgument(arg: string, i: number): void {
         switch (i) {
-        case 0: // Nucleotide index when changing nucleotide color. Fold mode in Mode 1.
-            if (this._type === ROPRNAType.SETBASE) {
-                this._nucIdx = Number(arg) - 1;
-            } else if (this._type === ROPRNAType.CHANGEMODE) {
-                this._foldMode = Number(arg);
-            } else if (this._type === ROPRNAType.ENABLEMODIFICATION || this._type === ROPRNAType.SETPIP) {
-                this._enabled = (arg.toUpperCase() === "TRUE");
-            } else if (this._type === ROPRNAType.SETPAINTER) {
-                this._color = this._env.getStringRef(arg);
-            } else if (this._type === ROPRNAType.CHANGESTATE) {
-                this._state = Number(arg) - 1;
-            } else if (this._type === ROPRNAType.SETZOOM) {
-                this._zoomLevel = MathUtil.clamp(Number(arg), 0, 4);
-            }
-            break;
-        case 1:
-            if (this._type === ROPRNAType.SETBASE) {
-                this._color = this._env.getStringRef(arg);
-            } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
-                this._scope = [];
-                this._scope.push(Number(arg) - 1);
-            } else if (this._type === ROPRNAType.SETZOOM) {
-                this._animate = (arg.toUpperCase() === "TRUE");
-            }
-            break;
-        default:
-            if (this._type === ROPRNAType.ENABLEMODIFICATION) {
-                this._scope.push(Number(arg) - 1);
-            } else if (this._type === ROPRNAType.SETZOOM) {
-                this._center = (arg.toUpperCase() === "TRUE");
-            } else {
-                throw new Error(`Invalid argument for ROP: RNA -- ${this._env.getStringRef(arg)}`);
-            }
-            break;
+            case 0: // Nucleotide index when changing nucleotide color. Fold mode in Mode 1.
+                if (this._type === ROPRNAType.SETBASE) {
+                    this._nucIdx = Number(arg) - 1;
+                } else if (this._type === ROPRNAType.CHANGEMODE) {
+                    this._foldMode = Number(arg);
+                } else if (this._type === ROPRNAType.ENABLEMODIFICATION || this._type === ROPRNAType.SETPIP) {
+                    this._enabled = (arg.toUpperCase() === 'TRUE');
+                } else if (this._type === ROPRNAType.SETPAINTER) {
+                    this._color = this._env.getStringRef(arg);
+                } else if (this._type === ROPRNAType.CHANGESTATE) {
+                    this._state = Number(arg) - 1;
+                } else if (this._type === ROPRNAType.SETZOOM) {
+                    this._zoomLevel = MathUtil.clamp(Number(arg), 0, 4);
+                }
+                break;
+            case 1:
+                if (this._type === ROPRNAType.SETBASE) {
+                    this._color = this._env.getStringRef(arg);
+                } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
+                    this._scope = [];
+                    this._scope.push(Number(arg) - 1);
+                } else if (this._type === ROPRNAType.SETZOOM) {
+                    this._animate = (arg.toUpperCase() === 'TRUE');
+                }
+                break;
+            default:
+                if (this._type === ROPRNAType.ENABLEMODIFICATION) {
+                    this._scope.push(Number(arg) - 1);
+                } else if (this._type === ROPRNAType.SETZOOM) {
+                    this._center = (arg.toUpperCase() === 'TRUE');
+                } else {
+                    throw new Error(`Invalid argument for ROP: RNA -- ${this._env.getStringRef(arg)}`);
+                }
+                break;
         }
     }
 

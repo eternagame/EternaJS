@@ -1,6 +1,6 @@
-import {ContainerObject} from "flashbang/objects";
-import Eterna from "eterna/Eterna";
-import Bubble from "./Bubble";
+import {ContainerObject} from 'flashbang/objects';
+import Eterna from 'eterna/Eterna';
+import Bubble from './Bubble';
 
 export default class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {
@@ -53,11 +53,11 @@ export default class Background extends ContainerObject {
             let lightBlue: string; let
                 darkBlue: string;
             if (this._isFrozen) {
-                lightBlue = "rgb(67, 93, 146) 0%";
-                darkBlue = "rgb(10, 43, 87) 70%";
+                lightBlue = 'rgb(67, 93, 146) 0%';
+                darkBlue = 'rgb(10, 43, 87) 70%';
             } else {
-                lightBlue = "rgb(45, 64, 102) 0%";
-                darkBlue = "rgb(6, 26, 52) 70%";
+                lightBlue = 'rgb(45, 64, 102) 0%';
+                darkBlue = 'rgb(6, 26, 52) 70%';
             }
             Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }

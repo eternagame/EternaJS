@@ -1,15 +1,15 @@
-import {Container} from "pixi.js";
+import {Container} from 'pixi.js';
 import {
     RegistrationGroup, Signal, SignalView, UnitSignal
-} from "signals";
-import {KeyboardInput, MouseWheelInput} from "../input";
-import {Assert} from "../util";
-import GameObject from "./GameObject";
-import GameObjectBase from "./GameObjectBase";
-import GameObjectRef from "./GameObjectRef";
-import LateUpdatable from "./LateUpdatable";
-import ModeStack from "./ModeStack";
-import Updatable from "./Updatable";
+} from 'signals';
+import {KeyboardInput, MouseWheelInput} from '../input';
+import {Assert} from '../util';
+import GameObject from './GameObject';
+import GameObjectBase from './GameObjectBase';
+import GameObjectRef from './GameObjectRef';
+import LateUpdatable from './LateUpdatable';
+import ModeStack from './ModeStack';
+import Updatable from './Updatable';
 
 export default class AppMode {
     /** Default keyboard input processor */
@@ -49,7 +49,7 @@ export default class AppMode {
         return objs;
     }
 
-    public constructor() {
+    constructor() {
         this._rootObject = new RootObject(this);
         this.container.interactiveChildren = false;
     }
@@ -99,7 +99,7 @@ export default class AppMode {
      */
     public waitTillActive(): Promise<void> {
         if (this._isDiposed) {
-            return Promise.reject("Mode is already disposed");
+            return Promise.reject(new Error('Mode is already disposed'));
         } else if (this._isActive) {
             return Promise.resolve();
         } else {
@@ -118,7 +118,7 @@ export default class AppMode {
                         let fn = reject;
                         resolve = null;
                         reject = null;
-                        fn("Mode was disposed");
+                        fn('Mode was disposed');
                     }
                 });
             });
@@ -129,11 +129,15 @@ export default class AppMode {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
-    public addNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public replaceNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public replaceNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
 
@@ -208,14 +212,14 @@ export default class AppMode {
     }
 
     /* internal */
-    setupInternal(modeStack: ModeStack): void {
+    public setupInternal(modeStack: ModeStack): void {
         this._modeStack = modeStack;
         this.setup();
     }
 
     /* internal */
-    disposeInternal(): void {
-        Assert.isTrue(!this._isDiposed, "already disposed");
+    public disposeInternal(): void {
+        Assert.isTrue(!this._isDiposed, 'already disposed');
         this._isDiposed = true;
 
         this.dispose();
@@ -240,7 +244,7 @@ export default class AppMode {
     }
 
     /* internal */
-    enterInternal(): void {
+    public enterInternal(): void {
         this._isActive = true;
         this.container.interactiveChildren = true;
         this.enter();
@@ -253,7 +257,7 @@ export default class AppMode {
     }
 
     /* internal */
-    exitInternal(): void {
+    public exitInternal(): void {
         this._exited.emit();
         this._isActive = false;
         this.container.interactiveChildren = false;
@@ -261,13 +265,13 @@ export default class AppMode {
     }
 
     /* internal */
-    updateInternal(dt: number): void {
+    public updateInternal(dt: number): void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
     /* internal */
-    registerObjectInternal(obj: GameObjectBase): void {
+    public registerObjectInternal(obj: GameObjectBase): void {
         obj._mode = this;
 
         // Handle IDs
@@ -280,7 +284,7 @@ export default class AppMode {
             }));
 
             for (let id of ids) {
-                Assert.isFalse(this._idObjects.has(id), "two objects with the same ID added to the AppMode");
+                Assert.isFalse(this._idObjects.has(id), 'two objects with the same ID added to the AppMode');
                 this._idObjects.set(id, obj);
             }
         }
@@ -299,7 +303,8 @@ export default class AppMode {
         this.registerObject(obj);
     }
 
-    resizeInternal(): void {
+    /* internal */
+    public resizeInternal(): void {
         if (this._isActive) {
             this.onResized();
         } else {

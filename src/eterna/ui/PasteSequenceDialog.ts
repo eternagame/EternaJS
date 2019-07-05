@@ -1,8 +1,8 @@
-import {Flashbang} from "flashbang/core";
-import {KeyCode} from "flashbang/input";
-import {GameMode} from "eterna/mode";
-import Dialog from "./Dialog";
-import TextInputPanel from "./TextInputPanel";
+import {Flashbang} from 'flashbang/core';
+import {KeyCode} from 'flashbang/input';
+import {GameMode} from 'eterna/mode';
+import Dialog from './Dialog';
+import TextInputPanel from './TextInputPanel';
 
 /**
  * Prompts the user to paste a sequence.
@@ -12,11 +12,11 @@ export default class PasteSequenceDialog extends Dialog<string> {
     protected added(): void {
         super.added();
 
-        const SEQUENCE = "Sequence";
+        const SEQUENCE = 'Sequence';
 
         let inputPanel = new TextInputPanel();
         let sequenceField = inputPanel.addField(SEQUENCE, 200);
-        inputPanel.title = "Write down a sequence";
+        inputPanel.title = 'Write down a sequence';
         this.addObject(inputPanel, this.container);
 
         sequenceField.setFocus(true);
@@ -39,8 +39,8 @@ export default class PasteSequenceDialog extends Dialog<string> {
 
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
-            if (char !== "A" && char !== "U" && char !== "G" && char !== "C") {
-                (this.mode as GameMode).showNotification("You can only use characters A, U, G, and C");
+            if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
+                (this.mode as GameMode).showNotification('You can only use characters A, U, G, and C');
                 return;
             }
         }

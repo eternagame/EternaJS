@@ -1,6 +1,6 @@
-import AbstractValue from "./AbstractValue";
-import ValueView from "./ValueView";
-import Connection from "./Connection";
+import AbstractValue from './AbstractValue';
+import ValueView from './ValueView';
+import Connection from './Connection';
 
 /**
  * Plumbing to implement mapped values in such a way that they automatically manage a connection to

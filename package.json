@@ -53,6 +53,7 @@
     "@types/node": "^12.0.10",
     "@types/pixi.js": "^4.8.8",
     "@types/storejs": "^2.0.3",
+    "@types/upng-js": "^2.1.1",
     "@types/webfontloader": "^1.6.29",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",

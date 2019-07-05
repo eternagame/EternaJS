@@ -1,14 +1,16 @@
-import * as log from "loglevel";
-import {EmscriptenUtil} from "eterna/emscripten";
-import EPars from "eterna/EPars";
-import {FullFoldResult} from "./engines/LinearFold_lib";
-import * as LinearFold_lib from "./engines/LinearFold_lib/index";
-import {FullEvalResult} from "./engines/vienna_lib";
-import Folder from "./Folder";
-import FoldUtil from "./FoldUtil";
+import * as log from 'loglevel';
+import {EmscriptenUtil} from 'eterna/emscripten';
+import EPars from 'eterna/EPars';
+/* eslint-disable import/no-duplicates, import/no-unresolved */
+import * as LinearFoldLib from './engines/LinearFoldLib';
+import {FullFoldResult} from './engines/LinearFoldLib';
+import {FullEvalResult} from './engines/ViennaLib';
+/* eslint-enable import/no-duplicates, import/no-unresolved */
+import Folder from './Folder';
+import FoldUtil from './FoldUtil';
 
 export default abstract class LinearFoldBase extends Folder {
-    protected constructor(lib: LinearFold_lib) {
+    protected constructor(lib: LinearFoldLib) {
         super();
         this._lib = lib;
     }
@@ -18,7 +20,7 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        log.warn("LinearFold.get_dot_plot: unimplemented");
+        log.warn('LinearFold.getDotPlot: unimplemented');
         return [];
     }
 
@@ -32,7 +34,7 @@ export default abstract class LinearFoldBase extends Folder {
 
     public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {
-            primitive: "score", seq, pairs, temp
+            primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
 
@@ -53,7 +55,7 @@ export default abstract class LinearFoldBase extends Folder {
                 );
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
-                log.error("FullEval error", e);
+                log.error('FullEval error', e);
                 return 0;
             } finally {
                 if (result != null) {
@@ -79,7 +81,7 @@ export default abstract class LinearFoldBase extends Folder {
             let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
-                throw new Error("Something went terribly wrong in score_structures()");
+                throw new Error('Something went terribly wrong in scoreStructures()');
             }
 
             cache.nodes.splice(0); // make empty
@@ -105,12 +107,14 @@ export default abstract class LinearFoldBase extends Folder {
         return energy;
     }
 
-    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    public foldSequence(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let key: any = {
-            primitive: "fold",
+            primitive: 'fold',
             seq,
-            second_best_pairs,
-            desired_pairs,
+            secondBestPairs,
+            desiredPairs,
             temp
         };
 
@@ -131,7 +135,7 @@ export default abstract class LinearFoldBase extends Folder {
             result = this._lib.FullFoldDefault(seqStr);
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("FullFoldDefault error", e);
+            log.error('FullFoldDefault error', e);
             return [];
         } finally {
             if (result != null) {
@@ -145,8 +149,11 @@ export default abstract class LinearFoldBase extends Folder {
         return false;
     }
 
-    public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
-        log.warn("LinearFold.fold_sequence_with_binding_site: unimplemented");
+    public foldSequenceWithBindingSite(
+        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        version: number = 1.0, temp: number = 37
+    ): number[] {
+        log.warn('LinearFold.foldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
     }
 
@@ -154,8 +161,10 @@ export default abstract class LinearFoldBase extends Folder {
         return false;
     }
 
-    public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
-        log.warn("LinearFold.cofold_sequence: unimplemented");
+    public cofoldSequence(
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+    ): number[] {
+        log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);
     }
 
@@ -163,32 +172,40 @@ export default abstract class LinearFoldBase extends Folder {
         return false;
     }
 
-    public cofoldSequenceWithBindingSite(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
-        log.warn("LinearFold.cofold_sequence_with_binding_site: unimplemented");
+    public cofoldSequenceWithBindingSite(
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        malus: number = 0, temp: number = 37
+    ): number[] {
+        log.warn('LinearFold.cofoldSequenceWithBindingSite: unimplemented');
         return this.foldSequence(seq, null);
     }
 
-    public mlEnergy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
-        log.warn("LinearFold.ml_energy: unimplemented");
+    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
+        log.warn('LinearFold.mlEnergy: unimplemented');
         return 0;
     }
 
     public cutInLoop(i: number): number {
-        log.warn("LinearFold.cut_in_loop: unimplemented");
+        log.warn('LinearFold.cutInLoop: unimplemented');
         return 0;
     }
 
-    public loopEnergy(n1: number, n2: number, type: number, type_2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean): number {
-        log.warn("LinearFold.loop_energy: unimplemented");
+    public loopEnergy(
+        n1: number, n2: number, type: number, type2: number,
+        si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
+    ): number {
+        log.warn('LinearFold.loopEnergy: unimplemented');
         return 0;
     }
 
-    public hairpinEnergy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
-        log.warn("LinearFold.hairpin_energy: unimplemented");
+    public hairpinEnergy(
+        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
+    ): number {
+        log.warn('LinearFold.hairpinEnergy: unimplemented');
         return 0;
     }
 
-    private readonly _lib: LinearFold_lib;
+    private readonly _lib: LinearFoldLib;
 }
 
 interface FullEvalCache {

@@ -1,5 +1,5 @@
-import GameObject from "./GameObject";
-import GameObjectBase from "./GameObjectBase";
+import GameObject from './GameObject';
+import GameObjectBase from './GameObjectBase';
 
 export default class GameObjectRef {
     public static readonly NULL: GameObjectRef = new GameObjectRef();
@@ -28,7 +28,7 @@ export default class GameObjectRef {
     }
 
     // managed by ObjectDB
-    _obj: GameObjectBase;
-    _next: GameObjectRef;
-    _prev: GameObjectRef;
+    /* internal */ public _obj: GameObjectBase;
+    /* internal */ public _next: GameObjectRef;
+    /* internal */ public _prev: GameObjectRef;
 }

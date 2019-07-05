@@ -1,1 +1,2 @@
-export {default as FontLoader} from "./FontLoader";
+/* eslint-disable import/prefer-default-export */
+export {default as FontLoader} from './FontLoader';

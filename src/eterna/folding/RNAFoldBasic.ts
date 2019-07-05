@@ -1,8 +1,9 @@
-import EPars from "eterna/EPars";
-import Folder from "./Folder";
+import * as log from 'loglevel';
+import EPars from 'eterna/EPars';
+import Folder from './Folder';
 
 export default class RNAFoldBasic extends Folder {
-    public static readonly NAME = "Basic";
+    public static readonly NAME = 'Basic';
 
     /** Asynchronously creates a new instance of the RNAFoldBasic folder. */
     public static create(): Promise<RNAFoldBasic> {
@@ -33,11 +34,13 @@ export default class RNAFoldBasic extends Folder {
         return score;
     }
 
-    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    public foldSequence(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let n: number = seq.length;
         let pairs: number[] = new Array(n);
-        let dp_array: number[] = new Array(n * n);
-        let trace_array: number[] = new Array(n * n);
+        let dpArray: number[] = new Array(n * n);
+        let traceArray: number[] = new Array(n * n);
 
         for (let ii = 0; ii < n; ii++) {
             pairs[ii] = -1;
@@ -46,113 +49,111 @@ export default class RNAFoldBasic extends Folder {
                 let index: number = ii * n + jj;
 
                 if (ii > jj + 1) {
-                    dp_array[index] = -1;
+                    dpArray[index] = -1;
                 } else if ((ii === jj) || (ii + 1 === jj) || (ii === jj + 1)) {
-                    dp_array[index] = 0;
+                    dpArray[index] = 0;
                 } else {
-                    dp_array[index] = -1;
+                    dpArray[index] = -1;
                 }
 
-                trace_array[index] = 0;
+                traceArray[index] = 0;
             }
         }
 
         for (let iter = 1; iter < n; iter++) {
-            let ii_walker = 0;
-            let jj_walker: number = iter;
+            let iiWalker = 0;
+            let jjWalker: number = iter;
 
-            while (jj_walker < n) {
-                let max_case = 0;
-                let max_val = -1;
-                let current_val = 0;
+            while (jjWalker < n) {
+                let maxCase = 0;
+                let maxVal = -1;
+                let currentVal = 0;
 
-                if (ii_walker < n - 1 && jj_walker > 0 && ii_walker < jj_walker - 1) {
-                    if (EPars.pairType(seq[ii_walker], seq[jj_walker])) {
-                        current_val = dp_array[(ii_walker + 1) * n + jj_walker - 1] + 1;
+                if (iiWalker < n - 1 && jjWalker > 0 && iiWalker < jjWalker - 1) {
+                    if (EPars.pairType(seq[iiWalker], seq[jjWalker])) {
+                        currentVal = dpArray[(iiWalker + 1) * n + jjWalker - 1] + 1;
 
-                        if (current_val < 1) {
-                            console.warn("Something is wrong with DP case 1", ii_walker, jj_walker);
+                        if (currentVal < 1) {
+                            log.warn('Something is wrong with DP case 1', iiWalker, jjWalker);
                         }
 
-                        if (current_val > max_val) {
-                            max_val = current_val;
-                            max_case = 1;
-                        }
-                    }
-                }
-
-                if (jj_walker > 0) {
-                    current_val = dp_array[(ii_walker) * n + jj_walker - 1];
-
-                    if (current_val < 0) {
-                        console.warn("Something is wrong with DP case 3", ii_walker, jj_walker);
-                    }
-
-                    if (current_val > max_val) {
-                        max_val = current_val;
-                        max_case = 3;
-                    }
-                }
-
-                if (ii_walker < n - 1) {
-                    current_val = dp_array[(ii_walker + 1) * n + jj_walker];
-
-                    if (current_val < 0) {
-                        console.warn("Something is wrong with DP case 2", ii_walker, jj_walker);
-                    }
-
-                    if (current_val > max_val) {
-                        max_val = current_val;
-                        max_case = 2;
-                    }
-                }
-
-                if (ii_walker + 1 < jj_walker) {
-                    for (let kk_walker: number = ii_walker + 1; kk_walker < jj_walker; kk_walker++) {
-                        if (dp_array[ii_walker * n + kk_walker] < 0 || dp_array[kk_walker * n + jj_walker] < 0) {
-                            console.warn("Something is wrong with DP case k");
-                        }
-
-                        current_val = dp_array[ii_walker * n + kk_walker] + dp_array[(kk_walker + 1) * n + jj_walker];
-
-                        if (current_val > max_val) {
-                            max_val = current_val;
-                            max_case = -kk_walker;
+                        if (currentVal > maxVal) {
+                            maxVal = currentVal;
+                            maxCase = 1;
                         }
                     }
                 }
 
-                dp_array[ii_walker * n + jj_walker] = max_val;
-                trace_array[ii_walker * n + jj_walker] = max_case;
+                if (jjWalker > 0) {
+                    currentVal = dpArray[(iiWalker) * n + jjWalker - 1];
 
-                ii_walker++;
-                jj_walker++;
+                    if (currentVal < 0) {
+                        log.warn('Something is wrong with DP case 3', iiWalker, jjWalker);
+                    }
+
+                    if (currentVal > maxVal) {
+                        maxVal = currentVal;
+                        maxCase = 3;
+                    }
+                }
+
+                if (iiWalker < n - 1) {
+                    currentVal = dpArray[(iiWalker + 1) * n + jjWalker];
+
+                    if (currentVal < 0) {
+                        log.warn('Something is wrong with DP case 2', iiWalker, jjWalker);
+                    }
+
+                    if (currentVal > maxVal) {
+                        maxVal = currentVal;
+                        maxCase = 2;
+                    }
+                }
+
+                if (iiWalker + 1 < jjWalker) {
+                    for (let kkWalker: number = iiWalker + 1; kkWalker < jjWalker; kkWalker++) {
+                        if (dpArray[iiWalker * n + kkWalker] < 0 || dpArray[kkWalker * n + jjWalker] < 0) {
+                            log.warn('Something is wrong with DP case k');
+                        }
+
+                        currentVal = dpArray[iiWalker * n + kkWalker] + dpArray[(kkWalker + 1) * n + jjWalker];
+
+                        if (currentVal > maxVal) {
+                            maxVal = currentVal;
+                            maxCase = -kkWalker;
+                        }
+                    }
+                }
+
+                dpArray[iiWalker * n + jjWalker] = maxVal;
+                traceArray[iiWalker * n + jjWalker] = maxCase;
+
+                iiWalker++;
+                jjWalker++;
             }
         }
 
-        this.tracePairs(trace_array, pairs, n, 0, n - 1);
+        this.tracePairs(traceArray, pairs, n, 0, n - 1);
 
         return pairs;
     }
 
-    private tracePairs(trace_array: number[], pairs: number[], n: number, ii_start: number, jj_start: number): void {
-        let dir: number = trace_array[ii_start * n + jj_start];
+    private tracePairs(traceArray: number[], pairs: number[], n: number, iiStart: number, jjStart: number): void {
+        let dir: number = traceArray[iiStart * n + jjStart];
 
         if (dir === 1) {
-            pairs[ii_start] = jj_start;
-            pairs[jj_start] = ii_start;
+            pairs[iiStart] = jjStart;
+            pairs[jjStart] = iiStart;
 
-            this.tracePairs(trace_array, pairs, n, ii_start + 1, jj_start - 1);
+            this.tracePairs(traceArray, pairs, n, iiStart + 1, jjStart - 1);
         } else if (dir === 2) {
-            this.tracePairs(trace_array, pairs, n, ii_start + 1, jj_start);
+            this.tracePairs(traceArray, pairs, n, iiStart + 1, jjStart);
         } else if (dir === 3) {
-            this.tracePairs(trace_array, pairs, n, ii_start, jj_start - 1);
-        } else if (dir === 0) {
-
-        } else {
+            this.tracePairs(traceArray, pairs, n, iiStart, jjStart - 1);
+        } else if (dir !== 0) {
             let kk: number = -dir;
-            this.tracePairs(trace_array, pairs, n, ii_start, kk);
-            this.tracePairs(trace_array, pairs, n, kk + 1, jj_start);
+            this.tracePairs(traceArray, pairs, n, iiStart, kk);
+            this.tracePairs(traceArray, pairs, n, kk + 1, jjStart);
         }
     }
 }

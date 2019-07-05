@@ -1,5 +1,5 @@
-import {ObjectTask, Updatable} from "../core";
-import {Easing, EasingFunc} from "../util";
+import {ObjectTask, Updatable} from '../core';
+import {Easing, EasingFunc} from '../util';
 
 export default class InterpolatingTask extends ObjectTask implements Updatable {
     constructor(time: number = 0, easingFn: EasingFunc = null) {

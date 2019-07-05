@@ -1,8 +1,7 @@
-import * as PIXI from "pixi.js";
-import {Point} from "pixi.js";
-import {Assert} from "../util";
-import FlashbangApp from "./FlashbangApp";
-import AppMode from "./AppMode";
+import * as PIXI from 'pixi.js';
+import {Assert} from '../util';
+import FlashbangApp from './FlashbangApp';
+import AppMode from './AppMode';
 
 type InteractionManager = PIXI.interaction.InteractionManager;
 
@@ -28,13 +27,13 @@ export default class Flashbang {
     }
 
     /** Global mouse location */
-    public static get globalMouse(): Point {
+    public static get globalMouse(): PIXI.Point {
         return this._interaction.mouse.global;
     }
 
     /* internal */
-    static registerApp(app: FlashbangApp): void {
-        Assert.isTrue(Flashbang._app == null, "A FlashbangApp has already been registered");
+    public static registerApp(app: FlashbangApp): void {
+        Assert.isTrue(Flashbang._app == null, 'A FlashbangApp has already been registered');
         Flashbang._app = app;
         Flashbang._interaction = app.pixi.renderer.plugins.interaction;
     }

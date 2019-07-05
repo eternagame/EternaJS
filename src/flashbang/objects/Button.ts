@@ -1,14 +1,18 @@
-import {Point} from "pixi.js";
-import Eterna from "eterna/Eterna";
-import {Sounds} from "eterna/resources";
-import {UnitSignal} from "signals";
-import {InputUtil, PointerCapture} from "../input";
-import {CallbackTask, DelayTask, SerialTask} from "../tasks";
-import {DisplayUtil} from "../util";
-import ContainerObject from "./ContainerObject";
-import Enableable from "./Enableable";
+import {Point} from 'pixi.js';
+import Eterna from 'eterna/Eterna';
+import {Sounds} from 'eterna/resources';
+import {UnitSignal} from 'signals';
+import {InputUtil, PointerCapture} from '../input';
+import {CallbackTask, DelayTask, SerialTask} from '../tasks';
+import {DisplayUtil} from '../util';
+import ContainerObject from './ContainerObject';
+import Enableable from './Enableable';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
+
+export enum ButtonState {
+    UP = 0, OVER, DOWN, DISABLED
+}
 
 /** A button base class. */
 export default abstract class Button extends ContainerObject implements Enableable {
@@ -25,10 +29,6 @@ export default abstract class Button extends ContainerObject implements Enableab
 
     /** Sound played when the button is pressed while disabled (null for no sound) */
     public disabledSound: string = null;
-
-    protected constructor() {
-        super();
-    }
 
     /* override */
     protected added(): void {
@@ -130,9 +130,9 @@ export default abstract class Button extends ContainerObject implements Enableab
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
-            if (InputUtil.IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
+            if (InputUtil.IsLeftMouse(e) && (e.type === 'pointerup' || e.type === 'pointerupoutside')) {
                 this.onPointerUp(false);
-            } else if (e.type === "pointercancel") {
+            } else if (e.type === 'pointercancel') {
                 this.endCapture(true);
             } else {
                 this.onPointerMove(e);
@@ -220,8 +220,4 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected _isPointerOver: boolean;
     protected _isPointerDown: boolean;
     protected _pointerCapture: PointerCapture;
-}
-
-export enum ButtonState {
-    UP = 0, OVER, DOWN, DISABLED
 }

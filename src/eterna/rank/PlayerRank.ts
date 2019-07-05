@@ -3,7 +3,7 @@ export default class PlayerRank {
     public score: number;
     public rank: number;
 
-    public constructor(name: string, score: number | string) {
+    constructor(name: string, score: number | string) {
         this.name = name;
         this.score = Number(score);
         this.rank = 0;

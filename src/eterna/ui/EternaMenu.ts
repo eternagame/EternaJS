@@ -1,18 +1,18 @@
-import {Point} from "pixi.js";
-import {PointerCapture} from "flashbang/input";
-import {Enableable} from "flashbang/objects";
-import {DisplayUtil} from "flashbang/util";
-import GameButton from "./GameButton";
-import GamePanel, {GamePanelType} from "./GamePanel";
+import {Point} from 'pixi.js';
+import {PointerCapture} from 'flashbang/input';
+import {Enableable} from 'flashbang/objects';
+import {DisplayUtil} from 'flashbang/util';
+import GameButton from './GameButton';
+import GamePanel, {GamePanelType} from './GamePanel';
 
 export enum EternaMenuStyle {
     DEFAULT = 0, PULLUP
 }
 
 export default class EternaMenu extends GamePanel implements Enableable {
-    public constructor(menu_style: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
+    constructor(menuStyle: EternaMenuStyle = EternaMenuStyle.DEFAULT) {
         super();
-        this._style = menu_style;
+        this._style = menuStyle;
     }
 
     protected added() {
@@ -26,7 +26,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
         if (url != null && url.length > 0) {
             menuButton.label(`<A HREF="${url}"><U>${label}</U></A>`, 12);
             menuButton.clicked.connect(() => {
-                window.open(url, "_self");
+                window.open(url, '_self');
             });
         } else {
             menuButton.label(label, 12);
@@ -47,14 +47,14 @@ export default class EternaMenu extends GamePanel implements Enableable {
         return this._menus.length - 1;
     }
 
-    public addSubMenuButton(menuIdx: number, itemButton: GameButton, at_top: boolean = false): void {
+    public addSubMenuButton(menuIdx: number, itemButton: GameButton, atTop: boolean = false): void {
         let menu: Menu = this._menus[menuIdx];
         if (menu.itemButtons.indexOf(itemButton) >= 0) {
             return;
         }
 
         menu.panel.addObject(itemButton, menu.panel.container);
-        if (at_top) {
+        if (atTop) {
             menu.itemButtons.unshift(itemButton);
         } else {
             menu.itemButtons.push(itemButton);
@@ -102,8 +102,8 @@ export default class EternaMenu extends GamePanel implements Enableable {
         }
     }
 
-    public getWidth(use_margin: boolean = true): number {
-        return this._menuWidth + (use_margin ? this._rightMargin : 0);
+    public getWidth(useMargin: boolean = true): number {
+        return this._menuWidth + (useMargin ? this._rightMargin : 0);
     }
 
     public get width(): number {
@@ -166,7 +166,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
 
                     this._activeCapture = new PointerCapture(menu.panel.display);
                     this._activeCapture.beginCapture((e) => {
-                        if (e.type === "pointerdown") {
+                        if (e.type === 'pointerdown') {
                             // Wait a bit before closing, so that if we tapped the button,
                             // we don't just reopen the flyout
                             setTimeout(() => { menu.panel.display.visible = false; }, 100);
@@ -187,7 +187,7 @@ export default class EternaMenu extends GamePanel implements Enableable {
     }
 
     private doLayout(): void {
-        if (this._menus.length == 0) {
+        if (this._menus.length === 0) {
             this.setSize(0, 0);
             return;
         }
@@ -198,46 +198,46 @@ export default class EternaMenu extends GamePanel implements Enableable {
                 continue;
             }
 
-            let height_walker = 7;
-            let width_walker = 0;
+            let heightWalker = 7;
+            let widthWalker = 0;
 
             for (let button of menu.itemButtons) {
                 if (button == null) {
                     continue;
                 }
 
-                button.display.position = new Point(7, height_walker);
-                height_walker += DisplayUtil.height(button.display) + 7;
-                width_walker = Math.max(width_walker, DisplayUtil.width(button.display) + 14);
+                button.display.position = new Point(7, heightWalker);
+                heightWalker += DisplayUtil.height(button.display) + 7;
+                widthWalker = Math.max(widthWalker, DisplayUtil.width(button.display) + 14);
             }
 
-            menu.panel.setSize(width_walker, height_walker);
+            menu.panel.setSize(widthWalker, heightWalker);
         }
 
         let space: number = (this._style === EternaMenuStyle.PULLUP ? 1 : 10);
-        let width_offset: number = space;
+        let widthOffset: number = space;
         this._menuHeight = 0;
 
         for (let menu of this._menus) {
             let buttonWidth: number = menu.menuButton.container.width;
             let buttonHeight: number = menu.menuButton.container.height;
 
-            menu.menuButton.display.position = new Point(width_offset, 0);
+            menu.menuButton.display.position = new Point(widthOffset, 0);
             if (this._style === EternaMenuStyle.DEFAULT) {
                 menu.panel.display.position = new Point(0, buttonHeight - 1);
             } else if (this._style === EternaMenuStyle.PULLUP) {
                 menu.panel.display.position = new Point(0, -menu.panel.height);
             }
-            width_offset += buttonWidth + space;
+            widthOffset += buttonWidth + space;
             this._menuHeight = Math.max(this._menuHeight, buttonHeight);
         }
 
         let lastIdx = this._menus.length - 1;
         let lastButtonWidth = this._menus[lastIdx].menuButton.container.width;
-        this._menuWidth = (width_offset + space);
+        this._menuWidth = (widthOffset + space);
         this._rightMargin = Math.max(lastButtonWidth, this._menus[lastIdx].panel.width) - lastButtonWidth;
 
-        this.setSize(width_offset, this._menuHeight + 1);
+        this.setSize(widthOffset, this._menuHeight + 1);
     }
 
     private readonly _style: EternaMenuStyle;

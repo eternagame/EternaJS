@@ -1,4 +1,4 @@
-import {ObjectTask, Updatable} from "../core";
+import {ObjectTask, Updatable} from '../core';
 
 /** A Task that calls a function continuously until the function returns true */
 export default class FunctionTask extends ObjectTask implements Updatable {

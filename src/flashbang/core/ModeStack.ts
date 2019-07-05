@@ -1,7 +1,17 @@
-import {Container} from "pixi.js";
-import {UnitSignal} from "signals";
-import {Assert, MathUtil} from "../util";
-import AppMode from "./AppMode";
+import {Container} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import {Assert, MathUtil} from '../util';
+import AppMode from './AppMode';
+
+export enum ModeTransition {
+    PUSH, UNWIND, INSERT, REMOVE, CHANGE, SET_INDEX,
+}
+
+class PendingTransition {
+    public mode: AppMode;
+    public type: ModeTransition;
+    public index: number;
+}
 
 /**
  * A stack of AppModes. Only the top-most mode in the stack gets updates
@@ -152,7 +162,7 @@ export default class ModeStack {
     }
 
     /* internal */
-    handleModeTransitions(): void {
+    public handleModeTransitions(): void {
         if (this._pendingModeTransitionQueue.length <= 0) {
             return;
         }
@@ -230,7 +240,7 @@ export default class ModeStack {
                     newIdx = this._modeStack.length + newIdx;
                 }
                 newIdx = MathUtil.clamp(newIdx, 0, this._modeStack.length - 1);
-                if (prevIdx != newIdx) {
+                if (prevIdx !== newIdx) {
                     // Rearrange the modestack
                     this._modeStack.splice(prevIdx, 1);
                     this._modeStack.splice(newIdx, 0, mode);
@@ -286,6 +296,9 @@ export default class ModeStack {
                 case ModeTransition.SET_INDEX:
                     doSetIndex(mode, transition.index);
                     break;
+
+                default:
+                    Assert.unreachable(transition.type);
             }
         }
 
@@ -313,7 +326,7 @@ export default class ModeStack {
     }
 
     /* internal */
-    clearModeStackNow(): void {
+    public clearModeStackNow(): void {
         this._pendingModeTransitionQueue.length = 0;
         if (this._modeStack.length > 0) {
             this.popAllModes();
@@ -322,7 +335,7 @@ export default class ModeStack {
     }
 
     /* internal */
-    dispose(): void {
+    public dispose(): void {
         this.clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
@@ -333,14 +346,4 @@ export default class ModeStack {
     protected _container: Container = new Container();
     protected _modeStack: AppMode[] = [];
     protected _pendingModeTransitionQueue: PendingTransition[] = [];
-}
-
-export enum ModeTransition {
-    PUSH, UNWIND, INSERT, REMOVE, CHANGE, SET_INDEX,
-}
-
-class PendingTransition {
-    public mode: AppMode;
-    public type: ModeTransition;
-    public index: number;
 }

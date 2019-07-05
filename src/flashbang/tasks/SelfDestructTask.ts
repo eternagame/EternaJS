@@ -1,4 +1,4 @@
-import {ObjectTask} from "../core";
+import {ObjectTask} from '../core';
 
 /**
  * A Task that destroys its parent.

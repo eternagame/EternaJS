@@ -20,24 +20,24 @@
  */
 import * as stdcpp from "../../../emscripten/stdcpp";
 
-export = vrna2_lib;
+export = Vienna2Lib;
 
 /*~ Write your module's methods and properties in this class */
-declare class vrna2_lib {
-    FullEval (temperature_in: number, seqString: string, structString: string): vrna2_lib.FullEvalResult;
+declare class Vienna2Lib {
+    FullEval (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullEvalResult;
 
-    FullFoldDefault(seqString: string, structString: string): vrna2_lib.FullFoldResult;
-    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): vrna2_lib.FullFoldResult;
-    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): vrna2_lib.DotPlotResult;
-    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): vrna2_lib.FullFoldResult;
-    CoFoldSequence (seqString: string, structString: string): vrna2_lib.FullFoldResult;
-    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): vrna2_lib.FullFoldResult;
+    FullFoldDefault(seqString: string, structString: string): Vienna2Lib.FullFoldResult;
+    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): Vienna2Lib.FullFoldResult;
+    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): Vienna2Lib.DotPlotResult;
+    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult;
+    CoFoldSequence (seqString: string, structString: string): Vienna2Lib.FullFoldResult;
+    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): Vienna2Lib.FullFoldResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block.
  */
-declare namespace vrna2_lib {
+declare namespace Vienna2Lib {
     export interface FullEvalResult {
         nodes: stdcpp.vector<number>;
         energy: number;

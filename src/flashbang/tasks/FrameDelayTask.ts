@@ -1,4 +1,4 @@
-import {ObjectTask, Updatable} from "../core";
+import {ObjectTask, Updatable} from '../core';
 
 /** Delays for the given number of frames. (Unlike DelayTask, which delays for a specific amount of time.) */
 export default class FrameDelayTask extends ObjectTask implements Updatable {
