@@ -1,19 +1,21 @@
 import {
     Container, Graphics, Point, Sprite
-} from "pixi.js";
-import {Flashbang, AppMode} from "flashbang/core";
-import {DisplayObjectPointerTarget, InputUtil, KeyCode} from "flashbang/input";
-import {DisplayUtil, StyledTextBuilder} from "flashbang/util";
-import EPars from "eterna/EPars";
-import Eterna from "eterna/Eterna";
-import {Bitmaps} from "eterna/resources";
+} from 'pixi.js';
+import {Flashbang, AppMode} from 'flashbang/core';
+import {DisplayObjectPointerTarget, InputUtil, KeyCode} from 'flashbang/input';
+import {DisplayUtil, StyledTextBuilder} from 'flashbang/util';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import {Bitmaps} from 'eterna/resources';
 import {
     ConstraintBox, GameButton, HTMLTextObject, PoseThumbnail, PoseThumbnailType
-} from "eterna/ui";
-import {Fonts} from "eterna/util";
+} from 'eterna/ui';
+import {Fonts} from 'eterna/util';
 
 export default class MissionIntroMode extends AppMode {
-    public constructor(puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]) {
+    constructor(
+        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]
+    ) {
         super();
         this._puzzleName = puzzleName;
         this._puzzleDescription = puzzleDescription;
@@ -32,7 +34,7 @@ export default class MissionIntroMode extends AppMode {
         let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.container.addChild(moleculeImg);
 
-        let missionText = Fonts.stdLight("MISSION", 48).color(0xFFCC00).build();
+        let missionText = Fonts.stdLight('MISSION', 48).color(0xFFCC00).build();
         this.container.addChild(missionText);
 
         const descriptionStyle = {
@@ -64,7 +66,7 @@ export default class MissionIntroMode extends AppMode {
             .maxWidth(Flashbang.stageWidth);
         this.addObject(nameLabel, this.container);
 
-        let goalsLabel = Fonts.stdLight("GOAL", 24).color(0xffcc00).build();
+        let goalsLabel = Fonts.stdLight('GOAL', 24).color(0xffcc00).build();
         this.container.addChild(goalsLabel);
 
         this._goalsBG = Sprite.fromImage(Bitmaps.MissionPuzzleThumbnailImage);
@@ -242,7 +244,8 @@ export default class MissionIntroMode extends AppMode {
     }
 
     private scrollDown(): void {
-        let limit = -this._constraintsHeight + 367 + 60 + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
+        let limit = -this._constraintsHeight + 367 + 60
+            + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
         this._constraintsLayer.y = Math.max(this._constraintsLayer.y - 10, limit);
     }
 
@@ -278,7 +281,9 @@ export default class MissionIntroMode extends AppMode {
 
         this._constraintMask.clear();
         this._constraintMask.beginFill(0x00FF00, 0);
-        this._constraintMask.drawRect(0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY);
+        this._constraintMask.drawRect(
+            0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY
+        );
         this._constraintMask.x = 0;
         this._constraintMask.y = 0;
         this._constraintsLayer.mask = this._constraintMask;

@@ -1,15 +1,15 @@
-import {Point} from "pixi.js";
-import {Flashbang} from "flashbang/core";
-import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
-import {Easing} from "flashbang/util";
-import {Dialog} from "eterna/ui";
-import {Fonts} from "eterna/util";
+import {Point} from 'pixi.js';
+import {Flashbang} from 'flashbang/core';
+import {AlphaTask, RepeatingTask, SerialTask} from 'flashbang/tasks';
+import {Easing} from 'flashbang/util';
+import {Dialog} from 'eterna/ui';
+import {Fonts} from 'eterna/util';
 
 export default class SubmittingDialog extends Dialog<void> {
     protected added(): void {
         super.added();
 
-        let text = Fonts.arial("Submitting...", 20).color(0xffffff).bold().build();
+        let text = Fonts.arial('Submitting...', 20).color(0xffffff).bold().build();
         this.container.addChild(text);
 
         text.alpha = 0;

@@ -1,4 +1,4 @@
-import {Graphics} from "pixi.js";
+import {Graphics} from 'pixi.js';
 
 // GridLines class written by Jerry Fu
 // Draws any number of lines covering the entire width of the design browser at a specified interval,

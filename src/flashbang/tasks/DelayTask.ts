@@ -1,4 +1,4 @@
-import {ObjectTask, Updatable} from "../core";
+import {ObjectTask, Updatable} from '../core';
 
 export default class DelayTask extends ObjectTask implements Updatable {
     constructor(time: number) {

@@ -1,30 +1,30 @@
-import {Point, Text} from "pixi.js";
-import {Signal, UnitSignal} from "signals";
+import {Point, Text} from 'pixi.js';
+import {Signal, UnitSignal} from 'signals';
 
-import {Fonts} from "eterna/util";
-import GameButton from "./GameButton";
-import GamePanel from "./GamePanel";
-import TextInputObject from "./TextInputObject";
+import {Fonts} from 'eterna/util';
+import GameButton from './GameButton';
+import GamePanel from './GamePanel';
+import TextInputObject from './TextInputObject';
 
 export default class TextInputPanel extends GamePanel {
     public readonly cancelClicked: UnitSignal = new UnitSignal();
     public readonly okClicked: Signal<Map<string, string>> = new Signal();
 
-    public constructor(inputFontSize: number = 14) {
+    constructor(inputFontSize: number = 14) {
         super();
 
         this._fontSize = inputFontSize;
 
         this.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
 
-        this._okButton = new GameButton().label("Ok", 14);
+        this._okButton = new GameButton().label('Ok', 14);
         this.addObject(this._okButton, this.container);
         this._okButton.clicked.connect(() => {
             this.okClicked.emit(this.getFieldValues());
             this.resetHotkeys();
         });
 
-        this._cancelButton = new GameButton().label("Cancel", 14);
+        this._cancelButton = new GameButton().label('Cancel', 14);
         this.addObject(this._cancelButton, this.container);
         this._cancelButton.clicked.connect(() => {
             this.cancelClicked.emit();
@@ -79,7 +79,7 @@ export default class TextInputPanel extends GamePanel {
 
     public addField(name: string, width: number, multiline: boolean = false): TextInputObject {
         if (this.isLiveObject) {
-            throw new Error("Add all fields before adding object to mode");
+            throw new Error('Add all fields before adding object to mode');
         }
 
         let input = new TextInputObject(this._fontSize, width, multiline ? 3 : 1).font(Fonts.ARIAL);
@@ -93,9 +93,11 @@ export default class TextInputPanel extends GamePanel {
         return input;
     }
 
-    public setHotkeys(ok_key: string = null, ok_txt: string = "", cancel_key: string = null, cancel_txt: string = ""): void {
-        this._okButton.hotkey(ok_key, false).tooltip(ok_txt);
-        this._cancelButton.hotkey(cancel_key, false).tooltip(cancel_txt);
+    public setHotkeys(
+        okKey: string = null, okText: string = '', cancelKey: string = null, cancelText: string = ''
+    ): void {
+        this._okButton.hotkey(okKey, false).tooltip(okText);
+        this._cancelButton.hotkey(cancelKey, false).tooltip(cancelText);
     }
 
     public resetHotkeys(): void {
@@ -113,7 +115,7 @@ export default class TextInputPanel extends GamePanel {
 
     public clearFields(): void {
         for (let field of this._fields) {
-            field.input.text = "";
+            field.input.text = '';
         }
     }
 

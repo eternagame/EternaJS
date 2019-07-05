@@ -1,4 +1,4 @@
-import * as WebFont from "webfontloader";
+import * as WebFont from 'webfontloader';
 
 export default class FontLoader {
     /**
@@ -13,7 +13,9 @@ export default class FontLoader {
                     urls: cssURL ? [cssURL] : undefined
                 },
                 fontactive: (familyName, fvd) => resolve(),
-                fontinactive: (familyName, fvd) => reject(`Font load failure [css=${cssURL}, family=${familyName}]`)
+                fontinactive: (familyName, fvd) => reject(
+                    new Error(`Font load failure [css=${cssURL}, family=${familyName}]`)
+                )
             });
         });
     }

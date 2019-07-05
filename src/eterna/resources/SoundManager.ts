@@ -1,11 +1,11 @@
-import * as log from "loglevel";
-import "pixi-sound";
-import {RegistrationGroup} from "signals";
-import Eterna from "eterna/Eterna";
-import {EternaSettings} from "eterna/settings";
+import * as log from 'loglevel';
+import 'pixi-sound';
+import {RegistrationGroup} from 'signals';
+import Eterna from 'eterna/Eterna';
+import {EternaSettings} from 'eterna/settings';
 
 export default class SoundManager {
-    public constructor(settings: EternaSettings) {
+    constructor(settings: EternaSettings) {
         this._settings = settings;
 
         this._regs.add(settings.soundMute.connectNotify((mute) => {
@@ -50,7 +50,7 @@ export default class SoundManager {
  * when it has completed loading.
  */
 class EternaSound {
-    public constructor(url: string) {
+    constructor(url: string) {
         this._sound = PIXI.sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
     }
 

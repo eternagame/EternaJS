@@ -1,15 +1,15 @@
-import {Point} from "pixi.js";
-import {Updatable} from "flashbang/core";
-import {ContainerObject} from "flashbang/objects";
-import PlayerRank from "./PlayerRank";
-import RankRowLayout from "./RankRowLayout";
+import {Point} from 'pixi.js';
+import {Updatable} from 'flashbang/core';
+import {ContainerObject} from 'flashbang/objects';
+import PlayerRank from './PlayerRank';
+import RankRowLayout from './RankRowLayout';
 
 export default class RankBoard extends ContainerObject implements Updatable {
     public static readonly ROW_WIDTH = 400;
     public static readonly ROW_HEIGHT = 20;
     public static readonly PLAYER_ROW_HEIGHT = 32;
 
-    public constructor(startingRank: number, rankData: PlayerRank[], offsetBtwRankCoin: number) {
+    constructor(startingRank: number, rankData: PlayerRank[], offsetBtwRankCoin: number) {
         super();
         this._rankData = rankData;
         this._startingPosition = 0;
@@ -35,16 +35,22 @@ export default class RankBoard extends ContainerObject implements Updatable {
     }
 
     public update(dt: number): void {
-        let parentOffset: number = this.container.y - this._startingPosition;
+        let parentOffset = this.container.y - this._startingPosition;
         for (let ii = 0; ii < this._rows.length; ii++) {
-            // pos_offset / RankBoard.ROW_HEIGHT = How many entries we have moved by
-            let loopNum: number = Math.floor((parentOffset / RankBoard.ROW_HEIGHT - ii + 2) / 3); // How many times a row has looped
-            let rankIdx: number = loopNum * this._rows.length + ii; // this row's player index in the data array
-            if (rankIdx < this._rankData.length) { // Catch if entry doesn't exist (ie. rank 1)
+            // posOffset / RankBoard.ROW_HEIGHT = How many entries we have moved by
+            // How many times a row has looped
+            let loopNum = Math.floor((parentOffset / RankBoard.ROW_HEIGHT - ii + 2) / 3);
+            // This row's player index in the data array
+            let rankIdx = loopNum * this._rows.length + ii;
+            if (rankIdx < this._rankData.length) {
+                // Catch if entry doesn't exist (ie. rank 1)
                 const row = this._rows[ii];
-                row.display.position.y = RankBoard.ROW_HEIGHT * (this._rankData.length - ii - 1) // Starting position
-                    - this._rows.length * RankBoard.ROW_HEIGHT // Height of all entries combined, allows looping
-                    * loopNum; // Multiplied by how many loops this row has gone through
+                // Starting position
+                row.display.position.y = RankBoard.ROW_HEIGHT * (this._rankData.length - ii - 1)
+                    // Height of all entries combined, allows looping
+                    - this._rows.length * RankBoard.ROW_HEIGHT
+                    // Multiplied by how many loops this row has gone through
+                    * loopNum;
 
                 const rank: PlayerRank = this._rankData[rankIdx];
                 row.setRank(rank.rank);
@@ -59,5 +65,6 @@ export default class RankBoard extends ContainerObject implements Updatable {
 
     private _startingPosition: number;
 
-    private static readonly NUM_VISIBLE: number = 2; // the number of entries you want visible at once (intermediary entry is automatically added)
+    // The number of entries you want visible at once (intermediary entry is automatically added)
+    private static readonly NUM_VISIBLE: number = 2;
 }

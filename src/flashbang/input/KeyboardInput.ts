@@ -1,5 +1,5 @@
-import {Registration} from "signals";
-import {LinkedElement, LinkedList} from "../util";
+import {Registration} from 'signals';
+import {LinkedElement, LinkedList} from '../util';
 
 export interface KeyboardListener {
     /**
@@ -18,7 +18,11 @@ export default class KeyboardInput {
     public handleKeyboardEvent(e: KeyboardEvent): boolean {
         let handled = false;
         try {
-            for (let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration(); elt != null; elt = elt.next) {
+            for (
+                let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration();
+                elt != null;
+                elt = elt.next
+            ) {
                 handled = elt.data.onKeyboardEvent(e);
                 if (handled) {
                     break;

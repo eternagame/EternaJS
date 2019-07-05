@@ -2,7 +2,7 @@
 export default class Deferred<T> {
     public readonly promise: Promise<T>;
 
-    public constructor() {
+    constructor() {
         this.promise = new Promise((resolve, reject) => {
             this._resolve = resolve;
             this._reject = reject;

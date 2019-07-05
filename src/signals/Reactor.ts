@@ -1,4 +1,4 @@
-import Cons from "./Cons";
+import Cons from './Cons';
 
 export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
 
@@ -14,7 +14,7 @@ export default abstract class Reactor {
 
     protected addConnection(listener: RListener): Cons {
         if (listener == null) {
-            throw new Error("Null listener");
+            throw new Error('Null listener');
         }
         return this._addCons(new Cons(this, listener));
     }
@@ -39,7 +39,7 @@ export default abstract class Reactor {
             // Bail early if we have no listeners
             return;
         } else if (this._listeners === Reactor.DISPATCHING) {
-            throw new Error("Initiated notify while notifying");
+            throw new Error('Initiated notify while notifying');
         }
 
         let lners: Cons = this._listeners;
@@ -101,7 +101,7 @@ export default abstract class Reactor {
     }
 
     /* internal */
-    _addCons(cons: Cons): Cons {
+    public _addCons(cons: Cons): Cons {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons.insert(this._listeners, cons);
@@ -115,7 +115,7 @@ export default abstract class Reactor {
     }
 
     /* internal */
-    _removeCons(cons: Cons): void {
+    public _removeCons(cons: Cons): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
                 this._listeners = Cons.remove(this._listeners, cons);

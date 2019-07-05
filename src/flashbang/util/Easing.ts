@@ -1,4 +1,4 @@
-import PowerEaser from "./PowerEaser";
+import PowerEaser from './PowerEaser';
 
 export type EasingFunc = (from: number, to: number, dt: number, t: number) => number;
 

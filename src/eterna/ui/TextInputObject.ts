@@ -1,10 +1,10 @@
-import {Graphics, Point, Sprite} from "pixi.js";
-import {DisplayObjectPointerTarget} from "flashbang/input";
-import {DOMObject} from "flashbang/objects";
-import {TextBuilder} from "flashbang/util";
-import {Signal} from "signals";
-import Eterna from "eterna/Eterna";
-import {Fonts} from "eterna/util";
+import {Graphics, Point, Sprite} from 'pixi.js';
+import {DisplayObjectPointerTarget} from 'flashbang/input';
+import {DOMObject} from 'flashbang/objects';
+import {TextBuilder} from 'flashbang/util';
+import {Signal} from 'signals';
+import Eterna from 'eterna/Eterna';
+import {Fonts} from 'eterna/util';
 
 /**
  * A text input object in the DOM. Floats on top of the PIXI canvas.
@@ -13,8 +13,11 @@ import {Fonts} from "eterna/util";
 export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
 
-    public constructor(fontSize: number, width: number = 100, rows: number = 1) {
-        super(Eterna.OVERLAY_DIV_ID, rows === 1 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows));
+    constructor(fontSize: number, width: number = 100, rows: number = 1) {
+        super(
+            Eterna.OVERLAY_DIV_ID, rows === 1
+                ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows)
+        );
 
         this._fontSize = fontSize;
         this._rows = rows;
@@ -37,7 +40,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             if (this._fakeTextInput != null) {
                 setTimeout(() => {
                     this.destroyFakeTextInput();
-                    this._obj.style.visibility = "visible";
+                    this._obj.style.visibility = 'visible';
                     this._obj.focus();
                 });
             }
@@ -64,7 +67,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     protected updateElementProperties(): void {
         super.updateElementProperties();
         if (this._fakeTextInput != null) {
-            this._obj.style.visibility = "hidden";
+            this._obj.style.visibility = 'hidden';
         }
     }
 
@@ -109,7 +112,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     public bold(): TextInputObject {
-        return this.fontWeight("bold");
+        return this.fontWeight('bold');
     }
 
     public placeholderText(value: string): TextInputObject {
@@ -168,7 +171,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private onInput(): void {
         if (this._disallow != null) {
             let curValue = this.text;
-            this._obj.value = this._obj.value.replace(this._disallow, "");
+            this._obj.value = this._obj.value.replace(this._disallow, '');
             if (this.text !== curValue) {
                 return;
             }
@@ -204,7 +207,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         let displayText = this.text;
         let textColor = 0x0;
-        if (displayText.length == 0) {
+        if (displayText.length === 0) {
             displayText = this._obj.placeholder;
             // This color is probably browser dependent!
             textColor = 0x777777;
@@ -220,8 +223,8 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             .build();
         text.mask = textMask;
         text.position = new Point(
-            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue("padding-left")),
-            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue("padding-right"))
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'))
         );
         this._fakeTextInput.addChild(text);
 
@@ -229,18 +232,18 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     }
 
     private static createTextArea(rows: number): HTMLTextAreaElement {
-        let element = document.createElement("textarea");
+        let element = document.createElement('textarea');
         element.rows = rows;
-        element.title = "";
-        element.style.resize = "none";
-        element.style.overflow = "scroll";
+        element.title = '';
+        element.style.resize = 'none';
+        element.style.overflow = 'scroll';
         return element;
     }
 
     private static createTextInput(): HTMLInputElement {
-        let element = document.createElement("input");
-        element.type = "text";
-        element.title = "";
+        let element = document.createElement('input');
+        element.type = 'text';
+        element.title = '';
         return element;
     }
 

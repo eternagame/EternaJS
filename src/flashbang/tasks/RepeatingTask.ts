@@ -1,4 +1,4 @@
-import {ObjectTask} from "../core";
+import {ObjectTask} from '../core';
 
 type TaskCreator = () => ObjectTask;
 

@@ -1,8 +1,8 @@
-import {GameMode} from "../mode";
-import {ViewSolutionDialog} from "../mode/DesignBrowser";
+import {GameMode} from '../mode';
+import {ViewSolutionDialog} from '../mode/DesignBrowser';
 import {
     Puzzle, PuzzleManager, Solution, SolutionManager
-} from "../puzzle";
+} from '../puzzle';
 
 export default class TestMode extends GameMode {
     protected setup(): void {

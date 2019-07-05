@@ -1,7 +1,7 @@
-import {DisplayObject} from "pixi.js";
-import {SignalView} from "signals";
-import {GameObject} from "../core";
-import {PointerTarget, DisplayObjectPointerTarget} from "../input";
+import {DisplayObject} from 'pixi.js';
+import {SignalView} from 'signals';
+import {GameObject} from '../core';
+import {PointerTarget, DisplayObjectPointerTarget} from '../input';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

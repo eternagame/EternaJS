@@ -1,18 +1,18 @@
-import Constants from "eterna/Constants";
-import {ColorUtil, MathUtil} from "flashbang/util";
+import Constants from 'eterna/Constants';
+import {ColorUtil, MathUtil} from 'flashbang/util';
 
 export default class ExpPainter {
     public static readonly NUM_COLORS = 5;
 
-    public static transformData(data: number[], data_max: number, data_min: number): number[] {
-        let data_ret: number[] = data.slice();
-        let abs_max: number = 2 * data_max - data_min;
+    public static transformData(data: number[], dataMax: number, dataMin: number): number[] {
+        let dataRet: number[] = data.slice();
+        let absMax: number = 2 * dataMax - dataMin;
 
-        for (let ii = 0; ii < data_ret.length; ii++) {
-            data_ret[ii] = MathUtil.clamp(data_ret[ii], data_min, abs_max);
+        for (let ii = 0; ii < dataRet.length; ii++) {
+            dataRet[ii] = MathUtil.clamp(dataRet[ii], dataMin, absMax);
         }
 
-        return data_ret;
+        return dataRet;
     }
 
     public static getColorByLevel(lev: number): number {
@@ -31,9 +31,9 @@ export default class ExpPainter {
         }
     }
 
-    constructor(data: number[], start_index: number) {
+    constructor(data: number[], startIndex: number) {
         if (data == null || data.length === 0) {
-            throw new Error("ExpPainter got empty array");
+            throw new Error('ExpPainter got empty array');
         }
 
         this._data = data.slice();
@@ -42,7 +42,7 @@ export default class ExpPainter {
         this._dataMax = this._data[0];
         this._dataAvg = this._data[0];
 
-        this._startIdx = start_index;
+        this._startIdx = startIndex;
 
         this._continuous = false;
         this._extended = false;
@@ -204,17 +204,15 @@ export default class ExpPainter {
                     diff = MathUtil.clamp(diff, 0, 1);
                     return Math.round(ExpPainter.NUM_COLORS * diff) + ExpPainter.NUM_COLORS;
                 }
-            } else {
+            } else if (!this._continuous) {
                 // / SUPER HACK - binary coloring
-                if (!this._continuous) {
-                    return 0;
-                } else {
-                    diff *= -1;
-                    diff /= (this._dataAvg - this._dataMin);
-                    diff = MathUtil.clamp(diff, 0, 1);
+                return 0;
+            } else {
+                diff *= -1;
+                diff /= (this._dataAvg - this._dataMin);
+                diff = MathUtil.clamp(diff, 0, 1);
 
-                    return Math.round(ExpPainter.NUM_COLORS * diff) * -1 + ExpPainter.NUM_COLORS;
-                }
+                return Math.round(ExpPainter.NUM_COLORS * diff) * -1 + ExpPainter.NUM_COLORS;
             }
         }
     }

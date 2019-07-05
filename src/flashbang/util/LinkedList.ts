@@ -1,4 +1,4 @@
-import {Registration} from "signals";
+import {Registration} from 'signals';
 
 export interface LinkedElement<T> {
     next: LinkedElement<T>;
@@ -59,7 +59,7 @@ export default class LinkedList<T> {
 
     public beginIteration(): LinkedElement<T> {
         if (this._head === this.ITERATING) {
-            throw new Error("Initiated beginIteration while iterating");
+            throw new Error('Initiated beginIteration while iterating');
         }
         this._iterating = this._head;
         this._head = this.ITERATING;
@@ -69,7 +69,7 @@ export default class LinkedList<T> {
     public endIteration(): void {
         // note that we're no longer dispatching
         if (this._head !== this.ITERATING) {
-            throw new Error("Not iterating");
+            throw new Error('Not iterating');
         }
 
         this._head = this._iterating;
@@ -93,7 +93,7 @@ export default class LinkedList<T> {
     }
 
     /* internal */
-    removeCons(cons: Cons<T>): void {
+    public removeCons(cons: Cons<T>): void {
         if (this.isIterating) {
             this._pendingRuns = LinkedList.pend(this._pendingRuns, new Runs(() => {
                 this._head = Cons.remove(this._head, cons);

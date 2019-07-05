@@ -1,5 +1,5 @@
-import {ObjectTask} from "../core";
-import {Assert} from "../util";
+import {ObjectTask} from '../core';
+import {Assert} from '../util';
 
 export default class SerialTask extends ObjectTask {
     constructor(...tasks: ObjectTask[]) {

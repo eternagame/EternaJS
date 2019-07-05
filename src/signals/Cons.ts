@@ -1,6 +1,6 @@
-import Reactor, {RListener} from "./Reactor";
+import Reactor, {RListener} from './Reactor';
 
-import Connection from "./Connection";
+import Connection from './Connection';
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.
@@ -40,7 +40,7 @@ export default class Cons implements Connection {
 
     public atPriority(priority: number): Connection {
         if (this._owner == null) {
-            throw new Error("Cannot change priority of disconnected connection.");
+            throw new Error('Cannot change priority of disconnected connection.');
         }
         this._owner._removeCons(this);
         this.next = null;
@@ -50,7 +50,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    static insert(head: Cons, cons: Cons): Cons {
+    public static insert(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
@@ -63,7 +63,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    static remove(head: Cons, cons: Cons): Cons {
+    public static remove(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return head;
         } else if (head === cons) {
@@ -75,7 +75,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    static removeAll(head: Cons, listener: RListener): Cons {
+    public static removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;
         } else if (head.listener === listener) {

@@ -1,8 +1,8 @@
-import {ContainerObject} from "flashbang/objects";
-import Bubble from "./Bubble";
+import {ContainerObject} from 'flashbang/objects';
+import Bubble from './Bubble';
 
 export default class BubbleSweep extends ContainerObject {
-    public constructor(numBubbles: number) {
+    constructor(numBubbles: number) {
         super();
         this._bubbles = [];
         for (let ii = 0; ii < numBubbles; ii++) {

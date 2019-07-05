@@ -1,7 +1,7 @@
-import {Graphics} from "pixi.js";
+import {Graphics} from 'pixi.js';
 
 export default class DotLine extends Graphics {
-    public constructor(thickness: number, color: number) {
+    constructor(thickness: number, color: number) {
         super();
         this._thickness = thickness;
         this._color = color;
@@ -12,7 +12,7 @@ export default class DotLine extends Graphics {
     }
 
     public set length(value: number) {
-        if (this._length == value) {
+        if (this._length === value) {
             return;
         }
         this._length = value;
@@ -20,25 +20,25 @@ export default class DotLine extends Graphics {
         this.clear();
         this.lineStyle(this._thickness, this._color);
 
-        let w_walker = 0;
+        let wWalker = 0;
         let index = 0;
         while (1) {
-            let len_to_go = 0;
-            if (index % 3 == 0) {
-                len_to_go = DotLine.LONG_LEN;
+            let lenToGo = 0;
+            if (index % 3 === 0) {
+                lenToGo = DotLine.LONG_LEN;
             } else {
-                len_to_go = DotLine.SHORT_LEN;
+                lenToGo = DotLine.SHORT_LEN;
             }
 
-            if (len_to_go + w_walker >= this._length) {
-                len_to_go = this._length - len_to_go;
+            if (lenToGo + wWalker >= this._length) {
+                lenToGo = this._length - lenToGo;
                 break;
             }
 
-            this.moveTo(w_walker, 0);
-            this.lineTo(w_walker + len_to_go, 0);
+            this.moveTo(wWalker, 0);
+            this.lineTo(wWalker + lenToGo, 0);
 
-            w_walker += len_to_go + DotLine.SHORT_LEN;
+            wWalker += lenToGo + DotLine.SHORT_LEN;
             index++;
         }
     }

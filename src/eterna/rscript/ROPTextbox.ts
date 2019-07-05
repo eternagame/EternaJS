@@ -1,30 +1,30 @@
-import * as log from "loglevel";
-import {ExtendedTextStyle} from "pixi-multistyle-text";
-import {Point} from "pixi.js";
-import {Flashbang, GameObject} from "flashbang/core";
-import {Vector2} from "flashbang/geom";
-import {ColorUtil, StyledTextBuilder} from "flashbang/util";
-import {RNAAnchorObject} from "eterna/pose2D";
-import {FancyTextBalloon} from "eterna/ui";
-import {Fonts} from "eterna/util";
-import ROPWait from "./ROPWait";
-import RScriptArrow from "./RScriptArrow";
-import RScriptEnv from "./RScriptEnv";
-import RScriptOp from "./RScriptOp";
+import * as log from 'loglevel';
+import {ExtendedTextStyle} from 'pixi-multistyle-text';
+import {Point} from 'pixi.js';
+import {Flashbang, GameObject} from 'flashbang/core';
+import {Vector2} from 'flashbang/geom';
+import {ColorUtil, StyledTextBuilder} from 'flashbang/util';
+import {RNAAnchorObject} from 'eterna/pose2D';
+import {FancyTextBalloon} from 'eterna/ui';
+import {Fonts} from 'eterna/util';
+import ROPWait from './ROPWait';
+import RScriptArrow from './RScriptArrow';
+import RScriptEnv from './RScriptEnv';
+import RScriptOp from './RScriptOp';
 
 export enum ROPTextboxMode {
-    TEXTBOX_LOCATION = "TEXTBOX_LOCATION",
-    TEXTBOX_NUCLEOTIDE = "TEXTBOX_NUCLEOTIDE",
-    TEXTBOX_DEFAULT = "TEXTBOX_DEFAULT",
-    ARROW_LOCATION = "ARROW_LOCATION",
-    ARROW_NUCLEOTIDE = "ARROW_NUCLEOTIDE",
-    ARROW_DEFAULT = "ARROW_DEFAULT",
+    TEXTBOX_LOCATION = 'TEXTBOX_LOCATION',
+    TEXTBOX_NUCLEOTIDE = 'TEXTBOX_NUCLEOTIDE',
+    TEXTBOX_DEFAULT = 'TEXTBOX_DEFAULT',
+    ARROW_LOCATION = 'ARROW_LOCATION',
+    ARROW_NUCLEOTIDE = 'ARROW_NUCLEOTIDE',
+    ARROW_DEFAULT = 'ARROW_DEFAULT',
 }
 
 export default class ROPTextbox extends RScriptOp {
-    public static readonly ID_POSTFIX = "_textbox_";
+    public static readonly ID_POSTFIX = '_textbox_';
 
-    public constructor(env: RScriptEnv, show: boolean, mode: ROPTextboxMode) {
+    constructor(env: RScriptEnv, show: boolean, mode: ROPTextboxMode) {
         super(env);
         this._show = show;
         this._mode = mode;
@@ -41,12 +41,12 @@ export default class ROPTextbox extends RScriptOp {
     private showTextbox(): void {
         let textBox = new FancyTextBalloon(0x122944, 1.0, true, 0xC0DCE7);
         if (this._initialShow) {
-            if (this._forceTopmost && false) {
-                // parent = Application.instance.get_front_object_container();
-                // Application.instance.get_front_object_container().add_object(textBox);
-            } else {
-                this._env.addObject(textBox, this._env.container);
-            }
+            // if (this._forceTopmost && false) {
+            // parent = Application.instance.get_front_object_container();
+            // Application.instance.get_front_object_container().add_object(textBox);
+            // } else {
+            this._env.addObject(textBox, this._env.container);
+            // }
         }
 
         this._env.setVar(this._id, textBox);
@@ -73,7 +73,7 @@ export default class ROPTextbox extends RScriptOp {
             textBox.title = this._title;
         }
 
-        if (this._buttonText !== "") {
+        if (this._buttonText !== '') {
             textBox.showButton(true).clicked.connect(() => this.onClickEvent());
         } else {
             textBox.showButton(false);
@@ -87,7 +87,7 @@ export default class ROPTextbox extends RScriptOp {
                 );
             } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
                 // Get position of the textbox based on position of the nucleotide.
-                let p: Point = this._env.pose.getBaseXY(this._nucIdx);
+                let p: Point = this._env.pose.getBaseLoc(this._nucIdx);
                 let offset = new Point(ROPTextbox.DEFAULT_X_OFFSET, -(textBox.container.height * 0.5) - 10);
                 if (this._hasXOffset) {
                     offset.x = this._xOffset;
@@ -133,7 +133,7 @@ export default class ROPTextbox extends RScriptOp {
                     Flashbang.stageHeight * this._yPos + this._yRel
                 );
             } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                newArrow.display.position = this._env.pose.getBaseXY(this._nucIdx);
+                newArrow.display.position = this._env.pose.getBaseLoc(this._nucIdx);
             }
 
             // Determine where we want to draw the tip of the arrow
@@ -189,9 +189,9 @@ export default class ROPTextbox extends RScriptOp {
                 } else {
                     offset.length = this._xOffset;
                 }
-                let p = this._env.pose.getBaseXY(this._nucIdx);
+                let p = this._env.pose.getBaseLoc(this._nucIdx);
                 newArrow.display.position = new Point(p.x + offset.x, p.y + offset.y);
-                log.debug("TODO: set_anchor_nucleotide?");
+                log.debug('TODO: set_anchor_nucleotide?');
                 // TSC - I'm not sure if this is ever called or what it should do
                 // newArrow.set_anchor_nucleotide(this._env.GetRNA(), this._nuc_idx, offset.x, offset.y);
             }
@@ -232,140 +232,146 @@ export default class ROPTextbox extends RScriptOp {
         let rx = /^([^+-]*)((?:\+|-).+)$/g;
         let regResult: RegExpExecArray = null;
         switch (i) {
-        case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
-            if (this._show && (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE || this._mode === ROPTextboxMode.TEXTBOX_LOCATION)) {
-                this._text = this._env.getStringRef(arg);
-            } else if (this._show && this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                if ((regResult = rx.exec(arg)) != null) {
-                    this._xPos = Number(regResult[1]);
-                    this._xRel = Number(regResult[2]);
+            case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
+                if (
+                    this._show
+                    && (
+                        this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE
+                        || this._mode === ROPTextboxMode.TEXTBOX_LOCATION
+                    )
+                ) {
+                    this._text = this._env.getStringRef(arg);
+                } else if (this._show && this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    if ((regResult = rx.exec(arg)) != null) {
+                        this._xPos = Number(regResult[1]);
+                        this._xRel = Number(regResult[2]);
+                    } else {
+                        this._xPos = Number(arg);
+                    }
+                } else if (this._show && this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._nucIdx = Number(arg) - 1;
                 } else {
-                    this._xPos = Number(arg);
+                    this._id = this._env.getStringRef(arg);
                 }
-            } else if (this._show && this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._nucIdx = Number(arg) - 1;
-            } else {
-                this._id = this._env.getStringRef(arg);
-            }
-            break;
-        case 1: // X in mode 0. Nucleotide index in mode 1.
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                if ((regResult = rx.exec(arg)) != null) {
-                    this._xPos = Number(regResult[1]);
-                    this._xRel = Number(regResult[2]);
+                break;
+            case 1: // X in mode 0. Nucleotide index in mode 1.
+                if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    if ((regResult = rx.exec(arg)) != null) {
+                        this._xPos = Number(regResult[1]);
+                        this._xRel = Number(regResult[2]);
+                    } else {
+                        this._xPos = Number(arg);
+                    }
+                } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    if ((regResult = rx.exec(arg)) != null) {
+                        this._yPos = Number(regResult[1]);
+                        this._yRel = Number(regResult[2]);
+                    } else {
+                        this._yPos = Number(arg);
+                    }
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._id = this._env.getStringRef(arg);
                 } else {
-                    this._xPos = Number(arg);
+                    this._nucIdx = Number(arg) - 1;
                 }
-            } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                if ((regResult = rx.exec(arg)) != null) {
-                    this._yPos = Number(regResult[1]);
-                    this._yRel = Number(regResult[2]);
+                break;
+            case 2: // Y in mode 0. Title in mode 1.
+                if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    if ((regResult = rx.exec(arg)) != null) {
+                        this._yPos = Number(regResult[1]);
+                        this._yRel = Number(regResult[2]);
+                    } else {
+                        this._yPos = Number(arg);
+                    }
+                } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._id = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._arrowRotation = Number(arg);
                 } else {
-                    this._yPos = Number(arg);
+                    this._title = this._env.getStringRef(arg);
                 }
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._id = this._env.getStringRef(arg);
-            } else {
-                this._nucIdx = Number(arg) - 1;
-            }
-            break;
-        case 2: // Y in mode 0. Title in mode 1.
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                if ((regResult = rx.exec(arg)) != null) {
-                    this._yPos = Number(regResult[1]);
-                    this._yRel = Number(regResult[2]);
+                break;
+            case 3: // Title in mode 0. Id in mode 1.
+                if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    this._title = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._arrowRotation = Number(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._arrowLength = Number(arg);
                 } else {
-                    this._yPos = Number(arg);
+                    this._id = this._env.getStringRef(arg);
                 }
-            } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._id = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._arrowRotation = Number(arg);
-            } else {
-                this._title = this._env.getStringRef(arg);
-            }
-            break;
-        case 3: // Title in mode 0. Id in mode 1.
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._title = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._arrowRotation = Number(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._arrowLength = Number(arg);
-            } else {
-                this._id = this._env.getStringRef(arg);
-            }
-            break;
-        case 4: // Id in mode 0. Button text in mode 1.
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._id = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._arrowLength = Number(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._myWidth = Number(arg);
-            } else {
-                this._buttonText = this._env.getStringRef(arg);
-            }
-            break;
-        case 5: // Button text in mode 1.
-            if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._buttonText = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._myWidth = Number(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._hasParent = ROPTextbox.parseBool(arg);
-            } else {
-                this._initialShow = ROPTextbox.parseBool(arg);
-            }
-            break;
-        case 6:
-            if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._hasParent = ROPTextbox.parseBool(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._parentID = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                this._fixedSize = ROPTextbox.parseBool(arg);
-            } else {
-                this._initialShow = ROPTextbox.parseBool(arg);
-            }
-            break;
-        case 7:
-            if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._parentID = this._env.getStringRef(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._fixedSize = ROPTextbox.parseBool(arg);
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                this._forceTopmost = ROPTextbox.parseBool(arg);
-            }
-            break;
-        case 8:
-            if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
-                this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
-                this._forceTopmost = ROPTextbox.parseBool(arg);
-            } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                this._hasXOffset = true;
-                this._xOffset = Number(arg);
-            }
-            break;
-        case 9:
-            if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
-                this._hasYOffset = true;
-                this._yOffset = Number(arg);
-            } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
-                this._hasXOffset = true;
-                this._xOffset = Number(arg);
-            } else {
-                this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
-            }
-            break;
+                break;
+            case 4: // Id in mode 0. Button text in mode 1.
+                if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    this._id = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._arrowLength = Number(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._myWidth = Number(arg);
+                } else {
+                    this._buttonText = this._env.getStringRef(arg);
+                }
+                break;
+            case 5: // Button text in mode 1.
+                if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    this._buttonText = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._myWidth = Number(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._hasParent = ROPTextbox.parseBool(arg);
+                } else {
+                    this._initialShow = ROPTextbox.parseBool(arg);
+                }
+                break;
+            case 6:
+                if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._hasParent = ROPTextbox.parseBool(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._parentID = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
+                    this._fixedSize = ROPTextbox.parseBool(arg);
+                } else {
+                    this._initialShow = ROPTextbox.parseBool(arg);
+                }
+                break;
+            case 7:
+                if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._parentID = this._env.getStringRef(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
+                } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    this._fixedSize = ROPTextbox.parseBool(arg);
+                } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
+                    this._forceTopmost = ROPTextbox.parseBool(arg);
+                }
+                break;
+            case 8:
+                if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                    this._fillColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
+                } else if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                    this._forceTopmost = ROPTextbox.parseBool(arg);
+                } else if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
+                    this._hasXOffset = true;
+                    this._xOffset = Number(arg);
+                }
+                break;
+            case 9:
+                if (this._mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE) {
+                    this._hasYOffset = true;
+                    this._yOffset = Number(arg);
+                } else if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
+                    this._hasXOffset = true;
+                    this._xOffset = Number(arg);
+                } else {
+                    this._outlineColor = ColorUtil.fromString(`#${this._env.getStringRef(arg)}`);
+                }
+                break;
 
-        default:
-            throw new Error(`Invalid argument for ROP: Textbox -- ${this._env.getStringRef(arg)}`);
+            default:
+                throw new Error(`Invalid argument for ROP: Textbox -- ${this._env.getStringRef(arg)}`);
         }
     }
 
@@ -391,23 +397,25 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private static processText(inText: string): string {
-        if (!inText) return "";
-        inText = inText.replace(/\<color/gi, "<font color");
-        inText = inText.replace(/\<red/gi, `<font color = "#${ROPTextbox.STD_RED_COLOR}"`);
-        inText = inText.replace(/\<green/gi, `<font color = "#${ROPTextbox.STD_GREEN_COLOR}"`);
-        inText = inText.replace(/\<blue/gi, `<font color = "#${ROPTextbox.STD_BLUE_COLOR}"`);
-        inText = inText.replace(/\<yellow/gi, `<font color = "#${ROPTextbox.STD_YELLOW_COLOR}"`);
+        if (!inText) return '';
+        inText = inText.replace(/<color/gi, '<font color');
+        inText = inText.replace(/<red/gi, `<font color = "#${ROPTextbox.STD_RED_COLOR}"`);
+        inText = inText.replace(/<green/gi, `<font color = "#${ROPTextbox.STD_GREEN_COLOR}"`);
+        inText = inText.replace(/<blue/gi, `<font color = "#${ROPTextbox.STD_BLUE_COLOR}"`);
+        inText = inText.replace(/<yellow/gi, `<font color = "#${ROPTextbox.STD_YELLOW_COLOR}"`);
 
-        inText = inText.replace(/\/(color|red|green|blue|yellow)/gi, "/font");
+        inText = inText.replace(/\/(color|red|green|blue|yellow)/gi, '/font');
         return inText;
     }
 
     private static parseBool(arg: string): boolean {
-        return arg.toUpperCase() === "TRUE";
+        return arg.toUpperCase() === 'TRUE';
     }
 
     private static isTextbox(mode: string): boolean {
-        return mode === ROPTextboxMode.TEXTBOX_LOCATION || mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE || mode === ROPTextboxMode.TEXTBOX_DEFAULT;
+        return mode === ROPTextboxMode.TEXTBOX_LOCATION
+            || mode === ROPTextboxMode.TEXTBOX_NUCLEOTIDE
+            || mode === ROPTextboxMode.TEXTBOX_DEFAULT;
     }
 
     private static isArrow(mode: string): boolean {
@@ -418,20 +426,20 @@ export default class ROPTextbox extends RScriptOp {
     private readonly _mode: ROPTextboxMode;
 
     private _text: string;
-    private _title: string = "";
+    private _title: string = '';
     private _xPos: number = 0;
     private _yPos: number = 0;
     private _xRel: number = 0;
     private _yRel: number = 0;
     private _nucIdx: number = 0;
-    private _id: string = "";
-    private _buttonText: string = "Next";
+    private _id: string = '';
+    private _buttonText: string = 'Next';
     private _initialShow: boolean = true;
     private _arrowRotation: number = 0;
     private _arrowLength: number = 100;
     private _myWidth: number = 20;
     private _hasParent: boolean = false;
-    private _parentID: string = "";
+    private _parentID: string = '';
     private _fillColor: number = 0xFF0000;
     private _outlineColor: number= 0x000000;
     private _fixedSize: boolean = true;
@@ -441,13 +449,13 @@ export default class ROPTextbox extends RScriptOp {
     private _hasYOffset: boolean = false;
     private _yOffset: number;
 
-    private static readonly ARROW_ID_POSTFIX = "_arrow_";
+    private static readonly ARROW_ID_POSTFIX = '_arrow_';
 
     private static readonly DEFAULT_X_OFFSET = 35;
     private static readonly DEFAULT_ARROW_OFFSET = 12;
 
-    private static readonly STD_RED_COLOR = "F85F00";
-    private static readonly STD_BLUE_COLOR = "00BFF9";
-    private static readonly STD_GREEN_COLOR = "01EC04";
-    private static readonly STD_YELLOW_COLOR = "FFFA00";
+    private static readonly STD_RED_COLOR = 'F85F00';
+    private static readonly STD_BLUE_COLOR = '00BFF9';
+    private static readonly STD_GREEN_COLOR = '01EC04';
+    private static readonly STD_YELLOW_COLOR = 'FFFA00';
 }

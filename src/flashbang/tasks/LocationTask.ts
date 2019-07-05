@@ -1,6 +1,6 @@
-import {DisplayObject} from "pixi.js";
-import {EasingFunc} from "../util";
-import DisplayObjectTask from "./DisplayObjectTask";
+import {DisplayObject} from 'pixi.js';
+import {EasingFunc} from '../util';
+import DisplayObjectTask from './DisplayObjectTask';
 
 export default class LocationTask extends DisplayObjectTask {
     constructor(x: number, y: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {

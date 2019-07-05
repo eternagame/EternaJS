@@ -1,9 +1,11 @@
-﻿import {Container, Point, Sprite, Texture} from "pixi.js";
-import {BitmapManager, Bitmaps} from "eterna/resources";
-import {EternaTextureUtil, int} from "eterna/util";
+import {
+    Container, Point, Sprite, Texture
+} from 'pixi.js';
+import {BitmapManager, Bitmaps} from 'eterna/resources';
+import {EternaTextureUtil, int} from 'eterna/util';
 
 export default class Molecule extends Container {
-    public constructor() {
+    constructor() {
         super();
         Molecule.initTextures();
 
@@ -29,15 +31,19 @@ export default class Molecule extends Container {
         prog = Math.max(0, prog);
         let progInd = int(int(prog / 2.0 * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
 
-        let glowTex = this._isWrong ?
-            Molecule._glowWrongTex[zoomLevel][progInd] :
-            Molecule._glowTex[zoomLevel][progInd];
+        let glowTex = this._isWrong
+            ? Molecule._glowWrongTex[zoomLevel][progInd]
+            : Molecule._glowTex[zoomLevel][progInd];
 
         this._glow.texture = glowTex;
         this._glow.pivot.x = glowTex.width * 0.5;
         this._glow.pivot.y = glowTex.height * 0.5;
 
-        progInd = int(int(elapsedTime / Molecule.BODY_ANIMATION_SPAN * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
+        progInd = int(
+            int(
+                elapsedTime / Molecule.BODY_ANIMATION_SPAN * Molecule.NUM_ANIMATION_STEPS
+            ) % Molecule.NUM_ANIMATION_STEPS
+        );
         let bodyTex = Molecule._bodyTex[zoomLevel][progInd];
 
         this._body.texture = bodyTex;
@@ -74,7 +80,8 @@ export default class Molecule extends Container {
 
             for (let ii = 0; ii < Molecule.NUM_ANIMATION_STEPS; ii++) {
                 let glowTex = EternaTextureUtil.colorTransformAlpha(
-                    scaledGlowTex, 255, 255, 255, 1.0 - (ii / Molecule.NUM_ANIMATION_STEPS) * 0.5, 0, 0, 0, 0);
+                    scaledGlowTex, 255, 255, 255, 1.0 - (ii / Molecule.NUM_ANIMATION_STEPS) * 0.5, 0, 0, 0, 0
+                );
                 texturesInZoom.push(glowTex);
 
                 let wrongGlowTex = EternaTextureUtil.colorTransform(glowTex, 255, 0, 0, 0, 0, 0);
@@ -105,5 +112,4 @@ export default class Molecule extends Container {
     private static readonly NUM_ANIMATION_STEPS: number = 60;
     private static readonly ANIMATION_SPAN: number = 1.1;
     private static readonly BODY_ANIMATION_SPAN: number = 2.2;
-
 }

@@ -1,17 +1,17 @@
 import {
     Point, Rectangle, Sprite, Text, Texture
-} from "pixi.js";
+} from 'pixi.js';
 import {
     InputUtil, KeyboardEventType, KeyboardListener, KeyCode
-} from "flashbang/input";
-import {ContainerObject, Enableable} from "flashbang/objects";
-import {StyledTextBuilder} from "flashbang/util";
-import {Signal} from "signals";
-import EPars from "eterna/EPars";
-import {BitmapManager, Bitmaps} from "eterna/resources";
-import {ROPWait, RScriptUIElementID} from "eterna/rscript";
-import {Fonts} from "eterna/util";
-import Tooltips from "./Tooltips";
+} from 'flashbang/input';
+import {ContainerObject, Enableable} from 'flashbang/objects';
+import {StyledTextBuilder, Assert} from 'flashbang/util';
+import {Signal} from 'signals';
+import EPars from 'eterna/EPars';
+import {BitmapManager, Bitmaps} from 'eterna/resources';
+import {ROPWait, RScriptUIElementID} from 'eterna/rscript';
+import {Fonts} from 'eterna/util';
+import Tooltips from './Tooltips';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -21,26 +21,27 @@ export enum PaletteTargetType {
 
 export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
     switch (type) {
-    case PaletteTargetType.A: return EPars.RNABASE_ADENINE;
-    case PaletteTargetType.U: return EPars.RNABASE_URACIL;
-    case PaletteTargetType.G: return EPars.RNABASE_GUANINE;
-    case PaletteTargetType.C: return EPars.RNABASE_CYTOSINE;
-    case PaletteTargetType.AU: return EPars.RNABASE_AU_PAIR;
-    case PaletteTargetType.UG: return EPars.RNABASE_GU_PAIR;
-    case PaletteTargetType.GC: return EPars.RNABASE_GC_PAIR;
+        case PaletteTargetType.A: return EPars.RNABASE_ADENINE;
+        case PaletteTargetType.U: return EPars.RNABASE_URACIL;
+        case PaletteTargetType.G: return EPars.RNABASE_GUANINE;
+        case PaletteTargetType.C: return EPars.RNABASE_CYTOSINE;
+        case PaletteTargetType.AU: return EPars.RNABASE_AU_PAIR;
+        case PaletteTargetType.UG: return EPars.RNABASE_GU_PAIR;
+        case PaletteTargetType.GC: return EPars.RNABASE_GC_PAIR;
+        default: return Assert.unreachable(type);
     }
 }
 
 export function StringToPaletteTargetType(value: string): PaletteTargetType {
     switch (value.toUpperCase()) {
-    case "A": return PaletteTargetType.A;
-    case "U": return PaletteTargetType.U;
-    case "G": return PaletteTargetType.G;
-    case "C": return PaletteTargetType.C;
-    case "AU": case "UA": return PaletteTargetType.AU;
-    case "GC": case "CG": return PaletteTargetType.GC;
-    case "UG": case "GU": return PaletteTargetType.UG;
-    default: return null;
+        case 'A': return PaletteTargetType.A;
+        case 'U': return PaletteTargetType.U;
+        case 'G': return PaletteTargetType.G;
+        case 'C': return PaletteTargetType.C;
+        case 'AU': case 'UA': return PaletteTargetType.AU;
+        case 'GC': case 'CG': return PaletteTargetType.GC;
+        case 'UG': case 'GU': return PaletteTargetType.UG;
+        default: return null;
     }
 }
 
@@ -59,7 +60,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         return builder;
     }
 
-    public constructor() {
+    constructor() {
         super();
 
         this.display.interactive = true;
@@ -75,11 +76,11 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         this._selection = new Sprite();
         this.container.addChild(this._selection);
 
-        this._numAU = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this._numAU = Fonts.arial('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numAU);
-        this._numUG = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this._numUG = Fonts.arial('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numUG);
-        this._numGC = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this._numGC = Fonts.arial('', 12).color(0xffffff).bold().build();
         this.container.addChild(this._numGC);
 
         this._targets = new Array(7);
@@ -87,43 +88,43 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
             [new Rectangle(9, 7, 25, 25)],
-            NucleotidePalette.createTooltip("Mutate to <A>A (Adenine)</A>. (1)")
+            NucleotidePalette.createTooltip('Mutate to <A>A (Adenine)</A>. (1)')
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
             [new Rectangle(58, 7, 25, 25)],
-            NucleotidePalette.createTooltip("Mutate to <U>U (Uracil)</U>. (2)")
+            NucleotidePalette.createTooltip('Mutate to <U>U (Uracil)</U>. (2)')
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
             [new Rectangle(107, 7, 25, 25)],
-            NucleotidePalette.createTooltip("Mutate to <G>G (Guanine)</G>. (3)")
+            NucleotidePalette.createTooltip('Mutate to <G>G (Guanine)</G>. (3)')
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
             [new Rectangle(156, 7, 25, 25)],
-            NucleotidePalette.createTooltip("Mutate to <C>C (Cytosine)</C>. (4)")
+            NucleotidePalette.createTooltip('Mutate to <C>C (Cytosine)</C>. (4)')
         );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
             [new Rectangle(31, 29, 30, 20), new Rectangle(37, 15, 22, 20)],
-            NucleotidePalette.createTooltip("Mutate to pair (<A>A</A>, <U>U</U>). (Q)")
+            NucleotidePalette.createTooltip('Mutate to pair (<A>A</A>, <U>U</U>). (Q)')
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
             [new Rectangle(80, 29, 30, 20), new Rectangle(87, 15, 22, 20)],
-            NucleotidePalette.createTooltip("Mutate to pair (<G>G</G>, <U>U</U>). (W)")
+            NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <U>U</U>). (W)')
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
             [new Rectangle(129, 29, 30, 20), new Rectangle(137, 15, 22, 20)],
-            NucleotidePalette.createTooltip("Mutate to pair (<G>G</G>, <C>C</C>). (E)")
+            NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <C>C</C>). (E)')
         );
     }
 
@@ -190,27 +191,29 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         if (e.type === KeyboardEventType.KEY_DOWN) {
             switch (e.code) {
-            case KeyCode.Digit1:
-                this.clickTarget(PaletteTargetType.A);
-                return true;
-            case KeyCode.Digit2:
-                this.clickTarget(PaletteTargetType.U);
-                return true;
-            case KeyCode.Digit3:
-                this.clickTarget(PaletteTargetType.G);
-                return true;
-            case KeyCode.Digit4:
-                this.clickTarget(PaletteTargetType.C);
-                return true;
-            case KeyCode.KeyQ:
-                this.clickTarget(PaletteTargetType.AU);
-                return true;
-            case KeyCode.KeyW:
-                this.clickTarget(PaletteTargetType.UG);
-                return true;
-            case KeyCode.KeyE:
-                this.clickTarget(PaletteTargetType.GC);
-                return true;
+                case KeyCode.Digit1:
+                    this.clickTarget(PaletteTargetType.A);
+                    return true;
+                case KeyCode.Digit2:
+                    this.clickTarget(PaletteTargetType.U);
+                    return true;
+                case KeyCode.Digit3:
+                    this.clickTarget(PaletteTargetType.G);
+                    return true;
+                case KeyCode.Digit4:
+                    this.clickTarget(PaletteTargetType.C);
+                    return true;
+                case KeyCode.KeyQ:
+                    this.clickTarget(PaletteTargetType.AU);
+                    return true;
+                case KeyCode.KeyW:
+                    this.clickTarget(PaletteTargetType.UG);
+                    return true;
+                case KeyCode.KeyE:
+                    this.clickTarget(PaletteTargetType.GC);
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -251,16 +254,16 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
     }
 
-    private showSelection(selected_box: Rectangle, is_pair: boolean, do_show: boolean): void {
-        if (selected_box == null) {
+    private showSelection(selectedBox: Rectangle, isPair: boolean, doShow: boolean): void {
+        if (selectedBox == null) {
             return;
         }
 
-        if (!do_show) {
+        if (!doShow) {
             this.clearSelection();
         } else {
-            this._selection.texture = is_pair ? this._selectPairData : this._selectBaseData;
-            this._selection.position = new Point(selected_box.x, selected_box.y);
+            this._selection.texture = isPair ? this._selectPairData : this._selectBaseData;
+            this._selection.position = new Point(selectedBox.x, selectedBox.y);
             this._selection.visible = true;
         }
     }
@@ -348,7 +351,14 @@ class PaletteTarget {
     public readonly tooltip: StyledTextBuilder;
     public enabled: boolean = true;
 
-    public constructor(type: PaletteTargetType, id: RScriptUIElementID, isPair: boolean, keyCode: string, hitboxes: Rectangle[], tooltip: StyledTextBuilder) {
+    constructor(
+        type: PaletteTargetType,
+        id: RScriptUIElementID,
+        isPair: boolean,
+        keyCode: string,
+        hitboxes: Rectangle[],
+        tooltip: StyledTextBuilder
+    ) {
         this.type = type;
         this.id = id;
         this.isPair = isPair;

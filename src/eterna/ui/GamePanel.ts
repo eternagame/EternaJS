@@ -1,15 +1,21 @@
 import {
     Graphics, Point, Text, Rectangle
-} from "pixi.js";
-import {Fonts} from "eterna/util";
-import BaseGamePanel from "./BaseGamePanel";
+} from 'pixi.js';
+import {Fonts} from 'eterna/util';
+import BaseGamePanel from './BaseGamePanel';
 
 export enum GamePanelType {
     NORMAL, INVISIBLE
 }
 
 export default class GamePanel extends BaseGamePanel {
-    public constructor(type: GamePanelType = GamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, borderAlpha: number = 0.0, borderColor: number = 0) {
+    constructor(
+        type: GamePanelType = GamePanelType.NORMAL,
+        alpha: number = 0.07,
+        color: number = 0xffffff,
+        borderAlpha: number = 0.0,
+        borderColor: number = 0
+    ) {
         super();
 
         // Clicks should not pass through the panel

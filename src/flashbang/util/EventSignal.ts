@@ -1,13 +1,13 @@
 import {
     AbstractSignal, FilteredSignal, MappedSignal, SignalView
-} from "signals";
+} from 'signals';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 type EventEmitter = PIXI.utils.EventEmitter;
 
 /** Redispatches a pixi InteractionEvent as a Signal */
 export default class EventSignal extends AbstractSignal<InteractionEvent> implements SignalView<InteractionEvent> {
-    public constructor(target: EventEmitter, eventType: string | symbol) {
+    constructor(target: EventEmitter, eventType: string | symbol) {
         super();
         this._target = target;
         this._eventType = eventType;

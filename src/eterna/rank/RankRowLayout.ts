@@ -1,22 +1,22 @@
-import {Point, Text} from "pixi.js";
-import {ContainerObject} from "flashbang/objects";
-import {TextUtil} from "flashbang/util";
-import {Fonts} from "eterna/util";
-import PlayerRank from "./PlayerRank";
+import {Point, Text} from 'pixi.js';
+import {ContainerObject} from 'flashbang/objects';
+import {TextUtil} from 'flashbang/util';
+import {Fonts} from 'eterna/util';
+import PlayerRank from './PlayerRank';
 
 export default class RankRowLayout extends ContainerObject {
-    public constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
+    constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
         fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
         super();
 
-        this._tfName = Fonts.stdRegular("", fontSize).color(textColor).build();
+        this._tfName = Fonts.stdRegular('', fontSize).color(textColor).build();
         this.container.addChild(this._tfName);
 
-        this._tfRank = Fonts.stdRegular("", fontSize).color(textColor).build();
+        this._tfRank = Fonts.stdRegular('', fontSize).color(textColor).build();
         this._tfRank.position = new Point(130, 0);
         this.container.addChild(this._tfRank);
 
-        this._tfScore = Fonts.stdRegular("", fontSize).color(textColor).build();
+        this._tfScore = Fonts.stdRegular('', fontSize).color(textColor).build();
         this._tfScore.position = new Point(130 + rankScoreOffset, 0);
         this.container.addChild(this._tfScore);
 
@@ -26,7 +26,7 @@ export default class RankRowLayout extends ContainerObject {
     }
 
     public setRank(rank: number): void {
-        this._tfRank.text = rank < 0 ? "" : `${rank}`;
+        this._tfRank.text = rank < 0 ? '' : `${rank}`;
         this._rank = rank;
     }
 
@@ -37,7 +37,7 @@ export default class RankRowLayout extends ContainerObject {
     public setPlayerName(name: string, maxTextWidth: number = -1): void {
         this._tfName.text = name;
         if (maxTextWidth >= 0) {
-            TextUtil.trimTextToWidth(this._tfName, maxTextWidth, "...");
+            TextUtil.trimTextToWidth(this._tfName, maxTextWidth, '...');
         }
         this._playerName = this._tfName.text;
     }
@@ -47,7 +47,7 @@ export default class RankRowLayout extends ContainerObject {
     }
 
     public setScore(score: number): void {
-        this._tfScore.text = (score < 0) ? "" : score.toString();
+        this._tfScore.text = (score < 0) ? '' : score.toString();
         this._score = score;
     }
 

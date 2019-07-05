@@ -1,1 +1,2 @@
-export {default as EternaSettings} from "./EternaSettings";
+/* eslint-disable import/prefer-default-export */
+export {default as EternaSettings} from './EternaSettings';

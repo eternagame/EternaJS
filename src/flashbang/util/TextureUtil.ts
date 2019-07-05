@@ -1,25 +1,25 @@
 import {
     BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
-} from "pixi.js";
-import {Flashbang} from "../core";
-import Assert from "./Assert";
+} from 'pixi.js';
+import {Flashbang} from '../core';
+import Assert from './Assert';
 
 export default class TextureUtil {
-    public static fromBase64PNG(base64PNG: string): Promise<Texture> {
+    public static async fromBase64PNG(base64PNG: string): Promise<Texture> {
         // <img> elements can be created from base64 strings.
         // We create an img, set its src data to the base64 string,
         // and then use that as the source for a new PIXI texture.
-        let img = document.createElement("img");
+        let img = document.createElement('img');
         img.src = `data:image/png;base64, ${base64PNG}`;
         let baseTex = new BaseTexture(img);
         let tex = new Texture(baseTex);
 
         if (baseTex.hasLoaded) {
             // The image may already be loaded
-            return Promise.resolve(tex);
+            return tex;
         } else {
             return new Promise<Texture>((resolve) => {
-                tex.once("update", tex => resolve(tex));
+                tex.once('update', () => resolve(tex));
             });
         }
     }
@@ -27,7 +27,7 @@ export default class TextureUtil {
     public static load(source: Texture | string | string[]): Promise<void> {
         if (source instanceof Texture) {
             return this.loadTexture(source as Texture).then(() => {});
-        } else if (typeof source === "string") {
+        } else if (typeof source === 'string') {
             return this.loadURL(source as string).then(() => {});
         } else {
             return this.loadURLs(source as string[]).then(() => {});
@@ -35,17 +35,16 @@ export default class TextureUtil {
     }
 
     /** Returns a promise that will resolve when the texture is loaded */
-    public static loadTexture(tex: Texture): Promise<Texture> {
+    public static async loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
         if (!base.isLoading) {
-            return base.hasLoaded
-                ? Promise.resolve(tex)
-                : Promise.reject(`texture failed to load [url=${base.imageUrl}]`);
+            if (base.hasLoaded) return tex;
+            else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
         } else {
             // log.debug(`Loading image... [url=${base.imageUrl}]`);
             return new Promise<Texture>((resolve, reject) => {
-                base.once("loaded", () => resolve(tex));
-                base.once("error", () => reject(`texture failed to load [url=${base.imageUrl}]`));
+                base.once('loaded', () => resolve(tex));
+                base.once('error', () => reject(new Error(`texture failed to load [url=${base.imageUrl}]`)));
             });
         }
     }
@@ -68,7 +67,7 @@ export default class TextureUtil {
      * All textures in the DisplayObject's hierarchy should be loaded before calling this.
      */
     public static renderToTexture(disp: DisplayObject): Texture {
-        Assert.isTrue(disp.parent == null, "TODO");
+        Assert.isTrue(disp.parent == null, 'TODO');
 
         let wrap: Container = new Container();
         wrap.addChild(disp);
