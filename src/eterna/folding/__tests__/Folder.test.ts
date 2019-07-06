@@ -1,3 +1,6 @@
+// Build order issues
+import "eterna/EternaApp";
+
 import EPars from "eterna/EPars";
 import Folder from "../Folder";
 import NuPACK from "../NuPACK";
@@ -123,5 +126,3 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
             .resolves.toBeDeepCloseTo(expectedResult, 5);
     });
 }
-
-

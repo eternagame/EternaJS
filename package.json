@@ -15,11 +15,21 @@
     "lint": "eslint src --ext .ts"
   },
   "jest": {
+    "preset": "ts-jest",
+    "moduleDirectories": [
+      "node_modules",
+      "src",
+      ""
+    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js"
     ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "assets/__mocks__/fileMock.js",
+      "\\.(css|less)$": "assets/__mocks__/styleMock.js"
+    },
     "rootDir": "src",
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
@@ -30,7 +40,8 @@
         "babelConfig": false,
         "tsConfig": "./tsconfig.jest.json"
       }
-    }
+    },
+    "setupFiles": ["jest-canvas-mock", "dotenv/config"]
   },
   "repository": {
     "type": "git",
@@ -71,7 +82,10 @@
     "file-loader": "^4.0.0",
     "hard-source-webpack-plugin": "0.13.1",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^3.0.0",
     "jest": "^24.8.0",
+    "jest-canvas-mock": "^2.1.0",
+    "lint-staged": "^9.0.2",
     "local-web-server": "^3.0.4",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.1",
@@ -94,5 +108,17 @@
     "store": "^2.0.12",
     "upng-js": "^2.1.0",
     "webfontloader": "^1.6.28"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run lint -- --fix",
+      "npm run test -- --findRelatedTests",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run typecheck"
+    }
   }
 }
