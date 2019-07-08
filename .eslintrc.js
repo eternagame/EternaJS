@@ -1,12 +1,8 @@
 module.exports = {
     'extends': ['airbnb-base', 'plugin:@typescript-eslint/recommended'],
-    //'parser': '@typescript-eslint/parser',
     'parserOptions': {
       'project': './tsconfig.json'
     },
-    /*'plugins': [
-        '@typescript-eslint'
-    ],*/
      // Some imports may be resolved via webpack aliases
     'settings': {
         'import/resolver': {
