@@ -1,7 +1,5 @@
 import {Point} from 'pixi.js';
-import {PointerCapture} from 'flashbang/input';
-import {Enableable} from 'flashbang/objects';
-import {DisplayUtil} from 'flashbang/util';
+import {Enableable, PointerCapture, DisplayUtil} from 'flashbang';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 

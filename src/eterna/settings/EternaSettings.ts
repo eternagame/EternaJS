@@ -1,6 +1,6 @@
-import {Setting, Settings} from 'flashbang/settings';
-import {DesignCategory} from 'eterna/mode/DesignBrowser';
+import {Settings, Setting} from 'flashbang';
 import Eterna from 'eterna/Eterna';
+import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 
 export default class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;

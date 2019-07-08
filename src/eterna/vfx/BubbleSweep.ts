@@ -1,4 +1,4 @@
-import {ContainerObject} from 'flashbang/objects';
+import {ContainerObject} from 'flashbang';
 import Bubble from './Bubble';
 
 export default class BubbleSweep extends ContainerObject {

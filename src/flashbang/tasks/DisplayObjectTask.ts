@@ -1,5 +1,6 @@
 import {DisplayObject} from 'pixi.js';
-import {Assert, EasingFunc} from '../util';
+import {EasingFunc} from 'flashbang/util/Easing';
+import Assert from 'flashbang/util/Assert';
 import InterpolatingTask from './InterpolatingTask';
 
 export default class DisplayObjectTask extends InterpolatingTask {

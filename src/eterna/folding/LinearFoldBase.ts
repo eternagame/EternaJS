@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {EmscriptenUtil} from 'eterna/emscripten';
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as LinearFoldLib from './engines/LinearFoldLib';

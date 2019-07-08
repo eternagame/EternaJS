@@ -1,18 +1,15 @@
 import {Graphics, Point} from 'pixi.js';
 import {RegistrationGroup} from 'signals';
-import {Flashbang, HAlign, VAlign} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {ContainerObject} from 'flashbang/objects';
-import {LocationTask} from 'flashbang/tasks';
-import {Easing, DisplayUtil} from 'flashbang/util';
 import Eterna from 'eterna/Eterna';
-// Stupid cyclic dependancy - TODO: Fix later once this can get refactored
 import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
-import {Bitmaps} from 'eterna/resources';
-import {RScriptUIElementID} from 'eterna/rscript';
-import {BoostersData} from 'eterna/puzzle';
+import {
+    ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing
+} from 'flashbang';
+import {BoostersData} from 'eterna/puzzle/Puzzle';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';

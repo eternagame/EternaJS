@@ -1,6 +1,6 @@
 import {Rectangle} from 'pixi.js';
-import {VAlign} from '../core';
-import {DisplayUtil} from '../util';
+import {VAlign} from 'flashbang/core/Align';
+import DisplayUtil from 'flashbang/util/DisplayUtil';
 import LayoutContainer from './LayoutContainer';
 
 /**

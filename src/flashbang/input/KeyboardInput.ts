@@ -1,5 +1,5 @@
 import {Registration} from 'signals';
-import {LinkedElement, LinkedList} from '../util';
+import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
 
 export interface KeyboardListener {
     /**

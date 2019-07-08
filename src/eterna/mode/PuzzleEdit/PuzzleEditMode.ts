@@ -1,28 +1,41 @@
 import {DisplayObject, Point} from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {Base64, DisplayUtil} from 'flashbang/util';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {
-    Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, Vienna, Vienna2
-} from 'eterna/folding';
-import {
-    Molecule, Pose2D, PoseField, PuzzleEditOp
-} from 'eterna/pose2D';
-import {ConstraintType} from 'eterna/puzzle';
-import {Bitmaps} from 'eterna/resources';
-import {
-    AsyncProcessDialog, ConstraintBox, DialogCanceledError, EternaViewOptionsDialog, EternaViewOptionsMode,
-    GameButton, GetPaletteTargetBaseType, PaletteTargetType, PasteSequenceDialog, PoseThumbnail, PoseThumbnailType,
-    URLButton, Toolbar, ToolbarType
-} from 'eterna/ui';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
-import {ExternalInterfaceCtx, Fonts} from 'eterna/util';
-import {Background, BaseGlow} from 'eterna/vfx';
-import {CopyTextDialogMode, GameMode} from 'eterna/mode';
-import StructureInput from './StructureInput';
+import Background from 'eterna/vfx/Background';
+import Molecule from 'eterna/pose2D/Molecule';
+import BaseGlow from 'eterna/vfx/BaseGlow';
+import FolderManager from 'eterna/folding/FolderManager';
+import Vienna from 'eterna/folding/Vienna';
+import GameButton from 'eterna/ui/GameButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
+import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import PoseField from 'eterna/pose2D/PoseField';
+import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import ConstraintBox from 'eterna/ui/ConstraintBox';
+import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import Folder from 'eterna/folding/Folder';
+import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
+import {
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode
+} from 'flashbang';
+import {DialogCanceledError} from 'eterna/ui/Dialog';
+import Vienna2 from 'eterna/folding/Vienna2';
+import NuPACK from 'eterna/folding/NuPACK';
+import AsyncProcessDialog from 'eterna/ui/AsyncProcessDialog';
+import {ConstraintType} from 'eterna/puzzle/Constraints';
+import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import URLButton from 'eterna/ui/URLButton';
+import Fonts from 'eterna/util/Fonts';
+import LinearFoldV from 'eterna/folding/LinearFoldV';
+import LinearFoldC from 'eterna/folding/LinearFoldC';
+import CopyTextDialogMode from '../CopyTextDialogMode';
+import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
+import StructureInput from './StructureInput';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

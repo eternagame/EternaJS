@@ -1,4 +1,4 @@
-import {ContainerObject} from 'flashbang/objects';
+import {ContainerObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bubble from './Bubble';
 

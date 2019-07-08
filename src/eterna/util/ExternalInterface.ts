@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
-import {Assert, Deferred} from 'flashbang/util';
 import {Registration, UnitSignal} from 'signals';
+import {Deferred, Assert} from 'flashbang';
 
 /**
  * A collection of externally registered callbacks.

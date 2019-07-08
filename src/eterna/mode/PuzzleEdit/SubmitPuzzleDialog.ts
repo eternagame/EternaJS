@@ -1,9 +1,9 @@
-import {Flashbang} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
+import {KeyCode, Flashbang} from 'flashbang';
 import EPars from 'eterna/EPars';
-import {Dialog, DialogCanceledError, TextInputPanel} from 'eterna/ui';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
-import {GameMode} from 'eterna/mode';
+import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
+import TextInputPanel from 'eterna/ui/TextInputPanel';
+import GameMode from '../GameMode';
 
 function GetNumber(dict: Map<string, string>, name: string): number | undefined {
     if (!dict.has(name)) {

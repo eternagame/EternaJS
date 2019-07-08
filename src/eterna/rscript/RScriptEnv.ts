@@ -1,12 +1,13 @@
 import * as log from 'loglevel';
 import {Container, DisplayObject} from 'pixi.js';
-import {GameObject} from 'flashbang/core';
-import {ContainerObject, Enableable} from 'flashbang/objects';
+import {ContainerObject, Enableable, GameObject} from 'flashbang';
 import EPars from 'eterna/EPars';
-import {PoseEditMode} from 'eterna/mode';
-import {Pose2D, RNAHighlightState} from 'eterna/pose2D';
-import {Puzzle} from 'eterna/puzzle';
-import {PaletteTargetType, TextBalloon, ToggleBar} from 'eterna/ui';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import TextBalloon from 'eterna/ui/TextBalloon';
+import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
+import {PaletteTargetType} from 'eterna/ui/NucleotidePalette';
+import ToggleBar from 'eterna/ui/ToggleBar';
 import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
 /**

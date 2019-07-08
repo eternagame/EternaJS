@@ -1,7 +1,7 @@
 import {
     BaseRenderTexture, BaseTexture, Container, DisplayObject, Rectangle, RenderTexture, Texture
 } from 'pixi.js';
-import {Flashbang} from '../core';
+import Flashbang from 'flashbang/core/Flashbang';
 import Assert from './Assert';
 
 export default class TextureUtil {

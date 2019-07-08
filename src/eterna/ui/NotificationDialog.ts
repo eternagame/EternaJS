@@ -1,6 +1,5 @@
 import {Point} from 'pixi.js';
-import {Flashbang} from 'flashbang/core';
-import {HLayoutContainer} from 'flashbang/layout';
+import {HLayoutContainer, Flashbang} from 'flashbang';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
 import TextBalloon from './TextBalloon';

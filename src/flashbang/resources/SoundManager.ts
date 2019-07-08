@@ -1,47 +1,47 @@
 import * as log from 'loglevel';
 import 'pixi-sound';
-import {RegistrationGroup} from 'signals';
-import Eterna from 'eterna/Eterna';
-import {EternaSettings} from 'eterna/settings';
 
 export default class SoundManager {
-    constructor(settings: EternaSettings) {
-        this._settings = settings;
+    public set muted(mute: boolean) {
+        if (mute) {
+            PIXI.sound.muteAll();
+        } else {
+            PIXI.sound.unmuteAll();
+        }
 
-        this._regs.add(settings.soundMute.connectNotify((mute) => {
-            if (mute) {
-                PIXI.sound.muteAll();
-            } else {
-                PIXI.sound.unmuteAll();
-            }
-        }));
+        this._muted = mute;
     }
 
+    public get muted(): boolean {
+        return this._muted;
+    }
+
+    public volume: number = 0.6;
+
     public playSound(name: string, startTime: number = 0): void {
-        if (this._settings.soundMute.value) {
+        if (this._muted) {
             return;
         }
 
         try {
             let sound = this.getSound(name);
-            sound.play({volume: this._settings.soundVolume.value, start: startTime});
+            sound.play({volume: this.volume, start: startTime});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);
         }
     }
 
-    private getSound(name: string): EternaSound {
-        let sound = this._sounds.get(name);
+    private getSound(url: string): Sound {
+        let sound = this._sounds.get(url);
         if (sound === undefined) {
-            sound = new EternaSound(name);
-            this._sounds.set(name, sound);
+            sound = new Sound(url, this);
+            this._sounds.set(url, sound);
         }
         return sound;
     }
 
-    private readonly _settings: EternaSettings;
-    private readonly _sounds: Map<string, EternaSound> = new Map();
-    private readonly _regs: RegistrationGroup = new RegistrationGroup();
+    private _muted: boolean;
+    private readonly _sounds: Map<string, Sound> = new Map();
 }
 
 /**
@@ -49,9 +49,10 @@ export default class SoundManager {
  * For sounds that are loading, we store the last play request, and play the sound with those settings
  * when it has completed loading.
  */
-class EternaSound {
-    constructor(url: string) {
+class Sound {
+    constructor(url: string, manager: SoundManager) {
         this._sound = PIXI.sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
+        this._manager = manager;
     }
 
     public play(options: PIXI.sound.PlayOptions) {
@@ -63,13 +64,14 @@ class EternaSound {
     }
 
     private onLoaded(): void {
-        if (this._pendingPlayOptions != null && !Eterna.settings.soundMute.value) {
-            this._pendingPlayOptions.volume = Eterna.settings.soundVolume.value;
+        if (this._pendingPlayOptions != null && !this._manager.muted) {
+            this._pendingPlayOptions.volume = this._manager.volume;
             this._sound.play(this._pendingPlayOptions);
         }
         this._pendingPlayOptions = null;
     }
 
     private readonly _sound: PIXI.sound.Sound;
+    private readonly _manager: SoundManager;
     private _pendingPlayOptions: PIXI.sound.PlayOptions;
 }

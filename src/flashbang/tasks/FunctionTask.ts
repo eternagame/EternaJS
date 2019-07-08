@@ -1,4 +1,5 @@
-import {ObjectTask, Updatable} from '../core';
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
 
 /** A Task that calls a function continuously until the function returns true */
 export default class FunctionTask extends ObjectTask implements Updatable {

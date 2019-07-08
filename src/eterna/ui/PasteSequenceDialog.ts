@@ -1,6 +1,5 @@
-import {Flashbang} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {GameMode} from 'eterna/mode';
+import {KeyCode, Flashbang} from 'flashbang';
+import GameMode from 'eterna/mode/GameMode';
 import Dialog from './Dialog';
 import TextInputPanel from './TextInputPanel';
 

@@ -1,9 +1,7 @@
 import {
-    HAlign, VAlign, GameObject, GameObjectRef
-} from 'flashbang/core';
-import {CallbackTask, FunctionTask, SerialTask} from 'flashbang/tasks';
-import {DisplayUtil} from 'flashbang/util';
-import {GameMode} from 'eterna/mode';
+    GameObject, GameObjectRef, SerialTask, FunctionTask, CallbackTask, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import GameMode from 'eterna/mode/GameMode';
 import AchievementBox from './AchievementBox';
 
 export default class AchievementManager extends GameObject {

@@ -1,6 +1,5 @@
 import {Container} from 'pixi.js';
-import {SceneObject} from 'flashbang/objects';
-import {MathUtil} from 'flashbang/util';
+import {SceneObject, MathUtil} from 'flashbang';
 import ScrollContainer from './ScrollContainer';
 import SliderBar from './SliderBar';
 

@@ -1,4 +1,4 @@
-import {MathUtil, ColorUtil} from 'flashbang/util';
+import {ColorUtil, MathUtil} from 'flashbang';
 
 export enum ScoreDisplayNodeType {
     STACK = 0, LOOP

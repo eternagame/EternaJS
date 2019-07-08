@@ -1,6 +1,5 @@
 import {Point} from 'pixi.js';
-import {GameObjectRef} from 'flashbang/core';
-import {SceneObject} from 'flashbang/objects';
+import {GameObjectRef, SceneObject} from 'flashbang';
 
 export default class RNAAnchorObject {
     public ref: GameObjectRef;

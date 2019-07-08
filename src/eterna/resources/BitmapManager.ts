@@ -1,6 +1,6 @@
 import {Texture} from 'pixi.js';
-import {Assert, TextBuilder, TextureUtil} from 'flashbang/util';
-import {Fonts} from 'eterna/util';
+import {TextureUtil, Assert, TextBuilder} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 import Bitmaps from './Bitmaps';
 
 export default class BitmapManager {

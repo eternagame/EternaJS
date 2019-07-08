@@ -1,8 +1,8 @@
 import {Graphics} from 'pixi.js';
-import {Vector2} from 'flashbang/geom';
-import {SceneObject} from 'flashbang/objects';
-import {AlphaTask, SerialTask, VisibleTask} from 'flashbang/tasks';
 import EPars from 'eterna/EPars';
+import {
+    SceneObject, SerialTask, AlphaTask, VisibleTask, Vector2
+} from 'flashbang';
 
 export default class LightRay extends SceneObject<Graphics> {
     constructor() {

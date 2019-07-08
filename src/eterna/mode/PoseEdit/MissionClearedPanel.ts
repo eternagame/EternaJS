@@ -1,17 +1,15 @@
 import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
-import {Flashbang, HAlign, VAlign} from 'flashbang/core';
-import {VLayoutContainer} from 'flashbang/layout';
-import {ContainerObject, DOMObject} from 'flashbang/objects';
-import {AlphaTask} from 'flashbang/tasks';
-import {DisplayUtil} from 'flashbang/util';
-import {RankScroll} from 'eterna/rank';
-import {Bitmaps} from 'eterna/resources';
 import {
-    GameButton, GamePanel, GamePanelType, HTMLTextObject
-} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import Fonts from 'eterna/util/Fonts';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import RankScroll from 'eterna/rank/RankScroll';
 
 export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;

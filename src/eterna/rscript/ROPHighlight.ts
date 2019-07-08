@@ -1,14 +1,14 @@
 import * as log from 'loglevel';
 import {Graphics, Point} from 'pixi.js';
-import {GameObject} from 'flashbang/core';
-import {SceneObject} from 'flashbang/objects';
-import {AlphaTask, RepeatingTask, SerialTask} from 'flashbang/tasks';
-import {ColorUtil, Easing, Assert} from 'flashbang/util';
-import {RNAHighlightState} from 'eterna/pose2D';
-import {ConstraintBox, EternaMenu} from 'eterna/ui';
-import RScriptEnv from './RScriptEnv';
-import RScriptOp from './RScriptOp';
+import {
+    GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil
+} from 'flashbang';
+import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
+import ConstraintBox from 'eterna/ui/ConstraintBox';
+import EternaMenu from 'eterna/ui/EternaMenu';
 import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from './RScriptUIElement';
+import RScriptOp from './RScriptOp';
+import RScriptEnv from './RScriptEnv';
 
 export enum ROPHighlightMode {
     RNA = 'RNA',

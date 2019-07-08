@@ -1,9 +1,9 @@
 import {Point} from 'pixi.js';
-import {Flashbang} from 'flashbang/core';
-import {AlphaTask, RepeatingTask, SerialTask} from 'flashbang/tasks';
-import {Easing} from 'flashbang/util';
-import {Dialog} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+import Dialog from 'eterna/ui/Dialog';
+import Fonts from 'eterna/util/Fonts';
+import {
+    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang
+} from 'flashbang';
 
 export default class SubmittingDialog extends Dialog<void> {
     protected added(): void {

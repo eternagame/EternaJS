@@ -1,7 +1,5 @@
-import {HAlign} from 'flashbang/core';
-import {VLayoutContainer} from 'flashbang/layout';
-import {ContainerObject} from 'flashbang/objects';
 import {UnitSignal} from 'signals';
+import {ContainerObject, VLayoutContainer, HAlign} from 'flashbang';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';
 

@@ -2,8 +2,9 @@ import {Container} from 'pixi.js';
 import {
     RegistrationGroup, Signal, SignalView, UnitSignal
 } from 'signals';
-import {KeyboardInput, MouseWheelInput} from '../input';
-import {Assert} from '../util';
+import KeyboardInput from 'flashbang/input/KeyboardInput';
+import MouseWheelInput from 'flashbang/input/MouseWheelInput';
+import Assert from 'flashbang/util/Assert';
 import GameObject from './GameObject';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';

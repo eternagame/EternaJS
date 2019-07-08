@@ -1,7 +1,8 @@
 import {DisplayObject} from 'pixi.js';
 import {SignalView} from 'signals';
-import {GameObject} from '../core';
-import {PointerTarget, DisplayObjectPointerTarget} from '../input';
+import GameObject from 'flashbang/core/GameObject';
+import PointerTarget from 'flashbang/input/PointerTarget';
+import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

@@ -1,4 +1,4 @@
-import {PoseOp} from 'eterna/pose2D';
+import PoseOp from 'eterna/pose2D/PoseOp';
 
 export default abstract class Folder {
     public abstract get name (): string;

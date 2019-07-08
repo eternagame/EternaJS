@@ -1,6 +1,7 @@
 import * as log from 'loglevel';
 import {RegistrationGroup, Value} from 'signals';
-import {KeyboardEventType, KeyCode} from '../input';
+import KeyboardEventType from 'flashbang/input/KeyboardEventType';
+import KeyCode from 'flashbang/input/KeyCode';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';

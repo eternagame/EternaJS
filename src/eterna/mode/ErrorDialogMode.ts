@@ -1,9 +1,10 @@
 import {Graphics, Point} from 'pixi.js';
-import {Flashbang, HAlign, AppMode} from 'flashbang/core';
-import {VLayoutContainer} from 'flashbang/layout';
-import {ErrorUtil} from 'flashbang/util';
-import {GameButton, GamePanel, GamePanelType} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import {
+    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
 
 export default class ErrorDialogMode extends AppMode {
     public readonly error: any;

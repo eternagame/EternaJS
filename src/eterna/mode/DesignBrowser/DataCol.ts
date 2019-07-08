@@ -1,17 +1,18 @@
 import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
-import {Flashbang} from 'flashbang/core';
-import {ContainerObject} from 'flashbang/objects';
-import {TextBuilder} from 'flashbang/util';
 import {Signal, UnitSignal} from 'signals';
+import {ContainerObject, TextBuilder, Flashbang} from 'flashbang';
 import Feedback from 'eterna/Feedback';
-import {Solution} from 'eterna/puzzle';
-import {GameButton, TextInputObject} from 'eterna/ui';
-import {Fonts, int, Utility} from 'eterna/util';
-import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
-import SequenceStringListView from './SequenceStringListView';
+import GameButton from 'eterna/ui/GameButton';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import Fonts from 'eterna/util/Fonts';
+import Solution from 'eterna/puzzle/Solution';
+import int from 'eterna/util/int';
+import Utility from 'eterna/util/Utility';
 import {SortOrder} from './SortOptions';
+import SequenceStringListView from './SequenceStringListView';
+import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
 
 export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();

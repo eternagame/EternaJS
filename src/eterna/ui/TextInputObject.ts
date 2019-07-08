@@ -1,10 +1,8 @@
 import {Graphics, Point, Sprite} from 'pixi.js';
-import {DisplayObjectPointerTarget} from 'flashbang/input';
-import {DOMObject} from 'flashbang/objects';
-import {TextBuilder} from 'flashbang/util';
 import {Signal} from 'signals';
+import {DOMObject, DisplayObjectPointerTarget, TextBuilder} from 'flashbang';
 import Eterna from 'eterna/Eterna';
-import {Fonts} from 'eterna/util';
+import Fonts from 'eterna/util/Fonts';
 
 /**
  * A text input object in the DOM. Floats on top of the PIXI canvas.

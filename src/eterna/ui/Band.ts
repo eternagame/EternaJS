@@ -1,11 +1,12 @@
 import {
     Graphics, Matrix, Point, Sprite, Text, Texture
 } from 'pixi.js';
-import {Updatable} from 'flashbang/core';
-import {ContainerObject} from 'flashbang/objects';
-import {ColorUtil, MathUtil, TextureUtil} from 'flashbang/util';
-import {BitmapManager, Bitmaps} from 'eterna/resources';
-import {Fonts} from 'eterna/util';
+import {
+    ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 

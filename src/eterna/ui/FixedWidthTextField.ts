@@ -1,8 +1,7 @@
 import {
     Container, Graphics, Text, TextStyle
 } from 'pixi.js';
-import {HAlign} from 'flashbang/core';
-import {Assert} from 'flashbang/util';
+import {HAlign, Assert} from 'flashbang';
 
 export default class FixedWidthTextField extends Container {
     constructor(text: string, style: TextStyle, width: number, hAlign: HAlign = HAlign.LEFT) {

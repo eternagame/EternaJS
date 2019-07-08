@@ -1,5 +1,5 @@
 import {Graphics, DisplayObject} from 'pixi.js';
-import {Flashbang, GameObject, Updatable} from 'flashbang/core';
+import {GameObject, Flashbang, Updatable} from 'flashbang';
 import EPars from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {

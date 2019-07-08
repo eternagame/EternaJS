@@ -2,42 +2,56 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Point, Sprite, Text
 } from 'pixi.js';
-import {
-    Flashbang, HAlign, VAlign, GameObjectRef
-} from 'flashbang/core';
-import {KeyboardEventType, KeyCode} from 'flashbang/input';
-import {SpriteObject} from 'flashbang/objects';
-import {AlphaTask, SelfDestructTask, SerialTask} from 'flashbang/tasks';
-import {Assert, DisplayUtil, Easing} from 'flashbang/util';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {Folder, FolderManager, FoldUtil} from 'eterna/folding';
-import {CopyTextDialogMode, GameMode, PuzzleEditPoseData} from 'eterna/mode';
-import {EternaURL} from 'eterna/net';
-import {
-    Oligo, Pose2D, PoseField, PoseOp, PuzzleEditOp
-} from 'eterna/pose2D';
-import {
-    Constraints, ConstraintType, BoostersData, PoseState,
-    Puzzle, PuzzleType, PuzzleManager, Solution, SolutionManager
-} from 'eterna/puzzle';
-import {BitmapManager, Bitmaps, Sounds} from 'eterna/resources';
-import {RNAScript} from 'eterna/rscript';
-import {
-    ActionBar, ConstraintBox, ConstraintBoxType, ContextMenu, EternaViewOptionsDialog, EternaViewOptionsMode,
-    GameButton, GamePanel, HTMLTextObject, GetPaletteTargetBaseType, PaletteTargetType,
-    PasteSequenceDialog, SpecBox, SpecBoxDialog, URLButton, Toolbar, ToolbarType
-} from 'eterna/ui';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import Solution from 'eterna/puzzle/Solution';
+import Puzzle, {PuzzleType, PoseState, BoostersData} from 'eterna/puzzle/Puzzle';
+import Background from 'eterna/vfx/Background';
+import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import SpecBox from 'eterna/ui/SpecBox';
+import GameButton from 'eterna/ui/GameButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import {
-    ExternalInterface, ExternalInterfaceCtx, Fonts, int
-} from 'eterna/util';
-import {Background, BubbleSweep} from 'eterna/vfx';
-import MissionClearedPanel from './MissionClearedPanel';
-import MissionIntroMode from './MissionIntroMode';
-import SubmitPoseDetails from './SubmitPoseDetails';
-import SubmitPoseDialog from './SubmitPoseDialog';
+    KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask
+} from 'flashbang';
+import ActionBar from 'eterna/ui/ActionBar';
+import Fonts from 'eterna/util/Fonts';
+import PasteSequenceDialog from 'eterna/ui/PasteSequenceDialog';
+import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import FolderManager from 'eterna/folding/FolderManager';
+import Folder from 'eterna/folding/Folder';
+import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
+import GamePanel from 'eterna/ui/GamePanel';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import PoseField from 'eterna/pose2D/PoseField';
+import Pose2D, {Oligo} from 'eterna/pose2D/Pose2D';
+import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import ConstraintBox, {ConstraintBoxType} from 'eterna/ui/ConstraintBox';
+import Constraints, {ConstraintType} from 'eterna/puzzle/Constraints';
+import int from 'eterna/util/int';
+import PoseOp from 'eterna/pose2D/PoseOp';
+import RNAScript from 'eterna/rscript/RNAScript';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
+import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import ContextMenu from 'eterna/ui/ContextMenu';
+import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
+import BubbleSweep from 'eterna/vfx/BubbleSweep';
+import Sounds from 'eterna/resources/Sounds';
+import EternaURL from 'eterna/net/EternaURL';
+import PuzzleManager from 'eterna/puzzle/PuzzleManager';
+import URLButton from 'eterna/ui/URLButton';
+import FoldUtil from 'eterna/folding/FoldUtil';
+import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
+import CopyTextDialogMode from '../CopyTextDialogMode';
+import GameMode from '../GameMode';
 import SubmittingDialog from './SubmittingDialog';
+import SubmitPoseDialog from './SubmitPoseDialog';
+import SubmitPoseDetails from './SubmitPoseDetails';
+import MissionIntroMode from './MissionIntroMode';
+import MissionClearedPanel from './MissionClearedPanel';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -1713,7 +1727,7 @@ export default class PoseEditMode extends GameMode {
             this.disableTools(true);
             this.setPuzzleState(PuzzleState.CLEARED);
 
-            Eterna.sound.playSound(Sounds.SoundPuzzleClear);
+            Flashbang.sound.playSound(Sounds.SoundPuzzleClear);
             for (let pose of this._poses) {
                 pose.setZoomLevel(0, true, true);
                 let p = pose.startExplosion();
@@ -2855,14 +2869,14 @@ export default class PoseEditMode extends GameMode {
 
         if (allAreSatisfied && !allWereSatisfied && !hasPendingConstraints) {
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                Eterna.sound.playSound(Sounds.SoundAllConditions);
+                Flashbang.sound.playSound(Sounds.SoundAllConditions);
             } else if (this._puzState !== PuzzleState.GAME) {
-                Eterna.sound.playSound(Sounds.SoundCondition);
+                Flashbang.sound.playSound(Sounds.SoundCondition);
             }
         } else if (playConstraintSatisfiedSFX) {
-            Eterna.sound.playSound(Sounds.SoundCondition);
+            Flashbang.sound.playSound(Sounds.SoundCondition);
         } else if (playConstraintUnsatisfiedSFX) {
-            Eterna.sound.playSound(Sounds.SoundDecondition);
+            Flashbang.sound.playSound(Sounds.SoundDecondition);
         }
 
         return allAreSatisfied;
@@ -3099,7 +3113,7 @@ export default class PoseEditMode extends GameMode {
                         for (let jj = segments[2]; jj <= segments[3]; jj++) {
                             this._targetPairs[xx][jj] = -1;
                         }
-                        Eterna.sound.playSound(Sounds.SoundRY);
+                        Flashbang.sound.playSound(Sounds.SoundRY);
                         this.flashConstraintForTarget(xx);
                         this._poses[targetIndex].clearDesignStruct();
                     } else if (numUnpaired === segments[1] - segments[0] + segments[3] - segments[2] + 2) {
@@ -3116,7 +3130,7 @@ export default class PoseEditMode extends GameMode {
                             for (let jj = segments[2]; jj <= segments[3]; jj++) {
                                 this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
                             }
-                            Eterna.sound.playSound(Sounds.SoundGB);
+                            Flashbang.sound.playSound(Sounds.SoundGB);
                             this.flashConstraintForTarget(xx);
                             this._poses[targetIndex].clearDesignStruct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
@@ -3152,7 +3166,7 @@ export default class PoseEditMode extends GameMode {
                                     for (let jj = segments[2]; jj <= segments[3]; jj++) {
                                         this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
                                     }
-                                    Eterna.sound.playSound(Sounds.SoundGB);
+                                    Flashbang.sound.playSound(Sounds.SoundGB);
                                     this.flashConstraintForTarget(xx);
                                     this._poses[targetIndex].clearDesignStruct();
                                     more = false;

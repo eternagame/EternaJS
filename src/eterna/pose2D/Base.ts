@@ -1,11 +1,10 @@
 import * as log from 'loglevel';
 import {Point, Sprite, Texture} from 'pixi.js';
-import {LateUpdatable} from 'flashbang/core';
-import {ContainerObject} from 'flashbang/objects';
+import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {ROPWait} from 'eterna/rscript';
+import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import Pose2D, {RNAHighlightState} from './Pose2D';
@@ -106,7 +105,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         if (playSound) {
             const soundName: string = BaseAssets.getBaseTypeSound(type);
             if (soundName != null) {
-                Eterna.sound.playSound(soundName);
+                Flashbang.sound.playSound(soundName);
             }
         }
         ROPWait.notifyNucleotideChange(this._baseIdx, type);

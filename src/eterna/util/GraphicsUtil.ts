@@ -1,5 +1,5 @@
 import {Graphics, Point} from 'pixi.js';
-import {Vector2} from 'flashbang/geom';
+import {Vector2} from 'flashbang';
 
 export default class GraphicsUtil {
     /** Draw a left-facing arrow, with its tip anchored at (0, 0) */

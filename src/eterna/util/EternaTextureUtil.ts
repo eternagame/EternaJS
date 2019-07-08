@@ -1,5 +1,5 @@
 import {Matrix, Sprite, Texture} from 'pixi.js';
-import {ColorUtil, MathUtil, TextureUtil} from 'flashbang/util';
+import {TextureUtil, ColorUtil, MathUtil} from 'flashbang';
 
 export default class EternaTextureUtil {
     /**

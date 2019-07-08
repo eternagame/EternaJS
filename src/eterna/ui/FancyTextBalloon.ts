@@ -1,12 +1,12 @@
 import {Point} from 'pixi.js';
-import {HAlign, VAlign, Updatable} from 'flashbang/core';
-import {Vector2} from 'flashbang/geom';
-import {DisplayUtil} from 'flashbang/util';
-import {Bitmaps} from 'eterna/resources';
-import {RScriptArrow} from 'eterna/rscript';
-import FancyGamePanel from './FancyGamePanel';
-import GameButton from './GameButton';
+import {
+    Updatable, DisplayUtil, HAlign, VAlign, Vector2
+} from 'flashbang';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import RScriptArrow from 'eterna/rscript/RScriptArrow';
 import TextBalloon from './TextBalloon';
+import GameButton from './GameButton';
+import FancyGamePanel from './FancyGamePanel';
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
     constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,

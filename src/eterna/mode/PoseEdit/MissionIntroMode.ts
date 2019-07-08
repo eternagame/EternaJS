@@ -1,16 +1,17 @@
 import {
     Container, Graphics, Point, Sprite
 } from 'pixi.js';
-import {Flashbang, AppMode} from 'flashbang/core';
-import {DisplayObjectPointerTarget, InputUtil, KeyCode} from 'flashbang/input';
-import {DisplayUtil, StyledTextBuilder} from 'flashbang/util';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {Bitmaps} from 'eterna/resources';
 import {
-    ConstraintBox, GameButton, HTMLTextObject, PoseThumbnail, PoseThumbnailType
-} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+    AppMode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, Flashbang, DisplayUtil, KeyCode
+} from 'flashbang';
+import ConstraintBox from 'eterna/ui/ConstraintBox';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 
 export default class MissionIntroMode extends AppMode {
     constructor(

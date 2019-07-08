@@ -1,13 +1,13 @@
 import {Graphics, Point, Text} from 'pixi.js';
-import {KeyboardEventType, KeyboardListener, KeyCode} from 'flashbang/input';
-import {ContainerObject, Enableable} from 'flashbang/objects';
-import {LocationTask} from 'flashbang/tasks';
-import {Easing} from 'flashbang/util';
 import {Signal} from 'signals';
 import Eterna from 'eterna/Eterna';
-import {Sounds} from 'eterna/resources';
-import {ROPWait, RScriptUIElementID} from 'eterna/rscript';
-import {Fonts} from 'eterna/util';
+import {
+    ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Sounds from 'eterna/resources/Sounds';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import ROPWait from 'eterna/rscript/ROPWait';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -93,7 +93,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             );
             this._labels[this._selectedState].style.fill = ToggleBar.COLOR_HIGH;
 
-            Eterna.sound.playSound(Sounds.SoundSwitch);
+            Flashbang.sound.playSound(Sounds.SoundSwitch);
             this.stateChanged.emit(newState);
         }
     }

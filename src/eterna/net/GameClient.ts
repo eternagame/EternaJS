@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Base64} from 'flashbang/util';
+import {Base64} from 'flashbang';
 
 type JSONData = any;
 

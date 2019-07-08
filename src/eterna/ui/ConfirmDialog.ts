@@ -1,8 +1,8 @@
 import {Point} from 'pixi.js';
-import {Flashbang, HAlign} from 'flashbang/core';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {AlphaTask} from 'flashbang/tasks';
-import {Fonts} from 'eterna/util';
+import {
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 import Dialog, {DialogCanceledError} from './Dialog';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';

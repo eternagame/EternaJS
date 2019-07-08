@@ -1,13 +1,10 @@
 import * as log from 'loglevel';
-import {Flashbang} from 'flashbang/core';
-import {SaveGameManager} from 'flashbang/settings';
-import {ErrorUtil} from 'flashbang/util';
+import {SaveGameManager, ErrorUtil, Flashbang} from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import EternaApp from 'eterna/EternaApp';
-import {ErrorDialogMode} from 'eterna/mode';
-import {GameClient} from 'eterna/net';
-import {EternaSettings} from 'eterna/settings';
-import {SoundManager} from 'eterna/resources';
+import EternaSettings from './settings/EternaSettings';
+import GameClient from './net/GameClient';
+import ErrorDialogMode from './mode/ErrorDialogMode';
 
 /** Return env.APP_SERVER_URL; if unspecified, default to window.location.origin */
 function GetServerURL(): string {
@@ -34,7 +31,6 @@ export default class Eterna {
     public static settings: EternaSettings;
     public static saveManager: SaveGameManager;
     public static client: GameClient;
-    public static sound: SoundManager;
     public static chat: ChatManager;
 
     public static playerID: number;

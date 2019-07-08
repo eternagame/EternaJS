@@ -3,8 +3,8 @@ module.exports = {
     'parserOptions': {
       'project': './tsconfig.json'
     },
-     // Some imports may be resolved via webpack aliases
     'settings': {
+        // Some imports may be resolved via webpack aliases
         'import/resolver': {
           'webpack': {
             'config': 'webpack.common.js'

@@ -1,8 +1,10 @@
 import {Point, Text} from 'pixi.js';
 import {Signal} from 'signals';
-import {KeyCode} from 'flashbang/input';
-import {GameButton, GamePanel, TextInputObject} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+import {KeyCode} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import GameButton from 'eterna/ui/GameButton';
+import GamePanel from 'eterna/ui/GamePanel';
 
 export default class ExplosionFactorPanel extends GamePanel {
     public readonly factorUpdated: Signal<number> = new Signal();

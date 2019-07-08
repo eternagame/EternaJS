@@ -1,6 +1,6 @@
-import {Flashbang} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {Dialog, TextInputPanel} from 'eterna/ui';
+import {Flashbang, KeyCode} from 'flashbang';
+import Dialog from 'eterna/ui/Dialog';
+import TextInputPanel from 'eterna/ui/TextInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
