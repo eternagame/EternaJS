@@ -1,8 +1,7 @@
 import MultiStyleText from 'pixi-multistyle-text';
 import {Container, Graphics, Point} from 'pixi.js';
-import {HAlign} from 'flashbang/core';
-import {VLayoutContainer} from 'flashbang/layout';
-import {Fonts} from 'eterna/util';
+import {VLayoutContainer, HAlign} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 
 export default class EnergyScoreDisplay extends Container {
     public static grey(text: string): string {

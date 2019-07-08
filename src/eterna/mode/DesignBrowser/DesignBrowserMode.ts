@@ -3,33 +3,36 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import {Flashbang, HAlign, VAlign} from 'flashbang/core';
-import {HLayoutContainer} from 'flashbang/layout';
-import {ContainerObject, SceneObject} from 'flashbang/objects';
-import {
-    AlphaTask, CallbackTask, DelayTask, LocationTask, RepeatingTask, SerialTask
-} from 'flashbang/tasks';
-import {DisplayUtil, Easing, MathUtil} from 'flashbang/util';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
-import {Puzzle, Solution, SolutionManager} from 'eterna/puzzle';
-import {BitmapManager, Bitmaps} from 'eterna/resources';
+import GameMode from 'eterna/mode/GameMode';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import GamePanel from 'eterna/ui/GamePanel';
+import Fonts from 'eterna/util/Fonts';
+import SliderBar from 'eterna/ui/SliderBar';
 import {
-    GameButton, GamePanel, HTMLTextObject, SliderBar, URLButton
-} from 'eterna/ui';
-import {Fonts, int} from 'eterna/util';
-import {GameMode} from 'eterna/mode';
-import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
-import DataCol from './DataCol';
-import DotLine from './DotLine';
-import GridLines from './GridLines';
-import MarkerBoxView from './MarkerBoxView';
-import SelectionBox from './SelectionBox';
-import SortOptions, {SortOrder} from './SortOptions';
-import SortOptionsDialog from './SortOptionsDialog';
-import ViewSolutionDialog from './ViewSolutionDialog';
+    ContainerObject, DisplayUtil, HAlign, VAlign, RepeatingTask, SerialTask, DelayTask, CallbackTask,
+    MathUtil, Flashbang, SceneObject, AlphaTask, LocationTask, Easing, HLayoutContainer
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import Solution from 'eterna/puzzle/Solution';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
+import URLButton from 'eterna/ui/URLButton';
+import int from 'eterna/util/int';
 import VoteProcessor from './VoteProcessor';
+import ViewSolutionDialog from './ViewSolutionDialog';
+import SortOptionsDialog from './SortOptionsDialog';
+import SortOptions, {SortOrder} from './SortOptions';
+import SelectionBox from './SelectionBox';
+import MarkerBoxView from './MarkerBoxView';
+import GridLines from './GridLines';
+import DotLine from './DotLine';
+import DataCol from './DataCol';
+import CustomizeColumnOrderDialog from './CustomizeColumnOrderDialog';
 
 export enum DesignBrowserDataType {
     INT = 0,

@@ -1,4 +1,4 @@
-import {StyledTextBuilder} from 'flashbang/util';
+import {StyledTextBuilder} from 'flashbang';
 import IntLoopPars from 'eterna/IntLoopPars';
 
 export default class EPars {

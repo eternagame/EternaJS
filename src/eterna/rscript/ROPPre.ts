@@ -1,4 +1,4 @@
-import {PoseState} from 'eterna/puzzle';
+import {PoseState} from 'eterna/puzzle/Puzzle';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 

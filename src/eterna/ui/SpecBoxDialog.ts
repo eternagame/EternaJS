@@ -1,8 +1,8 @@
 import {Point} from 'pixi.js';
-import {Flashbang, HAlign, VAlign} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {DisplayUtil} from 'flashbang/util';
 import UndoBlock from 'eterna/UndoBlock';
+import {
+    KeyCode, Flashbang, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
 import SpecBox from './SpecBox';

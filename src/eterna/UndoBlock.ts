@@ -1,9 +1,9 @@
-import {JSONUtil} from 'flashbang/util';
+import {JSONUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
-import {Folder} from 'eterna/folding';
 import Plot, {PlotType} from 'eterna/Plot';
-import {Oligo, Pose2D} from 'eterna/pose2D';
-import {Utility} from './util';
+import Pose2D, {Oligo} from './pose2D/Pose2D';
+import Folder from './folding/Folder';
+import Utility from './util/Utility';
 
 export enum UndoBlockParam {
     GU = 0,

@@ -1,13 +1,10 @@
 import {Text} from 'pixi.js';
-import {Flashbang, AppMode, ObjectTask} from 'flashbang/core';
-import {ContainerObject} from 'flashbang/objects';
 import {
-    DelayTask, RepeatingTask, ScaleTask, SerialTask
-} from 'flashbang/tasks';
-import {Easing} from 'flashbang/util';
+    AppMode, ContainerObject, SerialTask, DelayTask, RepeatingTask, ObjectTask, ScaleTask, Easing, Flashbang
+} from 'flashbang';
+import Background from 'eterna/vfx/Background';
+import Fonts from 'eterna/util/Fonts';
 import Eterna from 'eterna/Eterna';
-import {Fonts} from 'eterna/util';
-import {Background} from 'eterna/vfx';
 
 /** Displays a simple animation while we're loading assets */
 export default class LoadingMode extends AppMode {

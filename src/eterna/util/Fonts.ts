@@ -1,6 +1,5 @@
 import * as log from 'loglevel';
-import {FontLoader} from 'flashbang/resources';
-import {TextBuilder} from 'flashbang/util';
+import {FontLoader, TextBuilder} from 'flashbang';
 
 export default class Fonts {
     public static readonly ARIAL = 'Arial';

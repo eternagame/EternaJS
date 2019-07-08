@@ -2,22 +2,19 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text, Texture
 } from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {ContainerObject, Enableable, SceneObject} from 'flashbang/objects';
-import {
-    AlphaTask, DelayTask, LocationTask, ParallelTask, ScaleTask, SerialTask, VisibleTask
-} from 'flashbang/tasks';
-import {
-    DisplayUtil, Easing, StyledTextBuilder, TextureUtil
-} from 'flashbang/util';
 import {RegistrationGroup} from 'signals';
 import EPars from 'eterna/EPars';
-import {ConstraintType} from 'eterna/puzzle';
-import {BitmapManager, Bitmaps} from 'eterna/resources';
-import {Fonts} from 'eterna/util';
-import Band from './Band';
-import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
+import {
+    ContainerObject, Enableable, Easing, LocationTask, AlphaTask, StyledTextBuilder,
+    DisplayUtil, TextureUtil, HAlign, VAlign, SerialTask, VisibleTask, ParallelTask, ScaleTask, SceneObject, DelayTask
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import {ConstraintType} from 'eterna/puzzle/Constraints';
 import TextBalloon from './TextBalloon';
+import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
+import Band from './Band';
 
 export enum ConstraintBoxType {
     DEFAULT = 'DEFAULT',

@@ -3,17 +3,16 @@ import MultiStyleText from 'pixi-multistyle-text';
 import {
     Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {DisplayObjectPointerTarget, InputUtil, KeyCode} from 'flashbang/input';
-import {ContainerObject} from 'flashbang/objects';
-import {DisplayUtil, StyledTextBuilder} from 'flashbang/util';
 import {UnitSignal} from 'signals';
 import EPars from 'eterna/EPars';
 import Plot from 'eterna/Plot';
-import {EternaURL} from 'eterna/net';
-import {Bitmaps} from 'eterna/resources';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
-import {Fonts} from 'eterna/util';
+import {
+    ContainerObject, KeyCode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import EternaURL from 'eterna/net/EternaURL';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import HTMLTextObject from './HTMLTextObject';
@@ -144,7 +143,7 @@ export default class SpecBox extends ContainerObject {
         this._meltplot = datablock.createMeltPlot();
 
         if (this._stattext != null) {
-            let statString: StyledTextBuilder = new StyledTextBuilder({
+            let statString = new StyledTextBuilder({
                 fontFamily: Fonts.ARIAL,
                 fontSize: 14,
                 fill: 0xffffff

@@ -1,5 +1,5 @@
 import Eterna from 'eterna/Eterna';
-import {Utility} from 'eterna/util';
+import Utility from 'eterna/util/Utility';
 
 export default class LabComments {
     constructor(nid: number) {

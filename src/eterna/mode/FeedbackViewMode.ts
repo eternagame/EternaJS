@@ -1,22 +1,27 @@
 import * as log from 'loglevel';
 import {DisplayObject, Point, Text} from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {KeyboardEventType, KeyCode} from 'flashbang/input';
-import {DisplayUtil} from 'flashbang/util';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
 import UndoBlock from 'eterna/UndoBlock';
-import {Folder, FolderManager, Vienna} from 'eterna/folding';
-import {GameMode} from 'eterna/mode';
-import {PoseField} from 'eterna/pose2D';
-import {Puzzle, Solution} from 'eterna/puzzle';
+import Solution from 'eterna/puzzle/Solution';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import Background from 'eterna/vfx/Background';
+import Fonts from 'eterna/util/Fonts';
+import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import PoseField from 'eterna/pose2D/PoseField';
+import FolderManager from 'eterna/folding/FolderManager';
+import Vienna from 'eterna/folding/Vienna';
 import {
-    EternaViewOptionsDialog, EternaViewOptionsMode, SpecBoxDialog, URLButton, Toolbar, ToolbarType
-} from 'eterna/ui';
-import {Fonts, Utility} from 'eterna/util';
-import {Background} from 'eterna/vfx';
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode
+} from 'flashbang';
+import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import Utility from 'eterna/util/Utility';
+import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
+import Folder from 'eterna/folding/Folder';
+import URLButton from 'eterna/ui/URLButton';
+import GameMode from './GameMode';
 
 enum PoseFoldMode {
     ESTIMATE = 'ESTIMATE',

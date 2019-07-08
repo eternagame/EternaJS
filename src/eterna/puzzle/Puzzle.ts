@@ -1,8 +1,10 @@
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
-import {Folder, FolderManager, Vienna} from 'eterna/folding';
-import {EternaURL} from 'eterna/net';
-import {Pose2D} from 'eterna/pose2D';
+import FolderManager from 'eterna/folding/FolderManager';
+import Vienna from 'eterna/folding/Vienna';
+import Folder from 'eterna/folding/Folder';
+import EternaURL from 'eterna/net/EternaURL';
+import Pose2D from 'eterna/pose2D/Pose2D';
 import {ConstraintType} from './Constraints';
 
 export interface BoostersData {

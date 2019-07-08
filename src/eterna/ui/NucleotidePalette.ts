@@ -1,16 +1,16 @@
 import {
     Point, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
-import {
-    InputUtil, KeyboardEventType, KeyboardListener, KeyCode
-} from 'flashbang/input';
-import {ContainerObject, Enableable} from 'flashbang/objects';
-import {StyledTextBuilder, Assert} from 'flashbang/util';
 import {Signal} from 'signals';
+import {
+    ContainerObject, KeyboardListener, Enableable, StyledTextBuilder, KeyCode, InputUtil, KeyboardEventType, Assert
+} from 'flashbang';
 import EPars from 'eterna/EPars';
-import {BitmapManager, Bitmaps} from 'eterna/resources';
-import {ROPWait, RScriptUIElementID} from 'eterna/rscript';
-import {Fonts} from 'eterna/util';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Fonts from 'eterna/util/Fonts';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import ROPWait from 'eterna/rscript/ROPWait';
 import Tooltips from './Tooltips';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;

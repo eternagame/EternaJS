@@ -1,16 +1,18 @@
 import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {Arrays, DisplayUtil} from 'flashbang/util';
-import {Bitmaps} from 'eterna/resources';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Dialog from 'eterna/ui/Dialog';
 import {
-    Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
-} from 'eterna/ui';
-import {Fonts, GraphicsUtil} from 'eterna/util';
-import {DesignCategory} from './DesignBrowserMode';
+    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign, DisplayUtil
+} from 'flashbang';
+import GraphicsUtil from 'eterna/util/GraphicsUtil';
+import GameButton from 'eterna/ui/GameButton';
+import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import SortOptions, {SortOrder} from './SortOptions';
+import {DesignCategory} from './DesignBrowserMode';
 
 export default class SortOptionsDialog extends Dialog<void> {
     public readonly options: SortOptions;

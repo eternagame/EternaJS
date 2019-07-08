@@ -1,6 +1,6 @@
 import {DisplayObject} from 'pixi.js';
 import {SignalView} from 'signals';
-import {EventSignal} from '../util';
+import EventSignal from 'flashbang/util/EventSignal';
 import PointerTarget from './PointerTarget';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;

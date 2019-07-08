@@ -1,5 +1,5 @@
+import {MathUtil, ColorUtil} from 'flashbang';
 import Constants from 'eterna/Constants';
-import {ColorUtil, MathUtil} from 'flashbang/util';
 
 export default class ExpPainter {
     public static readonly NUM_COLORS = 5;

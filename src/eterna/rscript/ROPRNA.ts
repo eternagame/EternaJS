@@ -1,5 +1,5 @@
-import {MathUtil} from 'flashbang/util';
-import {StringToPaletteTargetType} from 'eterna/ui';
+import {MathUtil} from 'flashbang';
+import {StringToPaletteTargetType} from 'eterna/ui/NucleotidePalette';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 

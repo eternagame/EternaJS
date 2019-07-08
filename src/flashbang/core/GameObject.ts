@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {Container, DisplayObject} from 'pixi.js';
-import Assert from '../util/Assert';
+import Assert from 'flashbang/util/Assert';
 import GameObjectBase from './GameObjectBase';
 import GameObjectRef from './GameObjectRef';
 

@@ -1,9 +1,9 @@
 import * as log from 'loglevel';
-import {EmscriptenUtil} from 'eterna/emscripten';
 import EPars from 'eterna/EPars';
-import {RNALayout} from 'eterna/pose2D';
-import {Utility} from 'eterna/util';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import Utility from 'eterna/util/Utility';
+import RNALayout from 'eterna/pose2D/RNALayout';
 import * as ViennaLib from './engines/ViennaLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

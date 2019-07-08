@@ -2,9 +2,10 @@ import {
     DisplayObject, Graphics, Matrix, Point, Rectangle
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
-import {Flashbang, HAlign, VAlign} from '../core';
+import Flashbang from 'flashbang/core/Flashbang';
+import {HAlign, VAlign} from 'flashbang/core/Align';
 import RectangleUtil from './RectangleUtil';
-import {Assert} from '.';
+import Assert from './Assert';
 
 export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {

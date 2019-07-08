@@ -1,9 +1,9 @@
 import * as log from 'loglevel';
-import {EmscriptenUtil} from 'eterna/emscripten';
 import EPars from 'eterna/EPars';
-import {PoseOp} from 'eterna/pose2D';
-import {int} from 'eterna/util';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import PoseOp from 'eterna/pose2D/PoseOp';
+import int from 'eterna/util/int';
 import * as NupackLib from './engines/NupackLib';
 import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */

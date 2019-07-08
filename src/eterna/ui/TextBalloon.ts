@@ -1,8 +1,7 @@
 import MultiStyleText from 'pixi-multistyle-text';
 import {Point, Text} from 'pixi.js';
-import {ContainerObject} from 'flashbang/objects';
-import {DisplayUtil, StyledTextBuilder} from 'flashbang/util';
-import {Fonts} from 'eterna/util';
+import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';
 import GameButton from './GameButton';
 import GamePanel, {GamePanelType} from './GamePanel';

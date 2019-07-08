@@ -1,13 +1,12 @@
 import * as log from 'loglevel';
 import {Texture} from 'pixi.js';
-import {TextureUtil} from 'flashbang/util';
+import {TextureUtil, Flashbang} from 'flashbang';
 import EPars from 'eterna/EPars';
-import Eterna from 'eterna/Eterna';
-import {Pose2D} from 'eterna/pose2D';
-import {Sounds} from 'eterna/resources';
-import {GameButton} from 'eterna/ui';
-import {ExternalInterface, ExternalInterfaceCtx} from 'eterna/util';
-import {GameMode} from 'eterna/mode';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import GameButton from 'eterna/ui/GameButton';
+import Sounds from 'eterna/resources/Sounds';
+import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import GameMode from '../GameMode';
 
 export enum BoosterType {
     PAINTER = 1,
@@ -118,7 +117,7 @@ export default class Booster {
     }
 
     public onPaint(pose: Pose2D, baseNum: number): void {
-        Eterna.sound.playSound(Sounds.SoundPaint);
+        Flashbang.sound.playSound(Sounds.SoundPaint);
         this.executeScript(pose, 'MOUSE_DOWN', baseNum);
     }
 
@@ -182,7 +181,7 @@ export default class Booster {
             .then((ret) => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
-                    Eterna.sound.playSound(
+                    Flashbang.sound.playSound(
                         ret != null && ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail
                     );
                 }
@@ -190,7 +189,7 @@ export default class Booster {
             .catch(() => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
-                    Eterna.sound.playSound(Sounds.SoundScriptFail);
+                    Flashbang.sound.playSound(Sounds.SoundScriptFail);
                 }
             });
     }

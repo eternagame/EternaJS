@@ -1,19 +1,21 @@
 import {
     Container, Graphics, Point, Sprite, Text
 } from 'pixi.js';
-import {Flashbang, HAlign, VAlign} from 'flashbang/core';
-import {HLayoutContainer} from 'flashbang/layout';
-import {DisplayUtil, MathUtil} from 'flashbang/util';
 import {UnitSignal} from 'signals';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
-import {Puzzle, Solution} from 'eterna/puzzle';
-import {Bitmaps} from 'eterna/resources';
+import Dialog from 'eterna/ui/Dialog';
+import Solution from 'eterna/puzzle/Solution';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import GamePanel from 'eterna/ui/GamePanel';
 import {
-    Dialog, GameButton, GamePanel, PoseThumbnail, PoseThumbnailType
-} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+    HLayoutContainer, MathUtil, Flashbang, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import GameButton from 'eterna/ui/GameButton';
+import Fonts from 'eterna/util/Fonts';
 import SolutionDescBox from './SolutionDescBox';
 
 export default class ViewSolutionDialog extends Dialog<void> {

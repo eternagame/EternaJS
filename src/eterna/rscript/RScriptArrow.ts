@@ -1,7 +1,6 @@
 import {Graphics} from 'pixi.js';
-import {SceneObject} from 'flashbang/objects';
-import {MathUtil} from 'flashbang/util';
-import {GraphicsUtil} from 'eterna/util';
+import {SceneObject, MathUtil} from 'flashbang';
+import GraphicsUtil from 'eterna/util/GraphicsUtil';
 
 export default class RScriptArrow extends SceneObject {
     constructor(

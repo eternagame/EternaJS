@@ -1,9 +1,8 @@
 import {Point, Texture} from 'pixi.js';
-import {Flashbang, Updatable} from 'flashbang/core';
-import {SpriteObject} from 'flashbang/objects';
-import {AlphaTask, ParallelTask, ScaleTask} from 'flashbang/tasks';
-import {Easing} from 'flashbang/util';
-import {Bitmaps} from 'eterna/resources';
+import {
+    SpriteObject, Flashbang, ParallelTask, Easing, AlphaTask, ScaleTask, Updatable
+} from 'flashbang';
+import Bitmaps from 'eterna/resources/Bitmaps';
 
 export default class Bubble extends SpriteObject implements Updatable {
     public isPaused: boolean = false;

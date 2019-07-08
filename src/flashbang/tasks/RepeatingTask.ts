@@ -1,4 +1,4 @@
-import {ObjectTask} from '../core';
+import ObjectTask from 'flashbang/core/ObjectTask';
 
 type TaskCreator = () => ObjectTask;
 

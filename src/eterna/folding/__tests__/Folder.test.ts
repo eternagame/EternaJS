@@ -1,6 +1,3 @@
-// Build order issues
-import "eterna/EternaApp";
-
 import EPars from "eterna/EPars";
 import Folder from "../Folder";
 import NuPACK from "../NuPACK";

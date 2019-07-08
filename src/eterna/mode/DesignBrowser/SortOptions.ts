@@ -1,6 +1,6 @@
-import {Arrays} from 'flashbang/util';
 import {UnitSignal} from 'signals';
-import {Solution} from 'eterna/puzzle';
+import {Arrays} from 'flashbang';
+import Solution from 'eterna/puzzle/Solution';
 import {DesignCategory} from './DesignBrowserMode';
 
 export enum SortOrder {

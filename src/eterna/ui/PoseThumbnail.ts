@@ -1,12 +1,12 @@
 import {
     Container, DisplayObject, Graphics, Sprite, Texture
 } from 'pixi.js';
-import {DisplayUtil, TextureUtil} from 'flashbang/util';
+import {TextureUtil, DisplayUtil} from 'flashbang';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
-import {RNALayout} from 'eterna/pose2D';
-import {Bitmaps} from 'eterna/resources';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import RNALayout from 'eterna/pose2D/RNALayout';
 
 export enum PoseThumbnailType {
     BASE_COLORED = 'BASE_COLORED',

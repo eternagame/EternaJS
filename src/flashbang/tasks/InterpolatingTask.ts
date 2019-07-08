@@ -1,5 +1,6 @@
-import {ObjectTask, Updatable} from '../core';
-import {Easing, EasingFunc} from '../util';
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
+import Easing, {EasingFunc} from 'flashbang/util/Easing';
 
 export default class InterpolatingTask extends ObjectTask implements Updatable {
     constructor(time: number = 0, easingFn: EasingFunc = null) {

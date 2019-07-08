@@ -1,6 +1,6 @@
 import {Graphics, Text, Container} from 'pixi.js';
-import {ColorUtil} from 'flashbang/util';
-import {Fonts} from 'eterna/util';
+import {ColorUtil} from 'flashbang';
+import Fonts from './util/Fonts';
 
 export enum PlotType {
     LINE, BAR, SCATTER

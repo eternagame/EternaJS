@@ -1,4 +1,4 @@
-import {ObjectTask} from '../core';
+import ObjectTask from 'flashbang/core/ObjectTask';
 
 /** A Task that calls a function once and then completes. */
 export default class CallbackTask extends ObjectTask {

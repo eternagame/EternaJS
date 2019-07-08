@@ -1,20 +1,24 @@
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
 } from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {KeyboardEventType, KeyboardListener} from 'flashbang/input';
-import {Button, ButtonState} from 'flashbang/objects';
-import {DisplayUtil, TextBuilder} from 'flashbang/util';
 import {Registration, Registrations, Value} from 'signals';
-import {ROPWait, RScriptUIElementID} from 'eterna/rscript';
-import {Fonts} from 'eterna/util';
+import {
+    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import ROPWait from 'eterna/rscript/ROPWait';
+import Fonts from 'eterna/util/Fonts';
+import Sounds from 'eterna/resources/Sounds';
 import Tooltips from './Tooltips';
 
 export default class GameButton extends Button implements KeyboardListener {
     public readonly toggled: Value<boolean> = new Value<boolean>(false);
+    public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
 
     constructor() {
         super();
+
+        this.downSound = GameButton.DEFAULT_DOWN_SOUND;
 
         this._content = new Container();
         this.container.addChild(this._content);

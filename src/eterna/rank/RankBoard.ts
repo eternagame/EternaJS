@@ -1,6 +1,5 @@
 import {Point} from 'pixi.js';
-import {Updatable} from 'flashbang/core';
-import {ContainerObject} from 'flashbang/objects';
+import {ContainerObject, Updatable} from 'flashbang';
 import PlayerRank from './PlayerRank';
 import RankRowLayout from './RankRowLayout';
 

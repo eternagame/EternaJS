@@ -1,20 +1,23 @@
 import MultiStyleText from 'pixi-multistyle-text';
 import {Point, Text} from 'pixi.js';
-import {HAlign} from 'flashbang/core';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {SceneObject} from 'flashbang/objects';
-import {AlphaTask, RepeatingTask, SerialTask} from 'flashbang/tasks';
-import {Assert} from 'flashbang/util';
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
-import {EternaURL} from 'eterna/net';
-import {Puzzle, Solution} from 'eterna/puzzle';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import Solution from 'eterna/puzzle/Solution';
+import EternaURL from 'eterna/net/EternaURL';
+import Utility from 'eterna/util/Utility';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import VScrollBox from 'eterna/ui/VScrollBox';
 import {
-    GameButton, GamePanel, GamePanelType, HTMLTextObject, TextInputObject, VScrollBox
-} from 'eterna/ui';
-import {Fonts, Utility} from 'eterna/util';
-import {CopyTextDialogMode, GameMode} from 'eterna/mode';
+    VLayoutContainer, HAlign, HLayoutContainer, SceneObject, RepeatingTask, SerialTask, AlphaTask
+} from 'flashbang';
+import CopyTextDialogMode from '../CopyTextDialogMode';
 import LabComments from './LabComments';
+import GameMode from '../GameMode';
 
 export default class SolutionDescBox extends GamePanel {
     constructor(solution: Solution, puzzle: Puzzle) {

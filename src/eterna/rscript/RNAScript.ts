@@ -1,5 +1,5 @@
-import {PoseEditMode} from 'eterna/mode';
-import {Puzzle} from 'eterna/puzzle';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import ROPHighlight, {ROPHighlightMode} from './ROPHighlight';
 import ROPHint from './ROPHint';
 import ROPPre from './ROPPre';

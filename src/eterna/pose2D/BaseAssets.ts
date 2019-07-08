@@ -1,14 +1,16 @@
 import {
     Container, Graphics, Sprite, Texture
 } from 'pixi.js';
-import {ColorUtil, TextureUtil} from 'flashbang/util';
+import {ColorUtil, TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
 import ExpPainter from 'eterna/ExpPainter';
-import {BitmapManager, Bitmaps, Sounds} from 'eterna/resources';
-import {EternaTextureUtil} from 'eterna/util';
-import Base from './Base';
-import BaseDrawFlags from './BaseDrawFlags';
+import Sounds from 'eterna/resources/Sounds';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 import BaseTextures from './BaseTextures';
+import BaseDrawFlags from './BaseDrawFlags';
+import Base from './Base';
 
 /** Handles initialization and management of Base-related assets */
 export default class BaseAssets {
@@ -246,10 +248,10 @@ export default class BaseAssets {
 
         // SOUNDS
         // log.debug("INIT SOUND");
-        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_R, "SoundR");
-        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_G, "SoundG");
-        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_Y, "SoundY");
-        // Eterna.sound.add_sound_by_name(BaseAssets.GAMESOUND_B, "SoundB");
+        // Flashbang.sound.add_sound_by_name(BaseAssets.GAMESOUND_R, "SoundR");
+        // Flashbang.sound.add_sound_by_name(BaseAssets.GAMESOUND_G, "SoundG");
+        // Flashbang.sound.add_sound_by_name(BaseAssets.GAMESOUND_Y, "SoundY");
+        // Flashbang.sound.add_sound_by_name(BaseAssets.GAMESOUND_B, "SoundB");
     }
 
     public static drawCircularBarcode(radius: number, lineThickness: number, lineAlpha: number): Texture {

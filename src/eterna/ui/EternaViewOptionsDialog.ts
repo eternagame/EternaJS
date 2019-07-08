@@ -1,10 +1,9 @@
 import {Point} from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {Setting} from 'flashbang/settings';
-import {DisplayUtil} from 'flashbang/util';
+import {
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang
+} from 'flashbang';
 import Eterna from 'eterna/Eterna';
-import {Bitmaps} from 'eterna/resources';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
 import GameCheckbox from './GameCheckbox';
@@ -63,7 +62,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         this._muteButton.clicked.connect(() => {
             this.setVolume(!Eterna.settings.soundMute.value, Eterna.settings.soundVolume.value);
             // Play the button-clicked sound after the volume has been adjusted.
-            Eterna.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+            Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
         });
         this.addObject(this._muteButton, soundButtonLayout);
 
@@ -73,7 +72,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             volumeButton.downSound = null;
             volumeButton.clicked.connect(() => {
                 this.setVolume(false, (ii + 1) / NUM_VOLUME_BUTTONS);
-                Eterna.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+                Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
             this._volumeButtons.push(volumeButton);
             this.addObject(volumeButton, soundButtonLayout);

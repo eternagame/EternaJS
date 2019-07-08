@@ -1,6 +1,7 @@
 import {Container} from 'pixi.js';
 import {UnitSignal} from 'signals';
-import {Assert, MathUtil} from '../util';
+import MathUtil from 'flashbang/util/MathUtil';
+import Assert from 'flashbang/util/Assert';
 import AppMode from './AppMode';
 
 export enum ModeTransition {

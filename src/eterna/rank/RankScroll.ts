@@ -1,16 +1,15 @@
 import {Graphics, Point, Text} from 'pixi.js';
-import {ContainerObject} from 'flashbang/objects';
 import {
-    AlphaTask, DelayTask, InterpolatingTask, LocationTask, ParallelTask, SerialTask, VisibleTask
-} from 'flashbang/tasks';
-import {Easing, EasingFunc} from 'flashbang/util';
+    ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
+    ParallelTask, AlphaTask, InterpolatingTask, EasingFunc
+} from 'flashbang';
 import Eterna from 'eterna/Eterna';
-import {GamePanel} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
-import {VibrateTask} from 'eterna/vfx';
-import PlayerRank from './PlayerRank';
-import RankBoard from './RankBoard';
+import GamePanel from 'eterna/ui/GamePanel';
+import Fonts from 'eterna/util/Fonts';
+import VibrateTask from 'eterna/vfx/VibrateTask';
 import RankRowLayout from './RankRowLayout';
+import RankBoard from './RankBoard';
+import PlayerRank from './PlayerRank';
 
 export default class RankScroll extends ContainerObject {
     public static hasRankScrollData(submissionRsp: any): boolean {
@@ -215,7 +214,7 @@ export default class RankScroll extends ContainerObject {
             }
         }
 
-        let bg: GamePanel = new GamePanel(0, 0.9, 0x152843);
+        let bg = new GamePanel(0, 0.9, 0x152843);
         bg.setSize(310, 88);
         bg.display.position = new Point(-10, -10);
         this.addObject(bg, this.container);

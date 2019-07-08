@@ -1,5 +1,5 @@
-import {EternaSettings} from 'eterna/settings';
 import * as log from 'loglevel';
+import EternaSettings from './settings/EternaSettings';
 
 export default class ChatManager {
     constructor(chatboxID: string, settings: EternaSettings) {

@@ -1,10 +1,11 @@
 import {Text, Texture} from 'pixi.js';
-import {TextureUtil} from 'flashbang/util';
+import {TextureUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
-import {BitmapManager} from 'eterna/resources';
-import {EternaTextureUtil, Fonts} from 'eterna/util';
-import Base from './Base';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
+import Fonts from 'eterna/util/Fonts';
 import BaseDrawFlags from './BaseDrawFlags';
+import Base from './Base';
 
 /** Encapsulates textures for a Base type */
 export default class BaseTextures {

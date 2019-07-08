@@ -1,12 +1,12 @@
 import * as log from 'loglevel';
 import {ExtendedTextStyle} from 'pixi-multistyle-text';
 import {Point} from 'pixi.js';
-import {Flashbang, GameObject} from 'flashbang/core';
-import {Vector2} from 'flashbang/geom';
-import {ColorUtil, StyledTextBuilder} from 'flashbang/util';
-import {RNAAnchorObject} from 'eterna/pose2D';
-import {FancyTextBalloon} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+import FancyTextBalloon from 'eterna/ui/FancyTextBalloon';
+import Fonts from 'eterna/util/Fonts';
+import {
+    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil
+} from 'flashbang';
+import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
 import ROPWait from './ROPWait';
 import RScriptArrow from './RScriptArrow';
 import RScriptEnv from './RScriptEnv';

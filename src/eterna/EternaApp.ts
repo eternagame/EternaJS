@@ -1,25 +1,33 @@
 import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
 import * as log from 'loglevel';
-import {FlashbangApp} from 'flashbang/core';
-import {SaveGameManager} from 'flashbang/settings';
-import {ErrorUtil, TextureUtil} from 'flashbang/util';
+import {
+    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang
+} from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
-import {TestMode} from 'eterna/debug';
 import Eterna from 'eterna/Eterna';
-import {
-    Folder, FolderManager, LinearFoldC, LinearFoldV, NuPACK, RNAFoldBasic, Vienna, Vienna2
-} from 'eterna/folding';
-import {
-    LoadingMode, FeedbackViewMode, DesignBrowserFilter, DesignBrowserMode,
-    PoseEditMode, PoseEditParams, PuzzleEditMode, PuzzleEditPoseData
-} from 'eterna/mode';
-import {GameClient} from 'eterna/net';
-import {
-    Puzzle, PuzzleManager, Solution, SolutionManager
-} from 'eterna/puzzle';
-import {Bitmaps, SoundManager} from 'eterna/resources';
-import {EternaSettings} from 'eterna/settings';
-import {ExternalInterface, ExternalInterfaceCtx, Fonts} from 'eterna/util';
+import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
+import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
+import EternaSettings from './settings/EternaSettings';
+import GameClient from './net/GameClient';
+import Bitmaps from './resources/Bitmaps';
+import Fonts from './util/Fonts';
+import TestMode from './debug/TestMode';
+import Puzzle from './puzzle/Puzzle';
+import PoseEditMode, {PoseEditParams} from './mode/PoseEdit/PoseEditMode';
+import PuzzleEditMode, {PuzzleEditPoseData} from './mode/PuzzleEdit/PuzzleEditMode';
+import FeedbackViewMode from './mode/FeedbackViewMode';
+import Solution from './puzzle/Solution';
+import PuzzleManager from './puzzle/PuzzleManager';
+import SolutionManager from './puzzle/SolutionManager';
+import LoadingMode from './mode/LoadingMode';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
+import NuPACK from './folding/NuPACK';
+import RNAFoldBasic from './folding/RNAFoldBasic';
+import FolderManager from './folding/FolderManager';
+import LinearFoldC from './folding/LinearFoldC';
+import LinearFoldV from './folding/LinearFoldV';
+import Folder from './folding/Folder';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -115,9 +123,16 @@ export default class EternaApp extends FlashbangApp {
         Eterna.saveManager = new SaveGameManager('EternaSaveGame');
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
-        Eterna.sound = new SoundManager(Eterna.settings);
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
+
+        this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
+            Flashbang.sound.muted = mute;
+        }));
+
+        this._regs.add(Eterna.settings.soundVolume.connectNotify((volume) => {
+            Flashbang.sound.volume = volume;
+        }));
 
         this.setLoadingText('Authenticating...');
 

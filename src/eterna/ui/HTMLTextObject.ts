@@ -1,4 +1,4 @@
-import {DOMObject} from 'flashbang/objects';
+import {DOMObject} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */

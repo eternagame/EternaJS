@@ -1,6 +1,6 @@
 import {DisplayObject} from 'pixi.js';
-import {ObjectTask} from '../core';
-import {Assert} from '../util';
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Assert from 'flashbang/util/Assert';
 
 export default class VisibleTask extends ObjectTask {
     constructor(visible: boolean, target: DisplayObject = null) {

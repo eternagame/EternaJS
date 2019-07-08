@@ -1,6 +1,7 @@
 import * as log from 'loglevel';
 import Eterna from 'eterna/Eterna';
-import {Folder, FolderManager} from '../folding';
+import FolderManager from 'eterna/folding/FolderManager';
+import Folder from 'eterna/folding/Folder';
 import Puzzle from './Puzzle';
 import SolutionManager from './SolutionManager';
 

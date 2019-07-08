@@ -1,5 +1,5 @@
 import EPars from 'eterna/EPars';
-import {Folder} from 'eterna/folding';
+import Folder from 'eterna/folding/Folder';
 
 export class RNATreeNode {
     public isPair: boolean = false;

@@ -2,26 +2,25 @@ import * as log from 'loglevel';
 import {
     Container, Graphics, Point, Sprite, Texture, Rectangle
 } from 'pixi.js';
-import {Flashbang, Updatable} from 'flashbang/core';
-import {Vector2} from 'flashbang/geom';
-import {InputUtil} from 'flashbang/input';
-import {ContainerObject, SceneObject, Dragger} from 'flashbang/objects';
-import {
-    AlphaTask, DelayTask, LocationTask, ParallelTask, RepeatingTask, SelfDestructTask, SerialTask
-} from 'flashbang/tasks';
-import {Arrays, DisplayUtil, Easing} from 'flashbang/util';
 import {Registration} from 'signals';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
-import {Folder} from 'eterna/folding';
-import {GameMode} from 'eterna/mode';
-import {Booster} from 'eterna/mode/PoseEdit';
-import {BitmapManager, Sounds} from 'eterna/resources';
-import {ROPWait} from 'eterna/rscript';
-import {TextBalloon} from 'eterna/ui';
-import {Fonts, Utility} from 'eterna/util';
-import {BaseGlow, LightRay} from 'eterna/vfx';
+import {
+    ContainerObject, InputUtil, Flashbang, Dragger, DisplayUtil, SceneObject, SerialTask, Easing,
+    ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays, RepeatingTask, Updatable
+} from 'flashbang';
+import LightRay from 'eterna/vfx/LightRay';
+import TextBalloon from 'eterna/ui/TextBalloon';
+import ROPWait from 'eterna/rscript/ROPWait';
+import Fonts from 'eterna/util/Fonts';
+import Sounds from 'eterna/resources/Sounds';
+import BaseGlow from 'eterna/vfx/BaseGlow';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Booster from 'eterna/mode/PoseEdit/Booster';
+import GameMode from 'eterna/mode/GameMode';
+import Utility from 'eterna/util/Utility';
+import Folder from 'eterna/folding/Folder';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -1155,11 +1154,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (playSound) {
             if (playGC) {
-                Eterna.sound.playSound(Sounds.SoundRG);
+                Flashbang.sound.playSound(Sounds.SoundRG);
             } else if (playUA) {
-                Eterna.sound.playSound(Sounds.SoundYB);
+                Flashbang.sound.playSound(Sounds.SoundYB);
             } else if (playGU) {
-                Eterna.sound.playSound(Sounds.SoundRB);
+                Flashbang.sound.playSound(Sounds.SoundRB);
             }
         }
     }

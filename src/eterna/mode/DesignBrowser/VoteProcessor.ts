@@ -1,6 +1,6 @@
 import Eterna from 'eterna/Eterna';
-import {SolutionManager} from 'eterna/puzzle';
-import {int} from 'eterna/util';
+import int from 'eterna/util/int';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
 
 export default class VoteProcessor {
     public processData(data: any[]): void {

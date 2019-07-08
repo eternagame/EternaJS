@@ -1,5 +1,5 @@
 import {DisplayObject} from 'pixi.js';
-import {EasingFunc} from '../util';
+import {EasingFunc} from 'flashbang/util/Easing';
 import DisplayObjectTask from './DisplayObjectTask';
 
 export default class AlphaTask extends DisplayObjectTask {

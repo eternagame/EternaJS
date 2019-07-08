@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
-import {Assert} from '../util';
+import Assert from 'flashbang/util/Assert';
+import {SoundManager} from 'flashbang';
 import FlashbangApp from './FlashbangApp';
 import AppMode from './AppMode';
 
@@ -31,13 +32,19 @@ export default class Flashbang {
         return this._interaction.mouse.global;
     }
 
+    public static get sound(): SoundManager {
+        return this._sound;
+    }
+
     /* internal */
     public static registerApp(app: FlashbangApp): void {
         Assert.isTrue(Flashbang._app == null, 'A FlashbangApp has already been registered');
         Flashbang._app = app;
         Flashbang._interaction = app.pixi.renderer.plugins.interaction;
+        Flashbang._sound = new SoundManager();
     }
 
     private static _app: FlashbangApp;
     private static _interaction: InteractionManager;
+    private static _sound: SoundManager;
 }

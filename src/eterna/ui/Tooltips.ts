@@ -2,12 +2,11 @@ import {ExtendedTextStyle} from 'pixi-multistyle-text';
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Text
 } from 'pixi.js';
-import {Flashbang, GameObject, GameObjectRef} from 'flashbang/core';
-import {Button} from 'flashbang/objects';
-import {AlphaTask, DelayTask, SerialTask} from 'flashbang/tasks';
-import {Easing, StyledTextBuilder} from 'flashbang/util';
 import {Registration, RegistrationGroup} from 'signals';
-import {Fonts} from 'eterna/util';
+import {
+    StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
 export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;

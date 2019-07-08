@@ -1,6 +1,5 @@
 import {DisplayObject, Point} from 'pixi.js';
-import {DisplayObjectTask} from 'flashbang/tasks';
-import {Easing} from 'flashbang/util';
+import {DisplayObjectTask, Easing} from 'flashbang';
 
 export default class VibrateTask extends DisplayObjectTask {
     constructor(duration: number, target: DisplayObject = null) {

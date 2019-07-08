@@ -1,5 +1,5 @@
 import {DisplayObject} from 'pixi.js';
-import {Flashbang} from '../core';
+import Flashbang from 'flashbang/core/Flashbang';
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;

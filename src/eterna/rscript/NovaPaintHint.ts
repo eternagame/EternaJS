@@ -1,9 +1,8 @@
 import {Point, Sprite, Texture} from 'pixi.js';
-import {Updatable} from 'flashbang/core';
-import {Vector2} from 'flashbang/geom';
-import {ContainerObject} from 'flashbang/objects';
-import {Pose2D} from 'eterna/pose2D';
-import {BitmapManager, Bitmaps} from 'eterna/resources';
+import {ContainerObject, Vector2, Updatable} from 'flashbang';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Pose2D from 'eterna/pose2D/Pose2D';
 
 
 export default class NovaPaintHint extends ContainerObject implements Updatable {
@@ -55,7 +54,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
         }
 
         let stageTime: number = (currentTime - this._startAnimTime);
-        let dir: Vector2 = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
+        let dir = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
         if (stageTime < 1.5 && this._curStage === 0) {
             if (stageTime >= 1.4) {
                 ++this._curStage;

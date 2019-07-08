@@ -1,6 +1,7 @@
 import {DisplayObject, Graphics, Matrix} from 'pixi.js';
-import {Flashbang, GameObject} from '../core';
-import {MatrixUtil} from '../util';
+import GameObject from 'flashbang/core/GameObject';
+import Flashbang from 'flashbang/core/Flashbang';
+import MatrixUtil from 'flashbang/util/MatrixUtil';
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.

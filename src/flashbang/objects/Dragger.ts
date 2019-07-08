@@ -1,7 +1,8 @@
 import {Container, Graphics} from 'pixi.js';
 import {UnitSignal} from 'signals';
-import {Flashbang, GameObject} from '../core';
-import {DisplayObjectPointerTarget} from '../input';
+import GameObject from 'flashbang/core/GameObject';
+import Flashbang from 'flashbang/core/Flashbang';
+import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
 
 /** A utility object that captures mouse input and dispatches update events until a mouseUp occurs */
 export default class Dragger extends GameObject {

@@ -1,12 +1,15 @@
 import {Rectangle} from 'pixi.js';
-import {HAlign, VAlign, Updatable} from 'flashbang/core';
-import {KeyCode} from 'flashbang/input';
-import {DisplayUtil} from 'flashbang/util';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import {Pose2D, PuzzleEditOp} from 'eterna/pose2D';
-import {GamePanel, TextInputObject, TextBalloon} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
+import {
+    KeyCode, DisplayUtil, HAlign, VAlign, Updatable
+} from 'flashbang';
+import GamePanel from 'eterna/ui/GamePanel';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import TextBalloon from 'eterna/ui/TextBalloon';
+import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
+import Fonts from 'eterna/util/Fonts';
 
 
 function IsArrowKey(keyCode: string): boolean {

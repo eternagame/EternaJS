@@ -1,13 +1,15 @@
 import {Container, Point, Text} from 'pixi.js';
-import {HAlign, VAlign} from 'flashbang/core';
-import {HLayoutContainer, VLayoutContainer} from 'flashbang/layout';
-import {Arrays, DisplayUtil} from 'flashbang/util';
 import {Signal} from 'signals';
-import {Bitmaps} from 'eterna/resources';
+import Dialog from 'eterna/ui/Dialog';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
-} from 'eterna/ui';
-import {Fonts, GraphicsUtil} from 'eterna/util';
+    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import GraphicsUtil from 'eterna/util/GraphicsUtil';
+import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import {DesignCategory} from './DesignBrowserMode';
 
 export default class CustomizeColumnOrderDialog extends Dialog<void> {

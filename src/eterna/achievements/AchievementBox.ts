@@ -1,14 +1,14 @@
 import * as log from 'loglevel';
 import {Point, Sprite, Text} from 'pixi.js';
-import {ContainerObject} from 'flashbang/objects';
 import {
-    AlphaTask, DelayTask, ParallelTask, ScaleTask, SerialTask
-} from 'flashbang/tasks';
-import {Easing, TextureUtil} from 'flashbang/util';
-import {PlaySoundTask, Sounds} from 'eterna/resources';
-import {GameButton, GamePanel, GamePanelType} from 'eterna/ui';
-import {Fonts} from 'eterna/util';
-import {VibrateTask} from 'eterna/vfx';
+    ContainerObject, TextureUtil, SerialTask, DelayTask, ParallelTask, AlphaTask, ScaleTask, Easing
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Fonts from 'eterna/util/Fonts';
+import PlaySoundTask from 'eterna/resources/PlaySoundTask';
+import Sounds from 'eterna/resources/Sounds';
+import VibrateTask from 'eterna/vfx/VibrateTask';
 
 export default class AchievementBox extends ContainerObject {
     constructor(imageURL: string, text: string) {

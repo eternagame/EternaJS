@@ -1,5 +1,5 @@
 import {Container, Graphics} from 'pixi.js';
-import {MathUtil} from 'flashbang/util';
+import {MathUtil} from 'flashbang';
 
 export default class ScrollContainer extends Container {
     public readonly content = new Container();

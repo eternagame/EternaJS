@@ -1,5 +1,5 @@
 import {Graphics, Point, Text} from 'pixi.js';
-import {Fonts} from 'eterna/util';
+import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';
 
 export enum FancyGamePanelType {

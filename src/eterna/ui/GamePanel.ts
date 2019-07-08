@@ -1,7 +1,7 @@
 import {
     Graphics, Point, Text, Rectangle
 } from 'pixi.js';
-import {Fonts} from 'eterna/util';
+import Fonts from 'eterna/util/Fonts';
 import BaseGamePanel from './BaseGamePanel';
 
 export enum GamePanelType {

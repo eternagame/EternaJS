@@ -1,8 +1,7 @@
 import {DisplayObject, Graphics, Point} from 'pixi.js';
-import {GameObject, LateUpdatable, ObjectTask} from 'flashbang/core';
-import {Vector2} from 'flashbang/geom';
-import {AlphaTask, RepeatingTask, SerialTask} from 'flashbang/tasks';
-import {Assert} from 'flashbang/util';
+import {
+    GameObject, LateUpdatable, Assert, RepeatingTask, ObjectTask, SerialTask, AlphaTask, Vector2
+} from 'flashbang';
 import Pose2D from './Pose2D';
 
 export enum HighlightType {
@@ -247,12 +246,12 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
             for (let ii: number = loopStart; ii <= loopEnd; ii++) {
                 let numGos = 0;
-                let axis: Vector2 = new Vector2(0, 0);
+                let axis = new Vector2(0, 0);
                 baseLoc = this._pose.getBaseLoc(ii);
 
                 if (ii > 0) {
                     let prevBaseLoc: Point = this._pose.getBaseLoc(ii - 1);
-                    let fromPrev: Vector2 = new Vector2((baseLoc.x - prevBaseLoc.x), (baseLoc.y - prevBaseLoc.y));
+                    let fromPrev = new Vector2((baseLoc.x - prevBaseLoc.x), (baseLoc.y - prevBaseLoc.y));
                     fromPrev.normalizeLocal();
                     axis.x += fromPrev.x;
                     axis.y += fromPrev.y;

@@ -1,5 +1,5 @@
 import {Graphics, Text} from 'pixi.js';
-import {TextBuilder} from '../util';
+import TextBuilder from 'flashbang/util/TextBuilder';
 import Button, {ButtonState} from './Button';
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
