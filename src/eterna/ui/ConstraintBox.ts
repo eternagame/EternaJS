@@ -615,7 +615,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
 
             this._bgGraphics.lineStyle(2.5, 0xFFFFFF, 0.9);
@@ -697,7 +697,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
 
             this._base1.texture = BitmapManager.getBitmap(Bitmaps.BaseAMid);
@@ -805,7 +805,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
 
             this._icon.visible = true;
@@ -930,7 +930,7 @@ export class ConstraintBox extends ContainerObject implements Enableable {
             this._bgGraphics.visible = true;
             this._bgGraphics.clear();
             this._bgGraphics.beginFill(0x1E314B, 0.5);
-            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
+            this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
 
             let {data_png} = val;
