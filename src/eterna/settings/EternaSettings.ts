@@ -1,6 +1,6 @@
-import {Setting, Settings} from "flashbang/settings";
-import {DesignCategory} from "eterna/mode/DesignBrowser";
-import Eterna from "eterna/Eterna";
+import {Settings, Setting} from 'flashbang';
+import Eterna from 'eterna/Eterna';
+import {DesignCategory} from 'eterna/mode/DesignBrowser/DesignBrowserMode';
 
 export default class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
@@ -26,36 +26,36 @@ export default class EternaSettings extends Settings {
 
     public readonly saveGamesTransfered: Setting<boolean>;
 
-    public constructor() {
-        super("EternaSettings");
+    constructor() {
+        super('EternaSettings');
 
-        this.showChat = this.setting("showChat", true);
-        this.showNumbers = this.setting("showNumbers", true);
-        this.showLetters = this.setting("showLetters", false);
-        this.displayFreeEnergies = this.setting("displayFreeEnergies", false);
-        this.highlightRestricted = this.setting("highlightRestricted", true);
-        this.autohideToolbar = this.setting("autohideToolbar", false);
-        this.freezeButtonAlwaysVisible = this.setting("freezeButtonAlwaysVisible", false);
-        this.multipleFoldingEngines = this.setting("multipleFoldingEngines", false);
-        this.useContinuousColors = this.setting("useContinuousColors", false);
-        this.useExtendedColors = this.setting("useExtendedColors", false);
-        this.displayAuxInfo = this.setting("displayAuxInfo", false);
-        this.soundMute = this.setting("soundMute", false);
-        this.soundVolume = this.setting("soundVolume", 0.6);
-        this.lastUsedFolder = this.setting("lastUsedFolder", null);
-        this.pipEnabled = this.setting("pipEnabled", false);
-        this.simpleGraphics = this.setting("simpleGraphics", false);
+        this.showChat = this.setting<boolean>('showChat', true);
+        this.showNumbers = this.setting<boolean>('showNumbers', true);
+        this.showLetters = this.setting<boolean>('showLetters', false);
+        this.displayFreeEnergies = this.setting<boolean>('displayFreeEnergies', false);
+        this.highlightRestricted = this.setting<boolean>('highlightRestricted', true);
+        this.autohideToolbar = this.setting<boolean>('autohideToolbar', false);
+        this.freezeButtonAlwaysVisible = this.setting<boolean>('freezeButtonAlwaysVisible', false);
+        this.multipleFoldingEngines = this.setting<boolean>('multipleFoldingEngines', false);
+        this.useContinuousColors = this.setting<boolean>('useContinuousColors', false);
+        this.useExtendedColors = this.setting<boolean>('useExtendedColors', false);
+        this.displayAuxInfo = this.setting<boolean>('displayAuxInfo', false);
+        this.soundMute = this.setting<boolean>('soundMute', false);
+        this.soundVolume = this.setting('soundVolume', 0.6);
+        this.lastUsedFolder = this.setting('lastUsedFolder', null);
+        this.pipEnabled = this.setting<boolean>('pipEnabled', false);
+        this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
 
-        this.designBrowserColumnNames = this.setting("designBrowserColumnNames", null);
-        this.designBrowserSelectedSolutionIDs = this.setting("designBrowserSelectedSolutionIDs", null);
+        this.designBrowserColumnNames = this.setting('designBrowserColumnNames', null);
+        this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to
         // indexedDB/localforage/SaveGameManager - eventually this might be able to be dropped,
         // but anyone who hasn't run Eterna between the EternaJS launch and the time it was
         // introduced will loose any autosaves
-        this.saveGamesTransfered = this.setting("saveGamesTransfered", false);
+        this.saveGamesTransfered = this.setting<boolean>('saveGamesTransfered', false);
 
-        if (this.saveGamesTransfered.value == false) {
+        if (this.saveGamesTransfered.value === false) {
             this._namespace.each((val, key) => {
                 if (key.match(/^(puz|puzedit)_.*$/)) {
                     Eterna.saveManager.save(key, val);

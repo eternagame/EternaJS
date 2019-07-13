@@ -1,6 +1,5 @@
-/* import MultiFailureError from "./MultiFailureError";
-import Registration from "./Registration"; */
-import {MultiFailureError, Registration} from ".";
+import MultiFailureError from './MultiFailureError';
+import Registration from './Registration';
 
 /** Collects Registrations to allow mass operations on them. */
 export default class RegistrationGroup implements Registration {

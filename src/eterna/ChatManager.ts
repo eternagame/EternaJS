@@ -1,13 +1,13 @@
-import {EternaSettings} from "eterna/settings";
-import * as log from "loglevel";
+import * as log from 'loglevel';
+import EternaSettings from './settings/EternaSettings';
 
 export default class ChatManager {
-    public constructor(chatboxID: string, settings: EternaSettings) {
+    constructor(chatboxID: string, settings: EternaSettings) {
         this._chatbox = document.getElementById(chatboxID);
         if (this._chatbox == null) {
             log.warn(`Missing chatbox (id=${chatboxID})`);
         } else {
-            let iframe: HTMLIFrameElement = this._chatbox.getElementsByTagName("iframe")[0];
+            let iframe: HTMLIFrameElement = this._chatbox.getElementsByTagName('iframe')[0];
             if (iframe == null) {
                 log.warn(`No iframe in chatbox (id=${chatboxID}`);
             } else {
@@ -22,7 +22,7 @@ export default class ChatManager {
     /** Posts a message to the chat */
     public postText(text: string): void {
         if (this._chatIFrame != null) {
-            this._chatIFrame.postMessage({type: "chat-message", content: text}, "*");
+            this._chatIFrame.postMessage({type: 'chat-message', content: text}, '*');
         }
     }
 
@@ -35,7 +35,7 @@ export default class ChatManager {
     /** Decreases the hideChat counter. Chat is visible if the counter is 0. */
     public popHideChat(): void {
         if (this._hideChat <= 0) {
-            log.warn("popHideChat, but no matching pushHideChat");
+            log.warn('popHideChat, but no matching pushHideChat');
         } else {
             this._hideChat--;
             this.updateChatVisibility();
@@ -48,8 +48,8 @@ export default class ChatManager {
         }
 
         let show = this._settings.showChat.value && this._hideChat <= 0;
-        this._chatbox.style.display = show ? null : "none";
-        if (show) this._chatIFrame.postMessage({type: "chat-scroll"}, "*");
+        this._chatbox.style.display = show ? null : 'none';
+        if (show) this._chatIFrame.postMessage({type: 'chat-scroll'}, '*');
     }
 
     private readonly _chatbox: HTMLElement;

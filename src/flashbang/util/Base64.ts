@@ -1,6 +1,6 @@
-import * as base64js from "base64-js";
-import {DisplayObject, Sprite, Texture} from "pixi.js";
-import {DisplayUtil} from ".";
+import * as base64js from 'base64-js';
+import {DisplayObject, Sprite, Texture} from 'pixi.js';
+import DisplayUtil from './DisplayUtil';
 
 export default class Base64 {
     /** Renders a DisplayObject or Texture to a PNG and base64-encodes it */

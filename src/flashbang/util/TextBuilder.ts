@@ -1,7 +1,7 @@
-import {Text, TextStyle, TextStyleOptions} from "pixi.js";
+import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
 
 export default class TextBuilder {
-    public constructor(text: string = "") {
+    constructor(text: string = '') {
         this.text(text);
     }
 
@@ -15,7 +15,7 @@ export default class TextBuilder {
 
     public computeLineHeight(): number {
         let dummy = this.build();
-        dummy.text = "A";
+        dummy.text = 'A';
         return dummy.height;
     }
 
@@ -49,8 +49,8 @@ export default class TextBuilder {
 
     public bold(value: boolean = true): TextBuilder {
         if (value) {
-            this.fontWeight("bold");
-        } else if (this._style.fontWeight === "bold") {
+            this.fontWeight('bold');
+        } else if (this._style.fontWeight === 'bold') {
             this._style.fontWeight = undefined;
         }
         return this;
@@ -63,24 +63,24 @@ export default class TextBuilder {
     }
 
     /** Horizontal alignment for multiline (wordwrapped) text. @default "center" */
-    public hAlign(align: "left" | "center" | "right"): TextBuilder {
+    public hAlign(align: 'left' | 'center' | 'right'): TextBuilder {
         this._style.align = align;
         return this;
     }
 
     /** Equivalent to <code>hAlign(HAlign.LEFT)</code> */
     public hAlignLeft(): TextBuilder {
-        return this.hAlign("left");
+        return this.hAlign('left');
     }
 
     /** Equivalent to <code>hAlign(Align.CENTER)</code> */
     public hAlignCenter(): TextBuilder {
-        return this.hAlign("center");
+        return this.hAlign('center');
     }
 
     /** Equivalent to <code>hAlign(HAlign.RIGHT)</code> */
     public hAlignRight(): TextBuilder {
-        return this.hAlign("right");
+        return this.hAlign('right');
     }
 
     /** Enables or disables word wrapping. @default false */

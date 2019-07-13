@@ -1,4 +1,5 @@
-import {ROPWait, RScriptOp} from ".";
+import ROPWait from './ROPWait';
+import RScriptOp from './RScriptOp';
 
 /*
  * RScript Operation Tree.
@@ -42,14 +43,12 @@ export default class RScriptOpTree {
             } else if (this._curptr.isPaused() && this._waitQueue.indexOf(this._curptr)) {
                 this._waitQueue.push(this._curptr);
                 return null;
-            } else {
+            } else if (this.checkWaitQueueContinue()) {
                 // If it cannot then see if the wait queue is clear.
-                if (this.checkWaitQueueContinue()) {
-                    // Clear queue and proceed.
-                    this._waitQueue.splice(0);
-                } else {
-                    return null;
-                }
+                // Clear queue and proceed.
+                this._waitQueue.splice(0);
+            } else {
+                return null;
             }
         }
 

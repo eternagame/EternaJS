@@ -1,31 +1,28 @@
-import MultiStyleText from "pixi-multistyle-text";
+import MultiStyleText from 'pixi-multistyle-text';
 import {
     Container, Graphics, Point, Sprite, Text, Texture
-} from "pixi.js";
-import {HAlign, VAlign} from "flashbang/core";
-import {ContainerObject, Enableable, SceneObject} from "flashbang/objects";
+} from 'pixi.js';
+import {RegistrationGroup} from 'signals';
+import EPars from 'eterna/EPars';
 import {
-    AlphaTask, DelayTask, LocationTask, ParallelTask, ScaleTask, SerialTask, VisibleTask
-} from "flashbang/tasks";
-import {
-    DisplayUtil, Easing, StyledTextBuilder, TextureUtil
-} from "flashbang/util";
-import {RegistrationGroup} from "signals";
-import EPars from "eterna/EPars";
-import {ConstraintType} from "eterna/puzzle";
-import {BitmapManager, Bitmaps} from "eterna/resources";
-import {Fonts} from "eterna/util";
-import {
-    Band, PoseThumbnail, PoseThumbnailType, TextBalloon
-} from ".";
+    ContainerObject, Enableable, Easing, LocationTask, AlphaTask, StyledTextBuilder,
+    DisplayUtil, TextureUtil, HAlign, VAlign, SerialTask, VisibleTask, ParallelTask, ScaleTask, SceneObject, DelayTask
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import {ConstraintType} from 'eterna/puzzle/Constraints';
+import TextBalloon from './TextBalloon';
+import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
+import Band from './Band';
 
 export enum ConstraintBoxType {
-    DEFAULT = "DEFAULT",
-    MISSION_SCREEN = "MISSION_SCREEN" // slightly minimized, requirements text on the right
+    DEFAULT = 'DEFAULT',
+    MISSION_SCREEN = 'MISSION_SCREEN' // slightly minimized, requirements text on the right
 }
 
 export default class ConstraintBox extends ContainerObject implements Enableable {
-    public constructor(type: ConstraintBoxType = ConstraintBoxType.DEFAULT) {
+    constructor(type: ConstraintBoxType = ConstraintBoxType.DEFAULT) {
         super();
 
         this._boxType = type;
@@ -80,43 +77,43 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         this._enlarged = false;
 
-        this._valText = new MultiStyleText("", {
+        this._valText = new MultiStyleText('', {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 18,
                 fill: 0xffffff,
-                fontStyle: "bold",
+                fontStyle: 'bold',
                 letterSpacing: -0.5
             }
         });
         this._valText.visible = false;
         this.container.addChild(this._valText);
 
-        this._bigText = new MultiStyleText("", {
+        this._bigText = new MultiStyleText('', {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 23,
                 fill: 0xffffff,
-                fontStyle: "bold",
+                fontStyle: 'bold',
                 letterSpacing: -0.5
             }
         });
         this._bigText.visible = false;
         this.container.addChild(this._bigText);
 
-        this._noText = Fonts.arial("NO", 16).color(0xffffff).bold().letterSpacing(-0.5)
+        this._noText = Fonts.arial('NO', 16).color(0xffffff).bold().letterSpacing(-0.5)
             .build();
         this._noText.position = new Point(35, 0);
         this._noText.visible = false;
         this.container.addChild(this._noText);
 
-        this._stateText = Fonts.arial("", 18).color(0xffffff).bold().letterSpacing(-0.5)
+        this._stateText = Fonts.arial('', 18).color(0xffffff).bold().letterSpacing(-0.5)
             .build();
         this._stateText.position = new Point(3, 45);
         this._stateText.visible = false;
         this.container.addChild(this._stateText);
 
-        this._reqClarifyText = new MultiStyleText("", {
+        this._reqClarifyText = new MultiStyleText('', {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 11,
@@ -128,7 +125,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqClarifyText.visible = false;
         this.container.addChild(this._reqClarifyText);
 
-        this._reqStatTxt = new MultiStyleText("", {
+        this._reqStatTxt = new MultiStyleText('', {
             default: {
                 fontFamily: Fonts.ARIAL,
                 fontSize: 11,
@@ -158,7 +155,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.container.addChild(this._flag);
 
         if (this._boxType === ConstraintBoxType.MISSION_SCREEN) {
-            this._sideTxt = new MultiStyleText("", {
+            this._sideTxt = new MultiStyleText('', {
                 default: {
                     fontFamily: Fonts.STDFONT_REGULAR,
                     fontSize: 16,
@@ -227,41 +224,43 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         return this._constraintType;
     }
 
-    public getWrongPairs(native_pairs: number[], target_pairs: number[], structure_constraints: any[], satisfied: boolean): number[] {
-        let wrong_pairs: number[] = new Array(native_pairs.length);
+    public getWrongPairs(
+        naturalPairs: number[], targetPairs: number[], structureConstraints: any[], satisfied: boolean
+    ): number[] {
+        let wrongPairs: number[] = new Array(naturalPairs.length);
 
         if (this._constraintType === ConstraintType.SHAPE) {
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
-                wrong_pairs[ii] = -1;
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
+                wrongPairs[ii] = -1;
             }
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
-                if (native_pairs[ii] !== target_pairs[ii]) {
-                    if (structure_constraints == null || structure_constraints[ii]) {
-                        wrong_pairs[ii] = 1;
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
+                if (naturalPairs[ii] !== targetPairs[ii]) {
+                    if (structureConstraints == null || structureConstraints[ii]) {
+                        wrongPairs[ii] = 1;
                     } else {
-                        wrong_pairs[ii] = 0;
+                        wrongPairs[ii] = 0;
                     }
-                } else if (structure_constraints == null || structure_constraints[ii]) {
-                    wrong_pairs[ii] = -1;
+                } else if (structureConstraints == null || structureConstraints[ii]) {
+                    wrongPairs[ii] = -1;
                 } else {
-                    wrong_pairs[ii] = 0;
+                    wrongPairs[ii] = 0;
                 }
             }
         } else if (this._constraintType === ConstraintType.ANTISHAPE) {
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
-                wrong_pairs[ii] = 0;
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
+                wrongPairs[ii] = 0;
             }
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
-                if (structure_constraints == null || structure_constraints[ii]) {
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
+                if (structureConstraints == null || structureConstraints[ii]) {
                     if (satisfied) {
-                        wrong_pairs[ii] = -1;
+                        wrongPairs[ii] = -1;
                     } else {
-                        wrong_pairs[ii] = 1;
+                        wrongPairs[ii] = 1;
                     }
                 }
             }
         }
-        return wrong_pairs;
+        return wrongPairs;
     }
 
     public set flagged(vis: boolean) {
@@ -330,17 +329,17 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
             tooltip.append(`You must have ${val.toString()} or `);
 
             if (isMissionScreen) {
-                tooltip.append("more", "altText");
+                tooltip.append('more', 'altText');
             } else {
-                tooltip.append("more");
+                tooltip.append('more');
             }
 
-            tooltip.append("boosted loops.");
+            tooltip.append('boosted loops.');
 
             if (isMissionScreen) {
                 tooltip.popStyle();
@@ -361,23 +360,23 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have");
+            tooltip.append('You must have');
 
             if (isMissionScreen) {
-                tooltip.append(" no ", "altText");
+                tooltip.append(' no ', 'altText');
             } else {
-                tooltip.append(" no ");
+                tooltip.append(' no ');
             }
 
-            tooltip.append(`${EPars.getColoredLetter("U")}-${EPars.getColoredLetter("G")} pairs.`);
+            tooltip.append(`${EPars.getColoredLetter('U')}-${EPars.getColoredLetter('G')} pairs.`);
 
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
 
-            this._reqClarifyText.text = "NO UG PAIRS";
+            this._reqClarifyText.text = 'NO UG PAIRS';
             this._reqStatTxt.text = stat.toString();
 
             this._req.texture = isMissionScreen
@@ -392,17 +391,17 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
             tooltip.append(`You must have ${val.toString()} or `);
 
             if (isMissionScreen) {
-                tooltip.append("more ", "altText");
+                tooltip.append('more ', 'altText');
             } else {
-                tooltip.append("more ");
+                tooltip.append('more ');
             }
 
-            tooltip.append(`${EPars.getColoredLetter("U")}-${EPars.getColoredLetter("G")} pairs.`);
+            tooltip.append(`${EPars.getColoredLetter('U')}-${EPars.getColoredLetter('G')} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -424,24 +423,24 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have ");
+            tooltip.append('You must have ');
 
-            let newClarifyText = "";
+            let newClarifyText = '';
 
             if (constraintType === ConstraintType.GCMIN) {
                 tooltip.append(`${val.toString()} or more`);
                 newClarifyText += `${(Number(val)).toString()} OR MORE`;
             } else if (constraintType === ConstraintType.GC) {
-                tooltip.append("at most", "altText").append(` ${(Number(val)).toString()}`);
+                tooltip.append('at most', 'altText').append(` ${(Number(val)).toString()}`);
                 newClarifyText += `${(Number(val)).toString()} OR FEWER`;
             } else if (constraintType === ConstraintType.NOGC) {
-                tooltip.append("no");
-                newClarifyText += "NO GC PAIRS";
+                tooltip.append('no');
+                newClarifyText += 'NO GC PAIRS';
             }
 
-            tooltip.append(` ${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs.`);
+            tooltip.append(` ${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('C')} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -467,19 +466,19 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have ");
+            tooltip.append('You must have ');
 
-            let newClarifyText = "";
+            let newClarifyText = '';
             if (constraintType === ConstraintType.AU) {
                 tooltip.append(`${val.toString()} or more`);
                 newClarifyText += `${(Number(val)).toString()} OR MORE`;
             } else if (constraintType === ConstraintType.AUMAX) {
-                tooltip.append("at most", "altText").append((Number(val)).toString());
+                tooltip.append('at most', 'altText').append((Number(val)).toString());
                 newClarifyText += `${(Number(val)).toString()} OR FEWER`;
             }
-            tooltip.append(` ${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs.`);
+            tooltip.append(` ${EPars.getColoredLetter('A')}-${EPars.getColoredLetter('U')} pairs.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -502,28 +501,34 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 this._stateText.visible = true;
                 this._stateText.text = val.index + 1;
             } else {
-                tooltip.append("Your RNA must fold into the outlined structure.");
+                tooltip.append('Your RNA must fold into the outlined structure.');
             }
 
-            let target_pairs: number[] = val.target;
-            let native_pairs: number[] = val.native;
-            let {structure_constraints} = val;
-            let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
+            let targetPairs: number[] = val.target;
+            let naturalPairs: number[] = val.native;
+            let {structureConstraints} = val;
+            let wrongPairs: number[] = this.getWrongPairs(naturalPairs, targetPairs, structureConstraints, satisfied);
 
-            let sequence: number[] = new Array(native_pairs.length);
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
+            let sequence: number[] = new Array(naturalPairs.length);
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
             if (this._enlarged) {
                 this._smallThumbnail.visible = false;
                 this._bigThumbnail.visible = true;
-                PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                PoseThumbnail.drawToSprite(
+                    this._bigThumbnail, sequence, targetPairs,
+                    7, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+                );
                 DisplayUtil.center(this._bigThumbnail, this._bg);
             } else {
                 this._bigThumbnail.visible = false;
                 this._smallThumbnail.visible = true;
-                PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                PoseThumbnail.drawToSprite(
+                    this._smallThumbnail, sequence, targetPairs,
+                    3, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+                );
                 DisplayUtil.center(this._smallThumbnail, this._bg);
             }
 
@@ -537,28 +542,34 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 this._stateText.visible = true;
                 this._stateText.text = val.index + 1;
             } else {
-                tooltip.append("Your RNA must NOT have the structure in white outline.");
+                tooltip.append('Your RNA must NOT have the structure in white outline.');
             }
 
-            let target_pairs: number[] = val.target;
-            let native_pairs: number[] = val.native;
-            let {structure_constraints} = val;
-            let wrong_pairs: number[] = this.getWrongPairs(native_pairs, target_pairs, structure_constraints, satisfied);
+            let targetPairs: number[] = val.target;
+            let naturalPairs: number[] = val.native;
+            let {structureConstraints} = val;
+            let wrongPairs: number[] = this.getWrongPairs(naturalPairs, targetPairs, structureConstraints, satisfied);
 
-            let sequence: number[] = new Array(native_pairs.length);
-            for (let ii = 0; ii < wrong_pairs.length; ii++) {
+            let sequence: number[] = new Array(naturalPairs.length);
+            for (let ii = 0; ii < wrongPairs.length; ii++) {
                 sequence[ii] = EPars.RNABASE_ADENINE;
             }
 
             if (this._enlarged) {
                 this._smallThumbnail.visible = false;
                 this._bigThumbnail.visible = true;
-                PoseThumbnail.drawToSprite(this._bigThumbnail, sequence, target_pairs, 7, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                PoseThumbnail.drawToSprite(
+                    this._bigThumbnail, sequence, targetPairs,
+                    7, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+                );
                 DisplayUtil.center(this._bigThumbnail, this._bg);
             } else {
                 this._bigThumbnail.visible = false;
                 this._smallThumbnail.visible = true;
-                PoseThumbnail.drawToSprite(this._smallThumbnail, sequence, target_pairs, 3, PoseThumbnailType.WRONG_COLORED, 0, wrong_pairs, false, 0);
+                PoseThumbnail.drawToSprite(
+                    this._smallThumbnail, sequence, targetPairs,
+                    3, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+                );
                 DisplayUtil.center(this._smallThumbnail, this._bg);
             }
 
@@ -569,25 +580,25 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqClarifyText.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
 
             tooltip.append(`In state ${(Number(val.index) + 1).toString()}, your RNA must:\n`);
 
             let clarifyTextBuilder = new StyledTextBuilder(this._reqClarifyText.style);
             for (let ii = 0; ii < val.bind.length; ii++) {
-                tooltip.append("- ");
+                tooltip.append('- ');
                 if (isMissionScreen) {
-                    tooltip.pushStyle("altText");
+                    tooltip.pushStyle('altText');
                 }
-                tooltip.append(val.bind[ii] ? "bind" : "NOT bind");
+                tooltip.append(val.bind[ii] ? 'bind' : 'NOT bind');
                 if (isMissionScreen) {
                     tooltip.popStyle();
                 }
-                tooltip.append(` with ${val.oligo_name[ii]}\n`);
+                tooltip.append(` with ${val.oligoNames[ii]}\n`);
 
                 if (ii > 0) {
-                    clarifyTextBuilder.append("\u2003");
+                    clarifyTextBuilder.append('\u2003');
                 }
 
                 clarifyTextBuilder.append(` ${val.label[ii]}`, {fill: val.bind[ii] ? 0xffffff : 0x808080});
@@ -615,9 +626,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._bgGraphics.lineTo((111 + tw) * 0.5, 27);
 
             for (let ii = 0; ii < val.bind.length; ii++) {
-                let ctrl_y: number = (val.bind[ii] ? 22 : 14);
-                this._bgGraphics.moveTo(orig + (ii * 2) * step, ctrl_y);
-                this._bgGraphics.lineTo(orig + (ii * 2 + 1) * step, ctrl_y);
+                let ctrlY: number = (val.bind[ii] ? 22 : 14);
+                this._bgGraphics.moveTo(orig + (ii * 2) * step, ctrlY);
+                this._bgGraphics.lineTo(orig + (ii * 2 + 1) * step, ctrlY);
             }
             this._bg.visible = true;
 
@@ -630,15 +641,15 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             || constraintType === ConstraintType.G || constraintType === ConstraintType.GMAX
             || constraintType === ConstraintType.U || constraintType === ConstraintType.UMAX) {
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have ");
+            tooltip.append('You must have ');
 
             let letter: string = constraintType.substr(0, 1);
             if (constraintType === letter) {
                 tooltip.append(`${val.toString()} or more`);
             } else {
-                tooltip.append("at most", "altText").append(` ${(Number(val)).toString()}`);
+                tooltip.append('at most', 'altText').append(` ${(Number(val)).toString()}`);
             }
             tooltip.append(` ${EPars.getColoredLetter(letter)}s.`);
             if (isMissionScreen) {
@@ -667,7 +678,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
             tooltip.append(`You must have ${val.toString()} or more pairs`);
             if (isMissionScreen) {
@@ -766,18 +777,18 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
             tooltip.append(`You must have a stack with ${val.toString()} or more pairs.`);
             tooltip.apply(this._bigText);
-        } else if (constraintType.lastIndexOf("CONSECUTIVE_") >= 0) {
+        } else if (constraintType.lastIndexOf('CONSECUTIVE_') >= 0) {
             this._valText.visible = true;
             this._reqClarifyText.visible = true;
             this._reqStatTxt.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have ");
+            tooltip.append('You must have ');
 
             let letter: string = constraintType.substr(12, 1);
-            tooltip.append("at most", "altText")
+            tooltip.append('at most', 'altText')
                 .append(` ${(Number(val) - 1).toString()} ${EPars.getColoredLetter(letter)}s in a row.`);
             if (isMissionScreen) {
                 tooltip.popStyle();
@@ -811,44 +822,44 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                     fill: 0xC0DCE7,
                     letterSpacing: -0.5
                 });
-                noGoodBuilder.addStyle("redText", {fill: 0xff0000});
+                noGoodBuilder.addStyle('redText', {fill: 0xff0000});
 
-                if (!(val.g_count < val.g_max)) {
-                    noGoodBuilder.append((val.g_count).toString(), "redText").append("G");
+                if (!(val.gCount < val.gMax)) {
+                    noGoodBuilder.append((val.gCount).toString(), 'redText').append('G');
                 }
 
-                if (!(val.c_count < val.c_max)) {
-                    noGoodBuilder.append((val.c_count).toString(), "redText").append("C");
+                if (!(val.cCount < val.cMax)) {
+                    noGoodBuilder.append((val.cCount).toString(), 'redText').append('C');
                 }
 
-                if (!(val.a_count < val.a_max)) {
-                    noGoodBuilder.append((val.a_count).toString(), "redText").append("A");
+                if (!(val.aCount < val.aMax)) {
+                    noGoodBuilder.append((val.aCount).toString(), 'redText').append('A');
                 }
 
                 this._reqStatTxt.visible = true;
                 if (noGoodBuilder.text.length > 0) {
                     noGoodBuilder.apply(this._reqStatTxt);
                 } else {
-                    this._reqStatTxt.text = "OK";
+                    this._reqStatTxt.text = 'OK';
                 }
             } else {
                 this._reqStatTxt.visible = false;
             }
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have:\n")
-                .append("- ").append("at most", "altText").append(` ${val.g_max - 1} `)
-                .append(`${EPars.getColoredLetter("G")}s in a row\n`)
-                .append("- ")
-                .append("at most", "altText")
-                .append(` ${val.c_max - 1} `)
-                .append(`${EPars.getColoredLetter("C")}s in a row\n`)
-                .append("- ")
-                .append("at most", "altText")
-                .append(` ${val.a_max - 1} `)
-                .append(`${EPars.getColoredLetter("A")}s in a row\n`);
+            tooltip.append('You must have:\n')
+                .append('- ').append('at most', 'altText').append(` ${val.gMax - 1} `)
+                .append(`${EPars.getColoredLetter('G')}s in a row\n`)
+                .append('- ')
+                .append('at most', 'altText')
+                .append(` ${val.cMax - 1} `)
+                .append(`${EPars.getColoredLetter('C')}s in a row\n`)
+                .append('- ')
+                .append('at most', 'altText')
+                .append(` ${val.aMax - 1} `)
+                .append(`${EPars.getColoredLetter('A')}s in a row\n`);
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
@@ -858,22 +869,22 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._reqClarifyText.visible = true;
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
-            tooltip.append("You must have a ");
+            tooltip.append('You must have a ');
 
             if (isMissionScreen) {
-                tooltip.append("unique ", "altText");
+                tooltip.append('unique ', 'altText');
             } else {
-                tooltip.append("unique ");
+                tooltip.append('unique ');
             }
-            tooltip.append("barcode.");
+            tooltip.append('barcode.');
 
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
 
-            this._reqClarifyText.text = "MUST BE UNIQUE";
+            this._reqClarifyText.text = 'MUST BE UNIQUE';
 
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaBarcodeMissionReq)
@@ -881,30 +892,30 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
             this._req.visible = true;
             this._outline.visible = true;
-        } else if (constraintType.lastIndexOf("OLIGO_") >= 0) {
+        } else if (constraintType.lastIndexOf('OLIGO_') >= 0) {
             this._reqClarifyText.visible = true;
 
-            let binder: boolean = (constraintType.lastIndexOf("UNBOUND") < 0);
+            let binder: boolean = (constraintType.lastIndexOf('UNBOUND') < 0);
 
             if (isMissionScreen) {
-                tooltip.pushStyle("altTextMain");
+                tooltip.pushStyle('altTextMain');
             }
             tooltip.append(`In state ${(Number(val) + 1).toString()}, the oligo must `);
             if (isMissionScreen) {
-                tooltip.pushStyle("altText");
+                tooltip.pushStyle('altText');
             }
-            tooltip.append(binder ? "bind" : "NOT bind");
+            tooltip.append(binder ? 'bind' : 'NOT bind');
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
-            tooltip.append(" with your RNA.");
+            tooltip.append(' with your RNA.');
             if (isMissionScreen) {
                 tooltip.popStyle();
             }
 
-            this._reqClarifyText.text = binder ? "MUST BIND" : "MAY NOT BIND";
+            this._reqClarifyText.text = binder ? 'MUST BIND' : 'MAY NOT BIND';
 
-            const ico = binder ? "Bound" : "Unbound";
+            const ico = binder ? 'Bound' : 'Unbound';
             this._req.texture = isMissionScreen
                 ? BitmapManager.getBitmapNamed(`Nova${ico}OligoMissionReq`)
                 : BitmapManager.getBitmapNamed(`Nova${ico}OligoReq`);
@@ -925,10 +936,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._bgGraphics.drawRoundedRect(0, 0, 111, isMissionScreen ? 55 : 75, 20);
             this._bgGraphics.endFill();
 
-            let {data_png} = val;
-            if (data_png != null) {
+            let dataPNG = val['dataPNG'];
+            if (dataPNG != null) {
                 this._icon.visible = true;
-                TextureUtil.fromBase64PNG(data_png).then((tex) => {
+                TextureUtil.fromBase64PNG(dataPNG).then((tex) => {
                     this._icon.texture = tex;
                     this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
                 });
@@ -969,7 +980,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._outline.visible = false;
             tooltip.apply(this._sideTxt);
             if (this._req.visible) {
-                this._sideTxt.position = new Point(this._req.width + 18, this._req.height / 2 - this._sideTxt.height / 2);
+                this._sideTxt.position = new Point(
+                    this._req.width + 18, this._req.height / 2 - this._sideTxt.height / 2
+                );
             } else {
                 this._sideTxt.position = new Point(111 + 18, 55 / 2 - this._sideTxt.height / 2);
             }
@@ -1082,10 +1095,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
     private setTooltip(styledText: StyledTextBuilder, satisfied: boolean): void {
         if (!satisfied) {
-            styledText = styledText.clone().append("\n").append("Unsatisfied", {fill: 0xff0000});
+            styledText = styledText.clone().append('\n').append('Unsatisfied', {fill: 0xff0000});
         }
 
-        let balloon = new TextBalloon("", 0x0, 0.8);
+        let balloon = new TextBalloon('', 0x0, 0.8);
         balloon.styledText = styledText;
         this.setMouseOverObject(balloon);
     }
@@ -1109,7 +1122,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
             this._mouseOverObject = obj;
 
-            const MOUSE_OVER_ANIM = "MouseOverAnim";
+            const MOUSE_OVER_ANIM = 'MouseOverAnim';
 
             let isMouseOver = false;
             this._mouseOverRegs = new RegistrationGroup();
@@ -1144,10 +1157,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             letterSpacing: -0.5,
             wordWrap: true,
             wordWrapWidth: 250
-        }).addStyle("altText", {
+        }).addStyle('altText', {
             fontFamily: Fonts.STDFONT_MEDIUM,
             leading: 10
-        }).addStyle("altTextMain", {
+        }).addStyle('altTextMain', {
             fontFamily: Fonts.STDFONT_REGULAR,
             leading: 5
         });
@@ -1198,8 +1211,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _mouseOverRegs: RegistrationGroup;
     private _mouseOverObject: SceneObject;
 
-    private static readonly LOCATION_ANIM = "AnimateLocation";
-    private static readonly BIG_TEXT_FADE_ANIM = "BigTextFadeAnim";
-    private static readonly BACKLIGHT_ANIM = "BacklightAnim";
-    private static readonly FGLOW_ANIM = "FGlowAnim";
+    private static readonly LOCATION_ANIM = 'AnimateLocation';
+    private static readonly BIG_TEXT_FADE_ANIM = 'BigTextFadeAnim';
+    private static readonly BACKLIGHT_ANIM = 'BacklightAnim';
+    private static readonly FGLOW_ANIM = 'FGlowAnim';
 }

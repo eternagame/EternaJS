@@ -1,13 +1,13 @@
-import {Point} from "pixi.js";
-import {Flashbang} from "flashbang/core";
-import {AlphaTask, RepeatingTask, SerialTask} from "flashbang/tasks";
-import {Easing} from "flashbang/util";
-import {Fonts} from "eterna/util";
-import {Dialog} from ".";
+import {Point} from 'pixi.js';
+import Fonts from 'eterna/util/Fonts';
+import {
+    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang
+} from 'flashbang';
+import Dialog from './Dialog';
 
 /** Dims the screen and shows a notification text that fades in and out */
 export default class AsyncProcessDialog extends Dialog<void> {
-    public constructor(text: string) {
+    constructor(text: string) {
         super();
         this._text = text;
     }

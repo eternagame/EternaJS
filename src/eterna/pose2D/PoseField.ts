@@ -1,10 +1,10 @@
-import {Graphics, Point} from "pixi.js";
-import {Flashbang, GameObjectRef} from "flashbang/core";
-import {InputUtil, KeyboardEventType, KeyboardListener, KeyCode, MouseWheelListener} from "flashbang/input";
-import {ContainerObject} from "flashbang/objects";
-import {Dragger} from "flashbang/util";
-import {ROPWait} from "eterna/rscript";
-import {Pose2D} from ".";
+import {Graphics, Point} from 'pixi.js';
+import {
+    ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
+    Dragger, KeyboardEventType, KeyCode, GameObjectRef
+} from 'flashbang';
+import ROPWait from 'eterna/rscript/ROPWait';
+import Pose2D from './Pose2D';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -24,7 +24,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.onMouseDown(e));
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
@@ -83,21 +83,19 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public zoomIn(): void {
-        let prev_zoom: number = this._pose.zoomLevel;
+        let prevZoom: number = this._pose.zoomLevel;
 
-        if (prev_zoom === 0)
-            return;
+        if (prevZoom === 0) return;
 
-        this._pose.setZoomLevel(prev_zoom - 1);
+        this._pose.setZoomLevel(prevZoom - 1);
     }
 
     public zoomOut(): void {
-        let prev_zoom: number = this._pose.zoomLevel;
+        let prevZoom: number = this._pose.zoomLevel;
 
-        if (prev_zoom === Pose2D.ZOOM_SPACINGS.length - 1)
-            return;
+        if (prevZoom === Pose2D.ZOOM_SPACINGS.length - 1) return;
 
-        this._pose.setZoomLevel(prev_zoom + 1);
+        this._pose.setZoomLevel(prevZoom + 1);
     }
 
     public get pose(): Pose2D {
@@ -151,7 +149,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     }
 
     public onKeyboardEvent(e: KeyboardEvent): boolean {
-        if (!this.display.visible || e.type != KeyboardEventType.KEY_DOWN) {
+        if (!this.display.visible || e.type !== KeyboardEventType.KEY_DOWN) {
             return false;
         }
 

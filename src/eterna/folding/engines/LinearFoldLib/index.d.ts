@@ -21,18 +21,18 @@
 
 import * as stdcpp from "../../../emscripten/stdcpp";
 
-export = LinearFold_lib;
+export = LinearFoldLib;
 
 /*~ Write your module's methods and properties in this class */
-declare class LinearFold_lib {
-    FullFoldDefault(seqString: string): LinearFold_lib.FullFoldResult;
-    FullEval(seqString: string, structString: string): LinearFold_lib.FullEvalResult;
+declare class LinearFoldLib {
+    FullFoldDefault(seqString: string): LinearFoldLib.FullFoldResult;
+    FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block.
  */
-declare namespace LinearFold_lib {
+declare namespace LinearFoldLib {
     export interface FullFoldResult {
         structure: string;
 

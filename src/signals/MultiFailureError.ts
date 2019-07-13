@@ -16,14 +16,14 @@ export default class MultiFailureError extends Error {
     }
 
     public getMessage(): string {
-        let buf = "";
+        let buf = '';
         for (let failure of this._failures) {
             if (buf.length > 0) {
-                buf += ", ";
+                buf += ', ';
             }
             buf += MultiFailureError.getMessageInternal(failure, false);
         }
-        return `${this._failures.length}${this._failures.length !== 1 ? " failures: " : " failure: "}${buf}`;
+        return `${this._failures.length}${this._failures.length !== 1 ? ' failures: ' : ' failure: '}${buf}`;
     }
 
     private static getMessageInternal(error: any, wantStackTrace: boolean): string {
@@ -31,11 +31,11 @@ export default class MultiFailureError extends Error {
         // Error() is a top-level function that creates a new error object, rather than performing
         // a class-cast, as expected.
 
-        if (typeof (error) === "string") {
+        if (typeof (error) === 'string') {
             return error as string;
         } else if (error instanceof Error) {
             let e: Error = ((<Error>error));
-            return (wantStackTrace ? e.stack : e.message || "");
+            return (wantStackTrace ? e.stack : e.message || '');
         } else if (error instanceof ErrorEvent) {
             let ee: ErrorEvent = ((<ErrorEvent>error));
             return `${(ee as any).name

@@ -1,13 +1,12 @@
-import {ExtendedTextStyle} from "pixi-multistyle-text";
+import {ExtendedTextStyle} from 'pixi-multistyle-text';
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Text
-} from "pixi.js";
-import {Flashbang, GameObject, GameObjectRef} from "flashbang/core";
-import {Button} from "flashbang/objects";
-import {AlphaTask, DelayTask, SerialTask} from "flashbang/tasks";
-import {Easing, StyledTextBuilder} from "flashbang/util";
-import {Registration, RegistrationGroup} from "signals";
-import {Fonts} from "eterna/util";
+} from 'pixi.js';
+import {Registration, RegistrationGroup} from 'signals';
+import {
+    StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 
 /** A tooltip can be a string, styled text, or a function that creates a DisplayObject */
 export type Tooltip = (() => DisplayObject) | string | StyledTextBuilder;
@@ -24,7 +23,7 @@ export default class Tooltips extends GameObject {
         return Flashbang.curMode.getObjectWithId(Tooltips);
     }
 
-    public constructor(layer: Container) {
+    constructor(layer: Container) {
         super();
         this._layer = layer;
     }
@@ -39,7 +38,7 @@ export default class Tooltips extends GameObject {
     }
 
     public showTooltip(key: any, loc: Point, tooltip: Tooltip): void {
-        if (this._curTooltipKey == key) {
+        if (this._curTooltipKey === key) {
             return;
         }
 
@@ -62,7 +61,7 @@ export default class Tooltips extends GameObject {
     }
 
     public showTooltipFor(target: DisplayObject, key: any, tooltip: Tooltip): void {
-        if (this._curTooltipKey == key) {
+        if (this._curTooltipKey === key) {
             return;
         }
 
@@ -73,7 +72,7 @@ export default class Tooltips extends GameObject {
     }
 
     public removeTooltip(key: any): void {
-        if (this._curTooltipKey == key) {
+        if (this._curTooltipKey === key) {
             this.removeCurTooltip();
         }
     }
@@ -111,9 +110,9 @@ export default class Tooltips extends GameObject {
     }
 
     private static createTooltip(tooltip: Tooltip): DisplayObject {
-        if (typeof (tooltip) === "string" || tooltip instanceof StyledTextBuilder) {
+        if (typeof (tooltip) === 'string' || tooltip instanceof StyledTextBuilder) {
             let textField: Container;
-            if (typeof (tooltip) === "string") {
+            if (typeof (tooltip) === 'string') {
                 textField = new Text(tooltip, Tooltips.DEFAULT_STYLE);
             } else {
                 textField = tooltip.build();

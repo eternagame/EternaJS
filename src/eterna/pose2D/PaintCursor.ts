@@ -1,16 +1,16 @@
-import {Graphics, DisplayObject} from "pixi.js";
-import {Flashbang, GameObject, Updatable} from "flashbang/core";
-import EPars from "eterna/EPars";
+import {Graphics, DisplayObject} from 'pixi.js';
+import {GameObject, Flashbang, Updatable} from 'flashbang';
+import EPars from 'eterna/EPars';
 
 export default class PaintCursor extends GameObject implements Updatable {
-    public constructor() {
+    constructor() {
         super();
         this._graphics = new Graphics();
         this._color = PaintCursor.WHITE;
         this._outColor = PaintCursor.NULL;
     }
 
-    /*override*/
+    /* override */
     public get display(): DisplayObject {
         return this._graphics;
     }
@@ -21,55 +21,55 @@ export default class PaintCursor extends GameObject implements Updatable {
 
     public setShape(shape: number): void {
         switch (shape) {
-        case EPars.RNABASE_ADENINE:
-            this._color = PaintCursor.YELLOW;
-            this._outColor = PaintCursor.NULL;
-            break;
+            case EPars.RNABASE_ADENINE:
+                this._color = PaintCursor.YELLOW;
+                this._outColor = PaintCursor.NULL;
+                break;
 
-        case EPars.RNABASE_URACIL:
-            this._color = PaintCursor.BLUE;
-            this._outColor = PaintCursor.NULL;
-            break;
+            case EPars.RNABASE_URACIL:
+                this._color = PaintCursor.BLUE;
+                this._outColor = PaintCursor.NULL;
+                break;
 
-        case EPars.RNABASE_DELETE:
-        case EPars.RNABASE_GUANINE:
-            this._color = PaintCursor.RED;
-            this._outColor = PaintCursor.NULL;
-            break;
+            case EPars.RNABASE_DELETE:
+            case EPars.RNABASE_GUANINE:
+                this._color = PaintCursor.RED;
+                this._outColor = PaintCursor.NULL;
+                break;
 
-        case EPars.RNABASE_CYTOSINE:
-            this._color = PaintCursor.GREEN;
-            this._outColor = PaintCursor.NULL;
-            break;
+            case EPars.RNABASE_CYTOSINE:
+                this._color = PaintCursor.GREEN;
+                this._outColor = PaintCursor.NULL;
+                break;
 
-        case EPars.RNABASE_AU_PAIR:
-            this._color = PaintCursor.YELLOW;
-            this._outColor = PaintCursor.BLUE;
-            break;
+            case EPars.RNABASE_AU_PAIR:
+                this._color = PaintCursor.YELLOW;
+                this._outColor = PaintCursor.BLUE;
+                break;
 
-        case EPars.RNABASE_GU_PAIR:
-            this._color = PaintCursor.BLUE;
-            this._outColor = PaintCursor.RED;
-            break;
+            case EPars.RNABASE_GU_PAIR:
+                this._color = PaintCursor.BLUE;
+                this._outColor = PaintCursor.RED;
+                break;
 
-        case EPars.RNABASE_GC_PAIR:
-            this._color = PaintCursor.RED;
-            this._outColor = PaintCursor.GREEN;
-            break;
+            case EPars.RNABASE_GC_PAIR:
+                this._color = PaintCursor.RED;
+                this._outColor = PaintCursor.GREEN;
+                break;
 
-        case EPars.RNABASE_ADD_BASE:
-        case EPars.RNABASE_ADD_PAIR:
-            this._color = PaintCursor.YELLOW;
-            this._outColor = PaintCursor.NULL;
-            break;
+            case EPars.RNABASE_ADD_BASE:
+            case EPars.RNABASE_ADD_PAIR:
+                this._color = PaintCursor.YELLOW;
+                this._outColor = PaintCursor.NULL;
+                break;
 
-        default:
-            this._color = PaintCursor.WHITE;
-            this._outColor = PaintCursor.NULL;
+            default:
+                this._color = PaintCursor.WHITE;
+                this._outColor = PaintCursor.NULL;
         }
     }
 
-    /*override*/
+    /* override */
     public update(dt: number): void {
         this._graphics.clear();
 
@@ -114,4 +114,3 @@ export default class PaintCursor extends GameObject implements Updatable {
     private static readonly GREY = 0xC0C0C0;
     private static readonly NULL = 0x0;
 }
-

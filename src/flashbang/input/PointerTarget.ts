@@ -1,5 +1,5 @@
-import {DisplayObject} from "pixi.js";
-import {SignalView} from "signals";
+import {DisplayObject} from 'pixi.js';
+import {SignalView} from 'signals';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

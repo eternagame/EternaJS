@@ -1,11 +1,11 @@
-import {DisplayObject} from "pixi.js";
-import {Flashbang} from "../core";
+import {DisplayObject} from 'pixi.js';
+import Flashbang from 'flashbang/core/Flashbang';
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 export default class PointerCapture {
-    public constructor(root: DisplayObject) {
+    constructor(root: DisplayObject) {
         this._root = root;
     }
 
@@ -72,8 +72,8 @@ export default class PointerCapture {
     private static _captures: PointerCapture[] = [];
 
     private static readonly POINTER_EVENTS: InteractionPointerEvents[] = [
-        "pointerdown", "pointercancel", "pointerup",
-        "pointertap", "pointerupoutside", "pointermove",
-        "pointerover", "pointerout"
+        'pointerdown', 'pointercancel', 'pointerup',
+        'pointertap', 'pointerupoutside', 'pointermove',
+        'pointerover', 'pointerout'
     ];
 }

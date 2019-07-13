@@ -1,18 +1,19 @@
-import {
-    ROPTextbox, RScriptEnv, RScriptOp, RScriptUIElementID
-} from ".";
+import ROPTextbox from './ROPTextbox';
+import RScriptEnv from './RScriptEnv';
+import RScriptOp from './RScriptOp';
+import {RScriptUIElementID} from './RScriptUIElement';
 
 export enum ROPWaitType {
-    MOVECAMERA = "MOVECAMERA",
-    CLICKUI = "CLICKUI",
-    NUCLEOTIDECHANGE = "NUCLEOTIDECHANGE", // single range
-    PAINT = "PAINT",
-    TEXTBOX = "TEXTBOX",
-    NUCLEOTIDEPAIR = "NUCLEOTIDEPAIR",
-    MUTATION = "MUTATION", // list of indices
-    TIME = "TIME",
-    BLACKMARK = "BLACKMARK",
-    BLUEMARK = "BLUEMARK", // 'magic glue'
+    MOVECAMERA = 'MOVECAMERA',
+    CLICKUI = 'CLICKUI',
+    NUCLEOTIDECHANGE = 'NUCLEOTIDECHANGE', // single range
+    PAINT = 'PAINT',
+    TEXTBOX = 'TEXTBOX',
+    NUCLEOTIDEPAIR = 'NUCLEOTIDEPAIR',
+    MUTATION = 'MUTATION', // list of indices
+    TIME = 'TIME',
+    BLACKMARK = 'BLACKMARK',
+    BLUEMARK = 'BLUEMARK', // 'magic glue'
 }
 
 export default class ROPWait extends RScriptOp {
@@ -35,9 +36,13 @@ export default class ROPWait extends RScriptOp {
 
         let newColor: string = RScriptEnv.convertNucleotideIntToString(inColor);
 
-        ROPWait.genericNotifyClear(ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor));
+        ROPWait.genericNotifyClear(
+            ROPWaitType.NUCLEOTIDECHANGE, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor)
+        );
 
-        ROPWait.genericNotifyClear(ROPWaitType.MUTATION, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor));
+        ROPWait.genericNotifyClear(
+            ROPWaitType.MUTATION, (op: ROPWait): boolean => op.addNucleotideCompletion(i, newColor)
+        );
     }
 
     public static notifyBlackMark(i: number, marked: boolean): void {
@@ -80,14 +85,16 @@ export default class ROPWait extends RScriptOp {
     }
 
     public static notifyTextboxProgress(id: string): void {
-        ROPWait.genericNotifyClear(ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.id + ROPTextbox.ID_POSTFIX === id));
+        ROPWait.genericNotifyClear(
+            ROPWaitType.TEXTBOX, (op: ROPWait): boolean => (op.id + ROPTextbox.ID_POSTFIX === id)
+        );
     }
 
     public static notifyFinishRNA(): void {
         ROPWait.genericNotifyClear(ROPWaitType.NUCLEOTIDEPAIR, (): boolean => true);
     }
 
-    public constructor(waitType: ROPWaitType, env: RScriptEnv) {
+    constructor(waitType: ROPWaitType, env: RScriptEnv) {
         super(env);
         this._waitType = waitType;
         ROPWait.registerROPWait(this);
@@ -192,7 +199,7 @@ export default class ROPWait extends RScriptOp {
             this._allNucleotidesCompleted = [];
         }
 
-        if (this._expectedColor && color !== this._expectedColor && color !== "") {
+        if (this._expectedColor && color !== this._expectedColor && color !== '') {
             return false;
         }
 
@@ -253,66 +260,66 @@ export default class ROPWait extends RScriptOp {
     /* override */
     protected parseArgument(arg: string, i: number): void {
         switch (i) {
-        case 0:
-            if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.getStringRef(arg).toUpperCase());
-            } else if (this._waitType === ROPWaitType.TEXTBOX) {
-                this._id = this._env.getStringRef(arg);
-            } else if (this._waitType === ROPWaitType.MUTATION) {
-                if ("AUGC".indexOf(arg.toUpperCase()) !== -1) {
-                    this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
+            case 0:
+                if (this._waitType === ROPWaitType.CLICKUI) {
+                    this._elements.push(this._env.getStringRef(arg).toUpperCase());
+                } else if (this._waitType === ROPWaitType.TEXTBOX) {
+                    this._id = this._env.getStringRef(arg);
+                } else if (this._waitType === ROPWaitType.MUTATION) {
+                    if ('AUGC'.indexOf(arg.toUpperCase()) !== -1) {
+                        this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(' ', '');
+                    } else {
+                        this._elements.push(Number(arg) - 1);
+                    }
+                } else if (this._waitType === ROPWaitType.TIME) {
+                    this._delay = Number(arg);
                 } else {
+                    this._startIdx = Number(arg) - 1;
+                }
+                break;
+            case 1:
+                if (this._waitType === ROPWaitType.CLICKUI) {
+                    this._elements.push(this._env.getStringRef(arg).toUpperCase());
+                } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
+                    this._color1 = this._env.getStringRef(arg).toUpperCase().replace(' ', '');
+                } else if (this._waitType === ROPWaitType.MUTATION) {
+                    this._elements.push(Number(arg) - 1);
+                } else {
+                    this._endIdx = Number(arg) - 1;
+                }
+
+                break;
+            case 2:
+                if (this._waitType === ROPWaitType.CLICKUI) {
+                    this._elements.push(this._env.getStringRef(arg).toUpperCase());
+                } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE) {
+                    this._expectedColor = this._env.getStringRef(arg);
+                } else if (this._waitType === ROPWaitType.PAINT) {
+                    this._id = this._env.getStringRef(arg);
+                } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
+                    this._color2 = this._env.getStringRef(arg).toUpperCase().replace(' ', '');
+                } else if (this._waitType === ROPWaitType.MUTATION) {
                     this._elements.push(Number(arg) - 1);
                 }
-            } else if (this._waitType === ROPWaitType.TIME) {
-                this._delay = Number(arg);
-            } else {
-                this._startIdx = Number(arg) - 1;
-            }
-            break;
-        case 1:
-            if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.getStringRef(arg).toUpperCase());
-            } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-                this._color1 = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
-            } else if (this._waitType === ROPWaitType.MUTATION) {
-                this._elements.push(Number(arg) - 1);
-            } else {
-                this._endIdx = Number(arg) - 1;
-            }
-
-            break;
-        case 2:
-            if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.getStringRef(arg).toUpperCase());
-            } else if (this._waitType === ROPWaitType.NUCLEOTIDECHANGE) {
-                this._expectedColor = this._env.getStringRef(arg);
-            } else if (this._waitType === ROPWaitType.PAINT) {
-                this._id = this._env.getStringRef(arg);
-            } else if (this._waitType === ROPWaitType.NUCLEOTIDEPAIR) {
-                this._color2 = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
-            } else if (this._waitType === ROPWaitType.MUTATION) {
-                this._elements.push(Number(arg) - 1);
-            }
-            break;
-        case 3:
-            if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.getStringRef(arg).toUpperCase());
-            } else if (this._waitType === ROPWaitType.MUTATION) {
-                this._elements.push(Number(arg) - 1);
-            } else {
-                this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(" ", "");
-            }
-            break;
-        default:
-            if (this._waitType === ROPWaitType.CLICKUI) {
-                this._elements.push(this._env.getStringRef(arg).toUpperCase());
-            } else if (this._waitType === ROPWaitType.MUTATION) {
-                this._elements.push(Number(arg) - 1);
-            } else {
-                throw new Error("Too many arguments for a ROP Wait Instruction");
-            }
-            break;
+                break;
+            case 3:
+                if (this._waitType === ROPWaitType.CLICKUI) {
+                    this._elements.push(this._env.getStringRef(arg).toUpperCase());
+                } else if (this._waitType === ROPWaitType.MUTATION) {
+                    this._elements.push(Number(arg) - 1);
+                } else {
+                    this._expectedColor = this._env.getStringRef(arg).toUpperCase().replace(' ', '');
+                }
+                break;
+            default:
+                if (this._waitType === ROPWaitType.CLICKUI) {
+                    this._elements.push(this._env.getStringRef(arg).toUpperCase());
+                } else if (this._waitType === ROPWaitType.MUTATION) {
+                    this._elements.push(Number(arg) - 1);
+                } else {
+                    throw new Error('Too many arguments for a ROP Wait Instruction');
+                }
+                break;
         }
     }
 
@@ -339,15 +346,15 @@ export default class ROPWait extends RScriptOp {
         }
     }
 
-    private static notifyMark(mark_type: ROPWaitType, i: number, marked: boolean): void {
+    private static notifyMark(markType: ROPWaitType, i: number, marked: boolean): void {
         if (i === -1) {
             return;
         }
 
-        ROPWait.genericNotifyClear(mark_type, (op: ROPWait): boolean => op.addMarkCompletion(i, marked));
+        ROPWait.genericNotifyClear(markType, (op: ROPWait): boolean => op.addMarkCompletion(i, marked));
     }
 
-    private static genericNotifyClear(inType: ROPWaitType, clear_check: (op: ROPWait) => boolean): void {
+    private static genericNotifyClear(inType: ROPWaitType, clearCheck: (op: ROPWait) => boolean): void {
         if (ROPWait._allROPWaitOps == null || ROPWait._allROPWaitOps.get(inType) == null) {
             return;
         }
@@ -356,7 +363,7 @@ export default class ROPWait extends RScriptOp {
         let clearOps: ROPWait[] = [];
 
         for (let op of list) {
-            if (op.isWaitActive() && clear_check(op)) {
+            if (op.isWaitActive() && clearCheck(op)) {
                 clearOps.push(op);
                 op.clearCondition();
             }
@@ -377,7 +384,7 @@ export default class ROPWait extends RScriptOp {
 
     private _color1: string;
     private _color2: string;
-    private _id: string = "";
+    private _id: string = '';
 
     private _conditionClear: boolean = false;
 

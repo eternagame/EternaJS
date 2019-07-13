@@ -1,4 +1,5 @@
-import {ObjectTask, Updatable} from "../core";
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
 
 export default class DelayTask extends ObjectTask implements Updatable {
     constructor(time: number) {

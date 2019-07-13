@@ -1,8 +1,9 @@
-import {Container} from "pixi.js";
-import {RegistrationGroup, UnitSignal} from "signals";
-import {
-    AppMode, ModeStack, GameObject, GameObjectRef
-} from ".";
+import {Container} from 'pixi.js';
+import {RegistrationGroup, UnitSignal} from 'signals';
+import AppMode from './AppMode';
+import ModeStack from './ModeStack';
+import GameObject from './GameObject';
+import GameObjectRef from './GameObjectRef';
 
 export default class GameObjectBase {
     public get destroyed(): UnitSignal {
@@ -113,17 +114,17 @@ export default class GameObjectBase {
     }
 
     /* internal */
-    _attachToDisplayList(displayParent: Container, displayIdx: number): void {
+    public _attachToDisplayList(displayParent: Container, displayIdx: number): void {
         // implemented by subclasses
     }
 
     /* internal */
-    _addedInternal(): void {
+    public _addedInternal(): void {
         this.added();
     }
 
     /* internal */
-    _removedInternal(): void {
+    public _removedInternal(): void {
         this._ref._obj = null;
         this._parent = null;
         this._mode = null;
@@ -136,7 +137,7 @@ export default class GameObjectBase {
     }
 
     /* internal */
-    _disposeInternal(): void {
+    public _disposeInternal(): void {
         this._ref._obj = null;
         this.dispose();
         if (this._regs != null) {
@@ -146,7 +147,7 @@ export default class GameObjectBase {
     }
 
     /* internal */
-    get _wasRemoved(): boolean {
+    public get _wasRemoved(): boolean {
         return (this._ref != null && this._ref._obj == null);
     }
 
@@ -154,10 +155,10 @@ export default class GameObjectBase {
     private _regs: RegistrationGroup;
     private _destroyed: UnitSignal;
 
-    /* internal */ _name: string;
-    /* internal */ _ref: GameObjectRef;
-    /* internal */ _parent: GameObject;
-    /* internal */ _mode: AppMode;
+    /* internal */ public _name: string;
+    /* internal */ public _ref: GameObjectRef;
+    /* internal */ public _parent: GameObject;
+    /* internal */ public _mode: AppMode;
 
     private static readonly EMPTY_ARRAY: any[] = [];
 }

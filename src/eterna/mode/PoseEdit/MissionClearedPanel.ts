@@ -1,23 +1,21 @@
 import {
     Container, Graphics, Point, Text
-} from "pixi.js";
-import {Flashbang, HAlign, VAlign} from "flashbang/core";
-import {VLayoutContainer} from "flashbang/layout";
-import {ContainerObject, DOMObject} from "flashbang/objects";
-import {AlphaTask} from "flashbang/tasks";
-import {DisplayUtil} from "flashbang/util";
-import {RankScroll} from "eterna/rank";
-import {Bitmaps} from "eterna/resources";
+} from 'pixi.js';
 import {
-    GameButton, GamePanel, GamePanelType, HTMLTextObject
-} from "eterna/ui";
-import {Fonts} from "eterna/util";
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import Fonts from 'eterna/util/Fonts';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import RankScroll from 'eterna/rank/RankScroll';
 
 export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
     public closeButton: GameButton;
 
-    public constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
+    constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
@@ -34,9 +32,9 @@ export default class MissionClearedPanel extends ContainerObject {
         this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
         this.container.addChild(this._contentLayout);
 
-        this._contentLayout.addChild(Fonts.stdLight("Mission Accomplished!", 36).color(0xFFCC00).build());
+        this._contentLayout.addChild(Fonts.stdLight('Mission Accomplished!', 36).color(0xFFCC00).build());
 
-        const infoText: string = this._infoText || "You have solved the puzzle, congratulations!";
+        const infoText: string = this._infoText || 'You have solved the puzzle, congratulations!';
         const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(20)
@@ -44,7 +42,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .lineHeight(1.2)
             .selectable(false);
         // Images should be centered, even if the HTML doesn't specify it
-        DOMObject.applyStyleRecursive(infoObj.element, {display: "block", margin: "auto"}, false, ["img"]);
+        DOMObject.applyStyleRecursive(infoObj.element, {display: 'block', margin: 'auto'}, false, ['img']);
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
@@ -58,24 +56,24 @@ export default class MissionClearedPanel extends ContainerObject {
         this._rankScrollHeading = new GamePanel(GamePanelType.NORMAL, 1.0, 0x2D4159);
         this.addObject(this._rankScrollHeading, this._rankScrollContainer);
 
-        this._tfPlayer = Fonts.stdBold("PLAYER", 14).bold().color(0xffffff).build();
+        this._tfPlayer = Fonts.stdBold('PLAYER', 14).bold().color(0xffffff).build();
         this._tfPlayer.position = new Point(10, 2);
         this._rankScrollHeading.container.addChild(this._tfPlayer);
 
-        let tfRank: Text = Fonts.stdBold("RANK", 14).bold().color(0xffffff).build();
+        let tfRank: Text = Fonts.stdBold('RANK', 14).bold().color(0xffffff).build();
         tfRank.position = new Point(10 + 130, 2);
         this._rankScrollHeading.container.addChild(tfRank);
 
-        let tfCoin: Text = Fonts.stdBold("POINTS", 14).bold().color(0xffffff).build();
+        let tfCoin: Text = Fonts.stdBold('POINTS', 14).bold().color(0xffffff).build();
         tfCoin.position = new Point(10 + 130 + 85, 2);
         this._rankScrollHeading.container.addChild(tfCoin);
 
         this.closeButton = new GameButton()
             .allStates(Bitmaps.ImgCross)
-            .tooltip("Stay in this puzzle and review your design");
+            .tooltip('Stay in this puzzle and review your design');
         this.addObject(this.closeButton, this.container);
 
-        this.nextButton = new GameButton().label(this._hasNextPuzzle ? "NEXT PUZZLE" : "WHAT'S NEXT?");
+        this.nextButton = new GameButton().label(this._hasNextPuzzle ? 'NEXT PUZZLE' : "WHAT'S NEXT?");
         this.addObject(this.nextButton, this.container);
 
         this.regs.add(this.mode.resized.connect(() => this.onResize()));

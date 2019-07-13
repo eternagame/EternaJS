@@ -1,14 +1,15 @@
-import {Graphics, Point} from "pixi.js";
-import {Flashbang, HAlign, AppMode} from "flashbang/core";
-import {VLayoutContainer} from "flashbang/layout";
-import {ErrorUtil} from "flashbang/util";
-import {GameButton, GamePanel, GamePanelType} from "eterna/ui";
-import {Fonts} from "eterna/util";
+import {Graphics, Point} from 'pixi.js';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import {
+    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
 
 export default class ErrorDialogMode extends AppMode {
     public readonly error: any;
 
-    public constructor(error: any) {
+    constructor(error: any) {
         super();
         this.error = error;
     }
@@ -22,12 +23,12 @@ export default class ErrorDialogMode extends AppMode {
         this.container.addChild(bg);
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
-        panel.title = "Fatal Error!";
+        panel.title = 'Fatal Error!';
         this.addObject(panel, this.container);
 
         let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
         panel.container.addChild(panelLayout);
-        panelLayout.addChild(Fonts.arial("", 15)
+        panelLayout.addChild(Fonts.arial('', 15)
             .text(ErrorUtil.getErrString(this.error, false))
             .color(0xC0DCE7)
             .wordWrap(true, 300)
@@ -35,7 +36,7 @@ export default class ErrorDialogMode extends AppMode {
 
         panelLayout.addVSpacer(20);
 
-        let okButton = new GameButton().label("OK", 16);
+        let okButton = new GameButton().label('OK', 16);
         panel.addObject(okButton, panelLayout);
         okButton.clicked.connect(() => this.modeStack.removeMode(this));
 

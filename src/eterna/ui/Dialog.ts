@@ -1,9 +1,7 @@
-import {Graphics} from "pixi.js";
-import {Flashbang} from "flashbang/core";
+import {Graphics} from 'pixi.js';
 import {
-    InputUtil, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget
-} from "flashbang/input";
-import {ContainerObject} from "flashbang/objects";
+    ContainerObject, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget, InputUtil, Flashbang
+} from 'flashbang';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class DialogCanceledError extends Error {}
@@ -13,9 +11,9 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     /** A Promise that will resolve when the dialog is closed. */
     public readonly closed: Promise<T | null>;
 
-    public constructor() {
+    constructor() {
         super();
-        this.closed = new Promise(resolve => this._resolvePromise = resolve);
+        this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
     protected added() {

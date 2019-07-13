@@ -1,7 +1,6 @@
-/* import Reactor from "./Reactor";
-import SignalView from "./SignalView";
-import Connection from "./Connection"; */
-import {Reactor, SignalView, Connection} from ".";
+import Reactor from './Reactor';
+import SignalView from './SignalView';
+import Connection from './Connection';
 
 /**
  * Handles the machinery of connecting slots to a signal and emitting events to them, without

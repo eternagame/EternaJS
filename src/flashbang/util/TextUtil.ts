@@ -1,4 +1,4 @@
-import {Text} from "pixi.js";
+import {Text} from 'pixi.js';
 
 export default class TextUtil {
     /**
@@ -11,7 +11,7 @@ export default class TextUtil {
             return;
         }
 
-        trimmedPostfix = trimmedPostfix || "";
+        trimmedPostfix = trimmedPostfix || '';
 
         const originalString = text.text;
         const originalWidth = text.width;

@@ -1,8 +1,5 @@
-import {Connection} from "../Connection";
-import {Signal} from "../Signal";
-import {SignalView} from "../SignalView";
-import {UnitSignal} from "../UnitSignal";
-import {Counter} from "./Counter";
+import {Connection, Signal, SignalView, UnitSignal} from "signals";
+import Counter from "./Counter";
 
 test("signalToSlot", () => {
     let signal: Signal<number> = new Signal();

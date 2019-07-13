@@ -1,13 +1,13 @@
-import {Graphics, Point, Text} from "pixi.js";
-import {KeyboardEventType, KeyboardListener, KeyCode} from "flashbang/input";
-import {ContainerObject, Enableable} from "flashbang/objects";
-import {LocationTask} from "flashbang/tasks";
-import {Easing} from "flashbang/util";
-import {Signal} from "signals";
-import Eterna from "eterna/Eterna";
-import {Sounds} from "eterna/resources";
-import {ROPWait, RScriptUIElementID} from "eterna/rscript";
-import {Fonts} from "eterna/util";
+import {Graphics, Point, Text} from 'pixi.js';
+import {Signal} from 'signals';
+import Eterna from 'eterna/Eterna';
+import {
+    ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Sounds from 'eterna/resources/Sounds';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import ROPWait from 'eterna/rscript/ROPWait';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -26,7 +26,11 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
         this._bg.clear();
         this._bg.beginFill(ToggleBar.COLOR_DARK, 0.6);
         this._bg.lineStyle(2, ToggleBar.COLOR_LIGHT, 0.85);
-        this._bg.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE * this._numStates, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
+        this._bg.drawRoundedRect(
+            0, 0,
+            ToggleBar.BUTTON_SIZE * this._numStates, ToggleBar.BUTTON_SIZE,
+            ToggleBar.ROUND_RECT_RADIUS
+        );
         this._bg.endFill();
 
         this._hoverHilite = new Graphics();
@@ -34,7 +38,11 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
         this._hoverHilite.clear();
         this._hoverHilite.beginFill(ToggleBar.COLOR_MEDIUM, 0.45);
-        this._hoverHilite.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
+        this._hoverHilite.drawRoundedRect(
+            0, 0,
+            ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE,
+            ToggleBar.ROUND_RECT_RADIUS
+        );
         this._hoverHilite.endFill();
         this._hoverHilite.visible = false;
 
@@ -43,7 +51,11 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
         this._selectedHilite.clear();
         this._selectedHilite.beginFill(ToggleBar.COLOR_LIGHT, 0.85);
-        this._selectedHilite.drawRoundedRect(0, 0, ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE, ToggleBar.ROUND_RECT_RADIUS);
+        this._selectedHilite.drawRoundedRect(
+            0, 0,
+            ToggleBar.BUTTON_SIZE, ToggleBar.BUTTON_SIZE,
+            ToggleBar.ROUND_RECT_RADIUS
+        );
         this._selectedHilite.endFill();
 
         for (let ii = 0; ii < this._numStates; ii++) {
@@ -72,11 +84,16 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
             }
 
             this._selectedState = newState;
-            this.replaceNamedObject("BGSelectedAnim",
-                new LocationTask(this._selectedState * ToggleBar.BUTTON_SIZE, 0, 0.5, Easing.easeInOut, this._selectedHilite));
+            this.replaceNamedObject(
+                'BGSelectedAnim',
+                new LocationTask(
+                    this._selectedState * ToggleBar.BUTTON_SIZE, 0,
+                    0.5, Easing.easeInOut, this._selectedHilite
+                )
+            );
             this._labels[this._selectedState].style.fill = ToggleBar.COLOR_HIGH;
 
-            Eterna.sound.playSound(Sounds.SoundSwitch);
+            Flashbang.sound.playSound(Sounds.SoundSwitch);
             this.stateChanged.emit(newState);
         }
     }

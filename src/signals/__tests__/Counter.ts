@@ -1,4 +1,4 @@
-export class Counter {
+export default class Counter {
     public get slot(): (value: any) => void {
         return this.onEmit;
     }

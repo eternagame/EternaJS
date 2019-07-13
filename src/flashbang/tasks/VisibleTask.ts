@@ -1,6 +1,6 @@
-import {DisplayObject} from "pixi.js";
-import {ObjectTask} from "../core";
-import {Assert} from "../util";
+import {DisplayObject} from 'pixi.js';
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Assert from 'flashbang/util/Assert';
 
 export default class VisibleTask extends ObjectTask {
     constructor(visible: boolean, target: DisplayObject = null) {
@@ -14,7 +14,7 @@ export default class VisibleTask extends ObjectTask {
         // If we weren't given a target, operate on our parent object
         let target = this._target;
         if (target == null) {
-            Assert.notNull(this.parent.display, "parent does not have a DisplayObject");
+            Assert.notNull(this.parent.display, 'parent does not have a DisplayObject');
             target = this.parent.display;
         }
 

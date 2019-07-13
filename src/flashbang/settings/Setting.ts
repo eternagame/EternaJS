@@ -1,7 +1,7 @@
-import {AbstractValue, MappedValue, ValueView} from "signals";
+import {AbstractValue, MappedValue, ValueView} from 'signals';
 
 export default class Setting<T> extends AbstractValue<T> {
-    public constructor(store: StoreJsAPI, name: string, defaultVal: T) {
+    constructor(store: StoreJsAPI, name: string, defaultVal: T) {
         super();
         this._store = store;
         this._name = name;

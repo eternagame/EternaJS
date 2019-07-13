@@ -8,8 +8,8 @@
 //
 // =================================================================================================
 
-import {Point, Rectangle, Matrix} from "pixi.js";
-import {MatrixUtil} from ".";
+import {Point, Rectangle, Matrix} from 'pixi.js';
+import MatrixUtil from './MatrixUtil';
 
 /** A utility class containing methods related to the Rectangle class. */
 export default class RectangleUtil {

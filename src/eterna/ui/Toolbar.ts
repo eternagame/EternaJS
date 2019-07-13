@@ -1,19 +1,19 @@
-import {Graphics, Container, Point} from "pixi.js";
-import {RegistrationGroup} from "signals";
-import {Flashbang, HAlign, VAlign} from "flashbang/core";
-import {KeyCode} from "flashbang/input";
-import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
-import {ContainerObject} from "flashbang/objects";
-import {LocationTask} from "flashbang/tasks";
-import {Easing, DisplayUtil} from "flashbang/util";
-import Eterna from "eterna/Eterna";
-import {Booster, PoseEditMode} from "eterna/mode/PoseEdit";
-import {Bitmaps} from "eterna/resources";
-import {RScriptUIElementID} from "eterna/rscript";
-import {BoostersData} from "eterna/puzzle";
+import {Graphics, Point} from 'pixi.js';
+import {RegistrationGroup} from 'signals';
+import Eterna from 'eterna/Eterna';
+import Booster from 'eterna/mode/PoseEdit/Booster';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
-    NucleotidePalette, GameButton, ToggleBar, EternaMenu, EternaMenuStyle
-} from ".";
+    ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing
+} from 'flashbang';
+import {BoostersData} from 'eterna/puzzle/Puzzle';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import NucleotidePalette from './NucleotidePalette';
+import GameButton from './GameButton';
+import ToggleBar from './ToggleBar';
+import EternaMenu, {EternaMenuStyle} from './EternaMenu';
 
 export enum ToolbarType {
     PUZZLE,
@@ -80,8 +80,10 @@ export default class Toolbar extends ContainerObject {
     // Puzzle Maker + Lab
     public submitButton: GameButton;
 
-    constructor(type: ToolbarType,
-        {states = 1, showHint = false, boosters = null}: {states?: number; showHint?: boolean; boosters?: BoostersData}) {
+    constructor(
+        type: ToolbarType,
+        {states = 1, showHint = false, boosters = null}: {states?: number; showHint?: boolean; boosters?: BoostersData}
+    ) {
         super();
         this._type = type;
         this._states = states;
@@ -107,7 +109,11 @@ export default class Toolbar extends ContainerObject {
         this.container.addChild(this._content);
 
         this.stateToggle = new ToggleBar(this._states);
-        if (this._states > 1 && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._states > 1
+            && this._type !== ToolbarType.PUZZLEMAKER
+            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             // We create the stateToggle even if we don't add it to the mode,
             // as scripts may rely on its existence
             this.addObject(this.stateToggle, this._content);
@@ -115,7 +121,7 @@ export default class Toolbar extends ContainerObject {
 
         // UPPER TOOLBAR (structure editing tools)
         let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
-        if (this._type == ToolbarType.PUZZLEMAKER || this._type == ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this._content.addChild(upperToolbarLayout);
         }
 
@@ -125,7 +131,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgAddBaseSelect)
             .selected(Bitmaps.ImgAddBaseSelect)
             .hotkey(KeyCode.Digit6)
-            .tooltip("Add a single base.");
+            .tooltip('Add a single base.');
 
         this.addpairButton = new GameButton()
             .up(Bitmaps.ImgAddPair)
@@ -133,7 +139,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgAddPairSelect)
             .selected(Bitmaps.ImgAddPairSelect)
             .hotkey(KeyCode.Digit7)
-            .tooltip("Add a pair.");
+            .tooltip('Add a pair.');
 
         this.deleteButton = new GameButton()
             .up(Bitmaps.ImgErase)
@@ -141,7 +147,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgEraseSelect)
             .selected(Bitmaps.ImgEraseSelect)
             .hotkey(KeyCode.Digit8)
-            .tooltip("Delete a base or a pair.");
+            .tooltip('Delete a base or a pair.');
 
         this.lockButton = new GameButton()
             .up(Bitmaps.ImgLock)
@@ -149,7 +155,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgLockSelect)
             .selected(Bitmaps.ImgLockSelect)
             .hotkey(KeyCode.Digit9)
-            .tooltip("Lock or unlock a base.");
+            .tooltip('Lock or unlock a base.');
 
         this.moleculeButton = new GameButton()
             .up(Bitmaps.ImgMolecule)
@@ -157,9 +163,9 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgMoleculeSelect)
             .selected(Bitmaps.ImgMoleculeSelect)
             .hotkey(KeyCode.Digit0)
-            .tooltip("Create or remove a molecular binding site.");
+            .tooltip('Create or remove a molecular binding site.');
 
-        if (this._type == ToolbarType.PUZZLEMAKER || this._type == ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this.addObject(this.addbaseButton, upperToolbarLayout);
             this.addObject(this.addpairButton, upperToolbarLayout);
             this.addObject(this.deleteButton, upperToolbarLayout);
@@ -199,49 +205,49 @@ export default class Toolbar extends ContainerObject {
         this.screenshotButton = new GameButton()
             .allStates(Bitmaps.ImgScreenshot)
             .disabled(null)
-            .label("Screenshot", 14)
+            .label('Screenshot', 14)
             .scaleBitmapToLabel()
-            .tooltip("Screenshot");
+            .tooltip('Screenshot');
         this.actionMenu.addSubMenuButton(0, this.screenshotButton);
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
             .disabled(null)
-            .label("Settings", 14)
+            .label('Settings', 14)
             .scaleBitmapToLabel()
-            .tooltip("Game options");
+            .tooltip('Game options');
         this.actionMenu.addSubMenuButton(0, this.viewOptionsButton);
 
         this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
             .disabled(null)
-            .label("Designs", 14)
+            .label('Designs', 14)
             .scaleBitmapToLabel()
-            .tooltip("View all submitted designs for this puzzle.");
+            .tooltip('View all submitted designs for this puzzle.');
 
-        if (this._type == ToolbarType.LAB || this._type == ToolbarType.FEEDBACK) {
+        if (this._type === ToolbarType.LAB || this._type === ToolbarType.FEEDBACK) {
             this.actionMenu.addSubMenuButton(0, this.viewSolutionsButton);
         }
 
         this.specButton = new GameButton()
             .allStates(Bitmaps.ImgSpec)
             .disabled(null)
-            .label("Specs", 14)
+            .label('Specs', 14)
             .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
             .hotkey(KeyCode.KeyS);
 
-        if (this._type == ToolbarType.FEEDBACK || this._type == ToolbarType.LAB) {
+        if (this._type === ToolbarType.FEEDBACK || this._type === ToolbarType.LAB) {
             this.actionMenu.addSubMenuButton(0, this.specButton);
         }
 
-        let resetTooltip = this._type == ToolbarType.PUZZLEMAKER || this._type == ToolbarType.PUZZLEMAKER_EMBEDDED
-            ? "Reset all bases to A" : "Reset and try this puzzle again.";
+        let resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
+            ? 'Reset all bases to A' : 'Reset and try this puzzle again.';
 
         this.resetButton = new GameButton()
             .allStates(Bitmaps.ImgReset)
             .disabled(null)
-            .label("Reset", 14)
+            .label('Reset', 14)
             .scaleBitmapToLabel()
             .tooltip(resetTooltip)
             .rscriptID(RScriptUIElementID.RESET);
@@ -249,25 +255,25 @@ export default class Toolbar extends ContainerObject {
         this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
             .disabled(null)
-            .label("Copy", 14)
+            .label('Copy', 14)
             .scaleBitmapToLabel()
-            .tooltip("Copy the current sequence");
+            .tooltip('Copy the current sequence');
 
         this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
             .disabled(null)
-            .label("Paste", 14)
+            .label('Paste', 14)
             .scaleBitmapToLabel()
-            .tooltip("Type in a sequence");
+            .tooltip('Type in a sequence');
 
-        if (this._type != ToolbarType.FEEDBACK) {
+        if (this._type !== ToolbarType.FEEDBACK) {
             this.actionMenu.addSubMenuButton(0, this.resetButton);
             this.actionMenu.addSubMenuButton(0, this.copyButton);
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
+        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
         if (this._boostersData != null && this._boostersData.actions != null) {
-            this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
                 let data = this._boostersData.actions[ii];
@@ -284,9 +290,9 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgSubmit)
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit)
-            .tooltip("Publish your solution!");
+            .tooltip('Publish your solution!');
 
-        if (this._type == ToolbarType.LAB) {
+        if (this._type === ToolbarType.LAB) {
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
             this.addObject(this.submitButton, lowerToolbarLayout);
         }
@@ -298,11 +304,11 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgFreezeOver)
             .down(Bitmaps.ImgFreezeSelected)
             .selected(Bitmaps.ImgFreezeSelected)
-            .tooltip("Frozen mode. Suspends/resumes folding engine calculations.")
+            .tooltip('Frozen mode. Suspends/resumes folding engine calculations.')
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
 
-        if (this._type == ToolbarType.LAB || this._type == ToolbarType.PUZZLE) {
+        if (this._type === ToolbarType.LAB || this._type === ToolbarType.PUZZLE) {
             this.addObject(this.freezeButton, lowerToolbarLayout);
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
             this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
@@ -316,11 +322,14 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgPip)
             .over(Bitmaps.ImgPipOver)
             .down(Bitmaps.ImgPipHit)
-            .tooltip("Set PiP mode")
+            .tooltip('Set PiP mode')
             .hotkey(KeyCode.KeyP)
             .rscriptID(RScriptUIElementID.PIP);
 
-        if (this._states > 1 && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+        if (
+            this._states > 1
+            && this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
             this.addObject(this.pipButton, lowerToolbarLayout);
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
@@ -330,7 +339,7 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgNativeOver)
             .down(Bitmaps.ImgNativeSelected)
             .selected(Bitmaps.ImgNativeSelected)
-            .tooltip("Natural Mode. RNA folds into the most stable shape.")
+            .tooltip('Natural Mode. RNA folds into the most stable shape.')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
         this.estimateButton = new GameButton()
@@ -338,18 +347,18 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgEstimateOver)
             .down(Bitmaps.ImgEstimateSelected)
             .selected(Bitmaps.ImgEstimateSelected)
-            .tooltip("Estimate Mode. The game approximates how the RNA actually folded in a test tube.");
+            .tooltip('Estimate Mode. The game approximates how the RNA actually folded in a test tube.');
 
         this.targetButton = new GameButton()
             .up(Bitmaps.ImgTarget)
             .over(Bitmaps.ImgTargetOver)
             .down(Bitmaps.ImgTargetSelected)
             .selected(Bitmaps.ImgTargetSelected)
-            .tooltip("Target Mode. RNA freezes into the desired shape.")
+            .tooltip('Target Mode. RNA freezes into the desired shape.')
             .rscriptID(RScriptUIElementID.TOGGLETARGET);
 
-        if (this._type != ToolbarType.PUZZLEMAKER_EMBEDDED) {
-            if (this._type != ToolbarType.FEEDBACK) {
+        if (this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+            if (this._type !== ToolbarType.FEEDBACK) {
                 this.addObject(this.naturalButton, lowerToolbarLayout);
             } else {
                 this.addObject(this.estimateButton, lowerToolbarLayout);
@@ -363,16 +372,16 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgColoringOver)
             .down(Bitmaps.ImgColoringSelected)
             .selected(Bitmaps.ImgColoringSelected)
-            .tooltip("Color sequences based on base colors as in the game.");
+            .tooltip('Color sequences based on base colors as in the game.');
 
         this.expColorButton = new GameButton()
             .up(Bitmaps.ImgFlask)
             .over(Bitmaps.ImgFlaskOver)
             .down(Bitmaps.ImgFlaskSelected)
             .selected(Bitmaps.ImgFlaskSelected)
-            .tooltip("Color sequences based on experimental data.");
+            .tooltip('Color sequences based on experimental data.');
 
-        if (this._type == ToolbarType.FEEDBACK) {
+        if (this._type === ToolbarType.FEEDBACK) {
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
             this.letterColorButton.toggled.value = false;
@@ -394,10 +403,10 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgSwapOver)
             .selected(Bitmaps.ImgSwapSelect)
             .hotkey(KeyCode.Digit5)
-            .tooltip("Swap paired bases.")
+            .tooltip('Swap paired bases.')
             .rscriptID(RScriptUIElementID.SWAP);
 
-        if (this._type != ToolbarType.FEEDBACK) {
+        if (this._type !== ToolbarType.FEEDBACK) {
             lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
             this.addObject(this.palette, lowerToolbarLayout);
@@ -440,7 +449,7 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgZoomInOver)
             .down(Bitmaps.ImgZoomInHit)
             .disabled(Bitmaps.ImgZoomInDisable)
-            .tooltip("Zoom in")
+            .tooltip('Zoom in')
             .hotkey(KeyCode.Equal)
             .rscriptID(RScriptUIElementID.ZOOMIN);
         this.addObject(this.zoomInButton, lowerToolbarLayout);
@@ -450,7 +459,7 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgZoomOutOver)
             .down(Bitmaps.ImgZoomOutHit)
             .disabled(Bitmaps.ImgZoomOutDisable)
-            .tooltip("Zoom out")
+            .tooltip('Zoom out')
             .hotkey(KeyCode.Minus)
             .rscriptID(RScriptUIElementID.ZOOMOUT);
         this.addObject(this.zoomOutButton, lowerToolbarLayout);
@@ -461,7 +470,7 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgUndo)
             .over(Bitmaps.ImgUndoOver)
             .down(Bitmaps.ImgUndoHit)
-            .tooltip("Undo")
+            .tooltip('Undo')
             .hotkey(KeyCode.KeyZ)
             .rscriptID(RScriptUIElementID.UNDO);
 
@@ -469,11 +478,11 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgRedo)
             .over(Bitmaps.ImgRedoOver)
             .down(Bitmaps.ImgRedoHit)
-            .tooltip("Redo")
+            .tooltip('Redo')
             .hotkey(KeyCode.KeyY)
             .rscriptID(RScriptUIElementID.REDO);
 
-        if (this._type != ToolbarType.FEEDBACK) {
+        if (this._type !== ToolbarType.FEEDBACK) {
             this.addObject(this.undoButton, lowerToolbarLayout);
             this.addObject(this.redoButton, lowerToolbarLayout);
         }
@@ -483,7 +492,7 @@ export default class Toolbar extends ContainerObject {
             .over(Bitmaps.ImgHintOver)
             .down(Bitmaps.ImgHintHit)
             .hotkey(KeyCode.KeyH)
-            .tooltip("Hint")
+            .tooltip('Hint')
             .rscriptID(RScriptUIElementID.HINT);
 
         if (this._showHint) {
@@ -494,9 +503,9 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgSubmit)
             .over(Bitmaps.ImgSubmitOver)
             .down(Bitmaps.ImgSubmitHit)
-            .tooltip("Publish your puzzle!");
+            .tooltip('Publish your puzzle!');
 
-        if (this._type == ToolbarType.PUZZLEMAKER) {
+        if (this._type === ToolbarType.PUZZLEMAKER) {
             this.addObject(this.submitButton, lowerToolbarLayout);
         }
 
@@ -514,7 +523,7 @@ export default class Toolbar extends ContainerObject {
         // the boosters button. The tutorial hardcodes screen locations for its
         // point-at-toolbar-buttons tips, so everything needs to be laid out *just so*,
         // unfortunately.
-        let hOffset = (this.boostersMenu == null && this._type == ToolbarType.PUZZLE ? 27 : 0);
+        let hOffset = (this.boostersMenu == null && this._type === ToolbarType.PUZZLE ? 27 : 0);
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
@@ -524,7 +533,7 @@ export default class Toolbar extends ContainerObject {
     }
 
     private setToolbarAutohide(enabled: boolean): void {
-        const COLLAPSE_ANIM = "CollapseAnim";
+        const COLLAPSE_ANIM = 'CollapseAnim';
         if (enabled) {
             this.display.interactive = true;
 
