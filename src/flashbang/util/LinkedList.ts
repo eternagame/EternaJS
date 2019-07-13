@@ -93,7 +93,7 @@ export default class LinkedList<T> {
     }
 
     /* internal */
-    public removeCons(cons: Cons<T>): void {
+    public _removeCons(cons: Cons<T>): void {
         if (this.isIterating) {
             this._pendingRuns = LinkedList.pend(this._pendingRuns, new Runs(() => {
                 this._head = Cons.remove(this._head, cons);
@@ -146,7 +146,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
     public close(): void {
         // multiple disconnects are OK, we just NOOP after the first one
         if (this.owner != null) {
-            this.owner.removeCons(this);
+            this.owner._removeCons(this);
             this.owner = null;
             this.data = null;
         }

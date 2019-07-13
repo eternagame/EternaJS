@@ -17,7 +17,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
     constructor(pose: Pose2D, type: number) {
         super();
-        BaseAssets.init();
+        BaseAssets._init();
         this._pose = pose;
         this.setType(type);
 

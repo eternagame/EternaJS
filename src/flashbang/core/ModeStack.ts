@@ -145,7 +145,7 @@ export default class ModeStack {
     /** Called when the app is resized */
     public onResized(): void {
         for (let mode of this._modeStack) {
-            mode.resizeInternal();
+            mode._resizeInternal();
         }
     }
 
@@ -153,17 +153,17 @@ export default class ModeStack {
         if (this._pendingModeTransitionQueue.length > 0) {
             // handleModeTransition generates a lot of garbage in memory, avoid calling it on
             // updates where it will NOOP anyway.
-            this.handleModeTransitions();
+            this._handleModeTransitions();
         }
 
         // update the top mode
         if (this._modeStack.length > 0) {
-            this._modeStack[this._modeStack.length - 1].updateInternal(dt);
+            this._modeStack[this._modeStack.length - 1]._updateInternal(dt);
         }
     }
 
     /* internal */
-    public handleModeTransitions(): void {
+    public _handleModeTransitions(): void {
         if (this._pendingModeTransitionQueue.length <= 0) {
             return;
         }
@@ -178,7 +178,7 @@ export default class ModeStack {
             this._modeStack.push(newMode);
             this._container.addChild(newMode.container);
 
-            newMode.setupInternal(this);
+            newMode._setupInternal(this);
         };
 
         const doInsertMode = (newMode: AppMode, index: number) => {
@@ -194,7 +194,7 @@ export default class ModeStack {
             this._modeStack.splice(index, 0, newMode);
             this._container.addChildAt(newMode.container, index);
 
-            newMode.setupInternal(this);
+            newMode._setupInternal(this);
         };
 
         const doRemoveMode = (modeOrIndex: AppMode | number) => {
@@ -220,11 +220,11 @@ export default class ModeStack {
             // if the top mode is removed, make sure it's exited first
             let mode: AppMode = this._modeStack[index];
             if (mode === initialTopMode) {
-                initialTopMode.exitInternal();
+                initialTopMode._exitInternal();
                 initialTopMode = null;
             }
 
-            mode.disposeInternal();
+            mode._disposeInternal();
             this._modeStack.splice(index, 1);
         };
 
@@ -316,28 +316,28 @@ export default class ModeStack {
         let newTopMode = this.topMode;
         if (newTopMode !== initialTopMode) {
             if (initialTopMode != null) {
-                initialTopMode.exitInternal();
+                initialTopMode._exitInternal();
             }
 
             if (newTopMode != null) {
-                newTopMode.enterInternal();
+                newTopMode._enterInternal();
             }
             this.topModeChanged.emit();
         }
     }
 
     /* internal */
-    public clearModeStackNow(): void {
+    public _clearModeStackNow(): void {
         this._pendingModeTransitionQueue.length = 0;
         if (this._modeStack.length > 0) {
             this.popAllModes();
-            this.handleModeTransitions();
+            this._handleModeTransitions();
         }
     }
 
     /* internal */
-    public dispose(): void {
-        this.clearModeStackNow();
+    public _dispose(): void {
+        this._clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
         this._container.destroy();

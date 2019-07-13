@@ -157,7 +157,7 @@ export default class GameObject extends GameObjectBase {
 
     /* internal */
     public _registerObject(obj: GameObjectBase): void {
-        this._mode.registerObjectInternal(obj);
+        this._mode._registerObjectInternal(obj);
         obj._addedInternal();
     }
 
