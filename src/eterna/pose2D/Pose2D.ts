@@ -809,8 +809,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public toggleDesignStruct(seqnum: number): boolean {
-        if (this._designStruct.length !== this._sequence.length) {
-            this._designStruct = new Array(this._sequence.length);
+        if (this._designStruct.length !== this.fullSequenceLength) {
+            this._designStruct = new Array(this.fullSequenceLength);
         }
 
         this._designStruct[seqnum] = !this._designStruct[seqnum];
