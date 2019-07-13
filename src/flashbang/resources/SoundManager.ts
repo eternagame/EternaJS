@@ -1,5 +1,6 @@
 import * as log from 'loglevel';
 import 'pixi-sound';
+import {Flashbang} from 'flashbang';
 
 export default class SoundManager {
     public set muted(mute: boolean) {
@@ -34,7 +35,7 @@ export default class SoundManager {
     private getSound(url: string): Sound {
         let sound = this._sounds.get(url);
         if (sound === undefined) {
-            sound = new Sound(url, this);
+            sound = new Sound(url);
             this._sounds.set(url, sound);
         }
         return sound;
@@ -50,9 +51,8 @@ export default class SoundManager {
  * when it has completed loading.
  */
 class Sound {
-    constructor(url: string, manager: SoundManager) {
+    constructor(url: string) {
         this._sound = PIXI.sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
-        this._manager = manager;
     }
 
     public play(options: PIXI.sound.PlayOptions) {
@@ -64,14 +64,13 @@ class Sound {
     }
 
     private onLoaded(): void {
-        if (this._pendingPlayOptions != null && !this._manager.muted) {
-            this._pendingPlayOptions.volume = this._manager.volume;
+        if (this._pendingPlayOptions != null && !Flashbang.sound.muted) {
+            this._pendingPlayOptions.volume = Flashbang.sound.volume;
             this._sound.play(this._pendingPlayOptions);
         }
         this._pendingPlayOptions = null;
     }
 
     private readonly _sound: PIXI.sound.Sound;
-    private readonly _manager: SoundManager;
     private _pendingPlayOptions: PIXI.sound.PlayOptions;
 }
