@@ -50,38 +50,38 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    public static insert(head: Cons, cons: Cons): Cons {
+    public static _insert(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
             cons.next = head;
             return cons;
         } else {
-            head.next = Cons.insert(head.next, cons);
+            head.next = Cons._insert(head.next, cons);
             return head;
         }
     }
 
     /* internal */
-    public static remove(head: Cons, cons: Cons): Cons {
+    public static _remove(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return head;
         } else if (head === cons) {
             return head.next;
         } else {
-            head.next = Cons.remove(head.next, cons);
+            head.next = Cons._remove(head.next, cons);
             return head;
         }
     }
 
     /* internal */
-    public static removeAll(head: Cons, listener: RListener): Cons {
+    public static _removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;
         } else if (head.listener === listener) {
-            return Cons.removeAll(head.next, listener);
+            return Cons._removeAll(head.next, listener);
         } else {
-            head.next = Cons.removeAll(head.next, listener);
+            head.next = Cons._removeAll(head.next, listener);
             return head;
         }
     }

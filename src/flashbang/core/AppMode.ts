@@ -213,13 +213,13 @@ export default class AppMode {
     }
 
     /* internal */
-    public setupInternal(modeStack: ModeStack): void {
+    public _setupInternal(modeStack: ModeStack): void {
         this._modeStack = modeStack;
         this.setup();
     }
 
     /* internal */
-    public disposeInternal(): void {
+    public _disposeInternal(): void {
         Assert.isTrue(!this._isDiposed, 'already disposed');
         this._isDiposed = true;
 
@@ -245,7 +245,7 @@ export default class AppMode {
     }
 
     /* internal */
-    public enterInternal(): void {
+    public _enterInternal(): void {
         this._isActive = true;
         this.container.interactiveChildren = true;
         this.enter();
@@ -258,7 +258,7 @@ export default class AppMode {
     }
 
     /* internal */
-    public exitInternal(): void {
+    public _exitInternal(): void {
         this._exited.emit();
         this._isActive = false;
         this.container.interactiveChildren = false;
@@ -266,13 +266,13 @@ export default class AppMode {
     }
 
     /* internal */
-    public updateInternal(dt: number): void {
+    public _updateInternal(dt: number): void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
     /* internal */
-    public registerObjectInternal(obj: GameObjectBase): void {
+    public _registerObjectInternal(obj: GameObjectBase): void {
         obj._mode = this;
 
         // Handle IDs
@@ -305,7 +305,7 @@ export default class AppMode {
     }
 
     /* internal */
-    public resizeInternal(): void {
+    public _resizeInternal(): void {
         if (this._isActive) {
             this.onResized();
         } else {

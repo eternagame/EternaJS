@@ -37,7 +37,7 @@ export default class Flashbang {
     }
 
     /* internal */
-    public static registerApp(app: FlashbangApp): void {
+    public static _registerApp(app: FlashbangApp): void {
         Assert.isTrue(Flashbang._app == null, 'A FlashbangApp has already been registered');
         Flashbang._app = app;
         Flashbang._interaction = app.pixi.renderer.plugins.interaction;

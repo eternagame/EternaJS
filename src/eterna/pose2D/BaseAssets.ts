@@ -154,7 +154,7 @@ export default class BaseAssets {
     }
 
     /* internal */
-    public static init(): void {
+    public static _init(): void {
         if (BaseAssets._inited) {
             return;
         }

@@ -29,10 +29,10 @@ export default class FlashbangApp {
 
         this._modeStack = new ModeStack(this._pixi.stage);
 
-        Flashbang.registerApp(this);
+        Flashbang._registerApp(this);
 
         this.setup();
-        this._modeStack.handleModeTransitions();
+        this._modeStack._handleModeTransitions();
 
         this._pixi.ticker.add(delta => this.update(delta));
 
@@ -138,7 +138,7 @@ export default class FlashbangApp {
     }
 
     protected disposeNow(): void {
-        this._modeStack.dispose();
+        this._modeStack._dispose();
 
         this._updatables = null;
 

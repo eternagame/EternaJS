@@ -22,11 +22,11 @@ export default abstract class Reactor {
     protected removeConnection(listener: RListener): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
-                this._listeners = Cons.removeAll(this._listeners, listener);
+                this._listeners = Cons._removeAll(this._listeners, listener);
                 this.connectionRemoved();
             }));
         } else {
-            this._listeners = Cons.removeAll(this._listeners, listener);
+            this._listeners = Cons._removeAll(this._listeners, listener);
             this.connectionRemoved();
         }
     }
@@ -104,11 +104,11 @@ export default abstract class Reactor {
     public _addCons(cons: Cons): Cons {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons.insert(this._listeners, cons);
+                this._listeners = Cons._insert(this._listeners, cons);
                 this.connectionAdded();
             }));
         } else {
-            this._listeners = Cons.insert(this._listeners, cons);
+            this._listeners = Cons._insert(this._listeners, cons);
             this.connectionAdded();
         }
         return cons;
@@ -118,11 +118,11 @@ export default abstract class Reactor {
     public _removeCons(cons: Cons): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons.remove(this._listeners, cons);
+                this._listeners = Cons._remove(this._listeners, cons);
                 this.connectionRemoved();
             }));
         } else {
-            this._listeners = Cons.remove(this._listeners, cons);
+            this._listeners = Cons._remove(this._listeners, cons);
             this.connectionRemoved();
         }
     }
