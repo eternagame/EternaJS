@@ -1,15 +1,18 @@
 import {
     Container, Graphics, Point, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "flashbang/core";
-import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
-import {Arrays, DisplayUtil} from "flashbang/util";
-import {Bitmaps} from "eterna/resources";
+} from 'pixi.js';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Dialog from 'eterna/ui/Dialog';
 import {
-    Dialog, FixedWidthTextField, GameButton, GamePanel, GamePanelType
-} from "eterna/ui";
-import {Fonts, GraphicsUtil} from "eterna/util";
-import {DesignCategory, SortOptions, SortOrder} from ".";
+    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign, DisplayUtil
+} from 'flashbang';
+import GraphicsUtil from 'eterna/util/GraphicsUtil';
+import GameButton from 'eterna/ui/GameButton';
+import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import SortOptions, {SortOrder} from './SortOptions';
+import {DesignCategory} from './DesignBrowserMode';
 
 export default class SortOptionsDialog extends Dialog<void> {
     public readonly options: SortOptions;
@@ -41,7 +44,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         this._curCategoryText = new FixedWidthTextField(
             this.options.validCategories[0],
-            Fonts.arial("", 17).color(0xffffff).style,
+            Fonts.arial('', 17).color(0xffffff).style,
             140, HAlign.CENTER
         );
         addCriterionLayout.addChild(this._curCategoryText);
@@ -52,11 +55,11 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         addCriterionLayout.addHSpacer(10);
 
-        this._toggleCurSortOrderButton = new GameButton().label("increasing", 15);
+        this._toggleCurSortOrderButton = new GameButton().label('increasing', 15);
         this._toggleCurSortOrderButton.clicked.connect(() => this.toggleCurrentSortOrder());
         this.addObject(this._toggleCurSortOrderButton, addCriterionLayout);
 
-        this._addCriterionButton = new GameButton().label("Add", 15);
+        this._addCriterionButton = new GameButton().label('Add', 15);
         this._addCriterionButton.clicked.connect(() => this.addCurrentCriteria());
         this.addObject(this._addCriterionButton, addCriterionLayout);
 
@@ -64,7 +67,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         this._panelContent.addVSpacer(20);
 
-        let okButton = new GameButton().label("Ok", 20);
+        let okButton = new GameButton().label('Ok', 20);
         okButton.clicked.connect(() => this.close(null));
         this.addObject(okButton, this._panelContent);
 
@@ -89,7 +92,7 @@ export default class SortOptionsDialog extends Dialog<void> {
         ui.container.addChild(ui.categoryText);
 
         ui.sortOrderButton = new GameButton()
-            .label(sortOrder === SortOrder.INCREASING ? "increasing" : "decreasing", 15);
+            .label(sortOrder === SortOrder.INCREASING ? 'increasing' : 'decreasing', 15);
         ui.sortOrderButton.clicked.connect(() => this.toggleSort(category));
         ui.sortOrderButton.display.position = new Point(180, 0);
         this.addObject(ui.sortOrderButton, ui.container);
@@ -115,10 +118,10 @@ export default class SortOptionsDialog extends Dialog<void> {
         this.options.addCriteria(category, order, args);
 
         if (curIdx >= 0) {
-            if (order == SortOrder.INCREASING) {
-                this._criteriaUI[curIdx].sortOrderButton.label("increasing", 15);
+            if (order === SortOrder.INCREASING) {
+                this._criteriaUI[curIdx].sortOrderButton.label('increasing', 15);
             } else {
-                this._criteriaUI[curIdx].sortOrderButton.label("decreasing", 15);
+                this._criteriaUI[curIdx].sortOrderButton.label('decreasing', 15);
             }
 
             if (curIdx > 0) {
@@ -150,10 +153,10 @@ export default class SortOptionsDialog extends Dialog<void> {
     private toggleCurrentSortOrder(): void {
         this._addCriteriaSortOrder *= -1;
 
-        if (this._addCriteriaSortOrder == SortOrder.INCREASING) {
-            this._toggleCurSortOrderButton.label("increasing", 15);
+        if (this._addCriteriaSortOrder === SortOrder.INCREASING) {
+            this._toggleCurSortOrderButton.label('increasing', 15);
         } else {
-            this._toggleCurSortOrderButton.label("decreasing", 15);
+            this._toggleCurSortOrderButton.label('decreasing', 15);
         }
     }
 
@@ -202,10 +205,10 @@ export default class SortOptionsDialog extends Dialog<void> {
         let newSortOrder = this.options.toggleSort(category);
         let ui = this._criteriaUI[index];
 
-        if (newSortOrder == SortOrder.INCREASING) {
-            ui.sortOrderButton.label("increasing", 15);
+        if (newSortOrder === SortOrder.INCREASING) {
+            ui.sortOrderButton.label('increasing', 15);
         } else {
-            ui.sortOrderButton.label("decreasing", 15);
+            ui.sortOrderButton.label('decreasing', 15);
         }
     }
 

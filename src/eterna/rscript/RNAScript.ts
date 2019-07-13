@@ -1,12 +1,18 @@
-import {PoseEditMode} from "eterna/mode";
-import {Puzzle} from "eterna/puzzle";
-import {
-    ROPHighlight, ROPHighlightMode, ROPHint, ROPPre, ROPRNA, ROPRNAType, ROPTextbox, ROPTextboxMode,
-    ROPUI, ROPWait, ROPWaitType, RScriptEnv, RScriptOp, RScriptOpTree
-} from ".";
+import Puzzle from 'eterna/puzzle/Puzzle';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
+import ROPHighlight, {ROPHighlightMode} from './ROPHighlight';
+import ROPHint from './ROPHint';
+import ROPPre from './ROPPre';
+import ROPRNA, {ROPRNAType} from './ROPRNA';
+import ROPTextbox, {ROPTextboxMode} from './ROPTextbox';
+import ROPUI from './ROPUI';
+import ROPWait, {ROPWaitType} from './ROPWait';
+import RScriptEnv from './RScriptEnv';
+import RScriptOp from './RScriptOp';
+import RScriptOpTree from './RScriptOpTree';
 
 export default class RNAScript {
-    public constructor(puz: Puzzle, ui: PoseEditMode) {
+    constructor(puz: Puzzle, ui: PoseEditMode) {
         let strData: string = puz.rscript;
 
         this._env = new RScriptEnv(ui, puz);
@@ -18,7 +24,7 @@ export default class RNAScript {
         // Convert string into instructions by splitting at semicolons.
         // If we ever make "Blocks" (i.e for IF conditionals), we'll need to make this a little
         // more complex
-        let instructions: string[] = strData.split(";");
+        let instructions: string[] = strData.split(';');
 
         // For each instruction, make it into an RScriptOp (OP).
         // Give it to the OpTree to handle placing it where it should go.
@@ -58,16 +64,16 @@ export default class RNAScript {
     }
 
     private createOpFromInstruction(instruction: string): RScriptOp {
-        instruction = instruction.replace(/^\s*/, "");
-        instruction = instruction.replace(/\s*$/, "");
-        if (instruction === "") {
+        instruction = instruction.replace(/^\s*/, '');
+        instruction = instruction.replace(/\s*$/, '');
+        if (instruction === '') {
             return null;
         }
 
-        const instRegex = /(\#PRE\-)?(\w+)\s*(.*)/ig;
+        const instRegex = /(#PRE-)?(\w+)\s*(.*)/ig;
         let regResult: RegExpExecArray;
         if ((regResult = instRegex.exec(instruction)) != null) {
-            let op: string = (regResult[1] ? regResult[1] : "") + regResult[2];
+            let op: string = (regResult[1] ? regResult[1] : '') + regResult[2];
             let args: string = regResult[3];
             // Based on the OP, create the proper RScriptOp.
             let ret: RScriptOp = this.opToRScriptOp(op, args);
@@ -82,8 +88,8 @@ export default class RNAScript {
 
     private opToRScriptOp(op: string, args: string): RScriptOp {
         // Strip op of any pre/post white space
-        op = op.replace(/^\s*/, "");
-        op = op.replace(/\s*$/, "");
+        op = op.replace(/^\s*/, '');
+        op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
         let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide)?/ig;
@@ -103,34 +109,36 @@ export default class RNAScript {
             return null;
         } else if ((regResult = textboxRegex.exec(op))) {
             let textboxMode: ROPTextboxMode;
-            if (regResult[2].toUpperCase() === "ARROW") {
+            if (regResult[2].toUpperCase() === 'ARROW') {
                 if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() === "LOCATION"
+                    textboxMode = regResult[3].toUpperCase() === 'LOCATION'
                         ? ROPTextboxMode.ARROW_LOCATION
                         : ROPTextboxMode.ARROW_NUCLEOTIDE;
                 } else {
                     textboxMode = ROPTextboxMode.ARROW_DEFAULT;
                 }
             } else if (regResult[3]) {
-                textboxMode = regResult[3].toUpperCase() === "LOCATION"
+                textboxMode = regResult[3].toUpperCase() === 'LOCATION'
                     ? ROPTextboxMode.TEXTBOX_LOCATION
                     : ROPTextboxMode.TEXTBOX_NUCLEOTIDE;
             } else {
                 textboxMode = ROPTextboxMode.TEXTBOX_DEFAULT;
             }
 
-            let show: boolean = regResult[1].toUpperCase() === "SHOW";
+            let show: boolean = regResult[1].toUpperCase() === 'SHOW';
             return new ROPTextbox(this._env, show, textboxMode);
         } else if ((regResult = highlightRegex.exec(op))) {
             return new ROPHighlight(
-                regResult[1].toUpperCase() === "SHOW",
+                regResult[1].toUpperCase() === 'SHOW',
                 regResult[2] ? ROPHighlightMode.UI : ROPHighlightMode.RNA,
                 this._env
             );
         } else if ((regResult = uiRegex.exec(op))) {
-            return new ROPUI(this._env, regResult[1].toUpperCase() !== "HIDE", regResult[1].toUpperCase() === "DISABLE");
+            return new ROPUI(
+                this._env, regResult[1].toUpperCase() !== 'HIDE', regResult[1].toUpperCase() === 'DISABLE'
+            );
         } else if ((regResult = hintRegex.exec(op))) {
-            return new ROPHint(regResult[1].toUpperCase() === "SHOW", this._env);
+            return new ROPHint(regResult[1].toUpperCase() === 'SHOW', this._env);
         } else if ((regResult = waitRegex.exec(op))) {
             let waitType: ROPWaitType = regResult[1].toUpperCase();
             return new ROPWait(waitType, this._env);

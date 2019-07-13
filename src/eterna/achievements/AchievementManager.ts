@@ -1,10 +1,8 @@
 import {
-    HAlign, VAlign, GameObject, GameObjectRef
-} from "flashbang/core";
-import {CallbackTask, FunctionTask, SerialTask} from "flashbang/tasks";
-import {DisplayUtil} from "flashbang/util";
-import {GameMode} from "eterna/mode";
-import {AchievementBox} from ".";
+    GameObject, GameObjectRef, SerialTask, FunctionTask, CallbackTask, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import GameMode from 'eterna/mode/GameMode';
+import AchievementBox from './AchievementBox';
 
 export default class AchievementManager extends GameObject {
     /** True if there's an achievement animation playing, or about to play */
@@ -28,8 +26,8 @@ export default class AchievementManager extends GameObject {
 
     public awardAchievements(achievementData: any): Promise<void> {
         if (achievementData != null) {
-            for (let key in achievementData) {
-                if (achievementData.hasOwnProperty(key)) {
+            for (let key of Object.keys(achievementData)) {
+                if (Object.prototype.hasOwnProperty.call(achievementData, key)) {
                     let data: AchievementData = achievementData[key];
                     this._pending.push(data);
                 }
@@ -42,11 +40,11 @@ export default class AchievementManager extends GameObject {
     }
 
     private maybeShowNextAchievement(): void {
-        if (this._pending.length == 0 || this._cur.isLive) {
+        if (this._pending.length === 0 || this._cur.isLive) {
             return;
         }
 
-        (this.mode as GameMode).pushUILock("ShowAchievement");
+        (this.mode as GameMode).pushUILock('ShowAchievement');
 
         let nextData: AchievementData = this._pending.shift();
         let view = new AchievementBox(nextData.image, nextData.past);
@@ -57,7 +55,7 @@ export default class AchievementManager extends GameObject {
 
         view.destroyed.connect(() => {
             this.maybeShowNextAchievement();
-            (this.mode as GameMode).popUILock("ShowAchievement");
+            (this.mode as GameMode).popUILock('ShowAchievement');
         });
 
         let updateLoc = () => {

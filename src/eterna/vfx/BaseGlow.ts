@@ -1,9 +1,10 @@
-import {Point, Sprite, Texture} from "pixi.js";
-import {BitmapManager, Bitmaps} from "eterna/resources";
-import {EternaTextureUtil} from "eterna/util";
+import {Point, Sprite, Texture} from 'pixi.js';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 
 export default class BaseGlow extends Sprite {
-    public constructor() {
+    constructor() {
         super();
         BaseGlow.initTextures();
     }
@@ -16,21 +17,21 @@ export default class BaseGlow extends Sprite {
         this._backward = backward;
     }
 
-    public updateView(zoom_level: number, x: number, y: number, current_time: number): void {
+    public updateView(zoomLevel: number, x: number, y: number, currentTime: number): void {
         if (this._animStartTime < 0) {
-            this._animStartTime = current_time;
+            this._animStartTime = currentTime;
         }
 
-        let diff: number = current_time - this._animStartTime;
+        let diff: number = currentTime - this._animStartTime;
         diff -= Math.floor(diff / BaseGlow.ANIMATION_SPAN) * BaseGlow.ANIMATION_SPAN;
 
         let prog: number = diff / BaseGlow.ANIMATION_SPAN;
-        let prog_ind: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
-        if (this._backward) prog_ind = BaseGlow.NUM_ANIMATION_STEPS - 1 - prog_ind;
+        let progInd: number = Math.floor(prog * BaseGlow.NUM_ANIMATION_STEPS) % BaseGlow.NUM_ANIMATION_STEPS;
+        if (this._backward) progInd = BaseGlow.NUM_ANIMATION_STEPS - 1 - progInd;
 
         let bodyTex: Texture = this._isWrong
-            ? BaseGlow._texturesWrong[zoom_level][prog_ind]
-            : BaseGlow._textures[zoom_level][prog_ind];
+            ? BaseGlow._texturesWrong[zoomLevel][progInd]
+            : BaseGlow._textures[zoomLevel][progInd];
 
         this.texture = bodyTex;
         this.position = new Point(x - bodyTex.width / 2, y - bodyTex.height / 2);
@@ -43,26 +44,26 @@ export default class BaseGlow extends Sprite {
 
         BaseGlow._textures = [];
         BaseGlow._texturesWrong = [];
-        let original_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
+        let originalData: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
         for (let zz = 0; zz < 5; zz++) {
-            let bitmaps_in_zoom: Texture[] = [];
-            let wrong_bitmaps_in_zoom: Texture[] = [];
-            let zoom_factor: number = 1.0 - zz * 0.1;
-            let base_data: Texture = EternaTextureUtil.scaleBy(original_data, zoom_factor);
+            let bitmapsInZoom: Texture[] = [];
+            let wrongBitmapsInZoom: Texture[] = [];
+            let zoomFactor: number = 1.0 - zz * 0.1;
+            let baseData: Texture = EternaTextureUtil.scaleBy(originalData, zoomFactor);
 
             for (let ii = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
-                let new_base_data: Texture = EternaTextureUtil.colorTransformAlpha(
-                    base_data, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0
+                let newBaseData: Texture = EternaTextureUtil.colorTransformAlpha(
+                    baseData, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0
                 );
-                new_base_data = EternaTextureUtil.scaleBy(new_base_data, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
-                bitmaps_in_zoom.push(new_base_data);
+                newBaseData = EternaTextureUtil.scaleBy(newBaseData, 0.5 + (ii + 1) / BaseGlow.NUM_ANIMATION_STEPS);
+                bitmapsInZoom.push(newBaseData);
 
-                let wrong_new_base_data: Texture = EternaTextureUtil.colorTransform(new_base_data, 255, 0, 0, 0, 0, 0);
-                wrong_bitmaps_in_zoom.push(wrong_new_base_data);
+                let wrongNewBaseData: Texture = EternaTextureUtil.colorTransform(newBaseData, 255, 0, 0, 0, 0, 0);
+                wrongBitmapsInZoom.push(wrongNewBaseData);
             }
-            BaseGlow._textures.push(bitmaps_in_zoom);
-            BaseGlow._texturesWrong.push(wrong_bitmaps_in_zoom);
+            BaseGlow._textures.push(bitmapsInZoom);
+            BaseGlow._texturesWrong.push(wrongBitmapsInZoom);
         }
     }
 

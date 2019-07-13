@@ -1,5 +1,4 @@
-// import Registration from "./Registration";
-import {Registration} from ".";
+import Registration from './Registration';
 
 export default class Registrations {
     /** Returns a Registration that will call the given function when disconnected */

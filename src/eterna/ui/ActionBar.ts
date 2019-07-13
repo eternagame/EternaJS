@@ -1,9 +1,8 @@
-import {Graphics, Point} from "pixi.js";
-import {ContainerObject, SceneObject} from "flashbang/objects";
-import {DisplayUtil} from "flashbang/util";
+import {Graphics, Point} from 'pixi.js';
+import {ContainerObject, SceneObject, DisplayUtil} from 'flashbang';
 
 export default class ActionBar extends ContainerObject {
-    public constructor(height: number = 0) {
+    constructor(height: number = 0) {
         super();
 
         this._bg = new Graphics();
@@ -13,10 +12,10 @@ export default class ActionBar extends ContainerObject {
         this.doLayout();
     }
 
-    public addItem(obj: SceneObject, layout: boolean = true, height_mod: number = 0): void {
+    public addItem(obj: SceneObject, layout: boolean = true, heightMod: number = 0): void {
         this._items.push(obj);
         this.addObject(obj, this.container);
-        this._heightMods.push(height_mod);
+        this._heightMods.push(heightMod);
 
         if (layout) {
             this.doLayout();
@@ -41,41 +40,43 @@ export default class ActionBar extends ContainerObject {
             return;
         }
 
-        let item_space = 35;
-        let bar_space = 10;
+        let itemSpace = 35;
+        let barSpace = 10;
 
-        let center_width = 0;
+        let centerWidth = 0;
         for (let ii = 0; ii < this._items.length; ii++) {
-            center_width += Math.max(DisplayUtil.width(this._items[ii].display), 35);
+            centerWidth += Math.max(DisplayUtil.width(this._items[ii].display), 35);
         }
 
-        center_width += (bar_space) * this._items.length + bar_space;
-        let whole_width: number = center_width;
-        let whole_height: number = this._height;
+        centerWidth += (barSpace) * this._items.length + barSpace;
+        let wholeWidth: number = centerWidth;
+        let wholeHeight: number = this._height;
 
-        if (whole_height < 1) {
-            let max_height = 0;
-            let vertical_margin = 10;
+        if (wholeHeight < 1) {
+            let maxHeight = 0;
+            let verticalMargin = 10;
             for (let ii = 0; ii < this._items.length; ii++) {
-                max_height = Math.max(max_height, DisplayUtil.height(this._items[ii].display));
+                maxHeight = Math.max(maxHeight, DisplayUtil.height(this._items[ii].display));
             }
-            whole_height = max_height + vertical_margin;
+            wholeHeight = maxHeight + verticalMargin;
         }
 
-        let item_space_walker = 0;
+        let itemSpaceWalker = 0;
 
         for (let ii = 0; ii < this._items.length; ii++) {
-            let cur_space: number = Math.max(DisplayUtil.width(this._items[ii].display), item_space);
-            let item_y: number = whole_height / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
+            let curSpace = Math.max(DisplayUtil.width(this._items[ii].display), itemSpace);
+            let itemY = wholeHeight / 2.0 - DisplayUtil.height(this._items[ii].display) / 2.0 + this._heightMods[ii];
+
             this._items[ii].display.position = new Point(
-                bar_space + bar_space / 2.0 + item_space_walker + (bar_space) * ii,
-                item_y
+                barSpace + barSpace / 2.0 + itemSpaceWalker + (barSpace) * ii,
+                itemY
             );
-            item_space_walker += cur_space;
+
+            itemSpaceWalker += curSpace;
         }
 
         this._bg.beginFill(0xffffff, 0.05);
-        this._bg.drawRoundedRect(0, 0, whole_width, whole_height, 10);
+        this._bg.drawRoundedRect(0, 0, wholeWidth, wholeHeight, 10);
     }
 
     public get width(): number {
@@ -83,16 +84,16 @@ export default class ActionBar extends ContainerObject {
             return 0;
         }
 
-        let bar_space = 10;
+        let barSpace = 10;
 
-        let center_width = 0;
+        let centerWidth = 0;
         for (let ii = 0; ii < this._items.length; ii++) {
-            center_width += Math.max(DisplayUtil.width(this._items[ii].display), 35);
+            centerWidth += Math.max(DisplayUtil.width(this._items[ii].display), 35);
         }
 
-        center_width += (bar_space) * this._items.length + bar_space;
+        centerWidth += (barSpace) * this._items.length + barSpace;
 
-        return center_width;
+        return centerWidth;
     }
 
     private readonly _bg: Graphics;

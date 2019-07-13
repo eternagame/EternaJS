@@ -1,12 +1,15 @@
-import {Graphics} from "pixi.js";
-import {HAlign, VAlign} from "flashbang/core";
-import {ButtonState, ToggleButton} from "flashbang/objects";
-import {DisplayUtil} from "flashbang/util";
-import {Fonts} from "eterna/util";
+import {Graphics} from 'pixi.js';
+import {
+    ToggleButton, DisplayUtil, HAlign, VAlign, ButtonState
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from './GameButton';
 
 export default class GameCheckbox extends ToggleButton {
     constructor(size: number, txt: string) {
         super();
+
+        this.downSound = GameButton.DEFAULT_DOWN_SOUND;
 
         // setting cacheAsBitmap on these Graphics objects
         // breaks interactivity :( (PIXI bug?)

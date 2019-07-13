@@ -15,11 +15,21 @@
     "lint": "eslint src --ext .ts"
   },
   "jest": {
+    "preset": "ts-jest",
+    "moduleDirectories": [
+      "node_modules",
+      "src",
+      ""
+    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js"
     ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "assets/__mocks__/fileMock.js",
+      "\\.(css|less)$": "assets/__mocks__/styleMock.js"
+    },
     "rootDir": "src",
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
@@ -30,7 +40,11 @@
         "babelConfig": false,
         "tsConfig": "./tsconfig.jest.json"
       }
-    }
+    },
+    "setupFiles": [
+      "jest-canvas-mock",
+      "dotenv/config"
+    ]
   },
   "repository": {
     "type": "git",
@@ -40,44 +54,48 @@
   "author": "Tim Conkling",
   "license": "ISC",
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-env": "^7.5.0",
     "@babel/preset-typescript": "^7.3.3",
     "@types/base64-js": "^1.2.5",
-    "@types/jest": "^24.0.13",
-    "@types/loglevel": "^1.5.4",
-    "@types/node": "^12.0.4",
-    "@types/pixi.js": "^4.8.6",
+    "@types/jest": "^24.0.15",
+    "@types/loglevel": "^1.6.3",
+    "@types/node": "^12.0.12",
+    "@types/pixi.js": "^4.8.8",
     "@types/storejs": "^2.0.3",
+    "@types/upng-js": "^2.1.1",
     "@types/webfontloader": "^1.6.29",
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
     "babel-preset-minify": "^0.5.0",
     "coffeescript": "^1.12.7",
-    "concurrently": "^4.1.0",
-    "css-loader": "^2.1.1",
+    "concurrently": "^4.1.1",
+    "css-loader": "^3.0.0",
     "dotenv-webpack": "^1.7.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.2.0",
     "eslint-import-resolver-webpack": "^0.11.1",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-import": "^2.18.0",
     "file-loader": "^4.0.0",
     "hard-source-webpack-plugin": "0.13.1",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^3.0.0",
     "jest": "^24.8.0",
-    "local-web-server": "^2.6.1",
+    "jest-canvas-mock": "^2.1.0",
+    "lint-staged": "^9.0.2",
+    "local-web-server": "^3.0.4",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.1",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.5.1",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.2",
+    "typescript": "^3.5.2",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.5",
     "webpack-manifest-plugin": "^2.0.4",
     "webpack-merge": "^4.2.1"
   },
@@ -85,13 +103,25 @@
     "base64-js": "^1.3.0",
     "js-polyfills": "^0.1.42",
     "localforage": "^1.7.3",
-    "loglevel": "^1.6.2",
+    "loglevel": "^1.6.3",
     "pixi-filters": "^2.7.1",
     "pixi-multistyle-text": "^0.7.0",
     "pixi-sound": "^2.1.0",
-    "pixi.js": "^4.8.6",
+    "pixi.js": "^4.8.8",
     "store": "^2.0.12",
     "upng-js": "^2.1.0",
     "webfontloader": "^1.6.28"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run lint -- --fix",
+      "npm run test -- --findRelatedTests",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run typecheck"
+    }
   }
 }

@@ -1,10 +1,7 @@
-/* import Connection from "./Connection";
-import Cons from "./Cons";
-import Reactor from "./Reactor";
-import ValueView from "./ValueView"; */
-import {
-    Connection, Cons, Reactor, ValueView
-} from ".";
+import Connection from './Connection';
+import Cons from './Cons';
+import Reactor from './Reactor';
+import ValueView from './ValueView';
 
 /**
  * Handles the machinery of connecting listeners to a value and notifying them, without exposing a
@@ -85,7 +82,7 @@ export default abstract class AbstractValue<T> extends Reactor implements ValueV
      * @return the previously stored value.
      */
     protected updateLocal(value: T): T {
-        throw new Error("IllegalOperationError");
+        throw new Error('IllegalOperationError');
     }
 
     /**

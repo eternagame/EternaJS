@@ -1,14 +1,14 @@
-import * as log from "loglevel";
-import {Point, Sprite, Text} from "pixi.js";
-import {ContainerObject} from "flashbang/objects";
+import * as log from 'loglevel';
+import {Point, Sprite, Text} from 'pixi.js';
 import {
-    AlphaTask, DelayTask, ParallelTask, ScaleTask, SerialTask
-} from "flashbang/tasks";
-import {Easing, TextureUtil} from "flashbang/util";
-import {PlaySoundTask, Sounds} from "eterna/resources";
-import {GameButton, GamePanel, GamePanelType} from "eterna/ui";
-import {Fonts} from "eterna/util";
-import {VibrateTask} from "eterna/vfx";
+    ContainerObject, TextureUtil, SerialTask, DelayTask, ParallelTask, AlphaTask, ScaleTask, Easing
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Fonts from 'eterna/util/Fonts';
+import PlaySoundTask from 'eterna/resources/PlaySoundTask';
+import Sounds from 'eterna/resources/Sounds';
+import VibrateTask from 'eterna/vfx/VibrateTask';
 
 export default class AchievementBox extends ContainerObject {
     constructor(imageURL: string, text: string) {
@@ -49,7 +49,7 @@ export default class AchievementBox extends ContainerObject {
         imageSprite.position = new Point(15, 35);
         panel.container.addChild(imageSprite);
 
-        let titleTxt = Fonts.arial("Congratulations!", 18).color(0xffffff).bold().build();
+        let titleTxt = Fonts.arial('Congratulations!', 18).color(0xffffff).bold().build();
         titleTxt.position = new Point(160, 5);
         panel.container.addChild(titleTxt);
 
@@ -60,7 +60,7 @@ export default class AchievementBox extends ContainerObject {
         this._descriptionTxt.position = new Point(160, 50);
         panel.container.addChild(this._descriptionTxt);
 
-        this._okButton = new GameButton().label("CLOSE", 18);
+        this._okButton = new GameButton().label('CLOSE', 18);
         panel.addObject(this._okButton, panel.container);
         this._okButton.container.position = new Point(
             (panel.width - this._okButton.container.width) * 0.5,

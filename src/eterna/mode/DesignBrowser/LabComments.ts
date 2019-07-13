@@ -1,35 +1,35 @@
-import Eterna from "eterna/Eterna";
-import {Utility} from "eterna/util";
+import Eterna from 'eterna/Eterna';
+import Utility from 'eterna/util/Utility';
 
 export default class LabComments {
     constructor(nid: number) {
-        this._solution_nid = nid;
-        this._comments_data = [];
+        this._solutionNID = nid;
+        this._commentsData = [];
     }
 
     public update(): Promise<any[]> {
-        return Eterna.client.getSolutionComments(this._solution_nid)
+        return Eterna.client.getSolutionComments(this._solutionNID)
             .then((data) => {
-                this._comments_data = data["data"]["comments"];
-                return this._comments_data;
+                this._commentsData = data['data']['comments'];
+                return this._commentsData;
             });
     }
 
-    public submit_comment(body: string): Promise<any[]> {
+    public submitComment(body: string): Promise<any[]> {
         body = Utility.stripHtmlTags(body);
         body = Utility.stripQuotationsAndNewlines(body);
 
-        return Eterna.client.submitSolutionComment(this._solution_nid, body)
+        return Eterna.client.submitSolutionComment(this._solutionNID, body)
             .then((data) => {
-                this._comments_data = data["data"]["comments"];
-                return this._comments_data;
+                this._commentsData = data['data']['comments'];
+                return this._commentsData;
             });
     }
 
-    public get_comments(): any[] {
-        return this._comments_data;
+    public getComments(): any[] {
+        return this._commentsData;
     }
 
-    private readonly _solution_nid: number;
-    private _comments_data: any[];
+    private readonly _solutionNID: number;
+    private _commentsData: any[];
 }

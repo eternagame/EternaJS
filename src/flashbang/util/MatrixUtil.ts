@@ -8,7 +8,7 @@
 //
 // =================================================================================================
 
-import {Matrix, Point} from "pixi.js";
+import {Matrix, Point} from 'pixi.js';
 
 /** A utility class containing methods related to the Matrix class. */
 export default class MatrixUtil {
@@ -128,7 +128,7 @@ export default class MatrixUtil {
     }
 
     private static formatRawData(data: number[], numCols: number, numRows: number,
-        precision: number, indent: string = "  "): string {
+        precision: number, indent: string = '  '): string {
         let result: string = indent;
         let numValues: number = numCols * numRows;
         let highestValue = 0.0;
@@ -150,7 +150,7 @@ export default class MatrixUtil {
                 while (valueString.length < numChars) valueString = ` ${valueString}`;
 
                 result += valueString;
-                if (x !== numCols - 1) result += ", ";
+                if (x !== numCols - 1) result += ', ';
             }
 
             if (y !== numRows - 1) result += `\n${indent}`;

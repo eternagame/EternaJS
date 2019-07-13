@@ -1,8 +1,8 @@
-import {Texture, Sprite} from "pixi.js";
-import {Button, ButtonState} from ".";
+import {Texture, Sprite} from 'pixi.js';
+import Button, {ButtonState} from './Button';
 
 export default class ImageButton extends Button {
-    public constructor(textures: Texture[]) {
+    constructor(textures: Texture[]) {
         super();
 
         this._sprite = new Sprite();

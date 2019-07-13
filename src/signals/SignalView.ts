@@ -1,5 +1,4 @@
-// import Connection from "./Connection";
-import {Connection} from ".";
+import Connection from './Connection';
 
 /**
  * A view of a {@link Signal}, on which slots may listen, but to which one cannot emit events. This

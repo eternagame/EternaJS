@@ -1,20 +1,24 @@
 import {
     Container, DisplayObject, Graphics, Point, Rectangle, Sprite, Text, Texture
-} from "pixi.js";
-import {HAlign, VAlign} from "flashbang/core";
-import {KeyboardEventType, KeyboardListener} from "flashbang/input";
-import {Button, ButtonState} from "flashbang/objects";
-import {DisplayUtil, TextBuilder} from "flashbang/util";
-import {Registration, Registrations, Value} from "signals";
-import {ROPWait, RScriptUIElementID} from "eterna/rscript";
-import {Fonts} from "eterna/util";
-import {Tooltips} from ".";
+} from 'pixi.js';
+import {Registration, Registrations, Value} from 'signals';
+import {
+    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import ROPWait from 'eterna/rscript/ROPWait';
+import Fonts from 'eterna/util/Fonts';
+import Sounds from 'eterna/resources/Sounds';
+import Tooltips from './Tooltips';
 
 export default class GameButton extends Button implements KeyboardListener {
-    public readonly toggled: Value<boolean> = new Value(false);
+    public readonly toggled: Value<boolean> = new Value<boolean>(false);
+    public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
 
-    public constructor() {
+    constructor() {
         super();
+
+        this.downSound = GameButton.DEFAULT_DOWN_SOUND;
 
         this._content = new Container();
         this.container.addChild(this._content);
@@ -78,7 +82,7 @@ export default class GameButton extends Button implements KeyboardListener {
     }
 
     public label(text: string | TextBuilder, fontSize?: number): GameButton {
-        if (typeof (text) === "string") {
+        if (typeof (text) === 'string') {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
@@ -88,7 +92,7 @@ export default class GameButton extends Button implements KeyboardListener {
     }
 
     public fixedLabelWidth(width: number): GameButton {
-        if (this._fixedLabelWidth != width) {
+        if (this._fixedLabelWidth !== width) {
             this._fixedLabelWidth = width;
             this.needsRedraw();
         }
@@ -102,7 +106,7 @@ export default class GameButton extends Button implements KeyboardListener {
     }
 
     public tooltip(text: string): GameButton {
-        if (this._tooltip != text) {
+        if (this._tooltip !== text) {
             this._tooltip = text;
             if (this.isLiveObject) {
                 this.setupTooltip();
@@ -149,7 +153,7 @@ export default class GameButton extends Button implements KeyboardListener {
         this._content.alpha = 1;
 
         let icon = this.getIconForState(state, this.isSelected);
-        if (icon == null && state == ButtonState.DISABLED) {
+        if (icon == null && state === ButtonState.DISABLED) {
             // If we're missing the disabled state, use the UP state at 50% alpha
             icon = this.getIconForState(ButtonState.UP, this.isSelected);
             this._content.alpha = 0.5;
@@ -254,7 +258,7 @@ export default class GameButton extends Button implements KeyboardListener {
     }
 
     private getIconForState(state: ButtonState, selected: boolean): DisplayObject {
-        if (state != ButtonState.DISABLED && selected && this._selectedState != null) {
+        if (state !== ButtonState.DISABLED && selected && this._selectedState != null) {
             return this._selectedState;
         } else {
             return this._buttonIcons != null && this._buttonIcons.length > state
@@ -268,7 +272,7 @@ export default class GameButton extends Button implements KeyboardListener {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
-        } else if (typeof (displayOrTex) === "string") {
+        } else if (typeof (displayOrTex) === 'string') {
             return Sprite.fromImage(displayOrTex);
         } else {
             return null;

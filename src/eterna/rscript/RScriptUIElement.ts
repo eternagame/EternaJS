@@ -1,6 +1,5 @@
-import {DisplayObject, Rectangle} from "pixi.js";
-import {GameObject} from "flashbang/core";
-import {DisplayUtil} from "flashbang/util";
+import {DisplayObject, Rectangle} from 'pixi.js';
+import {GameObject, DisplayUtil} from 'flashbang';
 
 export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
 
@@ -22,52 +21,52 @@ export function GetRScriptUIElementBounds(element: RScriptUIElement): Rectangle 
 }
 
 export enum RScriptUIElementID {
-    TOGGLETARGET = "TOGGLETARGET",
-    TOGGLENATURAL = "TOGGLENATURAL",
-    ZOOMIN = "ZOOMIN",
-    ZOOMOUT = "ZOOMOUT",
-    RESET = "RESET",
-    UNDO = "UNDO",
-    REDO = "REDO",
-    SWAP = "SWAP",
-    HINT = "HINT",
-    PIP = "PIP",
-    FREEZE = "FREEZE",
-    SWITCH = "SWITCH",
+    TOGGLETARGET = 'TOGGLETARGET',
+    TOGGLENATURAL = 'TOGGLENATURAL',
+    ZOOMIN = 'ZOOMIN',
+    ZOOMOUT = 'ZOOMOUT',
+    RESET = 'RESET',
+    UNDO = 'UNDO',
+    REDO = 'REDO',
+    SWAP = 'SWAP',
+    HINT = 'HINT',
+    PIP = 'PIP',
+    FREEZE = 'FREEZE',
+    SWITCH = 'SWITCH',
 
-    OBJECTIVES = "OBJECTIVES",
-    OBJECTIVE = "OBJECTIVE-",
-    SHAPEOBJECTIVE = "SHAPEOBJECTIVE",
+    OBJECTIVES = 'OBJECTIVES',
+    OBJECTIVE = 'OBJECTIVE-',
+    SHAPEOBJECTIVE = 'SHAPEOBJECTIVE',
 
-    A = "A",
-    U = "U",
-    G = "G",
-    C = "C",
-    AU = "AU",
-    UA = "UA",
-    GU = "GU",
-    UG = "UG",
-    GC = "GC",
-    CG = "CG",
-    AUCOMPLETE = "AUCOMPLETE",
-    UACOMPLETE = "UACOMPLETE",
-    GUCOMPLETE = "GUCOMPLETE",
-    UGCOMPLETE = "UGCOMPLETE",
-    GCCOMPLETE = "GCCOMPLETE",
-    CGCOMPLETE = "CGCOMPLETE",
+    A = 'A',
+    U = 'U',
+    G = 'G',
+    C = 'C',
+    AU = 'AU',
+    UA = 'UA',
+    GU = 'GU',
+    UG = 'UG',
+    GC = 'GC',
+    CG = 'CG',
+    AUCOMPLETE = 'AUCOMPLETE',
+    UACOMPLETE = 'UACOMPLETE',
+    GUCOMPLETE = 'GUCOMPLETE',
+    UGCOMPLETE = 'UGCOMPLETE',
+    GCCOMPLETE = 'GCCOMPLETE',
+    CGCOMPLETE = 'CGCOMPLETE',
 
-    HELP = "HELP",
+    HELP = 'HELP',
 
-    TOTALENERGY = "TOTALENERGY",
-    PRIMARY_ENERGY = "PRIMARY_ENERGY",
-    SECONDARY_ENERGY = "SECONDARY_ENERGY",
+    TOTALENERGY = 'TOTALENERGY',
+    PRIMARY_ENERGY = 'PRIMARY_ENERGY',
+    SECONDARY_ENERGY = 'SECONDARY_ENERGY',
 
-    PALETTE = "PALETTE",
-    PALETTEALT = "PALETTEALT",
-    TOGGLEBAR = "TOGGLEBAR",
-    ACTIONBAR = "ACTIONBAR",
-    ACTION_MENU = "ACTION_MENU",
+    PALETTE = 'PALETTE',
+    PALETTEALT = 'PALETTEALT',
+    TOGGLEBAR = 'TOGGLEBAR',
+    ACTIONBAR = 'ACTIONBAR',
+    ACTION_MENU = 'ACTION_MENU',
 
-    ENERGY = "ENERGY",
-    BASENUMBERING = "BASENUMBERING"
+    ENERGY = 'ENERGY',
+    BASENUMBERING = 'BASENUMBERING'
 }

@@ -1,7 +1,18 @@
-import {Container} from "pixi.js";
-import {UnitSignal} from "signals";
-import {Assert, MathUtil} from "../util";
-import {AppMode} from ".";
+import {Container} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import MathUtil from 'flashbang/util/MathUtil';
+import Assert from 'flashbang/util/Assert';
+import AppMode from './AppMode';
+
+export enum ModeTransition {
+    PUSH, UNWIND, INSERT, REMOVE, CHANGE, SET_INDEX,
+}
+
+class PendingTransition {
+    public mode: AppMode;
+    public type: ModeTransition;
+    public index: number;
+}
 
 /**
  * A stack of AppModes. Only the top-most mode in the stack gets updates
@@ -134,7 +145,7 @@ export default class ModeStack {
     /** Called when the app is resized */
     public onResized(): void {
         for (let mode of this._modeStack) {
-            mode.resizeInternal();
+            mode._resizeInternal();
         }
     }
 
@@ -142,17 +153,17 @@ export default class ModeStack {
         if (this._pendingModeTransitionQueue.length > 0) {
             // handleModeTransition generates a lot of garbage in memory, avoid calling it on
             // updates where it will NOOP anyway.
-            this.handleModeTransitions();
+            this._handleModeTransitions();
         }
 
         // update the top mode
         if (this._modeStack.length > 0) {
-            this._modeStack[this._modeStack.length - 1].updateInternal(dt);
+            this._modeStack[this._modeStack.length - 1]._updateInternal(dt);
         }
     }
 
     /* internal */
-    handleModeTransitions(): void {
+    public _handleModeTransitions(): void {
         if (this._pendingModeTransitionQueue.length <= 0) {
             return;
         }
@@ -167,7 +178,7 @@ export default class ModeStack {
             this._modeStack.push(newMode);
             this._container.addChild(newMode.container);
 
-            newMode.setupInternal(this);
+            newMode._setupInternal(this);
         };
 
         const doInsertMode = (newMode: AppMode, index: number) => {
@@ -183,7 +194,7 @@ export default class ModeStack {
             this._modeStack.splice(index, 0, newMode);
             this._container.addChildAt(newMode.container, index);
 
-            newMode.setupInternal(this);
+            newMode._setupInternal(this);
         };
 
         const doRemoveMode = (modeOrIndex: AppMode | number) => {
@@ -209,11 +220,11 @@ export default class ModeStack {
             // if the top mode is removed, make sure it's exited first
             let mode: AppMode = this._modeStack[index];
             if (mode === initialTopMode) {
-                initialTopMode.exitInternal();
+                initialTopMode._exitInternal();
                 initialTopMode = null;
             }
 
-            mode.disposeInternal();
+            mode._disposeInternal();
             this._modeStack.splice(index, 1);
         };
 
@@ -230,7 +241,7 @@ export default class ModeStack {
                     newIdx = this._modeStack.length + newIdx;
                 }
                 newIdx = MathUtil.clamp(newIdx, 0, this._modeStack.length - 1);
-                if (prevIdx != newIdx) {
+                if (prevIdx !== newIdx) {
                     // Rearrange the modestack
                     this._modeStack.splice(prevIdx, 1);
                     this._modeStack.splice(newIdx, 0, mode);
@@ -286,6 +297,9 @@ export default class ModeStack {
                 case ModeTransition.SET_INDEX:
                     doSetIndex(mode, transition.index);
                     break;
+
+                default:
+                    Assert.unreachable(transition.type);
             }
         }
 
@@ -302,28 +316,28 @@ export default class ModeStack {
         let newTopMode = this.topMode;
         if (newTopMode !== initialTopMode) {
             if (initialTopMode != null) {
-                initialTopMode.exitInternal();
+                initialTopMode._exitInternal();
             }
 
             if (newTopMode != null) {
-                newTopMode.enterInternal();
+                newTopMode._enterInternal();
             }
             this.topModeChanged.emit();
         }
     }
 
     /* internal */
-    clearModeStackNow(): void {
+    public _clearModeStackNow(): void {
         this._pendingModeTransitionQueue.length = 0;
         if (this._modeStack.length > 0) {
             this.popAllModes();
-            this.handleModeTransitions();
+            this._handleModeTransitions();
         }
     }
 
     /* internal */
-    dispose(): void {
-        this.clearModeStackNow();
+    public _dispose(): void {
+        this._clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
         this._container.destroy();
@@ -333,14 +347,4 @@ export default class ModeStack {
     protected _container: Container = new Container();
     protected _modeStack: AppMode[] = [];
     protected _pendingModeTransitionQueue: PendingTransition[] = [];
-}
-
-export enum ModeTransition {
-    PUSH, UNWIND, INSERT, REMOVE, CHANGE, SET_INDEX,
-}
-
-class PendingTransition {
-    public mode: AppMode;
-    public type: ModeTransition;
-    public index: number;
 }

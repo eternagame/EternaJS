@@ -1,13 +1,19 @@
-import {Graphics, Point, Text} from "pixi.js";
-import {Fonts} from "eterna/util";
-import {BaseGamePanel} from ".";
+import {Graphics, Point, Text} from 'pixi.js';
+import Fonts from 'eterna/util/Fonts';
+import BaseGamePanel from './BaseGamePanel';
 
 export enum FancyGamePanelType {
     NORMAL, INVISIBLE, NEW_NOVA
 }
 
 export default class FancyGamePanel extends BaseGamePanel {
-    constructor(type: FancyGamePanelType = FancyGamePanelType.NORMAL, alpha: number = 0.07, color: number = 0xffffff, outlineColor: number = 0xffffff, outlineAlpha: number = 0.2) {
+    constructor(
+        type: FancyGamePanelType = FancyGamePanelType.NORMAL,
+        alpha: number = 0.07,
+        color: number = 0xffffff,
+        outlineColor: number = 0xffffff,
+        outlineAlpha: number = 0.2
+    ) {
         super();
 
         this._background = new Graphics();

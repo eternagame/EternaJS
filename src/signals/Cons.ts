@@ -1,7 +1,6 @@
-/* import Reactor from "./Reactor";
-import {RListener} from "./Reactor";
-import Connection from "./Connection"; */
-import {Reactor, RListener, Connection} from ".";
+import Reactor, {RListener} from './Reactor';
+
+import Connection from './Connection';
 
 /**
  * Implements {@link Connection} and a linked-list style listener list for {@link Reactor}s.
@@ -41,7 +40,7 @@ export default class Cons implements Connection {
 
     public atPriority(priority: number): Connection {
         if (this._owner == null) {
-            throw new Error("Cannot change priority of disconnected connection.");
+            throw new Error('Cannot change priority of disconnected connection.');
         }
         this._owner._removeCons(this);
         this.next = null;
@@ -51,38 +50,38 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    static insert(head: Cons, cons: Cons): Cons {
+    public static _insert(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
             cons.next = head;
             return cons;
         } else {
-            head.next = Cons.insert(head.next, cons);
+            head.next = Cons._insert(head.next, cons);
             return head;
         }
     }
 
     /* internal */
-    static remove(head: Cons, cons: Cons): Cons {
+    public static _remove(head: Cons, cons: Cons): Cons {
         if (head == null) {
             return head;
         } else if (head === cons) {
             return head.next;
         } else {
-            head.next = Cons.remove(head.next, cons);
+            head.next = Cons._remove(head.next, cons);
             return head;
         }
     }
 
     /* internal */
-    static removeAll(head: Cons, listener: RListener): Cons {
+    public static _removeAll(head: Cons, listener: RListener): Cons {
         if (head == null) {
             return null;
         } else if (head.listener === listener) {
-            return Cons.removeAll(head.next, listener);
+            return Cons._removeAll(head.next, listener);
         } else {
-            head.next = Cons.removeAll(head.next, listener);
+            head.next = Cons._removeAll(head.next, listener);
             return head;
         }
     }

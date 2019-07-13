@@ -1,7 +1,7 @@
-import {Arrays} from "flashbang/util";
-import {UnitSignal} from "signals";
-import {Solution} from "eterna/puzzle";
-import {DesignCategory} from ".";
+import {UnitSignal} from 'signals';
+import {Arrays} from 'flashbang';
+import Solution from 'eterna/puzzle/Solution';
+import {DesignCategory} from './DesignBrowserMode';
 
 export enum SortOrder {
     INCREASING = 1,
@@ -14,7 +14,7 @@ export class SortCriterion {
     public sortOrder: SortOrder;
     public arg: string;
 
-    public constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -25,8 +25,8 @@ export default class SortOptions {
     /** Emitted when any of our sort options have changed */
     public readonly sortChanged = new UnitSignal();
 
-    public constructor(validCategories: DesignCategory[]) {
-        if (validCategories == null || validCategories.length == 0) {
+    constructor(validCategories: DesignCategory[]) {
+        if (validCategories == null || validCategories.length === 0) {
             throw new Error("Sort names length can't be 0");
         }
 
@@ -62,31 +62,31 @@ export default class SortOptions {
             let aProperty: any;
             let bProperty: any;
 
-            if (criterion.category == DesignCategory.Sequence) {
-                let anchor_sequence: string = criterion.arg;
-                let a_string: string = a.sequence;
-                if (a_string == null) throw new Error(`solution ${a.nodeID} invalid`);
-                let b_string: string = b.sequence;
-                if (b_string == null) throw new Error(`solution ${b.nodeID} invalid`);
-                if (a_string.length != anchor_sequence.length || b_string.length != anchor_sequence.length) {
-                    throw new Error("Wrong anchor sequence length");
+            if (criterion.category === DesignCategory.SEQUENCE) {
+                let anchorSequence: string = criterion.arg;
+                let aString: string = a.sequence;
+                if (aString == null) throw new Error(`solution ${a.nodeID} invalid`);
+                let bString: string = b.sequence;
+                if (bString == null) throw new Error(`solution ${b.nodeID} invalid`);
+                if (aString.length !== anchorSequence.length || bString.length !== anchorSequence.length) {
+                    throw new Error('Wrong anchor sequence length');
                 }
 
-                let a_score = 0;
-                let b_score = 0;
+                let aScore = 0;
+                let bScore = 0;
 
-                for (let jj = 0; jj < a_string.length; jj++) {
-                    if (a_string.charAt(jj) != anchor_sequence.charAt(jj)) {
-                        a_score++;
+                for (let jj = 0; jj < aString.length; jj++) {
+                    if (aString.charAt(jj) !== anchorSequence.charAt(jj)) {
+                        aScore++;
                     }
 
-                    if (b_string.charAt(jj) != anchor_sequence.charAt(jj)) {
-                        b_score++;
+                    if (bString.charAt(jj) !== anchorSequence.charAt(jj)) {
+                        bScore++;
                     }
                 }
 
-                aProperty = a_score;
-                bProperty = b_score;
+                aProperty = aScore;
+                bProperty = bScore;
             } else {
                 aProperty = a.getProperty(criterion.category);
                 bProperty = b.getProperty(criterion.category);

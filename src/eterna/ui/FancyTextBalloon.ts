@@ -1,13 +1,15 @@
-import {Point} from "pixi.js";
-import {HAlign, VAlign, Updatable} from "flashbang/core";
-import {Vector2} from "flashbang/geom";
-import {DisplayUtil} from "flashbang/util";
-import {Bitmaps} from "eterna/resources";
-import {RScriptArrow} from "eterna/rscript";
-import {FancyGamePanel, GameButton, TextBalloon} from ".";
+import {Point} from 'pixi.js';
+import {
+    Updatable, DisplayUtil, HAlign, VAlign, Vector2
+} from 'flashbang';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import RScriptArrow from 'eterna/rscript/RScriptArrow';
+import TextBalloon from './TextBalloon';
+import GameButton from './GameButton';
+import FancyGamePanel from './FancyGamePanel';
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
-    public constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
+    constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
         showOutline: boolean = false, outlineColor: number = 0xFFFFFF,
         outlineAlpha: number = 0.70) {
         super(null, balloonColor, balloonAlpha);
@@ -43,8 +45,8 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
         this.updateView();
     }
 
-    public set fixedWidth(in_width: number) {
-        this._fixedWidth = in_width;
+    public set fixedWidth(inWidth: number) {
+        this._fixedWidth = inWidth;
         this._hasFixedWidth = true;
 
         if (this.isLiveObject) {

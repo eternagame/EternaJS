@@ -1,6 +1,6 @@
 enum KeyboardEventType {
-    KEY_DOWN = "keydown",
-    KEY_UP = "keyup"
+    KEY_DOWN = 'keydown',
+    KEY_UP = 'keyup'
 }
 
 export default KeyboardEventType;

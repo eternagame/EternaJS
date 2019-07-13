@@ -1,5 +1,5 @@
-import * as storejs from "store";
-import {Setting} from ".";
+import * as storejs from 'store';
+import Setting from './Setting';
 
 export default abstract class Settings {
     protected constructor(namespace: string) {

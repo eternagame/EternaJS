@@ -1,23 +1,23 @@
-import {Point} from "pixi.js";
+import {Point} from 'pixi.js';
 
 export default class Utility {
     public static roundTo(num: number, floating: number): number {
-        let div: number = Math.pow(10, floating);
+        let div: number = 10 ** floating;
         let temp: number = num * div;
         return Number(temp) / div;
     }
 
     public static stripHtmlTags(str: string): string {
         let newlinereg = /</g;
-        str = str.replace(newlinereg, "&lt;");
+        str = str.replace(newlinereg, '&lt;');
         newlinereg = />/g;
-        str = str.replace(newlinereg, "&gt;");
+        str = str.replace(newlinereg, '&gt;');
         return str;
     }
 
     public static stripQuotationsAndNewlines(str: string): string {
         let newlinereg = /\n/g;
-        str = str.replace(newlinereg, " ");
+        str = str.replace(newlinereg, ' ');
         newlinereg = /"/g;
         str = str.replace(newlinereg, "'");
         return str;
@@ -25,43 +25,30 @@ export default class Utility {
 
     public static generateParameterString(obj: any): string {
         if (obj == null) {
-            return "";
+            return '';
         }
 
-        let res = "";
-        let first = true;
-        let key: string;
-        for (key in obj) {
-            if (first) {
-                first = false;
-            } else {
-                res += "&";
-            }
-
-            res += `${key}=${(obj as any)[key]}`;
-        }
-
-        return res;
+        return Object.entries(obj).map(([key, val]) => `${key}=${val}`).join('&');
     }
 
-    public static isPointWithin(p: Point, polygon: Point[], stretch_length: number = 10000): boolean {
-        let hit_count = 0;
+    public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
+        let hitCount = 0;
 
-        let p_to: Point = new Point(p.x + stretch_length, p.y + stretch_length);
+        let pTo: Point = new Point(p.x + stretchLength, p.y + stretchLength);
 
         for (let ii = 0; ii < polygon.length; ii++) {
             let a: Point = polygon[ii];
             let b: Point = polygon[(ii + 1) % polygon.length];
 
-            if (Utility.findIntersection(a, b, p, p_to) != null) {
-                hit_count++;
+            if (Utility.findIntersection(a, b, p, pTo) != null) {
+                hitCount++;
             }
         }
 
-        return (hit_count % 2) === 1;
+        return (hitCount % 2) === 1;
     }
 
-    public static findIntersection(A: Point, B: Point, E: Point, F: Point, as_seg: boolean = true): Point {
+    public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point {
         let ip: Point;
         let a1: number;
         let a2: number;
@@ -92,23 +79,61 @@ export default class Utility {
         // Return null if it is with any.
         //---------------------------------------------------
 
-        if (as_seg) {
-            if (Math.pow(ip.x - B.x, 2) + Math.pow(ip.y - B.y, 2) > Math.pow(A.x - B.x, 2) + Math.pow(A.y - B.y, 2)) {
+        if (asSeg) {
+            if (((ip.x - B.x) ** 2) + ((ip.y - B.y) ** 2) > ((A.x - B.x) ** 2) + ((A.y - B.y) ** 2)) {
                 return null;
             }
 
-            if (Math.pow(ip.x - A.x, 2) + Math.pow(ip.y - A.y, 2) > Math.pow(A.x - B.x, 2) + Math.pow(A.y - B.y, 2)) {
+            if (((ip.x - A.x) ** 2) + ((ip.y - A.y) ** 2) > ((A.x - B.x) ** 2) + ((A.y - B.y) ** 2)) {
                 return null;
             }
 
-            if (Math.pow(ip.x - F.x, 2) + Math.pow(ip.y - F.y, 2) > Math.pow(E.x - F.x, 2) + Math.pow(E.y - F.y, 2)) {
+            if (((ip.x - F.x) ** 2) + ((ip.y - F.y) ** 2) > ((E.x - F.x) ** 2) + ((E.y - F.y) ** 2)) {
                 return null;
             }
 
-            if (Math.pow(ip.x - E.x, 2) + Math.pow(ip.y - E.y, 2) > Math.pow(E.x - F.x, 2) + Math.pow(E.y - F.y, 2)) {
+            if (((ip.x - E.x) ** 2) + ((ip.y - E.y) ** 2) > ((E.x - F.x) ** 2) + ((E.y - F.y) ** 2)) {
                 return null;
             }
         }
         return ip;
+    }
+
+    public static range(start: number, stop: number): number[];
+    public static range(length: number): number[];
+
+    public static range(a: number, b?: number): number[] {
+        let start = b ? a : 0;
+        let stop = b || a;
+
+        return new Array(stop - start).fill(0).map((_, i) => i + start);
+    }
+
+    /**
+     * Similar to `string.split(' ')`, but acts differently with multiple consecutive spaces
+     * E.g., two spaces results in the second space being placed in the following entry,
+     * three results in one entry of a single space, four both, five two single space entried, etc
+     *
+     * @param csl string to split
+     */
+    public static splitOnWhitespace(csl: string): string[] {
+        let vals: string[] = [];
+        let lastComma = -1;
+        let ii: number;
+
+        for (ii = 0; ii < csl.length; ii++) {
+            if (csl.charAt(ii) === ' ') {
+                if (lastComma < ii - 1) {
+                    vals.push(csl.substr(lastComma + 1, ii - (lastComma + 1)));
+                    lastComma = ii;
+                }
+            }
+        }
+
+        if (lastComma < ii - 1) {
+            vals.push(csl.substr(lastComma + 1, ii - (lastComma + 1)));
+        }
+
+        return vals;
     }
 }

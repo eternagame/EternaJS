@@ -1,14 +1,14 @@
-import {Rectangle} from "pixi.js";
-import {VAlign} from "../core";
-import {DisplayUtil} from "../util";
-import {LayoutContainer} from ".";
+import {Rectangle} from 'pixi.js';
+import {VAlign} from 'flashbang/core/Align';
+import DisplayUtil from 'flashbang/util/DisplayUtil';
+import LayoutContainer from './LayoutContainer';
 
 /**
  * A Container that arranges its children horizontally.
  * Call layout() after adding or removing children to update the sprite's layout.
  */
 export default class HLayoutContainer extends LayoutContainer {
-    public constructor(hOffset: number = 0, vAlign: VAlign = VAlign.CENTER) {
+    constructor(hOffset: number = 0, vAlign: VAlign = VAlign.CENTER) {
         super();
         this._hOffset = hOffset;
         this._vAlign = vAlign;

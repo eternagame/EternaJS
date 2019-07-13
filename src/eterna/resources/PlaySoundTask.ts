@@ -1,14 +1,14 @@
-import {ObjectTask} from "flashbang/core";
-import Eterna from "eterna/Eterna";
+import {ObjectTask, Flashbang} from 'flashbang';
+import Eterna from 'eterna/Eterna';
 
 export default class PlaySoundTask extends ObjectTask {
-    public constructor(name: string) {
+    constructor(name: string) {
         super();
         this._soundName = name;
     }
 
     protected added(): void {
-        Eterna.sound.playSound(this._soundName);
+        Flashbang.sound.playSound(this._soundName);
         this.destroySelf();
     }
 

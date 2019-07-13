@@ -1,14 +1,15 @@
-import {Point} from "pixi.js";
-import {Flashbang, HAlign} from "flashbang/core";
-import {HLayoutContainer, VLayoutContainer} from "flashbang/layout";
-import {AlphaTask} from "flashbang/tasks";
-import {Fonts} from "eterna/util";
+import {Point} from 'pixi.js';
 import {
-    Dialog, DialogCanceledError, GameButton, GamePanel, GamePanelType, HTMLTextObject
-} from ".";
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Dialog, {DialogCanceledError} from './Dialog';
+import GameButton from './GameButton';
+import GamePanel, {GamePanelType} from './GamePanel';
+import HTMLTextObject from './HTMLTextObject';
 
 export default class ConfirmDialog extends Dialog<boolean> {
-    public constructor(prompt: string, promptIsHTML: boolean = false) {
+    constructor(prompt: string, promptIsHTML: boolean = false) {
         super();
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
@@ -34,7 +35,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         super.added();
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
-        panel.title = "Are you sure?";
+        panel.title = 'Are you sure?';
         this.addObject(panel, this.container);
 
         let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
@@ -57,11 +58,11 @@ export default class ConfirmDialog extends Dialog<boolean> {
         panelLayout.addVSpacer(10);
         panelLayout.addChild(buttonLayout);
 
-        let yesButton: GameButton = new GameButton().label("Yes", 16);
+        let yesButton: GameButton = new GameButton().label('Yes', 16);
         panel.addObject(yesButton, buttonLayout);
         yesButton.clicked.connect(() => this.close(true));
 
-        let noButton: GameButton = new GameButton().label("No", 16);
+        let noButton: GameButton = new GameButton().label('No', 16);
         panel.addObject(noButton, buttonLayout);
         noButton.clicked.connect(() => this.close(false));
 

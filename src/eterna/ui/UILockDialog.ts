@@ -1,6 +1,6 @@
-import * as log from "loglevel";
-import {AlphaTask} from "flashbang/tasks";
-import {Dialog} from ".";
+import * as log from 'loglevel';
+import {AlphaTask} from 'flashbang';
+import Dialog from './Dialog';
 
 /** A "dialog" that simply dims the screen and eats UI events */
 export default class UILockDialog extends Dialog<void> {

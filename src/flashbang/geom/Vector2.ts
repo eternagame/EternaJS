@@ -1,4 +1,4 @@
-import {Point} from "pixi.js";
+import {Point} from 'pixi.js';
 
 /** A 2D vector */
 export default class Vector2 {

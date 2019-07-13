@@ -1,9 +1,8 @@
-import {Point, Sprite, Texture} from "pixi.js";
-import {Updatable} from "flashbang/core";
-import {Vector2} from "flashbang/geom";
-import {ContainerObject} from "flashbang/objects";
-import {Pose2D} from "eterna/pose2D";
-import {BitmapManager, Bitmaps} from "eterna/resources";
+import {Point, Sprite, Texture} from 'pixi.js';
+import {ContainerObject, Vector2, Updatable} from 'flashbang';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Pose2D from 'eterna/pose2D/Pose2D';
 
 
 export default class NovaPaintHint extends ContainerObject implements Updatable {
@@ -38,24 +37,24 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
             return;
         }
 
-        let current_time = this.mode.time;
+        let currentTime = this.mode.time;
 
         let startPos: Point = this._startPoint;
         if (this._anchorSet) {
-            startPos = this._rna.getBaseXY(this._base);
+            startPos = this._rna.getBaseLoc(this._base);
         }
 
         if (this._lastTimeTick === 0) {
-            this._lastTimeTick = current_time;
+            this._lastTimeTick = currentTime;
             return;
         }
 
         if (this._startAnimTime === -1) {
-            this._startAnimTime = current_time;
+            this._startAnimTime = currentTime;
         }
 
-        let stageTime: number = (current_time - this._startAnimTime);
-        let dir: Vector2 = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
+        let stageTime: number = (currentTime - this._startAnimTime);
+        let dir = new Vector2(this._endPoint.x - this._startPoint.x, this._endPoint.y - this._startPoint.y);
         if (stageTime < 1.5 && this._curStage === 0) {
             if (stageTime >= 1.4) {
                 ++this._curStage;
@@ -63,12 +62,15 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
                 this._img.texture = this._clickImg;
             }
         } else if (this._curStage === 1) {
-            let deltaTime: number = current_time - this._lastTimeTick;
+            let deltaTime: number = currentTime - this._lastTimeTick;
             // Move from our current position to the end
             let stepDistance = deltaTime * NovaPaintHint.PAINT_HINT_SPEED;
             this._totalDistance += stepDistance;
-            if (this._totalDistance >= Vector2.distance(this._startPoint.x, this._startPoint.y, this._endPoint.x, this._endPoint.y) - 1.5) {
-                this._endAnimTime = current_time;
+            if (
+                this._totalDistance
+                >= Vector2.distance(this._startPoint.x, this._startPoint.y, this._endPoint.x, this._endPoint.y) - 1.5
+            ) {
+                this._endAnimTime = currentTime;
                 ++this._curStage;
             }
         } else if (this._curStage === 2) {
@@ -77,7 +79,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
                 return;
             }
 
-            let endTime: number = (current_time - this._endAnimTime) / 1000.0;
+            let endTime: number = (currentTime - this._endAnimTime) / 1000.0;
             if (endTime > 1.0) {
                 this._startAnimTime = -1;
                 this._curStage = 0;
@@ -86,7 +88,7 @@ export default class NovaPaintHint extends ContainerObject implements Updatable 
                 this._img.texture = this._noClick;
             }
         }
-        this._lastTimeTick = current_time;
+        this._lastTimeTick = currentTime;
 
         dir.length = this._totalDistance;
         this.display.position = new Point(startPos.x + dir.x, startPos.y + dir.y);

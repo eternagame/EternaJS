@@ -1,6 +1,6 @@
-import * as log from "loglevel";
-import {Assert, Deferred} from "flashbang/util";
-import {Registration, UnitSignal} from "signals";
+import * as log from 'loglevel';
+import {Registration, UnitSignal} from 'signals';
+import {Deferred, Assert} from 'flashbang';
 
 /**
  * A collection of externally registered callbacks.
@@ -31,6 +31,23 @@ export interface RunScriptOptions {
     checkValid?: () => boolean;
 }
 
+function getDeepProperty(obj: any, name: string): [any, any] {
+    if (name === '') {
+        return [obj, undefined];
+    } else {
+        let prop = obj;
+        let parent;
+        for (let component of name.split('.')) {
+            if (prop === undefined) {
+                throw new Error(`'${name}' is not a property of ${obj}`);
+            }
+            parent = prop;
+            prop = prop[component];
+        }
+        return [parent, prop];
+    }
+}
+
 /**
  * Exposes named functions to external scripts.
  * This mirrors Flash's ExternalInterface class: it installs functions on the "maingame" <div> that the Eterna
@@ -39,7 +56,7 @@ export interface RunScriptOptions {
  */
 export default class ExternalInterface {
     public static init(scriptRoot: HTMLElement) {
-        Assert.isTrue(this._scriptRoot === undefined, "Already initialized");
+        Assert.isTrue(this._scriptRoot === undefined, 'Already initialized');
         this._scriptRoot = scriptRoot;
     }
 
@@ -115,7 +132,9 @@ export default class ExternalInterface {
      * @return true if the script ran to completion, and false if it couldn't run synchronously and is instead
      * queued to be executed asynchronously.
      */
-    public static runScriptMaybeSynchronously(scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void): boolean {
+    public static runScriptMaybeSynchronously(
+        scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void
+    ): boolean {
         let completed = false;
         const complete = (result: any, error: any) => {
             if (completed) {
@@ -198,7 +217,7 @@ export default class ExternalInterface {
                 log.warn(`Script ${script.scriptID}: error: ${error}`);
                 script.reject(error);
             } else {
-                log.info(`Completed ${isAsync ? "async" : ""} script ${script.scriptID}`);
+                log.info(`Completed ${isAsync ? 'async' : ''} script ${script.scriptID}`);
                 script.resolve(successValue);
             }
 
@@ -232,7 +251,7 @@ export default class ExternalInterface {
 
         try {
             this.call(
-                "ScriptInterface.evaluate_script_with_nid",
+                'ScriptInterface.evaluate_script_with_nid',
                 script.scriptID,
                 script.options.params || {},
                 null,
@@ -250,7 +269,7 @@ export default class ExternalInterface {
 
         return (
             Boolean(returnValue.cause.async) === true
-            || (typeof returnValue.cause.async === "string" && returnValue.cause.async.toLowerCase() === "true")
+            || (typeof returnValue.cause.async === 'string' && returnValue.cause.async.toLowerCase() === 'true')
         );
     }
 
@@ -289,21 +308,4 @@ interface PendingScript {
 interface RegisteredCtx {
     ctx: ExternalInterfaceCtx;
     reg: Registration;
-}
-
-function getDeepProperty(obj: any, name: string): [any, any] {
-    if (name === "") {
-        return [obj, undefined];
-    } else {
-        let prop = obj;
-        let parent;
-        for (let component of name.split(".")) {
-            if (prop === undefined) {
-                throw new Error(`'${name}' is not a property of ${obj}`);
-            }
-            parent = prop;
-            prop = prop[component];
-        }
-        return [parent, prop];
-    }
 }

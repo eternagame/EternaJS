@@ -1,7 +1,7 @@
-import {Texture} from "pixi.js";
-import {Assert, TextBuilder, TextureUtil} from "flashbang/util";
-import {Fonts} from "eterna/util";
-import {Bitmaps} from ".";
+import {Texture} from 'pixi.js';
+import {TextureUtil, Assert, TextBuilder} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from './Bitmaps';
 
 export default class BitmapManager {
     public static getBitmap(url: string): Texture {
@@ -22,7 +22,9 @@ export default class BitmapManager {
         return BitmapManager.getTextBitmapImpl(txt, Fonts.ARIAL, 12, true, color);
     }
 
-    private static getTextBitmapImpl(text: string, fontName: string, fontSize: number, bold: boolean, color: number): Texture {
+    private static getTextBitmapImpl(
+        text: string, fontName: string, fontSize: number, bold: boolean, color: number
+    ): Texture {
         let bitmap: Texture = BitmapManager._textBitmaps.get(text);
         if (bitmap == null) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);
