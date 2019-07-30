@@ -185,6 +185,7 @@ export default class ExternalInterface {
         return scriptReturn;
     }
 
+    // TODO: Remove once class-based constraints (using preloadScript/runScriptSync) are used
     /**
      * Requests execution of an external script, and attempts to get its return value synchronously.
      * Promises are always resolved asynchronously, so this runScript flavor eschews Promises and takes a
