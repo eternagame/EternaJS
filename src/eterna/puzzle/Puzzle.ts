@@ -189,23 +189,6 @@ export default class Puzzle {
         }
     }
 
-    public get temporaryConstraints(): string[] {
-        return this._tempConstraints;
-    }
-
-    public set temporaryConstraints(constraints: string[]) {
-        if (constraints != null) {
-            this._tempConstraints = constraints.slice();
-        } else {
-            this._tempConstraints = null;
-        }
-    }
-
-    /** Returns temporaryConstraints, if they're set, else constraints */
-    public get curConstraints(): string[] {
-        return this.temporaryConstraints || this.constraints;
-    }
-
     public get puzzleLocks(): boolean[] {
         let puzlocks: boolean[];
         let ii: number;
@@ -616,8 +599,6 @@ export default class Puzzle {
             folderName: this.folderName,
             targetConditions: this.targetConditions,
             constraints: this.constraints,
-            temporaryConstraints: this.temporaryConstraints,
-            curConstraints: this.curConstraints,
             puzzleLocks: this.puzzleLocks,
             shiftLimit: this.shiftLimit,
             secstructs: this.getSecstructs(),
@@ -647,7 +628,6 @@ export default class Puzzle {
     private _useBarcode: boolean = false;
     private _targetConditions: any[] = null;
     private _constraints: string[] = null;
-    private _tempConstraints: string[];
     private _round: number = -1;
     private _numSubmissions: number = 3;
     private _folder: string;

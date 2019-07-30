@@ -1285,7 +1285,6 @@ export default class PoseEditMode extends GameMode {
         this.showConfirmDialog(PROMPT).closed.then((confirmed) => {
             if (confirmed) {
                 this.resetAutosaveData();
-                this._puzzle.temporaryConstraints = null;
                 this.modeStack.changeMode(new PoseEditMode(this._puzzle, {isReset: true}));
             }
         });
@@ -1934,10 +1933,6 @@ export default class PoseEditMode extends GameMode {
         let numConstraints = 0;
         let constraints: string[] = this._puzzle.constraints;
 
-        if (this._puzzle.temporaryConstraints != null) {
-            constraints = this._puzzle.temporaryConstraints;
-        }
-
         if (constraints != null) {
             numConstraints = constraints.length;
         }
@@ -2001,7 +1996,7 @@ export default class PoseEditMode extends GameMode {
     private startCountdown(): void {
         this._isPlaying = false;
 
-        const constraints: string[] = this._puzzle.curConstraints;
+        const constraints: string[] = this._puzzle.constraints;
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
             this.startPlaying();
         } else {
@@ -2764,7 +2759,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkConstraints(render: boolean = true): boolean {
-        const constraints: string[] = this._puzzle.curConstraints;
+        const constraints: string[] = this._puzzle.constraints;
         if (constraints == null || constraints.length === 0) {
             return false;
         }
@@ -3023,9 +3018,7 @@ export default class PoseEditMode extends GameMode {
         // / Update spec thumbnail if it is open
         this.updateDockedSpecBox();
 
-        let isThereTempConstraints: boolean = (this._puzzle.temporaryConstraints != null);
-
-        if (constraintsSatisfied && !isThereTempConstraints) {
+        if (constraintsSatisfied) {
             if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL && this._puzState === PuzzleState.GAME) {
                 this.submitCurrentPose();
             }
@@ -3502,10 +3495,6 @@ export default class PoseEditMode extends GameMode {
             let isShapeConstrained = false;
             let constraints: string[] = this._puzzle.constraints;
 
-            if (this._puzzle.temporaryConstraints != null) {
-                constraints = this._puzzle.temporaryConstraints;
-            }
-
             if (constraints != null) {
                 for (let ii = 0; ii < constraints.length; ii += 2) {
                     if (constraints[ii] === ConstraintType.SHAPE) {
@@ -3685,8 +3674,8 @@ export default class PoseEditMode extends GameMode {
      */
     private onConstraintBoxClicked(idx: number): void {
         if (
-            this._puzzle.curConstraints[idx] === ConstraintType.SHAPE
-            || this._puzzle.curConstraints[idx] === ConstraintType.ANTISHAPE
+            this._puzzle.constraints[idx] === ConstraintType.SHAPE
+            || this._puzzle.constraints[idx] === ConstraintType.ANTISHAPE
         ) {
             this._unstableShapeConstraintIdx = (this._unstableShapeConstraintIdx === idx ? -1 : idx);
             this.checkConstraints();
