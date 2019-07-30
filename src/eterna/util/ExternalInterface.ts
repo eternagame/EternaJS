@@ -109,8 +109,8 @@ export default class ExternalInterface {
                 'Script.get_script',
                 scriptID,
                 () => {
-                    Promise.resolve();
                     ExternalInterface._preloadedScripts.push(`${scriptID}`);
+                    Promise.resolve();
                 }
             );
         });
