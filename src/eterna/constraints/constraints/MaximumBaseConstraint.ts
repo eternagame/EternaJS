@@ -1,37 +1,37 @@
 import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus} from '../Constraint';
 
-interface MinBaseConstraintStatus extends BaseConstraintStatus{
+interface MaxBaseConstraintStatus extends BaseConstraintStatus {
     currentCount: number;
 }
 
-abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus> {
+abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus> {
     public baseType: number;
-    public minCount: number;
+    public maxCount: number;
 
-    constructor(baseType: number, minCount: number) {
+    constructor(baseType: number, maxCount: number) {
         super();
         this.baseType = baseType;
-        this.minCount = minCount;
+        this.maxCount = maxCount;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MinBaseConstraintStatus {
+    public evaluate(undoBlocks: UndoBlock[]): MaxBaseConstraintStatus {
         // TODO: Multistate?
         const count = undoBlocks[0].sequence.reduce(
             (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
         );
 
         return {
-            satisfied: count >= this.minCount,
+            satisfied: count <= this.maxCount,
             currentCount: count
         };
     }
 
     public getConstraintBoxConfig(
-        status: MinBaseConstraintStatus,
+        status: MaxBaseConstraintStatus,
         undoBlocks: UndoBlock[],
         targetConditions: any[],
         forMissionScreen: boolean
@@ -42,7 +42,9 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append(`You must have ${this.minCount} or more`)
+        tooltip.append('You must have ')
+            .append('at most', 'altText')
+            .append(` ${this.maxCount}`)
             .append(` ${EPars.getColoredLetter(EPars.nucleotideToString(this.baseType, false, false))}s.`);
 
         if (forMissionScreen) {
@@ -52,7 +54,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
         return {
             satisfied: status.satisfied,
             tooltip,
-            clarificationText: `${this.minCount} OR MORE`,
+            clarificationText: `${this.maxCount} OR FEWER`,
             statText: status.currentCount.toString(),
             showOutline: true,
             fullTexture: forMissionScreen
@@ -62,32 +64,32 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
     }
 }
 
-export class MinimumAConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'A';
+export class MaximumAConstraint extends MaximumBaseConstraint {
+    public static readonly NAME: 'AMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
     }
 }
 
-export class MinimumUConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'U';
+export class MaximumUConstraint extends MaximumBaseConstraint {
+    public static readonly NAME: 'UMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
     }
 }
 
-export class MinimumGConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'G';
+export class MaximumGConstraint extends MaximumBaseConstraint {
+    public static readonly NAME: 'GMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
     }
 }
 
-export class MinimumCConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'C';
+export class MaximumCConstraint extends MaximumBaseConstraint {
+    public static readonly NAME: 'CMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);

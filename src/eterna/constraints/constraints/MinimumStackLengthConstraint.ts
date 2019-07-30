@@ -6,8 +6,8 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
 import Band from 'eterna/ui/Band';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus} from '../Constraint';
 
 interface MinStackConstraintStatus extends BaseConstraintStatus{
     currentLength: number;

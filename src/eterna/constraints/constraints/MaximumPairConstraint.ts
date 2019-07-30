@@ -2,8 +2,8 @@ import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus} from '../Constraint';
 
 interface MaxPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;

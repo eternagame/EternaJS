@@ -1,8 +1,8 @@
 import UndoBlock from 'eterna/UndoBlock';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus} from '../Constraint';
 
 interface BoostConstraintStatus extends BaseConstraintStatus {
     boostCount: number;

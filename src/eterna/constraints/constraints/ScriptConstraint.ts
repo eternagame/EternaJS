@@ -2,8 +2,8 @@ import UndoBlock from 'eterna/UndoBlock';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
+import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
 interface ScriptConstraintStatus extends BaseConstraintStatus {
     goal: string;
