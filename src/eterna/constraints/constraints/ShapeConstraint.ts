@@ -2,8 +2,8 @@ import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
+import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
 interface ShapeConstraintStatus extends BaseConstraintStatus {
     wrongPairs: number[];

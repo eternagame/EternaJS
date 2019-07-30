@@ -7,8 +7,8 @@ import Puzzle from 'eterna/puzzle/Puzzle';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus} from '../Constraint';
 
 interface MaxMutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;

@@ -5,8 +5,8 @@ import {Graphics} from 'pixi.js';
 import EPars from 'eterna/EPars';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
-import ConstraintBox, {ConstraintBoxConfig} from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
+import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
 
 interface OligoInfo {
     bind: boolean;
