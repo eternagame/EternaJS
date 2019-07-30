@@ -33,6 +33,7 @@ export default class PoseThumbnail {
         return TextureUtil.renderToTexture(disp);
     }
 
+    // TODO: Remove
     public static drawToSprite(
         sprite: Sprite,
         sequence: number[],

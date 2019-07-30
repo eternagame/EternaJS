@@ -84,7 +84,7 @@ interface ConstraintInfo {
     maxAllowedAdenine: number;
 }
 
-interface OligoDef {
+export interface OligoDef {
     sequence: string;
     malus: number;
     name: string;
