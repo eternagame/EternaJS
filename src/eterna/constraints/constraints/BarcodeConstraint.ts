@@ -49,7 +49,8 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
                 ? BitmapManager.getBitmap(Bitmaps.NovaBarcodeMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaBarcodeReq),
             clarificationText: 'MUST BE UNIQUE',
-            tooltip
+            tooltip,
+            showOutline: true
         };
     }
 }

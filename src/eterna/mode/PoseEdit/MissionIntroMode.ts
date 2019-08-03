@@ -6,7 +6,7 @@ import Eterna from 'eterna/Eterna';
 import {
     AppMode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, Flashbang, DisplayUtil, KeyCode
 } from 'flashbang';
-import ConstraintBox from 'eterna/ui/ConstraintBox';
+import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
@@ -176,7 +176,6 @@ export default class MissionIntroMode extends AppMode {
     private addConstraintBoxes(): void {
         for (let constraintBox of this._constraintBoxes) {
             this.addObject(constraintBox, this._constraintsLayer);
-            constraintBox.showBigText = false;
             constraintBox.flare(false);
         }
 

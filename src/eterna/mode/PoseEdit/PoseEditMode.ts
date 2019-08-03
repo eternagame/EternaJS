@@ -29,8 +29,8 @@ import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Oligo} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import BitmapManager from 'eterna/resources/BitmapManager';
-import ConstraintBox, {ConstraintBoxType} from 'eterna/ui/ConstraintBox';
-import Constraints, {ConstraintType} from 'eterna/puzzle/Constraints';
+import ConstraintBar from 'eterna/constraints/ConstraintBar';
+import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import int from 'eterna/util/int';
 import PoseOp from 'eterna/pose2D/PoseOp';
 import RNAScript from 'eterna/rscript/RNAScript';
@@ -44,6 +44,8 @@ import EternaURL from 'eterna/net/EternaURL';
 import PuzzleManager from 'eterna/puzzle/PuzzleManager';
 import URLButton from 'eterna/ui/URLButton';
 import FoldUtil from 'eterna/folding/FoldUtil';
+import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
+import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -188,7 +190,6 @@ export default class PoseEditMode extends GameMode {
         this._uiHighlight = new SpriteObject();
         this.addObject(this._uiHighlight, this.uiLayer);
 
-        this._constraintBoxes = [];
         this._constraintsLayer = new Container();
         this.uiLayer.addChild(this._constraintsLayer);
 
@@ -275,7 +276,7 @@ export default class PoseEditMode extends GameMode {
             Flashbang.stageHeight - 129
         );
 
-        this.layoutConstraints();
+        this._constraintBar.layout(false, this._isPipMode ? this._targetConditions.length : 1);
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
         let s: number = this._dockedSpecBox.plotSize;
@@ -597,70 +598,32 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.palette.clickTarget(PaletteTargetType.A);
         }
 
-        let numConstraints = 0;
-        let constraints: string[] = [];
-        if (this._puzzle.constraints != null) {
-            numConstraints = this._puzzle.constraints.length;
-            constraints = this._puzzle.constraints;
-        }
-
-        this._constraintBoxes = [];
-        this._unstableShapeConstraintIdx = -1;
-
-        if (numConstraints > 0) {
-            if (numConstraints % 2 !== 0) {
-                throw new Error('Wrong constraints length');
-            }
-
-            for (let constraintIdx = 0; constraintIdx < numConstraints; constraintIdx += 2) {
-                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
-                this._constraintBoxes.push(newbox);
-                this.addObject(newbox, this._constraintsLayer);
-
-                newbox.pointerDown.connect(() => {
-                    this.onConstraintBoxClicked(constraintIdx);
-                });
-            }
-
-            this._constraintShapeBoxes = [];
-            this._constraintShapeBoxes.push(null);
-
-            this._constraintAntishapeBoxes = [];
-            this._constraintAntishapeBoxes.push(null);
-            if (this._targetPairs.length > 1) {
-                for (let pairsIdx = 1; pairsIdx < this._targetPairs.length; pairsIdx++) {
-                    this._constraintShapeBoxes[pairsIdx] = null;
-                    this._constraintAntishapeBoxes[pairsIdx] = null;
-                    for (let constraintIdx = 0; constraintIdx < numConstraints; constraintIdx += 2) {
-                        if (constraints[constraintIdx] === ConstraintType.SHAPE) {
-                            if (int(constraints[constraintIdx + 1]) === pairsIdx) {
-                                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
-                                this._constraintShapeBoxes[pairsIdx] = newbox;
-                                this.addObject(newbox, this._constraintsLayer);
-
-                                newbox.pointerDown.connect(() => {
-                                    this.onConstraintBoxClicked(constraintIdx);
-                                });
-                            }
-                        } else if (constraints[constraintIdx] === ConstraintType.ANTISHAPE) {
-                            if (int(constraints[constraintIdx + 1]) === pairsIdx) {
-                                let newbox = new ConstraintBox(ConstraintBoxType.DEFAULT);
-                                this._constraintAntishapeBoxes[pairsIdx] = newbox;
-                                this.addObject(newbox, this._constraintsLayer);
-
-                                newbox.pointerDown.connect(() => {
-                                    this.onConstraintBoxClicked(constraintIdx);
-                                });
-                            }
+        this._constraintBar = new ConstraintBar(this._puzzle.constraints);
+        this.addObject(this._constraintBar, this._constraintsLayer);
+        this._constraintBar.sequenceHighlights.connect((highlightInfos) => {
+            for (let pose of this._poses) {
+                pose.clearRestrictedHighlight();
+                pose.clearUnstableHighlight();
+                pose.clearUserDefinedHighlight();
+                for (let highlightInfo of highlightInfos) {
+                    if (highlightInfo) {
+                        switch (highlightInfo.color) {
+                            case HighlightType.RESTRICTED:
+                                pose.highlightRestrictedSequence(highlightInfo.ranges);
+                                break;
+                            case HighlightType.UNSTABLE:
+                                pose.highlightUnstableSequence(highlightInfo.ranges);
+                                break;
+                            case HighlightType.USER_DEFINED:
+                                pose.highlightUserDefinedSequence(highlightInfo.ranges);
+                                break;
+                            default:
+                                log.error(`Invalid highlight type: ${highlightInfo.color}`);
                         }
                     }
                 }
             }
-        }
-
-        for (let box of this._constraintBoxes) {
-            box.display.visible = false;
-        }
+        });
 
         let pairs: number[] = EPars.parenthesisToPairs(this._puzzle.getSecstruct());
 
@@ -860,17 +823,14 @@ export default class PoseEditMode extends GameMode {
             return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
         });
 
-        this._scriptInterface.addCallback(
-            'get_constraints', (): any[] => JSON.parse(JSON.stringify(this._puzzle.constraints))
-        );
-
-        this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints(false));
+        this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
 
         this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean => {
-            this.checkConstraints(true);
+            this.checkConstraints();
             if (idx >= 0 && idx < this.constraintCount) {
-                let o: ConstraintBox = this.getConstraint(idx);
-                return o.isSatisfied;
+                return this._puzzle.constraints[idx].evaluate(
+                    this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
+                ).satisfied;
             } else {
                 return false;
             }
@@ -1030,26 +990,6 @@ export default class PoseEditMode extends GameMode {
             .catch(() => this.popUILock(LOCK_NAME));
     }
 
-    public layoutConstraints(): void {
-        let minX: number = this._constraintsOffset + 17;
-        let relX: number;
-        if (this._targetPairs == null) return;
-        let n: number = this._targetPairs.length;
-        if (n < 2) return;
-        for (let ii = 1; ii < n; ii++) {
-            relX = (ii / n) * Flashbang.stageWidth + 17;
-            if (relX < minX) relX = minX;
-            if (this._constraintShapeBoxes[ii]) {
-                this._constraintShapeBoxes[ii].display.position = new Point(relX, 35);
-                minX = relX + 77;
-            }
-            if (this._constraintAntishapeBoxes[ii]) {
-                this._constraintAntishapeBoxes[ii].display.position = new Point(relX + 77, 35);
-                minX = relX + 2 * 77;
-            }
-        }
-    }
-
     public onKeyboardEvent(e: KeyboardEvent): void {
         let handled: boolean = this.keyboardInput.handleKeyboardEvent(e);
 
@@ -1139,15 +1079,15 @@ export default class PoseEditMode extends GameMode {
     }
 
     public get constraintCount(): number {
-        return this._constraintBoxes.length;
+        return this._puzzle.constraints.length;
     }
 
-    public getConstraint(i: number): ConstraintBox {
-        return this._constraintBoxes[this._constraintBoxes.length - i - 1];
+    public getConstraintBox(i: number): ConstraintBox {
+        return this._constraintBar.getConstraintBox(i);
     }
 
     public getShapeBox(i: number): ConstraintBox {
-        return this._constraintBoxes[i];
+        return this._constraintBar.getShapeBox(i);
     }
 
     public setAncestorId(id: number): void {
@@ -1162,11 +1102,12 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.stateToggle.display.visible = false;
             this._targetName.visible = false;
 
+            this._constraintBar.highlightState(-1);
+            this._constraintBar.layout(false, this._targetPairs.length);
+
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this.setPoseTarget(ii, ii);
             }
-
-            this.displayConstraintBoxes(false, true);
 
             if (this._poseState === PoseState.NATIVE) {
                 this.setToNativeMode();
@@ -1187,6 +1128,9 @@ export default class PoseEditMode extends GameMode {
         } else {
             this._toolbar.stateToggle.display.visible = true;
             this._targetName.visible = true;
+
+            this._constraintBar.highlightState(this._curTargetIndex);
+            this._constraintBar.layout(false, 1);
 
             this.changeTarget(this._curTargetIndex);
             this._poses[0].setZoomLevel(this._poses[0].computeDefaultZoomLevel(), true, true);
@@ -1292,6 +1236,8 @@ export default class PoseEditMode extends GameMode {
 
     private changeTarget(targetIndex: number): void {
         this._curTargetIndex = targetIndex;
+
+        this._constraintBar.highlightState(targetIndex);
 
         if (this._targetConditions && this._targetConditions[this._curTargetIndex]) {
             if (this._targetConditions[this._curTargetIndex]['state_name'] != null) {
@@ -1585,7 +1531,7 @@ export default class PoseEditMode extends GameMode {
                 + 'You can still submit the sequence, but please note that there is a risk of not getting\n'
                 + 'synthesized properly';
 
-            if (!this.checkConstraints(false)) {
+            if (!this.checkConstraints()) {
                 if (this._puzzle.isSoftConstraint || Eterna.DEV_MODE) {
                     this.showConfirmDialog(NOT_SATISFIED_PROMPT).closed
                         .then((confirmed) => {
@@ -1929,92 +1875,14 @@ export default class PoseEditMode extends GameMode {
         // if (this._beam_cmi) this._beam_cmi.enabled = !disable;
     }
 
-    private displayConstraintBoxes(animate: boolean, display: boolean): void {
-        let numConstraints = 0;
-        let constraints: string[] = this._puzzle.constraints;
-
-        if (constraints != null) {
-            numConstraints = constraints.length;
-        }
-
-        let wWalker = 17;
-
-        for (let xx = 0; xx < this._targetPairs.length; xx++) {
-            if (xx === 0) {
-                // scan for non-(ANTI)SHAPE
-                for (let ii = 0; ii < numConstraints / 2; ii++) {
-                    const box = this._constraintBoxes[ii];
-                    if (
-                        box.constraintType === ConstraintType.SHAPE || box.constraintType === ConstraintType.ANTISHAPE
-                    ) {
-                        continue;
-                    }
-                    let cpos = new Point(wWalker, 35);
-                    wWalker += 119;
-                    box.setLocation(cpos, animate);
-                    box.showBigText = false;
-                    box.display.visible = display;
-                }
-                if (wWalker > 17) {
-                    wWalker += 25;
-                }
-            } else if (xx === 1) {
-                // save the offset for later use (avoid overlaps in PIP mode)
-                this._constraintsOffset = wWalker;
-            }
-
-            // scan for SHAPE
-            for (let ii = 0; ii < numConstraints / 2; ii++) {
-                const box = this._constraintBoxes[ii];
-                if (box.constraintType !== ConstraintType.SHAPE || int(constraints[2 * ii + 1]) !== xx) {
-                    continue;
-                }
-                let cpos = new Point(wWalker, 35);
-                wWalker += 77;
-                box.setLocation(cpos, animate);
-                box.showBigText = false;
-                box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
-            }
-
-            // scan for ANTISHAPE
-            for (let ii = 0; ii < numConstraints / 2; ii++) {
-                const box = this._constraintBoxes[ii];
-                if (box.constraintType !== ConstraintType.ANTISHAPE || int(constraints[2 * ii + 1]) !== xx) {
-                    continue;
-                }
-                let cpos = new Point(wWalker, 35);
-                wWalker += 77;
-                box.setLocation(cpos, animate);
-                box.showBigText = false;
-                box.display.visible = (xx === 0 || !this._isPipMode) ? display : false;
-            }
-        }
-
-        this.layoutConstraints();
-    }
-
     private startCountdown(): void {
         this._isPlaying = false;
 
-        const constraints: string[] = this._puzzle.constraints;
+        const constraints = this._puzzle.constraints;
         if (constraints == null || constraints.length === 0 || !this._showMissionScreen) {
             this.startPlaying();
         } else {
             this.setPuzzleState(PuzzleState.COUNTDOWN);
-
-            this._constraintsHead = this._constraintsTop;
-            this._constraintsFoot = this._constraintsBottom;
-
-            for (let ii = 0; ii < constraints.length / 2; ii++) {
-                let box: ConstraintBox = this._constraintBoxes[ii];
-                box.display.visible = true;
-                box.showBigText = true;
-
-                box.setLocation(new Point(
-                    (Flashbang.stageWidth * 0.3),
-                    (Flashbang.stageHeight * 0.4) + (ii * 77)
-                ));
-            }
 
             this._startSolvingTime = new Date().getTime();
             this.startPlaying();
@@ -2031,41 +1899,34 @@ export default class PoseEditMode extends GameMode {
             missionText = boosters.mission['text'];
         }
 
-        // Create constraint boxes and pass them to the MissionIntroMode.
-        // The ConstraintBox creation logic is so tied to PoseEditMode that it's just much easier -
-        // though uglier - to do things this way.
-
-        let dummyInfo: ConstraintInfo = {
-            wrongPairs: null,
-            restrictedLocal: null,
-            maxAllowedAdenine: -1,
-            maxAllowedCytosine: -1,
-            maxAllowedGuanine: -1
-        };
-        let introConstraintBoxes: ConstraintBox[] = [];
-        let constraints = this._puzzle.constraints;
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            const type: ConstraintType = constraints[ii] as ConstraintType;
-            if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
-                continue;
+        let introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints.filter(
+            constraint => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
+        ).map(
+            (constraint) => {
+                let box = new ConstraintBox(true);
+                box.setContent(constraint.getConstraintBoxConfig(
+                    constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
+                    this._seqStacks[this._stackLevel],
+                    this._targetConditions,
+                    true
+                ));
+                return box;
             }
+        );
 
-            const value = constraints[ii + 1];
-            const box = new ConstraintBox(ConstraintBoxType.MISSION_SCREEN);
-            this.updateConstraint(type, value, ii, box, true, dummyInfo);
+        this._constraintBar.display.visible = false;
 
-            introConstraintBoxes.push(box);
-        }
+        this.modeStack.pushMode(new MissionIntroMode(
+            this._puzzle.getName(true),
+            missionText,
+            this._targetPairs,
+            introConstraintBoxes
+        ));
 
-        // Don't show our intro screen till scripts have completed running,
-        // so that our introConstraintBoxes are properly populated
-        ExternalInterface.waitForScriptCompletion().then(() => {
-            this.modeStack.pushMode(new MissionIntroMode(
-                this._puzzle.getName(true),
-                missionText,
-                this._targetPairs,
-                introConstraintBoxes
-            ));
+        let conn = this.entered.connect(() => {
+            this._constraintBar.display.visible = true;
+            this._constraintBar.layout(true, this._isPipMode ? this._targetPairs.length : 1);
+            conn.close();
         });
     }
 
@@ -2074,7 +1935,6 @@ export default class PoseEditMode extends GameMode {
         this.disableTools(false);
 
         this.setPuzzleState(PuzzleState.GAME);
-        this.displayConstraintBoxes(true, true);
     }
 
     private resetAutosaveData(): void {
@@ -2216,16 +2076,6 @@ export default class PoseEditMode extends GameMode {
         this._moves = [];
     }
 
-    private setDefaultVisibilities(): void {
-        this._exitButton.display.visible = false;
-
-        this._showMissionScreen = true;
-        this.showConstraints(true);
-
-        this._toolbar.palette.resetOverrides();
-        this._toolbar.palette.changeDefaultMode();
-    }
-
     private moveHistoryAddMutations(before: number[], after: number[]): void {
         let muts: any[] = [];
         for (let ii = 0; ii < after.length; ii++) {
@@ -2272,609 +2122,12 @@ export default class PoseEditMode extends GameMode {
         this.ropPresets();
     }
 
-    private updateConstraint(
-        type: ConstraintType, value: string, constraintIdx: number,
-        box: ConstraintBox, render: boolean, outInfo: ConstraintInfo
-    ): ConstraintStatus {
-        let isSatisfied = true;
-        let isPending = false;
-
-        const undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        const sequence = undoBlock.sequence;
-
-        if (type === ConstraintType.GU) {
-            const count: number = undoBlock.getParam(UndoBlockParam.GU);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.GU, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.AU) {
-            const count: number = undoBlock.getParam(UndoBlockParam.AU);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.AU, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.GC) {
-            const count: number = undoBlock.getParam(UndoBlockParam.GC);
-            isSatisfied = (count <= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.GC, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.MUTATION) {
-            const sequenceDiff: number = EPars.sequenceDiff(
-                this._puzzle.getSubsequenceWithoutBarcode(sequence),
-                this._puzzle.getSubsequenceWithoutBarcode(this._puzzle.getBeginningSequence())
-            );
-            isSatisfied = sequenceDiff <= Number(value);
-            if (render) {
-                box.setContent(ConstraintType.MUTATION, value, isSatisfied, sequenceDiff);
-            }
-        } else if (type === ConstraintType.SHAPE) {
-            const targetIndex = Number(value);
-            const ublk: UndoBlock = this.getCurrentUndoBlock(targetIndex);
-            let nativePairs = ublk.getPairs();
-            let structureConstraints: any[] = null;
-            if (this._targetConditions != null && this._targetConditions[targetIndex] != null) {
-                structureConstraints = this._targetConditions[targetIndex]['structure_constraints'];
-
-                if (ublk.oligoOrder != null) {
-                    let npMap: number[] = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
-                    let tpMap: number[] = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
-                    if (npMap != null) {
-                        let newPairs: number[] = [];
-                        let newSC: number[] = [];
-                        for (let jj = 0; jj < nativePairs.length; jj++) {
-                            let kk: number = tpMap.indexOf(jj);
-                            newSC[jj] = structureConstraints[kk];
-                            let pp: number = nativePairs[npMap[kk]];
-                            newPairs[jj] = pp < 0 ? pp : tpMap[npMap.indexOf(pp)];
-                        }
-                        nativePairs = newPairs;
-                        structureConstraints = newSC;
-                    }
-                }
-            }
-
-            isSatisfied = EPars.arePairsSame(nativePairs, this._targetPairs[targetIndex], structureConstraints);
-
-            let inputIndex: number;
-            if (this._targetPairs.length > 1) {
-                inputIndex = targetIndex;
-            }
-
-            if (render) {
-                box.setContent(ConstraintType.SHAPE, {
-                    target: this._targetPairs[targetIndex],
-                    index: inputIndex,
-                    native: nativePairs,
-                    structureConstraints
-                }, isSatisfied, 0);
-                box.flagged = this._unstableShapeConstraintIdx === constraintIdx;
-                if (this._unstableShapeConstraintIdx === constraintIdx) {
-                    outInfo.wrongPairs = box.getWrongPairs(
-                        nativePairs, this._targetPairs[targetIndex], structureConstraints, isSatisfied
-                    );
-                }
-            }
-
-            if (targetIndex > 0) {
-                if (this._constraintShapeBoxes != null) {
-                    if (this._constraintShapeBoxes[targetIndex] != null) {
-                        this._constraintShapeBoxes[targetIndex].setContent(ConstraintType.SHAPE, {
-                            target: this._targetPairs[targetIndex],
-                            index: inputIndex,
-                            native: nativePairs,
-                            structureConstraints
-                        }, isSatisfied, 0);
-
-                        let flag = this._unstableShapeConstraintIdx === constraintIdx;
-                        this._constraintShapeBoxes[targetIndex].flagged = flag;
-                        this._constraintShapeBoxes[targetIndex].display.visible = this._isPipMode;
-                    }
-                }
-            }
-        } else if (type === ConstraintType.ANTISHAPE) {
-            let targetIndex = Number(value);
-            let nativePairs = this.getCurrentUndoBlock(targetIndex).getPairs();
-            if (this._targetConditions == null) {
-                throw new Error('Target object not available for ANTISHAPE constraint');
-            }
-
-            if (this._targetConditions[targetIndex] == null) {
-                throw new Error('Target condition not available for ANTISHAPE constraint');
-            }
-
-            let antiStructureString: string = this._targetConditions[targetIndex]['anti_secstruct'];
-
-            if (antiStructureString == null) {
-                throw new Error('Target structure not available for ANTISHAPE constraint');
-            }
-
-            let antiStructureConstraints: any[] = this._targetConditions[targetIndex]['anti_structure_constraints'];
-            let antiPairs: number[] = EPars.parenthesisToPairs(antiStructureString);
-            isSatisfied = !EPars.arePairsSame(nativePairs, antiPairs, antiStructureConstraints);
-
-            let inputIndex: number;
-            if (this._targetPairs.length > 1) {
-                inputIndex = targetIndex;
-            }
-
-            if (render) {
-                box.setContent(ConstraintType.ANTISHAPE, {
-                    target: antiPairs,
-                    native: nativePairs,
-                    index: inputIndex,
-                    structureConstraints: antiStructureConstraints
-                }, isSatisfied, 0);
-                box.flagged = this._unstableShapeConstraintIdx === constraintIdx;
-
-                if (this._unstableShapeConstraintIdx === constraintIdx) {
-                    outInfo.wrongPairs = box.getWrongPairs(
-                        nativePairs, antiPairs, antiStructureConstraints, isSatisfied
-                    );
-                }
-            }
-
-            if (targetIndex > 0) {
-                if (this._constraintAntishapeBoxes != null) {
-                    if (this._constraintAntishapeBoxes[targetIndex] != null) {
-                        this._constraintAntishapeBoxes[targetIndex].setContent(ConstraintType.ANTISHAPE, {
-                            target: antiPairs,
-                            native: nativePairs,
-                            index: inputIndex,
-                            structureConstraints: antiStructureConstraints
-                        }, isSatisfied, 0);
-
-                        let flag = this._unstableShapeConstraintIdx === constraintIdx;
-                        this._constraintAntishapeBoxes[targetIndex].flagged = flag;
-
-                        this._constraintAntishapeBoxes[targetIndex].display.visible = this._isPipMode;
-                    }
-                }
-            }
-        } else if (type === ConstraintType.BINDINGS) {
-            const targetIndex = Number(value);
-            const undoblk: UndoBlock = this.getCurrentUndoBlock(targetIndex);
-
-            if (this._targetConditions == null) {
-                throw new Error('Target object not available for BINDINGS constraint');
-            }
-
-            if (this._targetConditions[targetIndex] == null) {
-                throw new Error('Target condition not available for BINDINGS constraint');
-            }
-
-            const oligos: OligoDef[] = this._targetConditions[targetIndex]['oligos'];
-            if (oligos == null) {
-                throw new Error('Target condition not available for BINDINGS constraint');
-            }
-
-            let oNames: string[] = [];
-            let bind: boolean[] = [];
-            let label: string[] = [];
-            let bmap: boolean[] = [];
-            let offsets: number[] = [];
-            let ofs: number = sequence.length;
-            let o: number[] = undoblk.oligoOrder;
-            let count: number = undoblk.oligosPaired;
-            for (let jj = 0; jj < o.length; jj++) {
-                bmap[o[jj]] = (jj < count);
-                offsets[o[jj]] = ofs + 1;
-                ofs += oligos[o[jj]]['sequence'].length + 1;
-            }
-
-            isSatisfied = true;
-            for (let jj = 0; jj < oligos.length; jj++) {
-                if (oligos[jj]['bind'] == null) continue;
-                let oName: string = oligos[jj]['name'];
-                if (oName == null) oName = `Oligo ${(jj + 1).toString()}`;
-                oNames.push(oName);
-                let expected = Boolean(oligos[jj]['bind']);
-                bind.push(expected);
-                let lbl: string = oligos[jj]['label'] != null
-                    ? String(oligos[jj]['label']) : String.fromCharCode(65 + jj);
-                label.push(lbl);
-
-                if (bmap[jj] !== expected) {
-                    isSatisfied = false;
-                    if (outInfo.restrictedLocal == null) {
-                        outInfo.restrictedLocal = [];
-                    }
-                    if (outInfo.restrictedLocal[targetIndex] == null) {
-                        outInfo.restrictedLocal[targetIndex] = [];
-                    }
-                    outInfo.restrictedLocal[targetIndex].push(offsets[jj]);
-                    outInfo.restrictedLocal[targetIndex].push(offsets[jj] + oligos[jj]['sequence'].length - 1);
-                }
-            }
-
-            if (render) {
-                box.setContent(ConstraintType.BINDINGS, {
-                    index: targetIndex,
-                    bind,
-                    label,
-                    oligoNames: oNames
-                }, isSatisfied, 0);
-            }
-        } else if (type === ConstraintType.G) {
-            const count: number = Constraints.count(sequence, EPars.RNABASE_GUANINE);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.G, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.GMAX) {
-            const count = Constraints.count(sequence, EPars.RNABASE_GUANINE);
-            isSatisfied = (count <= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.GMAX, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.A) {
-            const count: number = Constraints.count(sequence, EPars.RNABASE_ADENINE);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.A, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.AMAX) {
-            const count = Constraints.count(sequence, EPars.RNABASE_ADENINE);
-            isSatisfied = (count <= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.AMAX, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.U) {
-            const count: number = Constraints.count(sequence, EPars.RNABASE_URACIL);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.U, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.UMAX) {
-            const count = Constraints.count(sequence, EPars.RNABASE_URACIL);
-            isSatisfied = (count <= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.UMAX, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.C) {
-            const count: number = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
-            isSatisfied = (count >= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.C, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.CMAX) {
-            const count = Constraints.count(sequence, EPars.RNABASE_CYTOSINE);
-            isSatisfied = (count <= Number(value));
-            if (render) {
-                box.setContent(ConstraintType.CMAX, value, isSatisfied, count);
-            }
-        } else if (type === ConstraintType.PAIRS) {
-            let numGU: number = undoBlock.getParam(UndoBlockParam.GU);
-            let numGC: number = undoBlock.getParam(UndoBlockParam.GC);
-            let numUA: number = undoBlock.getParam(UndoBlockParam.AU);
-            isSatisfied = (numGC + numGU + numUA >= Number(value));
-
-            if (render) {
-                box.setContent(ConstraintType.PAIRS, value, isSatisfied, numGC + numGU + numUA);
-            }
-        } else if (type === ConstraintType.STACK) {
-            const stackLen: number = undoBlock.getParam(UndoBlockParam.STACK);
-            isSatisfied = (stackLen >= Number(value));
-
-            if (render) {
-                box.setContent(ConstraintType.STACK, value, isSatisfied, stackLen);
-            }
-        } else if (type === ConstraintType.CONSECUTIVE_G) {
-            let consecutiveGCount: number = EPars.countConsecutive(sequence, EPars.RNABASE_GUANINE);
-            isSatisfied = (consecutiveGCount < Number(value));
-
-            if (render) {
-                box.setContent(ConstraintType.CONSECUTIVE_G, value, isSatisfied, consecutiveGCount);
-            }
-
-            outInfo.maxAllowedGuanine = Number(value);
-        } else if (type === ConstraintType.CONSECUTIVE_C) {
-            let consecutiveCCount: number = EPars.countConsecutive(sequence, EPars.RNABASE_CYTOSINE);
-            isSatisfied = (consecutiveCCount < Number(value));
-
-            if (render) {
-                box.setContent(ConstraintType.CONSECUTIVE_C, value, isSatisfied, consecutiveCCount);
-            }
-
-            outInfo.maxAllowedCytosine = Number(value);
-        } else if (type === ConstraintType.CONSECUTIVE_A) {
-            let consecutiveACount: number = EPars.countConsecutive(sequence, EPars.RNABASE_ADENINE);
-            isSatisfied = (consecutiveACount < Number(value));
-
-            if (render) {
-                box.setContent(ConstraintType.CONSECUTIVE_A, value, isSatisfied, consecutiveACount);
-            }
-
-            outInfo.maxAllowedAdenine = Number(value);
-        } else if (type === ConstraintType.LAB_REQUIREMENTS) {
-            let locks: boolean[] = undoBlock.puzzleLocks;
-            let consecutiveGCount: number = EPars.countConsecutive(sequence, EPars.RNABASE_GUANINE, locks);
-            let consecutiveCCount: number = EPars.countConsecutive(sequence, EPars.RNABASE_CYTOSINE, locks);
-            let consecutiveACount: number = EPars.countConsecutive(sequence, EPars.RNABASE_ADENINE, locks);
-            outInfo.maxAllowedGuanine = 4;
-            outInfo.maxAllowedCytosine = 4;
-            outInfo.maxAllowedAdenine = 5;
-            isSatisfied = (consecutiveGCount < outInfo.maxAllowedGuanine);
-            isSatisfied = isSatisfied && (consecutiveCCount < outInfo.maxAllowedCytosine);
-            isSatisfied = isSatisfied && (consecutiveACount < outInfo.maxAllowedAdenine);
-
-            if (render) {
-                box.setContent(ConstraintType.LAB_REQUIREMENTS, {
-                    gCount: consecutiveGCount,
-                    gMax: outInfo.maxAllowedGuanine,
-                    cCount: consecutiveCCount,
-                    cMax: outInfo.maxAllowedCytosine,
-                    aCount: consecutiveACount,
-                    aMax: outInfo.maxAllowedAdenine
-                }, isSatisfied, 0);
-            }
-        } else if (type === ConstraintType.BARCODE) {
-            isSatisfied = !SolutionManager.instance.checkRedundancyByHairpin(EPars.sequenceToString(sequence));
-            if (render) {
-                box.setContent(ConstraintType.BARCODE, 0, isSatisfied, 0);
-            }
-        } else if (type === ConstraintType.OLIGO_BOUND) {
-            let targetIndex = Number(value);
-            let nnfe: number[] = this.getCurrentUndoBlock(targetIndex)
-                .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-            isSatisfied = (nnfe != null && nnfe[0] === -2);
-
-            if (this._targetConditions == null) {
-                throw new Error('Target object not available for BINDINGS constraint');
-            }
-
-            if (this._targetConditions[targetIndex] == null) {
-                throw new Error('Target condition not available for BINDINGS constraint');
-            }
-
-            let oNames: string[] = [];
-            let oName: string = this._targetConditions[targetIndex]['oligo_name'];
-
-            // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
-            let jj = 0;
-            if (oName == null) oName = `Oligo ${(jj + 1).toString()}`;
-            oNames.push(oName);
-
-            let bind: boolean[] = [];
-            bind.push(true);
-
-            let label: string[] = [];
-            let lbl: string = this._targetConditions[targetIndex]['oligo_label'];
-            if (lbl == null) lbl = String.fromCharCode(65 + jj);
-            label.push(lbl);
-
-            if (render) {
-                box.setContent(ConstraintType.BINDINGS, {
-                    index: targetIndex,
-                    bind,
-                    label,
-                    oligoNames: oNames
-                }, isSatisfied, 0);
-            }
-        } else if (type === ConstraintType.OLIGO_UNBOUND) {
-            let targetIndex = Number(value);
-            let nnfe: number[] = this.getCurrentUndoBlock(targetIndex)
-                .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
-            isSatisfied = (nnfe == null || nnfe[0] !== -2);
-
-            if (this._targetConditions == null) {
-                throw new Error('Target object not available for BINDINGS constraint');
-            }
-
-            if (this._targetConditions[targetIndex] == null) {
-                throw new Error('Target condition not available for BINDINGS constraint');
-            }
-
-            // TSC: not sure what this value should be. It's not guaranteed to be initialized in the original Flash code
-            let jj = 0;
-
-            let oNames: string[] = [];
-            let oName: string = this._targetConditions[targetIndex]['oligo_name'];
-            if (oName == null) oName = `Oligo ${(jj + 1).toString()}`;
-            oNames.push(oName);
-
-            let bind: boolean[] = [];
-            bind.push(false);
-
-            let label: string[] = [];
-            let lbl: string = this._targetConditions[targetIndex]['oligo_label'];
-            if (lbl == null) lbl = String.fromCharCode(65 + jj);
-            label.push(lbl);
-
-            if (render) {
-                box.setContent(ConstraintType.BINDINGS, {
-                    index: targetIndex,
-                    bind,
-                    label,
-                    oligoNames: oNames
-                }, isSatisfied, 0);
-            }
-        } else if (type === ConstraintType.SCRIPT) {
-            isSatisfied = false;
-
-            const scriptID = value;
-            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID,
-                {params: {puzzleInfo: this._puzzle.toJSON()}},
-                (scriptResult) => {
-                    let goal = '';
-                    let name = '...';
-                    let resultValue = '';
-                    let index = null;
-                    let dataPNG = '';
-                    if (scriptResult && scriptResult.cause) {
-                        if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
-                        if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
-                        if (scriptResult.cause.name != null) name = scriptResult.cause.name;
-                        if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
-                        if (scriptResult.cause.index != null) {
-                            index = (scriptResult.cause.index + 1).toString();
-                            let ll: number;
-                            if (this._isPipMode) {
-                                ll = scriptResult.cause.index;
-                            } else {
-                                ll = (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
-                            }
-
-                            if (ll >= 0) {
-                                if (scriptResult.cause.highlight != null) {
-                                    this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
-                                } else {
-                                    this._poses[ll].clearUserDefinedHighlight();
-                                }
-                            }
-                        }
-
-                        if (scriptResult.cause.icon_b64) {
-                            dataPNG = scriptResult.cause.icon_b64;
-                        }
-                    }
-
-                    if (render) {
-                        box.setContent(ConstraintType.SCRIPT, {
-                            nid: scriptID,
-                            goal,
-                            name,
-                            value: resultValue,
-                            index,
-                            dataPNG
-                        }, isSatisfied, 0);
-                    }
-                });
-
-            if (!scriptCompleted) {
-                log.warn(`Constraint script wasn't able to run synchronously [scriptID=${scriptID}]`);
-                isSatisfied = false;
-                isPending = true;
-            }
-        }
-
-        if (isPending) {
-            return ConstraintStatus.PENDING;
-        } else if (isSatisfied) {
-            return ConstraintStatus.SATISFIED;
-        } else {
-            return ConstraintStatus.UNSATISFIED;
-        }
-    }
-
-    private checkConstraints(render: boolean = true): boolean {
-        const constraints: string[] = this._puzzle.constraints;
-        if (constraints == null || constraints.length === 0) {
-            return false;
-        }
-
-        let constraintsInfo: ConstraintInfo = {
-            wrongPairs: null,
-            restrictedLocal: null,
-            maxAllowedAdenine: -1,
-            maxAllowedCytosine: -1,
-            maxAllowedGuanine: -1
-        };
-
-        let allAreSatisfied = true;
-        let allWereSatisfied = true;
-        let hasPendingConstraints = false;
-
-        let playConstraintSatisfiedSFX = false;
-        let playConstraintUnsatisfiedSFX = false;
-
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            const type: ConstraintType = constraints[ii] as ConstraintType;
-            const value = constraints[ii + 1];
-            const box: ConstraintBox = this._constraintBoxes[ii / 2];
-
-            const wasSatisfied: boolean = box.isSatisfied;
-            const status = this.updateConstraint(type, value, ii, box, render, constraintsInfo);
-
-            allAreSatisfied = allAreSatisfied && status === ConstraintStatus.SATISFIED;
-            allWereSatisfied = allWereSatisfied && wasSatisfied;
-            hasPendingConstraints = hasPendingConstraints || status === ConstraintStatus.PENDING;
-
-            if (type === ConstraintType.SHAPE || type === ConstraintType.ANTISHAPE) {
-                const targetIndex = Number(value);
-                if (!this._isPipMode) {
-                    box.display.alpha = (targetIndex === this._curTargetIndex) ? 1.0 : 0.3;
-                } else {
-                    box.display.alpha = 1.0;
-                }
-
-                if (this._isPipMode && targetIndex > 0) {
-                    box.display.visible = false;
-                } else if (this._puzState === PuzzleState.GAME || this._puzState === PuzzleState.CLEARED) {
-                    box.display.visible = true;
-                }
-            }
-
-            if (render) {
-                if (status === ConstraintStatus.SATISFIED && !wasSatisfied) {
-                    playConstraintSatisfiedSFX = true;
-                    box.flare(true);
-                } else if (status === ConstraintStatus.UNSATISFIED && wasSatisfied) {
-                    playConstraintUnsatisfiedSFX = true;
-                    box.flare(false);
-                }
-            }
-        }
-
-        let unstable: number[] = [];
-        if (constraintsInfo.wrongPairs) {
-            let curr = 0;
-            let jj: number;
-            for (jj = 0; jj < constraintsInfo.wrongPairs.length; jj++) {
-                let stat: number = (constraintsInfo.wrongPairs[jj] === 1 ? 1 : 0);
-                if ((curr ^ stat) !== 0) {
-                    unstable.push(jj - curr);
-                    curr = stat;
-                }
-            }
-            if ((unstable.length % 2) === 1) {
-                unstable.push(jj - 1);
-            }
-        }
-
-        const undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        const sequence: number[] = undoBlock.sequence;
-        const locks: boolean[] = undoBlock.puzzleLocks;
-
-        const restrictedGuanine = EPars.getRestrictedConsecutive(
-            sequence, EPars.RNABASE_GUANINE, constraintsInfo.maxAllowedGuanine - 1, locks
+    private checkConstraints(): boolean {
+        return this._constraintBar.updateConstraints(
+            this._seqStacks[this._stackLevel],
+            this._targetConditions,
+            this._puzzle
         );
-        const restrictedCytosine = EPars.getRestrictedConsecutive(
-            sequence, EPars.RNABASE_CYTOSINE, constraintsInfo.maxAllowedCytosine - 1, locks
-        );
-        const restrictedAdenine = EPars.getRestrictedConsecutive(
-            sequence, EPars.RNABASE_ADENINE, constraintsInfo.maxAllowedAdenine - 1, locks
-        );
-
-        const restrictedGlobal: number[] = restrictedGuanine.concat(restrictedCytosine).concat(restrictedAdenine);
-
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            let jj = (this._isPipMode || ii !== 0) ? ii : this._curTargetIndex;
-
-            let restricted: number[];
-            if (constraintsInfo.restrictedLocal && constraintsInfo.restrictedLocal[jj]) {
-                restricted = restrictedGlobal.concat(constraintsInfo.restrictedLocal[jj]);
-            } else {
-                restricted = restrictedGlobal;
-            }
-            this._poses[ii].highlightRestrictedSequence(restricted);
-            this._poses[ii].highlightUnstableSequence(unstable);
-        }
-
-        if (allAreSatisfied && !allWereSatisfied && !hasPendingConstraints) {
-            if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
-                Flashbang.sound.playSound(Sounds.SoundAllConditions);
-            } else if (this._puzState !== PuzzleState.GAME) {
-                Flashbang.sound.playSound(Sounds.SoundCondition);
-            }
-        } else if (playConstraintSatisfiedSFX) {
-            Flashbang.sound.playSound(Sounds.SoundCondition);
-        } else if (playConstraintUnsatisfiedSFX) {
-            Flashbang.sound.playSound(Sounds.SoundDecondition);
-        }
-
-        return allAreSatisfied;
     }
 
     private updateScore(): void {
@@ -2883,8 +2136,6 @@ export default class PoseEditMode extends GameMode {
         // if (dn != null) dn.visible = (this._stack_level === 0);
 
         let undoBlock: UndoBlock = this.getCurrentUndoBlock();
-        let sequence: number[] = undoBlock.sequence;
-        let bestPairs: number[] = undoBlock.getPairs(EPars.DEFAULT_TEMPERATURE);
         let nnfe: number[];
 
         if (!this._paused) {
@@ -3005,11 +2256,6 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let wasSatisfied = true;
-        for (let ii = 0; ii < this._puzzle.constraints.length; ii += 2) {
-            wasSatisfied = wasSatisfied && this._constraintBoxes[ii / 2].isSatisfied;
-        }
-
         let constraintsSatisfied: boolean = this.checkConstraints();
         for (let ii = 0; ii < this._poses.length; ii++) {
             this.getCurrentUndoBlock(ii).stable = constraintsSatisfied;
@@ -3026,22 +2272,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private flashConstraintForTarget(targetIndex: number): void {
-        let box: ConstraintBox = null;
-        if (targetIndex === 0 || !this._isPipMode) {
-            let constraints: string[] = this._puzzle.constraints;
-            for (let ii = 0; ii < constraints.length; ii += 2) {
-                if (constraints[ii] === ConstraintType.SHAPE && Number(constraints[ii + 1]) === targetIndex) {
-                    box = this._constraintBoxes[ii / 2];
-                    break;
-                }
-            }
-        } else {
-            box = this._constraintShapeBoxes[targetIndex];
-        }
-
-        if (box != null) {
-            box.flash(0x00FFFF);
-        }
+        this._constraintBar.getShapeBox(targetIndex).flash(0x00FFFF);
     }
 
     private poseEditByTarget(targetIndex: number): void {
@@ -3492,16 +2723,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (lastBestPairs != null) {
-            let isShapeConstrained = false;
-            let constraints: string[] = this._puzzle.constraints;
-
-            if (constraints != null) {
-                for (let ii = 0; ii < constraints.length; ii += 2) {
-                    if (constraints[ii] === ConstraintType.SHAPE) {
-                        isShapeConstrained = true;
-                    }
-                }
-            }
+            let isShapeConstrained = this._puzzle.constraints.some(constraint => constraint instanceof ShapeConstraint);
 
             let pairsDiff: number[] = [];
 
@@ -3668,20 +2890,6 @@ export default class PoseEditMode extends GameMode {
         this._seqStacks = [];
     }
 
-    /**
-     * When a structure constraint box is clicked, we hilite the bases that are misfolding.
-     * The _unstableShapeConstraintIdx indicates which constraint's misfolded bases should be hilited.
-     */
-    private onConstraintBoxClicked(idx: number): void {
-        if (
-            this._puzzle.constraints[idx] === ConstraintType.SHAPE
-            || this._puzzle.constraints[idx] === ConstraintType.ANTISHAPE
-        ) {
-            this._unstableShapeConstraintIdx = (this._unstableShapeConstraintIdx === idx ? -1 : idx);
-            this.checkConstraints();
-        }
-    }
-
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
@@ -3728,19 +2936,16 @@ export default class PoseEditMode extends GameMode {
     private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     // / constraints && scoring display
-    private _constraintBoxes: ConstraintBox[];
-    private _constraintShapeBoxes: ConstraintBox[];
-    private _constraintAntishapeBoxes: ConstraintBox[];
-    private _unstableShapeConstraintIdx: number;
-    private _constraintsOffset: number;
+    private _constraintBar: ConstraintBar;
+    // private _constraintBoxes: ConstraintBox[];
+    // private _constraintShapeBoxes: ConstraintBox[];
+    // private _constraintAntishapeBoxes: ConstraintBox[];
+    // private _unstableShapeConstraintIdx: number;
+    // private _constraintsOffset: number;
 
     private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;
 
-    private _constraintsHead: number = 0;
-    private _constraintsFoot: number = 0;
-    private _constraintsTop: number = 0;
-    private _constraintsBottom: number = 0;
     private _uiHighlight: SpriteObject;
 
     private _homeButton: URLButton;

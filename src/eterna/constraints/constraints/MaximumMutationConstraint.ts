@@ -48,7 +48,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
             satisfied: status.satisfied,
             tooltip,
             drawBG: true,
-            iconTexture: MaximumMutationConstraint._icon,
+            icon: MaximumMutationConstraint._icon,
             showOutline: true,
             statText,
             clarificationText: `AT MOST ${this.maxMutations} CHANGES`

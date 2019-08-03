@@ -107,11 +107,10 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         let stateCondition = targetConditions[this.stateIndex];
 
         return {
-            ranges: status.satisfied
-                ? Utility.range(
-                    undoBlock.sequence.length + 1,
-                    undoBlock.sequence.length + 1 + stateCondition['oligo_sequence'].length - 1
-                ) : null,
+            ranges: Utility.range(
+                undoBlock.sequence.length + 1,
+                undoBlock.sequence.length + 1 + stateCondition['oligo_sequence'].length - 1
+            ),
             color: HighlightType.RESTRICTED
         };
     }

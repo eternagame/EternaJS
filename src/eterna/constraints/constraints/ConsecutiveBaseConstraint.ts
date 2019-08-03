@@ -75,7 +75,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 }
 
 export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
-    public static readonly NAME: 'CONSECUTIVE_A';
+    public static readonly NAME = 'CONSECUTIVE_A';
 
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
@@ -83,7 +83,7 @@ export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
 }
 
 export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
-    public static readonly NAME: 'CONSECUTIVE_U';
+    public static readonly NAME = 'CONSECUTIVE_U';
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
@@ -91,7 +91,7 @@ export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
 }
 
 export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
-    public static readonly NAME: 'CONSECUTIVE_G';
+    public static readonly NAME = 'CONSECUTIVE_G';
 
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
@@ -99,7 +99,7 @@ export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
 }
 
 export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
-    public static readonly NAME: 'CONSECUTIVE_C';
+    public static readonly NAME = 'CONSECUTIVE_C';
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);

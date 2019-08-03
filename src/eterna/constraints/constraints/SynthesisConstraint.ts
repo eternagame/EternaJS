@@ -92,7 +92,7 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
 
         return {
             satisfied: status.satisfied,
-            iconTexture: BitmapManager.getBitmap(Bitmaps.ImgLabReq),
+            icon: BitmapManager.getBitmap(Bitmaps.ImgLabReq),
             drawBG: true,
             showOutline: true,
             statText,

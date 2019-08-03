@@ -4,7 +4,7 @@ import {
     GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
-import ConstraintBox from 'eterna/ui/ConstraintBox';
+import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import EternaMenu from 'eterna/ui/EternaMenu';
 import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from './RScriptUIElement';
 import RScriptOp from './RScriptOp';
@@ -127,9 +127,9 @@ export default class ROPHighlight extends RScriptOp {
         switch (key) {
             case RScriptUIElementID.OBJECTIVES: {
                 let n: number = this._env.ui.constraintCount;
-                let firstObj: ConstraintBox = this._env.ui.getConstraint(0);
-                let lastObj: ConstraintBox = this._env.ui.getConstraint(n - 1);
-                size.x = lastObj.display.x - firstObj.display.x + lastObj.width + 2 * padding.x;
+                let firstObj: ConstraintBox = this._env.ui.getConstraintBox(0);
+                let lastObj: ConstraintBox = this._env.ui.getConstraintBox(n - 1);
+                size.x = lastObj.display.x - firstObj.display.x + lastObj.display.width + 2 * padding.x;
                 size.y = 84;
                 break;
             }
@@ -138,7 +138,7 @@ export default class ROPHighlight extends RScriptOp {
                 size.y = 84;
                 break;
             case RScriptUIElementID.OBJECTIVE:
-                size.x = 10 + (uiObj as ConstraintBox).width;
+                size.x = 10 + (uiObj as ConstraintBox).display.width;
                 size.y = 84;
                 break;
             case RScriptUIElementID.SWAP:
