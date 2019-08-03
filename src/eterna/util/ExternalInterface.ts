@@ -110,7 +110,7 @@ export default class ExternalInterface {
                 scriptID,
                 () => {
                     ExternalInterface._preloadedScripts.push(`${scriptID}`);
-                    Promise.resolve();
+                    resolve();
                 }
             );
         });
@@ -183,54 +183,6 @@ export default class ExternalInterface {
         }
 
         return scriptReturn;
-    }
-
-    // TODO: Remove once class-based constraints (using preloadScript/runScriptSync) are used
-    /**
-     * Requests execution of an external script, and attempts to get its return value synchronously.
-     * Promises are always resolved asynchronously, so this runScript flavor eschews Promises and takes a
-     * callback that will be called immediately *if possible*.
-     *
-     * This doesn't guarantee synchronous execution - another script may already be running, or the script itself
-     * may be asynchronous, or the script may need to be fetched from the network if it hasn't already been
-     * cached. In fact, the entire premise is folly, ScriptInterface cannot make the guarantee that it claims
-     * to, and this function is only here because PoseEditMode.checkConstraint was designed to resolve its
-     * constraints synchronously. Use the async version of this function if possible!
-     *
-     * @return true if the script ran to completion, and false if it couldn't run synchronously and is instead
-     * queued to be executed asynchronously.
-     */
-    public static runScriptMaybeSynchronously(
-        scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void
-    ): boolean {
-        let completed = false;
-        const complete = (result: any, error: any) => {
-            if (completed) {
-                return;
-            }
-            completed = true;
-            callback(result, error);
-        };
-
-        this._pendingScripts.push({
-            scriptID: `${scriptID}`,
-            options,
-            resolve: result => complete(result, undefined),
-            reject: err => complete(undefined, err),
-            synchronous: true
-        });
-
-        this.maybeRunNextScript();
-
-        // Omit this warning because it'll be fired whenever a puzzle with script constraints is loaded.
-        // This is some seriously busted functionality, and script-interface and/or constraint evaluation
-        // should be refactored to either always assume async results, or guarantee synchronous return.
-
-        // if (!completed) {
-        //     log.warn(`Script did not complete synchronously, but it was supposed to! [scriptID=${scriptID}]`);
-        // }
-
-        return completed;
     }
 
     public static call(name: string, ...args: any[]): any {
@@ -368,7 +320,7 @@ export default class ExternalInterface {
     private static _scriptRoot: any;
     private static _curSyncScript: PendingScript;
     private static _noPendingScripts: Deferred<void>;
-    private static _preloadedScripts: string[];
+    private static _preloadedScripts: string[] = [];
 }
 
 interface PendingScript {

@@ -2,15 +2,18 @@ import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import Eterna from 'eterna/Eterna';
+import {Sprite} from 'pixi.js';
+import {TextureUtil} from 'flashbang';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
+import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
 
 interface ShapeConstraintStatus extends BaseConstraintStatus {
     wrongPairs: number[];
 }
 
 abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
-    protected readonly stateIndex: number;
+    public stateIndex: number;
 
     constructor(stateIndex: number) {
         super();
@@ -28,11 +31,15 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
     protected _targetAlignedConstraints(constraints: boolean[], ublk: UndoBlock): boolean[] {
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
 
-        let targetAlignedConstraints: boolean[] = [];
-        for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
-            targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
+        if (targetMap != null) {
+            let targetAlignedConstraints: boolean[] = [];
+            for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
+                targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
+            }
+            return targetAlignedConstraints;
+        } else {
+            return constraints;
         }
-        return targetAlignedConstraints;
     }
 
     /**
@@ -45,25 +52,30 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
      * @param ublk
      */
     protected _targetAlignedNaturalPairs(ublk: UndoBlock): number[] {
-        // rawIndex => targetAlignedIndex
-        let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
-        // rawIndex => naturalAlignedIndex
-        let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
         let naturalPairs = ublk.getPairs();
 
-        let targetAlignedNaturalPairs: number[] = [];
-        for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
-            let naturalIndex = naturalMap[Number(rawIndex)];
-            let naturalPairedIndex = naturalPairs[naturalIndex];
-            let rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
+        // rawIndex => targetAlignedIndex
+        let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
+        if (targetMap != null) {
+            // rawIndex => naturalAlignedIndex
+            let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
 
-            // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
-            // according to target mode
-            targetAlignedNaturalPairs[targetIndex] = naturalPairedIndex < 0
-                ? naturalPairedIndex : targetMap[rawPairedIndex];
+            let targetAlignedNaturalPairs: number[] = [];
+            for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
+                let naturalIndex = naturalMap[Number(rawIndex)];
+                let naturalPairedIndex = naturalPairs[naturalIndex];
+                let rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
+
+                // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
+                // according to target mode
+                targetAlignedNaturalPairs[targetIndex] = naturalPairedIndex < 0
+                    ? naturalPairedIndex : targetMap[rawPairedIndex];
+            }
+
+            return targetAlignedNaturalPairs;
+        } else {
+            return naturalPairs;
         }
-
-        return targetAlignedNaturalPairs;
     }
 
     public getConstraintBoxConfig(
@@ -71,18 +83,11 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         undoBlocks: UndoBlock[],
         targetConditions: any[]
     ): ConstraintBoxConfig {
-        let undoBlock = undoBlocks[this.stateIndex];
-        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
-
         return {
             satisfied: status.satisfied,
             tooltip: '',
             thumbnailBG: true,
-            stateNumber: targetConditions.length > 1 ? this.stateIndex + 1 : null,
-            thumbnail: PoseThumbnail.createFramedBitmap(
-                new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
-                undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
-            )
+            stateNumber: targetConditions.length > 1 ? this.stateIndex + 1 : null
         };
     }
 
@@ -116,19 +121,13 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): ShapeConstraintStatus {
         let undoBlock = undoBlocks[this.stateIndex];
 
-        // TODO: These checks should probably be in Puzzle
-        if (targetConditions == null) {
-            throw new Error('Target object not available for SHAPE constraint');
+        let targetAlignedConstraints: boolean[] = null;
+        if (targetConditions !== null && targetConditions[this.stateIndex] != null) {
+            let structureConstraints: any = targetConditions[this.stateIndex]['structure_constraints'];
+            targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
         }
-
-        if (targetConditions[this.stateIndex] == null) {
-            throw new Error('Target condition not available for SHAPE constraint');
-        }
-
-        let structureConstraints: any = targetConditions[this.stateIndex]['structure_constraints'];
 
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
-        let targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
 
         return {
             satisfied: EPars.arePairsSame(naturalPairs, undoBlock.targetPairs, targetAlignedConstraints),
@@ -142,12 +141,18 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         targetConditions: any[]
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, undoBlocks, targetConditions);
+        let undoBlock = undoBlocks[this.stateIndex];
+        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
                 details.stateNumber
                     ? `In state ${details.stateNumber}, your RNA must fold into the outlined structure.`
                     : 'Your RNA must fold into the outlined structure.'
+            ),
+            thumbnail: PoseThumbnail.drawToGraphics(
+                new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
+                undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
             )
         };
     }
@@ -208,7 +213,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             wrongPairs: this._getWrongPairs(
                 naturalPairs,
                 targetAlignedConstraints,
-                EPars.arePairsSame(naturalPairs, antiPairs, targetAlignedConstraints)
+                !EPars.arePairsSame(naturalPairs, antiPairs, targetAlignedConstraints)
             )
         };
     }
@@ -219,6 +224,8 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         targetConditions: any[]
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, undoBlocks, targetConditions);
+        let undoBlock = undoBlocks[this.stateIndex];
+        let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
@@ -226,7 +233,12 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
                     ? `In state ${details.stateNumber}, your RNA must fold into the outlined structure.`
                     : 'Your RNA must fold into the outlined structure.'
             ),
-            noText: true
+            noText: true,
+            thumbnail: PoseThumbnail.drawToGraphics(
+                new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
+                EPars.parenthesisToPairs(targetConditions[this.stateIndex]['anti_secstruct']),
+                3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
+            )
         };
     }
 

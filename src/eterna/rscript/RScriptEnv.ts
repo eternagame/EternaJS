@@ -175,7 +175,7 @@ export default class RScriptEnv extends ContainerObject {
             case RScriptUIElementID.SHAPEOBJECTIVE:
                 return this.ui.getShapeBox(0);
             case RScriptUIElementID.OBJECTIVE:
-                return this.ui.getConstraint(i);
+                return this.ui.getConstraintBox(i);
             case RScriptUIElementID.SWITCH:
                 return this.ui.toolbar.stateToggle;
             case RScriptUIElementID.TOTALENERGY:

@@ -58,7 +58,8 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
             satisfied: status.satisfied,
             clarificationText: `${this.maxPairs} OR FEWER`,
             statText: status.currentPairs.toString(),
-            tooltip
+            tooltip,
+            showOutline: true
         };
     }
 }
@@ -126,8 +127,8 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
         return {
             ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
+                ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
         };
     }
 }

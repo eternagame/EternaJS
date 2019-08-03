@@ -33,6 +33,27 @@ export default class PoseThumbnail {
         return TextureUtil.renderToTexture(disp);
     }
 
+    public static drawToGraphics(
+        sequence: number[],
+        pairs: number[],
+        size: number = 1,
+        type: PoseThumbnailType = PoseThumbnailType.BASE_COLORED,
+        expStartIndex: number = 0,
+        wrongPairs: number[] = null,
+        expUseThreshold: boolean = false,
+        expThreshold: number = 0
+    ) {
+        const graphics = new Graphics();
+        PoseThumbnail.create(
+            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics
+        );
+        const newGraphics = graphics.clone();
+        let bounds = newGraphics.getLocalBounds();
+        newGraphics.x = -bounds.left;
+        newGraphics.y = -bounds.top;
+        return newGraphics;
+    }
+
     public static drawToSprite(
         sprite: Sprite,
         sequence: number[],

@@ -57,7 +57,8 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
             satisfied: status.satisfied,
             clarificationText: `${this.minPairs} OR MORE`,
             statText: status.currentPairs.toString(),
-            tooltip
+            tooltip,
+            showOutline: true
         };
     }
 }
@@ -125,8 +126,8 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
         return {
             ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
+                ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
+                : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
         };
     }
 }
