@@ -15,7 +15,7 @@ interface ScriptConstraintStatus extends BaseConstraintStatus {
 
 export default class ScriptConstraint extends Constraint<ScriptConstraintStatus> {
     public static readonly NAME = 'SCRIPT';
-    public scriptID: number;
+    public readonly scriptID: number;
 
     constructor(scriptID: number) {
         super();

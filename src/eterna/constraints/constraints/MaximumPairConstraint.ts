@@ -10,8 +10,8 @@ interface MaxPairConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus> {
-    public pairType: number;
-    public maxPairs: number;
+    public readonly pairType: number;
+    public readonly maxPairs: number;
 
     constructor(pairType: number, maxPairs: number) {
         super();

@@ -16,7 +16,7 @@ interface MaxMutationConstraintStatus extends BaseConstraintStatus {
 
 export default class MaximumMutationConstraint extends Constraint<MaxMutationConstraintStatus> {
     public static readonly NAME = 'MUTATION';
-    public maxMutations: number;
+    public readonly maxMutations: number;
 
     constructor(maxMutations: number) {
         super();
