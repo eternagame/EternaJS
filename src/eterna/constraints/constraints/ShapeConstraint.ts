@@ -13,7 +13,7 @@ interface ShapeConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
-    public stateIndex: number;
+    public readonly stateIndex: number;
 
     constructor(stateIndex: number) {
         super();

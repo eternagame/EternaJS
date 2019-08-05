@@ -9,8 +9,8 @@ interface MaxBaseConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus> {
-    public baseType: number;
-    public maxCount: number;
+    public readonly baseType: number;
+    public readonly maxCount: number;
 
     constructor(baseType: number, maxCount: number) {
         super();

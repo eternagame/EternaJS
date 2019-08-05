@@ -15,7 +15,7 @@ interface MinStackConstraintStatus extends BaseConstraintStatus{
 
 export default class MinimumStackLengthConstraint extends Constraint<MinStackConstraintStatus> {
     public static readonly NAME = 'STACK';
-    public minLength: number;
+    public readonly minLength: number;
 
     constructor(minLength: number) {
         super();

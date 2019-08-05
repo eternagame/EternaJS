@@ -1,6 +1,7 @@
 import UndoBlock from 'eterna/UndoBlock';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {Value, UnitSignal, ValueView} from 'signals';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus} from '../Constraint';
 
@@ -10,11 +11,11 @@ interface BoostConstraintStatus extends BaseConstraintStatus {
 
 class BoostConstraint extends Constraint<BoostConstraintStatus> {
     public static readonly NAME = 'BOOST';
-    public minBoosts: number;
+    public readonly minBoosts: number;
 
     constructor(minBoosts: number) {
         super();
-        this.minBoosts = minBoosts;
+
         throw new Error('BOOST constraint is unimplemented');
     }
 

@@ -10,8 +10,8 @@ interface ConsecutiveConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstraintStatus> {
-    public baseType: number;
-    public maxConsecutive: number;
+    public readonly baseType: number;
+    public readonly maxConsecutive: number;
 
     constructor(baseType: number, count: number) {
         super();

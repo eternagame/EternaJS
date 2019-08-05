@@ -10,8 +10,8 @@ interface MinPairConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus> {
-    public pairType: number;
-    public minPairs: number;
+    public readonly pairType: number;
+    public readonly minPairs: number;
 
     constructor(pairType: number, minPairs: number) {
         super();

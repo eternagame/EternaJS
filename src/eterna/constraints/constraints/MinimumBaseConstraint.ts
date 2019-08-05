@@ -9,8 +9,8 @@ interface MinBaseConstraintStatus extends BaseConstraintStatus{
 }
 
 abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus> {
-    public baseType: number;
-    public minCount: number;
+    public readonly baseType: number;
+    public readonly minCount: number;
 
     constructor(baseType: number, minCount: number) {
         super();

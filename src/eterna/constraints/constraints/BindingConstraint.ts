@@ -15,7 +15,7 @@ interface OligoInfo {
 }
 
 abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus> extends Constraint<ConstraintStatus> {
-    public stateIndex: number;
+    public readonly stateIndex: number;
 
     constructor(stateIndex: number) {
         super();
