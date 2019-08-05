@@ -175,6 +175,15 @@ export default class ConstraintBar extends ContainerObject {
         )[0].constraintBox;
     }
 
+    public serializeConstraints(): string {
+        return this._constraints.map(
+            (constraint) => constraint.constraint.serialize()
+        ).reduce(
+            (all, current) => all.concat(current),
+            []
+        ).join(',');
+    }
+
     private _constraints: ConstraintWrapper[];
     private _flaggedConstraint: ConstraintWrapper;
 }

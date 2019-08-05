@@ -193,6 +193,13 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
             color: HighlightType.RESTRICTED
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            BindingsConstraint.NAME,
+            this.stateIndex.toString()
+        ];
+    }
 }
 
 export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatus> {
@@ -215,6 +222,13 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
             satisfied: nnfe != null && nnfe[0] === -2
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            OligoBoundConstraint.NAME,
+            this.stateIndex.toString()
+        ];
+    }
 }
 
 export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintStatus> {
@@ -236,5 +250,12 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
         return {
             satisfied: nnfe != null && nnfe[0] !== -2
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            OligoBoundConstraint.NAME,
+            this.stateIndex.toString()
+        ];
     }
 }

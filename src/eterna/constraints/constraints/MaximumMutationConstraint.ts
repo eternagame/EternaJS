@@ -55,6 +55,13 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
         };
     }
 
+    public serialize(): [string, string] {
+        return [
+            MaximumMutationConstraint.NAME,
+            this.maxMutations.toString()
+        ];
+    }
+
     private static get _icon(): Texture {
         let icon = new Container();
 

@@ -61,4 +61,11 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
             stateIndex: status.stateIndex
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            ScriptConstraint.NAME,
+            this.scriptID.toString()
+        ];
+    }
 }

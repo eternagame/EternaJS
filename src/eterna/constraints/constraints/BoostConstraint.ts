@@ -58,4 +58,11 @@ class BoostConstraint extends Constraint<BoostConstraintStatus> {
             showOutline: true
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            BoostConstraint.NAME,
+            this.minBoosts.toString()
+        ];
+    }
 }

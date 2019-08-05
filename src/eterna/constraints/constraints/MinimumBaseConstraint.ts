@@ -66,6 +66,13 @@ export class MinimumAConstraint extends MinimumBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumAConstraint.NAME,
+            this.minCount.toString()
+        ];
+    }
 }
 
 export class MinimumUConstraint extends MinimumBaseConstraint {
@@ -73,6 +80,13 @@ export class MinimumUConstraint extends MinimumBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumUConstraint.NAME,
+            this.minCount.toString()
+        ];
     }
 }
 
@@ -82,6 +96,13 @@ export class MinimumGConstraint extends MinimumBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumGConstraint.NAME,
+            this.minCount.toString()
+        ];
+    }
 }
 
 export class MinimumCConstraint extends MinimumBaseConstraint {
@@ -89,5 +110,12 @@ export class MinimumCConstraint extends MinimumBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumCConstraint.NAME,
+            this.minCount.toString()
+        ];
     }
 }

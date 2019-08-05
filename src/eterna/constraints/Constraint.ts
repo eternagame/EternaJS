@@ -40,4 +40,6 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
     ): HighlightInfo {
         return null;
     }
+
+    public abstract serialize(): [string, string];
 }

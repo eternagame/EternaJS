@@ -118,6 +118,13 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
         };
     }
 
+    public serialize(): [string, string] {
+        return [
+            SynthesisConstraint.NAME,
+            '0'
+        ];
+    }
+
     private readonly _consecutiveAConstraint = new ConsecutiveAConstraint(SynthesisConstraint.AMAX);
     private readonly _consecutiveGConstraint = new ConsecutiveGConstraint(SynthesisConstraint.GMAX);
     private readonly _consecutiveCConstraint = new ConsecutiveCConstraint(SynthesisConstraint.CMAX);

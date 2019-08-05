@@ -80,6 +80,13 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
                 : BitmapManager.getBitmap(Bitmaps.NovaGCReq)
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumGCConstraint.NAME,
+            this.minPairs.toString()
+        ];
+    }
 }
 
 export class MinimumAUConstraint extends MinimumPairConstraint {
@@ -101,6 +108,13 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
                 : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumAUConstraint.NAME,
+            this.minPairs.toString()
+        ];
+    }
 }
 
 export class MinimumGUConstraint extends MinimumPairConstraint {
@@ -121,6 +135,13 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
                 ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumGUConstraint.NAME,
+            this.minPairs.toString()
+        ];
     }
 }
 
@@ -171,5 +192,12 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
                 ? BitmapManager.getBitmap(Bitmaps.NovaPairsMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaPairsReq)
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MinimumAnyPairConstraint.NAME,
+            this.minPairs.toString()
+        ];
     }
 }
