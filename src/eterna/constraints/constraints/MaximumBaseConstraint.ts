@@ -68,6 +68,13 @@ export class MaximumAConstraint extends MaximumBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumAConstraint.NAME,
+            this.maxCount.toString()
+        ];
+    }
 }
 
 export class MaximumUConstraint extends MaximumBaseConstraint {
@@ -75,6 +82,13 @@ export class MaximumUConstraint extends MaximumBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumUConstraint.NAME,
+            this.maxCount.toString()
+        ];
     }
 }
 
@@ -84,6 +98,13 @@ export class MaximumGConstraint extends MaximumBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumGConstraint.NAME,
+            this.maxCount.toString()
+        ];
+    }
 }
 
 export class MaximumCConstraint extends MaximumBaseConstraint {
@@ -91,5 +112,12 @@ export class MaximumCConstraint extends MaximumBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumCConstraint.NAME,
+            this.maxCount.toString()
+        ];
     }
 }

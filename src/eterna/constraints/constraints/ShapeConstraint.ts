@@ -120,7 +120,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         let undoBlock = undoBlocks[this.stateIndex];
 
         let targetAlignedConstraints: boolean[] = null;
-        if (targetConditions !== null && targetConditions[this.stateIndex] != null) {
+        if (targetConditions != null && targetConditions[this.stateIndex] != null) {
             let structureConstraints: any = targetConditions[this.stateIndex]['structure_constraints'];
             targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
         }
@@ -153,6 +153,13 @@ export default class ShapeConstraint extends BaseShapeConstraint {
                 undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
             )
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            ShapeConstraint.NAME,
+            this.stateIndex.toString()
+        ];
     }
 
     private _getWrongPairs(
@@ -239,6 +246,13 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
                 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
             )
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            AntiShapeConstraint.NAME,
+            this.stateIndex.toString()
+        ];
     }
 
     private _getWrongPairs(

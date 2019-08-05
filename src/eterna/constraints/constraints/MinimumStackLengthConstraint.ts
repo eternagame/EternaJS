@@ -44,6 +44,13 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
         };
     }
 
+    public serialize(): [string, string] {
+        return [
+            MinimumStackLengthConstraint.NAME,
+            this.minLength.toString()
+        ];
+    }
+
     private static get _icon(): Texture {
         let icon = new Container();
         let tex = BitmapManager.getBitmap(Bitmaps.BaseWMidPattern);

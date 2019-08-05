@@ -51,4 +51,11 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
             showOutline: true
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            BarcodeConstraint.NAME,
+            '0'
+        ];
+    }
 }

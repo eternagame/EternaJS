@@ -15,7 +15,6 @@ import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaVi
 import PoseField from 'eterna/pose2D/PoseField';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Pose2D from 'eterna/pose2D/Pose2D';
-import ConstraintBox from 'eterna/ui/ConstraintBox';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
@@ -26,12 +25,14 @@ import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
 import NuPACK from 'eterna/folding/NuPACK';
 import AsyncProcessDialog from 'eterna/ui/AsyncProcessDialog';
-import {ConstraintType} from 'eterna/puzzle/Constraints';
 import {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
 import URLButton from 'eterna/ui/URLButton';
 import Fonts from 'eterna/util/Fonts';
 import LinearFoldV from 'eterna/folding/LinearFoldV';
 import LinearFoldC from 'eterna/folding/LinearFoldC';
+import ConstraintBar from 'eterna/constraints/ConstraintBar';
+import Utility from 'eterna/util/Utility';
+import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -226,16 +227,13 @@ export default class PuzzleEditMode extends GameMode {
 
             structureInput.structureString = defaultStructure;
             this._structureInputs.push(structureInput);
-
-            let constraintBox = new ConstraintBox();
-            constraintBox.display.position = new Point(17, 35);
-            poseField.addObject(constraintBox, poseField.container);
-            if (this._embedded) {
-                constraintBox.display.visible = false;
-            }
-
-            this._constraintBoxes.push(constraintBox);
         }
+
+        this._constraintBar = new ConstraintBar(Utility.range(this._numTargets).map(
+            (stateIndex) => new ShapeConstraint(stateIndex)
+        ));
+        this.addObject(this._constraintBar, this.container);
+        this._constraintBar.layout(true, this._numTargets);
 
         this.setPoseFields(poseFields);
         this.poseEditByTarget(0);
@@ -370,13 +368,10 @@ export default class PuzzleEditMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
+        pushVisibleState(this._constraintBar.display);
 
         for (let structureInput of this._structureInputs) {
             pushVisibleState(structureInput.display);
-        }
-
-        for (let constraintBox of this._constraintBoxes) {
-            pushVisibleState(constraintBox.display);
         }
 
         let energyVisible: boolean[] = [];
@@ -492,12 +487,22 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     private submitPuzzle(details: SubmitPuzzleDetails): void {
-        let constraints = '';
-        for (let ii = 0; ii < this._poses.length; ii++) {
-            if (ii > 0) {
-                constraints += ',';
+        let constraints = this._constraintBar.serializeConstraints();
+
+        if (this._poses.length === 1) {
+            let numPairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
+
+            if (details.minGU !== undefined && details.minGU > 0) {
+                constraints += `,GU,${details.minGU.toString()}`;
             }
-            constraints += `SHAPE,${ii}`;
+
+            if (details.maxGC !== undefined && details.maxGC <= numPairs) {
+                constraints += `,GC,${details.maxGC.toString()}`;
+            }
+
+            if (details.minAU !== undefined && details.minAU > 0) {
+                constraints += `,AU,${details.minAU.toString()}`;
+            }
         }
 
         let len: number = this._poses[0].sequence.length;
@@ -519,22 +524,6 @@ export default class PuzzleEditMode extends GameMode {
                 beginningSequence += sequence.substr(ii, 1);
             } else {
                 beginningSequence += 'A';
-            }
-        }
-
-        if (this._poses.length === 1) {
-            let numPairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
-
-            if (details.minGU !== undefined && details.minGU > 0) {
-                constraints += `,GU,${details.minGU.toString()}`;
-            }
-
-            if (details.maxGC !== undefined && details.maxGC <= numPairs) {
-                constraints += `,GC,${details.maxGC.toString()}`;
-            }
-
-            if (details.minAU !== undefined && details.minAU > 0) {
-                constraints += `,AU,${details.minAU.toString()}`;
             }
         }
 
@@ -739,12 +728,7 @@ export default class PuzzleEditMode extends GameMode {
                 this._poses[ii].pairs = bestPairs;
             }
 
-            this._constraintBoxes[ii].setContent(ConstraintType.SHAPE, {
-                target: targetPairs,
-                native: bestPairs
-            }, EPars.arePairsSame(bestPairs, targetPairs), 0);
-            this._constraintBoxes[ii].display.scale.x = 1;
-            this._constraintBoxes[ii].display.scale.y = 1;
+            this._constraintBar.updateConstraints(this._seqStack[this._stackLevel]);
         }
 
         let undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
@@ -886,6 +870,7 @@ export default class PuzzleEditMode extends GameMode {
             let undoBlock = new UndoBlock(seq);
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics(this._folder);
+            undoBlock.targetPairs = targetPairs;
             currentUndoBlocks.push(undoBlock);
             currentLock.push(lock);
             currentBindingSites.push(bindingSite);
@@ -925,5 +910,5 @@ export default class PuzzleEditMode extends GameMode {
     private _toolbar: Toolbar;
     private _folderButton: GameButton;
     private _homeButton: URLButton;
-    private _constraintBoxes: ConstraintBox[] = [];
+    private _constraintBar: ConstraintBar;
 }

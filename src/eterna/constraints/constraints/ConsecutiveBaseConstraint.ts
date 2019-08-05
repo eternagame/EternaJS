@@ -78,6 +78,13 @@ export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            ConsecutiveAConstraint.NAME,
+            this.maxConsecutive.toString()
+        ];
+    }
 }
 
 export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
@@ -85,6 +92,13 @@ export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            ConsecutiveUConstraint.NAME,
+            this.maxConsecutive.toString()
+        ];
     }
 }
 
@@ -94,6 +108,13 @@ export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
     }
+
+    public serialize(): [string, string] {
+        return [
+            ConsecutiveGConstraint.NAME,
+            this.maxConsecutive.toString()
+        ];
+    }
 }
 
 export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
@@ -101,5 +122,12 @@ export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);
+    }
+
+    public serialize(): [string, string] {
+        return [
+            ConsecutiveCConstraint.NAME,
+            this.maxConsecutive.toString()
+        ];
     }
 }

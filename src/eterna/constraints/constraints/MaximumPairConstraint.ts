@@ -81,6 +81,13 @@ export class MaximumGCConstraint extends MaximumPairConstraint {
                 : BitmapManager.getBitmap(Bitmaps.NovaGCReq)
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumGCConstraint.NAME,
+            this.maxPairs.toString()
+        ];
+    }
 }
 
 export class MaximumAUConstraint extends MaximumPairConstraint {
@@ -102,6 +109,13 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
                 : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
         };
     }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumAUConstraint.NAME,
+            this.maxPairs.toString()
+        ];
+    }
 }
 
 export class MaximumGUConstraint extends MaximumPairConstraint {
@@ -122,5 +136,12 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
                 ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
         };
+    }
+
+    public serialize(): [string, string] {
+        return [
+            MaximumGUConstraint.NAME,
+            this.maxPairs.toString()
+        ];
     }
 }
