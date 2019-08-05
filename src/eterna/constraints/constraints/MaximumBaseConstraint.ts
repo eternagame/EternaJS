@@ -32,8 +32,6 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
 
     public getConstraintBoxConfig(
         status: MaxBaseConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();

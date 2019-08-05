@@ -34,8 +34,6 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
@@ -74,12 +72,10 @@ export class MaximumGCConstraint extends MaximumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaGCMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGCReq)
@@ -97,12 +93,10 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
@@ -120,12 +114,10 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MaxPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGUReq)

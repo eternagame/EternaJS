@@ -2,9 +2,6 @@ import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Eterna from 'eterna/Eterna';
-import {Sprite} from 'pixi.js';
-import {TextureUtil} from 'flashbang';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
 
@@ -80,14 +77,15 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
     public getConstraintBoxConfig(
         status: ShapeConstraintStatus,
+        forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        targetConditions?: any[]
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,
             tooltip: '',
             thumbnailBG: true,
-            stateNumber: targetConditions.length > 1 ? this.stateIndex + 1 : null
+            stateNumber: undoBlocks.length > 1 ? this.stateIndex + 1 : null
         };
     }
 
@@ -118,7 +116,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 export default class ShapeConstraint extends BaseShapeConstraint {
     public static readonly NAME = 'SHAPE';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): ShapeConstraintStatus {
+    public evaluate(undoBlocks: UndoBlock[], targetConditions?: any[]): ShapeConstraintStatus {
         let undoBlock = undoBlocks[this.stateIndex];
 
         let targetAlignedConstraints: boolean[] = null;
@@ -137,10 +135,10 @@ export default class ShapeConstraint extends BaseShapeConstraint {
 
     public getConstraintBoxConfig(
         status: ShapeConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        forMissionScreen: boolean,
+        undoBlocks: UndoBlock[]
     ): ConstraintBoxConfig {
-        let details = super.getConstraintBoxConfig(status, undoBlocks, targetConditions);
+        let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
         return {
@@ -220,10 +218,11 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
 
     public getConstraintBoxConfig(
         status: ShapeConstraintStatus,
+        forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
         targetConditions: any[]
     ): ConstraintBoxConfig {
-        let details = super.getConstraintBoxConfig(status, undoBlocks, targetConditions);
+        let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
         return {

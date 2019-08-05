@@ -1906,9 +1906,9 @@ export default class PoseEditMode extends GameMode {
                 let box = new ConstraintBox(true);
                 box.setContent(constraint.getConstraintBoxConfig(
                     constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
+                    true,
                     this._seqStacks[this._stackLevel],
-                    this._targetConditions,
-                    true
+                    this._targetConditions
                 ));
                 return box;
             }
