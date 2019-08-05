@@ -131,13 +131,13 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public updateConstraints(undoBlocks: UndoBlock[], targetConditions: any[], puzzle?: Puzzle): boolean {
+    public updateConstraints(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): boolean {
         let satisfied = true;
 
         for (let constraint of this._constraints) {
             let status = constraint.constraint.evaluate(undoBlocks, targetConditions, puzzle);
             constraint.constraintBox.setContent(
-                constraint.constraint.getConstraintBoxConfig(status, undoBlocks, targetConditions, false)
+                constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
             );
             constraint.highlightCache = status.satisfied
                 ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);

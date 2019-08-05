@@ -21,15 +21,13 @@ class BoostConstraint extends Constraint<BoostConstraintStatus> {
         throw new Error('BOOST constraint is unimplemented');
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): BoostConstraintStatus {
+    public evaluate(): BoostConstraintStatus {
         throw new Error('BOOST constraint is unimplemented');
     }
 
     public getConstraintBoxConfig(
         status: BoostConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
-        forMissionScreen: boolean
+        forMissionScreen: boolean,
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {

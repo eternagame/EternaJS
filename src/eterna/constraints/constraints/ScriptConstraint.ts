@@ -22,7 +22,7 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
         this.scriptID = scriptID;
     }
 
-    public evaluate(_1: UndoBlock[], _2: any[], puzzle?: Puzzle): ScriptConstraintStatus {
+    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[], puzzle: Puzzle): ScriptConstraintStatus {
         const scriptResult = ExternalInterface.runScriptSync(
             this.scriptID,
             {params: {puzzleInfo: puzzle.toJSON() || null}}
@@ -41,8 +41,6 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
 
     public getConstraintBoxConfig(
         status: ScriptConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {

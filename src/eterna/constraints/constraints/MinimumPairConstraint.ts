@@ -34,8 +34,6 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
 
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
@@ -73,12 +71,10 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaGCMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGCReq)
@@ -96,12 +92,10 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
@@ -119,12 +113,10 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
                 : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
@@ -158,8 +150,6 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
     /** @override */
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
@@ -175,7 +165,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
         }
 
         return {
-            ...super.getConstraintBoxConfig(status, undoBlocks, targetConditions, forMissionScreen),
+            ...super.getConstraintBoxConfig(status, forMissionScreen),
             tooltip,
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaPairsMissionReq)

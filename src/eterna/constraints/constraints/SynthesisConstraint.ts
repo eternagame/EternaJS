@@ -37,8 +37,6 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
 
     public getConstraintBoxConfig(
         status: SynthConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let statText: StyledTextBuilder | string;

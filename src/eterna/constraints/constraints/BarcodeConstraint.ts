@@ -19,8 +19,6 @@ export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> 
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();

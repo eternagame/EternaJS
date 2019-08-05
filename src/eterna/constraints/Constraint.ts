@@ -18,24 +18,25 @@ export interface HighlightInfo {
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {
     public static readonly NAME: string;
     /**
-     * @param undoBlocks Current undo block for each state of the puzzle
-     * @param targetConditions
-     * @param puzzle This is not available in the puzzle maker, so any constraints which require it will not be
-     * usable within PuzzleMaker for now
+     * @param undoBlocks
+     * @param targetConditions This is not available in the puzzle maker, so any constraints which require it will not
+     * be usable within PuzzleMaker for now
+     * @param puzzle This is not available in the puzzle maker, so any constraints which require it will not
+     * be usable within PuzzleMaker for now
      */
-    public abstract evaluate(undoBlocks: UndoBlock[], targetConditions: any[], puzzle?: Puzzle): ConstraintStatus;
+    public abstract evaluate(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): ConstraintStatus;
 
     public abstract getConstraintBoxConfig(
         status: ConstraintStatus,
+        forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[],
-        forMissionScreen: boolean
+        targetConditions?: any[],
     ): ConstraintBoxConfig;
 
     public getHighlight(
         status: ConstraintStatus,
         undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        targetConditions?: any[]
     ): HighlightInfo {
         return null;
     }

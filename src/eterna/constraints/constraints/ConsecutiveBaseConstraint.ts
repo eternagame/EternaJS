@@ -33,8 +33,6 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 
     public getConstraintBoxConfig(
         status: ConsecutiveConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();

@@ -32,9 +32,9 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
+        forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[],
-        forMissionScreen: boolean
+        targetConditions: any[]
     ): ConstraintBoxConfig {
         let oligos = this._getOligoInfo(targetConditions);
 

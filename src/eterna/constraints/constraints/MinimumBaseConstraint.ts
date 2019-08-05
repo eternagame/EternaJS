@@ -32,8 +32,6 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
 
     public getConstraintBoxConfig(
         status: MinBaseConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[],
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
