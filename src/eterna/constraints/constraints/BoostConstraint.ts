@@ -16,6 +16,8 @@ class BoostConstraint extends Constraint<BoostConstraintStatus> {
     constructor(minBoosts: number) {
         super();
 
+        this.minBoosts = minBoosts;
+
         throw new Error('BOOST constraint is unimplemented');
     }
 
