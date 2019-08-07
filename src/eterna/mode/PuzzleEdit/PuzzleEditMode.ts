@@ -232,8 +232,8 @@ export default class PuzzleEditMode extends GameMode {
 
         this._constraintBar = new ConstraintBar(Utility.range(this._numTargets).map(
             (stateIndex) => new ShapeConstraint(stateIndex)
-        ));
-        this.addObject(this._constraintBar, this.container);
+        ), true);
+        this.addObject(this._constraintBar, this.uiLayer);
         this._constraintBar.layout(true, this._numTargets);
 
         this.setPoseFields(poseFields);
@@ -370,7 +370,6 @@ export default class PuzzleEditMode extends GameMode {
         pushVisibleState(this.uiLayer);
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
-        pushVisibleState(this._constraintBar.display);
 
         for (let structureInput of this._structureInputs) {
             pushVisibleState(structureInput.display);
@@ -461,10 +460,8 @@ export default class PuzzleEditMode extends GameMode {
             }
 
             if (
-                !EPars.arePairsSame(
-                    this.getCurrentTargetPairs(ii),
-                    this.getCurrentUndoBlock(ii).getPairs(EPars.DEFAULT_TEMPERATURE)
-                ) && !Eterna.DEV_MODE
+                !this._constraintBar.updateConstraints(this._seqStack[this._stackLevel])
+                && !Eterna.DEV_MODE
             ) {
                 this.showNotification('You should first solve your puzzle before submitting it!');
                 return;
@@ -490,22 +487,6 @@ export default class PuzzleEditMode extends GameMode {
 
     private submitPuzzle(details: SubmitPuzzleDetails): void {
         let constraints = this._constraintBar.serializeConstraints();
-
-        if (this._poses.length === 1) {
-            let numPairs: number = EPars.numPairs(this.getCurrentTargetPairs(0));
-
-            if (details.minGU !== undefined && details.minGU > 0) {
-                constraints += `,GU,${details.minGU.toString()}`;
-            }
-
-            if (details.maxGC !== undefined && details.maxGC <= numPairs) {
-                constraints += `,GC,${details.maxGC.toString()}`;
-            }
-
-            if (details.minAU !== undefined && details.minAU > 0) {
-                constraints += `,AU,${details.minAU.toString()}`;
-            }
-        }
 
         let len: number = this._poses[0].sequence.length;
 

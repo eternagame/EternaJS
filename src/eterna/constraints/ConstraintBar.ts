@@ -1,13 +1,14 @@
 import {ContainerObject, Flashbang} from 'flashbang';
 import UndoBlock from 'eterna/UndoBlock';
 import Puzzle from 'eterna/puzzle/Puzzle';
-import {Point} from 'pixi.js';
+import {Point, Container} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
+import AddConstraintBox from './AddConstraintBox';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -28,11 +29,13 @@ function isSSCW(
 export default class ConstraintBar extends ContainerObject {
     public sequenceHighlights: Value<HighlightInfo[]> = new Value(null);
 
-    constructor(constraints: Constraint<BaseConstraintStatus>[]) {
+    constructor(constraints: Constraint<BaseConstraintStatus>[], editable: boolean = false) {
         super();
         this._constraints = constraints.map(
             (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
         );
+
+        this._editable = editable;
 
         Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
@@ -44,6 +47,14 @@ export default class ConstraintBar extends ContainerObject {
             this.addObject(constraint.constraintBox, this.container);
             constraint.constraintBox.pointerDown.connect(() => {
                 this.onConstraintBoxClicked(constraint);
+            });
+        }
+
+        if (this._editable) {
+            this._addConstraintBox = new AddConstraintBox();
+            this.addObject(this._addConstraintBox, this.container);
+            this._addConstraintBox.pointerUp.connect(() => {
+                // TODO: Dialog
             });
         }
     }
@@ -74,7 +85,12 @@ export default class ConstraintBar extends ContainerObject {
             xWalker += 119;
         }
 
-        if (nonStateConstraints.length > 0) {
+        if (this._editable) {
+            this._addConstraintBox.display.position = new Point(xWalker, yPos);
+            xWalker += 119;
+        }
+
+        if (nonStateConstraints.length > 0 || this._editable) {
             xWalker += 25;
         }
 
@@ -183,6 +199,10 @@ export default class ConstraintBar extends ContainerObject {
             []
         ).join(',');
     }
+
+    private _editable: boolean;
+
+    private _addConstraintBox: ContainerObject;
 
     private _constraints: ConstraintWrapper[];
     private _flaggedConstraint: ConstraintWrapper;
