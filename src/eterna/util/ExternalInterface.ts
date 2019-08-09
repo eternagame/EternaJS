@@ -111,6 +111,9 @@ export default class ExternalInterface {
                 () => {
                     ExternalInterface._preloadedScripts.push(`${scriptID}`);
                     resolve();
+                },
+                () => {
+                    reject(new Error(`Script preloading failed for script ${scriptID}`));
                 }
             );
         });
