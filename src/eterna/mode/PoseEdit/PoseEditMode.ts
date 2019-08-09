@@ -2935,13 +2935,7 @@ export default class PoseEditMode extends GameMode {
 
     private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
-    // / constraints && scoring display
     private _constraintBar: ConstraintBar;
-    // private _constraintBoxes: ConstraintBox[];
-    // private _constraintShapeBoxes: ConstraintBox[];
-    // private _constraintAntishapeBoxes: ConstraintBox[];
-    // private _unstableShapeConstraintIdx: number;
-    // private _constraintsOffset: number;
 
     private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;
