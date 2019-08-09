@@ -345,7 +345,6 @@ export default class PuzzleManager {
         }
 
         let puzzle = this.parsePuzzle(data['puzzle']);
-        let scriptConstraints = puzzle.constraints.filter(constraint => constraint instanceof ScriptConstraint);
 
         let isScriptConstraint = (
             constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
