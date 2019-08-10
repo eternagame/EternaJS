@@ -23,19 +23,23 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
     }
 
     public evaluate(undoBlocks: UndoBlock[], targetConditions: any[], puzzle: Puzzle): ScriptConstraintStatus {
-        const scriptResult = ExternalInterface.runScriptSync(
+        const {result, error} = ExternalInterface.runScriptSync(
             this.scriptID,
             {params: {puzzleInfo: puzzle.toJSON() || null}}
-        ).result;
+        );
+
+        if (error) {
+            throw new Error(`Script constraint ${this.scriptID} failed to evaluate. Error: ${error}`);
+        }
 
         return {
-            goal: scriptResult.cause.goal != null ? scriptResult.cause.goal : '',
-            resultValue: scriptResult.cause.value != null ? scriptResult.cause.value : '',
-            stateIndex: scriptResult.cause.index != null && scriptResult.cause.index >= 0
-                ? scriptResult.cause.index : null,
-            highlightRanges: scriptResult.cause.highlight ? scriptResult.cause.highlight : [],
-            dataPNG: scriptResult.cause.icon_b64 != null ? scriptResult.cause.icon_b64 : '',
-            satisfied: !!scriptResult.cause.satisfied
+            goal: result.cause.goal != null ? result.cause.goal : '',
+            resultValue: result.cause.value != null ? result.cause.value : '',
+            stateIndex: result.cause.index != null && result.cause.index >= 0
+                ? result.cause.index : null,
+            highlightRanges: result.cause.highlight ? result.cause.highlight : [],
+            dataPNG: result.cause.icon_b64 != null ? result.cause.icon_b64 : '',
+            satisfied: !!result.cause.satisfied
         };
     }
 
