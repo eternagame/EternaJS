@@ -78,14 +78,6 @@ export interface PoseEditParams {
     solutions?: Solution[];
 }
 
-interface ConstraintInfo {
-    wrongPairs: number[];
-    restrictedLocal: number[][];
-    maxAllowedGuanine: number;
-    maxAllowedCytosine: number;
-    maxAllowedAdenine: number;
-}
-
 export interface OligoDef {
     sequence: string;
     malus: number;
@@ -93,10 +85,6 @@ export interface OligoDef {
     bind?: boolean;
     concentration?: string;
     label?: string;
-}
-
-enum ConstraintStatus {
-    SATISFIED = 'satisfied', UNSATISFIED = 'unsatisfied', PENDING = 'pending'
 }
 
 export default class PoseEditMode extends GameMode {
