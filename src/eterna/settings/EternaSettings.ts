@@ -18,6 +18,7 @@ export class EternaSettings extends Settings {
     public readonly lastUsedFolder: Setting<string>;
     public readonly pipEnabled: Setting<boolean>;
     public readonly simpleGraphics: Setting<boolean>;
+    public readonly markerRadiusMultiplier: Setting<number>;
 
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
@@ -46,6 +47,7 @@ export class EternaSettings extends Settings {
         this.lastUsedFolder = this.setting("lastUsedFolder", null);
         this.pipEnabled = this.setting("pipEnabled", false);
         this.simpleGraphics = this.setting("simpleGraphics", false);
+        this.markerRadiusMultiplier = this.setting("markerRadiusMultiplier", 1);
 
         this.designBrowserColumnNames = this.setting("designBrowserColumnNames", null);
         this.designBrowserSelectedSolutionIDs = this.setting("designBrowserSelectedSolutionIDs", null);

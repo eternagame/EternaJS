@@ -154,15 +154,22 @@ export class Booster {
             return true;
         });
 
-        scriptInterface.addCallback("set_tracked_indices", (marks: any[], color: number = 0x000000): void => {
-            for (let ii = 0; ii < this._view.numPoseFields; ii++) {
-                let pose: Pose2D = this._view.getPose(ii);
-                pose.clearTracking();
-                for (let mark of marks) {
-                    pose.addBaseMark(mark, color);
+        scriptInterface.addCallback("set_tracked_indices",
+            (marks: number[] | {baseNumber: number; colors?: number | number[]}[], colors?: number[]): void => {
+                if (colors && colors.length !== marks.length) {
+                    console.error(`Mark array is not the same length as color array for set_tracked_indices
+                                - leaving as black`);
+                } else if (colors) marks = colors.map((color, i) => ({baseNumber: marks[i] as number, colors: color}));
+
+                for (let ii = 0; this._view.numPoseFields; ii++) {
+                    let pose: Pose2D = this._view.getPose(ii);
+                    pose.clearTracking();
+                    for (let mark of marks) {
+                        if (typeof (mark) === "number") mark = {baseNumber: mark};
+                        pose.addBaseMark(mark.baseNumber, mark.colors);
+                    }
                 }
-            }
-        });
+            });
 
         scriptInterface.addCallback("set_script_status", (): void => {});
 

@@ -509,7 +509,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         if (closest_index >= 0) {
             this._mouseDownAltKey = altDown;
             if (ctrlDown && closest_index < this.fullSequenceLength) {
-                this.toggleBlackMark(closest_index);
+                this.toggleBaseMark(closest_index);
                 return;
             }
             if (shiftDown) {
@@ -555,48 +555,54 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public toggleBlackMark(closestIndex: number): void {
-        let index: number = this._trackedIndices.indexOf(closestIndex);
-        if (index === -1) {
-            this.addBaseMark(closestIndex);
+    public toggleBaseMark(baseNumber: number): void {
+        if (!this.isTrackedIndex(baseNumber)) {
+            this.addBaseMark(baseNumber);
         } else {
-            this.removeBlackMark(closestIndex);
+            this.removeBaseMark(baseNumber);
         }
     }
 
-    public addBaseMark(closestIndex: number, color:number = 0x000000): void {
-        let index: number = this._trackedIndices.indexOf(closestIndex);
-        if (index === -1) {
-            this._trackedIndices.push(closestIndex);
-            ROPWait.notifyBlackMark(closestIndex, true);
-
-            let base_box: Graphics = new Graphics();
-            this._baseBoxes.push(base_box);
-            this.container.addChild(base_box);
-
-            let n: number = this._trackedIndices.length;
-            let center: Point = this.getBaseXY(this._trackedIndices[n - 1]);
-            this._baseBoxes[n - 1].x = center.x;
-            this._baseBoxes[n - 1].y = center.y;
-            this._baseBoxes[n - 1].visible = true;
-            this._baseBoxes[n - 1].clear();
-            this._baseBoxes[n - 1].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
-            this._baseBoxes[n - 1].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
+    public addBaseMark(baseNumber: number, colors: number | number[] = 0x000000): void {
+        let marked: boolean = this._trackedIndices.some(o => o.baseNumber === baseNumber);
+        if (!marked) {
+            if(typeof(colors) === "number")
+                colors = [colors];
+            ROPWait.notifyBlackMark(baseNumber, true);
+            const markBox = new Graphics();
+            this.container.addChild(markBox);
+            this._trackedIndices.push({ baseNumber: baseNumber, colors, markBox });
+            this.drawBaseMark({markBox, baseNumber, colors});
         }
+        
     }
 
-    public removeBlackMark(closest_index: number): void {
-        let index: number = this._trackedIndices.indexOf(closest_index);
+    public removeBaseMark(baseNumber: number): void {
+        let index: number = this._trackedIndices.findIndex(o => o.baseNumber === baseNumber);
         if (index !== -1) {
-            this._baseBoxes[index].visible = false;
+            this._trackedIndices[index].markBox.destroy();
             this._trackedIndices.splice(index, 1);
-            this._baseBoxes.splice(index, 1);
-            ROPWait.notifyBlackMark(closest_index, false);
+            ROPWait.notifyBlackMark(baseNumber, false);
         }
     }
 
     public isTrackedIndex(index: number): boolean {
-        return this._trackedIndices.indexOf(index) >= 0;
+        return this._trackedIndices.some(o => o.baseNumber === index);
+    }
+
+    private drawBaseMark({markBox, baseNumber, colors}: {markBox: Graphics, baseNumber: number, colors: number[]}){
+        const angle = Math.PI * 2 / colors.length;
+        let center: Point = this.getBaseXY(baseNumber);
+
+        markBox.clear();
+        colors.forEach((color, colorIndex) => {
+            markBox.x = center.x;
+            markBox.y = center.y;
+            markBox.visible = true;
+            markBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
+            markBox.arc(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel],
+                               colorIndex * angle, (colorIndex + 1) * angle);
+        });
     }
 
     public onMouseMoved(): void {
@@ -675,7 +681,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public deleteBaseWithIndexPairs(index: number, pairs: number[]): any[] {
         if (this.isTrackedIndex(index)) {
-            this.toggleBlackMark(index);
+            this.toggleBaseMark(index);
         }
 
         return PoseUtil.deleteNopairWithIndex(index, pairs);
@@ -683,15 +689,12 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public clearTracking(): void {
         while (this._trackedIndices.length > 0) {
-            this._trackedIndices.pop();
-        }
-        while (this._baseBoxes.length > 0) {
-            DisplayUtil.removeFromParent(this._baseBoxes.pop());
+            this._trackedIndices.pop().markBox.destroy();
         }
     }
 
-    public get trackedIndices(): number[] {
-        return this._trackedIndices.slice();
+    public get trackedIndices(): { baseNumber: number, colors: number[] }[] {
+        return this._trackedIndices.map(mark => ({ baseNumber: mark.baseNumber, colors: mark.colors}));
     }
 
     public getBase(ind: number): Base {
@@ -992,6 +995,15 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public get useSimpleGraphics(): boolean {
         return this._simpleGraphicsMods;
+    }
+    
+    public set markerRadiusMultiplier(markerRadiusMultiplier: number) {
+        this._markerRadiusMultiplier = markerRadiusMultiplier;
+        this._redraw = true;
+    }
+
+    public get markerRadius(): number {
+        return this._markerRadiusMultiplier;
     }
 
     public set highlightRestricted(highlight: boolean) {
@@ -1370,7 +1382,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         } else if (this._sequence.length < this._bases.length) {
             for (let ii: number = this._sequence.length; ii < this._bases.length; ii++) {
                 if (this.isTrackedIndex(ii)) {
-                    this.removeBlackMark(ii);
+                    this.removeBaseMark(ii);
                 }
             }
         }
@@ -1618,12 +1630,12 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._prevOligosOrder = null;
 
         // black marks
-        let indices: number[] = this.trackedIndices;
+        let indices = this.trackedIndices;
         this.clearTracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
-            indices[ii] = idx_map[indices[ii]];
-            this.addBaseMark(indices[ii]);
+            indices[ii].baseNumber = idx_map[indices[ii].baseNumber];
+            this.addBaseMark(indices[ii].baseNumber, indices[ii].colors);
         }
 
         // blue highlights ("magic glue")
@@ -2004,17 +2016,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
 
         if (this._redraw || basesMoved) {
-            if (this._trackedIndices.length === this._baseBoxes.length && this._trackedIndices.length !== 0) {
-                let n: number = this._trackedIndices.length;
-                for (let ii = 0; ii < n; ii++) {
-                    center = this.getBaseXY(this._trackedIndices[ii]);
-                    this._baseBoxes[ii].x = center.x;
-                    this._baseBoxes[ii].y = center.y;
-                    const color = this._baseBoxes[ii].lineColor;
-                    this._baseBoxes[ii].clear();
-                    this._baseBoxes[ii].lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
-                    this._baseBoxes[ii].drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
-                }
+            let n: number = this._trackedIndices.length;
+            for (let ii = 0; ii < n; ii++) {
+                this.drawBaseMark(this._trackedIndices[ii]);
             }
     
             if (this._cursorIndex > 0) {
@@ -2541,7 +2545,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     private deleteBaseWithIndex(index: number): any[] {
         if (this.isTrackedIndex(index)) {
-            this.toggleBlackMark(index);
+            this.toggleBaseMark(index);
         }
 
         if (this._pairs[index] < 0 || this.isLocked(this._pairs[index])) {
@@ -3403,12 +3407,12 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _explosionFactorPanel: ExplosionFactorPanel;
 
     /// For tracking a base
-    private _trackedIndices: number[] = [];
-    private _baseBoxes: Graphics[] = [];
+    private _trackedIndices: { baseNumber: number, colors: number[], markBox: Graphics }[] = [];
     private _cursorIndex: number = 0;
     private _cursorBox: Graphics = null;
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
+    private _markerRadiusMultiplier: number = 1;
 
     /// Rendering mode
     private _numberingMode: boolean = false;
