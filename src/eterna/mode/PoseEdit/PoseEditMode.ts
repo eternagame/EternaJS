@@ -955,17 +955,27 @@ export class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback("set_tracked_indices", 
-                                         (marks: number[] | {baseNumber: number; colors?: number | number[]}[], colors?: number[]): void => {
-            if (colors && colors.length !== marks.length) {
-                console.error(`Mark array is not the same length as color array for set_tracked_indices
-                                - leaving as black`);
-            } else if (colors) marks = colors.map((color, i) => ({baseNumber: marks[i] as number, colors: color}));                
-                                        
+            (marks: (number | {baseNumber: number; colors?: number | number[]})[], colors?: number[]): void => {
+            if (colors) {
+                if (colors.length !== marks.length) {
+                    console.error("Marks array is not the same length as color array for set_tracked_indices - leaving as black");
+                } else if (marks.some(mark => typeof (mark) !== "number")) {
+                    console.error("Marks array should consist of numbers when the colors argument is present - aborting");
+                    return;
+                } else marks = colors.map((color, i) => ({baseNumber: marks[i] as number, colors: color}));
+            }
+            
+            const _marks = marks.map(mark => typeof (mark) === "number" ? {baseNumber: mark as number, colors: []}: mark);
+            
+            if(_marks.some(mark => typeof(mark.baseNumber) !== "number")){
+                console.error("At least one mark object either doesn't have a `baseNumber` property or has a non-numeric one - aborting");
+                return;
+            }
+
             for (let ii = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.clearTracking();
-                for (let mark of marks) {
-                    if (typeof (mark) === "number") mark = {baseNumber: mark};
+                for (let mark of _marks) {
                     pose.addBaseMark(mark.baseNumber, mark.colors);
                 }
             }
