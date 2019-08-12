@@ -864,7 +864,7 @@ export class PoseEditMode extends GameMode {
             }
         });
 
-        this._scriptInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices);
+        this._scriptInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices.map(mark => mark.baseIndex));
         this._scriptInterface.addCallback("get_barcode_indices", (): number[] => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback("is_barcode_available",
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
@@ -954,25 +954,35 @@ export class PoseEditMode extends GameMode {
             return true;
         });
 
-        this._scriptInterface.addCallback("set_tracked_indices", (marks: number[], colors?: number[]): void => {
-            for (let ii: number = 0; ii < this.numPoseFields; ii++) {
+        this._scriptInterface.addCallback("set_tracked_indices", 
+            (marks: (number | {baseIndex: number; colors?: number | number[]})[], colors?: number[]): void => {
+            
+            let standardizedMarks: {baseIndex: number; colors?: number | number[]}[];
+            
+            if (colors) {
+                log.warn("Sending a colors argument to set_tracked_indices is deprecated, and will soon not be supported");
+                if (colors.length !== marks.length) {
+                    log.error("Marks array is not the same length as color array for set_tracked_indices - leaving as black");
+                } else if (marks.some(mark => typeof (mark) !== "number")) {
+                    log.error("Marks array should consist of numbers when the colors argument is present - aborting");
+                    return;
+                } else standardizedMarks = colors.map((color, i) => ({baseIndex: marks[i] as number, colors: color}));
+            }
+            
+            if(!standardizedMarks) {
+                standardizedMarks = marks.map(mark => typeof (mark) === "number" ? { baseIndex: mark as number } : mark);
+            }
+
+            if(standardizedMarks.some(mark => typeof(mark.baseIndex) !== "number")){
+                log.error("At least one mark object either doesn't have a `baseIndex` property or has a non-numeric one - aborting");
+                return;
+            }
+
+            for (let ii = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.clearTracking();
-                let baseColors: number[] = [];
-                if (colors) {
-                    if (colors.length == marks.length) {
-                        baseColors = colors;
-                    } else {
-                        console.error("Mark array is not the same length as color array for set_tracked_indices - leaving as black");
-                    }
-                }
-
-                if (baseColors.length == 0) {
-                    baseColors = marks.map(idx => 0x000000);
-                }
-
-                for (let k: number = 0; k < marks.length; k++) {
-                    pose.addBaseMark(marks[k], baseColors[k]);
+                for (let mark of standardizedMarks) {
+                    pose.addBaseMark(mark.baseIndex, mark.colors);
                 }
             }
         });

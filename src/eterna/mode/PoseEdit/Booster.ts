@@ -154,16 +154,6 @@ export class Booster {
             return true;
         });
 
-        scriptInterface.addCallback("set_tracked_indices", (marks: any[], color: number = 0x000000): void => {
-            for (let ii = 0; ii < this._view.numPoseFields; ii++) {
-                let pose: Pose2D = this._view.getPose(ii);
-                pose.clearTracking();
-                for (let mark of marks) {
-                    pose.addBaseMark(mark, color);
-                }
-            }
-        });
-
         scriptInterface.addCallback("set_script_status", (): void => {});
 
         const useUILock = this._type === BoosterType.ACTION;
