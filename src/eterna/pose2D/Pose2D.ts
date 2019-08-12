@@ -595,7 +595,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             markBox.visible = false;
             return;
         }
-        console.log({baseIndex});
+
         let center: Point = this.getBaseXY(baseIndex);
 
         markBox.clear();
