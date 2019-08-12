@@ -555,44 +555,48 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public toggleBaseMark(baseNumber: number): void {
-        if (!this.isTrackedIndex(baseNumber)) {
-            this.addBaseMark(baseNumber);
+    public toggleBaseMark(baseIndex: number): void {
+        if (!this.isTrackedIndex(baseIndex)) {
+            this.addBaseMark(baseIndex);
         } else {
-            this.removeBaseMark(baseNumber);
+            this.removeBaseMark(baseIndex);
         }
     }
 
-    public addBaseMark(baseNumber: number, colors: number | number[] = 0x000000): void {
-        let marked: boolean = this._trackedIndices.some(o => o.baseNumber === baseNumber);
-        if (!marked) {
+    public addBaseMark(baseIndex: number, colors: number | number[] = 0x000000): void {
+        if (!this.isTrackedIndex(baseIndex)) {
             if(typeof(colors) === "number")
                 colors = [colors];
-            ROPWait.notifyBlackMark(baseNumber, true);
+            ROPWait.notifyBlackMark(baseIndex, true);
             const markBox = new Graphics();
             this.container.addChild(markBox);
-            this._trackedIndices.push({ baseNumber: baseNumber, colors, markBox });
-            this.drawBaseMark({markBox, baseNumber, colors});
+            this._trackedIndices.push({ baseIndex: baseIndex, colors, markBox });
+            this.drawBaseMark({markBox, baseIndex, colors});
         }
         
     }
 
-    public removeBaseMark(baseNumber: number): void {
-        let index: number = this._trackedIndices.findIndex(o => o.baseNumber === baseNumber);
+    public removeBaseMark(baseIndex: number): void {
+        let index: number = this._trackedIndices.findIndex(mark => mark.baseIndex === baseIndex);
         if (index !== -1) {
             this._trackedIndices[index].markBox.destroy();
             this._trackedIndices.splice(index, 1);
-            ROPWait.notifyBlackMark(baseNumber, false);
+            ROPWait.notifyBlackMark(baseIndex, false);
         }
     }
 
     public isTrackedIndex(index: number): boolean {
-        return this._trackedIndices.some(o => o.baseNumber === index);
+        return this._trackedIndices.some(mark => mark.baseIndex === index);
     }
 
-    private drawBaseMark({markBox, baseNumber, colors}: {markBox: Graphics, baseNumber: number, colors: number[]}){
+    private drawBaseMark({markBox, baseIndex, colors}: {markBox: Graphics, baseIndex: number, colors: number[]}){
         const angle = Math.PI * 2 / colors.length;
-        let center: Point = this.getBaseXY(baseNumber);
+        if(baseIndex >= this.fullSequenceLength){
+            markBox.visible = false;
+            return;
+        }
+        console.log({baseIndex});
+        let center: Point = this.getBaseXY(baseIndex);
 
         markBox.clear();
         colors.forEach((color, colorIndex) => {
@@ -693,8 +697,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get trackedIndices(): { baseNumber: number, colors: number[] }[] {
-        return this._trackedIndices.map(mark => ({ baseNumber: mark.baseNumber, colors: mark.colors}));
+    public get trackedIndices(): { baseIndex: number, colors: number[] }[] {
+        return this._trackedIndices.map(mark => ({ baseIndex: mark.baseIndex, colors: mark.colors}));
     }
 
     public getBase(ind: number): Base {
@@ -997,15 +1001,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         return this._simpleGraphicsMods;
     }
     
-    public set markerRadiusMultiplier(markerRadiusMultiplier: number) {
-        this._markerRadiusMultiplier = markerRadiusMultiplier;
-        this._redraw = true;
-    }
-
-    public get markerRadius(): number {
-        return this._markerRadiusMultiplier;
-    }
-
     public set highlightRestricted(highlight: boolean) {
         this._highlightRestricted = highlight;
         this._restrictedHighlightBox.enabled = highlight;
@@ -1629,13 +1624,13 @@ export class Pose2D extends ContainerObject implements Updatable {
         let idx_map: number[] = this.getOrderMap(this._prevOligosOrder);
         this._prevOligosOrder = null;
 
-        // black marks
+        // base marks
         let indices = this.trackedIndices;
         this.clearTracking();
         let ii: number;
         for (ii = 0; ii < indices.length; ii++) {
-            indices[ii].baseNumber = idx_map[indices[ii].baseNumber];
-            this.addBaseMark(indices[ii].baseNumber, indices[ii].colors);
+            indices[ii].baseIndex = idx_map[indices[ii].baseIndex];
+            this.addBaseMark(indices[ii].baseIndex, indices[ii].colors);
         }
 
         // blue highlights ("magic glue")
@@ -3407,12 +3402,11 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _explosionFactorPanel: ExplosionFactorPanel;
 
     /// For tracking a base
-    private _trackedIndices: { baseNumber: number, colors: number[], markBox: Graphics }[] = [];
+    private _trackedIndices: { baseIndex: number, colors: number[], markBox: Graphics }[] = [];
     private _cursorIndex: number = 0;
     private _cursorBox: Graphics = null;
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
-    private _markerRadiusMultiplier: number = 1;
 
     /// Rendering mode
     private _numberingMode: boolean = false;
