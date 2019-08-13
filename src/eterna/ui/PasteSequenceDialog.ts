@@ -35,12 +35,12 @@ export class PasteSequenceDialog extends Dialog<string> {
     }
 
     private onSequenceEntered(sequence: string): void {
-        sequence = sequence.toUpperCase();
+        sequence = sequence.toUpperCase().replace(/T/g, "U").replace(/N/g, "A").replace(/\s/g, "");
 
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
             if (char !== "A" && char !== "U" && char !== "G" && char !== "C") {
-                (this.mode as GameMode).showNotification("You can only use characters A, U, G, and C");
+                (this.mode as GameMode).showNotification("You can only use the characters A, U, G, C, T and N");
                 return;
             }
         }
