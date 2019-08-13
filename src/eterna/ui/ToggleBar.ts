@@ -91,7 +91,7 @@ export class ToggleBar extends ContainerObject implements KeyboardListener, Enab
         }
 
         if (e.type === KeyboardEventType.KEY_DOWN && e.code === KeyCode.Tab && !e.ctrlKey) {
-            this.state = (this._selectedState + 1) % this._numStates;
+            this.state = (this._selectedState + (e.shiftKey ? -1 : 1) + this._numStates) % this._numStates;
             e.preventDefault(); // prevent Tab from changing focus in the browser
             return true;
         } else {
