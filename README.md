@@ -25,6 +25,8 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 * Create a .env file:
     - `$ cp .env.example .env` and fill in the values. 
     - To start, you can use `APP_SERVER_URL=https://eternagame.org`, and use your actual player ID and password for `DEBUG_PLAYER_ID` and `DEBUG_PLAYER_PASSWORD`
+* Create the directory `dist`:
+    - `$ mkdir dist`
 * Compile and Serve:
     - `$ npm start`
 
