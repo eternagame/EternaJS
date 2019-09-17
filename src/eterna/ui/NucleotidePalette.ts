@@ -1,4 +1,6 @@
-import {Point, Rectangle, Sprite, Text, Texture} from "pixi.js";
+import {
+    Point, Rectangle, Sprite, Text, Texture
+} from "pixi.js";
 import {IsLeftMouse} from "../../flashbang/input/InputUtil";
 import {KeyboardEventType} from "../../flashbang/input/KeyboardEventType";
 import {KeyboardListener} from "../../flashbang/input/KeyboardInput";

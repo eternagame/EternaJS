@@ -15,7 +15,7 @@ export class ModeStack {
         parentSprite.addChild(this._container);
     }
 
-    public get modes(): ReadonlyArray<AppMode> {
+    public get modes(): readonly AppMode[] {
         return this._modeStack;
     }
 
@@ -249,50 +249,50 @@ export class ModeStack {
         this._pendingModeTransitionQueue = [];
 
         for (let transition of transitionQueue) {
-            let mode: AppMode = transition.mode;
+            let {mode} = transition;
             switch (transition.type) {
-            case ModeTransition.PUSH:
-                doPushMode(mode);
-                break;
-
-            case ModeTransition.INSERT:
-                doInsertMode(mode, transition.index);
-                break;
-
-            case ModeTransition.REMOVE:
-                doRemoveMode(transition.mode != null ? transition.mode : transition.index);
-                break;
-
-            case ModeTransition.CHANGE:
-                // a pop followed by a push
-                if (this.topMode != null) {
-                    doRemoveMode(-1);
-                }
-                doPushMode(mode);
-                break;
-
-            case ModeTransition.UNWIND:
-                // pop modes until we find the one we're looking for
-                while (this._modeStack.length > 0 && this.topMode !== mode) {
-                    doRemoveMode(-1);
-                }
-
-                Assert.isTrue(this.topMode === mode || this._modeStack.length === 0);
-
-                if (this._modeStack.length === 0 && mode != null) {
+                case ModeTransition.PUSH:
                     doPushMode(mode);
-                }
-                break;
+                    break;
 
-            case ModeTransition.SET_INDEX:
-                doSetIndex(mode, transition.index);
-                break;
+                case ModeTransition.INSERT:
+                    doInsertMode(mode, transition.index);
+                    break;
+
+                case ModeTransition.REMOVE:
+                    doRemoveMode(transition.mode != null ? transition.mode : transition.index);
+                    break;
+
+                case ModeTransition.CHANGE:
+                // a pop followed by a push
+                    if (this.topMode != null) {
+                        doRemoveMode(-1);
+                    }
+                    doPushMode(mode);
+                    break;
+
+                case ModeTransition.UNWIND:
+                // pop modes until we find the one we're looking for
+                    while (this._modeStack.length > 0 && this.topMode !== mode) {
+                        doRemoveMode(-1);
+                    }
+
+                    Assert.isTrue(this.topMode === mode || this._modeStack.length === 0);
+
+                    if (this._modeStack.length === 0 && mode != null) {
+                        doPushMode(mode);
+                    }
+                    break;
+
+                case ModeTransition.SET_INDEX:
+                    doSetIndex(mode, transition.index);
+                    break;
             }
         }
 
         // Update mode visibility. An opaque mode causes everything below it to be invisible.
         let hasOpaqueMode = false;
-        for (let ii = this._modeStack.length - 1; ii >=0; --ii) {
+        for (let ii = this._modeStack.length - 1; ii >= 0; --ii) {
             let mode = this._modeStack[ii];
             mode.container.visible = !hasOpaqueMode;
             if (mode.isOpaque) {

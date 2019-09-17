@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Text
+} from "pixi.js";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {ContainerObject} from "../../../flashbang/objects/ContainerObject";
 import {TextBuilder} from "../../../flashbang/util/TextBuilder";
@@ -21,8 +23,8 @@ export class DataCol extends ContainerObject {
     public readonly category: DesignCategory;
 
     constructor(data_type: DesignBrowserDataType, category: DesignCategory,
-                data_width: number, fonttype: string,
-                fontSize: number, sortable: boolean) {
+        data_width: number, fonttype: string,
+        fontSize: number, sortable: boolean) {
         super();
 
         this.category = category;
@@ -72,8 +74,7 @@ export class DataCol extends ContainerObject {
         const TEXT_INPUT_SIZE = 13;
 
         if (this._data_type == DesignBrowserDataType.STRING) {
-            this._filterField1 =
-                new TextInputObject(TEXT_INPUT_SIZE, this._dataWidth - 22).showFakeTextInputWhenNotFocused();
+            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, this._dataWidth - 22).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
@@ -83,10 +84,8 @@ export class DataCol extends ContainerObject {
             this._filterLabel1 = Fonts.arial("search", 14).color(0xffffff).build();
             this._filterLabel1.position = new Point(11, 33);
             this.container.addChild(this._filterLabel1);
-
         } else {
-            this._filterField1 =
-                new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
+            this._filterField1 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
             this._filterField1.display.position = new Point(11, 54);
             this.addObject(this._filterField1, this.container);
@@ -97,8 +96,7 @@ export class DataCol extends ContainerObject {
             this._filterLabel1.position = new Point(11, 33);
             this.container.addChild(this._filterLabel1);
 
-            this._filterField2 =
-                new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
+            this._filterField2 = new TextInputObject(TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5).showFakeTextInputWhenNotFocused();
             this._filterField2.tabIndex = -1; // prevent tab-selection
             this._filterField2.display.position = new Point(11 + (this._dataWidth - 29) / 2 + 7, 54);
             this.addObject(this._filterField2, this.container);
@@ -141,7 +139,7 @@ export class DataCol extends ContainerObject {
     }
 
     public getMouseIndex(): [number, number] {
-        let mouseLoc = this.mouseLoc;
+        let {mouseLoc} = this;
         if (mouseLoc.y < DataCol.DATA_H) {
             return [-1, -1];
         }
@@ -254,11 +252,11 @@ export class DataCol extends ContainerObject {
             if (this._data_type == DesignBrowserDataType.INT) {
                 this._rawData.push(int(raw[ii]));
             } else if (this._data_type == DesignBrowserDataType.STRING) {
-                this._rawData.push("" + raw[ii]);
+                this._rawData.push(`${raw[ii]}`);
             } else if (this._data_type == DesignBrowserDataType.NUMBER) {
                 this._rawData.push(Number(raw[ii]));
             } else {
-                throw new Error("Unrecognized data type " + this._data_type);
+                throw new Error(`Unrecognized data type ${this._data_type}`);
             }
         }
 
@@ -307,7 +305,7 @@ export class DataCol extends ContainerObject {
         let boardData: string[] = [];
         let board_exp_data: any[] = [];
 
-        let pairs_length: number = 0;
+        let pairs_length = 0;
         if (this._pairsArray != null) {
             for (let pair of this._pairsArray) {
                 if (pair >= 0) {
@@ -321,9 +319,9 @@ export class DataCol extends ContainerObject {
             if (ii >= this._rawData.length) {
                 dataString += "\n";
             } else {
-                let rawstr = Utility.stripHtmlTags("" + this._rawData[ii]);
+                let rawstr = Utility.stripHtmlTags(`${this._rawData[ii]}`);
 
-                //trace(rawstr);
+                // trace(rawstr);
                 switch (this.category) {
                 case DesignCategory.Sequence:
                     boardData.push(rawstr);
@@ -333,7 +331,7 @@ export class DataCol extends ContainerObject {
 
                 case DesignCategory.Votes:
                     if (this._rawData[ii] >= 0) {
-                        dataString += rawstr + "\n";
+                        dataString += `${rawstr}\n`;
                     } else {
                         dataString += "-\n";
                     }
@@ -341,7 +339,7 @@ export class DataCol extends ContainerObject {
 
                 case DesignCategory.My_Votes:
                     if (this._rawData[ii] >= 0) {
-                        dataString += rawstr + "\n";
+                        dataString += `${rawstr}\n`;
                     } else {
                         dataString += "-\n";
                     }
@@ -357,61 +355,58 @@ export class DataCol extends ContainerObject {
                     if (exp == null) {
                         dataString += "-\n";
                     } else {
-
-                        let brent_data: any = exp.brentTheoData;
+                            let brent_data: any = exp.brentTheoData;
                         if (brent_data != null) {
-                            dataString += Utility.roundTo(brent_data['score'], 3) + "x";
-                            dataString += " (" + Utility.roundTo(brent_data['ribo_without_theo'], 3) + " / " + Utility.roundTo(brent_data['ribo_with_theo'], 3) + ")\n";
+                            dataString += `${Utility.roundTo(brent_data["score"], 3)}x`;
+                            dataString += ` (${Utility.roundTo(brent_data["ribo_without_theo"], 3)} / ${Utility.roundTo(brent_data["ribo_with_theo"], 3)})\n`;
+                        } else if (this._rawData[ii] >= 0) {
+                            dataString += `${rawstr} / 100\n`;
+                        } else if (this._rawData[ii] < 0) {
+                            dataString += `${Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii])]}\n`;
                         } else {
-                            if (this._rawData[ii] >= 0) {
-                                dataString += rawstr + " / 100\n";
-                            } else if (this._rawData[ii] < 0) {
-                                dataString += Feedback.EXPDISPLAYS[Feedback.EXPCODES.indexOf(this._rawData[ii])] + "\n";
-                            } else {
-                                dataString += "-\n";
-                            }
+                            dataString += "-\n";
                         }
                     }
                     break;
 
                 case DesignCategory.Title:
-                    dataString += rawstr + "\n";
+                    dataString += `${rawstr}\n`;
                     break;
 
                 case DesignCategory.Melting_Point:
-                    dataString += rawstr + " 'C\n";
+                    dataString += `${rawstr} 'C\n`;
                     break;
 
                 case DesignCategory.Free_Energy:
-                    dataString += rawstr + " kcal\n";
+                    dataString += `${rawstr} kcal\n`;
                     break;
 
                 case DesignCategory.GU_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
+                        dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        dataString += rawstr + "\n";
+                        dataString += `${rawstr}\n`;
                     }
                     break;
 
                 case DesignCategory.GC_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
+                        dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        dataString += rawstr + "\n";
+                        dataString += `${rawstr}\n`;
                     }
                     break;
 
                 case DesignCategory.UA_Pairs:
                     if (pairs_length > 0) {
-                        dataString += rawstr + ` (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
+                        dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairs_length * 100)}%)\n`;
                     } else {
-                        dataString += rawstr + "\n";
+                        dataString += `${rawstr}\n`;
                     }
                     break;
 
                 default:
-                    dataString += rawstr + "\n";
+                    dataString += `${rawstr}\n`;
                     break;
                 }
             }

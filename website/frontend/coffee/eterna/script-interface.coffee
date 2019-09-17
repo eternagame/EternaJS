@@ -89,7 +89,7 @@
       for i in [0..input_array.length-1]
         input = input_array[i]
         if input['value']
-          param += "var "+input['value']+"='"+input['val']+"';"
+          param += "var "+input['value']+"='"+input['val']?.replace(/'/g, "<ETERNASINGLEQUOTEESCAPE>")+"'.replace(/<ETERNASINGLEQUOTEESCAPE>/g, \"'\");"
     return param
   
   set_library : (Library) ->

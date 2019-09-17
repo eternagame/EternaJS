@@ -104,14 +104,14 @@ export class StyledTextBuilder {
                     this.addStyle(styleName, style);
                 }
 
-                text = text.slice(0, openMatch.index) + `<${styleName}>` + text.slice(openMatch.index + openMatch[0].length);
+                text = `${text.slice(0, openMatch.index)}<${styleName}>${text.slice(openMatch.index + openMatch[0].length)}`;
 
                 let closeMatch = closeTag.exec(text);
                 if (closeMatch == null) {
                     break;
                 }
 
-                text = text.slice(0, closeMatch.index) + `</${styleName}>` + text.slice(closeMatch.index + closeMatch[0].length);
+                text = `${text.slice(0, closeMatch.index)}</${styleName}>${text.slice(closeMatch.index + closeMatch[0].length)}`;
             }
 
             return text;

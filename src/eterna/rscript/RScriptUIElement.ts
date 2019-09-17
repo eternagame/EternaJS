@@ -6,13 +6,14 @@ export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
 
 export function GetRScriptUIElementBounds(element: RScriptUIElement): Rectangle {
     if (element instanceof GameObject) {
-        return element.display != null ?
-            new Rectangle(
+        return element.display != null
+            ? new Rectangle(
                 element.display.x,
                 element.display.y,
                 DisplayUtil.width(element.display),
-                DisplayUtil.height(element.display)) :
-            new Rectangle();
+                DisplayUtil.height(element.display)
+            )
+            : new Rectangle();
     } else if (element instanceof DisplayObject) {
         return new Rectangle(element.x, element.y, DisplayUtil.width(element), DisplayUtil.height(element));
     } else {

@@ -34,7 +34,7 @@ export class ROPRNA extends RScriptOp {
         } else if (this._type === ROPRNAType.ENABLEMODIFICATION) {
             this._env.pose.forceEditable(this._enabled, this._scope);
         } else if (this._type === ROPRNAType.SETPAINTER) {
-            let ui: PoseEditMode = this._env.ui;
+            let {ui} = this._env;
             if (this._color === "SWAP") {
                 ui.toolbar.pairSwapButton.click();
             } else {

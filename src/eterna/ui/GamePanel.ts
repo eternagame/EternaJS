@@ -1,4 +1,6 @@
-import {Graphics, Point, Text, Rectangle} from "pixi.js";
+import {
+    Graphics, Point, Text, Rectangle
+} from "pixi.js";
 import {Fonts} from "../util/Fonts";
 import {BaseGamePanel} from "./BaseGamePanel";
 
@@ -13,11 +15,11 @@ export class GamePanel extends BaseGamePanel {
         // Clicks should not pass through the panel
         this.pointerDown.connect((e) => {
             e.stopPropagation();
-        })
+        });
 
         this._background = new Graphics();
         this.container.addChild(this._background);
-        
+
         this.setup(type, alpha, color, borderAlpha, borderColor);
     }
 
@@ -33,7 +35,7 @@ export class GamePanel extends BaseGamePanel {
     public setSize(width: number, height: number): void {
         this._width = width;
         this._height = height;
-        
+
         this.updateView();
     }
 

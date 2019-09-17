@@ -7,13 +7,13 @@ export class ROPPre extends RScriptOp {
         super(env);
         this._type = null;
 
-        const disMissionScreenRegex: RegExp = /DisableMissionScreen/ig;
-        const altPaletteRegex: RegExp = /UseAlternatePalette/ig;
-        const disableHintRegex: RegExp = /DisableHintSystem/ig;
-        const hideObjRegex: RegExp = /HideObjectives/ig;
-        const hideUIRegex: RegExp = /(Hide|Show|Disable|Enable)UI/ig;
-        const disableRNAMod: RegExp = /(DisableRNAModification)/ig;
-        const modeRegex: RegExp = /^(Native|Target)Mode$/ig;
+        const disMissionScreenRegex = /DisableMissionScreen/ig;
+        const altPaletteRegex = /UseAlternatePalette/ig;
+        const disableHintRegex = /DisableHintSystem/ig;
+        const hideObjRegex = /HideObjectives/ig;
+        const hideUIRegex = /(Hide|Show|Disable|Enable)UI/ig;
+        const disableRNAMod = /(DisableRNAModification)/ig;
+        const modeRegex = /^(Native|Target)Mode$/ig;
 
         let regResult: RegExpExecArray;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {
@@ -38,7 +38,7 @@ export class ROPPre extends RScriptOp {
 
     public initArgs(args: string): void {
         this._allArgs = args.split(",");
-        for (let i: number = 0; i < this._allArgs.length; ++i) {
+        for (let i = 0; i < this._allArgs.length; ++i) {
             this._allArgs[i] = this._allArgs[i].replace(/^\s*/, "");
             this._allArgs[i] = this._allArgs[i].replace(/\s*$/, "");
         }
@@ -61,7 +61,7 @@ export class ROPPre extends RScriptOp {
             this._env.ui.showConstraints(false);
             break;
         case ROPPreType.DISABLE_UI_ELEMENT:
-            for (let i: number = 0; i < this._allArgs.length; ++i) {
+            for (let i = 0; i < this._allArgs.length; ++i) {
                 if (this._allArgs[i].toUpperCase() === "ENERGY") {
                     this._env.ui.ropSetDisplayScoreTexts(this._doVisible);
                     continue;

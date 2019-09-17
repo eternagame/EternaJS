@@ -16,7 +16,7 @@ export class KeyboardInput {
     }
 
     public handleKeyboardEvent(e: KeyboardEvent): boolean {
-        let handled: boolean = false;
+        let handled = false;
         try {
             for (let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration(); elt != null; elt = elt.next) {
                 handled = elt.data.onKeyboardEvent(e);

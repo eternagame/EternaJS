@@ -76,7 +76,7 @@ export class GameClient {
         params["type"] = "puzzle";
         return this.post(GameClient.POST_URI, params)
             .then(rsp => rsp.json())
-            .then(json => {
+            .then((json) => {
                 let data = json["data"];
                 if (data["success"]) {
                     return Promise.resolve();
@@ -87,7 +87,7 @@ export class GameClient {
     }
 
     public getSolutions(puzzleID: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "solutions", "puznid": puzzleID})
+        return this.get(GameClient.GET_URI, {type: "solutions", puznid: puzzleID})
             .then(rsp => rsp.json());
     }
 
@@ -110,7 +110,7 @@ export class GameClient {
     public deleteSolution(solutionID: number): Promise<void> {
         return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solutionID})
             .then(rsp => rsp.json())
-            .then(json => {
+            .then((json) => {
                 let data = json["data"];
                 if (data["success"]) {
                     return Promise.resolve();
@@ -132,7 +132,7 @@ export class GameClient {
 
         return this.post(GameClient.POST_URI, post_params)
             .then(rsp => rsp.json())
-            .then(json => {
+            .then((json) => {
                 let data = json["data"];
                 if (data["success"]) {
                     return data;
@@ -158,15 +158,15 @@ export class GameClient {
             type: "screenshot",
             data: encoded
         })
-        .then(rsp => rsp.json())
-        .then(jsonData => {
-            let data = jsonData["data"];
-            if (data["success"]) {
-                return data["filename"];
-            } else {
-                throw new Error(`Failed to post screenshot: ${data["error"]}`);
-            }
-        });
+            .then(rsp => rsp.json())
+            .then((jsonData) => {
+                let data = jsonData["data"];
+                if (data["success"]) {
+                    return data["filename"];
+                } else {
+                    throw new Error(`Failed to post screenshot: ${data["error"]}`);
+                }
+            });
     }
 
     private get(urlString: string, params?: any): Promise<Response> {

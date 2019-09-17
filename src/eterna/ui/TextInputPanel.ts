@@ -39,9 +39,9 @@ export class TextInputPanel extends GamePanel {
     protected added(): void {
         super.added();
 
-        let fieldStart: number = 0;
-        let maxWidth: number = 0;
-        let heightWalker: number = 0;
+        let fieldStart = 0;
+        let maxWidth = 0;
+        let heightWalker = 0;
 
         if (this._fields.length > 0) {
             for (let field of this._fields) {

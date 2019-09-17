@@ -15,7 +15,7 @@ export class SolutionManager {
 
     public getSolutionsForPuzzle(puzzleID: number): Promise<Solution[]> {
         log.info(`Loading solutions for puzzle ${puzzleID}...`);
-        return Eterna.client.getSolutions(puzzleID).then(json => {
+        return Eterna.client.getSolutions(puzzleID).then((json) => {
             let data: any = json["data"];
             let solutionsData: any[] = data["solutions"];
             this._solutions = [];
@@ -84,8 +84,8 @@ export class SolutionManager {
 
         let newfb: Feedback = null;
 
-        let player_name: string = "";
-        let player_id: number = -1;
+        let player_name = "";
+        let player_id = -1;
 
         if (obj["name"] != null) {
             player_name = obj["name"];
@@ -108,13 +108,13 @@ export class SolutionManager {
             if (Array.isArray(synthesis_data_raw)) {
                 let synthesis_data: any[] = synthesis_data_raw;
 
-                for (let ii: number = 0; ii < synthesis_data.length; ii++) {
+                for (let ii = 0; ii < synthesis_data.length; ii++) {
                     let synthesis: any = synthesis_data[ii];
                     if (synthesis["reactive"] === "SHAPE") {
                         let peaks: number[] = [];
                         peaks.push(Number(synthesis["start_index"]));
 
-                        for (let ss: number = 0; ss < synthesis["peaks"].length; ss++) {
+                        for (let ss = 0; ss < synthesis["peaks"].length; ss++) {
                             peaks.push(Number(synthesis["peaks"][ss]));
                         }
 
@@ -128,7 +128,8 @@ export class SolutionManager {
                             Number(synthesis["threshold"]),
                             Number(synthesis["max"]),
                             Number(synthesis["min"]),
-                            null);
+                            null
+                        );
                     }
                 }
                 // / Ad-hoc handling for different exp types : Brent's theophylline puzzle
@@ -147,7 +148,7 @@ export class SolutionManager {
                 newfb.setShapeData(null, 0, null, null, null, obj["SHAPE"]);
             } else {
                 let shape_array: any[] = CSVParser.splitOnComma(obj["SHAPE"]);
-                for (let kk: number = 0; kk < shape_array.length; kk++) {
+                for (let kk = 0; kk < shape_array.length; kk++) {
                     shape_array[kk] = Number(shape_array[kk]);
                 }
 

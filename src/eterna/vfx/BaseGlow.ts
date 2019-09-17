@@ -46,13 +46,13 @@ export class BaseGlow extends Sprite {
         BaseGlow._texturesWrong = [];
         let original_data: Texture = BitmapManager.getBitmap(Bitmaps.ImgBindingBaseGlow);
 
-        for (let zz: number = 0; zz < 5; zz++) {
+        for (let zz = 0; zz < 5; zz++) {
             let bitmaps_in_zoom: Texture[] = [];
             let wrong_bitmaps_in_zoom: Texture[] = [];
             let zoom_factor: number = 1.0 - zz * 0.1;
             let base_data: Texture = EternaTextureUtil.scaleBy(original_data, zoom_factor);
 
-            for (let ii: number = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
+            for (let ii = 0; ii < BaseGlow.NUM_ANIMATION_STEPS; ii++) {
                 let new_base_data: Texture = EternaTextureUtil.colorTransformAlpha(
                     base_data, 255, 255, 255, 1.0 - ii / BaseGlow.NUM_ANIMATION_STEPS, 0, 0, 0, 0
                 );

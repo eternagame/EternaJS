@@ -108,7 +108,7 @@ export class RScriptEnv extends ContainerObject {
             throw new Error("Invalid UI Element ID format");
         }
 
-        let altParam: number = -1;
+        let altParam = -1;
         if (splitId.length > 1) {
             altParam = Math.floor(Number(splitId[1]));
             if (Number.isNaN(altParam)) {

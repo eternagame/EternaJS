@@ -1,4 +1,6 @@
-﻿import {Container, Graphics, Point, Text} from "pixi.js";
+import {
+    Container, Graphics, Point, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "../../../flashbang/core/Align";
 import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
 import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
@@ -45,7 +47,8 @@ export class SortOptionsDialog extends Dialog<void> {
         this._curCategoryText = new FixedWidthTextField(
             this.options.validCategories[0],
             Fonts.arial("", 17).color(0xffffff).style,
-            140, HAlign.CENTER);
+            140, HAlign.CENTER
+        );
         addCriterionLayout.addChild(this._curCategoryText);
 
         this._nextCategoryButton = new GameButton().allStates(GraphicsUtil.drawRightTriangle(2));
@@ -126,7 +129,6 @@ export class SortOptionsDialog extends Dialog<void> {
             if (curIdx > 0) {
                 this.setCriteriaIdx(category, 0);
             }
-
         } else {
             this.addCriterionUI(category, order, 0);
             this.layout();
@@ -138,7 +140,7 @@ export class SortOptionsDialog extends Dialog<void> {
     private removeCriteria(category: DesignCategory): void {
         let idx = this.options.getCriterionIdx(category);
         if (idx < 0) {
-            throw new Error("Can't find sort_category " + category);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         this.options.removeCriteria(category);
@@ -179,7 +181,6 @@ export class SortOptionsDialog extends Dialog<void> {
             this._prevCategoryButton.enabled = true;
             this._nextCategoryButton.enabled = true;
             this._curCategoryText.text = unused[this._addCriteriaCategoryIdx];
-
         } else {
             this._addCriteriaCategoryIdx = 0;
             this._curCategoryText.alpha = 0.3;
@@ -200,7 +201,7 @@ export class SortOptionsDialog extends Dialog<void> {
     private toggleSort(category: DesignCategory): void {
         let index = this.options.getCriterionIdx(category);
         if (index < 0) {
-            throw new Error("Can't find sort_category " + category);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         let newSortOrder = this.options.toggleSort(category);
@@ -221,7 +222,7 @@ export class SortOptionsDialog extends Dialog<void> {
     private setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.options.getCriterionIdx(category);
         if (curIdx < 0) {
-            throw new Error("Can't find sort_category " + category);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         if (curIdx === newIdx || newIdx < 0 || newIdx >= this.options.sortCriteria.length) {
@@ -249,11 +250,13 @@ export class SortOptionsDialog extends Dialog<void> {
     private repositionDialog(): void {
         DisplayUtil.positionRelativeToStage(
             this._bg.display, HAlign.CENTER, VAlign.TOP,
-            HAlign.CENTER, VAlign.TOP, 0, 145);
+            HAlign.CENTER, VAlign.TOP, 0, 145
+        );
 
         DisplayUtil.positionRelative(
             this._panelContent, HAlign.CENTER, VAlign.CENTER,
-            this._bg.display, HAlign.CENTER, VAlign.CENTER);
+            this._bg.display, HAlign.CENTER, VAlign.CENTER
+        );
     }
 
     private _bg: GamePanel;

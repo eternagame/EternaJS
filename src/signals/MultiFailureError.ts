@@ -16,7 +16,7 @@ export class MultiFailureError extends Error {
     }
 
     public getMessage(): string {
-        let buf: string = "";
+        let buf = "";
         for (let failure of this._failures) {
             if (buf.length > 0) {
                 buf += ", ";

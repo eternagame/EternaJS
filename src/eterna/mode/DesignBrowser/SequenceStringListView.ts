@@ -1,4 +1,6 @@
-﻿import {Container, Graphics, Sprite, Texture} from "pixi.js";
+import {
+    Container, Graphics, Sprite, Texture
+} from "pixi.js";
 import {TextBuilder} from "../../../flashbang/util/TextBuilder";
 import {TextureUtil} from "../../../flashbang/util/TextureUtil";
 import {EPars} from "../../EPars";
@@ -53,11 +55,11 @@ export class SequenceStringListView extends Container {
         for (let ii = 0; ii < sequences.length; ii++) {
             let seq: string = sequences[ii];
             let shape_data: number[] = null;
-            let shape_data_start: number = 0;
+            let shape_data_start = 0;
             let exp_painter: ExpPainter = null;
-            let is_there_shape_threshold: boolean = false;
-            let shape_threshold: number = 0;
-            let shape_max: number = 0;
+            let is_there_shape_threshold = false;
+            let shape_threshold = 0;
+            let shape_max = 0;
 
             if (exp_data != null && exp_data[ii] != null) {
                 shape_data = exp_data[ii].getShapeData();
@@ -84,7 +86,7 @@ export class SequenceStringListView extends Container {
                     }
 
                     const x = jj * this._letterWidth;
-                    const y  = 0;
+                    const y = 0;
                     const w = this._letterWidth;
                     const h = Math.min(this._height, sequences.length * this._letterHeight);
 
@@ -92,7 +94,7 @@ export class SequenceStringListView extends Container {
                     this._graphics.endFill();
                 }
 
-                let letter_index: number = 0;
+                let letter_index = 0;
                 let letter: string = seq.charAt(jj);
 
                 if (letter == "A") {
@@ -105,24 +107,22 @@ export class SequenceStringListView extends Container {
                     letter_index = SequenceStringListView.C_INDEX;
                 }
 
-                let bd_index: number = 0;
+                let bd_index = 0;
 
                 if (!use_exp) {
                     bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER;
+                } else if (shape_data == null || jj < shape_data_start || jj >= shape_data.length + shape_data_start) {
+                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1;
                 } else {
-                    if (shape_data == null || jj < shape_data_start || jj >= shape_data.length + shape_data_start) {
-                        bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1;
+                    let color_index = 0;
+
+                    if (is_there_shape_threshold) {
+                        color_index = exp_painter.getColorLevelWithMidpoint(jj, shape_threshold, shape_max);
                     } else {
-                        let color_index: number = 0;
-
-                        if (is_there_shape_threshold) {
-                            color_index = exp_painter.getColorLevelWithMidpoint(jj, shape_threshold, shape_max);
-                        } else {
-                            color_index = exp_painter.getColorLevel(jj);
-                        }
-
-                        bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + color_index;
+                        color_index = exp_painter.getColorLevel(jj);
                     }
+
+                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + color_index;
                 }
 
                 let letterSprite = new Sprite(this._letterTextures[bd_index]);
@@ -144,7 +144,8 @@ export class SequenceStringListView extends Container {
             tfTex,
             color / (256 * 256),
             (color % (256 * 256)) / 256,
-            color % 256, 0, 0, 0));
+            color % 256, 0, 0, 0
+        ));
 
         for (let ii = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
             let color = ExpPainter.getColorByLevel(ii);
@@ -152,7 +153,8 @@ export class SequenceStringListView extends Container {
                 tfTex,
                 color / (256 * 256),
                 (color % (256 * 256)) / 256,
-                color % 256, 0, 0, 0));
+                color % 256, 0, 0, 0
+            ));
         }
 
         return textures;
@@ -173,5 +175,4 @@ export class SequenceStringListView extends Container {
     private static readonly U_INDEX = 1;
     private static readonly G_INDEX = 2;
     private static readonly C_INDEX = 3;
-
 }

@@ -1,4 +1,6 @@
-import {Container, Graphics, Point, Sprite} from "pixi.js";
+import {
+    Container, Graphics, Point, Sprite
+} from "pixi.js";
 import {AppMode} from "../../../flashbang/core/AppMode";
 import {Flashbang} from "../../../flashbang/core/Flashbang";
 import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
@@ -186,7 +188,8 @@ export class MissionIntroMode extends AppMode {
                 let bounds = constraintBox.container.getLocalBounds();
                 constraintBox.display.position = new Point(
                     (Flashbang.stageWidth * 0.5) - 420.5 + this._goalsBG.width + 82,
-                    -bounds.top + yLoc);
+                    -bounds.top + yLoc
+                );
                 yLoc += bounds.height + 10;
             }
 
@@ -205,7 +208,7 @@ export class MissionIntroMode extends AppMode {
         let thumbnailButtons: GameButton[] = [];
 
         if (this._puzzleThumbnails.length > 1) {
-            for (let ii: number = 0; ii < this._puzzleThumbnails.length; ++ii) {
+            for (let ii = 0; ii < this._puzzleThumbnails.length; ++ii) {
                 let thumbnailButton = new GameButton().label((ii + 1).toString(), 22);
                 thumbnailButtons.push(thumbnailButton);
                 this.addObject(thumbnailButton, this.container);
@@ -264,7 +267,8 @@ export class MissionIntroMode extends AppMode {
             sequence[ii] = EPars.RNABASE_ADENINE;
         }
         PoseThumbnail.drawToSprite(
-            this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0);
+            this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+        );
         DisplayUtil.center(this._goalsThumbnail, this._goalsBG);
     }
 

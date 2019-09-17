@@ -208,10 +208,10 @@ export class NuPACK extends Folder {
         }
 
         let site_groups: number[][] = [];
-        let last_index: number = -1;
+        let last_index = -1;
         let current_group: number[] = [];
 
-        for (let jj: number = 0; jj < binding_site.length; jj++) {
+        for (let jj = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
@@ -235,7 +235,7 @@ export class NuPACK extends Folder {
     /* override */
     public get canCofold(): boolean {
         return true;
-    } 
+    }
 
     /* override */
     public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
@@ -274,7 +274,7 @@ export class NuPACK extends Folder {
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             co_pairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -313,10 +313,10 @@ export class NuPACK extends Folder {
         // FIXME: what about desired_pairs? (forced structure)
 
         let site_groups: number[][] = [];
-        let last_index: number = -1;
+        let last_index = -1;
         let current_group: number[] = [];
 
-        for (let jj: number = 0; jj < binding_site.length; jj++) {
+        for (let jj = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
@@ -352,7 +352,7 @@ export class NuPACK extends Folder {
         }
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             co_pairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -386,7 +386,7 @@ export class NuPACK extends Folder {
         mfold["order"] = null;
         mfold["count"] = -1;
 
-        let best_fe: number = 1000000;
+        let best_fe = 1000000;
         let order: number[] = [];
         let num_oligo: number = oligos.length;
 
@@ -418,7 +418,7 @@ export class NuPACK extends Folder {
                     let s_nodes: number[] = [];
                     let s_fe: number = this.scoreStructures(oligos[order[jj]].seq, s_pairs, temp, s_nodes);
 
-                    let struc: string = `${EPars.pairsToParenthesis(ms_pairs)}&${EPars.pairsToParenthesis(s_pairs)}`;
+                    let struc = `${EPars.pairsToParenthesis(ms_pairs)}&${EPars.pairsToParenthesis(s_pairs)}`;
                     ms_pairs = EPars.parenthesisToPairs(struc);
                     ms_fe += s_fe;
                 }

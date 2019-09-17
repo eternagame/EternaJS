@@ -157,7 +157,7 @@ export class PoseEditToolbar extends ContainerObject {
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < boostersData.actions.length; ii++) {
                 let data = boostersData.actions[ii];
-                Booster.create(this.mode as GameMode, data).then(booster => {
+                Booster.create(this.mode as GameMode, data).then((booster) => {
                     let button: GameButton = booster.createButton(14);
                     button.clicked.connect(() => booster.onRun());
                     this.actionMenu.addSubMenuButtonAt(boosterMenuIdx, button, ii);
@@ -191,7 +191,7 @@ export class PoseEditToolbar extends ContainerObject {
         this.addObject(this.freezeButton, this._toolbarLayout);
         this._toolbarLayout.addHSpacer(SPACE_NARROW);
         this.freezeButton.display.visible = Eterna.settings.freezeButtonAlwaysVisible.value;
-        this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect(visible => {
+        this.regs.add(Eterna.settings.freezeButtonAlwaysVisible.connect((visible) => {
             this.freezeButton.display.visible = visible;
             this.updateLayout();
         }));
@@ -263,7 +263,7 @@ export class PoseEditToolbar extends ContainerObject {
             this._toolbarLayout.addHSpacer(SPACE_NARROW);
             this._toolbarLayout.addChild(boosterPaintToolsLayout);
             for (let data of boostersData.paint_tools) {
-                Booster.create(mode, data).then(booster => {
+                Booster.create(mode, data).then((booster) => {
                     booster.onLoad();
                     let button: GameButton = booster.createButton();
                     button.clicked.connect(() => {
@@ -352,7 +352,8 @@ export class PoseEditToolbar extends ContainerObject {
         if (this.puzzleStateToggle.isLiveObject) {
             DisplayUtil.positionRelative(
                 this.puzzleStateToggle.display, HAlign.CENTER, VAlign.BOTTOM,
-                this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5);
+                this._toolbarLayout, HAlign.CENTER, VAlign.TOP, 0, -5
+            );
         }
 
         // If we have no boosters menu, we offset our entire layout by the .5 width of
@@ -364,7 +365,8 @@ export class PoseEditToolbar extends ContainerObject {
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            hOffset, 0);
+            hOffset, 0
+        );
     }
 
     public setToolbarAutohide(enabled: boolean): void {
@@ -379,7 +381,7 @@ export class PoseEditToolbar extends ContainerObject {
         if (this._autoCollapse) {
             this.display.interactive = true;
 
-            let collapsed: boolean = false;
+            let collapsed = false;
 
             const uncollapse = () => {
                 if (collapsed) {
@@ -431,7 +433,7 @@ export class PoseEditToolbar extends ContainerObject {
     public disableTools(disable: boolean): void {
         this.palette.enabled = !disable;
         this.pairSwapButton.enabled = !disable;
-        for (let k: number = 0; k < this.dynPaintTools.length; k++) {
+        for (let k = 0; k < this.dynPaintTools.length; k++) {
             this.dynPaintTools[k].enabled = !disable;
         }
 

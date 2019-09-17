@@ -168,17 +168,19 @@ export abstract class GameMode extends AppMode {
             newPoseField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder) {
+                    let poseidx = this._isPipMode ? idx : this._curTargetIndex;
+
                     let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.fullSequence, pairs);
 
                     // This changes between PoseEdit mode and PuzzleEditMode
-                    let targetPairs: number[] = this._targetPairs ? this._targetPairs[idx] : this.getCurrentTargetPairs(idx);
-                    let nativePairs: number[] = this.getCurrentUndoBlock(idx).getPairs();
+                    let targetPairs: number[] = this._targetPairs ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
+                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
 
                     return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.fullSequence)) - score(nativePairs);
                 }
                 return -1;
-            }
-        })
+            };
+        });
 
         this.layoutPoseFields();
     }
@@ -223,25 +225,24 @@ export abstract class GameMode extends AppMode {
         this.pushUILock("Screenshot");
 
         Eterna.client.postScreenshot(screenshot)
-            .then(filename => {
+            .then((filename) => {
                 let url = new URL(filename, Eterna.SERVER_URL);
                 let prompt = `Do you want to post <u><a href="${url.href}" target="_blank">this</a></u> screenshot in chat?`;
-                this.showConfirmDialog(prompt, true).closed.then(confirmed => {
+                this.showConfirmDialog(prompt, true).closed.then((confirmed) => {
                     if (confirmed) {
                         Eterna.chat.postText(url.href);
                     }
                 });
             })
-            .catch(err => {
+            .catch((err) => {
                 this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
-            ./*finally*/then(() => {
+            ./* finally */then(() => {
                 this.popUILock("Screenshot");
             });
     }
 
     public onContextMenuEvent(e: Event): void {
-
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -252,7 +253,8 @@ export abstract class GameMode extends AppMode {
                 if (menu != null) {
                     this._contextMenuDialogRef = this.addObject(
                         new ContextMenuDialog(menu, Flashbang.globalMouse),
-                        this.contextMenuLayer);
+                        this.contextMenuLayer
+                    );
                     handled = true;
                 }
             }
@@ -277,7 +279,7 @@ export abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        let button = new URLButton("Go to Home", EternaURL.createURL({"page":"lab_bench"}));
+        let button = new URLButton("Go to Home", EternaURL.createURL({page: "lab_bench"}));
         button.selectable(false);
         return button;
     }
@@ -292,17 +294,20 @@ export abstract class GameMode extends AppMode {
     private _modeScriptInterface: ExternalInterfaceCtx;
 
     protected _poseFields: PoseField[] = [];
-    protected _poses: Pose2D[] = [];    // TODO: remove me!
+    protected _poses: Pose2D[] = []; // TODO: remove me!
     protected _isPipMode: boolean = false;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     protected _folder: Folder;
+    protected _curTargetIndex: number;
     protected getCurrentUndoBlock(index: number): UndoBlock {
         return undefined;
-    };
+    }
+
     protected getCurrentTargetPairs(index: number): number[] {
         return undefined;
-    };
+    }
+
     protected _targetPairs: number[][];
 }
 

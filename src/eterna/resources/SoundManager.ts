@@ -51,7 +51,7 @@ export class SoundManager {
  */
 class EternaSound {
     public constructor(url: string) {
-        this._sound = PIXI.sound.Sound.from({url: url, preload: true, loaded: () => this.onLoaded()});
+        this._sound = PIXI.sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
     }
 
     public play(options: PIXI.sound.PlayOptions) {

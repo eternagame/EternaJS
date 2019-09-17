@@ -864,7 +864,7 @@ export class PoseEditMode extends GameMode {
             }
         });
 
-        this._scriptInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices);
+        this._scriptInterface.addCallback("get_tracked_indices", (): number[] => this.getPose(0).trackedIndices.map(mark => mark.baseIndex));
         this._scriptInterface.addCallback("get_barcode_indices", (): number[] => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback("is_barcode_available",
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
@@ -954,25 +954,35 @@ export class PoseEditMode extends GameMode {
             return true;
         });
 
-        this._scriptInterface.addCallback("set_tracked_indices", (marks: number[], colors?: number[]): void => {
-            for (let ii: number = 0; ii < this.numPoseFields; ii++) {
+        this._scriptInterface.addCallback("set_tracked_indices", 
+            (marks: (number | {baseIndex: number; colors?: number | number[]})[], colors?: number[]): void => {
+            
+            let standardizedMarks: {baseIndex: number; colors?: number | number[]}[];
+            
+            if (colors) {
+                log.warn("Sending a colors argument to set_tracked_indices is deprecated, and will soon not be supported");
+                if (colors.length !== marks.length) {
+                    log.error("Marks array is not the same length as color array for set_tracked_indices - leaving as black");
+                } else if (marks.some(mark => typeof (mark) !== "number")) {
+                    log.error("Marks array should consist of numbers when the colors argument is present - aborting");
+                    return;
+                } else standardizedMarks = colors.map((color, i) => ({baseIndex: marks[i] as number, colors: color}));
+            }
+            
+            if(!standardizedMarks) {
+                standardizedMarks = marks.map(mark => typeof (mark) === "number" ? { baseIndex: mark as number } : mark);
+            }
+
+            if(standardizedMarks.some(mark => typeof(mark.baseIndex) !== "number")){
+                log.error("At least one mark object either doesn't have a `baseIndex` property or has a non-numeric one - aborting");
+                return;
+            }
+
+            for (let ii = 0; ii < this.numPoseFields; ii++) {
                 let pose: Pose2D = this.getPose(ii);
                 pose.clearTracking();
-                let baseColors: number[] = [];
-                if (colors) {
-                    if (colors.length == marks.length) {
-                        baseColors = colors;
-                    } else {
-                        console.error("Mark array is not the same length as color array for set_tracked_indices - leaving as black");
-                    }
-                }
-
-                if (baseColors.length == 0) {
-                    baseColors = marks.map(idx => 0x000000);
-                }
-
-                for (let k: number = 0; k < marks.length; k++) {
-                    pose.addBaseMark(marks[k], baseColors[k]);
+                for (let mark of standardizedMarks) {
+                    pose.addBaseMark(mark.baseIndex, mark.colors);
                 }
             }
         });
@@ -1224,6 +1234,12 @@ export class PoseEditMode extends GameMode {
         pushVisibleState(this.dialogLayer);
         pushVisibleState(this.achievementsLayer);
 
+        let explosionFactorVisible: boolean[] = [];
+        for (let pose of this._poses) {
+            explosionFactorVisible.push(pose.showExplosionFactor);
+            pose.showExplosionFactor = false;
+        }
+
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
@@ -1242,6 +1258,10 @@ export class PoseEditMode extends GameMode {
 
         for (let [disp, wasVisible] of visibleState.entries()) {
             disp.visible = wasVisible;
+        }
+
+        for (let ii = 0; ii < this._poses.length; ++ii) {
+            this._poses[ii].showExplosionFactor = explosionFactorVisible[ii];
         }
 
         return pngData;
@@ -2667,47 +2687,50 @@ export class PoseEditMode extends GameMode {
             isSatisfied = false;
 
             const scriptID = value;
-            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID, {}, scriptResult => {
-                let goal = "";
-                let name = "...";
-                let resultValue = "";
-                let index = null;
-                let dataPNG = "";
-                if (scriptResult && scriptResult.cause) {
-                    if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
-                    if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
-                    if (scriptResult.cause.name != null) name = scriptResult.cause.name;
-                    if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
-                    if (scriptResult.cause.index != null) {
-                        index = (scriptResult.cause.index + 1).toString();
-                        let ll: number = this._isPipMode ?
-                            scriptResult.cause.index :
-                            (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
-                        if (ll >= 0) {
-                            if (scriptResult.cause.highlight != null) {
-                                this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
-                            } else {
-                                this._poses[ll].clearUserDefinedHighlight();
+            const scriptCompleted = ExternalInterface.runScriptMaybeSynchronously(scriptID,
+                { params: { puzzleInfo: this._puzzle.toJSON() } },
+                scriptResult => {
+                    let goal = "";
+                    let name = "...";
+                    let resultValue = "";
+                    let index = null;
+                    let dataPNG = "";
+                    if (scriptResult && scriptResult.cause) {
+                        if (scriptResult.cause.satisfied) isSatisfied = scriptResult.cause.satisfied;
+                        if (scriptResult.cause.goal != null) goal = scriptResult.cause.goal;
+                        if (scriptResult.cause.name != null) name = scriptResult.cause.name;
+                        if (scriptResult.cause.value != null) resultValue = scriptResult.cause.value;
+                        if (scriptResult.cause.index != null) {
+                            index = (scriptResult.cause.index + 1).toString();
+                            let ll: number = this._isPipMode ?
+                                scriptResult.cause.index :
+                                (scriptResult.cause.index === this._curTargetIndex ? 0 : -1);
+                            if (ll >= 0) {
+                                if (scriptResult.cause.highlight != null) {
+                                    this._poses[ll].highlightUserDefinedSequence(scriptResult.cause.highlight);
+                                } else {
+                                    this._poses[ll].clearUserDefinedHighlight();
+                                }
                             }
+                        }
+
+                        if (scriptResult.cause.icon_b64) {
+                            dataPNG = scriptResult.cause.icon_b64;
                         }
                     }
 
-                    if (scriptResult.cause.icon_b64) {
-                        dataPNG = scriptResult.cause.icon_b64;
+                    if (render) {
+                        box.setContent(ConstraintType.SCRIPT, {
+                            "nid": scriptID,
+                            "goal": goal,
+                            "name": name,
+                            "value": resultValue,
+                            "index": index,
+                            "data_png": dataPNG
+                        }, isSatisfied, 0);
                     }
                 }
-
-                if (render) {
-                    box.setContent(ConstraintType.SCRIPT, {
-                        "nid": scriptID,
-                        "goal": goal,
-                        "name": name,
-                        "value": resultValue,
-                        "index": index,
-                        "data_png": dataPNG
-                    }, isSatisfied, 0);
-                }
-            });
+            );
 
             if (!scriptCompleted) {
                 log.warn(`Constraint script wasn't able to run synchronously [scriptID=${scriptID}]`);
@@ -3635,7 +3658,7 @@ export class PoseEditMode extends GameMode {
     private _startingPoint: string;
     private _moveCount: number = 0;
     private _moves: any[] = [];
-    private _curTargetIndex: number = 0;
+    protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
     private _targetConditions: any[] = [];

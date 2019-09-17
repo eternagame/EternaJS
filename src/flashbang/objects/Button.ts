@@ -42,7 +42,7 @@ export abstract class Button extends ContainerObject implements Enableable {
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
         this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(() => this.onPointerDown()));
-        this.regs.add(this.pointerUp.filter(IsLeftMouse).connect(() => this.onPointerUp(true)))
+        this.regs.add(this.pointerUp.filter(IsLeftMouse).connect(() => this.onPointerUp(true)));
     }
 
     /* override */

@@ -58,7 +58,7 @@ export class RankScroll extends ContainerObject {
             player = new PlayerRank(playername, prevPoints);
             player.rank = newRank;
         } else {
-            let last_after_entry_uid: number = -1;
+            let last_after_entry_uid = -1;
             for (let ii = 0; ii < newRicher.length; ii++) {
                 let rank = new PlayerRank(newRicher[ii]["name"], newRicher[ii]["points"]);
                 rank.rank = newRicher[ii]["rank"];
@@ -73,8 +73,8 @@ export class RankScroll extends ContainerObject {
                 last_after_entry_uid = newPoorer[ii]["uid"];
             }
 
-            let common_entry: boolean = false;
-            let common_index: number = 0;
+            let common_entry = false;
+            let common_index = 0;
             for (let ii = 0; ii < prevRicher.length; ii++) {
                 if (prevRicher[ii]["uid"] === last_after_entry_uid) {
                     common_entry = true;
@@ -131,15 +131,15 @@ export class RankScroll extends ContainerObject {
         super.added();
 
         // How many rows other than player's will show for each top/bottom side
-        const size_indicator: number = 1;
+        const size_indicator = 1;
 
         let startScore: number = this._playerRank.score;
         let startRank: number = this._playerRank.rank;
 
-        let topStartingIdx: number = 0;
-        let bottomStartingIdx: number = 0;
-        let startingSet: boolean = false;
-        let endIdx: number = 0;
+        let topStartingIdx = 0;
+        let bottomStartingIdx = 0;
+        let startingSet = false;
+        let endIdx = 0;
 
         for (let ii = 0; ii < this._allRanks.length; ii++) {
             if (this._allRanks[ii].score <= this._newScore) {
@@ -157,10 +157,10 @@ export class RankScroll extends ContainerObject {
             endIdx = this._allRanks.length;
         }
 
-        let top_ending_index: number = 0;
-        let bottom_ending_index: number = 0;
-        let ending_set: boolean = false;
-        let startIdx: number = 0;
+        let top_ending_index = 0;
+        let bottom_ending_index = 0;
+        let ending_set = false;
+        let startIdx = 0;
         for (let ii = 0; ii < this._allRanks.length; ii++) {
             if (this._allRanks[ii].score <= startScore) {
                 top_ending_index = ii - 1;
@@ -191,7 +191,7 @@ export class RankScroll extends ContainerObject {
         this._scoreOffset = this._newScore - startScore;
         this._moveOffset = startIdx - endIdx;
 
-        let max_width: number = 85;
+        let max_width = 85;
 
         // Make rank data coming down from top (of player)
         let rank_data_top: PlayerRank[] = [];
@@ -285,7 +285,7 @@ export class RankScroll extends ContainerObject {
 
         // After, show our rank offset
         if (this._rankOffset > 0) {
-            const RANK_ANIM_DURATION: number = 2;
+            const RANK_ANIM_DURATION = 2;
 
             this.addObject(new SerialTask(
                 new DelayTask(this._scrollAnimDuration + 1),
@@ -308,7 +308,7 @@ export class RankScroll extends ContainerObject {
     public get realWidth(): number {
         let rankOffsetVisible = this._tfRankOffset.visible;
         this._tfRankOffset.visible = false;
-        let width = this.container.width;
+        let {width} = this.container;
         this._tfRankOffset.visible = rankOffsetVisible;
 
         return width + 100;

@@ -11,7 +11,7 @@ export class FilteredSignal<T> extends MappedSignal<T> {
 
     /* override */
     protected connectToSource(): Connection {
-        return this._source.connect((value) => {
+        return this._source.connect((value): void => {
             if (this._pred(value)) {
                 this.notifyEmit(value);
             }

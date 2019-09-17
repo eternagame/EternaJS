@@ -37,7 +37,7 @@ export class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public color(color: number): HTMLTextObject {
-        DOMObject.applyStyleRecursive(this._obj, {"color": `#${color.toString(16)}`}, false, HTMLTextObject.STYLE_NODE_NAMES);
+        DOMObject.applyStyleRecursive(this._obj, {color: `#${color.toString(16)}`}, false, HTMLTextObject.STYLE_NODE_NAMES);
         this.onSizeChanged();
         return this;
     }
