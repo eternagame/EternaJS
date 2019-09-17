@@ -40,7 +40,7 @@ export class AchievementBox extends ContainerObject {
 
         let imageSprite = new Sprite();
         TextureUtil.loadURL(this._imageURL)
-            .then(tex => {
+            .then((tex) => {
                 if (this.isLiveObject) {
                     let scale = Math.min(IMAGE_SIZE / tex.width, IMAGE_SIZE / tex.height);
                     imageSprite.texture = tex;
@@ -48,8 +48,8 @@ export class AchievementBox extends ContainerObject {
                     imageSprite.scale.y = scale;
                 }
             })
-            .catch(err => {
-                log.warn(`Failed to load Achievement image [url=${this._imageURL}, err=${err}]`)
+            .catch((err) => {
+                log.warn(`Failed to load Achievement image [url=${this._imageURL}, err=${err}]`);
             });
         imageSprite.position = new Point(15, 35);
         panel.container.addChild(imageSprite);
@@ -69,7 +69,8 @@ export class AchievementBox extends ContainerObject {
         panel.addObject(this._okButton, panel.container);
         this._okButton.container.position = new Point(
             (panel.width - this._okButton.container.width) * 0.5,
-            150 + 5);
+            150 + 5
+        );
     }
 
     public animate(): void {

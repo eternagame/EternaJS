@@ -19,7 +19,7 @@ export class AchievementManager extends GameObject {
         if (!this.hasPendingAchievements) {
             return Promise.resolve();
         } else {
-            return new Promise<void>(resolve => {
+            return new Promise<void>((resolve) => {
                 this.addObject(new SerialTask(
                     new FunctionTask((): boolean => !this.hasPendingAchievements),
                     new CallbackTask(resolve),
@@ -66,7 +66,8 @@ export class AchievementManager extends GameObject {
             DisplayUtil.positionRelativeToStage(
                 view.display,
                 HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER);
+                HAlign.CENTER, VAlign.CENTER
+            );
         };
         updateLoc();
         view.regs.add(this.mode.resized.connect(updateLoc));

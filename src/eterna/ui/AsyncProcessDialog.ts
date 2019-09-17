@@ -19,12 +19,10 @@ export class AsyncProcessDialog extends Dialog<void> {
         this.container.addChild(textField);
 
         textField.alpha = 0;
-        this.addObject(new RepeatingTask(() => {
-            return new SerialTask(
-                new AlphaTask(1, 0.3, Easing.linear, textField),
-                new AlphaTask(0, 0.3, Easing.linear, textField),
-            );
-        }));
+        this.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(1, 0.3, Easing.linear, textField),
+            new AlphaTask(0, 0.3, Easing.linear, textField),
+        )));
 
         let updateLocation = () => {
             textField.position = new Point(

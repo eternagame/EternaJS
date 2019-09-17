@@ -94,7 +94,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         viewLayout.layout();
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 0.27, 0xC0DCE7);
-        panel.title  = "Game options";
+        panel.title = "Game options";
         panel.setSize(viewLayout.width + 40, viewLayout.height + 40 + panel.titleHeight);
         this.addObject(panel, this.container);
 
@@ -104,7 +104,8 @@ export class EternaViewOptionsDialog extends Dialog<void> {
             DisplayUtil.positionRelativeToStage(
                 panel.display,
                 HAlign.CENTER, VAlign.CENTER,
-                HAlign.CENTER, VAlign.CENTER);
+                HAlign.CENTER, VAlign.CENTER
+            );
 
             DisplayUtil.positionRelative(
                 viewLayout, HAlign.CENTER, VAlign.CENTER,

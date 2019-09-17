@@ -90,13 +90,13 @@ export class FeedbackViewMode extends GameMode {
 
         let secstructs: string[] = this._puzzle.getSecstructs();
         let poseFields: PoseField[] = [];
-        for (let ii: number = 0; ii < secstructs.length; ii++) {
+        for (let ii = 0; ii < secstructs.length; ii++) {
             let secs: string = secstructs[ii];
             if (secs != null && secs.length != this._sequence.length) {
                 log.warn("Solution secondary structure and sequence length doesn't match", secs.length, this._sequence.length);
                 if (secs.length < this._sequence.length) {
                     let diff: number = this._sequence.length - secs.length;
-                    for (let jj: number = 0; jj < diff; ++jj) {
+                    for (let jj = 0; jj < diff; ++jj) {
                         secs += ".";
                     }
                 } else {
@@ -143,11 +143,13 @@ export class FeedbackViewMode extends GameMode {
     private updateUILayout(): void {
         DisplayUtil.positionRelativeToStage(
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
-            HAlign.CENTER, VAlign.BOTTOM, 20, -20);
+            HAlign.CENTER, VAlign.BOTTOM, 20, -20
+        );
 
         DisplayUtil.positionRelativeToStage(
             this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5);
+            HAlign.RIGHT, VAlign.TOP, 0, 5
+        );
     }
 
     private showViewOptionsDialog(): void {
@@ -178,7 +180,7 @@ export class FeedbackViewMode extends GameMode {
         }
     }
 
-    /*override*/
+    /* override */
     protected onSetPip(pip_mode: boolean): void {
         if (pip_mode) {
             if (this._toolbar.toggleBar != null) {
@@ -191,7 +193,7 @@ export class FeedbackViewMode extends GameMode {
                 this.setToTargetMode();
             }
 
-            let min_zoom: number = -1;
+            let min_zoom = -1;
             for (let pose of this._poses) {
                 min_zoom = Math.max(min_zoom, pose.computeDefaultZoomLevel());
             }
@@ -199,8 +201,8 @@ export class FeedbackViewMode extends GameMode {
             for (let ii = 0; ii < this._poses.length; ii++) {
                 let field: PoseField = this._poseFields[ii];
                 if (this._targetConditions[ii] != null) {
-                    if (this._targetConditions[ii]['type'] == "aptamer") {
-                        field.pose.setMolecularBinding(this._targetConditions[ii]['site'], this._targetConditions[ii]['binding_pairs'], this._targetConditions[ii]['bonus'] / 100.0);
+                    if (this._targetConditions[ii]["type"] == "aptamer") {
+                        field.pose.setMolecularBinding(this._targetConditions[ii]["site"], this._targetConditions[ii]["binding_pairs"], this._targetConditions[ii]["bonus"] / 100.0);
                     } else {
                         field.pose.setMolecularBinding(null, null, null);
                     }
@@ -216,7 +218,6 @@ export class FeedbackViewMode extends GameMode {
             if (this._isExpColor) {
                 this.showExperimentalColors();
             }
-
         } else {
             if (this._toolbar.toggleBar != null) {
                 this._toolbar.toggleBar.display.visible = true;
@@ -249,16 +250,16 @@ export class FeedbackViewMode extends GameMode {
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
-        let info =
-            `Designer: ${this._solution.playerName}\n` +
-            `Design ID: ${this._solution.nodeID}\n` +
-            `Design Title: ${this._solution.title}\n`;
+        let info = `Designer: ${this._solution.playerName}\n`
+            + `Design ID: ${this._solution.nodeID}\n`
+            + `Design Title: ${this._solution.title}\n`;
         let infoText = Fonts.arial(info).color(0xffffff).build();
         this.container.addChild(infoText);
 
         DisplayUtil.positionRelativeToStage(
             infoText, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, -3, 3);
+            HAlign.RIGHT, VAlign.TOP, -3, 3
+        );
 
         let pngData = DisplayUtil.renderToPNG(this.container);
 
@@ -283,7 +284,7 @@ export class FeedbackViewMode extends GameMode {
         this._toolbar.showEstimateButton.toggled.value = false;
         this._toolbar.showTargetButton.toggled.value = true;
         if (this._isPipMode) {
-            for (let ii: number = 0; ii < this._pairs.length; ii++) {
+            for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._pairs[ii];
             }
         } else {
@@ -298,7 +299,7 @@ export class FeedbackViewMode extends GameMode {
         this._toolbar.showEstimateButton.toggled.value = true;
         this._toolbar.showTargetButton.toggled.value = false;
         if (this._isPipMode) {
-            for (let ii: number = 0; ii < this._pairs.length; ii++) {
+            for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._shapePairs[ii];
             }
         } else {
@@ -310,8 +311,8 @@ export class FeedbackViewMode extends GameMode {
         this._currentIndex = target_index;
 
         if (this._targetConditions[this._currentIndex] != null) {
-            if (this._targetConditions[this._currentIndex]['type'] == "aptamer") {
-                this._poseFields[0].pose.setMolecularBinding(this._targetConditions[this._currentIndex]['site'], this._targetConditions[this._currentIndex]['binding_pairs'], this._targetConditions[this._currentIndex]['bonus'] / 100.0);
+            if (this._targetConditions[this._currentIndex]["type"] == "aptamer") {
+                this._poseFields[0].pose.setMolecularBinding(this._targetConditions[this._currentIndex]["site"], this._targetConditions[this._currentIndex]["binding_pairs"], this._targetConditions[this._currentIndex]["bonus"] / 100.0);
             } else {
                 this._poseFields[0].pose.setMolecularBinding(null, null, null);
             }
@@ -338,13 +339,14 @@ export class FeedbackViewMode extends GameMode {
         this._toolbar.expColorButton.toggled.value = true;
 
         if (this._isPipMode) {
-            for (let ii: number = 0; ii < this._poseFields.length; ii++) {
+            for (let ii = 0; ii < this._poseFields.length; ii++) {
                 this._poseFields[ii].pose.visualizeFeedback(
                     this._feedback.getShapeData(ii),
                     this._feedback.getShapeThreshold(ii),
                     this._feedback.getShapeMin(ii),
                     this._feedback.getShapeMax(ii),
-                    this._feedback.getShapeStartIndex(ii));
+                    this._feedback.getShapeStartIndex(ii)
+                );
             }
         } else {
             this._poseFields[0].pose.visualizeFeedback(
@@ -352,7 +354,8 @@ export class FeedbackViewMode extends GameMode {
                 this._feedback.getShapeThreshold(this._currentIndex),
                 this._feedback.getShapeMin(this._currentIndex),
                 this._feedback.getShapeMax(this._currentIndex),
-                this._feedback.getShapeStartIndex(this._currentIndex));
+                this._feedback.getShapeStartIndex(this._currentIndex)
+            );
         }
     }
 
@@ -360,24 +363,24 @@ export class FeedbackViewMode extends GameMode {
         this._isExpColor = false;
         this._toolbar.letterColorButton.toggled.value = true;
         this._toolbar.expColorButton.toggled.value = false;
-        for (let ii: number = 0; ii < this._poseFields.length; ii++) {
+        for (let ii = 0; ii < this._poseFields.length; ii++) {
             this._poseFields[ii].pose.clearFeedback();
         }
     }
 
     private scoreFeedback(): void {
-        let titleText: string = "";
+        let titleText = "";
         let brentData: any = this._feedback.brentTheoData;
         let score: number;
 
         if (brentData != null) {
-            /// Brent's theophylline data
-            titleText += (this._solution.title + "\n");
-            titleText += "Cleavage suppression : x " + Utility.roundTo(brentData['score'], 2) + "\n";
-            titleText += "(Cleavage without Theophylline molecule : " + Utility.roundTo(brentData['ribo_without_theo'], 2);
-            titleText += " / with Theophylline : " + Utility.roundTo(brentData['ribo_with_theo'], 2) + ")";
+            // / Brent's theophylline data
+            titleText += (`${this._solution.title}\n`);
+            titleText += `Cleavage suppression : x ${Utility.roundTo(brentData["score"], 2)}\n`;
+            titleText += `(Cleavage without Theophylline molecule : ${Utility.roundTo(brentData["ribo_without_theo"], 2)}`;
+            titleText += ` / with Theophylline : ${Utility.roundTo(brentData["ribo_with_theo"], 2)})`;
         } else {
-            /// Default fallback to usual SHAPE data
+            // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {
                 score = Feedback.scoreFeedback(
                     this._feedback.getShapeData(this._currentIndex),
@@ -385,15 +388,16 @@ export class FeedbackViewMode extends GameMode {
                     this._feedback.getShapeStartIndex(this._currentIndex),
                     this._feedback.getShapeMin(this._currentIndex),
                     this._feedback.getShapeThreshold(this._currentIndex),
-                    this._feedback.getShapeMax(this._currentIndex));
-                titleText += (this._solution.title + "\n" + "Synthesis score : " + score + " / 100");
+                    this._feedback.getShapeMax(this._currentIndex)
+                );
+                titleText += (`${this._solution.title}\n` + `Synthesis score : ${score} / 100`);
             } else {
-                titleText += (this._solution.title + "\n" + "Synthesis score : " + this._solution.getProperty("Synthesis score") + " / 100");
+                titleText += (`${this._solution.title}\n` + `Synthesis score : ${this._solution.getProperty("Synthesis score")} / 100`);
             }
 
             if (this._targetConditions.length > 1) {
                 titleText += "\n(";
-                for (let ii: number = 0; ii < this._targetConditions.length; ii++) {
+                for (let ii = 0; ii < this._targetConditions.length; ii++) {
                     if (ii > 0) {
                         titleText += ", ";
                     }
@@ -404,9 +408,10 @@ export class FeedbackViewMode extends GameMode {
                         this._feedback.getShapeStartIndex(ii),
                         this._feedback.getShapeMin(ii),
                         this._feedback.getShapeThreshold(ii),
-                        this._feedback.getShapeMax(ii));
+                        this._feedback.getShapeMax(ii)
+                    );
 
-                    titleText += "state " + (ii + 1) + " : " + score + " / 100";
+                    titleText += `state ${ii + 1} : ${score} / 100`;
                 }
                 titleText += ")";
             }
@@ -415,7 +420,7 @@ export class FeedbackViewMode extends GameMode {
     }
 
     private setupShape(): void {
-        for (let ss: number = 0; ss < this._puzzle.getSecstructs().length; ss++) {
+        for (let ss = 0; ss < this._puzzle.getSecstructs().length; ss++) {
             this.foldEstimate(ss);
         }
     }
@@ -428,9 +433,9 @@ export class FeedbackViewMode extends GameMode {
         let shape_max: number = this._feedback.getShapeMax(index);
         let shape_min: number = this._feedback.getShapeMin(index);
 
-        let desired_pairs: string = "";
+        let desired_pairs = "";
 
-        for (let ii: number = 0; ii < start_index; ii++) {
+        for (let ii = 0; ii < start_index; ii++) {
             if (puzzle_locks[ii]) {
                 desired_pairs += "U0";
             } else {
@@ -461,7 +466,6 @@ export class FeedbackViewMode extends GameMode {
                 }
 
                 desired_pairs += Number(Math.floor(lev * 10)).toString();
-
             } else if (shape_data[ii] > shape_threshold) {
                 desired_pairs += "U";
                 let lev = 0;
@@ -474,7 +478,6 @@ export class FeedbackViewMode extends GameMode {
                     }
                 }
                 desired_pairs += Number(Math.floor(lev * 10)).toString();
-
             } else {
                 desired_pairs += "P0";
             }
@@ -496,7 +499,7 @@ export class FeedbackViewMode extends GameMode {
         this.pushUILock();
         Eterna.app.switchToDesignBrowser(this._puzzle.nodeID)
             .then(() => this.popUILock())
-            .catch(e => {
+            .catch((e) => {
                 log.error(e);
                 this.popUILock();
             });

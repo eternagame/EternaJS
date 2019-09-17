@@ -41,7 +41,7 @@ export class FolderManager {
     }
 
     public getNextFolder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
-        let curFolderIdx: number = -1;
+        let curFolderIdx = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
             if (this._folders[ii].name.toLowerCase() === folder_name.toLowerCase()) {
                 curFolderIdx = ii;

@@ -93,18 +93,18 @@ export class EPars {
     }
 
     public static getLongestStackLength(pairs: number[]): number {
-        let longlen: number = 0;
+        let longlen = 0;
 
-        let stack_start: number = -1;
-        let last_stack_other: number = -1;
+        let stack_start = -1;
+        let last_stack_other = -1;
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 if (stack_start < 0) {
                     stack_start = ii;
                 }
 
-                let is_continued: boolean = false;
+                let is_continued = false;
                 if (last_stack_other < 0) {
                     is_continued = true;
                 } else if (pairs[ii] === last_stack_other - 1) {
@@ -170,8 +170,8 @@ export class EPars {
     }
 
     public static getColoredSequence(seq: string): string {
-        let res: string = "";
-        for (let ii: number = 0; ii < seq.length; ii++) {
+        let res = "";
+        for (let ii = 0; ii < seq.length; ii++) {
             res += EPars.getColoredLetter(seq.charAt(ii));
         }
         return res;
@@ -185,7 +185,7 @@ export class EPars {
         let offset: number = exp_data[0];
         let maxmax: number = exp_data[1];
         let minmin: number = exp_data[1];
-        for (let ii: number = 1; ii < exp_data.length; ii++) {
+        for (let ii = 1; ii < exp_data.length; ii++) {
             if (exp_data[ii] > maxmax) {
                 maxmax = exp_data[ii];
             }
@@ -197,7 +197,7 @@ export class EPars {
 
         let avg: number = (maxmax + minmin) / 2.0;
 
-        let res: string = "";
+        let res = "";
         for (let ii = 0; ii < seq.length; ii++) {
             if (ii < offset - 1 || ii >= exp_data.length) {
                 res += seq.charAt(ii);
@@ -212,10 +212,10 @@ export class EPars {
     }
 
     public static countConsecutive(sequence: number[], letter: number, locks: boolean[] | null = null): number {
-        let max_consecutive: number = 0;
+        let max_consecutive = 0;
 
-        let ii: number = 0;
-        let start_index: number = -1;
+        let ii = 0;
+        let start_index = -1;
         for (ii = 0; ii < sequence.length; ii++) {
             if (sequence[ii] === letter) {
                 if (start_index < 0) {
@@ -226,7 +226,7 @@ export class EPars {
                     if (locks == null) {
                         max_consecutive = ii - start_index;
                     } else {
-                        let all_locked: boolean = true;
+                        let all_locked = true;
                         let jj: number;
                         for (jj = start_index; jj < ii; jj++) {
                             all_locked = all_locked && locks[jj];
@@ -252,8 +252,8 @@ export class EPars {
     public static getRestrictedConsecutive(sequence: number[], letter: number, max_allowed: number, locks: boolean[] | null = null): number[] {
         let restricted: number[] = [];
 
-        let ii: number = 0;
-        let start_index: number = -1;
+        let ii = 0;
+        let start_index = -1;
 
         if (max_allowed <= 0) {
             return restricted;
@@ -270,7 +270,7 @@ export class EPars {
                         restricted.push(start_index);
                         restricted.push(ii - 1);
                     } else {
-                        let all_locked: boolean = true;
+                        let all_locked = true;
                         let jj: number;
                         for (jj = start_index; jj < ii; jj++) {
                             all_locked = all_locked && locks[jj];
@@ -298,9 +298,9 @@ export class EPars {
 
     public static getSequenceRepetition(seq_str: string, n: number): number {
         let dict: Set<string> = new Set<string>();
-        let num_repeats: number = 0;
+        let num_repeats = 0;
 
-        for (let ii: number = 0; ii < seq_str.length - n; ii++) {
+        for (let ii = 0; ii < seq_str.length - n; ii++) {
             let substr: string = seq_str.substr(ii, n);
             if (dict.has(substr)) {
                 num_repeats++;
@@ -358,7 +358,7 @@ export class EPars {
 
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqarray: number[] = [];
-        for (let ii: number = 0; ii < seq.length; ii++) {
+        for (let ii = 0; ii < seq.length; ii++) {
             let char = seq.charAt(ii);
             seqarray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
         }
@@ -366,7 +366,7 @@ export class EPars {
     }
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
-        let str: string = "";
+        let str = "";
         for (let value of sequence) {
             str += EPars.nucleotideToString(value, allowCut, allowUnknown);
         }
@@ -374,10 +374,10 @@ export class EPars {
     }
 
     public static isInternal(index: number, pairs: number[]): number[] | null {
-        let pair_start_here: number = -1;
-        let pair_end_here: number = -1;
-        let pair_start_there: number = -1;
-        let pair_end_there: number = -1;
+        let pair_start_here = -1;
+        let pair_end_here = -1;
+        let pair_start_there = -1;
+        let pair_end_there = -1;
 
         if (pairs[index] >= 0) {
             return null;
@@ -440,7 +440,7 @@ export class EPars {
             return `Structure length limit is ${length_limit}`;
         }
 
-        for (let jj: number = 0; jj < parenthesis.length; jj++) {
+        for (let jj = 0; jj < parenthesis.length; jj++) {
             if (parenthesis.charAt(jj) === "(") {
                 pair_stack.push(jj);
             } else if (parenthesis.charAt(jj) === ")") {
@@ -482,7 +482,7 @@ export class EPars {
         let pairs: number[] = [];
         let pair_stack: number[] = [];
 
-        for (let jj: number = 0; jj < parenthesis.length; jj++) {
+        for (let jj = 0; jj < parenthesis.length; jj++) {
             pairs.push(-1);
         }
 
@@ -509,7 +509,7 @@ export class EPars {
     public static getSatisfiedPairs(pairs: number[], seq: number[]): number[] {
         let ret_pairs: number[] = new Array(pairs.length);
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] < 0) {
                 ret_pairs[ii] = -1;
             } else if (pairs[ii] > ii) {
@@ -529,7 +529,7 @@ export class EPars {
     public static pairsToParenthesis(pairs: number[], seq: number[] | null = null): string {
         let bi_pairs: number[] = new Array(pairs.length);
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             bi_pairs[ii] = -1;
         }
 
@@ -540,7 +540,7 @@ export class EPars {
             }
         }
 
-        let str: string = "";
+        let str = "";
 
         for (let ii = 0; ii < bi_pairs.length; ii++) {
             if (bi_pairs[ii] > ii) {
@@ -561,7 +561,7 @@ export class EPars {
         let forced: number[] = [];
         let pair_stack: number[] = [];
 
-        for (let jj: number = 0; jj < parenthesis.length; jj++) {
+        for (let jj = 0; jj < parenthesis.length; jj++) {
             forced.push(EPars.FORCE_IGNORE);
         }
 
@@ -596,9 +596,9 @@ export class EPars {
     }
 
     public static forcedArrayToParenthesis(forced: number[]): string {
-        let str: string = "";
+        let str = "";
 
-        for (let ii: number = 0; ii < forced.length; ii++) {
+        for (let ii = 0; ii < forced.length; ii++) {
             if (forced[ii] > ii) {
                 str = str.concat("(");
             } else if (forced[ii] >= 0) {
@@ -620,9 +620,9 @@ export class EPars {
     }
 
     public static numPairs(pairs: number[]): number {
-        let ret: number = 0;
+        let ret = 0;
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 ret++;
             }
@@ -631,9 +631,9 @@ export class EPars {
     }
 
     public static numGUPairs(sequence: number[], pairs: number[]): number {
-        let ret: number = 0;
+        let ret = 0;
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
                     ret++;
@@ -648,9 +648,9 @@ export class EPars {
     }
 
     public static numGCPairs(sequence: number[], pairs: number[]): number {
-        let ret: number = 0;
+        let ret = 0;
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 if (sequence[ii] === EPars.RNABASE_GUANINE && sequence[pairs[ii]] === EPars.RNABASE_CYTOSINE) {
                     ret++;
@@ -665,9 +665,9 @@ export class EPars {
     }
 
     public static numUAPairs(sequence: number[], pairs: number[]): number {
-        let ret: number = 0;
+        let ret = 0;
 
-        for (let ii: number = 0; ii < pairs.length; ii++) {
+        for (let ii = 0; ii < pairs.length; ii++) {
             if (pairs[ii] > ii) {
                 if (sequence[ii] === EPars.RNABASE_ADENINE && sequence[pairs[ii]] === EPars.RNABASE_URACIL) {
                     ret++;
@@ -682,8 +682,8 @@ export class EPars {
     }
 
     public static sequenceDiff(seq1: number[], seq2: number[]): number {
-        let diff: number = 0;
-        for (let ii: number = 0; ii < seq1.length; ii++) {
+        let diff = 0;
+        for (let ii = 0; ii < seq1.length; ii++) {
             if (seq1[ii] !== seq2[ii]) {
                 diff++;
             }
@@ -696,7 +696,7 @@ export class EPars {
             return false;
         }
 
-        for (let ii: number = 0; ii < a_pairs.length; ii++) {
+        for (let ii = 0; ii < a_pairs.length; ii++) {
             if (b_pairs[ii] >= 0) {
                 if (b_pairs[ii] !== a_pairs[ii]) {
                     if (constraints == null || constraints[ii]) {
@@ -756,7 +756,7 @@ export class EPars {
     }
 
     public static getTetraLoopBonus(loop: string): number {
-        for (let ii: number = 0; ii < EPars.TETRA_LOOPS.length; ii++) {
+        for (let ii = 0; ii < EPars.TETRA_LOOPS.length; ii++) {
             if (EPars.TETRA_LOOPS[ii] === loop) {
                 return EPars.TETRA_ENERGY_37[ii];
             }

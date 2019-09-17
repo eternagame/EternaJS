@@ -208,7 +208,7 @@ export class UndoBlock {
                 full_seq = full_seq.concat(this._targetOligo);
             }
         } else if (this._targetOligos) {
-            for (let ii: number = 0; ii < this._targetOligos.length; ii++) {
+            for (let ii = 0; ii < this._targetOligos.length; ii++) {
                 full_seq.push(EPars.RNABASE_CUT);
                 full_seq = full_seq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
             }
@@ -250,10 +250,10 @@ export class UndoBlock {
             }
             let cur_dat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii);
             let cur_pairs: number[] = this.getPairs(ii);
-            let prob_score: number = 0;
-            let score_count: number = 0;
+            let prob_score = 0;
+            let score_count = 0;
 
-            for (let jj: number = 0; jj < cur_dat.length; jj += 3) {
+            for (let jj = 0; jj < cur_dat.length; jj += 3) {
                 let index_i: number = cur_dat[jj] - 1;
                 let index_j: number = cur_dat[jj + 1] - 1;
 
@@ -274,7 +274,7 @@ export class UndoBlock {
                 prob_score /= score_count;
             }
 
-            let num_paired: number = 0;
+            let num_paired = 0;
             for (let jj = 0; jj < cur_pairs.length; jj++) {
                 if (cur_pairs[jj] > jj) {
                     num_paired += 2;
@@ -294,7 +294,7 @@ export class UndoBlock {
 
         let init_score: number = this.getParam(UndoBlockParam.PROB_SCORE, 37);
 
-        let meltpoint: number = 107;
+        let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
             let current_score: number = this.getParam(UndoBlockParam.PROB_SCORE, ii);
             if (current_score < init_score * 0.5) {

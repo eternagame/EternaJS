@@ -61,7 +61,7 @@ export class PuzzleManager {
             }
         }
 
-        let usetails: number = Number(json["usetails"]);
+        let usetails = Number(json["usetails"]);
         newpuz.setUseTails(usetails > 0, usetails === 2);
 
         if (json["folder"] && json["folder"].length > 0) {
@@ -176,7 +176,7 @@ export class PuzzleManager {
             newpuz.folderName = FolderManager.instance.getNextFolder(newpuz.folderName, (folder: Folder) => !newpuz.canUseFolder(folder)).name;
         }
 
-        let replace: boolean = false;
+        let replace = false;
 
         for (let jj = 0; jj < this._puzzles.length; jj++) {
             if (newpuz.nodeID === this._puzzles[jj].nodeID) {

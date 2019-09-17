@@ -147,7 +147,7 @@ export class EternaMenu extends GamePanel implements Enableable {
             // since in order to not have a gap between the flyout and the button, that's likely
             this.container.removeChild(menuButton.display);
             this.container.addChild(menuButton.display);
-        }
+        };
 
         menuButton.pointerOver.connect((e) => {
             if (this._enabled) {
@@ -166,10 +166,10 @@ export class EternaMenu extends GamePanel implements Enableable {
 
                     this._activeCapture = new PointerCapture(menu.panel.display);
                     this._activeCapture.beginCapture((e) => {
-                        if (e.type === 'pointerdown') {
+                        if (e.type === "pointerdown") {
                             // Wait a bit before closing, so that if we tapped the button,
                             // we don't just reopen the flyout
-                            setTimeout(() => {menu.panel.display.visible = false}, 100);
+                            setTimeout(() => { menu.panel.display.visible = false; }, 100);
                             this._activeCapture.endCapture();
                         }
                     });
@@ -198,8 +198,8 @@ export class EternaMenu extends GamePanel implements Enableable {
                 continue;
             }
 
-            let height_walker: number = 7;
-            let width_walker: number = 0;
+            let height_walker = 7;
+            let width_walker = 0;
 
             for (let button of menu.itemButtons) {
                 if (button == null) {

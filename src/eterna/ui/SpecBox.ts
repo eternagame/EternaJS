@@ -1,6 +1,8 @@
 import * as log from "loglevel";
 import MultiStyleText from "pixi-multistyle-text";
-import {Graphics, Point, Sprite, Text} from "pixi.js";
+import {
+    Graphics, Point, Sprite, Text
+} from "pixi.js";
 import {HAlign, VAlign} from "../../flashbang/core/Align";
 import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
 import {IsLeftMouse} from "../../flashbang/input/InputUtil";
@@ -72,7 +74,6 @@ export class SpecBox extends ContainerObject {
                 .hotkey(KeyCode.KeyM);
             this.addObject(this._maximizeButton, this.container);
             this._maximizeButton.clicked.connect(() => this.shouldMaximize.emit());
-
         } else {
             this._stattext = new MultiStyleText("", {
                 default: {
@@ -245,7 +246,7 @@ export class SpecBox extends ContainerObject {
             this._dotplotOriginY = 0;
         }
 
-        let plotSize: number = this.plotSize;
+        let {plotSize} = this;
         let plotSizeLevel: number = plotSize * level;
         if (this._dotplot != null && plotSize > 0 && plotSizeLevel > 0) {
             this._dotplotOriginX += (-this._dotplotOriginX) / level;
@@ -274,7 +275,6 @@ export class SpecBox extends ContainerObject {
             this._dotPlotSprite.position = new Point(20, 15);
             this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
             this._maximizeButton.display.position = new Point(this._width - 22, 5);
-
         } else {
             this._panel.title = "RNA Spec";
 
@@ -302,7 +302,7 @@ export class SpecBox extends ContainerObject {
         // Redraw our dotplot
         this.scaleDotPlot(this._dotplotScaleLevel);
 
-        let plotSize = this.plotSize;
+        let {plotSize} = this;
         if (this._meltplot != null && plotSize > 0) {
             this._meltplot.setSize(plotSize, plotSize);
             this._meltplot.replot();
@@ -311,19 +311,23 @@ export class SpecBox extends ContainerObject {
 
             DisplayUtil.positionRelative(
                 this._v0Melt, HAlign.RIGHT, VAlign.BOTTOM,
-                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, -1, 0);
+                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, -1, 0
+            );
 
             DisplayUtil.positionRelative(
                 this._vnMelt, HAlign.RIGHT, VAlign.TOP,
-                this._meltPlotSprite, HAlign.LEFT, VAlign.TOP, -1, 0);
+                this._meltPlotSprite, HAlign.LEFT, VAlign.TOP, -1, 0
+            );
 
             DisplayUtil.positionRelative(
                 this._h0Melt, HAlign.LEFT, VAlign.TOP,
-                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, 0, 1);
+                this._meltPlotSprite, HAlign.LEFT, VAlign.BOTTOM, 0, 1
+            );
 
             DisplayUtil.positionRelative(
                 this._hnMelt, HAlign.RIGHT, VAlign.TOP,
-                this._meltPlotSprite, HAlign.RIGHT, VAlign.BOTTOM, 0, 1);
+                this._meltPlotSprite, HAlign.RIGHT, VAlign.BOTTOM, 0, 1
+            );
         }
     }
 
@@ -367,7 +371,7 @@ export class SpecBox extends ContainerObject {
             let diffX: number = e.data.global.x - this._dragBeginX;
             let diffY: number = e.data.global.y - this._dragBeginY;
 
-            let plotSize: number = this.plotSize;
+            let {plotSize} = this;
             let plotSizeLevel: number = plotSize * this._dotplotScaleLevel;
 
             this._dotplotX = this._dotplotOriginX + diffX;
@@ -390,9 +394,8 @@ export class SpecBox extends ContainerObject {
                 y = 1;
             }
 
-            let msg: string =
-                `${String.fromCharCode(65 + x)},${Math.floor(y * 10)}` +
-                ` - (${Math.floor(x * 10)}, ${Math.floor(y * 10)})`;
+            let msg: string = `${String.fromCharCode(65 + x)},${Math.floor(y * 10)}`
+                + ` - (${Math.floor(x * 10)}, ${Math.floor(y * 10)})`;
             if (this._coordBalloon != null) {
                 this._coordBalloon.setText(msg);
                 this._coordBalloon.display.visible = true;
@@ -422,7 +425,7 @@ export class SpecBox extends ContainerObject {
     }
 
     private updateDotplotLabel(ref_x: number, ref_y: number): void {
-        let plotSize: number = this.plotSize;
+        let {plotSize} = this;
         let h0DefaultX: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
         let h0DefaultY: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
 
@@ -503,5 +506,5 @@ export class SpecBox extends ContainerObject {
     private static readonly H0_DEFAULT_Y = 55;
     private static readonly V0_DEFAULT_X = 30;
     private static readonly V0_DEFAULT_Y = 70;
-    private static readonly OFFSET = 10;    // coord offset
+    private static readonly OFFSET = 10; // coord offset
 }

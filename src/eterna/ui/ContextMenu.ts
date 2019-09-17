@@ -42,7 +42,7 @@ export class ContextMenu extends ContainerObject {
     }
 
     private doLayout(): void {
-        let maxButtonWidth: number = 0;
+        let maxButtonWidth = 0;
         for (let button of this._buttons) {
             button.fixedLabelWidth(0);
             maxButtonWidth = Math.max(button.container.width, maxButtonWidth);
@@ -63,7 +63,8 @@ export class ContextMenu extends ContainerObject {
 
         this._panel.setSize(
             this._buttonLayout.width + (MARGIN * 2),
-            this._buttonLayout.height + (MARGIN * 2));
+            this._buttonLayout.height + (MARGIN * 2)
+        );
     }
 
     private readonly _panel: GamePanel;

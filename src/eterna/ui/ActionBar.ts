@@ -42,11 +42,11 @@ export class ActionBar extends ContainerObject {
             return;
         }
 
-        let item_space: number = 35;
-        let bar_space: number = 10;
+        let item_space = 35;
+        let bar_space = 10;
 
-        let center_width: number = 0;
-        for (let ii: number = 0; ii < this._items.length; ii++) {
+        let center_width = 0;
+        for (let ii = 0; ii < this._items.length; ii++) {
             center_width += Math.max(DisplayUtil.width(this._items[ii].display), 35);
         }
 
@@ -55,15 +55,15 @@ export class ActionBar extends ContainerObject {
         let whole_height: number = this._height;
 
         if (whole_height < 1) {
-            let max_height: number = 0;
-            let vertical_margin: number = 10;
+            let max_height = 0;
+            let vertical_margin = 10;
             for (let ii = 0; ii < this._items.length; ii++) {
                 max_height = Math.max(max_height, DisplayUtil.height(this._items[ii].display));
             }
             whole_height = max_height + vertical_margin;
         }
 
-        let item_space_walker: number = 0;
+        let item_space_walker = 0;
 
         for (let ii = 0; ii < this._items.length; ii++) {
             let cur_space: number = Math.max(DisplayUtil.width(this._items[ii].display), item_space);
@@ -84,10 +84,10 @@ export class ActionBar extends ContainerObject {
             return 0;
         }
 
-        let bar_space: number = 10;
+        let bar_space = 10;
 
-        let center_width: number = 0;
-        for (let ii: number = 0; ii < this._items.length; ii++) {
+        let center_width = 0;
+        for (let ii = 0; ii < this._items.length; ii++) {
             center_width += Math.max(DisplayUtil.width(this._items[ii].display), 35);
         }
 

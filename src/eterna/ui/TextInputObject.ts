@@ -221,8 +221,8 @@ export class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaEl
             .build();
         text.mask = textMask;
         text.position = new Point(
-            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-left')),
-            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue('padding-right'))
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue("padding-left")),
+            parseFloat(window.getComputedStyle(this._obj, null).getPropertyValue("padding-right"))
         );
         this._fakeTextInput.addChild(text);
 

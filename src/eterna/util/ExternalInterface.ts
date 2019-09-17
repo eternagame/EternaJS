@@ -47,7 +47,7 @@ export class ExternalInterface {
 
     public static pushContext(ctx: ExternalInterfaceCtx): void {
         let updateReg = ctx.changed.connect(() => this.updateCallbacks());
-        this._registeredContexts.push({ctx: ctx, reg: updateReg});
+        this._registeredContexts.push({ctx, reg: updateReg});
         if (ctx.callbacks.size > 0) {
             this.updateCallbacks();
         }
@@ -77,7 +77,6 @@ export class ExternalInterface {
                 this._noPendingScripts = new Deferred();
             }
             return this._noPendingScripts.promise;
-
         } else {
             return Promise.resolve();
         }
@@ -93,11 +92,11 @@ export class ExternalInterface {
     public static runScript(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this._pendingScripts.push({
-                scriptID: "" + scriptID,
-                options: options,
-                resolve: resolve,
-                reject: reject,
-                synchronous: false,
+                scriptID: `${scriptID}`,
+                options,
+                resolve,
+                reject,
+                synchronous: false
             });
 
             this.maybeRunNextScript();
@@ -129,11 +128,11 @@ export class ExternalInterface {
         };
 
         this._pendingScripts.push({
-            scriptID: "" + scriptID,
-            options: options,
+            scriptID: `${scriptID}`,
+            options,
             resolve: result => complete(result, undefined),
             reject: err => complete(undefined, err),
-            synchronous: true,
+            synchronous: true
         });
 
         this.maybeRunNextScript();
@@ -177,7 +176,7 @@ export class ExternalInterface {
     }
 
     private static runPendingScript(script: PendingScript): void {
-        let ctx = script.options.ctx;
+        let {ctx} = script.options;
         if (ctx == null) {
             ctx = new ExternalInterfaceCtx();
         }
@@ -239,7 +238,8 @@ export class ExternalInterface {
                 script.scriptID,
                 script.options.params || {},
                 null,
-                script.synchronous);
+                script.synchronous
+            );
         } catch (err) {
             complete(undefined, err || `Unknown error in script ${script.scriptID}`);
         }

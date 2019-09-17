@@ -45,7 +45,7 @@ export class EternaSettings extends Settings {
         this.soundVolume = this.setting("soundVolume", 0.6);
         this.lastUsedFolder = this.setting("lastUsedFolder", null);
         this.pipEnabled = this.setting("pipEnabled", false);
-        this.simpleGraphics = this.setting('simpleGraphics', false);
+        this.simpleGraphics = this.setting("simpleGraphics", false);
 
         this.designBrowserColumnNames = this.setting("designBrowserColumnNames", null);
         this.designBrowserSelectedSolutionIDs = this.setting("designBrowserSelectedSolutionIDs", null);

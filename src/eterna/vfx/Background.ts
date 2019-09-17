@@ -15,7 +15,7 @@ export class Background extends ContainerObject {
         this.updateBackground();
 
         this._bubbles = [];
-        for (let ii: number = 0; ii < this._bubbleCount; ii++) {
+        for (let ii = 0; ii < this._bubbleCount; ii++) {
             let bub: Bubble = new Bubble(this._foreground);
             // bub.sprite.visible = false;
             bub.init();
@@ -24,7 +24,7 @@ export class Background extends ContainerObject {
         }
 
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
-        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.disableBubbles(value)))
+        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.disableBubbles(value)));
     }
 
     public disableBubbles(disable: boolean): void {
@@ -50,7 +50,8 @@ export class Background extends ContainerObject {
 
     private updateBackground(): void {
         if (Eterna.gameDiv != null) {
-            let lightBlue: string, darkBlue :string;
+            let lightBlue: string; let
+                darkBlue: string;
             if (this._isFrozen) {
                 lightBlue = "rgb(67, 93, 146) 0%";
                 darkBlue = "rgb(10, 43, 87) 70%";

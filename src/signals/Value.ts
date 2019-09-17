@@ -13,10 +13,6 @@ export class Value<T> extends AbstractValue<T> implements ValueView<T> {
         return this._value;
     }
 
-    public map<U>(func: (value: T) => U): ValueView<U> {
-        return MappedValue.create(this, func);
-    }
-
     /**
      * Updates this instance with the supplied value. Registered listeners are notified only if the
      * value differs from the current value.
@@ -24,6 +20,10 @@ export class Value<T> extends AbstractValue<T> implements ValueView<T> {
      */
     public set value(value: T) {
         this.updateAndNotifyIf(value);
+    }
+
+    public map<U>(func: (value: T) => U): ValueView<U> {
+        return MappedValue.create(this, func);
     }
 
     /**

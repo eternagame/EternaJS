@@ -36,8 +36,8 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
             }
             e.stopPropagation();
         });
-        bgTarget.pointerUp.connect((e) => e.stopPropagation());
-        bgTarget.pointerMove.connect((e) => e.stopPropagation());
+        bgTarget.pointerUp.connect(e => e.stopPropagation());
+        bgTarget.pointerMove.connect(e => e.stopPropagation());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -73,7 +73,7 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         super.removed();
     }
 
-    protected get bgAlpha() :number {
+    protected get bgAlpha(): number {
         return 0.7;
     }
 

@@ -98,7 +98,7 @@ export abstract class Folder {
         return 0;
     }
 
-    protected putCache(key: Object, data: any): void {
+    protected putCache(key: Record<string, any>, data: any): void {
         let key_str = JSON.stringify(key);
         this._cache.set(key_str, data);
     }

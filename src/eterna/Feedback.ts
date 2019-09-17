@@ -9,9 +9,9 @@ export class Feedback {
     public static readonly EXPSCORES: number[] = [0, 10, 15];
 
     public static scoreFeedback(shapedata: number[], secstruct: string, start_index: number, min: number, threshold: number, max: number): number {
-        let score: number = 0;
+        let score = 0;
 
-        for (let ii: number = 0; ii < secstruct.length; ii++) {
+        for (let ii = 0; ii < secstruct.length; ii++) {
             if (ii < start_index) {
                 continue;
             }
@@ -53,7 +53,7 @@ export class Feedback {
             let smin: number = shape_data[0];
             let savg: number = shape_data[0];
 
-            for (let ii: number = 0; ii < shape_data.length; ii++) {
+            for (let ii = 0; ii < shape_data.length; ii++) {
                 if (shape_data[ii] > smax) {
                     smax = shape_data[ii];
                 }

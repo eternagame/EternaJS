@@ -58,7 +58,7 @@ export class HLayoutContainer extends LayoutContainer {
 
     /* override */
     protected doLayout(): void {
-        let maxHeight: number = 0;
+        let maxHeight = 0;
         if (this._vAlign !== VAlign.TOP) {
             for (let child of this.children) {
                 if (child.visible) {
@@ -68,9 +68,9 @@ export class HLayoutContainer extends LayoutContainer {
             }
         }
 
-        let from: number,
-            to: number,
-            inc: number;
+        let from: number;
+        let to: number;
+        let inc: number;
         if (this._reversed) {
             from = this.children.length - 1;
             to = -1;
@@ -81,7 +81,7 @@ export class HLayoutContainer extends LayoutContainer {
             inc = 1;
         }
 
-        let x: number = 0;
+        let x = 0;
         for (let ii = from; ii !== to; ii += inc) {
             let child = this.getChildAt(ii);
             if (child.visible) {

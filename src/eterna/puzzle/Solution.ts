@@ -19,7 +19,7 @@ export class Solution {
         this._desc = desc;
 
         if (this._desc) {
-            let newlinereg: RegExp = /\n/g;
+            let newlinereg = /\n/g;
             this._shortDesc = this._desc.replace(newlinereg, " ");
             newlinereg = /\r/g;
             this._shortDesc = this._shortDesc.replace(newlinereg, " ");
@@ -43,7 +43,7 @@ export class Solution {
     public set title(title: string) {
         this._title = title;
 
-        let newlinereg: RegExp = /\n/g;
+        let newlinereg = /\n/g;
         this._title = this._title.replace(newlinereg, " ");
         newlinereg = /\r/g;
         this._title = this._title.replace(newlinereg, " ");

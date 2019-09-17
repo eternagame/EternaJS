@@ -9,7 +9,7 @@ export class ExpPainter {
         let data_ret: number[] = data.slice();
         let abs_max: number = 2 * data_max - data_min;
 
-        for (let ii: number = 0; ii < data_ret.length; ii++) {
+        for (let ii = 0; ii < data_ret.length; ii++) {
             data_ret[ii] = MathUtil.clamp(data_ret[ii], data_min, abs_max);
         }
 
@@ -48,7 +48,7 @@ export class ExpPainter {
         this._continuous = false;
         this._extended = false;
 
-        for (let ii: number = 1; ii < this._data.length; ii++) {
+        for (let ii = 1; ii < this._data.length; ii++) {
             this._dataMin = Math.min(this._dataMin, this._data[ii]);
             this._dataMax = Math.max(this._dataMax, this._data[ii]);
 

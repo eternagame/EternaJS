@@ -37,7 +37,7 @@ export abstract class RScriptOp {
         args = this.createStrings(args);
 
         let param: string[] = args.split(",");
-        for (let i: number = 0; i < param.length; ++i) {
+        for (let i = 0; i < param.length; ++i) {
             let arg: string = param[i];
             arg = arg.replace(/^\s*/, "");
             arg = arg.replace(/\s*$/, "");
@@ -68,8 +68,8 @@ export abstract class RScriptOp {
             let d_idx: number = arg.indexOf("\"");
             let d_matchIdx: number = arg.indexOf("\"", d_idx + 1);
 
-            let idx: number = -1;
-            let matchIdx: number = -1;
+            let idx = -1;
+            let matchIdx = -1;
             if ((s_idx < d_idx || d_idx === -1) && s_idx >= 0 && s_matchIdx >= 0) {
                 idx = s_idx;
                 matchIdx = s_matchIdx;

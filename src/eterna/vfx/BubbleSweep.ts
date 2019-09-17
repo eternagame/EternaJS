@@ -5,7 +5,7 @@ export class BubbleSweep extends ContainerObject {
     public constructor(numBubbles: number) {
         super();
         this._bubbles = [];
-        for (let ii: number = 0; ii < numBubbles; ii++) {
+        for (let ii = 0; ii < numBubbles; ii++) {
             let bub: Bubble = new Bubble(true);
             this.addObject(bub, this.container);
             this._bubbles.push(bub);

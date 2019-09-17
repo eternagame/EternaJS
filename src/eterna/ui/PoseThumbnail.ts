@@ -1,4 +1,6 @@
-import {Container, DisplayObject, Graphics, Sprite, Texture} from "pixi.js";
+import {
+    Container, DisplayObject, Graphics, Sprite, Texture
+} from "pixi.js";
 import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
 import {TextureUtil} from "../../flashbang/util/TextureUtil";
 import {Constants} from "../Constants";
@@ -75,7 +77,7 @@ export class PoseThumbnail {
         let ymin: number = yarray[0];
         let ymax: number = yarray[0];
 
-        for (let ii: number = 0; ii < n; ii++) {
+        for (let ii = 0; ii < n; ii++) {
             if (xarray[ii] < xmin) {
                 xmin = xarray[ii];
             }
@@ -94,11 +96,11 @@ export class PoseThumbnail {
         }
 
         let xdiff: number = xmax - xmin;
-        let xscale: number = 1;
+        let xscale = 1;
         if (xdiff > Constants.EPSILON) xscale = (w) / xdiff;
 
         let ydiff: number = ymax - ymin;
-        let yscale: number = 1;
+        let yscale = 1;
         if (ydiff > Constants.EPSILON) yscale = (h) / ydiff;
 
         let scale: number = Math.min(xscale, yscale);
@@ -118,8 +120,8 @@ export class PoseThumbnail {
         let small_ymax: number = (yarray[0] - ymin) * scale;
         let small_ymin: number = (yarray[0] - ymin) * scale;
 
-        let xpos: number,
-            ypos: number;
+        let xpos: number;
+        let ypos: number;
 
         for (let ii = 0; ii < n; ii++) {
             xpos = (xarray[ii] - xmin) * scale;
@@ -153,7 +155,7 @@ export class PoseThumbnail {
         const COLOR_CYTOSINE = 0x00FF00;
         const COLOR_URACIL = 0x8888FF;
 
-        let color: number = 0;
+        let color = 0;
         for (let ii = 0; ii < n; ii++) {
             color = 0;
 

@@ -66,7 +66,7 @@ export class Vienna2 extends Folder {
             throw new Error(`Something's wrong with dot plot return ${temp_array.length}`);
         }
 
-        for (let ii: number = 0; ii < temp_array.length; ii += 4) {
+        for (let ii = 0; ii < temp_array.length; ii += 4) {
             if (temp_array[ii + 3] === "ubox") {
                 ret_array.push(Number(temp_array[ii]));
                 ret_array.push(Number(temp_array[ii + 1]));
@@ -220,10 +220,10 @@ export class Vienna2 extends Folder {
         }
 
         let site_groups: number[][] = [];
-        let last_index: number = -1;
+        let last_index = -1;
         let current_group: number[] = [];
 
-        for (let jj: number = 0; jj < binding_site.length; jj++) {
+        for (let jj = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
@@ -245,7 +245,8 @@ export class Vienna2 extends Folder {
                 site_groups[0][site_groups[0].length - 1],
                 site_groups[1][site_groups[1].length - 1],
                 site_groups[1][0],
-                bonus);
+                bonus
+            );
         } else {
             pairs = this.foldSequenceWithBindingSiteOld(seq, target_pairs, binding_site, bonus);
         }
@@ -296,7 +297,7 @@ export class Vienna2 extends Folder {
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             co_pairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -335,10 +336,10 @@ export class Vienna2 extends Folder {
         // FIXME: what about desired_pairs? (forced structure)
 
         let site_groups: number[][] = [];
-        let last_index: number = -1;
+        let last_index = -1;
         let current_group: number[] = [];
 
-        for (let jj: number = 0; jj < binding_site.length; jj++) {
+        for (let jj = 0; jj < binding_site.length; jj++) {
             if (last_index < 0 || binding_site[jj] - last_index === 1) {
                 current_group.push(binding_site[jj]);
                 last_index = binding_site[jj];
@@ -371,14 +372,15 @@ export class Vienna2 extends Folder {
             site_groups[0][site_groups[0].length - 1],
             site_groups[1][site_groups[1].length - 1],
             site_groups[1][0],
-            bonus);
+            bonus
+        );
 
         let co_nodes: number[] = [];
         let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
         if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) co_fe += bonus;
 
         if (co_fe + malus >= feA + feB) {
-            let struc: string = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
+            let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
             co_pairs = EPars.parenthesisToPairs(struc);
         }
 
@@ -400,21 +402,21 @@ export class Vienna2 extends Folder {
 
     /* override */
     public mlEnergy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
-        let energy: number,
-            cx_energy: number,
-            best_energy: number;
+        let energy: number;
+        let cx_energy: number;
+        let best_energy: number;
         best_energy = EPars.INF;
-        let i1: number,
-            j: number,
-            p: number,
-            q: number,
-            u: number,
-            x: number,
-            type: number,
-            count: number;
+        let i1: number;
+        let j: number;
+        let p: number;
+        let q: number;
+        let u: number;
+        let x: number;
+        let type: number;
+        let count: number;
         let mlintern: number[] = new Array(EPars.NBPAIRS + 1);
-        let mlclosing: number,
-            mlbase: number;
+        let mlclosing: number;
+        let mlbase: number;
 
         let dangles: number = EPars.DANGLES;
 
@@ -435,7 +437,7 @@ export class Vienna2 extends Folder {
         }
 
         for (count = 0; count < 2; count++) { /* do it twice */
-            let ld5: number = 0;
+            let ld5 = 0;
             /* 5' dangle energy on prev pair (type) */
             if (i === 0) {
                 j = pairs[0] + 1;
@@ -456,8 +458,8 @@ export class Vienna2 extends Folder {
             cx_energy = EPars.INF;
 
             do { /* walk around the multi-loop */
-                let tt: number,
-                    new_cx: number;
+                let tt: number;
+                let new_cx: number;
                 new_cx = EPars.INF;
 
                 /* hope over unpaired positions */
@@ -480,9 +482,9 @@ export class Vienna2 extends Folder {
                 cx_energy += mlintern[tt];
 
                 if (dangles) {
-                    let dang5: number = 0;
-                    let dang3: number = 0;
-                    let dang: number = 0;
+                    let dang5 = 0;
+                    let dang3 = 0;
+                    let dang = 0;
                     if ((p > 1)) {
                         dang5 = EPars.getDangle5Score(tt, S[p - 1]);
                         /* 5'dangle of pq pair */
@@ -539,11 +541,11 @@ export class Vienna2 extends Folder {
 
     /* override */
     public loopEnergy(n1: number, n2: number, type: number, type_2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean): number {
-        let loop_score: number = 0;
+        let loop_score = 0;
 
         /* compute energy of degree 2 loop (stack bulge or interior) */
-        let nl: number,
-            ns: number;
+        let nl: number;
+        let ns: number;
 
         if (n1 > n2) {
             nl = n1;
@@ -614,7 +616,7 @@ export class Vienna2 extends Folder {
 
     /* override */
     public hairpinEnergy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
-        let hairpin_score: number = 0;
+        let hairpin_score = 0;
 
         if (size <= 30) {
             hairpin_score = EPars.HAIRPIN_37[size];
@@ -623,7 +625,7 @@ export class Vienna2 extends Folder {
         }
 
         if (size === 4) {
-            let loop_str: string = "";
+            let loop_str = "";
             for (let walker: number = i; walker <= j; walker++) {
                 if (sequence[walker] === EPars.RNABASE_ADENINE) {
                     loop_str += "A";
@@ -670,7 +672,7 @@ export class Vienna2 extends Folder {
 
     private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        const structStr: string = "";
+        const structStr = "";
         let result: FullFoldResult;
 
         try {
@@ -742,10 +744,10 @@ export class Vienna2 extends Folder {
         target_tree.scoreTree(seq, this);
         let target_score: number = target_tree.totalScore;
 
-        let native_bound: boolean = true;
-        let target_bound: boolean = true;
+        let native_bound = true;
+        let target_bound = true;
 
-        for (let bb: number = 0; bb < binding_site.length; bb++) {
+        for (let bb = 0; bb < binding_site.length; bb++) {
             let bi: number = binding_site[bb];
             if (target_pairs[bi] !== native_pairs[bi]) {
                 native_bound = false;

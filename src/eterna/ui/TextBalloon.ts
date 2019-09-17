@@ -89,7 +89,7 @@ export class TextBalloon extends ContainerObject {
     }
 
     public get height(): number {
-        let whole_height: number = 0;
+        let whole_height = 0;
         whole_height += this._text != null ? this._text.height : 0;
 
         if (this._button != null && this._button.display.visible) {
@@ -104,8 +104,8 @@ export class TextBalloon extends ContainerObject {
             return;
         }
 
-        let width = this.width;
-        let height = this.height;
+        let {width} = this;
+        let {height} = this;
         this._panel.setSize(width, height);
 
         let whole_width: number = width - 2 * TextBalloon.W_MARGIN;
