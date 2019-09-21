@@ -14,10 +14,9 @@ import {Background} from "../vfx/Background";
 
 /** Displays a simple animation while we're loading assets */
 export class LoadingMode extends AppMode {
-    public constructor(text: string, extraBlurbText: string ) {
+    public constructor(text: string) {
         super();
         this._text = text;
-        this._extraBlurbText = extraBlurbText;
     }
 
     public get isOpaque(): boolean { return true; }
@@ -42,17 +41,12 @@ export class LoadingMode extends AppMode {
 
         this.addObject(new Background(0), this._container);
 
-        this._textField = Fonts.arial(this._text, 30).color(0xffffff).build();
+        this._textField = Fonts.arial(this._text, 36).bold().color(0xffffff).build();
         this._textField.x = -this._textField.width * 0.5;
         this._textField.y = -this._textField.height * 0.5;
 
-        this._extraBlurbTextField = Fonts.arial(this._extraBlurbText, 36).bold().color(0xffffff).build();
-        this._extraBlurbTextField.x = -this._extraBlurbTextField.width * 0.5;
-        this._extraBlurbTextField.y = -this._extraBlurbTextField.height * 1.6;
-
         let container = new ContainerObject();
         container.container.addChild(this._textField);
-        container.container.addChild(this._extraBlurbTextField);
         this.addObject(container, this.container);
 
         container.addObject(new SerialTask(
@@ -83,7 +77,4 @@ export class LoadingMode extends AppMode {
 
     private _text: string;
     private _textField: Text;
-
-    private _extraBlurbText: string;
-    private _extraBlurbTextField: Text;
 }
