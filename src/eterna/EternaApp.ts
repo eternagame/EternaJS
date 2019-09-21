@@ -129,7 +129,7 @@ export class EternaApp extends FlashbangApp {
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
-        this.setLoadingText("Authenticating...");
+        this.setLoadingText("Authenticating...", this.getExtraBlurb());
 
         this.authenticate()
             .then(() => {
@@ -303,7 +303,7 @@ export class EternaApp extends FlashbangApp {
         if (puzzleOrID instanceof Puzzle) {
             return Promise.resolve(puzzleOrID);
         } else {
-            this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
+            this.setLoadingText(`Loading puzzle...`);
             return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
                 .then((puzzle) => {
                     this.popLoadingMode();
@@ -349,13 +349,40 @@ export class EternaApp extends FlashbangApp {
         return document.getElementById(Eterna.PIXI_CONTAINER_ID);
     }
 
-    private setLoadingText(text: string): void {
+    private setLoadingText(text: string, extraBlurbText: string): void {
         if (this._modeStack.topMode instanceof LoadingMode) {
             (this._modeStack.topMode as LoadingMode).text = text;
+            if (extraBlurbText) (this._modeStack.topMode as LoadingMode).extraBlurbText = extraBlurbText;
         } else {
-            this._modeStack.pushMode(new LoadingMode(text));
+            this._modeStack.pushMode(new LoadingMode(text, extraBlurbText));
         }
     }
+
+    // FIXME: This probably belongs in the backend database to allow for easy updating
+    //  and reweighting by message importance without requiring code updates -- rhiju.
+    private getExtraBlurb(): string {
+        var ExtraBlurbs = [
+            "Developed by players for players",
+            "Afraid of pandemic flu? Stay calm and play Eterna.",
+            "Played by Humans, Scored by Nature.",
+            "Empowering citizen scientists to invent medicine",
+            "Heard of CRISPR? That's medicine based on designed RNA",
+            "The only videogame with real experiments in the loop",
+            "No computer can solve the entire Eterna100",
+            "Player-made bot NEMO crushes deep learning.",
+            "Twenty scientific publications and counting...",
+            "Top Eterna players still crush all bots.",
+            "Science is much more about the questions than the facts",
+            "Citizen science works because we are a curious species.",
+            "Just hang in there and you will eventually get the hang of it.",
+            "The ribosome makes life. You can re-design it.",
+            "The first treatment for spinal muscular atrophy is RNA",
+            //"RNA design is provably intractable for computers."
+        ]
+        return ExtraBlurbs[Math.floor(Math.random() * ExtraBlurbs.length)];
+    }
+
+
 
     private popLoadingMode(): void {
         if (this._modeStack.topMode instanceof LoadingMode) {
