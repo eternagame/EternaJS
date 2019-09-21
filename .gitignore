@@ -85,3 +85,6 @@ typings/
 
 # Webpack build output
 dist/
+
+# dropbox/Mac temp file
+*.DS_Store
