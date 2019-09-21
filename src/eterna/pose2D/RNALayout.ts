@@ -1,5 +1,6 @@
 import {EPars} from "../EPars";
 import {Folder} from "../folding/Folder";
+import { Assert } from "../../flashbang/util/Assert";
 
 export class RNATreeNode {
     public isPair: boolean = false;
@@ -60,6 +61,7 @@ export class RNALayout {
             }
         }
 
+        // is dangling_end used for anything? -- rhiju
         for (ii = bi_pairs.length - 1; ii >= 0; ii--) {
             if (bi_pairs[ii] < 0) {
                 dangling_end++;
@@ -248,7 +250,6 @@ export class RNALayout {
         let cross_x: number = -go_y;
         let cross_y: number = go_x;
 
-        let children_width: number = rootnode.children.length * RNALayout.NODE_R * 2;
         let oligo_displacement: number = 0;
 
         rootnode.goX = go_x;
@@ -280,41 +281,109 @@ export class RNALayout {
 
             let circle_length: number = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
             circle_length += oligo_displacement;
-
             let circle_radius: number = circle_length / (2 * Math.PI);
             let length_walker: number = this._pairSpace / 2.0;
 
-            if (parentnode == null) {
-                rootnode.x = go_x * circle_radius;
-                rootnode.y = go_y * circle_radius;
+            // TODO. pre-identify any junctions that are 'special cases'. This is hardwired in for puzzle 9386151 in dev server. (1L2X pseudoknot)
+            let special_case: boolean = ( ( (parentnode) && (parentnode.indexA == 6) && (rootnode.children.length == 6) ) || (parentnode == null) && (rootnode.children.length == 13) );
+            
+            if ( special_case ) {
+                // TODO. read this in via puzzle JSON
+                let native_layout : Array[[number,number]] = [[1.349030,1.182363], [1.349030,2.182363], [1.849030,3.182363], [1.849030,4.182363], [1.849030,5.182363], [1.849030,6.182363], [1.849030,7.182363], [1.182363,9.099030], [2.432363,11.099030], [3.932363,11.099030], [3.932363,10.099030], [3.932363,9.099030], [3.432363,8.099030], [2.849030,7.182363], [2.849030,6.182363], [2.849030,5.182363], [2.849030,4.182363], [2.849030,3.182363], [4.182363,2.349030], [5.182363,2.849030], [5.682363,3.849030], [5.682363,5.099030], [5.682363,6.099030], [5.432363,7.099030], [5.432363,8.099030], [4.932363,9.099030], [4.932363,10.099030], [4.932363,11.099030]];            
+                rootnode.x = 0;
+                rootnode.y = 0;
+                let parent_native_x : number = 0;
+                let parent_native_y : number = 0;
+                let parent_native_go_x : number = 0;
+                let parent_native_go_y : number = 1;
+                let parent_native_cross_x : number = -1;
+                let parent_native_cross_y : number = 0;
+                if (parentnode && parentnode.isPair ) {
+                    rootnode.x = parentnode.x;
+                    rootnode.y = parentnode.y;
+                    let native_coordA : [number,number] = native_layout[ parentnode.indexA ]
+                    let native_coordB : [number,number] = native_layout[ parentnode.indexB ]
+                    parent_native_x = ( native_coordA[ 0 ] + native_coordB[ 0 ] ) / 2;
+                    parent_native_y = ( native_coordA[ 1 ] + native_coordB[ 1 ] ) / 2;
+                    parent_native_cross_x = ( native_coordA[ 0 ] - native_coordB[ 0 ] );
+                    parent_native_cross_y = ( native_coordA[ 1 ] - native_coordB[ 1 ] );
+                    parent_native_go_x = parent_native_cross_y;
+                    parent_native_go_y = -parent_native_cross_x;
+                }
+                for (ii = 0; ii < rootnode.children.length; ii++) {
+                    // read out where this point should be based on 'native_layout'. get coordinates in 
+                    // "local coordinate frame" set by parent pair in native_layout. 
+                    // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
+                    let native_coord : [number,number] = native_layout[ rootnode.children[ii].indexA ];
+                    if ( rootnode.children[ii].isPair ) {
+                        let native_coordA : [number,number] = native_layout[ rootnode.children[ii].indexA ];
+                        let native_coordB : [number,number] = native_layout[ rootnode.children[ii].indexB ];
+                        native_coord[ 0 ] = ( native_coordA[ 0 ] + native_coordB[ 0 ] ) / 2;
+                        native_coord[ 1 ] = ( native_coordA[ 1 ] + native_coordB[ 1 ] ) / 2;
+                    }
+
+                    let dev_x : number = native_coord[0] - parent_native_x;
+                    let dev_y : number = native_coord[1] - parent_native_y;
+                    let template_x : number = dev_x * parent_native_cross_x + dev_y * parent_native_cross_y;
+                    let template_y : number = dev_x * parent_native_go_x + dev_y * parent_native_go_y;
+                    template_x *= this._primarySpace;
+                    template_y *= this._primarySpace;
+
+                    // go to Eterna RNALayout global frame.
+                    let child_x : number = rootnode.x + cross_x * template_x + go_x * template_y;                    
+                    let child_y : number = rootnode.y + cross_y * template_x + go_y * template_y;
+                    let child_go_x: number = 0;
+                    let child_go_y: number = 1;
+                    if ( rootnode.children[ii].isPair ) {
+                        let native_coordA : [number,number] = native_layout[ rootnode.children[ii].indexA ];
+                        let native_coordB : [number,number] = native_layout[ rootnode.children[ii].indexB ];
+                        let native_cross_x : number = ( native_coordA[ 0 ] - native_coordB[ 0 ] );
+                        let native_cross_y : number = ( native_coordA[ 1 ] - native_coordB[ 1 ] );
+                        let native_go_x : number = native_cross_y;
+                        let native_go_y : number = -native_cross_x;
+                        child_go_x = native_go_x * parent_native_cross_x + native_go_y * parent_native_cross_y;
+                        child_go_y = native_go_x * parent_native_go_x    + native_go_y * parent_native_go_y;
+                    }
+                    let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
+
+                    this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
+                        child_go_x / child_go_len, child_go_y / child_go_len);
+
+                }
             } else {
-                rootnode.x = parentnode.x + go_x * circle_radius;
-                rootnode.y = parentnode.y + go_y * circle_radius;
-            }
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-
-                length_walker += this._primarySpace;
-                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
-                    length_walker += 2 * this._primarySpace;
+                if (parentnode == null) {
+                    rootnode.x = go_x * circle_radius;
+                    rootnode.y = go_y * circle_radius;
+                } else {
+                    rootnode.x = parentnode.x + go_x * circle_radius;
+                    rootnode.y = parentnode.y + go_y * circle_radius;
                 }
 
-                if (rootnode.children[ii].isPair) {
-                    length_walker += this._pairSpace / 2.0;
-                }
+                for (ii = 0; ii < rootnode.children.length; ii++) {
 
-                let rad_angle: number = length_walker / circle_length * 2 * Math.PI - Math.PI / 2.0;
-                let child_x: number = rootnode.x + Math.cos(rad_angle) * cross_x * circle_radius + Math.sin(rad_angle) * go_x * circle_radius;
-                let child_y: number = rootnode.y + Math.cos(rad_angle) * cross_y * circle_radius + Math.sin(rad_angle) * go_y * circle_radius;
+                    length_walker += this._primarySpace;
+                    if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
+                        length_walker += 2 * this._primarySpace;
+                    }
 
-                let child_go_x: number = child_x - rootnode.x;
-                let child_go_y: number = child_y - rootnode.y;
-                let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
+                    if (rootnode.children[ii].isPair) {
+                        length_walker += this._pairSpace / 2.0;
+                    }
 
-                this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
-                    child_go_x / child_go_len, child_go_y / child_go_len);
+                    let rad_angle: number = length_walker / circle_length * 2 * Math.PI - Math.PI / 2.0;
+                    let child_x: number = rootnode.x + Math.cos(rad_angle) * cross_x * circle_radius + Math.sin(rad_angle) * go_x * circle_radius;
+                    let child_y: number = rootnode.y + Math.cos(rad_angle) * cross_y * circle_radius + Math.sin(rad_angle) * go_y * circle_radius;
 
-                if (rootnode.children[ii].isPair) {
-                    length_walker += this._pairSpace / 2.0;
+                    let child_go_x: number = child_x - rootnode.x;
+                    let child_go_y: number = child_y - rootnode.y;
+                    let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
+
+                    this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
+                        child_go_x / child_go_len, child_go_y / child_go_len);
+
+                    if (rootnode.children[ii].isPair) {
+                        length_walker += this._pairSpace / 2.0;
+                    }
                 }
             }
         } else {
