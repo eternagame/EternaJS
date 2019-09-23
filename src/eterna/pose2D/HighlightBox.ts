@@ -7,6 +7,7 @@ import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Pose2D} from "./Pose2D";
+import { access } from "fs";
 
 export enum HighlightType {
     STACK = 0,
@@ -261,16 +262,6 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                     axis.x += from_prev.x;
                     axis.y += from_prev.y;
                     num_gos++;
-
-                    if (ii === loop_start) {
-                        start_from.x = from_prev.x;
-                        start_from.y = from_prev.y;
-                    }
-
-                    if (ii === loop_end && ii === full_len - 1) {
-                        end_to.x = from_prev.x;
-                        end_to.y = from_prev.y;
-                    }
                 }
 
                 if (ii < full_len - 1) {
@@ -280,25 +271,23 @@ export class HighlightBox extends GameObject implements LateUpdatable {
                     axis.x += to_next.x;
                     axis.y += to_next.y;
                     num_gos++;
-
-                    if (ii === loop_start) {
-                        start_from.x = to_next.x;
-                        start_from.y = to_next.y;
-                    }
-
-                    if (ii === loop_end) {
-                        end_to.x = to_next.x;
-                        end_to.y = to_next.y;
-                    }
                 }
 
                 if (num_gos === 0) {
                     throw new Error("Something wrong with loop highlight!");
                 }
-
                 axis.normalizeLocal();
                 axes.push(new Point(axis.y, -axis.x));
+
+                if (ii === loop_start ) {
+                    start_from = axis;
+                }
+
+                if (ii === loop_end) {
+                    end_to = axis;
+                }
             }
+
 
             let loop_start_xy: Point = this._pose.getBaseXY(loop_start);
             let loop_end_xy: Point = this._pose.getBaseXY(loop_end);
