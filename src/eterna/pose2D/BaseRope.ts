@@ -17,20 +17,21 @@ export class BaseRope extends GameObject implements LateUpdatable {
         return this._graphics;
     }
 
-    public update(): void {
+    public lateUpdate(dt: number): void {
         this._graphics.clear();
-
 
         let idx: number[] = [];
         let baseposX: number[] = [];
         let baseposY: number[] = [];
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
-            let center: Point = this._pose.getBaseXY(i);
+            let center: Point = this._pose._bases[i].getLastDrawnPos();
+
             if (center) {
                 idx.push(i);
                 baseposX.push(center.x);
                 baseposY.push(center.y);
             }
+           //if ( this._pose._bases[i]._animate ) console.log( i, this._pose._bases[i].display.x, this._pose._bases[i].lastCenterX,  this._pose._bases[i].getLastDrawnPos().x )
         }
 
         const Spline = require('cubic-spline');
