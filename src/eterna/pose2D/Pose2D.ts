@@ -72,6 +72,8 @@ export class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodeHighlight = new Graphics();
         this.container.addChild(this._scoreNodeHighlight);
 
+        this._baseRope = new Graphics()
+        this.container.addChild( this._baseRope );
         this.container.addChild(this._baseLayer);
 
         this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
@@ -2390,14 +2392,14 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     private updateBaseRope(): void {
-        if (this._baseRope == null) {
-            // this initialization really should not be in here.
-            // 1. but where should this function go so that it updated properly? example edge case -- when resizing window, line not redrawn with pose.
-            // 2. which class should hold _baseRope?
-            // 3. how to get baseRope to show up _under_ bases? alternatively, could be smart abuot display, e.g. show 'dashed line' 
-            this._baseRope = new Graphics(); 
-            this.container.addChild( this._baseRope );
-        }
+        // if (this._baseRope == null) {
+        //     // this initialization really should not be in here.
+        //     // 1. but where should this function go so that it updated properly? example edge case -- when resizing window, line not redrawn with pose.
+        //     // 2. which class should hold _baseRope?
+        //     // 3. how to get baseRope to show up _under_ bases? alternatively, could be smart abuot display, e.g. show 'dashed line' 
+        //     this._baseRope = new Graphics(); 
+        //     this.container.addChild( this._baseRope );
+        // }
 
         const baseposX = [];
         const baseposY = [];
