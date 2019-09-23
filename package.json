@@ -89,7 +89,7 @@
     "pixi-filters": "^2.7.1",
     "pixi-multistyle-text": "^0.7.0",
     "pixi-sound": "^2.1.0",
-    "pixi.js": "^4.8.6",
+    "pixi.js": "^4.8.8",
     "store": "^2.0.12",
     "upng-js": "^2.1.0",
     "webfontloader": "^1.6.28"
