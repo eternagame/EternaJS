@@ -2020,8 +2020,6 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this.drawBaseMark(this._trackedIndices[ii]);
             }
 
-            this._baseRope.update();
-
             if (this._cursorIndex > 0) {
                 center = this.getBaseXY(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
