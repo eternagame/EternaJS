@@ -20,6 +20,7 @@ export class BaseRope extends GameObject implements LateUpdatable {
     public update(): void {
         this._graphics.clear();
 
+
         let idx: number[] = [];
         let baseposX: number[] = [];
         let baseposY: number[] = [];
@@ -38,11 +39,14 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
         // by drawing twice, can get a nice looking texture.
         // draw thick line and thin line on top
-        this._graphics.lineStyle(10, 0x777777, 0.2);
+        let OUTER_ROPE_THICKNESS : number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose._zoomLevel];
+        let INNER_ROPE_THICKNESS : number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose._zoomLevel];
+
+        this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
         this._graphics.moveTo(baseposX[0], baseposY[0]);
         this.drawBaseRopeLine(splineX, splineY);
 
-        this._graphics.lineStyle(7, 0xEEEEEE, 0.2);
+        this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
         this._graphics.moveTo(baseposX[0], baseposY[0]);
         this.drawBaseRopeLine(splineX, splineY);
     }
