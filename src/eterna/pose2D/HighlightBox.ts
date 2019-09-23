@@ -7,7 +7,6 @@ import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
 import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
 import {SerialTask} from "../../flashbang/tasks/SerialTask";
 import {Pose2D} from "./Pose2D";
-import { access } from "fs";
 
 export enum HighlightType {
     STACK = 0,
