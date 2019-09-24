@@ -303,7 +303,7 @@ export class EternaApp extends FlashbangApp {
         if (puzzleOrID instanceof Puzzle) {
             return Promise.resolve(puzzleOrID);
         } else {
-            this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
+            this.setLoadingText(`Loading puzzle...`);
             return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
                 .then((puzzle) => {
                     this.popLoadingMode();
@@ -349,11 +349,12 @@ export class EternaApp extends FlashbangApp {
         return document.getElementById(Eterna.PIXI_CONTAINER_ID);
     }
 
-    private setLoadingText(text: string): void {
+    private setLoadingText(text: string, extraBlurbText: string): void {
         if (this._modeStack.topMode instanceof LoadingMode) {
             (this._modeStack.topMode as LoadingMode).text = text;
+            if (extraBlurbText) (this._modeStack.topMode as LoadingMode).extraBlurbText = extraBlurbText;
         } else {
-            this._modeStack.pushMode(new LoadingMode(text));
+            this._modeStack.pushMode(new LoadingMode(text, extraBlurbText));
         }
     }
 
