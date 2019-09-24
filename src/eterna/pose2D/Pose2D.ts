@@ -157,6 +157,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         // handle view settings
         this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
+        this.regs.add(Eterna.settings.showRope.connectNotify(value => this.showBaseRope = value));
         this.regs.add(Eterna.settings.showLetters.connectNotify(value => this.lettermode = value));
         this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => this.useContinuousExpColors = value));
         this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => this.useExtendedScale = value));
@@ -994,6 +995,15 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public get showNumbering(): boolean {
         return this._numberingMode;
+    }
+
+    public set showBaseRope(show: boolean) {
+        this._baseRopeMode = show;
+        this._redraw = true;
+    }
+
+    public get showRope(): boolean {
+        return this._baseRopeMode;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -2014,11 +2024,15 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        this._baseRope._visible = this._baseRopeMode;
+
         if (this._redraw || basesMoved) {
             let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
                 this.drawBaseMark(this._trackedIndices[ii]);
             }
+
+            // this._baseRope.makeVisibleIfLongSpacings();
 
             if (this._cursorIndex > 0) {
                 center = this.getBaseXY(this._cursorIndex - 1);
@@ -3417,6 +3431,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Rendering mode
     private _numberingMode: boolean = false;
+    private _baseRopeMode: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     /// Last exp paint data

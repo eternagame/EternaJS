@@ -335,6 +335,16 @@ export class PoseEditMode extends GameMode {
         this._ropPresets.push(() => this.setShowNumbering(show));
     }
 
+    public setShowRope(show: boolean): void {
+        for (let pose of this._poses) {
+            pose.showRope = show;
+        }
+    }
+
+    public ropSetShowRope(show: boolean): void {
+        this._ropPresets.push(() => this.setShowRope(show));
+    }
+
     public setShowTotalEnergy(show: boolean): void {
         for (let pose of this._poses) {
             pose.showTotalEnergy = show;
@@ -772,7 +782,7 @@ export class PoseEditMode extends GameMode {
         };
 
         this.poseEditByTarget(0);
-
+ 
         // Setup RScript and execute the ROPPRE ops
         this._rscript = new RNAScript(this._puzzle, this);
         this._rscript.tick();
@@ -1050,6 +1060,9 @@ export class PoseEditMode extends GameMode {
 
             if (!ctrl && key === KeyCode.KeyN) {
                 Eterna.settings.showNumbers.value = !Eterna.settings.showNumbers.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.KeyR) {
+                Eterna.settings.showRope.value = !Eterna.settings.showRope.value;
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;

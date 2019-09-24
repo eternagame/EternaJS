@@ -3,6 +3,7 @@ import { GameObject } from "../../flashbang/core/GameObject";
 import { LateUpdatable } from "../../flashbang/core/LateUpdatable";
 import { Pose2D } from "./Pose2D";
 import { Spline } from "cubic-spline"
+import { Vector2 } from "../../flashbang/geom/Vector2";
 
 /** BaseRope: A class for drawing a smooth 'rope' through bases. **/
 export class BaseRope extends GameObject implements LateUpdatable {
@@ -11,6 +12,7 @@ export class BaseRope extends GameObject implements LateUpdatable {
         super();
         this._pose = pose;
         this._graphics = new Graphics();
+        this._visible = false;
     }
 
     public get display(): DisplayObject {
@@ -19,20 +21,19 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
     public lateUpdate(dt: number): void {
         this._graphics.clear();
+        if (!this._visible) return;
 
         let idx: number[] = [];
         let baseposX: number[] = [];
         let baseposY: number[] = [];
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             let center: Point = this._pose._bases[i].getLastDrawnPos();
-
             if (center) {
                 idx.push(i);
                 baseposX.push(center.x);
                 baseposY.push(center.y);
             }
-           //if ( this._pose._bases[i]._animate ) console.log( i, this._pose._bases[i].display.x, this._pose._bases[i].lastCenterX,  this._pose._bases[i].getLastDrawnPos().x )
-        }
+          }
 
         const Spline = require('cubic-spline');
         const splineX = new Spline(idx, baseposX);
@@ -62,7 +63,19 @@ export class BaseRope extends GameObject implements LateUpdatable {
         }
     }
 
+    public makeVisibleIfLongSpacings(): void {
+        if (this._visible) return;
+        for (let i = 1; i < this._pose.fullSequence.length; i++) {
+            let vec: Vector2 = new Vector2.fromPoint(this._pose.getBaseXY(i)) - new Vector2.fromPoint(this._pose.getBaseXY(i - 1));
+            if (vec.length > Pose2D.ZOOM_SPACINGS[0]) {
+                this._visible = true;
+                return;
+            }
+        }
+    }
+
     private readonly _pose: Pose2D;
     private readonly _graphics: Graphics;
+    visible_: boolean;
 
 }
