@@ -36,6 +36,7 @@ import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
+import {BaseRope} from "./BaseRope";
 import {Molecule} from "./Molecule";
 import {PaintCursor} from "./PaintCursor"
 import {PoseField} from "./PoseField";
@@ -71,6 +72,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._scoreNodeHighlight = new Graphics();
         this.container.addChild(this._scoreNodeHighlight);
+
+        this._baseRope = new BaseRope(this);
+        this.addObject(this._baseRope, this.container);
 
         this.container.addChild(this._baseLayer);
 
@@ -153,6 +157,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         // handle view settings
         this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
+        this.regs.add(Eterna.settings.showRope.connectNotify(value => this.showBaseRope = value));
         this.regs.add(Eterna.settings.showLetters.connectNotify(value => this.lettermode = value));
         this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => this.useContinuousExpColors = value));
         this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => this.useExtendedScale = value));
@@ -990,6 +995,15 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     public get showNumbering(): boolean {
         return this._numberingMode;
+    }
+
+    public set showBaseRope(show: boolean) {
+        this._baseRopeMode = show;
+        this._redraw = true;
+    }
+
+    public get showRope(): boolean {
+        return this._baseRopeMode;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -1919,9 +1933,6 @@ export class Pose2D extends ContainerObject implements Updatable {
                 this._bases[ii].setXY(current_x, current_y);
             }
 
-            // RHIJU -- Making a ROPE. Might be a better place to put this.
-            this.updateBaseRope();
-
             if (done) {
                 this._baseToX = null;
                 this._baseToY = null;
@@ -2013,12 +2024,16 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
+        this._baseRope._visible = this._baseRopeMode;
+
         if (this._redraw || basesMoved) {
             let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
                 this.drawBaseMark(this._trackedIndices[ii]);
             }
-    
+
+            // this._baseRope.makeVisibleIfLongSpacings();
+
             if (this._cursorIndex > 0) {
                 center = this.getBaseXY(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
@@ -2388,76 +2403,6 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.molecularBindingSite = binding_site;
         this.parenthesis = parenthesis;
     }
-
-    private updateBaseRope(): void {
-        if (this._baseRope == null) {
-            // this initialization really should not be in here.
-            // 1. but where should this function go so that it updated properly? example edge case -- when resizing window, line not redrawn with pose.
-            // 2. which class should hold _baseRope?
-            // 3. how to get baseRope to show up _under_ bases? alternatively, could be smart abuot display, e.g. show 'dashed line' 
-            this._baseRope = new Graphics(); 
-            this.container.addChild( this._baseRope );
-        }
-
-        const baseposX = [];
-        const baseposY = [];
-        for ( let i = 0; i < this._bases.length; i++ ) {
-            const center = this.getBaseXY(i);
-            if  ( center ) {
-                baseposX.push( center.x );
-                baseposY.push( center.y );
-            }
-        }
-
-        // oh man, total redraw.
-        this._baseRope.clear();
-        this._baseRope.lineStyle(7, 0x777777, 0.1);
-        this.drawBaseRopeLine( baseposX, baseposY );
-        this._baseRope.lineStyle(5, 0xEEEEEE, 0.1);
-        this.drawBaseRopeLine(  baseposX, baseposY );
-    }
-
-    private drawBaseRopeLine( baseposX, baseposY ): void {
-        // by drawing twice, can get a nice looking texture.
-        this._baseRope.moveTo(baseposX[0], baseposY[0]);
-        // Update the points to correspond with base locations
-        // Note that this could be way smarter -- just look at rope segments that need to be updated, not entire rope.
-        let smooth_factor : integer = 5;
-        for (let i = 1; i < this._bases.length * smooth_factor; i++) {
-            // Smooth the curve with cubic interpolation to prevent sharp edges.
-            const ix = this.cubicInterpolation(baseposX, i / smooth_factor );
-            const iy = this.cubicInterpolation(baseposY, i / smooth_factor );
-            this._baseRope.lineTo( ix, iy );
-        }
-    }
-
-
-    // adapted directly from  demo    
-    //         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
-    /**
-     * Cubic interpolation based on https://github.com/osuushi/Smooth.js
-     */
-    private cubicInterpolation(array, t, tangentFactor) {
-        if (tangentFactor == null) tangentFactor = 1;
-    
-        const k = Math.floor(t);
-        const m = [this.getTangent(k, tangentFactor, array), this.getTangent(k + 1, tangentFactor, array)];
-        const p = [this.clipInput(k, array), this.clipInput(k + 1, array)];
-        t -= k;
-        const t2 = t * t;
-        const t3 = t * t2;
-        return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * m[0] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
-    }
-    
-    private getTangent(k, factor, array) {
-        return factor * (this.clipInput(k + 1, array) - this.clipInput(k - 1, array)) / 2;
-    }
-    private clipInput(k, arr) {
-        if (k < 0) k = 0;
-        if (k > arr.length - 1) k = arr.length - 1;
-        return arr[k];
-    }
-    
 
     public registerPaintTool(paint_color: number, tool: Booster): void {
         this._dynPaintColors.push(paint_color);
@@ -3383,8 +3328,8 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
 
-    /// BaseRope -- where should this go?
-    private _baseRope : Graphics;
+    // Rope connecting bases for crazy user-defined layouts
+    private _baseRope: BaseRope;
 
     /// Scripted painters
     private _dynPaintColors: number[] = [];
@@ -3486,6 +3431,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Rendering mode
     private _numberingMode: boolean = false;
+    private _baseRopeMode: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     /// Last exp paint data
