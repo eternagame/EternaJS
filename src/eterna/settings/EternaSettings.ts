@@ -7,6 +7,7 @@ export class EternaSettings extends Settings {
     public readonly showChat: Setting<boolean>;
     public readonly showNumbers: Setting<boolean>;
     public readonly showLetters: Setting<boolean>;
+    public readonly showRope: Setting<boolean>;
     public readonly displayFreeEnergies: Setting<boolean>;
     public readonly highlightRestricted: Setting<boolean>;
     public readonly autohideToolbar: Setting<boolean>;
@@ -33,6 +34,7 @@ export class EternaSettings extends Settings {
         this.showChat = this.setting("showChat", true);
         this.showNumbers = this.setting("showNumbers", true);
         this.showLetters = this.setting("showLetters", false);
+        this.showRope = this.setting("showRope", false);
         this.displayFreeEnergies = this.setting("displayFreeEnergies", false);
         this.highlightRestricted = this.setting("highlightRestricted", true);
         this.autohideToolbar = this.setting("autohideToolbar", false);
