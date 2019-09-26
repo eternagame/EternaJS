@@ -341,10 +341,6 @@ export class PoseEditMode extends GameMode {
         }
     }
 
-    public ropSetShowRope(show: boolean): void {
-        this._ropPresets.push(() => this.setShowRope(show));
-    }
-
     public setShowTotalEnergy(show: boolean): void {
         for (let pose of this._poses) {
             pose.showTotalEnergy = show;

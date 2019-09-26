@@ -11,13 +11,20 @@ export class BaseRope extends GameObject implements LateUpdatable {
         super();
         this._pose = pose;
         this._graphics = new Graphics();
-        this._visible = false;
+        this._enabled = false;
     }
 
     public get display(): DisplayObject {
         return this._graphics;
     }
 
+    public set enabled(value: boolean) {
+        if (value === this._enabled){
+            return;
+        }
+        this._enabled = value;
+    }
+    
     public lateUpdate(dt: number): void {
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             if (this._pose._bases[i]._animate) {
@@ -31,7 +38,7 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
         this._graphics.clear();
 
-        if (!this._visible || this._pose.isAnimating ) return;
+        if (!this._enabled || this._pose.isAnimating ) return;
 
         let idx: number[] = [];
         let baseposX: number[] = [];
@@ -52,8 +59,8 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
         // by drawing twice, can get a nice looking texture.
         // draw thick line and thin line on top
-        let OUTER_ROPE_THICKNESS : number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose._zoomLevel];
-        let INNER_ROPE_THICKNESS : number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose._zoomLevel];
+        let OUTER_ROPE_THICKNESS : number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
+        let INNER_ROPE_THICKNESS : number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
 
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
         this._graphics.moveTo(baseposX[0], baseposY[0]);
@@ -109,11 +116,11 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
     // following not in use -- delete if still not in use in 2020.
     public makeVisibleIfLongSpacings(): void {
-        if (this._visible) return;
+        if (this._enabled) return;
         for (let i = 1; i < this._pose.fullSequence.length; i++) {
             let vec: Vector2 = new Vector2.fromPoint(this._pose.getBaseXY(i)) - new Vector2.fromPoint(this._pose.getBaseXY(i - 1));
             if (vec.length > Pose2D.ZOOM_SPACINGS[0]) {
-                this._visible = true;
+                this._enabled = true;
                 return;
             }
         }
@@ -121,6 +128,6 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
     private readonly _pose: Pose2D;
     private readonly _graphics: Graphics;
-    visible_: boolean;
+    private _enabled: boolean;
 
 }
