@@ -2116,6 +2116,13 @@ export class Pose2D extends ContainerObject implements Updatable {
             go_x = this._bases[ii + 1].x - this._bases[ii].x;
             go_y = this._bases[ii + 1].y - this._bases[ii].y;
 
+            let go_length: number = Math.sqrt(go_x * go_x + go_y * go_y);
+            if (go_length > Pose2D.ZOOM_SPACINGS[this._zoomLevel]) {
+                go_x = go_x * Pose2D.ZOOM_SPACINGS[this._zoomLevel] / go_length;
+                go_y = go_y * Pose2D.ZOOM_SPACINGS[this._zoomLevel] / go_length;
+            }
+
+
             out_x += go_x;
             out_y += go_y;
 
