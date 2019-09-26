@@ -989,6 +989,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set showNumbering(show: boolean) {
+        // FIXME: change  _numberingMode to _showNumbering?
         this._numberingMode = show;
         this._redraw = true;
     }
@@ -998,12 +999,12 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set showBaseRope(show: boolean) {
-        this._baseRopeMode = show;
+        this._showBaseRope = show;
         this._redraw = true;
     }
 
     public get showRope(): boolean {
-        return this._baseRopeMode;
+        return this._showBaseRope;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -2024,7 +2025,7 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._baseRope._visible = this._baseRopeMode;
+        this._baseRope.enabled = this._showBaseRope;
 
         if (this._redraw || basesMoved) {   
             let n: number = this._trackedIndices.length;
@@ -2033,7 +2034,6 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._baseRope.redraw( true /* force baseXY*/ );
-            // this._baseRope.makeVisibleIfLongSpacings();
 
             if (this._cursorIndex > 0) {
                 center = this.getBaseXY(this._cursorIndex - 1);
@@ -3432,7 +3432,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Rendering mode
     private _numberingMode: boolean = false;
-    private _baseRopeMode: boolean = false;
+    private _showBaseRope: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     /// Last exp paint data
