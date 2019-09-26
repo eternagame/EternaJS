@@ -1063,6 +1063,9 @@ export class PoseEditMode extends GameMode {
             } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
                 handled = true;
+            } else if (!ctrl && key === KeyCode.Comma) {
+                Eterna.settings.simpleGraphics.value = !Eterna.settings.simpleGraphics.value;
+                handled = true;
             } else if (!ctrl && key === KeyCode.KeyS) {
                 this.showSpec();
                 handled = true;
