@@ -20,8 +20,8 @@ export class BaseRope extends GameObject implements LateUpdatable {
 
     public lateUpdate(dt: number): void {
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
-            if (this._pose._bases[i].needRedraw()) {
-                this.redraw( false )
+            if (this._pose._bases[i]._animate) {
+                this.redraw(false)
                 return;
             }
         }
