@@ -2,7 +2,7 @@ import { DisplayObject, Graphics, Point } from "pixi.js";
 import { GameObject } from "../../flashbang/core/GameObject";
 import { LateUpdatable } from "../../flashbang/core/LateUpdatable";
 import { Pose2D } from "./Pose2D";
-import { Spline } from "cubic-spline"
+import * as Spline from "cubic-spline"
 import { Vector2 } from "../../flashbang/geom/Vector2";
 
 /** BaseRope: A class for drawing a smooth 'rope' through bases. **/
@@ -20,14 +20,30 @@ export class BaseRope extends GameObject implements LateUpdatable {
     }
 
     public lateUpdate(dt: number): void {
+        for (let i = 0; i < this._pose.fullSequence.length; i++) {
+            if (this._pose._bases[i].needRedraw()) {
+                this.redraw( false )
+                return;
+            }
+        }
+    }
+
+    public redraw( force_BaseXY : boolean ) : void {
+
         this._graphics.clear();
-        if (!this._visible) return;
+
+        if (!this._visible || this._pose.isAnimating ) return;
 
         let idx: number[] = [];
         let baseposX: number[] = [];
         let baseposY: number[] = [];
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
-            let center: Point = this._pose._bases[i].getLastDrawnPos();
+            let center: Point = this._pose.getBaseXY(i);
+            if ( !force_BaseXY && !this._pose._bases[i]._needsRedraw ) {
+                // this logic took a long time to figure out -- the event 
+                //  loop boolean settings are way too confusing -- rhiju.
+                center = this._pose._bases[i].getLastDrawnPos();
+            }
             if (center) {
                 idx.push(i);
                 baseposX.push(center.x);
@@ -35,7 +51,6 @@ export class BaseRope extends GameObject implements LateUpdatable {
             }
           }
 
-        const Spline = require('cubic-spline');
         const splineX = new Spline(idx, baseposX);
         const splineY = new Spline(idx, baseposY);
 
@@ -54,7 +69,7 @@ export class BaseRope extends GameObject implements LateUpdatable {
     }
 
     private drawBaseRopeLine(splineX: Spline, splineY: Spline): void {
-        let smooth_factor: integer = 5;
+        let smooth_factor: integer = 3;
         for (let i = 1; i < this._pose.fullSequence.length * smooth_factor; i++) {
             // Smooth the curve with cubic interpolation to prevent sharp edges.
             const ix = splineX.at(i / smooth_factor);

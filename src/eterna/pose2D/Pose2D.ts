@@ -2026,12 +2026,13 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._baseRope._visible = this._baseRopeMode;
 
-        if (this._redraw || basesMoved) {
+        if (this._redraw || basesMoved) {   
             let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
                 this.drawBaseMark(this._trackedIndices[ii]);
             }
 
+            this._baseRope.redraw( true /* force baseXY*/ );
             // this._baseRope.makeVisibleIfLongSpacings();
 
             if (this._cursorIndex > 0) {
