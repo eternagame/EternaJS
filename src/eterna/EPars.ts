@@ -360,6 +360,18 @@ export default class EPars {
         }
     }
 
+    public static nucleotidePairToString(value: number): 'AU'|'GU'|'GC' {
+        if (value === EPars.RNABASE_AU_PAIR) {
+            return 'AU';
+        } else if (value === EPars.RNABASE_GU_PAIR) {
+            return 'GU';
+        } else if (value === EPars.RNABASE_GC_PAIR) {
+            return 'GC';
+        } else {
+            throw new Error(`Bad nucleotide '${value}`);
+        }
+    }
+
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqarray: number[] = [];
         for (let ii = 0; ii < seq.length; ii++) {

@@ -312,16 +312,14 @@ export default class EternaApp extends FlashbangApp {
             });
     }
 
-    private loadPuzzle(puzzleOrID: number | Puzzle): Promise<Puzzle> {
+    private async loadPuzzle(puzzleOrID: number | Puzzle): Promise<Puzzle> {
         if (puzzleOrID instanceof Puzzle) {
-            return Promise.resolve(puzzleOrID);
+            return puzzleOrID;
         } else {
             this.setLoadingText(`Loading puzzle ${puzzleOrID}...`);
-            return PuzzleManager.instance.getPuzzleByID(puzzleOrID)
-                .then((puzzle) => {
-                    this.popLoadingMode();
-                    return puzzle;
-                });
+            let puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
+            this.popLoadingMode();
+            return puzzle;
         }
     }
 

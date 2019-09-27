@@ -2,8 +2,38 @@ import * as log from 'loglevel';
 import Eterna from 'eterna/Eterna';
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder from 'eterna/folding/Folder';
-import Puzzle from './Puzzle';
+import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
+import {
+    MultistrandBindingsConstraint,
+    OligoBoundConstraint,
+    OligoUnboundConstraint
+} from 'eterna/constraints/constraints/BindingConstraint';
+import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
+import {
+    ConsecutiveAConstraint, ConsecutiveCConstraint, ConsecutiveUConstraint, ConsecutiveGConstraint
+} from 'eterna/constraints/constraints/ConsecutiveBaseConstraint';
+import {
+    MaximumAConstraint, MaximumCConstraint, MaximumGConstraint, MaximumUConstraint
+} from 'eterna/constraints/constraints/MaximumBaseConstraint';
+import MaximumMutationConstraint from 'eterna/constraints/constraints/MaximumMutationConstraint';
+import {
+    MaximumAUConstraint,
+    MaximumGCConstraint,
+    MaximumGUConstraint
+} from 'eterna/constraints/constraints/MaximumPairConstraint';
+import {
+    MinimumAConstraint, MinimumCConstraint, MinimumGConstraint, MinimumUConstraint
+} from 'eterna/constraints/constraints/MinimumBaseConstraint';
+import {
+    MinimumAUConstraint, MinimumGCConstraint, MinimumGUConstraint, MinimumAnyPairConstraint
+} from 'eterna/constraints/constraints/MinimumPairConstraint';
+import MinimumStackLengthConstraint from 'eterna/constraints/constraints/MinimumStackLengthConstraint';
+import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
+import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
+import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
+import ExternalInterface from 'eterna/util/ExternalInterface';
 import SolutionManager from './SolutionManager';
+import Puzzle from './Puzzle';
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {
@@ -168,16 +198,114 @@ export default class PuzzleManager {
             }
         }
 
+        let constraints: Constraint<BaseConstraintStatus>[] = [];
         if (json['constraints'] && json['constraints'].length > 0) {
-            let constraints: string[] = json['constraints'].split(',');
-            if (json['check_hairpin'] && Number(json['check_hairpin'])) {
-                constraints.push('BARCODE');
-                constraints.push('0');
+            let constraintDefs: string[] = json['constraints'].split(',');
+            if (constraintDefs.length % 2 === 1) {
+                throw new Error('Invalid constraint definition - uneven number of constraints and parameters');
             }
-            newpuz.constraints = constraints;
-        } else if (json['check_hairpin'] && Number(json['check_hairpin'])) {
-            newpuz.constraints = ['BARCODE', '0'];
+
+            for (let i = 0; i < constraintDefs.length; i += 2) {
+                let [name, parameter] = constraintDefs.slice(i, i + 2);
+                switch (name) {
+                    case 'SOFT':
+                        newpuz.isSoftConstraint = true;
+                        break;
+                    case AntiShapeConstraint.NAME:
+                        constraints.push(new AntiShapeConstraint(Number(parameter)));
+                        break;
+                    case MultistrandBindingsConstraint.NAME:
+                        constraints.push(new MultistrandBindingsConstraint(Number(parameter)));
+                        break;
+                    case OligoBoundConstraint.NAME:
+                        constraints.push(new OligoBoundConstraint(Number(parameter)));
+                        break;
+                    case OligoUnboundConstraint.NAME:
+                        constraints.push(new OligoUnboundConstraint(Number(parameter)));
+                        break;
+                    case ConsecutiveAConstraint.NAME:
+                        constraints.push(new ConsecutiveAConstraint(Number(parameter)));
+                        break;
+                    case ConsecutiveCConstraint.NAME:
+                        constraints.push(new ConsecutiveCConstraint(Number(parameter)));
+                        break;
+                    case ConsecutiveGConstraint.NAME:
+                        constraints.push(new ConsecutiveGConstraint(Number(parameter)));
+                        break;
+                    case ConsecutiveUConstraint.NAME:
+                        constraints.push(new ConsecutiveUConstraint(Number(parameter)));
+                        break;
+                    case MaximumAConstraint.NAME:
+                        constraints.push(new MaximumAConstraint(Number(parameter)));
+                        break;
+                    case MaximumCConstraint.NAME:
+                        constraints.push(new MaximumCConstraint(Number(parameter)));
+                        break;
+                    case MaximumGConstraint.NAME:
+                        constraints.push(new MaximumGConstraint(Number(parameter)));
+                        break;
+                    case MaximumUConstraint.NAME:
+                        constraints.push(new MaximumUConstraint(Number(parameter)));
+                        break;
+                    case MaximumMutationConstraint.NAME:
+                        constraints.push(new MaximumMutationConstraint(Number(parameter)));
+                        break;
+                    case MaximumAUConstraint.NAME:
+                        constraints.push(new MaximumAUConstraint(Number(parameter)));
+                        break;
+                    case MaximumGCConstraint.NAME:
+                        constraints.push(new MaximumGCConstraint(Number(parameter)));
+                        break;
+                    case MaximumGUConstraint.NAME:
+                        constraints.push(new MaximumGUConstraint(Number(parameter)));
+                        break;
+                    case MinimumAConstraint.NAME:
+                        constraints.push(new MinimumAConstraint(Number(parameter)));
+                        break;
+                    case MinimumCConstraint.NAME:
+                        constraints.push(new MinimumCConstraint(Number(parameter)));
+                        break;
+                    case MinimumGConstraint.NAME:
+                        constraints.push(new MinimumGConstraint(Number(parameter)));
+                        break;
+                    case MinimumUConstraint.NAME:
+                        constraints.push(new MinimumUConstraint(Number(parameter)));
+                        break;
+                    case MinimumAUConstraint.NAME:
+                        constraints.push(new MinimumAUConstraint(Number(parameter)));
+                        break;
+                    case MinimumGCConstraint.NAME:
+                        constraints.push(new MinimumGCConstraint(Number(parameter)));
+                        break;
+                    case MinimumGUConstraint.NAME:
+                        constraints.push(new MinimumGUConstraint(Number(parameter)));
+                        break;
+                    case MinimumAnyPairConstraint.NAME:
+                        constraints.push(new MinimumAnyPairConstraint(Number(parameter)));
+                        break;
+                    case MinimumStackLengthConstraint.NAME:
+                        constraints.push(new MinimumStackLengthConstraint(Number(parameter)));
+                        break;
+                    case ScriptConstraint.NAME:
+                        constraints.push(new ScriptConstraint(Number(parameter)));
+                        break;
+                    case ShapeConstraint.NAME:
+                        constraints.push(new ShapeConstraint(Number(parameter)));
+                        break;
+                    case SynthesisConstraint.NAME:
+                        constraints.push(new SynthesisConstraint());
+                        break;
+                    default:
+                        log.warn(`Unknown constraint ${name} - skipping`);
+                }
+            }
         }
+
+        if (json['check_hairpin'] && Number(json['check_hairpin'])) {
+            constraints.push(new BarcodeConstraint());
+        }
+
+        newpuz.constraints = constraints;
 
         if (!newpuz.canUseFolder(FolderManager.instance.getFolder(newpuz.folderName))) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
@@ -202,7 +330,7 @@ export default class PuzzleManager {
         return newpuz;
     }
 
-    public getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
+    public async getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
         for (let puzzle of this._puzzles) {
             if (puzzle.nodeID === puznid) {
                 return Promise.resolve(puzzle);
@@ -210,17 +338,24 @@ export default class PuzzleManager {
         }
 
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
-        return Eterna.client.getPuzzle(puznid, scriptid)
-            .then((json: any) => {
-                let data = json['data'];
-                if (data['hairpins']) {
-                    SolutionManager.instance.addHairpins(data['hairpins']);
-                }
+        let json = await Eterna.client.getPuzzle(puznid, scriptid);
+        let data = json['data'];
+        if (data['hairpins']) {
+            SolutionManager.instance.addHairpins(data['hairpins']);
+        }
 
-                let puzzle = this.parsePuzzle(data['puzzle']);
-                log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
-                return puzzle;
-            });
+        let puzzle = this.parsePuzzle(data['puzzle']);
+
+        let isScriptConstraint = (
+            constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
+        ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
+
+        await Promise.all(
+            puzzle.constraints.filter(isScriptConstraint)
+                .map(scriptConstraint => ExternalInterface.preloadScript(scriptConstraint.scriptID))
+        );
+        log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
+        return puzzle;
     }
 
     private _puzzles: Puzzle[] = [];
@@ -234,4 +369,8 @@ export default class PuzzleManager {
     /* eslint-enable max-len */
 
     private static readonly RE_MISSION_TEXT = /<span id="mission">(.*?)<\/span>/s;
+}
+
+interface Array<T> {
+    filter<U extends T>(pred: (a: T) => a is U): U[];
 }
