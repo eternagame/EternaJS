@@ -294,7 +294,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         let rna_coords: RNALayout;
         rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-        rna_coords.setupTree(this._pairs);
+        rna_coords.setupTree(this._pairs, this._targetPairs);
         rna_coords.drawTree();
         rna_coords.getCoords(xarray, yarray);
 
@@ -1840,7 +1840,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rna_drawer: RNALayout = new RNALayout(radius, radius);
-        rna_drawer.setupTree(this._pairs);
+        rna_drawer.setupTree(this._pairs, this._targetPairs);
         rna_drawer.drawTree();
         let xarray: number[] = new Array(this._bases.length);
         let yarray: number[] = new Array(this._bases.length);
@@ -2484,11 +2484,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         rna_drawer = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
             Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
-            exception_indices,
+            exception_indices
         );
-        rna_drawer.targetPairs = this._targetPairs;
 
-        rna_drawer.setupTree(this._pairs);
+        rna_drawer.setupTree(this._pairs, this._targetPairs);
         rna_drawer.drawTree();
         rna_drawer.getCoords(xarray, yarray);
 

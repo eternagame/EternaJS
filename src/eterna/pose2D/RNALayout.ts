@@ -31,7 +31,7 @@ export class RNALayout {
         return this._root;
     }
 
-    public setupTree(pairs: number[]): void {
+    public setupTree(pairs: number[], targetPairs : number[]): void {
         let dangling_start: number = 0;
         let dangling_end: number = 0;
         let ii: number;
@@ -41,6 +41,7 @@ export class RNALayout {
         this._root = null;
         /// save for later
         this._origPairs = pairs.slice();
+        this._targetPairs = targetPairs;
 
         for (ii = 0; ii < pairs.length; ii++) {
             bi_pairs[ii] = -1;
@@ -284,45 +285,47 @@ export class RNALayout {
             let circle_radius: number = circle_length / (2 * Math.PI);
             let length_walker: number = this._pairSpace / 2.0;
 
-            if ( this.junctionMatchesTarget( rootnode, parentnode ) ) {
-                // TODO. read this in via puzzle JSON
-                let native_layout : Array<[number,number]> = [[1.349030,1.182363], [1.349030,2.182363], [1.849030,3.182363], [1.849030,4.182363], [1.849030,5.182363], [1.849030,6.182363], [1.849030,7.182363], [1.182363,9.099030], [2.432363,11.099030], [3.932363,11.099030], [3.932363,10.099030], [3.932363,9.099030], [3.432363,8.099030], [2.849030,7.182363], [2.849030,6.182363], [2.849030,5.182363], [2.849030,4.182363], [2.849030,3.182363], [4.182363,2.349030], [5.182363,2.849030], [5.682363,3.849030], [5.682363,5.099030], [5.682363,6.099030], [5.432363,7.099030], [5.432363,8.099030], [4.932363,9.099030], [4.932363,10.099030], [4.932363,11.099030]];            
+            // TODO. read this in via puzzle JSON
+            if (this._origPairs.length == 28) {
+                this._customLayout = [[1.349030, 1.182363], [1.349030, 2.182363], [1.849030, 3.182363], [1.849030, 4.182363], [1.849030, 5.182363], [1.849030, 6.182363], [1.849030, 7.182363], [1.182363, 9.099030], [2.432363, 11.099030], [3.932363, 11.099030], [3.932363, 10.099030], [3.932363, 9.099030], [3.432363, 8.099030], [2.849030, 7.182363], [2.849030, 6.182363], [2.849030, 5.182363], [2.849030, 4.182363], [2.849030, 3.182363], [4.182363, 2.349030], [5.182363, 2.849030], [5.682363, 3.849030], [5.682363, 5.099030], [5.682363, 6.099030], [5.432363, 7.099030], [5.432363, 8.099030], [4.932363, 9.099030], [4.932363, 10.099030], [4.932363, 11.099030]];
+            }
+            if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
                 rootnode.x = 0;
                 rootnode.y = 0;
-                let parent_native_x : number = 0;
-                let parent_native_y : number = 0;
-                let parent_native_go_x : number = 0;
-                let parent_native_go_y : number = 1;
-                let parent_native_cross_x : number = -1;
-                let parent_native_cross_y : number = 0;
+                let parent_custom_x : number = 0;
+                let parent_custom_y : number = 0;
+                let parent_custom_go_x : number = 0;
+                let parent_custom_go_y : number = 1;
+                let parent_custom_cross_x : number = -1;
+                let parent_custom_cross_y : number = 0;
                 if (parentnode && parentnode.isPair ) {
                     rootnode.x = parentnode.x;
                     rootnode.y = parentnode.y;
-                    let native_coordA : [number,number] = native_layout[ parentnode.indexA ]
-                    let native_coordB : [number,number] = native_layout[ parentnode.indexB ]
-                    parent_native_x = ( native_coordA[ 0 ] + native_coordB[ 0 ] ) / 2;
-                    parent_native_y = ( native_coordA[ 1 ] + native_coordB[ 1 ] ) / 2;
-                    parent_native_cross_x = ( native_coordA[ 0 ] - native_coordB[ 0 ] );
-                    parent_native_cross_y = ( native_coordA[ 1 ] - native_coordB[ 1 ] );
-                    parent_native_go_x = parent_native_cross_y;
-                    parent_native_go_y = -parent_native_cross_x;
+                    let custom_coordA : [number,number] = this._customLayout[ parentnode.indexA ]
+                    let custom_coordB : [number,number] = this._customLayout[ parentnode.indexB ]
+                    parent_custom_x = ( custom_coordA[ 0 ] + custom_coordB[ 0 ] ) / 2;
+                    parent_custom_y = ( custom_coordA[ 1 ] + custom_coordB[ 1 ] ) / 2;
+                    parent_custom_cross_x = ( custom_coordA[ 0 ] - custom_coordB[ 0 ] );
+                    parent_custom_cross_y = ( custom_coordA[ 1 ] - custom_coordB[ 1 ] );
+                    parent_custom_go_x = parent_custom_cross_y;
+                    parent_custom_go_y = -parent_custom_cross_x;
                 }
                 for (ii = 0; ii < rootnode.children.length; ii++) {
-                    // read out where this point should be based on 'native_layout'. get coordinates in 
-                    // "local coordinate frame" set by parent pair in native_layout. 
+                    // read out where this point should be based on 'this._customLayout'. get coordinates in 
+                    // "local coordinate frame" set by parent pair in this._customLayout. 
                     // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-                    let native_coord : [number,number] = native_layout[ rootnode.children[ii].indexA ];
+                    let custom_coord : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
                     if ( rootnode.children[ii].isPair ) {
-                        let native_coordA : [number,number] = native_layout[ rootnode.children[ii].indexA ];
-                        let native_coordB : [number,number] = native_layout[ rootnode.children[ii].indexB ];
-                        native_coord[ 0 ] = ( native_coordA[ 0 ] + native_coordB[ 0 ] ) / 2;
-                        native_coord[ 1 ] = ( native_coordA[ 1 ] + native_coordB[ 1 ] ) / 2;
+                        let custom_coordA : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
+                        let custom_coordB : [number,number] = this._customLayout[ rootnode.children[ii].indexB ];
+                        custom_coord[ 0 ] = ( custom_coordA[ 0 ] + custom_coordB[ 0 ] ) / 2;
+                        custom_coord[ 1 ] = ( custom_coordA[ 1 ] + custom_coordB[ 1 ] ) / 2;
                     }
 
-                    let dev_x : number = native_coord[0] - parent_native_x;
-                    let dev_y : number = native_coord[1] - parent_native_y;
-                    let template_x : number = dev_x * parent_native_cross_x + dev_y * parent_native_cross_y;
-                    let template_y : number = dev_x * parent_native_go_x + dev_y * parent_native_go_y;
+                    let dev_x : number = custom_coord[0] - parent_custom_x;
+                    let dev_y : number = custom_coord[1] - parent_custom_y;
+                    let template_x : number = dev_x * parent_custom_cross_x + dev_y * parent_custom_cross_y;
+                    let template_y : number = dev_x * parent_custom_go_x + dev_y * parent_custom_go_y;
                     template_x *= this._primarySpace;
                     template_y *= this._primarySpace;
 
@@ -332,14 +335,14 @@ export class RNALayout {
                     let child_go_x: number = 0;
                     let child_go_y: number = 1;
                     if ( rootnode.children[ii].isPair ) {
-                        let native_coordA : [number,number] = native_layout[ rootnode.children[ii].indexA ];
-                        let native_coordB : [number,number] = native_layout[ rootnode.children[ii].indexB ];
-                        let native_cross_x : number = ( native_coordA[ 0 ] - native_coordB[ 0 ] );
-                        let native_cross_y : number = ( native_coordA[ 1 ] - native_coordB[ 1 ] );
-                        let native_go_x : number = native_cross_y;
-                        let native_go_y : number = -native_cross_x;
-                        child_go_x = native_go_x * parent_native_cross_x + native_go_y * parent_native_cross_y;
-                        child_go_y = native_go_x * parent_native_go_x    + native_go_y * parent_native_go_y;
+                        let custom_coordA : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
+                        let custom_coordB : [number,number] = this._customLayout[ rootnode.children[ii].indexB ];
+                        let custom_cross_x : number = ( custom_coordA[ 0 ] - custom_coordB[ 0 ] );
+                        let custom_cross_y : number = ( custom_coordA[ 1 ] - custom_coordB[ 1 ] );
+                        let custom_go_x : number = custom_cross_y;
+                        let custom_go_y : number = -custom_cross_x;
+                        child_go_x = custom_go_x * parent_custom_cross_x + custom_go_y * parent_custom_cross_y;
+                        child_go_y = custom_go_x * parent_custom_go_x    + custom_go_y * parent_custom_go_y;
                     }
                     let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
 
@@ -558,10 +561,6 @@ export class RNALayout {
         return 0;
     }
 
-    public set targetPairs(target_pairs: number[]) {
-        this._targetPairs = target_pairs.slice();
-    }
-
     private junctionMatchesTarget( rootnode : RNATreeNode, parentnode : RNATreeNode ) : boolean {
         if (this._targetPairs == null) return false;
         if (parentnode) {
@@ -596,6 +595,7 @@ export class RNALayout {
     private _root: RNATreeNode;
     private _origPairs: number[];
     private _targetPairs: number[];
+    private _customLayout: Array<[number, number]>;
 
     /// "New" method to gather NN free energies, just use the folding engine
     private _biPairs: number[];
