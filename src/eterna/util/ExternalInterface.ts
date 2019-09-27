@@ -153,23 +153,21 @@ export default class ExternalInterface {
      * The primary reason for the existance of this function is for SCRIPT constraints, which are designed to be
      * executed synchronously. If at all possible, use the async version of this function.
      */
-    public static runScriptSync(
-        scriptID: string | number, options: RunScriptOptions
-    ): {result?: any; error?: any} {
+    public static runScriptSync(scriptID: string | number, options: RunScriptOptions): any {
         if (!this._preloadedScripts.includes(`${scriptID}`)) {
             // If we try to do this it's almost certainly going to break (scripts have to be asynchronously loaded once,
             // so this can't be synchronous), so just... don't.
             throw new Error('runScriptSync attempted to run a script which has not been preloaded');
         }
 
-        let scriptReturn: {result?: any; error?: any} = null;
+        let scriptReturn: any = null;
 
         this.runScriptInternal(
             `${scriptID}`,
             options,
             true,
-            (result) => { scriptReturn = {result}; },
-            (error) => { scriptReturn = {error}; }
+            (result) => { scriptReturn = result; },
+            (error) => { throw new Error(error); }
         );
 
         return scriptReturn;
