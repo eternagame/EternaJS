@@ -311,7 +311,7 @@ export class RNALayout {
                     // read out where this point should be based on 'this._customLayout'. get coordinates in 
                     // "local coordinate frame" set by parent pair in this._customLayout. 
                     // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-                    let custom_coord : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
+                    let custom_coord : [number,number] = this._customLayout[ rootnode.children[ii].indexA ].slice();
                     if ( rootnode.children[ii].isPair ) {
                         let custom_coordA : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
                         let custom_coordB : [number,number] = this._customLayout[ rootnode.children[ii].indexB ];
