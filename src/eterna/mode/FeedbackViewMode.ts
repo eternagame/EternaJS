@@ -1,31 +1,35 @@
-import * as log from "loglevel";
-import {DisplayObject, Point, Text} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {KeyboardEventType} from "../../../flashbang/input/KeyboardEventType";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Constants} from "../../Constants";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Feedback} from "../../Feedback";
-import {Folder} from "../../folding/Folder";
-import {FolderManager} from "../../folding/FolderManager";
-import {Vienna} from "../../folding/Vienna";
-import {PoseField} from "../../pose2D/PoseField";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {EternaViewOptionsDialog, EternaViewOptionsMode} from "../../ui/EternaViewOptionsDialog";
-import {SpecBoxDialog} from "../../ui/SpecBoxDialog";
-import {URLButton} from "../../ui/URLButton";
-import {UndoBlock} from "../../UndoBlock";
-import {Fonts} from "../../util/Fonts";
-import {Utility} from "../../util/Utility";
-import {Background} from "../../vfx/Background";
-import {GameMode} from "../GameMode";
-import {FeedbackViewToolbar} from "./FeedbackViewToolbar";
+import * as log from 'loglevel';
+import {DisplayObject, Point, Text} from 'pixi.js';
+import Constants from 'eterna/Constants';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import Feedback from 'eterna/Feedback';
+import UndoBlock from 'eterna/UndoBlock';
+import Solution from 'eterna/puzzle/Solution';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import Background from 'eterna/vfx/Background';
+import Fonts from 'eterna/util/Fonts';
+import Toolbar, {ToolbarType} from 'eterna/ui/Toolbar';
+import PoseField from 'eterna/pose2D/PoseField';
+import FolderManager from 'eterna/folding/FolderManager';
+import Vienna from 'eterna/folding/Vienna';
+import {
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode
+} from 'flashbang';
+import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
+import Utility from 'eterna/util/Utility';
+import SpecBoxDialog from 'eterna/ui/SpecBoxDialog';
+import Folder from 'eterna/folding/Folder';
+import URLButton from 'eterna/ui/URLButton';
+import GameMode from './GameMode';
 
-export class FeedbackViewMode extends GameMode {
-    public constructor(solution: Solution, puzzle: Puzzle) {
+enum PoseFoldMode {
+    ESTIMATE = 'ESTIMATE',
+    TARGET = 'TARGET',
+}
+
+export default class FeedbackViewMode extends GameMode {
+    constructor(solution: Solution, puzzle: Puzzle) {
         super();
         this._solution = solution;
         this._puzzle = puzzle;
@@ -45,7 +49,7 @@ export class FeedbackViewMode extends GameMode {
         this._puzzleTitle.position = new Point(33, 8);
         this.uiLayer.addChild(this._puzzleTitle);
 
-        this._title = Fonts.arial("", 12).color(0xffffff).bold().build();
+        this._title = Fonts.arial('', 12).color(0xffffff).bold().build();
         this._title.position = new Point(33, 30);
         this.uiLayer.addChild(this._title);
 
@@ -53,7 +57,7 @@ export class FeedbackViewMode extends GameMode {
         this._homeButton.hideWhenModeInactive();
         this.addObject(this._homeButton, this.uiLayer);
 
-        this._toolbar = new FeedbackViewToolbar(this._puzzle);
+        this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -75,8 +79,8 @@ export class FeedbackViewMode extends GameMode {
         this._toolbar.expColorButton.clicked.connect(() => this.showExperimentalColors());
         this._toolbar.specButton.clicked.connect(() => this.showSpec());
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
-        this._toolbar.showEstimateButton.clicked.connect(() => this.setToEstimateMode());
-        this._toolbar.showTargetButton.clicked.connect(() => this.setToTargetMode());
+        this._toolbar.estimateButton.clicked.connect(() => this.setToEstimateMode());
+        this._toolbar.targetButton.clicked.connect(() => this.setToTargetMode());
 
         this._feedback = this._solution.expFeedback;
         this._targetConditions = this._puzzle.targetConditions;
@@ -92,12 +96,16 @@ export class FeedbackViewMode extends GameMode {
         let poseFields: PoseField[] = [];
         for (let ii = 0; ii < secstructs.length; ii++) {
             let secs: string = secstructs[ii];
-            if (secs != null && secs.length != this._sequence.length) {
-                log.warn("Solution secondary structure and sequence length doesn't match", secs.length, this._sequence.length);
+            if (secs != null && secs.length !== this._sequence.length) {
+                log.warn(
+                    "Solution secondary structure and sequence length doesn't match",
+                    secs.length,
+                    this._sequence.length
+                );
                 if (secs.length < this._sequence.length) {
                     let diff: number = this._sequence.length - secs.length;
                     for (let jj = 0; jj < diff; ++jj) {
-                        secs += ".";
+                        secs += '.';
                     }
                 } else {
                     secs = secs.slice(0, this._sequence.length);
@@ -123,8 +131,8 @@ export class FeedbackViewMode extends GameMode {
 
         this.setupShape();
 
-        let see_shape: boolean = (this._feedback.getShapeData() != null);
-        if (see_shape) {
+        let seeShape: boolean = (this._feedback.getShapeData() != null);
+        if (seeShape) {
             this.showExperimentalColors();
         }
 
@@ -181,28 +189,32 @@ export class FeedbackViewMode extends GameMode {
     }
 
     /* override */
-    protected onSetPip(pip_mode: boolean): void {
-        if (pip_mode) {
-            if (this._toolbar.toggleBar != null) {
-                this._toolbar.toggleBar.display.visible = false;
+    protected onSetPip(pipMode: boolean): void {
+        if (pipMode) {
+            if (this._toolbar.stateToggle != null) {
+                this._toolbar.stateToggle.display.visible = false;
             }
 
-            if (this._foldMode == PoseFoldMode.ESTIMATE) {
+            if (this._foldMode === PoseFoldMode.ESTIMATE) {
                 this.setToEstimateMode();
             } else {
                 this.setToTargetMode();
             }
 
-            let min_zoom = -1;
+            let minZoom = -1;
             for (let pose of this._poses) {
-                min_zoom = Math.max(min_zoom, pose.computeDefaultZoomLevel());
+                minZoom = Math.max(minZoom, pose.computeDefaultZoomLevel());
             }
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 let field: PoseField = this._poseFields[ii];
                 if (this._targetConditions[ii] != null) {
-                    if (this._targetConditions[ii]["type"] == "aptamer") {
-                        field.pose.setMolecularBinding(this._targetConditions[ii]["site"], this._targetConditions[ii]["binding_pairs"], this._targetConditions[ii]["bonus"] / 100.0);
+                    if (this._targetConditions[ii]['type'] === 'aptamer') {
+                        field.pose.setMolecularBinding(
+                            this._targetConditions[ii]['site'],
+                            this._targetConditions[ii]['binding_pairs'],
+                            this._targetConditions[ii]['bonus'] / 100.0
+                        );
                     } else {
                         field.pose.setMolecularBinding(null, null, null);
                     }
@@ -212,15 +224,15 @@ export class FeedbackViewMode extends GameMode {
             }
 
             for (let pose of this._poses) {
-                pose.setZoomLevel(min_zoom, true, true);
+                pose.setZoomLevel(minZoom, true, true);
             }
 
             if (this._isExpColor) {
                 this.showExperimentalColors();
             }
         } else {
-            if (this._toolbar.toggleBar != null) {
-                this._toolbar.toggleBar.display.visible = true;
+            if (this._toolbar.stateToggle != null) {
+                this._toolbar.stateToggle.display.visible = true;
             }
 
             this.changeTarget(this._currentIndex);
@@ -279,10 +291,10 @@ export class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this._toolbar.showTargetButton.hotkey(null);
-        this._toolbar.showEstimateButton.hotkey(KeyCode.Space);
-        this._toolbar.showEstimateButton.toggled.value = false;
-        this._toolbar.showTargetButton.toggled.value = true;
+        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.estimateButton.hotkey(KeyCode.Space);
+        this._toolbar.estimateButton.toggled.value = false;
+        this._toolbar.targetButton.toggled.value = true;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._pairs[ii];
@@ -294,10 +306,10 @@ export class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this._toolbar.showEstimateButton.hotkey(null);
-        this._toolbar.showTargetButton.hotkey(KeyCode.Space);
-        this._toolbar.showEstimateButton.toggled.value = true;
-        this._toolbar.showTargetButton.toggled.value = false;
+        this._toolbar.estimateButton.hotkey(null);
+        this._toolbar.targetButton.hotkey(KeyCode.Space);
+        this._toolbar.estimateButton.toggled.value = true;
+        this._toolbar.targetButton.toggled.value = false;
         if (this._isPipMode) {
             for (let ii = 0; ii < this._pairs.length; ii++) {
                 this._poseFields[ii].pose.pairs = this._shapePairs[ii];
@@ -307,12 +319,16 @@ export class FeedbackViewMode extends GameMode {
         }
     }
 
-    private changeTarget(target_index: number): void {
-        this._currentIndex = target_index;
+    private changeTarget(targetIndex: number): void {
+        this._currentIndex = targetIndex;
 
         if (this._targetConditions[this._currentIndex] != null) {
-            if (this._targetConditions[this._currentIndex]["type"] == "aptamer") {
-                this._poseFields[0].pose.setMolecularBinding(this._targetConditions[this._currentIndex]["site"], this._targetConditions[this._currentIndex]["binding_pairs"], this._targetConditions[this._currentIndex]["bonus"] / 100.0);
+            if (this._targetConditions[this._currentIndex]['type'] === 'aptamer') {
+                this._poseFields[0].pose.setMolecularBinding(
+                    this._targetConditions[this._currentIndex]['site'],
+                    this._targetConditions[this._currentIndex]['binding_pairs'],
+                    this._targetConditions[this._currentIndex]['bonus'] / 100.0
+                );
             } else {
                 this._poseFields[0].pose.setMolecularBinding(null, null, null);
             }
@@ -320,7 +336,7 @@ export class FeedbackViewMode extends GameMode {
             this._poseFields[0].pose.setMolecularBinding(null, null, 0);
         }
 
-        if (this._foldMode == PoseFoldMode.ESTIMATE) {
+        if (this._foldMode === PoseFoldMode.ESTIMATE) {
             this.setToEstimateMode();
         } else {
             this.setToTargetMode();
@@ -369,16 +385,16 @@ export class FeedbackViewMode extends GameMode {
     }
 
     private scoreFeedback(): void {
-        let titleText = "";
+        let titleText = '';
         let brentData: any = this._feedback.brentTheoData;
         let score: number;
 
         if (brentData != null) {
             // / Brent's theophylline data
             titleText += (`${this._solution.title}\n`);
-            titleText += `Cleavage suppression : x ${Utility.roundTo(brentData["score"], 2)}\n`;
-            titleText += `(Cleavage without Theophylline molecule : ${Utility.roundTo(brentData["ribo_without_theo"], 2)}`;
-            titleText += ` / with Theophylline : ${Utility.roundTo(brentData["ribo_with_theo"], 2)})`;
+            titleText += `Cleavage suppression : x ${Utility.roundTo(brentData['score'], 2)}\n`;
+            titleText += `(Cleavage without Theophylline molecule : ${Utility.roundTo(brentData['ribo_without_theo'], 2)}`;
+            titleText += ` / with Theophylline : ${Utility.roundTo(brentData['ribo_with_theo'], 2)})`;
         } else {
             // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {
@@ -390,16 +406,16 @@ export class FeedbackViewMode extends GameMode {
                     this._feedback.getShapeThreshold(this._currentIndex),
                     this._feedback.getShapeMax(this._currentIndex)
                 );
-                titleText += (`${this._solution.title}\n` + `Synthesis score : ${score} / 100`);
+                titleText += (`${this._solution.title}\nSynthesis score : ${score} / 100`);
             } else {
-                titleText += (`${this._solution.title}\n` + `Synthesis score : ${this._solution.getProperty("Synthesis score")} / 100`);
+                titleText += (`${this._solution.title}\nSynthesis score : ${this._solution.getProperty('Synthesis score')} / 100`);
             }
 
             if (this._targetConditions.length > 1) {
-                titleText += "\n(";
+                titleText += '\n(';
                 for (let ii = 0; ii < this._targetConditions.length; ii++) {
                     if (ii > 0) {
-                        titleText += ", ";
+                        titleText += ', ';
                     }
 
                     score = Feedback.scoreFeedback(
@@ -413,7 +429,7 @@ export class FeedbackViewMode extends GameMode {
 
                     titleText += `state ${ii + 1} : ${score} / 100`;
                 }
-                titleText += ")";
+                titleText += ')';
             }
         }
         this._title.text = titleText;
@@ -426,38 +442,38 @@ export class FeedbackViewMode extends GameMode {
     }
 
     private foldEstimate(index: number): void {
-        let shape_threshold: number = this._feedback.getShapeThreshold(index);
-        let shape_data: number[] = this._feedback.getShapeData(index);
-        let start_index: number = this._feedback.getShapeStartIndex(index);
-        let puzzle_locks: boolean[] = this._puzzle.puzzleLocks;
-        let shape_max: number = this._feedback.getShapeMax(index);
-        let shape_min: number = this._feedback.getShapeMin(index);
+        let shapeThreshold: number = this._feedback.getShapeThreshold(index);
+        let shapeData: number[] = this._feedback.getShapeData(index);
+        let startIndex: number = this._feedback.getShapeStartIndex(index);
+        let {puzzleLocks} = this._puzzle;
+        let shapeMax: number = this._feedback.getShapeMax(index);
+        let shapeMin: number = this._feedback.getShapeMin(index);
 
-        let desired_pairs = "";
+        let desiredPairs = '';
 
-        for (let ii = 0; ii < start_index; ii++) {
-            if (puzzle_locks[ii]) {
-                desired_pairs += "U0";
+        for (let ii = 0; ii < startIndex; ii++) {
+            if (puzzleLocks[ii]) {
+                desiredPairs += 'U0';
             } else {
-                desired_pairs += "P0";
+                desiredPairs += 'P0';
             }
         }
 
-        for (let ii = 0; ii < shape_data.length; ii++) {
-            if (ii + start_index >= this._sequence.length) {
+        for (let ii = 0; ii < shapeData.length; ii++) {
+            if (ii + startIndex >= this._sequence.length) {
                 break;
             }
 
-            if (puzzle_locks[ii + start_index]) {
-                desired_pairs += "U0";
+            if (puzzleLocks[ii + startIndex]) {
+                desiredPairs += 'U0';
                 continue;
             }
 
-            if (shape_data[ii] < shape_threshold) {
-                desired_pairs += "P";
+            if (shapeData[ii] < shapeThreshold) {
+                desiredPairs += 'P';
                 let lev = 0;
-                if (Math.abs(shape_threshold - shape_min) > Constants.EPSILON) {
-                    lev = (shape_threshold - shape_data[ii]) / (shape_threshold - shape_min);
+                if (Math.abs(shapeThreshold - shapeMin) > Constants.EPSILON) {
+                    lev = (shapeThreshold - shapeData[ii]) / (shapeThreshold - shapeMin);
                     if (lev >= 1) {
                         lev = 0.95;
                     } else if (lev < 0) {
@@ -465,34 +481,34 @@ export class FeedbackViewMode extends GameMode {
                     }
                 }
 
-                desired_pairs += Number(Math.floor(lev * 10)).toString();
-            } else if (shape_data[ii] > shape_threshold) {
-                desired_pairs += "U";
+                desiredPairs += Number(Math.floor(lev * 10)).toString();
+            } else if (shapeData[ii] > shapeThreshold) {
+                desiredPairs += 'U';
                 let lev = 0;
-                if (Math.abs(shape_max - shape_threshold) > Constants.EPSILON) {
-                    lev = (shape_data[ii] - shape_threshold) / (shape_max - shape_threshold);
+                if (Math.abs(shapeMax - shapeThreshold) > Constants.EPSILON) {
+                    lev = (shapeData[ii] - shapeThreshold) / (shapeMax - shapeThreshold);
                     if (lev >= 1) {
                         lev = 0.95;
                     } else if (lev < 0) {
                         lev = 0;
                     }
                 }
-                desired_pairs += Number(Math.floor(lev * 10)).toString();
+                desiredPairs += Number(Math.floor(lev * 10)).toString();
             } else {
-                desired_pairs += "P0";
+                desiredPairs += 'P0';
             }
         }
 
-        for (let ii = shape_data.length + start_index; ii < this._sequence.length; ii++) {
-            if (puzzle_locks[ii]) {
-                desired_pairs += "U0";
+        for (let ii = shapeData.length + startIndex; ii < this._sequence.length; ii++) {
+            if (puzzleLocks[ii]) {
+                desiredPairs += 'U0';
             } else {
-                desired_pairs += "P0";
+                desiredPairs += 'P0';
             }
         }
 
         let folder: Folder = FolderManager.instance.getFolder(Vienna.NAME);
-        this._shapePairs[index] = folder.foldSequence(this._sequence, null, desired_pairs);
+        this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
     }
 
     private loadDesignBrowser(): void {
@@ -514,7 +530,7 @@ export class FeedbackViewMode extends GameMode {
     private readonly _solution: Solution;
     private readonly _puzzle: Puzzle;
 
-    private _toolbar: FeedbackViewToolbar;
+    private _toolbar: Toolbar;
     private _homeButton: URLButton;
 
     private _undoBlocks: UndoBlock[] = [];
@@ -529,9 +545,4 @@ export class FeedbackViewMode extends GameMode {
     private _shapePairs: any[] = [];
     private _targetConditions: any[];
     private _isExpColor: boolean;
-}
-
-enum PoseFoldMode {
-    ESTIMATE = "ESTIMATE",
-    TARGET = "TARGET",
 }

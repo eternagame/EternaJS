@@ -1,7 +1,7 @@
-import {Arrays} from "../../../flashbang/util/Arrays";
-import {UnitSignal} from "../../../signals/UnitSignal";
-import {Solution} from "../../puzzle/Solution";
-import {DesignCategory} from "./DesignBrowserMode";
+import {UnitSignal} from 'signals';
+import {Arrays} from 'flashbang';
+import Solution from 'eterna/puzzle/Solution';
+import {DesignCategory} from './DesignBrowserMode';
 
 export enum SortOrder {
     INCREASING = 1,
@@ -14,19 +14,19 @@ export class SortCriterion {
     public sortOrder: SortOrder;
     public arg: string;
 
-    public constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
     }
 }
 
-export class SortOptions {
+export default class SortOptions {
     /** Emitted when any of our sort options have changed */
     public readonly sortChanged = new UnitSignal();
 
-    public constructor(validCategories: DesignCategory[]) {
-        if (validCategories == null || validCategories.length == 0) {
+    constructor(validCategories: DesignCategory[]) {
+        if (validCategories == null || validCategories.length === 0) {
             throw new Error("Sort names length can't be 0");
         }
 
@@ -62,31 +62,31 @@ export class SortOptions {
             let aProperty: any;
             let bProperty: any;
 
-            if (criterion.category == DesignCategory.Sequence) {
-                let anchor_sequence: string = criterion.arg;
-                let a_string: string = a.sequence;
-                if (a_string == null) throw new Error(`solution ${  a.nodeID  } invalid`);
-                let b_string: string = b.sequence;
-                if (b_string == null) throw new Error(`solution ${  b.nodeID  } invalid`);
-                if (a_string.length != anchor_sequence.length || b_string.length != anchor_sequence.length) {
-                    throw new Error("Wrong anchor sequence length");
+            if (criterion.category === DesignCategory.SEQUENCE) {
+                let anchorSequence: string = criterion.arg;
+                let aString: string = a.sequence;
+                if (aString == null) throw new Error(`solution ${a.nodeID} invalid`);
+                let bString: string = b.sequence;
+                if (bString == null) throw new Error(`solution ${b.nodeID} invalid`);
+                if (aString.length !== anchorSequence.length || bString.length !== anchorSequence.length) {
+                    throw new Error('Wrong anchor sequence length');
                 }
 
-                let a_score = 0;
-                let b_score = 0;
+                let aScore = 0;
+                let bScore = 0;
 
-                for (let jj = 0; jj < a_string.length; jj++) {
-                    if (a_string.charAt(jj) != anchor_sequence.charAt(jj)) {
-                        a_score++;
+                for (let jj = 0; jj < aString.length; jj++) {
+                    if (aString.charAt(jj) !== anchorSequence.charAt(jj)) {
+                        aScore++;
                     }
 
-                    if (b_string.charAt(jj) != anchor_sequence.charAt(jj)) {
-                        b_score++;
+                    if (bString.charAt(jj) !== anchorSequence.charAt(jj)) {
+                        bScore++;
                     }
                 }
 
-                aProperty = a_score;
-                bProperty = b_score;
+                aProperty = aScore;
+                bProperty = bScore;
             } else {
                 aProperty = a.getProperty(criterion.category);
                 bProperty = b.getProperty(criterion.category);
@@ -99,11 +99,10 @@ export class SortOptions {
                     return -1;
                 }
             } else if (aProperty < bProperty) {
-                    return -1;
-                } else if (aProperty > bProperty) {
-                    return 1;
-                }
-
+                return -1;
+            } else if (aProperty > bProperty) {
+                return 1;
+            }
         }
 
         if (a.nodeID < b.nodeID) {
@@ -131,7 +130,7 @@ export class SortOptions {
     public removeCriteria(category: DesignCategory): void {
         let idx = this.getCriterionIdx(category);
         if (idx < 0) {
-            throw new Error(`Can't find sort_category ${  category}`);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         this._criteria.splice(idx, 1);
@@ -142,7 +141,7 @@ export class SortOptions {
     public toggleSort(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
         if (criterion == null) {
-            throw new Error(`Can't find category ${  category}`);
+            throw new Error(`Can't find category ${category}`);
         }
 
         criterion.sortOrder *= -1;
@@ -154,7 +153,7 @@ export class SortOptions {
     public setCriteriaIdx(category: DesignCategory, newIdx: number): void {
         let curIdx = this.getCriterionIdx(category);
         if (curIdx < 0) {
-            throw new Error(`Can't find sort_category ${  category}`);
+            throw new Error(`Can't find sort_category ${category}`);
         }
 
         if (newIdx === curIdx || newIdx < 0 || newIdx >= this._criteria.length) {

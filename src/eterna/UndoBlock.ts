@@ -1,8 +1,9 @@
-import {JSONUtil} from "../flashbang/util/JSONUtil";
-import {EPars} from "./EPars";
-import {Folder} from "./folding/Folder";
-import {Plot, PlotType} from "./Plot";
-import {Oligo, Pose2D} from "./pose2D/Pose2D";
+import {JSONUtil} from 'flashbang';
+import EPars from 'eterna/EPars';
+import Plot, {PlotType} from 'eterna/Plot';
+import Pose2D, {Oligo} from './pose2D/Pose2D';
+import Folder from './folding/Folder';
+import Utility from './util/Utility';
 
 export enum UndoBlockParam {
     GU = 0,
@@ -22,12 +23,16 @@ export enum UndoBlockParam {
     MAX = 14,
 }
 
-export class UndoBlock {
-    public constructor(seq: number[]) {
+export default class UndoBlock {
+    constructor(seq: number[]) {
         this._sequence = seq.slice();
     }
 
     public toJSON(): any {
+        // TODO: Updating this requires changing all content in the DB AND
+        // migrating all autosave content on boot for however long we want to allow
+        // players to migrate their autosaves
+        /* eslint-disable @typescript-eslint/camelcase */
         return {
             sequence_: this._sequence,
             pairs_array_: this._pairsArray,
@@ -43,23 +48,24 @@ export class UndoBlock {
             forced_struct_: this._forcedStruct,
             target_conditions_: this._targetConditions
         };
+        /* eslint-enable @typescript-eslint/camelcase */
     }
 
     public fromJSON(json: any): void {
         try {
-            this._sequence = JSONUtil.require(json, "sequence_");
-            this._pairsArray = JSONUtil.require(json, "pairs_array_");
-            this._paramsArray = JSONUtil.require(json, "params_array_");
-            this._stable = JSONUtil.require(json, "stable_");
-            this._targetOligo = JSONUtil.require(json, "target_oligo_");
-            this._targetOligos = JSONUtil.require(json, "target_oligos_");
-            this._oligoOrder = JSONUtil.require(json, "oligo_order_");
-            this._oligosPaired = JSONUtil.require(json, "oligos_paired_");
-            this._targetPairs = JSONUtil.require(json, "target_pairs_");
-            this._targetOligoOrder = JSONUtil.require(json, "target_oligo_order_");
-            this._puzzleLocks = JSONUtil.require(json, "puzzle_locks_");
-            this._forcedStruct = JSONUtil.require(json, "forced_struct_");
-            this._targetConditions = JSONUtil.require(json, "target_conditions_");
+            this._sequence = JSONUtil.require(json, 'sequence_');
+            this._pairsArray = JSONUtil.require(json, 'pairs_array_');
+            this._paramsArray = JSONUtil.require(json, 'params_array_');
+            this._stable = JSONUtil.require(json, 'stable_');
+            this._targetOligo = JSONUtil.require(json, 'target_oligo_');
+            this._targetOligos = JSONUtil.require(json, 'target_oligos_');
+            this._oligoOrder = JSONUtil.require(json, 'oligo_order_');
+            this._oligosPaired = JSONUtil.require(json, 'oligos_paired_');
+            this._targetPairs = JSONUtil.require(json, 'target_pairs_');
+            this._targetOligoOrder = JSONUtil.require(json, 'target_oligo_order_');
+            this._puzzleLocks = JSONUtil.require(json, 'puzzle_locks_');
+            this._forcedStruct = JSONUtil.require(json, 'forced_struct_');
+            this._targetConditions = JSONUtil.require(json, 'target_conditions_');
         } catch (e) {
             throw new Error(`Error parsing UndoBlock JSON: ${e}`);
         }
@@ -69,22 +75,22 @@ export class UndoBlock {
         return this._targetOligos;
     }
 
-    public set targetOligos(target_oligos: Oligo[]) {
-        this._targetOligos = target_oligos == null ? null : JSON.parse(JSON.stringify(target_oligos));
+    public set targetOligos(targetOligos: Oligo[]) {
+        this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
     }
 
     public get targetOligo(): number[] {
         return this._targetOligo;
     }
 
-    public set targetOligo(target_oligo: number[]) {
-        this._targetOligo = target_oligo == null ? null : target_oligo.slice();
+    public set targetOligo(targetOligo: number[]) {
+        this._targetOligo = targetOligo == null ? null : targetOligo.slice();
     }
 
     public get oligoMode(): number {
         let tc: any = this.targetConditions;
         if (tc == null) return 0;
-        return tc["fold_mode"] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc["fold_mode"]);
+        return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
     public get oligoName(): string {
@@ -92,39 +98,39 @@ export class UndoBlock {
         if (tc == null) {
             return null;
         }
-        return tc.hasOwnProperty("oligo_name") ? tc["oligo_name"] : null;
+        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
     }
 
     public get oligoOrder(): number[] {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligo_order: number[]) {
-        this._oligoOrder = oligo_order == null ? null : oligo_order.slice();
+    public set oligoOrder(oligoOrder: number[]) {
+        this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
     public get oligosPaired(): number {
         return this._oligosPaired;
     }
 
-    public set oligosPaired(oligos_paired: number) {
-        this._oligosPaired = oligos_paired;
+    public set oligosPaired(oligosPaired: number) {
+        this._oligosPaired = oligosPaired;
     }
 
     public get targetPairs(): number[] {
         return this._targetPairs;
     }
 
-    public set targetPairs(target_pairs: number[]) {
-        this._targetPairs = target_pairs.slice();
+    public set targetPairs(targetPairs: number[]) {
+        this._targetPairs = targetPairs.slice();
     }
 
     public get targetOligoOrder(): number[] {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligo_order: number[]) {
-        this._targetOligoOrder = oligo_order == null ? null : oligo_order.slice();
+    public set targetOligoOrder(oligoOrder: number[]) {
+        this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
     public get sequence(): number[] {
@@ -191,39 +197,39 @@ export class UndoBlock {
     }
 
     public setBasics(folder: Folder, temp: number = 37): void {
-        let best_pairs: number[] = this.getPairs(temp);
+        let bestPairs: number[] = this.getPairs(temp);
         let seq: number[] = this._sequence;
 
-        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, best_pairs), temp);
-        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, best_pairs), temp);
-        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, best_pairs), temp);
-        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(best_pairs), temp);
+        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp);
+        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp);
+        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp);
+        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(EPars.sequenceToString(seq), 5), temp);
-        let full_seq: number[] = seq.slice();
+        let fullSeq: number[] = seq.slice();
         if (this._targetOligo) {
-            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) full_seq.push(EPars.RNABASE_CUT);
+            if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(EPars.RNABASE_CUT);
             if (this.oligoMode === Pose2D.OLIGO_MODE_EXT5P) {
-                full_seq = this._targetOligo.concat(full_seq);
+                fullSeq = this._targetOligo.concat(fullSeq);
             } else {
-                full_seq = full_seq.concat(this._targetOligo);
+                fullSeq = fullSeq.concat(this._targetOligo);
             }
         } else if (this._targetOligos) {
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
-                full_seq.push(EPars.RNABASE_CUT);
-                full_seq = full_seq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
+                fullSeq.push(EPars.RNABASE_CUT);
+                fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
             }
         }
         let nnfe: number[] = [];
-        let total_fe: number = folder.scoreStructures(full_seq, best_pairs, temp, nnfe);
-        this.setParam(UndoBlockParam.FE, total_fe, temp);
+        let totalFE: number = folder.scoreStructures(fullSeq, bestPairs, temp, nnfe);
+        this.setParam(UndoBlockParam.FE, totalFE, temp);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
 
     public updateMeltingPointAndDotPlot(folder: Folder): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37) == null) {
-            let dot_array: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37);
-            this.setParam(UndoBlockParam.DOTPLOT, dot_array, 37);
-            this._dotPlotData = dot_array.slice();
+            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37);
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37);
+            this._dotPlotData = dotArray.slice();
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
@@ -232,72 +238,72 @@ export class UndoBlock {
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dot_temp_array: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii);
-                this.setParam(UndoBlockParam.DOTPLOT, dot_temp_array, ii);
+                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii);
+                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii);
             }
         }
 
-        let ref_pairs: number[] = this.getPairs(37);
+        let refPairs: number[] = this.getPairs(37);
 
-        let pair_scores: number[] = [];
-        let max_pair_scores: number[] = [];
+        let pairScores: number[] = [];
+        let maxPairScores: number[] = [];
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
-                pair_scores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii));
-                max_pair_scores.push(1.0);
+                pairScores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii));
+                maxPairScores.push(1.0);
                 continue;
             }
-            let cur_dat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii);
-            let cur_pairs: number[] = this.getPairs(ii);
-            let prob_score = 0;
-            let score_count = 0;
+            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii);
+            let curPairs: number[] = this.getPairs(ii);
+            let probScore = 0;
+            let scoreCount = 0;
 
-            for (let jj = 0; jj < cur_dat.length; jj += 3) {
-                let index_i: number = cur_dat[jj] - 1;
-                let index_j: number = cur_dat[jj + 1] - 1;
+            for (let jj = 0; jj < curDat.length; jj += 3) {
+                let indexI: number = curDat[jj] - 1;
+                let indexJ: number = curDat[jj + 1] - 1;
 
-                if (index_i < index_j) {
-                    if (ref_pairs[index_i] === index_j) {
-                        prob_score += Number(cur_dat[jj + 2]);
-                        score_count++;
+                if (indexI < indexJ) {
+                    if (refPairs[indexI] === indexJ) {
+                        probScore += Number(curDat[jj + 2]);
+                        scoreCount++;
                     }
-                } else if (index_j < index_i) {
-                    if (ref_pairs[index_j] === index_i) {
-                        prob_score += Number(cur_dat[jj + 2]);
-                        score_count++;
+                } else if (indexJ < indexI) {
+                    if (refPairs[indexJ] === indexI) {
+                        probScore += Number(curDat[jj + 2]);
+                        scoreCount++;
                     }
                 }
             }
 
-            if (score_count > 0) {
-                prob_score /= score_count;
+            if (scoreCount > 0) {
+                probScore /= scoreCount;
             }
 
-            let num_paired = 0;
-            for (let jj = 0; jj < cur_pairs.length; jj++) {
-                if (cur_pairs[jj] > jj) {
-                    num_paired += 2;
+            let numPaired = 0;
+            for (let jj = 0; jj < curPairs.length; jj++) {
+                if (curPairs[jj] > jj) {
+                    numPaired += 2;
                 }
             }
-            let pair_score: number = Number(num_paired) / ref_pairs.length;
+            let pairScore: number = Number(numPaired) / refPairs.length;
 
-            pair_scores.push(1 - pair_score);
-            max_pair_scores.push(1.0);
+            pairScores.push(1 - pairScore);
+            maxPairScores.push(1.0);
 
-            this.setParam(UndoBlockParam.PROB_SCORE, prob_score, ii);
-            this.setParam(UndoBlockParam.PAIR_SCORE, pair_score, ii);
+            this.setParam(UndoBlockParam.PROB_SCORE, probScore, ii);
+            this.setParam(UndoBlockParam.PAIR_SCORE, pairScore, ii);
         }
 
-        this._meltPlotPairScores = pair_scores;
-        this._meltPlotMaxPairScores = max_pair_scores;
+        this._meltPlotPairScores = pairScores;
+        this._meltPlotMaxPairScores = maxPairScores;
 
-        let init_score: number = this.getParam(UndoBlockParam.PROB_SCORE, 37);
+        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37);
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let current_score: number = this.getParam(UndoBlockParam.PROB_SCORE, ii);
-            if (current_score < init_score * 0.5) {
+            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii);
+            if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
             }
@@ -318,27 +324,31 @@ export class UndoBlock {
         return plot;
     }
 
-    public getOrderMap(other_order: number[]): number[] {
+    /**
+     * Return map of current base indices to adjusted base indices when oligos are rearranged
+     * according to otherorder
+     * @param otherOrder An array of indexes, where the index refers to the new index
+     * the oligo at the given position in the old array should be placed at.
+     * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
+     * (oligo A, with the old index of 0, should be at new index 1)
+     */
+    public reorderedOligosIndexMap(otherOrder: number[]): number[] {
         if (this._targetOligos == null) return null;
 
-        let idx_map: number[] = [];
-        let ofs: number[] = [];
-        let ii: number = this._sequence.length;
-        for (let jj = 0; jj < this._targetOligos.length; jj++) {
-            let kk = (other_order == null ? jj : other_order[jj]);
-            ofs[kk] = ii;
-            ii += 1 + this._targetOligos[kk].sequence.length;
+        let originalIndices: number[][] = [];
+        let oligoFirstBaseIndex = this._sequence.length;
+
+        for (let oligo of this._targetOligos) {
+            // The + 1 is used to account for the "cut" base denoting split points between strands
+            originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1));
+            oligoFirstBaseIndex += oligo.sequence.length;
         }
-        for (let ii = 0; ii < this._sequence.length; ii++) idx_map[ii] = ii;
-        for (let jj = 0; jj < this._targetOligos.length; jj++) {
-            let kk = ofs[jj];
-            let xx: number;
-            for (xx = 0; xx <= this._targetOligos[jj].sequence.length; xx++) {
-                idx_map[ii + xx] = kk + xx;
-            }
-            ii += xx;
-        }
-        return idx_map;
+
+        let newOrder = otherOrder || Utility.range(this._targetOligos.length);
+
+        return Utility.range(this._sequence.length).concat(
+            ...Utility.range(this._targetOligos.length).map(idx => originalIndices[newOrder.indexOf(idx)])
+        );
     }
 
     private _sequence: number[];

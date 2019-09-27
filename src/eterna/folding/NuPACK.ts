@@ -1,27 +1,29 @@
-import * as log from "loglevel";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {EPars} from "../EPars";
-import {PoseOp} from "../pose2D/PoseOp";
-import {int} from "../util/int";
-import * as nupack_lib from "./engines/nupack_lib/index";
-import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/nupack_lib/index";
-import {Folder} from "./Folder";
-import {FoldUtil} from "./FoldUtil";
+import * as log from 'loglevel';
+import EPars from 'eterna/EPars';
+/* eslint-disable import/no-duplicates, import/no-unresolved */
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import PoseOp from 'eterna/pose2D/PoseOp';
+import int from 'eterna/util/int';
+import * as NupackLib from './engines/NupackLib';
+import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/NupackLib';
+/* eslint-enable import/no-duplicates, import/no-unresolved */
+import Folder from './Folder';
+import FoldUtil from './FoldUtil';
 
-export class NuPACK extends Folder {
-    public static NAME = "NuPACK";
+export default class NuPACK extends Folder {
+    public static NAME = 'NuPACK';
 
     /**
      * Asynchronously creates a new instance of the NuPACK folder.
      * @returns {Promise<NuPACK>}
      */
     public static create(): Promise<NuPACK> {
-        return import("./engines/nupack")
+        return import('./engines/nupack')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new NuPACK(program));
     }
 
-    private constructor(lib: nupack_lib) {
+    private constructor(lib: NupackLib) {
         super();
         this._lib = lib;
     }
@@ -34,22 +36,22 @@ export class NuPACK extends Folder {
     /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
         let key: any = {
-            primitive: "dotplot", seq, pairs, temp
+            primitive: 'dotplot', seq, pairs, temp
         };
-        let ret_array: number[] = this.getCache(key);
-        if (ret_array != null) {
+        let retArray: number[] = this.getCache(key);
+        if (retArray != null) {
             // trace("dotplot cache hit");
-            return ret_array.slice();
+            return retArray.slice();
         }
 
-        let seq_str: string = EPars.sequenceToString(seq);
+        let seqStr: string = EPars.sequenceToString(seq);
 
         let result: DotPlotResult = null;
         try {
-            result = this._lib.GetDotPlot(temp, seq_str);
-            ret_array = EmscriptenUtil.stdVectorToArray(result.plot);
+            result = this._lib.GetDotPlot(temp, seqStr);
+            retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
-            log.error("GetDotPlot error", e);
+            log.error('GetDotPlot error', e);
             return [];
         } finally {
             if (result != null) {
@@ -58,8 +60,8 @@ export class NuPACK extends Folder {
             }
         }
 
-        this.putCache(key, ret_array.slice());
-        return ret_array;
+        this.putCache(key, retArray.slice());
+        return retArray;
     }
 
     /* override */
@@ -80,7 +82,7 @@ export class NuPACK extends Folder {
     /* override */
     public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {
-            primitive: "score", seq, pairs, temp
+            primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
         if (cache != null) {
@@ -99,7 +101,7 @@ export class NuPACK extends Folder {
                     EPars.pairsToParenthesis(pairs));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
-                log.error("FullEval error", e);
+                log.error('FullEval error', e);
                 return 0;
             } finally {
                 if (result != null) {
@@ -128,7 +130,7 @@ export class NuPACK extends Folder {
                 let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
                 if (nodesA[0] >= 0 || nodesB[0] !== -1) {
-                    throw new Error("Something went terribly wrong in score_structures()");
+                    throw new Error('Something went terribly wrong in scoreStructures()');
                 }
 
                 cache.nodes.splice(0); // make empty
@@ -167,12 +169,14 @@ export class NuPACK extends Folder {
     }
 
     /* override */
-    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
-        let key: any = {
-            primitive: "fold",
+    public foldSequence(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
+        let key = {
+            primitive: 'fold',
             seq,
-            second_best_pairs,
-            desired_pairs,
+            secondBestPairs,
+            desiredPairs,
             temp
         };
         let pairs: number[] = this.getCache(key);
@@ -191,42 +195,48 @@ export class NuPACK extends Folder {
     }
 
     /* override */
-    public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
-        let key: any = {
-            primitive: "fold_aptamer",
+    public foldSequenceWithBindingSite(
+        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        version: number = 1.0, temp: number = 37
+    ): number[] {
+        let key = {
+            primitive: 'foldAptamer',
             seq,
-            target_pairs,
-            binding_site,
+            targetPairs,
+            bindingSite,
             bonus,
             version,
             temp
         };
         let pairs: number[] = this.getCache(key);
         if (pairs != null) {
-            // trace("fold_aptamer cache hit");
+            // trace("foldAptamer cache hit");
             return pairs.slice();
         }
 
-        let site_groups: number[][] = [];
-        let last_index = -1;
-        let current_group: number[] = [];
+        let siteGroups: number[][] = [];
+        let lastIndex = -1;
+        let currentGroup: number[] = [];
 
-        for (let jj = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index === 1) {
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+        for (let jj = 0; jj < bindingSite.length; jj++) {
+            if (lastIndex < 0 || bindingSite[jj] - lastIndex === 1) {
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             } else {
-                site_groups.push(current_group);
-                current_group = [];
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+                siteGroups.push(currentGroup);
+                currentGroup = [];
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             }
         }
-        if (current_group.length > 0) {
-            site_groups.push(current_group);
+        if (currentGroup.length > 0) {
+            siteGroups.push(currentGroup);
         }
 
-        pairs = this.foldSequenceWithBindingSiteImpl(seq, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
+        pairs = this.foldSequenceWithBindingSiteImpl(
+            seq, siteGroups[0][0], siteGroups[0][siteGroups[0].length - 1], siteGroups[1][siteGroups[1].length - 1],
+            siteGroups[1][0], bonus, temp
+        );
 
         this.putCache(key, pairs.slice());
         return pairs;
@@ -238,27 +248,29 @@ export class NuPACK extends Folder {
     }
 
     /* override */
-    public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
+    public cofoldSequence(
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
-            throw new Error("Missing cutting point");
+            throw new Error('Missing cutting point');
         }
 
         let key: any = {
-            primitive: "cofold",
+            primitive: 'cofold',
             seq,
-            second_best_pairs,
+            secondBestPairs,
             malus,
-            desired_pairs,
+            desiredPairs,
             temp
         };
-        let co_pairs: number[] = this.getCache(key);
-        if (co_pairs != null) {
+        let coPairs: number[] = this.getCache(key);
+        if (coPairs != null) {
             // trace("cofold cache hit");
-            return co_pairs.slice();
+            return coPairs.slice();
         }
 
-        // FIXME: what about desired_pairs? (forced structure)
+        // FIXME: what about desiredPairs? (forced structure)
         let seqA: number[] = seq.slice(0, cut);
         let pairsA: number[] = this.foldSequence(seqA, null, null, temp);
         let nodesA: number[] = [];
@@ -269,73 +281,76 @@ export class NuPACK extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofoldSequenceImpl(seq);
-        let co_nodes: number[] = [];
-        let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
+        coPairs = this.cofoldSequenceImpl(seq);
+        let coNodes: number[] = [];
+        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
 
-        if (co_fe + malus >= feA + feB) {
+        if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesisToPairs(struc);
+            coPairs = EPars.parenthesisToPairs(struc);
         }
 
-        this.putCache(key, co_pairs.slice());
-        return co_pairs;
+        this.putCache(key, coPairs.slice());
+        return coPairs;
     }
 
     /* override */
-    public can_cofold_with_binding_site(): boolean {
+    public get canCofoldWithBindingSite(): boolean {
         return true;
     }
 
     /* override */
-    public cofoldSequenceWithBindingSite(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
+    public cofoldSequenceWithBindingSite(
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        malus: number = 0, temp: number = 37
+    ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
-            throw new Error("Missing cutting point");
+            throw new Error('Missing cutting point');
         }
 
         let key: any = {
-            primitive: "cofold_aptamer",
+            primitive: 'cofoldAptamer',
             seq,
             malus,
-            desired_pairs,
-            binding_site,
+            desiredPairs,
+            bindingSite,
             bonus,
             temp
         };
-        let co_pairs: number[] = this.getCache(key);
-        if (co_pairs != null) {
-            // trace("cofold_aptamer cache hit");
-            return co_pairs.slice();
+        let coPairs: number[] = this.getCache(key);
+        if (coPairs != null) {
+            // trace("cofoldAptamer cache hit");
+            return coPairs.slice();
         }
 
         // IMPORTANT: assumption is that the binding site is in segment A
-        // FIXME: what about desired_pairs? (forced structure)
+        // FIXME: what about desiredPairs? (forced structure)
 
-        let site_groups: number[][] = [];
-        let last_index = -1;
-        let current_group: number[] = [];
+        let siteGroups: number[][] = [];
+        let lastIndex = -1;
+        let currentGroup: number[] = [];
 
-        for (let jj = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index === 1) {
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+        for (let jj = 0; jj < bindingSite.length; jj++) {
+            if (lastIndex < 0 || bindingSite[jj] - lastIndex === 1) {
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             } else {
-                site_groups.push(current_group);
-                current_group = [];
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+                siteGroups.push(currentGroup);
+                currentGroup = [];
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             }
         }
-        if (current_group.length > 0) {
-            site_groups.push(current_group);
+        if (currentGroup.length > 0) {
+            siteGroups.push(currentGroup);
         }
 
         let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, binding_site, bonus, 2.5, temp);
+        let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
-        if (FoldUtil.bindingSiteFormed(pairsA, site_groups)) {
+        if (FoldUtil.bindingSiteFormed(pairsA, siteGroups)) {
             feA += bonus;
         }
 
@@ -344,20 +359,23 @@ export class NuPACK extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofoldSequenceWithBindingSiteImpl(seq, desired_pairs, site_groups[0][0], site_groups[0][site_groups[0].length - 1], site_groups[1][site_groups[1].length - 1], site_groups[1][0], bonus, temp);
-        let co_nodes: number[] = [];
-        let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
-        if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) {
-            co_fe += bonus;
+        coPairs = this.cofoldSequenceWithBindingSiteImpl(
+            seq, desiredPairs, siteGroups[0][0], siteGroups[0][siteGroups[0].length - 1],
+            siteGroups[1][siteGroups[1].length - 1], siteGroups[1][0], bonus, temp
+        );
+        let coNodes: number[] = [];
+        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        if (FoldUtil.bindingSiteFormed(coPairs, siteGroups)) {
+            coFE += bonus;
         }
 
-        if (co_fe + malus >= feA + feB) {
+        if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesisToPairs(struc);
+            coPairs = EPars.parenthesisToPairs(struc);
         }
 
-        this.putCache(key, co_pairs.slice());
-        return co_pairs;
+        this.putCache(key, coPairs.slice());
+        return coPairs;
     }
 
     /* override */
@@ -366,13 +384,15 @@ export class NuPACK extends Folder {
     }
 
     /* override */
-    public multifold(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): any {
+    public multifold(
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+    ): any {
         let key: any = {
-            primitive: "multifold",
+            primitive: 'multifold',
             seq,
-            second_best_pairs,
+            secondBestPairs,
             oligos,
-            desired_pairs,
+            desiredPairs,
             temp
         };
         let mfold: any = this.getCache(key);
@@ -382,50 +402,50 @@ export class NuPACK extends Folder {
         }
 
         mfold = {};
-        mfold["pairs"] = null;
-        mfold["order"] = null;
-        mfold["count"] = -1;
+        mfold['pairs'] = null;
+        mfold['order'] = null;
+        mfold['count'] = -1;
 
-        let best_fe = 1000000;
+        let bestFE = 1000000;
         let order: number[] = [];
-        let num_oligo: number = oligos.length;
+        let numOligo: number = oligos.length;
 
-        for (let ii = 0; ii < num_oligo; ii++) {
+        for (let ii = 0; ii < numOligo; ii++) {
             order.push(ii);
         }
 
         let more: boolean;
         do {
-            for (let ii = num_oligo; ii >= 0; ii--) {
-                let ms_seq: number[] = seq.slice();
+            for (let ii = numOligo; ii >= 0; ii--) {
+                let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
-                    ms_seq.push(EPars.RNABASE_CUT);
-                    ms_seq = ms_seq.concat(oligos[order[jj]].seq);
+                    msSeq.push(EPars.RNABASE_CUT);
+                    msSeq = msSeq.concat(oligos[order[jj]].seq);
                 }
-                let ms_pairs: number[];
+                let msPairs: number[];
                 if (ii === 0) {
-                    ms_pairs = this.foldSequence(ms_seq, null, null, temp);
+                    msPairs = this.foldSequence(msSeq, null, null, temp);
                 } else {
-                    ms_pairs = this.cofoldSeq2(ms_seq, null, null, temp);
+                    msPairs = this.cofoldSeq2(msSeq, null, null, temp);
                 }
-                let ms_nodes: number[] = [];
-                let ms_fe: number = this.scoreStructures(ms_seq, ms_pairs, temp, ms_nodes);
+                let msNodes: number[] = [];
+                let msFE: number = this.scoreStructures(msSeq, msPairs, temp, msNodes);
                 for (let jj = 0; jj < ii; jj++) {
-                    ms_fe += oligos[order[jj]].malus;
+                    msFE += oligos[order[jj]].malus;
                 }
-                for (let jj = ii; jj < num_oligo; jj++) {
-                    let s_pairs: number[] = this.foldSequence(oligos[order[jj]].seq, null, null, temp);
-                    let s_nodes: number[] = [];
-                    let s_fe: number = this.scoreStructures(oligos[order[jj]].seq, s_pairs, temp, s_nodes);
+                for (let jj = ii; jj < numOligo; jj++) {
+                    let sPairs: number[] = this.foldSequence(oligos[order[jj]].seq, null, null, temp);
+                    let sNodes: number[] = [];
+                    let sFE: number = this.scoreStructures(oligos[order[jj]].seq, sPairs, temp, sNodes);
 
-                    let struc = `${EPars.pairsToParenthesis(ms_pairs)}&${EPars.pairsToParenthesis(s_pairs)}`;
-                    ms_pairs = EPars.parenthesisToPairs(struc);
-                    ms_fe += s_fe;
+                    let struc = `${EPars.pairsToParenthesis(msPairs)}&${EPars.pairsToParenthesis(sPairs)}`;
+                    msPairs = EPars.parenthesisToPairs(struc);
+                    msFE += sFE;
                 }
 
-                if (ms_fe < best_fe) {
-                    best_fe = ms_fe;
-                    mfold.pairs = ms_pairs.slice();
+                if (msFE < bestFE) {
+                    bestFE = msFE;
+                    mfold.pairs = msPairs.slice();
                     mfold.order = order.slice();
                     mfold.count = ii;
                 }
@@ -438,40 +458,42 @@ export class NuPACK extends Folder {
         return mfold;
     }
 
-    public multifoldUnroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): PoseOp[] {
+    public multifoldUnroll(
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+    ): PoseOp[] {
         let ops: PoseOp[] = [];
 
         let order: number[] = [];
-        let num_oligo: number = oligos.length;
+        let numOligo: number = oligos.length;
 
-        for (let ii = 0; ii < num_oligo; ii++) {
+        for (let ii = 0; ii < numOligo; ii++) {
             order.push(ii);
         }
 
-        for (let ii = 0; ii < num_oligo; ii++) {
+        for (let ii = 0; ii < numOligo; ii++) {
             ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].seq, null, null, temp)));
         }
 
         let more: boolean;
         do {
-            for (let ii = num_oligo; ii >= 0; ii--) {
-                let ms_seq: number[] = seq.slice();
+            for (let ii = numOligo; ii >= 0; ii--) {
+                let msSeq: number[] = seq.slice();
                 for (let jj = 0; jj < ii; jj++) {
-                    ms_seq.push(EPars.RNABASE_CUT);
-                    ms_seq = ms_seq.concat(oligos[order[jj]].seq);
+                    msSeq.push(EPars.RNABASE_CUT);
+                    msSeq = msSeq.concat(oligos[order[jj]].seq);
                 }
 
                 if (ii === 0) {
-                    ops.push(new PoseOp(null, () => this.foldSequence(ms_seq, null, null, temp)));
+                    ops.push(new PoseOp(null, () => this.foldSequence(msSeq, null, null, temp)));
                 } else {
-                    ops.push(new PoseOp(null, () => this.cofoldSeq2(ms_seq, null, null, temp)));
+                    ops.push(new PoseOp(null, () => this.cofoldSeq2(msSeq, null, null, temp)));
                 }
             }
 
             more = FoldUtil.nextPerm(order);
         } while (more);
 
-        ops.push(new PoseOp(null, () => this.multifold(seq, second_best_pairs, oligos, desired_pairs, temp)));
+        ops.push(new PoseOp(null, () => this.multifold(seq, secondBestPairs, oligos, desiredPairs, temp)));
         return ops;
     }
 
@@ -483,7 +505,7 @@ export class NuPACK extends Folder {
             result = this._lib.FullFoldTemperature(temp, seqStr);
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("FullFoldTemperature error", e);
+            log.error('FullFoldTemperature error', e);
             return [];
         } finally {
             if (result != null) {
@@ -493,7 +515,9 @@ export class NuPACK extends Folder {
         }
     }
 
-    private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private foldSequenceWithBindingSiteImpl(
+        seq: number[], i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+    ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
 
         let result: FullFoldResult = null;
@@ -501,7 +525,7 @@ export class NuPACK extends Folder {
             result = this._lib.FullFoldWithBindingSite(seqStr, i, p, j, q, -bonus);
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("FullFoldWithBindingSite error", e);
+            log.error('FullFoldWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
@@ -517,10 +541,10 @@ export class NuPACK extends Folder {
         let result: FullFoldResult = null;
         try {
             result = this._lib.CoFoldSequence(seqStr);
-            log.debug("done cofolding");
+            log.debug('done cofolding');
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("CoFoldSequence error", e);
+            log.error('CoFoldSequence error', e);
             return [];
         } finally {
             if (result != null) {
@@ -530,16 +554,18 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofoldSequenceWithBindingSiteImpl(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37): number[] {
+    private cofoldSequenceWithBindingSiteImpl(
+        seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+    ): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
 
         let result: FullFoldResult;
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, i, p, j, q, -bonus);
-            log.debug("done cofolding_wbs");
+            log.debug('done cofoldingWBS');
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("CoFoldSequenceWithBindingSite error", e);
+            log.error('CoFoldSequenceWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
@@ -549,27 +575,29 @@ export class NuPACK extends Folder {
         }
     }
 
-    private cofoldSeq2(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    private cofoldSeq2(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let key: any = {
-            primitive: "cofold2",
+            primitive: 'cofold2',
             seq,
-            second_best_pairs,
-            desired_pairs,
+            secondBestPairs,
+            desiredPairs,
             temp
         };
-        let co_pairs: number[] = this.getCache(key);
-        if (co_pairs != null) {
+        let coPairs: number[] = this.getCache(key);
+        if (coPairs != null) {
             // trace("cofold2 cache hit");
-            return co_pairs.slice();
+            return coPairs.slice();
         }
 
-        co_pairs = this.cofoldSequenceImpl(seq);
+        coPairs = this.cofoldSequenceImpl(seq);
 
-        this.putCache(key, co_pairs.slice());
-        return co_pairs;
+        this.putCache(key, coPairs.slice());
+        return coPairs;
     }
 
-    private readonly _lib: nupack_lib;
+    private readonly _lib: NupackLib;
 }
 
 interface FullEvalCache {

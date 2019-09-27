@@ -1,18 +1,16 @@
 import {
     Graphics, Matrix, Point, Sprite, Text, Texture
-} from "pixi.js";
-import {Updatable} from "../../flashbang/core/Updatable";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {BitmapManager} from "../resources/BitmapManager";
-import {Bitmaps} from "../resources/Bitmaps";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {Fonts} from "../util/Fonts";
+} from 'pixi.js';
+import {
+    ContainerObject, MathUtil, TextureUtil, ColorUtil, Updatable
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
 
 type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 
-export class Band extends ContainerObject implements Updatable {
+export default class Band extends ContainerObject implements Updatable {
     constructor(farDist: number, closeDist: number, strength: number) {
         super();
 
@@ -29,9 +27,9 @@ export class Band extends ContainerObject implements Updatable {
         this._st1 = new Sprite();
         this.container.addChild(this._st1);
 
-        let score_text: Text = Fonts.arial("", 10).bold().build();
-        score_text.position = new Point(2, 19);
-        this.container.addChild(score_text);
+        let scoreText: Text = Fonts.arial('', 10).bold().build();
+        scoreText.position = new Point(2, 19);
+        this.container.addChild(scoreText);
 
         this.strength = strength;
     }
@@ -55,12 +53,12 @@ export class Band extends ContainerObject implements Updatable {
             this._startTime = dt;
         }
 
-        let pair_r: number = Math.cos((dt - this._startTime) * 4) * this._movDist + this._midDist;
+        let pairR: number = Math.cos((dt - this._startTime) * 4) * this._movDist + this._midDist;
 
-        this._st0.x = -pair_r;
+        this._st0.x = -pairR;
         this._st0.y = 0;
 
-        this._st1.x = pair_r;
+        this._st1.x = pairR;
         this._st1.y = 0;
     }
 

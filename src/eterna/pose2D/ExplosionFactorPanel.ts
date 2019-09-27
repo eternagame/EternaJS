@@ -1,15 +1,15 @@
-import {Point, Text} from "pixi.js";
-import {GamePanel} from "../ui/GamePanel";
-import {Signal} from "../../signals/Signal";
-import {GameButton} from "../ui/GameButton";
-import {TextInputObject} from "../ui/TextInputObject";
-import {Fonts} from "../util/Fonts";
-import {KeyCode} from "../../flashbang/input/KeyCode";
+import {Point, Text} from 'pixi.js';
+import {Signal} from 'signals';
+import {KeyCode} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import GameButton from 'eterna/ui/GameButton';
+import GamePanel from 'eterna/ui/GamePanel';
 
-export class ExplosionFactorPanel extends GamePanel {
+export default class ExplosionFactorPanel extends GamePanel {
     public readonly factorUpdated: Signal<number> = new Signal();
 
-    public constructor() {
+    constructor() {
         super();
 
         this.setup(0, 1.0, 0x152843, 0.27, 0xC0DCE7);
@@ -32,45 +32,45 @@ export class ExplosionFactorPanel extends GamePanel {
         input.text = '1';
         input.display.position = new Point(widthWalker, heightWalker);
         this.addObject(input, this.container);
-        input.valueChanged.connect(val => {
+        input.valueChanged.connect((val) => {
             let factor = parseFloat(val);
-            if (isNaN(factor)) return;
+            if (Number.isNaN(factor)) return;
             if (factor < 0) return;
             this.factorUpdated.emit(factor);
         });
 
-        widthWalker += /*input.width*/ 50 + 5;
+        widthWalker += /* input.width */ 50 + 5;
 
         let decreaseButton: GameButton = new GameButton().label('-', 16);
         decreaseButton.display.position = new Point(widthWalker, heightWalker);
         this.addObject(decreaseButton, this.container);
         decreaseButton.clicked.connect(() => {
-            let factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25)*1000)/1000);
-            input.text = (isNaN(factor) ? 1 : factor).toString();
+            let factor = Math.max(0, Math.round((parseFloat(input.text) - 0.25) * 1000) / 1000);
+            input.text = (Number.isNaN(factor) ? 1 : factor).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
         decreaseButton.hotkey(KeyCode.BracketLeft);
         decreaseButton.tooltip('Decrease space between paired bases ([)');
 
-        widthWalker += /*decreaseButton.container.width*/20 + 5;
+        widthWalker += /* decreaseButton.container.width */20 + 5;
 
         let increaseButton: GameButton = new GameButton().label('+', 16);
         increaseButton.display.position = new Point(widthWalker, heightWalker);
         this.addObject(increaseButton, this.container);
         increaseButton.clicked.connect(() => {
-            let factor = Math.max(0, Math.round((parseFloat(input.text)+ 0.25)*1000)/1000);
-            input.text = (isNaN(factor) ? 1 : factor).toString();
+            let factor = Math.max(0, Math.round((parseFloat(input.text) + 0.25) * 1000) / 1000);
+            input.text = (Number.isNaN(factor) ? 1 : factor).toString();
             this.factorUpdated.emit(parseFloat(input.text));
         });
         increaseButton.hotkey(KeyCode.BracketRight);
         increaseButton.tooltip('Increase space between paired bases (])');
 
         // Prevent PoseField from adding a drag surface over our buttons when we're trying to click, not drag
-        decreaseButton.pointerDown.connect((e) => e.stopPropagation());
-        increaseButton.pointerDown.connect((e) => e.stopPropagation());
+        decreaseButton.pointerDown.connect(e => e.stopPropagation());
+        increaseButton.pointerDown.connect(e => e.stopPropagation());
 
-        widthWalker += /*increaseButton.container.width*/20;
-        heightWalker += /*increaseButton.container.height*/26;
+        widthWalker += /* increaseButton.container.width */20;
+        heightWalker += /* increaseButton.container.height */26;
 
         this.setSize(
             Math.max(label.width, widthWalker + ExplosionFactorPanel.WMARGIN),

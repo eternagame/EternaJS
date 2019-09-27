@@ -1,12 +1,12 @@
-import * as log from "loglevel";
-import {Base64} from "../../flashbang/util/Base64";
+import * as log from 'loglevel';
+import {Base64} from 'flashbang';
 
 type JSONData = any;
 
-export class GameClient {
+export default class GameClient {
     public readonly baseURL: string;
 
-    public constructor(baseURL: string) {
+    constructor(baseURL: string) {
         log.info(`GameClient baseURL=${baseURL}`);
         this.baseURL = baseURL;
     }
@@ -15,17 +15,17 @@ export class GameClient {
 
     /** Authenticates the logged-in player. */
     public authenticate(): Promise<[string, number]> {
-        return this.get("/eterna_authenticate.php")
+        return this.get('/eterna_authenticate.php')
             .then(rsp => rsp.text())
             .then((res) => {
-                if (res === "NOT LOGGED IN") {
-                    return Promise.resolve<[string, number]>(["Anonymous", 0]);
+                if (res === 'NOT LOGGED IN') {
+                    return Promise.resolve<[string, number]>(['Anonymous', 0]);
                 } else {
                     try {
                         let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
                         return Promise.resolve<[string, number]>([username, Number(uid)]);
                     } catch (e) {
-                        throw new Error("Authentication response malformed");
+                        throw new Error('Authentication response malformed');
                     }
                 }
             });
@@ -33,121 +33,121 @@ export class GameClient {
 
     /** Logs the player in. Resolves with the player's UID if successful. */
     public login(name: string, password: string): Promise<number> {
-        return this.post("/login/", {name, pass: password, type: "login"})
+        return this.post('/login/', {name, pass: password, type: 'login'})
             .then(rsp => rsp.json())
             .then((json) => {
-                if (json["error"] != null) {
-                    throw new Error(`Failed to log in as ${name}: ${json["error"]}`);
-                } else if (json["data"] == null || json["data"]["uid"] == null) {
-                    throw new Error("Failed to log in (bad response data)");
+                if (json['error'] != null) {
+                    throw new Error(`Failed to log in as ${name}: ${json['error']}`);
+                } else if (json['data'] == null || json['data']['uid'] == null) {
+                    throw new Error('Failed to log in (bad response data)');
                 }
 
-                return Number(json["data"]["uid"]);
+                return Number(json['data']['uid']);
             });
     }
 
     public logout(): Promise<void> {
-        return this.get("/eterna_logout.php", {noredirect: true})
+        return this.get('/eterna_logout.php', {noredirect: true})
             .then(rsp => rsp.text()).then(() => {});
     }
 
     public getBannedList(): Promise<JSONData> {
-        return this.get("/banned.list").then(rsp => rsp.json());
+        return this.get('/banned.list').then(rsp => rsp.json());
     }
 
     // / PUZZLES
 
     public getPuzzle(puznid: number, scriptid: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "puzzle", nid: puznid, script: scriptid})
+        return this.get(GameClient.GET_URI, {type: 'puzzle', nid: puznid, script: scriptid})
             .then((rsp: Response) => rsp.json());
     }
 
     public getPuzzleVotes(puznid: number, round: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "votes", puznid, round})
+        return this.get(GameClient.GET_URI, {type: 'votes', puznid, round})
             .then(rsp => rsp.json());
     }
 
     public submitSolution(params: any): Promise<JSONData> {
-        params["type"] = "post_solution";
+        params['type'] = 'post_solution';
         return this.post(GameClient.POST_URI, params).then(rsp => rsp.json());
     }
 
     public submitPuzzle(params: any): Promise<void> {
-        params["type"] = "puzzle";
+        params['type'] = 'puzzle';
         return this.post(GameClient.POST_URI, params)
             .then(rsp => rsp.json())
             .then((json) => {
-                let data = json["data"];
-                if (data["success"]) {
+                let data = json['data'];
+                if (data['success']) {
                     return Promise.resolve();
                 } else {
-                    return Promise.reject(data["error"]);
+                    return Promise.reject(data['error']);
                 }
             });
     }
 
     public getSolutions(puzzleID: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "solutions", puznid: puzzleID})
+        return this.get(GameClient.GET_URI, {type: 'solutions', puznid: puzzleID})
             .then(rsp => rsp.json());
     }
 
     public getSolutionInfo(solutionID: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {type: "solution_info", solid: solutionID, round: "1"})
+        return this.get(GameClient.GET_URI, {type: 'solution_info', solid: solutionID, round: '1'})
             .then(rsp => rsp.json());
     }
 
     public getSolutionComments(solutionID: number): Promise<JSONData> {
-        return this.get(GameClient.GET_URI, {nid: solutionID, type: "comments"})
+        return this.get(GameClient.GET_URI, {nid: solutionID, type: 'comments'})
             .then(rsp => rsp.json());
     }
 
     public submitSolutionComment(solutionID: number, body: string): Promise<JSONData> {
-        return this.post(GameClient.POST_URI, {type: "post_comment", nid: solutionID, body})
+        return this.post(GameClient.POST_URI, {type: 'post_comment', nid: solutionID, body})
             .then(rsp => rsp.json());
     }
 
     /** Deletes a solution. Returns nothing on success, and an error string if there was a problem. */
     public deleteSolution(solutionID: number): Promise<void> {
-        return this.post(GameClient.POST_URI, {type: "delete_solution", nid: solutionID})
+        return this.post(GameClient.POST_URI, {type: 'delete_solution', nid: solutionID})
             .then(rsp => rsp.json())
             .then((json) => {
-                let data = json["data"];
-                if (data["success"]) {
+                let data = json['data'];
+                if (data['success']) {
                     return Promise.resolve();
                 } else {
-                    return Promise.reject(data["error"]);
+                    return Promise.reject(data['error']);
                 }
             });
     }
 
     public toggleSolutionVote(solutionID: number, puznid: number, myVotes: number): Promise<any> {
-        let post_params: any = {solnid: solutionID, puznid};
+        let postParams: any = {solnid: solutionID, puznid};
         if (myVotes === 1) {
-            post_params["type"] = "unvote";
+            postParams['type'] = 'unvote';
         } else if (myVotes === 0) {
-            post_params["type"] = "vote";
+            postParams['type'] = 'vote';
         } else {
             throw new Error("Wrong vote value - can't submit");
         }
 
-        return this.post(GameClient.POST_URI, post_params)
+        return this.post(GameClient.POST_URI, postParams)
             .then(rsp => rsp.json())
             .then((json) => {
-                let data = json["data"];
-                if (data["success"]) {
+                let data = json['data'];
+                if (data['success']) {
                     return data;
                 } else {
-                    return Promise.reject(data["error"]);
+                    return Promise.reject(data['error']);
                 }
             });
     }
 
-    public updateSolutionFoldData(solutionID: number, fold_data: any): Promise<string> {
-        let dataString: string = JSON.stringify(fold_data);
+    public updateSolutionFoldData(solutionID: number, foldData: any): Promise<string> {
+        let dataString: string = JSON.stringify(foldData);
         return this.post(GameClient.POST_URI, {
-            type: "update_solution_fold_data",
+            type: 'update_solution_fold_data',
             nid: solutionID,
-            "fold-data": dataString
+            'fold-data': dataString
         }).then(rsp => rsp.text());
     }
 
@@ -155,16 +155,16 @@ export class GameClient {
     public postScreenshot(imgBytes: ArrayBuffer): Promise<string> {
         let encoded = Base64.encodeBytes(imgBytes);
         return this.post(GameClient.POST_URI, {
-            type: "screenshot",
+            type: 'screenshot',
             data: encoded
         })
             .then(rsp => rsp.json())
             .then((jsonData) => {
-                let data = jsonData["data"];
-                if (data["success"]) {
-                    return data["filename"];
+                let data = jsonData['data'];
+                if (data['success']) {
+                    return data['filename'];
                 } else {
-                    throw new Error(`Failed to post screenshot: ${data["error"]}`);
+                    throw new Error(`Failed to post screenshot: ${data['error']}`);
                 }
             });
     }
@@ -178,8 +178,8 @@ export class GameClient {
         }
 
         return fetch(url.toString(), {
-            headers: new Headers({"Content-Type": "text/plain"}),
-            credentials: "include"
+            headers: new Headers({'Content-Type': 'text/plain'}),
+            credentials: 'include'
         }).then((rsp) => {
             if (!rsp.ok) {
                 throw new Error(`HTTP status code: ${rsp.status}`);
@@ -200,10 +200,10 @@ export class GameClient {
         }
 
         return fetch(url.toString(), {
-            method: "POST",
+            method: 'POST',
             body: postParams.toString(),
-            headers: new Headers({"Content-Type": "application/x-www-form-urlencoded"}),
-            credentials: "include"
+            headers: new Headers({'Content-Type': 'application/x-www-form-urlencoded'}),
+            credentials: 'include'
         }).then((rsp) => {
             if (!rsp.ok) {
                 throw new Error(`HTTP status code: ${rsp.status}`);
@@ -239,6 +239,6 @@ export class GameClient {
         return new URL(urlString, this.baseURL);
     }
 
-    private static GET_URI: string = "/get/";
-    private static POST_URI: string = "/post/";
+    private static GET_URI: string = '/get/';
+    private static POST_URI: string = '/post/';
 }

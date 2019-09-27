@@ -1,7 +1,7 @@
-import {Setting} from "./Setting";
-import * as storejs from "store";
+import * as storejs from 'store';
+import Setting from './Setting';
 
-export abstract class Settings {
+export default abstract class Settings {
     protected constructor(namespace: string) {
         if (Settings.ALL_NAMESPACES.has(namespace)) {
             throw new Error(`Settings namespace '${namespace}' already taken`);

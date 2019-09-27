@@ -1,20 +1,25 @@
-import {DisplayObject, Graphics, Matrix} from "pixi.js";
-import {Flashbang} from "../core/Flashbang";
-import {GameObject} from "../core/GameObject";
-import {MatrixUtil} from "../util/MatrixUtil";
+import {DisplayObject, Graphics, Matrix} from 'pixi.js';
+import GameObject from 'flashbang/core/GameObject';
+import Flashbang from 'flashbang/core/Flashbang';
+import MatrixUtil from 'flashbang/util/MatrixUtil';
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
  * Contains a "dummy" that mirrors the element's transform.
  */
-export abstract class DOMObject<T extends HTMLElement> extends GameObject {
+export default abstract class DOMObject<T extends HTMLElement> extends GameObject {
     /**
      * Applies the given style to the DOM object and all children who do not already have the given style property set.
      * This will not overrwrite existing properties, unless replaceIfExists is true.
      *
      * If elementNames is non-null, the style will only be applied to elements with the given names.
      */
-    public static applyStyleRecursive(element: HTMLElement, styles: any, replaceIfExists: boolean = false, elementNames: string[] = null): void {
+    public static applyStyleRecursive(
+        element: HTMLElement,
+        styles: {[property: string]: string},
+        replaceIfExists: boolean = false,
+        elementNames: string[] = null
+    ): void {
         let isValidElement = true;
         if (elementNames != null) {
             isValidElement = false;
@@ -28,17 +33,17 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         }
 
         if (isValidElement) {
-            for (let styleName in styles) {
+            for (let [property, value] of Object.entries(styles)) {
                 let applyStyle = true;
                 if (!replaceIfExists) {
-                    let cur = element.style.getPropertyValue(styleName);
+                    let cur = element.style.getPropertyValue(property);
                     if (cur != null && cur.length > 0) {
                         applyStyle = false;
                     }
                 }
 
                 if (applyStyle) {
-                    element.style.setProperty(styleName, styles[styleName]);
+                    element.style.setProperty(property, value);
                 }
             }
         }
@@ -55,13 +60,13 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
         super();
 
         this._obj = obj;
-        this._obj.style.position = "absolute";
-        this._obj.style.transformOrigin = "0 0";
+        this._obj.style.position = 'absolute';
+        this._obj.style.transformOrigin = '0 0';
 
         // Set the initial opacity to 0 so that the object will be hidden
         // until the first postrender event. This prevents it from flickering
         // briefly on the frame it's added.
-        this._obj.style.opacity = "0";
+        this._obj.style.opacity = '0';
 
         this._domParent = document.getElementById(domParentID);
     }
@@ -118,12 +123,12 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
 
         // Update the HTML element's transform during the PIXI postrender event -
         // this is the point where the dummy display object's transform will be up to date.
-        Flashbang.pixi.renderer.addListener("postrender", this.updateElementProperties, this);
+        Flashbang.pixi.renderer.addListener('postrender', this.updateElementProperties, this);
     }
 
     protected dispose(): void {
         this._domParent.removeChild(this._obj);
-        Flashbang.pixi.renderer.removeListener("postrender", this.updateElementProperties, this);
+        Flashbang.pixi.renderer.removeListener('postrender', this.updateElementProperties, this);
 
         super.dispose();
     }
@@ -135,7 +140,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
             m.copy(this._lastTransform);
         }
 
-        this._obj.style.visibility = this.display.worldVisible ? "visible" : "hidden";
+        this._obj.style.visibility = this.display.worldVisible ? 'visible' : 'hidden';
         this._obj.style.opacity = this.display.worldAlpha.toString();
     }
 
@@ -163,7 +168,7 @@ export abstract class DOMObject<T extends HTMLElement> extends GameObject {
     }
 
     protected static stringToSize(value: string): number {
-        let idx = value.indexOf("px");
+        let idx = value.indexOf('px');
         if (idx >= 0) {
             value = value.substr(0, idx);
         }

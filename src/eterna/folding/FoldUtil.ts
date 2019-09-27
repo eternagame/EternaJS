@@ -1,4 +1,4 @@
-export class FoldUtil {
+export default class FoldUtil {
     public static nextPerm(v: number[]): boolean {
         let more = false;
         let ii: number = v.length;

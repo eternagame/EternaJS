@@ -8,11 +8,11 @@
 //
 // =================================================================================================
 
-import {Point, Rectangle, Matrix} from "pixi.js";
-import {MatrixUtil} from "./MatrixUtil";
+import {Point, Rectangle, Matrix} from 'pixi.js';
+import MatrixUtil from './MatrixUtil';
 
 /** A utility class containing methods related to the Rectangle class. */
-export class RectangleUtil {
+export default class RectangleUtil {
     public static setTo(r: Rectangle, left: number, top: number, width: number, height: number): void {
         r.x = left;
         r.y = top;

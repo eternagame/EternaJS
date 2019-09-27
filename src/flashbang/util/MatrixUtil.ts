@@ -8,10 +8,10 @@
 //
 // =================================================================================================
 
-import {Matrix, Point} from "pixi.js";
+import {Matrix, Point} from 'pixi.js';
 
 /** A utility class containing methods related to the Matrix class. */
-export class MatrixUtil {
+export default class MatrixUtil {
     public static equals(a: Matrix, b: Matrix): boolean {
         return a.a === b.a && a.b === b.b && a.c === b.c && a.d === b.d && a.tx === b.tx && a.ty === b.ty;
     }
@@ -128,7 +128,7 @@ export class MatrixUtil {
     }
 
     private static formatRawData(data: number[], numCols: number, numRows: number,
-        precision: number, indent: string = "  "): string {
+        precision: number, indent: string = '  '): string {
         let result: string = indent;
         let numValues: number = numCols * numRows;
         let highestValue = 0.0;
@@ -150,7 +150,7 @@ export class MatrixUtil {
                 while (valueString.length < numChars) valueString = ` ${valueString}`;
 
                 result += valueString;
-                if (x !== numCols - 1) result += ", ";
+                if (x !== numCols - 1) result += ', ';
             }
 
             if (y !== numRows - 1) result += `\n${indent}`;
