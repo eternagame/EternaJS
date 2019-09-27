@@ -295,7 +295,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let rna_coords: RNALayout;
         rna_coords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
         rna_coords.setupTree(this._pairs, this._targetPairs);
-        rna_coords.drawTree();
+        rna_coords.drawTree( this._customLayout );
         rna_coords.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
@@ -1802,6 +1802,10 @@ export class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
+    public set customLayout( custom_layout: Array<[number,number]> ) {
+        this._customLayout = custom_layout;
+    }
+
     public isPairSatisfied(a: number, b: number): boolean {
         if (b < a) {
             let temp: number = a;
@@ -1841,7 +1845,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rna_drawer: RNALayout = new RNALayout(radius, radius);
         rna_drawer.setupTree(this._pairs, this._targetPairs);
-        rna_drawer.drawTree();
+        rna_drawer.drawTree( this._customLayout );
         let xarray: number[] = new Array(this._bases.length);
         let yarray: number[] = new Array(this._bases.length);
         rna_drawer.getCoords(xarray, yarray);
@@ -2488,7 +2492,7 @@ export class Pose2D extends ContainerObject implements Updatable {
         );
 
         rna_drawer.setupTree(this._pairs, this._targetPairs);
-        rna_drawer.drawTree();
+        rna_drawer.drawTree( this._customLayout );
         rna_drawer.getCoords(xarray, yarray);
 
         if (this._desiredAngle === 90) {
@@ -3319,6 +3323,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
+    private _customLayout: Array<[number,number]>;
 
     /// Oligos
     private _oligo: number[] = null;

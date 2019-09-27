@@ -143,7 +143,8 @@ export class RNALayout {
         }
     }
 
-    public drawTree(): void {
+    public drawTree( customLayout : Array<[number,number]> ): void {
+        this._customLayout = customLayout;
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1);
         }
@@ -285,10 +286,6 @@ export class RNALayout {
             let circle_radius: number = circle_length / (2 * Math.PI);
             let length_walker: number = this._pairSpace / 2.0;
 
-            // TODO. read this in via puzzle JSON
-            if (this._origPairs.length == 28) {
-                this._customLayout = [[1.349030, 1.182363], [1.349030, 2.182363], [1.849030, 3.182363], [1.849030, 4.182363], [1.849030, 5.182363], [1.849030, 6.182363], [1.849030, 7.182363], [1.182363, 9.099030], [2.432363, 11.099030], [3.932363, 11.099030], [3.932363, 10.099030], [3.932363, 9.099030], [3.432363, 8.099030], [2.849030, 7.182363], [2.849030, 6.182363], [2.849030, 5.182363], [2.849030, 4.182363], [2.849030, 3.182363], [4.182363, 2.349030], [5.182363, 2.849030], [5.682363, 3.849030], [5.682363, 5.099030], [5.682363, 6.099030], [5.432363, 7.099030], [5.432363, 8.099030], [4.932363, 9.099030], [4.932363, 10.099030], [4.932363, 11.099030]];
-            }
             if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
                 rootnode.x = 0;
                 rootnode.y = 0;
