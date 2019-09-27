@@ -36,6 +36,7 @@ import {Base} from "./Base";
 import {BaseDrawFlags} from "./BaseDrawFlags";
 import {EnergyScoreDisplay} from "./EnergyScoreDisplay";
 import {HighlightBox, HighlightType} from "./HighlightBox";
+import {BaseRope} from "./BaseRope";
 import {Molecule} from "./Molecule";
 import {PaintCursor} from "./PaintCursor"
 import {PoseField} from "./PoseField";
@@ -71,6 +72,9 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         this._scoreNodeHighlight = new Graphics();
         this.container.addChild(this._scoreNodeHighlight);
+
+        this._baseRope = new BaseRope(this);
+        this.addObject(this._baseRope, this.container);
 
         this.container.addChild(this._baseLayer);
 
@@ -153,6 +157,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
         // handle view settings
         this.regs.add(Eterna.settings.showNumbers.connectNotify(value => this.showNumbering = value));
+        this.regs.add(Eterna.settings.showRope.connectNotify(value => this.showBaseRope = value));
         this.regs.add(Eterna.settings.showLetters.connectNotify(value => this.lettermode = value));
         this.regs.add(Eterna.settings.useContinuousColors.connectNotify(value => this.useContinuousExpColors = value));
         this.regs.add(Eterna.settings.useExtendedColors.connectNotify(value => this.useExtendedScale = value));
@@ -984,12 +989,22 @@ export class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set showNumbering(show: boolean) {
+        // FIXME: change  _numberingMode to _showNumbering?
         this._numberingMode = show;
         this._redraw = true;
     }
 
     public get showNumbering(): boolean {
         return this._numberingMode;
+    }
+
+    public set showBaseRope(show: boolean) {
+        this._showBaseRope = show;
+        this._redraw = true;
+    }
+
+    public get showRope(): boolean {
+        return this._showBaseRope;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -2010,12 +2025,16 @@ export class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        if (this._redraw || basesMoved) {
+        this._baseRope.enabled = this._showBaseRope;
+
+        if (this._redraw || basesMoved) {   
             let n: number = this._trackedIndices.length;
             for (let ii = 0; ii < n; ii++) {
                 this.drawBaseMark(this._trackedIndices[ii]);
             }
-    
+
+            this._baseRope.redraw( true /* force baseXY*/ );
+
             if (this._cursorIndex > 0) {
                 center = this.getBaseXY(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
@@ -3310,6 +3329,9 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _bindingSiteUpdated: boolean;
     private _designStructUpdated: boolean;
 
+    // Rope connecting bases for crazy user-defined layouts
+    private _baseRope: BaseRope;
+
     /// Scripted painters
     private _dynPaintColors: number[] = [];
     private _dynPaintTools: Booster[] = [];
@@ -3410,6 +3432,7 @@ export class Pose2D extends ContainerObject implements Updatable {
 
     /// Rendering mode
     private _numberingMode: boolean = false;
+    private _showBaseRope: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     /// Last exp paint data
