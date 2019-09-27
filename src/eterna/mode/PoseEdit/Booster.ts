@@ -177,7 +177,7 @@ export default class Booster {
             param: baseNum.toString()
         };
 
-        ExternalInterface.runScript(this._scriptID, {params: scriptParams, ctx: scriptInterface})
+        ExternalInterface.runScriptThroughQueue(this._scriptID, {params: scriptParams, ctx: scriptInterface})
             .then((ret) => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
