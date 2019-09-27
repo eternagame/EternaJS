@@ -284,10 +284,7 @@ export class RNALayout {
             let circle_radius: number = circle_length / (2 * Math.PI);
             let length_walker: number = this._pairSpace / 2.0;
 
-            // TODO. pre-identify any junctions that are 'special cases'. This is hardwired in for puzzle 9386151 in dev server. (1L2X pseudoknot)
-            let special_case: boolean = ( ( (parentnode) && (parentnode.indexA == 6) && (rootnode.children.length == 6) ) || (parentnode == null) && (rootnode.children.length == 13) );
-            
-            if ( special_case ) {
+            if ( this.junctionMatchesTarget( rootnode, parentnode ) ) {
                 // TODO. read this in via puzzle JSON
                 let native_layout : Array<[number,number]> = [[1.349030,1.182363], [1.349030,2.182363], [1.849030,3.182363], [1.849030,4.182363], [1.849030,5.182363], [1.849030,6.182363], [1.849030,7.182363], [1.182363,9.099030], [2.432363,11.099030], [3.932363,11.099030], [3.932363,10.099030], [3.932363,9.099030], [3.432363,8.099030], [2.849030,7.182363], [2.849030,6.182363], [2.849030,5.182363], [2.849030,4.182363], [2.849030,3.182363], [4.182363,2.349030], [5.182363,2.849030], [5.682363,3.849030], [5.682363,5.099030], [5.682363,6.099030], [5.432363,7.099030], [5.432363,8.099030], [4.932363,9.099030], [4.932363,10.099030], [4.932363,11.099030]];            
                 rootnode.x = 0;
@@ -561,6 +558,36 @@ export class RNALayout {
         return 0;
     }
 
+    public set targetPairs(target_pairs: number[]) {
+        this._targetPairs = target_pairs.slice();
+    }
+
+    private junctionMatchesTarget( rootnode : RNATreeNode, parentnode : RNATreeNode ) : boolean {
+        if (this._targetPairs == null) return false;
+        if (parentnode) {
+            // is initial pair of junction paired in target structure?
+            if (this._targetPairs[parentnode.indexA] != parentnode.indexB) {
+                return false;
+            }
+        }
+
+        for ( let ii : number = 0; ii < rootnode.children.length; ii++) {
+            if (rootnode.children[ii].isPair) {
+                // all other pairs of junction paired in target structure?
+                if (this._targetPairs[rootnode.children[ii].indexA] != rootnode.children[ii].indexB) {
+                    return false;
+                }
+            } else {
+                // all unpaired bases of junction also unpaired in target structure?
+                if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
+                   return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private readonly _primarySpace: number;
     private readonly _pairSpace: number;
     // indices that need to be streched (e.g., connectors for oligos)
@@ -568,6 +595,7 @@ export class RNALayout {
 
     private _root: RNATreeNode;
     private _origPairs: number[];
+    private _targetPairs: number[];
 
     /// "New" method to gather NN free energies, just use the folding engine
     private _biPairs: number[];

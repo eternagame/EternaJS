@@ -1793,6 +1793,15 @@ export class Pose2D extends ContainerObject implements Updatable {
         this.generateScoreNodes();
     }
 
+    public set targetPairs(target_pairs: number[]) {
+        this._targetPairs = target_pairs.slice();
+        for (let ii: number = 0; ii < this._targetPairs.length; ii++) {
+            if (this._targetPairs[ii] > ii) {
+                this._targetPairs[this._targetPairs[ii]] = ii;
+            }
+        }
+    }
+
     public isPairSatisfied(a: number, b: number): boolean {
         if (b < a) {
             let temp: number = a;
@@ -2475,8 +2484,9 @@ export class Pose2D extends ContainerObject implements Updatable {
         rna_drawer = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
             Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
-            exception_indices
+            exception_indices,
         );
+        rna_drawer.targetPairs = this._targetPairs;
 
         rna_drawer.setupTree(this._pairs);
         rna_drawer.drawTree();
@@ -3295,6 +3305,7 @@ export class Pose2D extends ContainerObject implements Updatable {
     private _sequence: number[] = [];
     private _mutatedSequence: number[];
     private _pairs: number[] = [];
+    private _targetPairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
     private _forcedStruct: number[] = [];
