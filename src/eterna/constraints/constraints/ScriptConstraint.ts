@@ -23,14 +23,10 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
     }
 
     public evaluate(undoBlocks: UndoBlock[], targetConditions: any[], puzzle: Puzzle): ScriptConstraintStatus {
-        const {result, error} = ExternalInterface.runScriptSync(
+        const result = ExternalInterface.runScriptSync(
             this.scriptID,
             {params: {puzzleInfo: puzzle.toJSON() || null}}
         );
-
-        if (error) {
-            throw new Error(`Script constraint ${this.scriptID} failed to evaluate. Error: ${error}`);
-        }
 
         return {
             goal: result.cause.goal != null ? result.cause.goal : '',
