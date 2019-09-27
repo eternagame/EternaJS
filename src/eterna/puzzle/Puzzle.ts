@@ -5,6 +5,8 @@ import Vienna from 'eterna/folding/Vienna';
 import Folder from 'eterna/folding/Folder';
 import EternaURL from 'eterna/net/EternaURL';
 import Pose2D from 'eterna/pose2D/Pose2D';
+import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
+import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 import {ConstraintType} from './Constraints';
 
 export interface BoostersData {
@@ -148,62 +150,12 @@ export default class Puzzle {
         }
     }
 
-    public get constraints(): string[] {
+    public get constraints(): Constraint<BaseConstraintStatus>[] {
         return this._constraints;
     }
 
-    public set constraints(constraints: string[]) {
-        this._constraints = [];
-        let shapes: boolean[] = [];
-        let antishapes: boolean[] = [];
-
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] === ConstraintType.SHAPE) {
-                shapes[Number(constraints[ii + 1])] = true;
-            } else if (constraints[ii] === ConstraintType.ANTISHAPE) {
-                antishapes[Number(constraints[ii + 1])] = true;
-            }
-        }
-
-        for (let ii = shapes.length - 1; ii >= 0; ii--) {
-            if (antishapes[ii]) {
-                this._constraints.push(ConstraintType.ANTISHAPE);
-                this._constraints.push(`${ii}`);
-            }
-
-            if (shapes[ii]) {
-                this._constraints.push(ConstraintType.SHAPE);
-                this._constraints.push(`${ii}`);
-            }
-        }
-
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] !== ConstraintType.SHAPE
-                && constraints[ii] !== ConstraintType.SOFT
-                && constraints[ii] !== ConstraintType.ANTISHAPE) {
-                this._constraints.push(constraints[ii]);
-                this._constraints.push(constraints[ii + 1]);
-            } else if (constraints[ii] === ConstraintType.SOFT) {
-                this._isSoftConstraint = true;
-            }
-        }
-    }
-
-    public get temporaryConstraints(): string[] {
-        return this._tempConstraints;
-    }
-
-    public set temporaryConstraints(constraints: string[]) {
-        if (constraints != null) {
-            this._tempConstraints = constraints.slice();
-        } else {
-            this._tempConstraints = null;
-        }
-    }
-
-    /** Returns temporaryConstraints, if they're set, else constraints */
-    public get curConstraints(): string[] {
-        return this.temporaryConstraints || this.constraints;
+    public set constraints(constraints: Constraint<BaseConstraintStatus>[]) {
+        this._constraints = constraints;
     }
 
     public get puzzleLocks(): boolean[] {
@@ -392,6 +344,10 @@ export default class Puzzle {
         return this._isSoftConstraint;
     }
 
+    public set isSoftConstraint(isSoftConstraint: boolean) {
+        this._isSoftConstraint = isSoftConstraint;
+    }
+
     public get round(): number {
         return this._round;
     }
@@ -426,12 +382,7 @@ export default class Puzzle {
 
     public get isPairBrushAllowed(): boolean {
         let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = false;
-        for (let ii = 0; ii < this._constraints.length; ii++) {
-            if (this._constraints[ii] === ConstraintType.SHAPE) {
-                hasTarget = true;
-            }
-        }
+        let hasTarget = this._constraints.some(constraint => constraint instanceof ShapeConstraint);
 
         return isBasic || hasTarget;
     }
@@ -616,8 +567,6 @@ export default class Puzzle {
             folderName: this.folderName,
             targetConditions: this.targetConditions,
             constraints: this.constraints,
-            temporaryConstraints: this.temporaryConstraints,
-            curConstraints: this.curConstraints,
             puzzleLocks: this.puzzleLocks,
             shiftLimit: this.shiftLimit,
             secstructs: this.getSecstructs(),
@@ -646,8 +595,7 @@ export default class Puzzle {
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
     private _targetConditions: any[] = null;
-    private _constraints: string[] = null;
-    private _tempConstraints: string[];
+    private _constraints: Constraint<BaseConstraintStatus>[] = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;
     private _folder: string;

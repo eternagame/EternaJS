@@ -98,20 +98,41 @@ export default class ExternalInterface {
     }
 
     /**
+     * Request a script over the network and cache it.
+     * The script interface lazily loads scripts and caches them. By requesting it ahead of time,
+     * we can ensure that a script can be executed synchronously (as long as the script itself runs
+     * synchronously)
+     */
+    public static preloadScript(scriptID: string | number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.call(
+                'Script.get_script',
+                scriptID,
+                () => {
+                    this._preloadedScripts.push(`${scriptID}`);
+                    resolve();
+                },
+                () => {
+                    reject(new Error(`Script preloading failed for script ${scriptID}`));
+                }
+            );
+        });
+    }
+
+    /**
      * Requests execution of an external script.
      * runScript requests are processed in order, and only one script can run at a time, except for
      * scripts that indicate that they're asynchronous.
      *
      * @return a Promise that will resolve with the results of the script.
      */
-    public static runScript(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
+    public static runScriptThroughQueue(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this._pendingScripts.push({
                 scriptID: `${scriptID}`,
                 options,
                 resolve,
-                reject,
-                synchronous: false
+                reject
             });
 
             this.maybeRunNextScript();
@@ -120,49 +141,36 @@ export default class ExternalInterface {
 
     /**
      * Requests execution of an external script, and attempts to get its return value synchronously.
-     * Promises are always resolved asynchronously, so this runScript flavor eschews Promises and takes a
-     * callback that will be called immediately *if possible*.
+     * Promises are always resolved asynchronously, so this runScript flavor eschews Promises.
      *
-     * This doesn't guarantee synchronous execution - another script may already be running, or the script itself
-     * may be asynchronous, or the script may need to be fetched from the network if it hasn't already been
-     * cached. In fact, the entire premise is folly, ScriptInterface cannot make the guarantee that it claims
-     * to, and this function is only here because PoseEditMode.checkConstraint was designed to resolve its
-     * constraints synchronously. Use the async version of this function if possible!
+     * preloadScript **MUST** be used in order to ensure sychronous execution. Note that nothing is stopping script
+     * authors from using code such as setTimeout, setInterval, async net requests, or so forth. There are a couple
+     * basic checks to detect that happening (specifically, if the author does not know this and tries indicating
+     * the script as async, an error will be thrown). Naturally if nothing is synchronously returned, then the script
+     * will be useless to whatever functionality calls this function. Beyond that, any asynchronous code in a script
+     * run by this function may lead to undefined behavior.
      *
-     * @return true if the script ran to completion, and false if it couldn't run synchronously and is instead
-     * queued to be executed asynchronously.
+     * The primary reason for the existance of this function is for SCRIPT constraints, which are designed to be
+     * executed synchronously. If at all possible, use the async version of this function.
      */
-    public static runScriptMaybeSynchronously(
-        scriptID: string | number, options: RunScriptOptions, callback: (result: any, error: any) => void
-    ): boolean {
-        let completed = false;
-        const complete = (result: any, error: any) => {
-            if (completed) {
-                return;
-            }
-            completed = true;
-            callback(result, error);
-        };
+    public static runScriptSync(scriptID: string | number, options: RunScriptOptions): any {
+        if (!this._preloadedScripts.includes(`${scriptID}`)) {
+            // If we try to do this it's almost certainly going to break (scripts have to be asynchronously loaded once,
+            // so this can't be synchronous), so just... don't.
+            throw new Error('runScriptSync attempted to run a script which has not been preloaded');
+        }
 
-        this._pendingScripts.push({
-            scriptID: `${scriptID}`,
+        let scriptReturn: any = null;
+
+        this.runScriptInternal(
+            `${scriptID}`,
             options,
-            resolve: result => complete(result, undefined),
-            reject: err => complete(undefined, err),
-            synchronous: true
-        });
+            true,
+            (result) => { scriptReturn = result; },
+            (error) => { throw new Error(error); }
+        );
 
-        this.maybeRunNextScript();
-
-        // Omit this warning because it'll be fired whenever a puzzle with script constraints is loaded.
-        // This is some seriously busted functionality, and script-interface and/or constraint evaluation
-        // should be refactored to either always assume async results, or guarantee synchronous return.
-
-        // if (!completed) {
-        //     log.warn(`Script did not complete synchronously, but it was supposed to! [scriptID=${scriptID}]`);
-        // }
-
-        return completed;
+        return scriptReturn;
     }
 
     public static call(name: string, ...args: any[]): any {
@@ -181,7 +189,25 @@ export default class ExternalInterface {
             if (nextScript.options.checkValid != null && !nextScript.options.checkValid()) {
                 log.info(`Not running stale request for script ${nextScript.scriptID}`);
             } else {
-                this.runPendingScript(nextScript);
+                this._curSyncScript = nextScript;
+                let cleanup = () => {
+                    this._curSyncScript = null;
+                    this.maybeRunNextScript();
+                };
+
+                this.runScriptInternal(
+                    nextScript.scriptID,
+                    nextScript.options,
+                    false,
+                    (result) => {
+                        nextScript.resolve(result);
+                        cleanup();
+                    },
+                    (error) => {
+                        nextScript.reject(error instanceof Error ? error : new Error(error));
+                        cleanup();
+                    },
+                );
             }
         }
 
@@ -192,73 +218,85 @@ export default class ExternalInterface {
         }
     }
 
-    private static runPendingScript(script: PendingScript): void {
-        let {ctx} = script.options;
-        if (ctx == null) {
-            ctx = new ExternalInterfaceCtx();
-        }
+    /**
+     * Runs a named script. Calls a callback with the result of the script, or a different one if
+     * the script has an error.
+     *
+     * This function uses callbacks instead of a Promise because Promise callbacks never run syncronously
+     *
+     * @param script The name of the script
+     * @param options RunScriptOptions
+     * @param requireSynchronous If true:
+     * 1. if the script doesn't complete immediately, the error callback will be called
+     * 2. The syncronous flag is passed ScriptInterface.evaluate_script_with_nid (forcing the preloaded script to
+     * be returned immediately in Script.get_script)
+     * @param onSuccess Callback on successful script execution
+     * @param onError Callback on unsuccessful script execution
+     */
+    private static runScriptInternal(
+        scriptID: string,
+        options: RunScriptOptions,
+        requireSynchronous: boolean,
+        onSuccess: (result: any) => void,
+        onError: (reason: any) => void
+    ): void {
+        let ctx = options.ctx || new ExternalInterfaceCtx();
 
         let isComplete = false;
-        let isAsync = false;
+        let declaredAsync = false;
 
         const complete = (successValue: any, error: any) => {
             if (isComplete) {
+                // We can only resolve/reject once
                 return;
             }
             isComplete = true;
 
             this.popContext(ctx);
 
-            if (this._curSyncScript === script) {
-                this._curSyncScript = null;
-            }
-
             if (error !== undefined) {
-                log.warn(`Script ${script.scriptID}: error: ${error}`);
-                script.reject(error);
+                log.warn(`Script ${scriptID}: error: ${error}`);
+                onError(error);
             } else {
-                log.info(`Completed ${isAsync ? 'async' : ''} script ${script.scriptID}`);
-                script.resolve(successValue);
+                log.info(`Completed ${declaredAsync ? 'async' : ''} script ${scriptID}`);
+                onSuccess(successValue);
             }
-
-            this.maybeRunNextScript();
         };
 
-        // Create a new "end_" callback
-        ctx.addCallback(`end_${script.scriptID}`, (returnValue: any) => {
+        ctx.addCallback(`end_${scriptID}`, (returnValue: any) => {
             if (!this.isAsync(returnValue)) {
                 complete(returnValue, undefined);
-            } else if (!isAsync) {
+            } else if (!declaredAsync) {
+                // This should only be run once, if the script indicates that it's async multiple times, ignore it
+
+                if (requireSynchronous) {
+                    complete(undefined, `Script requested to run asynchronously, which is not supported for this script type [scriptID=${scriptID}]`);
+                }
                 // Scripts can indicate that they run asynchronously by calling their end_
                 // function with { "cause": { "async": "true" } }. (They must later
                 // call the end_ function normally, when they've actually completed.)
-                // If the script indicates that it's async, we immediately relinquish
-                // our lock on curSyncScript, and allow other scripts to run.
-
-                log.info(`Script ${script.scriptID} is async. Allowing other scripts to run.`);
-                isAsync = true;
-                if (this._curSyncScript === script) {
-                    this._curSyncScript = null;
-                    this.maybeRunNextScript();
-                }
+                declaredAsync = true;
             }
         });
 
         this.pushContext(ctx);
 
-        log.info(`Running script ${script.scriptID}...`);
-        this._curSyncScript = script;
+        log.info(`Running script ${scriptID}...`);
 
         try {
             this.call(
                 'ScriptInterface.evaluate_script_with_nid',
-                script.scriptID,
-                script.options.params || {},
+                scriptID,
+                options.params || {},
                 null,
-                script.synchronous
+                requireSynchronous
             );
         } catch (err) {
-            complete(undefined, err || `Unknown error in script ${script.scriptID}`);
+            complete(undefined, err || `Unknown error in script ${scriptID}`);
+        }
+
+        if (!isComplete && requireSynchronous) {
+            complete(undefined, `Script did not complete synchronously, but it was supposed to! [scriptID=${scriptID}]`);
         }
     }
 
@@ -295,6 +333,7 @@ export default class ExternalInterface {
     private static _scriptRoot: any;
     private static _curSyncScript: PendingScript;
     private static _noPendingScripts: Deferred<void>;
+    private static _preloadedScripts: string[] = [];
 }
 
 interface PendingScript {
@@ -302,7 +341,6 @@ interface PendingScript {
     options: RunScriptOptions;
     resolve: (value?: any) => void;
     reject: (reason?: any) => void;
-    synchronous: boolean;
 }
 
 interface RegisteredCtx {
