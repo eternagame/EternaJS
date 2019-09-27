@@ -228,14 +228,17 @@ export default class ExternalInterface {
      *
      * @param script The name of the script
      * @param options RunScriptOptions
-     * @param synchronous If true, and the script doesn't complete immediately, the error callback will be caleld.
+     * @param requireSynchronous If true:
+     * 1. if the script doesn't complete immediately, the error callback will be called
+     * 2. The syncronous flag is passed ScriptInterface.evaluate_script_with_nid (forcing the preloaded script to
+     * be returned immediately in Script.get_script)
      * @param onSuccess Callback on successful script execution
      * @param onError Callback on unsuccessful script execution
      */
     private static runScriptInternal(
         scriptID: string,
         options: RunScriptOptions,
-        synchronous: boolean,
+        requireSynchronous: boolean,
         onSuccess: (result: any) => void,
         onError: (reason: any) => void
     ): void {
@@ -268,7 +271,7 @@ export default class ExternalInterface {
             } else if (!declaredAsync) {
                 // This should only be run once, if the script indicates that it's async multiple times, ignore it
 
-                if (synchronous) {
+                if (requireSynchronous) {
                     complete(undefined, `Script requested to run asynchronously, which is not supported for this script type [scriptID=${scriptID}]`);
                 }
                 // Scripts can indicate that they run asynchronously by calling their end_
@@ -288,13 +291,13 @@ export default class ExternalInterface {
                 scriptID,
                 options.params || {},
                 null,
-                synchronous
+                requireSynchronous
             );
         } catch (err) {
             complete(undefined, err || `Unknown error in script ${scriptID}`);
         }
 
-        if (!isComplete && synchronous) {
+        if (!isComplete && requireSynchronous) {
             complete(undefined, `Script did not complete synchronously, but it was supposed to! [scriptID=${scriptID}]`);
         }
     }
