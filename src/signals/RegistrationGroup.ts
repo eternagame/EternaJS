@@ -1,8 +1,8 @@
-import {MultiFailureError} from "./MultiFailureError";
-import {Registration} from "./Registration";
+import MultiFailureError from './MultiFailureError';
+import Registration from './Registration';
 
 /** Collects Registrations to allow mass operations on them. */
-export class RegistrationGroup implements Registration {
+export default class RegistrationGroup implements Registration {
     /**
      * Adds a Registration to the manager.
      * @return the Registration passed to the function.

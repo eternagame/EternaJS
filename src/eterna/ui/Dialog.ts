@@ -1,22 +1,19 @@
-import {Graphics} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {KeyboardListener} from "../../flashbang/input/KeyboardInput";
-import {MouseWheelListener} from "../../flashbang/input/MouseWheelInput";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
+import {Graphics} from 'pixi.js';
+import {
+    ContainerObject, KeyboardListener, MouseWheelListener, DisplayObjectPointerTarget, InputUtil, Flashbang
+} from 'flashbang';
 
 /** Dialogs that expose a "confirmed" promise will reject with this error if the dialog is canceled */
 export class DialogCanceledError extends Error {}
 
 /** Convenience base class for dialog objects. */
-export abstract class Dialog<T> extends ContainerObject implements KeyboardListener, MouseWheelListener {
+export default abstract class Dialog<T> extends ContainerObject implements KeyboardListener, MouseWheelListener {
     /** A Promise that will resolve when the dialog is closed. */
     public readonly closed: Promise<T | null>;
 
-    public constructor() {
+    constructor() {
         super();
-        this.closed = new Promise(resolve => this._resolvePromise = resolve);
+        this.closed = new Promise((resolve) => { this._resolvePromise = resolve; });
     }
 
     protected added() {
@@ -31,7 +28,7 @@ export abstract class Dialog<T> extends ContainerObject implements KeyboardListe
         let bgTarget = new DisplayObjectPointerTarget(bg);
 
         bgTarget.pointerDown.connect((e) => {
-            if (IsLeftMouse(e)) {
+            if (InputUtil.IsLeftMouse(e)) {
                 this.onBGClicked();
             }
             e.stopPropagation();

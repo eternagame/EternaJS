@@ -1,9 +1,9 @@
-import {Eterna} from "../../Eterna";
-import {SolutionManager} from "../../puzzle/SolutionManager";
-import {int} from "../../util/int";
+import Eterna from 'eterna/Eterna';
+import int from 'eterna/util/int';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
 
-export class VoteProcessor {
-    public process_data(data: any[]): void {
+export default class VoteProcessor {
+    public processData(data: any[]): void {
         let solutionIDs: number[] = [];
         let voteCounts: number[] = [];
         let myVoteCounts: number[] = [];
@@ -14,26 +14,26 @@ export class VoteProcessor {
         for (let ii = data.length - 1; ii >= 0; ii--) {
             let obj: any = data[ii];
 
-            let nid = Number(obj["solnid"]);
-            let is_mine: boolean = Eterna.playerID == Number(obj["uid"]);
-            let vote_count: number = int(obj["count"]);
+            let nid = Number(obj['solnid']);
+            let isMine: boolean = Eterna.playerID === Number(obj['uid']);
+            let voteCount: number = int(obj['count']);
 
             let index = solutionIDs.indexOf(nid);
 
             if (index < 0) {
                 solutionIDs.push(nid);
-                voteCounts.push(vote_count);
-                if (is_mine) {
-                    myVoteCounts.push(vote_count);
-                    totalMyVotes += vote_count;
+                voteCounts.push(voteCount);
+                if (isMine) {
+                    myVoteCounts.push(voteCount);
+                    totalMyVotes += voteCount;
                 } else {
                     myVoteCounts.push(0);
                 }
             } else {
-                voteCounts[index] += vote_count;
-                if (is_mine) {
-                    myVoteCounts[index] += vote_count;
-                    totalMyVotes += vote_count;
+                voteCounts[index] += voteCount;
+                if (isMine) {
+                    myVoteCounts[index] += voteCount;
+                    totalMyVotes += voteCount;
                 }
             }
         }
@@ -52,10 +52,10 @@ export class VoteProcessor {
         return this._votesLeft;
     }
 
-    public update_votes(puznid: number, round: number): Promise<void> {
+    public updateVotes(puznid: number, round: number): Promise<void> {
         return Eterna.client.getPuzzleVotes(puznid, round).then((json) => {
-            let data: any = json["data"];
-            this.process_data(data["votes"]);
+            let data: any = json['data'];
+            this.processData(data['votes']);
         });
     }
 

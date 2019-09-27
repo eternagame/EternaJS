@@ -1,10 +1,9 @@
-import MultiStyleText from "pixi-multistyle-text";
-import {Container, Graphics, Point} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {Fonts} from "../util/Fonts";
+import MultiStyleText from 'pixi-multistyle-text';
+import {Container, Graphics, Point} from 'pixi.js';
+import {VLayoutContainer, HAlign} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
 
-export class EnergyScoreDisplay extends Container {
+export default class EnergyScoreDisplay extends Container {
     public static grey(text: string): string {
         return `<grey>${text}</grey>`;
     }
@@ -17,7 +16,7 @@ export class EnergyScoreDisplay extends Container {
         return `<red>${text}</red>`;
     }
 
-    public constructor(width: number, height: number) {
+    constructor(width: number, height: number) {
         super();
 
         this._width = width;
@@ -29,27 +28,27 @@ export class EnergyScoreDisplay extends Container {
 
         let textLayout: VLayoutContainer = new VLayoutContainer(2, HAlign.LEFT);
 
-        this._labelText = new MultiStyleText("Total", {
-            "default": {
+        this._labelText = new MultiStyleText('Total', {
+            default: {
                 fontFamily: Fonts.STDFONT_REGULAR,
                 fontSize: 11,
-                fill: 0xffffff,
+                fill: 0xffffff
             },
-            "grey": { fill: 0x777777 },
-            "green": { fill: 0x33AA33 },
-            "red": { fill: 0xFF4747 }
+            grey: {fill: 0x777777},
+            green: {fill: 0x33AA33},
+            red: {fill: 0xFF4747}
         });
         textLayout.addChild(this._labelText);
 
-        this._energyText = new MultiStyleText("5.2 kcal", {
-            "default": {
+        this._energyText = new MultiStyleText('5.2 kcal', {
+            default: {
                 fontFamily: Fonts.STDFONT_MEDIUM,
                 fontSize: 13,
-                fill: 0xffffff,
+                fill: 0xffffff
             },
-            "grey": { fill: 0x777777 },
-            "green": { fill: 0x33AA33 },
-            "red": { fill: 0xFF4747 }
+            grey: {fill: 0x777777},
+            green: {fill: 0x33AA33},
+            red: {fill: 0xFF4747}
         });
         textLayout.addChild(this._energyText);
 
@@ -57,12 +56,12 @@ export class EnergyScoreDisplay extends Container {
         textLayout.position = new Point(5, 4);
         this.addChild(textLayout);
 
-        this.setEnergyText("", "");
+        this.setEnergyText('', '');
     }
 
     public get hasText(): boolean {
-        return (this._labelText.text.length > 0 && this._labelText.text != " ") ||
-            (this._energyText.text.length > 0 && this._energyText.text != " ");
+        return (this._labelText.text.length > 0 && this._labelText.text !== ' ')
+            || (this._energyText.text.length > 0 && this._energyText.text !== ' ');
     }
 
     public setEnergyText(label: string, energy: string): void {
@@ -91,5 +90,5 @@ export class EnergyScoreDisplay extends Container {
     private readonly _bg: Graphics;
 
     private _width: number;
-    private _height :number;
+    private _height: number;
 }

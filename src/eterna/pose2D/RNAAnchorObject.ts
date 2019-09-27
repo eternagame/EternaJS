@@ -1,8 +1,7 @@
-import {Point} from "pixi.js"
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
+import {Point} from 'pixi.js';
+import {GameObjectRef, SceneObject} from 'flashbang';
 
-export class RNAAnchorObject {
+export default class RNAAnchorObject {
     public ref: GameObjectRef;
     public base: number;
     public offset: Point;
@@ -15,7 +14,7 @@ export class RNAAnchorObject {
         return this.ref.isLive;
     }
 
-    public constructor(object: SceneObject, base: number, offset: Point) {
+    constructor(object: SceneObject, base: number, offset: Point) {
         this.ref = object.ref;
         this.base = base;
         this.offset = offset;

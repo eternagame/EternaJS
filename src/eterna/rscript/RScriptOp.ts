@@ -1,11 +1,11 @@
-import {RScriptEnv} from "./RScriptEnv";
+import RScriptEnv from './RScriptEnv';
 
 /**
  * RScript Operation.
  * One instruction in RScript.
  * A node in RScriptOpTree.
  */
-export abstract class RScriptOp {
+export default abstract class RScriptOp {
     protected constructor(env: RScriptEnv) {
         this._children = [];
         this._env = env;
@@ -33,15 +33,15 @@ export abstract class RScriptOp {
         this._originalArgs = args;
 
         // Replace <newline> with \n regardless of where it is.
-        args = args.replace(/\<newline\>/g, "\n");
+        args = args.replace(/<newline>/g, '\n');
         args = this.createStrings(args);
 
-        let param: string[] = args.split(",");
+        let param: string[] = args.split(',');
         for (let i = 0; i < param.length; ++i) {
             let arg: string = param[i];
-            arg = arg.replace(/^\s*/, "");
-            arg = arg.replace(/\s*$/, "");
-            if (arg === "") {
+            arg = arg.replace(/^\s*/, '');
+            arg = arg.replace(/\s*$/, '');
+            if (arg === '') {
                 continue;
             }
             this.parseArgument(arg, i);
@@ -62,20 +62,20 @@ export abstract class RScriptOp {
         // Identify strings marked by "" or '' and store them in the environment.
         while (true) {
             // Find the first matching pair of quotation marks. Single or double.
-            let s_idx: number = arg.indexOf("'");
-            let s_matchIdx: number = arg.indexOf("'", s_idx + 1);
+            let sIdx: number = arg.indexOf("'");
+            let sMatchIdx: number = arg.indexOf("'", sIdx + 1);
 
-            let d_idx: number = arg.indexOf("\"");
-            let d_matchIdx: number = arg.indexOf("\"", d_idx + 1);
+            let dIdx: number = arg.indexOf('"');
+            let dMatchIdx: number = arg.indexOf('"', dIdx + 1);
 
             let idx = -1;
             let matchIdx = -1;
-            if ((s_idx < d_idx || d_idx === -1) && s_idx >= 0 && s_matchIdx >= 0) {
-                idx = s_idx;
-                matchIdx = s_matchIdx;
-            } else if ((d_idx < s_idx || s_idx === -1) && d_idx >= 0 && d_matchIdx >= 0) {
-                idx = d_idx;
-                matchIdx = d_matchIdx;
+            if ((sIdx < dIdx || dIdx === -1) && sIdx >= 0 && sMatchIdx >= 0) {
+                idx = sIdx;
+                matchIdx = sMatchIdx;
+            } else if ((dIdx < sIdx || sIdx === -1) && dIdx >= 0 && dMatchIdx >= 0) {
+                idx = dIdx;
+                matchIdx = dMatchIdx;
             }
 
             if (idx === -1 || matchIdx === -1) {

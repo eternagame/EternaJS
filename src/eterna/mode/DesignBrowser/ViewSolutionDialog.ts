@@ -1,26 +1,24 @@
 import {
     Container, Graphics, Point, Sprite, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {MathUtil} from "../../../flashbang/util/MathUtil";
-import {UnitSignal} from "../../../signals/UnitSignal";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {ExpPainter} from "../../ExpPainter";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Dialog} from "../../ui/Dialog";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel} from "../../ui/GamePanel";
-import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
-import {Fonts} from "../../util/Fonts";
-import {SolutionDescBox} from "./SolutionDescBox";
+} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import ExpPainter from 'eterna/ExpPainter';
+import Dialog from 'eterna/ui/Dialog';
+import Solution from 'eterna/puzzle/Solution';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import GamePanel from 'eterna/ui/GamePanel';
+import {
+    HLayoutContainer, MathUtil, Flashbang, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import GameButton from 'eterna/ui/GameButton';
+import Fonts from 'eterna/util/Fonts';
+import SolutionDescBox from './SolutionDescBox';
 
-export class ViewSolutionDialog extends Dialog<void> {
+export default class ViewSolutionDialog extends Dialog<void> {
     public readonly playClicked = new UnitSignal();
     public readonly seeResultClicked = new UnitSignal();
     public readonly sortClicked = new UnitSignal();
@@ -28,7 +26,7 @@ export class ViewSolutionDialog extends Dialog<void> {
     public readonly editClicked = new UnitSignal();
     public readonly deleteClicked = new UnitSignal();
 
-    public constructor(solution: Solution, puzzle: Puzzle, voteDisabled: boolean) {
+    constructor(solution: Solution, puzzle: Puzzle, voteDisabled: boolean) {
         super();
         this._solution = solution;
         this._puzzle = puzzle;
@@ -53,16 +51,18 @@ export class ViewSolutionDialog extends Dialog<void> {
             EPars.parenthesisToPairs(this._puzzle.getSecstruct()),
             3, PoseThumbnailType.BASE_COLORED);
         let playButton = new ThumbnailAndTextButton()
-            .text("View/Copy")
+            .text('View/Copy')
             .thumbnail(playThumbnail)
-            .tooltip("Click to view this design in the game.\nYou can also modify the design and create a new one.");
+            .tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
         playButton.clicked.connect(() => this.playClicked.emit());
         this.addObject(playButton, this._actionButtonsLayout);
 
         if (this._solution.expFeedback != null && this._solution.expFeedback.isFailed() === 0) {
             // SEE RESULT (allowed if the solution is synthesized)
             let expdata = this._solution.expFeedback;
-            let shapeData = ExpPainter.transformData(expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin());
+            let shapeData = ExpPainter.transformData(
+                expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()
+            );
             let resultThumbnail = new Sprite();
             PoseThumbnail.drawToSprite(
                 resultThumbnail,
@@ -77,50 +77,53 @@ export class ViewSolutionDialog extends Dialog<void> {
             );
 
             let seeResultButton = new ThumbnailAndTextButton()
-                .text("See Result")
+                .text('See Result')
                 .thumbnail(resultThumbnail)
-                .tooltip("Click to see the experimental result!");
+                .tooltip('Click to see the experimental result!');
             seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
             this.addObject(seeResultButton, this._actionButtonsLayout);
-        } else {
+        } else if (
+            this._solution.getProperty('Synthesized') === 'n'
+            && this._solution.getProperty('Round') === this._puzzle.round
+        ) {
             // VOTE (disallowed is solution is synthesized or old)
-            if (this._solution.getProperty("Synthesized") === "n" && this._solution.getProperty("Round") == this._puzzle.round) {
-                let voteButton = new ThumbnailAndTextButton();
-                if (this._solution.getProperty("My Votes") == 0) {
-                    voteButton
-                        .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes))
-                        .text("Vote")
-                        .tooltip("Vote on this design.");
-                } else {
-                    let rotatedSprite = Sprite.fromImage(Bitmaps.ImgVotes);
-                    rotatedSprite.rotation = MathUtil.deg2Rad * 180;
-                    let thumbnail = new Container();
-                    thumbnail.addChild(rotatedSprite);
-                    voteButton
-                        .thumbnail(thumbnail)
-                        .text("Unvote")
-                        .tooltip("Take back your vote on this design.");
-                }
-                voteButton.clicked.connect(() => this.voteClicked.emit());
-                this.addObject(voteButton, this._actionButtonsLayout);
+            let voteButton = new ThumbnailAndTextButton();
+            if (this._solution.getProperty('My Votes') === 0) {
+                voteButton
+                    .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes))
+                    .text('Vote')
+                    .tooltip('Vote on this design.');
+            } else {
+                let rotatedSprite = Sprite.fromImage(Bitmaps.ImgVotes);
+                rotatedSprite.rotation = MathUtil.deg2Rad * 180;
+                let thumbnail = new Container();
+                thumbnail.addChild(rotatedSprite);
+                voteButton
+                    .thumbnail(thumbnail)
+                    .text('Unvote')
+                    .tooltip('Take back your vote on this design.');
             }
+            voteButton.clicked.connect(() => this.voteClicked.emit());
+            this.addObject(voteButton, this._actionButtonsLayout);
         }
 
         let sortImage = Sprite.fromImage(Bitmaps.ImgNextInside);
         sortImage.scale = new Point(0.3, 0.3);
         let sortButton = new ThumbnailAndTextButton()
-            .text("Sort")
+            .text('Sort')
             .thumbnail(sortImage)
-            .tooltip("Sort based on similarity to this design.");
+            .tooltip('Sort based on similarity to this design.');
         sortButton.clicked.connect(() => this.sortClicked.emit());
         this.addObject(sortButton, this._actionButtonsLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
-        if (this._solution.getProperty("Round") == this._puzzle.round
-            && this._solution.playerID == Eterna.playerID
-            && this._solution.getProperty("Votes") === 0) {
+        if (
+            this._solution.getProperty('Round') === this._puzzle.round
+            && this._solution.playerID === Eterna.playerID
+            && this._solution.getProperty('Votes') === 0
+        ) {
             let deleteButton = new ThumbnailAndTextButton()
-                .text("Delete")
+                .text('Delete')
                 .thumbnail(new Graphics()
                     .beginFill(0, 0)
                     .lineStyle(2, 0xC0DCE7)
@@ -130,19 +133,19 @@ export class ViewSolutionDialog extends Dialog<void> {
                     .lineTo(65, 65)
                     .moveTo(65, 10)
                     .lineTo(10, 65))
-                .tooltip("Delete this design to retrieve your slots for this round");
+                .tooltip('Delete this design to retrieve your slots for this round');
             deleteButton.clicked.connect(() => this.deleteClicked.emit());
             this.addObject(deleteButton, this._actionButtonsLayout);
         }
 
         this._actionButtonsLayout.layout();
 
-        this._cancelButton = new GameButton().label("Cancel", 12);
+        this._cancelButton = new GameButton().label('Cancel', 12);
         this.addObject(this._cancelButton, this._content);
         this._cancelButton.clicked.connect(() => this.close(null));
 
         if (Eterna.DEV_MODE) {
-            this._editButton = new GameButton().label("Edit", 12);
+            this._editButton = new GameButton().label('Edit', 12);
             this.addObject(this._editButton, this._content);
             this._editButton.clicked.connect(() => this.editClicked.emit());
         }
@@ -208,7 +211,7 @@ export class ViewSolutionDialog extends Dialog<void> {
 }
 
 class ThumbnailAndTextButton extends GameButton {
-    public constructor() {
+    constructor() {
         super();
 
         this._view = new Container();
@@ -221,7 +224,7 @@ class ThumbnailAndTextButton extends GameButton {
             .endFill();
         this._view.addChild(this._bgFrame);
 
-        this._textField = Fonts.arial("", 14).bold().color(0xffffff).build();
+        this._textField = Fonts.arial('', 14).bold().color(0xffffff).build();
         this._view.addChild(this._textField);
 
         this.allStates(this._view);

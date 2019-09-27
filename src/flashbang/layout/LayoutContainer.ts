@@ -1,7 +1,7 @@
-import {Container, DisplayObject, Sprite} from "pixi.js";
+import {Container, DisplayObject, Sprite} from 'pixi.js';
 
 /** A base class for Containers that arrange their children automatically. */
-export abstract class LayoutContainer extends Container {
+export default abstract class LayoutContainer extends Container {
     public get needsLayout(): boolean {
         return this._needsLayout;
     }
@@ -76,7 +76,7 @@ export abstract class LayoutContainer extends Container {
 }
 
 class Spacer extends Container {
-    public constructor(width: number, height: number) {
+    constructor(width: number, height: number) {
         super();
 
         // For some reasons, spacers have zero-width bounds

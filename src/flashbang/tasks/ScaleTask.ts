@@ -1,8 +1,8 @@
-import {DisplayObject} from "pixi.js";
-import {EasingFunc} from "../util/Easing";
-import {DisplayObjectTask} from "./DisplayObjectTask";
+import {DisplayObject} from 'pixi.js';
+import {EasingFunc} from 'flashbang/util/Easing';
+import DisplayObjectTask from './DisplayObjectTask';
 
-export class ScaleTask extends DisplayObjectTask {
+export default class ScaleTask extends DisplayObjectTask {
     constructor(x: number, y: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {
         super(time, easingFn, target);
         this._toX = x;

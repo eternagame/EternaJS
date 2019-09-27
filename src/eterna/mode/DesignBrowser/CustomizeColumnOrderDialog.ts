@@ -1,23 +1,21 @@
-import {Container, Point, Text} from "pixi.js";
-import {HAlign, VAlign} from "../../../flashbang/core/Align";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {Arrays} from "../../../flashbang/util/Arrays";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {Signal} from "../../../signals/Signal";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {Dialog} from "../../ui/Dialog";
-import {FixedWidthTextField} from "../../ui/FixedWidthTextField";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {Fonts} from "../../util/Fonts";
-import {GraphicsUtil} from "../../util/GraphicsUtil";
-import {DesignCategory} from "./DesignBrowserMode";
+import {Container, Point, Text} from 'pixi.js';
+import {Signal} from 'signals';
+import Dialog from 'eterna/ui/Dialog';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import {
+    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import GraphicsUtil from 'eterna/util/GraphicsUtil';
+import FixedWidthTextField from 'eterna/ui/FixedWidthTextField';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import {DesignCategory} from './DesignBrowserMode';
 
-export class CustomizeColumnOrderDialog extends Dialog<void> {
+export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    public constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> = null) {
+    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> = null) {
         super();
         this._allColumnCategories = allCategories.slice();
         this._initialColumns = curColumns.slice();
@@ -46,7 +44,7 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this._curCategoryText = new FixedWidthTextField(
             this._allColumnCategories[0],
-            Fonts.arial("", 17).color(0xffffff).style,
+            Fonts.arial('', 17).color(0xffffff).style,
             140, HAlign.CENTER
         );
         addCriterionLayout.addChild(this._curCategoryText);
@@ -57,11 +55,11 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
 
         addCriterionLayout.addHSpacer(10);
 
-        this._addCriterionButton = new GameButton().label("Add", 15);
+        this._addCriterionButton = new GameButton().label('Add', 15);
         this._addCriterionButton.clicked.connect(() => this.addCurrentCriteria());
         this.addObject(this._addCriterionButton, addCriterionLayout);
 
-        let resetButton = new GameButton().label("Reset", 15);
+        let resetButton = new GameButton().label('Reset', 15);
         resetButton.clicked.connect(() => this.reset());
         this.addObject(resetButton, addCriterionLayout);
 
@@ -69,7 +67,7 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this._panelContent.addVSpacer(20);
 
-        let okButton = new GameButton().label("Ok", 20);
+        let okButton = new GameButton().label('Ok', 20);
         okButton.clicked.connect(() => this.close(null));
         this.addObject(okButton, this._panelContent);
 
@@ -110,7 +108,7 @@ export class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private getColumnIdx(category: DesignCategory): number {
-        return this._columnUIs.findIndex(ui => ui.category == category);
+        return this._columnUIs.findIndex(ui => ui.category === category);
     }
 
     private getUnusedColumns(): DesignCategory[] {
@@ -274,7 +272,7 @@ class ColumnUI {
     public moveDownButton: GameButton;
     public removeButton: GameButton;
 
-    public constructor(category: DesignCategory) {
+    constructor(category: DesignCategory) {
         this.category = category;
     }
 

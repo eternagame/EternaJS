@@ -1,5 +1,5 @@
 /** Contains useful static function for performing operations on Strings. */
-export class StringUtil {
+export default class StringUtil {
     /**
      * Get a hashCode for the specified String. null returns 0.
      * This hashes identically to Java's String.hashCode().
@@ -16,12 +16,12 @@ export class StringUtil {
 
     /** Is the specified string null, empty, or does it contain only whitespace? */
     public static isBlank(str: string): boolean {
-        return (str == null) || (str.search("\\S") === -1);
+        return (str == null) || (str.search('\\S') === -1);
     }
 
     /** Return the specified String, or "" if it is null. */
     public static deNull(str: string): string {
-        return (str == null) ? "" : str;
+        return (str == null) ? '' : str;
     }
 
     /** Does the specified string end with any of the specified substrings. */
@@ -107,26 +107,26 @@ export class StringUtil {
      * @param prefix the prefix to place in front of it. @default "0x", other possibilities are
      * "#" or "".
      */
-    public static toColorString(c: number, prefix: string = "0x"): string {
-        return prefix + StringUtil.prepad(c.toString(16), 6, "0");
+    public static toColorString(c: number, prefix: string = '0x'): string {
+        return prefix + StringUtil.prepad(c.toString(16), 6, '0');
     }
 
     /** Format the specified numbers as coordinates, (e.g. "+3-2" or "-7.4432-54.23+6.3"). */
     public static toCoordsString(x: number, y: number, z: number = NaN): string {
-        let result: string = ((x >= 0) ? "+" : "") + x + ((y >= 0) ? "+" : "") + y;
+        let result: string = ((x >= 0) ? '+' : '') + x + ((y >= 0) ? '+' : '') + y;
         if (!Number.isNaN(z)) {
-            result += ((z >= 0) ? "+" : "") + z;
+            result += ((z >= 0) ? '+' : '') + z;
         }
         return result;
     }
 
     /** Format the specified number, nicely, with commas. */
     public static formatNumber(n: number): string {
-        let postfix = "";
+        let postfix = '';
         let s: string = n.toString(); // use standard to-stringing
 
         // move any fractional portion to the postfix
-        const dex: number = s.lastIndexOf(".");
+        const dex: number = s.lastIndexOf('.');
         if (dex !== -1) {
             postfix = s.substring(dex);
             s = s.substring(0, dex);
@@ -151,19 +151,19 @@ export class StringUtil {
      */
     public static parseNumber(str: string): number {
         if (str == null) {
-            throw new Error("Cannot parseNumber(null)");
+            throw new Error('Cannot parseNumber(null)');
         }
 
         // deal with a few special cases
-        if (str === "Infinity") {
+        if (str === 'Infinity') {
             return Infinity;
-        } else if (str === "-Infinity") {
+        } else if (str === '-Infinity') {
             return -Infinity;
-        } else if (str === "NaN") {
+        } else if (str === 'NaN') {
             return NaN;
         }
 
-        const noCommas: string = str.replace(",", "");
+        const noCommas: string = str.replace(',', '');
 
         if (StringUtil.DECIMAL_REGEXP.exec(noCommas) == null) {
             throw new Error(`Could not convert '${str}' to Number`);
@@ -186,9 +186,9 @@ export class StringUtil {
 
         if (str != null) {
             str = str.toLowerCase();
-            if (str === "true" || str === "1") {
+            if (str === 'true' || str === '1') {
                 return true;
-            } else if (str === "false" || str === "0") {
+            } else if (str === 'false' || str === '0') {
                 return false;
             }
         }
@@ -200,7 +200,7 @@ export class StringUtil {
      * Append 0 or more copies of the padChar String to the input String
      * until it is at least the specified length.
      */
-    public static pad(str: string, length: number, padChar: string = " "): string {
+    public static pad(str: string, length: number, padChar: string = ' '): string {
         while (str.length < length) {
             str += padChar;
         }
@@ -211,7 +211,7 @@ export class StringUtil {
      * Prepend 0 or more copies of the padChar String to the input String
      * until it is at least the specified length.
      */
-    public static prepad(str: string, length: number, padChar: string = " "): string {
+    public static prepad(str: string, length: number, padChar: string = ' '): string {
         while (str.length < length) {
             str = padChar + str;
         }
@@ -223,7 +223,7 @@ export class StringUtil {
      * the specified length.
      */
     public static zeroPad(n: number, length: number = 2): string {
-        return StringUtil.prepad(n.toString(), length, "0");
+        return StringUtil.prepad(n.toString(), length, '0');
     }
 
     /**
@@ -234,7 +234,7 @@ export class StringUtil {
         // TODO: FIXME: this might be wrong, if your {0} replacement has a {1} in it, then
         // that'll get replaced next iteration.
         for (let ii = 0; ii < len; ii++) {
-            str = str.replace(new RegExp(`\\{${ii}\\}`, "g"), args[ii]);
+            str = str.replace(new RegExp(`\\{${ii}\\}`, 'g'), args[ii]);
         }
         return str;
     }
@@ -283,15 +283,14 @@ export class StringUtil {
      */
     public static isWhitespace(character: string): boolean {
         switch (character) {
-        case " ":
-        case "\t":
-        case "\r":
-        case "\n":
-        case "\f":
-            return true;
-
-        default:
-            return false;
+            case ' ':
+            case '\t':
+            case '\r':
+            case '\n':
+            case '\f':
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -304,7 +303,7 @@ export class StringUtil {
      * truncation.
      */
     public static truncate(
-        s: string, maxLength: number, append: string = ""
+        s: string, maxLength: number, append: string = ''
     ): string {
         if ((s == null) || (s.length <= maxLength)) {
             return s;
@@ -348,13 +347,13 @@ export class StringUtil {
             array.push(s.substring(0, index));
             s = s.substring(index + url.length);
             // clean up the url if necessary
-            if (StringUtil.startsWith(url.toLowerCase(), "www.")) {
+            if (StringUtil.startsWith(url.toLowerCase(), 'www.')) {
                 url = `http://${url}`;
             }
             array.push(url);
         }
 
-        if (s !== "" || array.length === 0) { // avoid putting an empty string on the end
+        if (s !== '' || array.length === 0) { // avoid putting an empty string on the end
             array.push(s);
         }
         return array;
@@ -366,7 +365,7 @@ export class StringUtil {
      *       toHex(131, 4) -> "0083"
      */
     public static toHex(n: number, width: number): string {
-        return StringUtil.prepad(n.toString(16), width, "0");
+        return StringUtil.prepad(n.toString(16), width, '0');
     }
 
     /**
@@ -374,31 +373,31 @@ export class StringUtil {
      */
     private static parseInt0(str: string, radix: number, allowNegative: boolean): number {
         if (str == null) {
-            throw new Error("Cannot parseInt(null)");
+            throw new Error('Cannot parseInt(null)');
         }
 
-        let negative: boolean = (str.charAt(0) === "-");
+        let negative: boolean = (str.charAt(0) === '-');
         if (negative) {
             str = str.substring(1);
         }
 
         // handle this special case immediately, to prevent confusion about
         // a leading 0 meaning "parse as octal"
-        if (str === "0") {
+        if (str === '0') {
             return 0;
         }
 
         if (radix === 0) {
-            if (StringUtil.startsWith(str, "0x")) {
+            if (StringUtil.startsWith(str, '0x')) {
                 str = str.substring(2);
                 radix = 16;
-            } else if (StringUtil.startsWith(str, "0")) {
+            } else if (StringUtil.startsWith(str, '0')) {
                 str = str.substring(1);
                 radix = 8;
             } else {
                 radix = 10;
             }
-        } else if (radix === 16 && StringUtil.startsWith(str, "0x")) {
+        } else if (radix === 16 && StringUtil.startsWith(str, '0x')) {
             str = str.substring(2);
         } else if (radix < 2 || radix > 16) {
             throw new Error(`Radix out of range: ${radix}`);
@@ -408,14 +407,14 @@ export class StringUtil {
         for (let ii = 0; ii < str.length; ii++) {
             let dex: number = StringUtil.HEX.indexOf(str.charAt(ii).toLowerCase());
             if (dex === -1 || dex >= radix) {
-                throw new Error(`Invalid characters in String [string=${arguments[0]}, radix=${radix}`);
+                throw new Error(`Invalid characters in String [string=${str}, radix=${radix}`);
             }
         }
 
         let result: number = parseInt(str, radix);
         if (Number.isNaN(result)) {
             // this shouldn't happen..
-            throw new Error(`Could not parseInt: ${arguments[0]}`);
+            throw new Error(`Could not parseInt: ${str}`);
         }
         if (negative) {
             result *= -1;
@@ -424,13 +423,15 @@ export class StringUtil {
     }
 
     /** Hexidecimal digits. */
-    private static HEX: string[] = ["0", "1", "2", "3", "4",
-        "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"];
+    private static HEX: string[] = ['0', '1', '2', '3', '4',
+        '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 
     private static DECIMAL_REGEXP: RegExp = /^-?[0-9]*\.?[0-9]+(e-?[0-9]+)?$/;
 
-    /** A regular expression that finds URLs. */
-    private static URL_REGEXP: RegExp = // new RegExp("(http|https|ftp)://\\S+", "i");
-    // from John Gruber: http://daringfireball.net/2009/11/liberal_regex_for_matching_urls
-    new RegExp("\\b(([\\w-]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^!\\\"#$%&'()*+,\\-./:;<=>?@\\[\\\\\\]\\^_`{|}~\\s]|/)))", "i");
+    /**
+     * A regular expression that finds URLs.
+     * From John Gruber: https://gist.github.com/gruber/8891611#file-liberal-regex-pattern-for-web-urls-L7
+     */
+    private static URL_REGEXP: RegExp =
+    /\b((?:(?:http|ftp)s?:(?:\/{1,3}|[a-z0-9%])|[a-z0-9.-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\/)(?:[^\s()<>{}[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()[\]{};:'".,<>?«»“”‘’])|(?:(?:(?!@).|^)[a-z0-9]+(?:[.-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b\/?(?!@)))/im;
 }

@@ -1,27 +1,26 @@
-import * as log from "loglevel";
-import {Container, Point} from "pixi.js";
-import {AppMode} from "../../flashbang/core/AppMode";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AchievementManager} from "../achievements/AchievementManager";
-import {Eterna} from "../Eterna";
-import {EternaURL} from "../net/EternaURL";
-import {Pose2D} from "../pose2D/Pose2D";
-import {PoseField} from "../pose2D/PoseField";
-import {ConfirmDialog} from "../ui/ConfirmDialog";
-import {ContextMenu} from "../ui/ContextMenu";
-import {Dialog} from "../ui/Dialog";
-import {NotificationDialog} from "../ui/NotificationDialog";
-import {Tooltips} from "../ui/Tooltips";
-import {UILockDialog} from "../ui/UILockDialog";
-import {URLButton} from "../ui/URLButton";
-import {ExternalInterface, ExternalInterfaceCtx} from "../util/ExternalInterface";
-import {Folder} from "../folding/Folder";
-import {UndoBlock} from "../UndoBlock";
-import {EPars} from "../EPars";
+import * as log from 'loglevel';
+import {Container, Point} from 'pixi.js';
+import Eterna from 'eterna/Eterna';
+import UndoBlock from 'eterna/UndoBlock';
+import EPars from 'eterna/EPars';
+import {
+    AppMode, SceneObject, Flashbang, GameObjectRef
+} from 'flashbang';
+import AchievementManager from 'eterna/achievements/AchievementManager';
+import Tooltips from 'eterna/ui/Tooltips';
+import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import ConfirmDialog from 'eterna/ui/ConfirmDialog';
+import NotificationDialog from 'eterna/ui/NotificationDialog';
+import UILockDialog from 'eterna/ui/UILockDialog';
+import PoseField from 'eterna/pose2D/PoseField';
+import ContextMenu from 'eterna/ui/ContextMenu';
+import URLButton from 'eterna/ui/URLButton';
+import EternaURL from 'eterna/net/EternaURL';
+import Folder from 'eterna/folding/Folder';
+import Dialog from 'eterna/ui/Dialog';
 
-export abstract class GameMode extends AppMode {
+export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
     public readonly uiLayer = new Container();
@@ -76,7 +75,7 @@ export abstract class GameMode extends AppMode {
     /** Show a dialog. Removes any existing dialog. */
     public showDialog<T extends SceneObject>(dialog: T): T {
         if (this._dialogRef.isLive) {
-            log.warn("Dialog already showing");
+            log.warn('Dialog already showing');
             this._dialogRef.destroyObject();
         }
 
@@ -94,7 +93,7 @@ export abstract class GameMode extends AppMode {
      */
     public showNotification(message: string, extraButtonTitle?: string): NotificationDialog {
         if (this._notifRef.isLive) {
-            log.warn("Notification already showing");
+            log.warn('Notification already showing');
             this._notifRef.destroyObject();
         }
 
@@ -103,7 +102,7 @@ export abstract class GameMode extends AppMode {
 
         // Hide dialogs while a notification is showing
         this.dialogLayer.visible = false;
-        notif.destroyed.connect(() => this.dialogLayer.visible = true);
+        notif.destroyed.connect(() => { this.dialogLayer.visible = true; });
 
         return notif;
     }
@@ -124,7 +123,7 @@ export abstract class GameMode extends AppMode {
         if (this._uiLockRef.isLive) {
             (this._uiLockRef.object as UILockDialog).releaseRef(name);
         } else {
-            log.warn("UILockDialog not currently active");
+            log.warn('UILockDialog not currently active');
         }
     }
 
@@ -132,13 +131,13 @@ export abstract class GameMode extends AppMode {
         return this._poseFields.length;
     }
 
-    public ropSetPip(pip_mode: boolean): void {
-        this.setPip(pip_mode);
+    public ropSetPip(pipMode: boolean): void {
+        this.setPip(pipMode);
     }
 
     protected registerScriptInterface(ctx: ExternalInterfaceCtx): void {
         if (this._modeScriptInterface != null) {
-            throw new Error("ExternalInterfaceCtx already registered for this mode");
+            throw new Error('ExternalInterfaceCtx already registered for this mode');
         }
 
         this._modeScriptInterface = ctx;
@@ -162,21 +161,23 @@ export abstract class GameMode extends AppMode {
         this._poseFields = [];
         this._poses = [];
 
-        newPoseFields.forEach((newPoseField, idx) => {
-            this._poseFields.push(newPoseField);
-            this._poses.push(newPoseField.pose);
-            newPoseField.pose.getEnergyDelta = () => {
+        newPoseFields.forEach((newField, idx) => {
+            this._poseFields.push(newField);
+            this._poses.push(newField.pose);
+            newField.pose.getEnergyDelta = () => {
                 // Sanity check
                 if (this._folder) {
                     let poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = (pairs: number[]) => this._folder.scoreStructures(newPoseField.pose.fullSequence, pairs);
+                    let score = (pairs: number[]) => this._folder.scoreStructures(newField.pose.fullSequence, pairs);
 
                     // This changes between PoseEdit mode and PuzzleEditMode
-                    let targetPairs: number[] = this._targetPairs ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
+                    let targetPairs: number[] = this._targetPairs
+                        ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
                     let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
 
-                    return score(EPars.getSatisfiedPairs(targetPairs, newPoseField.pose.fullSequence)) - score(nativePairs);
+                    return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
+                        - score(nativePairs);
                 }
                 return -1;
             };
@@ -189,10 +190,10 @@ export abstract class GameMode extends AppMode {
         this.setPip(!this._isPipMode);
     }
 
-    protected setPip(pip_mode: boolean): void {
-        this._isPipMode = pip_mode;
+    protected setPip(pipMode: boolean): void {
+        this._isPipMode = pipMode;
         this.layoutPoseFields();
-        this.onSetPip(pip_mode);
+        this.onSetPip(pipMode);
     }
 
     protected layoutPoseFields(): void {
@@ -218,11 +219,11 @@ export abstract class GameMode extends AppMode {
         }
     }
 
-    protected onSetPip(pip_mode: boolean): void {
+    protected onSetPip(pipMode: boolean): void {
     }
 
     protected postScreenshot(screenshot: ArrayBuffer): void {
-        this.pushUILock("Screenshot");
+        this.pushUILock('Screenshot');
 
         Eterna.client.postScreenshot(screenshot)
             .then((filename) => {
@@ -238,7 +239,7 @@ export abstract class GameMode extends AppMode {
                 this.showNotification(`There was an error posting the screenshot\n${err}`);
             })
             ./* finally */then(() => {
-                this.popUILock("Screenshot");
+                this.popUILock('Screenshot');
             });
     }
 
@@ -279,7 +280,7 @@ export abstract class GameMode extends AppMode {
     }
 
     protected static createHomeButton(): URLButton {
-        let button = new URLButton("Go to Home", EternaURL.createURL({page: "lab_bench"}));
+        let button = new URLButton('Go to Home', EternaURL.createURL({page: 'lab_bench'}));
         button.selectable(false);
         return button;
     }
@@ -312,7 +313,7 @@ export abstract class GameMode extends AppMode {
 }
 
 class ContextMenuDialog extends Dialog<void> {
-    public constructor(menu: ContextMenu, menuLoc: Point) {
+    constructor(menu: ContextMenu, menuLoc: Point) {
         super();
         this._menu = menu;
         this._menuLoc = menuLoc;

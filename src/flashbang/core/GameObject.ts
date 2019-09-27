@@ -1,10 +1,10 @@
-import * as log from "loglevel";
-import {Container, DisplayObject} from "pixi.js";
-import {Assert} from "../util/Assert";
-import {GameObjectBase} from "./GameObjectBase";
-import {GameObjectRef} from "./GameObjectRef";
+import * as log from 'loglevel';
+import {Container, DisplayObject} from 'pixi.js';
+import Assert from 'flashbang/util/Assert';
+import GameObjectBase from './GameObjectBase';
+import GameObjectRef from './GameObjectRef';
 
-export class GameObject extends GameObjectBase {
+export default class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */
     public get display(): DisplayObject {
         return null;
@@ -14,11 +14,15 @@ export class GameObject extends GameObjectBase {
         return this._addObjectInternal(obj, null, false, displayParent, displayIdx);
     }
 
-    public addNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._addObjectInternal(obj, name, false, displayParent, displayIdx);
     }
 
-    public replaceNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public replaceNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._addObjectInternal(obj, name, true, displayParent, displayIdx);
     }
 
@@ -88,14 +92,14 @@ export class GameObject extends GameObjectBase {
     }
 
     /* internal */
-    _addObjectInternal(obj: GameObjectBase,
+    public _addObjectInternal(obj: GameObjectBase,
         name: string, replaceExisting: boolean,
         displayParent: Container, displayIdx: number = -1): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal
 
         Assert.isTrue(!this._wasRemoved, "cannot add to an object that's been removed");
-        Assert.isTrue(obj._ref == null, "cannot re-parent GameObjects");
+        Assert.isTrue(obj._ref == null, 'cannot re-parent GameObjects');
 
         if (name != null && replaceExisting) {
             this.removeNamedObjects(name);
@@ -136,10 +140,13 @@ export class GameObject extends GameObjectBase {
     }
 
     /* internal */
-    _attachToDisplayList(displayParent: Container, displayIdx: number): void {
+    public _attachToDisplayList(displayParent: Container, displayIdx: number): void {
         // Attach the object to a display parent.
         // (This is purely a convenience - the client is free to do the attaching themselves)
-        Assert.isTrue(this.display != null, "obj must manage a non-null DisplayObject to be attached to a display parent");
+        Assert.isTrue(
+            this.display != null,
+            'obj must manage a non-null DisplayObject to be attached to a display parent'
+        );
 
         if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
             displayParent.addChild(this.display);
@@ -149,15 +156,15 @@ export class GameObject extends GameObjectBase {
     }
 
     /* internal */
-    _registerObject(obj: GameObjectBase): void {
-        this._mode.registerObjectInternal(obj);
+    public _registerObject(obj: GameObjectBase): void {
+        this._mode._registerObjectInternal(obj);
         obj._addedInternal();
     }
 
     /* override */
 
     /* internal */
-    _addedInternal(): void {
+    public _addedInternal(): void {
         // Add pending children first
         if (this._pendingChildren != null) {
             for (let ref of this._pendingChildren) {
@@ -172,7 +179,7 @@ export class GameObject extends GameObjectBase {
     /* override */
 
     /* internal */
-    _removedInternal(): void {
+    public _removedInternal(): void {
         // null out ref immediately - so that we're not considered "live"
         // while children are being removed - rather than waiting for
         // GameObjectBase._removedInternal to do it at the end of the function
@@ -196,7 +203,7 @@ export class GameObject extends GameObjectBase {
     /* override */
 
     /* internal */
-    _disposeInternal(): void {
+    public _disposeInternal(): void {
         this._ref._obj = null;
         // dispose our children
         let cur: GameObjectRef = this._children;
@@ -214,7 +221,7 @@ export class GameObject extends GameObjectBase {
                 try {
                     (this.display as Container).destroy({children: true});
                 } catch (e) {
-                    log.warn("GameObject.display.destroy blew up", e);
+                    log.warn('GameObject.display.destroy blew up', e);
                 }
             } else {
                 this.display.destroy();

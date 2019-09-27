@@ -1,13 +1,10 @@
-import {GlowFilter} from "pixi-filters";
-import {Graphics} from "pixi.js";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
-import {EPars} from "../EPars";
+import {Graphics} from 'pixi.js';
+import EPars from 'eterna/EPars';
+import {
+    SceneObject, SerialTask, AlphaTask, VisibleTask, Vector2
+} from 'flashbang';
 
-export class LightRay extends SceneObject<Graphics> {
+export default class LightRay extends SceneObject<Graphics> {
     constructor() {
         super(new Graphics());
     }
@@ -61,5 +58,5 @@ export class LightRay extends SceneObject<Graphics> {
         }
     }
 
-    private static readonly ANIM = "Anim";
+    private static readonly ANIM = 'Anim';
 }

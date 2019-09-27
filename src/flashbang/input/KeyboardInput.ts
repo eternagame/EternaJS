@@ -1,5 +1,5 @@
-import {Registration} from "../../signals/Registration";
-import {LinkedElement, LinkedList} from "../util/LinkedList";
+import {Registration} from 'signals';
+import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
 
 export interface KeyboardListener {
     /**
@@ -9,7 +9,7 @@ export interface KeyboardListener {
     onKeyboardEvent(e: KeyboardEvent): boolean;
 }
 
-export class KeyboardInput {
+export default class KeyboardInput {
     public dispose(): void {
         this._listeners.dispose();
         this._listeners = null;
@@ -18,7 +18,11 @@ export class KeyboardInput {
     public handleKeyboardEvent(e: KeyboardEvent): boolean {
         let handled = false;
         try {
-            for (let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration(); elt != null; elt = elt.next) {
+            for (
+                let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration();
+                elt != null;
+                elt = elt.next
+            ) {
                 handled = elt.data.onKeyboardEvent(e);
                 if (handled) {
                     break;

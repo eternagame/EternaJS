@@ -1,7 +1,7 @@
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
+import {ContainerObject} from 'flashbang';
 
-export abstract class BaseGamePanel extends ContainerObject {
+export default abstract class BaseGamePanel extends ContainerObject {
     public abstract setSize(width: number, height: number): void;
     public abstract set title(title: string);
-    public abstract get titleHeight(): number
+    public abstract get titleHeight(): number;
 }

@@ -1,21 +1,25 @@
-import MultiStyleText from "pixi-multistyle-text";
-import {Point, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {Fonts} from "../util/Fonts";
-import {BaseGamePanel} from "./BaseGamePanel";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
+import MultiStyleText from 'pixi-multistyle-text';
+import {Point, Text} from 'pixi.js';
+import {StyledTextBuilder, DisplayUtil, ContainerObject} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import BaseGamePanel from './BaseGamePanel';
+import GameButton from './GameButton';
+import GamePanel, {GamePanelType} from './GamePanel';
 
-export class TextBalloon extends ContainerObject {
-    public constructor(text: string = "", balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07, borderColor: number = 0, borderAlpha: number = 0) {
+export default class TextBalloon extends ContainerObject {
+    constructor(
+        text: string = '',
+        balloonColor: number = 0xFFFFFF,
+        balloonAlpha: number = 0.07,
+        borderColor: number = 0,
+        borderAlpha: number = 0
+    ) {
         super();
 
         this._panel = new GamePanel(GamePanelType.NORMAL, balloonAlpha, balloonColor, borderAlpha, borderColor);
         this.addObject(this._panel, this.container);
 
-        this._button = new GameButton().label("Next", 12);
+        this._button = new GameButton().label('Next', 12);
         this.addObject(this._button, this.container);
         this._button.display.visible = false;
 
@@ -62,11 +66,11 @@ export class TextBalloon extends ContainerObject {
         }
     }
 
-    public setText(text: string, fontsize: number = 15, font_color: number = 0xC0DCE7): void {
+    public setText(text: string, fontsize: number = 15, fontColor: number = 0xC0DCE7): void {
         this.styledText = new StyledTextBuilder({
             fontFamily: Fonts.ARIAL,
             fontSize: fontsize,
-            fill: font_color
+            fill: fontColor
         }).append(text);
     }
 
@@ -79,24 +83,24 @@ export class TextBalloon extends ContainerObject {
     }
 
     public get width(): number {
-        let whole_width: number = this._text != null ? this._text.width : 0;
+        let wholeWidth: number = this._text != null ? this._text.width : 0;
         if (this._button != null && this._button.display.visible) {
-            whole_width += TextBalloon.W_MARGIN;
-            whole_width += DisplayUtil.width(this._button.display);
+            wholeWidth += TextBalloon.W_MARGIN;
+            wholeWidth += DisplayUtil.width(this._button.display);
         }
 
-        return whole_width + 2 * TextBalloon.W_MARGIN;
+        return wholeWidth + 2 * TextBalloon.W_MARGIN;
     }
 
     public get height(): number {
-        let whole_height = 0;
-        whole_height += this._text != null ? this._text.height : 0;
+        let wholeHeight = 0;
+        wholeHeight += this._text != null ? this._text.height : 0;
 
         if (this._button != null && this._button.display.visible) {
-            whole_height = Math.max(whole_height, DisplayUtil.height(this._button.display));
+            wholeHeight = Math.max(wholeHeight, DisplayUtil.height(this._button.display));
         }
 
-        return whole_height + 2 * TextBalloon.H_MARGIN + this._panel.titleHeight;
+        return wholeHeight + 2 * TextBalloon.H_MARGIN + this._panel.titleHeight;
     }
 
     protected updateView(): void {
@@ -108,35 +112,35 @@ export class TextBalloon extends ContainerObject {
         let {height} = this;
         this._panel.setSize(width, height);
 
-        let whole_width: number = width - 2 * TextBalloon.W_MARGIN;
-        let title_space: number = this._panel.titleHeight;
+        let wholeWidth: number = width - 2 * TextBalloon.W_MARGIN;
+        let titleSpace: number = this._panel.titleHeight;
 
         if (!this._centered) {
             if (this._text != null) {
-                this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + title_space);
+                this._text.position = new Point(TextBalloon.W_MARGIN, TextBalloon.H_MARGIN + titleSpace);
             }
 
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
                     TextBalloon.W_MARGIN + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display)
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
                 );
             }
 
             this._panel.display.position = new Point(0, 0);
         } else {
             if (this._text != null) {
-                this._text.position = new Point(-whole_width / 2, TextBalloon.H_MARGIN + title_space);
+                this._text.position = new Point(-wholeWidth / 2, TextBalloon.H_MARGIN + titleSpace);
             }
 
             if (this._button.display.visible) {
                 this._button.display.position = new Point(
-                    -whole_width / 2 + this._text.width + TextBalloon.W_MARGIN,
-                    TextBalloon.H_MARGIN + title_space + this._text.height - DisplayUtil.height(this._button.display)
+                    -wholeWidth / 2 + this._text.width + TextBalloon.W_MARGIN,
+                    TextBalloon.H_MARGIN + titleSpace + this._text.height - DisplayUtil.height(this._button.display)
                 );
             }
 
-            this._panel.display.position = new Point(-whole_width / 2, 0);
+            this._panel.display.position = new Point(-wholeWidth / 2, 0);
         }
     }
 

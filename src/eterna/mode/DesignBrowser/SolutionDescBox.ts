@@ -1,29 +1,25 @@
-import MultiStyleText from "pixi-multistyle-text";
-import {Point, Text} from "pixi.js";
-import {HAlign} from "../../../flashbang/core/Align";
-import {HLayoutContainer} from "../../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../../flashbang/layout/VLayoutContainer";
-import {SceneObject} from "../../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../../flashbang/tasks/SerialTask";
-import {Eterna} from "../../Eterna";
-import {Feedback} from "../../Feedback";
-import {EternaURL} from "../../net/EternaURL";
-import {Puzzle} from "../../puzzle/Puzzle";
-import {Solution} from "../../puzzle/Solution";
-import {GameButton} from "../../ui/GameButton";
-import {GamePanel, GamePanelType} from "../../ui/GamePanel";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {TextInputObject} from "../../ui/TextInputObject";
-import {VScrollBox} from "../../ui/VScrollBox";
-import {Fonts} from "../../util/Fonts";
-import {Utility} from "../../util/Utility";
-import {CopyTextDialogMode} from "../CopyTextDialogMode";
-import {GameMode} from "../GameMode";
-import {LabComments} from "./LabComments";
+import MultiStyleText from 'pixi-multistyle-text';
+import {Point, Text} from 'pixi.js';
+import Eterna from 'eterna/Eterna';
+import Feedback from 'eterna/Feedback';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import Solution from 'eterna/puzzle/Solution';
+import EternaURL from 'eterna/net/EternaURL';
+import Utility from 'eterna/util/Utility';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
+import TextInputObject from 'eterna/ui/TextInputObject';
+import VScrollBox from 'eterna/ui/VScrollBox';
+import {
+    VLayoutContainer, HAlign, HLayoutContainer, SceneObject, RepeatingTask, SerialTask, AlphaTask
+} from 'flashbang';
+import CopyTextDialogMode from '../CopyTextDialogMode';
+import LabComments from './LabComments';
+import GameMode from '../GameMode';
 
-export class SolutionDescBox extends GamePanel {
+export default class SolutionDescBox extends GamePanel {
     constructor(solution: Solution, puzzle: Puzzle) {
         super(GamePanelType.INVISIBLE, 1.0, 0x152843, 0.27, 0xC0DCE7);
         this._solution = solution;
@@ -36,7 +32,7 @@ export class SolutionDescBox extends GamePanel {
         super.added();
 
         const boxTitleText = `<FONT COLOR="#FFCC00">${Utility.stripHtmlTags(this._solution.title)}</FONT> by <A HREF="${
-            EternaURL.createURL({page: "player", uid: this._solution.playerID})
+            EternaURL.createURL({page: 'player', uid: this._solution.playerID})
         }" TARGET="_PLAYER"><U>${Utility.stripHtmlTags(this._solution.playerName)}</U></A>`;
 
         this._boxTitle = new HTMLTextObject(boxTitleText).font(Fonts.ARIAL).fontSize(16).selectable(false)
@@ -44,41 +40,47 @@ export class SolutionDescBox extends GamePanel {
         this._boxTitle.display.position = new Point(20, 20);
         this.addObject(this._boxTitle, this.container);
 
-        this._copySolutionButton = new GameButton().label("Get URL for this design", 10);
+        this._copySolutionButton = new GameButton().label('Get URL for this design', 10);
         this._copySolutionButton.display.position = new Point(20, 45);
         this.addObject(this._copySolutionButton, this.container);
 
         const solutionURL = Eterna.SERVER_URL + EternaURL.createURL({
-            page: "browse_solution",
+            page: 'browse_solution',
             puznid: this._puzzle.nodeID,
-            filter1: "Id",
+            filter1: 'Id',
+            // TODO: Update website so that these can be camelcase
+            /* eslint-disable @typescript-eslint/camelcase */
             filter1_arg1: this._solution.nodeID,
             filter1_arg2: this._solution.nodeID
+            /* eslint-enable @typescript-eslint/camelcase */
         });
         this._copySolutionButton.clicked.connect(
-            () => this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, "Solution URL"))
+            () => this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'))
         );
 
-        this._copyPlayerButton = new GameButton().label("Get URL for all designs by this player", 10);
+        this._copyPlayerButton = new GameButton().label('Get URL for all designs by this player', 10);
         this._copyPlayerButton.display.position = new Point(20 + this._copySolutionButton.container.width + 10, 45);
         this.addObject(this._copyPlayerButton, this.container);
 
         const playerURL = Eterna.SERVER_URL + EternaURL.createURL({
-            page: "browse_player",
+            page: 'browse_player',
             puznid: this._puzzle.nodeID,
-            filter1: "Designer",
+            filter1: 'Designer',
+            // TODO: Update website so that these can be camelcase
+            /* eslint-disable @typescript-eslint/camelcase */
             filter1_arg1: this._solution.playerName
+            /* eslint-enable @typescript-eslint/camelcase */
         });
         this._copyPlayerButton.clicked.connect(
-            () => this.modeStack.pushMode(new CopyTextDialogMode(playerURL, "Player URL"))
+            () => this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'))
         );
 
         this._commentInput = new TextInputObject(14)
-            .placeholderText("Enter your comment here")
+            .placeholderText('Enter your comment here')
             .showFakeTextInputWhenNotFocused();
         this.addObject(this._commentInput, this.container);
 
-        this._commentButton = new GameButton().label("Post", 14);
+        this._commentButton = new GameButton().label('Post', 14);
         this._commentButton.clicked.connect(() => this.submitComment());
         this.addObject(this._commentButton, this.container);
 
@@ -87,7 +89,7 @@ export class SolutionDescBox extends GamePanel {
         this._commentInput.display.visible = false;
         this._commentButton.display.visible = false;
 
-        let loadingText = SolutionDescBox.createLoadingText("Loading comments...");
+        let loadingText = SolutionDescBox.createLoadingText('Loading comments...');
         loadingText.display.position = new Point(
             (this._width - loadingText.display.width) * 0.5,
             this._height - 30
@@ -99,7 +101,7 @@ export class SolutionDescBox extends GamePanel {
 
             this._commentInput.display.visible = true;
             this._commentButton.display.visible = true;
-            this._commentInput.text = "";
+            this._commentInput.text = '';
 
             this.updateDescriptionAndComments(commentsData);
         });
@@ -114,12 +116,14 @@ export class SolutionDescBox extends GamePanel {
                 pxdelta = e.deltaY;
                 break;
             case WheelEvent.DOM_DELTA_LINE:
-            // 13 -> body font size
+                // 13 -> body font size
                 pxdelta = e.deltaY * 13;
                 break;
             case WheelEvent.DOM_DELTA_PAGE:
                 pxdelta = e.deltaY * this._height;
                 break;
+            default:
+                throw new Error('Unhandled scroll delta mode');
         }
 
         this._descriptionAndComments.scrollTo(
@@ -179,12 +183,16 @@ export class SolutionDescBox extends GamePanel {
                     let commentLayout = new HLayoutContainer(4);
                     layout.addChild(commentLayout);
 
-                    let url = EternaURL.createURL({page: "player", uid: comment["uid"]});
-                    let userButton = new GameButton().label(comment["name"], 10);
-                    userButton.clicked.connect(() => window.open(url, "_blank"));
+                    let url = EternaURL.createURL({page: 'player', uid: comment['uid']});
+                    let userButton = new GameButton().label(comment['name'], 10);
+
+                    // eslint-disable-next-line no-loop-func
+                    userButton.clicked.connect(() => window.open(url, '_blank'));
 
                     this._descriptionAndComments.addObject(userButton, commentLayout);
-                    let comm = Fonts.arial(comment["comment"], 13).color(0xffffff).wordWrap(true, this._width - 40).build();
+                    let comm = Fonts.arial(
+                        comment['comment'], 13
+                    ).color(0xffffff).wordWrap(true, this._width - 40).build();
                     this._descriptionAndCommentsTexts.push(comm);
                     commentLayout.addChild(comm);
                 }
@@ -200,28 +208,28 @@ export class SolutionDescBox extends GamePanel {
     }
 
     private submitComment(): void {
-        if (this._commentInput.text == "") {
-            (this.mode as GameMode).showNotification("You cannot post an empty comment");
+        if (this._commentInput.text === '') {
+            (this.mode as GameMode).showNotification('You cannot post an empty comment');
             return;
         }
 
         this._commentInput.display.visible = false;
         this._commentButton.display.visible = false;
 
-        let submittingText = SolutionDescBox.createLoadingText("Submitting your comment...");
+        let submittingText = SolutionDescBox.createLoadingText('Submitting your comment...');
         this.addObject(submittingText, this.container);
         submittingText.display.position = new Point(
             (this._width - submittingText.display.width) * 0.5,
             this._height - 30
         );
 
-        this._comments.submit_comment(this._commentInput.text)
+        this._comments.submitComment(this._commentInput.text)
             .then((commentsData) => {
                 submittingText.destroySelf();
 
                 this._commentInput.display.visible = true;
                 this._commentButton.display.visible = true;
-                this._commentInput.text = "";
+                this._commentInput.text = '';
 
                 this.updateDescriptionAndComments(commentsData);
             });
@@ -237,30 +245,31 @@ export class SolutionDescBox extends GamePanel {
     }
 
     private getSolutionText(solution: Solution, puzzle: Puzzle): MultiStyleText {
-        let text = "";
+        let text = '';
 
         if (solution.expFeedback != null) {
-            if (solution.expFeedback.isFailed() == 0) {
-                text += "<bold>[SYNTHESIZED!]</bold>\n"
-                    + "<orange>This design was synthesized with score </orange>"
-                    + `<bold>${solution.getProperty("Synthesis score")} / 100</bold>\n\n`;
+            if (solution.expFeedback.isFailed() === 0) {
+                text += '<bold>[SYNTHESIZED!]</bold>\n'
+                    + '<orange>This design was synthesized with score </orange>'
+                    + `<bold>${solution.getProperty('Synthesis score')} / 100</bold>\n\n`;
             } else {
                 let failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
                 text += `${Feedback.EXPDISPLAYS_LONG[failureIdx]
                 } Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n\n`;
             }
-        } else if (solution.getProperty("Synthesized") == "y") {
-            text += "<bold>[WAITING]</bold>\n"
-                    + "<orange>This design is being synthesized and waiting for results. </orange>\n\n";
-        } else if (solution.getProperty("Round") < puzzle.round) {
-            text += "<bold>[OLD]</bold>\n"
-                    + "<orange>This design was submitted in round </orange>"
-                    + `<bold>${solution.getProperty("Round")}.</bold>`
-                    + "<orange> You can't vote on designs from previous rounds. But you can use or resubmit this design by clicking on </orange>"
-                    + "<bold>\"Modify\".</bold>\n\n";
+        } else if (solution.getProperty('Synthesized') === 'y') {
+            text += '<bold>[WAITING]</bold>\n'
+                    + '<orange>This design is being synthesized and waiting for results. </orange>\n\n';
+        } else if (solution.getProperty('Round') < puzzle.round) {
+            text += '<bold>[OLD]</bold>\n'
+                    + '<orange>This design was submitted in round </orange>'
+                    + `<bold>${solution.getProperty('Round')}.</bold>`
+                    + "<orange> You can't vote on designs from previous rounds."
+                    + 'But you can use or resubmit this design by clicking on </orange>'
+                    + '<bold>"Modify".</bold>\n\n';
         }
 
-        text += "<bold>Design description</bold>\n\n";
+        text += '<bold>Design description</bold>\n\n';
         text += Utility.stripHtmlTags(solution.fullDescription);
 
         return new MultiStyleText(text, {
@@ -271,7 +280,7 @@ export class SolutionDescBox extends GamePanel {
                 wordWrap: true,
                 wordWrapWidth: this._width - 40
             },
-            bold: {fontStyle: "bold"},
+            bold: {fontStyle: 'bold'},
             orange: {fill: 0xffcc00}
         });
     }
