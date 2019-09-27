@@ -742,6 +742,7 @@ export class PoseEditMode extends GameMode {
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
             this._poses[ii].pairs = this._targetPairs[ii];
+            this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions != null && this._targetConditions[ii] != null) {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
             }
