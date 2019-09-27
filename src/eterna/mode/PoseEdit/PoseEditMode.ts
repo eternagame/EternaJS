@@ -965,7 +965,7 @@ export default class PoseEditMode extends GameMode {
         const LOCK_NAME = 'RunScript';
         this.pushUILock(LOCK_NAME);
 
-        ExternalInterface.runScript(nid)
+        ExternalInterface.runScriptThroughQueue(nid)
             .then((ret) => {
                 log.info(ret);
                 if (typeof (ret['cause']) === 'string') {

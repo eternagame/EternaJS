@@ -126,7 +126,7 @@ export default class ExternalInterface {
      *
      * @return a Promise that will resolve with the results of the script.
      */
-    public static runScript(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
+    public static runScriptThroughQueue(scriptID: string | number, options: RunScriptOptions = {}): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this._pendingScripts.push({
                 scriptID: `${scriptID}`,
