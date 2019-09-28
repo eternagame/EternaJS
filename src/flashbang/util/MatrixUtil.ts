@@ -116,7 +116,7 @@ export default class MatrixUtil {
     }
 
     /** Converts a Matrix instance to a String, which is useful when debugging. */
-    public static toString(matrix: Matrix, precision: number = 3): string {
+    public static toString(matrix: Matrix, precision = 3): string {
         MatrixUtil.sRawData2[0] = matrix.a;
         MatrixUtil.sRawData2[1] = matrix.c;
         MatrixUtil.sRawData2[2] = matrix.tx;
@@ -128,7 +128,7 @@ export default class MatrixUtil {
     }
 
     private static formatRawData(data: number[], numCols: number, numRows: number,
-        precision: number, indent: string = '  '): string {
+        precision: number, indent = '  '): string {
         let result: string = indent;
         let numValues: number = numCols * numRows;
         let highestValue = 0.0;

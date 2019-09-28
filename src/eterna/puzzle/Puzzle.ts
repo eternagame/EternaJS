@@ -7,7 +7,6 @@ import EternaURL from 'eterna/net/EternaURL';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
-import {ConstraintType} from './Constraints';
 
 export interface BoostersData {
     mission?: any;
@@ -297,7 +296,7 @@ export default class Puzzle {
             if (uiSpec[ii] === 'NOMODES') {
                 this._useModes = Puzzle.BOOL_FALSE;
             } else if (uiSpec[ii] === 'STARTSTATE') {
-                this._defaultPoseState = <PoseState>(uiSpec[ii + 1].toUpperCase());
+                this._defaultPoseState = uiSpec[ii + 1].toUpperCase() as PoseState;
                 ii++;
             } else if (uiSpec[ii] === 'NOTOOLS') {
                 this._useTools = Puzzle.BOOL_FALSE;
@@ -382,7 +381,7 @@ export default class Puzzle {
 
     public get isPairBrushAllowed(): boolean {
         let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = this._constraints.some(constraint => constraint instanceof ShapeConstraint);
+        let hasTarget = this._constraints.some((constraint) => constraint instanceof ShapeConstraint);
 
         return isBasic || hasTarget;
     }

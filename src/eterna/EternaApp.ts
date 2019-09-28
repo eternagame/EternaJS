@@ -173,7 +173,7 @@ export default class EternaApp extends FlashbangApp {
     /** Creates a PoseEditMode and removes all other modes from the stack */
     public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
         return this.loadPuzzle(puzzleOrID)
-            .then(async puzzle => this._modeStack.unwindToMode(new PoseEditMode(
+            .then(async (puzzle) => this._modeStack.unwindToMode(new PoseEditMode(
                 puzzle,
                 params,
                 await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
@@ -207,7 +207,7 @@ export default class EternaApp extends FlashbangApp {
     /** Creates a DesignBrowser for the given puzzle, and removes all other modes from the stack. */
     public loadDesignBrowser(puzzleOrID: number | Puzzle, initialFilters?: DesignBrowserFilter[]): Promise<void> {
         return this.loadPuzzle(puzzleOrID)
-            .then(puzzle => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle, false, initialFilters)));
+            .then((puzzle) => this._modeStack.unwindToMode(new DesignBrowserMode(puzzle, false, initialFilters)));
     }
 
     /**
@@ -217,7 +217,7 @@ export default class EternaApp extends FlashbangApp {
     public switchToDesignBrowser(puzzleOrID: number | Puzzle): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const existingBrowser = this.modeStack.modes.find(
-            mode => mode instanceof DesignBrowserMode
+            (mode) => mode instanceof DesignBrowserMode
         ) as DesignBrowserMode;
         if (existingBrowser != null && existingBrowser.puzzleID === puzzleID) {
             this.modeStack.setModeIndex(existingBrowser, -1);
@@ -261,7 +261,7 @@ export default class EternaApp extends FlashbangApp {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
-        const existingMode = this.modeStack.modes.find(mode => mode instanceof FeedbackViewMode) as FeedbackViewMode;
+        const existingMode = this.modeStack.modes.find((mode) => mode instanceof FeedbackViewMode) as FeedbackViewMode;
         if (existingMode != null && existingMode.puzzleID === puzzleID && existingMode.solutionID === solutionID) {
             this.modeStack.setModeIndex(existingMode, -1);
             return Promise.resolve();
@@ -278,7 +278,7 @@ export default class EternaApp extends FlashbangApp {
 
     /** Returns an existing PoseEditMode, if there's one on the mode stack */
     public get existingPoseEditMode(): PoseEditMode {
-        return this.modeStack.modes.find(mode => mode instanceof PoseEditMode) as PoseEditMode;
+        return this.modeStack.modes.find((mode) => mode instanceof PoseEditMode) as PoseEditMode;
     }
 
     private loadSolution(puzzleOrID: number | Puzzle, solutionOrID: number | Solution): Promise<[Puzzle, Solution]> {
@@ -424,7 +424,7 @@ export default class EternaApp extends FlashbangApp {
     private initScriptInterface(): void {
         this._scriptInterface.addCallback('test_tutorial', (puzzleID: number, rscript: string): void => {
             this.loadPoseEdit(puzzleID, {rscript, isReset: true})
-                .catch(e => Eterna.onFatalError(e));
+                .catch((e) => Eterna.onFatalError(e));
         });
 
         this._scriptInterface.addCallback('load_puzzle', (puzzleID: number, doneCallback: string): void => {
@@ -432,7 +432,7 @@ export default class EternaApp extends FlashbangApp {
                 .then(() => {
                     ExternalInterface.call(doneCallback);
                 })
-                .catch(e => Eterna.onFatalError(e));
+                .catch((e) => Eterna.onFatalError(e));
         });
 
         ExternalInterface.pushContext(this._scriptInterface);

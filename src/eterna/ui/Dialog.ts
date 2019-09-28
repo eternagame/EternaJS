@@ -33,8 +33,8 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
             }
             e.stopPropagation();
         });
-        bgTarget.pointerUp.connect(e => e.stopPropagation());
-        bgTarget.pointerMove.connect(e => e.stopPropagation());
+        bgTarget.pointerUp.connect((e) => e.stopPropagation());
+        bgTarget.pointerMove.connect((e) => e.stopPropagation());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));

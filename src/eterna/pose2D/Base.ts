@@ -3,7 +3,6 @@ import {Point, Sprite, Texture} from 'pixi.js';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
-import Eterna from 'eterna/Eterna';
 import ROPWait from 'eterna/rscript/ROPWait';
 import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
@@ -171,7 +170,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     public setPairing(pairing: boolean, goX: number, goY: number, duration: number, pairType: number): void {
-        let targetAngle: number = Math.atan2(goY, goX) * 180.0 / Math.PI;
+        let targetAngle: number = (Math.atan2(goY, goX) * 180.0) / Math.PI;
 
         if (this._pairing && !pairing) {
             this._unpairing = true;
@@ -290,7 +289,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
             }
 
             let progsin: number = Math.sin(prog);
-            angleRand = Math.PI / 12.0 * progsin;
+            angleRand = (Math.PI / 12.0) * progsin;
 
             randomX = this._goY * progsin * 0.07;
             randomY = -this._goX * progsin * 0.07;
@@ -369,7 +368,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
                 let st0DiffDegree: number;
                 let st0Angle: number = Math.PI / 5.2 + angleRand;
-                st0DiffDegree = (goRadian + st0Angle) * 180 / Math.PI - 90.0;
+                st0DiffDegree = ((goRadian + st0Angle) * 180) / Math.PI - 90.0;
                 st0DiffDegree = Base.toCanonicalRange(st0DiffDegree);
 
 
@@ -392,8 +391,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 if (drawSt0) {
                     let st0Cos: number = Math.cos(st0Angle);
                     let st0Sin: number = Math.sin(st0Angle);
-                    let st0X: number = this._goX / 2.5 * st0Cos - this._goY / 2.5 * st0Sin + offX + randomX;
-                    let st0Y: number = this._goX / 2.5 * st0Sin + this._goY / 2.5 * st0Cos + offY + randomY;
+                    let st0X: number = (this._goX / 2.5) * st0Cos - (this._goY / 2.5) * st0Sin + offX + randomX;
+                    let st0Y: number = (this._goX / 2.5) * st0Sin + (this._goY / 2.5) * st0Cos + offY + randomY;
 
                     Base.showSprite(this._sat0, satelliteBodyData);
                     Base.showHighlightState(this._sat0, this._baseIdx, highlightState);
@@ -411,16 +410,16 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 if (!this._pairing) {
                     if (!this._unpairing) {
                         let st1Angle: number = -Math.PI / 5.2 - angleRand;
-                        st1DiffDegree = (goRadian + st1Angle) * 180 / Math.PI - 90.0;
+                        st1DiffDegree = ((goRadian + st1Angle) * 180) / Math.PI - 90.0;
                         st1DiffDegree = Base.toCanonicalRange(st1DiffDegree);
                         let st1Cos: number = Math.cos(st1Angle);
                         let st1Sin: number = Math.sin(st1Angle);
-                        st1X = this._goX / 2.5 * st1Cos - this._goY / 2.5 * st1Sin + offX + randomX;
-                        st1Y = this._goX / 2.5 * st1Sin + this._goY / 2.5 * st1Cos + offY + randomY;
+                        st1X = (this._goX / 2.5) * st1Cos - (this._goY / 2.5) * st1Sin + offX + randomX;
+                        st1Y = (this._goX / 2.5) * st1Sin + (this._goY / 2.5) * st1Cos + offY + randomY;
 
                         this._lastSatellite1Radius = referenceBaseSize * 0.45;
                     } else {
-                        let targetAngle: number = (goRadian - Math.PI / 5.2) * 180 / Math.PI;
+                        let targetAngle: number = ((goRadian - Math.PI / 5.2) * 180) / Math.PI;
 
                         if (Math.abs(targetAngle - this._pairingStartDegree) > 180) {
                             if (targetAngle > this._pairingStartDegree) {
@@ -433,7 +432,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
                         let currentAngle: number = (
                             this._pairingStartDegree * (1 - pairingProg) + targetAngle * pairingProg
                         );
-                        currentRadian = currentAngle * Math.PI / 180.0;
+                        currentRadian = (currentAngle * Math.PI) / 180.0;
                         st1DiffDegree = Base.toCanonicalRange(currentAngle - 90.0);
                         let currentRadius: number = (
                             this._pairingStartRadius * (1 - pairingProg) + (referenceBaseSize * 0.45) * pairingProg
@@ -446,7 +445,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
                     let currentDegree: number = (
                         this._pairingTargetDegree * pairingProg + this._pairingStartDegree * (1 - pairingProg)
                     );
-                    currentRadian = currentDegree * Math.PI / 180.0;
+                    currentRadian = (currentDegree * Math.PI) / 180.0;
 
                     st1DiffDegree = currentDegree - 90.0;
                     st1DiffDegree = Base.toCanonicalRange(st1DiffDegree);
@@ -505,7 +504,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
             let outDist: number = Math.sqrt(this._outX * this._outX + this._outY * this._outY);
             if (outDist > Constants.EPSILON) {
                 let numberPos = new Point(
-                    offX + this._outX * desiredDist / outDist, offY + this._outY * desiredDist / outDist
+                    offX + (this._outX * desiredDist) / outDist, offY + (this._outY * desiredDist) / outDist
                 );
                 Base.showSprite(this._number, numberTexture);
                 this._number.x = numberPos.x;

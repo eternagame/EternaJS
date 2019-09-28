@@ -152,7 +152,7 @@ export default class ROPTextbox extends RScriptOp {
                 }
 
                 if (xdiff !== 0) {
-                    this._arrowRotation = Math.atan(ydiff / xdiff) * 180 / Math.PI;
+                    this._arrowRotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;
                 } else {
                     this._arrowRotation = 0.0;
                 }
@@ -182,8 +182,8 @@ export default class ROPTextbox extends RScriptOp {
 
             if (this._mode === ROPTextboxMode.ARROW_NUCLEOTIDE) {
                 let offset = new Vector2();
-                offset.x = Math.cos(this._arrowRotation * Math.PI / 180);
-                offset.y = Math.sin(this._arrowRotation * Math.PI / 180);
+                offset.x = Math.cos((this._arrowRotation * Math.PI) / 180);
+                offset.y = Math.sin((this._arrowRotation * Math.PI) / 180);
                 if (!this._hasXOffset) {
                     offset.length = ROPTextbox.DEFAULT_ARROW_OFFSET;
                 } else {
@@ -441,7 +441,7 @@ export default class ROPTextbox extends RScriptOp {
     private _hasParent: boolean = false;
     private _parentID: string = '';
     private _fillColor: number = 0xFF0000;
-    private _outlineColor: number= 0x000000;
+    private _outlineColor: number = 0x000000;
     private _fixedSize: boolean = true;
     private _forceTopmost: boolean = false;
     private _hasXOffset: boolean = false;

@@ -93,11 +93,11 @@ export default class Bubble extends SpriteObject implements Updatable {
         let dist = Math.max(mX * mX + mY * mY, 0.01);
         if (dist < 10000) {
             if (this._foreground) {
-                this._accX += -500 * mX * 2 / (dist);
-                this._accY += -500 * mY * 2 / (dist);
+                this._accX += (-500 * mX * 2) / dist;
+                this._accY += (-500 * mY * 2) / dist;
             } else {
-                this._accX += -500 * mX * (3 - this._bubbleSize) / (dist);
-                this._accY += -500 * mY * (3 - this._bubbleSize) / (dist);
+                this._accX += (-500 * mX * (3 - this._bubbleSize)) / dist;
+                this._accY += (-500 * mY * (3 - this._bubbleSize)) / dist;
             }
         }
 
@@ -187,7 +187,7 @@ class NormalDistPRNG {
         }
         while (w >= 1 || !w);
 
-        w = Math.sqrt(-2 * Math.log(w) / w);
+        w = Math.sqrt((-2 * Math.log(w)) / w);
 
         NormalDistPRNG.cached = true;
         NormalDistPRNG.cache = x * w; //  Cache one of the outputs

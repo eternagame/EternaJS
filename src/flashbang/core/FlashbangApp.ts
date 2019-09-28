@@ -34,16 +34,16 @@ export default class FlashbangApp {
         this.setup();
         this._modeStack._handleModeTransitions();
 
-        this._pixi.ticker.add(delta => this.update(delta));
+        this._pixi.ticker.add((delta) => this.update(delta));
 
-        window.addEventListener(KeyboardEventType.KEY_DOWN, e => this.onKeyboardEvent(e));
-        window.addEventListener(KeyboardEventType.KEY_UP, e => this.onKeyboardEvent(e));
-        window.addEventListener('wheel', e => this.onMouseWheelEvent(e));
-        window.addEventListener('contextmenu', e => this.onContextMenuEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_DOWN, (e) => this.onKeyboardEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_UP, (e) => this.onKeyboardEvent(e));
+        window.addEventListener('wheel', (e) => this.onMouseWheelEvent(e));
+        window.addEventListener('contextmenu', (e) => this.onContextMenuEvent(e));
         window.addEventListener('focus', () => { this.isActive.value = true; });
         window.addEventListener('blur', () => { this.isActive.value = false; });
 
-        this.isActive.connect(value => this.onIsActiveChanged(value));
+        this.isActive.connect((value) => this.onIsActiveChanged(value));
     }
 
     public get view(): HTMLCanvasElement {

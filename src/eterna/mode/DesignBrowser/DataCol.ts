@@ -388,7 +388,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GU_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairsLength * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -396,7 +396,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.GC_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairsLength * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }
@@ -404,7 +404,7 @@ export default class DataCol extends ContainerObject {
 
                     case DesignCategory.UA_PAIRS:
                         if (pairsLength > 0) {
-                            dataString += `${rawstr} (${Math.round(this._rawData[ii] / pairsLength * 100)}%)\n`;
+                            dataString += `${rawstr} (${Math.round((this._rawData[ii] / pairsLength) * 100)}%)\n`;
                         } else {
                             dataString += `${rawstr}\n`;
                         }

@@ -31,6 +31,8 @@ module.exports = {
         'no-continue': 'off',
         'no-plusplus': 'off',
         'no-underscore-dangle': 'off',
+        'max-classes-per-file': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
         'no-fallthrough': ['error', { "commentPattern": "break[\\s\\w]*omitted" }],
         '@typescript-eslint/no-use-before-define': ['error', {'classes': false}],
         // NOTE: Some are public but marked `/* internal */`, awaiting https://github.com/Microsoft/TypeScript/issues/5228
@@ -60,6 +62,8 @@ module.exports = {
 
       // Stylistic preference
       'comma-dangle': ['error', 'never'],
+      'indent': 'off',
+      '@typescript-eslint/indent': ['error', 4],
       //'quotes': ['error', 'single'],
       'max-len': ['error', {
         'code': 120,
@@ -76,6 +80,11 @@ module.exports = {
       // This would be great if it could pick up when we reassign multiple properties, but it's all sorts of
       // painful/less readable in a large number of of cases
       'prefer-destructuring': 'off',
+      // In adition to stylistic preference, also prevents issues with the TS typechecker
+      '@typescript-eslint/no-inferrable-types': ['error', {
+        "ignoreParameters": true,
+        "ignoreProperties": true,
+      }],
 
       // Stuff to review, likely due to impending code changes
       // This isn't generally great practice, but a couple portions of our code benefit from this.

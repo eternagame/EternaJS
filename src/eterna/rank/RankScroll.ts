@@ -359,7 +359,7 @@ class RankScoreTask extends InterpolatingTask {
 
     private readonly _newRank: number;
     private readonly _newScore: number;
-    private _startRank: number = -1;
-    private _startScore: number = -1;
+    private _startRank = -1;
+    private _startScore = -1;
     private _target: RankRowLayout;
 }

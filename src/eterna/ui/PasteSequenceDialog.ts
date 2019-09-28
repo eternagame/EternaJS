@@ -23,7 +23,7 @@ export default class PasteSequenceDialog extends Dialog<string> {
         inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect(values => this.onSequenceEntered(values.get(SEQUENCE)));
+        inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
 
         let updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;

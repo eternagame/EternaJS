@@ -11,7 +11,7 @@ import Fonts from 'eterna/util/Fonts';
 export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
 
-    constructor(fontSize: number, width: number = 100, rows: number = 1) {
+    constructor(fontSize: number, width = 100, rows = 1) {
         super(
             Eterna.OVERLAY_DIV_ID, rows === 1
                 ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows)

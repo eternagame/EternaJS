@@ -92,9 +92,11 @@ export default class GameObject extends GameObjectBase {
     }
 
     /* internal */
-    public _addObjectInternal(obj: GameObjectBase,
+    public _addObjectInternal(
+        obj: GameObjectBase,
         name: string, replaceExisting: boolean,
-        displayParent: Container, displayIdx: number = -1): GameObjectRef {
+        displayParent: Container, displayIdx: number = -1
+    ): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal
 

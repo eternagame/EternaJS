@@ -31,7 +31,7 @@ export default class ConstraintBar extends ContainerObject {
     constructor(constraints: Constraint<BaseConstraintStatus>[]) {
         super();
         this._constraints = constraints.map(
-            constraint => ({constraint, constraintBox: new ConstraintBox(false)})
+            (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
         );
 
         Eterna.settings.highlightRestricted.connect(() => {
@@ -54,7 +54,7 @@ export default class ConstraintBar extends ContainerObject {
      * to the states they're intended for in PiP mode
      */
     public layout(animate: boolean, pipStates: number) {
-        let nonStateConstraints = this._constraints.filter(constraint => !isSSCW(constraint));
+        let nonStateConstraints = this._constraints.filter((constraint) => !isSSCW(constraint));
 
         if (animate) {
             for (let [idx, constraint] of this._constraints.entries()) {
@@ -168,7 +168,7 @@ export default class ConstraintBar extends ContainerObject {
 
     public getShapeBox(index: number): ConstraintBox {
         return this._constraints.filter(
-            constraint => (
+            (constraint) => (
                 constraint.constraint instanceof ShapeConstraint
                 && constraint.constraint.stateIndex === index
             )

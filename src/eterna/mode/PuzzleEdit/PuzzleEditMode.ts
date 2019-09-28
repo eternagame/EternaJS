@@ -149,7 +149,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.resetButton.clicked.connect(() => this.promptForReset());
         this._toolbar.submitButton.clicked.connect(() => this.onSubmitPuzzle());
 
-        this._toolbar.palette.targetClicked.connect(type => this.onPaletteTargetSelected(type));
+        this._toolbar.palette.targetClicked.connect((type) => this.onPaletteTargetSelected(type));
 
         if (this._embedded) {
             this._scriptInterface.addCallback('get_secstruct', () => this.structure);
@@ -483,7 +483,7 @@ export default class PuzzleEditMode extends GameMode {
         const PROMPT = 'You can only submit 3 puzzles per 24 hours.\nAre you sure you want to submit?';
         this.showConfirmDialog(PROMPT).confirmed
             .then(() => this.showDialog(new SubmitPuzzleDialog(this._poses.length, puzzleState)).confirmed)
-            .then(details => this.submitPuzzle(details))
+            .then((details) => this.submitPuzzle(details))
             .catch((err) => {
                 if (!(err instanceof DialogCanceledError)) {
                     throw err;

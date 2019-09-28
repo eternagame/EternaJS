@@ -29,9 +29,9 @@ export default class Molecule extends Container {
         }
 
         let elapsedTime = currentTime - this._animStartTime;
-        let prog = Math.sin(elapsedTime * Math.PI / (Molecule.ANIMATION_SPAN)) + 0.95;
+        let prog = Math.sin((elapsedTime * Math.PI) / (Molecule.ANIMATION_SPAN)) + 0.95;
         prog = Math.max(0, prog);
-        let progInd = int(int(prog / 2.0 * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
+        let progInd = int(int((prog / 2.0) * Molecule.NUM_ANIMATION_STEPS) % Molecule.NUM_ANIMATION_STEPS);
 
         let glowTex = this._isWrong
             ? Molecule._glowWrongTex[zoomLevel][progInd]
@@ -43,7 +43,7 @@ export default class Molecule extends Container {
 
         progInd = int(
             int(
-                elapsedTime / Molecule.BODY_ANIMATION_SPAN * Molecule.NUM_ANIMATION_STEPS
+                (elapsedTime / Molecule.BODY_ANIMATION_SPAN) * Molecule.NUM_ANIMATION_STEPS
             ) % Molecule.NUM_ANIMATION_STEPS
         );
         let bodyTex = Molecule._bodyTex[zoomLevel][progInd];
@@ -89,7 +89,7 @@ export default class Molecule extends Container {
                 let wrongGlowTex = EternaTextureUtil.colorTransform(glowTex, 255, 0, 0, 0, 0, 0);
                 wrongTexturesInZoom.push(wrongGlowTex);
 
-                let bodyTex = EternaTextureUtil.rotate(scaledBodyTex, 360 * ii / Molecule.NUM_ANIMATION_STEPS);
+                let bodyTex = EternaTextureUtil.rotate(scaledBodyTex, (360 * ii) / Molecule.NUM_ANIMATION_STEPS);
                 bodyTexturesInZoom.push(bodyTex);
             }
 

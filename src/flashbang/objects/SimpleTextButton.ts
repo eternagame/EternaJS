@@ -4,7 +4,7 @@ import Button, {ButtonState} from './Button';
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
 export default class SimpleTextButton extends Button {
-    constructor(text: string, fontSize: number = 24, fontName: string = 'Arial') {
+    constructor(text: string, fontSize: number = 24, fontName = 'Arial') {
         super();
 
         this._tf = new TextBuilder()

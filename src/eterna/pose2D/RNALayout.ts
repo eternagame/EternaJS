@@ -131,7 +131,7 @@ export default class RNALayout {
                     lengthWalker += 2 * this._primarySpace;
                 }
 
-                let radAngle: number = lengthWalker / circleLength * 2 * Math.PI - Math.PI / 2.0;
+                let radAngle: number = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
                 xarray[ii] = (
                     _rootX + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius
                 );
@@ -228,11 +228,11 @@ export default class RNALayout {
             let crossX: number = -rootnode.goY;
             let crossY: number = rootnode.goX;
 
-            xarray[rootnode.indexA] = rootnode.x + crossX * this._pairSpace / 2.0;
-            xarray[rootnode.indexB] = rootnode.x - crossX * this._pairSpace / 2.0;
+            xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
+            xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
 
-            yarray[rootnode.indexA] = rootnode.y + crossY * this._pairSpace / 2.0;
-            yarray[rootnode.indexB] = rootnode.y - crossY * this._pairSpace / 2.0;
+            yarray[rootnode.indexA] = rootnode.y + (crossY * this._pairSpace) / 2.0;
+            yarray[rootnode.indexB] = rootnode.y - (crossY * this._pairSpace) / 2.0;
         } else if (rootnode.indexA >= 0) {
             xarray[rootnode.indexA] = rootnode.x;
             yarray[rootnode.indexA] = rootnode.y;
@@ -319,7 +319,7 @@ export default class RNALayout {
                     lengthWalker += this._pairSpace / 2.0;
                 }
 
-                let radAngle = lengthWalker / circleLength * 2 * Math.PI - Math.PI / 2.0;
+                let radAngle = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
                 let childX = (
                     rootnode.x + Math.cos(radAngle) * crossX * circleRadius + Math.sin(radAngle) * goX * circleRadius
                 );

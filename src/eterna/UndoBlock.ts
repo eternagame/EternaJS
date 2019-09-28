@@ -347,7 +347,7 @@ export default class UndoBlock {
         let newOrder = otherOrder || Utility.range(this._targetOligos.length);
 
         return Utility.range(this._sequence.length).concat(
-            ...Utility.range(this._targetOligos.length).map(idx => originalIndices[newOrder.indexOf(idx)])
+            ...Utility.range(this._targetOligos.length).map((idx) => originalIndices[newOrder.indexOf(idx)])
         );
     }
 

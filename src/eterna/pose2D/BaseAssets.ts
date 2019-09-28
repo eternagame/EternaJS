@@ -275,8 +275,8 @@ export default class BaseAssets {
             }
 
             scratch.lineStyle(lineThickness, color, lineAlpha);
-            xx = centerX + Math.cos(i / steps * twoPI) * radius;
-            yy = centerY + Math.sin(i / steps * twoPI) * radius;
+            xx = centerX + Math.cos((i / steps) * twoPI) * radius;
+            yy = centerY + Math.sin((i / steps) * twoPI) * radius;
             scratch.lineTo(xx, yy);
         }
 

@@ -241,8 +241,10 @@ export default class DisplayUtil {
     }
 
     /** Centers a DisplayObject on another DisplayObject */
-    public static center(disp: DisplayObject, relativeTo: DisplayObject,
-        xOffset: number = 0, yOffset: number = 0): void {
+    public static center(
+        disp: DisplayObject, relativeTo: DisplayObject,
+        xOffset: number = 0, yOffset: number = 0
+    ): void {
         this.positionRelative(
             disp, HAlign.CENTER, VAlign.CENTER,
             relativeTo, HAlign.CENTER, VAlign.CENTER,

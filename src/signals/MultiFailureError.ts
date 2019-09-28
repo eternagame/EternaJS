@@ -34,10 +34,10 @@ export default class MultiFailureError extends Error {
         if (typeof (error) === 'string') {
             return error as string;
         } else if (error instanceof Error) {
-            let e: Error = ((<Error>error));
+            let e: Error = error;
             return (wantStackTrace ? e.stack : e.message || '');
         } else if (error instanceof ErrorEvent) {
-            let ee: ErrorEvent = ((<ErrorEvent>error));
+            let ee: ErrorEvent = error;
             return `${(ee as any).name
             } [errorID=${ee.error
             }, type='${ee.type}'`

@@ -201,7 +201,7 @@ export default abstract class GameMode extends AppMode {
             let numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
                 let poseField = this._poseFields[ii];
-                poseField.display.position = new Point(Flashbang.stageWidth / numFields * ii, 0);
+                poseField.display.position = new Point((Flashbang.stageWidth / numFields) * ii, 0);
                 poseField.setSize(Flashbang.stageWidth / numFields, Flashbang.stageHeight, true);
                 poseField.display.visible = true;
             }

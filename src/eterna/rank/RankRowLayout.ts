@@ -4,8 +4,10 @@ import Fonts from 'eterna/util/Fonts';
 import PlayerRank from './PlayerRank';
 
 export default class RankRowLayout extends ContainerObject {
-    constructor(rank: number, data: PlayerRank, rankScoreOffset: number,
-        fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF) {
+    constructor(
+        rank: number, data: PlayerRank, rankScoreOffset: number,
+        fontSize: number = 18, maxNameWidth: number = -1, textColor: number = 0xFFFFFF
+    ) {
         super();
 
         this._tfName = Fonts.stdRegular('', fontSize).color(textColor).build();

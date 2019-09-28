@@ -150,10 +150,10 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.pipButton.clicked.connect(() => this.togglePip());
 
-        this._toolbar.stateToggle.stateChanged.connect(targetIdx => this.changeTarget(targetIdx));
+        this._toolbar.stateToggle.stateChanged.connect((targetIdx) => this.changeTarget(targetIdx));
 
         this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
-        this._toolbar.palette.targetClicked.connect(targetType => this.onPaletteTargetSelected(targetType));
+        this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
         this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
 
@@ -449,7 +449,7 @@ export default class PoseEditMode extends GameMode {
 
         if (this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            solution.queryFoldData().then(result => setSolution(result));
+            solution.queryFoldData().then((result) => setSolution(result));
         } else {
             setSolution(null);
         }
@@ -831,7 +831,7 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('get_tracked_indices',
-            (): number[] => this.getPose(0).trackedIndices.map(mark => mark.baseIndex));
+            (): number[] => this.getPose(0).trackedIndices.map((mark) => mark.baseIndex));
         this._scriptInterface.addCallback('get_barcode_indices', (): number[] => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
@@ -939,7 +939,7 @@ export default class PoseEditMode extends GameMode {
                             'Marks array is not the same length as color array for set_tracked_indices',
                             ' - leaving as black'
                         );
-                    } else if (marks.some(mark => typeof (mark) !== 'number')) {
+                    } else if (marks.some((mark) => typeof (mark) !== 'number')) {
                         log.error(
                             'Marks array should consist of numbers when the colors argument is present - aborting'
                         );
@@ -951,11 +951,11 @@ export default class PoseEditMode extends GameMode {
 
                 if (!standardizedMarks) {
                     standardizedMarks = marks.map(
-                        mark => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
+                        (mark) => (typeof (mark) === 'number' ? {baseIndex: mark as number} : mark)
                     );
                 }
 
-                if (standardizedMarks.some(mark => typeof (mark.baseIndex) !== 'number')) {
+                if (standardizedMarks.some((mark) => typeof (mark.baseIndex) !== 'number')) {
                     log.error(
                         "At least one mark object either doesn't have a `baseIndex` property or has a non-numeric one",
                         '- aborting'
@@ -1919,7 +1919,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints.filter(
-            constraint => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
+            (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
         ).map(
             (constraint) => {
                 let box = new ConstraintBox(true);
@@ -1999,7 +1999,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         Eterna.app.loadPuzzleEditor(1, poseData)
-            .catch(err => Eterna.onFatalError(err));
+            .catch((err) => Eterna.onFatalError(err));
     }
 
     private loadSavedData(): boolean {
@@ -2556,7 +2556,7 @@ export default class PoseEditMode extends GameMode {
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
             this.showAsyncText('retrieving...');
-            sol.queryFoldData().then(result => execfoldCB(result));
+            sol.queryFoldData().then((result) => execfoldCB(result));
         } else {
             execfoldCB(null);
         }
@@ -2742,7 +2742,9 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (lastBestPairs != null) {
-            let isShapeConstrained = this._puzzle.constraints.some(constraint => constraint instanceof ShapeConstraint);
+            let isShapeConstrained = this._puzzle.constraints.some(
+                (constraint) => constraint instanceof ShapeConstraint
+            );
 
             let pairsDiff: number[] = [];
 

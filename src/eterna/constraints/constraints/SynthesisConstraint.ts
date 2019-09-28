@@ -28,7 +28,7 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
         let cRet = this._consecutiveCConstraint.evaluate(undoBlocks);
 
         return {
-            satisfied: [aRet, gRet, cRet].every(ret => ret.satisfied),
+            satisfied: [aRet, gRet, cRet].every((ret) => ret.satisfied),
             currentA: aRet.currentConsecutive,
             currentG: aRet.currentConsecutive,
             currentC: cRet.currentConsecutive

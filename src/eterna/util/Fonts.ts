@@ -12,11 +12,11 @@ export default class Fonts {
 
     public static loadFonts(): Promise<any> {
         log.info('Loading fonts...');
-        let loaders = Fonts.LOCAL.map(fontFamily => FontLoader.load(fontFamily));
+        let loaders = Fonts.LOCAL.map((fontFamily) => FontLoader.load(fontFamily));
 
         return Promise.all(loaders)
             .then(() => log.info('Fonts loaded'))
-            .catch(e => log.error('Error loading fonts: ', e));
+            .catch((e) => log.error('Error loading fonts: ', e));
     }
 
     public static monospace(text: string = '', fontSize: number = 12): TextBuilder {

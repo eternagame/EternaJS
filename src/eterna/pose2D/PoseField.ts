@@ -24,7 +24,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.onMouseDown(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));

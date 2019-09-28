@@ -352,7 +352,7 @@ export default class PuzzleManager {
 
         await Promise.all(
             puzzle.constraints.filter(isScriptConstraint)
-                .map(scriptConstraint => ExternalInterface.preloadScript(scriptConstraint.scriptID))
+                .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
         );
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
