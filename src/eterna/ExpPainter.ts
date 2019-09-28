@@ -20,7 +20,7 @@ export default class ExpPainter {
             return ExpPainter.EXPCOLOR_NODATA;
         }
 
-        let diff: number = 1.0 / ExpPainter.NUM_COLORS * lev;
+        let diff: number = (1.0 / ExpPainter.NUM_COLORS) * lev;
 
         if (diff > 1) {
             return ColorUtil.blend(ExpPainter.EXPCOLOR_OVEREXPOSED, ExpPainter.EXPCOLOR_EXPOSED, diff - 1);

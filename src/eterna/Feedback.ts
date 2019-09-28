@@ -27,7 +27,7 @@ export default class Feedback {
             let char: string = secstruct.charAt(ii);
 
             if (char === '.') {
-                if (shapedata[ii - startIndex] > (threshold / 4 + min / 4 * 3)) {
+                if (shapedata[ii - startIndex] > (threshold / 4 + (min / 4) * 3)) {
                     score++;
                 }
             } else if (shapedata[ii - startIndex] < threshold) {
@@ -35,7 +35,7 @@ export default class Feedback {
             }
         }
 
-        return Math.round(score / shapedata.length * 100);
+        return Math.round((score / shapedata.length) * 100);
     }
 
     // / Ad-hoc object for Brent's theophylline puzzle

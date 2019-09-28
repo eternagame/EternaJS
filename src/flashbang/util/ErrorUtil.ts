@@ -11,7 +11,7 @@ export default class ErrorUtil {
     }
 
     /** Returns a reasonable string value for an error object, if possible */
-    public static getErrString(e: any, includeStack: boolean = true): string {
+    public static getErrString(e: any, includeStack = true): string {
         try {
             if (e == null) {
                 return 'Unknown error';

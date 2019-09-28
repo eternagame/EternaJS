@@ -46,7 +46,7 @@ export default abstract class LayoutContainer extends Container {
         // Recursively lay out our children if they need it.
         for (let child of this.children) {
             if (child instanceof LayoutContainer) {
-                (<LayoutContainer> child).layout(force);
+                (child as LayoutContainer).layout(force);
             }
         }
 
@@ -56,7 +56,7 @@ export default abstract class LayoutContainer extends Container {
         // If our parent is a layout sprite, force it to re-layout, since our size has
         // likely changed.
         if (this.parent instanceof LayoutContainer) {
-            let layoutParent: LayoutContainer = (<LayoutContainer> this.parent);
+            let layoutParent: LayoutContainer = this.parent as LayoutContainer;
             if (!layoutParent._isLayingOut) {
                 layoutParent.layout(true);
             }

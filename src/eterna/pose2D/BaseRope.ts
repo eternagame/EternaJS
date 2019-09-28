@@ -100,7 +100,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     }
 
     private getTangent(k: number, factor: number, array: number[]) {
-        return factor * (this.clipInput(k + 1, array) - this.clipInput(k - 1, array)) / 2;
+        return (factor * (this.clipInput(k + 1, array) - this.clipInput(k - 1, array))) / 2;
     }
 
     private clipInput(k: number, arr: number[]) {

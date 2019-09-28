@@ -160,8 +160,8 @@ export default class RScriptEnv extends ContainerObject {
                 obj.display.visible = visible;
             }
 
-            if ((<Enableable>(obj as any)).enabled !== undefined) {
-                (<Enableable>(obj as any)).enabled = visible && !disabled;
+            if (((obj as any) as Enableable).enabled !== undefined) {
+                ((obj as any) as Enableable).enabled = visible && !disabled;
             }
         }
     }

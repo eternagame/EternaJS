@@ -105,7 +105,7 @@ export default class Plot extends Container {
             }
 
             for (let ii = 0; ii < 10; ii++) {
-                let yCoord = ii / 10 * (this._height - Plot.H_MARGIN) + y;
+                let yCoord = (ii / 10) * (this._height - Plot.H_MARGIN) + y;
                 this._graphics.moveTo(0, yCoord + Plot.H_MARGIN);
                 this._graphics.lineTo(this._width, yCoord + Plot.H_MARGIN);
             }

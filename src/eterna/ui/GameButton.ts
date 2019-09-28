@@ -27,7 +27,7 @@ export default class GameButton extends Button implements KeyboardListener {
     protected added(): void {
         super.added();
 
-        this.toggled.connect(toggled => this.onToggledChanged(toggled));
+        this.toggled.connect((toggled) => this.onToggledChanged(toggled));
         this.clicked.connect(() => {
             if (this._selectedState != null) {
                 this.toggle();
@@ -191,7 +191,7 @@ export default class GameButton extends Button implements KeyboardListener {
         // Position label
         if (label != null) {
             if (this._scaleIconToLabel && icon != null) {
-                let scale: number = 1.5 * label.height / this._content.height;
+                let scale: number = (1.5 * label.height) / this._content.height;
                 icon.scale = new Point(scale, scale);
             }
 

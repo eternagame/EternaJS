@@ -1,7 +1,7 @@
 import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
 
 export default class TextBuilder {
-    constructor(text: string = '') {
+    constructor(text = '') {
         this.text(text);
     }
 
@@ -47,7 +47,7 @@ export default class TextBuilder {
         return this;
     }
 
-    public bold(value: boolean = true): TextBuilder {
+    public bold(value = true): TextBuilder {
         if (value) {
             this.fontWeight('bold');
         } else if (this._style.fontWeight === 'bold') {
@@ -84,7 +84,7 @@ export default class TextBuilder {
     }
 
     /** Enables or disables word wrapping. @default false */
-    public wordWrap(wrap: boolean, wordWrapWidth: number = 100): TextBuilder {
+    public wordWrap(wrap: boolean, wordWrapWidth = 100): TextBuilder {
         this._style.wordWrap = wrap;
         this._style.wordWrapWidth = wordWrapWidth;
         return this;
@@ -125,5 +125,5 @@ export default class TextBuilder {
 
     private _style: TextStyleOptions = {};
     private _text: string;
-    private _scale: number = 1;
+    private _scale = 1;
 }

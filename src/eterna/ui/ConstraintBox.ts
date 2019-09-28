@@ -1059,7 +1059,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._fglow.position = new Point(0, 0);
         this.replaceNamedObject(ConstraintBox.FGLOW_ANIM, new ParallelTask(
             new LocationTask(0, -lineWidth, 1.6, Easing.easeIn, this._fglow),
-            new ScaleTask(1.0, 1.0 + 2 * (lineWidth + 1) / this.width, 1.6, Easing.easeIn, this._fglow),
+            new ScaleTask(1.0, 1.0 + (2 * (lineWidth + 1)) / this.width, 1.6, Easing.easeIn, this._fglow),
             new SerialTask(
                 new AlphaTask(1, 0.8, Easing.linear, this._fglow),
                 new AlphaTask(0, 0.8, Easing.linear, this._fglow),

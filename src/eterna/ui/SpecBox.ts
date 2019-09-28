@@ -106,10 +106,10 @@ export default class SpecBox extends ContainerObject {
             this.addObject(this._zoomOutButton, this.container);
 
             let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
-            pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
+            pointerTarget.pointerMove.connect((e) => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());
             pointerTarget.pointerOut.connect(() => this.onDotPlotMouseExit());
-            pointerTarget.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
+            pointerTarget.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onDotPlotMouseDown(e));
             pointerTarget.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onDotPlotMouseUp());
         }
 
@@ -187,7 +187,7 @@ export default class SpecBox extends ContainerObject {
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            let vnew: Text = Fonts.arial(`${ii / SpecBox.OFFSET * 10}`, 12).color(0xffffff).build();
+            let vnew: Text = Fonts.arial(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }
@@ -404,7 +404,7 @@ export default class SpecBox extends ContainerObject {
     }
 
     private get dotplotOffsetSize(): number {
-        return this.plotSize / (this._datasize / 10) * this._dotplotScaleLevel;
+        return (this.plotSize / (this._datasize / 10)) * this._dotplotScaleLevel;
     }
 
     // calculate it's origin and axis by from and to

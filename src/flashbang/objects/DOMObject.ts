@@ -49,7 +49,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         }
 
         for (let ii = 0; ii < element.children.length; ++ii) {
-            let child = <HTMLElement> (element.children[ii] as any);
+            let child = (element.children[ii] as any) as HTMLElement;
             if (child.accessKey !== undefined) {
                 this.applyStyleRecursive(child, styles, replaceIfExists, elementNames);
             }

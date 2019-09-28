@@ -59,7 +59,7 @@ export enum DesignCategory {
 }
 
 function AllCategories(): DesignCategory[] {
-    return Object.keys(DesignCategory).map(key => DesignCategory[key as any] as DesignCategory);
+    return Object.values(DesignCategory);
 }
 
 export interface DesignBrowserFilter {
@@ -69,7 +69,7 @@ export interface DesignBrowserFilter {
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote: boolean = false, initialFilters: DesignBrowserFilter[] = null) {
+    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] = null) {
         super();
 
         this._puzzle = puzzle;
@@ -117,12 +117,12 @@ export default class DesignBrowserMode extends GameMode {
 
         this._vSlider = new SliderBar(true);
         this._vSlider.setProgress(0);
-        this._vSlider.scrollChanged.connect(scrollValue => this.setScrollVertical(scrollValue));
+        this._vSlider.scrollChanged.connect((scrollValue) => this.setScrollVertical(scrollValue));
         this.addObject(this._vSlider, this._content);
 
         this._hSlider = new SliderBar(false);
         this._hSlider.setProgress(0);
-        this._hSlider.scrollChanged.connect(scrollValue => this.setScrollHorizontal(scrollValue));
+        this._hSlider.scrollChanged.connect((scrollValue) => this.setScrollHorizontal(scrollValue));
         this.addObject(this._hSlider, this._content);
 
         this._dataColParent = new ContainerObject();
@@ -715,7 +715,7 @@ export default class DesignBrowserMode extends GameMode {
 
             column.setSize(this.contentWidth, this.contentHeight);
             column.filtersChanged.connect(() => this.reorganize(false));
-            column.sortOrderChanged.connect(sortOrder => this.updateSortOption(column.category, sortOrder));
+            column.sortOrderChanged.connect((sortOrder) => this.updateSortOption(column.category, sortOrder));
 
             this._dataCols.push(column);
             this._dataColParent.addObject(column, this._dataColParent.container);

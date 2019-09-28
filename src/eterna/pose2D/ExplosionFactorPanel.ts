@@ -66,8 +66,8 @@ export default class ExplosionFactorPanel extends GamePanel {
         increaseButton.tooltip('Increase space between paired bases (])');
 
         // Prevent PoseField from adding a drag surface over our buttons when we're trying to click, not drag
-        decreaseButton.pointerDown.connect(e => e.stopPropagation());
-        increaseButton.pointerDown.connect(e => e.stopPropagation());
+        decreaseButton.pointerDown.connect((e) => e.stopPropagation());
+        increaseButton.pointerDown.connect((e) => e.stopPropagation());
 
         widthWalker += /* increaseButton.container.width */20;
         heightWalker += /* increaseButton.container.height */26;

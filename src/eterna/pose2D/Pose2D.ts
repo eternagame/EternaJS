@@ -141,7 +141,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.addObject(this._strandLabel, this.container);
 
         this.pointerMove.connect(() => this.onMouseMoved());
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(e => this.callStartMousedownCallback(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
         // handle view settings
@@ -325,11 +325,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let scale: number = Math.max(xscale, yscale);
         if (scale < 1.0) {
             return 0;
-        } else if (30 / 45 * scale < 1.0) {
+        } else if ((30 / 45) * scale < 1.0) {
             return 1;
-        } else if (20 / 45 * scale < 1.0) {
+        } else if ((20 / 45) * scale < 1.0) {
             return 2;
-        } else if (14 / 45 * scale < 1.0) {
+        } else if ((14 / 45) * scale < 1.0) {
             return 3;
         } else {
             return 4;
@@ -573,7 +573,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public removeBaseMark(baseIndex: number): void {
-        let index: number = this._trackedIndices.findIndex(mark => mark.baseIndex === baseIndex);
+        let index: number = this._trackedIndices.findIndex((mark) => mark.baseIndex === baseIndex);
         if (index !== -1) {
             this._trackedIndices[index].markBox.destroy();
             this._trackedIndices.splice(index, 1);
@@ -582,11 +582,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public isTrackedIndex(index: number): boolean {
-        return this._trackedIndices.some(mark => mark.baseIndex === index);
+        return this._trackedIndices.some((mark) => mark.baseIndex === index);
     }
 
     private drawBaseMark({markBox, baseIndex, colors}: {markBox: Graphics; baseIndex: number; colors: number[]}) {
-        const angle = Math.PI * 2 / colors.length;
+        const angle = (Math.PI * 2) / colors.length;
         if (baseIndex >= this.fullSequenceLength) {
             markBox.visible = false;
             return;
@@ -696,7 +696,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get trackedIndices(): { baseIndex: number; colors: number[] }[] {
-        return this._trackedIndices.map(mark => ({baseIndex: mark.baseIndex, colors: mark.colors}));
+        return this._trackedIndices.map((mark) => ({baseIndex: mark.baseIndex, colors: mark.colors}));
     }
 
     public getBase(ind: number): Base {
@@ -1837,7 +1837,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 let by: number = yarray[jj];
                 bx = ax - bx;
                 by = ay - by;
-                if (bx * bx + by * by < radius * radius / 10) {
+                if (bx * bx + by * by < (radius * radius) / 10) {
                     return true;
                 }
             }
@@ -1921,8 +1921,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 let vx: number = this._baseToX[ii] - this._baseFromX[ii];
                 let vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-                let currentX: number = this._baseFromX[ii] + (vx + (vx * prog)) / 2 * prog;
-                let currentY: number = this._baseFromY[ii] + (vy + (vy * prog)) / 2 * prog;
+                let currentX: number = this._baseFromX[ii] + ((vx + (vx * prog)) / 2) * prog;
+                let currentY: number = this._baseFromY[ii] + ((vy + (vy * prog)) / 2) * prog;
 
                 this._bases[ii].setXY(currentX, currentY);
             }

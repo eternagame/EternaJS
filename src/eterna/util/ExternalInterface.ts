@@ -69,7 +69,7 @@ export default class ExternalInterface {
     }
 
     public static popContext(ctx: ExternalInterfaceCtx): void {
-        let idx = this._registeredContexts.findIndex(registered => registered.ctx === ctx);
+        let idx = this._registeredContexts.findIndex((registered) => registered.ctx === ctx);
         if (idx >= 0) {
             let registered = this._registeredContexts[idx];
             registered.reg.close();

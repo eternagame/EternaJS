@@ -33,7 +33,7 @@ export default class LightRay extends SceneObject<Graphics> {
         this._display.moveTo(0, 2);
         this._display.lineTo(len, 30);
         for (let ii = 1; ii <= 7; ii++) {
-            let lineAngle: number = Math.PI * (ii - 4) / 8;
+            let lineAngle: number = (Math.PI * (ii - 4)) / 8;
             this._display.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
         }
 

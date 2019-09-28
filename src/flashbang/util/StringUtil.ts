@@ -77,7 +77,7 @@ export default class StringUtil {
      *        unless the String begins with "0x" in which case it will be 16,
      *        or the String begins with "0" in which case it will be 8.
      */
-    public static parseInteger(str: string, radix: number = 0): number {
+    public static parseInteger(str: string, radix = 0): number {
         return Number(StringUtil.parseInt0(str, radix, true));
     }
 
@@ -92,7 +92,7 @@ export default class StringUtil {
      *        unless the String begins with "0x" in which case it will be 16,
      *        or the String begins with "0" in which case it will be 8.
      */
-    public static parseUnsignedInteger(str: string, radix: number = 0): number {
+    public static parseUnsignedInteger(str: string, radix = 0): number {
         let result: number = StringUtil.parseInt0(str, radix, false);
         if (result < 0) {
             throw new Error(`parseUnsignedInteger parsed negative value [value=${str}]`);
@@ -107,12 +107,12 @@ export default class StringUtil {
      * @param prefix the prefix to place in front of it. @default "0x", other possibilities are
      * "#" or "".
      */
-    public static toColorString(c: number, prefix: string = '0x'): string {
+    public static toColorString(c: number, prefix = '0x'): string {
         return prefix + StringUtil.prepad(c.toString(16), 6, '0');
     }
 
     /** Format the specified numbers as coordinates, (e.g. "+3-2" or "-7.4432-54.23+6.3"). */
-    public static toCoordsString(x: number, y: number, z: number = NaN): string {
+    public static toCoordsString(x: number, y: number, z = NaN): string {
         let result: string = ((x >= 0) ? '+' : '') + x + ((y >= 0) ? '+' : '') + y;
         if (!Number.isNaN(z)) {
             result += ((z >= 0) ? '+' : '') + z;
@@ -200,7 +200,7 @@ export default class StringUtil {
      * Append 0 or more copies of the padChar String to the input String
      * until it is at least the specified length.
      */
-    public static pad(str: string, length: number, padChar: string = ' '): string {
+    public static pad(str: string, length: number, padChar = ' '): string {
         while (str.length < length) {
             str += padChar;
         }
@@ -211,7 +211,7 @@ export default class StringUtil {
      * Prepend 0 or more copies of the padChar String to the input String
      * until it is at least the specified length.
      */
-    public static prepad(str: string, length: number, padChar: string = ' '): string {
+    public static prepad(str: string, length: number, padChar = ' '): string {
         while (str.length < length) {
             str = padChar + str;
         }
@@ -222,7 +222,7 @@ export default class StringUtil {
      * Returns a string representation of the number that's prepadded with zeros to be at least
      * the specified length.
      */
-    public static zeroPad(n: number, length: number = 2): string {
+    public static zeroPad(n: number, length = 2): string {
         return StringUtil.prepad(n.toString(), length, '0');
     }
 
@@ -303,7 +303,7 @@ export default class StringUtil {
      * truncation.
      */
     public static truncate(
-        s: string, maxLength: number, append: string = ''
+        s: string, maxLength: number, append = ''
     ): string {
         if ((s == null) || (s.length <= maxLength)) {
             return s;
@@ -426,12 +426,12 @@ export default class StringUtil {
     private static HEX: string[] = ['0', '1', '2', '3', '4',
         '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
 
-    private static DECIMAL_REGEXP: RegExp = /^-?[0-9]*\.?[0-9]+(e-?[0-9]+)?$/;
+    private static DECIMAL_REGEXP = /^-?[0-9]*\.?[0-9]+(e-?[0-9]+)?$/;
 
     /**
      * A regular expression that finds URLs.
      * From John Gruber: https://gist.github.com/gruber/8891611#file-liberal-regex-pattern-for-web-urls-L7
      */
-    private static URL_REGEXP: RegExp =
+    private static URL_REGEXP =
     /\b((?:(?:http|ftp)s?:(?:\/{1,3}|[a-z0-9%])|[a-z0-9.-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\/)(?:[^\s()<>{}[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()[\]{};:'".,<>?«»“”‘’])|(?:(?:(?!@).|^)[a-z0-9]+(?:[.-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b\/?(?!@)))/im;
 }

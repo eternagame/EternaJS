@@ -37,11 +37,11 @@ export default class SortOptions {
     public get sortCriteria(): readonly SortCriterion[] { return this._criteria; }
 
     public getUnusedCategories(): DesignCategory[] {
-        return this._validCategories.filter(category => !this.hasCriterion(category));
+        return this._validCategories.filter((category) => !this.hasCriterion(category));
     }
 
     public getCriterion(category: DesignCategory): SortCriterion | null {
-        return this._criteria.find(value => value.category === category);
+        return this._criteria.find((value) => value.category === category);
     }
 
     public hasCriterion(category: DesignCategory): boolean {
@@ -49,7 +49,7 @@ export default class SortOptions {
     }
 
     public getCriterionIdx(category: DesignCategory): number {
-        return this._criteria.findIndex(value => value.category === category);
+        return this._criteria.findIndex((value) => value.category === category);
     }
 
     public getSortOrder(category: DesignCategory): SortOrder {

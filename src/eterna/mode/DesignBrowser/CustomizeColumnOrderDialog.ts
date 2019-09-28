@@ -108,15 +108,15 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private getColumnIdx(category: DesignCategory): number {
-        return this._columnUIs.findIndex(ui => ui.category === category);
+        return this._columnUIs.findIndex((ui) => ui.category === category);
     }
 
     private getUnusedColumns(): DesignCategory[] {
-        return this._allColumnCategories.filter(category => this.getColumnIdx(category) < 0);
+        return this._allColumnCategories.filter((category) => this.getColumnIdx(category) < 0);
     }
 
     private onColumnsChanged(): void {
-        this.columnsReorganized.emit(this._columnUIs.map(ui => ui.category));
+        this.columnsReorganized.emit(this._columnUIs.map((ui) => ui.category));
     }
 
     private addColumn(category: DesignCategory): void {

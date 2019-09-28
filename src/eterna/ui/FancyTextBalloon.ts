@@ -9,9 +9,11 @@ import GameButton from './GameButton';
 import FancyGamePanel from './FancyGamePanel';
 
 export default class FancyTextBalloon extends TextBalloon implements Updatable {
-    constructor(balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
-        showOutline: boolean = false, outlineColor: number = 0xFFFFFF,
-        outlineAlpha: number = 0.70) {
+    constructor(
+        balloonColor: number = 0xFFFFFF, balloonAlpha: number = 0.07,
+        showOutline = false, outlineColor = 0xFFFFFF,
+        outlineAlpha = 0.70
+    ) {
         super(null, balloonColor, balloonAlpha);
 
         this._balloonColor = balloonColor;
@@ -113,7 +115,7 @@ export default class FancyTextBalloon extends TextBalloon implements Updatable {
             }
 
             if (xdiff !== 0) {
-                arrow.rotation = Math.atan(ydiff / xdiff) * 180 / Math.PI;
+                arrow.rotation = (Math.atan(ydiff / xdiff) * 180) / Math.PI;
             } else {
                 arrow.rotation = 0.0;
             }

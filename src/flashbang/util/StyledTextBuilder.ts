@@ -171,7 +171,7 @@ export default class StyledTextBuilder {
 
     private _styleStack: string[] = [];
     private _styles: TextStyleSet = {};
-    private _text: string = '';
+    private _text = '';
 
-    private _anonymousStyleCounter: number = 0;
+    private _anonymousStyleCounter = 0;
 }

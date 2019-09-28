@@ -291,14 +291,14 @@ export default class AppMode {
         }
 
         // Handle Updatable and LateUpdatable
-        let updatable: Updatable = <Updatable> (obj as any);
+        let updatable: Updatable = (obj as any) as Updatable;
         if (updatable.update !== undefined) {
-            obj.regs.add(this.updateBegan.connect(dt => updatable.update(dt)));
+            obj.regs.add(this.updateBegan.connect((dt) => updatable.update(dt)));
         }
 
-        let lateUpdatable: LateUpdatable = <LateUpdatable> (obj as any);
+        let lateUpdatable: LateUpdatable = (obj as any) as LateUpdatable;
         if (lateUpdatable.lateUpdate !== undefined) {
-            obj.regs.add(this.lateUpdate.connect(dt => lateUpdatable.lateUpdate(dt)));
+            obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
         }
 
         this.registerObject(obj);

@@ -58,8 +58,8 @@ export default class RectangleUtil {
     }
 
     /** Extends the rectangle in all four directions. */
-    public static extend(rect: Rectangle, left: number = 0, right: number = 0,
-        top: number = 0, bottom: number = 0): void {
+    public static extend(rect: Rectangle, left = 0, right = 0,
+        top = 0, bottom = 0): void {
         rect.x -= left;
         rect.y -= top;
         rect.width += left + right;
@@ -67,7 +67,7 @@ export default class RectangleUtil {
     }
 
     /** Extends the rectangle in all four directions so that it is exactly on pixel bounds. */
-    public static extendToWholePixels(rect: Rectangle, scaleFactor: number = 1): void {
+    public static extendToWholePixels(rect: Rectangle, scaleFactor = 1): void {
         let left: number = Math.floor(rect.x * scaleFactor) / scaleFactor;
         let top: number = Math.floor(rect.y * scaleFactor) / scaleFactor;
         let right: number = Math.ceil(rect.right * scaleFactor) / scaleFactor;
@@ -122,7 +122,7 @@ export default class RectangleUtil {
 
     /** Compares all properties of the given rectangle, returning true only if
      *  they are equal (with the given accuracy 'e'). */
-    public static compare(r1: Rectangle, r2: Rectangle, e: number = 0.0001): boolean {
+    public static compare(r1: Rectangle, r2: Rectangle, e = 0.0001): boolean {
         if (r1 == null) {
             return r2 == null;
         } else if (r2 == null) {

@@ -12,7 +12,7 @@ export default class GraphicsUtil {
 
         // draw an equilateral triangle
         let triWidth = triSize;
-        let triHeight = triWidth / 2 * Math.sqrt(2);
+        let triHeight = (triWidth / 2) * Math.sqrt(2);
 
         let dir = new Vector2(1, 0);
         let perpDir = new Vector2(-1 * dir.y, dir.x);
