@@ -271,20 +271,6 @@ export class RNALayout {
         } else if (rootnode.children.length > 1) {
 
             let ii: number;
-            let npairs: number = 0;
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                if (rootnode.children[ii].isPair) {
-                    npairs++;
-                }
-                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
-                    oligo_displacement += 2 * this._primarySpace;
-                }
-            }
-
-            let circle_length: number = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
-            circle_length += oligo_displacement;
-            let circle_radius: number = circle_length / (2 * Math.PI);
-            let length_walker: number = this._pairSpace / 2.0;
 
             if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
                 rootnode.x = 0;
@@ -319,27 +305,44 @@ export class RNALayout {
                         custom_coord[ 1 ] = ( custom_coordA[ 1 ] + custom_coordB[ 1 ] ) / 2;
                     }
 
-                    let dev_x : number = custom_coord[0] - parent_custom_x;
-                    let dev_y : number = custom_coord[1] - parent_custom_y;
-                    let template_x : number = dev_x * parent_custom_cross_x + dev_y * parent_custom_cross_y;
-                    let template_y : number = dev_x * parent_custom_go_x + dev_y * parent_custom_go_y;
-                    template_x *= this._primarySpace;
-                    template_y *= this._primarySpace;
+                    let child_x : number = 0.0;
+                    let child_y : number = 0.0;
+                    let child_go_x : number = 0.0;
+                    let child_go_y : number = 0.0;
 
-                    // go to Eterna RNALayout global frame.
-                    let child_x : number = rootnode.x + cross_x * template_x + go_x * template_y;                    
-                    let child_y : number = rootnode.y + cross_y * template_x + go_y * template_y;
-                    let child_go_x: number = 0;
-                    let child_go_y: number = 1;
-                    if ( rootnode.children[ii].isPair ) {
-                        let custom_coordA : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
-                        let custom_coordB : [number,number] = this._customLayout[ rootnode.children[ii].indexB ];
-                        let custom_cross_x : number = ( custom_coordA[ 0 ] - custom_coordB[ 0 ] );
-                        let custom_cross_y : number = ( custom_coordA[ 1 ] - custom_coordB[ 1 ] );
-                        let custom_go_x : number = custom_cross_y;
-                        let custom_go_y : number = -custom_cross_x;
-                        child_go_x = custom_go_x * parent_custom_cross_x + custom_go_y * parent_custom_cross_y;
-                        child_go_y = custom_go_x * parent_custom_go_x    + custom_go_y * parent_custom_go_y;
+                    if (parentnode == null) {
+                        child_x = custom_coord[0] * this._primarySpace;
+                        child_y = custom_coord[1] * this._primarySpace;
+                    } else {
+                        let dev_x: number = custom_coord[0] - parent_custom_x;
+                        let dev_y: number = custom_coord[1] - parent_custom_y;
+                        let template_x: number = dev_x * parent_custom_cross_x + dev_y * parent_custom_cross_y;
+                        let template_y: number = dev_x * parent_custom_go_x + dev_y * parent_custom_go_y;
+                        template_x *= this._primarySpace;
+                        template_y *= this._primarySpace;
+
+                        // go to Eterna RNALayout global frame.
+                        child_x = rootnode.x + cross_x * template_x + go_x * template_y;
+                        child_y = rootnode.y + cross_y * template_x + go_y * template_y;
+                    }
+
+                    if (rootnode.children[ii].isPair) {
+                        let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                        let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                        let custom_cross_x: number = (custom_coordA[0] - custom_coordB[0]);
+                        let custom_cross_y: number = (custom_coordA[1] - custom_coordB[1]);
+                        let custom_go_x: number = custom_cross_y;
+                        let custom_go_y: number = -custom_cross_x;
+
+                        if (parentnode == null) {
+                            child_go_x = custom_go_x;
+                            child_go_y = custom_go_y;
+                        } else {
+                            let template_go_x = custom_go_x * parent_custom_cross_x + custom_go_y * parent_custom_cross_y;
+                            let template_go_y = custom_go_x * parent_custom_go_x + custom_go_y * parent_custom_go_y;
+                            child_go_x = cross_x * template_go_x + go_x * template_go_y;
+                            child_go_y = cross_y * template_go_x + go_y * template_go_y;
+                        }
                     }
                     let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
 
@@ -348,6 +351,21 @@ export class RNALayout {
 
                 }
             } else {
+                let npairs: number = 0;
+                for (ii = 0; ii < rootnode.children.length; ii++) {
+                    if (rootnode.children[ii].isPair) {
+                        npairs++;
+                    }
+                    if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
+                        oligo_displacement += 2 * this._primarySpace;
+                    }
+                }
+    
+                let circle_length: number = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
+                circle_length += oligo_displacement;
+                let circle_radius: number = circle_length / (2 * Math.PI);
+                let length_walker: number = this._pairSpace / 2.0;
+    
                 if (parentnode == null) {
                     rootnode.x = go_x * circle_radius;
                     rootnode.y = go_y * circle_radius;
