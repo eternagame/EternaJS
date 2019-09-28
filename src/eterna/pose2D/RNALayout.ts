@@ -257,6 +257,10 @@ export class RNALayout {
         rootnode.goX = go_x;
         rootnode.goY = go_y;
 
+        if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
+            this.drawTreeCustomLayout(rootnode, parentnode, start_x, start_y, go_x, go_y);
+            return;
+        }
         if (rootnode.children.length === 1) {
             rootnode.x = start_x;
             rootnode.y = start_y;
@@ -271,134 +275,53 @@ export class RNALayout {
         } else if (rootnode.children.length > 1) {
 
             let ii: number;
-
-            if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
-                rootnode.x = 0;
-                rootnode.y = 0;
-                let parent_custom_x : number = 0;
-                let parent_custom_y : number = 0;
-                let parent_custom_go_x : number = 0;
-                let parent_custom_go_y : number = 1;
-                let parent_custom_cross_x : number = -1;
-                let parent_custom_cross_y : number = 0;
-                if (parentnode && parentnode.isPair ) {
-                    rootnode.x = parentnode.x;
-                    rootnode.y = parentnode.y;
-                    let custom_coordA : [number,number] = this._customLayout[ parentnode.indexA ]
-                    let custom_coordB : [number,number] = this._customLayout[ parentnode.indexB ]
-                    parent_custom_x = ( custom_coordA[ 0 ] + custom_coordB[ 0 ] ) / 2;
-                    parent_custom_y = ( custom_coordA[ 1 ] + custom_coordB[ 1 ] ) / 2;
-                    parent_custom_cross_x = ( custom_coordA[ 0 ] - custom_coordB[ 0 ] );
-                    parent_custom_cross_y = ( custom_coordA[ 1 ] - custom_coordB[ 1 ] );
-                    parent_custom_go_x = parent_custom_cross_y;
-                    parent_custom_go_y = -parent_custom_cross_x;
+            let npairs: number = 0;
+            for (ii = 0; ii < rootnode.children.length; ii++) {
+                if (rootnode.children[ii].isPair) {
+                    npairs++;
                 }
-                for (ii = 0; ii < rootnode.children.length; ii++) {
-                    // read out where this point should be based on 'this._customLayout'. get coordinates in 
-                    // "local coordinate frame" set by parent pair in this._customLayout. 
-                    // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-                    let custom_coord : [number,number] = this._customLayout[ rootnode.children[ii].indexA ].slice();
-                    if ( rootnode.children[ii].isPair ) {
-                        let custom_coordA : [number,number] = this._customLayout[ rootnode.children[ii].indexA ];
-                        let custom_coordB : [number,number] = this._customLayout[ rootnode.children[ii].indexB ];
-                        custom_coord[ 0 ] = ( custom_coordA[ 0 ] + custom_coordB[ 0 ] ) / 2;
-                        custom_coord[ 1 ] = ( custom_coordA[ 1 ] + custom_coordB[ 1 ] ) / 2;
-                    }
-
-                    let child_x : number = 0.0;
-                    let child_y : number = 0.0;
-                    let child_go_x : number = 0.0;
-                    let child_go_y : number = 0.0;
-
-                    if (parentnode == null) {
-                        child_x = custom_coord[0] * this._primarySpace;
-                        child_y = custom_coord[1] * this._primarySpace;
-                    } else {
-                        let dev_x: number = custom_coord[0] - parent_custom_x;
-                        let dev_y: number = custom_coord[1] - parent_custom_y;
-                        let template_x: number = dev_x * parent_custom_cross_x + dev_y * parent_custom_cross_y;
-                        let template_y: number = dev_x * parent_custom_go_x + dev_y * parent_custom_go_y;
-                        template_x *= this._primarySpace;
-                        template_y *= this._primarySpace;
-
-                        // go to Eterna RNALayout global frame.
-                        child_x = rootnode.x + cross_x * template_x + go_x * template_y;
-                        child_y = rootnode.y + cross_y * template_x + go_y * template_y;
-                    }
-
-                    if (rootnode.children[ii].isPair) {
-                        let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                        let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
-                        let custom_cross_x: number = (custom_coordA[0] - custom_coordB[0]);
-                        let custom_cross_y: number = (custom_coordA[1] - custom_coordB[1]);
-                        let custom_go_x: number = custom_cross_y;
-                        let custom_go_y: number = -custom_cross_x;
-
-                        if (parentnode == null) {
-                            child_go_x = custom_go_x;
-                            child_go_y = custom_go_y;
-                        } else {
-                            let template_go_x = custom_go_x * parent_custom_cross_x + custom_go_y * parent_custom_cross_y;
-                            let template_go_y = custom_go_x * parent_custom_go_x + custom_go_y * parent_custom_go_y;
-                            child_go_x = cross_x * template_go_x + go_x * template_go_y;
-                            child_go_y = cross_y * template_go_x + go_y * template_go_y;
-                        }
-                    }
-                    let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
-
-                    this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
-                        child_go_x / child_go_len, child_go_y / child_go_len);
-
+                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
+                    oligo_displacement += 2 * this._primarySpace;
                 }
+            }
+
+            let circle_length: number = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
+            circle_length += oligo_displacement;
+            let circle_radius: number = circle_length / (2 * Math.PI);
+            let length_walker: number = this._pairSpace / 2.0;
+
+            if (parentnode == null) {
+                rootnode.x = go_x * circle_radius;
+                rootnode.y = go_y * circle_radius;
             } else {
-                let npairs: number = 0;
-                for (ii = 0; ii < rootnode.children.length; ii++) {
-                    if (rootnode.children[ii].isPair) {
-                        npairs++;
-                    }
-                    if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
-                        oligo_displacement += 2 * this._primarySpace;
-                    }
-                }
-    
-                let circle_length: number = (rootnode.children.length + 1) * this._primarySpace + (npairs + 1) * this._pairSpace;
-                circle_length += oligo_displacement;
-                let circle_radius: number = circle_length / (2 * Math.PI);
-                let length_walker: number = this._pairSpace / 2.0;
-    
-                if (parentnode == null) {
-                    rootnode.x = go_x * circle_radius;
-                    rootnode.y = go_y * circle_radius;
-                } else {
-                    rootnode.x = parentnode.x + go_x * circle_radius;
-                    rootnode.y = parentnode.y + go_y * circle_radius;
+                rootnode.x = parentnode.x + go_x * circle_radius;
+                rootnode.y = parentnode.y + go_y * circle_radius;
+            }
+
+            for (ii = 0; ii < rootnode.children.length; ii++) {
+
+                length_walker += this._primarySpace;
+                if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
+                    length_walker += 2 * this._primarySpace;
                 }
 
-                for (ii = 0; ii < rootnode.children.length; ii++) {
+                if (rootnode.children[ii].isPair) {
+                    length_walker += this._pairSpace / 2.0;
+                }
 
-                    length_walker += this._primarySpace;
-                    if (this._exceptionIndices != null && (this._exceptionIndices.indexOf(rootnode.children[ii].indexA) >= 0 || this._exceptionIndices.indexOf(rootnode.children[ii].indexB) >= 0)) {
-                        length_walker += 2 * this._primarySpace;
-                    }
+                let rad_angle: number = length_walker / circle_length * 2 * Math.PI - Math.PI / 2.0;
+                let child_x: number = rootnode.x + Math.cos(rad_angle) * cross_x * circle_radius + Math.sin(rad_angle) * go_x * circle_radius;
+                let child_y: number = rootnode.y + Math.cos(rad_angle) * cross_y * circle_radius + Math.sin(rad_angle) * go_y * circle_radius;
 
-                    if (rootnode.children[ii].isPair) {
-                        length_walker += this._pairSpace / 2.0;
-                    }
+                let child_go_x: number = child_x - rootnode.x;
+                let child_go_y: number = child_y - rootnode.y;
+                let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
 
-                    let rad_angle: number = length_walker / circle_length * 2 * Math.PI - Math.PI / 2.0;
-                    let child_x: number = rootnode.x + Math.cos(rad_angle) * cross_x * circle_radius + Math.sin(rad_angle) * go_x * circle_radius;
-                    let child_y: number = rootnode.y + Math.cos(rad_angle) * cross_y * circle_radius + Math.sin(rad_angle) * go_y * circle_radius;
+                this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
+                    child_go_x / child_go_len, child_go_y / child_go_len);
 
-                    let child_go_x: number = child_x - rootnode.x;
-                    let child_go_y: number = child_y - rootnode.y;
-                    let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
-
-                    this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
-                        child_go_x / child_go_len, child_go_y / child_go_len);
-
-                    if (rootnode.children[ii].isPair) {
-                        length_walker += this._pairSpace / 2.0;
-                    }
+                if (rootnode.children[ii].isPair) {
+                    length_walker += this._pairSpace / 2.0;
                 }
             }
         } else {
@@ -406,6 +329,107 @@ export class RNALayout {
             rootnode.y = start_y;
         }
 
+    }
+
+    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, go_x: number, go_y: number): void {
+        let ii: number;
+        let cross_x: number = -go_y;
+        let cross_y: number = go_x;
+
+        rootnode.x = start_x;
+        rootnode.y = start_y;
+        let parent_x: number = 0;
+        let parent_y: number = 0;
+        let parent_custom_x: number = 0;
+        let parent_custom_y: number = 0;
+        let parent_custom_go_x: number = 0;
+        let parent_custom_go_y: number = 1;
+        let parent_custom_cross_x: number = -1;
+        let parent_custom_cross_y: number = 0;
+        let parent_defined : boolean = false;
+        // here and below 'parent_' is probably wrong prefix, since sometimes this coordinate system
+        // is taken from root. alternative name could be anchor_?
+        // and for display, could use display_. [parent_x --> display_parent_x]
+        if (parentnode && parentnode.isPair) {
+            // this is the case in junctions, where root is 'pseudonode' in middle of junction, 
+            //  and parent is the exterior pair (or the global root)
+            parent_x = parentnode.x;
+            parent_y = parentnode.y;
+            let custom_coordA: [number, number] = this._customLayout[parentnode.indexA]
+            let custom_coordB: [number, number] = this._customLayout[parentnode.indexB]
+            parent_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
+            parent_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
+            parent_custom_cross_x = (custom_coordA[0] - custom_coordB[0]);
+            parent_custom_cross_y = (custom_coordA[1] - custom_coordB[1]);
+            parent_custom_go_x = parent_custom_cross_y;
+            parent_custom_go_y = -parent_custom_cross_x;
+            parent_defined = true;
+        } else if ( rootnode && rootnode.isPair ) {
+            // this can be the case in stacked pairs.
+            parent_x = rootnode.x;
+            parent_y = rootnode.y;
+            let custom_coordA: [number, number] = this._customLayout[rootnode.indexA]
+            let custom_coordB: [number, number] = this._customLayout[rootnode.indexB]
+            parent_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
+            parent_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
+            parent_custom_cross_x = (custom_coordA[0] - custom_coordB[0]);
+            parent_custom_cross_y = (custom_coordA[1] - custom_coordB[1]);
+            parent_custom_go_x = parent_custom_cross_y;
+            parent_custom_go_y = -parent_custom_cross_x;        
+            parent_defined = true;
+        }
+        for (ii = 0; ii < rootnode.children.length; ii++) {
+            // read out where this point should be based on 'this._customLayout'. get coordinates in 
+            // "local coordinate frame" set by parent pair in this._customLayout. 
+            // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
+            let custom_coord: [number, number] = this._customLayout[rootnode.children[ii].indexA].slice();
+            if (rootnode.children[ii].isPair) {
+                let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                custom_coord[0] = (custom_coordA[0] + custom_coordB[0]) / 2;
+                custom_coord[1] = (custom_coordA[1] + custom_coordB[1]) / 2;
+            }
+
+            let child_x: number = 0.0;
+            let child_y: number = 0.0;
+            let child_go_x: number = 0.0;
+            let child_go_y: number = 0.0;
+            child_x = custom_coord[0] * this._primarySpace;
+            child_y = custom_coord[1] * this._primarySpace;
+            if (parent_defined) {
+                let dev_x: number = custom_coord[0] - parent_custom_x;
+                let dev_y: number = custom_coord[1] - parent_custom_y;
+                let template_x: number = dev_x * parent_custom_cross_x + dev_y * parent_custom_cross_y;
+                let template_y: number = dev_x * parent_custom_go_x + dev_y * parent_custom_go_y;
+                template_x *= this._primarySpace;
+                template_y *= this._primarySpace;
+                // go to Eterna RNALayout global frame.
+                child_x = parent_x + cross_x * template_x + go_x * template_y;
+                child_y = parent_y + cross_y * template_x + go_y * template_y;
+            }
+
+            if (rootnode.children[ii].isPair) {
+                let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                let custom_cross_x: number = (custom_coordA[0] - custom_coordB[0]);
+                let custom_cross_y: number = (custom_coordA[1] - custom_coordB[1]);
+                let custom_go_x: number = custom_cross_y;
+                let custom_go_y: number = -custom_cross_x;
+
+                child_go_x = custom_go_x;
+                child_go_y = custom_go_y;
+                if (parent_defined) {
+                    let template_go_x = custom_go_x * parent_custom_cross_x + custom_go_y * parent_custom_cross_y;
+                    let template_go_y = custom_go_x * parent_custom_go_x + custom_go_y * parent_custom_go_y;
+                    child_go_x = cross_x * template_go_x + go_x * template_go_y;
+                    child_go_y = cross_y * template_go_x + go_y * template_go_y;
+                }
+            }
+            let child_go_len: number = Math.sqrt(child_go_x * child_go_x + child_go_y * child_go_y);
+
+            this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
+                child_go_x / child_go_len, child_go_y / child_go_len);
+        }
     }
 
     private getTotalScoreRecursive(rootnode: RNATreeNode): number {
@@ -578,12 +602,14 @@ export class RNALayout {
 
     private junctionMatchesTarget( rootnode : RNATreeNode, parentnode : RNATreeNode ) : boolean {
         if (this._targetPairs == null) return false;
-        if (parentnode) {
+
+        if (parentnode && parentnode.isPair) {
             // is initial pair of junction paired in target structure?
             if (this._targetPairs[parentnode.indexA] != parentnode.indexB) {
                 return false;
             }
         }
+        if (rootnode.children.length == 1 && rootnode.children[0].indexA < 0 ) return false;
 
         for ( let ii : number = 0; ii < rootnode.children.length; ii++) {
             if (rootnode.children[ii].isPair) {
