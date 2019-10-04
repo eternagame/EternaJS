@@ -22,13 +22,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         this.stateIndex = stateIndex;
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
-        return [{
-            name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
-            label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
-            bind: true
-        }];
-    }
+    protected abstract _getOligoInfo(targetConditions: any[]): OligoInfo[];
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
@@ -64,28 +58,31 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         let clarifyTextBuilder = new StyledTextBuilder();
         for (let ii = 0; ii < oligos.length; ii++) {
             if (ii > 0) {
-                clarifyTextBuilder.append('\u2003');
+                clarifyTextBuilder.append(' \u2003');
             }
 
             clarifyTextBuilder.append(
-                ` ${oligos[ii].label}`,
-                {fill: oligos[ii].bind ? 0xffffff : 0x808080}
+                `${oligos[ii].label}`,
+                {fill: oligos[ii].bind ? '#ffffff' : '#808080'}
             );
+            console.log(clarifyTextBuilder.build());
         }
 
-        let tw: number = Math.min(101, 15 * (2 * oligos.length - 1));
-        let step: number = tw / (2 * oligos.length - 1);
-        if (oligos.length === 1) tw = 45;
+        let twUpper: number = Math.min(101, 15 * (2 * oligos.length - 1));
+        let origUpper: number = (111 - twUpper) * 0.5;
+        let twLower = oligos.length === 1 ? 45 : twUpper;
+        let origLower = (111 - twLower) * 0.5;
+        let step: number = twUpper / (2 * oligos.length - 1);
 
         let iconGraphics = new Graphics();
         iconGraphics.lineStyle(2.5, 0xFFFFFF, 0.9);
-        iconGraphics.moveTo(0, 25);
-        iconGraphics.lineTo(tw, 25);
+        iconGraphics.moveTo(origLower, 27);
+        iconGraphics.lineTo(origLower + twLower, 27);
 
         for (let ii = 0; ii < oligos.length; ii++) {
             let ctrlY: number = (oligos[ii].bind ? 22 : 14);
-            iconGraphics.moveTo((ii * 2) * step, ctrlY);
-            iconGraphics.lineTo((ii * 2 + 1) * step, ctrlY);
+            iconGraphics.moveTo(origUpper + (ii * 2) * step, ctrlY);
+            iconGraphics.lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
         }
 
         return {
@@ -94,7 +91,8 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
             clarificationText: clarifyTextBuilder,
             showOutline: true,
             stateNumber: this.stateIndex + 1,
-            drawBG: true
+            drawBG: true,
+            icon: iconGraphics
         };
     }
 
@@ -167,7 +165,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
                 bind: Boolean(def['bind']),
                 label: def['label'] || String.fromCharCode(65 + idx)
             } : null)
-        );
+        ).filter((oligo) => oligo != null);
     }
 
     public getHighlight(
@@ -229,6 +227,14 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
             this.stateIndex.toString()
         ];
     }
+
+    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+        return [{
+            name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
+            label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
+            bind: true
+        }];
+    }
 }
 
 export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintStatus> {
@@ -257,5 +263,13 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
             OligoBoundConstraint.NAME,
             this.stateIndex.toString()
         ];
+    }
+
+    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+        return [{
+            name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
+            label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
+            bind: false
+        }];
     }
 }
