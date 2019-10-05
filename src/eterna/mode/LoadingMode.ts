@@ -95,7 +95,8 @@ export default class LoadingMode extends AppMode {
             'Citizen science works because\nwe are a curious species.',
             'Just hang in there and you will eventually\nget the hang of it.',
             'The ribosome makes life. You can re-design it.',
-            'First treatment for spinal muscular atrophy is RNA'
+            'First treatment for spinal muscular atrophy is RNA',
+	    'Can we invent our own medicine?'
             //           "RNA design is provably intractable for computers.",
             // eslint-disable-next-line max-len
             //            "Beware this game is addicting...\n...at least this addiction is for a noble cause.\n     -- Eterna player hoglahoo",
