@@ -361,36 +361,29 @@ export class RNALayout {
         let anchor_custom_go_y: number = 1;
         let anchor_custom_cross_x: number = -1;
         let anchor_custom_cross_y: number = 0;
-        let anchor_defined : boolean = false;
 
+        let anchornode = null;
         if (parentnode && parentnode.isPair) {
             // this is the case in junctions, where root is 'pseudonode' in middle of junction, 
             //  and parent is the exterior pair (or the global root)
-            anchor_x = parentnode.x;
-            anchor_y = parentnode.y;
-            let custom_coordA: [number, number] = this._customLayout[parentnode.indexA]
-            let custom_coordB: [number, number] = this._customLayout[parentnode.indexB]
+            anchornode = parentnode;
+        } else if ( rootnode && rootnode.isPair ) {
+            // this can be the case in stacked pairs.
+            anchornode = rootnode;
+        }
+        if (anchornode != null) {
+            anchor_x = anchornode.x;
+            anchor_y = anchornode.y;
+            let custom_coordA: [number, number] = this._customLayout[anchornode.indexA]
+            let custom_coordB: [number, number] = this._customLayout[anchornode.indexB]
             anchor_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
             anchor_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
             anchor_custom_cross_x = (custom_coordA[0] - custom_coordB[0]);
             anchor_custom_cross_y = (custom_coordA[1] - custom_coordB[1]);
             anchor_custom_go_x = anchor_custom_cross_y;
             anchor_custom_go_y = -anchor_custom_cross_x;
-            anchor_defined = true;
-        } else if ( rootnode && rootnode.isPair ) {
-            // this can be the case in stacked pairs.
-            anchor_x = rootnode.x;
-            anchor_y = rootnode.y;
-            let custom_coordA: [number, number] = this._customLayout[rootnode.indexA]
-            let custom_coordB: [number, number] = this._customLayout[rootnode.indexB]
-            anchor_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
-            anchor_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
-            anchor_custom_cross_x = (custom_coordA[0] - custom_coordB[0]);
-            anchor_custom_cross_y = (custom_coordA[1] - custom_coordB[1]);
-            anchor_custom_go_x = anchor_custom_cross_y;
-            anchor_custom_go_y = -anchor_custom_cross_x;        
-            anchor_defined = true;
         }
+
         for (ii = 0; ii < rootnode.children.length; ii++) {
             // read out where this point should be based on 'this._customLayout'. get coordinates in 
             // "local coordinate frame" set by parent pair in this._customLayout. 
@@ -409,7 +402,7 @@ export class RNALayout {
             let child_go_y: number = 0.0;
             child_x = custom_coord[0] * this._primarySpace;
             child_y = custom_coord[1] * this._primarySpace;
-            if (anchor_defined) {
+            if (anchornode != null) {
                 let dev_x: number = custom_coord[0] - anchor_custom_x;
                 let dev_y: number = custom_coord[1] - anchor_custom_y;
                 let template_x: number = dev_x * anchor_custom_cross_x + dev_y * anchor_custom_cross_y;
@@ -431,7 +424,7 @@ export class RNALayout {
 
                 child_go_x = custom_go_x;
                 child_go_y = custom_go_y;
-                if (anchor_defined) {
+                if (anchornode != null) {
                     let template_go_x = custom_go_x * anchor_custom_cross_x + custom_go_y * anchor_custom_cross_y;
                     let template_go_y = custom_go_x * anchor_custom_go_x + custom_go_y * anchor_custom_go_y;
                     child_go_x = cross_x * template_go_x + go_x * template_go_y;
