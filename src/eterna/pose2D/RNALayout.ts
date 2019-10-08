@@ -179,7 +179,7 @@ export default class RNALayout {
         }
     }
 
-    public drawTree(customLayout: Array<[number, number]> = null ): void {
+    public drawTree(customLayout: Array<[number, number]> = null): void {
         this._customLayout = customLayout;
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, 1);
@@ -262,7 +262,11 @@ export default class RNALayout {
     }
 
 
-    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign: number = 1): void {
+    private drawTreeRecursive(
+        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        startX: number, startY: number,
+        goX: number, goY: number, flipSign: number = 1
+    ): void {
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
@@ -366,22 +370,26 @@ export default class RNALayout {
         }
     }
 
-    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign: number): void {
+    private drawTreeCustomLayout(
+        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        startX: number, startY: number,
+        goX: number, goY: number, flipSign: number
+    ): void {
         let ii: number;
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
         rootnode.x = startX;
         rootnode.y = startY;
-        let anchor_x = 0;
-        let anchor_y = 0;
-        let anchor_custom_x = 0;
-        let anchor_custom_y = 0;
-        let anchor_custom_goX = 0;
-        let anchor_custom_goY = 1;
-        let anchor_custom_crossX = -1;
-        let anchor_custom_crossY = 0;
-        let anchor_custom_whichway = 1;
+        let anchorX = 0;
+        let anchorY = 0;
+        let anchorCustomX = 0;
+        let anchorCustomY = 0;
+        let anchorCustomGoX = 0;
+        let anchorCustomGoY = 1;
+        let anchorCustomCrossX = -1;
+        let anchorCustomCrossY = 0;
+        let anchorCustomFlipSign = 1;
 
         let anchornode: RNATreeNode = null;
         if (parentnode && parentnode.isPair) {
@@ -393,88 +401,90 @@ export default class RNALayout {
             anchornode = rootnode;
         }
         if (anchornode != null) {
-            anchor_x = anchornode.x;
-            anchor_y = anchornode.y;
-            let custom_coordA: [number, number] = this._customLayout[anchornode.indexA];
-            let custom_coordB: [number, number] = this._customLayout[anchornode.indexB];
-            anchor_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
-            anchor_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
-            anchor_custom_crossX = (custom_coordA[0] - custom_coordB[0]);
-            anchor_custom_crossY = (custom_coordA[1] - custom_coordB[1]);
-            anchor_custom_goX = anchor_custom_crossY;
-            anchor_custom_goY = -anchor_custom_crossX;
+            anchorX = anchornode.x;
+            anchorY = anchornode.y;
+            let customCoordA: [number, number] = this._customLayout[anchornode.indexA];
+            let customCoordB: [number, number] = this._customLayout[anchornode.indexB];
+            anchorCustomX = (customCoordA[0] + customCoordB[0]) / 2;
+            anchorCustomY = (customCoordA[1] + customCoordB[1]) / 2;
+            anchorCustomCrossX = (customCoordA[0] - customCoordB[0]);
+            anchorCustomCrossY = (customCoordA[1] - customCoordB[1]);
+            anchorCustomGoX = anchorCustomCrossY;
+            anchorCustomGoY = -anchorCustomCrossX;
 
             // are we rendering counterclockwise (default) or clockwise (non-default, flipSign = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
-            let anchor_custom_coord_next: [number, number] = this._customLayout[anchornode.indexA + 1];
-            let anchor_custom_go_next_x: number = anchor_custom_coord_next[0] - anchor_custom_x;
-            let anchor_custom_go_next_y: number = anchor_custom_coord_next[1] - anchor_custom_y;
-            anchor_custom_whichway = Math.sign(anchor_custom_go_next_x * anchor_custom_goX + anchor_custom_go_next_y * anchor_custom_goY);
-            anchor_custom_goX *= anchor_custom_whichway;
-            anchor_custom_goY *= anchor_custom_whichway;
+            let anchorCustomCoordNext: [number, number] = this._customLayout[anchornode.indexA + 1];
+            let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
+            let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
+            anchorCustomFlipSign = Math.sign(
+                anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
+            );
+            anchorCustomGoX *= anchorCustomFlipSign;
+            anchorCustomGoY *= anchorCustomFlipSign;
         }
 
         for (ii = 0; ii < rootnode.children.length; ii++) {
             // read out where this point should be based on 'this._customLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let custom_coord: number[] = this._customLayout[rootnode.children[ii].indexA].slice();
+            let customCoord: number[] = this._customLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
-                let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
-                custom_coord[0] = (custom_coordA[0] + custom_coordB[0]) / 2;
-                custom_coord[1] = (custom_coordA[1] + custom_coordB[1]) / 2;
+                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                customCoord[0] = (customCoordA[0] + customCoordB[0]) / 2;
+                customCoord[1] = (customCoordA[1] + customCoordB[1]) / 2;
             }
 
-            let child_x = 0.0;
-            let child_y = 0.0;
-            let child_goX = 0.0;
-            let child_goY = 0.0;
-            child_x = custom_coord[0] * this._primarySpace;
-            child_y = custom_coord[1] * this._primarySpace;
+            let childX = 0.0;
+            let childY = 0.0;
+            let childGoX = 0.0;
+            let childGoY = 0.0;
+            childX = customCoord[0] * this._primarySpace;
+            childY = customCoord[1] * this._primarySpace;
             if (anchornode != null) {
-                let dev_x: number = custom_coord[0] - anchor_custom_x;
-                let dev_y: number = custom_coord[1] - anchor_custom_y;
-                let template_x: number = dev_x * anchor_custom_crossX + dev_y * anchor_custom_crossY;
-                let template_y: number = dev_x * anchor_custom_goX + dev_y * anchor_custom_goY;
-                template_x *= this._primarySpace;
-                template_y *= this._primarySpace;
+                let devX: number = customCoord[0] - anchorCustomX;
+                let devY: number = customCoord[1] - anchorCustomY;
+                let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
+                let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
+                templateX *= this._primarySpace;
+                templateY *= this._primarySpace;
                 // go to Eterna RNALayout global frame.
-                child_x = anchor_x + crossX * template_x + goX * template_y;
-                child_y = anchor_y + crossY * template_x + goY * template_y;
+                childX = anchorX + crossX * templateX + goX * templateY;
+                childY = anchorY + crossY * templateX + goY * templateY;
             }
 
-            let child_flipSign: number = flipSign;
+            let childFlipSign: number = flipSign;
             if (rootnode.children[ii].isPair) {
-                let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
-                let custom_crossX: number = (custom_coordA[0] - custom_coordB[0]);
-                let custom_crossY: number = (custom_coordA[1] - custom_coordB[1]);
-                let custom_goX: number = custom_crossY;
-                let custom_goY: number = -custom_crossX;
+                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                let customCrossX: number = (customCoordA[0] - customCoordB[0]);
+                let customCrossY: number = (customCoordA[1] - customCoordB[1]);
+                let customGoX: number = customCrossY;
+                let customGoY: number = -customCrossX;
 
-                let custom_coord_next: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
-                let custom_go_next_x: number = custom_coord_next[0] - custom_coord[0];
-                let custom_go_next_y: number = custom_coord_next[1] - custom_coord[1];
-                let child_custom_whichway: number = Math.sign(custom_go_next_x * custom_goX + custom_go_next_y * custom_goY);
-                custom_goX *= child_custom_whichway;
-                custom_goY *= child_custom_whichway;
+                let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
+                let customGoNextX: number = customCoordNext[0] - customCoord[0];
+                let customGoNextY: number = customCoordNext[1] - customCoord[1];
+                let childCustomFlipSign: number = Math.sign(customGoNextX * customGoX + customGoNextY * customGoY);
+                customGoX *= childCustomFlipSign;
+                customGoY *= childCustomFlipSign;
 
-                child_goX = custom_goX;
-                child_goY = custom_goY;
-                child_flipSign = flipSign * child_custom_whichway / anchor_custom_whichway;
+                childGoX = customGoX;
+                childGoY = customGoY;
+                childFlipSign = flipSign * (childCustomFlipSign / anchorCustomFlipSign);
                 if (anchornode != null) {
-                    let template_goX = custom_goX * anchor_custom_crossX + custom_goY * anchor_custom_crossY;
-                    let template_goY = custom_goX * anchor_custom_goX + custom_goY * anchor_custom_goY;
-                    child_goX = crossX * template_goX + goX * template_goY;
-                    child_goY = crossY * template_goX + goY * template_goY;
+                    let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
+                    let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
+                    childGoX = crossX * templateGoX + goX * templateGoY;
+                    childGoY = crossY * templateGoX + goY * templateGoY;
                 }
             }
-            let child_go_len: number = Math.sqrt(child_goX * child_goX + child_goY * child_goY);
+            let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
-            this.drawTreeRecursive(rootnode.children[ii], rootnode, child_x, child_y,
-                child_goX / child_go_len, child_goY / child_go_len, child_flipSign);
+            this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+                childGoX / childGoLength, childGoY / childGoLength, childFlipSign);
         }
     }
 
@@ -562,23 +572,21 @@ export default class RNALayout {
 
         if (parentnode && parentnode.isPair) {
             // is initial pair of junction paired in target structure?
-            if (this._targetPairs[parentnode.indexA] != parentnode.indexB) {
+            if (this._targetPairs[parentnode.indexA] !== parentnode.indexB) {
                 return false;
             }
         }
-        if (rootnode.children.length == 1 && rootnode.children[0].indexA < 0) return false;
+        if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
         for (let ii = 0; ii < rootnode.children.length; ii++) {
             if (rootnode.children[ii].isPair) {
                 // all other pairs of junction paired in target structure?
-                if (this._targetPairs[rootnode.children[ii].indexA] != rootnode.children[ii].indexB) {
+                if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
                     return false;
                 }
-            } else {
+            } else if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
                 // all unpaired bases of junction also unpaired in target structure?
-                if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
-                    return false;
-                }
+                return false;
             }
         }
 
