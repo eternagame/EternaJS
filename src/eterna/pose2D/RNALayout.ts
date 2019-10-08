@@ -15,8 +15,48 @@ export class RNATreeNode {
 
     public goX: number = 0;
     public goY: number = 0;
+
+    public rotationDirectionSign: number = 1; // 1 or -1 for counterclockwise or clockwise
 }
 
+// The RNATree has a node for each unpaired base, each base pair, and each junction tracing a sort
+//   of 'skeleton' through the layout.
+//
+//      5   4
+//      x   x
+//       \ /     3      2      1
+// 6 x<-- x <--  x <--- x <--- x <--- x [root]
+//       / \    10     11     12     / \
+//      x   x                       x   x
+//      7   8                      14   15
+//
+//      x = RNATreeNode
+//
+// * Root of tree is in the most exterior junction
+// * Root node does not have indexA or indexB defined! It is centered at 0,0.
+// * For each pair node, isPair = true, indexA and indexB are defined, and x,y center is at midpoint of two pairs.
+// * For each  junction,  x,y center is at center of circle.
+// * For each unpaired base node, center is at actual plot position.
+// * Default rendering assumes path of RNA is counter-clockwise, different from most other codebases!
+//
+//       (goX,goY)         is unit vector  pointing in 'direction' from previous node into current node.
+//       (crossX, crossY)  appears below as an orthogonal unit vector. For a base pair node, it points
+//                              from the higher-number base to the lower-number base (consistent with
+//                              counterclockwise rendering)
+//
+// * Above rendering can be overridden by customLayout, an array of x,y positions that makes the RNA junctions
+//      look 'nice' perhaps echoing the 3D structure of the RNA. (a.k.a., "2.5D" layout). This customLayout
+//      is applied to junctions that match the target structure (encoded in targetPairs). Note that
+//      if the customLayout has clockwise helices in parts, that will override counterclockwise rendering of
+//      any helices that are daughters through the rotationDirectionSign variable (-1 for clockwise,
+//                                          +1 for counterclockwise)
+//
+// TODO: The recursions below copy some code, unfortunately.
+// TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really
+//           operations that are useful in separate chunks.
+//
+//    -- rhiju, 2019, reviewing/updating code that was written ages ago by someone else.
+//
 export default class RNALayout {
     constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
         this._primarySpace = primSpace;
@@ -30,9 +70,7 @@ export default class RNALayout {
         return this._root;
     }
 
-    public setupTree(pairs: number[]): void {
-        let danglingStart = 0;
-        let danglingEnd = 0;
+    public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
@@ -40,7 +78,12 @@ export default class RNALayout {
         this._root = null;
         // / save for later
         this._origPairs = pairs.slice();
+        this._targetPairs = targetPairs;
 
+        // / biPairs is 'symmetrized'. Like pairs,
+        // /   an array the same length as RNA
+        // /   with -1 for unpaired bases, and
+        // /   with the partner number for each paired base.
         for (ii = 0; ii < pairs.length; ii++) {
             biPairs[ii] = -1;
         }
@@ -52,30 +95,24 @@ export default class RNALayout {
             }
         }
 
-        for (ii = 0; ii < biPairs.length; ii++) {
-            if (biPairs[ii] < 0) {
-                danglingStart++;
-            } else {
-                break;
-            }
-        }
-
-        for (ii = biPairs.length - 1; ii >= 0; ii--) {
-            if (biPairs[ii] < 0) {
-                danglingEnd++;
-            } else {
-                break;
-            }
-        }
-
         // / Array that will be used for scoring
-        this._biPairs = new Array(biPairs.length + 1);
+        // / Shifts so that
+        this._scoreBiPairs = new Array(biPairs.length + 1);
         for (ii = 0; ii < biPairs.length; ii++) {
-            this._biPairs[ii + 1] = biPairs[ii] + 1;
+            this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
         }
-        this._biPairs[0] = biPairs.length;
+        this._scoreBiPairs[0] = biPairs.length;
 
-        if (danglingStart === biPairs.length) {
+        // / no tree if there are no pairs -- special case to be handled
+        // /  separately in getCoords.
+        let foundPair = false;
+        for (ii = 0; ii < biPairs.length; ii++) {
+            if (biPairs[ii] >= 0) {
+                foundPair = true;
+                break;
+            }
+        }
+        if (!foundPair) {
             return;
         }
 
@@ -107,17 +144,11 @@ export default class RNALayout {
         } else {
             // if longer, make the sequence form a circle instead
             // FIXME: there's a bit of code duplication here, somewhat inelegant...
+            //   This should be easy to unify, but why is circleRadius not updated along with circleLength?
+            //    Need to think through an oligo case carefully -- rhiju
             let circleLength: number = (xarray.length + 1) * this._primarySpace + this._pairSpace;
             let circleRadius: number = circleLength / (2 * Math.PI);
-            let lengthWalker: number = this._pairSpace / 2.0;
-            let goX = 0;
-            let goY = 1;
-            let _rootX: number = goX * circleRadius;
-            let _rootY: number = goY * circleRadius;
-            let crossX: number = -goY;
-            let crossY: number = goX;
             let oligoDisplacement = 0;
-
             for (let ii = 0; ii < xarray.length; ii++) {
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
                     oligoDisplacement += 2 * this._primarySpace;
@@ -125,6 +156,13 @@ export default class RNALayout {
             }
             circleLength += oligoDisplacement;
 
+            let lengthWalker: number = this._pairSpace / 2.0;
+            let goX = 0;
+            let goY = 1;
+            let _rootX: number = goX * circleRadius;
+            let _rootY: number = goY * circleRadius;
+            let crossX: number = -goY;
+            let crossY: number = goX;
             for (let ii = 0; ii < xarray.length; ii++) {
                 lengthWalker += this._primarySpace;
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
@@ -142,9 +180,10 @@ export default class RNALayout {
         }
     }
 
-    public drawTree(): void {
+    public drawTree(customLayout: Array<[number, number]> = null): void {
+        this._customLayout = customLayout;
         if (this._root != null) {
-            this.drawTreeRecursive(this._root, null, 0, 0, 0, 1);
+            this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, 1);
         }
     }
 
@@ -156,28 +195,8 @@ export default class RNALayout {
         return this.getTotalScoreRecursive(this._root);
     }
 
-    // / DO NOT remove these _old methods until the new ones (below) are fully validated
-    public scoreTreeOld(seq: number[], folder: Folder): void {
-        if (this._biPairs == null || seq.length !== (this._biPairs.length - 1)) {
-            throw new Error(`Layout tree is not properly setup for scoring ${this._biPairs.length} ${seq.length}`);
-        }
-
-        if (this._root == null) {
-            return;
-        }
-
-        let S: number[] = new Array(seq.length + 2);
-        S[0] = seq.length;
-
-        for (let ii = 0; ii < seq.length; ii++) {
-            S[ii + 1] = seq[ii];
-        }
-
-        this.scoreTreeRecursiveOld(S, folder, this._root, null);
-    }
-
     public scoreTree(seq: number[], folder: Folder): void {
-        if (this._biPairs == null) {
+        if (this._scoreBiPairs == null) {
             throw new Error('Layout tree is not properly setup for scoring');
         }
 
@@ -225,8 +244,8 @@ export default class RNALayout {
 
     private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode.isPair) {
-            let crossX: number = -rootnode.goY;
-            let crossY: number = rootnode.goX;
+            let crossX: number = -rootnode.goY * rootnode.rotationDirectionSign;
+            let crossY: number = rootnode.goX * rootnode.rotationDirectionSign;
 
             xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
             xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
@@ -243,18 +262,25 @@ export default class RNALayout {
         }
     }
 
-    private drawTreeRecursive(
-        rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number
-    ): void {
-        let crossX: number = -goY;
-        let crossY: number = goX;
 
-        let childrenWidth: number = rootnode.children.length * RNALayout.NODE_R * 2;
+    private drawTreeRecursive(
+        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        startX: number, startY: number,
+        goX: number, goY: number, rotationDirectionSign: number = 1
+    ): void {
+        let crossX: number = -goY * rotationDirectionSign;
+        let crossY: number = goX * rotationDirectionSign;
+
         let oligoDisplacement = 0;
 
         rootnode.goX = goX;
         rootnode.goY = goY;
+        rootnode.rotationDirectionSign = rotationDirectionSign;
 
+        if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
+            this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirectionSign);
+            return;
+        }
         if (rootnode.children.length === 1) {
             rootnode.x = startX;
             rootnode.y = startY;
@@ -262,14 +288,17 @@ export default class RNALayout {
             if (rootnode.children[0].isPair) {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY,
+                    rotationDirectionSign
                 );
             } else if (!rootnode.children[0].isPair && rootnode.children[0].indexA < 0) {
-                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY);
+                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY,
+                    rotationDirectionSign);
             } else {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY,
+                    rotationDirectionSign
                 );
             }
         } else if (rootnode.children.length > 1) {
@@ -303,6 +332,7 @@ export default class RNALayout {
                 rootnode.x = parentnode.x + goX * circleRadius;
                 rootnode.y = parentnode.y + goY * circleRadius;
             }
+
             for (ii = 0; ii < rootnode.children.length; ii++) {
                 lengthWalker += this._primarySpace;
                 if (
@@ -332,7 +362,7 @@ export default class RNALayout {
                 let childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
                 this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
-                    childGoX / childGoLen, childGoY / childGoLen);
+                    childGoX / childGoLen, childGoY / childGoLen, rotationDirectionSign);
 
                 if (rootnode.children[ii].isPair) {
                     lengthWalker += this._pairSpace / 2.0;
@@ -344,6 +374,127 @@ export default class RNALayout {
         }
     }
 
+    private drawTreeCustomLayout(
+        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        startX: number, startY: number,
+        goX: number, goY: number, rotationDirectionSign: number
+    ): void {
+        let ii: number;
+        let crossX: number = -goY * rotationDirectionSign;
+        let crossY: number = goX * rotationDirectionSign;
+
+        rootnode.x = startX;
+        rootnode.y = startY;
+        let anchorX = 0;
+        let anchorY = 0;
+        let anchorCustomX = 0;
+        let anchorCustomY = 0;
+        let anchorCustomGoX = 0;
+        let anchorCustomGoY = 1;
+        let anchorCustomCrossX = -1;
+        let anchorCustomCrossY = 0;
+        let anchorCustomRotationDirectionSign = 1;
+
+        let anchornode: RNATreeNode = null;
+        if (parentnode && parentnode.isPair) {
+            // this is the case in junctions, where root is 'pseudonode' in middle of junction,
+            //  and parent is the exterior pair (or the global root)
+            anchornode = parentnode;
+        } else if (rootnode && rootnode.isPair) {
+            // this can be the case in stacked pairs.
+            anchornode = rootnode;
+        }
+        if (anchornode != null) {
+            anchorX = anchornode.x;
+            anchorY = anchornode.y;
+            let customCoordA: [number, number] = this._customLayout[anchornode.indexA];
+            let customCoordB: [number, number] = this._customLayout[anchornode.indexB];
+            anchorCustomX = (customCoordA[0] + customCoordB[0]) / 2;
+            anchorCustomY = (customCoordA[1] + customCoordB[1]) / 2;
+            anchorCustomCrossX = (customCoordA[0] - customCoordB[0]);
+            anchorCustomCrossY = (customCoordA[1] - customCoordB[1]);
+            anchorCustomGoX = anchorCustomCrossY;
+            anchorCustomGoY = -anchorCustomCrossX;
+
+            // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirectionSign = -1)
+            // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
+            // basically checking dot product of next base after pair with putative go direction above.
+            let anchorCustomCoordNext: [number, number] = this._customLayout[anchornode.indexA + 1];
+            let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
+            let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
+            anchorCustomRotationDirectionSign = Math.sign(
+                anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
+            );
+            anchorCustomGoX *= anchorCustomRotationDirectionSign;
+            anchorCustomGoY *= anchorCustomRotationDirectionSign;
+        }
+
+        for (ii = 0; ii < rootnode.children.length; ii++) {
+            // read out where this point should be based on 'this._customLayout'. get coordinates in
+            // "local coordinate frame" set by parent pair in this._customLayout.
+            // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
+            let customCoord: number[] = this._customLayout[rootnode.children[ii].indexA].slice();
+            if (rootnode.children[ii].isPair) {
+                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                customCoord[0] = (customCoordA[0] + customCoordB[0]) / 2;
+                customCoord[1] = (customCoordA[1] + customCoordB[1]) / 2;
+            }
+
+            let childX = 0.0;
+            let childY = 0.0;
+            let childGoX = 0.0;
+            let childGoY = 0.0;
+            childX = customCoord[0] * this._primarySpace;
+            childY = customCoord[1] * this._primarySpace;
+            if (anchornode != null) {
+                let devX: number = customCoord[0] - anchorCustomX;
+                let devY: number = customCoord[1] - anchorCustomY;
+                let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
+                let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
+                templateX *= this._primarySpace;
+                templateY *= this._primarySpace;
+                // go to Eterna RNALayout global frame.
+                childX = anchorX + crossX * templateX + goX * templateY;
+                childY = anchorY + crossY * templateX + goY * templateY;
+            }
+
+            let childRotationDirectionSign: number = rotationDirectionSign;
+            if (rootnode.children[ii].isPair) {
+                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                let customCrossX: number = (customCoordA[0] - customCoordB[0]);
+                let customCrossY: number = (customCoordA[1] - customCoordB[1]);
+                let customGoX: number = customCrossY;
+                let customGoY: number = -customCrossX;
+
+                let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
+                let customGoNextX: number = customCoordNext[0] - customCoord[0];
+                let customGoNextY: number = customCoordNext[1] - customCoord[1];
+                let childCustomRotationDirectionSign: number = Math.sign(
+                    customGoNextX * customGoX + customGoNextY * customGoY
+                );
+                customGoX *= childCustomRotationDirectionSign;
+                customGoY *= childCustomRotationDirectionSign;
+
+                childGoX = customGoX;
+                childGoY = customGoY;
+                childRotationDirectionSign = rotationDirectionSign
+                    * (childCustomRotationDirectionSign / anchorCustomRotationDirectionSign);
+                if (anchornode != null) {
+                    let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
+                    let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
+                    childGoX = crossX * templateGoX + goX * templateGoY;
+                    childGoY = crossY * templateGoX + goY * templateGoY;
+                }
+            }
+            let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
+
+            this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+                childGoX / childGoLength, childGoY / childGoLength, childRotationDirectionSign);
+        }
+    }
+
     private getTotalScoreRecursive(rootnode: RNATreeNode): number {
         let score: number = rootnode.score;
         for (let ii = 0; ii < rootnode.children.length; ii++) {
@@ -352,90 +503,6 @@ export default class RNALayout {
         return score;
     }
 
-    private scoreTreeRecursiveOld(S: number[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
-        let type1: number; let
-            type2: number;
-
-        if (rootnode.isPair) {
-            // / Pair node
-            if (rootnode.children.length > 1) {
-                throw new Error('Pair node should never have more than one child');
-            }
-
-            if (rootnode.children.length === 0) {
-                throw new Error("Pair node can't be childless");
-            }
-
-            if (rootnode.children[0].isPair) {
-                type1 = EPars.pairType(S[rootnode.indexA + 1], S[rootnode.indexB + 1]);
-                type2 = EPars.pairType(S[rootnode.children[0].indexB + 1], S[rootnode.children[0].indexA + 1]);
-                rootnode.score = folder.loopEnergy(
-                    0, 0, type1, type2, S[rootnode.indexA + 1 + 1], S[rootnode.indexB - 1 + 1],
-                    S[rootnode.children[0].indexA + 1 + 1], S[rootnode.children[0].indexB - 1 + 1], true, true
-                );
-            }
-
-            this.scoreTreeRecursiveOld(S, folder, rootnode.children[0], rootnode);
-        } else if (!rootnode.isPair && rootnode.indexA >= 0) {
-            // / Single residue node
-
-        } else {
-            // / Virtual node
-
-            // / Top root case
-            if (parentnode == null) {
-                // / initial ml scoring
-                rootnode.score = folder.mlEnergy(this._biPairs, S, 0, true);
-            } else if (!parentnode.isPair) {
-                throw new Error('Parent node must be a pair');
-            }
-
-            let ii: number;
-            let numStacks = 0;
-            let firstStackIndex = -1;
-
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                if (rootnode.children[ii].isPair) {
-                    numStacks++;
-                    if (firstStackIndex < 0) {
-                        firstStackIndex = ii;
-                    }
-                } else if (rootnode.children[ii].indexA < 0) {
-                    throw new Error('Virtual node should not have a virtual node child');
-                }
-            }
-            let i: number; let j: number; let p: number; let
-                q: number;
-
-            if (numStacks === 1 && parentnode != null) {
-                i = parentnode.indexA + 1;
-                j = parentnode.indexB + 1;
-                p = rootnode.children[firstStackIndex].indexA + 1;
-                q = rootnode.children[firstStackIndex].indexB + 1;
-
-                type1 = EPars.pairType(S[i], S[j]);
-                type2 = EPars.pairType(S[q], S[p]);
-                rootnode.score = folder.loopEnergy(
-                    p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true
-                );
-            } else if (numStacks === 0) {
-                i = parentnode.indexA + 1;
-                j = parentnode.indexB + 1;
-
-                let type: number = EPars.pairType(S[i], S[j]);
-                rootnode.score = folder.hairpinEnergy(j - i - 1, type, S[i + 1], S[j - 1], S, i, j);
-            } else if (numStacks > 1 && parentnode != null) {
-                i = parentnode.indexA + 1;
-                let cuti: number = folder.cutInLoop(i);
-                rootnode.score = (cuti === 0)
-                    ? folder.mlEnergy(this._biPairs, S, i, false) : folder.mlEnergy(this._biPairs, S, cuti, true);
-            }
-
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                this.scoreTreeRecursiveOld(S, folder, rootnode.children[ii], rootnode);
-            }
-        }
-    }
 
     private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
         if (rootnode.isPair) {
@@ -507,6 +574,32 @@ export default class RNALayout {
         return 0;
     }
 
+    private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode): boolean {
+        if (this._targetPairs == null) return false;
+
+        if (parentnode && parentnode.isPair) {
+            // is initial pair of junction paired in target structure?
+            if (this._targetPairs[parentnode.indexA] !== parentnode.indexB) {
+                return false;
+            }
+        }
+        if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
+
+        for (let ii = 0; ii < rootnode.children.length; ii++) {
+            if (rootnode.children[ii].isPair) {
+                // all other pairs of junction paired in target structure?
+                if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
+                    return false;
+                }
+            } else if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
+                // all unpaired bases of junction also unpaired in target structure?
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private readonly _primarySpace: number;
     private readonly _pairSpace: number;
     // indices that need to be streched (e.g., connectors for oligos)
@@ -514,9 +607,9 @@ export default class RNALayout {
 
     private _root: RNATreeNode;
     private _origPairs: number[];
+    private _targetPairs: number[];
+    private _customLayout: Array<[number, number]>;
 
     // / "New" method to gather NN free energies, just use the folding engine
-    private _biPairs: number[];
-
-    private static readonly NODE_R = 10;
+    private _scoreBiPairs: number[];
 }

@@ -290,8 +290,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let rnaCoords: RNALayout;
         rnaCoords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
-        rnaCoords.setupTree(this._pairs);
-        rnaCoords.drawTree();
+        rnaCoords.setupTree(this._pairs, this._targetPairs);
+        rnaCoords.drawTree(this._customLayout);
         rnaCoords.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
@@ -1821,11 +1821,25 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._pairs.slice();
     }
 
+    public set targetPairs(setting: number[]) {
+        this._targetPairs = setting.slice();
+        for (let ii = 0; ii < this._targetPairs.length; ii++) {
+            if (this._targetPairs[ii] > ii) {
+                this._targetPairs[this._targetPairs[ii]] = ii;
+            }
+        }
+    }
+
+    public set customLayout(setting: Array<[number, number]>) {
+        this._customLayout = setting;
+    }
+
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rnaDrawer: RNALayout = new RNALayout(radius, radius);
-        rnaDrawer.setupTree(this._pairs);
-        rnaDrawer.drawTree();
+        rnaDrawer.setupTree(this._pairs, this._targetPairs);
+        rnaDrawer.drawTree(this._customLayout);
+
         let xarray: number[] = new Array(this._bases.length);
         let yarray: number[] = new Array(this._bases.length);
         rnaDrawer.getCoords(xarray, yarray);
@@ -2108,6 +2122,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             goX = this._bases[ii + 1].x - this._bases[ii].x;
             goY = this._bases[ii + 1].y - this._bases[ii].y;
+
+            let goLength: number = Math.sqrt(goX * goX + goY * goY);
+            if (goLength > Pose2D.ZOOM_SPACINGS[this._zoomLevel]) {
+                goX *= (Pose2D.ZOOM_SPACINGS[this._zoomLevel] / goLength);
+                goY *= (Pose2D.ZOOM_SPACINGS[this._zoomLevel] / goLength);
+            }
+
 
             outX += goX;
             outY += goY;
@@ -2459,8 +2480,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             exceptionIndices
         );
 
-        rnaDrawer.setupTree(this._pairs);
-        rnaDrawer.drawTree();
+        rnaDrawer.setupTree(this._pairs, this._targetPairs);
+        rnaDrawer.drawTree(this._customLayout);
         rnaDrawer.getCoords(xarray, yarray);
 
         if (this._desiredAngle === 90) {
@@ -3265,6 +3286,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _sequence: number[] = [];
     private _mutatedSequence: number[];
     private _pairs: number[] = [];
+    private _targetPairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
     private _forcedStruct: number[] = [];
@@ -3279,6 +3301,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
+    private _customLayout: Array<[number, number]>;
 
     // Oligos
     private _oligo: number[] = null;
