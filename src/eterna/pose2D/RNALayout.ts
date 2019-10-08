@@ -48,7 +48,8 @@ export class RNATreeNode {
 //      look 'nice' perhaps echoing the 3D structure of the RNA. (a.k.a., "2.5D" layout). This customLayout
 //      is applied to junctions that match the target structure (encoded in targetPairs). Note that
 //      if the customLayout has clockwise helices in parts, that will override counterclockwise rendering of
-//      any helices that are daughters through the rotationDirectionSign variable (-1 for clockwise, +1 for counterclockwise)
+//      any helices that are daughters through the rotationDirectionSign variable (-1 for clockwise,
+//                                          +1 for counterclockwise)
 //
 // TODO: The recursions below copy some code, unfortunately.
 // TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really
@@ -287,14 +288,17 @@ export default class RNALayout {
             if (rootnode.children[0].isPair) {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, rotationDirectionSign
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY,
+                    rotationDirectionSign
                 );
             } else if (!rootnode.children[0].isPair && rootnode.children[0].indexA < 0) {
-                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY, rotationDirectionSign);
+                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY,
+                    rotationDirectionSign);
             } else {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, rotationDirectionSign
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY,
+                    rotationDirectionSign
                 );
             }
         } else if (rootnode.children.length > 1) {
@@ -467,13 +471,16 @@ export default class RNALayout {
                 let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
                 let customGoNextX: number = customCoordNext[0] - customCoord[0];
                 let customGoNextY: number = customCoordNext[1] - customCoord[1];
-                let childCustomRotationDirectionSign: number = Math.sign(customGoNextX * customGoX + customGoNextY * customGoY);
+                let childCustomRotationDirectionSign: number = Math.sign(
+                    customGoNextX * customGoX + customGoNextY * customGoY
+                );
                 customGoX *= childCustomRotationDirectionSign;
                 customGoY *= childCustomRotationDirectionSign;
 
                 childGoX = customGoX;
                 childGoY = customGoY;
-                childRotationDirectionSign = rotationDirectionSign * (childCustomRotationDirectionSign / anchorCustomRotationDirectionSign);
+                childRotationDirectionSign = rotationDirectionSign
+                    * (childCustomRotationDirectionSign / anchorCustomRotationDirectionSign);
                 if (anchornode != null) {
                     let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
                     let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
@@ -605,5 +612,4 @@ export default class RNALayout {
 
     // / "New" method to gather NN free energies, just use the folding engine
     private _scoreBiPairs: number[];
-
 }
