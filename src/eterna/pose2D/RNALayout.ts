@@ -16,7 +16,7 @@ export class RNATreeNode {
     public goX: number = 0;
     public goY: number = 0;
 
-    public flipSign: number = 1; // 1 or -1 for counterclockwise or clockwise
+    public rotationDirectionSign: number = 1; // 1 or -1 for counterclockwise or clockwise
 }
 
 // The RNATree has a node for each unpaired base, each base pair, and each junction tracing a sort
@@ -48,7 +48,7 @@ export class RNATreeNode {
 //      look 'nice' perhaps echoing the 3D structure of the RNA. (a.k.a., "2.5D" layout). This customLayout
 //      is applied to junctions that match the target structure (encoded in targetPairs). Note that
 //      if the customLayout has clockwise helices in parts, that will override counterclockwise rendering of
-//      any helices that are daughters through the flipSign variable (-1 for clockwise, +1 for counterclockwise)
+//      any helices that are daughters through the rotationDirectionSign variable (-1 for clockwise, +1 for counterclockwise)
 //
 // TODO: The recursions below copy some code, unfortunately.
 // TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really
@@ -243,8 +243,8 @@ export default class RNALayout {
 
     private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode.isPair) {
-            let crossX: number = -rootnode.goY * rootnode.flipSign;
-            let crossY: number = rootnode.goX * rootnode.flipSign;
+            let crossX: number = -rootnode.goY * rootnode.rotationDirectionSign;
+            let crossY: number = rootnode.goX * rootnode.rotationDirectionSign;
 
             xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
             xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
@@ -265,19 +265,19 @@ export default class RNALayout {
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
-        goX: number, goY: number, flipSign: number = 1
+        goX: number, goY: number, rotationDirectionSign: number = 1
     ): void {
-        let crossX: number = -goY * flipSign;
-        let crossY: number = goX * flipSign;
+        let crossX: number = -goY * rotationDirectionSign;
+        let crossY: number = goX * rotationDirectionSign;
 
         let oligoDisplacement = 0;
 
         rootnode.goX = goX;
         rootnode.goY = goY;
-        rootnode.flipSign = flipSign;
+        rootnode.rotationDirectionSign = rotationDirectionSign;
 
         if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
-            this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, flipSign);
+            this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirectionSign);
             return;
         }
         if (rootnode.children.length === 1) {
@@ -287,14 +287,14 @@ export default class RNALayout {
             if (rootnode.children[0].isPair) {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, flipSign
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, rotationDirectionSign
                 );
             } else if (!rootnode.children[0].isPair && rootnode.children[0].indexA < 0) {
-                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY, flipSign);
+                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY, rotationDirectionSign);
             } else {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, flipSign
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, rotationDirectionSign
                 );
             }
         } else if (rootnode.children.length > 1) {
@@ -358,7 +358,7 @@ export default class RNALayout {
                 let childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
                 this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
-                    childGoX / childGoLen, childGoY / childGoLen, flipSign);
+                    childGoX / childGoLen, childGoY / childGoLen, rotationDirectionSign);
 
                 if (rootnode.children[ii].isPair) {
                     lengthWalker += this._pairSpace / 2.0;
@@ -373,11 +373,11 @@ export default class RNALayout {
     private drawTreeCustomLayout(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
-        goX: number, goY: number, flipSign: number
+        goX: number, goY: number, rotationDirectionSign: number
     ): void {
         let ii: number;
-        let crossX: number = -goY * flipSign;
-        let crossY: number = goX * flipSign;
+        let crossX: number = -goY * rotationDirectionSign;
+        let crossY: number = goX * rotationDirectionSign;
 
         rootnode.x = startX;
         rootnode.y = startY;
@@ -389,7 +389,7 @@ export default class RNALayout {
         let anchorCustomGoY = 1;
         let anchorCustomCrossX = -1;
         let anchorCustomCrossY = 0;
-        let anchorCustomFlipSign = 1;
+        let anchorCustomRotationDirectionSign = 1;
 
         let anchornode: RNATreeNode = null;
         if (parentnode && parentnode.isPair) {
@@ -412,17 +412,17 @@ export default class RNALayout {
             anchorCustomGoX = anchorCustomCrossY;
             anchorCustomGoY = -anchorCustomCrossX;
 
-            // are we rendering counterclockwise (default) or clockwise (non-default, flipSign = -1)
+            // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirectionSign = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
             let anchorCustomCoordNext: [number, number] = this._customLayout[anchornode.indexA + 1];
             let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
             let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
-            anchorCustomFlipSign = Math.sign(
+            anchorCustomRotationDirectionSign = Math.sign(
                 anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
             );
-            anchorCustomGoX *= anchorCustomFlipSign;
-            anchorCustomGoY *= anchorCustomFlipSign;
+            anchorCustomGoX *= anchorCustomRotationDirectionSign;
+            anchorCustomGoY *= anchorCustomRotationDirectionSign;
         }
 
         for (ii = 0; ii < rootnode.children.length; ii++) {
@@ -455,7 +455,7 @@ export default class RNALayout {
                 childY = anchorY + crossY * templateX + goY * templateY;
             }
 
-            let childFlipSign: number = flipSign;
+            let childRotationDirectionSign: number = rotationDirectionSign;
             if (rootnode.children[ii].isPair) {
                 let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
                 let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
@@ -467,13 +467,13 @@ export default class RNALayout {
                 let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
                 let customGoNextX: number = customCoordNext[0] - customCoord[0];
                 let customGoNextY: number = customCoordNext[1] - customCoord[1];
-                let childCustomFlipSign: number = Math.sign(customGoNextX * customGoX + customGoNextY * customGoY);
-                customGoX *= childCustomFlipSign;
-                customGoY *= childCustomFlipSign;
+                let childCustomRotationDirectionSign: number = Math.sign(customGoNextX * customGoX + customGoNextY * customGoY);
+                customGoX *= childCustomRotationDirectionSign;
+                customGoY *= childCustomRotationDirectionSign;
 
                 childGoX = customGoX;
                 childGoY = customGoY;
-                childFlipSign = flipSign * (childCustomFlipSign / anchorCustomFlipSign);
+                childRotationDirectionSign = rotationDirectionSign * (childCustomRotationDirectionSign / anchorCustomRotationDirectionSign);
                 if (anchornode != null) {
                     let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
                     let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
@@ -484,7 +484,7 @@ export default class RNALayout {
             let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
             this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
-                childGoX / childGoLength, childGoY / childGoLength, childFlipSign);
+                childGoX / childGoLength, childGoY / childGoLength, childRotationDirectionSign);
         }
     }
 
@@ -606,5 +606,4 @@ export default class RNALayout {
     // / "New" method to gather NN free energies, just use the folding engine
     private _scoreBiPairs: number[];
 
-    private static readonly NODE_R = 10;
 }
