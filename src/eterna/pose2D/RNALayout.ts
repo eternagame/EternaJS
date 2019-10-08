@@ -103,15 +103,14 @@ export class RNALayout {
 
         /// no tree if there are no pairs -- special case to be handled
         ///  separately in getCoords.
-        let dangling_start: number = 0;
+        let foundPair: boolean = false;
         for (ii = 0; ii < bi_pairs.length; ii++) {
-            if (bi_pairs[ii] < 0) {
-                dangling_start++;
-            } else {
+            if (bi_pairs[ii] >= 0) {
+                foundPair = true;
                 break;
             }
         }
-        if (dangling_start === bi_pairs.length) {
+        if (!foundPair) {
             return;
         }
 
@@ -144,6 +143,8 @@ export class RNALayout {
             } else {
                 // if longer, make the sequence form a circle instead
                 // FIXME: there's a bit of code duplication here, somewhat inelegant...
+                //   This should be easy to unify, but why is circle_radius not updated along with circle_length?
+                //    Need to think through an oligo case carefully -- rhiju
                 let circle_length: number = (xarray.length + 1) * this._primarySpace + this._pairSpace;
                 let circle_radius: number = circle_length / (2 * Math.PI);
                 let oligo_displacement: number = 0;
@@ -188,26 +189,6 @@ export class RNALayout {
         }
 
         return this.getTotalScoreRecursive(this._root);
-    }
-
-    /// DO NOT remove these _old methods until the new ones (below) are fully validated
-    public scoreTreeOld(seq: number[], folder: Folder): void {
-        if (this._biPairs == null || seq.length !== (this._biPairs.length - 1)) {
-            throw new Error("Layout tree is not properly setup for scoring " + this._biPairs.length + " " + seq.length);
-        }
-
-        if (this._root == null) {
-            return;
-        }
-
-        let S: number[] = new Array(seq.length + 2);
-        S[0] = seq.length;
-
-        for (let ii = 0; ii < seq.length; ii++) {
-            S[ii + 1] = seq[ii];
-        }
-
-        this.scoreTreeRecursiveOld(S, folder, this._root, null)
     }
 
     public scoreTree(seq: number[], folder: Folder): void {
@@ -470,94 +451,6 @@ export class RNALayout {
             score += this.getTotalScoreRecursive(rootnode.children[ii]);
         }
         return score;
-    }
-
-    private scoreTreeRecursiveOld(S: number[], folder: Folder, rootnode: RNATreeNode, parentnode: RNATreeNode): void {
-
-        let type1: number, type2: number;
-
-        if (rootnode.isPair) {
-            /// Pair node
-            if (rootnode.children.length > 1) {
-                throw new Error("Pair node should never have more than one child");
-            }
-
-            if (rootnode.children.length === 0) {
-                throw new Error("Pair node can't be childless");
-            }
-
-            if (rootnode.children[0].isPair) {
-
-                type1 = EPars.pairType(S[rootnode.indexA + 1], S[rootnode.indexB + 1]);
-                type2 = EPars.pairType(S[rootnode.children[0].indexB + 1], S[rootnode.children[0].indexA + 1]);
-                rootnode.score = folder.loopEnergy(0, 0, type1, type2, S[rootnode.indexA + 1 + 1], S[rootnode.indexB - 1 + 1],
-                    S[rootnode.children[0].indexA + 1 + 1], S[rootnode.children[0].indexB - 1 + 1], true, true);
-            }
-
-            this.scoreTreeRecursiveOld(S, folder, rootnode.children[0], rootnode);
-
-        } else if (!rootnode.isPair && rootnode.indexA >= 0) {
-            /// Single residue node
-            return;
-        } else {
-            /// Virtual node
-
-            /// Top root case
-            if (parentnode == null) {
-                /// initial ml scoring
-                rootnode.score = folder.mlEnergy(this._biPairs, S, 0, true);
-            } else {
-                if (!parentnode.isPair) {
-                    throw new Error("Parent node must be a pair");
-                }
-            }
-
-            let ii: number;
-            let num_stacks: number = 0;
-            let first_stack_index: number = -1;
-
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                if (rootnode.children[ii].isPair) {
-                    num_stacks++;
-                    if (first_stack_index < 0) {
-                        first_stack_index = ii;
-                    }
-                } else if (rootnode.children[ii].indexA < 0) {
-                    throw new Error("Virtual node should not have a virtual node child");
-                }
-            }
-            let i: number, j: number, p: number, q: number;
-
-            if (num_stacks === 1 && parentnode != null) {
-
-                i = parentnode.indexA + 1;
-                j = parentnode.indexB + 1;
-                p = rootnode.children[first_stack_index].indexA + 1;
-                q = rootnode.children[first_stack_index].indexB + 1;
-
-                type1 = EPars.pairType(S[i], S[j]);
-                type2 = EPars.pairType(S[q], S[p]);
-                rootnode.score = folder.loopEnergy(p - i - 1, j - q - 1, type1, type2, S[i + 1], S[j - 1], S[p - 1], S[q + 1], true, true);
-
-            } else if (num_stacks === 0) {
-                i = parentnode.indexA + 1;
-                j = parentnode.indexB + 1;
-
-                let type: number = EPars.pairType(S[i], S[j]);
-                rootnode.score = folder.hairpinEnergy(j - i - 1, type, S[i + 1], S[j - 1], S, i, j);
-            } else if (num_stacks > 1 && parentnode != null) {
-
-                i = parentnode.indexA + 1;
-                let cuti: number = folder.cutInLoop(i);
-                rootnode.score = (cuti === 0) ? folder.mlEnergy(this._biPairs, S, i, false) : folder.mlEnergy(this._biPairs, S, cuti, true);
-            }
-
-            for (ii = 0; ii < rootnode.children.length; ii++) {
-                this.scoreTreeRecursiveOld(S, folder, rootnode.children[ii], rootnode);
-            }
-
-        }
-
     }
 
     private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
