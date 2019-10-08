@@ -1,11 +1,12 @@
-import {Constants} from "../Constants";
-import {EPars} from "../EPars";
-import {FolderManager} from "../folding/FolderManager";
-import {Vienna} from "../folding/Vienna";
-import {EternaURL} from "../net/EternaURL";
-import {Pose2D} from "../pose2D/Pose2D";
-import {ConstraintType} from "./Constraints";
-import {Folder} from "../folding/Folder";
+import Constants from 'eterna/Constants';
+import EPars from 'eterna/EPars';
+import FolderManager from 'eterna/folding/FolderManager';
+import Vienna from 'eterna/folding/Vienna';
+import Folder from 'eterna/folding/Folder';
+import EternaURL from 'eterna/net/EternaURL';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
+import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
 
 export interface BoostersData {
     mission?: any;
@@ -15,31 +16,31 @@ export interface BoostersData {
 }
 
 export enum PuzzleType {
-    BASIC = "Basic",
-    SWITCH_BASIC = "SwitchBasic",
-    CHALLENGE = "Challenge",
-    EXPERIMENTAL = "Experimental"
+    BASIC = 'Basic',
+    SWITCH_BASIC = 'SwitchBasic',
+    CHALLENGE = 'Challenge',
+    EXPERIMENTAL = 'Experimental'
 }
 
 export enum PoseState {
-    NATIVE = "NATIVE",
-    FROZEN = "FROZEN",
-    TARGET = "TARGET",
+    NATIVE = 'NATIVE',
+    FROZEN = 'FROZEN',
+    TARGET = 'TARGET',
 
     // TODO: move these to another enum;
     // they are only used to communicate events to rscript
-    PIP = "PIP",
-    NONPIP = "NONPIP",
-    SECOND = "SECOND",
+    PIP = 'PIP',
+    NONPIP = 'NONPIP',
+    SECOND = 'SECOND',
 }
 
-export class Puzzle {
-    public static isAptamerType(tc_type: string): boolean {
-        return (Puzzle.T_APTAMER.indexOf(tc_type) >= 0);
+export default class Puzzle {
+    public static isAptamerType(tcType: string): boolean {
+        return (Puzzle.T_APTAMER.indexOf(tcType) >= 0);
     }
 
-    public static isOligoType(tc_type: string): boolean {
-        return (Puzzle.T_OLIGO.indexOf(tc_type) >= 0);
+    public static isOligoType(tcType: string): boolean {
+        return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
     public static probeTail(seq: number[]): number[] {
@@ -58,7 +59,7 @@ export class Puzzle {
         return seq;
     }
 
-    public constructor(nid: number, name: string, puzzleType: PuzzleType) {
+    constructor(nid: number, name: string, puzzleType: PuzzleType) {
         this._nid = nid;
         this._name = name;
         this._puzzleType = puzzleType;
@@ -72,11 +73,11 @@ export class Puzzle {
 
     public canUseFolder(folder: Folder): boolean {
         return !(
-            (this.hasTargetType("multistrand") && !folder.canMultifold)
-            || (this.hasTargetType("aptamer") && !folder.canFoldWithBindingSite)
-            || (this.hasTargetType("oligo") && !folder.canCofold)
-            || (this.hasTargetType("aptamer+oligo") && !folder.canFoldWithBindingSite)
-            || (this.hasTargetType("aptamer+oligo") && !folder.canCofold)
+            (this.hasTargetType('multistrand') && !folder.canMultifold)
+            || (this.hasTargetType('aptamer') && !folder.canFoldWithBindingSite)
+            || (this.hasTargetType('oligo') && !folder.canCofold)
+            || (this.hasTargetType('aptamer+oligo') && !folder.canFoldWithBindingSite)
+            || (this.hasTargetType('aptamer+oligo') && !folder.canCofold)
         );
     }
 
@@ -138,72 +139,22 @@ export class Puzzle {
 
     public get targetConditions(): any[] {
         if (this._targetConditions == null) {
-            let target_conditions: any[] = [];
+            let targetConditions: any[] = [];
             for (let ii = 0; ii < this._secstructs.length; ii++) {
-                target_conditions.push(null);
+                targetConditions.push(null);
             }
-            return target_conditions;
+            return targetConditions;
         } else {
             return this._targetConditions;
         }
     }
 
-    public get constraints(): string[] {
+    public get constraints(): Constraint<BaseConstraintStatus>[] {
         return this._constraints;
     }
 
-    public set constraints(constraints: string[]) {
-        this._constraints = [];
-        let shapes: boolean[] = [];
-        let antishapes: boolean[] = [];
-
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] === ConstraintType.SHAPE) {
-                shapes[Number(constraints[ii + 1])] = true;
-            } else if (constraints[ii] === ConstraintType.ANTISHAPE) {
-                antishapes[Number(constraints[ii + 1])] = true;
-            }
-        }
-
-        for (let ii = shapes.length - 1; ii >= 0; ii--) {
-            if (antishapes[ii]) {
-                this._constraints.push(ConstraintType.ANTISHAPE);
-                this._constraints.push(`${ii}`);
-            }
-
-            if (shapes[ii]) {
-                this._constraints.push(ConstraintType.SHAPE);
-                this._constraints.push(`${ii}`);
-            }
-        }
-
-        for (let ii = 0; ii < constraints.length; ii += 2) {
-            if (constraints[ii] !== ConstraintType.SHAPE
-                && constraints[ii] !== ConstraintType.SOFT
-                && constraints[ii] !== ConstraintType.ANTISHAPE) {
-                this._constraints.push(constraints[ii]);
-                this._constraints.push(constraints[ii + 1]);
-            } else if (constraints[ii] === ConstraintType.SOFT) {
-                this._isSoftConstraint = true;
-            }
-        }
-    }
-
-    public get temporaryConstraints(): string[] {
-        return this._tempConstraints;
-    }
-
-    public set temporaryConstraints(constraints: string[]) {
-        if (constraints != null) {
-            this._tempConstraints = constraints.slice();
-        } else {
-            this._tempConstraints = null;
-        }
-    }
-
-    /** Returns temporary_constraints, if they're set, else constraints */
-    public get curConstraints(): string[] {
-        return this.temporaryConstraints || this.constraints;
+    public set constraints(constraints: Constraint<BaseConstraintStatus>[]) {
+        this._constraints = constraints;
     }
 
     public get puzzleLocks(): boolean[] {
@@ -268,55 +219,62 @@ export class Puzzle {
         let concentration: number;
 
         for (let ii = 0; ii < this._targetConditions.length; ii++) {
-            if (this._targetConditions[ii]["secstruct"] == null) {
+            if (this._targetConditions[ii]['secstruct'] == null) {
                 throw new Error("Can't find secstruct from a target condition");
             }
-            this._secstructs.push(this._targetConditions[ii]["secstruct"]);
+            this._secstructs.push(this._targetConditions[ii]['secstruct']);
 
-            let tc_type: string = this._targetConditions[ii]["type"];
+            let tcType: string = this._targetConditions[ii]['type'];
             // Aptamers
 
-            if (Puzzle.isAptamerType(tc_type) && this._targetConditions[ii]["site"] != null) {
-                let binding_pairs: any[] = [];
-                let binding_site: any[] = this._targetConditions[ii]["site"];
-                let target_pairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
+            if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] != null) {
+                let bindingPairs: any[] = [];
+                let bindingSite: any[] = this._targetConditions[ii]['site'];
+                let targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
 
-                for (let jj = 0; jj < binding_site.length; jj++) {
-                    binding_pairs.push(target_pairs[binding_site[jj]]);
+                for (let jj = 0; jj < bindingSite.length; jj++) {
+                    bindingPairs.push(targetPairs[bindingSite[jj]]);
                 }
 
-                this._targetConditions[ii]["binding_pairs"] = binding_pairs;
-                this._targetConditions[ii]["bonus"] = -0.6 * Math.log(this._targetConditions[ii]["concentration"] / 3) * 100;
+                this._targetConditions[ii]['binding_pairs'] = bindingPairs;
+                this._targetConditions[ii]['bonus'] = (
+                    -0.6 * Math.log(this._targetConditions[ii]['concentration'] / 3) * 100
+                );
             }
 
             // Simple oligos
 
-            if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii].hasOwnProperty("fold_mode") === false) {
-                this._targetConditions[ii]["fold_mode"] = Pose2D.OLIGO_MODE_DIMER.toString();
+            if (
+                Puzzle.isOligoType(tcType)
+                && Object.hasOwnProperty.call(this._targetConditions[ii], 'fold_mode') === false
+            ) {
+                this._targetConditions[ii]['fold_mode'] = Pose2D.OLIGO_MODE_DIMER.toString();
             }
 
-            if (Puzzle.isOligoType(tc_type) && this._targetConditions[ii]["oligo_sequence"] != null) {
+            if (Puzzle.isOligoType(tcType) && this._targetConditions[ii]['oligo_sequence'] != null) {
                 concentration = 0;
-                if (this._targetConditions[ii]["oligo_concentration"] != null) {
-                    concentration = this._targetConditions[ii]["oligo_concentration"];
+                if (this._targetConditions[ii]['oligo_concentration'] != null) {
+                    concentration = this._targetConditions[ii]['oligo_concentration'];
                 } else {
                     concentration = 1.0;
                 }
-                this._targetConditions[ii]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                this._targetConditions[ii]['malus'] = (
+                    -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration)
+                );
             }
 
             // Multi-strands
 
-            if (this._targetConditions[ii]["type"] === "multistrand") {
-                let oligos: any[] = this._targetConditions[ii]["oligos"];
+            if (this._targetConditions[ii]['type'] === 'multistrand') {
+                let oligos: any[] = this._targetConditions[ii]['oligos'];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
-                    if (oligos[jj]["concentration"] != null) {
-                        concentration = oligos[jj]["concentration"];
+                    if (oligos[jj]['concentration'] != null) {
+                        concentration = oligos[jj]['concentration'];
                     } else {
                         concentration = 1.0;
                     }
-                    oligos[jj]["malus"] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
+                    oligos[jj]['malus'] = -Constants.BOLTZMANN * (Constants.KELVIN_0C + 37) * Math.log(concentration);
                 }
             }
         }
@@ -330,19 +288,19 @@ export class Puzzle {
         this._savedSequence = EPars.stringToSequence(seq);
     }
 
-    public set uiSpecs(ui_spec: string[]) {
+    public set uiSpecs(uiSpec: string[]) {
         this._defaultPoseState = null;
         this._useModes = 0;
 
-        for (let ii = 0; ii < ui_spec.length; ii++) {
-            if (ui_spec[ii] === "NOMODES") {
+        for (let ii = 0; ii < uiSpec.length; ii++) {
+            if (uiSpec[ii] === 'NOMODES') {
                 this._useModes = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] === "STARTSTATE") {
-                this._defaultPoseState = <PoseState>(ui_spec[ii + 1].toUpperCase());
+            } else if (uiSpec[ii] === 'STARTSTATE') {
+                this._defaultPoseState = uiSpec[ii + 1].toUpperCase() as PoseState;
                 ii++;
-            } else if (ui_spec[ii] === "NOTOOLS") {
+            } else if (uiSpec[ii] === 'NOTOOLS') {
                 this._useTools = Puzzle.BOOL_FALSE;
-            } else if (ui_spec[ii] === "NOPALLETE") {
+            } else if (uiSpec[ii] === 'NOPALLETE') {
                 this._usePallete = Puzzle.BOOL_FALSE;
             }
         }
@@ -385,6 +343,10 @@ export class Puzzle {
         return this._isSoftConstraint;
     }
 
+    public set isSoftConstraint(isSoftConstraint: boolean) {
+        this._isSoftConstraint = isSoftConstraint;
+    }
+
     public get round(): number {
         return this._round;
     }
@@ -405,8 +367,8 @@ export class Puzzle {
         return this._useBarcode;
     }
 
-    public set useBarcode(use_barcode: boolean) {
-        this._useBarcode = use_barcode;
+    public set useBarcode(useBarcode: boolean) {
+        this._useBarcode = useBarcode;
     }
 
     public get isUndoZoomAllowed(): boolean {
@@ -418,15 +380,10 @@ export class Puzzle {
     }
 
     public get isPairBrushAllowed(): boolean {
-        let is_basic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let has_target = false;
-        for (let ii = 0; ii < this._constraints.length; ii++) {
-            if (this._constraints[ii] === ConstraintType.SHAPE) {
-                has_target = true;
-            }
-        }
+        let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
+        let hasTarget = this._constraints.some((constraint) => constraint instanceof ShapeConstraint);
 
-        return is_basic || has_target;
+        return isBasic || hasTarget;
     }
 
     public get areModesAvailable(): boolean {
@@ -453,8 +410,8 @@ export class Puzzle {
         }
     }
 
-    public set defaultMode(default_mode: PoseState) {
-        this._defaultPoseState = default_mode;
+    public set defaultMode(defaultMode: PoseState) {
+        this._defaultPoseState = defaultMode;
     }
 
     public get isUsingTails(): boolean {
@@ -483,17 +440,17 @@ export class Puzzle {
 
     public getName(linked: boolean = false): string {
         if (linked && this._puzzleType !== PuzzleType.EXPERIMENTAL) {
-            let url: string = EternaURL.createURL({page: "puzzle", nid: this._nid});
+            let url: string = EternaURL.createURL({page: 'puzzle', nid: this._nid});
             return `<u><A HREF="${url}" TARGET="_blank">${this._name}</a></u>`;
         }
 
         return this._name;
     }
 
-    public hasTargetType(tc_type: string): boolean {
+    public hasTargetType(tcType: string): boolean {
         if (this._targetConditions == null) return false;
         for (let ii = 0; ii < this._targetConditions.length; ii++) {
-            if (this._targetConditions[ii]["type"] === tc_type) {
+            if (this._targetConditions[ii]['type'] === tcType) {
                 return true;
             }
         }
@@ -515,8 +472,8 @@ export class Puzzle {
             }
         }
 
-        // FIXME: This needs revision, see PoseEditMode:2163
-        let len: number = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
+        // FIXME: This needs revision, see https://github.com/EteRNAgame/eterna/blob/1e537defaad17674b189df697ee6f1c7cca070c0/flash-rna/flash-rna/PoseEdit.as#L2163
+        let len = this._beginningSequence != null ? this._beginningSequence.length : this._secstructs[index].length;
         for (let ii = 0; ii < len; ii++) {
             if (this._beginningSequence != null) {
                 seq.push(this._beginningSequence[ii]);
@@ -546,84 +503,55 @@ export class Puzzle {
         return seq.slice(0, seq.length - minus);
     }
 
-    public setUseTails(use_tails: boolean, use_short_tails: boolean): void {
-        this._useTails = use_tails;
-        this._useShortTails = use_short_tails;
+    public setUseTails(useTails: boolean, useShortTails: boolean): void {
+        this._useTails = useTails;
+        this._useShortTails = useShortTails;
     }
 
-    public transformSequence(seq: number[], target_index: number): number[] {
+    public transformSequence(seq: number[], targetIndex: number): number[] {
         if (this._targetConditions != null) {
-            if (this._targetConditions[target_index]["sequence"] != null) {
-                let target_seq_temp: number[] = EPars.stringToSequence(this._targetConditions[target_index]["sequence"]);
-                let target_seq: number[] = [];
+            if (this._targetConditions[targetIndex]['sequence'] != null) {
+                let targetSeqTemp: number[] = EPars.stringToSequence(this._targetConditions[targetIndex]['sequence']);
+                let targetSeq: number[] = [];
 
                 if (this._useTails) {
                     if (this._useShortTails) {
-                        target_seq.push(EPars.RNABASE_GUANINE);
-                        target_seq.push(EPars.RNABASE_GUANINE);
+                        targetSeq.push(EPars.RNABASE_GUANINE);
+                        targetSeq.push(EPars.RNABASE_GUANINE);
                     } else {
-                        target_seq.push(EPars.RNABASE_GUANINE);
-                        target_seq.push(EPars.RNABASE_GUANINE);
-                        target_seq.push(EPars.RNABASE_ADENINE);
-                        target_seq.push(EPars.RNABASE_ADENINE);
-                        target_seq.push(EPars.RNABASE_ADENINE);
+                        targetSeq.push(EPars.RNABASE_GUANINE);
+                        targetSeq.push(EPars.RNABASE_GUANINE);
+                        targetSeq.push(EPars.RNABASE_ADENINE);
+                        targetSeq.push(EPars.RNABASE_ADENINE);
+                        targetSeq.push(EPars.RNABASE_ADENINE);
                     }
                 }
 
-                for (let ii = 0; ii < target_seq_temp.length; ii++) {
-                    target_seq.push(target_seq_temp[ii]);
+                for (let ii = 0; ii < targetSeqTemp.length; ii++) {
+                    targetSeq.push(targetSeqTemp[ii]);
                 }
 
                 if (this._useTails) {
                     for (let ii = 0; ii < 20; ii++) {
-                        target_seq.push(EPars.RNABASE_LAST20[ii]);
+                        targetSeq.push(EPars.RNABASE_LAST20[ii]);
                     }
                 }
 
                 let locks: boolean[] = this.puzzleLocks;
 
-                if (locks.length !== target_seq.length || target_seq.length !== seq.length) {
+                if (locks.length !== targetSeq.length || targetSeq.length !== seq.length) {
                     throw new Error("lock length doesn't match object sequence");
                 }
 
-                for (let ii = 0; ii < target_seq.length; ii++) {
+                for (let ii = 0; ii < targetSeq.length; ii++) {
                     if (!locks[ii]) {
-                        target_seq[ii] = seq[ii];
+                        targetSeq[ii] = seq[ii];
                     }
                 }
-                return target_seq;
+                return targetSeq;
             }
         }
         return seq;
-    }
-
-    public toJSON(): string {
-        return JSON.stringify({
-            nodeID: this.nodeID,
-            reward: this.reward,
-            nextPuzzleID: this.nextPuzzleID,
-            rscript: this.rscript,
-            hint: this.hint,
-            puzzleType: this.puzzleType,
-            missionText: this.missionText,
-            folderName: this.folderName,
-            targetConditions: this.targetConditions,
-            constraints: this.constraints,
-            temporaryConstraints: this.temporaryConstraints,
-            curConstraints: this.curConstraints,
-            puzzleLocks: this.puzzleLocks,
-            shiftLimit: this.shiftLimit,
-            secstructs: this.getSecstructs(),
-            beginningSequence: EPars.sequenceToString(this.getBeginningSequence()),
-            savedSequence: this.savedSequence,
-            boosters: this.boosters,
-            barcodeIndices: this.barcodeIndices,
-            isSoftConstraint: this.isSoftConstraint,
-            round: this.round,
-            numSubmissions: this.numSubmissions,
-            useBarcode: this.useBarcode,
-            isUsingTails: this.isUsingTails
-        });
     }
 
     private readonly _nid: number;
@@ -639,13 +567,12 @@ export class Puzzle {
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
     private _targetConditions: any[] = null;
-    private _constraints: string[] = null;
-    private _tempConstraints: string[];
+    private _constraints: Constraint<BaseConstraintStatus>[] = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;
     private _folder: string;
     private _reward: number = 0;
-    private _rscriptOps: string = "";
+    private _rscriptOps: string = '';
     private _defaultPoseState: PoseState;
     private _useTools: number = 0;
     private _usePallete: number = 0;
@@ -655,11 +582,11 @@ export class Puzzle {
     private _isSoftConstraint: boolean = false;
     private _boosterDefs: BoostersData = null;
 
-    private static readonly T_APTAMER: string[] = ["aptamer", "aptamer+oligo"];
-    private static readonly T_OLIGO: string[] = ["oligo", "aptamer+oligo"];
+    private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
+    private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];
 
     private static readonly BOOL_TRUE: number = 1;
     private static readonly BOOL_FALSE: number = 2;
 
-    private static readonly DEFAULT_MISSION_TEXT: string = "Match the desired RNA shape!";
+    private static readonly DEFAULT_MISSION_TEXT: string = 'Match the desired RNA shape!';
 }

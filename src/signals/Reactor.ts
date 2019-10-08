@@ -1,4 +1,4 @@
-import {Cons} from "./Cons";
+import Cons from './Cons';
 
 export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
 
@@ -6,7 +6,7 @@ export type RListener = (arg1?: any, arg2?: any, arg3?: any) => void;
  * A base class for all reactive classes. This is an implementation detail, but is public so that
  * third parties may use it to create their own reactive classes, if desired.
  */
-export abstract class Reactor {
+export default abstract class Reactor {
     /** true if this reactor has at least one connection. */
     public get hasConnections(): boolean {
         return this._listeners != null;
@@ -14,7 +14,7 @@ export abstract class Reactor {
 
     protected addConnection(listener: RListener): Cons {
         if (listener == null) {
-            throw new Error("Null listener");
+            throw new Error('Null listener');
         }
         return this._addCons(new Cons(this, listener));
     }
@@ -22,11 +22,11 @@ export abstract class Reactor {
     protected removeConnection(listener: RListener): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs((): void => {
-                this._listeners = Cons.removeAll(this._listeners, listener);
+                this._listeners = Cons._removeAll(this._listeners, listener);
                 this.connectionRemoved();
             }));
         } else {
-            this._listeners = Cons.removeAll(this._listeners, listener);
+            this._listeners = Cons._removeAll(this._listeners, listener);
             this.connectionRemoved();
         }
     }
@@ -39,7 +39,7 @@ export abstract class Reactor {
             // Bail early if we have no listeners
             return;
         } else if (this._listeners === Reactor.DISPATCHING) {
-            throw new Error("Initiated notify while notifying");
+            throw new Error('Initiated notify while notifying');
         }
 
         let lners: Cons = this._listeners;
@@ -101,28 +101,28 @@ export abstract class Reactor {
     }
 
     /* internal */
-    _addCons(cons: Cons): Cons {
+    public _addCons(cons: Cons): Cons {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons.insert(this._listeners, cons);
+                this._listeners = Cons._insert(this._listeners, cons);
                 this.connectionAdded();
             }));
         } else {
-            this._listeners = Cons.insert(this._listeners, cons);
+            this._listeners = Cons._insert(this._listeners, cons);
             this.connectionAdded();
         }
         return cons;
     }
 
     /* internal */
-    _removeCons(cons: Cons): void {
+    public _removeCons(cons: Cons): void {
         if (this.isDispatching) {
             this._pendingRuns = Reactor.insert(this._pendingRuns, new Runs(() => {
-                this._listeners = Cons.remove(this._listeners, cons);
+                this._listeners = Cons._remove(this._listeners, cons);
                 this.connectionRemoved();
             }));
         } else {
-            this._listeners = Cons.remove(this._listeners, cons);
+            this._listeners = Cons._remove(this._listeners, cons);
             this.connectionRemoved();
         }
     }

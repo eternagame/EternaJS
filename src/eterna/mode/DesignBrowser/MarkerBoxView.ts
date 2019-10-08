@@ -1,7 +1,7 @@
-import {Container, Point} from "pixi.js";
-import {SelectionBox} from "./SelectionBox";
+import {Container, Point} from 'pixi.js';
+import SelectionBox from './SelectionBox';
 
-export class MarkerBoxView extends Container {
+export default class MarkerBoxView extends Container {
     constructor(color: number, markerHeight: number) {
         super();
 
@@ -50,7 +50,7 @@ export class MarkerBoxView extends Container {
     public removeMarker(index: number): void {
         let removeIndex = -1;
         for (let ii = 0; ii < this._indices.length; ii++) {
-            if (index == this._indices[ii]) {
+            if (index === this._indices[ii]) {
                 removeIndex = ii;
                 break;
             }
@@ -64,7 +64,7 @@ export class MarkerBoxView extends Container {
     }
 
     public updateView(firstVisIdx: number): void {
-        if (this._markers == null || this._markers.length == 0) {
+        if (this._markers == null || this._markers.length === 0) {
             return;
         }
 

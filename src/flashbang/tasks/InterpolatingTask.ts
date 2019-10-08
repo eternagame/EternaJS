@@ -1,8 +1,8 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Updatable} from "../core/Updatable";
-import {Easing, EasingFunc} from "../util/Easing";
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
+import Easing, {EasingFunc} from 'flashbang/util/Easing';
 
-export class InterpolatingTask extends ObjectTask implements Updatable {
+export default class InterpolatingTask extends ObjectTask implements Updatable {
     constructor(time: number = 0, easingFn: EasingFunc = null) {
         super();
         this._totalTime = Math.max(time, 0);

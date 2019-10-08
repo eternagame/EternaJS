@@ -1,22 +1,21 @@
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {GameMode} from "../mode/GameMode";
-import {Dialog} from "./Dialog";
-import {TextInputPanel} from "./TextInputPanel";
+import {KeyCode, Flashbang} from 'flashbang';
+import GameMode from 'eterna/mode/GameMode';
+import Dialog from './Dialog';
+import TextInputPanel from './TextInputPanel';
 
 /**
  * Prompts the user to paste a sequence.
  * If OK is pressed, the dialog will be closed with the sequence string.
  */
-export class PasteSequenceDialog extends Dialog<string> {
+export default class PasteSequenceDialog extends Dialog<string> {
     protected added(): void {
         super.added();
 
-        const SEQUENCE = "Sequence";
+        const SEQUENCE = 'Sequence';
 
         let inputPanel = new TextInputPanel();
         let sequenceField = inputPanel.addField(SEQUENCE, 200);
-        inputPanel.title = "Write down a sequence";
+        inputPanel.title = 'Write down a sequence';
         this.addObject(inputPanel, this.container);
 
         sequenceField.setFocus(true);
@@ -24,7 +23,7 @@ export class PasteSequenceDialog extends Dialog<string> {
         inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect(values => this.onSequenceEntered(values.get(SEQUENCE)));
+        inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
 
         let updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
@@ -39,8 +38,8 @@ export class PasteSequenceDialog extends Dialog<string> {
 
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
-            if (char !== "A" && char !== "U" && char !== "G" && char !== "C") {
-                (this.mode as GameMode).showNotification("You can only use characters A, U, G, and C");
+            if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
+                (this.mode as GameMode).showNotification('You can only use characters A, U, G, and C');
                 return;
             }
         }

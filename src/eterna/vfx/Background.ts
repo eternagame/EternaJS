@@ -1,8 +1,8 @@
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Eterna} from "../Eterna";
-import {Bubble} from "./Bubble";
+import {ContainerObject} from 'flashbang';
+import Eterna from 'eterna/Eterna';
+import Bubble from './Bubble';
 
-export class Background extends ContainerObject {
+export default class Background extends ContainerObject {
     constructor(bubbleCount: number = 20, foreground: boolean = false) {
         super();
         this._bubbleCount = bubbleCount;
@@ -24,7 +24,7 @@ export class Background extends ContainerObject {
         }
 
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
-        this.regs.add(Eterna.settings.simpleGraphics.connectNotify(value => this.disableBubbles(value)));
+        this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => this.disableBubbles(value)));
     }
 
     public disableBubbles(disable: boolean): void {
@@ -53,11 +53,11 @@ export class Background extends ContainerObject {
             let lightBlue: string; let
                 darkBlue: string;
             if (this._isFrozen) {
-                lightBlue = "rgb(67, 93, 146) 0%";
-                darkBlue = "rgb(10, 43, 87) 70%";
+                lightBlue = 'rgb(67, 93, 146) 0%';
+                darkBlue = 'rgb(10, 43, 87) 70%';
             } else {
-                lightBlue = "rgb(45, 64, 102) 0%";
-                darkBlue = "rgb(6, 26, 52) 70%";
+                lightBlue = 'rgb(45, 64, 102) 0%';
+                darkBlue = 'rgb(6, 26, 52) 70%';
             }
             Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }

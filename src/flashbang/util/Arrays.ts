@@ -1,4 +1,4 @@
-export class Arrays {
+export default class Arrays {
     /** True if two Arrays hold the same contents */
     public static shallowEqual<T>(a: T[], b: T[]): boolean {
         if (a === b) {

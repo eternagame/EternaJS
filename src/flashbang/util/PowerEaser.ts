@@ -1,4 +1,4 @@
-export class PowerEaser {
+export default class PowerEaser {
     constructor(pow: number) {
         this._pow = pow;
     }
@@ -7,14 +7,14 @@ export class PowerEaser {
         if (t === 0) {
             return to;
         }
-        return from + ((to - from) * Math.pow(dt / t, this._pow));
+        return from + ((to - from) * ((dt / t) ** this._pow));
     };
 
     public readonly easeOut = (from: number, to: number, dt: number, t: number): number => {
         if (t === 0) {
             return to;
         }
-        return from + ((to - from) * (1 - Math.pow(1 - dt / t, this._pow)));
+        return from + ((to - from) * (1 - ((1 - dt / t) ** this._pow)));
     };
 
     public readonly easeInOut = (from: number, to: number, dt: number, t: number): number => {

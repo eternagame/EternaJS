@@ -1,4 +1,4 @@
-import {Registration} from "../../signals/Registration";
+import {Registration} from 'signals';
 
 export interface LinkedElement<T> {
     next: LinkedElement<T>;
@@ -6,7 +6,7 @@ export interface LinkedElement<T> {
 }
 
 /** A singly-linked list. */
-export class LinkedList<T> {
+export default class LinkedList<T> {
     /** Return true if the list is empty. During iteration, isEmpty will always return false. */
     public get isEmpty(): boolean {
         return this._head == null;
@@ -59,7 +59,7 @@ export class LinkedList<T> {
 
     public beginIteration(): LinkedElement<T> {
         if (this._head === this.ITERATING) {
-            throw new Error("Initiated beginIteration while iterating");
+            throw new Error('Initiated beginIteration while iterating');
         }
         this._iterating = this._head;
         this._head = this.ITERATING;
@@ -69,7 +69,7 @@ export class LinkedList<T> {
     public endIteration(): void {
         // note that we're no longer dispatching
         if (this._head !== this.ITERATING) {
-            throw new Error("Not iterating");
+            throw new Error('Not iterating');
         }
 
         this._head = this._iterating;
@@ -93,7 +93,7 @@ export class LinkedList<T> {
     }
 
     /* internal */
-    removeCons(cons: Cons<T>): void {
+    public _removeCons(cons: Cons<T>): void {
         if (this.isIterating) {
             this._pendingRuns = LinkedList.pend(this._pendingRuns, new Runs(() => {
                 this._head = Cons.remove(this._head, cons);
@@ -146,7 +146,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
     public close(): void {
         // multiple disconnects are OK, we just NOOP after the first one
         if (this.owner != null) {
-            this.owner.removeCons(this);
+            this.owner._removeCons(this);
             this.owner = null;
             this.data = null;
         }

@@ -1,13 +1,13 @@
-import {DisplayObject} from "pixi.js";
-import {SignalView} from "../../signals/SignalView";
-import {GameObject} from "../core/GameObject";
-import {PointerTarget} from "../input/PointerTarget";
-import {DisplayObjectPointerTarget} from "../input/DisplayObjectPointerTarget";
+import {DisplayObject} from 'pixi.js';
+import {SignalView} from 'signals';
+import GameObject from 'flashbang/core/GameObject';
+import PointerTarget from 'flashbang/input/PointerTarget';
+import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** A convenience class that manages a DisplayObject directly. */
-export class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {
+export default class SceneObject<T extends DisplayObject = DisplayObject> extends GameObject implements PointerTarget {
     constructor(displayObject: T) {
         super();
         this._display = displayObject;

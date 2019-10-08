@@ -1,22 +1,23 @@
-import {Point} from "pixi.js";
-import {Eterna} from "../../eterna/Eterna";
-import {Sounds} from "../../eterna/resources/Sounds";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {IsLeftMouse} from "../input/InputUtil";
-import {PointerCapture} from "../input/PointerCapture";
-import {CallbackTask} from "../tasks/CallbackTask";
-import {DelayTask} from "../tasks/DelayTask";
-import {SerialTask} from "../tasks/SerialTask";
-import {DisplayUtil} from "../util/DisplayUtil";
-import {ContainerObject} from "./ContainerObject";
-import {Enableable} from "./Enableable";
+import {Point} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import SerialTask from 'flashbang/tasks/SerialTask';
+import CallbackTask from 'flashbang/tasks/CallbackTask';
+import DelayTask from 'flashbang/tasks/DelayTask';
+import PointerCapture from 'flashbang/input/PointerCapture';
+import InputUtil from 'flashbang/input/InputUtil';
+import DisplayUtil from 'flashbang/util/DisplayUtil';
+import Flashbang from 'flashbang/core/Flashbang';
+import Enableable from './Enableable';
+import ContainerObject from './ContainerObject';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-/** A button base class. */
-export abstract class Button extends ContainerObject implements Enableable {
-    public static readonly DEFAULT_DOWN_SOUND: string = Sounds.SoundButtonClick;
+export enum ButtonState {
+    UP = 0, OVER, DOWN, DISABLED
+}
 
+/** A button base class. */
+export default abstract class Button extends ContainerObject implements Enableable {
     /** Fired when the button is clicked */
     public readonly clicked: UnitSignal = new UnitSignal();
 
@@ -24,14 +25,10 @@ export abstract class Button extends ContainerObject implements Enableable {
     public readonly clickCanceled: UnitSignal = new UnitSignal();
 
     /** Sound played when the button is pressed (null for no sound) */
-    public downSound: string = Button.DEFAULT_DOWN_SOUND;
+    public downSound: string = null;
 
     /** Sound played when the button is pressed while disabled (null for no sound) */
     public disabledSound: string = null;
-
-    protected constructor() {
-        super();
-    }
 
     /* override */
     protected added(): void {
@@ -41,8 +38,8 @@ export abstract class Button extends ContainerObject implements Enableable {
 
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
-        this.regs.add(this.pointerDown.filter(IsLeftMouse).connect(() => this.onPointerDown()));
-        this.regs.add(this.pointerUp.filter(IsLeftMouse).connect(() => this.onPointerUp(true)));
+        this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(true)));
     }
 
     /* override */
@@ -133,9 +130,9 @@ export abstract class Button extends ContainerObject implements Enableable {
         this._pointerCapture.beginCapture((e: InteractionEvent) => {
             e.stopPropagation();
 
-            if (IsLeftMouse(e) && (e.type === "pointerup" || e.type === "pointerupoutside")) {
+            if (InputUtil.IsLeftMouse(e) && (e.type === 'pointerup' || e.type === 'pointerupoutside')) {
                 this.onPointerUp(false);
-            } else if (e.type === "pointercancel") {
+            } else if (e.type === 'pointercancel') {
                 this.endCapture(true);
             } else {
                 this.onPointerMove(e);
@@ -209,13 +206,13 @@ export abstract class Button extends ContainerObject implements Enableable {
     protected playStateTransitionSound(fromState: ButtonState, toState: ButtonState): void {
         // TODO: make SoundManager part of Flashbang
         if (toState === ButtonState.DOWN && this.downSound != null) {
-            Eterna.sound.playSound(this.downSound);
+            Flashbang.sound.playSound(this.downSound);
         }
     }
 
     protected playDisabledSound(): void {
         if (this.disabledSound != null) {
-            Eterna.sound.playSound(this.disabledSound);
+            Flashbang.sound.playSound(this.disabledSound);
         }
     }
 
@@ -223,8 +220,4 @@ export abstract class Button extends ContainerObject implements Enableable {
     protected _isPointerOver: boolean;
     protected _isPointerDown: boolean;
     protected _pointerCapture: PointerCapture;
-}
-
-export enum ButtonState {
-    UP = 0, OVER, DOWN, DISABLED
 }

@@ -1,21 +1,21 @@
 import {
     DisplayObject, Graphics, Matrix, Point, Rectangle
-} from "pixi.js";
-import {HAlign, VAlign} from "../core/Align";
-import {Flashbang} from "../core/Flashbang";
-import {RectangleUtil} from "./RectangleUtil";
+} from 'pixi.js';
+import * as UPNG from 'upng-js';
+import Flashbang from 'flashbang/core/Flashbang';
+import {HAlign, VAlign} from 'flashbang/core/Align';
+import RectangleUtil from './RectangleUtil';
+import Assert from './Assert';
 
-// the @types file for upng-js is broken, so we just require it directly
-const UPNG = require("upng-js");
-
-export class DisplayUtil {
+export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
         let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
             [pixels.buffer],
             Math.floor(DisplayUtil.width(target)),
-            Math.floor(DisplayUtil.height(target))
+            Math.floor(DisplayUtil.height(target)),
+            0
         );
     }
 
@@ -190,7 +190,9 @@ export class DisplayUtil {
     }
 
     /** Transforms a Rectangle from one DisplayObject's coordinate space to another's. */
-    public static transformRect(r: Rectangle, from: DisplayObject, to: DisplayObject, out: Rectangle = null): Rectangle {
+    public static transformRect(
+        r: Rectangle, from: DisplayObject, to: DisplayObject, out: Rectangle = null
+    ): Rectangle {
         let left: number = Number.MAX_VALUE;
         let top: number = Number.MAX_VALUE;
         let right: number = -Number.MAX_VALUE;
@@ -239,8 +241,10 @@ export class DisplayUtil {
     }
 
     /** Centers a DisplayObject on another DisplayObject */
-    public static center(disp: DisplayObject, relativeTo: DisplayObject,
-        xOffset: number = 0, yOffset: number = 0): void {
+    public static center(
+        disp: DisplayObject, relativeTo: DisplayObject,
+        xOffset: number = 0, yOffset: number = 0
+    ): void {
         this.positionRelative(
             disp, HAlign.CENTER, VAlign.CENTER,
             relativeTo, HAlign.CENTER, VAlign.CENTER,
@@ -299,26 +303,31 @@ export class DisplayUtil {
         let y: number = yOffset;
 
         switch (targetHAlign) {
-        case HAlign.LEFT:
-            x += relativeTo.left;
-            break;
-        case HAlign.RIGHT:
-            x += relativeTo.right;
-            break;
-        case HAlign.CENTER:
-            x += relativeTo.left + (relativeTo.width * 0.5);
-            break;
+            case HAlign.LEFT:
+                x += relativeTo.left;
+                break;
+            case HAlign.RIGHT:
+                x += relativeTo.right;
+                break;
+            case HAlign.CENTER:
+                x += relativeTo.left + (relativeTo.width * 0.5);
+                break;
+            default:
+                Assert.unreachable(targetHAlign);
         }
+
         switch (targetVAlign) {
-        case VAlign.TOP:
-            y += relativeTo.top;
-            break;
-        case VAlign.BOTTOM:
-            y += relativeTo.bottom;
-            break;
-        case VAlign.CENTER:
-            y += relativeTo.top + (relativeTo.height * 0.5);
-            break;
+            case VAlign.TOP:
+                y += relativeTo.top;
+                break;
+            case VAlign.BOTTOM:
+                y += relativeTo.bottom;
+                break;
+            case VAlign.CENTER:
+                y += relativeTo.top + (relativeTo.height * 0.5);
+                break;
+            default:
+                Assert.unreachable(targetVAlign);
         }
 
         disp.x = 0;
@@ -327,26 +336,31 @@ export class DisplayUtil {
         // should this be relative to self or parent?
         // let dispBounds = DisplayUtil.getBoundsRelative(disp, disp, DisplayUtil.POSITION_RELATIVE_TO_BOUNDS_RECT);
         switch (dispHAlign) {
-        case HAlign.LEFT:
-            x -= dispBounds.left;
-            break;
-        case HAlign.RIGHT:
-            x -= dispBounds.right;
-            break;
-        case HAlign.CENTER:
-            x -= dispBounds.left + (dispBounds.width * 0.5);
-            break;
+            case HAlign.LEFT:
+                x -= dispBounds.left;
+                break;
+            case HAlign.RIGHT:
+                x -= dispBounds.right;
+                break;
+            case HAlign.CENTER:
+                x -= dispBounds.left + (dispBounds.width * 0.5);
+                break;
+            default:
+                Assert.unreachable(dispHAlign);
         }
+
         switch (dispVAlign) {
-        case VAlign.TOP:
-            y -= dispBounds.top;
-            break;
-        case VAlign.BOTTOM:
-            y -= dispBounds.bottom;
-            break;
-        case VAlign.CENTER:
-            y -= dispBounds.top + (dispBounds.height * 0.5);
-            break;
+            case VAlign.TOP:
+                y -= dispBounds.top;
+                break;
+            case VAlign.BOTTOM:
+                y -= dispBounds.bottom;
+                break;
+            case VAlign.CENTER:
+                y -= dispBounds.top + (dispBounds.height * 0.5);
+                break;
+            default:
+                Assert.unreachable(dispVAlign);
         }
 
         disp.x = x;
@@ -371,7 +385,7 @@ export class DisplayUtil {
         if (currentObject) {
             return currentObject;
         } else {
-            throw new Error("Object not connected to target");
+            throw new Error('Object not connected to target');
         }
     }
 

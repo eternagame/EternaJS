@@ -1,16 +1,15 @@
 import {
     Container, Graphics, Sprite, Texture
-} from "pixi.js";
-import {TextBuilder} from "../../../flashbang/util/TextBuilder";
-import {TextureUtil} from "../../../flashbang/util/TextureUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {ExpPainter} from "../../ExpPainter";
-import {Feedback} from "../../Feedback";
-import {EternaTextureUtil} from "../../util/EternaTextureUtil";
+} from 'pixi.js';
+import {TextBuilder, TextureUtil} from 'flashbang';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import ExpPainter from 'eterna/ExpPainter';
+import Feedback from 'eterna/Feedback';
+import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 
-export class SequenceStringListView extends Container {
-    public constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {
+export default class SequenceStringListView extends Container {
+    constructor(fontname: string, fontsize: number, fontbold: boolean, letterWidth: number, letterHeight: number) {
         super();
 
         this._letterWidth = letterWidth;
@@ -25,10 +24,10 @@ export class SequenceStringListView extends Container {
             .color(0xffffff)
             .bold(fontbold);
 
-        this._letterTextures = SequenceStringListView.createLetterBitmaps(textBuilder, "A")
-            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "U"))
-            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "G"))
-            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, "C"));
+        this._letterTextures = SequenceStringListView.createLetterBitmaps(textBuilder, 'A')
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, 'U'))
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, 'G'))
+            .concat(SequenceStringListView.createLetterBitmaps(textBuilder, 'C'));
     }
 
     public setSize(width: number, height: number): void {
@@ -36,7 +35,7 @@ export class SequenceStringListView extends Container {
         this._height = height;
     }
 
-    public set_sequences(sequences: string[], exp_data: Feedback[], pairs: number[]): void {
+    public setSequences(sequences: string[], expData: Feedback[], pairs: number[]): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -50,35 +49,37 @@ export class SequenceStringListView extends Container {
         this._content = new Container();
         this.addChild(this._content);
 
-        let use_exp: boolean = exp_data != null;
+        let useExp: boolean = expData != null;
 
         for (let ii = 0; ii < sequences.length; ii++) {
             let seq: string = sequences[ii];
-            let shape_data: number[] = null;
-            let shape_data_start = 0;
-            let exp_painter: ExpPainter = null;
-            let is_there_shape_threshold = false;
-            let shape_threshold = 0;
-            let shape_max = 0;
+            let shapeData: number[] = null;
+            let shapeDataStart = 0;
+            let expPainter: ExpPainter = null;
+            let isThereShapeThreshold = false;
+            let shapeThreshold = 0;
+            let shapeMax = 0;
 
-            if (exp_data != null && exp_data[ii] != null) {
-                shape_data = exp_data[ii].getShapeData();
-                shape_data_start = exp_data[ii].getShapeStartIndex();
+            if (expData != null && expData[ii] != null) {
+                shapeData = expData[ii].getShapeData();
+                shapeDataStart = expData[ii].getShapeStartIndex();
             }
 
-            if (shape_data != null) {
-                shape_data = ExpPainter.transformData(exp_data[ii].getShapeData(), exp_data[ii].getShapeMax(), exp_data[ii].getShapeMin());
-                is_there_shape_threshold = true;
-                shape_threshold = exp_data[ii].getShapeThreshold();
-                shape_max = exp_data[ii].getShapeMax();
+            if (shapeData != null) {
+                shapeData = ExpPainter.transformData(
+                    expData[ii].getShapeData(), expData[ii].getShapeMax(), expData[ii].getShapeMin()
+                );
+                isThereShapeThreshold = true;
+                shapeThreshold = expData[ii].getShapeThreshold();
+                shapeMax = expData[ii].getShapeMax();
 
-                exp_painter = new ExpPainter(shape_data, shape_data_start);
-                exp_painter.continuous = Eterna.settings.useContinuousColors.value;
-                exp_painter.extendedScale = Eterna.settings.useExtendedColors.value;
+                expPainter = new ExpPainter(shapeData, shapeDataStart);
+                expPainter.continuous = Eterna.settings.useContinuousColors.value;
+                expPainter.extendedScale = Eterna.settings.useExtendedColors.value;
             }
 
             for (let jj = 0; jj < seq.length; jj++) {
-                if (ii == 0 && exp_data != null) {
+                if (ii === 0 && expData != null) {
                     if (pairs[jj] < 0) {
                         this._graphics.beginFill(0xCCCC00, 0.5);
                     } else {
@@ -94,38 +95,40 @@ export class SequenceStringListView extends Container {
                     this._graphics.endFill();
                 }
 
-                let letter_index = 0;
-                let letter: string = seq.charAt(jj);
+                let letterIndex = 0;
+                let letter = seq.charAt(jj);
 
-                if (letter == "A") {
-                    letter_index = SequenceStringListView.A_INDEX;
-                } else if (letter == "U") {
-                    letter_index = SequenceStringListView.U_INDEX;
-                } else if (letter == "G") {
-                    letter_index = SequenceStringListView.G_INDEX;
-                } else if (letter == "C") {
-                    letter_index = SequenceStringListView.C_INDEX;
+                if (letter === 'A') {
+                    letterIndex = SequenceStringListView.A_INDEX;
+                } else if (letter === 'U') {
+                    letterIndex = SequenceStringListView.U_INDEX;
+                } else if (letter === 'G') {
+                    letterIndex = SequenceStringListView.G_INDEX;
+                } else if (letter === 'C') {
+                    letterIndex = SequenceStringListView.C_INDEX;
                 }
 
-                let bd_index = 0;
+                let bdIndex = 0;
 
-                if (!use_exp) {
-                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER;
-                } else if (shape_data == null || jj < shape_data_start || jj >= shape_data.length + shape_data_start) {
-                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1;
+                if (!useExp) {
+                    bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER;
+                } else if (shapeData == null || jj < shapeDataStart || jj >= shapeData.length + shapeDataStart) {
+                    bdIndex = (
+                        letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1
+                    );
                 } else {
-                    let color_index = 0;
+                    let colorIndex = 0;
 
-                    if (is_there_shape_threshold) {
-                        color_index = exp_painter.getColorLevelWithMidpoint(jj, shape_threshold, shape_max);
+                    if (isThereShapeThreshold) {
+                        colorIndex = expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax);
                     } else {
-                        color_index = exp_painter.getColorLevel(jj);
+                        colorIndex = expPainter.getColorLevel(jj);
                     }
 
-                    bd_index = letter_index * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + color_index;
+                    bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
                 }
 
-                let letterSprite = new Sprite(this._letterTextures[bd_index]);
+                let letterSprite = new Sprite(this._letterTextures[bdIndex]);
                 letterSprite.x = jj * this._letterWidth;
                 letterSprite.y = ii * this._letterHeight;
                 this._content.addChild(letterSprite);
@@ -139,21 +142,21 @@ export class SequenceStringListView extends Container {
         let tf = textBuilder.text(letter).build();
         let tfTex = TextureUtil.renderToTexture(tf);
 
-        let color = EPars.getLetterColor(letter);
+        let baseColor = EPars.getLetterColor(letter);
         textures.push(EternaTextureUtil.colorTransform(
             tfTex,
-            color / (256 * 256),
-            (color % (256 * 256)) / 256,
-            color % 256, 0, 0, 0
+            baseColor / (256 * 256),
+            (baseColor % (256 * 256)) / 256,
+            baseColor % 256, 0, 0, 0
         ));
 
         for (let ii = -ExpPainter.NUM_COLORS; ii <= 2 * ExpPainter.NUM_COLORS + 1; ii++) {
-            let color = ExpPainter.getColorByLevel(ii);
+            let expColor = ExpPainter.getColorByLevel(ii);
             textures.push(EternaTextureUtil.colorTransform(
                 tfTex,
-                color / (256 * 256),
-                (color % (256 * 256)) / 256,
-                color % 256, 0, 0, 0
+                expColor / (256 * 256),
+                (expColor % (256 * 256)) / 256,
+                expColor % 256, 0, 0, 0
             ));
         }
 

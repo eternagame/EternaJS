@@ -11,7 +11,8 @@
     "moduleResolution": "node",
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "baseUrl": "./src"
   },
   "include": [
     "./src/**/*.ts"

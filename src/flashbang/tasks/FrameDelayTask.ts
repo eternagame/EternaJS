@@ -1,8 +1,8 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Updatable} from "../core/Updatable";
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
 
 /** Delays for the given number of frames. (Unlike DelayTask, which delays for a specific amount of time.) */
-export class FrameDelayTask extends ObjectTask implements Updatable {
+export default class FrameDelayTask extends ObjectTask implements Updatable {
     constructor(frames: number = 1) {
         super();
         this._frames = frames;

@@ -1,4 +1,4 @@
-import {ObjectTask} from "../core/ObjectTask";
+import ObjectTask from 'flashbang/core/ObjectTask';
 
 type TaskCreator = () => ObjectTask;
 
@@ -9,7 +9,7 @@ type TaskCreator = () => ObjectTask;
  * When the RepeatingTask completes its task, it will call taskCreator to regenerate the task.
  * If taskCreator returns null, the RepeatingTask will complete; else it will keep running.
  */
-export class RepeatingTask extends ObjectTask {
+export default class RepeatingTask extends ObjectTask {
     constructor(taskCreator: TaskCreator) {
         super();
         this._taskCreator = taskCreator;

@@ -1,13 +1,10 @@
-import {GlowFilter} from "pixi-filters";
-import {Graphics} from "pixi.js";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {VisibleTask} from "../../flashbang/tasks/VisibleTask";
-import {EPars} from "../EPars";
+import {Graphics} from 'pixi.js';
+import EPars from 'eterna/EPars';
+import {
+    SceneObject, SerialTask, AlphaTask, VisibleTask, Vector2
+} from 'flashbang';
 
-export class LightRay extends SceneObject<Graphics> {
+export default class LightRay extends SceneObject<Graphics> {
     constructor() {
         super(new Graphics());
     }
@@ -36,7 +33,7 @@ export class LightRay extends SceneObject<Graphics> {
         this._display.moveTo(0, 2);
         this._display.lineTo(len, 30);
         for (let ii = 1; ii <= 7; ii++) {
-            let lineAngle: number = Math.PI * (ii - 4) / 8;
+            let lineAngle: number = (Math.PI * (ii - 4)) / 8;
             this._display.lineTo(len + Math.cos(lineAngle) * 30, -Math.sin(lineAngle) * 30);
         }
 
@@ -61,5 +58,5 @@ export class LightRay extends SceneObject<Graphics> {
         }
     }
 
-    private static readonly ANIM = "Anim";
+    private static readonly ANIM = 'Anim';
 }

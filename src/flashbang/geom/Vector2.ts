@@ -1,7 +1,7 @@
-import {Point} from "pixi.js";
+import {Point} from 'pixi.js';
 
 /** A 2D vector */
-export class Vector2 {
+export default class Vector2 {
     public x: number = 0;
     public y: number = 0;
 
@@ -273,12 +273,12 @@ export class Vector2 {
 
     /** Returns true if this vector is exactly equal to v. */
     public equals(obj: Record<string, any>): boolean {
-        const v: Vector2 = (<Vector2>obj);
+        const v: Vector2 = obj as Vector2;
         return (v != null && this.x === v.x && this.y === v.y);
     }
 
     /** Returns true if this Vector's components are equal to v within epsilon */
-    public epsilonEquals(v: Vector2, epsilon: number = 0.00001): boolean {
+    public epsilonEquals(v: Vector2, epsilon = 0.00001): boolean {
         return this.similar(v, epsilon);
     }
 

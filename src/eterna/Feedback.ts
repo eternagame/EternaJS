@@ -1,36 +1,41 @@
-export class Feedback {
+export default class Feedback {
     public static readonly EXPCODES: number[] = [1, -100, -200];
-    public static readonly EXPSTRINGS: string[] = ["NOT SYNTHESIZED", "FAILED", "NOT INTERPRETABLE"];
-    public static readonly EXPDISPLAYS: string[] = ["-", "<FONT COLOR='#FF3333'>Failed</FONT>", "<FONT COLOR='#FF33FF'>Unreadable</FONT>"];
-    public static readonly EXPDISPLAYS_LONG: string[] = ["Not synthesized",
+    public static readonly EXPSTRINGS: string[] = ['NOT SYNTHESIZED', 'FAILED', 'NOT INTERPRETABLE'];
+    public static readonly EXPDISPLAYS: string[] = [
+        '-', "<FONT COLOR='#FF3333'>Failed</FONT>", "<FONT COLOR='#FF33FF'>Unreadable</FONT>"
+    ];
+
+    public static readonly EXPDISPLAYS_LONG: string[] = ['Not synthesized',
         "<B><FONT COLOR='#FF3333'>[FAILED..]</FONT></B> This design failed to synthesize in test tubes.",
         "<B><FONT COLOR='#FF33FF'>[Unreadable..]</FONT></B> The synthesis result of this was not interpretable."];
 
     public static readonly EXPSCORES: number[] = [0, 10, 15];
 
-    public static scoreFeedback(shapedata: number[], secstruct: string, start_index: number, min: number, threshold: number, max: number): number {
+    public static scoreFeedback(
+        shapedata: number[], secstruct: string, startIndex: number, min: number, threshold: number, max: number
+    ): number {
         let score = 0;
 
         for (let ii = 0; ii < secstruct.length; ii++) {
-            if (ii < start_index) {
+            if (ii < startIndex) {
                 continue;
             }
-            if (ii - start_index >= shapedata.length) {
+            if (ii - startIndex >= shapedata.length) {
                 continue;
             }
 
             let char: string = secstruct.charAt(ii);
 
-            if (char === ".") {
-                if (shapedata[ii - start_index] > (threshold / 4 + min / 4 * 3)) {
+            if (char === '.') {
+                if (shapedata[ii - startIndex] > (threshold / 4 + (min / 4) * 3)) {
                     score++;
                 }
-            } else if (shapedata[ii - start_index] < threshold) {
+            } else if (shapedata[ii - startIndex] < threshold) {
                 score++;
             }
         }
 
-        return Math.round(score / shapedata.length * 100);
+        return Math.round((score / shapedata.length) * 100);
     }
 
     // / Ad-hoc object for Brent's theophylline puzzle
@@ -47,26 +52,26 @@ export class Feedback {
             this._shapeStarts[index] = dat[0] - 1;
             dat.splice(0, 1);
             this._shapeData[index] = dat.slice();
-            let shape_data: number[] = this._shapeData[index];
+            let shapeData: number[] = this._shapeData[index];
 
-            let smax: number = shape_data[0];
-            let smin: number = shape_data[0];
-            let savg: number = shape_data[0];
+            let smax: number = shapeData[0];
+            let smin: number = shapeData[0];
+            let savg: number = shapeData[0];
 
-            for (let ii = 0; ii < shape_data.length; ii++) {
-                if (shape_data[ii] > smax) {
-                    smax = shape_data[ii];
+            for (let ii = 0; ii < shapeData.length; ii++) {
+                if (shapeData[ii] > smax) {
+                    smax = shapeData[ii];
                 }
 
-                if (shape_data[ii] < smin) {
-                    smin = shape_data[ii];
+                if (shapeData[ii] < smin) {
+                    smin = shapeData[ii];
                 }
 
-                savg += shape_data[ii];
+                savg += shapeData[ii];
             }
 
-            if (shape_data.length > 0) {
-                savg /= shape_data.length;
+            if (shapeData.length > 0) {
+                savg /= shapeData.length;
             }
 
             if (threshold != null) {
