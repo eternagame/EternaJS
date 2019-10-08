@@ -69,7 +69,7 @@ export default class RNALayout {
         return this._root;
     }
 
-    public setupTree(pairs: number[], targetPairs : number[]): void {
+    public setupTree(pairs: number[], targetPairs : number[] = null ): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
@@ -79,7 +79,7 @@ export default class RNALayout {
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
 
-        /// bi_pairs is 'symmetrized'. Like pairs,
+        /// biPairs is 'symmetrized'. Like pairs,
         ///   an array the same length as RNA
         ///   with -1 for unpaired bases, and
         ///   with the partner number for each paired base.
@@ -96,17 +96,17 @@ export default class RNALayout {
 
         /// Array that will be used for scoring
         /// Shifts so that
-        this._biPairs = new Array(bi_pairs.length + 1);
-        for (ii = 0; ii < bi_pairs.length; ii++) {
-            this._biPairs[ii + 1] = bi_pairs[ii] + 1;
+        this._scoreBiPairs = new Array(biPairs.length + 1);
+        for (ii = 0; ii < biPairs.length; ii++) {
+            this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
         }
-        this._biPairs[0] = biPairs.length;
+        this._scoreBiPairs[0] = biPairs.length;
 
         /// no tree if there are no pairs -- special case to be handled
         ///  separately in getCoords.
         let foundPair: boolean = false;
-        for (ii = 0; ii < bi_pairs.length; ii++) {
-            if (bi_pairs[ii] >= 0) {
+        for (ii = 0; ii < biPairs.length; ii++) {
+            if (biPairs[ii] >= 0) {
                 foundPair = true;
                 break;
             }
@@ -195,7 +195,7 @@ export default class RNALayout {
     }
 
     public scoreTree(seq: number[], folder: Folder): void {
-        if (this._biPairs == null) {
+        if (this._scoreBiPairs == null) {
             throw new Error('Layout tree is not properly setup for scoring');
         }
 
@@ -262,7 +262,7 @@ export default class RNALayout {
     }
 
 
-    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, goX: number, goY: number, flipSign : number = 1 ): void {
+    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign : number = 1 ): void {
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
@@ -273,7 +273,7 @@ export default class RNALayout {
         rootnode.flipSign = flipSign;
 
         if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
-            this.drawTreeCustomLayout(rootnode, parentnode, start_x, start_y, goX, goY, flipSign);
+            this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, flipSign);
             return;
         }
         if (rootnode.children.length === 1) {
@@ -283,14 +283,14 @@ export default class RNALayout {
             if (rootnode.children[0].isPair) {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, flipSign
                 );
             } else if (!rootnode.children[0].isPair && rootnode.children[0].indexA < 0) {
-                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY);
+                this.drawTreeRecursive(rootnode.children[0], rootnode, startX, startY, goX, goY, flipSign);
             } else {
                 this.drawTreeRecursive(
                     rootnode.children[0], rootnode,
-                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY
+                    startX + goX * this._primarySpace, startY + goY * this._primarySpace, goX, goY, flipSign
                 );
             }
         } else if (rootnode.children.length > 1) {
@@ -354,7 +354,7 @@ export default class RNALayout {
                 let childGoLen = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
                 this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
-                    childGoX / childGoLen, childGoY / childGoLen);
+                    childGoX / childGoLen, childGoY / childGoLen, flipSign);
 
                 if (rootnode.children[ii].isPair) {
                     lengthWalker += this._pairSpace / 2.0;
@@ -366,13 +366,13 @@ export default class RNALayout {
         }
     }
 
-    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, start_x: number, start_y: number, goX: number, goY: number, flipSign : number ): void {
+    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign : number ): void {
         let ii: number;
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
-        rootnode.x = start_x;
-        rootnode.y = start_y;
+        rootnode.x = startX;
+        rootnode.y = startY;
         let anchor_x: number = 0;
         let anchor_y: number = 0;
         let anchor_custom_x: number = 0;
@@ -596,7 +596,7 @@ export default class RNALayout {
     private _customLayout: Array<[number, number]>;
 
     // / "New" method to gather NN free energies, just use the folding engine
-    private _biPairs: number[];
+    private _scoreBiPairs: number[];
 
     private static readonly NODE_R = 10;
 }
