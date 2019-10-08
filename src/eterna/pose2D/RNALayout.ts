@@ -18,6 +18,43 @@ export class RNATreeNode {
     public goY: number = 0;
 }
 
+// The RNATree has a node for each unpaired base, each base pair, and each junction tracing a sort
+//   of 'skeleton' through the layout.                  
+//
+//      5   4             
+//      x   x
+//       \ /     3      2      1  
+// 6 x<-- x <--  x <--- x <--- x <--- x [root]
+//       / \    10     11     12     / \     
+//      x   x                       x   x     
+//      7   8                      14   15
+//
+//      x = RNATreeNode
+//
+// * Root of tree is in the most exterior junction
+// * Root node does not have indexA or indexB defined! It is centered at 0,0.
+// * For each pair node, isPair = true, indexA and indexB are defined, and x,y center is at midpoint of two pairs.
+// * For each  junction,  x,y center is at center of circle.
+// * For each unpaired base node, center is at actual plot position.
+// * Default rendering assumes path of RNA is counter-clockwise, different from most other codebases! 
+//
+//       (goX,goY)         is unit vector  pointing in 'direction' from previous node into current node. 
+//       (crossX, crossY)  appears below as an orthogonal unit vector. For a base pair node, it points
+//                              from the higher-number base to the lower-number base (consistent with 
+//                              counterclockwise rendering)
+//                 
+// * Above rendering can be overridden by customLayout, an array of x,y positions that makes the RNA junctions  
+//      look 'nice' perhaps echoing the 3D structure of the RNA. (a.k.a., "2.5D" layout). This customLayout
+//      is applied to junctions that match the target structure (encoded in targetPairs). Note that
+//      if the customLayout has clockwise helices in parts, that will override counterclockwise rendering of
+//      any helices that are daughters through the flipSign variable (-1 for clockwise, +1 for counterclockwise)                     
+//
+// TODO: The recursions below copy some code, unfortunately.
+// TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really 
+//           operations that are useful in separate chunks.
+//        
+//    -- rhiju, 2019, reviewing/updating code that was written ages ago by someone else.
+//
 export class RNALayout {
     public constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
         this._primarySpace = primSpace;
@@ -259,8 +296,10 @@ export class RNALayout {
 
         if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
             this.drawTreeCustomLayout(rootnode, parentnode, start_x, start_y, go_x, go_y);
+            console.log( 'going to draw customLayout for', rootnode.indexA)
             return;
         }
+        console.log( '*not* going to draw customLayout for', rootnode.indexA)
         if (rootnode.children.length === 1) {
             rootnode.x = start_x;
             rootnode.y = start_y;
