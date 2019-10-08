@@ -20,14 +20,14 @@ export class RNATreeNode {
 }
 
 // The RNATree has a node for each unpaired base, each base pair, and each junction tracing a sort
-//   of 'skeleton' through the layout.                  
+//   of 'skeleton' through the layout.
 //
-//      5   4             
+//      5   4
 //      x   x
-//       \ /     3      2      1  
+//       \ /     3      2      1
 // 6 x<-- x <--  x <--- x <--- x <--- x [root]
-//       / \    10     11     12     / \     
-//      x   x                       x   x     
+//       / \    10     11     12     / \
+//      x   x                       x   x
 //      7   8                      14   15
 //
 //      x = RNATreeNode
@@ -37,23 +37,23 @@ export class RNATreeNode {
 // * For each pair node, isPair = true, indexA and indexB are defined, and x,y center is at midpoint of two pairs.
 // * For each  junction,  x,y center is at center of circle.
 // * For each unpaired base node, center is at actual plot position.
-// * Default rendering assumes path of RNA is counter-clockwise, different from most other codebases! 
+// * Default rendering assumes path of RNA is counter-clockwise, different from most other codebases!
 //
-//       (goX,goY)         is unit vector  pointing in 'direction' from previous node into current node. 
+//       (goX,goY)         is unit vector  pointing in 'direction' from previous node into current node.
 //       (crossX, crossY)  appears below as an orthogonal unit vector. For a base pair node, it points
-//                              from the higher-number base to the lower-number base (consistent with 
+//                              from the higher-number base to the lower-number base (consistent with
 //                              counterclockwise rendering)
-//                 
-// * Above rendering can be overridden by customLayout, an array of x,y positions that makes the RNA junctions  
+//
+// * Above rendering can be overridden by customLayout, an array of x,y positions that makes the RNA junctions
 //      look 'nice' perhaps echoing the 3D structure of the RNA. (a.k.a., "2.5D" layout). This customLayout
 //      is applied to junctions that match the target structure (encoded in targetPairs). Note that
 //      if the customLayout has clockwise helices in parts, that will override counterclockwise rendering of
-//      any helices that are daughters through the flipSign variable (-1 for clockwise, +1 for counterclockwise)                     
+//      any helices that are daughters through the flipSign variable (-1 for clockwise, +1 for counterclockwise)
 //
 // TODO: The recursions below copy some code, unfortunately.
-// TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really 
+// TODO: Its probably not necessary for user to initialize, drawTree, and getCoords separately -- these aren't really
 //           operations that are useful in separate chunks.
-//        
+//
 //    -- rhiju, 2019, reviewing/updating code that was written ages ago by someone else.
 //
 export default class RNALayout {
@@ -69,7 +69,7 @@ export default class RNALayout {
         return this._root;
     }
 
-    public setupTree(pairs: number[], targetPairs : number[] = null ): void {
+    public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
@@ -79,10 +79,10 @@ export default class RNALayout {
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
 
-        /// biPairs is 'symmetrized'. Like pairs,
-        ///   an array the same length as RNA
-        ///   with -1 for unpaired bases, and
-        ///   with the partner number for each paired base.
+        // / biPairs is 'symmetrized'. Like pairs,
+        // /   an array the same length as RNA
+        // /   with -1 for unpaired bases, and
+        // /   with the partner number for each paired base.
         for (ii = 0; ii < pairs.length; ii++) {
             biPairs[ii] = -1;
         }
@@ -94,17 +94,17 @@ export default class RNALayout {
             }
         }
 
-        /// Array that will be used for scoring
-        /// Shifts so that
+        // / Array that will be used for scoring
+        // / Shifts so that
         this._scoreBiPairs = new Array(biPairs.length + 1);
         for (ii = 0; ii < biPairs.length; ii++) {
             this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
         }
         this._scoreBiPairs[0] = biPairs.length;
 
-        /// no tree if there are no pairs -- special case to be handled
-        ///  separately in getCoords.
-        let foundPair: boolean = false;
+        // / no tree if there are no pairs -- special case to be handled
+        // /  separately in getCoords.
+        let foundPair = false;
         for (ii = 0; ii < biPairs.length; ii++) {
             if (biPairs[ii] >= 0) {
                 foundPair = true;
@@ -143,29 +143,29 @@ export default class RNALayout {
         } else {
             // if longer, make the sequence form a circle instead
             // FIXME: there's a bit of code duplication here, somewhat inelegant...
-            //   This should be easy to unify, but why is circle_radius not updated along with circle_length?
+            //   This should be easy to unify, but why is circleRadius not updated along with circleLength?
             //    Need to think through an oligo case carefully -- rhiju
-            let circle_length: number = (xarray.length + 1) * this._primarySpace + this._pairSpace;
-            let circle_radius: number = circle_length / (2 * Math.PI);
-            let oligo_displacement: number = 0;
+            let circleLength: number = (xarray.length + 1) * this._primarySpace + this._pairSpace;
+            let circleRadius: number = circleLength / (2 * Math.PI);
+            let oligoDisplacement = 0;
             for (let ii = 0; ii < xarray.length; ii++) {
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
-                    oligo_displacement += 2 * this._primarySpace;
+                    oligoDisplacement += 2 * this._primarySpace;
                 }
             }
-            circle_length += oligo_displacement;
-	    
-            let length_walker: number = this._pairSpace / 2.0;
-            let goX: number = 0;
-            let goY: number = 1;
-            let _root_x: number = goX * circle_radius;
-            let _root_y: number = goY * circle_radius;
+            circleLength += oligoDisplacement;
+
+            let lengthWalker: number = this._pairSpace / 2.0;
+            let goX = 0;
+            let goY = 1;
+            let _rootX: number = goX * circleRadius;
+            let _rootY: number = goY * circleRadius;
             let crossX: number = -goY;
             let crossY: number = goX;
             for (let ii = 0; ii < xarray.length; ii++) {
-                length_walker += this._primarySpace;
+                lengthWalker += this._primarySpace;
                 if (this._exceptionIndices != null && this._exceptionIndices.indexOf(ii) >= 0) {
-                    length_walker += 2 * this._primarySpace;
+                    lengthWalker += 2 * this._primarySpace;
                 }
 
                 let radAngle: number = (lengthWalker / circleLength) * 2 * Math.PI - Math.PI / 2.0;
@@ -179,7 +179,7 @@ export default class RNALayout {
         }
     }
 
-    public drawTree( customLayout : Array<[number,number]> ): void {
+    public drawTree(customLayout: Array<[number, number]> = null ): void {
         this._customLayout = customLayout;
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, 1);
@@ -262,11 +262,11 @@ export default class RNALayout {
     }
 
 
-    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign : number = 1 ): void {
+    private drawTreeRecursive(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign: number = 1): void {
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
-        let oligoDisplacement: number = 0;
+        let oligoDisplacement = 0;
 
         rootnode.goX = goX;
         rootnode.goY = goY;
@@ -366,37 +366,37 @@ export default class RNALayout {
         }
     }
 
-    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign : number ): void {
+    private drawTreeCustomLayout(rootnode: RNATreeNode, parentnode: RNATreeNode, startX: number, startY: number, goX: number, goY: number, flipSign: number): void {
         let ii: number;
         let crossX: number = -goY * flipSign;
         let crossY: number = goX * flipSign;
 
         rootnode.x = startX;
         rootnode.y = startY;
-        let anchor_x: number = 0;
-        let anchor_y: number = 0;
-        let anchor_custom_x: number = 0;
-        let anchor_custom_y: number = 0;
-        let anchor_custom_goX: number = 0;
-        let anchor_custom_goY: number = 1;
-        let anchor_custom_crossX: number = -1;
-        let anchor_custom_crossY: number = 0;
-        let anchor_custom_whichway : number = 1;
-        
-        let anchornode : RNATreeNode = null;
+        let anchor_x = 0;
+        let anchor_y = 0;
+        let anchor_custom_x = 0;
+        let anchor_custom_y = 0;
+        let anchor_custom_goX = 0;
+        let anchor_custom_goY = 1;
+        let anchor_custom_crossX = -1;
+        let anchor_custom_crossY = 0;
+        let anchor_custom_whichway = 1;
+
+        let anchornode: RNATreeNode = null;
         if (parentnode && parentnode.isPair) {
-            // this is the case in junctions, where root is 'pseudonode' in middle of junction, 
+            // this is the case in junctions, where root is 'pseudonode' in middle of junction,
             //  and parent is the exterior pair (or the global root)
             anchornode = parentnode;
-        } else if ( rootnode && rootnode.isPair ) {
+        } else if (rootnode && rootnode.isPair) {
             // this can be the case in stacked pairs.
             anchornode = rootnode;
         }
         if (anchornode != null) {
             anchor_x = anchornode.x;
             anchor_y = anchornode.y;
-            let custom_coordA: [number, number] = this._customLayout[anchornode.indexA]
-            let custom_coordB: [number, number] = this._customLayout[anchornode.indexB]
+            let custom_coordA: [number, number] = this._customLayout[anchornode.indexA];
+            let custom_coordB: [number, number] = this._customLayout[anchornode.indexB];
             anchor_custom_x = (custom_coordA[0] + custom_coordB[0]) / 2;
             anchor_custom_y = (custom_coordA[1] + custom_coordB[1]) / 2;
             anchor_custom_crossX = (custom_coordA[0] - custom_coordB[0]);
@@ -407,19 +407,19 @@ export default class RNALayout {
             // are we rendering counterclockwise (default) or clockwise (non-default, flipSign = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
-            let anchor_custom_coord_next : [number,number] = this._customLayout[ anchornode.indexA + 1 ];
-            let anchor_custom_go_next_x : number = anchor_custom_coord_next[0] - anchor_custom_x;
-            let anchor_custom_go_next_y : number = anchor_custom_coord_next[1] - anchor_custom_y;
-            anchor_custom_whichway = Math.sign( anchor_custom_go_next_x * anchor_custom_goX + anchor_custom_go_next_y * anchor_custom_goY );
-            anchor_custom_goX = anchor_custom_goX * anchor_custom_whichway;
-            anchor_custom_goY = anchor_custom_goY * anchor_custom_whichway;
+            let anchor_custom_coord_next: [number, number] = this._customLayout[anchornode.indexA + 1];
+            let anchor_custom_go_next_x: number = anchor_custom_coord_next[0] - anchor_custom_x;
+            let anchor_custom_go_next_y: number = anchor_custom_coord_next[1] - anchor_custom_y;
+            anchor_custom_whichway = Math.sign(anchor_custom_go_next_x * anchor_custom_goX + anchor_custom_go_next_y * anchor_custom_goY);
+            anchor_custom_goX *= anchor_custom_whichway;
+            anchor_custom_goY *= anchor_custom_whichway;
         }
 
         for (ii = 0; ii < rootnode.children.length; ii++) {
-            // read out where this point should be based on 'this._customLayout'. get coordinates in 
-            // "local coordinate frame" set by parent pair in this._customLayout. 
+            // read out where this point should be based on 'this._customLayout'. get coordinates in
+            // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let custom_coord: [number, number] = this._customLayout[rootnode.children[ii].indexA].slice();
+            let custom_coord: number[] = this._customLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
                 let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
                 let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
@@ -427,10 +427,10 @@ export default class RNALayout {
                 custom_coord[1] = (custom_coordA[1] + custom_coordB[1]) / 2;
             }
 
-            let child_x: number = 0.0;
-            let child_y: number = 0.0;
-            let child_goX: number = 0.0;
-            let child_goY: number = 0.0;
+            let child_x = 0.0;
+            let child_y = 0.0;
+            let child_goX = 0.0;
+            let child_goY = 0.0;
             child_x = custom_coord[0] * this._primarySpace;
             child_y = custom_coord[1] * this._primarySpace;
             if (anchornode != null) {
@@ -445,7 +445,7 @@ export default class RNALayout {
                 child_y = anchor_y + crossY * template_x + goY * template_y;
             }
 
-            let child_flipSign : number = flipSign;
+            let child_flipSign: number = flipSign;
             if (rootnode.children[ii].isPair) {
                 let custom_coordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
                 let custom_coordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
@@ -454,16 +454,16 @@ export default class RNALayout {
                 let custom_goX: number = custom_crossY;
                 let custom_goY: number = -custom_crossX;
 
-                let custom_coord_next : [number,number] = this._customLayout[ rootnode.children[ii].indexA + 1 ];
-                let custom_go_next_x : number = custom_coord_next[0] - custom_coord[0];
-                let custom_go_next_y : number = custom_coord_next[1] - custom_coord[1];
-                let child_custom_whichway : number = Math.sign( custom_go_next_x * custom_goX + custom_go_next_y * custom_goY );
-                custom_goX = custom_goX * child_custom_whichway;
-                custom_goY = custom_goY * child_custom_whichway;
-    
+                let custom_coord_next: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
+                let custom_go_next_x: number = custom_coord_next[0] - custom_coord[0];
+                let custom_go_next_y: number = custom_coord_next[1] - custom_coord[1];
+                let child_custom_whichway: number = Math.sign(custom_go_next_x * custom_goX + custom_go_next_y * custom_goY);
+                custom_goX *= child_custom_whichway;
+                custom_goY *= child_custom_whichway;
+
                 child_goX = custom_goX;
                 child_goY = custom_goY;
-                child_flipSign = flipSign * child_custom_whichway/anchor_custom_whichway;        
+                child_flipSign = flipSign * child_custom_whichway / anchor_custom_whichway;
                 if (anchornode != null) {
                     let template_goX = custom_goX * anchor_custom_crossX + custom_goY * anchor_custom_crossY;
                     let template_goY = custom_goX * anchor_custom_goX + custom_goY * anchor_custom_goY;
@@ -557,7 +557,7 @@ export default class RNALayout {
         return 0;
     }
 
-    private junctionMatchesTarget( rootnode : RNATreeNode, parentnode : RNATreeNode ) : boolean {
+    private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode): boolean {
         if (this._targetPairs == null) return false;
 
         if (parentnode && parentnode.isPair) {
@@ -566,9 +566,9 @@ export default class RNALayout {
                 return false;
             }
         }
-        if (rootnode.children.length == 1 && rootnode.children[0].indexA < 0 ) return false;
+        if (rootnode.children.length == 1 && rootnode.children[0].indexA < 0) return false;
 
-        for ( let ii : number = 0; ii < rootnode.children.length; ii++) {
+        for (let ii = 0; ii < rootnode.children.length; ii++) {
             if (rootnode.children[ii].isPair) {
                 // all other pairs of junction paired in target structure?
                 if (this._targetPairs[rootnode.children[ii].indexA] != rootnode.children[ii].indexB) {
@@ -577,7 +577,7 @@ export default class RNALayout {
             } else {
                 // all unpaired bases of junction also unpaired in target structure?
                 if (this._targetPairs[rootnode.children[ii].indexA] > 0) {
-                   return false;
+                    return false;
                 }
             }
         }
