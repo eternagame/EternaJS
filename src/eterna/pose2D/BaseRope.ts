@@ -34,7 +34,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     public redraw(forceBaseXY: boolean): void {
         this._graphics.clear();
 
-        if (!this._enabled || this._pose.isAnimating) return;
+        if (!this._enabled) return;
 
         let idx: number[] = [];
         let baseposX: number[] = [];
