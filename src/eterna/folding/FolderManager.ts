@@ -1,10 +1,10 @@
-import {Eterna} from "../Eterna";
-import {Folder} from "./Folder";
-import {RNAFoldBasic} from "./RNAFoldBasic";
-import {LinearFoldC} from "./LinearFoldC";
-import {Vienna} from "./Vienna";
+import Eterna from 'eterna/Eterna';
+import Folder from './Folder';
+import RNAFoldBasic from './RNAFoldBasic';
+import Vienna from './Vienna';
+import LinearFoldC from './LinearFoldC';
 
-export class FolderManager {
+export default class FolderManager {
     public static get instance(): FolderManager {
         if (FolderManager._instance == null) {
             FolderManager._instance = new FolderManager();
@@ -40,17 +40,17 @@ export class FolderManager {
         return null;
     }
 
-    public getNextFolder(folder_name: string, filter_cb: (folder: Folder) => boolean = null): Folder {
+    public getNextFolder(folderName: string, filterCB: (folder: Folder) => boolean = null): Folder {
         let curFolderIdx = -1;
         for (let ii = 0; ii < this._folders.length; ii++) {
-            if (this._folders[ii].name.toLowerCase() === folder_name.toLowerCase()) {
+            if (this._folders[ii].name.toLowerCase() === folderName.toLowerCase()) {
                 curFolderIdx = ii;
                 break;
             }
         }
 
         if (curFolderIdx < 0) {
-            throw new Error(`No such folder '${folder_name}'`);
+            throw new Error(`No such folder '${folderName}'`);
         }
 
         for (let jj = 1; jj < this._folders.length; jj++) {
@@ -61,7 +61,7 @@ export class FolderManager {
                 || folder.name === RNAFoldBasic.NAME
                 || folder.name === LinearFoldC.NAME
                 || !folder.isFunctional
-                || (filter_cb != null && filter_cb(folder))) {
+                || (filterCB != null && filterCB(folder))) {
                 continue;
             }
 

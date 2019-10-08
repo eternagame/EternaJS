@@ -1,7 +1,7 @@
-import {Text, TextStyle, TextStyleOptions} from "pixi.js";
+import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
 
-export class TextBuilder {
-    public constructor(text: string = "") {
+export default class TextBuilder {
+    constructor(text = '') {
         this.text(text);
     }
 
@@ -15,7 +15,7 @@ export class TextBuilder {
 
     public computeLineHeight(): number {
         let dummy = this.build();
-        dummy.text = "A";
+        dummy.text = 'A';
         return dummy.height;
     }
 
@@ -47,10 +47,10 @@ export class TextBuilder {
         return this;
     }
 
-    public bold(value: boolean = true): TextBuilder {
+    public bold(value = true): TextBuilder {
         if (value) {
-            this.fontWeight("bold");
-        } else if (this._style.fontWeight === "bold") {
+            this.fontWeight('bold');
+        } else if (this._style.fontWeight === 'bold') {
             this._style.fontWeight = undefined;
         }
         return this;
@@ -63,28 +63,28 @@ export class TextBuilder {
     }
 
     /** Horizontal alignment for multiline (wordwrapped) text. @default "center" */
-    public hAlign(align: "left" | "center" | "right"): TextBuilder {
+    public hAlign(align: 'left' | 'center' | 'right'): TextBuilder {
         this._style.align = align;
         return this;
     }
 
     /** Equivalent to <code>hAlign(HAlign.LEFT)</code> */
     public hAlignLeft(): TextBuilder {
-        return this.hAlign("left");
+        return this.hAlign('left');
     }
 
     /** Equivalent to <code>hAlign(Align.CENTER)</code> */
     public hAlignCenter(): TextBuilder {
-        return this.hAlign("center");
+        return this.hAlign('center');
     }
 
     /** Equivalent to <code>hAlign(HAlign.RIGHT)</code> */
     public hAlignRight(): TextBuilder {
-        return this.hAlign("right");
+        return this.hAlign('right');
     }
 
     /** Enables or disables word wrapping. @default false */
-    public wordWrap(wrap: boolean, wordWrapWidth: number = 100): TextBuilder {
+    public wordWrap(wrap: boolean, wordWrapWidth = 100): TextBuilder {
         this._style.wordWrap = wrap;
         this._style.wordWrapWidth = wordWrapWidth;
         return this;
@@ -125,5 +125,5 @@ export class TextBuilder {
 
     private _style: TextStyleOptions = {};
     private _text: string;
-    private _scale: number = 1;
+    private _scale = 1;
 }

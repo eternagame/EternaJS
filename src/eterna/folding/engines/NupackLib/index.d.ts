@@ -20,24 +20,24 @@
  */
 import * as stdcpp from "../../../emscripten/stdcpp";
 
-export = vienna_lib;
+export = NupackLib;
 
 /*~ Write your module's methods and properties in this class */
-declare class vienna_lib {
-    FullEval (temperature_in: number, seqString: string, structString: string): vienna_lib.FullEvalResult;
+declare class NupackLib {
+    FullEval(temperature_in: number, seqString: string, structString: string): NupackLib.FullEvalResult;
 
-    FullFoldDefault(seqString: string, structString: string): vienna_lib.FullFoldResult;
-    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): vienna_lib.FullFoldResult;
-    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): vienna_lib.DotPlotResult;
-    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): vienna_lib.FullFoldResult;
-    CoFoldSequence (seqString: string, structString: string): vienna_lib.FullFoldResult;
-    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): vienna_lib.FullFoldResult;
+    FullFoldDefault(seqString: string): NupackLib.FullFoldResult;
+    FullFoldTemperature(temperature_in: number, seqString: string): NupackLib.FullFoldResult;
+    GetDotPlot(temperature_in: number, seqString: string): NupackLib.DotPlotResult;
+    FullFoldWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult;
+    CoFoldSequence(seqString: string): NupackLib.FullFoldResult;
+    CoFoldSequenceWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
  *~ place them in this block.
  */
-declare namespace vienna_lib {
+declare namespace NupackLib {
     export interface FullEvalResult {
         nodes: stdcpp.vector<number>;
         energy: number;
@@ -54,7 +54,7 @@ declare namespace vienna_lib {
 
     export interface DotPlotResult {
         energy: number;
-        probabilitiesString: string;
+        plot: stdcpp.vector<number>;
 
         delete (): void;
     }

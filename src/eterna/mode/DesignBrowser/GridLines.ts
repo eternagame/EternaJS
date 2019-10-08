@@ -1,9 +1,9 @@
-import {Graphics} from "pixi.js";
+import {Graphics} from 'pixi.js';
 
 // GridLines class written by Jerry Fu
 // Draws any number of lines covering the entire width of the design browser at a specified interval,
 // starting from the top heading down
-export class GridLines extends Graphics {
+export default class GridLines extends Graphics {
     constructor(thickness: number, color: number, intervalSpacing: number) {
         super();
         this._thickness = thickness;

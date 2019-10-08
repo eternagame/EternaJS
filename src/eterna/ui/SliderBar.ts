@@ -1,12 +1,10 @@
-import {Graphics, Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Dragger} from "../../flashbang/util/Dragger";
-import {Signal} from "../../signals/Signal";
+import {Graphics, Point} from 'pixi.js';
+import {Signal} from 'signals';
+import {
+    ContainerObject, DisplayObjectPointerTarget, Dragger, Flashbang, GameObjectRef
+} from 'flashbang';
 
-export class SliderBar extends ContainerObject {
+export default class SliderBar extends ContainerObject {
     // The width (or height, for a horizontal SliderBar) of the thumb
     public static readonly THUMB_SIZE = 15;
 
@@ -30,7 +28,7 @@ export class SliderBar extends ContainerObject {
 
         this.container.addChild(this._barRect);
 
-        this._current_val = 1;
+        this._currentVal = 1;
 
         let barPointerTarget = new DisplayObjectPointerTarget(this._barRect);
         let linePointerTarget = new DisplayObjectPointerTarget(this._sliderLine);
@@ -49,17 +47,17 @@ export class SliderBar extends ContainerObject {
         }
     }
 
-    public get_progress(): number {
-        return this._current_val;
+    public getProgress(): number {
+        return this._currentVal;
     }
 
-    public set_progress(prog: number): void {
+    public setProgress(prog: number): void {
         if (this._vertical) {
-            this._current_val = prog;
-            this._barRect.y = this._current_val * (this._height - 10) + 10;
+            this._currentVal = prog;
+            this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
-            this._current_val = prog;
-            this._barRect.x = this._current_val * (this._width - 10) + 10;
+            this._currentVal = prog;
+            this._barRect.x = this._currentVal * (this._width - 10) + 10;
         }
 
         this.scrollChanged.emit(prog);
@@ -83,9 +81,9 @@ export class SliderBar extends ContainerObject {
         }
 
         if (this._vertical) {
-            this._barRect.y = this._current_val * (this._height - 10) + 10;
+            this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
-            this._barRect.x = this._current_val * (this._width - 10) + 10;
+            this._barRect.x = this._currentVal * (this._width - 10) + 10;
         }
     }
 
@@ -100,31 +98,31 @@ export class SliderBar extends ContainerObject {
             let mouse = this.container.toLocal(new Point(dragger.curX, dragger.curY));
             if (this._vertical) {
                 if (mouse.y < 0) {
-                    this._current_val = 0;
+                    this._currentVal = 0;
                 } else if (mouse.y > this._height) {
-                    this._current_val = 1;
+                    this._currentVal = 1;
                 } else if (this._height > 0) {
-                    this._current_val = mouse.y / this._height;
+                    this._currentVal = mouse.y / this._height;
                 } else {
-                    this._current_val = 1;
+                    this._currentVal = 1;
                 }
 
-                this._barRect.y = this._current_val * (this._height - 10) + 10;
+                this._barRect.y = this._currentVal * (this._height - 10) + 10;
             } else {
                 if (mouse.x < 0) {
-                    this._current_val = 0;
+                    this._currentVal = 0;
                 } else if (mouse.x > this._width) {
-                    this._current_val = 1;
+                    this._currentVal = 1;
                 } else if (this._width > 0) {
-                    this._current_val = mouse.x / this._width;
+                    this._currentVal = mouse.x / this._width;
                 } else {
-                    this._current_val = 1;
+                    this._currentVal = 1;
                 }
 
-                this._barRect.x = this._current_val * (this._width - 10) + 10;
+                this._barRect.x = this._currentVal * (this._width - 10) + 10;
             }
 
-            this.scrollChanged.emit(this.get_progress());
+            this.scrollChanged.emit(this.getProgress());
         });
     }
 
@@ -133,21 +131,21 @@ export class SliderBar extends ContainerObject {
 
         if (this._vertical) {
             if (this._height > 0) {
-                this._current_val = mouse.y / this._height;
+                this._currentVal = mouse.y / this._height;
             } else {
-                this._current_val = 1;
+                this._currentVal = 1;
             }
-            this._barRect.y = this._current_val * (this._height - 10) + 10;
+            this._barRect.y = this._currentVal * (this._height - 10) + 10;
         } else {
             if (this._width > 0) {
-                this._current_val = mouse.x / this._width;
+                this._currentVal = mouse.x / this._width;
             } else {
-                this._current_val = 1;
+                this._currentVal = 1;
             }
-            this._barRect.x = this._current_val * (this._width - 10) + 10;
+            this._barRect.x = this._currentVal * (this._width - 10) + 10;
         }
 
-        this.scrollChanged.emit(this.get_progress());
+        this.scrollChanged.emit(this.getProgress());
     }
 
     private readonly _vertical: boolean;
@@ -155,7 +153,7 @@ export class SliderBar extends ContainerObject {
     private readonly _sliderLine: Graphics;
 
     private _draggerRef: GameObjectRef = GameObjectRef.NULL;
-    private _current_val: number = 1;
+    private _currentVal: number = 1;
 
     private _width: number;
     private _height: number;

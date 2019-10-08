@@ -1,15 +1,12 @@
-import {PoseOp} from "../pose2D/PoseOp";
+import PoseOp from 'eterna/pose2D/PoseOp';
 
-export abstract class Folder {
-    protected constructor() {
-    }
-
+export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
 
     public getCache(key: any): any {
-        let key_str = JSON.stringify(key);
-        return this._cache.get(key_str);
+        let keyStr = JSON.stringify(key);
+        return this._cache.get(keyStr);
     }
 
     public get canScoreStructures(): boolean {
@@ -20,7 +17,9 @@ export abstract class Folder {
         return 0;
     }
 
-    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    public foldSequence(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
         return null;
     }
 
@@ -28,7 +27,10 @@ export abstract class Folder {
         return false;
     }
 
-    public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 2.0, temp: number = 37): number[] {
+    public foldSequenceWithBindingSite(
+        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        version: number = 2.0, temp: number = 37
+    ): number[] {
         return null;
     }
 
@@ -36,7 +38,9 @@ export abstract class Folder {
         return false;
     }
 
-    public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
+    public cofoldSequence(
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+    ): number[] {
         return null;
     }
 
@@ -44,7 +48,10 @@ export abstract class Folder {
         return false;
     }
 
-    public cofoldSequenceWithBindingSite(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
+    public cofoldSequenceWithBindingSite(
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        malus: number = 0, temp: number = 37
+    ): number[] {
         return null;
     }
 
@@ -60,11 +67,15 @@ export abstract class Folder {
         return false;
     }
 
-    public multifold(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): any {
+    public multifold(
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+    ): any {
         return null;
     }
 
-    public multifoldUnroll(seq: number[], second_best_pairs: number[], oligos: any[], desired_pairs: string = null, temp: number = 37): PoseOp[] {
+    public multifoldUnroll(
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+    ): PoseOp[] {
         return null;
     }
 
@@ -82,11 +93,16 @@ export abstract class Folder {
         return false;
     }
 
-    public hairpinEnergy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
+    public hairpinEnergy(
+        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
+    ): number {
         return 0;
     }
 
-    public loopEnergy(n1: number, n2: number, type: number, type_2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean): number {
+    public loopEnergy(
+        n1: number, n2: number, type: number,
+        type2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
+    ): number {
         return 0;
     }
 
@@ -94,13 +110,13 @@ export abstract class Folder {
         return 0;
     }
 
-    public mlEnergy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
+    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
         return 0;
     }
 
     protected putCache(key: Record<string, any>, data: any): void {
-        let key_str = JSON.stringify(key);
-        this._cache.set(key_str, data);
+        let keyStr = JSON.stringify(key);
+        this._cache.set(keyStr, data);
     }
 
     protected resetCache(): void {

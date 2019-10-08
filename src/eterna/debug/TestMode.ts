@@ -1,11 +1,11 @@
-import {ViewSolutionDialog} from "../mode/DesignBrowser/ViewSolutionDialog";
-import {GameMode} from "../mode/GameMode";
-import {Puzzle} from "../puzzle/Puzzle";
-import {PuzzleManager} from "../puzzle/PuzzleManager";
-import {Solution} from "../puzzle/Solution";
-import {SolutionManager} from "../puzzle/SolutionManager";
+import GameMode from 'eterna/mode/GameMode';
+import PuzzleManager from 'eterna/puzzle/PuzzleManager';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import SolutionManager from 'eterna/puzzle/SolutionManager';
+import Solution from 'eterna/puzzle/Solution';
+import ViewSolutionDialog from 'eterna/mode/DesignBrowser/ViewSolutionDialog';
 
-export class TestMode extends GameMode {
+export default class TestMode extends GameMode {
     protected setup(): void {
         super.setup();
 

@@ -1,4 +1,4 @@
-export class ErrorUtil {
+export default class ErrorUtil {
     /** Returns an appropriate Error object, if e can be coerced to one */
     public static getErrorObj(e: any): Error | null {
         if (e instanceof Error) {
@@ -11,10 +11,10 @@ export class ErrorUtil {
     }
 
     /** Returns a reasonable string value for an error object, if possible */
-    public static getErrString(e: any, includeStack: boolean = true): string {
+    public static getErrString(e: any, includeStack = true): string {
         try {
             if (e == null) {
-                return "Unknown error";
+                return 'Unknown error';
             } else if (e instanceof Error) {
                 return includeStack ? e.stack : e.message;
             } else if (e instanceof ErrorEvent) {
@@ -23,7 +23,7 @@ export class ErrorUtil {
                 return e.toString();
             }
         } catch (errStringError) {
-            return "Unknown error";
+            return 'Unknown error';
         }
     }
 }

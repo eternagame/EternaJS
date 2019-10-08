@@ -1,6 +1,6 @@
-import {RegistrationGroup} from "../RegistrationGroup";
-import {UnitSignal} from "../UnitSignal";
-import {Counter} from "./Counter";
+import RegistrationGroup from "../RegistrationGroup";
+import UnitSignal from "../UnitSignal";
+import Counter from "./Counter";
 
 test("registrationGroup", () => {
     let group: RegistrationGroup = new RegistrationGroup();

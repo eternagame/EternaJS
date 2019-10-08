@@ -1,6 +1,6 @@
-import * as WebFont from "webfontloader";
+import * as WebFont from 'webfontloader';
 
-export class FontLoader {
+export default class FontLoader {
     /**
      * Loads a font defined in a  @font-face element in a CSS file.
      * Return a Promise that will resolve when the given font is loaded
@@ -13,7 +13,9 @@ export class FontLoader {
                     urls: cssURL ? [cssURL] : undefined
                 },
                 fontactive: (familyName, fvd) => resolve(),
-                fontinactive: (familyName, fvd) => reject(`Font load failure [css=${cssURL}, family=${familyName}]`)
+                fontinactive: (familyName, fvd) => reject(
+                    new Error(`Font load failure [css=${cssURL}, family=${familyName}]`)
+                )
             });
         });
     }

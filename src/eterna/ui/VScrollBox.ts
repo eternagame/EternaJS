@@ -1,20 +1,19 @@
-import {Container} from "pixi.js";
-import {SceneObject} from "../../flashbang/objects/SceneObject";
-import {MathUtil} from "../../flashbang/util/MathUtil";
-import {ScrollContainer} from "./ScrollContainer";
-import {SliderBar} from "./SliderBar";
+import {Container} from 'pixi.js';
+import {SceneObject, MathUtil} from 'flashbang';
+import ScrollContainer from './ScrollContainer';
+import SliderBar from './SliderBar';
 
 /** Contains scrollable content and a vertical sliderbar */
-export class VScrollBox extends SceneObject<ScrollContainer> {
-    public constructor(width: number, height: number) {
+export default class VScrollBox extends SceneObject<ScrollContainer> {
+    constructor(width: number, height: number) {
         super(new ScrollContainer(width - SliderBar.THUMB_SIZE, height));
         this._width = width;
         this._height = height;
 
         this._sliderBar = new SliderBar(true);
         this.addObject(this._sliderBar, this._display);
-        this._sliderBar.set_progress(0);
-        this._sliderBar.scrollChanged.connect(progress => this.scrollProgress = progress);
+        this._sliderBar.setProgress(0);
+        this._sliderBar.scrollChanged.connect((progress) => { this.scrollProgress = progress; });
     }
 
     /** Attach scrollable content here */
@@ -46,7 +45,7 @@ export class VScrollBox extends SceneObject<ScrollContainer> {
     }
 
     public scrollTo(value: number) {
-        this._sliderBar.set_progress(MathUtil.clamp(value, 0, 1));
+        this._sliderBar.setProgress(MathUtil.clamp(value, 0, 1));
     }
 
     private readonly _sliderBar: SliderBar;

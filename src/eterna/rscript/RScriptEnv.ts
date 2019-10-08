@@ -1,22 +1,20 @@
-import * as log from "loglevel";
-import {Container, DisplayObject} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {Enableable} from "../../flashbang/objects/Enableable";
-import {EPars} from "../EPars";
-import {PoseEditMode} from "../mode/PoseEdit/PoseEditMode";
-import {Pose2D, RNAHighlightState} from "../pose2D/Pose2D";
-import {Puzzle} from "../puzzle/Puzzle";
-import {PaletteTargetType} from "../ui/NucleotidePalette";
-import {TextBalloon} from "../ui/TextBalloon";
-import {ToggleBar} from "../ui/ToggleBar";
-import {RScriptUIElement, RScriptUIElementID} from "./RScriptUIElement";
+import * as log from 'loglevel';
+import {Container, DisplayObject} from 'pixi.js';
+import {ContainerObject, Enableable, GameObject} from 'flashbang';
+import EPars from 'eterna/EPars';
+import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
+import Puzzle from 'eterna/puzzle/Puzzle';
+import TextBalloon from 'eterna/ui/TextBalloon';
+import Pose2D, {RNAHighlightState} from 'eterna/pose2D/Pose2D';
+import {PaletteTargetType} from 'eterna/ui/NucleotidePalette';
+import ToggleBar from 'eterna/ui/ToggleBar';
+import {RScriptUIElement, RScriptUIElementID} from './RScriptUIElement';
 
 /**
  * RScript Environment.
  * Can take care of variables and scope and such.
  */
-export class RScriptEnv extends ContainerObject {
+export default class RScriptEnv extends ContainerObject {
     public static convertNucleotideStringToInt(s: string): number {
         return EPars.stringToNucleotide(s, true, false);
     }
@@ -25,7 +23,7 @@ export class RScriptEnv extends ContainerObject {
         return EPars.nucleotideToString(i, true, false);
     }
 
-    public constructor(ui: PoseEditMode, puz: Puzzle) {
+    constructor(ui: PoseEditMode, puz: Puzzle) {
         super();
         this._ui = ui;
         this._puz = puz;
@@ -33,7 +31,7 @@ export class RScriptEnv extends ContainerObject {
     }
 
     public setTextboxVisible(id: string, isVisible: boolean): void {
-        if (id === "" || !this._vars.hasOwnProperty("id")) {
+        if (id === '' || !Object.prototype.hasOwnProperty.call(this._vars.hasOwnProperty, 'id')) {
             return;
         }
 
@@ -55,11 +53,11 @@ export class RScriptEnv extends ContainerObject {
     public getStringRef(ref: string): string {
         // Check if it's an actual ref.
         // If it's not, return it back unchanged
-        if (ref.indexOf("$$STRING_REF:") !== 0) {
+        if (ref.indexOf('$$STRING_REF:') !== 0) {
             return ref;
         } else {
             let value = this.getVar(ref);
-            if (typeof (value) === "string") {
+            if (typeof (value) === 'string') {
                 return value;
             } else {
                 log.warn(`'${ref}' is not a string`);
@@ -70,7 +68,7 @@ export class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        for (let key in this._vars) {
+        for (let key of Object.keys(this._vars)) {
             this.deleteVar(key);
         }
     }
@@ -95,17 +93,17 @@ export class RScriptEnv extends ContainerObject {
         let uiElement: RScriptUIElement;
 
         // Used UI Element ID.
-        let splitId: string[] = key.split("-");
+        let splitId: string[] = key.split('-');
 
         // Detect a number if it is included in the ui element key.
         // So for the objectives: objective-### (format).
         // The input number will always come after the dash. The dash should be
         // included in the key that is passed.
-        let idString: string = splitId[0] + (splitId.length > 1 ? "-" : "");
+        let idString: string = splitId[0] + (splitId.length > 1 ? '-' : '');
         let elementID: RScriptUIElementID = (idString.toUpperCase()) as RScriptUIElementID;
 
         if (splitId.length > 2) {
-            throw new Error("Invalid UI Element ID format");
+            throw new Error('Invalid UI Element ID format');
         }
 
         let altParam = -1;
@@ -162,81 +160,81 @@ export class RScriptEnv extends ContainerObject {
                 obj.display.visible = visible;
             }
 
-            if ((<Enableable>(obj as any)).enabled !== undefined) {
-                (<Enableable>(obj as any)).enabled = visible && !disabled;
+            if (((obj as any) as Enableable).enabled !== undefined) {
+                ((obj as any) as Enableable).enabled = visible && !disabled;
             }
         }
     }
 
     public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
         switch (type) {
-        case RScriptUIElementID.ACTION_MENU:
-            return this.ui.toolbar.actionMenu;
-        case RScriptUIElementID.OBJECTIVES:
-            return this.ui.constraintsLayer;
-        case RScriptUIElementID.SHAPEOBJECTIVE:
-            return this.ui.get_shape_box(0);
-        case RScriptUIElementID.OBJECTIVE:
-            return this.ui.getConstraint(i);
-        case RScriptUIElementID.SWITCH:
-            return this.ui.toolbar.puzzleStateToggle;
-        case RScriptUIElementID.TOTALENERGY:
-        case RScriptUIElementID.PRIMARY_ENERGY:
-            return this.pose.primaryScoreDisplay;
-        case RScriptUIElementID.SECONDARY_ENERGY:
-            return this.pose.secondaryScoreDisplay;
-        case RScriptUIElementID.PALETTE:
-        case RScriptUIElementID.PALETTEALT:
-            return this.ui.toolbar.palette;
-        case RScriptUIElementID.TOGGLENATURAL:
-            return this.ui.toolbar.nativeButton;
-        case RScriptUIElementID.TOGGLETARGET:
-            return this.ui.toolbar.targetButton;
-        case RScriptUIElementID.TOGGLEBAR:
-            // NOTE: There is no longer a toggle bar...
-            return this.ui.toolbar.nativeButton;
-        case RScriptUIElementID.ZOOMIN:
-            return this.ui.toolbar.zoomInButton;
-        case RScriptUIElementID.ZOOMOUT:
-            return this.ui.toolbar.zoomOutButton;
-        case RScriptUIElementID.ACTIONBAR:
-            // NOTE: There is no longer an action bar...
-            return this.ui.toolbar.zoomInButton;
-        case RScriptUIElementID.RESET:
-            return this.ui.toolbar.retryButton;
-        case RScriptUIElementID.UNDO:
-            return this.ui.toolbar.undoButton;
-        case RScriptUIElementID.REDO:
-            return this.ui.toolbar.redoButton;
-        case RScriptUIElementID.SWAP:
-            return this.ui.toolbar.pairSwapButton;
-        case RScriptUIElementID.PIP:
-            return this.ui.toolbar.pipButton;
-        case RScriptUIElementID.A:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
-        case RScriptUIElementID.U:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.U);
-        case RScriptUIElementID.G:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.G);
-        case RScriptUIElementID.C:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.C);
-        case RScriptUIElementID.AU:
-        case RScriptUIElementID.UA:
-        case RScriptUIElementID.AUCOMPLETE:
-        case RScriptUIElementID.UACOMPLETE:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.AU);
-        case RScriptUIElementID.GU:
-        case RScriptUIElementID.UG:
-        case RScriptUIElementID.GUCOMPLETE:
-        case RScriptUIElementID.UGCOMPLETE:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.UG);
-        case RScriptUIElementID.GC:
-        case RScriptUIElementID.CG:
-        case RScriptUIElementID.GCCOMPLETE:
-        case RScriptUIElementID.CGCOMPLETE:
-            return this.ui.toolbar.palette.getTarget(PaletteTargetType.GC);
-        default:
-            throw new Error(`Invalid UI Element: ${type}`);
+            case RScriptUIElementID.ACTION_MENU:
+                return this.ui.toolbar.actionMenu;
+            case RScriptUIElementID.OBJECTIVES:
+                return this.ui.constraintsLayer;
+            case RScriptUIElementID.SHAPEOBJECTIVE:
+                return this.ui.getShapeBox(0);
+            case RScriptUIElementID.OBJECTIVE:
+                return this.ui.getConstraintBox(i);
+            case RScriptUIElementID.SWITCH:
+                return this.ui.toolbar.stateToggle;
+            case RScriptUIElementID.TOTALENERGY:
+            case RScriptUIElementID.PRIMARY_ENERGY:
+                return this.pose.primaryScoreDisplay;
+            case RScriptUIElementID.SECONDARY_ENERGY:
+                return this.pose.secondaryScoreDisplay;
+            case RScriptUIElementID.PALETTE:
+            case RScriptUIElementID.PALETTEALT:
+                return this.ui.toolbar.palette;
+            case RScriptUIElementID.TOGGLENATURAL:
+                return this.ui.toolbar.naturalButton;
+            case RScriptUIElementID.TOGGLETARGET:
+                return this.ui.toolbar.targetButton;
+            case RScriptUIElementID.TOGGLEBAR:
+                // NOTE: There is no longer a toggle bar...
+                return this.ui.toolbar.naturalButton;
+            case RScriptUIElementID.ZOOMIN:
+                return this.ui.toolbar.zoomInButton;
+            case RScriptUIElementID.ZOOMOUT:
+                return this.ui.toolbar.zoomOutButton;
+            case RScriptUIElementID.ACTIONBAR:
+                // NOTE: There is no longer an action bar...
+                return this.ui.toolbar.zoomInButton;
+            case RScriptUIElementID.RESET:
+                return this.ui.toolbar.resetButton;
+            case RScriptUIElementID.UNDO:
+                return this.ui.toolbar.undoButton;
+            case RScriptUIElementID.REDO:
+                return this.ui.toolbar.redoButton;
+            case RScriptUIElementID.SWAP:
+                return this.ui.toolbar.pairSwapButton;
+            case RScriptUIElementID.PIP:
+                return this.ui.toolbar.pipButton;
+            case RScriptUIElementID.A:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
+            case RScriptUIElementID.U:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.U);
+            case RScriptUIElementID.G:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.G);
+            case RScriptUIElementID.C:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.C);
+            case RScriptUIElementID.AU:
+            case RScriptUIElementID.UA:
+            case RScriptUIElementID.AUCOMPLETE:
+            case RScriptUIElementID.UACOMPLETE:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.AU);
+            case RScriptUIElementID.GU:
+            case RScriptUIElementID.UG:
+            case RScriptUIElementID.GUCOMPLETE:
+            case RScriptUIElementID.UGCOMPLETE:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.UG);
+            case RScriptUIElementID.GC:
+            case RScriptUIElementID.CG:
+            case RScriptUIElementID.GCCOMPLETE:
+            case RScriptUIElementID.CGCOMPLETE:
+                return this.ui.toolbar.palette.getTarget(PaletteTargetType.GC);
+            default:
+                throw new Error(`Invalid UI Element: ${type}`);
         }
     }
 
