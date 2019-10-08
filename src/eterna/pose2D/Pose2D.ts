@@ -1821,8 +1821,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._pairs.slice();
     }
 
-    public set targetPairs(target_pairs: number[]) {
-        this._targetPairs = target_pairs.slice();
+    public set targetPairs(setting: number[]) {
+        this._targetPairs = setting.slice();
         for (let ii = 0; ii < this._targetPairs.length; ii++) {
             if (this._targetPairs[ii] > ii) {
                 this._targetPairs[this._targetPairs[ii]] = ii;
@@ -1830,8 +1830,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set customLayout(custom_layout: Array<[number, number]>) {
-        this._customLayout = custom_layout;
+    public set customLayout(setting: Array<[number, number]>) {
+        this._customLayout = setting;
     }
 
     public checkOverlap(): boolean {
@@ -2123,10 +2123,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
             goX = this._bases[ii + 1].x - this._bases[ii].x;
             goY = this._bases[ii + 1].y - this._bases[ii].y;
 
-            let go_length: number = Math.sqrt(goX * goX + goY * goY);
-            if (go_length > Pose2D.ZOOM_SPACINGS[this._zoomLevel]) {
-                goX = goX * Pose2D.ZOOM_SPACINGS[this._zoomLevel] / go_length;
-                goY = goY * Pose2D.ZOOM_SPACINGS[this._zoomLevel] / go_length;
+            let goLength: number = Math.sqrt(goX * goX + goY * goY);
+            if (goLength > Pose2D.ZOOM_SPACINGS[this._zoomLevel]) {
+                goX *= (Pose2D.ZOOM_SPACINGS[this._zoomLevel] / goLength);
+                goY *= (Pose2D.ZOOM_SPACINGS[this._zoomLevel] / goLength);
             }
 
 
