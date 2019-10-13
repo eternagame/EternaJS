@@ -2033,7 +2033,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._baseRope.enabled = this._showBaseRope;
+        this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
 
         if (this._redraw || basesMoved) {
             for (let ii = 0; ii < this._trackedIndices.length; ii++) {

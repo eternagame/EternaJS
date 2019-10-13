@@ -121,7 +121,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && npm run typecheck"
+      "pre-push": "lint-staged && npm run typecheck"
     }
   }
 }
