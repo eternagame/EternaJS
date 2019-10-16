@@ -341,7 +341,7 @@ export default class UndoBlock {
         for (let oligo of this._targetOligos) {
             // The + 1 is used to account for the "cut" base denoting split points between strands
             originalIndices.push(Utility.range(oligoFirstBaseIndex, oligoFirstBaseIndex + oligo.sequence.length + 1));
-            oligoFirstBaseIndex += oligo.sequence.length;
+            oligoFirstBaseIndex += oligo.sequence.length + 1;
         }
 
         let newOrder = otherOrder || Utility.range(this._targetOligos.length);
