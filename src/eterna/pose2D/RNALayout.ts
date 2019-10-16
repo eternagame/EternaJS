@@ -425,6 +425,7 @@ export default class RNALayout {
             anchorCustomRotationDirectionSign = Math.sign(
                 anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
             );
+            if (anchorCustomRotationDirectionSign == 0) anchorCustomRotationDirectionSign = 1;
             anchorCustomGoX *= anchorCustomRotationDirectionSign;
             anchorCustomGoY *= anchorCustomRotationDirectionSign;
         }
@@ -474,6 +475,7 @@ export default class RNALayout {
                 let childCustomRotationDirectionSign: number = Math.sign(
                     customGoNextX * customGoX + customGoNextY * customGoY
                 );
+                if (childCustomRotationDirectionSign == 0) childCustomRotationDirectionSign = 1;
                 customGoX *= childCustomRotationDirectionSign;
                 customGoY *= childCustomRotationDirectionSign;
 
@@ -488,6 +490,7 @@ export default class RNALayout {
                     childGoY = crossY * templateGoX + goY * templateGoY;
                 }
             }
+
             let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
             this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
