@@ -65,7 +65,6 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
                 `${oligos[ii].label}`,
                 {fill: oligos[ii].bind ? '#ffffff' : '#808080'}
             );
-            console.log(clarifyTextBuilder.build());
         }
 
         let twUpper: number = Math.min(101, 15 * (2 * oligos.length - 1));
