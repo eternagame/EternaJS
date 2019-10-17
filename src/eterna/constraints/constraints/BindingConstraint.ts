@@ -150,7 +150,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         ).filter((val) => val !== -1);
 
         return {
-            satisfied: unsatisfiedOligoIndexes.length > 0,
+            satisfied: unsatisfiedOligoIndexes.length === 0,
             unsatisfiedOligoIndexes
         };
     }
