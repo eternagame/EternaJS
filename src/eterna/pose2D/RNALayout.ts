@@ -262,6 +262,27 @@ export default class RNALayout {
         }
     }
 
+    public getRotationDirectionSign(rotationDirectionSign: number[]): void {
+        if (this._root != null) {
+            this.getRotationDirectionSignRecursive(this._root, rotationDirectionSign);
+        } else {
+            for (let ii = 0; ii < rotationDirectionSign.length; ii++) {
+                rotationDirectionSign[ii] = 1;
+            }
+        }
+    }
+
+    private getRotationDirectionSignRecursive(rootnode: RNATreeNode, rotationDirectionSign: number[]): void {
+        if (rootnode.isPair) {
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
+            rotationDirectionSign[rootnode.indexB] = rootnode.rotationDirectionSign;
+        } else if (rootnode.indexA >= 0) {
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
+        }
+        for (let ii = 0; ii < rootnode.children.length; ii++) {
+            this.getRotationDirectionSignRecursive(rootnode.children[ii], rotationDirectionSign);
+        }
+    }
 
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
@@ -425,7 +446,7 @@ export default class RNALayout {
             anchorCustomRotationDirectionSign = Math.sign(
                 anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
             );
-            if (anchorCustomRotationDirectionSign == 0) anchorCustomRotationDirectionSign = 1;
+            if (anchorCustomRotationDirectionSign === 0) anchorCustomRotationDirectionSign = 1;
             anchorCustomGoX *= anchorCustomRotationDirectionSign;
             anchorCustomGoY *= anchorCustomRotationDirectionSign;
         }
@@ -475,7 +496,7 @@ export default class RNALayout {
                 let childCustomRotationDirectionSign: number = Math.sign(
                     customGoNextX * customGoX + customGoNextY * customGoY
                 );
-                if (childCustomRotationDirectionSign == 0) childCustomRotationDirectionSign = 1;
+                if (childCustomRotationDirectionSign === 0) childCustomRotationDirectionSign = 1;
                 customGoX *= childCustomRotationDirectionSign;
                 customGoY *= childCustomRotationDirectionSign;
 
@@ -589,8 +610,8 @@ export default class RNALayout {
         if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
         for (let ii = 0; ii < rootnode.children.length; ii++) {
-            if (this._customLayout[rootnode.children[ii].indexA][0] == null) return false; 
-            if (this._customLayout[rootnode.children[ii].indexA][1] == null) return false; 
+            if (this._customLayout[rootnode.children[ii].indexA][0] == null) return false;
+            if (this._customLayout[rootnode.children[ii].indexA][1] == null) return false;
             if (rootnode.children[ii].isPair) {
                 // all other pairs of junction paired in target structure?
                 if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
