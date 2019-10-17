@@ -2112,10 +2112,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         for (let ii = 0; ii < fullSeq.length - 1; ii++) {
             let outX: number = goX;
             let outY: number = goY;
+            let sgn = 1;
+            if (ii < this._baseRotationDirectionSign.length) sgn = this._baseRotationDirectionSign[ii];
 
             if (this._sequence.length < fullSeq.length && ii === this._sequence.length - 1) {
                 this._bases[ii].setGoDir(goX, goY);
-                this._bases[ii].setOutDir(-goY, goX);
+                this._bases[ii].setOutDir(sgn * -goY, sgn * goX);
                 this._bases[ii].setLast(true);
                 continue;
             }
@@ -2139,7 +2141,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._bases[ii].setGoDir(goX, goY);
-            this._bases[ii].setOutDir(-outY, outX);
+            this._bases[ii].setOutDir(sgn * -outY, sgn * outX);
             this._bases[ii].setLast(false);
         }
 
@@ -2483,6 +2485,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         rnaDrawer.getCoords(xarray, yarray);
+
+        this._baseRotationDirectionSign = new Array(n);
+        rnaDrawer.getRotationDirectionSign(this._baseRotationDirectionSign);
 
         if (this._desiredAngle === 90) {
             let tmp = xarray;
@@ -3377,6 +3382,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _foldStartTime: number;
     private _foldDuration: number;
     private _paintCursor: PaintCursor;
+    private _baseRotationDirectionSign: number[];
 
     private _zoomLevel: number = 0;
     private _desiredAngle: number = 0;
