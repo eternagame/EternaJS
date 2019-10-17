@@ -589,6 +589,8 @@ export default class RNALayout {
         if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
         for (let ii = 0; ii < rootnode.children.length; ii++) {
+            if (this._customLayout[rootnode.children[ii].indexA][0] == null) return false; 
+            if (this._customLayout[rootnode.children[ii].indexA][1] == null) return false; 
             if (rootnode.children[ii].isPair) {
                 // all other pairs of junction paired in target structure?
                 if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
