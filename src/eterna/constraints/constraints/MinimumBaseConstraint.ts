@@ -61,7 +61,7 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
 }
 
 export class MinimumAConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'A';
+    public static readonly NAME = 'A';
 
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
@@ -76,7 +76,7 @@ export class MinimumAConstraint extends MinimumBaseConstraint {
 }
 
 export class MinimumUConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'U';
+    public static readonly NAME = 'U';
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
@@ -91,7 +91,7 @@ export class MinimumUConstraint extends MinimumBaseConstraint {
 }
 
 export class MinimumGConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'G';
+    public static readonly NAME = 'G';
 
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
@@ -106,7 +106,7 @@ export class MinimumGConstraint extends MinimumBaseConstraint {
 }
 
 export class MinimumCConstraint extends MinimumBaseConstraint {
-    public static readonly NAME: 'C';
+    public static readonly NAME = 'C';
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);
