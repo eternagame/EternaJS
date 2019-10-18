@@ -33,3 +33,13 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 Before committing (and on encountering issues), make sure to run `npm run typecheck` (to validate the TypeScript) and `npm run test` (to run our unit tests, currently just for the folding engines) to make sure no issues were introduced (in the future, we'll also set up CI).
 
 * To do the first puzzle in Eterna, load up `http://localhost:63343/?puzzleID=4350940`
+
+## Deployment
+
+To deploy the code from the active branch, run this command on the server:
+`cd /persistent/drupal/html/eternajs && git pull && npm run build:prod`
+
+You will need to authenticate to github if you don't have a ssh key set up.
+
+If you aren't sure which branch is active, simply run:
+`cd /persistent/drupal/html/eternajs && git branch`
