@@ -63,7 +63,7 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
 }
 
 export class MaximumAConstraint extends MaximumBaseConstraint {
-    public static readonly NAME: 'AMAX';
+    public static readonly NAME = 'AMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_ADENINE, count);
@@ -78,7 +78,7 @@ export class MaximumAConstraint extends MaximumBaseConstraint {
 }
 
 export class MaximumUConstraint extends MaximumBaseConstraint {
-    public static readonly NAME: 'UMAX';
+    public static readonly NAME = 'UMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_URACIL, count);
@@ -93,7 +93,7 @@ export class MaximumUConstraint extends MaximumBaseConstraint {
 }
 
 export class MaximumGConstraint extends MaximumBaseConstraint {
-    public static readonly NAME: 'GMAX';
+    public static readonly NAME = 'GMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_GUANINE, count);
@@ -108,7 +108,7 @@ export class MaximumGConstraint extends MaximumBaseConstraint {
 }
 
 export class MaximumCConstraint extends MaximumBaseConstraint {
-    public static readonly NAME: 'CMAX';
+    public static readonly NAME = 'CMAX';
 
     constructor(count: number) {
         super(EPars.RNABASE_CYTOSINE, count);
