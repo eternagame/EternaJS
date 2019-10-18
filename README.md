@@ -41,5 +41,4 @@ To deploy the code from the active branch, run this command on the server:
 
 You will need to authenticate to github if you don't have a ssh key set up.
 
-If you aren't sure which branch is active, simply run:
-`cd /persistent/drupal/html/eternajs && git branch`
+If you aren't sure which branch is active, simply run `cd /persistent/drupal/html/eternajs && git branch`
