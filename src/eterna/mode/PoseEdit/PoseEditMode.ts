@@ -712,11 +712,11 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions != null && this._targetConditions[ii] != null) {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
+                this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
             }
 
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
-            this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
         }
 
         this.clearUndoStack();
