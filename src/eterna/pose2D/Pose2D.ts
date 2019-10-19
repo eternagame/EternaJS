@@ -35,6 +35,7 @@ import RNAAnchorObject from './RNAAnchorObject';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
+import triangulate from './triangulate';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -2951,16 +2952,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null) {
                 this._scoreNodeHighlight.lineStyle(0, 0, 0);
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
-                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices;
+                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices.slice();
 
+                let contour: number[] = Array(0);
                 for (let ii = 0; ii < indices.length; ii++) {
                     let p: Point = this.getBaseLoc(indices[ii]);
-
-                    if (ii === 0) {
-                        this._scoreNodeHighlight.moveTo(p.x, p.y);
-                    } else {
-                        this._scoreNodeHighlight.lineTo(p.x, p.y);
-                    }
+                    contour.push(p.x);
+                    contour.push(p.y);
+                }
+                let triangleVerts = triangulate(contour);
+                for (let ii = 0; ii < triangleVerts.length / 6; ii++) {
+                    this._scoreNodeHighlight.moveTo(triangleVerts[6 * ii], triangleVerts[6 * ii + 1]);
+                    this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 2], triangleVerts[6 * ii + 3]);
+                    this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 4], triangleVerts[6 * ii + 5]);
                 }
                 this._scoreNodeHighlight.endFill();
             }
