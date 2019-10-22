@@ -419,6 +419,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
         for (let ii = 0; ii < n; ii++) {
+            if (sequence[ii] === EPars.RNABASE_UNDEFINED ) continue;
             if (this._sequence[ii] !== sequence[ii] && !this.isLocked(ofs + ii)) {
                 numMut++;
                 this._sequence[ii] = sequence[ii];

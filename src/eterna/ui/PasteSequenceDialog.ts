@@ -35,9 +35,9 @@ export default class PasteSequenceDialog extends Dialog<string> {
 
     private onSequenceEntered(sequence: string): void {
         sequence = sequence.toUpperCase();
-
-        for (let ii = 0; ii < sequence.length; ii++) {
-            let char = sequence.substr(ii, 1);
+        let seq = sequence.split(' ')[0]; // make paste entry robust to blanks, and allow index specification after sequence.
+        for (let ii = 0; ii < seq.length; ii++) {
+            let char = seq.substr(ii, 1);
             if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
                 (this.mode as GameMode).showNotification('You can only use characters A, U, G, and C');
                 return;
