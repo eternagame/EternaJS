@@ -383,7 +383,8 @@ export default class EPars {
         return seqArray;
     }
 
-    public static indexedStringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
+    public static indexedStringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true):
+    number[] {
         // expanded to allow specification of indices at end of sequence, e.g.,
         //
         //    ACUGU 11-14 6
@@ -395,18 +396,20 @@ export default class EPars {
         //   ACUGU&ACAGU 2-11
 
         // make robust to blanks:
-        let seqChunks : string[] = seq.split(' ');
-        if (seqChunks.length === 0) return seqArray; // blank sequence, no op.
-        if (seqChunks.length === 1) return this.stringToSequence(seq,allowCut,allowUnknown); // just sequence, no indices
+        let seqChunks: string[] = seq.split(' ');
+        if (seqChunks.length === 0) return []; // blank sequence, no op.
+        if (seqChunks.length === 1) {
+            return this.stringToSequence(seq, allowCut, allowUnknown); // just sequence, no indices
+        }
 
         let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
         let seqArray: number[] = [];
-        for (let ii = 0; ii < Math.max(...indices); ii++) seqArray.push(EPars.RNABASE_UNDEFINED);       
+        for (let ii = 0; ii < Math.max(...indices); ii++) seqArray.push(EPars.RNABASE_UNDEFINED);
         let s = seqChunks[0];
         for (let n = 0; n < indices.length; n++) {
             let ii = indices[n];
             let char = s.charAt(n);
-            seqArray[ii-1] = this.stringToNucleotide(char, allowCut, allowUnknown);
+            seqArray[ii - 1] = this.stringToNucleotide(char, allowCut, allowUnknown);
         }
         return seqArray;
     }
