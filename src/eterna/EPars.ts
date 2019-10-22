@@ -372,13 +372,14 @@ export default class EPars {
         }
     }
 
+
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
-        let seqarray: number[] = [];
+        let seqArray: number[] = [];
         for (let ii = 0; ii < seq.length; ii++) {
             let char = seq.charAt(ii);
-            seqarray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
+            seqArray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
         }
-        return seqarray;
+        return seqArray;
     }
 
     public static sequenceToString(sequence: number[], allowCut: boolean = true, allowUnknown: boolean = true): string {
