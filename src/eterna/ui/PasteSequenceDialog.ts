@@ -35,7 +35,8 @@ export default class PasteSequenceDialog extends Dialog<string> {
 
     private onSequenceEntered(sequence: string): void {
         sequence = sequence.toUpperCase();
-        let seq = sequence.split(' ')[0]; // make paste entry robust to blanks, and allow index specification after sequence.
+        // make paste entry robust to blanks, and allow index specification after sequence.
+        let seq = sequence.split(' ')[0];
         for (let ii = 0; ii < seq.length; ii++) {
             let char = seq.substr(ii, 1);
             if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
