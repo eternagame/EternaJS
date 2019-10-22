@@ -137,27 +137,27 @@ export default class Utility {
         return vals;
     }
 
-    public static ints_of(s: string): number[] {
+    public static intsOf(s: string): number[] {
         // Convert '-1-4,7-8,12' to [-1,0,1,2,3,4,7,8,12]
         let vals: number[] = [];
-        let string_is_ok: boolean = false;
-        if (s.indexOf(',') >= 0) {  // comma parsing                                                                                                        
-            for (let seq of s.split(',')) vals = vals.concat(Utility.ints_of(seq));
+        let stringIsOK = false;
+        if (s.indexOf(',') >= 0) { // comma parsing
+            for (let seq of s.split(',')) vals = vals.concat(Utility.intsOf(seq));
             return vals;
         }
 
-        let found_dash: number = s.indexOf('-');
-        if (found_dash === 0) found_dash = s.slice(1).indexOf('-') + 1; // handle negative number at beginnning.
-        if (found_dash <= 0) {//single number
-            let val: number = Number(s);
-            string_is_ok = !isNaN(val);
-            if (string_is_ok) vals.push(val);
+        let foundDash: number = s.indexOf('-');
+        if (foundDash === 0) foundDash = s.slice(1).indexOf('-') + 1; // handle negative number at beginnning.
+        if (foundDash <= 0) { // single number
+            let val = Number(s);
+            stringIsOK = !Number.isNaN(val);
+            if (stringIsOK) vals.push(val);
         } else {
-            let start_val: number = Number(s.slice(0, found_dash));
-            let end_val: number = Number(s.slice(found_dash + 1, s.length));
-            string_is_ok = !isNaN(start_val) && !isNaN(end_val); // currently cannot process                        
-            if (string_is_ok) {
-                for (let n = start_val; n <= end_val; n++) vals.push(n);
+            let startVal = Number(s.slice(0, foundDash));
+            let endVal = Number(s.slice(foundDash + 1, s.length));
+            stringIsOK = !Number.isNaN(startVal) && !Number.isNaN(endVal); // currently cannot process
+            if (stringIsOK) {
+                for (let n = startVal; n <= endVal; n++) vals.push(n);
             }
         }
 
@@ -165,28 +165,27 @@ export default class Utility {
     }
 
     public static getIndices(seq: string): number[] {
-        // allows for specification of sequences and their indices 
+        // allows for specification of sequences and their indices
         //   during a paste. Example:
         //
         //    ACUGU 11-14 16
         //
-        // will return [11,12,13,14,16]   
+        // will return [11,12,13,14,16]
         //
         // If no numbers are specified, e.g.,
         //
         //    ACUGU
         //
-        // will return the default range from 1 to len(seq), here 1,2,3,4,5.     
+        // will return the default range from 1 to len(seq), here 1,2,3,4,5.
         //
         // Note that indices will be 1-indexed, not 0-indexed .
         let indices: number[] = [];
         let splitted: string[] = seq.split(' ');
         for (let ii = 0; ii < splitted.length; ii++) {
-            let ints: number[] = this.ints_of(splitted[ii]);
+            let ints: number[] = this.intsOf(splitted[ii]);
             if (ints === null) return []; // signal failure
             indices = indices.concat(ints);
         }
         return indices;
     }
-
 }
