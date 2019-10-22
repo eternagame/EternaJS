@@ -138,7 +138,7 @@ export default class EternaApp extends FlashbangApp {
 
         this.authenticate()
             .then(() => {
-                this.setLoadingText('Loading assets...', null);
+                this.setLoadingText('Loading game...', null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
