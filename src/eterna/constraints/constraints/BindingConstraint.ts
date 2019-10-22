@@ -65,7 +65,6 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
                 `${oligos[ii].label}`,
                 {fill: oligos[ii].bind ? '#ffffff' : '#808080'}
             );
-            console.log(clarifyTextBuilder.build());
         }
 
         let twUpper: number = Math.min(101, 15 * (2 * oligos.length - 1));
@@ -151,7 +150,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         ).filter((val) => val !== -1);
 
         return {
-            satisfied: unsatisfiedOligoIndexes.length > 0,
+            satisfied: unsatisfiedOligoIndexes.length === 0,
             unsatisfiedOligoIndexes
         };
     }

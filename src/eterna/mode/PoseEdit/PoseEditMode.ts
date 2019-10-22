@@ -709,12 +709,14 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
             this._poses[ii].pairs = this._targetPairs[ii];
+            this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions != null && this._targetConditions[ii] != null) {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
             }
 
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
             this._poses[ii].shiftLimit = this._puzzle.shiftLimit;
+            this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
         }
 
         this.clearUndoStack();
@@ -1021,6 +1023,9 @@ export default class PoseEditMode extends GameMode {
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyG) {
                 Eterna.settings.displayFreeEnergies.value = !Eterna.settings.displayFreeEnergies.value;
+                handled = true;
+            } else if (!ctrl && key === KeyCode.Comma) {
+                Eterna.settings.simpleGraphics.value = !Eterna.settings.simpleGraphics.value;
                 handled = true;
             } else if (!ctrl && key === KeyCode.KeyS) {
                 this.showSpec();
