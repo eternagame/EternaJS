@@ -283,7 +283,7 @@ export default class PoseEditMode extends GameMode {
         this.showDialog(new PasteSequenceDialog()).closed.then((sequence) => {
             if (sequence != null) {
                 for (let pose of this._poses) {
-                    pose.pasteSequence(EPars.stringToSequence(sequence));
+                    pose.pasteSequence(EPars.indexedStringToSequence(sequence));
                 }
             }
         });
