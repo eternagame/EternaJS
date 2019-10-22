@@ -1,5 +1,6 @@
 import {StyledTextBuilder} from 'flashbang';
 import IntLoopPars from 'eterna/IntLoopPars';
+import Utility from 'eterna/util/Utility';
 
 export default class EPars {
     public static readonly INF: number = 1000000;
@@ -378,6 +379,34 @@ export default class EPars {
         for (let ii = 0; ii < seq.length; ii++) {
             let char = seq.charAt(ii);
             seqArray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
+        }
+        return seqArray;
+    }
+
+    public static indexedStringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
+        // expanded to allow specification of indices at end of sequence, e.g.,
+        //
+        //    ACUGU 11-14 6
+        //
+        //  will return Array of length 16, padded with UNDEFINED in first 10 positions and
+        //   then ADENINE, CYTOSINE, URACIL, GUANOSINE, UNDEFINED, URACIL
+        //
+        // TODO: properly handle oligos, e.g.
+        //   ACUGU&ACAGU 2-11
+
+        // make robust to blanks:
+        let seqChunks : string[] = seq.split(' ');
+        if (seqChunks.length === 0) return seqArray; // blank sequence, no op.
+        if (seqChunks.length === 1) return this.stringToSequence(seq,allowCut,allowUnknown); // just sequence, no indices
+
+        let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
+        let seqArray: number[] = [];
+        for (let ii = 0; ii < Math.max(...indices); ii++) seqArray.push(EPars.RNABASE_UNDEFINED);       
+        let s = seqChunks[0];
+        for (let n = 0; n < indices.length; n++) {
+            let ii = indices[n];
+            let char = s.charAt(n);
+            seqArray[ii-1] = this.stringToNucleotide(char, allowCut, allowUnknown);
         }
         return seqArray;
     }
