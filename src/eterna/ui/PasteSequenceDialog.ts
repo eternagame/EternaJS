@@ -1,13 +1,15 @@
 import {KeyCode, Flashbang} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
+import EPars from 'eterna/EPars';
 import Dialog from './Dialog';
 import TextInputPanel from './TextInputPanel';
 
 /**
  * Prompts the user to paste a sequence.
- * If OK is pressed, the dialog will be closed with the sequence string.
+ * If OK is pressed, the dialog will be closed with array of numbers (ADENOSINE,...)
+ *  corresponding to sequence string.
  */
-export default class PasteSequenceDialog extends Dialog<string> {
+export default class PasteSequenceDialog extends Dialog<number[]> {
     protected added(): void {
         super.added();
 
@@ -34,16 +36,22 @@ export default class PasteSequenceDialog extends Dialog<string> {
     }
 
     private onSequenceEntered(sequence: string): void {
-        sequence = sequence.toUpperCase().replace(/T/g, "U");
-
-        for (let ii = 0; ii < sequence.length; ii++) {
-            let char = sequence.substr(ii, 1);
+        sequence = sequence.toUpperCase();
+        // make paste entry robust to blanks, and allow index specification after sequence.
+        let seq = sequence.split(' ')[0].replace(/T/g, "U");;
+        for (const char of seq) {
             if (char !== 'A' && char !== 'U' && char !== 'G' && char !== 'C') {
                 (this.mode as GameMode).showNotification('You can only use characters A, C, G, T, and U');
                 return;
             }
         }
-
-        this.close(sequence);
+        let s = EPars.indexedStringToSequence(sequence);
+        if (s == null && seq.length > 0) {
+            (this.mode as GameMode).showNotification(
+                'Problem with how you formatted any input numbers after the sequence'
+            );
+            return;
+        }
+        this.close(s);
     }
 }
