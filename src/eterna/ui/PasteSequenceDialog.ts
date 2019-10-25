@@ -36,7 +36,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
     }
 
     private onSequenceEntered(sequence: string): void {
-        sequence = sequence.toUpperCase().replace(/T/g, "U");
+        sequence = sequence.toUpperCase().replace(/T/g, 'U');
         // make paste entry robust to blanks, and allow index specification after sequence.
         let seq = sequence.split(' ')[0];
         for (const char of seq) {
