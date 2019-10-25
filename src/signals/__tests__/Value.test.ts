@@ -1,8 +1,6 @@
 import * as assert from "assert";
-import {Connection} from "../Connection";
-import {Value} from "../Value";
-import {ValueView} from "../ValueView";
-import {Counter} from "./Counter";
+import {Connection, Value, ValueView} from "signals";
+import Counter from "./Counter";
 
 test("simpleListener", () => {
     let value: Value<number> = new Value(42);

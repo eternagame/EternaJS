@@ -1,9 +1,7 @@
-import {Matrix, Sprite, Texture} from "pixi.js";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {ColorUtil} from "../../flashbang/util/ColorUtil";
-import {MathUtil} from "../../flashbang/util/MathUtil";
+import {Matrix, Sprite, Texture} from 'pixi.js';
+import {TextureUtil, ColorUtil, MathUtil} from 'flashbang';
 
-export class EternaTextureUtil {
+export default class EternaTextureUtil {
     /**
      * Creates scaled versions of each texture in the given array.
      * @param textures an Array of textures to append to
@@ -11,19 +9,19 @@ export class EternaTextureUtil {
      * @param numScaleLevels number of scale levels to create versions of
      */
     public static createScaled(textures: Texture[], scaleFactor: number, numScaleLevels: number): void {
-        let orig_length: number = textures.length;
-        let size_scaler: number = scaleFactor;
-        let scaler_mat: Matrix = new Matrix();
+        let origLength: number = textures.length;
+        let sizeScaler: number = scaleFactor;
+        let scalerMat: Matrix = new Matrix();
 
         for (let ss = 1; ss < numScaleLevels; ss++) {
-            scaler_mat.identity();
-            scaler_mat.scale(size_scaler, size_scaler);
+            scalerMat.identity();
+            scalerMat.scale(sizeScaler, sizeScaler);
 
-            for (let ii = 0; ii < orig_length; ii++) {
-                textures.push(EternaTextureUtil.scaleBy(textures[ii], size_scaler));
+            for (let ii = 0; ii < origLength; ii++) {
+                textures.push(EternaTextureUtil.scaleBy(textures[ii], sizeScaler));
             }
 
-            size_scaler *= scaleFactor;
+            sizeScaler *= scaleFactor;
         }
     }
 
@@ -31,13 +29,13 @@ export class EternaTextureUtil {
      * Creates 360-degree rotated versions of the given texture.
      * @return an Array containing the original texture and its rotated versions.
      */
-    public static createRotated(texture: Texture, step_size: number): Texture[] {
+    public static createRotated(texture: Texture, stepSize: number): Texture[] {
         let rotated: Texture[] = [texture];
-        let end_index: number = 360 / step_size;
+        let endIndex: number = 360 / stepSize;
 
-        for (let ii = 1; ii < end_index; ii++) {
+        for (let ii = 1; ii < endIndex; ii++) {
             let sprite: Sprite = new Sprite(texture);
-            sprite.rotation = step_size * ii * MathUtil.deg2Rad;
+            sprite.rotation = stepSize * ii * MathUtil.deg2Rad;
             rotated.push(TextureUtil.renderToTexture(sprite));
         }
 
@@ -48,30 +46,36 @@ export class EternaTextureUtil {
      * Create versions of the given texture with successively lower alpha values, to 0.
      * @return an Array containing the original texture and its faded-out versions
      */
-    public static createTransparent(texture: Texture, num_levels: number): Texture[] {
+    public static createTransparent(texture: Texture, numLevels: number): Texture[] {
         let transparent: Texture[] = [texture];
 
-        for (let ss = 1; ss < num_levels; ss++) {
-            let col_trans = ColorUtil.colorTransform(1, 1, 1, 1 - (ss / num_levels), 0, 0, 0, 0);
+        for (let ss = 1; ss < numLevels; ss++) {
+            let colTrans = ColorUtil.colorTransform(1, 1, 1, 1 - (ss / numLevels), 0, 0, 0, 0);
             let sprite: Sprite = new Sprite(texture);
-            sprite.filters = [col_trans];
+            sprite.filters = [colTrans];
             transparent.push(TextureUtil.renderToTexture(sprite));
         }
 
         return transparent;
     }
 
-    public static colorTransform(texture: Texture, rs: number, gs: number, bs: number, rt: number, gt: number, bt: number): Texture {
-        let color_transform = ColorUtil.colorTransform(rs / 255.0, gs / 255.0, bs / 255.0, 1, rt, gt, bt, 0);
+    public static colorTransform(
+        texture: Texture, rs: number, gs: number, bs: number, rt: number, gt: number, bt: number
+    ): Texture {
+        let colorTransform = ColorUtil.colorTransform(rs / 255.0, gs / 255.0, bs / 255.0, 1, rt, gt, bt, 0);
         let sprite: Sprite = new Sprite(texture);
-        sprite.filters = [color_transform];
+        sprite.filters = [colorTransform];
         return TextureUtil.renderToTexture(sprite);
     }
 
-    public static colorTransformAlpha(texture: Texture, rs: number, gs: number, bs: number, als: number, rt: number, gt: number, bt: number, alt: number): Texture {
-        let color_transform = ColorUtil.colorTransform(rs / 255.0, gs / 255.0, bs / 255.0, als, rt, gt, bt, alt);
+    public static colorTransformAlpha(
+        texture: Texture,
+        rs: number, gs: number, bs: number, als: number,
+        rt: number, gt: number, bt: number, alt: number
+    ): Texture {
+        let colorTransform = ColorUtil.colorTransform(rs / 255.0, gs / 255.0, bs / 255.0, als, rt, gt, bt, alt);
         let sprite: Sprite = new Sprite(texture);
-        sprite.filters = [color_transform];
+        sprite.filters = [colorTransform];
         return TextureUtil.renderToTexture(sprite);
     }
 

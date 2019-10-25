@@ -1,10 +1,17 @@
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {EPars} from "../../EPars";
-import {Dialog, DialogCanceledError} from "../../ui/Dialog";
-import {TextInputPanel} from "../../ui/TextInputPanel";
-import {UndoBlock, UndoBlockParam} from "../../UndoBlock";
-import {GameMode} from "../GameMode";
+import {KeyCode, Flashbang} from 'flashbang';
+import EPars from 'eterna/EPars';
+import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
+import TextInputPanel from 'eterna/ui/TextInputPanel';
+import GameMode from '../GameMode';
+
+function GetNumber(dict: Map<string, string>, name: string): number | undefined {
+    if (!dict.has(name)) {
+        return undefined;
+    }
+    let value = dict.get(name);
+    return value != null && value.length > 0 ? Number(value) : undefined;
+}
 
 export interface SubmitPuzzleDetails {
     title: string;
@@ -15,8 +22,8 @@ export interface SubmitPuzzleDetails {
     minAU?: number;
 }
 
-export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
-    public constructor(numPoses: number, puzzleState: UndoBlock) {
+export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
+    constructor(numPoses: number, puzzleState: UndoBlock) {
         super();
         this._numPoses = numPoses;
         this._puzzleState = puzzleState;
@@ -41,19 +48,19 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
     protected added(): void {
         super.added();
 
-        const TITLE = "Title";
-        const MIN_GU = "Min G-U pairs required";
-        const MAX_GC = "Max G-C pairs allowed";
-        const MIN_AU = "Min A-U pairs required";
-        const DESCRIPTION = "Description";
+        const TITLE = 'Title';
+        const MIN_GU = 'Min G-U pairs required';
+        const MAX_GC = 'Max G-C pairs allowed';
+        const MIN_AU = 'Min A-U pairs required';
+        const DESCRIPTION = 'Description';
 
         const FIELD_WIDTH = 200;
 
         let inputPanel = new TextInputPanel();
-        inputPanel.title = "Publish your puzzle";
+        inputPanel.title = 'Publish your puzzle';
 
         let title = inputPanel.addField(TITLE, FIELD_WIDTH);
-        if (this._numPoses == 1) {
+        if (this._numPoses === 1) {
             inputPanel.addField(MIN_GU, FIELD_WIDTH);
             inputPanel.addField(MAX_GC, FIELD_WIDTH);
             inputPanel.addField(MIN_AU, FIELD_WIDTH);
@@ -93,34 +100,34 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
     }
 
     private validate(details: SubmitPuzzleDetails): string {
-        if (details.title.length == 0) {
-            return "You must enter a title for your puzzle";
-        } else if (details.description.length == 0) {
-            return "You must write a description of your puzzle";
+        if (details.title.length === 0) {
+            return 'You must enter a title for your puzzle';
+        } else if (details.description.length === 0) {
+            return 'You must write a description of your puzzle';
         }
 
-        if (this._numPoses == 1) {
+        if (this._numPoses === 1) {
             let numAU: number = this._puzzleState.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE);
             let numGU: number = this._puzzleState.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE);
             let numGC: number = this._puzzleState.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE);
 
             if (details.minGU) {
-                let max_GU = (numAU + numGU + numGC) / 3;
-                if (details.minGU < 0 || details.minGU > numGU || details.minGU > max_GU) {
-                    return `${"Number of G-U pairs should be either blank or "
-                        + "an integer between 0 and "}${numGU} (number of GUs in your current solution) `
-                        + `and at most ${max_GU} (a third of total number of pairs)`;
+                let maxGU = (numAU + numGU + numGC) / 3;
+                if (details.minGU < 0 || details.minGU > numGU || details.minGU > maxGU) {
+                    return `${'Number of G-U pairs should be either blank or '
+                        + 'an integer between 0 and '}${numGU} (number of GUs in your current solution) `
+                        + `and at most ${maxGU} (a third of total number of pairs)`;
                 }
             }
 
             if (details.maxGC && details.maxGC < numGC) {
-                return `${"Number of G-C pairs should be either blank or "
-                    + "at least "}${numGC} (number GCs in your current solution)`;
+                return `${'Number of G-C pairs should be either blank or '
+                    + 'at least '}${numGC} (number GCs in your current solution)`;
             }
 
             if (details.minAU && (details.minAU < 0 || details.minAU > numAU)) {
-                return `${"Number of A-U pairs should be either blank or "
-                    + "an integer between 0 and "}${numAU} (number of AUs in your current solution)`;
+                return `${'Number of A-U pairs should be either blank or '
+                    + 'an integer between 0 and '}${numAU} (number of AUs in your current solution)`;
             }
         }
 
@@ -129,12 +136,4 @@ export class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
 
     private readonly _numPoses: number;
     private readonly _puzzleState: UndoBlock;
-}
-
-function GetNumber(dict: Map<string, string>, name: string): number | undefined {
-    if (!dict.has(name)) {
-        return undefined;
-    }
-    let value = dict.get(name);
-    return value != null && value.length > 0 ? Number(value) : undefined;
 }

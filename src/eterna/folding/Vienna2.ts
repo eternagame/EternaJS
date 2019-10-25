@@ -1,27 +1,29 @@
-import * as log from "loglevel";
-import {EmscriptenUtil} from "../emscripten/EmscriptenUtil";
-import {EPars} from "../EPars";
-import {RNALayout} from "../pose2D/RNALayout";
-import {CSVParser} from "../util/CSVParser";
-import * as vrna2_lib from "./engines/vrna2_lib/index";
-import {DotPlotResult, FullEvalResult, FullFoldResult} from "./engines/vrna2_lib/index";
-import {Folder} from "./Folder";
-import {FoldUtil} from "./FoldUtil";
+import * as log from 'loglevel';
+import EPars from 'eterna/EPars';
+/* eslint-disable import/no-duplicates, import/no-unresolved */
+import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
+import Utility from 'eterna/util/Utility';
+import RNALayout from 'eterna/pose2D/RNALayout';
+import * as Vienna2Lib from './engines/Viena2Lib';
+import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Viena2Lib';
+/* eslint-enable import/no-duplicates, import/no-unresolved */
+import Folder from './Folder';
+import FoldUtil from './FoldUtil';
 
-export class Vienna2 extends Folder {
-    public static NAME = "Vienna2";
+export default class Vienna2 extends Folder {
+    public static NAME = 'Vienna2';
 
     /**
      * Asynchronously creates a new instance of the Vienna folder.
      * @returns {Promise<Vienna2>}
      */
     public static create(): Promise<Vienna2> {
-        return import("./engines/vrna2")
+        return import('./engines/vrna2')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna2(program));
     }
 
-    private constructor(lib: vrna2_lib) {
+    private constructor(lib: Vienna2Lib) {
         super();
         this._lib = lib;
     }
@@ -34,23 +36,23 @@ export class Vienna2 extends Folder {
     /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
         let key: any = {
-            primitive: "dotplot", seq, pairs, temp
+            primitive: 'dotplot', seq, pairs, temp
         };
-        let ret_array: number[] = this.getCache(key);
-        if (ret_array != null) {
-            return ret_array.slice();
+        let retArray: number[] = this.getCache(key);
+        if (retArray != null) {
+            return retArray.slice();
         }
 
-        let secstruct_str: string = EPars.pairsToParenthesis(pairs);
-        let seq_str: string = EPars.sequenceToString(seq);
+        let secstructStr: string = EPars.pairsToParenthesis(pairs);
+        let seqStr: string = EPars.sequenceToString(seq);
 
         let probabilitiesString: string;
         let result: DotPlotResult;
         try {
-            result = this._lib.GetDotPlot(temp, seq_str, secstruct_str);
+            result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
             probabilitiesString = result.probabilitiesString;
         } catch (e) {
-            log.error("GetDotPlot error", e);
+            log.error('GetDotPlot error', e);
             return [];
         } finally {
             if (result != null) {
@@ -59,27 +61,27 @@ export class Vienna2 extends Folder {
             }
         }
 
-        let temp_array: string[] = CSVParser.splitOnWhitespace(probabilitiesString);
-        ret_array = [];
+        let tempArray: string[] = Utility.splitOnWhitespace(probabilitiesString);
+        retArray = [];
 
-        if (temp_array.length % 4 !== 0) {
-            throw new Error(`Something's wrong with dot plot return ${temp_array.length}`);
+        if (tempArray.length % 4 !== 0) {
+            throw new Error(`Something's wrong with dot plot return ${tempArray.length}`);
         }
 
-        for (let ii = 0; ii < temp_array.length; ii += 4) {
-            if (temp_array[ii + 3] === "ubox") {
-                ret_array.push(Number(temp_array[ii]));
-                ret_array.push(Number(temp_array[ii + 1]));
-                ret_array.push(Number(temp_array[ii + 2]));
+        for (let ii = 0; ii < tempArray.length; ii += 4) {
+            if (tempArray[ii + 3] === 'ubox') {
+                retArray.push(Number(tempArray[ii]));
+                retArray.push(Number(tempArray[ii + 1]));
+                retArray.push(Number(tempArray[ii + 2]));
             } else {
-                ret_array.push(Number(temp_array[ii + 1]));
-                ret_array.push(Number(temp_array[ii]));
-                ret_array.push(Number(temp_array[ii + 2]));
+                retArray.push(Number(tempArray[ii + 1]));
+                retArray.push(Number(tempArray[ii]));
+                retArray.push(Number(tempArray[ii + 2]));
             }
         }
 
-        this.putCache(key, ret_array.slice());
-        return ret_array;
+        this.putCache(key, retArray.slice());
+        return retArray;
     }
 
     /* override */
@@ -100,7 +102,7 @@ export class Vienna2 extends Folder {
     /* override */
     public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
         let key: any = {
-            primitive: "score", seq, pairs, temp
+            primitive: 'score', seq, pairs, temp
         };
         let cache: FullEvalCache = this.getCache(key);
 
@@ -120,7 +122,7 @@ export class Vienna2 extends Folder {
                     EPars.pairsToParenthesis(pairs));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
-                log.error("FullEval error", e);
+                log.error('FullEval error', e);
                 return 0;
             } finally {
                 if (result != null) {
@@ -146,7 +148,7 @@ export class Vienna2 extends Folder {
             let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
-                throw new Error("Something went terribly wrong in score_structures()");
+                throw new Error('Something went terribly wrong in scoreStructures()');
             }
 
             cache.nodes.splice(0); // make empty
@@ -173,12 +175,14 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public foldSequence(seq: number[], second_best_pairs: number[], desired_pairs: string = null, temp: number = 37): number[] {
+    public foldSequence(
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let key: any = {
-            primitive: "fold",
+            primitive: 'fold',
             seq,
-            second_best_pairs,
-            desired_pairs,
+            secondBestPairs,
+            desiredPairs,
             temp
         };
         let pairs: number[] = this.getCache(key);
@@ -187,7 +191,7 @@ export class Vienna2 extends Folder {
             return pairs.slice();
         }
 
-        pairs = this.foldSequenceImpl(seq, desired_pairs, temp);
+        pairs = this.foldSequenceImpl(seq, desiredPairs, temp);
         this.putCache(key, pairs.slice());
         return pairs;
     }
@@ -197,58 +201,61 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public foldSequenceWithBindingSite(seq: number[], target_pairs: number[], binding_site: number[], bonus: number, version: number = 1.0, temp: number = 37): number[] {
+    public foldSequenceWithBindingSite(
+        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        version: number = 1.0, temp: number = 37
+    ): number[] {
         let key: any = {
-            primitive: "fold_aptamer",
+            primitive: 'foldAptamer',
             seq,
-            target_pairs,
-            binding_site,
+            targetPairs,
+            bindingSite,
             bonus,
             version,
             temp
         };
         let pairs: number[] = this.getCache(key);
         if (pairs != null) {
-            // trace("fold_aptamer cache hit");
+            // trace("foldAptamer cache hit");
             return pairs.slice();
         }
 
         if (!(version >= 2.0)) {
-            pairs = this.foldSequenceWithBindingSiteOld(seq, target_pairs, binding_site, bonus);
+            pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
             this.putCache(key, pairs.slice());
             return pairs;
         }
 
-        let site_groups: number[][] = [];
-        let last_index = -1;
-        let current_group: number[] = [];
+        let siteGroups: number[][] = [];
+        let lastIndex = -1;
+        let currentGroup: number[] = [];
 
-        for (let jj = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index === 1) {
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+        for (let jj = 0; jj < bindingSite.length; jj++) {
+            if (lastIndex < 0 || bindingSite[jj] - lastIndex === 1) {
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             } else {
-                site_groups.push(current_group);
-                current_group = [];
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+                siteGroups.push(currentGroup);
+                currentGroup = [];
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             }
         }
-        if (current_group.length > 0) {
-            site_groups.push(current_group);
+        if (currentGroup.length > 0) {
+            siteGroups.push(currentGroup);
         }
 
-        if (site_groups.length === 2) {
+        if (siteGroups.length === 2) {
             pairs = this.foldSequenceWithBindingSiteImpl(
                 seq,
-                site_groups[0][0],
-                site_groups[0][site_groups[0].length - 1],
-                site_groups[1][site_groups[1].length - 1],
-                site_groups[1][0],
+                siteGroups[0][0],
+                siteGroups[0][siteGroups[0].length - 1],
+                siteGroups[1][siteGroups[1].length - 1],
+                siteGroups[1][0],
                 bonus
             );
         } else {
-            pairs = this.foldSequenceWithBindingSiteOld(seq, target_pairs, binding_site, bonus);
+            pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
 
         this.putCache(key, pairs.slice());
@@ -261,27 +268,29 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public cofoldSequence(seq: number[], second_best_pairs: number[], malus: number = 0, desired_pairs: string = null, temp: number = 37): number[] {
+    public cofoldSequence(
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+    ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
-            throw new Error("Missing cutting point");
+            throw new Error('Missing cutting point');
         }
 
         let key: any = {
-            primitive: "cofold",
+            primitive: 'cofold',
             seq,
-            second_best_pairs,
+            secondBestPairs,
             malus,
-            desired_pairs,
+            desiredPairs,
             temp
         };
-        let co_pairs: number[] = this.getCache(key);
-        if (co_pairs != null) {
+        let coPairs: number[] = this.getCache(key);
+        if (coPairs != null) {
             // trace("cofold cache hit");
-            return co_pairs.slice();
+            return coPairs.slice();
         }
 
-        // FIXME: what about desired_pairs? (forced structure)
+        // FIXME: what about desiredPairs? (forced structure)
         let seqA: number[] = seq.slice(0, cut);
         let pairsA: number[] = this.foldSequence(seqA, null, null, temp);
         let nodesA: number[] = [];
@@ -292,17 +301,17 @@ export class Vienna2 extends Folder {
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofoldSequenceImpl(seq, desired_pairs);
-        let co_nodes: number[] = [];
-        let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
+        coPairs = this.cofoldSequenceImpl(seq, desiredPairs);
+        let coNodes: number[] = [];
+        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
 
-        if (co_fe + malus >= feA + feB) {
+        if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesisToPairs(struc);
+            coPairs = EPars.parenthesisToPairs(struc);
         }
 
-        this.putCache(key, co_pairs.slice());
-        return co_pairs;
+        this.putCache(key, coPairs.slice());
+        return coPairs;
     }
 
     /* override */
@@ -311,86 +320,89 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public cofoldSequenceWithBindingSite(seq: number[], binding_site: number[], bonus: number, desired_pairs: string = null, malus: number = 0, temp: number = 37): number[] {
+    public cofoldSequenceWithBindingSite(
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        malus: number = 0, temp: number = 37
+    ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
-            throw new Error("Missing cutting point");
+            throw new Error('Missing cutting point');
         }
 
         let key: any = {
-            primitive: "cofold_aptamer",
+            primitive: 'cofoldAptamer',
             seq,
             malus,
-            desired_pairs,
-            binding_site,
+            desiredPairs,
+            bindingSite,
             bonus,
             temp
         };
-        let co_pairs: number[] = this.getCache(key);
-        if (co_pairs != null) {
-            // trace("cofold_aptamer cache hit");
-            return co_pairs.slice();
+        let coPairs: number[] = this.getCache(key);
+        if (coPairs != null) {
+            // trace("cofoldAptamer cache hit");
+            return coPairs.slice();
         }
 
         // IMPORTANT: assumption is that the binding site is in segment A
         // FIXME: what about desired_pairs? (forced structure)
 
-        let site_groups: number[][] = [];
-        let last_index = -1;
-        let current_group: number[] = [];
+        let siteGroups: number[][] = [];
+        let lastIndex = -1;
+        let currentGroup: number[] = [];
 
-        for (let jj = 0; jj < binding_site.length; jj++) {
-            if (last_index < 0 || binding_site[jj] - last_index === 1) {
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+        for (let jj = 0; jj < bindingSite.length; jj++) {
+            if (lastIndex < 0 || bindingSite[jj] - lastIndex === 1) {
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             } else {
-                site_groups.push(current_group);
-                current_group = [];
-                current_group.push(binding_site[jj]);
-                last_index = binding_site[jj];
+                siteGroups.push(currentGroup);
+                currentGroup = [];
+                currentGroup.push(bindingSite[jj]);
+                lastIndex = bindingSite[jj];
             }
         }
-        if (current_group.length > 0) {
-            site_groups.push(current_group);
+        if (currentGroup.length > 0) {
+            siteGroups.push(currentGroup);
         }
 
         let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, binding_site, bonus, 2.5, temp);
+        let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
         let nodesA: number[] = [];
         let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
-        if (FoldUtil.bindingSiteFormed(pairsA, site_groups)) feA += bonus;
+        if (FoldUtil.bindingSiteFormed(pairsA, siteGroups)) feA += bonus;
 
         let seqB: number[] = seq.slice(cut + 1);
         let pairsB: number[] = this.foldSequence(seqB, null, null, temp);
         let nodesB: number[] = [];
         let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
 
-        co_pairs = this.cofoldSequenceWithBindingSiteImpl(
+        coPairs = this.cofoldSequenceWithBindingSiteImpl(
             seq,
-            desired_pairs,
-            site_groups[0][0],
-            site_groups[0][site_groups[0].length - 1],
-            site_groups[1][site_groups[1].length - 1],
-            site_groups[1][0],
+            desiredPairs,
+            siteGroups[0][0],
+            siteGroups[0][siteGroups[0].length - 1],
+            siteGroups[1][siteGroups[1].length - 1],
+            siteGroups[1][0],
             bonus
         );
 
-        let co_nodes: number[] = [];
-        let co_fe: number = this.scoreStructures(seq, co_pairs, temp, co_nodes);
-        if (FoldUtil.bindingSiteFormed(co_pairs, site_groups)) co_fe += bonus;
+        let coNodes: number[] = [];
+        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        if (FoldUtil.bindingSiteFormed(coPairs, siteGroups)) coFE += bonus;
 
-        if (co_fe + malus >= feA + feB) {
+        if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
-            co_pairs = EPars.parenthesisToPairs(struc);
+            coPairs = EPars.parenthesisToPairs(struc);
         }
 
-        this.putCache(key, co_pairs.slice());
-        return co_pairs;
+        this.putCache(key, coPairs.slice());
+        return coPairs;
     }
 
     /* override */
     protected loadCustomParams(): boolean {
-        log.info("TODO: Vienna2.load_custom_params");
+        log.info('TODO: Vienna2.load_custom_params');
         return false;
         // if (this._lib != null && this._lib.hasOwnProperty("loadParams")) {
         //     let success: boolean = (this._lib.loadParams("custom.par") === 0);
@@ -401,11 +413,11 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public mlEnergy(pairs: number[], S: number[], i: number, is_extloop: boolean): number {
+    public mlEnergy(pairs: number[], S: number[], i: number, isExtloop: boolean): number {
         let energy: number;
-        let cx_energy: number;
-        let best_energy: number;
-        best_energy = EPars.INF;
+        let cxEnergy: number;
+        let bestEnergy: number;
+        bestEnergy = EPars.INF;
         let i1: number;
         let j: number;
         let p: number;
@@ -420,13 +432,14 @@ export class Vienna2 extends Folder {
 
         let dangles: number = EPars.DANGLES;
 
-        if (is_extloop) {
+        if (isExtloop) {
             for (x = 0; x <= EPars.NBPAIRS; x++) {
                 mlintern[x] = EPars.mlIntern(x) - EPars.mlIntern(1);
                 /* 0 or TerminalAU */
             }
 
-            mlclosing = mlbase = 0;
+            mlbase = 0;
+            mlclosing = 0;
         } else {
             for (x = 0; x <= EPars.NBPAIRS; x++) {
                 mlintern[x] = EPars.mlIntern(x);
@@ -455,12 +468,12 @@ export class Vienna2 extends Folder {
             p = i + 1;
             u = 0;
             energy = 0;
-            cx_energy = EPars.INF;
+            cxEnergy = EPars.INF;
 
             do { /* walk around the multi-loop */
                 let tt: number;
-                let new_cx: number;
-                new_cx = EPars.INF;
+                let newCx: number;
+                newCx = EPars.INF;
 
                 /* hope over unpaired positions */
                 while (p <= pairs[0] && pairs[p] === 0) p++;
@@ -469,7 +482,8 @@ export class Vienna2 extends Folder {
                 u += p - i1 - 1;
                 /* get position of pairing partner */
                 if (p === pairs[0] + 1) {
-                    q = tt = 0;
+                    tt = 0;
+                    q = 0;
                     /* virtual root pair */
                 } else {
                     q = pairs[p];
@@ -479,7 +493,7 @@ export class Vienna2 extends Folder {
                 }
 
                 energy += mlintern[tt];
-                cx_energy += mlintern[tt];
+                cxEnergy += mlintern[tt];
 
                 if (dangles) {
                     let dang5 = 0;
@@ -495,14 +509,14 @@ export class Vienna2 extends Folder {
                     }
 
                     switch (p - i1 - 1) {
-                    case 0: /* adjacent helices *this./* adjacent helices */
-                    case 1: /* 1 unpaired base between helices *this./* 1 unpaired base between helices */
-                        dang = (dangles === 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
-                        energy += dang;
-                        break;
+                        case 0: /* adjacent helices *this./* adjacent helices */
+                        case 1: /* 1 unpaired base between helices *this./* 1 unpaired base between helices */
+                            dang = (dangles === 2) ? (dang3 + dang5) : Math.min(dang3, dang5);
+                            energy += dang;
+                            break;
 
-                    default: /* many unpaired base between helices *this./* many unpaired base between helices */
-                        energy += dang5 + dang3;
+                        default: /* many unpaired base between helices *this./* many unpaired base between helices */
+                            energy += dang5 + dang3;
                     }
                     type = tt;
                 }
@@ -511,10 +525,10 @@ export class Vienna2 extends Folder {
                 p = q + 1;
             } while (q !== i);
 
-            best_energy = Math.min(energy, best_energy);
-            /* don't use cx_energy here */
+            bestEnergy = Math.min(energy, bestEnergy);
+            /* don't use cxEnergy here */
 
-            if (dangles !== 3 || is_extloop) {
+            if (dangles !== 3 || isExtloop) {
                 break;
                 /* may break cofold with co-ax */
             }
@@ -526,7 +540,7 @@ export class Vienna2 extends Folder {
             i = pairs[p];
         }
 
-        energy = best_energy;
+        energy = bestEnergy;
         energy += mlclosing;
 
         energy += mlbase * u;
@@ -540,8 +554,12 @@ export class Vienna2 extends Folder {
     }
 
     /* override */
-    public loopEnergy(n1: number, n2: number, type: number, type_2: number, si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean): number {
-        let loop_score = 0;
+    public loopEnergy(
+        n1: number, n2: number,
+        type: number, type2: number,
+        si1: number, sj1: number, sp1: number, sq1: number, b1: boolean, b2: boolean
+    ): number {
+        let loopScore = 0;
 
         /* compute energy of degree 2 loop (stack bulge or interior) */
         let nl: number;
@@ -556,100 +574,102 @@ export class Vienna2 extends Folder {
         }
 
         if (nl === 0) {
-            return EPars.getStackScore(type, type_2, b1, b2);
+            return EPars.getStackScore(type, type2, b1, b2);
             /* stack */
         }
 
         if (ns === 0) { /* bulge */
             if (nl <= EPars.MAXLOOP) {
-                loop_score = EPars.BULGE_37[nl];
+                loopScore = EPars.BULGE_37[nl];
             } else {
-                loop_score = EPars.get_bulge(nl);
+                loopScore = EPars.getBulge(nl);
             }
             if (nl === 1) {
-                loop_score += EPars.getStackScore(type, type_2, b1, b2);
+                loopScore += EPars.getStackScore(type, type2, b1, b2);
             } else {
                 if (type > 2) {
-                    loop_score += EPars.TERM_AU;
+                    loopScore += EPars.TERM_AU;
                 }
-                if (type_2 > 2) {
-                    loop_score += EPars.TERM_AU;
+                if (type2 > 2) {
+                    loopScore += EPars.TERM_AU;
                 }
             }
-            return loop_score;
-        } else { /* interior loop */
+            return loopScore;
+        } else {
+            /* interior loop */
             if (ns === 1) {
-                if (nl === 1) // 1x1 loop
-                {
-                    return EPars.getInt11(type, type_2, si1, sj1);
+                if (nl === 1) {
+                    // 1x1 loop
+                    return EPars.getInt11(type, type2, si1, sj1);
                 }
 
-                if (nl === 2) { // 2x1 loop
+                if (nl === 2) {
+                    // 2x1 loop
                     if (n1 === 1) {
-                        loop_score = EPars.getInt21(type, type_2, si1, sq1, sj1);
+                        loopScore = EPars.getInt21(type, type2, si1, sq1, sj1);
                     } else {
-                        loop_score = EPars.getInt21(type_2, type, sq1, si1, sp1);
+                        loopScore = EPars.getInt21(type2, type, sq1, si1, sp1);
                     }
 
-                    return loop_score;
+                    return loopScore;
                 }
-            } else if (n1 === 2 && n2 === 2) // 2x2 loop
-            {
-                return EPars.getInt22(type, type_2, si1, sp1, sq1, sj1);
+            } else if (n1 === 2 && n2 === 2) {
+                // 2x2 loop
+                return EPars.getInt22(type, type2, si1, sp1, sq1, sj1);
             }
 
-            {
-                /* generic interior loop (no else here!) */
-                if ((n1 + n2 <= EPars.MAXLOOP)) {
-                    loop_score = EPars.INTERNAL_37[n1 + n2];
-                } else {
-                    loop_score = EPars.getInternal(n1 + n2);
-                }
-
-                loop_score += Math.min(EPars.MAX_NINIO, (nl - ns) * EPars.F_ninio37[2]);
-                loop_score += EPars.internalMismatch(type, si1, sj1) + EPars.internalMismatch(type_2, sq1, sp1);
+            /* generic interior loop (no else here!) */
+            if ((n1 + n2 <= EPars.MAXLOOP)) {
+                loopScore = EPars.INTERNAL_37[n1 + n2];
+            } else {
+                loopScore = EPars.getInternal(n1 + n2);
             }
+
+            loopScore += Math.min(EPars.MAX_NINIO, (nl - ns) * EPars.F_ninio37[2]);
+            loopScore += EPars.internalMismatch(type, si1, sj1) + EPars.internalMismatch(type2, sq1, sp1);
         }
 
-        return loop_score;
+        return loopScore;
     }
 
     /* override */
-    public hairpinEnergy(size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number): number {
-        let hairpin_score = 0;
+    public hairpinEnergy(
+        size: number, type: number, si1: number, sj1: number, sequence: number[], i: number, j: number
+    ): number {
+        let hairpinScore = 0;
 
         if (size <= 30) {
-            hairpin_score = EPars.HAIRPIN_37[size];
+            hairpinScore = EPars.HAIRPIN_37[size];
         } else {
-            hairpin_score = EPars.HAIRPIN_37[30] + Number(EPars.LXC * Math.log((size) / 30.0));
+            hairpinScore = EPars.HAIRPIN_37[30] + Number(EPars.LXC * Math.log((size) / 30.0));
         }
 
         if (size === 4) {
-            let loop_str = "";
+            let loopStr = '';
             for (let walker: number = i; walker <= j; walker++) {
                 if (sequence[walker] === EPars.RNABASE_ADENINE) {
-                    loop_str += "A";
+                    loopStr += 'A';
                 } else if (sequence[walker] === EPars.RNABASE_GUANINE) {
-                    loop_str += "G";
+                    loopStr += 'G';
                 } else if (sequence[walker] === EPars.RNABASE_URACIL) {
-                    loop_str += "U";
+                    loopStr += 'U';
                 } else if (sequence[walker] === EPars.RNABASE_CYTOSINE) {
-                    loop_str += "C";
+                    loopStr += 'C';
                 }
             }
 
-            hairpin_score += EPars.getTetraLoopBonus(loop_str);
+            hairpinScore += EPars.getTetraLoopBonus(loopStr);
         }
 
         if (size === 3) {
             if (type > 2) {
-                hairpin_score += EPars.TERM_AU;
+                hairpinScore += EPars.TERM_AU;
             }
         } else {
-            hairpin_score += EPars.hairpinMismatch(type, si1, sj1);
+            hairpinScore += EPars.hairpinMismatch(type, si1, sj1);
         }
 
-        return hairpin_score;
+        return hairpinScore;
     }
 
     private foldSequenceImpl(seq: number[], structStr: string = null, temp: number = 37): number[] {
@@ -657,10 +677,10 @@ export class Vienna2 extends Folder {
         let result: FullFoldResult;
 
         try {
-            result = this._lib.FullFoldTemperature(temp, seqStr, structStr || "");
+            result = this._lib.FullFoldTemperature(temp, seqStr, structStr || '');
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("FullFoldTemperature error", e);
+            log.error('FullFoldTemperature error', e);
             return [];
         } finally {
             if (result != null) {
@@ -670,16 +690,18 @@ export class Vienna2 extends Folder {
         }
     }
 
-    private foldSequenceWithBindingSiteImpl(seq: number[], i: number, p: number, j: number, q: number, bonus: number): number[] {
+    private foldSequenceWithBindingSiteImpl(
+        seq: number[], i: number, p: number, j: number, q: number, bonus: number
+    ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        const structStr = "";
+        const structStr = '';
         let result: FullFoldResult;
 
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("FullFoldWithBindingSite error", e);
+            log.error('FullFoldWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
@@ -691,15 +713,15 @@ export class Vienna2 extends Folder {
 
     private cofoldSequenceImpl(seq: number[], str: string = null): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
-        const structStr: string = str || "";
+        const structStr: string = str || '';
         let result: FullFoldResult;
 
         try {
             result = this._lib.CoFoldSequence(seqStr, structStr);
-            log.debug("done cofolding");
+            log.debug('done cofolding');
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("CoFoldSequence error", e);
+            log.error('CoFoldSequence error', e);
             return [];
         } finally {
             if (result != null) {
@@ -709,17 +731,19 @@ export class Vienna2 extends Folder {
         }
     }
 
-    private cofoldSequenceWithBindingSiteImpl(seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number): number[] {
+    private cofoldSequenceWithBindingSiteImpl(
+        seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number
+    ): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
-        const structStr: string = str || "";
+        const structStr: string = str || '';
         let result: FullFoldResult;
 
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
-            log.debug("done cofolding");
+            log.debug('done cofolding');
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
-            log.error("CoFoldSequenceWithBindingSite error", e);
+            log.error('CoFoldSequenceWithBindingSite error', e);
             return [];
         } finally {
             if (result != null) {
@@ -729,53 +753,55 @@ export class Vienna2 extends Folder {
         }
     }
 
-    private foldSequenceWithBindingSiteOld(seq: number[], target_pairs: number[], binding_site: number[], bonus: number): number[] {
-        let best_pairs: number[];
-        let native_pairs: number[] = this.foldSequence(seq, null, null);
+    private foldSequenceWithBindingSiteOld(
+        seq: number[], targetpairs: number[], bindingSite: number[], bonus: number
+    ): number[] {
+        let bestPairs: number[];
+        let nativePairs: number[] = this.foldSequence(seq, null, null);
 
-        let native_tree: RNALayout = new RNALayout();
-        native_tree.setupTree(native_pairs);
-        native_tree.scoreTree(seq, this);
-        let native_score: number = native_tree.totalScore;
+        let nativeTree: RNALayout = new RNALayout();
+        nativeTree.setupTree(nativePairs);
+        nativeTree.scoreTree(seq, this);
+        let nativeScore: number = nativeTree.totalScore;
 
-        let target_satisfied: number[] = EPars.getSatisfiedPairs(target_pairs, seq);
-        let target_tree: RNALayout = new RNALayout();
-        target_tree.setupTree(target_satisfied);
-        target_tree.scoreTree(seq, this);
-        let target_score: number = target_tree.totalScore;
+        let targetSatisfied: number[] = EPars.getSatisfiedPairs(targetpairs, seq);
+        let targetTree: RNALayout = new RNALayout();
+        targetTree.setupTree(targetSatisfied);
+        targetTree.scoreTree(seq, this);
+        let targetScore: number = targetTree.totalScore;
 
-        let native_bound = true;
-        let target_bound = true;
+        let nativeBound = true;
+        let targetBound = true;
 
-        for (let bb = 0; bb < binding_site.length; bb++) {
-            let bi: number = binding_site[bb];
-            if (target_pairs[bi] !== native_pairs[bi]) {
-                native_bound = false;
+        for (let bb = 0; bb < bindingSite.length; bb++) {
+            let bi: number = bindingSite[bb];
+            if (targetpairs[bi] !== nativePairs[bi]) {
+                nativeBound = false;
             }
 
-            if (target_pairs[bi] !== target_satisfied[bi]) {
-                target_bound = false;
+            if (targetpairs[bi] !== targetSatisfied[bi]) {
+                targetBound = false;
             }
         }
 
-        if (target_bound) {
-            target_score += bonus;
+        if (targetBound) {
+            targetScore += bonus;
         }
 
-        if (native_bound) {
-            native_score += bonus;
+        if (nativeBound) {
+            nativeScore += bonus;
         }
 
-        if (target_score < native_score) {
-            best_pairs = target_satisfied;
+        if (targetScore < nativeScore) {
+            bestPairs = targetSatisfied;
         } else {
-            best_pairs = native_pairs;
+            bestPairs = nativePairs;
         }
 
-        return best_pairs;
+        return bestPairs;
     }
 
-    private readonly _lib: vrna2_lib;
+    private readonly _lib: Vienna2Lib;
 }
 
 interface FullEvalCache {

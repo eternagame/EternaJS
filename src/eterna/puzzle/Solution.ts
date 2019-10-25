@@ -1,10 +1,10 @@
-import {Eterna} from "../Eterna";
-import {Feedback} from "../Feedback";
+import Eterna from 'eterna/Eterna';
+import Feedback from 'eterna/Feedback';
 
-export class Solution {
-    public constructor(nid: number, puzzle_nid: number) {
+export default class Solution {
+    constructor(nid: number, puzzleNID: number) {
         this._nid = nid;
-        this._puzzleNid = puzzle_nid;
+        this._puzzleNid = puzzleNID;
     }
 
     public set freeEnergy(fe: number) {
@@ -20,12 +20,12 @@ export class Solution {
 
         if (this._desc) {
             let newlinereg = /\n/g;
-            this._shortDesc = this._desc.replace(newlinereg, " ");
+            this._shortDesc = this._desc.replace(newlinereg, ' ');
             newlinereg = /\r/g;
-            this._shortDesc = this._shortDesc.replace(newlinereg, " ");
+            this._shortDesc = this._shortDesc.replace(newlinereg, ' ');
         } else {
-            this._shortDesc = "No description available";
-            this._desc = "No description available";
+            this._shortDesc = 'No description available';
+            this._desc = 'No description available';
         }
     }
 
@@ -44,9 +44,9 @@ export class Solution {
         this._title = title;
 
         let newlinereg = /\n/g;
-        this._title = this._title.replace(newlinereg, " ");
+        this._title = this._title.replace(newlinereg, ' ');
         newlinereg = /\r/g;
-        this._title = this._title.replace(newlinereg, " ");
+        this._title = this._title.replace(newlinereg, ' ');
     }
 
     public get nodeID(): number {
@@ -103,9 +103,9 @@ export class Solution {
         this._meltingPoint = mp;
     }
 
-    public setNumVotes(num_votes: number, num_my_votes: number): void {
-        this._numVotes = num_votes;
-        this._numMyVotes = num_my_votes;
+    public setNumVotes(numVotes: number, numMyVotes: number): void {
+        this._numVotes = numVotes;
+        this._numMyVotes = numMyVotes;
     }
 
     public setPlayer(name: string, id: number): void {
@@ -128,9 +128,9 @@ export class Solution {
                 return Promise.resolve(this._foldData);
             } else {
                 return Eterna.client.getSolutionInfo(this._nid).then((json) => {
-                    let data: any = json["data"];
-                    if (data["solution"] != null) {
-                        this.foldData = JSON.parse(data["solution"]["fold-data"]);
+                    let data = json['data'];
+                    if (data['solution'] != null) {
+                        this.foldData = JSON.parse(data['solution']['fold-data']);
                     }
 
                     return this._foldData;
@@ -142,51 +142,51 @@ export class Solution {
     }
 
     public getProperty(keyword: string): any {
-        if (keyword === "Title") {
+        if (keyword === 'Title') {
             return this._title;
-        } else if (keyword === "GU Pairs") {
+        } else if (keyword === 'GU Pairs') {
             return this._numGUs;
-        } else if (keyword === "GC Pairs") {
+        } else if (keyword === 'GC Pairs') {
             return this._numGCs;
-        } else if (keyword === "UA Pairs") {
+        } else if (keyword === 'UA Pairs') {
             return this._numUAs;
-        } else if (keyword === "Melting Point") {
+        } else if (keyword === 'Melting Point') {
             return this._meltingPoint;
-        } else if (keyword === "Designer") {
+        } else if (keyword === 'Designer') {
             return this._playerName;
-        } else if (keyword === "Sequence") {
+        } else if (keyword === 'Sequence') {
             return this._sequence;
-        } else if (keyword === "Free Energy") {
+        } else if (keyword === 'Free Energy') {
             return this._freeEnergy;
-        } else if (keyword === "Description") {
+        } else if (keyword === 'Description') {
             return this._shortDesc;
-        } else if (keyword === "Round") {
+        } else if (keyword === 'Round') {
             return this._round;
-        } else if (keyword === "Votes") {
+        } else if (keyword === 'Votes') {
             if (this._synthesizedRound) {
                 return -1;
             }
             return this._numVotes;
-        } else if (keyword === "My Votes") {
+        } else if (keyword === 'My Votes') {
             if (this._synthesizedRound) {
                 return -1;
             }
             return this._numMyVotes;
-        } else if (keyword === "Synthesized") {
+        } else if (keyword === 'Synthesized') {
             if (this._synthesizedRound > 0) {
-                return "y";
+                return 'y';
             } else {
-                return "n";
+                return 'n';
             }
-        } else if (keyword === "Synthesis score") {
+        } else if (keyword === 'Synthesis score') {
             if (this._expFeedback != null && this._expFeedback.getShapeData() != null) {
                 return this._synthesisScore;
             } else if (this._expFeedback != null && this._expFeedback.isFailed() !== 0) {
                 return this._expFeedback.isFailed();
             } else {
-                return Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf("NOT SYNTHESIZED")];
+                return Feedback.EXPCODES[Feedback.EXPSTRINGS.indexOf('NOT SYNTHESIZED')];
             }
-        } else if (keyword === "Id") {
+        } else if (keyword === 'Id') {
             return this._nid;
         }
 
@@ -199,7 +199,7 @@ export class Solution {
     private _sequence: string;
     private _title: string;
     private _playerID: number = -1;
-    private _playerName: string = "";
+    private _playerName: string = '';
     private _numGUs: number;
     private _numGCs: number;
     private _numUAs: number;

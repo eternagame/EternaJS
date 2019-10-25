@@ -1,7 +1,7 @@
-import {AbstractSignal} from "./AbstractSignal";
-import {FilteredSignal} from "./FilteredSignal";
-import {SignalView} from "./SignalView";
-import {Connection} from "./Connection";
+import AbstractSignal from './AbstractSignal';
+import SignalView from './SignalView';
+import Connection from './Connection';
+import FilteredSignal from './FilteredSignal';
 
 /**
  * Plumbing to implement mapped signals in such a way that they automatically manage a connection
@@ -9,7 +9,7 @@ import {Connection} from "./Connection";
  * connection to the underlying signal, and when it removes its last connection it clears its
  * connection from the underlying signal.
  */
-export abstract class MappedSignal<T> extends AbstractSignal<T> {
+export default abstract class MappedSignal<T> extends AbstractSignal<T> {
     public static create<TMapped, TSource>(
         source: SignalView<TSource>,
         f: (value: TSource) => TMapped

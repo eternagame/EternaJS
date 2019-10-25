@@ -1,19 +1,18 @@
-import {Container} from "pixi.js";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Signal} from "../../signals/Signal";
-import {SignalView} from "../../signals/SignalView";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {KeyboardInput} from "../input/KeyboardInput";
-import {MouseWheelInput} from "../input/MouseWheelInput";
-import {Assert} from "../util/Assert";
-import {GameObject} from "./GameObject";
-import {GameObjectBase} from "./GameObjectBase";
-import {GameObjectRef} from "./GameObjectRef";
-import {LateUpdatable} from "./LateUpdatable";
-import {ModeStack} from "./ModeStack";
-import {Updatable} from "./Updatable";
+import {Container} from 'pixi.js';
+import {
+    RegistrationGroup, Signal, SignalView, UnitSignal
+} from 'signals';
+import KeyboardInput from 'flashbang/input/KeyboardInput';
+import MouseWheelInput from 'flashbang/input/MouseWheelInput';
+import Assert from 'flashbang/util/Assert';
+import GameObject from './GameObject';
+import GameObjectBase from './GameObjectBase';
+import GameObjectRef from './GameObjectRef';
+import LateUpdatable from './LateUpdatable';
+import ModeStack from './ModeStack';
+import Updatable from './Updatable';
 
-export class AppMode {
+export default class AppMode {
     /** Default keyboard input processor */
     public readonly keyboardInput: KeyboardInput = new KeyboardInput();
     /** Default mouse wheel input processor */
@@ -51,7 +50,7 @@ export class AppMode {
         return objs;
     }
 
-    public constructor() {
+    constructor() {
         this._rootObject = new RootObject(this);
         this.container.interactiveChildren = false;
     }
@@ -101,7 +100,7 @@ export class AppMode {
      */
     public waitTillActive(): Promise<void> {
         if (this._isDiposed) {
-            return Promise.reject("Mode is already disposed");
+            return Promise.reject(new Error('Mode is already disposed'));
         } else if (this._isActive) {
             return Promise.resolve();
         } else {
@@ -120,7 +119,7 @@ export class AppMode {
                         let fn = reject;
                         resolve = null;
                         reject = null;
-                        fn("Mode was disposed");
+                        fn('Mode was disposed');
                     }
                 });
             });
@@ -131,11 +130,15 @@ export class AppMode {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
-    public addNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public replaceNamedObject(name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public replaceNamedObject(
+        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
 
@@ -210,14 +213,14 @@ export class AppMode {
     }
 
     /* internal */
-    setupInternal(modeStack: ModeStack): void {
+    public _setupInternal(modeStack: ModeStack): void {
         this._modeStack = modeStack;
         this.setup();
     }
 
     /* internal */
-    disposeInternal(): void {
-        Assert.isTrue(!this._isDiposed, "already disposed");
+    public _disposeInternal(): void {
+        Assert.isTrue(!this._isDiposed, 'already disposed');
         this._isDiposed = true;
 
         this.dispose();
@@ -242,7 +245,7 @@ export class AppMode {
     }
 
     /* internal */
-    enterInternal(): void {
+    public _enterInternal(): void {
         this._isActive = true;
         this.container.interactiveChildren = true;
         this.enter();
@@ -255,7 +258,7 @@ export class AppMode {
     }
 
     /* internal */
-    exitInternal(): void {
+    public _exitInternal(): void {
         this._exited.emit();
         this._isActive = false;
         this.container.interactiveChildren = false;
@@ -263,13 +266,13 @@ export class AppMode {
     }
 
     /* internal */
-    updateInternal(dt: number): void {
+    public _updateInternal(dt: number): void {
         this.update(dt);
         this._updateComplete.emit();
     }
 
     /* internal */
-    registerObjectInternal(obj: GameObjectBase): void {
+    public _registerObjectInternal(obj: GameObjectBase): void {
         obj._mode = this;
 
         // Handle IDs
@@ -282,26 +285,27 @@ export class AppMode {
             }));
 
             for (let id of ids) {
-                Assert.isFalse(this._idObjects.has(id), "two objects with the same ID added to the AppMode");
+                Assert.isFalse(this._idObjects.has(id), 'two objects with the same ID added to the AppMode');
                 this._idObjects.set(id, obj);
             }
         }
 
         // Handle Updatable and LateUpdatable
-        let updatable: Updatable = <Updatable> (obj as any);
+        let updatable: Updatable = (obj as any) as Updatable;
         if (updatable.update !== undefined) {
-            obj.regs.add(this.updateBegan.connect(dt => updatable.update(dt)));
+            obj.regs.add(this.updateBegan.connect((dt) => updatable.update(dt)));
         }
 
-        let lateUpdatable: LateUpdatable = <LateUpdatable> (obj as any);
+        let lateUpdatable: LateUpdatable = (obj as any) as LateUpdatable;
         if (lateUpdatable.lateUpdate !== undefined) {
-            obj.regs.add(this.lateUpdate.connect(dt => lateUpdatable.lateUpdate(dt)));
+            obj.regs.add(this.lateUpdate.connect((dt) => lateUpdatable.lateUpdate(dt)));
         }
 
         this.registerObject(obj);
     }
 
-    resizeInternal(): void {
+    /* internal */
+    public _resizeInternal(): void {
         if (this._isActive) {
             this.onResized();
         } else {

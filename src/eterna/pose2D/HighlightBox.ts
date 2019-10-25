@@ -1,12 +1,8 @@
-import {DisplayObject, Graphics, Point} from "pixi.js";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {LateUpdatable} from "../../flashbang/core/LateUpdatable";
-import {ObjectTask} from "../../flashbang/core/ObjectTask";
-import {Vector2} from "../../flashbang/geom/Vector2";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {RepeatingTask} from "../../flashbang/tasks/RepeatingTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Pose2D} from "./Pose2D";
+import {DisplayObject, Graphics, Point} from 'pixi.js';
+import {
+    GameObject, LateUpdatable, Assert, RepeatingTask, ObjectTask, SerialTask, AlphaTask, Vector2
+} from 'flashbang';
+import Pose2D from './Pose2D';
 
 export enum HighlightType {
     STACK = 0,
@@ -21,8 +17,8 @@ export enum HighlightType {
 
 
 /** A class for highlighting groups of bases in a Pose2D */
-export class HighlightBox extends GameObject implements LateUpdatable {
-    public constructor(pose: Pose2D) {
+export default class HighlightBox extends GameObject implements LateUpdatable {
+    constructor(pose: Pose2D) {
         super();
         this._pose = pose;
         this._graphics = new Graphics();
@@ -49,12 +45,12 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         this._on = on;
     }
 
-    public get enabled() :boolean {
+    public get enabled(): boolean {
         return this._enabled;
     }
 
     public set enabled(value: boolean) {
-        if (value === this._enabled){
+        if (value === this._enabled) {
             return;
         }
 
@@ -91,9 +87,8 @@ export class HighlightBox extends GameObject implements LateUpdatable {
 
     public isInQueue(basenum: number): boolean {
         if (this._queue == null) return false;
-        for (let ii: number = 1; ii < this._queue.length; ii += 2) {
-            if (basenum >= this._queue[ii] && basenum <= this._queue[ii + 1])
-                return true;
+        for (let ii = 1; ii < this._queue.length; ii += 2) {
+            if (basenum >= this._queue[ii] && basenum <= this._queue[ii + 1]) return true;
         }
         return false;
     }
@@ -102,8 +97,7 @@ export class HighlightBox extends GameObject implements LateUpdatable {
         if (this._pose.isAnimating || !this.enabled) {
             // Hide when we're disabled or the Pose is animating
             this.display.visible = false;
-
-        } else  {
+        } else {
             // Redraw when we're dirty or the zoom level has changed
             this.display.visible = true;
             if (this._dirty || this._pose.zoomLevel !== this._prevZoomLevel || this.basePositionChanged) {
@@ -120,15 +114,15 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             return false;
         }
 
-        let pos: Point = this._pose.getBaseXY(this._queue[1], HighlightBox.P);
+        let pos: Point = this._pose.getBaseLoc(this._queue[1], HighlightBox.P);
         return this._prevPosition.x !== pos.x || this._prevPosition.y !== pos.y;
     }
 
     private redraw(): void {
         let color: number;
-        let base_size: number;
-        let fadeTime: number = 0.85;
-        let zoom_level: number = this._pose.zoomLevel;
+        let baseSize: number;
+        let fadeTime = 0.85;
+        let zoomLevel: number = this._pose.zoomLevel;
 
         this.display.alpha = 0;
         this.display.visible = true;
@@ -138,65 +132,65 @@ export class HighlightBox extends GameObject implements LateUpdatable {
             return;
         }
 
-        this._prevPosition = this._pose.getBaseXY(this._queue[1], this._prevPosition);
+        this._prevPosition = this._pose.getBaseLoc(this._queue[1], this._prevPosition);
         this._lastKnownQueue = this._queue;
 
         let type: HighlightType = this._queue[0];
 
         if (type === HighlightType.STACK) {
-            base_size = 25;
-        } else if (zoom_level === 0) {
-            base_size = 18;
-        } else if (zoom_level === 1) {
-            base_size = 14;
-        } else if (zoom_level === 2) {
-            base_size = 10;
-        } else if (zoom_level === 3) {
-            base_size = 7;
+            baseSize = 25;
+        } else if (zoomLevel === 0) {
+            baseSize = 18;
+        } else if (zoomLevel === 1) {
+            baseSize = 14;
+        } else if (zoomLevel === 2) {
+            baseSize = 10;
+        } else if (zoomLevel === 3) {
+            baseSize = 7;
         } else {
-            base_size = 4;
+            baseSize = 4;
         }
 
         switch (type) {
-        case HighlightType.STACK:
-            color = 0xFFFFFF;
-            break;
-        case HighlightType.LOOP:
-            color = 0xFF0000;
-            break;
-        case HighlightType.RESTRICTED:
-            color = 0xFFFF7E;
-            break;
-        case HighlightType.FORCED:
-            color = 0x00FF00;
-            break;
-        case HighlightType.DESIGN:
-            color = 0x7EFFFF;
-            break;
-        case HighlightType.UNSTABLE:
-            color = 0xFF0000;
-            break;
-        case HighlightType.SHIFT:
-            color = 0xC0C0C0;
-            break;
-        case HighlightType.USER_DEFINED:
-            color = 0x32CD32;
-            fadeTime = 1.0;
-            break;
+            case HighlightType.STACK:
+                color = 0xFFFFFF;
+                break;
+            case HighlightType.LOOP:
+                color = 0xFF0000;
+                break;
+            case HighlightType.RESTRICTED:
+                color = 0xFFFF7E;
+                break;
+            case HighlightType.FORCED:
+                color = 0x00FF00;
+                break;
+            case HighlightType.DESIGN:
+                color = 0x7EFFFF;
+                break;
+            case HighlightType.UNSTABLE:
+                color = 0xFF0000;
+                break;
+            case HighlightType.SHIFT:
+                color = 0xC0C0C0;
+                break;
+            case HighlightType.USER_DEFINED:
+                color = 0x32CD32;
+                fadeTime = 1.0;
+                break;
+            default:
+                Assert.unreachable(type);
         }
 
         if (type === HighlightType.STACK) {
-            this.renderStack(color, base_size);
+            this.renderStack(color, baseSize);
         } else {
-            this.renderLoop(color, base_size);
+            this.renderLoop(color, baseSize);
         }
 
-        this.replaceNamedObject(HighlightBox.ANIM, new RepeatingTask((): ObjectTask => {
-            return new SerialTask(
-                new AlphaTask(1, fadeTime),
-                new AlphaTask(0.2, fadeTime)
-            );
-        }));
+        this.replaceNamedObject(HighlightBox.ANIM, new RepeatingTask((): ObjectTask => new SerialTask(
+            new AlphaTask(1, fadeTime),
+            new AlphaTask(0.2, fadeTime)
+        )));
 
         this._on = true;
     }
@@ -204,126 +198,133 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private renderStack(color: number, baseSize: number): void {
         let pairs: number[] = this._pose.pairs;
 
-        for (let ii: number = 1; ii < this._queue.length; ii += 2) {
-            let stack_start: number = this._queue[ii];
-            let stack_end: number = this._queue[ii + 1];
+        for (let ii = 1; ii < this._queue.length; ii += 2) {
+            let stackStart: number = this._queue[ii];
+            let stackEnd: number = this._queue[ii + 1];
 
-            if (pairs[stack_start] < 0 || pairs[stack_end] < 0) {
-                throw new Error("Invalid stack highlight from " + stack_start.toString() + " to " + stack_end.toString());
+            if (pairs[stackStart] < 0 || pairs[stackEnd] < 0) {
+                throw new Error(`Invalid stack highlight from ${stackStart.toString()} to ${stackEnd.toString()}`);
             }
 
-            let p0: Point = this._pose.getBaseXY(stack_start);
-            let p1: Point = this._pose.getBaseXY(pairs[stack_end]);
+            let p0: Point = this._pose.getBaseLoc(stackStart);
+            let p1: Point = this._pose.getBaseLoc(pairs[stackEnd]);
 
-            let max_x: number = Math.max(p0.x, p1.x);
-            let min_x: number = Math.min(p0.x, p1.x);
+            let maxX = Math.max(p0.x, p1.x);
+            let minX = Math.min(p0.x, p1.x);
 
-            let max_y: number = Math.max(p0.y, p1.y);
-            let min_y: number = Math.min(p0.y, p1.y);
+            let maxY = Math.max(p0.y, p1.y);
+            let minY = Math.min(p0.y, p1.y);
 
             this._graphics.lineStyle(5, color, 0.7);
             this._graphics.drawRoundedRect(
-                min_x - baseSize,
-                min_y - baseSize,
-                max_x - min_x + 2 * baseSize,
-                max_y - min_y + 2 * baseSize, 10);
+                minX - baseSize,
+                minY - baseSize,
+                maxX - minX + 2 * baseSize,
+                maxY - minY + 2 * baseSize, 10
+            );
         }
     }
 
-    private renderLoop(_color: number, base_size: number): void {
+    private renderLoop(_color: number, baseSize: number): void {
         let pairs: number[] = this._pose.pairs;
-        let full_len: number = this._pose.fullSequence.length;
+        let fullLen: number = this._pose.fullSequence.length;
         let strict: boolean = (this._queue[0] === HighlightType.LOOP);
 
-        for (let i: number = 1; i < this._queue.length; i += 2) {
-            let loop_start: number = this._queue[i];
-            let loop_end: number = this._queue[i + 1];
+        for (let i = 1; i < this._queue.length; i += 2) {
+            let loopStart: number = this._queue[i];
+            let loopEnd: number = this._queue[i + 1];
 
-            if (strict && (pairs[loop_start] >= 0 || pairs[loop_end] >= 0)) {
-                throw new Error("Invalid loop highlight from " + loop_start.toString() + " to " + loop_end.toString());
+            if (strict && (pairs[loopStart] >= 0 || pairs[loopEnd] >= 0)) {
+                throw new Error(`Invalid loop highlight from ${loopStart.toString()} to ${loopEnd.toString()}`);
             }
 
             let axes: Point[] = [];
-            let base_xy: Point;
+            let baseLoc: Point;
 
-            let start_from: Point = new Point;
-            let end_to: Point = new Point;
+            let startFrom: Point = new Point();
+            let endTo: Point = new Point();
 
-            for (let ii: number = loop_start; ii <= loop_end; ii++) {
-                let num_gos: number = 0;
-                let axis: Vector2 = new Vector2(0, 0);
-                base_xy = this._pose.getBaseXY(ii);
+            for (let ii: number = loopStart; ii <= loopEnd; ii++) {
+                let numGos = 0;
+                let axis = new Vector2(0, 0);
+                baseLoc = this._pose.getBaseLoc(ii);
 
                 if (ii > 0) {
-                    let prev_base_xy: Point = this._pose.getBaseXY(ii - 1);
-                    let from_prev: Vector2 = new Vector2((base_xy.x - prev_base_xy.x), (base_xy.y - prev_base_xy.y));
-                    from_prev.normalizeLocal();
-                    axis.x += from_prev.x;
-                    axis.y += from_prev.y;
-                    num_gos++;
-
-                    if (ii === loop_start) {
-                        start_from.x = from_prev.x;
-                        start_from.y = from_prev.y;
-                    }
-
-                    if (ii === loop_end && ii === full_len - 1) {
-                        end_to.x = from_prev.x;
-                        end_to.y = from_prev.y;
-                    }
+                    let prevBaseLoc: Point = this._pose.getBaseLoc(ii - 1);
+                    let fromPrev: Vector2 = new Vector2((baseLoc.x - prevBaseLoc.x), (baseLoc.y - prevBaseLoc.y));
+                    fromPrev.normalizeLocal();
+                    axis.x += fromPrev.x;
+                    axis.y += fromPrev.y;
+                    numGos++;
                 }
 
-                if (ii < full_len - 1) {
-                    let next_base_xy: Point = this._pose.getBaseXY(ii + 1);
-                    let to_next: Vector2 = new Vector2((next_base_xy.x - base_xy.x), (next_base_xy.y - base_xy.y));
-                    to_next.normalizeLocal();
-                    axis.x += to_next.x;
-                    axis.y += to_next.y;
-                    num_gos++;
-
-                    if (ii === loop_start) {
-                        start_from.x = to_next.x;
-                        start_from.y = to_next.y;
-                    }
-
-                    if (ii === loop_end) {
-                        end_to.x = to_next.x;
-                        end_to.y = to_next.y;
-                    }
+                if (ii < fullLen - 1) {
+                    let nextBaseLoc: Point = this._pose.getBaseLoc(ii + 1);
+                    let toNext: Vector2 = new Vector2((nextBaseLoc.x - baseLoc.x), (nextBaseLoc.y - baseLoc.y));
+                    toNext.normalizeLocal();
+                    axis.x += toNext.x;
+                    axis.y += toNext.y;
+                    numGos++;
                 }
 
-                if (num_gos === 0) {
-                    throw new Error("Something wrong with loop highlight!");
+                if (numGos === 0) {
+                    throw new Error('Something wrong with loop highlight!');
                 }
-
                 axis.normalizeLocal();
                 axes.push(new Point(axis.y, -axis.x));
+
+                if (ii === loopStart) {
+                    startFrom = axis.toPoint();
+                }
+
+                if (ii === loopEnd) {
+                    endTo = axis.toPoint();
+                }
             }
 
-            let loop_start_xy: Point = this._pose.getBaseXY(loop_start);
-            let loop_end_xy: Point = this._pose.getBaseXY(loop_end);
-            let loop_start_axis: Point = axes[0];
-            let loop_end_axis: Point = axes[loop_end - loop_start];
+            let loopStartLoc: Point = this._pose.getBaseLoc(loopStart);
+            let loopEndLoc: Point = this._pose.getBaseLoc(loopEnd);
+            let loopStartAxis: Point = axes[0];
+            let loopEndAxis: Point = axes[loopEnd - loopStart];
 
             this._graphics.lineStyle(5, _color, 0.7);
-            this._graphics.moveTo(loop_start_xy.x + loop_start_axis.x * base_size - start_from.x * base_size, loop_start_xy.y + loop_start_axis.y * base_size - start_from.y * base_size);
+            this._graphics.moveTo(
+                loopStartLoc.x + loopStartAxis.x * baseSize - startFrom.x * baseSize,
+                loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
+            );
 
-            for (let ii = loop_start; ii <= loop_end; ii++) {
-                base_xy = this._pose.getBaseXY(ii);
-                this._graphics.lineTo(base_xy.x + axes[ii - loop_start].x * base_size, base_xy.y + axes[ii - loop_start].y * base_size);
+            for (let ii = loopStart; ii <= loopEnd; ii++) {
+                baseLoc = this._pose.getBaseLoc(ii);
+                this._graphics.lineTo(
+                    baseLoc.x + axes[ii - loopStart].x * baseSize, baseLoc.y + axes[ii - loopStart].y * baseSize
+                );
             }
 
             if (this._queue[0] !== HighlightType.USER_DEFINED) {
-                this._graphics.lineTo(loop_end_xy.x + loop_end_axis.x * base_size + end_to.x * base_size, loop_end_xy.y + loop_end_axis.y * base_size + end_to.y * base_size);
-                this._graphics.lineTo(loop_end_xy.x - loop_end_axis.x * base_size + end_to.x * base_size, loop_end_xy.y - loop_end_axis.y * base_size + end_to.y * base_size);
+                this._graphics.lineTo(
+                    loopEndLoc.x + loopEndAxis.x * baseSize + endTo.x * baseSize,
+                    loopEndLoc.y + loopEndAxis.y * baseSize + endTo.y * baseSize
+                );
+                this._graphics.lineTo(
+                    loopEndLoc.x - loopEndAxis.x * baseSize + endTo.x * baseSize,
+                    loopEndLoc.y - loopEndAxis.y * baseSize + endTo.y * baseSize
+                );
 
-                for (let ii = loop_end; ii >= loop_start; ii--) {
-                    base_xy = this._pose.getBaseXY(ii);
-                    this._graphics.lineTo(base_xy.x - axes[ii - loop_start].x * base_size, base_xy.y - axes[ii - loop_start].y * base_size);
+                for (let ii = loopEnd; ii >= loopStart; ii--) {
+                    baseLoc = this._pose.getBaseLoc(ii);
+                    this._graphics.lineTo(
+                        baseLoc.x - axes[ii - loopStart].x * baseSize, baseLoc.y - axes[ii - loopStart].y * baseSize
+                    );
                 }
 
-                this._graphics.lineTo(loop_start_xy.x - loop_start_axis.x * base_size - start_from.x * base_size, loop_start_xy.y - loop_start_axis.y * base_size - start_from.y * base_size);
-                this._graphics.lineTo(loop_start_xy.x + loop_start_axis.x * base_size - start_from.x * base_size, loop_start_xy.y + loop_start_axis.y * base_size - start_from.y * base_size);
+                this._graphics.lineTo(
+                    loopStartLoc.x - loopStartAxis.x * baseSize - startFrom.x * baseSize,
+                    loopStartLoc.y - loopStartAxis.y * baseSize - startFrom.y * baseSize
+                );
+                this._graphics.lineTo(
+                    loopStartLoc.x + loopStartAxis.x * baseSize - startFrom.x * baseSize,
+                    loopStartLoc.y + loopStartAxis.y * baseSize - startFrom.y * baseSize
+                );
             }
         }
     }
@@ -339,5 +340,5 @@ export class HighlightBox extends GameObject implements LateUpdatable {
     private _prevPosition: Point;
     private _prevZoomLevel: number = -1;
 
-    private static readonly ANIM = "anim";
+    private static readonly ANIM = 'anim';
 }

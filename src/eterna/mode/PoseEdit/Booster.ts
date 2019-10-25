@@ -1,29 +1,28 @@
-import * as log from "loglevel";
-import {Texture} from "pixi.js";
-import {TextureUtil} from "../../../flashbang/util/TextureUtil";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Pose2D} from "../../pose2D/Pose2D";
-import {Sounds} from "../../resources/Sounds";
-import {GameButton} from "../../ui/GameButton";
-import {ExternalInterface, ExternalInterfaceCtx} from "../../util/ExternalInterface";
-import {GameMode} from "../GameMode";
+import * as log from 'loglevel';
+import {Texture} from 'pixi.js';
+import {TextureUtil, Flashbang} from 'flashbang';
+import EPars from 'eterna/EPars';
+import Pose2D from 'eterna/pose2D/Pose2D';
+import GameButton from 'eterna/ui/GameButton';
+import Sounds from 'eterna/resources/Sounds';
+import ExternalInterface, {ExternalInterfaceCtx} from 'eterna/util/ExternalInterface';
+import GameMode from '../GameMode';
 
 export enum BoosterType {
     PAINTER = 1,
     ACTION = 2,
 }
 
-export class Booster {
+export default class Booster {
     public static create(mode: GameMode, data: any): Promise<Booster> {
-        if (!data["type"]) {
-            return Promise.reject("Invalid booster definition (missing 'type')");
-        } else if (!data["icons_b64"] || data["icons_b64"].length != 5) {
-            return Promise.reject("Invalid booster definition (missing or malformed 'icons_b64'");
+        if (!data['type']) {
+            return Promise.reject(new Error("Invalid booster definition (missing 'type')"));
+        } else if (!data['icons_b64'] || data['icons_b64'].length !== 5) {
+            return Promise.reject(new Error("Invalid booster definition (missing or malformed 'icons_b64'"));
         }
 
         // load icons
-        let iconData: string[] = data["icons_b64"];
+        let iconData: string[] = data['icons_b64'];
         let buttonStateTextures: Texture[] = new Array(iconData.length);
         let imageLoaders: Promise<void>[] = [];
         for (let ii = 0; ii < iconData.length; ++ii) {
@@ -40,20 +39,20 @@ export class Booster {
         return Promise.all(imageLoaders)
             .then(() => mode.waitTillActive())
             .then(() => {
-                let type: BoosterType = Number(data["type"]);
-                let tool_color = -1;
-                if (type == BoosterType.PAINTER) {
-                    tool_color = Booster._toolColorCounter++;
-                    log.info(`color_num=${tool_color}`);
+                let type: BoosterType = Number(data['type']);
+                let toolColor = -1;
+                if (type === BoosterType.PAINTER) {
+                    toolColor = Booster._toolColorCounter++;
+                    log.info(`color_num=${toolColor}`);
                 }
 
                 return new Booster(
                     mode,
                     type,
-                    tool_color,
-                    data["label"],
-                    data["tooltip"],
-                    data["script"],
+                    toolColor,
+                    data['label'],
+                    data['tooltip'],
+                    data['script'],
                     buttonStateTextures
                 );
             });
@@ -62,23 +61,23 @@ export class Booster {
     private constructor(
         view: GameMode,
         type: BoosterType,
-        tool_color: number,
+        toolColor: number,
         label: string,
         tooltip: string,
-        script_nid: string,
+        scriptNID: string,
         buttonStateTextures: Texture[]
     ) {
         this._view = view;
         this._type = type;
-        this._toolColor = tool_color;
+        this._toolColor = toolColor;
         this._label = label;
         this._tooltip = tooltip;
-        this._scriptID = script_nid;
+        this._scriptID = scriptNID;
         this._buttonStateTextures = buttonStateTextures;
 
         for (let ii = 0; ii < this._view.numPoseFields; ii++) {
             let pose: Pose2D = this._view.getPose(ii);
-            pose.registerPaintTool(tool_color, this);
+            pose.registerPaintTool(toolColor, this);
         }
     }
 
@@ -88,7 +87,7 @@ export class Booster {
 
     public createButton(fontsize: number = 22): GameButton {
         let button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
-        if (this._type == BoosterType.PAINTER) {
+        if (this._type === BoosterType.PAINTER) {
             if (this._buttonStateTextures[0] !== undefined) {
                 button.up(this._buttonStateTextures[0]);
             }
@@ -114,81 +113,73 @@ export class Booster {
     }
 
     public onLoad(): void {
-        this.executeScript(null, "ON_LOAD", -1);
+        this.executeScript(null, 'ON_LOAD', -1);
     }
 
-    public onPaint(pose: Pose2D, base_num: number): void {
-        Eterna.sound.playSound(Sounds.SoundPaint);
-        this.executeScript(pose, "MOUSE_DOWN", base_num);
+    public onPaint(pose: Pose2D, baseNum: number): void {
+        Flashbang.sound.playSound(Sounds.SoundPaint);
+        this.executeScript(pose, 'MOUSE_DOWN', baseNum);
     }
 
-    public onPainting(pose: Pose2D, base_num: number): void {
-        this.executeScript(pose, "MOUSE_MOVE", base_num);
+    public onPainting(pose: Pose2D, baseNum: number): void {
+        this.executeScript(pose, 'MOUSE_MOVE', baseNum);
     }
 
     public onRun(): void {
         this.executeScript(null, null, -1);
     }
 
-    private executeScript(pose: Pose2D, cmd: string, base_num: number): void {
+    private executeScript(pose: Pose2D, cmd: string, baseNum: number): void {
         let scriptInterface = new ExternalInterfaceCtx();
 
-        scriptInterface.addCallback("set_sequence_string", (seq: string): boolean => {
-            let seq_arr: number[] = EPars.stringToSequence(seq);
-            if (seq_arr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seq_arr.indexOf(EPars.RNABASE_CUT) >= 0) {
+        scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
+            let seqArr: number[] = EPars.stringToSequence(seq);
+            if (seqArr.indexOf(EPars.RNABASE_UNDEFINED) >= 0 || seqArr.indexOf(EPars.RNABASE_CUT) >= 0) {
                 log.info(`Invalid characters in ${seq}`);
                 return false;
             }
 
-            if (this._type == BoosterType.PAINTER && pose) {
-                pose.setMutated(seq_arr);
+            if (this._type === BoosterType.PAINTER && pose) {
+                pose.setMutated(seqArr);
             } else {
                 let prevForceSync = this._view.forceSync;
                 this._view.forceSync = true;
                 for (let ii = 0; ii < this._view.numPoseFields; ii++) {
                     pose = this._view.getPose(ii);
-                    pose.pasteSequence(seq_arr);
+                    pose.pasteSequence(seqArr);
                 }
                 this._view.forceSync = prevForceSync;
             }
             return true;
         });
 
-        scriptInterface.addCallback("set_tracked_indices", (marks: any[], color: number = 0x000000): void => {
-            for (let ii = 0; ii < this._view.numPoseFields; ii++) {
-                let pose: Pose2D = this._view.getPose(ii);
-                pose.clearTracking();
-                for (let mark of marks) {
-                    pose.addBaseMark(mark, color);
-                }
-            }
-        });
-
-        scriptInterface.addCallback("set_script_status", (): void => {});
+        scriptInterface.addCallback('set_script_status', (): void => {});
 
         const useUILock = this._type === BoosterType.ACTION;
-        const LOCK_NAME = "BoosterScript";
+        const LOCK_NAME = 'BoosterScript';
 
-        if (this._type == BoosterType.ACTION) {
+        if (this._type === BoosterType.ACTION) {
             this._view.pushUILock(LOCK_NAME);
         }
 
         const scriptParams = this._type === BoosterType.ACTION ? {} : {
             command: cmd,
-            param: base_num.toString()
+            param: baseNum.toString()
         };
 
-        ExternalInterface.runScript(this._scriptID, {params: scriptParams, ctx: scriptInterface})
+        ExternalInterface.runScriptThroughQueue(this._scriptID, {params: scriptParams, ctx: scriptInterface})
             .then((ret) => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
-                    Eterna.sound.playSound(ret != null && ret["result"] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail);
+                    Flashbang.sound.playSound(
+                        ret != null && ret['result'] ? Sounds.SoundScriptDone : Sounds.SoundScriptFail
+                    );
                 }
             })
             .catch(() => {
                 if (useUILock) {
                     this._view.popUILock(LOCK_NAME);
-                    Eterna.sound.playSound(Sounds.SoundScriptFail);
+                    Flashbang.sound.playSound(Sounds.SoundScriptFail);
                 }
             });
     }

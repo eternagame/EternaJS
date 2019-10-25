@@ -1,7 +1,7 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Assert} from "../util/Assert";
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Assert from 'flashbang/util/Assert';
 
-export class SerialTask extends ObjectTask {
+export default class SerialTask extends ObjectTask {
     constructor(...tasks: ObjectTask[]) {
         super();
         this._subtasks = tasks.concat();

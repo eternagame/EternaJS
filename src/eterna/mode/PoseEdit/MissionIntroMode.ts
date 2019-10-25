@@ -1,24 +1,22 @@
 import {
     Container, Graphics, Point, Sprite
-} from "pixi.js";
-import {AppMode} from "../../../flashbang/core/AppMode";
-import {Flashbang} from "../../../flashbang/core/Flashbang";
-import {DisplayObjectPointerTarget} from "../../../flashbang/input/DisplayObjectPointerTarget";
-import {IsLeftMouse} from "../../../flashbang/input/InputUtil";
-import {KeyCode} from "../../../flashbang/input/KeyCode";
-import {DisplayUtil} from "../../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../../flashbang/util/StyledTextBuilder";
-import {EPars} from "../../EPars";
-import {Eterna} from "../../Eterna";
-import {Bitmaps} from "../../resources/Bitmaps";
-import {ConstraintBox} from "../../ui/ConstraintBox";
-import {GameButton} from "../../ui/GameButton";
-import {HTMLTextObject} from "../../ui/HTMLTextObject";
-import {PoseThumbnail, PoseThumbnailType} from "../../ui/PoseThumbnail";
-import {Fonts} from "../../util/Fonts";
+} from 'pixi.js';
+import EPars from 'eterna/EPars';
+import Eterna from 'eterna/Eterna';
+import {
+    AppMode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, Flashbang, DisplayUtil, KeyCode
+} from 'flashbang';
+import ConstraintBox from 'eterna/constraints/ConstraintBox';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Fonts from 'eterna/util/Fonts';
+import GameButton from 'eterna/ui/GameButton';
+import HTMLTextObject from 'eterna/ui/HTMLTextObject';
+import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 
-export class MissionIntroMode extends AppMode {
-    public constructor(puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]) {
+export default class MissionIntroMode extends AppMode {
+    constructor(
+        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]
+    ) {
         super();
         this._puzzleName = puzzleName;
         this._puzzleDescription = puzzleDescription;
@@ -32,12 +30,12 @@ export class MissionIntroMode extends AppMode {
         let background = new Graphics();
         this.container.addChild(background);
 
-        new DisplayObjectPointerTarget(background).pointerDown.filter(IsLeftMouse).connect(() => this.play());
+        new DisplayObjectPointerTarget(background).pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.play());
 
         let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
         this.container.addChild(moleculeImg);
 
-        let missionText = Fonts.stdLight("MISSION", 48).color(0xFFCC00).build();
+        let missionText = Fonts.stdLight('MISSION', 48).color(0xFFCC00).build();
         this.container.addChild(missionText);
 
         const descriptionStyle = {
@@ -69,7 +67,7 @@ export class MissionIntroMode extends AppMode {
             .maxWidth(Flashbang.stageWidth);
         this.addObject(nameLabel, this.container);
 
-        let goalsLabel = Fonts.stdLight("GOAL", 24).color(0xffcc00).build();
+        let goalsLabel = Fonts.stdLight('GOAL', 24).color(0xffcc00).build();
         this.container.addChild(goalsLabel);
 
         this._goalsBG = Sprite.fromImage(Bitmaps.MissionPuzzleThumbnailImage);
@@ -178,7 +176,6 @@ export class MissionIntroMode extends AppMode {
     private addConstraintBoxes(): void {
         for (let constraintBox of this._constraintBoxes) {
             this.addObject(constraintBox, this._constraintsLayer);
-            constraintBox.showBigText = false;
             constraintBox.flare(false);
         }
 
@@ -247,7 +244,8 @@ export class MissionIntroMode extends AppMode {
     }
 
     private scrollDown(): void {
-        let limit = -this._constraintsHeight + 367 + 60 + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
+        let limit = -this._constraintsHeight + 367 + 60
+            + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
         this._constraintsLayer.y = Math.max(this._constraintsLayer.y - 10, limit);
     }
 
@@ -283,7 +281,9 @@ export class MissionIntroMode extends AppMode {
 
         this._constraintMask.clear();
         this._constraintMask.beginFill(0x00FF00, 0);
-        this._constraintMask.drawRect(0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY);
+        this._constraintMask.drawRect(
+            0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY
+        );
         this._constraintMask.x = 0;
         this._constraintMask.y = 0;
         this._constraintsLayer.mask = this._constraintMask;

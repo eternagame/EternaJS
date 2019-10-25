@@ -3,7 +3,7 @@
 * There are two namespacing facilities, `module` and `namespace`
     - Neither works exactly how you'd expect
     - modules are single-file
-    - namespaces can be multi-file, but it's awkward and requires different a different, comment-based `import` declaration
+    - namespaces can be multi-file, but it's awkward and requires a different, comment-based `import` declaration
     - (multi-file namespaces get compiled down to a single .js file)
     - I'm eschewing namespacing for the most part
 * `process.env.NODE_ENV` can be queried.

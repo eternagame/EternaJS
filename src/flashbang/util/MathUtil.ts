@@ -1,4 +1,4 @@
-export class MathUtil {
+export default class MathUtil {
     /** Degrees-to-radians */
     public static readonly deg2Rad: number = Math.PI / 180;
 
@@ -7,6 +7,8 @@ export class MathUtil {
 
     /** Returns the value of n clamped to be within the range [min, max]. */
     public static clamp(n: number, min: number, max: number): number {
-        return (n < min ? min : (n > max ? max : n));
+        if (n < min) return min;
+        else if (n > max) return max;
+        else return n;
     }
 }

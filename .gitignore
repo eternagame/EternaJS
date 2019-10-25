@@ -16,7 +16,7 @@ CTestTestfile.cmake
 # JetBrains CLion
 vienna.cbp
 nupack.cbp
-vrna2.cbp
+vienna2.cbp
 LinearFold.cbp
 cmake-build-debug/
 cmake-build-release/
@@ -85,3 +85,6 @@ typings/
 
 # Webpack build output
 dist/
+
+# dropbox/Mac temp file
+*.DS_Store

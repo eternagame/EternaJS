@@ -1,9 +1,9 @@
-import * as log from "loglevel";
-import {default as MultiStyleText, ExtendedTextStyle, TextStyleSet} from "pixi-multistyle-text";
-import {ColorUtil} from "./ColorUtil";
+import * as log from 'loglevel';
+import MultiStyleText, {ExtendedTextStyle, TextStyleSet} from 'pixi-multistyle-text';
+import ColorUtil from './ColorUtil';
 
-export class StyledTextBuilder {
-    public constructor(defaultStyle?: ExtendedTextStyle) {
+export default class StyledTextBuilder {
+    constructor(defaultStyle?: ExtendedTextStyle) {
         if (defaultStyle !== undefined) {
             this.defaultStyle(defaultStyle);
         }
@@ -16,7 +16,7 @@ export class StyledTextBuilder {
     /** Creates a new MultiStyleText */
     public build(): MultiStyleText {
         if (this._styleStack.length > 0) {
-            log.warn("Unpopped styles");
+            log.warn('Unpopped styles');
         }
 
         return new MultiStyleText(this._text, this.cloneStyles());
@@ -25,7 +25,7 @@ export class StyledTextBuilder {
     /** Applies the styled text to an existing MultiSyleText object */
     public apply(textField: MultiStyleText): void {
         if (this._styleStack.length > 0) {
-            log.warn("Unpopped styles");
+            log.warn('Unpopped styles');
         }
 
         textField.text = this._text;
@@ -33,7 +33,7 @@ export class StyledTextBuilder {
     }
 
     public defaultStyle(style: ExtendedTextStyle): StyledTextBuilder {
-        return this.addStyle("default", style);
+        return this.addStyle('default', style);
     }
 
     public addStyle(name: string, style: ExtendedTextStyle): StyledTextBuilder {
@@ -46,7 +46,7 @@ export class StyledTextBuilder {
 
     public pushStyle(style: ExtendedTextStyle | string): StyledTextBuilder {
         let styleName: string;
-        if (typeof (style) === "string") {
+        if (typeof (style) === 'string') {
             if (this._styles[style] == null) {
                 log.warn(`Unrecognized style '${style}'`);
             }
@@ -65,7 +65,7 @@ export class StyledTextBuilder {
 
     public popStyle(): StyledTextBuilder {
         if (this._styleStack.length === 0) {
-            log.warn("Unbalanced popStyle");
+            log.warn('Unbalanced popStyle');
         } else {
             let lastStyle = this._styleStack.pop();
             this._text += `</${lastStyle}>`;
@@ -92,9 +92,11 @@ export class StyledTextBuilder {
     public appendHTMLStyledText(text: string): StyledTextBuilder {
         type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, ExtendedTextStyle];
 
-        const parseHTMLStyle = (text: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback): string => {
+        const parseHTMLStyle = (
+            rawText: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback
+        ): string => {
             while (true) {
-                let openMatch = openTag.exec(text);
+                let openMatch = openTag.exec(rawText);
                 if (openMatch == null) {
                     break;
                 }
@@ -104,17 +106,17 @@ export class StyledTextBuilder {
                     this.addStyle(styleName, style);
                 }
 
-                text = `${text.slice(0, openMatch.index)}<${styleName}>${text.slice(openMatch.index + openMatch[0].length)}`;
+                rawText = `${rawText.slice(0, openMatch.index)}<${styleName}>${rawText.slice(openMatch.index + openMatch[0].length)}`;
 
-                let closeMatch = closeTag.exec(text);
+                let closeMatch = closeTag.exec(rawText);
                 if (closeMatch == null) {
                     break;
                 }
 
-                text = `${text.slice(0, closeMatch.index)}</${styleName}>${text.slice(closeMatch.index + closeMatch[0].length)}`;
+                rawText = `${rawText.slice(0, closeMatch.index)}</${styleName}>${rawText.slice(closeMatch.index + closeMatch[0].length)}`;
             }
 
-            return text;
+            return rawText;
         };
 
         // Parse <font>
@@ -137,7 +139,7 @@ export class StyledTextBuilder {
         // Parse <b>
         const BOLD_OPEN = /<b>/i;
         const BOLD_CLOSE = /<\/b>/i;
-        text = parseHTMLStyle(text, BOLD_OPEN, BOLD_CLOSE, () => ["__bold", {fontStyle: "bold"}]);
+        text = parseHTMLStyle(text, BOLD_OPEN, BOLD_CLOSE, () => ['__bold', {fontStyle: 'bold'}]);
 
         return this.append(text);
     }
@@ -161,15 +163,15 @@ export class StyledTextBuilder {
 
     private cloneStyles(): TextStyleSet {
         let out: TextStyleSet = {};
-        for (let key in this._styles) {
-            out[key] = this._styles[key];
+        for (let [key, value] of Object.entries(this._styles)) {
+            out[key] = value;
         }
         return out;
     }
 
     private _styleStack: string[] = [];
     private _styles: TextStyleSet = {};
-    private _text: string = "";
+    private _text = '';
 
-    private _anonymousStyleCounter: number = 0;
+    private _anonymousStyleCounter = 0;
 }

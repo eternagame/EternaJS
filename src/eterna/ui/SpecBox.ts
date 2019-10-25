@@ -1,30 +1,26 @@
-import * as log from "loglevel";
-import MultiStyleText from "pixi-multistyle-text";
+import * as log from 'loglevel';
+import MultiStyleText from 'pixi-multistyle-text';
 import {
     Graphics, Point, Sprite, Text
-} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {DisplayObjectPointerTarget} from "../../flashbang/input/DisplayObjectPointerTarget";
-import {IsLeftMouse} from "../../flashbang/input/InputUtil";
-import {KeyCode} from "../../flashbang/input/KeyCode";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {StyledTextBuilder} from "../../flashbang/util/StyledTextBuilder";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {EPars} from "../EPars";
-import {EternaURL} from "../net/EternaURL";
-import {Plot} from "../Plot";
-import {Bitmaps} from "../resources/Bitmaps";
-import {UndoBlock, UndoBlockParam} from "../UndoBlock";
-import {Fonts} from "../util/Fonts";
-import {GameButton} from "./GameButton";
-import {GamePanel} from "./GamePanel";
-import {HTMLTextObject} from "./HTMLTextObject";
-import {TextBalloon} from "./TextBalloon";
+} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import EPars from 'eterna/EPars';
+import Plot from 'eterna/Plot';
+import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {
+    ContainerObject, KeyCode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import EternaURL from 'eterna/net/EternaURL';
+import GameButton from './GameButton';
+import GamePanel from './GamePanel';
+import HTMLTextObject from './HTMLTextObject';
+import TextBalloon from './TextBalloon';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
-export class SpecBox extends ContainerObject {
+export default class SpecBox extends ContainerObject {
     /** Emitted when a docked SpecBox's maximize button is clicked */
     public readonly shouldMaximize = new UnitSignal();
 
@@ -44,14 +40,14 @@ export class SpecBox extends ContainerObject {
         this._dotplotScaleLevel = 1;
 
         // / Dotplot h0
-        this._h0 = Fonts.arial("A", 12).color(0xffffff).build();
+        this._h0 = Fonts.arial('A', 12).color(0xffffff).build();
 
         // / Meltplot h0
-        this._h0Melt = Fonts.arial("37°C", 12).color(0xffffff).build();
-        this._hnMelt = Fonts.arial("97°C", 12).color(0xffffff).build();
-        this._v0 = Fonts.arial("1", 12).color(0xffffff).build();
-        this._v0Melt = Fonts.arial("0%", 12).color(0xffffff).build();
-        this._vnMelt = Fonts.arial("100%", 12).color(0xffffff).build();
+        this._h0Melt = Fonts.arial('37°C', 12).color(0xffffff).build();
+        this._hnMelt = Fonts.arial('97°C', 12).color(0xffffff).build();
+        this._v0 = Fonts.arial('1', 12).color(0xffffff).build();
+        this._v0Melt = Fonts.arial('0%', 12).color(0xffffff).build();
+        this._vnMelt = Fonts.arial('100%', 12).color(0xffffff).build();
 
         this.container.addChild(this._h0);
         this.container.addChild(this._h0Melt);
@@ -70,12 +66,12 @@ export class SpecBox extends ContainerObject {
         if (this._docked) {
             this._maximizeButton = new GameButton()
                 .allStates(Bitmaps.ImgMaximize)
-                .tooltip("Re-maximize")
+                .tooltip('Re-maximize')
                 .hotkey(KeyCode.KeyM);
             this.addObject(this._maximizeButton, this.container);
             this._maximizeButton.clicked.connect(() => this.shouldMaximize.emit());
         } else {
-            this._stattext = new MultiStyleText("", {
+            this._stattext = new MultiStyleText('', {
                 default: {
                     fontFamily: Fonts.ARIAL,
                     fontSize: 14,
@@ -84,37 +80,37 @@ export class SpecBox extends ContainerObject {
             });
             this.container.addChild(this._stattext);
 
-            let url = EternaURL.createURL({page: "manual"});
-            let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR=\"#FFFFFF\"><B>What are these parameters?</B></FONT></U></A>`;
+            let url = EternaURL.createURL({page: 'manual'});
+            let helpText = `<A HREF="${url}" target="_blank"><U><FONT COLOR="#FFFFFF"><B>What are these parameters?</B></FONT></U></A>`;
             this._helpText = new HTMLTextObject(helpText).font(Fonts.ARIAL).fontSize(14).color(0xffffff);
             this.addObject(this._helpText, this.container);
 
-            this._dotplottext = Fonts.arial("Pairing probabilities plot", 12).color(0xffffff).build();
+            this._dotplottext = Fonts.arial('Pairing probabilities plot', 12).color(0xffffff).build();
             this.container.addChild(this._dotplottext);
 
-            this._meltplottext = Fonts.arial("Melt plot (% of unpaired bases)", 12).color(0xffffff).build();
+            this._meltplottext = Fonts.arial('Melt plot (% of unpaired bases)', 12).color(0xffffff).build();
             this.container.addChild(this._meltplottext);
 
             this._zoomInButton = new GameButton()
                 .allStates(Bitmaps.PlusImg)
-                .tooltip("Zoom In")
+                .tooltip('Zoom In')
                 .hotkey(KeyCode.KeyI);
             this._zoomInButton.clicked.connect(() => this.dotPlotZoomIn());
             this.addObject(this._zoomInButton, this.container);
 
             this._zoomOutButton = new GameButton()
                 .allStates(Bitmaps.MinusImg)
-                .tooltip("Zoom out")
+                .tooltip('Zoom out')
                 .hotkey(KeyCode.KeyO);
             this._zoomOutButton.clicked.connect(() => this.dotPlotZoomOut());
             this.addObject(this._zoomOutButton, this.container);
 
             let pointerTarget = new DisplayObjectPointerTarget(this._dotPlotSprite);
-            pointerTarget.pointerMove.connect(e => this.onDotPlotMouseMove(e));
+            pointerTarget.pointerMove.connect((e) => this.onDotPlotMouseMove(e));
             pointerTarget.pointerOver.connect(() => this.onDotPlotMouseEnter());
             pointerTarget.pointerOut.connect(() => this.onDotPlotMouseExit());
-            pointerTarget.pointerDown.filter(IsLeftMouse).connect(e => this.onDotPlotMouseDown(e));
-            pointerTarget.pointerUp.filter(IsLeftMouse).connect(() => this.onDotPlotMouseUp());
+            pointerTarget.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onDotPlotMouseDown(e));
+            pointerTarget.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onDotPlotMouseUp());
         }
 
         this.updateLayout();
@@ -147,25 +143,25 @@ export class SpecBox extends ContainerObject {
         this._meltplot = datablock.createMeltPlot();
 
         if (this._stattext != null) {
-            let statString: StyledTextBuilder = new StyledTextBuilder({
+            let statString = new StyledTextBuilder({
                 fontFamily: Fonts.ARIAL,
                 fontSize: 14,
                 fill: 0xffffff
-            }).addStyle("bold", {
-                fontStyle: "bold"
+            }).addStyle('bold', {
+                fontStyle: 'bold'
             });
             EPars.addLetterStyles(statString);
 
             statString
-                .append(`${EPars.getColoredLetter("A")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
+                .append(`${EPars.getColoredLetter('A')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.AU, TEMPERATURE)}   `)
-                .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("C")} pairs : `, "bold")
+                .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('C')} pairs : `, 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.GC, TEMPERATURE)}   `)
-                .append(`${EPars.getColoredLetter("G")}-${EPars.getColoredLetter("U")} pairs : `, "bold")
+                .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.GU, TEMPERATURE)}\n`)
-                .append("Melting point : ", "bold")
+                .append('Melting point : ', 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
-                .append("Free energy : ", "bold")
+                .append('Free energy : ', 'bold')
                 .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) / 100).toFixed(1)}kcal\n`);
 
             statString.apply(this._stattext);
@@ -191,7 +187,7 @@ export class SpecBox extends ContainerObject {
             this._hvec.push(hnew);
             this.container.addChild(hnew);
 
-            let vnew: Text = Fonts.arial(`${ii / SpecBox.OFFSET * 10}`, 12).color(0xffffff).build();
+            let vnew: Text = Fonts.arial(`${(ii / SpecBox.OFFSET) * 10}`, 12).color(0xffffff).build();
             this._vvec.push(vnew);
             this.container.addChild(vnew);
         }
@@ -220,23 +216,23 @@ export class SpecBox extends ContainerObject {
     }
 
     public get plotSize(): number {
-        let plot_w: number;
-        let plot_h: number;
+        let plotW: number;
+        let plotH: number;
 
         if (this._docked) {
-            plot_w = this._width - 55;
-            plot_h = (this._height - 51) / 2.0;
+            plotW = this._width - 55;
+            plotH = (this._height - 51) / 2.0;
         } else {
-            plot_w = (this._width - 100) / 2.0;
-            plot_h = this._height - 200;
+            plotW = (this._width - 100) / 2.0;
+            plotH = this._height - 200;
         }
 
-        return Math.min(plot_w, plot_h);
+        return Math.min(plotW, plotH);
     }
 
     public scaleDotPlot(level: number = 1): void {
         if (level < 1) {
-            log.warn("scale dotplot level under 1");
+            log.warn('scale dotplot level under 1');
             return;
         }
         if (Number.isNaN(this._dotplotOriginX)) {
@@ -276,7 +272,7 @@ export class SpecBox extends ContainerObject {
             this._meltPlotSprite.position = new Point(20, (this._height * 0.5) + 8);
             this._maximizeButton.display.position = new Point(this._width - 22, 5);
         } else {
-            this._panel.title = "RNA Spec";
+            this._panel.title = 'RNA Spec';
 
             this._v0.position = new Point(40 - this._v0.width - 3, 70);
 
@@ -408,7 +404,7 @@ export class SpecBox extends ContainerObject {
     }
 
     private get dotplotOffsetSize(): number {
-        return this.plotSize / (this._datasize / 10) * this._dotplotScaleLevel;
+        return (this.plotSize / (this._datasize / 10)) * this._dotplotScaleLevel;
     }
 
     // calculate it's origin and axis by from and to
@@ -424,12 +420,12 @@ export class SpecBox extends ContainerObject {
         }
     }
 
-    private updateDotplotLabel(ref_x: number, ref_y: number): void {
+    private updateDotplotLabel(refX: number, refY: number): void {
         let {plotSize} = this;
         let h0DefaultX: number = this._docked ? 20 : SpecBox.H0_DEFAULT_X;
         let h0DefaultY: number = this._docked ? 0 : SpecBox.H0_DEFAULT_Y;
 
-        let h0XStart: number = h0DefaultX + ref_x;
+        let h0XStart: number = h0DefaultX + refX;
         let h0YStart: number = h0DefaultY;
 
         this._h0.position = new Point(h0XStart, h0YStart);
@@ -441,21 +437,21 @@ export class SpecBox extends ContainerObject {
             this._hvec[ii].visible = !(pos.x >= plotSize + h0DefaultX - this._hvec[ii].width || pos.x < h0DefaultX);
         }
 
-        let v0_default_x: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
-        let v0_default_y: number = this._docked ? 15 : SpecBox.V0_DEFAULT_Y;
+        let v0DefaultX: number = this._docked ? 10 : SpecBox.V0_DEFAULT_X;
+        let v0DefaultY: number = this._docked ? 15 : SpecBox.V0_DEFAULT_Y;
 
-        let v0_x_start: number = v0_default_x;
-        let v0_y_start: number = v0_default_y + ref_y;
+        let v0XStart: number = v0DefaultX;
+        let v0YStart: number = v0DefaultY + refY;
 
-        this._v0.position = new Point(v0_x_start, v0_y_start);
+        this._v0.position = new Point(v0XStart, v0YStart);
 
-        this._v0.visible = !(v0_y_start < v0_default_y);
+        this._v0.visible = !(v0YStart < v0DefaultY);
 
         for (let ii = 0; ii < this._vvec.length; ++ii) {
             let pos = this.calculateCoordPosition(this._v0, ii, SpecBox.VERTICAL);
             pos.set(pos.x - this._vvec[ii].width, pos.y);
             this._vvec[ii].position = pos;
-            this._vvec[ii].visible = !((pos.y >= plotSize + v0_default_y - this._vvec[ii].height || pos.y < v0_default_y));
+            this._vvec[ii].visible = !((pos.y >= plotSize + v0DefaultY - this._vvec[ii].height || pos.y < v0DefaultY));
         }
     }
 
