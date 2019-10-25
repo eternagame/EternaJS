@@ -137,53 +137,54 @@ export default class Utility {
         return vals;
     }
 
-    public static intsOf(s: string): number[] {
-        // Convert '-1-4,7-8,12' to [-1,0,1,2,3,4,7,8,12]
+    /**
+     * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
+     */
+    public static rangeStringToArray(sInput: string): number[] {
         let vals: number[] = [];
-        let stringIsOK = false;
-        if (s.indexOf(',') >= 0) { // comma parsing
-            for (let seq of s.split(',')) vals = vals.concat(Utility.intsOf(seq));
-            return vals;
-        }
-
-        let foundDash: number = s.indexOf('-');
-        if (foundDash === 0) foundDash = s.slice(1).indexOf('-') + 1; // handle negative number at beginnning.
-        if (foundDash <= 0) { // single number
-            let val = Number(s);
-            stringIsOK = !Number.isNaN(val);
-            if (stringIsOK) vals.push(val);
-        } else {
-            let startVal = Number(s.slice(0, foundDash));
-            let endVal = Number(s.slice(foundDash + 1, s.length));
-            stringIsOK = !Number.isNaN(startVal) && !Number.isNaN(endVal); // currently cannot process
-            if (stringIsOK) {
+        for (const s of sInput.split(',')) {
+            let foundDash = s.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
+            if (foundDash < 0) {
+                const val = Number(s);
+                if (Number.isNaN(val)) {
+                    return null; // signal error
+                } else {
+                    vals.push(val);
+                }
+            } else {
+                let startVal = Number(s.slice(0, foundDash));
+                let endVal = Number(s.slice(foundDash + 1, s.length));
+                if (Number.isNaN(startVal)) return null;
+                if (Number.isNaN(endVal)) return null;
                 for (let n = startVal; n <= endVal; n++) vals.push(n);
             }
         }
-
         return vals;
     }
 
+    /** allows for specification of sequences and their indices
+     *   during a paste. Example:
+     *
+     *    ACUGU 11-14 16
+     *
+     * will return [11,12,13,14,16]
+     *
+     * If no numbers are specified, e.g.,
+     *
+     *    ACUGU
+     *
+     * will return the default range from 1 to len(seq), here 1,2,3,4,5.
+     *
+     * Note that indices will be 1-indexed, not 0-indexed .
+     */
     public static getIndices(seq: string): number[] {
-        // allows for specification of sequences and their indices
-        //   during a paste. Example:
-        //
-        //    ACUGU 11-14 16
-        //
-        // will return [11,12,13,14,16]
-        //
-        // If no numbers are specified, e.g.,
-        //
-        //    ACUGU
-        //
-        // will return the default range from 1 to len(seq), here 1,2,3,4,5.
-        //
-        // Note that indices will be 1-indexed, not 0-indexed .
         let indices: number[] = [];
         let splitted: string[] = seq.split(' ');
-        for (let ii = 0; ii < splitted.length; ii++) {
-            let ints: number[] = this.intsOf(splitted[ii]);
-            if (ints === null) return []; // signal failure
+        for (const s of splitted) {
+            let ints: number[] = this.rangeStringToArray(s);
+            if (ints === null) {
+                return null; // signal failure
+            }
             indices = indices.concat(ints);
         }
         return indices;

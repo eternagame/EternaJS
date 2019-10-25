@@ -175,7 +175,7 @@ export default class EPars {
     public static getColoredSequence(seq: string): string {
         let res = '';
         for (let ii = 0; ii < seq.length; ii++) {
-            res += EPars.getColoredLetter(seq.charAt(ii));
+            res += EPars.getColoredLetter(seq[ii]);
         }
         return res;
     }
@@ -203,11 +203,11 @@ export default class EPars {
         let res = '';
         for (let ii = 0; ii < seq.length; ii++) {
             if (ii < offset - 1 || ii >= expData.length) {
-                res += seq.charAt(ii);
+                res += seq[ii];
             } else if (expData[ii] < avg) {
-                res += `<FONT COLOR='#7777FF'>${seq.charAt(ii)}</FONT>`;
+                res += `<FONT COLOR='#7777FF'>${seq[ii]}</FONT>`;
             } else {
-                res += `<FONT COLOR='#FF7777'>${seq.charAt(ii)}</FONT>`;
+                res += `<FONT COLOR='#FF7777'>${seq[ii]}</FONT>`;
             }
         }
 
@@ -376,25 +376,25 @@ export default class EPars {
 
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqArray: number[] = [];
-        for (let ii = 0; ii < seq.length; ii++) {
-            let char = seq.charAt(ii);
+        for (const char of seq) {
             seqArray.push(this.stringToNucleotide(char, allowCut, allowUnknown));
         }
         return seqArray;
     }
 
+    /**
+     *  Expanded to allow specification of indices at end of sequence, e.g.,
+     *
+     *    ACUGU 11-14 6
+     *
+     *  will return Array of length 16, padded with UNDEFINED in first 10 positions and
+     *  then ADENINE, CYTOSINE, URACIL, GUANOSINE, UNDEFINED, URACIL
+     *
+     *  TODO: properly handle oligos, e.g.
+     *       ACUGU&ACAGU 2-11
+     */
     public static indexedStringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true):
     number[] {
-        // expanded to allow specification of indices at end of sequence, e.g.,
-        //
-        //    ACUGU 11-14 6
-        //
-        //  will return Array of length 16, padded with UNDEFINED in first 10 positions and
-        //   then ADENINE, CYTOSINE, URACIL, GUANOSINE, UNDEFINED, URACIL
-        //
-        // TODO: properly handle oligos, e.g.
-        //   ACUGU&ACAGU 2-11
-
         // make robust to blanks:
         let seqChunks: string[] = seq.split(' ');
         if (seqChunks.length === 0) return []; // blank sequence, no op.
@@ -403,6 +403,7 @@ export default class EPars {
         }
 
         let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
+        if (indices === null) return null; // signal error
         let seqArray: number[] = [];
         for (let ii = 0; ii < Math.max(...indices); ii++) seqArray.push(EPars.RNABASE_UNDEFINED);
         let s = seqChunks[0];
