@@ -1,15 +1,14 @@
-import {Point} from "pixi.js";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {Dialog} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {TextBalloon} from "./TextBalloon";
+import {Point} from 'pixi.js';
+import {HLayoutContainer, Flashbang} from 'flashbang';
+import Dialog from './Dialog';
+import GameButton from './GameButton';
+import TextBalloon from './TextBalloon';
 
-export class NotificationDialog extends Dialog<void> {
+export default class NotificationDialog extends Dialog<void> {
     /** Non-null if extraButtonTitle is specified */
     public extraButton: GameButton;
 
-    public constructor(message: string, okButtonTitle: string = "Ok", extraButtonTitle?: string) {
+    constructor(message: string, okButtonTitle: string = 'Ok', extraButtonTitle?: string) {
         super();
         this._message = message;
         this._okButtonTitle = okButtonTitle;
@@ -19,8 +18,8 @@ export class NotificationDialog extends Dialog<void> {
     protected added() {
         super.added();
 
-        let box = new TextBalloon("", 0x152843, 1.0, 0xC0DCE7, 0.27);
-        box.title = "Notice";
+        let box = new TextBalloon('', 0x152843, 1.0, 0xC0DCE7, 0.27);
+        box.title = 'Notice';
         box.setText(`${this._message}\n\n\n`);
         this.addObject(box, this.container);
 

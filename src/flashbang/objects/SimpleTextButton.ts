@@ -1,10 +1,10 @@
-import {Graphics, Text} from "pixi.js";
-import {TextBuilder} from "../util/TextBuilder";
-import {Button, ButtonState} from "./Button";
+import {Graphics, Text} from 'pixi.js';
+import TextBuilder from 'flashbang/util/TextBuilder';
+import Button, {ButtonState} from './Button';
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
-export class SimpleTextButton extends Button {
-    constructor(text: string, fontSize: number = 24, fontName: string = "Arial") {
+export default class SimpleTextButton extends Button {
+    constructor(text: string, fontSize: number = 24, fontName = 'Arial') {
         super();
 
         this._tf = new TextBuilder()

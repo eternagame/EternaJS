@@ -1,11 +1,11 @@
-import {Container, Graphics} from "pixi.js";
-import {UnitSignal} from "../../signals/UnitSignal";
-import {Flashbang} from "../core/Flashbang";
-import {GameObject} from "../core/GameObject";
-import {DisplayObjectPointerTarget} from "../input/DisplayObjectPointerTarget";
+import {Container, Graphics} from 'pixi.js';
+import {UnitSignal} from 'signals';
+import GameObject from 'flashbang/core/GameObject';
+import Flashbang from 'flashbang/core/Flashbang';
+import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
 
 /** A utility object that captures mouse input and dispatches update events until a mouseUp occurs */
-export class Dragger extends GameObject {
+export default class Dragger extends GameObject {
     public readonly dragged = new UnitSignal();
     public readonly dragComplete = new UnitSignal();
 
@@ -15,7 +15,7 @@ export class Dragger extends GameObject {
     public curX: number = 0;
     public curY: number = 0;
 
-    public constructor(displayParent: Container = null) {
+    constructor(displayParent: Container = null) {
         super();
         this._displayParent = displayParent;
     }
@@ -35,8 +35,10 @@ export class Dragger extends GameObject {
         parent.addChild(this._disp);
         this.updateSize();
 
-        this.startX = this.curX = Flashbang.globalMouse.x;
-        this.startY = this.curY = Flashbang.globalMouse.y;
+        this.startX = Flashbang.globalMouse.x;
+        this.curX = Flashbang.globalMouse.x;
+        this.startY = Flashbang.globalMouse.y;
+        this.curY = Flashbang.globalMouse.y;
 
         let touchable = new DisplayObjectPointerTarget(this._disp);
         this.regs.add(touchable.pointerMove.connect((e) => {

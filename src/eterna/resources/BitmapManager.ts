@@ -1,11 +1,9 @@
-import {Texture} from "pixi.js";
-import {Assert} from "../../flashbang/util/Assert";
-import {TextBuilder} from "../../flashbang/util/TextBuilder";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {Fonts} from "../util/Fonts";
-import {Bitmaps} from "./Bitmaps";
+import {Texture} from 'pixi.js';
+import {TextureUtil, Assert, TextBuilder} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Bitmaps from './Bitmaps';
 
-export class BitmapManager {
+export default class BitmapManager {
     public static getBitmap(url: string): Texture {
         return Texture.fromImage(url);
     }
@@ -24,7 +22,9 @@ export class BitmapManager {
         return BitmapManager.getTextBitmapImpl(txt, Fonts.ARIAL, 12, true, color);
     }
 
-    private static getTextBitmapImpl(text: string, fontName: string, fontSize: number, bold: boolean, color: number): Texture {
+    private static getTextBitmapImpl(
+        text: string, fontName: string, fontSize: number, bold: boolean, color: number
+    ): Texture {
         let bitmap: Texture = BitmapManager._textBitmaps.get(text);
         if (bitmap == null) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);

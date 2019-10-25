@@ -1,5 +1,5 @@
-import {Registration} from "../../signals/Registration";
-import {LinkedElement, LinkedList} from "../util/LinkedList";
+import {Registration} from 'signals';
+import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
 
 export interface MouseWheelListener {
     /**
@@ -9,7 +9,7 @@ export interface MouseWheelListener {
     onMouseWheelEvent(e: WheelEvent): boolean;
 }
 
-export class MouseWheelInput {
+export default class MouseWheelInput {
     public dispose(): void {
         this._listeners.dispose();
         this._listeners = null;
@@ -18,7 +18,11 @@ export class MouseWheelInput {
     public handleMouseWheelEvent(e: WheelEvent): boolean {
         let handled = false;
         try {
-            for (let elt: LinkedElement<MouseWheelListener> = this._listeners.beginIteration(); elt != null; elt = elt.next) {
+            for (
+                let elt: LinkedElement<MouseWheelListener> = this._listeners.beginIteration();
+                elt != null;
+                elt = elt.next
+            ) {
                 handled = elt.data.onMouseWheelEvent(e);
                 if (handled) {
                     break;

@@ -1,22 +1,20 @@
-import {Point} from "pixi.js";
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {Setting} from "../../flashbang/settings/Setting";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {Eterna} from "../Eterna";
-import {Bitmaps} from "../resources/Bitmaps";
-import {Dialog} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {GameCheckbox} from "./GameCheckbox";
-import {GamePanel, GamePanelType} from "./GamePanel";
+import {Point} from 'pixi.js';
+import {
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang
+} from 'flashbang';
+import Eterna from 'eterna/Eterna';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import Dialog from './Dialog';
+import GameButton from './GameButton';
+import GameCheckbox from './GameCheckbox';
+import GamePanel, {GamePanelType} from './GamePanel';
 
 export enum EternaViewOptionsMode {
     PUZZLE = 0, PUZZLEMAKER, LAB
 }
 
-export class EternaViewOptionsDialog extends Dialog<void> {
-    public constructor(mode: EternaViewOptionsMode) {
+export default class EternaViewOptionsDialog extends Dialog<void> {
+    constructor(mode: EternaViewOptionsMode) {
         super();
         this._optionsMode = mode;
     }
@@ -30,26 +28,25 @@ export class EternaViewOptionsDialog extends Dialog<void> {
             this.addObject(EternaViewOptionsDialog.createCheckbox(name, setting), settingsLayout);
         };
 
-        bind(Eterna.settings.showNumbers, "Show nucleotides numbers (N)");
-        bind(Eterna.settings.showLetters, "Show nucleotides letters");
-        bind(Eterna.settings.displayFreeEnergies, "Display free energies for all structures (G)");
-        bind(Eterna.settings.highlightRestricted, "Highlight restricted sequences");
-        bind(Eterna.settings.showChat, "In-game chat");
-        bind(Eterna.settings.simpleGraphics, "Use simpler, less animated graphics");
-
+        bind(Eterna.settings.showNumbers, 'Show nucleotides numbers (N)');
+        bind(Eterna.settings.showLetters, 'Show nucleotides letters');
+        bind(Eterna.settings.displayFreeEnergies, 'Display free energies for all structures (G)');
+        bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
+        bind(Eterna.settings.showChat, 'In-game chat');
+        bind(Eterna.settings.simpleGraphics, 'Use simpler, less animated graphics (,)');
+        bind(Eterna.settings.autohideToolbar, 'Autohide toolbar');
         if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
-            bind(Eterna.settings.autohideToolbar, "Autohide toolbar");
-            bind(Eterna.settings.freezeButtonAlwaysVisible, "Freeze button always visible");
+            bind(Eterna.settings.freezeButtonAlwaysVisible, 'Freeze button always visible');
         }
 
         if (this._optionsMode !== EternaViewOptionsMode.PUZZLE) {
-            bind(Eterna.settings.multipleFoldingEngines, "Multiple folding engines");
+            bind(Eterna.settings.multipleFoldingEngines, 'Multiple folding engines');
         }
 
         if (this._optionsMode === EternaViewOptionsMode.LAB) {
-            bind(Eterna.settings.useContinuousColors, "Use continuous colors for the exp. data (advanced)");
-            bind(Eterna.settings.useExtendedColors, "Use extended 4-color scale for the exp. data (advanced)");
-            bind(Eterna.settings.displayAuxInfo, "Display auxiliary information about RNAs");
+            bind(Eterna.settings.useContinuousColors, 'Use continuous colors for the exp. data (advanced)');
+            bind(Eterna.settings.useExtendedColors, 'Use extended 4-color scale for the exp. data (advanced)');
+            bind(Eterna.settings.displayAuxInfo, 'Display auxiliary information about RNAs');
         }
 
         const NUM_VOLUME_BUTTONS = 5;
@@ -65,7 +62,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         this._muteButton.clicked.connect(() => {
             this.setVolume(!Eterna.settings.soundMute.value, Eterna.settings.soundVolume.value);
             // Play the button-clicked sound after the volume has been adjusted.
-            Eterna.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+            Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
         });
         this.addObject(this._muteButton, soundButtonLayout);
 
@@ -75,7 +72,7 @@ export class EternaViewOptionsDialog extends Dialog<void> {
             volumeButton.downSound = null;
             volumeButton.clicked.connect(() => {
                 this.setVolume(false, (ii + 1) / NUM_VOLUME_BUTTONS);
-                Eterna.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
+                Flashbang.sound.playSound(GameButton.DEFAULT_DOWN_SOUND);
             });
             this._volumeButtons.push(volumeButton);
             this.addObject(volumeButton, soundButtonLayout);
@@ -87,14 +84,14 @@ export class EternaViewOptionsDialog extends Dialog<void> {
         let viewLayout = new VLayoutContainer(22, HAlign.CENTER);
         viewLayout.addChild(settingsLayout);
 
-        let okButton: GameButton = new GameButton().label("Done", 14);
+        let okButton: GameButton = new GameButton().label('Done', 14);
         this.addObject(okButton, viewLayout);
         okButton.clicked.connect(() => this.close(null));
 
         viewLayout.layout();
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 0.27, 0xC0DCE7);
-        panel.title = "Game options";
+        panel.title = 'Game options';
         panel.setSize(viewLayout.width + 40, viewLayout.height + 40 + panel.titleHeight);
         this.addObject(panel, this.container);
 

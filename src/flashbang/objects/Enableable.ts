@@ -1,3 +1,3 @@
-export interface Enableable {
+export default interface Enableable {
     enabled: boolean;
 }

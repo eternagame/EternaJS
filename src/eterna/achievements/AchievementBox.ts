@@ -1,21 +1,16 @@
-import * as log from "loglevel";
-import {Point, Sprite, Text} from "pixi.js";
-import {ContainerObject} from "../../flashbang/objects/ContainerObject";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {DelayTask} from "../../flashbang/tasks/DelayTask";
-import {ParallelTask} from "../../flashbang/tasks/ParallelTask";
-import {ScaleTask} from "../../flashbang/tasks/ScaleTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {Easing} from "../../flashbang/util/Easing";
-import {TextureUtil} from "../../flashbang/util/TextureUtil";
-import {PlaySoundTask} from "../resources/PlaySoundTask";
-import {Sounds} from "../resources/Sounds";
-import {GameButton} from "../ui/GameButton";
-import {GamePanel, GamePanelType} from "../ui/GamePanel";
-import {Fonts} from "../util/Fonts";
-import {VibrateTask} from "../vfx/VibrateTask";
+import * as log from 'loglevel';
+import {Point, Sprite, Text} from 'pixi.js';
+import {
+    ContainerObject, TextureUtil, SerialTask, DelayTask, ParallelTask, AlphaTask, ScaleTask, Easing
+} from 'flashbang';
+import GameButton from 'eterna/ui/GameButton';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
+import Fonts from 'eterna/util/Fonts';
+import PlaySoundTask from 'eterna/resources/PlaySoundTask';
+import Sounds from 'eterna/resources/Sounds';
+import VibrateTask from 'eterna/vfx/VibrateTask';
 
-export class AchievementBox extends ContainerObject {
+export default class AchievementBox extends ContainerObject {
     constructor(imageURL: string, text: string) {
         super();
         this._imageURL = imageURL;
@@ -54,7 +49,7 @@ export class AchievementBox extends ContainerObject {
         imageSprite.position = new Point(15, 35);
         panel.container.addChild(imageSprite);
 
-        let titleTxt = Fonts.arial("Congratulations!", 18).color(0xffffff).bold().build();
+        let titleTxt = Fonts.arial('Congratulations!', 18).color(0xffffff).bold().build();
         titleTxt.position = new Point(160, 5);
         panel.container.addChild(titleTxt);
 
@@ -65,7 +60,7 @@ export class AchievementBox extends ContainerObject {
         this._descriptionTxt.position = new Point(160, 50);
         panel.container.addChild(this._descriptionTxt);
 
-        this._okButton = new GameButton().label("CLOSE", 18);
+        this._okButton = new GameButton().label('CLOSE', 18);
         panel.addObject(this._okButton, panel.container);
         this._okButton.container.position = new Point(
             (panel.width - this._okButton.container.width) * 0.5,

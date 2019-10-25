@@ -1,6 +1,6 @@
-import * as localforage from "localforage";
+import * as localforage from 'localforage';
 
-export class SaveGameManager {
+export default class SaveGameManager {
     constructor(namespace: string) {
         if (SaveGameManager.ALL_NAMESPACES.has(namespace)) {
             throw new Error(`SaveGameManager namespace '${namespace}' already taken`);
@@ -13,19 +13,19 @@ export class SaveGameManager {
     }
 
     public async load(name: string): Promise<any> {
-        return await this._store.getItem(name);
+        return this._store.getItem(name);
     }
 
     public async save(name: string, obj: any): Promise<any> {
-        return await this._store.setItem(name, obj);
+        return this._store.setItem(name, obj);
     }
 
     public async remove(name: string): Promise<void> {
-        return await this._store.removeItem(name);
+        return this._store.removeItem(name);
     }
 
     public async clear(): Promise<void> {
-        return await this._store.clear();
+        return this._store.clear();
     }
 
     protected static readonly ALL_NAMESPACES: Set<string> = new Set();

@@ -1,8 +1,8 @@
-import {ObjectTask} from "../core/ObjectTask";
-import {Updatable} from "../core/Updatable";
+import ObjectTask from 'flashbang/core/ObjectTask';
+import Updatable from 'flashbang/core/Updatable';
 
 /** A Task that calls a function continuously until the function returns true */
-export class FunctionTask extends ObjectTask implements Updatable {
+export default class FunctionTask extends ObjectTask implements Updatable {
     constructor(callback: (dt: number) => boolean) {
         super();
         this._callback = callback;

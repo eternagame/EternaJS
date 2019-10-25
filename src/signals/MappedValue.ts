@@ -1,6 +1,6 @@
-import {AbstractValue} from "./AbstractValue";
-import {ValueView} from "./ValueView";
-import {Connection} from "./Connection";
+import AbstractValue from './AbstractValue';
+import ValueView from './ValueView';
+import Connection from './Connection';
 
 /**
  * Plumbing to implement mapped values in such a way that they automatically manage a connection to
@@ -8,7 +8,7 @@ import {Connection} from "./Connection";
  * connection to the underlying value, and when it removes its last connection it clears its
  * connection from the underlying value.
  */
-export abstract class MappedValue<T> extends AbstractValue<T> {
+export default abstract class MappedValue<T> extends AbstractValue<T> {
     public static create<T, U>(source: ValueView<T>, map: (value: T) => U): ValueView<U> {
         return new MappedValueImpl(source, map);
     }

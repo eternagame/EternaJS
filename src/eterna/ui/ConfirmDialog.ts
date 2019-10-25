@@ -1,17 +1,15 @@
-import {Point} from "pixi.js";
-import {HAlign} from "../../flashbang/core/Align";
-import {Flashbang} from "../../flashbang/core/Flashbang";
-import {HLayoutContainer} from "../../flashbang/layout/HLayoutContainer";
-import {VLayoutContainer} from "../../flashbang/layout/VLayoutContainer";
-import {AlphaTask} from "../../flashbang/tasks/AlphaTask";
-import {Fonts} from "../util/Fonts";
-import {Dialog, DialogCanceledError} from "./Dialog";
-import {GameButton} from "./GameButton";
-import {GamePanel, GamePanelType} from "./GamePanel";
-import {HTMLTextObject} from "./HTMLTextObject";
+import {Point} from 'pixi.js';
+import {
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang
+} from 'flashbang';
+import Fonts from 'eterna/util/Fonts';
+import Dialog, {DialogCanceledError} from './Dialog';
+import GameButton from './GameButton';
+import GamePanel, {GamePanelType} from './GamePanel';
+import HTMLTextObject from './HTMLTextObject';
 
-export class ConfirmDialog extends Dialog<boolean> {
-    public constructor(prompt: string, promptIsHTML: boolean = false) {
+export default class ConfirmDialog extends Dialog<boolean> {
+    constructor(prompt: string, promptIsHTML: boolean = false) {
         super();
         this._prompt = prompt;
         this._useHTML = promptIsHTML;
@@ -37,7 +35,7 @@ export class ConfirmDialog extends Dialog<boolean> {
         super.added();
 
         let panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x152843, 0.27, 0xC0DCE7);
-        panel.title = "Are you sure?";
+        panel.title = 'Are you sure?';
         this.addObject(panel, this.container);
 
         let panelLayout = new VLayoutContainer(0, HAlign.CENTER);
@@ -60,11 +58,11 @@ export class ConfirmDialog extends Dialog<boolean> {
         panelLayout.addVSpacer(10);
         panelLayout.addChild(buttonLayout);
 
-        let yesButton: GameButton = new GameButton().label("Yes", 16);
+        let yesButton: GameButton = new GameButton().label('Yes', 16);
         panel.addObject(yesButton, buttonLayout);
         yesButton.clicked.connect(() => this.close(true));
 
-        let noButton: GameButton = new GameButton().label("No", 16);
+        let noButton: GameButton = new GameButton().label('No', 16);
         panel.addObject(noButton, buttonLayout);
         noButton.clicked.connect(() => this.close(false));
 

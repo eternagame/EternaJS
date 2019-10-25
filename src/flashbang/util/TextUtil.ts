@@ -1,6 +1,6 @@
-import {Text} from "pixi.js";
+import {Text} from 'pixi.js';
 
-export class TextUtil {
+export default class TextUtil {
     /**
      * Trims the given text field to fit into the given max width, if possible.
      * If trimmedPostfix is non-null, and the textfield must be trimmed, the
@@ -11,7 +11,7 @@ export class TextUtil {
             return;
         }
 
-        trimmedPostfix = trimmedPostfix || "";
+        trimmedPostfix = trimmedPostfix || '';
 
         const originalString = text.text;
         const originalWidth = text.width;

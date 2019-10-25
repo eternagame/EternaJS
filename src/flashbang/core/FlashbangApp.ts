@@ -1,19 +1,17 @@
-import * as log from "loglevel";
-import {RegistrationGroup} from "../../signals/RegistrationGroup";
-import {Value} from "../../signals/Value";
-import {KeyboardEventType} from "../input/KeyboardEventType";
-import {KeyCode} from "../input/KeyCode";
-import {ErrorUtil} from "../util/ErrorUtil";
-import {Flashbang} from "./Flashbang";
-import {ModeStack} from "./ModeStack";
-import {Updatable} from "./Updatable";
+import * as log from 'loglevel';
+import {RegistrationGroup, Value} from 'signals';
+import KeyboardEventType from 'flashbang/input/KeyboardEventType';
+import KeyCode from 'flashbang/input/KeyCode';
+import Flashbang from './Flashbang';
+import ModeStack from './ModeStack';
+import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
-import "js-polyfills/keyboard";
+import 'js-polyfills/keyboard';
 
-export class FlashbangApp {
+export default class FlashbangApp {
     /** True if the app is foregrounded */
-    public readonly isActive: Value<boolean> = new Value(true);
+    public readonly isActive: Value<boolean> = new Value<boolean>(true);
 
     public get pixi(): PIXI.Application {
         return this._pixi;
@@ -24,28 +22,28 @@ export class FlashbangApp {
     }
 
     public run(): void {
-        window.addEventListener("error", (e: ErrorEvent) => this.onUncaughtError(e));
+        window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
         this.pixiParent.appendChild(this._pixi.view);
 
         this._modeStack = new ModeStack(this._pixi.stage);
 
-        Flashbang.registerApp(this);
+        Flashbang._registerApp(this);
 
         this.setup();
-        this._modeStack.handleModeTransitions();
+        this._modeStack._handleModeTransitions();
 
-        this._pixi.ticker.add(delta => this.update(delta));
+        this._pixi.ticker.add((delta) => this.update(delta));
 
-        window.addEventListener(KeyboardEventType.KEY_DOWN, e => this.onKeyboardEvent(e));
-        window.addEventListener(KeyboardEventType.KEY_UP, e => this.onKeyboardEvent(e));
-        window.addEventListener("wheel", e => this.onMouseWheelEvent(e));
-        window.addEventListener("contextmenu", e => this.onContextMenuEvent(e));
-        window.addEventListener("focus", () => this.isActive.value = true);
-        window.addEventListener("blur", () => this.isActive.value = false);
+        window.addEventListener(KeyboardEventType.KEY_DOWN, (e) => this.onKeyboardEvent(e));
+        window.addEventListener(KeyboardEventType.KEY_UP, (e) => this.onKeyboardEvent(e));
+        window.addEventListener('wheel', (e) => this.onMouseWheelEvent(e));
+        window.addEventListener('contextmenu', (e) => this.onContextMenuEvent(e));
+        window.addEventListener('focus', () => { this.isActive.value = true; });
+        window.addEventListener('blur', () => { this.isActive.value = false; });
 
-        this.isActive.connect(value => this.onIsActiveChanged(value));
+        this.isActive.connect((value) => this.onIsActiveChanged(value));
     }
 
     public get view(): HTMLCanvasElement {
@@ -53,7 +51,7 @@ export class FlashbangApp {
     }
 
     public resize(width: number, height: number): void {
-        if (width != this._pixi.renderer.screen.width || height != this._pixi.renderer.screen.height) {
+        if (width !== this._pixi.renderer.screen.width || height !== this._pixi.renderer.screen.height) {
             this._pixi.renderer.resize(width, height);
             this._modeStack.onResized();
         }
@@ -140,7 +138,7 @@ export class FlashbangApp {
     }
 
     protected disposeNow(): void {
-        this._modeStack.dispose();
+        this._modeStack._dispose();
 
         this._updatables = null;
 

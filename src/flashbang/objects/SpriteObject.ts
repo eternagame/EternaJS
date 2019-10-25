@@ -1,9 +1,9 @@
-import {Sprite} from "pixi.js";
-import {SceneObject} from "./SceneObject";
+import {Sprite} from 'pixi.js';
+import SceneObject from './SceneObject';
 
 /** A GameObject that manages a PIXI Sprite */
-export class SpriteObject extends SceneObject<Sprite> {
-    public constructor(sprite?: Sprite) {
+export default class SpriteObject extends SceneObject<Sprite> {
+    constructor(sprite?: Sprite) {
         super(sprite || new Sprite());
     }
 }

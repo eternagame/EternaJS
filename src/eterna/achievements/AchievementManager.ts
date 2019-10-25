@@ -1,14 +1,10 @@
-import {HAlign, VAlign} from "../../flashbang/core/Align";
-import {GameObject} from "../../flashbang/core/GameObject";
-import {GameObjectRef} from "../../flashbang/core/GameObjectRef";
-import {CallbackTask} from "../../flashbang/tasks/CallbackTask";
-import {FunctionTask} from "../../flashbang/tasks/FunctionTask";
-import {SerialTask} from "../../flashbang/tasks/SerialTask";
-import {DisplayUtil} from "../../flashbang/util/DisplayUtil";
-import {GameMode} from "../mode/GameMode";
-import {AchievementBox} from "./AchievementBox";
+import {
+    GameObject, GameObjectRef, SerialTask, FunctionTask, CallbackTask, DisplayUtil, HAlign, VAlign
+} from 'flashbang';
+import GameMode from 'eterna/mode/GameMode';
+import AchievementBox from './AchievementBox';
 
-export class AchievementManager extends GameObject {
+export default class AchievementManager extends GameObject {
     /** True if there's an achievement animation playing, or about to play */
     public get hasPendingAchievements(): boolean {
         return this._cur.isLive || this._pending.length > 0;
@@ -30,8 +26,8 @@ export class AchievementManager extends GameObject {
 
     public awardAchievements(achievementData: any): Promise<void> {
         if (achievementData != null) {
-            for (let key in achievementData) {
-                if (achievementData.hasOwnProperty(key)) {
+            for (let key of Object.keys(achievementData)) {
+                if (Object.prototype.hasOwnProperty.call(achievementData, key)) {
                     let data: AchievementData = achievementData[key];
                     this._pending.push(data);
                 }
@@ -44,11 +40,11 @@ export class AchievementManager extends GameObject {
     }
 
     private maybeShowNextAchievement(): void {
-        if (this._pending.length == 0 || this._cur.isLive) {
+        if (this._pending.length === 0 || this._cur.isLive) {
             return;
         }
 
-        (this.mode as GameMode).pushUILock("ShowAchievement");
+        (this.mode as GameMode).pushUILock('ShowAchievement');
 
         let nextData: AchievementData = this._pending.shift();
         let view = new AchievementBox(nextData.image, nextData.past);
@@ -59,7 +55,7 @@ export class AchievementManager extends GameObject {
 
         view.destroyed.connect(() => {
             this.maybeShowNextAchievement();
-            (this.mode as GameMode).popUILock("ShowAchievement");
+            (this.mode as GameMode).popUILock('ShowAchievement');
         });
 
         let updateLoc = () => {

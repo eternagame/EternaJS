@@ -1,4 +1,4 @@
-export interface SubmitPoseDetails {
+export default interface SubmitPoseDetails {
     title: string;
     comment: string;
 }
