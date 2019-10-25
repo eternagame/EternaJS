@@ -34,7 +34,7 @@ export default class PasteSequenceDialog extends Dialog<string> {
     }
 
     private onSequenceEntered(sequence: string): void {
-        sequence = sequence.toUpperCase().replace(/T/g, "U").replace(/N/g, "A").replace(/\s/g, "");
+        sequence = sequence.toUpperCase().replace(/T/g, "U");
 
         for (let ii = 0; ii < sequence.length; ii++) {
             let char = sequence.substr(ii, 1);
