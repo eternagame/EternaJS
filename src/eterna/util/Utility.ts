@@ -136,4 +136,57 @@ export default class Utility {
 
         return vals;
     }
+
+    /**
+     * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
+     */
+    public static rangeStringToArray(sInput: string): number[] {
+        let vals: number[] = [];
+        for (const s of sInput.split(',')) {
+            let foundDash = s.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
+            if (foundDash < 0) {
+                const val = Number(s);
+                if (Number.isNaN(val)) {
+                    return null; // signal error
+                } else {
+                    vals.push(val);
+                }
+            } else {
+                let startVal = Number(s.slice(0, foundDash));
+                let endVal = Number(s.slice(foundDash + 1, s.length));
+                if (Number.isNaN(startVal)) return null;
+                if (Number.isNaN(endVal)) return null;
+                for (let n = startVal; n <= endVal; n++) vals.push(n);
+            }
+        }
+        return vals;
+    }
+
+    /** allows for specification of sequences and their indices
+     *   during a paste. Example:
+     *
+     *    ACUGU 11-14 16
+     *
+     * will return [11,12,13,14,16]
+     *
+     * If no numbers are specified, e.g.,
+     *
+     *    ACUGU
+     *
+     * will return the default range from 1 to len(seq), here 1,2,3,4,5.
+     *
+     * Note that indices will be 1-indexed, not 0-indexed .
+     */
+    public static getIndices(seq: string): number[] {
+        let indices: number[] = [];
+        let splitted: string[] = seq.split(' ');
+        for (const s of splitted) {
+            let ints: number[] = this.rangeStringToArray(s);
+            if (ints === null) {
+                return null; // signal failure
+            }
+            indices = indices.concat(ints);
+        }
+        return indices;
+    }
 }
