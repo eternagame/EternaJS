@@ -35,6 +35,7 @@ import RNAAnchorObject from './RNAAnchorObject';
 import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
+import triangulate from './triangulate';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -2034,7 +2035,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        this._baseRope.enabled = this._showBaseRope;
+        this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
 
         if (this._redraw || basesMoved) {
             for (let ii = 0; ii < this._trackedIndices.length; ii++) {
@@ -2113,10 +2114,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         for (let ii = 0; ii < fullSeq.length - 1; ii++) {
             let outX: number = goX;
             let outY: number = goY;
+            let dirSign = 1;
+            if (ii < this._baseRotationDirectionSign.length) dirSign = this._baseRotationDirectionSign[ii];
 
             if (this._sequence.length < fullSeq.length && ii === this._sequence.length - 1) {
                 this._bases[ii].setGoDir(goX, goY);
-                this._bases[ii].setOutDir(-goY, goX);
+                this._bases[ii].setOutDir(dirSign * -goY, dirSign * goX);
                 this._bases[ii].setLast(true);
                 continue;
             }
@@ -2140,7 +2143,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._bases[ii].setGoDir(goX, goY);
-            this._bases[ii].setOutDir(-outY, outX);
+            this._bases[ii].setOutDir(dirSign * -outY, dirSign * outX);
             this._bases[ii].setLast(false);
         }
 
@@ -2484,6 +2487,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         rnaDrawer.getCoords(xarray, yarray);
+
+        this._baseRotationDirectionSign = new Array(n);
+        rnaDrawer.getRotationDirectionSign(this._baseRotationDirectionSign);
 
         if (this._desiredAngle === 90) {
             let tmp = xarray;
@@ -2947,16 +2953,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null) {
                 this._scoreNodeHighlight.lineStyle(0, 0, 0);
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
-                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices;
+                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices.slice();
 
+                let contour: number[] = [];
                 for (let ii = 0; ii < indices.length; ii++) {
                     let p: Point = this.getBaseLoc(indices[ii]);
-
-                    if (ii === 0) {
-                        this._scoreNodeHighlight.moveTo(p.x, p.y);
-                    } else {
-                        this._scoreNodeHighlight.lineTo(p.x, p.y);
-                    }
+                    contour.push(p.x);
+                    contour.push(p.y);
+                }
+                let triangleVerts = triangulate(contour);
+                for (let ii = 0; ii < triangleVerts.length / 6; ii++) {
+                    this._scoreNodeHighlight.moveTo(triangleVerts[6 * ii], triangleVerts[6 * ii + 1]);
+                    this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 2], triangleVerts[6 * ii + 3]);
+                    this._scoreNodeHighlight.lineTo(triangleVerts[6 * ii + 4], triangleVerts[6 * ii + 5]);
                 }
                 this._scoreNodeHighlight.endFill();
             }
@@ -3378,6 +3387,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _foldStartTime: number;
     private _foldDuration: number;
     private _paintCursor: PaintCursor;
+    private _baseRotationDirectionSign: number[];
 
     private _zoomLevel: number = 0;
     private _desiredAngle: number = 0;
