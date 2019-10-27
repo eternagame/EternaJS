@@ -1,9 +1,5 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
-import { runInThisContext } from 'vm';
-import { AssertionError } from 'assert';
-import { Point } from 'pixi.js';
-import { Vector2 } from 'flashbang';
 
 export class RNATreeNode {
     public isPair: boolean = false;
@@ -641,17 +637,17 @@ export default class RNALayout {
             if (coord[0] === null || coord[1] === null) {
                 this._customLayout.push([null, null]);
             } else {
-                this._customLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor])
+                this._customLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
             }
         }
     }
 
-    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>):number {
-        let scaleFactor:number = 1.0;
-        if ( this._targetPairs !== null ){
+    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>): number {
+        let scaleFactor = 1.0;
+        if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
-                if (this._targetPairs[ii] == this._targetPairs[ii + 1] + 1) {
+                if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
                     let goX = customLayout[ii][0] - customLayout[ii + 1][0];
                     let goY = customLayout[ii][1] - customLayout[ii + 1][1];
                     let L = Math.sqrt(goX * goX + goY * goY);
