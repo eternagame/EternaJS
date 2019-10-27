@@ -93,6 +93,7 @@ export default class LoadingMode extends AppMode {
             'Top Eterna players still crush all bots.',
             'Science is much more about the\nquestions than the facts',
             'Citizen science works because\nwe are a curious species.',
+            'Can we invent our own medicine?',
             'Just hang in there and\nyou will eventually\nget the hang of it.',
             'The ribosome makes life.\nYou can re-design it.',
             'First treatment for spinal muscular atrophy is RNA',
