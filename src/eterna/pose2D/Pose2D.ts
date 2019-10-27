@@ -2114,12 +2114,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         for (let ii = 0; ii < fullSeq.length - 1; ii++) {
             let outX: number = goX;
             let outY: number = goY;
-            let sgn = 1;
-            if (ii < this._baseRotationDirectionSign.length) sgn = this._baseRotationDirectionSign[ii];
+            let dirSign = 1;
+            if (ii < this._baseRotationDirectionSign.length) dirSign = this._baseRotationDirectionSign[ii];
 
             if (this._sequence.length < fullSeq.length && ii === this._sequence.length - 1) {
                 this._bases[ii].setGoDir(goX, goY);
-                this._bases[ii].setOutDir(sgn * -goY, sgn * goX);
+                this._bases[ii].setOutDir(dirSign * -goY, dirSign * goX);
                 this._bases[ii].setLast(true);
                 continue;
             }
@@ -2143,7 +2143,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this._bases[ii].setGoDir(goX, goY);
-            this._bases[ii].setOutDir(sgn * -outY, sgn * outX);
+            this._bases[ii].setOutDir(dirSign * -outY, dirSign * outX);
             this._bases[ii].setLast(false);
         }
 
@@ -2955,7 +2955,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
                 let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices.slice();
 
-                let contour: number[] = Array(0);
+                let contour: number[] = [];
                 for (let ii = 0; ii < indices.length; ii++) {
                     let p: Point = this.getBaseLoc(indices[ii]);
                     contour.push(p.x);
