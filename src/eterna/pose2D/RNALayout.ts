@@ -1,5 +1,9 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
+import { runInThisContext } from 'vm';
+import { AssertionError } from 'assert';
+import { Point } from 'pixi.js';
+import { Vector2 } from 'flashbang';
 
 export class RNATreeNode {
     public isPair: boolean = false;
@@ -181,7 +185,7 @@ export default class RNALayout {
     }
 
     public drawTree(customLayout: Array<[number, number]> = null): void {
-        this._customLayout = customLayout;
+        this.initializeCustomLayout(customLayout);
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, 1);
         }
@@ -624,6 +628,36 @@ export default class RNALayout {
         }
 
         return true;
+    }
+
+    private initializeCustomLayout(customLayout: Array<[number, number]>): void {
+        if ( customLayout === null ) {
+            this._customLayout = null; 
+            return;
+        }
+        let scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
+        let customLayoutScaled: Array<[number, number]> = [];
+        for ( const coord of customLayout) {
+            customLayoutScaled.push( [coord[0]*scaleFactor,coord[1]*scaleFactor] )
+        }
+        this._customLayout = customLayoutScaled;
+    }
+
+    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>):number {
+        let scaleFactor:number = 1.0;
+        if ( this._targetPairs !== null ){
+            for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
+                // look for a stacked pair
+                if (this._targetPairs[ii] == this._targetPairs[ii + 1] + 1) {
+                    let goX = customLayout[ii][0] - customLayout[ii + 1][0];
+                    let goY = customLayout[ii][1] - customLayout[ii + 1][1];
+                    let L = Math.sqrt(goX * goX + goY * goY);
+                    scaleFactor = 1.0 / L;
+                    return scaleFactor;
+                }
+            }
+        }
+        return scaleFactor;
     }
 
     private readonly _primarySpace: number;
