@@ -80,22 +80,24 @@ export default class LoadingMode extends AppMode {
 
     private getExtraBlurb(): string {
         let ExtraBlurbs = [
-            'A good scientist will tell you that being wrong can\nbe just as interesting as being right.',
+            'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',
             'Developed by players for players',
-            'Afraid of pandemic flu? Stay calm and play Eterna.',
+            'Afraid of pandemic flu?\nStay calm and play Eterna.',
             'Played by Humans, Scored by Nature.',
             'Empowering citizen scientists to invent medicine',
             "Heard of CRISPR therapies? That's RNA medicine",
-            'The only videogame with real experiments in the loop',
+            'The only videogame with real\nexperiments in the loop',
             'No computer can solve the entire Eterna100',
             'Player-made bot NEMO crushes deep learning.',
             'Twenty scientific publications and counting...',
             'Top Eterna players still crush all bots.',
             'Science is much more about the\nquestions than the facts',
             'Citizen science works because\nwe are a curious species.',
-            'Just hang in there and you will eventually\nget the hang of it.',
-            'The ribosome makes life. You can re-design it.',
-            'First treatment for spinal muscular atrophy is RNA'
+            'Can we invent our own medicine?',
+            'Just hang in there and\nyou will eventually\nget the hang of it.',
+            'The ribosome makes life.\nYou can re-design it.',
+            'First treatment for spinal muscular atrophy is RNA',
+            'Evolution is a tinkerer.\nYou can accelerate it.'
             //           "RNA design is provably intractable for computers.",
             // eslint-disable-next-line max-len
             //            "Beware this game is addicting...\n...at least this addiction is for a noble cause.\n     -- Eterna player hoglahoo",
