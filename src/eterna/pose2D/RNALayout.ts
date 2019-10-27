@@ -631,16 +631,19 @@ export default class RNALayout {
     }
 
     private initializeCustomLayout(customLayout: Array<[number, number]>): void {
-        if ( customLayout === null ) {
-            this._customLayout = null; 
+        if (customLayout === null) {
+            this._customLayout = null;
             return;
         }
         let scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
-        let customLayoutScaled: Array<[number, number]> = [];
-        for ( const coord of customLayout) {
-            customLayoutScaled.push( [coord[0]*scaleFactor,coord[1]*scaleFactor] )
+        this._customLayout = [];
+        for (const coord of customLayout) {
+            if (coord[0] === null || coord[1] === null) {
+                this._customLayout.push([null, null]);
+            } else {
+                this._customLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor])
+            }
         }
-        this._customLayout = customLayoutScaled;
     }
 
     private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>):number {
