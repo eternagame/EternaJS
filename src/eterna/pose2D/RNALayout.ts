@@ -181,7 +181,7 @@ export default class RNALayout {
     }
 
     public drawTree(customLayout: Array<[number, number]> = null): void {
-        this._customLayout = customLayout;
+        this.initializeCustomLayout(customLayout);
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, 1);
         }
@@ -262,6 +262,27 @@ export default class RNALayout {
         }
     }
 
+    public getRotationDirectionSign(rotationDirectionSign: number[]): void {
+        if (this._root != null) {
+            this.getRotationDirectionSignRecursive(this._root, rotationDirectionSign);
+        } else {
+            for (let ii = 0; ii < rotationDirectionSign.length; ii++) {
+                rotationDirectionSign[ii] = 1;
+            }
+        }
+    }
+
+    private getRotationDirectionSignRecursive(rootnode: RNATreeNode, rotationDirectionSign: number[]): void {
+        if (rootnode.isPair) {
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
+            rotationDirectionSign[rootnode.indexB] = rootnode.rotationDirectionSign;
+        } else if (rootnode.indexA >= 0) {
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
+        }
+        for (let ii = 0; ii < rootnode.children.length; ii++) {
+            this.getRotationDirectionSignRecursive(rootnode.children[ii], rotationDirectionSign);
+        }
+    }
 
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
@@ -425,6 +446,7 @@ export default class RNALayout {
             anchorCustomRotationDirectionSign = Math.sign(
                 anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
             );
+            if (anchorCustomRotationDirectionSign === 0) anchorCustomRotationDirectionSign = 1;
             anchorCustomGoX *= anchorCustomRotationDirectionSign;
             anchorCustomGoY *= anchorCustomRotationDirectionSign;
         }
@@ -474,6 +496,7 @@ export default class RNALayout {
                 let childCustomRotationDirectionSign: number = Math.sign(
                     customGoNextX * customGoX + customGoNextY * customGoY
                 );
+                if (childCustomRotationDirectionSign === 0) childCustomRotationDirectionSign = 1;
                 customGoX *= childCustomRotationDirectionSign;
                 customGoY *= childCustomRotationDirectionSign;
 
@@ -488,6 +511,7 @@ export default class RNALayout {
                     childGoY = crossY * templateGoX + goY * templateGoY;
                 }
             }
+
             let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
 
             this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
@@ -586,6 +610,8 @@ export default class RNALayout {
         if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
         for (let ii = 0; ii < rootnode.children.length; ii++) {
+            if (this._customLayout[rootnode.children[ii].indexA][0] == null) return false;
+            if (this._customLayout[rootnode.children[ii].indexA][1] == null) return false;
             if (rootnode.children[ii].isPair) {
                 // all other pairs of junction paired in target structure?
                 if (this._targetPairs[rootnode.children[ii].indexA] !== rootnode.children[ii].indexB) {
@@ -598,6 +624,39 @@ export default class RNALayout {
         }
 
         return true;
+    }
+
+    private initializeCustomLayout(customLayout: Array<[number, number]>): void {
+        if (customLayout === null) {
+            this._customLayout = null;
+            return;
+        }
+        let scaleFactor = this.inferCustomLayoutScaleFactor(customLayout);
+        this._customLayout = [];
+        for (const coord of customLayout) {
+            if (coord[0] === null || coord[1] === null) {
+                this._customLayout.push([null, null]);
+            } else {
+                this._customLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
+            }
+        }
+    }
+
+    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>): number {
+        let scaleFactor = 1.0;
+        if (this._targetPairs !== null) {
+            for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
+                // look for a stacked pair
+                if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
+                    let goX = customLayout[ii][0] - customLayout[ii + 1][0];
+                    let goY = customLayout[ii][1] - customLayout[ii + 1][1];
+                    let L = Math.sqrt(goX * goX + goY * goY);
+                    scaleFactor = 1.0 / L;
+                    return scaleFactor;
+                }
+            }
+        }
+        return scaleFactor;
     }
 
     private readonly _primarySpace: number;
