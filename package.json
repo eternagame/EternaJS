@@ -105,6 +105,7 @@
     "libtess": "^1.2.2",
     "localforage": "^1.7.3",
     "loglevel": "^1.6.4",
+    "pchip": "^1.0.2",
     "pixi-filters": "^2.7.1",
     "pixi-multistyle-text": "^0.7.0",
     "pixi-sound": "^2.1.0",
