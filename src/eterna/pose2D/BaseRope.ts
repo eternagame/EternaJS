@@ -54,7 +54,12 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
         }
 
-        this.interpolateBaseRope(basePosX, basePosY, idx);
+        if (JSON.stringify(basePosX) !== JSON.stringify(this._lastBasePosX)
+            || JSON.stringify(basePosY) !== JSON.stringify(this._lastBasePosY)) {
+            this.interpolateBaseRope(basePosX, basePosY, idx);
+            this._lastBasePosX = basePosX;
+            this._lastBasePosY = basePosY;
+        }
 
         // by drawing twice, can get a nice looking texture.
         // draw thick line and thin line on top
@@ -167,6 +172,9 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     private readonly _pose: Pose2D;
     private readonly _graphics: Graphics;
     private _enabled: boolean;
+
+    private _lastBasePosX: Array<number> = [];
+    private _lastBasePosY: Array<number> = [];
 
     private _interpBasePosX: Array<number> = [];
     private _interpBasePosY: Array<number> = [];
