@@ -132,6 +132,7 @@ export default class RNALayout {
     }
 
     public getCoords(xarray: number[], yarray: number[]): void {
+        // FIXME add documentation. And its confusing that xarray,yarray are changeable by function ('outparams').
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
         } else if (xarray.length < 3) {
