@@ -1,6 +1,6 @@
 import libtess from 'libtess';
 
-/** 
+/**
  * libtess. Also tried PolyK, poly2tri, and earcut, and they failed for scoreNode -- rhiju.
  * see https://brendankenny.github.io/libtess.js/examples/simple_triangulation/triangulate.js
 */
@@ -25,8 +25,8 @@ tessy.gluTessCallback(libtess.gluEnum.GLU_TESS_COMBINE, combinecallback);
  *  libtess will take 3d verts and flatten to a plane for tesselation
  *  since only doing 2d tesselation here, provide z=1 normal to skip
  *  iterating over verts only to get the same answer.
- *  comment out to test normal-generation code 
- * @param contour 
+ *  comment out to test normal-generation code
+ * @param contour
  */
 export default function triangulate(contour: number[]): number[] {
     tessy.gluTessNormal(0, 0, 1);
