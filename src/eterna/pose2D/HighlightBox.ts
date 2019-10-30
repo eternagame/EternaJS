@@ -18,10 +18,11 @@ export enum HighlightType {
 
 /** A class for highlighting groups of bases in a Pose2D */
 export default class HighlightBox extends GameObject implements LateUpdatable {
-    constructor(pose: Pose2D) {
+    constructor(pose: Pose2D, type: HighlightType) {
         super();
         this._pose = pose;
         this._graphics = new Graphics();
+        this._type = type;
     }
 
     public get display(): DisplayObject {
@@ -34,15 +35,6 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
     public get sameQueue(): boolean {
         return this._lastKnownQueue === this._queue;
-    }
-
-    public get isOn(): boolean {
-        return this._on;
-    }
-
-    public set isOn(on: boolean) {
-        // TODO: TSC get rid of "on"
-        this._on = on;
     }
 
     public get enabled(): boolean {
@@ -71,15 +63,13 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         this._dirty = false;
     }
 
-    public setHighlight(type: HighlightType, elems: number[]): void {
-        // TODO: don't store type in _queue
-        if (elems.length === 0) {
-            this._queue = null;
-        } else {
-            this._queue = [type];
-            for (let ii = 0; ii < elems.length; ii++) {
-                this._queue.push(elems[ii]);
-            }
+    public setHighlight(elems: number[]): void {
+        if (!elems || elems.length === 0) return;
+
+        if (!this._queue) this._queue = [];
+
+        for (let ii = 0; ii < elems.length; ii++) {
+            this._queue.push(elems[ii]);
         }
 
         this._dirty = true;
@@ -87,7 +77,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
     public isInQueue(basenum: number): boolean {
         if (this._queue == null) return false;
-        for (let ii = 1; ii < this._queue.length; ii += 2) {
+        for (let ii = 0; ii < this._queue.length; ii += 2) {
             if (basenum >= this._queue[ii] && basenum <= this._queue[ii + 1]) return true;
         }
         return false;
@@ -114,7 +104,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             return false;
         }
 
-        let pos: Point = this._pose.getBaseLoc(this._queue[1], HighlightBox.P);
+        let pos: Point = this._pose.getBaseLoc(this._queue[0], HighlightBox.P);
         return this._prevPosition.x !== pos.x || this._prevPosition.y !== pos.y;
     }
 
@@ -132,10 +122,10 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
             return;
         }
 
-        this._prevPosition = this._pose.getBaseLoc(this._queue[1], this._prevPosition);
+        this._prevPosition = this._pose.getBaseLoc(this._queue[0], this._prevPosition);
         this._lastKnownQueue = this._queue;
 
-        let type: HighlightType = this._queue[0];
+        let type: HighlightType = this._type;
 
         if (type === HighlightType.STACK) {
             baseSize = 25;
@@ -198,7 +188,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     private renderStack(color: number, baseSize: number): void {
         let pairs: number[] = this._pose.pairs;
 
-        for (let ii = 1; ii < this._queue.length; ii += 2) {
+        for (let ii = 0; ii < this._queue.length; ii += 2) {
             let stackStart: number = this._queue[ii];
             let stackEnd: number = this._queue[ii + 1];
 
@@ -228,9 +218,9 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     private renderLoop(_color: number, baseSize: number): void {
         let pairs: number[] = this._pose.pairs;
         let fullLen: number = this._pose.fullSequence.length;
-        let strict: boolean = (this._queue[0] === HighlightType.LOOP);
+        let strict: boolean = (this._type === HighlightType.LOOP);
 
-        for (let i = 1; i < this._queue.length; i += 2) {
+        for (let i = 0; i < this._queue.length; i += 2) {
             let loopStart: number = this._queue[i];
             let loopEnd: number = this._queue[i + 1];
 
@@ -300,7 +290,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
                 );
             }
 
-            if (this._queue[0] !== HighlightType.USER_DEFINED) {
+            if (this._type !== HighlightType.USER_DEFINED) {
                 this._graphics.lineTo(
                     loopEndLoc.x + loopEndAxis.x * baseSize + endTo.x * baseSize,
                     loopEndLoc.y + loopEndAxis.y * baseSize + endTo.y * baseSize
@@ -331,6 +321,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
     private readonly _pose: Pose2D;
     private readonly _graphics: Graphics;
+    private readonly _type: HighlightType;
 
     private _dirty: boolean;
     private _enabled: boolean = true;
