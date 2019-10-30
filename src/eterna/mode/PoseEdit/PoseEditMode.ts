@@ -595,21 +595,27 @@ export default class PoseEditMode extends GameMode {
         this._constraintBar = new ConstraintBar(this._puzzle.constraints);
         this.addObject(this._constraintBar, this._constraintsLayer);
         this._constraintBar.sequenceHighlights.connect((highlightInfos) => {
-            for (let pose of this._poses) {
+            for (let [poseIdx, pose] of this._poses.entries()) {
                 pose.clearRestrictedHighlight();
                 pose.clearUnstableHighlight();
                 pose.clearUserDefinedHighlight();
+                let poseState = this._isPipMode ? poseIdx : this._curTargetIndex;
                 for (let highlightInfo of highlightInfos) {
-                    if (highlightInfo) {
+                    if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
+                        let currBlock = this.getCurrentUndoBlock(poseState);
+                        let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
+                        let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
+                            ? highlightInfo.ranges.map((index) => naturalMap.indexOf(index)) : highlightInfo.ranges;
+
                         switch (highlightInfo.color) {
                             case HighlightType.RESTRICTED:
-                                pose.highlightRestrictedSequence(highlightInfo.ranges);
+                                pose.highlightRestrictedSequence(ranges);
                                 break;
                             case HighlightType.UNSTABLE:
-                                pose.highlightUnstableSequence(highlightInfo.ranges);
+                                pose.highlightUnstableSequence(ranges);
                                 break;
                             case HighlightType.USER_DEFINED:
-                                pose.highlightUserDefinedSequence(highlightInfo.ranges);
+                                pose.highlightUserDefinedSequence(ranges);
                                 break;
                             default:
                                 log.error(`Invalid highlight type: ${highlightInfo.color}`);
