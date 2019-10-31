@@ -16,7 +16,13 @@ function ParseBool(value: string): boolean {
     return value.toLowerCase() === 'true';
 }
 
-/** Constants and global managers */
+// This class serves as a container for some common objects, probably
+// contained here as an approximation of a proper singleton pattern 
+// (if you always make your SaveGameManager through making an Eterna,
+// then you will never inexplicably and sadly have more SaveGameManagers
+// than you have ChatManagers or something). It also contains some fallback
+// error handling (like the onFatalError function) and valuable pseudo-
+// global constants.
 export default class Eterna {
     public static readonly OVERLAY_DIV_ID = 'overlay';
     public static readonly PIXI_CONTAINER_ID = 'pixi-container';
