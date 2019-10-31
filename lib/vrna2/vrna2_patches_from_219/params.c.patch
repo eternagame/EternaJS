@@ -1,0 +1,4 @@
+7c7
+< #include <config.h>
+---
+> #include "config.h"

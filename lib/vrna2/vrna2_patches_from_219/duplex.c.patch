@@ -1,0 +1,4 @@
+12c12
+< #include <config.h>
+---
+> #include "config.h"
