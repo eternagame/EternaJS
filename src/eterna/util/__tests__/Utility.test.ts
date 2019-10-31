@@ -1,61 +1,38 @@
-import {Point} from 'pixi.js';
+import Utility from "../Utility";
+//import "./jest-matcher-deep-close-to";
 
-export default class Utility {
 
-    /**
-     * Rounds a number to a certain number of digits.
-     *
-     * @remarks
-     * Currently tested only for pretty trivial cases.
-     *
-     * @param num - The number to be rounded
-     * @param floating - The decimal place to which to round (i.e., 1 == 'tens'; 2 == 'hundreds')
-     * @returns The number, rounded-off as directed
-     *
-     */
-    public static roundTo(num: number, floating: number): number {
-        let div: number = 10 ** floating;
-        let temp: number = num * div;
-        return Number(temp) / div;
-    }
+test(`test_roundTo`, () => {
+    // Basic tests for rounding. There are obviously more exponents to test
+    // and more conditions (e.g., rounding up; correct behavior of 5s) but
+    // this is a start.
+    expect(Utility.roundTo(52, 1)).toBe(50);
+    expect(Utility.roundTo(520, 2)).toBe(500);
+    expect(Utility.roundTo(520, 1)).toBe(520);
 
-    /**
-     * Safely remove HTML tags from an input by replacing <> with escapes.
-     *
-     * @param str - The string to be escaped
-     * @returns The string, with each <> replaced by regex.
-     *
-     */
-    public static stripHtmlTags(str: string): string {
-        let newlinereg = /</g;
-        str = str.replace(newlinereg, '&lt;');
-        newlinereg = />/g;
-        str = str.replace(newlinereg, '&gt;');
-        return str;
-    }
+    expect(Utility.roundTo(52.1, 1)).toBe(50);
+    expect(Utility.roundTo(521, 2)).toBe(500);
+    expect(Utility.roundTo(521, 1)).toBe(520);
+    expect(Utility.roundTo(521, 0)).toBe(521);
+    expect(Utility.roundTo(52.1, 1)).toBe(52);
+});
 
-   /**
-     * Map double quotes to single quotes and newlines to spaces.
-     *
-     * @param str - The string to be modified
-     * @returns The string, with each " replaced by ' and "\n" by " ".
-     *
-     */
-    public static stripQuotationsAndNewlines(str: string): string {
-        let newlinereg = /\n/g;
-        str = str.replace(newlinereg, ' ');
-        newlinereg = /"/g;
-        str = str.replace(newlinereg, "'");
-        return str;
-    }
 
-    /**
-     * Turn any non-null object into a stringified key-value repr.
-     *
-     * @param obj - The object to be representated
-     * @returns A string of key=val, joined by "&"
-     *
-     */
+test(`test_stripHtmlTags`, () => {
+    // Basic tests for stripping <>. Ensure it can do both or one at a time
+    // or doubles.
+    expect(Utility.stripHtmlTags("<foo>").toBe("&lt;foo&gt;");
+    expect(Utility.stripHtmlTags("<foo").toBe("&lt;foo");
+    expect(Utility.stripHtmlTags("foo>").toBe("foo&gt;");
+    expect(Utility.stripHtmlTags("<<foo>>").toBe("&lt;&lt;foo&gt;&gt;");
+});
+
+test(`test_stripQuotationsAndNewlines`, () => {
+    // Basic tests for stripping <>. Ensure it can do both or one at a time
+    // or doubles.
+    expect(Utility.stripQuotationsAndNewlines("\"\n\"").toBe("\' \'");
+});
+/*
     public static generateParameterString(obj: any): string {
         if (obj == null) {
             return '';
@@ -64,17 +41,6 @@ export default class Utility {
         return Object.entries(obj).map(([key, val]) => `${key}=${val}`).join('&');
     }
 
-    /**
-     * Determines if a point is within a polygon given as a point vector, using
-     * a consequence of the Jordan curve theorem.
-     *
-     * @param p - The single point
-     * @param polygon - A polygon defined as a point array.
-     * @param stretchLength - The length of the line segment for testing; thus,
-     * this method fails for very big polygons.
-     * @returns true if the point is in the polygon; false otherwise.
-     *
-     */
     public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
         let hitCount = 0;
 
@@ -153,13 +119,7 @@ export default class Utility {
         return new Array(stop - start).fill(0).map((_, i) => i + start);
     }
 
-    /**
-     * Similar to `string.split(' ')`, but acts differently with multiple consecutive spaces
-     * E.g., two spaces results in the second space being placed in the following entry,
-     * three results in one entry of a single space, four both, five two single space entried, etc
-     *
-     * @param csl string to split
-     */
+
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
         let lastComma = -1;
@@ -181,9 +141,7 @@ export default class Utility {
         return vals;
     }
 
-    /**
-     * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
-     */
+    
     public static rangeStringToArray(sInput: string): number[] {
         let vals: number[] = [];
         for (const s of sInput.split(',')) {
@@ -206,21 +164,7 @@ export default class Utility {
         return vals;
     }
 
-    /** allows for specification of sequences and their indices
-     *   during a paste. Example:
-     *
-     *    ACUGU 11-14 16
-     *
-     * will return [11,12,13,14,16]
-     *
-     * If no numbers are specified, e.g.,
-     *
-     *    ACUGU
-     *
-     * will return the default range from 1 to len(seq), here 1,2,3,4,5.
-     *
-     * Note that indices will be 1-indexed, not 0-indexed .
-     */
+    
     public static getIndices(seq: string): number[] {
         let indices: number[] = [];
         let splitted: string[] = seq.split(' ');
@@ -234,3 +178,4 @@ export default class Utility {
         return indices;
     }
 }
+*/
