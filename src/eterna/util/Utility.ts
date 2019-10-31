@@ -92,7 +92,20 @@ export default class Utility {
         return (hitCount % 2) === 1;
     }
 
-    public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point {
+    /**
+     * Determines the intersection of two lines or line segments AB and EF.
+     * 
+     * @param A - The first point of the first line or segment
+     * @param B - The second point of the first line or segment
+     * @param E - The first point of the second line or segment
+     * @param F - The second point of the second line or segment
+     * @param asSeg - Treat the two specified objects as line segments, not as
+     * lines, so that intersections further away from the endpoints than the 
+     * length of the segments themselves are returned as null.
+     * @returns true if the point is in the polygon; false otherwise.
+     *
+     */
+    public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point | null {
         let ip: Point;
         let a1: number;
         let a2: number;
@@ -158,7 +171,10 @@ export default class Utility {
      * E.g., two spaces results in the second space being placed in the following entry,
      * three results in one entry of a single space, four both, five two single space entried, etc
      *
-     * @param csl string to split
+     * @param csl string to split by whitespace
+     * 
+     * @returns string array
+     * 
      */
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
@@ -183,6 +199,11 @@ export default class Utility {
 
     /**
      * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
+     * 
+     * @param sInput string representing the numerical range
+     * 
+     * @returns array of numbers represented
+     * 
      */
     public static rangeStringToArray(sInput: string): number[] {
         let vals: number[] = [];
@@ -219,7 +240,13 @@ export default class Utility {
      *
      * will return the default range from 1 to len(seq), here 1,2,3,4,5.
      *
-     * Note that indices will be 1-indexed, not 0-indexed .
+     * Note that indices will be 1-indexed, not 0-indexed.
+     * 
+     * @param seq sequence-specification string, with a first item that is
+     * n legal sequence characters and a second item that "codes for" the
+     * same number of 1-indexed residue indices.
+     * 
+     * @returns the index array.
      */
     public static getIndices(seq: string): number[] {
         let indices: number[] = [];
