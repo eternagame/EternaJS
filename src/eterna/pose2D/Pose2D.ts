@@ -107,22 +107,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.addObject(ray, this.container);
         }
 
-        this._selectionHighlightBox = new HighlightBox(this);
+        this._selectionHighlightBox = new HighlightBox(this, HighlightType.DESIGN);
         this.addObject(this._selectionHighlightBox, this.container);
 
-        this._restrictedHighlightBox = new HighlightBox(this);
+        this._restrictedHighlightBox = new HighlightBox(this, HighlightType.RESTRICTED);
         this.addObject(this._restrictedHighlightBox, this.container);
 
-        this._unstableHighlightBox = new HighlightBox(this);
+        this._unstableHighlightBox = new HighlightBox(this, HighlightType.UNSTABLE);
         this.addObject(this._unstableHighlightBox, this.container);
 
-        this._userDefinedHighlightBox = new HighlightBox(this);
+        this._userDefinedHighlightBox = new HighlightBox(this, HighlightType.USER_DEFINED);
         this.addObject(this._userDefinedHighlightBox, this.container);
 
-        this._forcedHighlightBox = new HighlightBox(this);
+        this._forcedHighlightBox = new HighlightBox(this, HighlightType.FORCED);
         this.addObject(this._forcedHighlightBox, this.container);
 
-        this._shiftHighlightBox = new HighlightBox(this);
+        this._shiftHighlightBox = new HighlightBox(this, HighlightType.SHIFT);
         this.addObject(this._shiftHighlightBox, this.container);
 
         if (!this._editable) {
@@ -791,11 +791,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set forcedHighlights(elems: number[]) {
-        if (elems == null) {
-            this._forcedHighlightBox.clear();
-        } else {
-            this._forcedHighlightBox.setHighlight(HighlightType.FORCED, elems);
-        }
+        this._forcedHighlightBox.clear();
+        this._forcedHighlightBox.setHighlight(elems);
     }
 
     public set structConstraints(doCare: boolean[]) {
@@ -858,8 +855,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let first: number = q[1];
-        let last: number = q[2];
+        let first: number = q[0];
+        let last: number = q[1];
         let ii: number;
         // can't shift locked bases
         for (ii = first; ii <= last; ii++) {
@@ -906,7 +903,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice();
         this.setMutated(mutated);
         this.doneColoring();
-        this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._shiftHighlightBox.setHighlight([first + ofs, last + ofs]);
     }
 
     public shift5Prime(): void {
@@ -915,8 +912,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
-        let first: number = q[1];
-        let last: number = q[2];
+        let first: number = q[0];
+        let last: number = q[1];
         let ii: number;
         // can't shift locked bases
         for (ii = first; ii <= last; ii++) {
@@ -962,7 +959,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._mutatedSequence = this.fullSequence.slice();
         this.setMutated(mutated);
         this.doneColoring();
-        this._shiftHighlightBox.setHighlight(HighlightType.SHIFT, [first + ofs, last + ofs]);
+        this._shiftHighlightBox.clear();
+        this._shiftHighlightBox.setHighlight([first + ofs, last + ofs]);
     }
 
     public isDesignStructureHighlighted(index: number): boolean {
@@ -1062,21 +1060,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._selectionHighlightBox.clear();
     }
 
-    public highlightStack(action: number[]): void {
-        this._selectionHighlightBox.setHighlight(HighlightType.STACK, action.slice(1));
-    }
-
-    public highlightLoop(action: number[]): void {
-        this._selectionHighlightBox.setHighlight(HighlightType.LOOP, action.slice(1));
-    }
-
     // / For restricted queue
     public clearRestrictedHighlight(): void {
         this._restrictedHighlightBox.clear();
     }
 
     public highlightRestrictedSequence(restricted: number[]): void {
-        this._restrictedHighlightBox.setHighlight(HighlightType.RESTRICTED, restricted);
+        this._restrictedHighlightBox.setHighlight(restricted);
     }
 
     public clearUnstableHighlight(): void {
@@ -1084,7 +1074,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlightUnstableSequence(unstable: number[]): void {
-        this._unstableHighlightBox.setHighlight(HighlightType.UNSTABLE, unstable);
+        this._unstableHighlightBox.setHighlight(unstable);
     }
 
     public clearUserDefinedHighlight(): void {
@@ -1092,7 +1082,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public highlightUserDefinedSequence(userDefined: number[]): void {
-        this._userDefinedHighlightBox.setHighlight(HighlightType.USER_DEFINED, userDefined);
+        this._userDefinedHighlightBox.setHighlight(userDefined);
     }
 
     public clearShiftHighlight(): void {
@@ -2821,24 +2811,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private updateDesignHighlight(): void {
         let elems: number[] = this.designSegments;
-        if (elems.length === 0) {
-            this._selectionHighlightBox.clear();
-        } else {
-            this._selectionHighlightBox.setHighlight(HighlightType.DESIGN, elems);
-            this._selectionHighlightBox.isOn = false;
-        }
+        this._selectionHighlightBox.clear();
+        this._selectionHighlightBox.setHighlight(elems);
     }
 
     private updateShiftHighlight(): void {
-        if (this._shiftStart < 0) {
-            this._shiftHighlightBox.clear();
-        } else {
+        this._shiftHighlightBox.clear();
+        if (this._shiftStart >= 0) {
             this._shiftHighlightBox.setHighlight(
-                HighlightType.SHIFT,
                 this._shiftEnd < this._shiftStart
                     ? [this._shiftEnd, this._shiftStart] : [this._shiftStart, this._shiftEnd]
             );
-            this._shiftHighlightBox.isOn = false;
         }
     }
 
