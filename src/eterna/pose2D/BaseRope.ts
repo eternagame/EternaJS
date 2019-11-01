@@ -1,5 +1,8 @@
 import {DisplayObject, Graphics, Point} from 'pixi.js';
-import {GameObject, LateUpdatable, Vector2} from 'flashbang';
+import {
+    GameObject, LateUpdatable, Vector2, Arrays
+} from 'flashbang';
+import pchip from 'pchip';
 import Pose2D from './Pose2D';
 
 /** BaseRope: A class for drawing a smooth 'rope' through bases. * */
@@ -37,8 +40,8 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         if (!this._enabled) return;
 
         let idx: number[] = [];
-        let baseposX: number[] = [];
-        let baseposY: number[] = [];
+        let basePosX: number[] = [];
+        let basePosY: number[] = [];
         for (let i = 0; i < this._pose.fullSequence.length; i++) {
             let center: Point = this._pose.getBaseLoc(i);
             if (!forceBaseXY && !this._pose.getBase(i).needRedraw) {
@@ -48,39 +51,88 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
             if (center) {
                 idx.push(i);
-                baseposX.push(center.x);
-                baseposY.push(center.y);
+                basePosX.push(center.x);
+                basePosY.push(center.y);
             }
+        }
+
+        if (!Arrays.shallowEqual(basePosX, this._lastBasePosX)
+            || !Arrays.shallowEqual(basePosY, this._lastBasePosY)) {
+            this.updateInterpBasePos(basePosX, basePosY, idx);
+            this._lastBasePosX = basePosX;
+            this._lastBasePosY = basePosY;
         }
 
         // by drawing twice, can get a nice looking texture.
         // draw thick line and thin line on top
-        let OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
-        let INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
-
+        const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
-        this._graphics.moveTo(baseposX[0], baseposY[0]);
-        // this.drawBaseRopeLine(splineX, splineY);
-        this.drawBaseRopeLine(baseposX, baseposY);
+        this.drawBaseRopeLine();
 
+        const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
-        this._graphics.moveTo(baseposX[0], baseposY[0]);
-        // this.drawBaseRopeLine(splineX, splineY);
-        this.drawBaseRopeLine(baseposX, baseposY);
+        this.drawBaseRopeLine();
     }
 
-    private drawBaseRopeLine(baseposX: number[], baseposY: number[]): void {
-        // by drawing twice, can get a nice looking texture.
-        this._graphics.moveTo(baseposX[0], baseposY[0]);
-        // Update the points to correspond with base locations
-        // Note that this could be way smarter -- just look at rope segments that need to be updated, not entire rope.
-        let smoothFactor = 5;
-        for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
-            // Smooth the curve with cubic interpolation to prevent sharp edges.
-            const ix = this.cubicInterpolation(baseposX, i / smoothFactor);
-            const iy = this.cubicInterpolation(baseposY, i / smoothFactor);
-            this._graphics.lineTo(ix, iy);
+    private drawBaseRopeLine(): void {
+        this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
+        for (let ii = 0; ii < this._interpBasePosX.length; ii++) {
+            this._graphics.lineTo(this._interpBasePosX[ii], this._interpBasePosY[ii]);
         }
+    }
+
+    /**
+     * This function updates the _interpBasePosX and _interpBasePosY class variables.
+     * Currently allows use of cubic interpolation or Pchip -- if we are still using
+     * only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     */
+    private updateInterpBasePos(basePosX: number[], basePosY: number[], idx: number[]) {
+        const smoothFactor = 5;
+        // this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY, idx);
+        this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY, idx);
+    }
+
+    /**
+     * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
+     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
+     * @param smoothFactor
+     * @param basePosX
+     * @param basePosY
+     */
+    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]): void {
+        this._interpBasePosX = [];
+        this._interpBasePosY = [];
+        for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
+            this._interpBasePosX.push(this.cubicInterpolation(basePosX, i / smoothFactor));
+            this._interpBasePosY.push(this.cubicInterpolation(basePosY, i / smoothFactor));
+        }
+    }
+
+    /**
+     * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
+     * A little choppier, but keeps lines in stacks straight.
+     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
+     * @param basePosX
+     * @param basePosY
+     * @param idx
+     */
+    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[],
+        idx: number[]): void {
+        this._interpBasePosX = this.interpPchip(smoothFactor, basePosX, idx);
+        this._interpBasePosY = this.interpPchip(smoothFactor, basePosY, idx);
+    }
+
+    private interpPchip(smoothFactor: number, points: number[], idx: number[]): number[] {
+        let inputPoints: Array<[number, number]> = [];
+        for (let ii = 0; ii < points.length; ii++) {
+            inputPoints.push([idx[ii], points[ii]]);
+        }
+        let pchipFitPoints = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
+        let interpBasePos: number[] = [];
+        for (const point of pchipFitPoints) {
+            interpBasePos.push(point[1]);
+        }
+        return interpBasePos;
     }
 
     // adapted directly from  demo
@@ -126,4 +178,10 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     private readonly _pose: Pose2D;
     private readonly _graphics: Graphics;
     private _enabled: boolean;
+
+    private _lastBasePosX: Array<number> = [];
+    private _lastBasePosY: Array<number> = [];
+
+    private _interpBasePosX: Array<number> = [];
+    private _interpBasePosY: Array<number> = [];
 }
