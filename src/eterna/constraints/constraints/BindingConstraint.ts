@@ -104,11 +104,12 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         let stateCondition = targetConditions[this.stateIndex];
 
         return {
-            ranges: Utility.range(
+            ranges: [
                 undoBlock.sequence.length + 1,
                 undoBlock.sequence.length + 1 + stateCondition['oligo_sequence'].length - 1
-            ),
-            color: HighlightType.RESTRICTED
+            ],
+            color: HighlightType.RESTRICTED,
+            stateIndex: this.stateIndex
         };
     }
 }
@@ -187,7 +188,8 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 
         return {
             ranges: highlightedIndices,
-            color: HighlightType.RESTRICTED
+            color: HighlightType.RESTRICTED,
+            stateIndex: this.stateIndex
         };
     }
 
