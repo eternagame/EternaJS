@@ -1,5 +1,7 @@
 import {DisplayObject, Graphics, Point} from 'pixi.js';
-import {GameObject, LateUpdatable, Vector2} from 'flashbang';
+import {
+    GameObject, LateUpdatable, Vector2, Arrays
+} from 'flashbang';
 import pchip from 'pchip';
 import Pose2D from './Pose2D';
 
@@ -54,9 +56,9 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
         }
 
-        if (JSON.stringify(basePosX) !== JSON.stringify(this._lastBasePosX)
-            || JSON.stringify(basePosY) !== JSON.stringify(this._lastBasePosY)) {
-            this.interpolateBaseRope(basePosX, basePosY, idx);
+        if (!Arrays.shallowEqual(basePosX, this._lastBasePosX)
+            || !Arrays.shallowEqual(basePosY, this._lastBasePosY)) {
+            this.updateInterpBasePos(basePosX, basePosY, idx);
             this._lastBasePosX = basePosX;
             this._lastBasePosY = basePosY;
         }
@@ -65,52 +67,56 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         // draw thick line and thin line on top
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
-        this.drawBaseRopeLine(basePosX, basePosY);
+        this.drawBaseRopeLine();
 
         const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
-        this.drawBaseRopeLine(basePosX, basePosY);
+        this.drawBaseRopeLine();
     }
 
-    private drawBaseRopeLine(basePosX: number[], basePosY: number[]): void {
-        this._graphics.moveTo(basePosX[0], basePosY[0]);
+    private drawBaseRopeLine(): void {
+        this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
         for (let ii = 0; ii < this._interpBasePosX.length; ii++) {
             this._graphics.lineTo(this._interpBasePosX[ii], this._interpBasePosY[ii]);
         }
     }
 
-    private interpolateBaseRope(basePosX: number[], basePosY: number[], idx: number[]) {
+    /**
+     * This function updates the _interpBasePosX and _interpBasePosY class variables.
+     * Currently allows use of cubic interpolation or Pchip -- if we are still using
+     * only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     */
+    private updateInterpBasePos(basePosX: number[], basePosY: number[], idx: number[]) {
         const smoothFactor = 5;
-        // this.interpolateBaseRopeCubic( smoothFactor, basePosX, basePosY, idx);
-        this.interpolateBaseRopePchip(smoothFactor, basePosX, basePosY, idx);
+        // this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY, idx);
+        this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY, idx);
     }
 
     /**
      * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
+     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
      * @param smoothFactor
      * @param basePosX
      * @param basePosY
      */
-    private interpolateBaseRopeCubic(smoothFactor: number, basePosX: number[], basePosY: number[]): void {
-        // Update the points to correspond with base locations
-        // Note that this could be way smarter -- just look at rope segments that need to be updated, not entire rope.
+    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]): void {
         this._interpBasePosX = [];
         this._interpBasePosY = [];
         for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
-            // Smooth the curve with cubic interpolation to prevent sharp edges.
             this._interpBasePosX.push(this.cubicInterpolation(basePosX, i / smoothFactor));
             this._interpBasePosY.push(this.cubicInterpolation(basePosY, i / smoothFactor));
         }
     }
 
     /**
-     * Use PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
+     * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
      * A little choppier, but keeps lines in stacks straight.
+     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
      * @param basePosX
      * @param basePosY
      * @param idx
      */
-    private interpolateBaseRopePchip(smoothFactor: number, basePosX: number[], basePosY: number[],
+    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[],
         idx: number[]): void {
         this._interpBasePosX = this.interpPchip(smoothFactor, basePosX, idx);
         this._interpBasePosY = this.interpPchip(smoothFactor, basePosY, idx);
