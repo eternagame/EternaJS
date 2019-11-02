@@ -2,7 +2,20 @@ import {Graphics, Point} from 'pixi.js';
 import {Vector2} from 'flashbang';
 
 export default class GraphicsUtil {
-    /** Draw a left-facing arrow, with its tip anchored at (0, 0) */
+    /**
+     *
+     * Draw a left-facing arrow, with its tip anchored at the origin.
+     *
+     * @param triSize the width of the equilateral triangle that defines the tip of the arrow.
+     * @param baseLength rectangle length
+     * @param outlineColor the rectangle outline
+     * @param fillColor arrow fill collor
+     * @param graphics a Graphics object where the drawing takes place
+     *
+     * @returns the same graphics object that was passed, or a new one if null was passed,
+     * albeit with the arrow drawn.
+     *
+     */
     public static drawArrow(
         triSize: number, baseLength: number, outlineColor: number, fillColor: number, graphics: Graphics = null
     ): Graphics {
@@ -41,6 +54,12 @@ export default class GraphicsUtil {
         return graphics;
     }
 
+    /**
+     *
+     * Draw a leftward-facing triangle.
+     *
+     * @param scale scale factor for a triangle; default unity
+     */
     public static drawLeftTriangle(scale: number = 1): Graphics {
         let g = new Graphics()
             .beginFill(0xFFFFFF, 0.8)
@@ -52,6 +71,12 @@ export default class GraphicsUtil {
         return g;
     }
 
+    /**
+     *
+     * Draw a rightward facing triangle.
+     *
+     * @param scale scale factor for a triangle; default unity
+     */
     public static drawRightTriangle(scale: number = 1): Graphics {
         let g = new Graphics()
             .beginFill(0xFFFFFF, 0.8)
