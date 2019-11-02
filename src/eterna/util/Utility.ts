@@ -1,22 +1,21 @@
 import {Point} from 'pixi.js';
 
 export default class Utility {
-
     /**
-     * Rounds a number to a certain number of digits.
+     * Rounds a number to a certain number of digits past the decimal.
      *
      * @remarks
      * Currently tested only for pretty trivial cases.
      *
      * @param num - The number to be rounded
-     * @param floating - The decimal place to which to round (i.e., 1 == 'tens'; 2 == 'hundreds')
+     * @param floating - The decimal place to which to round (i.e., 1 == 'tenths'; 2 == 'hundredths')
      * @returns The number, rounded-off as directed
      *
      */
-    public static roundTo(num: number, floating: number): number {
-        let div: number = 10 ** floating;
-        let temp: number = num * div;
-        return Number(temp) / div;
+    public static roundTo(num: number, floating: number): string {
+        // let div: number = 10 ** floating;
+        // let temp: number = num * div;
+        return num.toFixed(floating); // Number(temp) / div;
     }
 
     /**
@@ -34,7 +33,7 @@ export default class Utility {
         return str;
     }
 
-   /**
+    /**
      * Map double quotes to single quotes and newlines to spaces.
      *
      * @param str - The string to be modified
@@ -94,13 +93,13 @@ export default class Utility {
 
     /**
      * Determines the intersection of two lines or line segments AB and EF.
-     * 
+     *
      * @param A - The first point of the first line or segment
      * @param B - The second point of the first line or segment
      * @param E - The first point of the second line or segment
      * @param F - The second point of the second line or segment
      * @param asSeg - Treat the two specified objects as line segments, not as
-     * lines, so that intersections further away from the endpoints than the 
+     * lines, so that intersections further away from the endpoints than the
      * length of the segments themselves are returned as null.
      * @returns true if the point is in the polygon; false otherwise.
      *
@@ -172,9 +171,9 @@ export default class Utility {
      * three results in one entry of a single space, four both, five two single space entried, etc
      *
      * @param csl string to split by whitespace
-     * 
+     *
      * @returns string array
-     * 
+     *
      */
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
@@ -199,11 +198,11 @@ export default class Utility {
 
     /**
      * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
-     * 
+     *
      * @param sInput string representing the numerical range
-     * 
+     *
      * @returns array of numbers represented
-     * 
+     *
      */
     public static rangeStringToArray(sInput: string): number[] {
         let vals: number[] = [];
@@ -241,17 +240,21 @@ export default class Utility {
      * will return the default range from 1 to len(seq), here 1,2,3,4,5.
      *
      * Note that indices will be 1-indexed, not 0-indexed.
-     * 
+     *
+     * AMW: According to Rhiju the first item shouldn't actually be
+     * supplied; it is parsed by an earlier argument.
+     *
      * @param seq sequence-specification string, with a first item that is
      * n legal sequence characters and a second item that "codes for" the
      * same number of 1-indexed residue indices.
-     * 
+     *
      * @returns the index array.
      */
     public static getIndices(seq: string): number[] {
         let indices: number[] = [];
         let splitted: string[] = seq.split(' ');
         for (const s of splitted) {
+            console.log(s);
             let ints: number[] = this.rangeStringToArray(s);
             if (ints === null) {
                 return null; // signal failure

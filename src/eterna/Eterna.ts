@@ -17,7 +17,7 @@ function ParseBool(value: string): boolean {
 }
 
 // This class serves as a container for some common objects, probably
-// contained here as an approximation of a proper singleton pattern 
+// contained here as an approximation of a proper singleton pattern
 // (if you always make your SaveGameManager through making an Eterna,
 // then you will never inexplicably and sadly have more SaveGameManagers
 // than you have ChatManagers or something). It also contains some fallback
