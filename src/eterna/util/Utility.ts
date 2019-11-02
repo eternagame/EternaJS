@@ -254,7 +254,6 @@ export default class Utility {
         let indices: number[] = [];
         let splitted: string[] = seq.split(' ');
         for (const s of splitted) {
-            console.log(s);
             let ints: number[] = this.rangeStringToArray(s);
             if (ints === null) {
                 return null; // signal failure
