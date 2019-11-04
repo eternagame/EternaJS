@@ -25,6 +25,12 @@ class BoostConstraint extends Constraint<BoostConstraintStatus> {
         throw new Error('BOOST constraint is unimplemented');
     }
 
+    /**
+     *
+     * @param status details on whether this BoostConstraint was satisfied
+     * and some additional details besides.
+     * @param forMissionScreen Is this for the mission screen or not?
+     */
     public getConstraintBoxConfig(
         status: BoostConstraintStatus,
         forMissionScreen: boolean,
