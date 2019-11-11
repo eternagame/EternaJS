@@ -20,3 +20,14 @@ cp -r nupack_emscripten_bindings nupack3.2.2/emscripten
 mv nupack3.2.2/src/shared/externals.c.in nupack3.2.2/src/shared/externals.c
 sed -i -e s/'unsigned int seqHash/extern unsigned int seqHash/g' nupack3.2.2/src/thermo/core/ene.c
 sed -i -e s/'int nupack_random_seed/extern unsigned int nupack_random_seed/g' nupack3.2.2/src/thermo/core/ReadCommandLineNPK.c
+
+
+### LinearFold
+##############
+## This is how the patch file was created.
+## diff -ur LinearFoldGit LinearFold  > linearfold_patch
+
+# With your fresh git checkout of LinearFold/LinearFold...
+cp linearfold_CML.txt LinearFold/CMakeLists.txt
+cp -r linearfold_emscripten_bindings LinearFold/emscripten
+echo "#ifndef LINEARFOLD_EVAL_H\n#define LINEARFOLD_EVAL_H\n#include <string>\n\nlong eval(std::string seq, std::string ref, bool is_verbose);\n#endif" > LinearFold/LinearFoldEval.h
