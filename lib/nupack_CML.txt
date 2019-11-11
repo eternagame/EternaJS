@@ -1,0 +1,77 @@
+cmake_minimum_required(VERSION 3.10)
+project(nupack)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist)
+SET(CMAKE_BUILD_TYPE_INIT "Release")
+set(CMAKE_CXX_STANDARD 11)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
+
+set(NUPACK_VERSION 3.2.2)
+
+include_directories(./src)
+include_directories(../emscripten_common)
+
+########################################
+# Build options
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${TEMP_LIB_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TEMP_LIB_DIR})
+
+if(SAMPLE)
+    add_definitions(-DNUPACK_SAMPLE)
+endif(SAMPLE)
+
+# Some strangeness that can be refactored out; minimal changes to allow 
+# access to included jsoncpp instead of system.
+set(JSONCPP_FOUND 1)
+set(JSONCPP_LIBRARY jsoncpp)
+set(JSONCPP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extlib/jsoncpp)
+message("-- Found jsoncpp library: " ${JSONCPP_LIBRARY})
+message("-- Found jsoncpp include directory: " ${JSONCPP_INCLUDE_DIR})
+
+include_directories(BEFORE ${INCLUDE_DIRS})
+link_directories(${TEMP_LIB_DIR})
+
+add_executable(nupack
+        src/thermo/core/backtrack.c
+        src/thermo/core/CalculateEnergy.c
+  		src/shared/externals.c
+        src/thermo/core/ene.c
+        src/thermo/core/GetEnergy.c
+        src/shared/functions.c
+        src/shared/hash.c
+        src/thermo/core/init.c
+        src/thermo/core/mfeUtils.c
+        src/thermo/core/min.c
+        src/shared/mt19937ar.c
+        src/thermo/core/nsStar.c
+        src/thermo/core/pairsPr.c
+        src/thermo/core/pf.c
+        src/thermo/core/pfuncUtils.c
+        src/thermo/core/pknots.c
+        src/thermo/core/ReadCommandLineNPK.c
+        src/thermo/core/sumexp.c
+        src/thermo/core/sumexp_pk.c
+		#src/shared/utils.c
+        emscripten/FullEval.cpp
+        emscripten/FullEval.h
+        emscripten/Bindings.cpp
+        emscripten/FullFold.cpp
+        emscripten/FullFold.h
+        ../emscripten_common/EmscriptenUtils.cpp
+        ../emscripten_common/EmscriptenUtils.h)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    set(CMAKE_C_COMPILER "emcc")
+
+    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1 --embed-file parameters@/")
+    set_target_properties(nupack PROPERTIES LINK_FLAGS_DEBUG "-O0 -s WASM=0 -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s SAFE_HEAP=1")
+    set_target_properties(nupack PROPERTIES LINK_FLAGS_RELEASE "-O3 -s WASM=1")
+endif ()
