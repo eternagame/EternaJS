@@ -1,0 +1,551 @@
+Only in nupack3.2.2: .ninja_deps
+Only in nupack3.2.2: .ninja_log
+Only in nupack3.2.2: CML.txt
+Only in nupack3.2.2: CMakeCache.txt
+Only in nupack3.2.2: CMakeFiles
+diff -ur nupack3.2.2/CMakeLists.txt nupack3.2.2_patched/CMakeLists.txt
+--- nupack3.2.2/CMakeLists.txt	2017-11-20 10:48:20.000000000 -0800
++++ nupack3.2.2_patched/CMakeLists.txt	2019-11-11 12:58:49.000000000 -0800
+@@ -1,50 +1,64 @@
+-cmake_minimum_required(VERSION 2.6)
+-project(NUPACKCORE)
++cmake_minimum_required(VERSION 3.10)
++project(nupack)
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
++set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist)
++SET(CMAKE_BUILD_TYPE_INIT "Release")
++set(CMAKE_CXX_STANDARD 11)
++
++if(NOT CMAKE_BUILD_TYPE)
++  set(CMAKE_BUILD_TYPE Release)
++endif()
++
++set(CMAKE_CXX_FLAGS "-Wall -Wextra")
++set(CMAKE_CXX_FLAGS_DEBUG "-g")
++set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
++
++#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+ 
+ set(NUPACK_VERSION 3.2.2)
+-add_definitions(-DCMAKE_NUPACK_VERSION="${NUPACK_VERSION}")
++#add_definitions(-DCMAKE_NUPACK_VERSION="${NUPACK_VERSION}")
+ 
++include_directories(./src)
++include_directories(../emscripten_common)
+ 
+ # Packaging Binary and Source
+-set(CPACK_PACKAGE_VERSION_MAJOR 3)
+-set(CPACK_PACKAGE_VERSION_MINOR 2)
+-set(CPACK_PACKAGE_VERSION_PATCH 0)
+-set(CPACK_SOURCE_GENERATOR "TGZ")
+-set(CPACK_PACKAGE_DIRECTORY "${PROJECT_BINARY_DIR}/cpack")
+-set(CPACK_SOURCE_PACKAGE_FILE_NAME "nupack${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+-set(CPACK_SOURCE_IGNORE_FILES "/build.*/" "/debug/" "/[.].*/" "/[.].*" ${CPACK_SOURCE_IGNORE_FILES})
++#set(CPACK_PACKAGE_VERSION_MAJOR 3)
++#set(CPACK_PACKAGE_VERSION_MINOR 2)
++#set(CPACK_PACKAGE_VERSION_PATCH 0)
++#set(CPACK_SOURCE_GENERATOR "TGZ")
++#set(CPACK_PACKAGE_DIRECTORY "${PROJECT_BINARY_DIR}/cpack")
++#set(CPACK_SOURCE_PACKAGE_FILE_NAME "nupack${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
++#set(CPACK_SOURCE_IGNORE_FILES "/build.*/" "/debug/" "/[.].*/" "/[.].*" ${CPACK_SOURCE_IGNORE_FILES})
+ 
+-include(CPack)
++#include(CPack)
+ 
+ 
+-include(CheckCXXCompilerFlag)
+-include(CheckIncludeFiles)
++#include(CheckCXXCompilerFlag)
++#include(CheckIncludeFiles)
+ 
+ # Set a default build type if none was specified
+ 
+-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+-    message(STATUS "Setting build type to 'Release' as none was specified.")
+-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build."
+-            FORCE)
+-endif()
++#if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
++#    message(STATUS "Setting build type to 'Release' as none was specified.")
++#    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build."
++#            FORCE)
++#endif()
+ 
+ ########################################
+ # Selection options
+-option(SAMPLE "SAMPLE" ON)
++#option(SAMPLE "SAMPLE" ON)
+ 
+ ########################################
+ # Location options
+-set(TEMP_LIB_DIR ${PROJECT_BINARY_DIR}/lib)
+-set(BIN_DIR bin)
++#set(TEMP_LIB_DIR ${PROJECT_BINARY_DIR}/lib)
++#set(BIN_DIR bin)
+ 
+ ########################################
+ # Include directories
+-set(INCLUDE_DIRS
+-    extlib
+-    src
+-)
++#set(INCLUDE_DIRS
++#    extlib
++#    src
++#)
+ 
+ ########################################
+ # Build options
+@@ -55,33 +69,6 @@
+ # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -O0 -fno-omit-frame-pointer -fsanitize=address")
+ # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+ 
+-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -g")
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
+-
+-if(CMAKE_C_COMPILER MATCHES "clang")
+-message("-- using Clang Compiler")
+-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -g")
+-endif(CMAKE_C_COMPILER MATCHES "clang")
+-
+-if(CMAKE_CXX_COMPILER MATCHES "clang")
+-message("-- using Clang++ Compiler")
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+-endif(CMAKE_CXX_COMPILER MATCHES "clang")
+-
+-check_cxx_compiler_flag("-std=c++11" HAS_CXX11)
+-check_cxx_compiler_flag("-std=c++0x" HAS_CXX0X)
+-
+-if (HAS_CXX11)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+-elseif (HAS_CXX0X)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+-else (HAS_CXX11)
+-    message("Compiler doesn't support -std=c++0x or -std=c++11")
+-    message("Some features may not build correctly")
+-endif (HAS_CXX11)
+-
+-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_pie -lc")
+-
+ # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -O0 -fno-omit-frame-pointer")
+ # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fno-omit-frame-pointer")
+ 
+@@ -89,8 +76,6 @@
+     add_definitions(-DNUPACK_SAMPLE)
+ endif(SAMPLE)
+ 
+-set(CLANG_ASAN "")
+-
+ # Some strangeness that can be refactored out; minimal changes to allow 
+ # access to included jsoncpp instead of system.
+ set(JSONCPP_FOUND 1)
+@@ -102,94 +87,85 @@
+ include_directories(BEFORE ${INCLUDE_DIRS})
+ link_directories(${TEMP_LIB_DIR})
+ 
+-find_library(MATH_LIB NAMES libm m)
+-if(MATH_LIB)
+-    message("-- MATH_LIB is ${MATH_LIB}")
+-else()
+-    message("-- MATH_LIB not found. Using -lm linker flag.")
+-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lm")
+-    set(MATH_LIB "")
+-endif()
+-
+-# Configure NUPACK_VERSION using Git if it's available
+-
+-find_package(Git)
+-if(GIT_FOUND AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+-    message("-- Found Git")
+-    
+-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags
+-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} 
+-            TIMEOUT 3
+-            OUTPUT_VARIABLE GIT_REVISION
+-            RESULT_VARIABLE FOUND_REVISION
+-            OUTPUT_STRIP_TRAILING_WHITESPACE
+-            )
+-    
+-    if(FOUND_REVISION EQUAL 0)
+-        set(NUPACK_VERSION "${GIT_REVISION}")
+-    endif(FOUND_REVISION EQUAL 0)
+-    
+-endif(GIT_FOUND AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+-message(STATUS "Building version ${NUPACK_VERSION}")
+ 
+ ########################################
+ # Install options
+-set(PARAMETER_INSTALL_LOCATION share/nupack)
+-set(INCLUDE_INSTALL_LOCATION include)
+-set(LIBRARY_INSTALL_LOCATION lib)
+-
+-install(DIRECTORY "parameters/" DESTINATION ${PARAMETER_INSTALL_LOCATION})
+-
+-find_package(Doxygen)
+-if(DOXYGEN_FOUND AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+-    add_custom_target(docs
+-    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR/doc}
+-    COMMENT "Generating API documentation with Doxygen" VERBATIM
+-)
+-endif(DOXYGEN_FOUND AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+-
+-function(INSTALL_INCLUDE_TREE dir)
+-    file(GLOB_RECURSE deploy_files "${dir}/*.h" "${dir}/*.hpp")
+-    if(${ARGN})
+-        list(REMOVE_ITEM deploy_files ${ARGN})
+-    endif()
+-    foreach(file_path ${deploy_files})
+-        file(RELATIVE_PATH rel_path ${CMAKE_SOURCE_DIR}/src ${file_path})
+-        get_filename_component(dir_path ${rel_path} PATH)
+-        install(FILES ${file_path} DESTINATION ${INCLUDE_INSTALL_LOCATION}/nupack/${dir_path})
+-    endforeach()
+-endfunction()
+ 
+-# Backtrace stuff
+-########################################
+-option(BACKTRACE "Print out backtrace in exceptions" OFF)
+-if(${BACKTRACE} STREQUAL "ON")
+-    CHECK_CXX_SOURCE_COMPILES(
+-        "#include <execinfo.h>
+-        void *array[10];
+-        auto size = backtrace(array, 10);
+-        auto strings = backtrace_symbols(array, size);
+-        int main() {return 0;}"
+-        CAN_BACKTRACE
+-    )
+-    if(${CAN_BACKTRACE})
+-        add_definitions(-DNUPACK_BACKTRACE)
+-        message("-- Printing backtrace in exceptions")
+-    else()
+-        message("-- Cannot print backtrace in exceptions")
+-    endif()
+-else()
+-    message("-- Not printing backtrace in exceptions")
+-endif()
+-########################################
++#function(ADD_DIR_IF_EXISTS dir)
++#    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
++#        add_subdirectory(${dir})
++#    endif()
++#endfunction(ADD_DIR_IF_EXISTS)
++
++#add_subdirectory(extlib)
++#add_subdirectory(src)
++
++#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist)
++#SET(CMAKE_BUILD_TYPE_INIT "Release")
++#set(CMAKE_CXX_STANDARD 11)
++
++#if(NOT CMAKE_BUILD_TYPE)
++#  set(CMAKE_BUILD_TYPE Release)
++#endif()
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++add_executable(nupack
++        src/thermo/core/backtrack.c
++        src/thermo/core/CalculateEnergy.c
++  		src/shared/externals.c
++        src/thermo/core/ene.c
++        src/thermo/core/GetEnergy.c
++        src/shared/functions.c
++        src/shared/hash.c
++        src/thermo/core/init.c
++        src/thermo/core/mfeUtils.c
++        src/thermo/core/min.c
++        src/shared/mt19937ar.c
++        src/thermo/core/nsStar.c
++        src/thermo/core/pairsPr.c
++        src/thermo/core/pf.c
++        src/thermo/core/pfuncUtils.c
++        src/thermo/core/pknots.c
++        src/thermo/core/ReadCommandLineNPK.c
++        src/thermo/core/sumexp.c
++        src/thermo/core/sumexp_pk.c
++		#src/shared/utils.c
++        emscripten/FullEval.cpp
++        emscripten/FullEval.h
++        emscripten/Bindings.cpp
++        emscripten/FullFold.cpp
++        emscripten/FullFold.h
++        ../emscripten_common/EmscriptenUtils.cpp
++        ../emscripten_common/EmscriptenUtils.h)
+ 
+-function(ADD_DIR_IF_EXISTS dir)
+-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
+-        add_subdirectory(${dir})
+-    endif()
+-endfunction(ADD_DIR_IF_EXISTS)
++if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
++    set(CMAKE_C_COMPILER "emcc")
+ 
+-add_subdirectory(extlib)
+-add_subdirectory(src)
++    # -s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1: export our module as 'nupack'
++    # --preload-file assets@/ : map all files inside the 'assets' folder to / in the virtual FS
++    # -s WASM=1: wasm enabled
++    # -s SINGLE_FILE=1: merge all outputs into a single file
++    # -s LEGACY_VM_SUPPORT=1: support IE11 (incompatible with WASM=1)
++    # -s ALLOW_MEMORY_GROWTH=1: allow the malloc pool to grow at runtime
++    #
++    # Debugging tools (see https://github.com/kripken/emscripten/blob/master/src/settings.js):
++    # -s SAFE_HEAP=1
++    set_target_properties(nupack PROPERTIES LINK_FLAGS "-s 'EXPORT_NAME=\"nupack\"' -s MODULARIZE=1 --bind -std=c++11 -s SINGLE_FILE=1 -s ALLOW_MEMORY_GROWTH=1 --embed-file parameters@/")
++    set_target_properties(nupack PROPERTIES LINK_FLAGS_DEBUG "-O0 -s WASM=0 -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s SAFE_HEAP=1")
++    set_target_properties(nupack PROPERTIES LINK_FLAGS_RELEASE "-O3 -s WASM=1")
++endif ()
+Only in nupack3.2.2: CPackConfig.cmake
+Only in nupack3.2.2: CPackSourceConfig.cmake
+Only in nupack3.2.2: Makefile
+Only in nupack3.2.2: bin
+Only in nupack3.2.2: build.ninja
+Only in nupack3.2.2: cmake_install.cmake
+Only in nupack3.2.2: dist
+Only in nupack3.2.2: emCML.txt
+Only in nupack3.2.2: emscripten
+Only in nupack3.2.2_patched/extlib: CMakeFiles
+Only in nupack3.2.2_patched/extlib: Makefile
+Only in nupack3.2.2_patched/extlib: cmake_install.cmake
+Only in nupack3.2.2: lib
+Only in nupack3.2.2: rules.ninja
+Only in nupack3.2.2_patched/src: CMakeFiles
+Only in nupack3.2.2_patched/src: Makefile
+Only in nupack3.2.2_patched/src: cmake_install.cmake
+Only in nupack3.2.2_patched/src/design: CMakeFiles
+Only in nupack3.2.2_patched/src/design: Makefile
+Only in nupack3.2.2_patched/src/design: cmake_install.cmake
+Only in nupack3.2.2_patched/src/design/multistate: CMakeFiles
+Only in nupack3.2.2_patched/src/design/multistate: Makefile
+Only in nupack3.2.2_patched/src/design/multistate: cmake_install.cmake
+Only in nupack3.2.2_patched/src/design/multistate: config.h
+Only in nupack3.2.2_patched/src/design/single-complex: CMakeFiles
+Only in nupack3.2.2_patched/src/design/single-complex: Makefile
+Only in nupack3.2.2_patched/src/design/single-complex: cmake_install.cmake
+Only in nupack3.2.2_patched/src/design/testtube: CMakeFiles
+Only in nupack3.2.2_patched/src/design/testtube: Makefile
+Only in nupack3.2.2_patched/src/design/testtube: cmake_install.cmake
+Only in nupack3.2.2_patched/src/shared: CMakeFiles
+Only in nupack3.2.2_patched/src/shared: Makefile
+Only in nupack3.2.2_patched/src/shared: cmake_install.cmake
+Only in nupack3.2.2_patched/src/shared: externals.c
+Only in nupack3.2.2_patched/src/thermo: CMakeFiles
+Only in nupack3.2.2_patched/src/thermo: Makefile
+Only in nupack3.2.2_patched/src/thermo/basics: CMakeFiles
+Only in nupack3.2.2_patched/src/thermo/basics: Makefile
+Only in nupack3.2.2_patched/src/thermo/basics: cmake_install.cmake
+Only in nupack3.2.2_patched/src/thermo: cmake_install.cmake
+Only in nupack3.2.2_patched/src/thermo/complexes: CMakeFiles
+Only in nupack3.2.2_patched/src/thermo/complexes: Makefile
+Only in nupack3.2.2_patched/src/thermo/complexes: cmake_install.cmake
+Only in nupack3.2.2_patched/src/thermo/concentrations: CMakeFiles
+Only in nupack3.2.2_patched/src/thermo/concentrations: Makefile
+Only in nupack3.2.2_patched/src/thermo/concentrations: cmake_install.cmake
+Only in nupack3.2.2_patched/src/thermo/core: CMakeFiles
+diff -ur nupack3.2.2/src/thermo/core/CalculateEnergy.c nupack3.2.2_patched/src/thermo/core/CalculateEnergy.c
+--- nupack3.2.2/src/thermo/core/CalculateEnergy.c	2017-11-20 10:48:21.000000000 -0800
++++ nupack3.2.2_patched/src/thermo/core/CalculateEnergy.c	2019-11-11 12:47:35.000000000 -0800
+@@ -1,5 +1,8 @@
+ #include "CalculateEnergy.h"
+ 
++/* for AS3 */
++extern void (*eos_cb)(int index, int fe);
++
+ //***********************************************************
+ 
+ DBL_TYPE naEnergy( char *prefix, int seq[]) {
+@@ -137,6 +140,7 @@
+   energy += LOG_FUNC( (DBL_TYPE) checkSymmetry( thefold.pairs, seqlength, nicks, 
+                                            possibleSymmetry, nStrands))*kB*TEMP_K;
+   energy += (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1);
++  if (eos_cb && (nStrands > 1)) (*eos_cb)(-2, floor(.5 + (BIMOLECULAR + SALT_CORRECTION)*(nStrands-1)*100.));
+   
+   free( thefold.pairs);
+   free( thefold.pknots);
+diff -ur nupack3.2.2/src/thermo/core/GetEnergy.c nupack3.2.2_patched/src/thermo/core/GetEnergy.c
+--- nupack3.2.2/src/thermo/core/GetEnergy.c	2017-11-20 10:48:21.000000000 -0800
++++ nupack3.2.2_patched/src/thermo/core/GetEnergy.c	2019-11-11 12:54:01.000000000 -0800
+@@ -1,5 +1,8 @@
+ #include "GetEnergy.h"
+ 
++/* for AS3 */
++void (*eos_cb)(int index, int fe) = NULL;
++
+ 
+ /* ******************************** */
+ DBL_TYPE GetEnergy( fold *thefold) {
+@@ -19,6 +22,8 @@
+   
+   int j;
+   DBL_TYPE bp_penalty;
++  DBL_TYPE local_e = 0.0;
++  DBL_TYPE contrib;
+   
+   j = stop; 
+   while( j >= start) {
+@@ -51,10 +56,12 @@
+         bp_penalty = AT_PENALTY;
+       }
+       //EnergyFb( d, j, thefold);
+-      energy +=
+-        EnergyFb( d, j, thefold) + 
++      contrib = 
+         DangleEnergyWithPairs( j+1, stop, thefold) +
+         bp_penalty;
++      energy +=
++        EnergyFb( d, j, thefold) + contrib;
++      local_e += contrib;
+       
+       j = d-1;
+       stop = j;
+@@ -65,8 +72,11 @@
+   }
+   
+   
+-  energy += DangleEnergyWithPairs( start, stop, 
++  contrib = DangleEnergyWithPairs( start, stop, 
+                                   thefold);
++  energy += contrib;
++  local_e += contrib;
++  if (eos_cb) (*eos_cb)(-1, floor(.5 + local_e * 100.));
+   /*  
+   energy += DangleEnergy( start, stop, 
+   thefold->seq, thefold->seqlength);
+@@ -176,14 +186,17 @@
+   if( nNicks == 0) {
+     if( nPairs == 1) { //hairpin
+       energy = HairpinEnergy( start, firstStop, thefold->seq);			
++      if (eos_cb) (*eos_cb)(start, floor(.5 + energy * 100.));
+       //return energy;
+     }
+     else if( nPairs == 2) { //interior loop
+-      energy = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq)
+-        + EnergyFb( pairs[2], pairs[3], thefold);
++      DBL_TYPE il_en = InteriorEnergy( start, firstStop, pairs[2], pairs[3], thefold->seq);
++      energy = il_en + EnergyFb( pairs[2], pairs[3], thefold);
++      if (eos_cb) (*eos_cb)(start, floor(.5 + il_en * 100.));
+       //return energy;
+     }
+     else if( nPairs >= 3) { //multiloop
++	  DBL_TYPE sub_en = 0.0;
+       energy = ALPHA_1 + ALPHA_2 + ALPHA_3 * (pairs[1]-pairs[3]-1) + 
+         DangleEnergyWithPairs(pairs[3]+1, pairs[1]-1, thefold);
+       
+@@ -227,6 +240,7 @@
+           DangleEnergyWithPairs( pairs[ p2]+1, pairs[p1]-1, thefold);
+       }
+       energy += bp_penalty;
++      if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
+     }
+     else {
+       printf("Error in calculation of EnergyFb! %d\n", nPairs);
+@@ -234,6 +248,7 @@
+     }
+   }
+   else if( nNicks == 1) { //nNicks
++    DBL_TYPE sub_en = 0.0;
+     if( thefold->seq[ pairs[0]] != BASE_C && thefold->seq[ pairs[1]] != BASE_C) {
+       bp_penalty = AT_PENALTY;
+     }
+@@ -262,6 +277,7 @@
+       energy += bp_penalty;
+       //return energy;
+     }
++    if (eos_cb) (*eos_cb)(start, floor(.5 + (energy - sub_en) * 100.));
+     
+   }
+   
+Only in nupack3.2.2_patched/src/thermo/core: Makefile
+Only in nupack3.2.2_patched/src/thermo/core: cmake_install.cmake
+diff -ur nupack3.2.2/src/thermo/core/ene.c nupack3.2.2_patched/src/thermo/core/ene.c
+--- nupack3.2.2/src/thermo/core/ene.c	2017-11-20 10:48:21.000000000 -0800
++++ nupack3.2.2_patched/src/thermo/core/ene.c	2019-11-11 12:58:07.000000000 -0800
+@@ -163,6 +163,8 @@
+   return InteriorEnergyFull( i, j, h, m, seq, TRUE);
+ }
+ 
++DBL_TYPE (*binding_site_cb)(int i, int j, int h, int m) = NULL;
++
+ DBL_TYPE InteriorEnergyFull( int i, int j, int h, int m, int seq[],
+                              int calcIJ) {
+ 
+@@ -295,6 +297,9 @@
+     exit(1);
+   }
+ 
++  if (binding_site_cb != NULL)
++    energy += (*binding_site_cb)(i, j, h, m);
++
+   return energy;
+ }
+ 
+diff -ur nupack3.2.2/src/thermo/core/min.c nupack3.2.2_patched/src/thermo/core/min.c
+--- nupack3.2.2/src/thermo/core/min.c	2017-11-20 10:48:21.000000000 -0800
++++ nupack3.2.2_patched/src/thermo/core/min.c	2019-11-11 12:55:51.000000000 -0800
+@@ -280,6 +280,8 @@
+ 	
+ }
+ 
++int (*binding_cb)(int i, int j, int* d, int*e) = NULL;
++
+ /* ****************** */
+ DBL_TYPE MinInextensibleIL( int i, int j, int seq[], int seqlength, 
+ 			    DBL_TYPE Fb[], int **etaN, DBL_TYPE *minILoopEnergyBySize) {
+@@ -361,6 +363,26 @@
+     }
+   }    
+ 	
++  // EteRNA binding site hack
++  if (binding_cb != NULL) {
++    if ((*binding_cb)(i, j, &d, &e)) {
++      size = d - i + j - e;
++
++      if( CanPair( seq[d], seq[e]) == TRUE &&
++	  //(etaN[ EtaNIndex(i+0.5, d-0.5,seqlength)][0] == 0) &&
++	  //(etaN[ EtaNIndex(e+0.5, j-0.5,seqlength)][0] == 0) ) {
++	  (etaN[ pf_index(IDX(i), IDX(d-1),seqlength)][0] == 0) &&
++	  (etaN[ pf_index(IDX(e), IDX(j-1),seqlength)][0] == 0) ) {
++				
++	energy = InteriorEnergy( i, j, d, e, seq);
++	tempMin = energy + 
++	  Fb[ pf_index( d, e, seqlength)];
++	min_energy = MIN( min_energy, tempMin);
++	minILoopEnergyBySize[ size] = MIN( tempMin, minILoopEnergyBySize[size]);
++      }
++    }
++  }
++
+   return min_energy;
+ }
+ 
+diff -ur nupack3.2.2/src/thermo/core/pfuncUtils.h nupack3.2.2_patched/src/thermo/core/pfuncUtils.h
+--- nupack3.2.2/src/thermo/core/pfuncUtils.h	2017-11-20 10:48:21.000000000 -0800
++++ nupack3.2.2_patched/src/thermo/core/pfuncUtils.h	2019-11-11 12:56:19.000000000 -0800
+@@ -18,6 +18,8 @@
+ //pf_index calculates the array index for a Q-type array
+ int pf_index_old( int i, int j, int N);
+ 
++#define IDX(a) ((a)<0?0:(a))
++
+ #define pf_index(i,j,N) ((j)==(i)-1?(N)*((N)+1)/2 + (i) : ((i)*(N)+(j)-(i)*(1+(i))/2))
+ 
+ #define pf_index_same(i,N) ((i)*(N)-(i)*((i)-1)/2)
+Only in nupack3.2.2_patched/src/thermo/distributions: CMakeFiles
+Only in nupack3.2.2_patched/src/thermo/distributions: Makefile
+Only in nupack3.2.2_patched/src/thermo/distributions: cmake_install.cmake
