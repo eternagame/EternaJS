@@ -1,0 +1,22 @@
+
+# VIENNA 2.4.14 INSTRUCTIONS (WIP)
+#Copy ViennaRNA-2.4.14/src/ViennaRNA to vrna24. Add CMakeLists.txt to that directory. 
+#cp vrna2/emscripten vrna24/
+#cp vrna2/config.h vrna24/
+#
+#cmake .
+
+
+
+
+### NUPACK (DONE)
+##################
+## This is how the patch file was created.
+## diff -ur nupack3.2.2_stock nupack3.2.2 > nupack_patch
+
+# With your fresh download, unzipped into nupack3.2.2...
+cp nupack_CML.txt nupack3.2.2/CMakeLists.txt
+cp -r nupack_emscripten_bindings nupack3.2.2/emscripten
+mv nupack3.2.2/src/shared/externals.c.in nupack3.2.2/src/shared/externals.c
+sed -i -e s/'unsigned int seqHash/extern unsigned int seqHash/g' nupack3.2.2/src/thermo/core/ene.c
+sed -i -e s/'int nupack_random_seed/extern unsigned int nupack_random_seed/g' nupack3.2.2/src/thermo/core/ReadCommandLineNPK.c
