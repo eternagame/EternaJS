@@ -30,7 +30,7 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 * Compile and Serve:
     - `$ npm run start`
 
-* To do the first puzzle in Eterna, load up `http://localhost:63343/?puzzleID=4350940`, and ask your browser to View JavaScript Console. To create your own test puzzles, check out the next section.
+* To do the first puzzle in Eterna, load up `http://localhost:63343/?puzzle=4350940`, and ask your browser to View JavaScript Console. To create your own test puzzles, check out the next section.
 
 ## Setting up new test puzzles
  * You can directly set up a puzzle via Drupal on the `eternadev` server through `http://eternadev.org/node/add/puzzle`. Your login will need to have been granted Drupal admin access.
