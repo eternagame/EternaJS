@@ -1,11 +1,12 @@
+### VIENNA 2.1.8 INSTRUCTIONS (WIP)
+################
+## This is how the patch file was created.
+## diff -ur diff -ur ViennaRNA-2.1.8 ViennaRNA-2.1.8_patched > vrna2_patch
 
-# VIENNA 2.4.14 INSTRUCTIONS (WIP)
-#Copy ViennaRNA-2.4.14/src/ViennaRNA to vrna24. Add CMakeLists.txt to that directory. 
-#cp vrna2/emscripten vrna24/
-#cp vrna2/config.h vrna24/
-#
-#cmake .
-
+patch -t -p0 < vrna2_patch
+cp vrna2_CML.txt ViennaRNA-2.1.8/CMakeLists.txt
+cp -r vrna2_emscripten_bindings ViennaRNA-2.1.8/emscripten
+cp vrna2_config.h ViennaRNA-2.1.8/config.h
 
 
 
@@ -15,6 +16,7 @@
 ## diff -ur nupack3.2.2_stock nupack3.2.2 > nupack_patch
 
 # With your fresh download, unzipped into nupack3.2.2...
+patch -t -p0 < nupack_patch
 cp nupack_CML.txt nupack3.2.2/CMakeLists.txt
 cp -r nupack_emscripten_bindings nupack3.2.2/emscripten
 mv nupack3.2.2/src/shared/externals.c.in nupack3.2.2/src/shared/externals.c
@@ -28,6 +30,7 @@ sed -i -e s/'int nupack_random_seed/extern unsigned int nupack_random_seed/g' nu
 ## diff -ur LinearFoldGit LinearFold  > linearfold_patch
 
 # With your fresh git checkout of LinearFold/LinearFold...
+patch -t -p0 < linearfold_patch
 cp linearfold_CML.txt LinearFold/CMakeLists.txt
 cp -r linearfold_emscripten_bindings LinearFold/emscripten
 echo "#ifndef LINEARFOLD_EVAL_H\n#define LINEARFOLD_EVAL_H\n#include <string>\n\nlong eval(std::string seq, std::string ref, bool is_verbose);\n#endif" > LinearFold/LinearFoldEval.h
