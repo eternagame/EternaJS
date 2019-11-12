@@ -1,0 +1,284 @@
+Only in ViennaRNA-2.1.8_patched: CMakeCache.txt
+Only in ViennaRNA-2.1.8_patched: CMakeFiles
+Only in ViennaRNA-2.1.8_patched: CMakeLists.txt
+diff -ur ViennaRNA-2.1.8/H/cofold.h ViennaRNA-2.1.8_patched/H/cofold.h
+--- ViennaRNA-2.1.8/H/cofold.h	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/H/cofold.h	2019-11-11 15:59:16.000000000 -0800
+@@ -9,6 +9,13 @@
+ #define DEPRECATED(func) func
+ #endif
+ 
++extern int binding_site_i;
++extern int binding_site_j;
++extern int binding_site_p;
++extern int binding_site_q;
++extern int binding_site_bonus;
++
++
+ /**
+  *  \addtogroup cofold
+  *  \brief Predict structures formed by two molecules upon hybridization.
+@@ -65,6 +72,8 @@
+ float cofold( const char *sequence,
+               char *structure);
+ 
++float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
++
+ /**
+  *  \brief Compute the minimum free energy of two interacting RNA molecules
+  * 
+diff -ur ViennaRNA-2.1.8/H/fold.h ViennaRNA-2.1.8_patched/H/fold.h
+--- ViennaRNA-2.1.8/H/fold.h	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/H/fold.h	2019-11-11 15:56:02.000000000 -0800
+@@ -143,6 +143,8 @@
+ float fold( const char *sequence,
+             char *structure);
+ 
++float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
++
+ /**
+  *  \brief Compute minimum free energy and an appropriate secondary structure of a circular RNA sequence
+  *
+diff -ur ViennaRNA-2.1.8/H/utils.h ViennaRNA-2.1.8_patched/H/utils.h
+--- ViennaRNA-2.1.8/H/utils.h	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/H/utils.h	2019-11-11 15:48:06.000000000 -0800
+@@ -587,6 +587,8 @@
+                     const char **lines,
+                     unsigned int option);
+ 
++extern int estimate_mode;
++
+ /**
+  *  \brief Insert constraining pair types according to constraint structure string
+  *
+Only in ViennaRNA-2.1.8_patched: Makefile
+Only in ViennaRNA-2.1.8_patched: cmake_install.cmake
+Only in ViennaRNA-2.1.8_patched: config.h
+Only in ViennaRNA-2.1.8_patched: dist
+Only in ViennaRNA-2.1.8_patched: emscripten
+diff -ur ViennaRNA-2.1.8/lib/MEA.c ViennaRNA-2.1.8_patched/lib/MEA.c
+--- ViennaRNA-2.1.8/lib/MEA.c	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/MEA.c	2019-11-11 15:36:33.000000000 -0800
+@@ -13,6 +13,7 @@
+ #include "utils.h"
+ #include "pair_mat.h"
+ #include "MEA.h"
++#include "gquad.h"
+ 
+ /* compute an MEA structure, i.e. the structure maximising
+    EA = \sum_{(i,j) \in S} 2\gamma p_{i,j} + \sum_{i is unpaired} p^u_i
+diff -ur ViennaRNA-2.1.8/lib/cofold.c ViennaRNA-2.1.8_patched/lib/cofold.c
+--- ViennaRNA-2.1.8/lib/cofold.c	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/cofold.c	2019-11-11 15:57:46.000000000 -0800
+@@ -227,6 +227,23 @@
+   return cofold_par(string, structure, NULL, fold_constrained);
+ }
+ 
++/// NNFIX
++float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++          
++  float e = cofold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = NULL;
++  return e;
++}
++
+ PUBLIC float cofold_par(const char *string,
+                         char *structure,
+                         paramT *parameters,
+diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
+--- ViennaRNA-2.1.8/lib/fold.c	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/fold.c	2019-11-11 16:03:35.000000000 -0800
+@@ -54,6 +54,15 @@
+ PUBLIC  int cut_point = -1; /* set to first pos of second seq for cofolding */
+ PUBLIC  int eos_debug = 0;  /* verbose info from energy_of_struct */
+ 
++PUBLIC  int estimate_mode = 0; /* EteRNA labs */
++
++// JEEFIX binding site spec
++PUBLIC int binding_site_i = -1;
++PUBLIC int binding_site_j = -1;
++PUBLIC int binding_site_p = -1;
++PUBLIC int binding_site_q = -1;
++PUBLIC int binding_site_bonus = 0;
++
+ /*
+ #################################
+ # PRIVATE VARIABLES             #
+@@ -387,6 +396,26 @@
+     }
+   }
+ 
++  if (!estimate_mode) {
++    /* check constraints */
++    for(i=1;i<=length;i++) {
++      if((BP[i]<0)&&(BP[i]>-4)) {
++        bonus_cnt++;
++        if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
++        if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
++        if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
++      }
++
++      if(BP[i]>i) {
++        int l;
++        bonus_cnt++;
++        for(l=1; l<=base_pair2[0].i; l++)
++          if(base_pair2[l].i != base_pair2[l].j)
++            if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
++      }
++    }
++  }
++
+   if (bonus_cnt>bonus) fprintf(stderr,"\ncould not enforce all constraints\n");
+   bonus*=BONUS;
+ 
+@@ -402,6 +431,23 @@
+     return (float) energy/100.;
+ }
+ 
++/// JEEFIX
++float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++
++  float e = fold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = 0;
++  return e;
++}
++                        
+ /**
+ *** fill "c", "fML" and "f5" arrays and return  optimal energy
+ **/
+@@ -448,9 +494,16 @@
+       type = ptype[ij];
+       energy = INF;
+       /* enforcing structure constraints */
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+-      if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++        if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      }
+ 
+       no_close = (((type==3)||(type==4))&&noGUclosure&&(bonus==0));
+ 
+@@ -1040,8 +1093,15 @@
+ 
+     bonus = 0;
+     if (struct_constrained) {
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      }
+     }
+     if (noLonelyPairs)
+       if (cij == c[ij]){
+@@ -1334,6 +1394,8 @@
+   update_fold_params_par(NULL);
+ }
+ 
++void (*eos_cb)(int index, int fe) = NULL;
++
+ PUBLIC void update_fold_params_par(paramT *parameters){
+   if(P) free(P);
+   if(parameters){
+@@ -1596,6 +1658,7 @@
+   length = S[0];
+ /*   energy =  backtrack_type=='M' ? ML_Energy(0, 0) : ML_Energy(0, 1); */
+     energy =  backtrack_type=='M' ? energy_of_ml_pt(0, ptable) : energy_of_extLoop_pt(0, ptable);
++  if (eos_cb) (*eos_cb)(0, energy);
+   if (verbosity_level>0)
+     printf("External loop                           : %5d\n", energy);
+   for (i=1; i<=length; i++) {
+@@ -1606,6 +1669,7 @@
+   for (i=1; !SAME_STRAND(i,length); i++) {
+     if (!SAME_STRAND(i,pair_table[i])) {
+       energy+=P->DuplexInit;
++      if (eos_cb) (*eos_cb)(-1, P->DuplexInit);
+       break;
+     }
+   }
+@@ -1725,6 +1789,7 @@
+         }
+       }
+     }
++  if (eos_cb) (*eos_cb)(0, en0);
+ 
+   if (verbosity_level>0)
+     printf("External loop                           : %5d\n", en0);
+@@ -1769,6 +1834,7 @@
+       ee = E_IntLoop(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1],P);
+     else
+       ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (verbosity_level>0)
+       printf("Interior loop (%3d,%3d) %c%c; (%3d,%3d) %c%c: %5d\n",
+              i,j,string[i-1],string[j-1],p,q,string[p-1],string[q-1], ee);
+@@ -1784,6 +1850,7 @@
+     else
+       ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
+     energy += ee;
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (verbosity_level>0)
+       printf("Hairpin  loop (%3d,%3d) %c%c              : %5d\n",
+              i, j, string[i-1],string[j-1], ee);
+@@ -1805,6 +1872,7 @@
+     ee = (ii==0) ? energy_of_ml_pt(i, pair_table) : energy_of_extLoop_pt(ii, pair_table);
+   }
+   energy += ee;
++  if (eos_cb) (*eos_cb)(i, ee);
+   if (verbosity_level>0)
+     printf("Multi    loop (%3d,%3d) %c%c              : %5d\n",
+            i,j,string[i-1],string[j-1],ee);
+diff -ur ViennaRNA-2.1.8/lib/utils.c ViennaRNA-2.1.8_patched/lib/utils.c
+--- ViennaRNA-2.1.8/lib/utils.c	2019-11-11 15:27:04.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/utils.c	2019-11-11 15:54:53.000000000 -0800
+@@ -1015,7 +1015,10 @@
+     index = get_indx(length);
+ 
+     for(hx=0, j=1; j<=n; j++){
+-      switch(constraint[j-1]){
++      if (estimate_mode) {
++        BP[j] = constraint[j-1];
++	  } else {
++		switch(constraint[j-1]){
+         case '|':   if(BP) BP[j] = -1;
+                     break;
+         case 'x':   /* can't pair */
+@@ -1046,6 +1049,7 @@
+         case '>':   /* pairs downstream */
+                     for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
+                     break;
++		}
+       }
+     }
+   }
