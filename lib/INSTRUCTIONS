@@ -1,7 +1,7 @@
 ### VIENNA 2.1.8
 ################
 ## This is how the patch file was created.
-## diff -ur diff -ur ViennaRNA-2.1.8 ViennaRNA-2.1.8_patched > vrna2_patch
+## diff -ur ViennaRNA-2.1.8 ViennaRNA-2.1.8_patched > vrna2_patch
 
 patch -t -p0 < vrna2_patch
 cp vrna2_CML.txt ViennaRNA-2.1.8/CMakeLists.txt
@@ -15,8 +15,15 @@ popd
 ### VIENNA 1.8.5
 ################
 ## This is how the patch file was created.
-##
+## diff -ur ViennaRNA-1.8.5 ViennaRNA-1.8.5_patched > vienna.patch
 
+patch -t -p0 < vienna_patch
+cp vienna_CML.txt ViennaRNA-1.8.5/CMakeLists.txt
+cp -r vienna_emscripten_bindings ViennaRNA-1.8.5/emscripten
+cp vienna_header.h ViennaRNA-1.8.5/RNAfold.h
+pushd ViennaRNA-1.8.5
+./configure
+popd
 
 
 ### NUPACK
