@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
 
 include_directories(.)
 include_directories(./H)
+include_directories(..libsvm-2.91)
 include_directories(../emscripten_common)
 
 add_executable(vrna2
