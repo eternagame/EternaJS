@@ -6,7 +6,9 @@
 patch -t -p0 < vrna2_patch
 cp vrna2_CML.txt ViennaRNA-2.1.8/CMakeLists.txt
 cp -r vrna2_emscripten_bindings ViennaRNA-2.1.8/emscripten
-cp vrna2_config.h ViennaRNA-2.1.8/config.h
+pushd ViennaRNA-2.1.8
+./configure
+popd
 
 
 
