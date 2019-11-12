@@ -1,12 +1,15 @@
+Only in ViennaRNA-2.1.8_patched: CMakeCache.txt
 Only in ViennaRNA-2.1.8_patched: CMakeFiles
 Only in ViennaRNA-2.1.8_patched: CMakeLists.txt
+Only in ViennaRNA-2.1.8_patched/H: Makefile
 diff -ur ViennaRNA-2.1.8/H/cofold.h ViennaRNA-2.1.8_patched/H/cofold.h
 --- ViennaRNA-2.1.8/H/cofold.h	2013-06-20 07:47:50.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/H/cofold.h	2019-11-11 16:04:42.000000000 -0800
-@@ -9,6 +9,13 @@
++++ ViennaRNA-2.1.8_patched/H/cofold.h	2019-11-11 19:05:45.000000000 -0800
+@@ -9,6 +9,14 @@
  #define DEPRECATED(func) func
  #endif
  
++
 +extern int binding_site_i;
 +extern int binding_site_j;
 +extern int binding_site_p;
@@ -17,30 +20,72 @@ diff -ur ViennaRNA-2.1.8/H/cofold.h ViennaRNA-2.1.8_patched/H/cofold.h
  /**
   *  \addtogroup cofold
   *  \brief Predict structures formed by two molecules upon hybridization.
-@@ -65,6 +72,8 @@
+@@ -65,6 +73,9 @@
  float cofold( const char *sequence,
                char *structure);
  
++
 +float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
 +
  /**
   *  \brief Compute the minimum free energy of two interacting RNA molecules
   * 
+diff -ur ViennaRNA-2.1.8/H/energy_par.h ViennaRNA-2.1.8_patched/H/energy_par.h
+--- ViennaRNA-2.1.8/H/energy_par.h	2013-06-20 07:47:50.000000000 -0700
++++ ViennaRNA-2.1.8_patched/H/energy_par.h	2019-11-11 19:05:45.000000000 -0800
+@@ -80,15 +80,15 @@
+ extern int DuplexInit37;
+ extern int DuplexInitdH;
+ /* stabilizing contribution due to special hairpins of size 4 (tetraloops) */
+-extern char Tetraloops[];  /* string containing the special tetraloops */
+-extern int  Tetraloop37[];  /* Bonus energy for special tetraloops */
+-extern int  TetraloopdH[];
+-extern char Triloops[];    /* string containing the special triloops */
+-extern int  Triloop37[]; /* Bonus energy for special Triloops */
+-extern int  TriloopdH[]; /* Bonus energy for special Triloops */
+-extern char Hexaloops[];    /* string containing the special triloops */
+-extern int  Hexaloop37[]; /* Bonus energy for special Triloops */
+-extern int  HexaloopdH[]; /* Bonus energy for special Triloops */
++extern char Tetraloops[281];  /* string containing the special tetraloops */
++extern int  Tetraloop37[40];  /* Bonus energy for special tetraloops */
++extern int  TetraloopdH[40];
++extern char Triloops[241];    /* string containing the special triloops */
++extern int  Triloop37[40]; /* Bonus energy for special Triloops */
++extern int  TriloopdH[40]; /* Bonus energy for special Triloops */
++extern char Hexaloops[361];    /* string containing the special triloops */
++extern int  Hexaloop37[40]; /* Bonus energy for special Triloops */
++extern int  HexaloopdH[40]; /* Bonus energy for special Triloops */
+ 
+ extern int GQuadAlpha37;
+ extern int GQuadAlphadH;
 diff -ur ViennaRNA-2.1.8/H/fold.h ViennaRNA-2.1.8_patched/H/fold.h
 --- ViennaRNA-2.1.8/H/fold.h	2013-08-21 01:50:41.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/H/fold.h	2019-11-11 16:04:42.000000000 -0800
-@@ -143,6 +143,8 @@
++++ ViennaRNA-2.1.8_patched/H/fold.h	2019-11-11 19:05:45.000000000 -0800
+@@ -143,6 +143,9 @@
  float fold( const char *sequence,
              char *structure);
  
 +float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
 +
++
  /**
   *  \brief Compute minimum free energy and an appropriate secondary structure of a circular RNA sequence
   *
+diff -ur ViennaRNA-2.1.8/H/read_epars.h ViennaRNA-2.1.8_patched/H/read_epars.h
+--- ViennaRNA-2.1.8/H/read_epars.h	2013-06-20 07:47:50.000000000 -0700
++++ ViennaRNA-2.1.8_patched/H/read_epars.h	2019-11-11 19:05:45.000000000 -0800
+@@ -29,7 +29,7 @@
+  * 
+  *  \param fname  The path to the file containing the energy parameters
+  */
+-void  read_parameter_file(const char fname[]);
++int  read_parameter_file(const char fname[]);
+ 
+ /**
+  *  \brief Write energy parameters to a file
 diff -ur ViennaRNA-2.1.8/H/utils.h ViennaRNA-2.1.8_patched/H/utils.h
 --- ViennaRNA-2.1.8/H/utils.h	2013-06-20 07:47:50.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/H/utils.h	2019-11-11 16:04:42.000000000 -0800
++++ ViennaRNA-2.1.8_patched/H/utils.h	2019-11-11 17:04:12.000000000 -0800
 @@ -587,6 +587,8 @@
                      const char **lines,
                      unsigned int option);
@@ -50,14 +95,162 @@ diff -ur ViennaRNA-2.1.8/H/utils.h ViennaRNA-2.1.8_patched/H/utils.h
  /**
   *  \brief Insert constraining pair types according to constraint structure string
   *
+Only in ViennaRNA-2.1.8_patched/Kinfold: .deps
+Only in ViennaRNA-2.1.8_patched/Kinfold/Example: Makefile
+Only in ViennaRNA-2.1.8_patched/Kinfold: Makefile
+Only in ViennaRNA-2.1.8_patched/Kinfold: config.h
+Only in ViennaRNA-2.1.8_patched/Kinfold: config.log
+Only in ViennaRNA-2.1.8_patched/Kinfold: config.status
+Only in ViennaRNA-2.1.8_patched/Kinfold: stamp-h1
 Only in ViennaRNA-2.1.8_patched: Makefile
+Only in ViennaRNA-2.1.8_patched/Progs: .deps
+Only in ViennaRNA-2.1.8_patched/Progs: Makefile
+Only in ViennaRNA-2.1.8_patched/RNAforester: Makefile
+Only in ViennaRNA-2.1.8_patched/RNAforester: config.h
+Only in ViennaRNA-2.1.8_patched/RNAforester: config.log
+Only in ViennaRNA-2.1.8_patched/RNAforester: config.status
+diff -ur ViennaRNA-2.1.8/RNAforester/g2-0.70/Makefile ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/Makefile
+--- ViennaRNA-2.1.8/RNAforester/g2-0.70/Makefile	2014-08-18 04:29:10.000000000 -0700
++++ ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/Makefile	2019-11-11 16:54:01.000000000 -0800
+@@ -23,16 +23,16 @@
+ 
+ CC           = gcc
+ CFLAGS       = 
+-INCLUDES     = -I./src -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
++INCLUDES     = -I./src -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
+ INSTALL      = /usr/bin/install -c
+ INSTALL_DATA = ${INSTALL} -m 644
+ FIND         = find
+-MAKEDEPEND   = :
++MAKEDEPEND   = makedepend
+ AR           = ar
+ ARFLAGS      = -cr
+ RANLIB       = ranlib
+ LD           = ld
+-LDFLAGS      =   -L/usr/local/lib -lm -lX11 -lgd
++LDFLAGS      =   -L/usr/local/lib -lm -lgd
+ 
+ 
+ BASE_DIR = ./src
+@@ -53,9 +53,9 @@
+ FIG_SRC = $(FIG_DIR)/g2_FIG.c
+ FIG_INS = $(FIG_DIR)/g2_FIG.h
+ 
+-X11_DIR = ./src/X11
+-X11_SRC = $(X11_DIR)/g2_X11.c
+-X11_INS = $(X11_DIR)/g2_X11.h
++#X11_DIR = ./src/X11
++#X11_SRC = $(X11_DIR)/g2_X11.c
++#X11_INS = $(X11_DIR)/g2_X11.h
+ 
+ #WIN32_DIR = ./src/WIN32
+ #WIN32_SRC = $(WIN32_DIR)/g2_win32.c $(WIN32_DIR)/g2_win32_thread.c 
+@@ -87,7 +87,7 @@
+ 	test -d ./include || mkdir ./include
+ 	cp $(INS) ./include/
+ 
+-shared: libg2.so.0.$(G2_VERSION)
++shared: libg2.so
+ 	@echo
+ 
+ 
+@@ -95,8 +95,8 @@
+ 	$(AR) $(ARFLAGS) libg2.a $(OBJ)
+ 	test ! -n "$(RANLIB)" || $(RANLIB) $@
+ 
+-libg2.so.0.$(G2_VERSION): $(OBJ)
+-	ld -shared -soname libg2.so.0 -o $@ $(OBJ) 
++libg2.so: $(OBJ)
++	  -o $@ $(OBJ) 
+ 
+ install: libg2.a
+ 	test -d $(DESTDIR)/$(LIBDIR) || mkdir -p $(DESTDIR)/$(LIBDIR)
+@@ -140,7 +140,7 @@
+ 	-rm -f ./g2_perl/test.jpg
+ 	-rm -f ./g2_perl/test.fig
+ 	-rm -f ./g2_perl/Makefile.old
+-	-rm -f ./libg2.so.0.$(G2_VERSION)
++	-rm -f ./libg2.so
+ 	-rm -f libg2.$(G2_VERSION).a
+ 	-rm -f a.out
+ 	-rm -fr doc/html/ doc/latex/ doc/g2_refman.ps doc/g2_refman.pdf
+Only in ViennaRNA-2.1.8_patched/RNAforester/g2-0.70: config.log
+Only in ViennaRNA-2.1.8_patched/RNAforester/g2-0.70: config.status
+diff -ur ViennaRNA-2.1.8/RNAforester/g2-0.70/demo/Makefile ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/demo/Makefile
+--- ViennaRNA-2.1.8/RNAforester/g2-0.70/demo/Makefile	2014-08-18 04:29:10.000000000 -0700
++++ ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/demo/Makefile	2019-11-11 16:54:01.000000000 -0800
+@@ -23,13 +23,13 @@
+ #F77 = f77 -n32
+ #CPP = /lib/cpp -P -DFORTRAN
+ 
+-CFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD -I../src/FIG -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
+-CXXFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD/ -I../src/FIG -g -O2 -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
+-LDFLAGS = -L.. -lg2   -L/usr/local/lib -lm -lX11 -lgd
++CFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD -I../src/FIG -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
++CXXFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD/ -I../src/FIG -g -O2 -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
++LDFLAGS = -L.. -lg2   -L/usr/local/lib -lm -lgd
+ 
+ DEMO_PS = simple_PS
+ DEMO_FIG = simple_FIG
+-DEMO_X11 = simple_X11 pointer handles
++#DEMO_X11 = simple_X11 pointer handles
+ DEMO_GD = simple_gd
+ #DEMO_WIN32 = simple_win32
+ 
+@@ -78,7 +78,7 @@
+ 	$(F77) $(F77_FLAGS) demo_f.f $(LDFLAGS) -o $@
+ 
+ g2testf: g2_test.f
+-	$(CPP) -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -E g2_test.f > g2testf.f
++	$(CPP) -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -E g2_test.f > g2testf.f
+ 	$(F77) g2testf.f $(LDFLAGS) -o g2testf
+ 
+ clean:
+diff -ur ViennaRNA-2.1.8/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/g2_perl/Makefile.PL
+--- ViennaRNA-2.1.8/RNAforester/g2-0.70/g2_perl/Makefile.PL	2014-08-18 04:29:10.000000000 -0700
++++ ViennaRNA-2.1.8_patched/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-11 16:54:01.000000000 -0800
+@@ -4,7 +4,7 @@
+ WriteMakefile(
+     'NAME'	=> 'G2',
+     'VERSION_FROM' => 'G2.pm', # finds $VERSION
+-    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lX11 -lgd'],  # e.g., '-lm' 
+-    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
++    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lgd'],  # e.g., '-lm' 
++    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
+     'INC'	=> '-I./../include',           # e.g., '-I/usr/local/include' 
+ );
+Only in ViennaRNA-2.1.8_patched/RNAforester/man: Makefile
+Only in ViennaRNA-2.1.8_patched/RNAforester/src: .deps
+Only in ViennaRNA-2.1.8_patched/RNAforester/src: Makefile
+Only in ViennaRNA-2.1.8_patched/RNAforester: stamp-h1
+Only in ViennaRNA-2.1.8_patched: RNAlib2.pc
+Only in ViennaRNA-2.1.8_patched/Utils: .deps
+Only in ViennaRNA-2.1.8_patched/Utils: Makefile
 Only in ViennaRNA-2.1.8_patched: cmake_install.cmake
 Only in ViennaRNA-2.1.8_patched: config.h
+Only in ViennaRNA-2.1.8_patched: config.log
+Only in ViennaRNA-2.1.8_patched: config.status
 Only in ViennaRNA-2.1.8_patched: dist
+Only in ViennaRNA-2.1.8_patched/doc: Makefile
 Only in ViennaRNA-2.1.8_patched: emscripten
+Only in ViennaRNA-2.1.8_patched/interfaces: Makefile
+Only in ViennaRNA-2.1.8_patched/interfaces/Perl: Makefile
+diff -ur ViennaRNA-2.1.8/interfaces/Perl/Makefile.PL ViennaRNA-2.1.8_patched/interfaces/Perl/Makefile.PL
+--- ViennaRNA-2.1.8/interfaces/Perl/Makefile.PL	2014-08-18 04:27:13.000000000 -0700
++++ ViennaRNA-2.1.8_patched/interfaces/Perl/Makefile.PL	2019-11-11 16:53:48.000000000 -0800
+@@ -45,7 +45,7 @@
+               LD          =>  '${CXX}',
+               PM          =>  {"RNA.pm", '$(INST_LIBDIR)/RNA.pm'},
+               OBJECT      =>  "RNA_wrap.o",
+-              dynamic_lib =>  {OTHERLDFLAGS => '$(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -fopenmp'},
++              dynamic_lib =>  {OTHERLDFLAGS => '$(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) '},
+               AUTHOR      =>  'Ivo Hofacker <ivo@tbi.univie.ac.at>',
+               VERSION     =>  '2.1.8'
+ );
+Only in ViennaRNA-2.1.8_patched/lib: .deps
 diff -ur ViennaRNA-2.1.8/lib/Lfold.c ViennaRNA-2.1.8_patched/lib/Lfold.c
 --- ViennaRNA-2.1.8/lib/Lfold.c	2014-08-18 03:58:37.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/lib/Lfold.c	2019-11-11 16:51:46.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/Lfold.c	2019-11-11 17:04:12.000000000 -0800
 @@ -9,12 +9,13 @@
                    Vienna RNA package
  */
@@ -245,7 +438,7 @@ diff -ur ViennaRNA-2.1.8/lib/Lfold.c ViennaRNA-2.1.8_patched/lib/Lfold.c
  
 diff -ur ViennaRNA-2.1.8/lib/MEA.c ViennaRNA-2.1.8_patched/lib/MEA.c
 --- ViennaRNA-2.1.8/lib/MEA.c	2013-06-20 07:47:50.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/lib/MEA.c	2019-11-11 16:04:42.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/MEA.c	2019-11-11 17:04:12.000000000 -0800
 @@ -13,6 +13,7 @@
  #include "utils.h"
  #include "pair_mat.h"
@@ -254,10 +447,52 @@ diff -ur ViennaRNA-2.1.8/lib/MEA.c ViennaRNA-2.1.8_patched/lib/MEA.c
  
  /* compute an MEA structure, i.e. the structure maximising
     EA = \sum_{(i,j) \in S} 2\gamma p_{i,j} + \sum_{i is unpaired} p^u_i
+Only in ViennaRNA-2.1.8_patched/lib: Makefile
+diff -ur ViennaRNA-2.1.8/lib/alifold.c ViennaRNA-2.1.8_patched/lib/alifold.c
+--- ViennaRNA-2.1.8/lib/alifold.c	2013-08-21 01:50:41.000000000 -0700
++++ ViennaRNA-2.1.8_patched/lib/alifold.c	2019-11-11 19:05:45.000000000 -0800
+@@ -841,11 +841,11 @@
+         that should then be decomposed further...
+       */
+       mm = 0;
+-      for(s=0;s<n_seq;s++){
+-        tt = type[s];
++      for(ss=0;ss<n_seq;ss++){
++        tt = type[ss];
+         if(tt == 0) tt = 7;
+         if(dangles == 2)
+-          mm += P->mismatchI[tt][S3[s][i]][S5[s][j]];
++          mm += P->mismatchI[tt][S3[ss][i]][S5[ss][j]];
+         if(tt > 2)
+           mm += P->TerminalAU;
+       }
+diff -ur ViennaRNA-2.1.8/lib/alipfold.c ViennaRNA-2.1.8_patched/lib/alipfold.c
+--- ViennaRNA-2.1.8/lib/alipfold.c	2013-06-20 07:47:50.000000000 -0700
++++ ViennaRNA-2.1.8_patched/lib/alipfold.c	2019-11-11 19:05:45.000000000 -0800
+@@ -990,7 +990,7 @@
+             type[s] = pair[S[s][q]][S[s][p]];
+             if (type[s]==0) type[s]=7;
+ 
+-            if (u<9){
++            if (u<7){
+               strcpy(loopseq , sequences[s]+q-1);
+               strncat(loopseq, sequences[s], p);
+             }
 diff -ur ViennaRNA-2.1.8/lib/cofold.c ViennaRNA-2.1.8_patched/lib/cofold.c
 --- ViennaRNA-2.1.8/lib/cofold.c	2014-01-27 01:25:59.000000000 -0800
-+++ ViennaRNA-2.1.8_patched/lib/cofold.c	2019-11-11 16:04:42.000000000 -0800
-@@ -227,6 +227,23 @@
++++ ViennaRNA-2.1.8_patched/lib/cofold.c	2019-11-11 19:05:45.000000000 -0800
+@@ -111,6 +111,10 @@
+ PRIVATE int   fill_arrays(const char *sequence);
+ PRIVATE void  free_end(int *array, int i, int start);
+ 
++/* TSC - 5/14/18 -- defined in fold.c */
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
++                 int index_i, int index_p, int index_j, int index_q, paramT* P);
++
+ /*
+ #################################
+ # BEGIN OF FUNCTION DEFINITIONS #
+@@ -227,6 +231,23 @@
    return cofold_par(string, structure, NULL, fold_constrained);
  }
  
@@ -281,9 +516,38 @@ diff -ur ViennaRNA-2.1.8/lib/cofold.c ViennaRNA-2.1.8_patched/lib/cofold.c
  PUBLIC float cofold_par(const char *string,
                          char *structure,
                          paramT *parameters,
+@@ -403,7 +424,7 @@
+                 if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+             if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-              energy = E_IntLoop(p-i-1, j-q-1, type, type_2, si, sj, S1[p-1], S1[q+1], P);
++              energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2, si, sj, S1[p-1], S1[q+1], i, p, j, q, P);
+             else
+               energy = E_IntLoop_Co(rtype[type], rtype[type_2],
+                                     i, j, p, q,
+@@ -1037,8 +1058,8 @@
+ 
+         /* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+         if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-          energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                              S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++          energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                              S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+         else {
+           energy = E_IntLoop_Co(rtype[type], rtype[type_2], i, j, p, q, cut_point, S1[i+1], S1[j-1], S1[p-1], S1[q+1], dangle_model, P);
+         }
+@@ -1234,7 +1255,7 @@
+       nrerror("backtracking failed in repeat_gquad");
+     }
+   repeat_gquad_exit:
+-    asm("nop");
++    /*asm("nop")*/;
+ 
+   } /* end >> while (s>0) << */
+ 
 diff -ur ViennaRNA-2.1.8/lib/energy_par.c ViennaRNA-2.1.8_patched/lib/energy_par.c
 --- ViennaRNA-2.1.8/lib/energy_par.c	2013-06-20 07:47:51.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/lib/energy_par.c	2019-11-11 16:50:03.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/energy_par.c	2019-11-11 17:04:12.000000000 -0800
 @@ -311,103 +311,122 @@
   ,{   830,   140,   830,   140,   -50}
   }};
@@ -832,7 +1096,7 @@ diff -ur ViennaRNA-2.1.8/lib/energy_par.c ViennaRNA-2.1.8_patched/lib/energy_par
  #include "intl11dH.h"
 diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
 --- ViennaRNA-2.1.8/lib/fold.c	2014-04-12 13:58:36.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/lib/fold.c	2019-11-11 16:04:42.000000000 -0800
++++ ViennaRNA-2.1.8_patched/lib/fold.c	2019-11-11 19:05:45.000000000 -0800
 @@ -54,6 +54,15 @@
  PUBLIC  int cut_point = -1; /* set to first pos of second seq for cofolding */
  PUBLIC  int eos_debug = 0;  /* verbose info from energy_of_struct */
@@ -849,10 +1113,35 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
  /*
  #################################
  # PRIVATE VARIABLES             #
-@@ -387,6 +396,26 @@
-     }
-   }
+@@ -132,6 +141,9 @@
+ int LoopEnergy(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1);
+ int HairpinE(int size, int type, int si1, int sj1, const char *string);
  
++/* EteRNA (binding site) */
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
++                 int index_i, int index_p, int index_j, int index_q, paramT* P);
+ 
+ /*
+ #################################
+@@ -369,21 +381,23 @@
+   }
+   */
+ 
+-  /* check constraints */
+-  for(i=1;i<=length;i++) {
+-    if((BP[i]<0)&&(BP[i]>-4)) {
+-      bonus_cnt++;
+-      if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
+-      if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
+-      if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
+-    }
+-
+-    if(BP[i]>i) {
+-      int l;
+-      bonus_cnt++;
+-      for(l=1; l<=base_pair2[0].i; l++)
+-        if(base_pair2[l].i != base_pair2[l].j)
+-          if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
 +  if (!estimate_mode) {
 +    /* check constraints */
 +    for(i=1;i<=length;i++) {
@@ -870,13 +1159,10 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
 +          if(base_pair2[l].i != base_pair2[l].j)
 +            if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
 +      }
-+    }
-+  }
-+
-   if (bonus_cnt>bonus) fprintf(stderr,"\ncould not enforce all constraints\n");
-   bonus*=BONUS;
+     }
+   }
  
-@@ -402,6 +431,23 @@
+@@ -402,6 +416,23 @@
      return (float) energy/100.;
  }
  
@@ -900,7 +1186,7 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
  /**
  *** fill "c", "fML" and "f5" arrays and return  optimal energy
  **/
-@@ -448,9 +494,16 @@
+@@ -448,9 +479,16 @@
        type = ptype[ij];
        energy = INF;
        /* enforcing structure constraints */
@@ -920,7 +1206,18 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
  
        no_close = (((type==3)||(type==4))&&noGUclosure&&(bonus==0));
  
-@@ -1040,8 +1093,15 @@
+@@ -480,8 +518,8 @@
+               if (no_close||(type_2==3)||(type_2==4))
+                 if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+-            energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                                S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++            energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                                S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+ 
+             ee = energy+c[indx[q]+p];
+             new_c = MIN2(new_c, ee);
+@@ -1040,8 +1078,15 @@
  
      bonus = 0;
      if (struct_constrained) {
@@ -938,16 +1235,36 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
      }
      if (noLonelyPairs)
        if (cij == c[ij]){
-@@ -1334,6 +1394,8 @@
-   update_fold_params_par(NULL);
+@@ -1078,8 +1123,8 @@
+             if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+         /* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+-        energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                            S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++        energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                            S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+ 
+         new = energy+c[indx[q]+p]+bonus;
+         traced = (cij == new);
+@@ -1233,7 +1278,7 @@
+       nrerror("backtracking failed in repeat_gquad");
+     }
+   repeat_gquad_exit:
+-    asm("nop");
++    /*asm("nop")*/;
+ 
+   } /* end of infinite while loop */
+ 
+@@ -1347,6 +1392,8 @@
+   if (init_length < 0) init_length=0;
  }
  
 +void (*eos_cb)(int index, int fe) = NULL;
 +
- PUBLIC void update_fold_params_par(paramT *parameters){
-   if(P) free(P);
-   if(parameters){
-@@ -1596,6 +1658,7 @@
+ /*---------------------------------------------------------------------------*/
+ PUBLIC float energy_of_structure(const char *string, const char *structure, int verbosity_level){
+   return energy_of_struct_par(string, structure, NULL, verbosity_level);
+@@ -1596,6 +1643,7 @@
    length = S[0];
  /*   energy =  backtrack_type=='M' ? ML_Energy(0, 0) : ML_Energy(0, 1); */
      energy =  backtrack_type=='M' ? energy_of_ml_pt(0, ptable) : energy_of_extLoop_pt(0, ptable);
@@ -955,7 +1272,7 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
    if (verbosity_level>0)
      printf("External loop                           : %5d\n", energy);
    for (i=1; i<=length; i++) {
-@@ -1606,6 +1669,7 @@
+@@ -1606,6 +1654,7 @@
    for (i=1; !SAME_STRAND(i,length); i++) {
      if (!SAME_STRAND(i,pair_table[i])) {
        energy+=P->DuplexInit;
@@ -963,23 +1280,27 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
        break;
      }
    }
-@@ -1725,6 +1789,7 @@
-         }
+@@ -1726,6 +1775,7 @@
        }
      }
-+  if (eos_cb) (*eos_cb)(0, en0);
  
++  if (eos_cb) (*eos_cb)(0, en0);
    if (verbosity_level>0)
      printf("External loop                           : %5d\n", en0);
-@@ -1769,6 +1834,7 @@
-       ee = E_IntLoop(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1],P);
+   energy += en0;
+@@ -1766,9 +1816,10 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      ee = E_IntLoop(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1],P);
++      ee = E_IntLoopNew(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
      else
        ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
 +    if (eos_cb) (*eos_cb)(i, ee);
      if (verbosity_level>0)
        printf("Interior loop (%3d,%3d) %c%c; (%3d,%3d) %c%c: %5d\n",
               i,j,string[i-1],string[j-1],p,q,string[p-1],string[q-1], ee);
-@@ -1784,6 +1850,7 @@
+@@ -1784,6 +1835,7 @@
      else
        ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
      energy += ee;
@@ -987,7 +1308,7 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
      if (verbosity_level>0)
        printf("Hairpin  loop (%3d,%3d) %c%c              : %5d\n",
               i, j, string[i-1],string[j-1], ee);
-@@ -1805,6 +1872,7 @@
+@@ -1805,6 +1857,7 @@
      ee = (ii==0) ? energy_of_ml_pt(i, pair_table) : energy_of_extLoop_pt(ii, pair_table);
    }
    energy += ee;
@@ -995,26 +1316,247 @@ diff -ur ViennaRNA-2.1.8/lib/fold.c ViennaRNA-2.1.8_patched/lib/fold.c
    if (verbosity_level>0)
      printf("Multi    loop (%3d,%3d) %c%c              : %5d\n",
             i,j,string[i-1],string[j-1],ee);
+@@ -2211,8 +2264,8 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                          S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++      energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                          S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+     else
+       energy = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
+   }
+@@ -2448,6 +2501,19 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1, 
++                 int index_i, int index_p, int index_j, int index_q, paramT* P)
++{
++  int le = E_IntLoop(n1,n2,type,type_2,si1,sj1,sp1,sq1,P);
++  if(index_p == binding_site_p && index_q == binding_site_q && index_i == binding_site_i && index_j == binding_site_j) {
++    //fprintf(stderr,"MATCH!!!");
++    le -= binding_site_bonus;
++  } 
++  return le;	
++}
++                          
++/*---------------------------------------------------------------------------*/
++
+ PUBLIC int oldLoopEnergy(int i, int j, int p, int q, int type, int type_2) {
+   /* compute energy of degree 2 loop (stack bulge or interior) */
+   int n1, n2, m, energy;
+diff -ur ViennaRNA-2.1.8/lib/gquad.c ViennaRNA-2.1.8_patched/lib/gquad.c
+--- ViennaRNA-2.1.8/lib/gquad.c	2014-08-18 03:58:37.000000000 -0700
++++ ViennaRNA-2.1.8_patched/lib/gquad.c	2019-11-11 19:05:45.000000000 -0800
+@@ -11,7 +11,7 @@
+ #include <math.h>
+ #include <string.h>
+ 
+-#include "../config.h"
++#include "config.h"
+ #include "fold_vars.h"
+ #include "data_structures.h"
+ #include "energy_const.h"
+@@ -917,8 +917,16 @@
+                             void *S,
+                             void *n_seq){
+ 
+-  int en[2], cc;
++  int j, en[2], cc;
+   en[0] = en[1] = INF;
++
++  for(j=0;j<3;j++){
++    if(l[j] > VRNA_GQUAD_MAX_LINKER_LENGTH) return;
++    if(l[j] < VRNA_GQUAD_MIN_LINKER_LENGTH) return;
++  }
++  if(L > VRNA_GQUAD_MAX_STACK_SIZE) return;
++  if(L < VRNA_GQUAD_MIN_STACK_SIZE) return;
++
+   gquad_mfe_ali_en(i, L, l, (void *)(&(en[0])), P, S, n_seq);
+   if(en[1] != INF){
+     cc  = en[0] + en[1];
+diff -ur ViennaRNA-2.1.8/lib/read_epars.c ViennaRNA-2.1.8_patched/lib/read_epars.c
+--- ViennaRNA-2.1.8/lib/read_epars.c	2013-06-20 07:47:51.000000000 -0700
++++ ViennaRNA-2.1.8_patched/lib/read_epars.c	2019-11-11 19:05:45.000000000 -0800
+@@ -80,7 +80,7 @@
+ PRIVATE void  rd_Hexaloop37(void);
+ 
+ /*------------------------------------------------------------*/
+-PUBLIC void read_parameter_file(const char fname[]){
++PUBLIC int read_parameter_file(const char fname[]){
+   char        *line, ident[256];
+   enum parset type;
+   int         r;
+@@ -90,13 +90,13 @@
+             "\nread_parameter_file:\n"
+             "\t\tcan't open file %s\n"
+             "\t\tusing default parameters instead.\n", fname);
+-    return;
++    return -1;
+   }
+ 
+   if (!(line = get_line(fp))) {
+     fprintf(stderr," File %s is inproper.\n", fname);
+     fclose(fp);
+-    return;
++    return -2;
+   }
+ 
+   if (strncmp(line,"## RNAfold parameter file v2.0",30)!=0) {
+@@ -257,7 +257,7 @@
+   fclose(fp);
+ 
+   check_symmetry();
+-  return;
++  return 0;
+ }
+ 
+ /*------------------------------------------------------------*/
+@@ -486,9 +486,9 @@
+ 
+   i=0;
+   /* erase old tetraloop entries */
+-  memset(&Tetraloops, 0, 281);
+-  memset(&Tetraloop37, 0, sizeof(int)*40);
+-  memset(&TetraloopdH, 0, sizeof(int)*40);
++  memset(Tetraloops, 0, 281);
++  memset(Tetraloop37, 0, sizeof(int)*40);
++  memset(TetraloopdH, 0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
+@@ -508,9 +508,9 @@
+ 
+   i=0;
+   /* erase old hexaloop entries */
+-  memset(&Hexaloops, 0, 361);
+-  memset(&Hexaloop37, 0, sizeof(int)*40);
+-  memset(&HexaloopdH, 0, sizeof(int)*40);
++  memset(Hexaloops, 0, 361);
++  memset(Hexaloop37, 0, sizeof(int)*40);
++  memset(HexaloopdH, 0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
+@@ -530,9 +530,9 @@
+ 
+   i=0;
+   /* erase old hexaloop entries */
+-  memset(&Triloops,   0, 241);
+-  memset(&Triloop37,  0, sizeof(int)*40);
+-  memset(&TriloopdH,  0, sizeof(int)*40);
++  memset(Triloops,   0, 241);
++  memset(Triloop37,  0, sizeof(int)*40);
++  memset(TriloopdH,  0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
 diff -ur ViennaRNA-2.1.8/lib/utils.c ViennaRNA-2.1.8_patched/lib/utils.c
 --- ViennaRNA-2.1.8/lib/utils.c	2013-06-20 07:47:51.000000000 -0700
-+++ ViennaRNA-2.1.8_patched/lib/utils.c	2019-11-11 16:04:42.000000000 -0800
-@@ -1015,7 +1015,10 @@
++++ ViennaRNA-2.1.8_patched/lib/utils.c	2019-11-11 19:05:45.000000000 -0800
+@@ -12,7 +12,7 @@
+ #include <errno.h>
+ #include <time.h>
+ #include <string.h>
+-#include "../config.h"
++#include "config.h"
+ #include "utils.h"
+ 
+ #ifdef WITH_DMALLOC
+@@ -32,6 +32,7 @@
+ PRIVATE char  *inbuf2 = NULL;
+ PRIVATE unsigned int typebuf2 = 0;
+ 
++
+ /*-------------------------------------------------------------------------*/
+ 
+ PUBLIC void *space(unsigned size) {
+@@ -998,7 +999,6 @@
+ }
+ 
+ 
+-
+ PUBLIC void constrain_ptypes(const char *constraint, unsigned int length, char *ptype, int *BP, int min_loop_size, unsigned int idx_type){
+   int n,i,j,k,l;
+   int hx, *stack;
+@@ -1015,37 +1015,41 @@
      index = get_indx(length);
  
      for(hx=0, j=1; j<=n; j++){
 -      switch(constraint[j-1]){
+-        case '|':   if(BP) BP[j] = -1;
+-                    break;
+-        case 'x':   /* can't pair */
+-                    for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
+-                    for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
+-                    break;
+-        case '(':   stack[hx++]=j;
+-                    /* fallthrough */
+-        case '<':   /* pairs upstream */
+-                    for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
+-                    break;
+-        case ')':   if (hx<=0) {
+-                      fprintf(stderr, "%s\n", constraint);
+-                      nrerror("unbalanced brackets in constraint");
+-                    }
+-                    i = stack[--hx];
+-                    type = ptype[index[j]+i];
+-                    for (k=i+1; k<=(int)length; k++) ptype[index[k]+i] = 0;
+-                    /* don't allow pairs i<k<j<l */
+-                    for (l=j; l<=(int)length; l++)
+-                      for (k=i+1; k<=j; k++) ptype[index[l]+k] = 0;
+-                    /* don't allow pairs k<i<l<j */
+-                    for (l=i; l<=j; l++)
+-                      for (k=1; k<=i; k++) ptype[index[l]+k] = 0;
+-                    for (k=1; k<j; k++) ptype[index[j]+k] = 0;
+-                    ptype[index[j]+i] = (type==0) ? 7 : type;
+-                    /* fallthrough */
+-        case '>':   /* pairs downstream */
+-                    for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
+-                    break;
 +      if (estimate_mode) {
 +        BP[j] = constraint[j-1];
-+	  } else {
-+		switch(constraint[j-1]){
-         case '|':   if(BP) BP[j] = -1;
-                     break;
-         case 'x':   /* can't pair */
-@@ -1046,6 +1049,7 @@
-         case '>':   /* pairs downstream */
-                     for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
-                     break;
-+		}
++      } else {
++        switch(constraint[j-1]){
++          case '|':   if(BP) BP[j] = -1;
++                      break;
++          case 'x':   /* can't pair */
++                      for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
++                      for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
++                      break;
++          case '(':   stack[hx++]=j;
++                      /* fallthrough */
++          case '<':   /* pairs upstream */
++                      for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
++                      break;
++          case ')':   if (hx<=0) {
++                        fprintf(stderr, "%s\n", constraint);
++                        nrerror("unbalanced brackets in constraint");
++                      }
++                      i = stack[--hx];
++                      type = ptype[index[j]+i];
++                      for (k=i+1; k<=(int)length; k++) ptype[index[k]+i] = 0;
++                      /* don't allow pairs i<k<j<l */
++                      for (l=j; l<=(int)length; l++)
++                        for (k=i+1; k<=j; k++) ptype[index[l]+k] = 0;
++                      /* don't allow pairs k<i<l<j */
++                      for (l=i; l<=j; l++)
++                        for (k=1; k<=i; k++) ptype[index[l]+k] = 0;
++                      for (k=1; k<j; k++) ptype[index[j]+k] = 0;
++                      ptype[index[j]+i] = (type==0) ? 7 : type;
++                      /* fallthrough */
++          case '>':   /* pairs downstream */
++                      for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
++                      break;
++        }
        }
      }
    }
+Only in ViennaRNA-2.1.8_patched/man: Makefile
+Only in ViennaRNA-2.1.8_patched/man: cmdlopt.sh
+Only in ViennaRNA-2.1.8_patched/misc: Makefile
+Only in ViennaRNA-2.1.8_patched/misc: PKGBUILD
+Only in ViennaRNA-2.1.8_patched/misc: ViennaRNA.spec
+Only in ViennaRNA-2.1.8_patched: stamp-h1
