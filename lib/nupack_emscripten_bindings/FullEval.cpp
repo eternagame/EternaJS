@@ -6,8 +6,10 @@
 #include "FullEval.h"
 #include "EmscriptenUtils.h"
 
-#include "../src/thermo/core/pfuncUtils.h"
-#include "../src/shared/externals.h"
+#include "src/thermo/utils/pfuncUtilsConstants.h"
+#include "src/thermo/utils/pfuncUtilsHeader.h"
+#include "src/shared/utilsHeader.h"
+#include "src/thermo/utils/DNAExternals.h"
 
 #define WATER_MOD 1
 // water concentration modulation (which we need to cancel here)

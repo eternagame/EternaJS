@@ -1,9 +1,10 @@
 #include "FullFold.h"
 #include "EmscriptenUtils.h"
 
-#include "../src/thermo/core/pfuncUtils.h"
-#include "../src/thermo/core/pf.h"
-#include "../src/shared/externals.h"
+#include "src/thermo/utils/pfuncUtilsConstants.h"
+#include "src/thermo/utils/pfuncUtilsHeader.h"
+#include "src/shared/utilsHeader.h"
+#include "src/thermo/utils/DNAExternals.h"
 
 FullFoldResult* FullFoldDefault (const std::string& seqString) {
     auto autoSeqString = MakeCString(seqString);

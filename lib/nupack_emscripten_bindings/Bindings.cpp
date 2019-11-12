@@ -1,8 +1,10 @@
 #include "FullEval.h"
 #include "FullFold.h"
 
-#include "../src/thermo/core/pfuncUtils.h"
-#include "../src/shared/externals.h"
+#include "src/thermo/utils/pfuncUtilsConstants.h"
+#include "src/thermo/utils/pfuncUtilsHeader.h"
+#include "src/shared/utilsHeader.h"
+#include "src/thermo/utils/DNAExternals.h"
 
 //entry point for code
 int main() {
