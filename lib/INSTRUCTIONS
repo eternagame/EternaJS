@@ -1,4 +1,4 @@
-### VIENNA 2.1.8 INSTRUCTIONS (WIP)
+### VIENNA 2.1.8
 ################
 ## This is how the patch file was created.
 ## diff -ur diff -ur ViennaRNA-2.1.8 ViennaRNA-2.1.8_patched > vrna2_patch
@@ -6,14 +6,21 @@
 patch -t -p0 < vrna2_patch
 cp vrna2_CML.txt ViennaRNA-2.1.8/CMakeLists.txt
 cp -r vrna2_emscripten_bindings ViennaRNA-2.1.8/emscripten
+cp -r ./libsvm-2.91 ViennaRNA-2.1.8
 pushd ViennaRNA-2.1.8
 ./configure
 popd
 
 
+### VIENNA 1.8.5
+################
+## This is how the patch file was created.
+##
 
-### NUPACK (DONE)
-##################
+
+
+### NUPACK
+##########
 ## This is how the patch file was created.
 ## diff -ur nupack3.2.2_stock nupack3.2.2 > nupack_patch
 
