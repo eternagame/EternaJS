@@ -8,7 +8,7 @@
     - Pass `-DCMAKE_BUILD_TYPE=Debug` for a debug build (-O0 optimizations), or `Release` for a release build (-O3 optimizations) (NOTE: when building/running EternaJS, ie via `npm start` or `npm run build:<dev|prod>`, you will likely need to set NODE_OPTIONS=--max_old_space_size=4096 in order to increase the momory limit, since the debug build is quite large)
     - Built libraries are output in `nupack/dist`, `vienna/dist`, etc.
 * Copy the built libraries into the typescript project:
-    - `$ for ii in "nupack" "vienna" "vrna2" "LinearFold"; do cp "$ii"/dist/*.js ../src/eterna/folding/engines/; done`
+    - `$ for ii in "nupack3.0.4" "ViennaRNA-1.8.5" "ViennaRNA-2.1.8" "LinearFold"; do cp "$ii"/dist/*.js ../src/eterna/folding/engines/; done`
 
 
 # Emscripten notes
