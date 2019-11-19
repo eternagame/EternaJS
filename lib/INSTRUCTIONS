@@ -15,7 +15,7 @@ popd
 ### VIENNA 1.8.5
 ################
 ## This is how the patch file was created.
-## diff -ur ViennaRNA-1.8.5 ViennaRNA-1.8.5_patched > vienna.patch
+## diff -ur ViennaRNA-1.8.5 ViennaRNA-1.8.5_patched > vienna_patch
 
 patch -t -p0 < vienna_patch
 cp vienna_CML.txt ViennaRNA-1.8.5/CMakeLists.txt
