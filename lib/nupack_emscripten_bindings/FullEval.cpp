@@ -75,7 +75,7 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
 
     energy = (float) naEnergyPairsOrParensFullWithSym(NULL, structure,
                                                seqNum, RNA,
-                                               DANGLETYPE, temperature_in, TRUE, SODIUM_CONC, MAGNESIUM_CONC,
+                                               1 /*DANGLETYPE*/, temperature_in, TRUE, SODIUM_CONC, MAGNESIUM_CONC,
                                                USE_LONG_HELIX_FOR_SALT_CORRECTION);
 #ifdef WATER_MOD
     energy += (water_mod * .01);

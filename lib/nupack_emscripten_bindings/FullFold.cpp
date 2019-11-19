@@ -17,7 +17,7 @@ FullFoldResult* FullFoldDefault (const std::string& seqString) {
     convertSeq(string, seqNum, tmpLength);
 
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   1 /*DANGLETYPE*/, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     FullFoldResult* result = new FullFoldResult();
@@ -49,7 +49,7 @@ FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& s
     convertSeq(string, seqNum, tmpLength);
 
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                   DANGLETYPE, temperature_in, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   1 /*DANGLETYPE*/, temperature_in, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     FullFoldResult* result = new FullFoldResult();
@@ -154,7 +154,7 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, int site_
     g_site_q = site_q;
     g_site_bonus = site_bonus;
     mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 3, RNA,
-                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   1 /*DANGLETYPE*/, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
     // clean up
     binding_site_cb = NULL;
@@ -196,7 +196,7 @@ FullFoldResult* CoFoldSequence (const std::string& seqString) {
     convertSeq(string, seqNum, seqLength);
 
     mfeFullWithSym(seqNum, seqLength, &mfeStructs, 3, RNA,
-                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   1 /*DANGLETYPE*/, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
 
     std::string outStructure;
@@ -255,7 +255,7 @@ FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, int
     g_site_q = site_q;
     g_site_bonus = site_bonus;
     mfeFullWithSym(seqNum, seqLength, &mfeStructs, 3, RNA,
-                   DANGLETYPE, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
+                   1 /*DANGLETYPE*/, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                    USE_LONG_HELIX_FOR_SALT_CORRECTION);
     // clean up
     binding_site_cb = NULL;
