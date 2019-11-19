@@ -46,4 +46,4 @@ cp -r nupack_emscripten_bindings nupack3.0.4/emscripten
 patch -t -p0 < linearfold_patch
 cp linearfold_CML.txt LinearFold/CMakeLists.txt
 cp -r linearfold_emscripten_bindings LinearFold/emscripten
-echo "#ifndef LINEARFOLD_EVAL_H\n#define LINEARFOLD_EVAL_H\n#include <string>\n\nlong eval(std::string seq, std::string ref, bool is_verbose);\n#endif" > LinearFold/LinearFoldEval.h
+cp leh LinearFold/LinearFoldEval.h
