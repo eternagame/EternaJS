@@ -150,7 +150,8 @@ export default class ShapeConstraint extends BaseShapeConstraint {
             ),
             thumbnail: PoseThumbnail.drawToGraphics(
                 new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
-                undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
+                undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
+                undoBlock.targetConditions['custom-layout']
             )
         };
     }
