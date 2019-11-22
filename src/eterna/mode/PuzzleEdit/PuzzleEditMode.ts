@@ -318,7 +318,8 @@ export default class PuzzleEditMode extends GameMode {
 
     public getThumbnailBase64(): string {
         let img = PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE
+            this._poses[0].sequence, this._poses[0].pairs, 6, PoseThumbnailType.WHITE,
+            0, null, false, 0, this._poses[0].customLayout
         );
         return Base64.encodeDisplayObjectPNG(img);
     }
@@ -575,11 +576,13 @@ export default class PuzzleEditMode extends GameMode {
 
         // Render pose thumbnail images
         let midImageString = Base64.encodeDisplayObjectPNG(PoseThumbnail.createFramedBitmap(
-            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE
+            this._poses[0].sequence, this._poses[0].pairs, 4, PoseThumbnailType.WHITE,
+            0, null, false, 0, this._poses[0].customLayout
         ));
 
         let bigImageString: string = Base64.encodeDisplayObjectPNG(
-            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2, PoseThumbnailType.WHITE)
+            PoseThumbnail.createFramedBitmap(this._poses[0].sequence, this._poses[0].pairs, 2, PoseThumbnailType.WHITE,
+                0, null, false, 0, this._poses[0].customLayout)
         );
 
         postParams['title'] = paramsTitle;
