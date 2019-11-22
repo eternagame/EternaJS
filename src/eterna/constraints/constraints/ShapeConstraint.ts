@@ -141,6 +141,8 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
+        let customLayout: Array<[number, number]> = null;
+        if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
@@ -151,7 +153,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
             thumbnail: PoseThumbnail.drawToGraphics(
                 new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
                 undoBlock.targetPairs, 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
-                undoBlock.targetConditions['custom-layout']
+                customLayout
             )
         };
     }
@@ -233,6 +235,8 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock);
+        let customLayout: Array<[number, number]> = null;
+        if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
             ...details,
             tooltip: ConstraintBox.createTextStyle().append(
@@ -245,7 +249,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
                 new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
                 EPars.parenthesisToPairs(targetConditions[this.stateIndex]['anti_secstruct']),
                 3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
-                targetConditions[this.stateIndex]['custom-layout']
+                customLayout
             )
         };
     }
