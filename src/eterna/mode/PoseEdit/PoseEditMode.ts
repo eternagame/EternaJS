@@ -935,8 +935,8 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('set_tracked_indices',
-            (marks: (number | {baseIndex: number; colors?: number | number[]})[], colors?: number[]): void => {
-                let standardizedMarks: {baseIndex: number; colors?: number | number[]}[];
+            (marks: (number | { baseIndex: number; colors?: number | number[] })[], colors?: number[]): void => {
+                let standardizedMarks: { baseIndex: number; colors?: number | number[] }[];
 
                 if (colors) {
                     log.warn(
@@ -1946,11 +1946,17 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar.display.visible = false;
 
+        let customLayout: Array<[number, number]> = null;
+        if (this._targetConditions && this._targetConditions[0]) {
+            // FIXME -- what if there are different customLayout's in different conditions?
+            customLayout = this._targetConditions[0]['custom-layout'];
+        }
         this.modeStack.pushMode(new MissionIntroMode(
             this._puzzle.getName(true),
             missionText,
             this._targetPairs,
-            introConstraintBoxes
+            introConstraintBoxes,
+            customLayout
         ));
 
         let conn = this.entered.connect(() => {
