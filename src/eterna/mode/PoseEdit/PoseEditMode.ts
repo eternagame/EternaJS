@@ -1948,7 +1948,6 @@ export default class PoseEditMode extends GameMode {
 
         let customLayout: Array<[number, number]> = null;
         if (this._targetConditions && this._targetConditions[0]) {
-            // FIXME -- what if there are different customLayout's in different conditions?
             customLayout = this._targetConditions[0]['custom-layout'];
         }
         this.modeStack.pushMode(new MissionIntroMode(
