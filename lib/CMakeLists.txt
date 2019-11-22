@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(ViennaRNA-1.8.5)
-add_subdirectory(ViennaRNA-2.1.8)
+add_subdirectory(Vienna1)
+add_subdirectory(Vienna2)
 add_subdirectory(LinearFold)
-add_subdirectory(nupack3.0.4)
+add_subdirectory(NUPACK)

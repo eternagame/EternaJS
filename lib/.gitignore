@@ -1,4 +1,8 @@
-LinearFold
-nupack3.0.4
-ViennaRNA-2.1.8
-ViennaRNA-1.8.5
+LinearFold/LinearFold
+NUPACK/nupack3.0.4
+Vienna2/ViennaRNA-2.1.8
+Vienna1/ViennaRNA-1.8.5
+CMakeCache
+CMakeFiles
+Makefile
+cmake_install.cmake

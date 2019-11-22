@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 project(LinearFold)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist)
@@ -14,20 +14,22 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
 
 include_directories(.)
+include_directories(./LinearFold)
+include_directories(./LinearFold/src)
 include_directories(../emscripten_common)
 
 SET(LINEARFOLD_FILES
-    LinearFold.cpp
-    LinearFold.h
-    feature_weight.h
-    utility.h
+    LinearFold/src/LinearFold.cpp
+    #LinearFold/src/LinearFold.h
+    #LinearFold/src/feature_weight.h
+    #LinearFold/src/utility.h
     emscripten/Bindings.cpp
     emscripten/FullFold.cpp
-    emscripten/FullFold.h
+    #emscripten/FullFold.h
     emscripten/FullEval.cpp
-    emscripten/FullEval.h
+    #emscripten/FullEval.h
     ../emscripten_common/EmscriptenUtils.cpp
-    ../emscripten_common/EmscriptenUtils.h
+    #../emscripten_common/EmscriptenUtils.h
 )
 
 add_library(LinearFoldBase INTERFACE)

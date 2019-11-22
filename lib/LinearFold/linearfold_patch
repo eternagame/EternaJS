@@ -1,0 +1,46 @@
+diff -ur LinearFoldGit/src/LinearFoldEval.cpp LinearFold/src/LinearFoldEval.cpp
+--- LinearFoldGit/src/LinearFoldEval.cpp	2019-11-11 14:27:59.000000000 -0800
++++ LinearFold/src/LinearFoldEval.cpp	2019-11-11 14:27:30.000000000 -0800
+@@ -16,6 +16,8 @@
+ 
+ using namespace std;
+ 
++void (*eos_cb)(int index, int fe) = NULL;
++
+ long eval(string seq, string ref, bool is_verbose) {
+ 
+     int seq_length = seq.length();
+@@ -81,6 +83,7 @@
+                     tetra_hex_tri = if_triloops[i];
+                 
+                 int newscore = - v_score_hairpin(i, j, nuci, nuci1, nucj_1, nucj, tetra_hex_tri);
++                if (eos_cb) (*eos_cb)(i+1, newscore / -1);
+                 if (is_verbose)
+                     printf("Hairpin loop ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], newscore / -100.0);
+                 total_energy += newscore;
+@@ -93,6 +96,7 @@
+ 
+                 int newscore = - v_score_single(i,j,p,q, nuci, nuci1, nucj_1, nucj,
+                                                   nucp_1, nucp, nucq, nucq1);
++                if (eos_cb) (*eos_cb)(i+1, newscore / -1);
+                 if (is_verbose)
+                     printf("Interior loop ( %d, %d) %c%c; ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], p+1, q+1, seq[p],seq[q], newscore / -100.0);
+                 total_energy += newscore;
+@@ -103,6 +107,7 @@
+                 multi_score += M1_energy[i];
+                 multi_score += - v_score_multi(i, j, nuci, nuci1, nucj_1, nucj, seq_length);
+                 multi_score += - v_score_multi_unpaired(i+1, i + multi_number_unpaired[i]); // current model is 0
++                if (eos_cb) (*eos_cb)(i+1, multi_score / -1);
+                 if (is_verbose)
+                     printf("Multi loop ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], multi_score / -100.0);
+                 total_energy += multi_score;
+@@ -129,6 +134,7 @@
+ 
+     if (is_verbose)
+         printf("External loop : %.2f\n", external_energy / -100.0);
++    if (eos_cb) (*eos_cb)(0, external_energy / -1);
+     total_energy += external_energy;
+     return total_energy;
+-}
+\ No newline at end of file
++}
