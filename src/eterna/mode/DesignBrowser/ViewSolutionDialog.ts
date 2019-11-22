@@ -49,7 +49,8 @@ export default class ViewSolutionDialog extends Dialog<void> {
         PoseThumbnail.drawToSprite(playThumbnail,
             EPars.stringToSequence(this._solution.sequence),
             EPars.parenthesisToPairs(this._puzzle.getSecstruct()),
-            3, PoseThumbnailType.BASE_COLORED);
+            3, PoseThumbnailType.BASE_COLORED,
+            0, null, false, 0, this._puzzle.targetConditions[0]['custom-layout']);
         let playButton = new ThumbnailAndTextButton()
             .text('View/Copy')
             .thumbnail(playThumbnail)
@@ -73,7 +74,8 @@ export default class ViewSolutionDialog extends Dialog<void> {
                 expdata.getShapeStartIndex(),
                 null,
                 true,
-                expdata.getShapeThreshold()
+                expdata.getShapeThreshold(),
+                this._puzzle.targetConditions[0]['custom-layout']
             );
 
             let seeResultButton = new ThumbnailAndTextButton()
