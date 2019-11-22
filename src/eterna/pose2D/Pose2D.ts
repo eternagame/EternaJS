@@ -1826,6 +1826,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._customLayout = setting;
     }
 
+    public get customLayout(): Array<[number, number]> {
+        return this._customLayout;
+    }
+
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rnaDrawer: RNALayout = new RNALayout(radius, radius);

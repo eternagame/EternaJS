@@ -79,6 +79,7 @@ export default class RNALayout {
         // / save for later
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
+        if (targetPairs == null) this._targetPairs = pairs;
 
         // / biPairs is 'symmetrized'. Like pairs,
         // /   an array the same length as RNA
