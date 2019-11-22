@@ -15,13 +15,15 @@ import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 
 export default class MissionIntroMode extends AppMode {
     constructor(
-        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[]
+        puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
+        customLayout: Array<[number, number]> = null
     ) {
         super();
         this._puzzleName = puzzleName;
         this._puzzleDescription = puzzleDescription;
         this._puzzleThumbnails = puzzleThumbnails;
         this._constraintBoxes = constraintBoxes;
+        this._customLayout = customLayout;
     }
 
     protected setup(): void {
@@ -265,7 +267,8 @@ export default class MissionIntroMode extends AppMode {
             sequence[ii] = EPars.RNABASE_ADENINE;
         }
         PoseThumbnail.drawToSprite(
-            this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0
+            this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0,
+            this._customLayout
         );
         DisplayUtil.center(this._goalsThumbnail, this._goalsBG);
     }
@@ -307,4 +310,6 @@ export default class MissionIntroMode extends AppMode {
     private _scrollDownButton: GameButton;
 
     private _constraintMask: Graphics;
+
+    private _customLayout: Array<[number, number]>;
 }

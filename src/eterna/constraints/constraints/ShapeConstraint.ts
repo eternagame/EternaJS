@@ -243,7 +243,8 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             thumbnail: PoseThumbnail.drawToGraphics(
                 new Array(naturalPairs.length).fill(EPars.RNABASE_ADENINE),
                 EPars.parenthesisToPairs(targetConditions[this.stateIndex]['anti_secstruct']),
-                3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0
+                3, PoseThumbnailType.WRONG_COLORED, 0, status.wrongPairs, false, 0,
+                targetConditions[this.stateIndex]['custom-layout']
             )
         };
     }
