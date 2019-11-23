@@ -1,8 +1,6 @@
-Only in nupack3.0.4_patched: CMakeFiles
-Only in nupack3.0.4_patched: CMakeLists.txt
-diff -ur nupack3.0.4/Makefile nupack3.0.4_patched/Makefile
---- nupack3.0.4/Makefile	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/Makefile	2019-11-11 19:36:15.000000000 -0800
+diff -ur nupack3.0.4_stock/Makefile nupack3.0.4/Makefile
+--- nupack3.0.4_stock/Makefile	2019-11-23 15:17:56.908070200 -0500
++++ nupack3.0.4/Makefile	2019-11-23 15:23:19.626109900 -0500
 @@ -1,17 +1,864 @@
 -# This Makefile is part of the NUPACK software suite
 -# Copyright (c) 2007 Caltech. All rights reserved.
@@ -884,12 +882,9 @@ diff -ur nupack3.0.4/Makefile nupack3.0.4_patched/Makefile
 +	cd /Users/andrewwatkins/programs/EternaJS/lib && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 +.PHONY : cmake_check_build_system
  
-Only in nupack3.0.4_patched: cmake_install.cmake
-Only in nupack3.0.4_patched: dist
-Only in nupack3.0.4_patched: emscripten
-diff -ur nupack3.0.4/src/thermo/utils/CalculateEnergy.c nupack3.0.4_patched/src/thermo/utils/CalculateEnergy.c
---- nupack3.0.4/src/thermo/utils/CalculateEnergy.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/CalculateEnergy.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c nupack3.0.4/src/thermo/utils/CalculateEnergy.c
+--- nupack3.0.4_stock/src/thermo/utils/CalculateEnergy.c	2019-11-23 15:17:56.848229600 -0500
++++ nupack3.0.4/src/thermo/utils/CalculateEnergy.c	2019-11-23 15:23:19.629088500 -0500
 @@ -13,6 +13,10 @@
  
  #include "pfuncUtilsHeader.h" //contains functions and structures
@@ -968,9 +963,9 @@ diff -ur nupack3.0.4/src/thermo/utils/CalculateEnergy.c nupack3.0.4_patched/src/
  }
  
  
-diff -ur nupack3.0.4/src/thermo/utils/GetEnergy.c nupack3.0.4_patched/src/thermo/utils/GetEnergy.c
---- nupack3.0.4/src/thermo/utils/GetEnergy.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/GetEnergy.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/GetEnergy.c nupack3.0.4/src/thermo/utils/GetEnergy.c
+--- nupack3.0.4_stock/src/thermo/utils/GetEnergy.c	2019-11-23 15:17:56.846252100 -0500
++++ nupack3.0.4/src/thermo/utils/GetEnergy.c	2019-11-23 15:23:19.631083100 -0500
 @@ -14,6 +14,8 @@
  #include "pfuncUtilsHeader.h"
  #include "DNAExternals.h"
@@ -1093,9 +1088,9 @@ diff -ur nupack3.0.4/src/thermo/utils/GetEnergy.c nupack3.0.4_patched/src/thermo
    }
    
    //#ifdef SHOWFB
-diff -ur nupack3.0.4/src/thermo/utils/backtrack.c nupack3.0.4_patched/src/thermo/utils/backtrack.c
---- nupack3.0.4/src/thermo/utils/backtrack.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/backtrack.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/backtrack.c nupack3.0.4/src/thermo/utils/backtrack.c
+--- nupack3.0.4_stock/src/thermo/utils/backtrack.c	2019-11-23 15:17:56.840751200 -0500
++++ nupack3.0.4/src/thermo/utils/backtrack.c	2019-11-23 15:23:19.634085400 -0500
 @@ -79,7 +79,8 @@
    }
  
@@ -1217,9 +1212,9 @@ diff -ur nupack3.0.4/src/thermo/utils/backtrack.c nupack3.0.4_patched/src/thermo
          energy = InteriorEnergy( i,j,d,e,seq) + Fb[ pf_index(d,e,seqlength)];
          if( WithinEps( Fb[ pf_ij], energy, ENERGY_TOLERANCE, allowableError)) {
  
-diff -ur nupack3.0.4/src/thermo/utils/ene.c nupack3.0.4_patched/src/thermo/utils/ene.c
---- nupack3.0.4/src/thermo/utils/ene.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/ene.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/ene.c nupack3.0.4/src/thermo/utils/ene.c
+--- nupack3.0.4_stock/src/thermo/utils/ene.c	2019-11-23 15:17:56.839739300 -0500
++++ nupack3.0.4/src/thermo/utils/ene.c	2019-11-23 15:23:19.637067000 -0500
 @@ -71,10 +71,10 @@
  
    extern DBL_TYPE MMEnergiesIL[];
@@ -1494,9 +1489,9 @@ diff -ur nupack3.0.4/src/thermo/utils/ene.c nupack3.0.4_patched/src/thermo/utils
    static DBL_TYPE *slCache[MAXSTRANDS], *edc, tc;
    static int CacheInd=-1, nCaches=0;
    static DBL_TYPE TCache[MAXSTRANDS];
-diff -ur nupack3.0.4/src/thermo/utils/init.c nupack3.0.4_patched/src/thermo/utils/init.c
---- nupack3.0.4/src/thermo/utils/init.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/init.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/init.c nupack3.0.4/src/thermo/utils/init.c
+--- nupack3.0.4_stock/src/thermo/utils/init.c	2019-11-23 15:17:56.836761000 -0500
++++ nupack3.0.4/src/thermo/utils/init.c	2019-11-23 15:23:19.640058700 -0500
 @@ -418,16 +418,18 @@
    // Allocate and deallocate Fx matrices
    
@@ -1575,9 +1570,9 @@ diff -ur nupack3.0.4/src/thermo/utils/init.c nupack3.0.4_patched/src/thermo/util
        etaN[ indexE][0] = 0;
        etaN[ indexE][1] = -1;
        
-diff -ur nupack3.0.4/src/thermo/utils/mfeUtils.c nupack3.0.4_patched/src/thermo/utils/mfeUtils.c
---- nupack3.0.4/src/thermo/utils/mfeUtils.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/mfeUtils.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/mfeUtils.c nupack3.0.4/src/thermo/utils/mfeUtils.c
+--- nupack3.0.4_stock/src/thermo/utils/mfeUtils.c	2019-11-23 15:17:56.847232400 -0500
++++ nupack3.0.4/src/thermo/utils/mfeUtils.c	2019-11-23 15:23:19.643050600 -0500
 @@ -29,6 +29,7 @@
  #include <stdlib.h>
  #include <math.h>
@@ -1794,9 +1789,9 @@ diff -ur nupack3.0.4/src/thermo/utils/mfeUtils.c nupack3.0.4_patched/src/thermo/
  
    return result;
  }
-diff -ur nupack3.0.4/src/thermo/utils/min.c nupack3.0.4_patched/src/thermo/utils/min.c
---- nupack3.0.4/src/thermo/utils/min.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/min.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/min.c nupack3.0.4/src/thermo/utils/min.c
+--- nupack3.0.4_stock/src/thermo/utils/min.c	2019-11-23 15:17:56.823022700 -0500
++++ nupack3.0.4/src/thermo/utils/min.c	2019-11-23 15:23:19.645045800 -0500
 @@ -24,7 +24,8 @@
    int nNicks = 0;
  	
@@ -2076,8 +2071,8 @@ diff -ur nupack3.0.4/src/thermo/utils/min.c nupack3.0.4_patched/src/thermo/utils
       
 -     extraTerms = DangleEnergy( i, d-1, seq, seqlength) +
 -       (ALPHA_3)*(d-i);
--     
       
+-     
 -     if( etaN[ EtaNIndex( d-0.5, d-0.5, seqlength)][0] == 0) { 
 +     //if( etaN[ EtaNIndex( d-0.5, d-0.5, seqlength)][0] == 0) { 
 +     if( etaN[ pf_index( IDX(d-1), IDX(d-1), seqlength)][0] == 0) { 
@@ -2135,9 +2130,9 @@ diff -ur nupack3.0.4/src/thermo/utils/min.c nupack3.0.4_patched/src/thermo/utils
  	    if( seq[d] != BASE_C && seq[e] != BASE_C) {
  	      bp_penalty = AT_PENALTY;
  	    }
-diff -ur nupack3.0.4/src/thermo/utils/nsStar.c nupack3.0.4_patched/src/thermo/utils/nsStar.c
---- nupack3.0.4/src/thermo/utils/nsStar.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/nsStar.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/nsStar.c nupack3.0.4/src/thermo/utils/nsStar.c
+--- nupack3.0.4_stock/src/thermo/utils/nsStar.c	2019-11-23 15:17:56.850224700 -0500
++++ nupack3.0.4/src/thermo/utils/nsStar.c	2019-11-23 15:23:19.646042900 -0500
 @@ -10,7 +10,7 @@
  
  #include <stdio.h>
@@ -2147,9 +2142,9 @@ diff -ur nupack3.0.4/src/thermo/utils/nsStar.c nupack3.0.4_patched/src/thermo/ut
  #include <math.h>
  #include <string.h>
  #include <ctype.h>
-diff -ur nupack3.0.4/src/thermo/utils/pairsPr.c nupack3.0.4_patched/src/thermo/utils/pairsPr.c
---- nupack3.0.4/src/thermo/utils/pairsPr.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/pairsPr.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/pairsPr.c nupack3.0.4/src/thermo/utils/pairsPr.c
+--- nupack3.0.4_stock/src/thermo/utils/pairsPr.c	2019-11-23 15:17:56.831001400 -0500
++++ nupack3.0.4/src/thermo/utils/pairsPr.c	2019-11-23 15:23:19.649035300 -0500
 @@ -64,7 +64,7 @@
  
    value = -b/a + 1.0;
@@ -2159,9 +2154,9 @@ diff -ur nupack3.0.4/src/thermo/utils/pairsPr.c nupack3.0.4_patched/src/thermo/u
  
  #ifdef DEBUG
    if( a < 0) printf("%Le %Le %f\n", (long double) a, (long double) b, precisionLost);
-diff -ur nupack3.0.4/src/thermo/utils/pfuncUtils.c nupack3.0.4_patched/src/thermo/utils/pfuncUtils.c
---- nupack3.0.4/src/thermo/utils/pfuncUtils.c	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/pfuncUtils.c	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c nupack3.0.4/src/thermo/utils/pfuncUtils.c
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtils.c	2019-11-23 15:17:56.843248300 -0500
++++ nupack3.0.4/src/thermo/utils/pfuncUtils.c	2019-11-23 15:23:19.652049600 -0500
 @@ -9,7 +9,7 @@
  #include <stdio.h>
  #include <math.h>
@@ -2215,9 +2210,9 @@ diff -ur nupack3.0.4/src/thermo/utils/pfuncUtils.c nupack3.0.4_patched/src/therm
    int shift;
    
    if( b == BASE_A) { 
-diff -ur nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h nupack3.0.4_patched/src/thermo/utils/pfuncUtilsConstants.h
---- nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/pfuncUtilsConstants.h	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsConstants.h	2019-11-23 15:17:56.835002100 -0500
++++ nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h	2019-11-23 15:23:19.653458400 -0500
 @@ -34,7 +34,7 @@
  #endif
  
@@ -2240,9 +2235,9 @@ diff -ur nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h nupack3.0.4_patched/
   
  //MATCH_PF will make the energy model used in energy calculations
  //match the one used in mfe and partition function calculations.
-diff -ur nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h nupack3.0.4_patched/src/thermo/utils/pfuncUtilsHeader.h
---- nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h	2014-03-15 15:04:18.000000000 -0700
-+++ nupack3.0.4_patched/src/thermo/utils/pfuncUtilsHeader.h	2019-11-11 19:28:26.000000000 -0800
+diff -ur nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h
+--- nupack3.0.4_stock/src/thermo/utils/pfuncUtilsHeader.h	2019-11-23 15:17:56.825017100 -0500
++++ nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h	2019-11-23 15:23:19.655528300 -0500
 @@ -22,7 +22,7 @@
  #include "pfuncUtilsConstants.h"
  #include "runtime_constants.h"

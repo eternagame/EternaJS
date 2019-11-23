@@ -1,5 +1,5 @@
-#ifndef VRNA2_FULLEVAL_H
-#define VRNA2_FULLEVAL_H
+#ifndef VIENNA2_FULLEVAL_H
+#define VIENNA2_FULLEVAL_H
 
 #include <vector>
 #include <string>
@@ -11,4 +11,4 @@ struct FullEvalResult {
 
 FullEvalResult* FullEval (int temperature_in, const std::string& seqString, const std::string& structString);
 
-#endif //VRNA2_FULLEVAL_H
+#endif //VIENNA2_FULLEVAL_H

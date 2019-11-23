@@ -50,12 +50,9 @@ add_executable(vienna
         ViennaRNA-1.8.5/lib/treedist.c
         ViennaRNA-1.8.5/lib/utils.c
         ../emscripten_common/EmscriptenUtils.cpp
-        ../emscripten_common/EmscriptenUtils.h
         emscripten/Bindings.cpp
         emscripten/FullEval.cpp
-        emscripten/FullEval.h
-        emscripten/FullFold.cpp
-        emscripten/FullFold.h)
+        emscripten/FullFold.cpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(CMAKE_C_COMPILER "emcc")
@@ -74,3 +71,4 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set_target_properties(vienna PROPERTIES LINK_FLAGS_RELEASE "-O3 -s WASM=1")
 endif ()
 
+install(TARGETS vienna DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../src/eterna/folding/engines)

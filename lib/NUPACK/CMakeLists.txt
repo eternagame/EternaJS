@@ -22,38 +22,27 @@ include_directories(../emscripten_common)
 add_executable(nupack
         nupack3.0.4/src/thermo/utils/backtrack.c
         nupack3.0.4/src/thermo/utils/CalculateEnergy.c
-        nupack3.0.4/src/thermo/utils/DNAExternals.h
         nupack3.0.4/src/thermo/utils/DNAGlobals.c
         nupack3.0.4/src/thermo/utils/ene.c
         nupack3.0.4/src/thermo/utils/GetEnergy.c
         nupack3.0.4/src/shared/hash.c
-        nupack3.0.4/src/shared/hash.h
         nupack3.0.4/src/thermo/utils/init.c
         nupack3.0.4/src/thermo/utils/mfeUtils.c
         nupack3.0.4/src/thermo/utils/min.c
         nupack3.0.4/src/shared/rng/mt19937ar.c
-        nupack3.0.4/src/shared/rng/mt19937ar.h
         nupack3.0.4/src/thermo/utils/nsStar.c
         nupack3.0.4/src/thermo/utils/pairsPr.c
         nupack3.0.4/src/thermo/utils/pf.c
         nupack3.0.4/src/thermo/utils/pfuncUtils.c
-        nupack3.0.4/src/thermo/utils/pfuncUtilsConstants.h
-        nupack3.0.4/src/thermo/utils/pfuncUtilsHeader.h
-        nupack3.0.4/src/shared/constants/physical_constants.h
         nupack3.0.4/src/thermo/utils/pknots.c
         nupack3.0.4/src/thermo/utils/ReadCommandLineNPK.c
-        nupack3.0.4/src/shared/constants/runtime_constants.h
         nupack3.0.4/src/thermo/utils/sumexp.c
         nupack3.0.4/src/thermo/utils/sumexp_pk.c
         nupack3.0.4/src/shared/utils.c
-        nupack3.0.4/src/shared/utilsHeader.h
         emscripten/Bindings.cpp
         emscripten/FullEval.cpp
-        emscripten/FullEval.h
         emscripten/FullFold.cpp
-        emscripten/FullFold.h
-        ../emscripten_common/EmscriptenUtils.cpp
-        ../emscripten_common/EmscriptenUtils.h)
+        ../emscripten_common/EmscriptenUtils.cpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(CMAKE_C_COMPILER "emcc")
@@ -71,3 +60,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set_target_properties(nupack PROPERTIES LINK_FLAGS_DEBUG "-O0 -s WASM=0 -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s SAFE_HEAP=1")
     set_target_properties(nupack PROPERTIES LINK_FLAGS_RELEASE "-O3 -s WASM=1")
 endif ()
+
+install(TARGETS nupack DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../src/eterna/folding/engines)

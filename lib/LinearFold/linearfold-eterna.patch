@@ -1,6 +1,6 @@
-diff -ur LinearFoldGit/src/LinearFoldEval.cpp LinearFold/src/LinearFoldEval.cpp
---- LinearFoldGit/src/LinearFoldEval.cpp	2019-11-11 14:27:59.000000000 -0800
-+++ LinearFold/src/LinearFoldEval.cpp	2019-11-11 14:27:30.000000000 -0800
+diff -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/LinearFoldEval.cpp
+--- LinearFold_stock/src/LinearFoldEval.cpp	2019-11-23 15:29:59.720758200 -0500
++++ LinearFold/src/LinearFoldEval.cpp	2019-11-23 15:30:35.077197300 -0500
 @@ -16,6 +16,8 @@
  
  using namespace std;

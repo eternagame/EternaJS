@@ -1,5 +1,5 @@
-#ifndef VRNA2_FULLFOLD_H
-#define VRNA2_FULLFOLD_H
+#ifndef VIENNA2_FULLFOLD_H
+#define VIENNA2_FULLFOLD_H
 
 #include <string>
 #include <vector>
@@ -21,4 +21,4 @@ FullFoldResult* FullFoldWithBindingSite (const std::string& seqString, const std
 FullFoldResult* CoFoldSequence (const std::string& seqString, const std::string& structString);
 FullFoldResult* CoFoldSequenceWithBindingSite (const std::string& seqString, const std::string& structString, int switch_bp_i, int switch_bp_p, int switch_bp_j, int switch_bp_q, int switch_bp_bonus);
 
-#endif //VRNA2_FULLFOLD_H
+#endif //VIENNA2_FULLFOLD_H

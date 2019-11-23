@@ -1,12 +1,6 @@
-Only in ViennaRNA-1.8.5: CMakeCache.txt
-Only in ViennaRNA-1.8.5: CMakeFiles
-Only in ViennaRNA-1.8.5: CMakeLists.txt
-Only in ViennaRNA-1.8.5/Cluster: .deps
-Only in ViennaRNA-1.8.5/Cluster: Makefile
-Only in ViennaRNA-1.8.5/H: Makefile
-diff -ur ViennaRNA-1.8.5_old/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
---- ViennaRNA-1.8.5_old/H/cofold.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/cofold.h	2019-11-11 21:28:44.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
+--- ViennaRNA-1.8.5_stock/H/cofold.h	2019-11-23 15:16:45.075180000 -0500
++++ ViennaRNA-1.8.5/H/cofold.h	2019-11-23 15:22:41.170924500 -0500
 @@ -1,6 +1,7 @@
  /* function from fold.c */
  #include "subopt.h"
@@ -15,9 +9,9 @@ diff -ur ViennaRNA-1.8.5_old/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
  /* calculate energy of string on structure */
  extern void   free_co_arrays(void);          /* free arrays for mfe folding */
  extern void   initialize_cofold(int length); /* allocate arrays for folding */
-diff -ur ViennaRNA-1.8.5_old/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
---- ViennaRNA-1.8.5_old/H/edit_cost.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/edit_cost.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
+--- ViennaRNA-1.8.5_stock/H/edit_cost.h	2019-11-23 15:16:45.084155500 -0500
++++ ViennaRNA-1.8.5/H/edit_cost.h	2019-11-23 15:22:41.173876600 -0500
 @@ -18,18 +18,18 @@
  PRIVATE CostMatrix  UsualCost = 
  {
@@ -75,9 +69,9 @@ diff -ur ViennaRNA-1.8.5_old/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
  
  };
  
-diff -ur ViennaRNA-1.8.5_old/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
---- ViennaRNA-1.8.5_old/H/energy_const.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/energy_const.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
+--- ViennaRNA-1.8.5_stock/H/energy_const.h	2019-11-23 15:16:45.088144900 -0500
++++ ViennaRNA-1.8.5/H/energy_const.h	2019-11-23 15:22:41.174875300 -0500
 @@ -15,7 +15,7 @@
  #define K0  273.15
  #define INF 1000000
@@ -87,9 +81,9 @@ diff -ur ViennaRNA-1.8.5_old/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
  #define NBPAIRS 7
  #define TURN 3
  #define MAXLOOP 30
-diff -ur ViennaRNA-1.8.5_old/H/fold.h ViennaRNA-1.8.5/H/fold.h
---- ViennaRNA-1.8.5_old/H/fold.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/fold.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/fold.h ViennaRNA-1.8.5/H/fold.h
+--- ViennaRNA-1.8.5_stock/H/fold.h	2019-11-23 15:16:45.075180000 -0500
++++ ViennaRNA-1.8.5/H/fold.h	2019-11-23 15:22:41.176113700 -0500
 @@ -1,5 +1,9 @@
 +#ifndef _FOLD_H
 +#define _FOLD_H
@@ -106,9 +100,9 @@ diff -ur ViennaRNA-1.8.5_old/H/fold.h ViennaRNA-1.8.5/H/fold.h
  extern	void	export_circfold_arrays(int *Fc_p, int *FcH_p, int *FcI_p, int *FcM_p, int **fM2_p, int **f5_p, int **c_p, int **fML_p, int **fM1_p, int **indx_p, char **ptype_p);
 +
 +#endif
-diff -ur ViennaRNA-1.8.5_old/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
---- ViennaRNA-1.8.5_old/H/pair_mat.h	2010-05-07 09:17:50.000000000 -0400
-+++ ViennaRNA-1.8.5/H/pair_mat.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
+--- ViennaRNA-1.8.5_stock/H/pair_mat.h	2019-11-23 15:16:45.079172400 -0500
++++ ViennaRNA-1.8.5/H/pair_mat.h	2019-11-23 15:22:41.177883100 -0500
 @@ -28,7 +28,7 @@
    int code;
    if (energy_set>0) code = (int) (c-'A')+1;
@@ -118,9 +112,9 @@ diff -ur ViennaRNA-1.8.5_old/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
      pos = strchr(Law_and_Order, c);
      if (pos==NULL) code=0;
      else code = (int) (pos-Law_and_Order);
-diff -ur ViennaRNA-1.8.5_old/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
---- ViennaRNA-1.8.5_old/H/part_func.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/part_func.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
+--- ViennaRNA-1.8.5_stock/H/part_func.h	2019-11-23 15:16:45.079172400 -0500
++++ ViennaRNA-1.8.5/H/part_func.h	2019-11-23 15:22:41.179881000 -0500
 @@ -6,9 +6,10 @@
  extern float  pf_fold(char *sequence, char *structure);
  /* calculate partition function and base pair probabilities */
@@ -133,9 +127,9 @@ diff -ur ViennaRNA-1.8.5_old/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
  extern double mean_bp_dist(int length); /* mean pair distance of ensemble */
  extern char  *centroid(int length, double *dist);     /* mean pair distance of ensemble */
  extern int get_pf_arrays(short **S_p, short **S1_p, char **ptype_p, FLT_OR_DBL **qb_p, FLT_OR_DBL **qm_p, FLT_OR_DBL **q1k_p, FLT_OR_DBL **qln_p);
-diff -ur ViennaRNA-1.8.5_old/H/utils.h ViennaRNA-1.8.5/H/utils.h
---- ViennaRNA-1.8.5_old/H/utils.h	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/H/utils.h	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/H/utils.h ViennaRNA-1.8.5/H/utils.h
+--- ViennaRNA-1.8.5_stock/H/utils.h	2019-11-23 15:16:45.087147700 -0500
++++ ViennaRNA-1.8.5/H/utils.h	2019-11-23 15:22:41.181584600 -0500
 @@ -28,7 +28,7 @@
  /* random string of length l using characters from symbols[] */
  extern int    hamming(const char *s1, const char *s2);
@@ -145,24 +139,9 @@ diff -ur ViennaRNA-1.8.5_old/H/utils.h ViennaRNA-1.8.5/H/utils.h
  
  
  extern char *pack_structure(const char *struc);
-Only in ViennaRNA-1.8.5/Kinfold: .deps
-Only in ViennaRNA-1.8.5/Kinfold/Example: Makefile
-Only in ViennaRNA-1.8.5/Kinfold: Makefile
-Only in ViennaRNA-1.8.5/Kinfold: config.h
-Only in ViennaRNA-1.8.5/Kinfold: config.log
-Only in ViennaRNA-1.8.5/Kinfold: config.status
-Only in ViennaRNA-1.8.5/Kinfold: stamp-h1
-Only in ViennaRNA-1.8.5: Makefile
-Only in ViennaRNA-1.8.5/Perl: Makefile
-Only in ViennaRNA-1.8.5/Progs: .deps
-Only in ViennaRNA-1.8.5/Progs: Makefile
-Only in ViennaRNA-1.8.5/RNAforester: Makefile
-Only in ViennaRNA-1.8.5/RNAforester: config.h
-Only in ViennaRNA-1.8.5/RNAforester: config.log
-Only in ViennaRNA-1.8.5/RNAforester: config.status
-diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile
---- ViennaRNA-1.8.5_old/RNAforester/g2-0.70/Makefile	2011-02-28 15:22:28.000000000 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile	2019-11-11 21:28:44.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile
+--- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/Makefile	2019-11-23 15:16:45.240426600 -0500
++++ ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile	2019-11-23 15:22:41.183883900 -0500
 @@ -22,16 +22,16 @@
  SHELL = /bin/sh
  
@@ -225,11 +204,9 @@ diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/Makefile ViennaRNA-1.8.5/RNAfor
  	-rm -f libg2.$(G2_VERSION).a
  	-rm -f a.out
  	-rm -fr doc/html/ doc/latex/ doc/g2_refman.ps doc/g2_refman.pdf
-Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.log
-Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.status
-diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/demo/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile
---- ViennaRNA-1.8.5_old/RNAforester/g2-0.70/demo/Makefile	2011-02-28 15:22:28.000000000 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile	2019-11-11 21:28:44.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/demo/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile
+--- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/demo/Makefile	2019-11-23 15:16:45.243419400 -0500
++++ ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile	2019-11-23 15:22:41.186851300 -0500
 @@ -23,13 +23,13 @@
  #F77 = f77 -n32
  #CPP = /lib/cpp -P -DFORTRAN
@@ -257,9 +234,9 @@ diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/demo/Makefile ViennaRNA-1.8.5/R
  	$(F77) g2testf.f $(LDFLAGS) -o g2testf
  
  clean:
-diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL
---- ViennaRNA-1.8.5_old/RNAforester/g2-0.70/g2_perl/Makefile.PL	2011-02-28 15:22:28.000000000 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-11 21:28:44.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL
+--- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:16:45.226464000 -0500
++++ ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:22:41.187840400 -0500
 @@ -4,7 +4,7 @@
  WriteMakefile(
      'NAME'	=> 'G2',
@@ -270,23 +247,9 @@ diff -ur ViennaRNA-1.8.5_old/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1
 +    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
      'INC'	=> '-I./../include',           # e.g., '-I/usr/local/include' 
  );
-Only in ViennaRNA-1.8.5/RNAforester/man: Makefile
-Only in ViennaRNA-1.8.5/RNAforester/src: .deps
-Only in ViennaRNA-1.8.5/RNAforester/src: Makefile
-Only in ViennaRNA-1.8.5/RNAforester: stamp-h1
-Only in ViennaRNA-1.8.5/Utils: .deps
-Only in ViennaRNA-1.8.5/Utils: Makefile
-Only in ViennaRNA-1.8.5: ViennaRNA.spec
-Only in ViennaRNA-1.8.5: cmake_install.cmake
-Only in ViennaRNA-1.8.5: config.h
-Only in ViennaRNA-1.8.5: config.log
-Only in ViennaRNA-1.8.5: config.status
-Only in ViennaRNA-1.8.5: dist
-Only in ViennaRNA-1.8.5: emscripten
-Only in ViennaRNA-1.8.5/lib: .deps
-diff -ur ViennaRNA-1.8.5_old/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
---- ViennaRNA-1.8.5_old/lib/LPfold.c	2010-04-12 12:57:03.000000000 -0400
-+++ ViennaRNA-1.8.5/lib/LPfold.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
+--- ViennaRNA-1.8.5_stock/lib/LPfold.c	2019-11-23 15:16:45.126730500 -0500
++++ ViennaRNA-1.8.5/lib/LPfold.c	2019-11-23 15:22:41.190831900 -0500
 @@ -367,7 +367,7 @@
  	  temp *= expMLintern[tt]*scale[2];
  	  if (k>1) temp *= expdangle5[tt][S1[k-1]];
@@ -296,10 +259,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
  	  pR[k][l] += temp;
  
  	  if (pR[k][l]>Qmax) {
-Only in ViennaRNA-1.8.5/lib: Makefile
-diff -ur ViennaRNA-1.8.5_old/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
---- ViennaRNA-1.8.5_old/lib/PS_dot.c	2009-10-30 10:36:45.000000000 -0400
-+++ ViennaRNA-1.8.5/lib/PS_dot.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
+--- ViennaRNA-1.8.5_stock/lib/PS_dot.c	2019-11-23 15:16:45.111769700 -0500
++++ ViennaRNA-1.8.5/lib/PS_dot.c	2019-11-23 15:22:41.192845700 -0500
 @@ -1132,7 +1132,7 @@
  
  #include "pair_mat.h"
@@ -483,9 +445,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
    return 0;
 +
  }
-diff -ur ViennaRNA-1.8.5_old/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
---- ViennaRNA-1.8.5_old/lib/alipfold.c	2010-04-06 12:05:42.000000000 -0400
-+++ ViennaRNA-1.8.5/lib/alipfold.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
+--- ViennaRNA-1.8.5_stock/lib/alipfold.c	2019-11-23 15:16:45.123739000 -0500
++++ ViennaRNA-1.8.5/lib/alipfold.c	2019-11-23 15:22:41.195820900 -0500
 @@ -1482,7 +1482,6 @@
      qbt1=1.;
      for (s=0; s<n_seq; s++){
@@ -494,9 +456,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
        qbt1 *= exphairpin[u];
        if (u<3) continue; /*sog amoi: strof??*/
        if ((tetra_loop)&&(u==4)) {
-diff -ur ViennaRNA-1.8.5_old/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
---- ViennaRNA-1.8.5_old/lib/cofold.c	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/lib/cofold.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
+--- ViennaRNA-1.8.5_stock/lib/cofold.c	2019-11-23 15:16:45.118752100 -0500
++++ ViennaRNA-1.8.5/lib/cofold.c	2019-11-23 15:22:41.198828300 -0500
 @@ -36,7 +36,8 @@
  #define free_arrays free_co_arrays
  #define initialize_fold initialize_cofold
@@ -605,9 +567,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
  		      int si1, int sj1, int sp1, int sq1) {
    /* compute energy of degree 2 loop (stack bulge or interior) */
    int nl, ns, energy;
-diff -ur ViennaRNA-1.8.5_old/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
---- ViennaRNA-1.8.5_old/lib/findpath.c	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/lib/findpath.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
+--- ViennaRNA-1.8.5_stock/lib/findpath.c	2019-11-23 15:16:45.116756500 -0500
++++ ViennaRNA-1.8.5/lib/findpath.c	2019-11-23 15:22:41.200805700 -0500
 @@ -12,8 +12,7 @@
  
  static char rcsid[] = "$Id: findpath.c,v 1.2 2008/10/09 15:42:45 ivo Exp $";
@@ -618,9 +580,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
  static int energy_of_move(short *pt, short *s, short *s1, int m1, int m2);
  
  typedef struct move {
-diff -ur ViennaRNA-1.8.5_old/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
---- ViennaRNA-1.8.5_old/lib/fold.c	2010-09-16 04:34:24.000000000 -0400
-+++ ViennaRNA-1.8.5/lib/fold.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
+--- ViennaRNA-1.8.5_stock/lib/fold.c	2019-11-23 15:16:45.129723500 -0500
++++ ViennaRNA-1.8.5/lib/fold.c	2019-11-23 15:22:41.204815000 -0500
 @@ -10,7 +10,7 @@
  		  Vienna RNA package
  */
@@ -1014,9 +976,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
        }
      }
      if (hx!=0) {
-diff -ur ViennaRNA-1.8.5_old/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
---- ViennaRNA-1.8.5_old/lib/part_func.c	2011-02-04 02:37:39.000000000 -0500
-+++ ViennaRNA-1.8.5/lib/part_func.c	2019-11-11 21:54:42.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
+--- ViennaRNA-1.8.5_stock/lib/part_func.c	2019-11-23 15:16:45.115766100 -0500
++++ ViennaRNA-1.8.5/lib/part_func.c	2019-11-23 15:22:41.206788200 -0500
 @@ -84,6 +84,7 @@
  
  PUBLIC  float pf_fold(char *sequence, char *structure);
@@ -1025,9 +987,9 @@ diff -ur ViennaRNA-1.8.5_old/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
  PUBLIC  void  free_pf_arrays(void);
  PUBLIC  void  update_pf_params(int length);
  PUBLIC  char  bppm_symbol(float *x);
-diff -ur ViennaRNA-1.8.5_old/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
---- ViennaRNA-1.8.5_old/lib/subopt.c	2009-02-23 10:14:06.000000000 -0500
-+++ ViennaRNA-1.8.5/lib/subopt.c	2019-11-11 21:28:44.000000000 -0500
+diff -ur ViennaRNA-1.8.5_stock/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
+--- ViennaRNA-1.8.5_stock/lib/subopt.c	2019-11-23 15:16:45.122741800 -0500
++++ ViennaRNA-1.8.5/lib/subopt.c	2019-11-23 15:22:41.209829100 -0500
 @@ -87,6 +87,7 @@
  #include "list.h"
  #include "subopt.h"
@@ -1045,5 +1007,3 @@ diff -ur ViennaRNA-1.8.5_old/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
  
  PRIVATE void encode_seq(char *sequence) {
    unsigned int i,l;
-Only in ViennaRNA-1.8.5/man: Makefile
-Only in ViennaRNA-1.8.5: stamp-h1
