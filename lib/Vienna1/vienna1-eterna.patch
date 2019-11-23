@@ -1,6 +1,7 @@
-diff -ur ViennaRNA-1.8.5_stock/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
---- ViennaRNA-1.8.5_stock/H/cofold.h	2019-11-23 15:16:45.075180000 -0500
-+++ ViennaRNA-1.8.5/H/cofold.h	2019-11-23 15:22:41.170924500 -0500
+Only in ViennaRNA-1.8.5/Cluster: .deps
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
+--- ViennaRNA-1.8.5_stock/H/cofold.h	2019-11-23 17:31:34.907901900 -0500
++++ ViennaRNA-1.8.5/H/cofold.h	2019-11-23 15:33:30.008101500 -0500
 @@ -1,6 +1,7 @@
  /* function from fold.c */
  #include "subopt.h"
@@ -9,9 +10,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
  /* calculate energy of string on structure */
  extern void   free_co_arrays(void);          /* free arrays for mfe folding */
  extern void   initialize_cofold(int length); /* allocate arrays for folding */
-diff -ur ViennaRNA-1.8.5_stock/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
---- ViennaRNA-1.8.5_stock/H/edit_cost.h	2019-11-23 15:16:45.084155500 -0500
-+++ ViennaRNA-1.8.5/H/edit_cost.h	2019-11-23 15:22:41.173876600 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
+--- ViennaRNA-1.8.5_stock/H/edit_cost.h	2019-11-23 17:31:34.929417100 -0500
++++ ViennaRNA-1.8.5/H/edit_cost.h	2019-11-23 15:33:30.011064300 -0500
 @@ -18,18 +18,18 @@
  PRIVATE CostMatrix  UsualCost = 
  {
@@ -69,9 +70,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
  
  };
  
-diff -ur ViennaRNA-1.8.5_stock/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
---- ViennaRNA-1.8.5_stock/H/energy_const.h	2019-11-23 15:16:45.088144900 -0500
-+++ ViennaRNA-1.8.5/H/energy_const.h	2019-11-23 15:22:41.174875300 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
+--- ViennaRNA-1.8.5_stock/H/energy_const.h	2019-11-23 17:31:34.932677800 -0500
++++ ViennaRNA-1.8.5/H/energy_const.h	2019-11-23 15:33:30.015080600 -0500
 @@ -15,7 +15,7 @@
  #define K0  273.15
  #define INF 1000000
@@ -81,9 +82,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
  #define NBPAIRS 7
  #define TURN 3
  #define MAXLOOP 30
-diff -ur ViennaRNA-1.8.5_stock/H/fold.h ViennaRNA-1.8.5/H/fold.h
---- ViennaRNA-1.8.5_stock/H/fold.h	2019-11-23 15:16:45.075180000 -0500
-+++ ViennaRNA-1.8.5/H/fold.h	2019-11-23 15:22:41.176113700 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/fold.h ViennaRNA-1.8.5/H/fold.h
+--- ViennaRNA-1.8.5_stock/H/fold.h	2019-11-23 17:31:34.900918400 -0500
++++ ViennaRNA-1.8.5/H/fold.h	2019-11-23 15:33:30.018079200 -0500
 @@ -1,5 +1,9 @@
 +#ifndef _FOLD_H
 +#define _FOLD_H
@@ -100,9 +101,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/fold.h ViennaRNA-1.8.5/H/fold.h
  extern	void	export_circfold_arrays(int *Fc_p, int *FcH_p, int *FcI_p, int *FcM_p, int **fM2_p, int **f5_p, int **c_p, int **fML_p, int **fM1_p, int **indx_p, char **ptype_p);
 +
 +#endif
-diff -ur ViennaRNA-1.8.5_stock/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
---- ViennaRNA-1.8.5_stock/H/pair_mat.h	2019-11-23 15:16:45.079172400 -0500
-+++ ViennaRNA-1.8.5/H/pair_mat.h	2019-11-23 15:22:41.177883100 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
+--- ViennaRNA-1.8.5_stock/H/pair_mat.h	2019-11-23 17:31:34.931681200 -0500
++++ ViennaRNA-1.8.5/H/pair_mat.h	2019-11-23 15:33:30.020065400 -0500
 @@ -28,7 +28,7 @@
    int code;
    if (energy_set>0) code = (int) (c-'A')+1;
@@ -112,9 +113,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
      pos = strchr(Law_and_Order, c);
      if (pos==NULL) code=0;
      else code = (int) (pos-Law_and_Order);
-diff -ur ViennaRNA-1.8.5_stock/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
---- ViennaRNA-1.8.5_stock/H/part_func.h	2019-11-23 15:16:45.079172400 -0500
-+++ ViennaRNA-1.8.5/H/part_func.h	2019-11-23 15:22:41.179881000 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
+--- ViennaRNA-1.8.5_stock/H/part_func.h	2019-11-23 17:31:34.923451200 -0500
++++ ViennaRNA-1.8.5/H/part_func.h	2019-11-23 15:33:30.023709400 -0500
 @@ -6,9 +6,10 @@
  extern float  pf_fold(char *sequence, char *structure);
  /* calculate partition function and base pair probabilities */
@@ -127,9 +128,9 @@ diff -ur ViennaRNA-1.8.5_stock/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
  extern double mean_bp_dist(int length); /* mean pair distance of ensemble */
  extern char  *centroid(int length, double *dist);     /* mean pair distance of ensemble */
  extern int get_pf_arrays(short **S_p, short **S1_p, char **ptype_p, FLT_OR_DBL **qb_p, FLT_OR_DBL **qm_p, FLT_OR_DBL **q1k_p, FLT_OR_DBL **qln_p);
-diff -ur ViennaRNA-1.8.5_stock/H/utils.h ViennaRNA-1.8.5/H/utils.h
---- ViennaRNA-1.8.5_stock/H/utils.h	2019-11-23 15:16:45.087147700 -0500
-+++ ViennaRNA-1.8.5/H/utils.h	2019-11-23 15:22:41.181584600 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/utils.h ViennaRNA-1.8.5/H/utils.h
+--- ViennaRNA-1.8.5_stock/H/utils.h	2019-11-23 17:31:34.920443900 -0500
++++ ViennaRNA-1.8.5/H/utils.h	2019-11-23 15:33:30.027699100 -0500
 @@ -28,7 +28,7 @@
  /* random string of length l using characters from symbols[] */
  extern int    hamming(const char *s1, const char *s2);
@@ -139,117 +140,41 @@ diff -ur ViennaRNA-1.8.5_stock/H/utils.h ViennaRNA-1.8.5/H/utils.h
  
  
  extern char *pack_structure(const char *struc);
-diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile
---- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/Makefile	2019-11-23 15:16:45.240426600 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/Makefile	2019-11-23 15:22:41.183883900 -0500
-@@ -22,16 +22,16 @@
- SHELL = /bin/sh
- 
- CC           = gcc
--CFLAGS       = -I./src -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
-+CFLAGS       = -I./src -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
- INSTALL      = /usr/bin/install -c
- INSTALL_DATA = ${INSTALL} -m 644
- FIND         = find
--MAKEDEPEND   = :
-+MAKEDEPEND   = makedepend
- AR           = ar
- ARFLAGS      = -cr
- RANLIB       = ranlib
- LD           = ld
--LDFLAGS      =   -L/usr/local/lib -lm -lX11 -lgd
-+LDFLAGS      =   -L/usr/local/lib -lm -lgd
- 
- 
- BASE_DIR = ./src
-@@ -52,9 +52,9 @@
- FIG_SRC = $(FIG_DIR)/g2_FIG.c
- FIG_INS = $(FIG_DIR)/g2_FIG.h
- 
--X11_DIR = ./src/X11
--X11_SRC = $(X11_DIR)/g2_X11.c
--X11_INS = $(X11_DIR)/g2_X11.h
-+#X11_DIR = ./src/X11
-+#X11_SRC = $(X11_DIR)/g2_X11.c
-+#X11_INS = $(X11_DIR)/g2_X11.h
- 
- #WIN32_DIR = ./src/WIN32
- #WIN32_SRC = $(WIN32_DIR)/g2_win32.c $(WIN32_DIR)/g2_win32_thread.c 
-@@ -86,7 +86,7 @@
- 	test -d ./include || mkdir ./include
- 	cp $(INS) ./include/
- 
--shared: libg2.so.0.$(G2_VERSION)
-+shared: libg2.so
- 	@echo
- 
- 
-@@ -94,8 +94,8 @@
- 	$(AR) $(ARFLAGS) libg2.a $(OBJ)
- 	test ! -n "$(RANLIB)" || $(RANLIB) $@
- 
--libg2.so.0.$(G2_VERSION): $(OBJ)
--	ld -shared -soname libg2.so.0 -o $@ $(OBJ) 
-+libg2.so: $(OBJ)
-+	  -o $@ $(OBJ) 
- 
- install: libg2.a
- 	test -d $(LIBDIR) || mkdir -p $(LIBDIR)
-@@ -127,7 +127,7 @@
- 	-rm -f ./g2_perl/test.jpg
- 	-rm -f ./g2_perl/test.fig
- 	-rm -f ./g2_perl/Makefile.old
--	-rm -f ./libg2.so.0.$(G2_VERSION)
-+	-rm -f ./libg2.so
- 	-rm -f libg2.$(G2_VERSION).a
- 	-rm -f a.out
- 	-rm -fr doc/html/ doc/latex/ doc/g2_refman.ps doc/g2_refman.pdf
-diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/demo/Makefile ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile
---- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/demo/Makefile	2019-11-23 15:16:45.243419400 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/demo/Makefile	2019-11-23 15:22:41.186851300 -0500
-@@ -23,13 +23,13 @@
- #F77 = f77 -n32
- #CPP = /lib/cpp -P -DFORTRAN
- 
--CFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD -I../src/FIG -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
--CXXFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD/ -I../src/FIG -g -O2 -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
--LDFLAGS = -L.. -lg2   -L/usr/local/lib -lm -lX11 -lgd
-+CFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD -I../src/FIG -g -O2  -I/usr/local/include -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
-+CXXFLAGS = -I../src -I../src/X11 -I../src/PS -I../src/Win32 -I../src/GD/ -I../src/FIG -g -O2 -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1
-+LDFLAGS = -L.. -lg2   -L/usr/local/lib -lm -lgd
- 
- DEMO_PS = simple_PS
- DEMO_FIG = simple_FIG
--DEMO_X11 = simple_X11 pointer handles
-+#DEMO_X11 = simple_X11 pointer handles
- DEMO_GD = simple_gd
- #DEMO_WIN32 = simple_win32
- 
-@@ -78,7 +78,7 @@
- 	$(F77) $(F77_FLAGS) demo_f.f $(LDFLAGS) -o $@
- 
- g2testf: g2_test.f
--	$(CPP) -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -E g2_test.f > g2testf.f
-+	$(CPP) -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -E g2_test.f > g2testf.f
- 	$(F77) g2testf.f $(LDFLAGS) -o g2testf
- 
- clean:
-diff -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL
---- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:16:45.226464000 -0500
-+++ ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:22:41.187840400 -0500
+Only in ViennaRNA-1.8.5/Kinfold: .deps
+Only in ViennaRNA-1.8.5/Kinfold: config.h
+Only in ViennaRNA-1.8.5/Kinfold: config.log
+Only in ViennaRNA-1.8.5/Kinfold: config.status
+Only in ViennaRNA-1.8.5/Kinfold: stamp-h1
+Only in ViennaRNA-1.8.5/Progs: .deps
+Only in ViennaRNA-1.8.5/RNAforester: config.h
+Only in ViennaRNA-1.8.5/RNAforester: config.log
+Only in ViennaRNA-1.8.5/RNAforester: config.status
+Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.log
+Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.status
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL
+--- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 17:31:35.290978800 -0500
++++ ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:34:10.403119600 -0500
 @@ -4,7 +4,7 @@
  WriteMakefile(
      'NAME'	=> 'G2',
      'VERSION_FROM' => 'G2.pm', # finds $VERSION
 -    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lX11 -lgd'],  # e.g., '-lm' 
 -    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
-+    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lgd'],  # e.g., '-lm' 
-+    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DUNIX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
++    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm'],  # e.g., '-lm' 
++    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
      'INC'	=> '-I./../include',           # e.g., '-I/usr/local/include' 
  );
-diff -ur ViennaRNA-1.8.5_stock/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
---- ViennaRNA-1.8.5_stock/lib/LPfold.c	2019-11-23 15:16:45.126730500 -0500
-+++ ViennaRNA-1.8.5/lib/LPfold.c	2019-11-23 15:22:41.190831900 -0500
+Only in ViennaRNA-1.8.5/RNAforester/src: .deps
+Only in ViennaRNA-1.8.5/RNAforester: stamp-h1
+Only in ViennaRNA-1.8.5/Utils: .deps
+Only in ViennaRNA-1.8.5: ViennaRNA.spec
+Only in ViennaRNA-1.8.5: config.h
+Only in ViennaRNA-1.8.5: config.log
+Only in ViennaRNA-1.8.5: config.status
+Only in ViennaRNA-1.8.5/lib: .deps
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
+--- ViennaRNA-1.8.5_stock/lib/LPfold.c	2019-11-23 17:31:35.366774700 -0500
++++ ViennaRNA-1.8.5/lib/LPfold.c	2019-11-23 15:33:30.038693500 -0500
 @@ -367,7 +367,7 @@
  	  temp *= expMLintern[tt]*scale[2];
  	  if (k>1) temp *= expdangle5[tt][S1[k-1]];
@@ -259,9 +184,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
  	  pR[k][l] += temp;
  
  	  if (pR[k][l]>Qmax) {
-diff -ur ViennaRNA-1.8.5_stock/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
---- ViennaRNA-1.8.5_stock/lib/PS_dot.c	2019-11-23 15:16:45.111769700 -0500
-+++ ViennaRNA-1.8.5/lib/PS_dot.c	2019-11-23 15:22:41.192845700 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
+--- ViennaRNA-1.8.5_stock/lib/PS_dot.c	2019-11-23 17:31:35.362787800 -0500
++++ ViennaRNA-1.8.5/lib/PS_dot.c	2019-11-23 15:33:30.041692400 -0500
 @@ -1132,7 +1132,7 @@
  
  #include "pair_mat.h"
@@ -445,9 +370,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
    return 0;
 +
  }
-diff -ur ViennaRNA-1.8.5_stock/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
---- ViennaRNA-1.8.5_stock/lib/alipfold.c	2019-11-23 15:16:45.123739000 -0500
-+++ ViennaRNA-1.8.5/lib/alipfold.c	2019-11-23 15:22:41.195820900 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
+--- ViennaRNA-1.8.5_stock/lib/alipfold.c	2019-11-23 17:31:35.357798000 -0500
++++ ViennaRNA-1.8.5/lib/alipfold.c	2019-11-23 15:33:30.045678300 -0500
 @@ -1482,7 +1482,6 @@
      qbt1=1.;
      for (s=0; s<n_seq; s++){
@@ -456,9 +381,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
        qbt1 *= exphairpin[u];
        if (u<3) continue; /*sog amoi: strof??*/
        if ((tetra_loop)&&(u==4)) {
-diff -ur ViennaRNA-1.8.5_stock/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
---- ViennaRNA-1.8.5_stock/lib/cofold.c	2019-11-23 15:16:45.118752100 -0500
-+++ ViennaRNA-1.8.5/lib/cofold.c	2019-11-23 15:22:41.198828300 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
+--- ViennaRNA-1.8.5_stock/lib/cofold.c	2019-11-23 17:31:35.335860000 -0500
++++ ViennaRNA-1.8.5/lib/cofold.c	2019-11-23 15:33:30.048669300 -0500
 @@ -36,7 +36,8 @@
  #define free_arrays free_co_arrays
  #define initialize_fold initialize_cofold
@@ -567,9 +492,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
  		      int si1, int sj1, int sp1, int sq1) {
    /* compute energy of degree 2 loop (stack bulge or interior) */
    int nl, ns, energy;
-diff -ur ViennaRNA-1.8.5_stock/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
---- ViennaRNA-1.8.5_stock/lib/findpath.c	2019-11-23 15:16:45.116756500 -0500
-+++ ViennaRNA-1.8.5/lib/findpath.c	2019-11-23 15:22:41.200805700 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
+--- ViennaRNA-1.8.5_stock/lib/findpath.c	2019-11-23 17:31:35.339846200 -0500
++++ ViennaRNA-1.8.5/lib/findpath.c	2019-11-23 15:33:30.051814600 -0500
 @@ -12,8 +12,7 @@
  
  static char rcsid[] = "$Id: findpath.c,v 1.2 2008/10/09 15:42:45 ivo Exp $";
@@ -580,9 +505,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
  static int energy_of_move(short *pt, short *s, short *s1, int m1, int m2);
  
  typedef struct move {
-diff -ur ViennaRNA-1.8.5_stock/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
---- ViennaRNA-1.8.5_stock/lib/fold.c	2019-11-23 15:16:45.129723500 -0500
-+++ ViennaRNA-1.8.5/lib/fold.c	2019-11-23 15:22:41.204815000 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
+--- ViennaRNA-1.8.5_stock/lib/fold.c	2019-11-23 17:31:35.341842600 -0500
++++ ViennaRNA-1.8.5/lib/fold.c	2019-11-23 15:33:30.054495800 -0500
 @@ -10,7 +10,7 @@
  		  Vienna RNA package
  */
@@ -976,9 +901,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
        }
      }
      if (hx!=0) {
-diff -ur ViennaRNA-1.8.5_stock/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
---- ViennaRNA-1.8.5_stock/lib/part_func.c	2019-11-23 15:16:45.115766100 -0500
-+++ ViennaRNA-1.8.5/lib/part_func.c	2019-11-23 15:22:41.206788200 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
+--- ViennaRNA-1.8.5_stock/lib/part_func.c	2019-11-23 17:31:35.331872300 -0500
++++ ViennaRNA-1.8.5/lib/part_func.c	2019-11-23 15:33:30.057489500 -0500
 @@ -84,6 +84,7 @@
  
  PUBLIC  float pf_fold(char *sequence, char *structure);
@@ -987,9 +912,9 @@ diff -ur ViennaRNA-1.8.5_stock/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
  PUBLIC  void  free_pf_arrays(void);
  PUBLIC  void  update_pf_params(int length);
  PUBLIC  char  bppm_symbol(float *x);
-diff -ur ViennaRNA-1.8.5_stock/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
---- ViennaRNA-1.8.5_stock/lib/subopt.c	2019-11-23 15:16:45.122741800 -0500
-+++ ViennaRNA-1.8.5/lib/subopt.c	2019-11-23 15:22:41.209829100 -0500
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
+--- ViennaRNA-1.8.5_stock/lib/subopt.c	2019-11-23 17:31:35.369767100 -0500
++++ ViennaRNA-1.8.5/lib/subopt.c	2019-11-23 15:33:30.061478900 -0500
 @@ -87,6 +87,7 @@
  #include "list.h"
  #include "subopt.h"
@@ -1007,3 +932,4 @@ diff -ur ViennaRNA-1.8.5_stock/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
  
  PRIVATE void encode_seq(char *sequence) {
    unsigned int i,l;
+Only in ViennaRNA-1.8.5: stamp-h1
