@@ -3,10 +3,11 @@
 * Download & install `emscripten`: https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk
 * Install `cmake`: https://cmake.org/download/
 * Download the tarballs for Vienna 1.8.5, Vienna 2.1.8, and nupack 3.0.4 into the corresponding directories
-* Clone the LinearFold 
+* Clone the LinearFold repository at commit 4d5a67b47b9dfcde66488f6c05b7583a4c9eff50
 * `$ ./patch.sh`
     - This applies the patchfiles with eterna's modifications (eg, for getting substructure energies and some energetic
-    modifications) to the energy libraries. 
+    modifications) to the energy libraries.
+    - To generate fresh diffs, make sure you have a fresh copy of the energy model (so that the patched code is in `<enginefolder>` and the original is in `<enginefolder>_stock`) and run `diff -X .gitignore -ur <enginefolder>_stock <enginefolder> > <enginename>-eterna.patch`
 * `$ source /path/to/emsdk/emsdk_env.sh`
     - This adds emscripten build tools to the path - do this once per shell
 * `$ emconfigure cmake -DCMAKE_BUILD_TYPE=Release && emmake make clean && emmake make install`
