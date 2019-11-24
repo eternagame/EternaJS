@@ -18,7 +18,7 @@ export default class Vienna2 extends Folder {
      * @returns {Promise<Vienna2>}
      */
     public static create(): Promise<Vienna2> {
-        return import('./engines/vrna2')
+        return import('./engines/vienna2')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna2(program));
     }
