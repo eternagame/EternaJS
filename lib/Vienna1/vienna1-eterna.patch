@@ -1,0 +1,935 @@
+Only in ViennaRNA-1.8.5/Cluster: .deps
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/cofold.h ViennaRNA-1.8.5/H/cofold.h
+--- ViennaRNA-1.8.5_stock/H/cofold.h	2019-11-23 17:31:34.907901900 -0500
++++ ViennaRNA-1.8.5/H/cofold.h	2019-11-23 15:33:30.008101500 -0500
+@@ -1,6 +1,7 @@
+ /* function from fold.c */
+ #include "subopt.h"
+ extern float  cofold(char *sequence, char *structure); 
++extern float  cofold_with_binding_site(const char *sequence, char *structure, int i, int p, int j, int q, int bonus); // NNFIX
+ /* calculate energy of string on structure */
+ extern void   free_co_arrays(void);          /* free arrays for mfe folding */
+ extern void   initialize_cofold(int length); /* allocate arrays for folding */
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/edit_cost.h ViennaRNA-1.8.5/H/edit_cost.h
+--- ViennaRNA-1.8.5_stock/H/edit_cost.h	2019-11-23 17:31:34.929417100 -0500
++++ ViennaRNA-1.8.5/H/edit_cost.h	2019-11-23 15:33:30.011064300 -0500
+@@ -18,18 +18,18 @@
+ PRIVATE CostMatrix  UsualCost = 
+ {
+ 
+-/*  Null,   U,   P,   H,   B,   I,   M,   S,   E,   R     */
++/*  Null,U,  P,   H,   B,   I,   M,   S,   E,   R     */
+ 
+-   {   0,   1,   2,   2,   2,   2,   2,   1,  1,  INF},   /* Null replaced */
+-   {   1,   0,   1, INF, INF, INF, INF, INF, INF, INF},   /* U    replaced */
+-   {   2,   1,   0, INF, INF, INF, INF, INF, INF, INF},   /* P    replaced */
+-   {   2, INF, INF,   0,   2,   2,   2, INF, INF, INF},   /* H    replaced */
+-   {   2, INF, INF,   2,   0,   1,   2, INF, INF, INF},   /* B    replaced */
+-   {   2, INF, INF,   2,   1,   0,   2, INF, INF, INF},   /* I    replaced */
+-   {   2, INF, INF,   2,   2,   2,   0, INF, INF, INF},   /* M    replaced */
+-   {   1, INF, INF, INF, INF, INF, INF,   0, INF, INF},   /* S    replaced */
+-   {   1, INF, INF, INF, INF, INF, INF, INF,   0, INF},   /* E    replaced */
+-   { INF, INF, INF, INF, INF, INF, INF, INF, INF,   0},   /* R    replaced */
++   {0,   1,   2,   2,   2,   2,   2,   1,  1,  INF},   /* Null */
++   {1,   0,   1, INF, INF, INF, INF, INF, INF, INF},   /* U    */
++   {2,   1,   0, INF, INF, INF, INF, INF, INF, INF},   /* P    */
++   {2, INF, INF,   0,   2,   2,   2, INF, INF, INF},   /* H    */
++   {2, INF, INF,   2,   0,   1,   2, INF, INF, INF},   /* B    */
++   {2, INF, INF,   2,   1,   0,   2, INF, INF, INF},   /* I    */
++   {2, INF, INF,   2,   2,   2,   0, INF, INF, INF},   /* M    */
++   {1, INF, INF, INF, INF, INF, INF,   0, INF, INF},   /* S    */
++   {1, INF, INF, INF, INF, INF, INF, INF,   0, INF},   /* E    */
++   {INF, INF, INF, INF, INF, INF, INF, INF, INF,   0}, /* R    */
+ 
+ };
+ 
+@@ -39,16 +39,16 @@
+ 
+ /*  Null,   U,   P,   H,   B,   I,   M,   S,   E,  R     */
+ 
+-   {   0,   1,   2, 100,   5,   5,  75,   5,   5, INF},   /* Null replaced */
+-   {   1,   0,   1, INF, INF, INF, INF, INF, INF, INF},   /* U    replaced */
+-   {   2,   1,   0, INF, INF, INF, INF, INF, INF, INF},   /* P    replaced */
+-   { 100, INF, INF,   0,   8,   8,   8, INF, INF, INF},   /* H    replaced */
+-   {   5, INF, INF,   8,   0,   3,   8, INF, INF, INF},   /* B    replaced */
+-   {   5, INF, INF,   8,   3,   0,   8, INF, INF, INF},   /* I    replaced */
+-   {  75, INF, INF,   8,   8,   8,   0, INF, INF, INF},   /* M    replaced */
+-   {   5, INF, INF, INF, INF, INF, INF,   0, INF, INF},   /* S    replaced */
+-   {   5, INF, INF, INF, INF, INF, INF, INF,   0, INF},   /* E    replaced */
+-   { INF, INF, INF, INF, INF, INF, INF, INF, INF,   0},   /* R    replaced */
++   {   0,   1,   2, 100,   5,   5,  75,   5,   5, INF},   /* Null*/
++   {   1,   0,   1, INF, INF, INF, INF, INF, INF, INF},   /* U   */
++   {   2,   1,   0, INF, INF, INF, INF, INF, INF, INF},   /* P   */
++   { 100, INF, INF,   0,   8,   8,   8, INF, INF, INF},   /* H   */
++   {   5, INF, INF,   8,   0,   3,   8, INF, INF, INF},   /* B   */
++   {   5, INF, INF,   8,   3,   0,   8, INF, INF, INF},   /* I   */
++   {  75, INF, INF,   8,   8,   8,   0, INF, INF, INF},   /* M   */
++   {   5, INF, INF, INF, INF, INF, INF,   0, INF, INF},   /* S   */
++   {   5, INF, INF, INF, INF, INF, INF, INF,   0, INF},   /* E   */
++   { INF, INF, INF, INF, INF, INF, INF, INF, INF,   0},   /* R   */
+ 
+ };
+ 
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/energy_const.h ViennaRNA-1.8.5/H/energy_const.h
+--- ViennaRNA-1.8.5_stock/H/energy_const.h	2019-11-23 17:31:34.932677800 -0500
++++ ViennaRNA-1.8.5/H/energy_const.h	2019-11-23 15:33:30.015080600 -0500
+@@ -15,7 +15,7 @@
+ #define K0  273.15
+ #define INF 1000000
+ #define FORBIDDEN 9999
+-#define BONUS 10000
++#define BONUS 100
+ #define NBPAIRS 7
+ #define TURN 3
+ #define MAXLOOP 30
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/fold.h ViennaRNA-1.8.5/H/fold.h
+--- ViennaRNA-1.8.5_stock/H/fold.h	2019-11-23 17:31:34.900918400 -0500
++++ ViennaRNA-1.8.5/H/fold.h	2019-11-23 15:33:30.018079200 -0500
+@@ -1,5 +1,9 @@
++#ifndef _FOLD_H
++#define _FOLD_H
++
+ /* function from fold.c */
+ extern float  fold(const char *sequence, char *structure);
++extern float  fold_with_binding_site(const char *sequence, char *structure, int i, int p, int j, int q, int bonus); // JEEFIX
+ /* calculate mfe-structure of sequence */
+ extern float  energy_of_struct(const char *string, const char *structure);
+ /* calculate energy of string on structure */
+@@ -14,3 +18,5 @@
+ extern	float	circfold(const char *string, char *structure);
+ extern	float	energy_of_circ_struct(const char *string, const char *structure);
+ extern	void	export_circfold_arrays(int *Fc_p, int *FcH_p, int *FcI_p, int *FcM_p, int **fM2_p, int **f5_p, int **c_p, int **fML_p, int **fM1_p, int **indx_p, char **ptype_p);
++
++#endif
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/pair_mat.h ViennaRNA-1.8.5/H/pair_mat.h
+--- ViennaRNA-1.8.5_stock/H/pair_mat.h	2019-11-23 17:31:34.931681200 -0500
++++ ViennaRNA-1.8.5/H/pair_mat.h	2019-11-23 15:33:30.020065400 -0500
+@@ -28,7 +28,7 @@
+   int code;
+   if (energy_set>0) code = (int) (c-'A')+1;
+   else {
+-    const char *pos;
++    char *pos;
+     pos = strchr(Law_and_Order, c);
+     if (pos==NULL) code=0;
+     else code = (int) (pos-Law_and_Order);
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/part_func.h ViennaRNA-1.8.5/H/part_func.h
+--- ViennaRNA-1.8.5_stock/H/part_func.h	2019-11-23 17:31:34.923451200 -0500
++++ ViennaRNA-1.8.5/H/part_func.h	2019-11-23 15:33:30.023709400 -0500
+@@ -6,9 +6,10 @@
+ extern float  pf_fold(char *sequence, char *structure);
+ /* calculate partition function and base pair probabilities */
+ extern void   init_pf_fold(int length);    /* allocate space for pf_fold() */
++extern	void  init_pf_circ_fold(int length);
+ extern void   free_pf_arrays(void);        /* free arrays from pf_fold() */
+ extern void   update_pf_params(int length); /*recalculate energy parameters */
+-extern char   bppm_symbol(const float *x);  /* string representation of structure */
++extern char   bppm_symbol(float *x);  /* string representation of structure */
+ extern double mean_bp_dist(int length); /* mean pair distance of ensemble */
+ extern char  *centroid(int length, double *dist);     /* mean pair distance of ensemble */
+ extern int get_pf_arrays(short **S_p, short **S1_p, char **ptype_p, FLT_OR_DBL **qb_p, FLT_OR_DBL **qm_p, FLT_OR_DBL **q1k_p, FLT_OR_DBL **qln_p);
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/H/utils.h ViennaRNA-1.8.5/H/utils.h
+--- ViennaRNA-1.8.5_stock/H/utils.h	2019-11-23 17:31:34.920443900 -0500
++++ ViennaRNA-1.8.5/H/utils.h	2019-11-23 15:33:30.027699100 -0500
+@@ -28,7 +28,7 @@
+ /* random string of length l using characters from symbols[] */
+ extern int    hamming(const char *s1, const char *s2);
+ /* calculate hamming distance */
+-extern /*@only@*/ /*@null@*/ char  *get_line(const FILE *fp); /* read one (arbitrary length) line from fp */
++extern /*@only@*/ /*@null@*/ char  *get_line(FILE *fp); /* read one (arbitrary length) line from fp */
+ 
+ 
+ extern char *pack_structure(const char *struc);
+Only in ViennaRNA-1.8.5/Kinfold: .deps
+Only in ViennaRNA-1.8.5/Kinfold: config.h
+Only in ViennaRNA-1.8.5/Kinfold: config.log
+Only in ViennaRNA-1.8.5/Kinfold: config.status
+Only in ViennaRNA-1.8.5/Kinfold: stamp-h1
+Only in ViennaRNA-1.8.5/Progs: .deps
+Only in ViennaRNA-1.8.5/RNAforester: config.h
+Only in ViennaRNA-1.8.5/RNAforester: config.log
+Only in ViennaRNA-1.8.5/RNAforester: config.status
+Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.log
+Only in ViennaRNA-1.8.5/RNAforester/g2-0.70: config.status
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL
+--- ViennaRNA-1.8.5_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 17:31:35.290978800 -0500
++++ ViennaRNA-1.8.5/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:34:10.403119600 -0500
+@@ -4,7 +4,7 @@
+ WriteMakefile(
+     'NAME'	=> 'G2',
+     'VERSION_FROM' => 'G2.pm', # finds $VERSION
+-    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lX11 -lgd'],  # e.g., '-lm' 
+-    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
++    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm'],  # e.g., '-lm' 
++    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLINUX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
+     'INC'	=> '-I./../include',           # e.g., '-I/usr/local/include' 
+ );
+Only in ViennaRNA-1.8.5/RNAforester/src: .deps
+Only in ViennaRNA-1.8.5/RNAforester: stamp-h1
+Only in ViennaRNA-1.8.5/Utils: .deps
+Only in ViennaRNA-1.8.5: ViennaRNA.spec
+Only in ViennaRNA-1.8.5: config.h
+Only in ViennaRNA-1.8.5: config.log
+Only in ViennaRNA-1.8.5: config.status
+Only in ViennaRNA-1.8.5/lib: .deps
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/LPfold.c ViennaRNA-1.8.5/lib/LPfold.c
+--- ViennaRNA-1.8.5_stock/lib/LPfold.c	2019-11-23 17:31:35.366774700 -0500
++++ ViennaRNA-1.8.5/lib/LPfold.c	2019-11-23 15:33:30.038693500 -0500
+@@ -367,7 +367,7 @@
+ 	  temp *= expMLintern[tt]*scale[2];
+ 	  if (k>1) temp *= expdangle5[tt][S1[k-1]];
+ 	  if (l<n) temp *= expdangle3[tt][S1[l+1]];
+-	  else if (tt>2)temp *= expTermAU;
++	  else temp *= expTermAU;
+ 	  pR[k][l] += temp;
+ 
+ 	  if (pR[k][l]>Qmax) {
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/PS_dot.c ViennaRNA-1.8.5/lib/PS_dot.c
+--- ViennaRNA-1.8.5_stock/lib/PS_dot.c	2019-11-23 17:31:35.362787800 -0500
++++ ViennaRNA-1.8.5/lib/PS_dot.c	2019-11-23 15:33:30.041692400 -0500
+@@ -1132,7 +1132,7 @@
+ 
+ #include "pair_mat.h"
+ #include "aln_util.h"
+-int PS_color_aln(const char *structure, const char *filename,
++int PS_color_aln(const char *structure, const char *filename, 
+ 		 const char *seqs[], const char *names[]) {
+   /* produce PS sequence alignment color-annotated by consensus structure */
+ 
+@@ -1180,16 +1180,16 @@
+ 	"1 -1 scale\n"
+ 	"/Courier findfont\n"
+ 	"[10 0 0 -10 0 0] makefont setfont\n";
+-
+-
++	
++  
+   outfile = fopen(filename, "w");
+ 
+   if (outfile == NULL) {
+-    fprintf(stderr, "can't open file %s - not doing alignment plot\n",
++    fprintf(stderr, "can't open file %s - not doing alignment plot\n", 
+ 	    filename);
+     return 0;
+   }
+-
++  
+   columnWidth=60;            /* Display long alignments in blocks of this size */
+   fontWidth=6;               /* Font metrics */
+   fontHeight=6.5;
+@@ -1209,7 +1209,7 @@
+ 
+   /* Allocate memory for various strings, length*2 is (more than)
+ 	 enough for all of them */
+-  tmpBuffer = (char *) space((unsigned) MAX(length*2,columnWidth)+1);
++  tmpBuffer = (char *) space((unsigned) length*2);
+   ssEscaped=(char *) space((unsigned) length*2);
+   ruler=(char *) space((unsigned) length*2);
+ 
+@@ -1222,14 +1222,14 @@
+     if (tmp>maxName)  maxName=tmp;
+   }
+ 
+-
++  
+   /* x-coord. where sequences start */
+-  seqsX=namesX+maxName*fontWidth+nameStep;
++  seqsX=namesX+maxName*fontWidth+nameStep; 
+ 
+   /* calculate number of digits of the alignment length */
+   snprintf(tmpBuffer,length, "%i",length);
+   maxNum=strlen(tmpBuffer);
+-
++  
+ 
+   /* Calculate bounding box */
+   tmpColumns=columnWidth;
+@@ -1257,7 +1257,7 @@
+ 	}
+   }
+   ruler[length]='\0';
+-
++  
+   /* Draw color annotation first */
+   /* Repeat for all pairs */
+   for (i=1; i<=length; i++) {
+@@ -1282,7 +1282,7 @@
+ 	  color = colorMatrix[pairings-1][nonpair];
+ 	  for (s=0; s<N; s++) {
+ 	    yy=startY+(block-1)*(lineStep*(N+2)+blockStep+consStep+rulerStep)+ssStep*(block)+(s+1)*lineStep;
+-
++	    
+ 	    /* Color according due color information in pi-array, only if base pair is possible */
+ 	    if (BP_pair[ENCODE(seqs[s][i-1])][ENCODE(seqs[s][j-1])]) {
+ 
+@@ -1302,14 +1302,14 @@
+   currPos=0;
+ 
+   cons =  consensus(seqs);
+-
++  
+   while (currPos<length) {
+ 
+     /* Display secondary structure line */
+     fprintf(outfile,"0 setgray\n");
+     strncpy(tmpBuffer,structure+currPos,columnWidth);
+     tmpBuffer[columnWidth]='\0';
+-
++    
+     x=0;y=0;
+     while ((c=tmpBuffer[x])){
+       if (c=='.'){
+@@ -1317,26 +1317,26 @@
+       } else {
+ 	ssEscaped[y++]='\\';
+ 	ssEscaped[y++]=c;
+-      }
++      }			 
+       x++;
+     }
+     ssEscaped[y]='\0';
+-
++    
+     fprintf(outfile, "(%s) %.1f %.1f string\n", ssEscaped,seqsX,currY);
+     currY+=ssStep+lineStep;
+-
++    
+     /* Display names, sequences and numbers */
+ 
+     for (i=0; i<N; i++) {
+-
++      
+       strncpy(tmpBuffer,seqs[i]+currPos,columnWidth);
+       tmpBuffer[columnWidth]='\0';
+-
++      
+       match=0;
+       for (j=0;j<(currPos+strlen(tmpBuffer));j++){
+ 	if (seqs[i][j] != '-') match++;
+       }
+-
++      
+       fprintf(outfile, "(%s) %.1f %.1f string\n", names[i],namesX,currY);
+       fprintf(outfile, "(%s) %.1f %.1f string\n", tmpBuffer,seqsX,currY);
+       fprintf(outfile, "(%i) %.1f %.1f string\n", match,seqsX+fontWidth*(strlen(tmpBuffer))+numberStep,currY);
+@@ -1346,12 +1346,12 @@
+     strncpy(tmpBuffer,ruler+currPos,columnWidth);
+     tmpBuffer[columnWidth]='\0';
+     fprintf(outfile, "(%s) %.1f %.1f string\n", tmpBuffer,seqsX,currY);
+-
++    
+     currY+=lineStep;
+     currY+=consStep;
+-
++    
+     /*Display conservation bar*/
+-
++    
+     fprintf(outfile,"0.6 setgray\n");
+     for (i=currPos;(i<currPos+columnWidth && i<length);i++){
+       match=0;
+@@ -1361,27 +1361,27 @@
+ 	if (cons[i]=='T' && seqs[j][i]=='U') match++;
+       }
+       score=(float)(match-1)/(N-1);
+-
++      
+       if (cons[i] == '-' ||
+ 	  cons[i] == '_' ||
+ 	  cons[i] == '.'){
+ 	score=0;
+       }
+-
++      
+       barHeight=maxConsBar*score;
+       if (barHeight==0){
+ 	barHeight=1;
+       }
+-
++      
+       xx=seqsX+(i-(columnWidth*currPos/columnWidth))*fontWidth;
+-
++      
+       fprintf(outfile,"%.1f %.1f %.1f %.1f box2\n",
+ 	      xx,
+ 	      currY+maxConsBar-barHeight,
+ 	      xx+fontWidth,
+ 	      currY+maxConsBar);
+     }
+-
++    
+     currY+=blockStep;
+     currPos+=columnWidth;
+   }
+@@ -1392,6 +1392,7 @@
+ 
+   free(tmpBuffer);
+   free(ssEscaped);free(ruler);
+-
++  
+   return 0;
++
+ }
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/alipfold.c ViennaRNA-1.8.5/lib/alipfold.c
+--- ViennaRNA-1.8.5_stock/lib/alipfold.c	2019-11-23 17:31:35.357798000 -0500
++++ ViennaRNA-1.8.5/lib/alipfold.c	2019-11-23 15:33:30.045678300 -0500
+@@ -1482,7 +1482,6 @@
+     qbt1=1.;
+     for (s=0; s<n_seq; s++){
+       u = a2s[s][j-1]-a2s[s][i];
+-      if (a2s[s][i]<1) continue;
+       qbt1 *= exphairpin[u];
+       if (u<3) continue; /*sog amoi: strof??*/
+       if ((tetra_loop)&&(u==4)) {
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/cofold.c ViennaRNA-1.8.5/lib/cofold.c
+--- ViennaRNA-1.8.5_stock/lib/cofold.c	2019-11-23 17:31:35.335860000 -0500
++++ ViennaRNA-1.8.5/lib/cofold.c	2019-11-23 15:33:30.048669300 -0500
+@@ -36,7 +36,8 @@
+ #define free_arrays free_co_arrays
+ #define initialize_fold initialize_cofold
+ #define update_fold_params update_cofold_params
+-PUBLIC float  cofold(const char *string, char *structure);
++PUBLIC float  cofold(char *string, char *structure);
++PUBLIC float  cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bouns);
+ PUBLIC void   free_arrays(void);
+ PUBLIC void   initialize_fold(int length);
+ PUBLIC void   update_fold_params(void);
+@@ -59,6 +60,8 @@
+ inline PRIVATE  int   oldLoopEnergy(int i, int j, int p, int q, int type, int type_2);
+ inline PRIVATE int  LoopEnergy(int n1, int n2, int type, int type_2,
+ 			 int si1, int sj1, int sp1, int sq1);
++inline PRIVATE int  LoopEnergyNew(int n1, int n2, int type, int type_2,
++                         int si1, int sj1, int sp1, int sq1, int index_i, int index_p, int index_j, int index_q);
+ inline PRIVATE int  HairpinE(int size, int type, int si1, int sj1, const char *string);
+ PRIVATE void free_end(int *array, int i, int start);
+ 
+@@ -94,6 +97,13 @@
+ extern  int cut_point;   /* set to first pos of second seq for cofolding */
+ extern  int eos_debug;   /* verbose info from energy_of_struct */
+ 
++
++extern int binding_site_i;
++extern int binding_site_j;
++extern int binding_site_p;
++extern int binding_site_q;
++extern int binding_site_bonus;
++
+ /*--------------------------------------------------------------------------*/
+ static float mfe1, mfe2; /* minimum free energies of the monomers */
+ PUBLIC void initialize_fold(int length)
+@@ -168,7 +178,7 @@
+ 			-4: x = base must not pair
+ 			positive int: base is paired with int      */
+ 
+-float cofold(const char *string, char *structure) {
++float cofold(char *string, char *structure) {
+   int i, length, energy, bonus=0, bonus_cnt=0;
+ 
+   length = (int) strlen(string);
+@@ -222,6 +232,23 @@
+     return (float) energy/100.;
+ }
+ 
++/// NNFIX
++float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++          
++  float e = cofold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = NULL;
++  return e;
++}
++                        
+ PRIVATE int fill_arrays(const char *string) {
+   /* fill "c", "fML" and "f5" arrays and return  optimal energy */
+ 
+@@ -300,8 +327,8 @@
+ 
+ #if 1
+ 	    if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-	      energy = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-				  S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++	      energy = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++				  S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q);
+ 	    else {
+ 	      energy = 0;
+ 	      if (dangles) {
+@@ -823,8 +850,8 @@
+ 
+ 	/* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+ 	if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-	  energy = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-			      S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++	  energy = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++			      S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q);
+ 	else {
+ 	  energy = 0;
+ 	  if (dangles) {
+@@ -1099,7 +1126,18 @@
+ 
+ /*--------------------------------------------------------------------------*/
+ 
+-inline int LoopEnergy(int n1, int n2, int type, int type_2,
++inline PRIVATE int LoopEnergyNew(int n1, int n2, int type, int type_2,
++                      int si1, int sj1, int sp1, int sq1, int index_i, int index_p, int index_j, int index_q) {
++                      
++  int le = LoopEnergy(n1,n2,type,type_2,si1,sj1,sp1,sq1);
++  if(index_p == binding_site_p && index_q == binding_site_q && index_i == binding_site_i && index_j == binding_site_j) {
++    //fprintf(stderr,"MATCH!!!");
++    le -= binding_site_bonus;
++  }
++  return le;  
++}
++                                                                            
++inline PRIVATE int LoopEnergy(int n1, int n2, int type, int type_2,
+ 		      int si1, int sj1, int sp1, int sq1) {
+   /* compute energy of degree 2 loop (stack bulge or interior) */
+   int nl, ns, energy;
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/findpath.c ViennaRNA-1.8.5/lib/findpath.c
+--- ViennaRNA-1.8.5_stock/lib/findpath.c	2019-11-23 17:31:35.339846200 -0500
++++ ViennaRNA-1.8.5/lib/findpath.c	2019-11-23 15:33:30.051814600 -0500
+@@ -12,8 +12,7 @@
+ 
+ static char rcsid[] = "$Id: findpath.c,v 1.2 2008/10/09 15:42:45 ivo Exp $";
+ 
+-extern int
+-energy_of_struct_pt (char *string, short * ptable, short *s, short *s1);
++extern int energy_of_struct_pt (char *string, short * ptable, short *s, short *s1);
+ static int energy_of_move(short *pt, short *s, short *s1, int m1, int m2);
+ 
+ typedef struct move {
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/fold.c ViennaRNA-1.8.5/lib/fold.c
+--- ViennaRNA-1.8.5_stock/lib/fold.c	2019-11-23 17:31:35.341842600 -0500
++++ ViennaRNA-1.8.5/lib/fold.c	2019-11-23 15:33:30.054495800 -0500
+@@ -10,7 +10,7 @@
+ 		  Vienna RNA package
+ */
+ 
+-#include <config.h>
++#include "config.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <math.h>
+@@ -39,11 +39,11 @@
+ #define NEW_NINIO     1   /* new asymetry penalty */
+ 
+ PUBLIC float  fold(const char *string, char *structure);
++PUBLIC float  fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bouns);
+ PUBLIC float  circfold(const char *string, char *structure);
+ PUBLIC float  energy_of_struct(const char *string, const char *structure);
+ PUBLIC float  energy_of_circ_struct(const char *string, const char *structure);
+-PUBLIC int    energy_of_struct_pt(const char *string, short *ptable,
+-				  short *s, short *s1);
++PUBLIC int    energy_of_struct_pt(char *string, short *ptable, short *s, short *s1);
+ PUBLIC void   free_arrays(void);
+ PUBLIC void   initialize_fold(int length);
+ PUBLIC void   update_fold_params(void);
+@@ -64,9 +64,13 @@
+ PRIVATE int fill_arrays(const char *sequence);
+ /*@unused@*/
+ INLINE PRIVATE  int oldLoopEnergy(int i, int j, int p, int q, int type, int type_2);
+-INLINE int  LoopEnergy(int n1, int n2, int type, int type_2,
++INLINE PRIVATE int  LoopEnergy(int n1, int n2, int type, int type_2,
+ 			 int si1, int sj1, int sp1, int sq1);
+-INLINE int  HairpinE(int size, int type, int si1, int sj1, const char *string);
++INLINE PRIVATE int  LoopEnergyNew(int n1, int n2, int type, int type_2,
++			 int si1, int sj1, int sp1, int sq1, int index_i, int index_p, int index_j, int index_q);
++
++// TSC 5/9/18 - fix 'warning: unresolved symbol: HairpinE' emscripten link issue
++/*INLINE*/ int  HairpinE(int size, int type, int si1, int sj1, const char *string);
+ 
+ #define MAXSECTORS      500     /* dimension for a backtrack array */
+ #define LOCALITY        0.      /* locality parameter for base-pairs */
+@@ -99,6 +103,15 @@
+ PUBLIC  int cut_point = -1; /* set to first pos of second seq for cofolding */
+ PUBLIC int   eos_debug=0;  /* verbose info from energy_of_struct */
+ 
++/// JEEFIX binding site spec
++PUBLIC int binding_site_i = -1;
++PUBLIC int binding_site_j = -1;
++PUBLIC int binding_site_p = -1;
++PUBLIC int binding_site_q = -1;
++PUBLIC int binding_site_bonus = NULL;
++
++PUBLIC  int estimate_mode = 0;
++
+ /* some definitions to take circfold into account...	*/
+ PUBLIC	int		circ = 0;
+ PRIVATE int   *fM2;	/* fM2 = multiloop region with exactly two stems, extending to 3' end	*/
+@@ -209,20 +222,22 @@
+   letter_structure(structure, length);
+ #endif
+ 
+-  /* check constraints */
+-  for(i=1;i<=length;i++) {
+-    if((BP[i]<0)&&(BP[i]>-4)) {
+-      bonus_cnt++;
+-      if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
+-      if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
+-      if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
+-    }
++  if (!estimate_mode) {
++    /* check constraints */
++    for(i=1;i<=length;i++) {
++      if((BP[i]<0)&&(BP[i]>-4)) {
++        bonus_cnt++;
++        if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
++        if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
++        if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
++      }
+ 
+-    if(BP[i]>i) {
+-      int l;
+-      bonus_cnt++;
+-      for(l=1; l<=base_pair[0].i; l++)
+-	if((i==base_pair[l].i)&&(BP[i]==base_pair[l].j)) bonus++;
++      if(BP[i]>i) {
++        int l;
++        bonus_cnt++;
++        for(l=1; l<=base_pair[0].i; l++)
++          if((i==base_pair[l].i)&&(BP[i]==base_pair[l].j)) bonus++;
++      }
+     }
+   }
+ 
+@@ -241,6 +256,23 @@
+     return (float) energy/100.;
+ }
+ 
++/// JEEFIX
++float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++
++  float e = fold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = NULL;
++  return e;
++}
++
+ PRIVATE int fill_arrays(const char *string) {
+   /* fill "c", "fML" and "f5" arrays and return  optimal energy */
+ 
+@@ -250,7 +282,7 @@
+   int   bonus=0;
+ 
+   length = (int) strlen(string);
+-  
++
+   max_separation = (int) ((1.-LOCALITY)*(double)(length-2)); /* not in use */
+ 
+   for (j=1; j<=length; j++) {
+@@ -263,8 +295,6 @@
+       if (uniq_ML) fM1[indx[j]+i] = INF;
+     }
+ 
+-  if (length <= TURN) return 0; 
+-
+   for (i = length-TURN-1; i >= 1; i--) { /* i,j in [1..length] */
+ 
+     for (j = i+TURN+1; j <= length; j++) {
+@@ -274,9 +304,16 @@
+       type = ptype[ij];
+ 
+       /* enforcing structure constraints */
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+-      if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++        if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      }
+ 
+       no_close = (((type==3)||(type==4))&&no_closingGU&&(bonus==0));
+ 
+@@ -309,8 +346,8 @@
+ 		if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+ #if 1
+-	    energy = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-				S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++	    energy = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++				S1[i+1], S1[j-1], S1[p-1], S1[q+1], i,p, j, q);
+ #else
+ 	    /* duplicated code is faster than function call */
+ 
+@@ -667,8 +704,15 @@
+     bonus = 0;
+ 
+     if (fold_constrained) {
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      }
+     }
+     if (noLonelyPairs)
+       if (cij == c[indx[j]+i]) {
+@@ -706,8 +750,8 @@
+ 	    if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+ 	/* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+-	energy = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-			    S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++	energy = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++			    S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q);
+ 
+ 	new = energy+c[indx[q]+p]+bonus;
+ 	traced = (cij == new);
+@@ -823,7 +867,8 @@
+ }
+ /*---------------------------------------------------------------------------*/
+ 
+-INLINE int HairpinE(int size, int type, int si1, int sj1, const char *string) {
++// TSC 5/9/18 - fix 'warning: unresolved symbol: HairpinE' emscripten link issue
++/*INLINE*/ int HairpinE(int size, int type, int si1, int sj1, const char *string) {
+   int energy;
+   energy = (size <= 30) ? P->hairpin[size] :
+     P->hairpin[30]+(int)(P->lxc*log((size)/30.));
+@@ -893,7 +938,18 @@
+ 
+ /*--------------------------------------------------------------------------*/
+ 
+-INLINE int LoopEnergy(int n1, int n2, int type, int type_2,
++INLINE PRIVATE int LoopEnergyNew(int n1, int n2, int type, int type_2,
++		      int si1, int sj1, int sp1, int sq1, int index_i, int index_p, int index_j, int index_q) {
++
++  int le = LoopEnergy(n1,n2,type,type_2,si1,sj1,sp1,sq1);
++  if(index_p == binding_site_p && index_q == binding_site_q && index_i == binding_site_i && index_j == binding_site_j) {
++    //fprintf(stderr,"MATCH!!!");
++    le -= binding_site_bonus;
++  } 
++  return le;	
++}
++
++INLINE PRIVATE int LoopEnergy(int n1, int n2, int type, int type_2,
+ 		      int si1, int sj1, int sp1, int sq1) {
+   /* compute energy of degree 2 loop (stack bulge or interior) */
+   int nl, ns, energy;
+@@ -901,6 +957,8 @@
+   if (n1>n2) { nl=n1; ns=n2;}
+   else {nl=n2; ns=n1;}
+ 
++  
++
+   if (nl == 0)
+     return P->stack[type][type_2];    /* stack */
+ 
+@@ -1018,6 +1076,8 @@
+ /*---------------------------------------------------------------------------*/
+ PRIVATE short  *pair_table;
+ 
++void (*eos_cb)(int index, int fe) = NULL;
++
+ float energy_of_struct(const char *string, const char *structure)
+ {
+   int   energy;
+@@ -1043,7 +1103,7 @@
+   return  (float) energy/100.;
+ }
+ 
+-int energy_of_struct_pt(const char *string, short * ptable,
++int energy_of_struct_pt(char *string, short * ptable,
+ 			short *s, short *s1) {
+   /* auxiliary function for kinfold,
+      for most purposes call energy_of_struct instead */
+@@ -1056,6 +1116,7 @@
+ 
+   length = S[0];
+   energy =  backtrack_type=='M' ? ML_Energy(0, 0) : ML_Energy(0, 1);
++  if (eos_cb) (*eos_cb)(0, energy);
+   if (eos_debug>0)
+     printf("External loop                           : %5d\n", energy);
+   for (i=1; i<=length; i++) {
+@@ -1066,6 +1127,7 @@
+   for (i=1; !SAME_STRAND(i,length); i++) {
+     if (!SAME_STRAND(i,pair_table[i])) {
+       energy+=P->DuplexInit;
++      if (eos_cb) (*eos_cb)(-1, P->DuplexInit);
+       break;
+     }
+   }
+@@ -1125,8 +1187,8 @@
+       if (type_2==0) type_2=7;
+       si1 = (i==1)? S1[length] : S1[i-1];
+       sq1 = (q==length)? S1[1] : S1[q+1];
+-      en0 = LoopEnergy(u1, u2, type, type_2,
+-		       S1[j+1], si1, S1[p-1], sq1);
++      en0 = LoopEnergyNew(u1, u2, type, type_2,
++		       S1[j+1], si1, S1[p-1], sq1, i, p, j, q);
+     } else { /* degree > 2 */
+       en0 = ML_Energy(0, 0) - P->MLintern[0];
+       if (dangles) {
+@@ -1212,10 +1274,11 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      ee = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-		      S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++      ee = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++		      S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q);
+     else
+       ee = ML_Energy(cut_in_loop(i), 1);
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (eos_debug>0)
+       printf("Interior loop (%3d,%3d) %c%c; (%3d,%3d) %c%c: %5d\n",
+ 	     i,j,string[i-1],string[j-1],p,q,string[p-1],string[q-1], ee);
+@@ -1231,6 +1294,7 @@
+     else
+       ee = ML_Energy(cut_in_loop(i), 1);
+     energy += ee;
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (eos_debug>0)
+       printf("Hairpin  loop (%3d,%3d) %c%c              : %5d\n",
+ 	     i, j, string[i-1],string[j-1], ee);
+@@ -1252,6 +1316,7 @@
+     ee = (ii==0) ? ML_Energy(i,0) : ML_Energy(ii, 1);
+   }
+   energy += ee;
++  if (eos_cb) (*eos_cb)(i, ee);
+   if (eos_debug>0)
+     printf("Multi    loop (%3d,%3d) %c%c              : %5d\n",
+ 	   i,j,string[i-1],string[j-1],ee);
+@@ -1454,8 +1519,8 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      energy = LoopEnergy(p-i-1, j-q-1, type, type_2,
+-			  S1[i+1], S1[j-1], S1[p-1], S1[q+1]);
++      energy = LoopEnergyNew(p-i-1, j-q-1, type, type_2,
++			  S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q);
+     else
+       energy = ML_Energy(cut_in_loop(i), 1);
+   }
+@@ -1506,38 +1571,42 @@
+     stack = (int *) space(sizeof(int)*(n+1));
+ 
+     for(hx=0, j=1; j<=n; j++) {
+-      switch (structure[j-1]) {
+-      case '|': BP[j] = -1; break;
+-      case 'x': /* can't pair */
+-	for (l=1; l<j-TURN; l++) ptype[indx[j]+l] = 0;
+-	for (l=j+TURN+1; l<=n; l++) ptype[indx[l]+j] = 0;
+-	break;
+-      case '(':
+-	stack[hx++]=j;
+-	/* fallthrough */
+-      case '<': /* pairs upstream */
+-	for (l=1; l<j-TURN; l++) ptype[indx[j]+l] = 0;
+-	break;
+-      case ')':
+-	if (hx<=0) {
+-	  fprintf(stderr, "%s\n", structure);
+-	  nrerror("unbalanced brackets in constraints");
+-	}
+-	i = stack[--hx];
+-	type = ptype[indx[j]+i];
+-	for (k=i+1; k<=n; k++) ptype[indx[k]+i] = 0;
+-	/* don't allow pairs i<k<j<l */
+-	for (l=j; l<=n; l++)
+-	  for (k=i+1; k<=j; k++) ptype[indx[l]+k] = 0;
+-	/* don't allow pairs k<i<l<j */
+-	for (l=i; l<=j; l++)
+-	  for (k=1; k<=i; k++) ptype[indx[l]+k] = 0;
+-	for (k=1; k<j; k++) ptype[indx[j]+k] = 0;
+-	ptype[indx[j]+i] = (type==0)?7:type;
+-	/* fallthrough */
+-      case '>': /* pairs downstream */
+-	for (l=j+TURN+1; l<=n; l++) ptype[indx[l]+j] = 0;
+-	break;
++      if (estimate_mode) {
++        BP[j] = structure[j-1];
++      } else {
++        switch (structure[j-1]) {
++        case '|': BP[j] = -1; break;
++        case 'x': /* can't pair */
++          for (l=1; l<j-TURN; l++) ptype[indx[j]+l] = 0;
++          for (l=j+TURN+1; l<=n; l++) ptype[indx[l]+j] = 0;
++          break;
++        case '(':
++          stack[hx++]=j;
++        /* fallthrough */
++        case '<': /* pairs upstream */
++          for (l=1; l<j-TURN; l++) ptype[indx[j]+l] = 0;
++          break;
++        case ')':
++          if (hx<=0) {
++            fprintf(stderr, "%s\n", structure);
++            nrerror("unbalanced brackets in constraints");
++          }
++          i = stack[--hx];
++          type = ptype[indx[j]+i];
++          for (k=i+1; k<=n; k++) ptype[indx[k]+i] = 0;
++          /* don't allow pairs i<k<j<l */
++          for (l=j; l<=n; l++)
++            for (k=i+1; k<=j; k++) ptype[indx[l]+k] = 0;
++          /* don't allow pairs k<i<l<j */
++          for (l=i; l<=j; l++)
++            for (k=1; k<=i; k++) ptype[indx[l]+k] = 0;
++          for (k=1; k<j; k++) ptype[indx[j]+k] = 0;
++          ptype[indx[j]+i] = (type==0)?7:type;
++          /* fallthrough */
++        case '>': /* pairs downstream */
++          for (l=j+TURN+1; l<=n; l++) ptype[indx[l]+j] = 0;
++          break;
++        }
+       }
+     }
+     if (hx!=0) {
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/part_func.c ViennaRNA-1.8.5/lib/part_func.c
+--- ViennaRNA-1.8.5_stock/lib/part_func.c	2019-11-23 17:31:35.331872300 -0500
++++ ViennaRNA-1.8.5/lib/part_func.c	2019-11-23 15:33:30.057489500 -0500
+@@ -84,6 +84,7 @@
+ 
+ PUBLIC  float pf_fold(char *sequence, char *structure);
+ PUBLIC  void  init_pf_fold(int length);
++PUBLIC	void  init_pf_circ_fold(int length);
+ PUBLIC  void  free_pf_arrays(void);
+ PUBLIC  void  update_pf_params(int length);
+ PUBLIC  char  bppm_symbol(float *x);
+diff -X .gitignore -ur ViennaRNA-1.8.5_stock/lib/subopt.c ViennaRNA-1.8.5/lib/subopt.c
+--- ViennaRNA-1.8.5_stock/lib/subopt.c	2019-11-23 17:31:35.369767100 -0500
++++ ViennaRNA-1.8.5/lib/subopt.c	2019-11-23 15:33:30.061478900 -0500
+@@ -87,6 +87,7 @@
+ #include "list.h"
+ #include "subopt.h"
+ #include "params.h"
++#include "cofold.h"
+ 
+ #define true	  1
+ #define false	  0
+@@ -191,7 +192,7 @@
+ extern	int circ;
+ PUBLIC	SOLUTION *subopt_circ(char *seq, char *sequence, int delta, FILE *fp);
+ PRIVATE int *fM2;	 /* energies of M2 */
+-PUBLIC	int	Fc, FcH, FcI, FcM;		/* parts of the exterior loop energies */
++extern PUBLIC	int	Fc, FcH, FcI, FcM;		/* parts of the exterior loop energies */
+ 
+ PRIVATE void encode_seq(char *sequence) {
+   unsigned int i,l;
+Only in ViennaRNA-1.8.5: stamp-h1
