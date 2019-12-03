@@ -20,7 +20,7 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 
 ## Building and running
 
-* When running locally, run your local web server at [http://localhost:63343](http://localhost:63343) - the eterna server currently allows CORS requests from these two localhost addresses.
+* When running locally, run your local web server at either [http://localhost:63343](http://localhost:63343) or [http://127.0.0.1:63343](http://127.0.0.1:63343) - the eterna server currently allows CORS requests from these two localhost addresses.
  
 * Create a .env file:
     - `$ cp .env.example .env` and fill in the values. 
