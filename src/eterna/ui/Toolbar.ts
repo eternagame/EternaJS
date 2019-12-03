@@ -97,6 +97,13 @@ export default class Toolbar extends ContainerObject {
         const SPACE_NARROW = 7;
         const SPACE_WIDE = 25;
 
+        // This can be used in both puzzlemaker and lab, so we'll create the base button ahead of time
+        // TODO: Maybe these should really be two separate buttons set on different properties?
+        this.submitButton = new GameButton()
+            .up(Bitmaps.ImgSubmit)
+            .over(Bitmaps.ImgSubmitOver)
+            .down(Bitmaps.ImgSubmitHit);
+
         this._invisibleBackground = new Graphics();
         this._invisibleBackground
             .beginFill(0, 0)
@@ -286,13 +293,8 @@ export default class Toolbar extends ContainerObject {
             }
         }
 
-        this.submitButton = new GameButton()
-            .up(Bitmaps.ImgSubmit)
-            .over(Bitmaps.ImgSubmitOver)
-            .down(Bitmaps.ImgSubmitHit)
-            .tooltip('Publish your solution!');
-
         if (this._type === ToolbarType.LAB) {
+            this.submitButton.tooltip('Publish your solution!');
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
             this.addObject(this.submitButton, lowerToolbarLayout);
         }
@@ -499,13 +501,9 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.hintButton, lowerToolbarLayout);
         }
 
-        this.submitButton = new GameButton()
-            .up(Bitmaps.ImgSubmit)
-            .over(Bitmaps.ImgSubmitOver)
-            .down(Bitmaps.ImgSubmitHit)
-            .tooltip('Publish your puzzle!');
-
         if (this._type === ToolbarType.PUZZLEMAKER) {
+            this.submitButton.tooltip('Publish your puzzle!');
+
             this.addObject(this.submitButton, lowerToolbarLayout);
         }
 

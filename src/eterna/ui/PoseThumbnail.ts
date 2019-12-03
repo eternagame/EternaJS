@@ -24,11 +24,13 @@ export default class PoseThumbnail {
         expStartIndex: number = 0,
         wrongPairs: number[] = null,
         expUseThreshold: boolean = false,
-        expThreshold: number = 0
+        expThreshold: number = 0,
+        customLayout: Array<[number, number]> = null
     ): Texture {
         let disp: DisplayObject = PoseThumbnail.create(
             sequence, pairs, size, type,
-            expStartIndex, wrongPairs, expUseThreshold, expThreshold
+            expStartIndex, wrongPairs, expUseThreshold, expThreshold,
+            null, customLayout
         );
         return TextureUtil.renderToTexture(disp);
     }
@@ -41,11 +43,13 @@ export default class PoseThumbnail {
         expStartIndex: number = 0,
         wrongPairs: number[] = null,
         expUseThreshold: boolean = false,
-        expThreshold: number = 0
+        expThreshold: number = 0,
+        customLayout: Array<[number, number]> = null
     ) {
         const graphics = new Graphics();
         PoseThumbnail.create(
-            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics
+            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
+            customLayout
         );
         const newGraphics = graphics.clone();
         let bounds = newGraphics.getLocalBounds();
@@ -63,12 +67,14 @@ export default class PoseThumbnail {
         expStartIndex: number = 0,
         wrongPairs: number[] = null,
         expUseThreshold: boolean = false,
-        expThreshold: number = 0
+        expThreshold: number = 0,
+        customLayout: Array<[number, number]> = null
     ): void {
         sprite.removeChildren();
         const graphics = new Graphics();
         PoseThumbnail.create(
-            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics
+            sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
+            customLayout
         );
         let bounds = graphics.getLocalBounds();
         graphics.x = -bounds.left;
@@ -85,7 +91,8 @@ export default class PoseThumbnail {
         wrongPairs: number[],
         expUseThreshold: boolean,
         expThreshold: number,
-        canvas: Graphics = null
+        canvas: Graphics = null,
+        customLayout: Array<[number, number]> = null
     ): DisplayObject {
         let frame: DisplayObject;
 
@@ -123,7 +130,7 @@ export default class PoseThumbnail {
 
         let rnaDrawer: RNALayout = new RNALayout(45, 45);
         rnaDrawer.setupTree(pairs);
-        rnaDrawer.drawTree();
+        rnaDrawer.drawTree(customLayout);
         rnaDrawer.getCoords(xarray, yarray);
 
         let xmin: number = xarray[0];
