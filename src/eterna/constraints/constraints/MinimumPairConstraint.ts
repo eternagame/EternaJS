@@ -32,6 +32,18 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         };
     }
 
+    protected _getBaseConstraintBoxConfig(
+        status: MinPairConstraintStatus,
+        forMissionScreen: boolean
+    ): Omit<ConstraintBoxConfig, 'tooltip'> {
+        return {
+            satisfied: status.satisfied,
+            clarificationText: `${this.minPairs} OR MORE`,
+            statText: status.currentPairs.toString(),
+            showOutline: true
+        };
+    }
+
     public getConstraintBoxConfig(
         status: MinPairConstraintStatus,
         forMissionScreen: boolean
@@ -52,11 +64,8 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         }
 
         return {
-            satisfied: status.satisfied,
-            clarificationText: `${this.minPairs} OR MORE`,
-            statText: status.currentPairs.toString(),
-            tooltip,
-            showOutline: true
+            ...this._getBaseConstraintBoxConfig(status, forMissionScreen),
+            tooltip
         };
     }
 }
@@ -186,7 +195,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
         }
 
         return {
-            ...super.getConstraintBoxConfig(status, forMissionScreen),
+            ...this._getBaseConstraintBoxConfig(status, forMissionScreen),
             tooltip,
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmap(Bitmaps.NovaPairsMissionReq)
