@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 project(LinearFold)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist)
@@ -14,20 +14,16 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
 
 include_directories(.)
+include_directories(./LinearFold)
+include_directories(./LinearFold/src)
 include_directories(../emscripten_common)
 
 SET(LINEARFOLD_FILES
-    LinearFold.cpp
-    LinearFold.h
-    feature_weight.h
-    utility.h
+    LinearFold/src/LinearFold.cpp
     emscripten/Bindings.cpp
     emscripten/FullFold.cpp
-    emscripten/FullFold.h
     emscripten/FullEval.cpp
-    emscripten/FullEval.h
     ../emscripten_common/EmscriptenUtils.cpp
-    ../emscripten_common/EmscriptenUtils.h
 )
 
 add_library(LinearFoldBase INTERFACE)
@@ -61,3 +57,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
   set_target_properties(LinearFoldBase PROPERTIES INTERFACE_LINK_FLAGS_DEBUG "-O0 -s WASM=0 -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s SAFE_HEAP=1")
   set_target_properties(LinearFoldBase PROPERTIES INTERFACE_LINK_FLAGS_RELEASE "-O3 -s WASM=1")
 endif ()
+
+install(TARGETS LinearFoldV LinearFoldC DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../src/eterna/folding/engines)

@@ -49,6 +49,7 @@ enum PuzzleID {
     TemporalAnomaly = 7796345, // Really big!
     Switch2pt5leftRight = 8984178, // molecule
     JieuxAppetit2 = 8980331, // unbound molecule
+    PTCCustomLayout = 9386237 // customLayout
 }
 
 interface SolutionAndPuzzleID {

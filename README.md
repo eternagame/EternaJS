@@ -20,7 +20,7 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 
 ## Building and running
 
-* When running locally, run your local web server at [http://localhost:63343](http://localhost:63343) - the eterna server currently allows CORS requests from these two localhost addresses.
+* When running locally, run your local web server at either [http://localhost:63343](http://localhost:63343) or [http://127.0.0.1:63343](http://127.0.0.1:63343) - the eterna server currently allows CORS requests from these two localhost addresses.
  
 * Create a .env file:
     - `$ cp .env.example .env` and fill in the values. 
@@ -30,7 +30,7 @@ The project uses NPM for dependency management, webpack for packaging, and babel
 * Compile and Serve:
     - `$ npm run start`
 
-* To do the first puzzle in Eterna, load up `http://localhost:63343/?puzzleID=4350940`, and ask your browser to View JavaScript Console. To create your own test puzzles, check out the next section.
+* To do the first puzzle in Eterna, load up `http://localhost:63343/?puzzle=4350940`, and ask your browser to View JavaScript Console. To create your own test puzzles, check out the next section.
 
 ## Setting up new test puzzles
  * You can directly set up a puzzle via Drupal on the `eternadev` server through `http://eternadev.org/node/add/puzzle`. Your login will need to have been granted Drupal admin access.
