@@ -44,7 +44,7 @@ export type PoseMouseDownCallback = (e: InteractionEvent, closestDist: number, c
 export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly COLOR_CURSOR: number = 0xFFC0CB;
     public static readonly ZOOM_SPACINGS: number[] = [45, 30, 20, 14, 7];
-    public static readonly BASE_TRACK_THICKNESS: number[] = [5, 4, 3, 2, 2];
+    public static readonly BASE_TRACK_THICKNESS: number = 0.4; // Relative to the radius
     public static readonly BASE_TRACK_RADIUS: number[] = [15, 10, 7, 5, 3];
 
     public static readonly OLIGO_MODE_DIMER: number = 1;
@@ -595,16 +595,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         let center: Point = this.getBaseLoc(baseIndex);
-
         markBox.clear();
         colors.forEach((color, colorIndex) => {
             markBox.x = center.x;
             markBox.y = center.y;
             markBox.visible = true;
-            markBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], color);
-            markBox.arc(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel],
+            markBox.lineStyle(1, color);
+            markBox.arc(0, 0, 1 / Pose2D.BASE_TRACK_THICKNESS,
                 colorIndex * angle, (colorIndex + 1) * angle);
         });
+        this.scaleBaseMark(markBox);
+    }
+
+    private scaleBaseMark(markBox: Graphics) {
+        markBox.scale.set((Pose2D.BASE_TRACK_THICKNESS * Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]));
     }
 
     public onMouseMoved(): void {
@@ -1868,7 +1872,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._cursorBox.y = center.y;
             this._cursorBox.visible = true;
             this._cursorBox.clear();
-            this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
+            this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS * Pose2D.BASE_TRACK_RADIUS[this.zoomLevel],
+                Pose2D.COLOR_CURSOR);
             this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
         } else if (this._cursorBox != null) {
             this._cursorBox.destroy({children: true});
@@ -2033,7 +2038,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (this._redraw || basesMoved) {
             for (let ii = 0; ii < this._trackedIndices.length; ii++) {
-                this.drawBaseMark(this._trackedIndices[ii]);
+                const _center = this.getBaseLoc(this._trackedIndices[ii].baseIndex);
+                this._trackedIndices[ii].markBox.position = _center;
+                this.scaleBaseMark(this._trackedIndices[ii].markBox);
             }
 
             this._baseRope.redraw(true /* force baseXY */);
@@ -2044,7 +2051,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._cursorBox.y = center.y;
                 this._cursorBox.visible = true;
                 this._cursorBox.clear();
-                this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS[this.zoomLevel], Pose2D.COLOR_CURSOR);
+                this._cursorBox.lineStyle(Pose2D.BASE_TRACK_THICKNESS * Pose2D.BASE_TRACK_RADIUS[this.zoomLevel],
+                    Pose2D.COLOR_CURSOR);
                 this._cursorBox.drawCircle(0, 0, Pose2D.BASE_TRACK_RADIUS[this.zoomLevel]);
             }
         }
