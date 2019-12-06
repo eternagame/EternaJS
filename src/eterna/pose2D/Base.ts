@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import {Point, Sprite, Texture} from 'pixi.js';
+import {
+    Point, Sprite, Texture, Graphics
+} from 'pixi.js';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
 import EPars from 'eterna/EPars';
@@ -13,6 +15,8 @@ type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
 export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
     public static ZOOM_SCALE_FACTOR = 0.75;
+    public static readonly MARKER_THICKNESS: number = 0.4; // Relative to the radius
+    public static readonly MARKER_RADIUS: number[] = [15, 10, 7, 5, 3];
 
     constructor(pose: Pose2D, type: number) {
         super();
@@ -30,6 +34,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this.container.addChild(this._number);
         this.container.addChild(this._spark1);
         this.container.addChild(this._spark2);
+        this.container.addChild(this._markers);
     }
 
     public set baseIndex(i: number) {
@@ -112,6 +117,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
     public get type(): number {
         return this._baseType;
+    }
+
+    public get markerColors(): number[] {
+        return [...this._markerColors];
     }
 
     public set forced(forced: boolean) {
@@ -228,6 +237,27 @@ export default class Base extends ContainerObject implements LateUpdatable {
         return -1;
     }
 
+    public mark(colors: number[]) {
+        const angle = (Math.PI * 2) / colors.length;
+        this._markers.clear();
+        colors.forEach((color, colorIndex) => {
+            this._markers.lineStyle(1, color);
+            this._markers.arc(0, 0, 1 / Base.MARKER_THICKNESS,
+                colorIndex * angle, (colorIndex + 1) * angle);
+        });
+        this._markers.visible = true;
+
+        this._markerColors = colors;
+    }
+
+    public unmark() {
+        this.mark([]);
+    }
+
+    public isMarked() {
+        return this._markerColors.length > 0;
+    }
+
     public setDrawParams(
         zoomLevel: number, offX: number, offY: number, currentTime: number, drawFlags: number,
         numberTexture: Texture, highlightState: RNAHighlightState = null
@@ -342,6 +372,8 @@ export default class Base extends ContainerObject implements LateUpdatable {
 
                 this._body.x = randomX + offX;
                 this._body.y = randomY + offY;
+                this._markers.position.set(offX, offY);
+                this._markers.scale.set((Base.MARKER_THICKNESS * Base.MARKER_RADIUS[this._zoomLevel]));
 
                 let letterdata: Texture = BaseAssets.getLetterTexture(this._baseType, zoomLevel, drawFlags);
                 if (letterdata != null) {
@@ -625,6 +657,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private readonly _number: Sprite = new Sprite();
     private readonly _spark1: Sprite = new Sprite();
     private readonly _spark2: Sprite = new Sprite();
+    private readonly _markers: Graphics = new Graphics();
 
     private _baseType: number = -1;
     // The index of the base in the base array.
@@ -633,6 +666,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     private _goY: number = 0;
     private _outX: number = 0;
     private _outY: number = 0;
+    private _markerColors: number[] = [];
     private _needsRedraw: boolean = false;
     private _lastCenterX: number;
     private _lastCenterY: number;
