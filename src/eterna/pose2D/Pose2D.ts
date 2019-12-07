@@ -669,8 +669,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get trackedIndices(): { baseIndex: number; colors: number[] }[] {
-        return this._bases.filter((base) => base.isMarked())
-            .map((base) => ({baseIndex: base.baseIndex, colors: base.markerColors}));
+        const result = [] as { baseIndex: number; colors: number[] }[];
+        this._bases.forEach((base, baseIndex) => {
+            if (base.isMarked()) {
+                result.push({baseIndex, colors: base.markerColors});
+            }
+        });
+        return result;
     }
 
     public getBase(ind: number): Base {
