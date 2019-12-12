@@ -271,7 +271,7 @@ export default class DesignBrowserMode extends GameMode {
 
         this.addObject(new RepeatingTask(() => new SerialTask(
             new DelayTask(300),
-            new CallbackTask(() => this.refreshSolutions()),
+            new CallbackTask(() => this.refreshSolutions())
         )));
 
         this.updateLayout();
@@ -404,7 +404,7 @@ export default class DesignBrowserMode extends GameMode {
         let statusText = new SceneObject<Text>(Fonts.arial(text, 22).color(0xffffff).bold().build());
         statusText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.3),
-            new AlphaTask(1, 0.3),
+            new AlphaTask(1, 0.3)
         )));
         return statusText;
     }

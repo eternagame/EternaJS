@@ -206,7 +206,7 @@ export default class ExternalInterface {
                     (error) => {
                         nextScript.reject(error instanceof Error ? error : new Error(error));
                         cleanup();
-                    },
+                    }
                 );
             }
         }

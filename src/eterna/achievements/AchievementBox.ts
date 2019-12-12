@@ -86,13 +86,13 @@ export default class AchievementBox extends ContainerObject {
             // "zoom in" and fade in
             new ParallelTask(
                 new AlphaTask(1, ZOOM_DURATION, Easing.easeIn),
-                new ScaleTask(1, 1, ZOOM_DURATION, Easing.easeIn),
+                new ScaleTask(1, 1, ZOOM_DURATION, Easing.easeIn)
             ),
             // Vibrate, and fade in the description text
             new ParallelTask(
                 new VibrateTask(VIBRATE_DURATION),
-                new AlphaTask(1, VIBRATE_DURATION, Easing.linear, this._descriptionTxt),
-            ),
+                new AlphaTask(1, VIBRATE_DURATION, Easing.linear, this._descriptionTxt)
+            )
         ));
     }
 

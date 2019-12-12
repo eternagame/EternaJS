@@ -27,7 +27,7 @@ class BoostConstraint extends Constraint<BoostConstraintStatus> {
 
     public getConstraintBoxConfig(
         status: BoostConstraintStatus,
-        forMissionScreen: boolean,
+        forMissionScreen: boolean
     ): ConstraintBoxConfig {
         let tooltip = ConstraintBox.createTextStyle();
         if (forMissionScreen) {
