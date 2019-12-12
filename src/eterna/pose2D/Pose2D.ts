@@ -1807,6 +1807,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._customLayout;
     }
 
+    public set customNumbering(setting: number[]) {
+        this._customNumbering = setting;
+    }
+
+    public get customNumbering(): number[] {
+        return this._customNumbering;
+    }
+
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rnaDrawer: RNALayout = new RNALayout(radius, radius);
@@ -1989,8 +1997,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     .result();
 
                 let numberBitmap: Texture = null;
-                if (this._numberingMode && (ii === 0 || (ii + 1) % 5 === 0 || ii === fullSeq.length - 1)) {
-                    numberBitmap = BitmapManager.getNumberBitmap(ii + 1);
+                if (this._numberingMode) {
+                    let n = ii;
+                    if (this._customNumbering !== null) n = this._customNumbering[ii];
+                    if (ii === 0 || (n + 1) % 5 === 0 || ii === fullSeq.length - 1) {
+                        numberBitmap = BitmapManager.getNumberBitmap(n);
+                    }
                 }
 
                 this._bases[ii].setDrawParams(
@@ -3406,6 +3418,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _numberingMode: boolean = false;
     private _showBaseRope: boolean = false;
     private _simpleGraphicsMods: boolean = false;
+
+    // customNumbering
+    private _customNumbering: number[] = null;
 
     // Last exp paint data
     private _expPainter: ExpPainter = null;
