@@ -19,7 +19,7 @@ export default class AsyncProcessDialog extends Dialog<void> {
         textField.alpha = 0;
         this.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(1, 0.3, Easing.linear, textField),
-            new AlphaTask(0, 0.3, Easing.linear, textField),
+            new AlphaTask(0, 0.3, Easing.linear, textField)
         )));
 
         let updateLocation = () => {
