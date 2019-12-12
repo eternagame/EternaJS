@@ -35,9 +35,10 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     }
 
     public redraw(forceBaseXY: boolean): void {
-        this._graphics.clear();
-
-        if (!this._enabled) return;
+        if (!this._enabled) {
+            if (this._graphics.currentPath !== null) this._graphics.clear();
+            return;
+        }
 
         let idx: number[] = [];
         let basePosX: number[] = [];
@@ -56,15 +57,33 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
         }
 
-        if (!Arrays.shallowEqual(basePosX, this._lastBasePosX)
-            || !Arrays.shallowEqual(basePosY, this._lastBasePosY)) {
-            this.updateInterpBasePos(basePosX, basePosY, idx);
-            this._lastBasePosX = basePosX;
-            this._lastBasePosY = basePosY;
+        if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
+            && Arrays.shallowEqual(basePosY, this._lastBasePosY)
+            && this._graphics.currentPath !== null) {
+            // base positions haven't changed, baseRope is drawn,
+            // so no need to update -- just return.
+            return;
         }
 
-        // by drawing twice, can get a nice looking texture.
-        // draw thick line and thin line on top
+        this.updateInterpBasePos(basePosX, basePosY, idx);
+        this._lastBasePosX = basePosX;
+        this._lastBasePosY = basePosY;
+        this.drawBaseRope();
+    }
+
+    /**
+     * drawBaseRope()
+     *  by drawing twice, can get a nice looking texture.
+     *   draw thick line and thin line on top
+     *
+     * TODO: explore passing in coordinates (rather than storing in BaseRope class), to make
+     *             code easier to understand
+     * TODO: instead of clearing Graphics every time, just edit its currentPath GraphicsData (which holds
+     *         the two BaseRope lines )
+     *
+     */
+    private drawBaseRope(): void {
+        this._graphics.clear();
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
         this.drawBaseRopeLine();
