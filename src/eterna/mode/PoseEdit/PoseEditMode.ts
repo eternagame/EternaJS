@@ -298,6 +298,7 @@ export default class PoseEditMode extends GameMode {
 
     private showCopySequenceDialog(): void {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
+        if (this._poses[0].customNumbering != null) sequenceString += ` ${this._poses[0].customNumbering.toString()}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
 
@@ -719,7 +720,7 @@ export default class PoseEditMode extends GameMode {
             if (this._targetConditions != null && this._targetConditions[ii] != null) {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
                 this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
-                if (this._poses[ii].customLayout !== null
+                if (this._poses[ii].customLayout != null
                     && this._poses[ii].customLayout.length !== targetSecstructs[ii].length) {
                     log.error(
                         'custom-layout field from puzzle objective json does not match target length.'
@@ -728,7 +729,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[ii].customLayout = null;
                 }
                 this._poses[ii].customNumbering = this._targetConditions[ii]['custom-numbering'];
-                if (this._poses[ii].customNumbering !== null
+                if (this._poses[ii].customNumbering != null
                     && this._poses[ii].customNumbering.length !== targetSecstructs[ii].length) {
                     log.error(
                         'custom-numbering field from puzzle objective json does not match target length.'

@@ -1999,7 +1999,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 let numberBitmap: Texture = null;
                 if (this._numberingMode) {
                     let n = ii;
-                    if (this._customNumbering !== null) n = this._customNumbering[ii];
+                    if (this._customNumbering != null) n = this._customNumbering[ii];
                     if (ii === 0 || (n + 1) % 5 === 0 || ii === fullSeq.length - 1) {
                         numberBitmap = BitmapManager.getNumberBitmap(n);
                     }
@@ -3285,7 +3285,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
-    private _customLayout: Array<[number, number]>;
+    private _customLayout: Array<[number, number]> = null;
 
     // Oligos
     private _oligo: number[] = null;
