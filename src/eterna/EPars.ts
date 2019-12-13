@@ -393,13 +393,15 @@ export default class EPars {
      *  TODO: properly handle oligos, e.g.
      *       ACUGU&ACAGU 2-11
      */
-    public static indexedStringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true):
-    number[] {
+    public static indexedStringToSequence(seq: string,
+        customNumbering: number[] = null /* TODO--handle use of customNumbering */):
+        number[] {
         // make robust to blanks:
         let seqChunks: string[] = seq.split(' ');
         if (seqChunks.length === 0) return []; // blank sequence, no op.
         if (seqChunks.length === 1) {
-            return this.stringToSequence(seq, allowCut, allowUnknown); // just sequence, no indices
+            // just sequence, no indices
+            return this.stringToSequence(seq, true /* allowCut */, true /* allowUnknown */);
         }
 
         let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
@@ -410,7 +412,7 @@ export default class EPars {
         for (let n = 0; n < indices.length; n++) {
             let ii = indices[n];
             let char = s.charAt(n);
-            seqArray[ii - 1] = this.stringToNucleotide(char, allowCut, allowUnknown);
+            seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
         }
         return seqArray;
     }
