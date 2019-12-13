@@ -65,66 +65,72 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             return;
         }
 
-        this.updateInterpBasePos(basePosX, basePosY, idx);
         this._lastBasePosX = basePosX;
         this._lastBasePosY = basePosY;
-        this.drawBaseRope();
+        this.drawBaseRope(basePosX, basePosY);
     }
 
     /**
      * drawBaseRope()
      *  by drawing twice, can get a nice looking texture.
      *   draw thick line and thin line on top
-     *
-     * TODO: explore passing in coordinates (rather than storing in BaseRope class), to make
-     *             code easier to understand
-     * TODO: instead of clearing Graphics every time, just edit its currentPath GraphicsData (which holds
-     *         the two BaseRope lines )
-     *
      */
-    private drawBaseRope(): void {
+    private drawBaseRope(basePosX: number[], basePosY: number[]): void {
+        // this math is the rate limiting thing.
+        //  for zooms, pans, and changes between target/natural mode,
+        //   it might be better to compute smooth ropes for beginning and final, and then
+        //   interpolate in between...
+        let interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
+
         this._graphics.clear();
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
-        this.drawBaseRopeLine();
+        this.drawBaseRopeLine(interpBasePosXY);
 
         const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
-        this.drawBaseRopeLine();
+        this.drawBaseRopeLine(interpBasePosXY);
     }
 
-    private drawBaseRopeLine(): void {
+    private drawBaseRopeLine(interpBasePosXY: Array<[number, number]>): void {
         this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
-        for (let ii = 0; ii < this._interpBasePosX.length; ii++) {
-            this._graphics.lineTo(this._interpBasePosX[ii], this._interpBasePosY[ii]);
+        for (let ii = 0; ii < interpBasePosXY.length; ii++) {
+            this._graphics.lineTo(interpBasePosXY[ii][0], interpBasePosXY[ii][1]);
         }
     }
 
     /**
-     * This function updates the _interpBasePosX and _interpBasePosY class variables.
      * Currently allows use of cubic interpolation or Pchip -- if we are still using
-     * only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     *   only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     *
+     * The most beautiful  solution would be to use planar elastica, either Euler's solution (which
+     *   still requires a numerical integral) or numerical minmization of a discrete elastica--
+     *
+     *  Let rhiju know if you want to try it. =)
      */
-    private updateInterpBasePos(basePosX: number[], basePosY: number[], idx: number[]) {
+    private updateInterpBasePos(basePosX: number[], basePosY: number[]): Array<[number, number]> {
         const smoothFactor = 5;
-        // this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY, idx);
-        this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY, idx);
+        // return this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY);
+        return this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY);
     }
 
     /**
      * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
-     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
+     *  get rid of this in mid-2020 if we do not restore it.
      * @param smoothFactor
      * @param basePosX
      * @param basePosY
      */
-    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]): void {
-        this._interpBasePosX = [];
-        this._interpBasePosY = [];
+    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]):
+    Array<[number, number]> {
+        let interpBasePosXY: Array<[number, number]> = [];
         for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
-            this._interpBasePosX.push(this.cubicInterpolation(basePosX, i / smoothFactor));
-            this._interpBasePosY.push(this.cubicInterpolation(basePosY, i / smoothFactor));
+            interpBasePosXY.push([
+                this.cubicInterpolation(basePosX, i / smoothFactor),
+                this.cubicInterpolation(basePosY, i / smoothFactor)
+            ]);
         }
+        return interpBasePosXY;
     }
 
     /**
@@ -133,18 +139,22 @@ export default class BaseRope extends GameObject implements LateUpdatable {
      *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
      * @param basePosX
      * @param basePosY
-     * @param idx
      */
-    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[],
-        idx: number[]): void {
-        this._interpBasePosX = this.interpPchip(smoothFactor, basePosX, idx);
-        this._interpBasePosY = this.interpPchip(smoothFactor, basePosY, idx);
+    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
+    Array<[number, number]> {
+        let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
+        let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
+        let interpBasePosXY: Array<[number, number]> = [];
+        for (let i = 1; i < interpBasePosX.length; i++) {
+            interpBasePosXY.push([interpBasePosX[i], interpBasePosY[i]]);
+        }
+        return interpBasePosXY;
     }
 
-    private interpPchip(smoothFactor: number, points: number[], idx: number[]): number[] {
+    private interpPchip(smoothFactor: number, points: number[]): number[] {
         let inputPoints: Array<[number, number]> = [];
         for (let ii = 0; ii < points.length; ii++) {
-            inputPoints.push([idx[ii], points[ii]]);
+            inputPoints.push([ii, points[ii]]);
         }
         let pchipFitPoints = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
         let interpBasePos: number[] = [];
@@ -200,7 +210,4 @@ export default class BaseRope extends GameObject implements LateUpdatable {
 
     private _lastBasePosX: Array<number> = [];
     private _lastBasePosY: Array<number> = [];
-
-    private _interpBasePosX: Array<number> = [];
-    private _interpBasePosY: Array<number> = [];
 }
