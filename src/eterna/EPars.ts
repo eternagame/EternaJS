@@ -385,17 +385,22 @@ export default class EPars {
     /**
      *  Expanded to allow specification of indices at end of sequence, e.g.,
      *
-     *    ACUGU 11-14 6
+     *    ACUGU 11-14 16
      *
      *  will return Array of length 16, padded with UNDEFINED in first 10 positions and
      *  then ADENINE, CYTOSINE, URACIL, GUANOSINE, UNDEFINED, URACIL
      *
+     * If customNumbering is available, then the indices will be remapped if possible. For example,
+     *    if the puzzle is a sub-puzzle of a bigger one and has only four nucleotides with
+     *    customNumbering of 13-16, we'd instead get an Array of length 4 with just the
+     *    inputted sequences that match up with something in the sub-puzzle:
+     *     URACIL, GUANOSINE, UNDEFINED, URACIL
+     *
      *  TODO: properly handle oligos, e.g.
      *       ACUGU&ACAGU 2-11
      */
-    public static indexedStringToSequence(seq: string,
-        customNumbering: number[] = null /* TODO--handle use of customNumbering */):
-        number[] {
+    public static indexedStringToSequence(seq: string, customNumbering: number[] = null):
+    number[] {
         // make robust to blanks:
         let seqChunks: string[] = seq.split(' ');
         if (seqChunks.length === 0) return []; // blank sequence, no op.
@@ -406,13 +411,18 @@ export default class EPars {
 
         let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
         if (indices === null) return null; // signal error
+        if (customNumbering != null) { // remap indices to match puzzle's "custom numbering"
+            indices = indices.map((n) => customNumbering.indexOf(n) + 1);
+        }
         let seqArray: number[] = [];
         for (let ii = 0; ii < Math.max(...indices); ii++) seqArray.push(EPars.RNABASE_UNDEFINED);
         let s = seqChunks[0];
         for (let n = 0; n < indices.length; n++) {
             let ii = indices[n];
-            let char = s.charAt(n);
-            seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
+            if (ii >= 0) {
+                let char = s.charAt(n);
+                seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
+            }
         }
         return seqArray;
     }

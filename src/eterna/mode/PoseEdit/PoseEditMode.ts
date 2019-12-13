@@ -280,7 +280,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showPasteSequenceDialog(): void {
-        this.showDialog(new PasteSequenceDialog()).closed.then((sequence) => {
+        let customNumbering = this._poses[0].customNumbering;
+        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
             if (sequence !== null) {
                 for (let pose of this._poses) {
                     pose.pasteSequence(sequence);
