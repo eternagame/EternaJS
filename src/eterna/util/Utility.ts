@@ -201,4 +201,43 @@ export default class Utility {
         }
         return indices;
     }
+
+    /**
+     * Creates string from start and end of a range, e.g.
+     *    4,6 becomes '4-6'
+     *    null,null becomes ''
+     * @param rangeStart integer starting range
+     * @param rangeEnd integer ending range
+     */
+    public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
+        if (rangeStart == null) return '';
+        if (rangeStart === rangeEnd) return rangeStart.toString();
+        return `${rangeStart.toString()}-${rangeEnd.toString()}`;
+    }
+
+    /**
+     * Converts arrays to range strings. Examples:
+     *
+     *      [1,2,3,4]  becomes '1-4'
+     *      [-1,null,1,2,3,4,-1,52,53,54,,] becomes -1,,1-4,-1,52-54,
+     *
+     * @param x array of numbers (integers or null) to convert into compact string
+     */
+    public static arrayToRangeString(x: number[]): string {
+        let s = '';
+        if (x == null || x.length === 0) return s;
+        let rangeStart = x[0];
+        let rangeEnd = x[0];
+        for (let ii = 1; ii < x.length; ii++) {
+            if (x[ii] === (x[ii - 1] + 1) && (rangeStart !== null)) {
+                rangeEnd = x[ii]; continue;
+            } else {
+                s += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;
+                rangeStart = x[ii];
+                rangeEnd = x[ii];
+            }
+        }
+        s += this.rangeStringFromStartEnd(rangeStart, rangeEnd);
+        return s;
+    }
 }

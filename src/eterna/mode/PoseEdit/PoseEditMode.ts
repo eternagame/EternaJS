@@ -46,6 +46,7 @@ import URLButton from 'eterna/ui/URLButton';
 import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import Utility from 'eterna/util/Utility';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -299,7 +300,7 @@ export default class PoseEditMode extends GameMode {
 
     private showCopySequenceDialog(): void {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
-        if (this._poses[0].customNumbering != null) sequenceString += ` ${this._poses[0].customNumbering.toString()}`;
+        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
 
