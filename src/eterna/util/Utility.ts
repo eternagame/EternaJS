@@ -139,21 +139,33 @@ export default class Utility {
 
     /**
      * Convert '-1-4,7-8,12 16' to [-1,0,1,2,3,4,7,8,12,16]
+     *
+     * Can handle blanks,'null', and 'NaN' as null. E.g.,
+     *
+     *  '-1,null,,,1-2' to [-1,null,null,null1,2]
+     *
+     * If error is encountered, returns null (not an array of numbers!)
+     *
      */
     public static rangeStringToArray(sInput: string): number[] {
         let vals: number[] = [];
+        const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
         for (const s of sInput.split(',')) {
             let foundDash = s.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
             if (foundDash < 0) {
-                const val = Number(s);
-                if (Number.isNaN(val)) {
-                    return null; // signal error
+                if (nullStrings.indexOf(s) > -1) {
+                    vals.push(null);
                 } else {
-                    vals.push(val);
+                    const val = parseInt(s, 10);
+                    if (Number.isNaN(val)) {
+                        return null; // signal error
+                    } else {
+                        vals.push(val);
+                    }
                 }
             } else {
-                let startVal = Number(s.slice(0, foundDash));
-                let endVal = Number(s.slice(foundDash + 1, s.length));
+                let startVal = parseInt(s.slice(0, foundDash), 10);
+                let endVal = parseInt(s.slice(foundDash + 1, s.length), 10);
                 if (Number.isNaN(startVal)) return null;
                 if (Number.isNaN(endVal)) return null;
                 for (let n = startVal; n <= endVal; n++) vals.push(n);
