@@ -1,6 +1,7 @@
-import {StyledTextBuilder} from 'flashbang';
 import IntLoopPars from 'eterna/IntLoopPars';
 import Utility from 'eterna/util/Utility';
+import {StyledTextBuilder} from 'flashbang';
+import Arrays from 'flashbang/util/Arrays';
 
 export default class EPars {
     public static readonly INF: number = 1000000;
@@ -383,18 +384,30 @@ export default class EPars {
     }
 
     /**
-     *  Expanded to allow specification of indices at end of sequence, e.g.,
+     *  a version of stringtoSequence expanded to allow specification of indices at end of sequence, e.g.,
      *
      *    ACUGU 11-14 16
      *
      *  will return Array of length 16, padded with UNDEFINED in first 10 positions and
      *  then ADENINE, CYTOSINE, URACIL, GUANOSINE, UNDEFINED, URACIL
      *
-     * If customNumbering is available, then the indices will be remapped if possible. For example,
+     * * If customNumbering is available, then the indices will be remapped if possible. For example,
      *    if the puzzle is a sub-puzzle of a bigger one and has only four nucleotides with
      *    customNumbering of 13-16, we'd instead get an Array of length 4 with just the
      *    inputted sequences that match up with something in the sub-puzzle:
      *     URACIL, GUANOSINE, UNDEFINED, URACIL
+     *
+     * * null's in input string are not mapped (e.g., as 'null,null' or ',,,,' ). So e.g.,
+     *
+     *  ACUGU 11-12,,,16    or
+     *  ACUGU 11-12,null,null,16
+     *
+     *  will skip placement of UG
+     *
+     * * null's in puzzle's customNumbering will not receive any mapping either.
+     *
+     * * the only exception is if the input null string *exactly* matches the customNumbering,
+     *    in which case its assumed that the players wants to copy/paste within the same puzzle.
      *
      *  TODO: properly handle oligos, e.g.
      *       ACUGU&ACAGU 2-11
@@ -412,6 +425,10 @@ export default class EPars {
         let indices: number[] = Utility.getIndices(seqChunks.slice(1).join());
         if (indices === null) return null; // signal error
         if (customNumbering != null) { // remap indices to match puzzle's "custom numbering"
+            if (Arrays.shallowEqual(customNumbering, indices)) {
+                // assume player is copy/pasting into the same puzzle.
+                return this.stringToSequence(seq, true /* allowCut */, true /* allowUnknown */);
+            }
             indices = indices.map((n) => customNumbering.indexOf(n) + 1);
         }
         let seqArray: number[] = [];
