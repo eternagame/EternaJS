@@ -1397,9 +1397,9 @@ export default class PoseEditMode extends GameMode {
 
         if (this._puzzle.nodeID === 2390140) {
             if (targetIndex === 1) {
-                this._poses[poseIndex].auxInfo(null);
+                this._poses[poseIndex].auxInfo = null;
             } else {
-                this._poses[poseIndex].auxInfo({cleavingSite: 28});
+                this._poses[poseIndex].auxInfo = {cleavingSite: 28};
             }
         }
     }
