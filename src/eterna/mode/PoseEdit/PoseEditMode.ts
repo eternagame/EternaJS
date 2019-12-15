@@ -730,7 +730,9 @@ export default class PoseEditMode extends GameMode {
                     );
                     this._poses[ii].customLayout = null;
                 }
-                this._poses[ii].customNumbering = this._targetConditions[ii]['custom-numbering'];
+                this._poses[ii].customNumbering = Utility.numberingJSONToArray(
+                    this._targetConditions[ii]['custom-numbering']
+                );
                 if (this._poses[ii].customNumbering != null
                     && this._poses[ii].customNumbering.length !== targetSecstructs[ii].length) {
                     log.error(

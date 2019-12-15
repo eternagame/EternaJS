@@ -177,21 +177,15 @@ export default class Utility {
     /** allows for specification of sequences and their indices
      *   during a paste. Example:
      *
-     *    ACUGU 11-14 16
+     *    11-14,12 16
      *
-     * will return [11,12,13,14,16]
+     * will return [11,12,13,14,12,16]
      *
-     * If no numbers are specified, e.g.,
-     *
-     *    ACUGU
-     *
-     * will return the default range from 1 to len(seq), here 1,2,3,4,5.
-     *
-     * Note that indices will be 1-indexed, not 0-indexed .
+     * @param s input string
      */
-    public static getIndices(seq: string): number[] {
+    public static getIndices(sInput: string): number[] {
         let indices: number[] = [];
-        let splitted: string[] = seq.split(' ');
+        let splitted: string[] = sInput.split(' ');
         for (const s of splitted) {
             let ints: number[] = this.rangeStringToArray(s);
             if (ints === null) {
@@ -239,5 +233,19 @@ export default class Utility {
         }
         s += this.rangeStringFromStartEnd(rangeStart, rangeEnd);
         return s;
+    }
+
+    /** during JSON readin of, e.g. custom-numbering, convert even concise format
+     *    strings ("1-12,52-53") to Array of numbers.
+     * @param x JSON string or array
+    */
+    public static numberingJSONToArray(x: any): number[] {
+        if (x == null) return null;
+        if (typeof x === 'string') {
+            return this.getIndices(x);
+        } else if (typeof x === 'object') {
+            return x;
+        }
+        return x;
     }
 }
