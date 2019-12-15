@@ -35,9 +35,11 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     }
 
     public redraw(forceBaseXY: boolean): void {
-        this._graphics.clear();
-
-        if (!this._enabled) return;
+        if (!this._enabled) {
+            // clear if not cleared.
+            if (this._graphics.currentPath !== null) this._graphics.clear();
+            return;
+        }
 
         let idx: number[] = [];
         let basePosX: number[] = [];
@@ -56,91 +58,116 @@ export default class BaseRope extends GameObject implements LateUpdatable {
             }
         }
 
-        if (!Arrays.shallowEqual(basePosX, this._lastBasePosX)
-            || !Arrays.shallowEqual(basePosY, this._lastBasePosY)) {
-            this.updateInterpBasePos(basePosX, basePosY, idx);
-            this._lastBasePosX = basePosX;
-            this._lastBasePosY = basePosY;
+        if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
+            && Arrays.shallowEqual(basePosY, this._lastBasePosY)
+            && this._graphics.currentPath !== null) {
+            // base positions haven't changed, and baseRope has not been cleared,
+            // so no need to update -- just return.
+            return;
         }
 
-        // by drawing twice, can get a nice looking texture.
-        // draw thick line and thin line on top
+        this._lastBasePosX = basePosX;
+        this._lastBasePosY = basePosY;
+        this.drawBaseRope(basePosX, basePosY);
+    }
+
+    /**
+     * drawBaseRope()
+     *  by drawing twice, can get a nice looking texture.
+     *   draw thick line and thin line on top
+     */
+    private drawBaseRope(basePosX: number[], basePosY: number[]): void {
+        // this math is the rate limiting thing.
+        //  for zooms, pans, and changes between target/natural mode,
+        //   it might be better to compute smooth ropes for beginning and final, and then
+        //   interpolate in between...
+        let interpBasePosXY = this.updateInterpBasePos(basePosX, basePosY);
+
+        this._graphics.clear();
         const OUTER_ROPE_THICKNESS: number = 0.30 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(OUTER_ROPE_THICKNESS, 0x777777, 0.2);
-        this.drawBaseRopeLine();
+        this.drawBaseRopeLine(interpBasePosXY);
 
         const INNER_ROPE_THICKNESS: number = 0.25 * Pose2D.ZOOM_SPACINGS[this._pose.zoomLevel];
         this._graphics.lineStyle(INNER_ROPE_THICKNESS, 0xE8E8E8, 0.2);
-        this.drawBaseRopeLine();
+        this.drawBaseRopeLine(interpBasePosXY);
     }
 
-    private drawBaseRopeLine(): void {
+    private drawBaseRopeLine(interpBasePosXY: Array<[number, number]>): void {
         this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
-        for (let ii = 0; ii < this._interpBasePosX.length; ii++) {
-            this._graphics.lineTo(this._interpBasePosX[ii], this._interpBasePosY[ii]);
+        for (let ii = 0; ii < interpBasePosXY.length; ii++) {
+            this._graphics.lineTo(interpBasePosXY[ii][0], interpBasePosXY[ii][1]);
         }
     }
 
     /**
-     * This function updates the _interpBasePosX and _interpBasePosY class variables.
      * Currently allows use of cubic interpolation or Pchip -- if we are still using
-     * only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     *   only Pchip in mid-2020, get rid of cubic, and consolidate functions.
+     *
+     * The most beautiful  solution would be to use planar elastica, either Euler's solution (which
+     *   still requires a numerical integral) or numerical minmization of a discrete elastica--
+     *
+     *  Let rhiju know if you want to try it. =)
      */
-    private updateInterpBasePos(basePosX: number[], basePosY: number[], idx: number[]) {
+    private updateInterpBasePos(basePosX: number[], basePosY: number[]): Array<[number, number]> {
         const smoothFactor = 5;
-        // this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY, idx);
-        this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY, idx);
+        // return this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY);
+        return this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY);
     }
 
     /**
      * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
-     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
-     * @param smoothFactor
-     * @param basePosX
-     * @param basePosY
+     *  get rid of this in mid-2020 if we do not restore it.
+     * @param smoothFactor number of interpolation points between each input point
+     * @param basePosX input points' X values
+     * @param basePosY input points' Y values
      */
-    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]): void {
-        this._interpBasePosX = [];
-        this._interpBasePosY = [];
+    private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]):
+    Array<[number, number]> {
+        let interpBasePosXY: Array<[number, number]> = [];
         for (let i = 1; i < this._pose.fullSequence.length * smoothFactor; i++) {
-            this._interpBasePosX.push(this.cubicInterpolation(basePosX, i / smoothFactor));
-            this._interpBasePosY.push(this.cubicInterpolation(basePosY, i / smoothFactor));
+            interpBasePosXY.push([
+                this.cubicInterpolation(basePosX, i / smoothFactor),
+                this.cubicInterpolation(basePosY, i / smoothFactor)
+            ]);
         }
+        return interpBasePosXY;
     }
 
     /**
      * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
      * A little choppier, but keeps lines in stacks straight.
      *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
-     * @param basePosX
-     * @param basePosY
-     * @param idx
+     * @param smoothFactor number of interpolation points between each input point
+     * @param basePosX input points' X values
+     * @param basePosY input points' Y values
      */
-    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[],
-        idx: number[]): void {
-        this._interpBasePosX = this.interpPchip(smoothFactor, basePosX, idx);
-        this._interpBasePosY = this.interpPchip(smoothFactor, basePosY, idx);
+    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
+    Array<[number, number]> {
+        let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
+        let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
+        let interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
+        return interpBasePosXY;
     }
 
-    private interpPchip(smoothFactor: number, points: number[], idx: number[]): number[] {
-        let inputPoints: Array<[number, number]> = [];
-        for (let ii = 0; ii < points.length; ii++) {
-            inputPoints.push([idx[ii], points[ii]]);
-        }
-        let pchipFitPoints = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
-        let interpBasePos: number[] = [];
-        for (const point of pchipFitPoints) {
-            interpBasePos.push(point[1]);
-        }
+    private interpPchip(smoothFactor: number, points: number[]): number[] {
+        // have to pack in ii for pchip.fit
+        let inputPoints = points.map((x, idx) => [idx, x]);
+        let pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
+        let interpBasePos = pchipFitPoints.map((x) => x[1]);
         return interpBasePos;
     }
 
-    // adapted directly from  demo
-    //         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
-    //  Cubic interpolation based on https://github.com/osuushi/Smooth.js
-    //
-    // Note: This is way faster than cubic-interpolation.js available through NPM.
-    //
+    /**
+     * adapted directly from  demo
+     *         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
+     *  Cubic interpolation based on https://github.com/osuushi/Smooth.js
+     *
+     * Note: This is way faster than cubic-interpolation.js available through NPM.
+     * @param array input points
+     * @param t     point at which to interpolate
+     *
+     */
     private cubicInterpolation(array: number[], t: number, tangentFactor: number = 1) {
         const k = Math.floor(t);
         const m = [this.getTangent(k, tangentFactor, array), this.getTangent(k + 1, tangentFactor, array)];
@@ -181,7 +208,4 @@ export default class BaseRope extends GameObject implements LateUpdatable {
 
     private _lastBasePosX: Array<number> = [];
     private _lastBasePosY: Array<number> = [];
-
-    private _interpBasePosX: Array<number> = [];
-    private _interpBasePosY: Array<number> = [];
 }
