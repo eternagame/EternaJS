@@ -36,6 +36,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
 
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
+            // clear if not cleared.
             if (this._graphics.currentPath !== null) this._graphics.clear();
             return;
         }
@@ -60,7 +61,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
             && Arrays.shallowEqual(basePosY, this._lastBasePosY)
             && this._graphics.currentPath !== null) {
-            // base positions haven't changed, baseRope is drawn,
+            // base positions haven't changed, and baseRope has not been cleared,
             // so no need to update -- just return.
             return;
         }
@@ -117,9 +118,9 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     /**
      * Use Cubic interpolation between points. Smooth, but can get wiggly if segments are far apart.
      *  get rid of this in mid-2020 if we do not restore it.
-     * @param smoothFactor
-     * @param basePosX
-     * @param basePosY
+     * @param smoothFactor number of interpolation points between each input point
+     * @param basePosX input points' X values
+     * @param basePosY input points' Y values
      */
     private updateInterpBasePosCubic(smoothFactor: number, basePosX: number[], basePosY: number[]):
     Array<[number, number]> {
@@ -137,39 +138,36 @@ export default class BaseRope extends GameObject implements LateUpdatable {
      * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
      * A little choppier, but keeps lines in stacks straight.
      *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
-     * @param basePosX
-     * @param basePosY
+     * @param smoothFactor number of interpolation points between each input point
+     * @param basePosX input points' X values
+     * @param basePosY input points' Y values
      */
     private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
     Array<[number, number]> {
         let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
         let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
-        let interpBasePosXY: Array<[number, number]> = [];
-        for (let i = 1; i < interpBasePosX.length; i++) {
-            interpBasePosXY.push([interpBasePosX[i], interpBasePosY[i]]);
-        }
+        let interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
         return interpBasePosXY;
     }
 
     private interpPchip(smoothFactor: number, points: number[]): number[] {
-        let inputPoints: Array<[number, number]> = [];
-        for (let ii = 0; ii < points.length; ii++) {
-            inputPoints.push([ii, points[ii]]);
-        }
-        let pchipFitPoints = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
-        let interpBasePos: number[] = [];
-        for (const point of pchipFitPoints) {
-            interpBasePos.push(point[1]);
-        }
+        // have to pack in ii for pchip.fit
+        let inputPoints = points.map((x, idx) => [idx, x]);
+        let pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
+        let interpBasePos = pchipFitPoints.map((x) => x[1]);
         return interpBasePos;
     }
 
-    // adapted directly from  demo
-    //         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
-    //  Cubic interpolation based on https://github.com/osuushi/Smooth.js
-    //
-    // Note: This is way faster than cubic-interpolation.js available through NPM.
-    //
+    /**
+     * adapted directly from  demo
+     *         https://pixijs.io/examples/#/demos-advanced/mouse-trail.js
+     *  Cubic interpolation based on https://github.com/osuushi/Smooth.js
+     *
+     * Note: This is way faster than cubic-interpolation.js available through NPM.
+     * @param array input points
+     * @param t     point at which to interpolate
+     *
+     */
     private cubicInterpolation(array: number[], t: number, tangentFactor: number = 1) {
         const k = Math.floor(t);
         const m = [this.getTangent(k, tangentFactor, array), this.getTangent(k + 1, tangentFactor, array)];
