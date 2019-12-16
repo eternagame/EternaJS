@@ -181,7 +181,7 @@ export default class Utility {
      *
      * will return [11,12,13,14,12,16]
      *
-     * @param s input string
+     * @param sInput input string
      */
     public static getIndices(sInput: string): number[] {
         let indices: number[] = [];
