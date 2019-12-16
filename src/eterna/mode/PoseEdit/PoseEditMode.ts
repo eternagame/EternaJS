@@ -724,7 +724,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
                 if (this._poses[ii].customLayout != null
                     && this._poses[ii].customLayout.length !== targetSecstructs[ii].length) {
-                    log.error(
+                    log.warn(
                         'custom-layout field from puzzle objective json does not match target length.'
                         + ' Ignoring custom-layout'
                     );
