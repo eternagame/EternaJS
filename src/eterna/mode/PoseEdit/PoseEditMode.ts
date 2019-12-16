@@ -735,7 +735,7 @@ export default class PoseEditMode extends GameMode {
                 );
                 if (this._poses[ii].customNumbering != null
                     && this._poses[ii].customNumbering.length !== targetSecstructs[ii].length) {
-                    log.error(
+                    log.warn(
                         'custom-numbering field from puzzle objective json does not match target length.'
                         + ' Ignoring custom-numbering'
                     );
