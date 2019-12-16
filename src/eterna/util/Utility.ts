@@ -146,17 +146,19 @@ export default class Utility {
      *
      * If error is encountered, returns null (not an array of numbers!)
      *
+     * @param rangeString string like '-1-4,7-8,12 16'
+     * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
-    public static rangeStringToArray(sInput: string): number[] {
+    public static rangeStringToArray(rangeString: string): number[] {
         let vals: number[] = [];
         const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
-        for (const s of sInput.split(',')) {
-            let foundDash = s.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
+        for (const str of rangeString.split(',')) {
+            let foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
             if (foundDash < 0) {
-                if (nullStrings.indexOf(s) > -1) {
+                if (nullStrings.indexOf(str) > -1) {
                     vals.push(null);
                 } else {
-                    const val = parseInt(s, 10);
+                    const val = parseInt(str, 10);
                     if (Number.isNaN(val)) {
                         return null; // signal error
                     } else {
@@ -164,8 +166,8 @@ export default class Utility {
                     }
                 }
             } else {
-                let startVal = parseInt(s.slice(0, foundDash), 10);
-                let endVal = parseInt(s.slice(foundDash + 1, s.length), 10);
+                let startVal = parseInt(str.slice(0, foundDash), 10);
+                let endVal = parseInt(str.slice(foundDash + 1, str.length), 10);
                 if (Number.isNaN(startVal)) return null;
                 if (Number.isNaN(endVal)) return null;
                 for (let n = startVal; n <= endVal; n++) vals.push(n);
@@ -177,17 +179,18 @@ export default class Utility {
     /** allows for specification of sequences and their indices
      *   during a paste. Example:
      *
-     *    11-14,12 16
+     *    '11-14,12 16'
      *
      * will return [11,12,13,14,12,16]
      *
-     * @param sInput input string
+     * @param strInput input string like '11-14,12 16'
+     * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
-    public static getIndices(sInput: string): number[] {
+    public static getIndices(strInput: string): number[] {
         let indices: number[] = [];
-        let splitted: string[] = sInput.split(' ');
-        for (const s of splitted) {
-            let ints: number[] = this.rangeStringToArray(s);
+        let splitted: string[] = strInput.split(' ');
+        for (const str of splitted) {
+            let ints: number[] = this.rangeStringToArray(str);
             if (ints === null) {
                 return null; // signal failure
             }
@@ -198,10 +201,13 @@ export default class Utility {
 
     /**
      * Creates string from start and end of a range, e.g.
+     *
      *    4,6 becomes '4-6'
      *    null,null becomes ''
-     * @param rangeStart integer starting range
-     * @param rangeEnd integer ending range
+     *
+     * @param rangeStart integer starting range (e.g., 4, or null)
+     * @param rangeEnd integer ending range (e.g., 6, or null)
+     * @returns string like '4-6' or ''
      */
     public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
         if (rangeStart == null) return '';
@@ -213,39 +219,41 @@ export default class Utility {
      * Converts arrays to range strings. Examples:
      *
      *      [1,2,3,4]  becomes '1-4'
-     *      [-1,null,1,2,3,4,-1,52,53,54,,] becomes -1,,1-4,-1,52-54,
+     *      [-1,null,1,2,3,4,-1,52,53,54,,] becomes '-1,,1-4,-1,52-54,'
      *
-     * @param x array of numbers (integers or null) to convert into compact string
+     * @param numberArray array of numbers (integers or null) to convert into compact string
+     * @returns rangeString, like '1-4'
      */
-    public static arrayToRangeString(x: number[]): string {
-        let s = '';
-        if (x == null || x.length === 0) return s;
-        let rangeStart = x[0];
-        let rangeEnd = x[0];
-        for (let ii = 1; ii < x.length; ii++) {
-            if (x[ii] === (x[ii - 1] + 1) && (rangeStart !== null)) {
-                rangeEnd = x[ii]; continue;
+    public static arrayToRangeString(numberArray: number[]): string {
+        let rangeString = '';
+        if (numberArray == null || numberArray.length === 0) return rangeString;
+        let rangeStart = numberArray[0];
+        let rangeEnd = numberArray[0];
+        for (let ii = 1; ii < numberArray.length; ii++) {
+            if (numberArray[ii] === (numberArray[ii - 1] + 1) && (rangeStart !== null)) {
+                rangeEnd = numberArray[ii]; continue;
             } else {
-                s += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;
-                rangeStart = x[ii];
-                rangeEnd = x[ii];
+                rangeString += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;
+                rangeStart = numberArray[ii];
+                rangeEnd = numberArray[ii];
             }
         }
-        s += this.rangeStringFromStartEnd(rangeStart, rangeEnd);
-        return s;
+        rangeString += this.rangeStringFromStartEnd(rangeStart, rangeEnd);
+        return rangeString;
     }
 
     /** during JSON readin of, e.g. custom-numbering, convert even concise format
-     *    strings ("1-12,52-53") to Array of numbers.
-     * @param x JSON string or array
+     *    strings ('1-12,52-53') to Array of numbers.
+     * @param numberingJSON JSON string like '1-12' or array like [1,2,...,12]
+     * @returns array of numbers
     */
-    public static numberingJSONToArray(x: any): number[] {
-        if (x == null) return null;
-        if (typeof x === 'string') {
-            return this.getIndices(x);
-        } else if (typeof x === 'object') {
-            return x;
+    public static numberingJSONToArray(numberingJSON: any): number[] {
+        if (numberingJSON == null) return null;
+        if (typeof numberingJSON === 'string') {
+            return this.getIndices(numberingJSON);
+        } else if (typeof numberingJSON === 'object') {
+            return numberingJSON;
         }
-        return x;
+        return numberingJSON;
     }
 }
