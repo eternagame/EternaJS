@@ -133,7 +133,8 @@ export default class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.pasteButton.clicked.connect(() => {
-            this.showDialog(new PasteSequenceDialog()).closed.then((sequence) => {
+            let customNumbering = this._poses[0].customNumbering;
+            this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
                 if (sequence != null) {
                     for (let pose of this._poses) {
                         pose.pasteSequence(sequence);
