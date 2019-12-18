@@ -4,7 +4,7 @@ type MatcherUtils = jest.MatcherUtils;
 
 declare global {
     namespace jest {
-        interface Matchers<R> {
+        interface Matchers<R, T> {
             toBeDeepCloseTo: (expected: any, numDigits? :number) => R;
             toMatchCloseTo: (expected: any, numDigits? :number) => R;
         }
