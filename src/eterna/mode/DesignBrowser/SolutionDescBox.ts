@@ -239,7 +239,7 @@ export default class SolutionDescBox extends GamePanel {
         let loadingText = new SceneObject(Fonts.arial(text, 14).color(0xffffff).build());
         loadingText.addObject(new RepeatingTask(() => new SerialTask(
             new AlphaTask(0, 0.7),
-            new AlphaTask(1, 0.7),
+            new AlphaTask(1, 0.7)
         )));
         return loadingText;
     }

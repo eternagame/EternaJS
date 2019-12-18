@@ -399,7 +399,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 new AlphaTask(1, 0.8, Easing.linear, this._fglow),
                 new AlphaTask(0, 0.8, Easing.linear, this._fglow),
                 new VisibleTask(false, this._fglow)
-            ),
+            )
         ));
 
         this._backlight.clear();
@@ -412,7 +412,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.replaceNamedObject(ConstraintBox.BACKLIGHT_ANIM, new SerialTask(
             new AlphaTask(1, 0.8, Easing.easeInOut, this._backlight),
             new AlphaTask(0, 0.8, Easing.easeInOut, this._backlight),
-            new VisibleTask(false, this._backlight),
+            new VisibleTask(false, this._backlight)
         ));
     }
 
@@ -430,7 +430,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             new AlphaTask(0, 0.15, Easing.easeInOut, this._backlight),
             new AlphaTask(1, 0.3, Easing.easeInOut, this._backlight),
             new AlphaTask(0, 0.4, Easing.easeInOut, this._backlight),
-            new VisibleTask(false, this._backlight),
+            new VisibleTask(false, this._backlight)
         ));
     }
 

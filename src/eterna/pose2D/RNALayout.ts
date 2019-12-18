@@ -427,6 +427,7 @@ export default class RNALayout {
             // this can be the case in stacked pairs.
             anchornode = rootnode;
         }
+
         if (anchornode != null) {
             anchorX = anchornode.x;
             anchorY = anchornode.y;
@@ -445,10 +446,13 @@ export default class RNALayout {
             let anchorCustomCoordNext: [number, number] = this._customLayout[anchornode.indexA + 1];
             let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
             let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
-            anchorCustomRotationDirectionSign = Math.sign(
-                anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY
-            );
-            if (anchorCustomRotationDirectionSign === 0) anchorCustomRotationDirectionSign = 1;
+            let anchorCustomDotProd = anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY;
+            anchorCustomRotationDirectionSign = Math.sign(anchorCustomDotProd);
+            if (anchorCustomRotationDirectionSign === 0
+                || anchorCustomCoordNext[0] === null
+                || Math.abs(anchorCustomDotProd) < 1e-3) {
+                anchorCustomRotationDirectionSign = 1;
+            }
             anchorCustomGoX *= anchorCustomRotationDirectionSign;
             anchorCustomGoY *= anchorCustomRotationDirectionSign;
         }
@@ -495,10 +499,14 @@ export default class RNALayout {
                 let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
                 let customGoNextX: number = customCoordNext[0] - customCoord[0];
                 let customGoNextY: number = customCoordNext[1] - customCoord[1];
-                let childCustomRotationDirectionSign: number = Math.sign(
-                    customGoNextX * customGoX + customGoNextY * customGoY
-                );
-                if (childCustomRotationDirectionSign === 0) childCustomRotationDirectionSign = 1;
+                let childCustomDotProd = customGoNextX * customGoX + customGoNextY * customGoY;
+                let childCustomRotationDirectionSign: number = Math.sign(childCustomDotProd);
+                if (customCoordNext[0] === null) {
+                    childCustomRotationDirectionSign = anchorCustomRotationDirectionSign;
+                } else if (childCustomRotationDirectionSign === 0
+                    || Math.abs(childCustomDotProd) < 1e-3) {
+                    childCustomRotationDirectionSign = 1;
+                }
                 customGoX *= childCustomRotationDirectionSign;
                 customGoY *= childCustomRotationDirectionSign;
 

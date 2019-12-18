@@ -301,7 +301,7 @@ export default class RankScroll extends ContainerObject {
                     ),
                     new AlphaTask(0, RANK_ANIM_DURATION, Easing.easeIn, this._tfRankOffset)
                 ),
-                new VisibleTask(false, this._tfRankOffset),
+                new VisibleTask(false, this._tfRankOffset)
             ));
         }
     }

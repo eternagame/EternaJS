@@ -56,7 +56,7 @@ export default class Tooltips extends GameObject {
 
         this._curTooltipFader = this.addObject(new SerialTask(
             new DelayTask(Tooltips.TOOLTIP_DELAY),
-            new AlphaTask(1, 0.1, Easing.linear, this._curTooltip),
+            new AlphaTask(1, 0.1, Easing.linear, this._curTooltip)
         ));
     }
 
