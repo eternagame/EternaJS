@@ -18,7 +18,7 @@ export default class AchievementManager extends GameObject {
             return new Promise<void>((resolve) => {
                 this.addObject(new SerialTask(
                     new FunctionTask((): boolean => !this.hasPendingAchievements),
-                    new CallbackTask(resolve),
+                    new CallbackTask(resolve)
                 ));
             });
         }

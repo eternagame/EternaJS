@@ -10,6 +10,11 @@ import TextInputPanel from './TextInputPanel';
  *  corresponding to sequence string.
  */
 export default class PasteSequenceDialog extends Dialog<number[]> {
+    constructor(customNumbering: number[] = null) {
+        super();
+        this._customNumbering = customNumbering;
+    }
+
     protected added(): void {
         super.added();
 
@@ -45,7 +50,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
                 return;
             }
         }
-        let s = EPars.indexedStringToSequence(sequence);
+        let s = EPars.indexedStringToSequence(sequence, this._customNumbering);
         if (s == null && seq.length > 0) {
             (this.mode as GameMode).showNotification(
                 'Problem with how you formatted any input numbers after the sequence'
@@ -54,4 +59,6 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         }
         this.close(s);
     }
+
+    private readonly _customNumbering: number[];
 }

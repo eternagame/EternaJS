@@ -46,6 +46,7 @@ import URLButton from 'eterna/ui/URLButton';
 import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import Utility from 'eterna/util/Utility';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -280,7 +281,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showPasteSequenceDialog(): void {
-        this.showDialog(new PasteSequenceDialog()).closed.then((sequence) => {
+        let customNumbering = this._poses[0].customNumbering;
+        this.showDialog(new PasteSequenceDialog(customNumbering)).closed.then((sequence) => {
             if (sequence !== null) {
                 for (let pose of this._poses) {
                     pose.pasteSequence(sequence);
@@ -298,6 +300,7 @@ export default class PoseEditMode extends GameMode {
 
     private showCopySequenceDialog(): void {
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
+        if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
     }
 
@@ -718,7 +721,43 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].targetPairs = this._targetPairs[ii];
             if (this._targetConditions != null && this._targetConditions[ii] != null) {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
+
                 this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
+                if (this._poses[ii].customLayout != null
+                    && this._poses[ii].customLayout.length !== targetSecstructs[ii].length) {
+                    log.warn(
+                        'custom-layout field from puzzle objective json does not match target length.'
+                        + ' Ignoring custom-layout'
+                    );
+                    this._poses[ii].customLayout = null;
+                }
+
+                this._poses[ii].customNumbering = Utility.numberingJSONToArray(
+                    this._targetConditions[ii]['custom-numbering']
+                );
+                if (this._poses[ii].customNumbering != null) {
+                    if (this._poses[ii].customNumbering.length !== targetSecstructs[ii].length) {
+                        log.warn(
+                            'custom-numbering field from puzzle objective json does not match target length.'
+                            + ' Ignoring custom-numbering'
+                        );
+                        this._poses[ii].customNumbering = null;
+                    } else {
+                        let x = this._poses[ii].customNumbering;
+                        for (let jj = 0; jj < x.length; jj++) {
+                            if (x[jj] == null) continue;
+                            let kk = x.indexOf(x[jj]);
+                            if (kk !== jj) {
+                                log.warn(
+                                    `custom-numbering field ${String(x[jj])} appears twice.`
+                                    + ' Ignoring custom-numbering'
+                                );
+                                this._poses[ii].customNumbering = null;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             this._poses[ii].puzzleLocks = this._puzzle.puzzleLocks;
@@ -1378,9 +1417,9 @@ export default class PoseEditMode extends GameMode {
 
         if (this._puzzle.nodeID === 2390140) {
             if (targetIndex === 1) {
-                this._poses[poseIndex].auxInfo(null);
+                this._poses[poseIndex].auxInfo = null;
             } else {
-                this._poses[poseIndex].auxInfo({cleavingSite: 28});
+                this._poses[poseIndex].auxInfo = {cleavingSite: 28};
             }
         }
     }
