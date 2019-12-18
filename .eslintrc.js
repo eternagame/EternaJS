@@ -94,7 +94,11 @@ module.exports = {
       '@typescript-eslint/no-explicit-any': 'off',
       // Outparams are used in some places to reduce allocations, however it'd be nice to have in general...
       // Should probably reconfigure with ignorePropertyModificationsFor
-      'no-param-reassign': 'off'
+      'no-param-reassign': 'off',
+
+
+      // this became a problem recently because a default changed
+      'import/extensions': ['error', 'never']
     }
   };
   
