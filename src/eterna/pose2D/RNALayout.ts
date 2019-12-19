@@ -617,6 +617,14 @@ export default class RNALayout {
                 return false;
             }
         }
+
+        if (rootnode && rootnode.isPair) {
+            // is initial pair of a stacked pair also paired in target structure?
+            if (this._targetPairs[rootnode.indexA] !== rootnode.indexB) {
+                return false;
+            }
+        }
+
         if (rootnode.children.length === 1 && rootnode.children[0].indexA < 0) return false;
 
         for (let ii = 0; ii < rootnode.children.length; ii++) {
