@@ -1,0 +1,50 @@
+{
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"type": "string"
+		},
+		"Authenticated as [name=${0}, uid=${1}]": {
+			"type": "string",
+			"minLength": 1,
+			"pattern": "(?=.*?\\$\\{0\\})(?=.*?\\$\\{1\\})"
+		},
+		"Authenticating...": {
+			"type": "string",
+			"minLength": 1
+		},
+		"Loading game...": {
+			"type": "string",
+			"minLength": 1
+		},
+		"Loading puzzle...": {
+			"type": "string",
+			"minLength": 1
+		},
+		"Loading solution ${0}...": {
+			"type": "string",
+			"minLength": 1,
+			"pattern": "(?=.*?\\$\\{0\\})"
+		},
+		"No such solution for given puzzle [puzzleID=${0}, solutionID=${1}": {
+			"type": "string",
+			"minLength": 1,
+			"pattern": "(?=.*?\\$\\{0\\})(?=.*?\\$\\{1\\})"
+		},
+		"Unrecognized mode '${0}'": {
+			"type": "string",
+			"minLength": 1,
+			"pattern": "(?=.*?\\$\\{0\\})"
+		}
+	},
+	"required": [
+		"Authenticated as [name=${0}, uid=${1}]",
+		"Authenticating...",
+		"Loading game...",
+		"Loading puzzle...",
+		"Loading solution ${0}...",
+		"No such solution for given puzzle [puzzleID=${0}, solutionID=${1}",
+		"Unrecognized mode '${0}'"
+	],
+	"additionalProperties": false
+}

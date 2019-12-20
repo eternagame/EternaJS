@@ -1,0 +1,9 @@
+{
+    "Authenticated as [name=${0}, uid=${1}]": "Authenticated as [name=${0}, uid=${1}]",
+    "Authenticating...": "Authenticating...",
+    "Loading game...": "Loading game...",
+    "Loading puzzle...": "Loading puzzle...",
+    "Loading solution ${0}...": "Loading solution ${0}...",
+    "No such solution for given puzzle [puzzleID=${0}, solutionID=${1}": "No such solution for given puzzle [puzzleID=${0}, solutionID=${1}",
+    "Unrecognized mode '${0}'": "Unrecognized mode '${0}'"
+}

@@ -12,7 +12,16 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
-    "baseUrl": "./src"
+    "baseUrl": "./",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "eterna/*": ["src/eterna/*"],
+      "flashbang": ["src/flashbang"],
+      "flashbang/*": ["src/flashbang/*"],
+      "signals": ["src/signals"],
+      "i18n/*": ["i18n/*"],
+    }
   },
   "include": [
     "./src/**/*.ts"

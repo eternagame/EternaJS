@@ -29,6 +29,7 @@ module.exports = {
             signals: path.resolve(__dirname, 'src/signals'),
             flashbang: path.resolve(__dirname, 'src/flashbang'),
             eterna: path.resolve(__dirname, 'src/eterna'),
+            i18n: path.resolve(__dirname, 'i18n'),
         }
     },
 

@@ -5,6 +5,7 @@ import {
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
+import i18n from 'es2015-i18n-tag';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -135,11 +136,11 @@ export default class EternaApp extends FlashbangApp {
             Flashbang.sound.volume = volume;
         }));
 
-        this.setLoadingText('Authenticating...', null);
+        this.setLoadingText(i18n`Authenticating...`, null);
 
         this.authenticate()
             .then(() => {
-                this.setLoadingText('Loading game...', null);
+                this.setLoadingText(i18n`Loading game...`, null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
@@ -162,7 +163,7 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.DESIGN_BROWSER:
                         return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
                     default:
-                        return Promise.reject(new Error(`Unrecognized mode '${this._params.mode}'`));
+                        return Promise.reject(new Error(i18n`Unrecognized mode '${this._params.mode}'`));
                 }
             })
             .catch((err) => {
@@ -301,11 +302,11 @@ export default class EternaApp extends FlashbangApp {
                     }
 
                     return Promise.reject(
-                        new Error(`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`)
+                        new Error(i18n`No such solution for given puzzle [puzzleID=${puzzleID}, solutionID=${solutionID}`)
                     );
                 });
 
-        this.setLoadingText(`Loading solution ${solutionID}...`, null);
+        this.setLoadingText(i18n`Loading solution ${solutionID}...`, null);
         return Promise.all([puzzlePromise, solutionPromise])
             .then((result) => {
                 this.popLoadingMode();
@@ -317,7 +318,7 @@ export default class EternaApp extends FlashbangApp {
         if (puzzleOrID instanceof Puzzle) {
             return puzzleOrID;
         } else {
-            this.setLoadingText('Loading puzzle...', null);
+            this.setLoadingText(i18n`Loading puzzle...`, null);
             let puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
             this.popLoadingMode();
             return puzzle;
@@ -380,7 +381,7 @@ export default class EternaApp extends FlashbangApp {
         if (!Eterna.DEV_MODE) {
             return Eterna.client.authenticate()
                 .then(([username, uid]) => {
-                    log.debug(`Authenticated as [name=${username}, uid=${uid}]`);
+                    log.debug(i18n`Authenticated as [name=${username}, uid=${uid}]`);
                     Eterna.setPlayer(username, uid);
                 });
         } else {
