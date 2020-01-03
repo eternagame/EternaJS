@@ -8,7 +8,9 @@ export default class Utility {
      * Currently tested only for pretty trivial cases.
      *
      * @param num - The number to be rounded
-     * @param floating - The decimal place to which to round (i.e., 1 == 'tenths'; 2 == 'hundredths')
+     * @param floating - The decimal place to which to round
+     * (i.e., 1 == 'tenths'; 2 == 'hundredths')
+     *
      * @returns The number, rounded-off as directed
      */
     public static roundTo(num: number, floating: number): string {
@@ -21,6 +23,7 @@ export default class Utility {
      * Safely remove HTML tags from an input by replacing <> with escapes.
      *
      * @param str - The string to be escaped
+     *
      * @returns The string, with each <> replaced by regex.
      */
     public static stripHtmlTags(str: string): string {
@@ -35,6 +38,7 @@ export default class Utility {
      * Map double quotes to single quotes and newlines to spaces.
      *
      * @param str - The string to be modified
+     *
      * @returns The string, with each " replaced by ' and "\n" by " ".
      */
     public static stripQuotationsAndNewlines(str: string): string {
@@ -49,6 +53,7 @@ export default class Utility {
      * Turn any non-null object into a stringified key-value repr.
      *
      * @param obj - The object to be representated
+     *
      * @returns A string of key=val, joined by "&"
      */
     public static generateParameterString(obj: any): string {
@@ -162,14 +167,14 @@ export default class Utility {
     }
 
     /**
-     * Similar to `string.split(' ')`, but acts differently with multiple consecutive spaces
-     * E.g., two spaces results in the second space being placed in the following entry,
-     * three results in one entry of a single space, four both, five two single space entried, etc
+     * Similar to `string.split(' ')`, but acts differently with multiple
+     * consecutive spaces. e.g., two spaces results in the second space being
+     * placed in the following entry, three results in one entry of a single
+     * space, four both, five two single space entries, etc
      *
      * @param csl string to split by whitespace
      *
      * @returns string array
-     *
      */
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
@@ -202,6 +207,7 @@ export default class Utility {
      * If error is encountered, returns null (not an array of numbers!)
      *
      * @param rangeString string like '-1-4,7-8,12 16'
+     *
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
     public static rangeStringToArray(rangeString: string): number[] {
@@ -231,8 +237,9 @@ export default class Utility {
         return vals;
     }
 
-    /** allows for specification of sequences and their indices
-     *   during a paste. Example:
+    /**
+     * allows for specification of sequences and their indices
+     * during a paste. Example:
      *
      *    '11-14,12 16'
      *
@@ -241,6 +248,7 @@ export default class Utility {
      * Note that indices will be 1-indexed, not 0-indexed.
      *
      * @param strInput input string like '11-14,12 16'
+     *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
     public static getIndices(strInput: string): number[] {
@@ -264,6 +272,7 @@ export default class Utility {
      *
      * @param rangeStart integer starting range (e.g., 4, or null)
      * @param rangeEnd integer ending range (e.g., 6, or null)
+     *
      * @returns string like '4-6' or ''
      */
     public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
@@ -278,7 +287,9 @@ export default class Utility {
      *      [1,2,3,4]  becomes '1-4'
      *      [-1,null,1,2,3,4,-1,52,53,54,,] becomes '-1,,1-4,-1,52-54,'
      *
-     * @param numberArray array of numbers (integers or null) to convert into compact string
+     * @param numberArray array of numbers (integers or null) to convert into
+     * compact string
+     *
      * @returns rangeString, like '1-4'
      */
     public static arrayToRangeString(numberArray: number[]): string {
@@ -299,9 +310,12 @@ export default class Utility {
         return rangeString;
     }
 
-    /** during JSON readin of, e.g. custom-numbering, convert even concise format
-     *    strings ('1-12,52-53') to Array of numbers.
+    /**
+     * during JSON readin of, e.g. custom-numbering, convert concise format
+     * strings ('1-12,52-53') to Array of numbers.
+     *
      * @param numberingJSON JSON string like '1-12' or array like [1,2,...,12]
+     *
      * @returns array of numbers
     */
     public static numberingJSONToArray(numberingJSON: any): number[] {
