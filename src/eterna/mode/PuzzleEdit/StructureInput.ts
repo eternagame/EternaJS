@@ -86,6 +86,12 @@ export default class StructureInput extends GamePanel implements Updatable {
         this.display.hitArea = new Rectangle(0, 0, width, height);
     }
 
+    /**
+     * Take the actual current input data and use it to update the Pose.
+     *
+     * @param op an "operation" (either adding or deleting a base or a base pair)
+     * @param index where in the structure the operation should take place
+     */
     public setPose(op: PuzzleEditOp = null, index: number = -1): void {
         let input = this._textInput.text;
         input = input.replace(/[^.()]/g, '');
@@ -115,7 +121,6 @@ export default class StructureInput extends GamePanel implements Updatable {
             bindingSite.push(false);
         }
 
-        // BASE SHIFTING MODIFIED HERE. Delete comments to apply the changes
         if (op === PuzzleEditOp.ADD_BASE) {
             // Add a base
             let afterIndex = sequence.slice(index);

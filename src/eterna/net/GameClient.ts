@@ -13,7 +13,11 @@ export default class GameClient {
 
     // / ACCOUNT
 
-    /** Authenticates the logged-in player. */
+    /**
+     * Authenticates the logged-in player.
+     *
+     * @returns resolves to a pair of user name and ID
+     */
     public authenticate(): Promise<[string, number]> {
         return this.get('/eterna_authenticate.php')
             .then((rsp) => rsp.text())
@@ -31,7 +35,11 @@ export default class GameClient {
             });
     }
 
-    /** Logs the player in. Resolves with the player's UID if successful. */
+    /**
+     * Logs the player in.
+     *
+     * @returns resolves with the player's UID if successful.
+     */
     public login(name: string, password: string): Promise<number> {
         return this.post('/login/', {name, pass: password, type: 'login'})
             .then((rsp) => rsp.json())
@@ -46,11 +54,19 @@ export default class GameClient {
             });
     }
 
+    /**
+     * Logs the player out.
+     */
     public logout(): Promise<void> {
         return this.get('/eterna_logout.php', {noredirect: true})
             .then((rsp) => rsp.text()).then(() => {});
     }
 
+    /**
+     * Gets the ban list
+     *
+     * @returns resolves to the JSON-data contents of the ban list
+     */
     public getBannedList(): Promise<JSONData> {
         return this.get('/banned.list').then((rsp) => rsp.json());
     }

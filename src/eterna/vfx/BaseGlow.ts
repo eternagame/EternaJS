@@ -3,6 +3,16 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EternaTextureUtil from 'eterna/util/EternaTextureUtil';
 
+
+/**
+ * With a color based on whether the bases are "right" or "wrong," and used for
+ * aptamer binding sites, the BaseGlow implements a fun visual effect through
+ * its updateView function, which is common to just about all Sprites.
+ *
+ * Upon construction, BaseGlow calls its initTextures() function, which loads
+ * in textures from the BitmapManager if the function hasn't been called yet.
+ *
+ */
 export default class BaseGlow extends Sprite {
     constructor() {
         super();

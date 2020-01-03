@@ -70,6 +70,15 @@ export default class RNALayout {
         return this._root;
     }
 
+    /**
+     * Initializes the tree structure of the RNALayout based on provided BPs.
+     *
+     * @param pairs An array as long as the structure. -1 for unpaired bases,
+     * index of the base it is paired to for a paired base
+     * @param targetPairs An optional array stored in the RNALayout that shows
+     * the structure of the puzzle "goal." A
+     * comparison of pairs to targetPairs will influence application of the customLayout
+     */
     public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
@@ -97,7 +106,8 @@ export default class RNALayout {
         }
 
         // / Array that will be used for scoring
-        // / Shifts so that
+        // / Shifted to be effectively 1-indexed
+        // / with the zero-indexed length at index 0
         this._scoreBiPairs = new Array(biPairs.length + 1);
         for (ii = 0; ii < biPairs.length; ii++) {
             this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
@@ -132,8 +142,19 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Provides actual coordinates for the layout whose structure is encoded
+     * by this object.
+     *
+     * @param xarray x-coordinates (output param)
+     * @param yarray y-coordinates (output param)
+     */
     public getCoords(xarray: number[], yarray: number[]): void {
         // FIXME add documentation. And its confusing that xarray,yarray are changeable by function ('outparams').
+
+        // If there is a root node in the layout, use the recursive function
+        // starting from root. The first two nt can be in a vertical line.
+        // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
         } else if (xarray.length < 3) {
@@ -182,6 +203,13 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Generate base positions for this RNALayout
+     *
+     * @param customLayout An array of x,y tuples defining all base positions,
+     * which will override the "normal" geometry wherever the base pairs match
+     * the target pairs in the structure.
+     */
     public drawTree(customLayout: Array<[number, number]> = null): void {
         this.initializeCustomLayout(customLayout);
         if (this._root != null) {
@@ -286,6 +314,20 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called only by drawTree, a wrapper that first iniitalizes the
+     * customLayout, this function determines and sets the base positions for the RNA
+     * structure embodied by this object.
+     *
+     * @param rootnode the root node for this recursive call
+     * @param parentnode the parent of this subtree's root; null when this
+     * function is called on the tree's root
+     * @param startX a plausible starting X for root, likely to be modified
+     * @param startY a plausible starting Y for root, likely to be modified
+     * @param goX X component of unit vector from parent to root
+     * @param goY Y component of unit vector from parent to root
+     * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
+     */
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
@@ -397,6 +439,19 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called if the customLayout is defined AND if the junction locally
+     * matches the target structure.
+     *
+     * @param rootnode the root node for this recursive call
+     * @param parentnode the parent of this subtree's root; null when this
+     * function is called on the tree's root
+     * @param startX a plausible starting X for root, likely to be modified
+     * @param startY a plausible starting Y for root, likely to be modified
+     * @param goX X component of unit vector from parent to root
+     * @param goY Y component of unit vector from parent to root
+     * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
+     */
     private drawTreeCustomLayout(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
@@ -529,6 +584,12 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Adds up the tree score by summing this node and childrens' score (typically free energy)
+     * @param rootnode Node for score evaluation
+     *
+     * @returns the total score
+     */
     private getTotalScoreRecursive(rootnode: RNATreeNode): number {
         let score: number = rootnode.score;
         for (let ii = 0; ii < rootnode.children.length; ii++) {
@@ -537,7 +598,13 @@ export default class RNALayout {
         return score;
     }
 
-
+    /**
+     * Actually assigns scores to each node.
+     *
+     * @param nnfe list of nearest neighbor free energies
+     * @param rootnode current node for consideration
+     * @param parentnode parent of roonode, null if rootnode is root_
+     */
     private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
         if (rootnode.isPair) {
             // / Pair node
@@ -601,6 +668,13 @@ export default class RNALayout {
     }
 
     // / FIXME: there's surely a smarter way to do this...
+    /**
+     * Find a particular nnfe element. Why isn't this a dict? Right now it is a
+     * list of pairs, basically... is JS dict lookup superlinear?
+     *
+     * @param nnfe Array of nearest neighbor parameters
+     * @param index A desired index from the structure, for which we must search
+     */
     private static lookupFe(nnfe: number[], index: number): number {
         for (let ii = 0; ii < nnfe.length - 1; ii += 2) {
             if (nnfe[ii] === index) return nnfe[ii + 1];
@@ -608,6 +682,15 @@ export default class RNALayout {
         return 0;
     }
 
+    /**
+     * Judge whether a junction (defined by a node and its parent) matches the
+     * target structure, which is necessary for customLayout
+     *
+     * @param rootnode the root node defining the junction
+     * @param parentnode the root node's parent, if applicable
+     *
+     * @returns true if junction is target-like, false otherwise
+     */
     private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode): boolean {
         if (this._targetPairs == null) return false;
 
@@ -644,6 +727,12 @@ export default class RNALayout {
         return true;
     }
 
+    /**
+     * Called by drawTree, this function takes an array of x,y coords and scales
+     * it to something Eterna-compatible.
+     *
+     * @param customLayout An array of x,y coords defining "custom" nt positions
+     */
     private initializeCustomLayout(customLayout: Array<[number, number]>): void {
         if (customLayout === null) {
             this._customLayout = null;
@@ -660,7 +749,18 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called by initalizeCustomLayout, this function is needed so that
+     * externally defined customLayouts don't need to know anything fixed about
+     * Eterna display conventions.
+     *
+     * @param customLayout An array of x,y coords defining "custom" nt positions
+     *
+     * @returns the normalization factor to make it Eterna-compatible
+     */
     private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>): number {
+        // Looks for a stacked pair and normalizes the distance between bases,
+        // returning the normalization factor.
         let scaleFactor = 1.0;
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {

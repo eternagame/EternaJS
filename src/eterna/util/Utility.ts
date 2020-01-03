@@ -1,12 +1,30 @@
 import {Point} from 'pixi.js';
 
 export default class Utility {
-    public static roundTo(num: number, floating: number): number {
-        let div: number = 10 ** floating;
-        let temp: number = num * div;
-        return Number(temp) / div;
+    /**
+     * Rounds a number to a certain number of digits past the decimal.
+     *
+     * @remarks Currently tested only for pretty trivial cases.
+     *
+     * @param num - The number to be rounded
+     * @param floating - The decimal place to which to round
+     * (i.e., 1 == 'tenths'; 2 == 'hundredths')
+     *
+     * @returns The number, rounded-off as directed
+     */
+    public static roundTo(num: number, floating: number): string {
+        // let div: number = 10 ** floating;
+        // let temp: number = num * div;
+        return num.toFixed(floating); // Number(temp) / div;
     }
 
+    /**
+     * Safely remove HTML tags from an input by replacing <> with escapes.
+     *
+     * @param str - The string to be escaped
+     *
+     * @returns The string, with each <> replaced by regex.
+     */
     public static stripHtmlTags(str: string): string {
         let newlinereg = /</g;
         str = str.replace(newlinereg, '&lt;');
@@ -15,6 +33,13 @@ export default class Utility {
         return str;
     }
 
+    /**
+     * Map double quotes to single quotes and newlines to spaces.
+     *
+     * @param str - The string to be modified
+     *
+     * @returns The string, with each " replaced by ' and "\n" by " ".
+     */
     public static stripQuotationsAndNewlines(str: string): string {
         let newlinereg = /\n/g;
         str = str.replace(newlinereg, ' ');
@@ -23,6 +48,13 @@ export default class Utility {
         return str;
     }
 
+    /**
+     * Turn any non-null object into a stringified key-value repr.
+     *
+     * @param obj - The object to be representated
+     *
+     * @returns A string of key=val, joined by "&"
+     */
     public static generateParameterString(obj: any): string {
         if (obj == null) {
             return '';
@@ -31,6 +63,17 @@ export default class Utility {
         return Object.entries(obj).map(([key, val]) => `${key}=${val}`).join('&');
     }
 
+    /**
+     * Determines if a point is within a polygon given as a point vector, using
+     * a consequence of the Jordan curve theorem.
+     *
+     * @param p - The single point
+     * @param polygon - A polygon defined as a point array.
+     * @param stretchLength - The length of the line segment for testing; thus,
+     * this method fails for very big polygons.
+     *
+     * @returns true if the point is in the polygon; false otherwise.
+     */
     public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
         let hitCount = 0;
 
@@ -48,7 +91,20 @@ export default class Utility {
         return (hitCount % 2) === 1;
     }
 
-    public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point {
+    /**
+     * Determines the intersection of two lines or line segments AB and EF.
+     *
+     * @param A - The first point of the first line or segment
+     * @param B - The second point of the first line or segment
+     * @param E - The first point of the second line or segment
+     * @param F - The second point of the second line or segment
+     * @param asSeg - Treat the two specified objects as line segments, not as
+     * lines, so that intersections further away from the endpoints than the
+     * length of the segments themselves are returned as null.
+     *
+     * @returns true if the point is in the polygon; false otherwise.
+     */
+    public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point | null {
         let ip: Point;
         let a1: number;
         let a2: number;
@@ -110,11 +166,14 @@ export default class Utility {
     }
 
     /**
-     * Similar to `string.split(' ')`, but acts differently with multiple consecutive spaces
-     * E.g., two spaces results in the second space being placed in the following entry,
-     * three results in one entry of a single space, four both, five two single space entried, etc
+     * Similar to `string.split(' ')`, but acts differently with multiple
+     * consecutive spaces. e.g., two spaces results in the second space being
+     * placed in the following entry, three results in one entry of a single
+     * space, four both, five two single space entries, etc
      *
-     * @param csl string to split
+     * @param csl string to split by whitespace
+     *
+     * @returns string array
      */
     public static splitOnWhitespace(csl: string): string[] {
         let vals: string[] = [];
@@ -147,6 +206,7 @@ export default class Utility {
      * If error is encountered, returns null (not an array of numbers!)
      *
      * @param rangeString string like '-1-4,7-8,12 16'
+     *
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
     public static rangeStringToArray(rangeString: string): number[] {
@@ -176,14 +236,18 @@ export default class Utility {
         return vals;
     }
 
-    /** allows for specification of sequences and their indices
-     *   during a paste. Example:
+    /**
+     * allows for specification of sequences and their indices
+     * during a paste. Example:
      *
      *    '11-14,12 16'
      *
      * will return [11,12,13,14,12,16]
      *
+     * Note that indices will be 1-indexed, not 0-indexed.
+     *
      * @param strInput input string like '11-14,12 16'
+     *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
     public static getIndices(strInput: string): number[] {
@@ -207,6 +271,7 @@ export default class Utility {
      *
      * @param rangeStart integer starting range (e.g., 4, or null)
      * @param rangeEnd integer ending range (e.g., 6, or null)
+     *
      * @returns string like '4-6' or ''
      */
     public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
@@ -221,7 +286,9 @@ export default class Utility {
      *      [1,2,3,4]  becomes '1-4'
      *      [-1,null,1,2,3,4,-1,52,53,54,,] becomes '-1,,1-4,-1,52-54,'
      *
-     * @param numberArray array of numbers (integers or null) to convert into compact string
+     * @param numberArray array of numbers (integers or null) to convert into
+     * compact string
+     *
      * @returns rangeString, like '1-4'
      */
     public static arrayToRangeString(numberArray: number[]): string {
@@ -242,9 +309,12 @@ export default class Utility {
         return rangeString;
     }
 
-    /** during JSON readin of, e.g. custom-numbering, convert even concise format
-     *    strings ('1-12,52-53') to Array of numbers.
+    /**
+     * during JSON readin of, e.g. custom-numbering, convert concise format
+     * strings ('1-12,52-53') to Array of numbers.
+     *
      * @param numberingJSON JSON string like '1-12' or array like [1,2,...,12]
+     *
      * @returns array of numbers
     */
     public static numberingJSONToArray(numberingJSON: any): number[] {

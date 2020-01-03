@@ -88,8 +88,13 @@ export default abstract class GameMode extends AppMode {
     }
 
     /**
+     *
      * Show a notification. Removes any existing notification. Dialogs will be hidden while the notification exists.
-     * Returns a Promise that will resolve when the notification is dismissed.
+     *
+     * @param message the message to display
+     * @param extraButtonTitle if provided, creates a second button with a label containing the given text
+     *
+     * @returns a NotificationDialogue constructed from the provided parameters
      */
     public showNotification(message: string, extraButtonTitle?: string): NotificationDialog {
         if (this._notifRef.isLive) {

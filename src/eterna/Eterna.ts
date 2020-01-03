@@ -16,7 +16,11 @@ function ParseBool(value: string): boolean {
     return value.toLowerCase() === 'true';
 }
 
-/** Constants and global managers */
+/**
+ * This class serves as a container for some constants and singleton managers.
+ * It also contains some fallback error handling (like onFatalError).
+ */
+
 export default class Eterna {
     public static readonly OVERLAY_DIV_ID = 'overlay';
     public static readonly PIXI_CONTAINER_ID = 'pixi-container';
