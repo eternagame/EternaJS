@@ -322,10 +322,10 @@ export default class RNALayout {
      * @param rootnode the root node for this recursive call
      * @param parentnode the parent of this subtree's root; null when this
      * function is called on the tree's root
-     * @param startX
-     * @param startY
-     * @param goX
-     * @param goY
+     * @param startX a plausible starting X for root, likely to be modified
+     * @param startY a plausible starting Y for root, likely to be modified
+     * @param goX X component of unit vector from parent to root
+     * @param goY Y component of unit vector from parent to root
      * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeRecursive(
@@ -446,10 +446,10 @@ export default class RNALayout {
      * @param rootnode the root node for this recursive call
      * @param parentnode the parent of this subtree's root; null when this
      * function is called on the tree's root
-     * @param startX
-     * @param startY
-     * @param goX
-     * @param goY
+     * @param startX a plausible starting X for root, likely to be modified
+     * @param startY a plausible starting Y for root, likely to be modified
+     * @param goX X component of unit vector from parent to root
+     * @param goY Y component of unit vector from parent to root
      * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeCustomLayout(
