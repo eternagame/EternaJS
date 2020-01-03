@@ -68,7 +68,6 @@ export default class GameClient {
      * Gets the ban list
      *
      * @returns resolves to the JSON-data contents of the ban list
-     *
      */
     public getBannedList(): Promise<JSONData> {
         return this.get('/banned.list').then((rsp) => rsp.json());
