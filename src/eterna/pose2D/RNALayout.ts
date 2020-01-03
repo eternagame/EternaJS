@@ -74,10 +74,10 @@ export default class RNALayout {
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
      * @param pairs An array as long as the structure. -1 for unpaired bases,
-     * paired idx for paired bases.
+     * index of the base it is paired to for a paired base
      * @param targetPairs An optional array stored in the RNALayout that shows
-     * how much of the above structure is the same as the puzzle "goal." A
-     * comparison to targetPairs will influence application of the customLayout
+     * the structure of the puzzle "goal." A
+     * comparison of pairs to targetPairs will influence application of the customLayout
      */
     public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
@@ -204,7 +204,7 @@ export default class RNALayout {
     }
 
     /**
-     * Actually draw the RNALayout
+     * Generate base positions for this RNALayout
      *
      * @param customLayout An array of x,y tuples defining all base positions,
      * which will override the "normal" geometry wherever the base pairs match
@@ -316,7 +316,7 @@ export default class RNALayout {
 
     /**
      * Called only by drawTree, a wrapper that first iniitalizes the
-     * customLayout, this function actually creates a depiction of the RNA
+     * customLayout, this function determines and sets the base positions for the RNA
      * structure embodied by this object.
      *
      * @param rootnode the root node for this recursive call
@@ -326,7 +326,7 @@ export default class RNALayout {
      * @param startY
      * @param goX
      * @param goY
-     * @param rotationDirectionSign mapping from CW/CCW to 5' => 3' direction
+     * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
@@ -450,7 +450,7 @@ export default class RNALayout {
      * @param startY
      * @param goX
      * @param goY
-     * @param rotationDirectionSign mapping from CW/CCW to 5' => 3' direction
+     * @param rotationDirectionSign mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeCustomLayout(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
@@ -585,7 +585,7 @@ export default class RNALayout {
     }
 
     /**
-     * Adds up the tree score by summing this node and childrens' score
+     * Adds up the tree score by summing this node and childrens' score (typically free energy)
      * @param rootnode Node for score evaluation
      *
      * @returns the total score

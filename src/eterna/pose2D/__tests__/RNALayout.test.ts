@@ -1,5 +1,4 @@
 import RNALayout from "../RNALayout"
-//jest.mock('../RNALayout');
 
 test(`RNALayout:setupTree`, () => {
     let rnalayout: RNALayout = new RNALayout();
