@@ -78,7 +78,6 @@ export default class RNALayout {
      * @param targetPairs An optional array stored in the RNALayout that shows
      * how much of the above structure is the same as the puzzle "goal." A
      * comparison to targetPairs will influence application of the customLayout
-     *
      */
     public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
