@@ -39,7 +39,6 @@ export default class GameClient {
      * Logs the player in.
      *
      * @returns resolves with the player's UID if successful.
-     *
      */
     public login(name: string, password: string): Promise<number> {
         return this.post('/login/', {name, pass: password, type: 'login'})
