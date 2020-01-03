@@ -4,8 +4,7 @@ export default class Utility {
     /**
      * Rounds a number to a certain number of digits past the decimal.
      *
-     * @remarks
-     * Currently tested only for pretty trivial cases.
+     * @remarks Currently tested only for pretty trivial cases.
      *
      * @param num - The number to be rounded
      * @param floating - The decimal place to which to round
