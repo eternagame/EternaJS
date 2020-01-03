@@ -3,18 +3,16 @@ import {Vector2} from 'flashbang';
 
 export default class GraphicsUtil {
     /**
-     *
      * Draw a left-facing arrow, with its tip anchored at the origin.
      *
      * @param triSize the width of the equilateral triangle that defines the tip of the arrow.
      * @param baseLength rectangle length
-     * @param outlineColor the rectangle outline
+     * @param outlineColor arrow outline color
      * @param fillColor arrow fill collor
-     * @param graphics a Graphics object where the drawing takes place
+     * @param graphics a graphics object where the drawing takes place (null creates a new graphics instance)
      *
      * @returns the same graphics object that was passed, or a new one if null was passed,
-     * albeit with the arrow drawn.
-     *
+     * with the arrow drawn.
      */
     public static drawArrow(
         triSize: number, baseLength: number, outlineColor: number, fillColor: number, graphics: Graphics = null
@@ -55,9 +53,7 @@ export default class GraphicsUtil {
     }
 
     /**
-     *
      * Draw a leftward-facing triangle.
-     *
      * @param scale scale factor for a triangle; default unity
      */
     public static drawLeftTriangle(scale: number = 1): Graphics {
@@ -72,9 +68,7 @@ export default class GraphicsUtil {
     }
 
     /**
-     *
      * Draw a rightward facing triangle.
-     *
      * @param scale scale factor for a triangle; default unity
      */
     public static drawRightTriangle(scale: number = 1): Graphics {

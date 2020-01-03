@@ -10,7 +10,6 @@ export default class Utility {
      * @param num - The number to be rounded
      * @param floating - The decimal place to which to round (i.e., 1 == 'tenths'; 2 == 'hundredths')
      * @returns The number, rounded-off as directed
-     *
      */
     public static roundTo(num: number, floating: number): string {
         // let div: number = 10 ** floating;
@@ -23,7 +22,6 @@ export default class Utility {
      *
      * @param str - The string to be escaped
      * @returns The string, with each <> replaced by regex.
-     *
      */
     public static stripHtmlTags(str: string): string {
         let newlinereg = /</g;
@@ -38,7 +36,6 @@ export default class Utility {
      *
      * @param str - The string to be modified
      * @returns The string, with each " replaced by ' and "\n" by " ".
-     *
      */
     public static stripQuotationsAndNewlines(str: string): string {
         let newlinereg = /\n/g;
@@ -53,7 +50,6 @@ export default class Utility {
      *
      * @param obj - The object to be representated
      * @returns A string of key=val, joined by "&"
-     *
      */
     public static generateParameterString(obj: any): string {
         if (obj == null) {
@@ -71,8 +67,8 @@ export default class Utility {
      * @param polygon - A polygon defined as a point array.
      * @param stretchLength - The length of the line segment for testing; thus,
      * this method fails for very big polygons.
-     * @returns true if the point is in the polygon; false otherwise.
      *
+     * @returns true if the point is in the polygon; false otherwise.
      */
     public static isPointWithin(p: Point, polygon: Point[], stretchLength: number = 10000): boolean {
         let hitCount = 0;
@@ -101,8 +97,8 @@ export default class Utility {
      * @param asSeg - Treat the two specified objects as line segments, not as
      * lines, so that intersections further away from the endpoints than the
      * length of the segments themselves are returned as null.
-     * @returns true if the point is in the polygon; false otherwise.
      *
+     * @returns true if the point is in the polygon; false otherwise.
      */
     public static findIntersection(A: Point, B: Point, E: Point, F: Point, asSeg: boolean = true): Point | null {
         let ip: Point;
