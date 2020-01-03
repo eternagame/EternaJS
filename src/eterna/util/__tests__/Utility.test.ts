@@ -1,6 +1,5 @@
 import Utility from "../Utility";
 import { Point } from "pixi.js";
-//import "./jest-matcher-deep-close-to";
 
 
 test(`test_roundTo`, () => {
