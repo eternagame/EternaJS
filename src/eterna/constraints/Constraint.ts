@@ -24,6 +24,7 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
      * constraints that require it will not be usable within PuzzleMaker for now
      * @param puzzle This is not available in the puzzle maker, so any
      * constraints that require it will not be usable within PuzzleMaker for now
+     *
      * @returns Judge whether the constraint is satisfied
      */
     public abstract evaluate(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): ConstraintStatus;
