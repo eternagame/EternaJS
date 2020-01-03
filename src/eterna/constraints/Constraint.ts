@@ -18,14 +18,31 @@ export interface HighlightInfo {
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {
     public static readonly NAME: string;
     /**
-     * @param undoBlocks
-     * @param targetConditions This is not available in the puzzle maker, so any constraints which require it will not
-     * be usable within PuzzleMaker for now
-     * @param puzzle This is not available in the puzzle maker, so any constraints which require it will not
-     * be usable within PuzzleMaker for now
+     * @param undoBlocks A list of puzzle states (with sequence and derivatives)
+     * that informs constraints (mostly with the first, current element)
+     * @param targetConditions This is not available in the puzzle maker, so any
+     * constraints that require it will not be usable within PuzzleMaker for now
+     * @param puzzle This is not available in the puzzle maker, so any
+     * constraints that require it will not be usable within PuzzleMaker for now
+     * @returns Judge whether the constraint is satisfied
      */
     public abstract evaluate(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): ConstraintStatus;
 
+    /**
+     * Consume details about a constraint and emit a description of how to show
+     * it as a ConstraintBoxConfig
+     *
+     * @param status details on whether this BoostConstraint was satisfied
+     * and some additional details besides.
+     * @param forMissionScreen Is this for the mission screen or not?
+     * @param undoBlocks A list of puzzle states (with sequence and derivatives)
+     * that informs constraints (mostly with the first, current element)
+     * @param targetConditions For puzzles with multiple states (say, with or
+     * without an oligo) this defines where a Constraint applies)
+     *
+     * @returns an object specifying the configuration for the box, including
+     * whether it's satisfied, an icon, display details, and a tooltip
+     */
     public abstract getConstraintBoxConfig(
         status: ConstraintStatus,
         forMissionScreen: boolean,
