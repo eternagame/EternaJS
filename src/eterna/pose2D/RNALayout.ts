@@ -70,6 +70,16 @@ export default class RNALayout {
         return this._root;
     }
 
+    /**
+     * Initializes the tree structure of the RNALayout based on provided BPs.
+     *
+     * @param pairs An array as long as the structure. -1 for unpaired bases,
+     * paired idx for paired bases.
+     * @param targetPairs An optional array stored in the RNALayout that shows
+     * how much of the above structure is the same as the puzzle "goal." A
+     * comparison to targetPairs will influence application of the customLayout
+     *
+     */
     public setupTree(pairs: number[], targetPairs: number[] = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
@@ -97,7 +107,8 @@ export default class RNALayout {
         }
 
         // / Array that will be used for scoring
-        // / Shifts so that
+        // / Shifted to be effectively 1-indexed
+        // / with the zero-indexed length at index 0
         this._scoreBiPairs = new Array(biPairs.length + 1);
         for (ii = 0; ii < biPairs.length; ii++) {
             this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
@@ -132,8 +143,19 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Provides actual coordinates for the layout whose structure is encoded
+     * by this object.
+     *
+     * @param xarray x-coordinates (output param)
+     * @param yarray y-coordinates (output param)
+     */
     public getCoords(xarray: number[], yarray: number[]): void {
         // FIXME add documentation. And its confusing that xarray,yarray are changeable by function ('outparams').
+
+        // If there is a root node in the layout, use the recursive function
+        // starting from root. The first two nt can be in a vertical line.
+        // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
         } else if (xarray.length < 3) {
@@ -182,6 +204,13 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Actually draw the RNALayout
+     *
+     * @param customLayout An array of x,y tuples defining all base positions,
+     * which will override the "normal" geometry wherever the base pairs match
+     * the target pairs in the structure.
+     */
     public drawTree(customLayout: Array<[number, number]> = null): void {
         this.initializeCustomLayout(customLayout);
         if (this._root != null) {
@@ -286,6 +315,20 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called only by drawTree, a wrapper that first iniitalizes the
+     * customLayout, this function actually creates a depiction of the RNA
+     * structure embodied by this object.
+     *
+     * @param rootnode the root node for this recursive call
+     * @param parentnode the parent of this subtree's root; null when this
+     * function is called on the tree's root
+     * @param startX
+     * @param startY
+     * @param goX
+     * @param goY
+     * @param rotationDirectionSign mapping from CW/CCW to 5' => 3' direction
+     */
     private drawTreeRecursive(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
@@ -397,6 +440,19 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called if the customLayout is defined AND if the junction locally
+     * matches the target structure.
+     *
+     * @param rootnode the root node for this recursive call
+     * @param parentnode the parent of this subtree's root; null when this
+     * function is called on the tree's root
+     * @param startX
+     * @param startY
+     * @param goX
+     * @param goY
+     * @param rotationDirectionSign mapping from CW/CCW to 5' => 3' direction
+     */
     private drawTreeCustomLayout(
         rootnode: RNATreeNode, parentnode: RNATreeNode,
         startX: number, startY: number,
@@ -529,6 +585,12 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Adds up the tree score by summing this node and childrens' score
+     * @param rootnode Node for score evaluation
+     *
+     * @returns the total score
+     */
     private getTotalScoreRecursive(rootnode: RNATreeNode): number {
         let score: number = rootnode.score;
         for (let ii = 0; ii < rootnode.children.length; ii++) {
@@ -537,7 +599,13 @@ export default class RNALayout {
         return score;
     }
 
-
+    /**
+     * Actually assigns scores to each node.
+     *
+     * @param nnfe list of nearest neighbor free energies
+     * @param rootnode current node for consideration
+     * @param parentnode parent of roonode, null if rootnode is root_
+     */
     private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
         if (rootnode.isPair) {
             // / Pair node
@@ -601,6 +669,7 @@ export default class RNALayout {
     }
 
     // / FIXME: there's surely a smarter way to do this...
+
     private static lookupFe(nnfe: number[], index: number): number {
         for (let ii = 0; ii < nnfe.length - 1; ii += 2) {
             if (nnfe[ii] === index) return nnfe[ii + 1];
