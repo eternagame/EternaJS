@@ -669,7 +669,13 @@ export default class RNALayout {
     }
 
     // / FIXME: there's surely a smarter way to do this...
-
+    /**
+     * Find a particular nnfe element. Why isn't this a dict? Right now it is a
+     * list of pairs, basically... is JS dict lookup superlinear?
+     *
+     * @param nnfe Array of nearest neighbor parameters
+     * @param index A desired index from the structure, for which we must search
+     */
     private static lookupFe(nnfe: number[], index: number): number {
         for (let ii = 0; ii < nnfe.length - 1; ii += 2) {
             if (nnfe[ii] === index) return nnfe[ii + 1];
@@ -677,6 +683,15 @@ export default class RNALayout {
         return 0;
     }
 
+    /**
+     * Judge whether a junction (defined by a node and its parent) matches the
+     * target structure, which is necessary for customLayout
+     *
+     * @param rootnode the root node defining the junction
+     * @param parentnode the root node's parent, if applicable
+     *
+     * @returns true if junction is target-like, false otherwise
+     */
     private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode): boolean {
         if (this._targetPairs == null) return false;
 
@@ -705,6 +720,12 @@ export default class RNALayout {
         return true;
     }
 
+    /**
+     * Called by drawTree, this function takes an array of x,y coords and scales
+     * it to something Eterna-compatible.
+     *
+     * @param customLayout An array of x,y coords defining "custom" nt positions
+     */
     private initializeCustomLayout(customLayout: Array<[number, number]>): void {
         if (customLayout === null) {
             this._customLayout = null;
@@ -721,7 +742,18 @@ export default class RNALayout {
         }
     }
 
+    /**
+     * Called by initalizeCustomLayout, this function is needed so that
+     * externally defined customLayouts don't need to know anything fixed about
+     * Eterna display conventions.
+     *
+     * @param customLayout An array of x,y coords defining "custom" nt positions
+     *
+     * @returns the normalization factor to make it Eterna-compatible
+     */
     private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>): number {
+        // Looks for a stacked pair and normalizes the distance between bases,
+        // returning the normalization factor.
         let scaleFactor = 1.0;
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
