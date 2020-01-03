@@ -87,7 +87,6 @@ export default class StructureInput extends GamePanel implements Updatable {
     }
 
     /**
-     *
      * Take the actual current input data and use it to update the Pose.
      *
      * @param op an "operation" (either adding or deleting a base or a base pair)
