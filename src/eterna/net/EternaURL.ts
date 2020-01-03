@@ -18,7 +18,6 @@ export default class EternaURL {
      * @param params an object containing a 'page' value and possibly a 'puznid' for browsing
      *
      * @returns a URL string
-     *
      */
     public static createURL(params: any): string {
         if (params == null) {
