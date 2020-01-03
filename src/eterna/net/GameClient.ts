@@ -56,8 +56,11 @@ export default class GameClient {
 
     /**
      * Logs the player out.
+<<<<<<< Updated upstream
      *
      * @returns resolves to void
+=======
+>>>>>>> Stashed changes
      */
     public logout(): Promise<void> {
         return this.get('/eterna_logout.php', {noredirect: true})
