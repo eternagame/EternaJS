@@ -75,8 +75,7 @@ test(`test_range`, () => {
 
 test(`test_splitOnWhitespace`, () => {
     expect(Utility.splitOnWhitespace("a b")).toStrictEqual(["a", "b"]);
-    //expect(Utility.splitOnWhitespace("a\tb")).toStrictEqual(["a", "b"]);
-    //expect(Utility.splitOnWhitespace("a\nb")).toStrictEqual(["a", "b"]);
+    expect(Utility.splitOnWhitespace("a\tb")).toStrictEqual(["a\tb"]);
     expect(Utility.splitOnWhitespace("a  b")).toStrictEqual(["a", " b"]);
 });
 
@@ -89,19 +88,3 @@ test(`test_getIndices`, () => {
     expect(Utility.getIndices("1-3,4,5,8-9")).toStrictEqual([1, 2, 3, 4, 5, 8, 9]);
     expect(Utility.getIndices("1-3,4,5 8-9")).toStrictEqual([1, 2, 3, 4, 5, 8, 9]);
 });
-/*
-    
-    public static getIndices(seq: string): number[] {
-        let indices: number[] = [];
-        let splitted: string[] = seq.split(' ');
-        for (const s of splitted) {
-            let ints: number[] = this.rangeStringToArray(s);
-            if (ints === null) {
-                return null; // signal failure
-            }
-            indices = indices.concat(ints);
-        }
-        return indices;
-    }
-}
-*/
