@@ -3,14 +3,12 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
-    "start": "npm run postbuild:dev && concurrently \"npm run build:dev -- --watch\" \"ws -d dist/dev -p 63343\"",
-    "clean": "rm -rf dist && rm -rf node_modules/.cache",
+    "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && concurrently \"npm run build:dev -- --watch\" \"ws -d dist/dev -p 63343\"",
+    "clean": "node multiplatform/rmrf dist && node multiplatform/rmrf node_modules/.cache",
     "typecheck": "tsc --noEmit",
-    "build:dev": "webpack --config webpack.dev.js",
-    "build:surge": "webpack --config webpack.surge.js",
-    "build:prod": "webpack --config webpack.prod.js",
-    "postbuild:dev": "cp -R ./website/frontend ./dist/dev && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
-    "postbuild:surge": "cp -R ./website/frontend ./dist/surge && coffee -o ./dist/surge/frontend/jscripts -c ./website/frontend/coffee",
+    "build:dev": "node multiplatform/mkdirp dist/dev && webpack --config webpack.dev.js",
+    "build:prod": "node multiplatform/mkdirp dist/prod && webpack --config webpack.prod.js",
+    "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",
     "test": "jest --verbose",
     "lint": "eslint src --ext .ts"
   },
@@ -50,9 +48,6 @@
     "type": "git",
     "url": "https://github.com/EteRNAgame/EternaJS.git"
   },
-  "keywords": [],
-  "author": "Tim Conkling",
-  "license": "ISC",
   "devDependencies": {
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",
