@@ -1,8 +1,12 @@
 import {
-    ContainerObject, DisplayUtil, HAlign, VAlign
+    ContainerObject, DisplayUtil, HAlign, VAlign, DisplayObjectPointerTarget, InputUtil, Flashbang
 } from 'flashbang';
-import {Graphics, Point, Text} from 'pixi.js';
+import {
+    Graphics, Point, Text, Container, Texture
+} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
+import GamePanel, {GamePanelType} from './GamePanel';
+import GameButton from './GameButton';
 
 export default class DropDown extends ContainerObject {
     public text: string;
@@ -44,6 +48,57 @@ export default class DropDown extends ContainerObject {
             this._LINE_WIDTH + this._PADDING
         );
         this._selectOption(this._defaultOption);
+
+        this.pointerTap.connect(() => this._showPopup());
+    }
+
+    private _showPopup(): void {
+        let bg = new Graphics();
+        this.mode.container.addChild(bg);
+
+        // Eat mouse events
+        let bgTarget = new DisplayObjectPointerTarget(bg);
+
+        bgTarget.pointerDown.connect((e) => {
+            if (InputUtil.IsLeftMouse(e)) {
+                // TODO: Close Popup
+            }
+            e.stopPropagation();
+        });
+        bgTarget.pointerUp.connect(e => e.stopPropagation());
+        bgTarget.pointerMove.connect(e => e.stopPropagation());
+
+        let updateBG = () => {
+            bg.clear()
+                .beginFill(0x0, 0)
+                .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
+                .endFill();
+        };
+        updateBG();
+        this.regs.add(this.mode.resized.connect(updateBG));
+
+        let popup = new GamePanel(GamePanelType.NORMAL, 1, 0x152843, 1.0, 0xC0DCE7);
+        this.addObject(popup, this.mode.container);
+        let globalBoxBounds = DisplayUtil.getBoundsRelative(this._box, this.mode.container);
+        DisplayUtil.positionRelativeToBounds(
+            popup.container, HAlign.LEFT, VAlign.TOP,
+            globalBoxBounds, HAlign.LEFT, VAlign.BOTTOM
+        );
+
+        let yWalker = 0;
+        let maxWidth = 0;
+        for (let option of this._options) {
+            // TODO: Don't use a GameButton, it really isn't what we want (more like the rows in the data browser)
+            // We also want it to scroll after some sane height...
+            /* let button = new GameButton().allStates(Texture.EMPTY).label(option);
+            popup.addObject(button, popup.container);
+            button.display.y = yWalker;
+            yWalker += button.display.height;
+            button.clicked.connect(() => console.log('clicked!!'));
+            maxWidth = Math.max(button.display.width, maxWidth); */
+        }
+
+        popup.setSize(maxWidth, yWalker);
     }
 
     private _drawBox(hover: boolean) {

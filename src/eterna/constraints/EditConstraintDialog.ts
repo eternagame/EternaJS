@@ -2,29 +2,18 @@ import {KeyCode, Flashbang} from 'flashbang';
 import UndoBlock from 'eterna/UndoBlock';
 import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
 import GenericInputPanel from 'eterna/ui/GenericInputPanel';
-import GameMode from '../GameMode';
+import GameMode from 'eterna/mode/GameMode';
 
-export interface SubmitPuzzleDetails {
-    title: string;
-    description: string;
+export interface EditConstraintDetails {
 
-    minGU?: number;
-    maxGC?: number;
-    minAU?: number;
 }
 
-export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
-    constructor(numPoses: number, puzzleState: UndoBlock) {
-        super();
-        this._numPoses = numPoses;
-        this._puzzleState = puzzleState;
-    }
-
+export default class EditConstraintDialog extends Dialog<EditConstraintDetails> {
     /**
      * Returns a new Promise that will resolve if the dialog is confirmed,
      * and reject with a DialogCanceledError otherwise.
      */
-    public get confirmed(): Promise<SubmitPuzzleDetails> {
+    public get confirmed(): Promise<EditConstraintDetails> {
         return new Promise((resolve, reject) => {
             this.closed.then((value) => {
                 if (value != null) {
@@ -40,15 +29,15 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         super.added();
 
         const TITLE = 'Title';
-        const DESCRIPTION = 'Description';
+        const TYPE = 'Constraint Type';
 
         const FIELD_WIDTH = 200;
 
         let inputPanel = new GenericInputPanel();
-        inputPanel.title = 'Publish your puzzle';
+        inputPanel.title = 'Add/Edit Constraint';
 
         let title = inputPanel.addTextField(TITLE, FIELD_WIDTH);
-        inputPanel.addTextField(DESCRIPTION, FIELD_WIDTH, true);
+        let type = inputPanel.addDropDown(TYPE, ['First', 'Second', 'Third']);
         this.addObject(inputPanel, this.container);
 
         title.setFocus();
@@ -57,7 +46,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
-            let dict = inputPanel.getFieldValues();
+            /* let dict = inputPanel.getFieldValues();
             let details = {
                 title: dict.get(TITLE),
                 description: dict.get(DESCRIPTION)
@@ -68,7 +57,8 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
                 (this.mode as GameMode).showNotification(errorString);
             } else {
                 this.close(details);
-            }
+            } */
+            this.close(null);
         });
 
         let updateLocation = () => {
@@ -79,16 +69,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
-    private validate(details: SubmitPuzzleDetails): string {
-        if (details.title.length === 0) {
-            return 'You must enter a title for your puzzle';
-        } else if (details.description.length === 0) {
-            return 'You must write a description of your puzzle';
-        }
-
+    private validate(details: EditConstraintDetails): string {
         return null;
     }
-
-    private readonly _numPoses: number;
-    private readonly _puzzleState: UndoBlock;
 }

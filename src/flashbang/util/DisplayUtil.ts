@@ -292,6 +292,21 @@ export default class DisplayUtil {
 
     public static readonly POSITION_RELATIVE_TO_BOUNDS_RECT: Rectangle = new Rectangle();
 
+    /**
+     * Position an object relative to some rect
+     *
+     * e.g., positionRelativeToBounds(disp, HAlign.LEFT, VAlign.TOP, rect, HAlign.RIGHT, VAlign.BOTTOM, 5, 10)
+     * will set the left edge of disp to the right of rect - 5px and the top edge of disp to the bottom of rect - 10px
+     *
+     * @param disp Display object to position
+     * @param dispHAlign Horizontal location on disp that should be alligned
+     * @param dispVAlign Vertical location on disp that should be alligned
+     * @param relativeTo Display object to position disp relative to
+     * @param targetHAlign Horizontal location on relativeTo to align disp (dispHAlign) to
+     * @param targetVAlign Vertical location on relativeTo to align dis (dispVAlign) to
+     * @param xOffset
+     * @param yOffset
+     */
     public static positionRelativeToBounds(
         disp: DisplayObject,
         dispHAlign: HAlign, dispVAlign: VAlign,

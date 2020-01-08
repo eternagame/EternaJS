@@ -2,7 +2,7 @@ import {KeyCode, Flashbang} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
 import Dialog from './Dialog';
-import TextInputPanel from './TextInputPanel';
+import GenericInputPanel from './GenericInputPanel';
 
 /**
  * Prompts the user to paste a sequence.
@@ -20,8 +20,8 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
 
         const SEQUENCE = 'Sequence';
 
-        let inputPanel = new TextInputPanel();
-        let sequenceField = inputPanel.addField(SEQUENCE, 200);
+        let inputPanel = new GenericInputPanel();
+        let sequenceField = inputPanel.addTextField(SEQUENCE, 200);
         inputPanel.title = 'Write down a sequence';
         this.addObject(inputPanel, this.container);
 

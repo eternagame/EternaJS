@@ -1,6 +1,6 @@
 import {Graphics} from 'pixi.js';
 import {AppMode, Flashbang, KeyCode} from 'flashbang';
-import TextInputPanel from 'eterna/ui/TextInputPanel';
+import GenericInputPanel from 'eterna/ui/GenericInputPanel';
 
 /** Show a dialog with text that the user can copy */
 export default class CopyTextDialogMode extends AppMode {
@@ -16,13 +16,17 @@ export default class CopyTextDialogMode extends AppMode {
         let bg = new Graphics();
         this.container.addChild(bg);
 
-        let inputPanel = new TextInputPanel(18);
+        let inputPanel = new GenericInputPanel(18);
         if (this._dialogTitle != null) {
             inputPanel.title = this._dialogTitle;
         }
         inputPanel.okButtonLabel = 'Copy';
 
-        let textField = inputPanel.addField('Text', Math.min(400, Math.max(200, Flashbang.stageWidth - 200)), false);
+        let textField = inputPanel.addTextField(
+            'Text',
+            Math.min(400, Math.max(200, Flashbang.stageWidth - 200)),
+            false
+        );
         textField.text = this._text;
         textField.readOnly = true;
 

@@ -1,6 +1,6 @@
 import {Flashbang, KeyCode} from 'flashbang';
 import Dialog from 'eterna/ui/Dialog';
-import TextInputPanel from 'eterna/ui/TextInputPanel';
+import GenericInputPanel from 'eterna/ui/GenericInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
 
 /** Prompts the player for a title and comment */
@@ -11,10 +11,10 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         const TITLE = 'Title';
         const COMMENT = 'Comment';
 
-        let inputPanel = new TextInputPanel();
+        let inputPanel = new GenericInputPanel();
         inputPanel.title = 'Submit your design';
-        let title = inputPanel.addField(TITLE, 200);
-        inputPanel.addField(COMMENT, 200, true);
+        let title = inputPanel.addTextField(TITLE, 200);
+        inputPanel.addTextField(COMMENT, 200, true);
         this.addObject(inputPanel, this.container);
 
         title.setFocus();

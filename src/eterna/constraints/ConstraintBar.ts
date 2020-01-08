@@ -5,10 +5,12 @@ import {Point, Container} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import GameMode from 'eterna/mode/GameMode';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
 import AddConstraintBox from './AddConstraintBox';
+import EditConstraintDialog from './EditConstraintDialog';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -54,7 +56,9 @@ export default class ConstraintBar extends ContainerObject {
             this._addConstraintBox = new AddConstraintBox();
             this.addObject(this._addConstraintBox, this.container);
             this._addConstraintBox.pointerUp.connect(() => {
-                // TODO: Dialog
+                (this.mode as GameMode).showDialog(
+                    new EditConstraintDialog()
+                );
             });
         }
     }
