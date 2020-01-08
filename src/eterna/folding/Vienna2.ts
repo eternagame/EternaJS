@@ -4,8 +4,8 @@ import EPars from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
 import RNALayout from 'eterna/pose2D/RNALayout';
-import * as Vienna2Lib from './engines/Viena2Lib';
-import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Viena2Lib';
+import * as Vienna2Lib from './engines/Vienna2Lib';
+import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/Vienna2Lib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
