@@ -88,3 +88,6 @@ dist/
 
 # dropbox/Mac temp file
 *.DS_Store
+
+# Built folding engines
+/src/eterna/folding/engines/*.js

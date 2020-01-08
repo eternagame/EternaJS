@@ -1,0 +1,1434 @@
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/H/cofold.h ViennaRNA-2.1.8/H/cofold.h
+--- ViennaRNA-2.1.8_stock/H/cofold.h	2019-11-23 17:30:39.211826800 -0500
++++ ViennaRNA-2.1.8/H/cofold.h	2019-11-23 15:34:23.214211300 -0500
+@@ -9,6 +9,14 @@
+ #define DEPRECATED(func) func
+ #endif
+ 
++
++extern int binding_site_i;
++extern int binding_site_j;
++extern int binding_site_p;
++extern int binding_site_q;
++extern int binding_site_bonus;
++
++
+ /**
+  *  \addtogroup cofold
+  *  \brief Predict structures formed by two molecules upon hybridization.
+@@ -65,6 +73,9 @@
+ float cofold( const char *sequence,
+               char *structure);
+ 
++
++float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
++
+ /**
+  *  \brief Compute the minimum free energy of two interacting RNA molecules
+  * 
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/H/energy_par.h ViennaRNA-2.1.8/H/energy_par.h
+--- ViennaRNA-2.1.8_stock/H/energy_par.h	2019-11-23 17:30:39.210829500 -0500
++++ ViennaRNA-2.1.8/H/energy_par.h	2019-11-23 15:34:23.217235500 -0500
+@@ -80,15 +80,15 @@
+ extern int DuplexInit37;
+ extern int DuplexInitdH;
+ /* stabilizing contribution due to special hairpins of size 4 (tetraloops) */
+-extern char Tetraloops[];  /* string containing the special tetraloops */
+-extern int  Tetraloop37[];  /* Bonus energy for special tetraloops */
+-extern int  TetraloopdH[];
+-extern char Triloops[];    /* string containing the special triloops */
+-extern int  Triloop37[]; /* Bonus energy for special Triloops */
+-extern int  TriloopdH[]; /* Bonus energy for special Triloops */
+-extern char Hexaloops[];    /* string containing the special triloops */
+-extern int  Hexaloop37[]; /* Bonus energy for special Triloops */
+-extern int  HexaloopdH[]; /* Bonus energy for special Triloops */
++extern char Tetraloops[281];  /* string containing the special tetraloops */
++extern int  Tetraloop37[40];  /* Bonus energy for special tetraloops */
++extern int  TetraloopdH[40];
++extern char Triloops[241];    /* string containing the special triloops */
++extern int  Triloop37[40]; /* Bonus energy for special Triloops */
++extern int  TriloopdH[40]; /* Bonus energy for special Triloops */
++extern char Hexaloops[361];    /* string containing the special triloops */
++extern int  Hexaloop37[40]; /* Bonus energy for special Triloops */
++extern int  HexaloopdH[40]; /* Bonus energy for special Triloops */
+ 
+ extern int GQuadAlpha37;
+ extern int GQuadAlphadH;
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/H/fold.h ViennaRNA-2.1.8/H/fold.h
+--- ViennaRNA-2.1.8_stock/H/fold.h	2019-11-23 17:30:39.208835000 -0500
++++ ViennaRNA-2.1.8/H/fold.h	2019-11-23 15:34:23.220330700 -0500
+@@ -143,6 +143,9 @@
+ float fold( const char *sequence,
+             char *structure);
+ 
++float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus);
++
++
+ /**
+  *  \brief Compute minimum free energy and an appropriate secondary structure of a circular RNA sequence
+  *
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/H/read_epars.h ViennaRNA-2.1.8/H/read_epars.h
+--- ViennaRNA-2.1.8_stock/H/read_epars.h	2019-11-23 17:30:39.247729100 -0500
++++ ViennaRNA-2.1.8/H/read_epars.h	2019-11-23 15:34:23.223188600 -0500
+@@ -29,7 +29,7 @@
+  * 
+  *  \param fname  The path to the file containing the energy parameters
+  */
+-void  read_parameter_file(const char fname[]);
++int  read_parameter_file(const char fname[]);
+ 
+ /**
+  *  \brief Write energy parameters to a file
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/H/utils.h ViennaRNA-2.1.8/H/utils.h
+--- ViennaRNA-2.1.8_stock/H/utils.h	2019-11-23 17:30:39.203872900 -0500
++++ ViennaRNA-2.1.8/H/utils.h	2019-11-23 15:34:23.225179000 -0500
+@@ -587,6 +587,8 @@
+                     const char **lines,
+                     unsigned int option);
+ 
++extern int estimate_mode;
++
+ /**
+  *  \brief Insert constraining pair types according to constraint structure string
+  *
+Only in ViennaRNA-2.1.8/Kinfold: .deps
+Only in ViennaRNA-2.1.8/Kinfold: config.h
+Only in ViennaRNA-2.1.8/Kinfold: config.log
+Only in ViennaRNA-2.1.8/Kinfold: config.status
+Only in ViennaRNA-2.1.8/Kinfold: stamp-h1
+Only in ViennaRNA-2.1.8/Progs: .deps
+Only in ViennaRNA-2.1.8/RNAforester: config.h
+Only in ViennaRNA-2.1.8/RNAforester: config.log
+Only in ViennaRNA-2.1.8/RNAforester: config.status
+Only in ViennaRNA-2.1.8/RNAforester/g2-0.70: config.log
+Only in ViennaRNA-2.1.8/RNAforester/g2-0.70: config.status
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL ViennaRNA-2.1.8/RNAforester/g2-0.70/g2_perl/Makefile.PL
+--- ViennaRNA-2.1.8_stock/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 17:30:38.861635600 -0500
++++ ViennaRNA-2.1.8/RNAforester/g2-0.70/g2_perl/Makefile.PL	2019-11-23 15:35:11.401076000 -0500
+@@ -4,7 +4,7 @@
+ WriteMakefile(
+     'NAME'	=> 'G2',
+     'VERSION_FROM' => 'G2.pm', # finds $VERSION
+-    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm -lX11 -lgd'],  # e.g., '-lm' 
+-    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DDO_PS=1 -DDO_FIG=1 -DDO_X11=1 -DDO_GD=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
++    'LIBS'	=> ['-L./.. -lg2   -L/usr/local/lib -lm'],  # e.g., '-lm' 
++    'DEFINE'	=> '-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DLINUX=1 -DX_DISPLAY_MISSING=1 -DDO_PS=1 -DDO_FIG=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1',                   # e.g., '-DHAVE_SOMETHING' 
+     'INC'	=> '-I./../include',           # e.g., '-I/usr/local/include' 
+ );
+Only in ViennaRNA-2.1.8/RNAforester/src: .deps
+Only in ViennaRNA-2.1.8/RNAforester: stamp-h1
+Only in ViennaRNA-2.1.8: RNAlib2.pc
+Only in ViennaRNA-2.1.8/Utils: .deps
+Only in ViennaRNA-2.1.8: config.h
+Only in ViennaRNA-2.1.8: config.log
+Only in ViennaRNA-2.1.8: config.status
+Only in ViennaRNA-2.1.8/lib: .deps
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/Lfold.c ViennaRNA-2.1.8/lib/Lfold.c
+--- ViennaRNA-2.1.8_stock/lib/Lfold.c	2019-11-23 17:30:39.154005600 -0500
++++ ViennaRNA-2.1.8/lib/Lfold.c	2019-11-23 15:34:23.237151500 -0500
+@@ -9,12 +9,13 @@
+                   Vienna RNA package
+ */
+ 
+-#include <config.h>
++#include "config.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <math.h>
+ #include <ctype.h>
+ #include <string.h>
++#include <limits.h>
+ #include "utils.h"
+ #include "energy_par.h"
+ #include "fold_vars.h"
+@@ -41,6 +42,10 @@
+ #define MAXSECTORS        500     /* dimension for a backtrack array */
+ #define LOCALITY          0.      /* locality parameter for base-pairs */
+ 
++
++#define INT_CLOSE_TO_UNDERFLOW(i)   ((i) <= (INT_MIN/16))
++#define UNDERFLOW_CORRECTION        (INT_MIN/32)
++
+ /*
+ #################################
+ # GLOBAL VARIABLES              #
+@@ -74,7 +79,6 @@
+ PRIVATE int           with_gquad  = 0;
+ PRIVATE int           **ggg       = NULL;
+ 
+-
+ #ifdef _OPENMP
+ 
+ #ifdef USE_SVM
+@@ -96,7 +100,7 @@
+ PRIVATE void  free_arrays(int maxdist);
+ PRIVATE void  make_ptypes(const short *S, int i, int maxdist, int n);
+ PRIVATE char  *backtrack(const char *sequence, int start, int maxdist);
+-PRIVATE int   fill_arrays(const char *sequence, int maxdist, int zsc, double min_z);
++PRIVATE int   fill_arrays(const char *sequence, int maxdist, int zsc, double min_z, int *underflow);
+ 
+ /*
+ #################################
+@@ -176,8 +180,15 @@
+   return Lfoldz(string, structure, maxdist, 0, 0.0);
+ }
+ 
+-PUBLIC  float Lfoldz(const char *string, char *structure, int maxdist, int zsc, double min_z){
+-  int i, energy;
++PUBLIC  float
++Lfoldz( const char *string,
++        char *structure,
++        int maxdist,
++        int zsc,
++        double min_z){
++
++  int i, energy, underflow;
++  float mfe_local;
+ 
+   length = (int) strlen(string);
+   if (maxdist>length) maxdist = length;
+@@ -197,8 +208,10 @@
+     sd_model  = svm_load_model_string(sd_model_string);
+   }
+ #endif
++  /* keep track of how many times we were close to an integer underflow */
++  underflow = 0;
+ 
+-  energy = fill_arrays(string, maxdist, zsc, min_z);
++  energy = fill_arrays(string, maxdist, zsc, min_z, &underflow);
+ 
+ #ifdef USE_SVM  /*svm*/
+   if(zsc){
+@@ -210,10 +223,19 @@
+   free(S); free(S1);
+   free_arrays(maxdist);
+ 
+-  return (float) energy/100.;
++  mfe_local = (underflow > 0) ? ((float)underflow * (float)(UNDERFLOW_CORRECTION)) / 100. : 0.;
++
++  mfe_local += (float)energy/100.;
++  return mfe_local;
+ }
+ 
+-PRIVATE int fill_arrays(const char *string, int maxdist, int zsc, double min_z) {
++PRIVATE int
++fill_arrays(const char *string,
++            int maxdist,
++            int zsc,
++            double min_z,
++            int *underflow) {
++
+   /* fill "c", "fML" and "f3" arrays and return  optimal energy */
+ 
+   int   i, j, k, length, energy;
+@@ -407,7 +429,11 @@
+ #pragma omp threadprivate(do_backtrack, prev_i)
+       char *ss=NULL;
+       double prevz;
++      
++      /* first case: i stays unpaired */
+       f3[i] = f3[i+1];
++      
++      /* next all cases where i is paired */
+       switch(dangles){
+         /* dont use dangling end and mismatch contributions at all */
+         case 0:   for(j=i+TURN+1; j<length && j<=i+maxdist; j++){
+@@ -492,18 +518,20 @@
+       } /* switch(dangles)... */
+ 
+       /* backtrack partial structure */
+-      if (f3[i] < f3[i+1]) do_backtrack=1;
++      if (f3[i] < f3[i+1]){
++        do_backtrack=1;
++      }
+       else if (do_backtrack) {
+         int pairpartner; /*i+1?? is paired with pairpartner*/
+         int cc;
+         int traced2=0;
+         fij = f3[i+1];
+         lind=i+1;
+-
+         /*start "short" backtrack*/
+ 
+         /*get paired base*/
+-        while(fij==f3[lind+1]) lind++;
++        while(fij==f3[lind+1])
++          lind++;
+ 
+         /*get pairpartner*/
+         for (pairpartner = lind + TURN; pairpartner <= lind + maxdist; pairpartner++){
+@@ -614,9 +642,9 @@
+           if (prev) {
+             if ((i+strlen(ss)<prev_i+strlen(prev)) || strncmp(ss+prev_i-i,prev,strlen(prev))){
+               /* ss does not contain prev */
+-              if (dangles==2)
++              if (dangles==2){
+                 printf(".%s (%6.2f) %4d\n", prev, (f3[prev_i]-f3[prev_i+strlen(prev)-1])/100., prev_i-1);
+-              else
++              } else
+                 printf("%s (%6.2f) %4d\n", prev, (f3[prev_i]-f3[prev_i+strlen(prev)])/100., prev_i);
+             }
+             free(prev);
+@@ -756,13 +784,29 @@
+     }
+     {
+       int ii, *FF; /* rotate the auxilliary arrays */
++
++      /* check for values close to integer underflow */
++      if(INT_CLOSE_TO_UNDERFLOW(f3[i])){
++        /* correct f3 free energies and increase underflow counter */
++        int cnt, cnt2;
++        for(cnt=i; cnt <= length && cnt <= lind + maxdist + 2; cnt++) {
++          f3[cnt] -= UNDERFLOW_CORRECTION;
++        }
++        (*underflow)++;
++      }
++
+       FF = DMLi2; DMLi2 = DMLi1; DMLi1 = DMLi; DMLi = FF;
+       FF = cc1; cc1=cc; cc=FF;
+-      for (j=0; j< maxdist+5; j++) {cc[j]=Fmi[j]=DMLi[j]=INF; }
++      for (j=0; j< maxdist+5; j++){
++        cc[j] = Fmi[j] = DMLi[j] = INF;
++      }
+       if (i+maxdist+4<=length) {
+-        c[i-1] = c[i+maxdist+4]; c[i+maxdist+4] = NULL;
+-        fML[i-1] = fML[i+maxdist+4]; fML[i+maxdist+4]=NULL;
+-        ptype[i-1] = ptype[i+maxdist+4]; ptype[i+maxdist+4] = NULL;
++        c[i-1] = c[i+maxdist+4];
++        c[i+maxdist+4] = NULL;
++        fML[i-1] = fML[i+maxdist+4];
++        fML[i+maxdist+4]=NULL;
++        ptype[i-1] = ptype[i+maxdist+4];
++        ptype[i+maxdist+4] = NULL;
+         if (i>1){
+           make_ptypes(S, i-1, maxdist, length);
+ 
+@@ -775,6 +819,7 @@
+           fML[i-1][ii] = INF;
+         }
+       }
++
+     }
+   }
+ 
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/MEA.c ViennaRNA-2.1.8/lib/MEA.c
+--- ViennaRNA-2.1.8_stock/lib/MEA.c	2019-11-23 17:30:39.154980700 -0500
++++ ViennaRNA-2.1.8/lib/MEA.c	2019-11-23 15:34:23.241142600 -0500
+@@ -13,6 +13,7 @@
+ #include "utils.h"
+ #include "pair_mat.h"
+ #include "MEA.h"
++#include "gquad.h"
+ 
+ /* compute an MEA structure, i.e. the structure maximising
+    EA = \sum_{(i,j) \in S} 2\gamma p_{i,j} + \sum_{i is unpaired} p^u_i
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/alifold.c ViennaRNA-2.1.8/lib/alifold.c
+--- ViennaRNA-2.1.8_stock/lib/alifold.c	2019-11-23 17:30:39.116366000 -0500
++++ ViennaRNA-2.1.8/lib/alifold.c	2019-11-23 15:34:23.245127400 -0500
+@@ -841,11 +841,11 @@
+         that should then be decomposed further...
+       */
+       mm = 0;
+-      for(s=0;s<n_seq;s++){
+-        tt = type[s];
++      for(ss=0;ss<n_seq;ss++){
++        tt = type[ss];
+         if(tt == 0) tt = 7;
+         if(dangles == 2)
+-          mm += P->mismatchI[tt][S3[s][i]][S5[s][j]];
++          mm += P->mismatchI[tt][S3[ss][i]][S5[ss][j]];
+         if(tt > 2)
+           mm += P->TerminalAU;
+       }
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/alipfold.c ViennaRNA-2.1.8/lib/alipfold.c
+--- ViennaRNA-2.1.8_stock/lib/alipfold.c	2019-11-23 17:30:39.186895100 -0500
++++ ViennaRNA-2.1.8/lib/alipfold.c	2019-11-23 15:34:23.248120100 -0500
+@@ -990,7 +990,7 @@
+             type[s] = pair[S[s][q]][S[s][p]];
+             if (type[s]==0) type[s]=7;
+ 
+-            if (u<9){
++            if (u<7){
+               strcpy(loopseq , sequences[s]+q-1);
+               strncat(loopseq, sequences[s], p);
+             }
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/cofold.c ViennaRNA-2.1.8/lib/cofold.c
+--- ViennaRNA-2.1.8_stock/lib/cofold.c	2019-11-23 17:30:39.143010100 -0500
++++ ViennaRNA-2.1.8/lib/cofold.c	2019-11-23 15:34:23.251113200 -0500
+@@ -111,6 +111,10 @@
+ PRIVATE int   fill_arrays(const char *sequence);
+ PRIVATE void  free_end(int *array, int i, int start);
+ 
++/* TSC - 5/14/18 -- defined in fold.c */
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
++                 int index_i, int index_p, int index_j, int index_q, paramT* P);
++
+ /*
+ #################################
+ # BEGIN OF FUNCTION DEFINITIONS #
+@@ -227,6 +231,23 @@
+   return cofold_par(string, structure, NULL, fold_constrained);
+ }
+ 
++/// NNFIX
++float cofold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++          
++  float e = cofold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = NULL;
++  return e;
++}
++
+ PUBLIC float cofold_par(const char *string,
+                         char *structure,
+                         paramT *parameters,
+@@ -403,7 +424,7 @@
+                 if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+             if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-              energy = E_IntLoop(p-i-1, j-q-1, type, type_2, si, sj, S1[p-1], S1[q+1], P);
++              energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2, si, sj, S1[p-1], S1[q+1], i, p, j, q, P);
+             else
+               energy = E_IntLoop_Co(rtype[type], rtype[type_2],
+                                     i, j, p, q,
+@@ -1037,8 +1058,8 @@
+ 
+         /* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+         if (SAME_STRAND(i,p) && SAME_STRAND(q,j))
+-          energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                              S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++          energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                              S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+         else {
+           energy = E_IntLoop_Co(rtype[type], rtype[type_2], i, j, p, q, cut_point, S1[i+1], S1[j-1], S1[p-1], S1[q+1], dangle_model, P);
+         }
+@@ -1234,7 +1255,7 @@
+       nrerror("backtracking failed in repeat_gquad");
+     }
+   repeat_gquad_exit:
+-    asm("nop");
++    /*asm("nop")*/;
+ 
+   } /* end >> while (s>0) << */
+ 
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/energy_par.c ViennaRNA-2.1.8/lib/energy_par.c
+--- ViennaRNA-2.1.8_stock/lib/energy_par.c	2019-11-23 17:30:39.190896200 -0500
++++ ViennaRNA-2.1.8/lib/energy_par.c	2019-11-23 15:34:23.253080700 -0500
+@@ -311,103 +311,122 @@
+  ,{   830,   140,   830,   140,   -50}
+  }};
+ 
++/* mismatch_multi */
+ PUBLIC int mismatchM37[NBPAIRS+1][5][5] =
+-{{{   INF,   INF,   INF,   INF,   INF}
++{{ /* NP.. */
++  {   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+- }
+-,{{   -80,  -100,  -110,  -100,   -80}
+- ,{  -140,  -150,  -150,  -140,  -150}
+- ,{   -80,  -100,  -110,  -100,   -80}
+- ,{  -140,  -140,  -150,  -160,  -150}
+- ,{  -100,  -100,  -140,  -100,  -120}
+- }
+-,{{   -50,  -110,   -70,  -110,   -50}
+- ,{  -110,  -110,  -150,  -130,  -150}
+- ,{   -50,  -110,   -70,  -110,   -50}
+- ,{  -140,  -160,  -150,  -140,  -150}
+- ,{   -70,  -110,  -100,  -110,   -70}
+- }
+-,{{   -30,   -30,   -70,   -60,   -60}
+- ,{   -30,   -30,  -100,   -80,  -100}
+- ,{   -60,   -60,   -70,   -60,   -70}
+- ,{   -60,   -60,  -100,   -80,  -100}
+- ,{   -60,   -60,   -80,   -60,   -60}
+- }
+-,{{   -50,   -50,   -60,   -70,   -50}
+- ,{   -80,  -100,   -80,  -110,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- ,{   -50,   -50,   -80,   -80,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- }
+-,{{   -60,   -60,   -70,   -60,   -70}
+- ,{   -80,   -80,  -100,   -80,  -100}
+- ,{   -60,   -60,   -70,   -60,   -70}
+- ,{   -80,   -80,  -100,   -80,  -100}
+- ,{   -60,   -60,   -80,   -60,   -80}
+- }
+-,{{   -50,   -70,   -60,   -70,   -50}
+- ,{   -80,  -100,   -80,  -110,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- ,{   -80,  -110,   -80,  -120,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- }
+-,{{   -30,   -30,   -60,   -60,   -50}
+- ,{   -30,   -30,   -80,   -80,   -80}
+- ,{   -50,   -60,   -60,   -60,   -50}
+- ,{   -50,   -50,   -80,   -80,   -80}
+- ,{   -50,   -60,   -60,   -60,   -50}
++ },
++ { /* CG.. */
++  {   -50,  -110,   -50,  -140,   -70}
++ ,{  -110,  -110,  -110,  -160,  -110}
++ ,{   -70,  -150,   -70,  -150,  -100}
++ ,{  -110,  -130,  -110,  -140,  -110}
++ ,{   -50,  -150,   -50,  -150,   -70}
++ },
++ { /* GC.. */
++  {   -80,  -140,   -80,  -140,  -100}
++ ,{  -100,  -150,  -100,  -140,  -100}
++ ,{  -110,  -150,  -110,  -150,  -140}
++ ,{  -100,  -140,  -100,  -160,  -100}
++ ,{   -80,  -150,   -80,  -150,  -120}
++ },
++ { /* GU.. */
++  {   -50,   -80,   -50,   -50,   -50}
++ ,{   -50,  -100,   -70,   -50,   -70}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -110,   -70,   -80,   -70}
++ ,{   -50,   -80,   -50,   -80,   -50}
++ },
++ { /* UG.. */
++  {   -30,   -30,   -60,   -60,   -60}
++ ,{   -30,   -30,   -60,   -60,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,  -100,   -70,  -100,   -60}
++ },
++ { /* AU.. */
++  {   -50,   -80,   -50,   -80,   -50}
++ ,{   -70,  -100,   -70,  -110,   -70}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -110,   -70,  -120,   -70}
++ ,{   -50,   -80,   -50,   -80,   -50}
++ },
++ { /* UA.. */
++  {   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ },
++ { /* NN.. */
++  {   -30,   -30,   -50,   -50,   -50}
++ ,{   -30,   -30,   -60,   -50,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -50,   -80,   -50,   -80,   -50}
+  }};
++
++/* mismatch_multi_enthalpies */
+ PUBLIC int mismatchMdH[NBPAIRS+1][5][5] =
+-{{{   INF,   INF,   INF,   INF,   INF}
++{{ /* NP.. */
++  {   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+- }
+-,{{  -270,  -570,  -340,  -560,  -270}
+- ,{  -560,  -910,  -560,  -560,  -560}
+- ,{  -270,  -570,  -340,  -570,  -270}
+- ,{  -560,  -820,  -560,  -920,  -560}
+- ,{  -530,  -570,  -530,  -570,  -860}
+- }
+-,{{    50,  -520,    50,  -560,  -400}
+- ,{  -400,  -520,  -400,  -560,  -400}
+- ,{    50,  -720,    50,  -720,  -420}
+- ,{  -400,  -710,  -400,  -620,  -400}
+- ,{   -30,  -720,   -30,  -720,  -500}
+- }
+-,{{   600,   -60,   600,  -230,   200}
+- ,{   200,  -340,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   200,   -60,   200,  -350,   200}
+- ,{   460,  -230,   460,  -230,   160}
+- }
+-,{{   310,   310,  -140,  -150,   140}
+- ,{  -480,  -480,  -630,  -890,  -630}
+- ,{  -180,  -430,  -510,  -430,  -180}
+- ,{   310,   310,  -630,  -150,  -630}
+- ,{   140,  -430,  -140,  -430,   140}
+- }
+-,{{   600,  -230,   600,  -230,   200}
+- ,{   200,  -390,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   200,  -310,   200,  -350,   200}
+- ,{   460,  -230,   460,  -230,  -170}
+- }
+-,{{   140,  -380,  -140,  -430,   140}
+- ,{  -400,  -400,  -630,  -890,  -630}
+- ,{  -180,  -430,  -510,  -430,  -180}
+- ,{  -380,  -380,  -630,  -890,  -630}
+- ,{   140,  -430,  -140,  -430,   140}
+- }
+-,{{   600,   310,   600,  -150,   200}
+- ,{   200,  -340,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   310,   310,   200,  -150,   200}
+- ,{   460,  -230,   460,  -230,   160}
++ },
++ { /* CG.. */
++  {    50,  -400,    50,  -400,   -30}
++ ,{  -520,  -520,  -720,  -710,  -720}
++ ,{    50,  -400,    50,  -400,   -30}
++ ,{  -560,  -560,  -720,  -620,  -720}
++ ,{  -400,  -400,  -420,  -400,  -500}
++ },
++ { /* GC.. */
++  {  -270,  -560,  -270,  -560,  -530}
++ ,{  -570,  -910,  -570,  -820,  -570}
++ ,{  -340,  -560,  -340,  -560,  -530}
++ ,{  -560,  -560,  -570,  -920,  -570}
++ ,{  -270,  -560,  -270,  -560,  -860}
++ },
++ { /* GU.. */
++  {   310,  -480,  -180,   310,   140}
++ ,{   310,  -480,  -430,   310,  -430}
++ ,{  -140,  -630,  -510,  -630,  -140}
++ ,{  -150,  -890,  -430,  -150,  -430}
++ ,{   140,  -630,  -180,  -630,   140}
++ },
++ { /* UG.. */
++  {   600,   200,   600,   200,   460}
++ ,{   -60,  -340,  -230,   -60,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -230,  -350,  -230,  -350,  -230}
++ ,{   200,   200,   -30,   200,   160}
++ },
++ { /* AU.. */
++  {   140,  -400,  -180,  -380,   140}
++ ,{  -380,  -400,  -430,  -380,  -430}
++ ,{  -140,  -630,  -510,  -630,  -140}
++ ,{  -430,  -890,  -430,  -890,  -430}
++ ,{   140,  -630,  -180,  -630,   140}
++ },
++ { /* UA.. */
++  {   600,   200,   600,   200,   460}
++ ,{  -230,  -390,  -230,  -310,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -230,  -350,  -230,  -350,  -230}
++ ,{   200,   200,   -30,   200,  -170}
++ },
++ { /* NN.. */
++  {   600,   200,   600,   310,   460}
++ ,{   310,  -340,  -230,   310,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -150,  -350,  -230,  -150,  -230}
++ ,{   200,   200,   -30,   200,   160}
+  }};
+ 
+ PUBLIC int mismatch1nI37[NBPAIRS+1][5][5] =
+@@ -608,149 +627,186 @@
+  ,{   500,   500,   500,   500,  -140}
+  }};
+ 
++/* mismatch_exterior */
+ PUBLIC int mismatchExt37[NBPAIRS+1][5][5] =
+-{{{   INF,   INF,   INF,   INF,   INF}
++{{ /* NP.. */
++  {   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+- }
+-,{{   -80,  -100,  -110,  -100,   -80}
+- ,{  -140,  -150,  -150,  -140,  -150}
+- ,{   -80,  -100,  -110,  -100,   -80}
+- ,{  -140,  -140,  -150,  -160,  -150}
+- ,{  -100,  -100,  -140,  -100,  -120}
+- }
+-,{{   -50,  -110,   -70,  -110,   -50}
+- ,{  -110,  -110,  -150,  -130,  -150}
+- ,{   -50,  -110,   -70,  -110,   -50}
+- ,{  -140,  -160,  -150,  -140,  -150}
+- ,{   -70,  -110,  -100,  -110,   -70}
+- }
+-,{{   -30,   -30,   -70,   -60,   -60}
+- ,{   -30,   -30,  -100,   -80,  -100}
+- ,{   -60,   -60,   -70,   -60,   -70}
+- ,{   -60,   -60,  -100,   -80,  -100}
+- ,{   -60,   -60,   -80,   -60,   -60}
+- }
+-,{{   -50,   -50,   -60,   -70,   -50}
+- ,{   -80,  -100,   -80,  -110,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- ,{   -50,   -50,   -80,   -80,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- }
+-,{{   -60,   -60,   -70,   -60,   -70}
+- ,{   -80,   -80,  -100,   -80,  -100}
+- ,{   -60,   -60,   -70,   -60,   -70}
+- ,{   -80,   -80,  -100,   -80,  -100}
+- ,{   -60,   -60,   -80,   -60,   -80}
+- }
+-,{{   -50,   -70,   -60,   -70,   -50}
+- ,{   -80,  -100,   -80,  -110,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- ,{   -80,  -110,   -80,  -120,   -80}
+- ,{   -50,   -70,   -60,   -70,   -50}
+- }
+-,{{   -30,   -30,   -60,   -60,   -50}
+- ,{   -30,   -30,   -80,   -80,   -80}
+- ,{   -50,   -60,   -60,   -60,   -50}
+- ,{   -50,   -50,   -80,   -80,   -80}
+- ,{   -50,   -60,   -60,   -60,   -50}
++ },
++ { /* CG.. */
++  {   -50,  -110,   -50,  -140,   -70}
++ ,{  -110,  -110,  -110,  -160,  -110}
++ ,{   -70,  -150,   -70,  -150,  -100}
++ ,{  -110,  -130,  -110,  -140,  -110}
++ ,{   -50,  -150,   -50,  -150,   -70}
++ },
++ { /* GC.. */
++  {   -80,  -140,   -80,  -140,  -100}
++ ,{  -100,  -150,  -100,  -140,  -100}
++ ,{  -110,  -150,  -110,  -150,  -140}
++ ,{  -100,  -140,  -100,  -160,  -100}
++ ,{   -80,  -150,   -80,  -150,  -120}
++ },
++ { /* GU.. */
++  {   -50,   -80,   -50,   -50,   -50}
++ ,{   -50,  -100,   -70,   -50,   -70}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -110,   -70,   -80,   -70}
++ ,{   -50,   -80,   -50,   -80,   -50}
++ },
++ { /* UG.. */
++  {   -30,   -30,   -60,   -60,   -60}
++ ,{   -30,   -30,   -60,   -60,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,  -100,   -70,  -100,   -60}
++ },
++ { /* AU.. */
++  {   -50,   -80,   -50,   -80,   -50}
++ ,{   -70,  -100,   -70,  -110,   -70}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -110,   -70,  -120,   -70}
++ ,{   -50,   -80,   -50,   -80,   -50}
++ },
++ { /* UA.. */
++  {   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -70,  -100,   -70,  -100,   -80}
++ },
++ { /* NN.. */
++  {   -30,   -30,   -50,   -50,   -50}
++ ,{   -30,   -30,   -60,   -50,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -60,   -80,   -60,   -80,   -60}
++ ,{   -50,   -80,   -50,   -80,   -50}
+  }};
++
++/* mismatch_exterior_enthalpies */
+ PUBLIC int mismatchExtdH[NBPAIRS+1][5][5] =
+-{{{   INF,   INF,   INF,   INF,   INF}
++{{ /* NP.. */
++  {   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+  ,{   INF,   INF,   INF,   INF,   INF}
+- }
+-,{{  -270,  -570,  -340,  -560,  -270}
+- ,{  -560,  -910,  -560,  -560,  -560}
+- ,{  -270,  -570,  -340,  -570,  -270}
+- ,{  -560,  -820,  -560,  -920,  -560}
+- ,{  -530,  -570,  -530,  -570,  -860}
+- }
+-,{{    50,  -520,    50,  -560,  -400}
+- ,{  -400,  -520,  -400,  -560,  -400}
+- ,{    50,  -720,    50,  -720,  -420}
+- ,{  -400,  -710,  -400,  -620,  -400}
+- ,{   -30,  -720,   -30,  -720,  -500}
+- }
+-,{{   600,   -60,   600,  -230,   200}
+- ,{   200,  -340,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   200,   -60,   200,  -350,   200}
+- ,{   460,  -230,   460,  -230,   160}
+- }
+-,{{   310,   310,  -140,  -150,   140}
+- ,{  -480,  -480,  -630,  -890,  -630}
+- ,{  -180,  -430,  -510,  -430,  -180}
+- ,{   310,   310,  -630,  -150,  -630}
+- ,{   140,  -430,  -140,  -430,   140}
+- }
+-,{{   600,  -230,   600,  -230,   200}
+- ,{   200,  -390,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   200,  -310,   200,  -350,   200}
+- ,{   460,  -230,   460,  -230,  -170}
+- }
+-,{{   140,  -380,  -140,  -430,   140}
+- ,{  -400,  -400,  -630,  -890,  -630}
+- ,{  -180,  -430,  -510,  -430,  -180}
+- ,{  -380,  -380,  -630,  -890,  -630}
+- ,{   140,  -430,  -140,  -430,   140}
+- }
+-,{{   600,   310,   600,  -150,   200}
+- ,{   200,  -340,   200,  -350,   200}
+- ,{   600,  -230,   600,  -230,   -30}
+- ,{   310,   310,   200,  -150,   200}
+- ,{   460,  -230,   460,  -230,   160}
++ },
++ { /* CG.. */
++  {    50,  -400,    50,  -400,   -30}
++ ,{  -520,  -520,  -720,  -710,  -720}
++ ,{    50,  -400,    50,  -400,   -30}
++ ,{  -560,  -560,  -720,  -620,  -720}
++ ,{  -400,  -400,  -420,  -400,  -500}
++ },
++ { /* GC.. */
++  {  -270,  -560,  -270,  -560,  -530}
++ ,{  -570,  -910,  -570,  -820,  -570}
++ ,{  -340,  -560,  -340,  -560,  -530}
++ ,{  -560,  -560,  -570,  -920,  -570}
++ ,{  -270,  -560,  -270,  -560,  -860}
++ },
++ { /* GU.. */
++  {   310,  -480,  -180,   310,   140}
++ ,{   310,  -480,  -430,   310,  -430}
++ ,{  -140,  -630,  -510,  -630,  -140}
++ ,{  -150,  -890,  -430,  -150,  -430}
++ ,{   140,  -630,  -180,  -630,   140}
++ },
++ { /* UG.. */
++  {   600,   200,   600,   200,   460}
++ ,{   -60,  -340,  -230,   -60,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -230,  -350,  -230,  -350,  -230}
++ ,{   200,   200,   -30,   200,   160}
++ },
++ { /* AU.. */
++  {   140,  -400,  -180,  -380,   140}
++ ,{  -380,  -400,  -430,  -380,  -430}
++ ,{  -140,  -630,  -510,  -630,  -140}
++ ,{  -430,  -890,  -430,  -890,  -430}
++ ,{   140,  -630,  -180,  -630,   140}
++ },
++ { /* UA.. */
++  {   600,   200,   600,   200,   460}
++ ,{  -230,  -390,  -230,  -310,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -230,  -350,  -230,  -350,  -230}
++ ,{   200,   200,   -30,   200,  -170}
++ },
++ { /* NN.. */
++  {   600,   200,   600,   310,   460}
++ ,{   310,  -340,  -230,   310,  -230}
++ ,{   600,   200,   600,   200,   460}
++ ,{  -150,  -350,  -230,  -150,  -230}
++ ,{   200,   200,   -30,   200,   160}
+  }};
+ 
++/* dangle5 */
++PUBLIC int dangle5_37[NBPAIRS+1][5] =
++{ /*           N      A      C      G      U */
++/* NP */ {   INF,   INF,   INF,   INF,   INF},
++/* CG */ {   -10,   -50,   -30,   -20,   -10},
++/* GC */ {    -0,   -20,   -30,    -0,    -0},
++/* GU */ {   -20,   -30,   -30,   -40,   -20},
++/* UG */ {   -10,   -30,   -10,   -20,   -20},
++/* AU */ {   -20,   -30,   -30,   -40,   -20},
++/* UA */ {   -10,   -30,   -10,   -20,   -20},
++/* NN */ {    -0,   -20,   -10,    -0,    -0}
++};
+ 
++/* dangle3 */
+ PUBLIC int dangle3_37[NBPAIRS+1][5] =
+-{{   INF,   INF,   INF,   INF,   INF}
+-,{   -80,  -170,   -80,  -170,  -120}
+-,{   -40,  -110,   -40,  -130,   -60}
+-,{   -50,   -80,   -50,   -80,   -60}
+-,{   -10,   -70,   -10,   -70,   -10}
+-,{   -50,   -80,   -50,   -80,   -60}
+-,{   -10,   -70,   -10,   -70,   -10}
+-,{   -10,   -70,   -10,   -70,   -10}};
+-PUBLIC int dangle3_dH[NBPAIRS+1][5] =
+-{{   INF,   INF,   INF,   INF,   INF}
+-,{  -410,  -900,  -410,  -860,  -750}
+-,{  -280,  -740,  -280,  -640,  -360}
+-,{   -90,  -490,   -90,  -550,  -230}
+-,{   -70,  -570,   -70,  -580,  -220}
+-,{   -90,  -490,   -90,  -550,  -230}
+-,{   -70,  -570,   -70,  -580,  -220}
+-,{   -70,  -490,   -70,  -550,  -220}};
+-PUBLIC int dangle5_37[NBPAIRS+1][5] =
+-{{   INF,   INF,   INF,   INF,   INF}
+-,{     0,   -20,   -30,     0,     0}
+-,{   -10,   -50,   -30,   -20,   -10}
+-,{   -10,   -30,   -10,   -20,   -20}
+-,{   -20,   -30,   -30,   -40,   -20}
+-,{   -10,   -30,   -10,   -20,   -20}
+-,{   -20,   -30,   -30,   -40,   -20}
+-,{     0,   -20,   -10,     0,     0}};
++{ /*           N      A      C      G      U */
++/* NP */ {   INF,   INF,   INF,   INF,   INF},
++/* CG */ {   -40,  -110,   -40,  -130,   -60},
++/* GC */ {   -80,  -170,   -80,  -170,  -120},
++/* GU */ {   -10,   -70,   -10,   -70,   -10},
++/* UG */ {   -50,   -80,   -50,   -80,   -60},
++/* AU */ {   -10,   -70,   -10,   -70,   -10},
++/* UA */ {   -50,   -80,   -50,   -80,   -60},
++/* NN */ {   -10,   -70,   -10,   -70,   -10}
++};
++
++/* dangle5_enthalpies */
+ PUBLIC int dangle5_dH[NBPAIRS+1][5] =
+-{{   INF,   INF,   INF,   INF,   INF}
+-,{    70,  -160,    70,  -460,   -40}
+-,{   330,  -240,   330,    80,  -140}
+-,{   690,   -50,   690,    60,    60}
+-,{   310,   160,   220,    70,   310}
+-,{   690,   -50,   690,    60,    60}
+-,{   310,   160,   220,    70,   310}
+-,{   690,   160,   690,    80,   310}};
++{ /*           N      A      C      G      U */
++/* NP */ {   INF,   INF,   INF,   INF,   INF},
++/* CG */ {   330,  -240,   330,    80,  -140},
++/* GC */ {    70,  -160,    70,  -460,   -40},
++/* GU */ {   310,   160,   220,    70,   310},
++/* UG */ {   690,   -50,   690,    60,    60},
++/* AU */ {   310,   160,   220,    70,   310},
++/* UA */ {   690,   -50,   690,    60,    60},
++/* NN */ {   690,   160,   690,    80,   310}
++};
++
++/* dangle3_enthalpies */
++PUBLIC int dangle3_dH[NBPAIRS+1][5] =
++{ /*           N      A      C      G      U */
++/* NP */ {   INF,   INF,   INF,   INF,   INF},
++/* CG */ {  -280,  -740,  -280,  -640,  -360},
++/* GC */ {  -410,  -900,  -410,  -860,  -750},
++/* GU */ {   -70,  -570,   -70,  -580,  -220},
++/* UG */ {   -90,  -490,   -90,  -550,  -230},
++/* AU */ {   -70,  -570,   -70,  -580,  -220},
++/* UA */ {   -90,  -490,   -90,  -550,  -230},
++/* NN */ {   -70,  -490,   -70,  -550,  -220}
++};
+ 
+ PUBLIC char Triloops[241] =
+   "CAACG "
+   "GUUAC "
+ ;
+-PUBLIC int Triloop37[40] = {   680,   690};
+-PUBLIC int TriloopdH[40] = {  2370,  1080};
++PUBLIC int Triloop37[40] = {   680,   690,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
++PUBLIC int TriloopdH[40] = {  2370,  1080,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+ 
+ PUBLIC char Tetraloops[281] =
+   "CAACGG "
+@@ -770,8 +826,10 @@
+   "CUUCGG "
+   "CUUUGG "
+ ;
+-PUBLIC int Tetraloop37[40] = {   550,   330,   370,   340,   350,   360,   370,   250,   360,   280,   370,   270,   280,   350,   370,   370};
+-PUBLIC int TetraloopdH[40] = {   690, -1030,  -330,  -890,  -660,  -750,  -350, -1390,  -760, -1070,  -660, -1290, -1070,  -620, -1530,  -680};
++PUBLIC int Tetraloop37[40] = {   550,   330,   370,   340,   350,   360,   370,   250,   360,   280,   370,   270,   280,   350,   370,   370,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
++PUBLIC int TetraloopdH[40] = {   690, -1030,  -330,  -890,  -660,  -750,  -350, -1390,  -760, -1070,  -660, -1290, -1070,  -620, -1530,  -680,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+ 
+ PUBLIC char Hexaloops[361] =
+   "ACAGUACU "
+@@ -779,8 +837,12 @@
+   "ACAGUGCU "
+   "ACAGUGUU "
+ ;
+-PUBLIC int Hexaloop37[40] = {   280,   360,   290,   180};
+-PUBLIC int HexaloopdH[40] = { -1680, -1140, -1280, -1540};
++PUBLIC int Hexaloop37[40] = {   280,   360,   290,   180,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
++PUBLIC int HexaloopdH[40] = { -1680, -1140, -1280, -1540,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
++                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+ 
+ #include "intl11.h"
+ #include "intl11dH.h"
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/fold.c ViennaRNA-2.1.8/lib/fold.c
+--- ViennaRNA-2.1.8_stock/lib/fold.c	2019-11-23 17:30:39.120420600 -0500
++++ ViennaRNA-2.1.8/lib/fold.c	2019-11-23 15:34:23.259097100 -0500
+@@ -54,6 +54,15 @@
+ PUBLIC  int cut_point = -1; /* set to first pos of second seq for cofolding */
+ PUBLIC  int eos_debug = 0;  /* verbose info from energy_of_struct */
+ 
++PUBLIC  int estimate_mode = 0; /* EteRNA labs */
++
++// JEEFIX binding site spec
++PUBLIC int binding_site_i = -1;
++PUBLIC int binding_site_j = -1;
++PUBLIC int binding_site_p = -1;
++PUBLIC int binding_site_q = -1;
++PUBLIC int binding_site_bonus = 0;
++
+ /*
+ #################################
+ # PRIVATE VARIABLES             #
+@@ -132,6 +141,9 @@
+ int LoopEnergy(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1);
+ int HairpinE(int size, int type, int si1, int sj1, const char *string);
+ 
++/* EteRNA (binding site) */
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1,
++                 int index_i, int index_p, int index_j, int index_q, paramT* P);
+ 
+ /*
+ #################################
+@@ -369,21 +381,23 @@
+   }
+   */
+ 
+-  /* check constraints */
+-  for(i=1;i<=length;i++) {
+-    if((BP[i]<0)&&(BP[i]>-4)) {
+-      bonus_cnt++;
+-      if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
+-      if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
+-      if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
+-    }
+-
+-    if(BP[i]>i) {
+-      int l;
+-      bonus_cnt++;
+-      for(l=1; l<=base_pair2[0].i; l++)
+-        if(base_pair2[l].i != base_pair2[l].j)
+-          if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
++  if (!estimate_mode) {
++    /* check constraints */
++    for(i=1;i<=length;i++) {
++      if((BP[i]<0)&&(BP[i]>-4)) {
++        bonus_cnt++;
++        if((BP[i]==-3)&&(structure[i-1]==')')) bonus++;
++        if((BP[i]==-2)&&(structure[i-1]=='(')) bonus++;
++        if((BP[i]==-1)&&(structure[i-1]!='.')) bonus++;
++      }
++
++      if(BP[i]>i) {
++        int l;
++        bonus_cnt++;
++        for(l=1; l<=base_pair2[0].i; l++)
++          if(base_pair2[l].i != base_pair2[l].j)
++            if((i==base_pair2[l].i)&&(BP[i]==base_pair2[l].j)) bonus++;
++      }
+     }
+   }
+ 
+@@ -402,6 +416,23 @@
+     return (float) energy/100.;
+ }
+ 
++/// JEEFIX
++float fold_with_binding_site(const char *string, char *structure, int i, int p, int j, int q, int bonus) {
++  binding_site_i = i;
++  binding_site_j = j;
++  binding_site_p = p;
++  binding_site_q = q;
++  binding_site_bonus = bonus;
++
++  float e = fold(string,structure);
++  binding_site_i = -1;
++  binding_site_j = -1;
++  binding_site_p = -1;
++  binding_site_q = -1;
++  binding_site_bonus = 0;
++  return e;
++}
++                        
+ /**
+ *** fill "c", "fML" and "f5" arrays and return  optimal energy
+ **/
+@@ -448,9 +479,16 @@
+       type = ptype[ij];
+       energy = INF;
+       /* enforcing structure constraints */
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
+-      if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++        if ((BP[i]==-4)||(BP[j]==-4)) type=0;
++      }
+ 
+       no_close = (((type==3)||(type==4))&&noGUclosure&&(bonus==0));
+ 
+@@ -480,8 +518,8 @@
+               if (no_close||(type_2==3)||(type_2==4))
+                 if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+-            energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                                S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++            energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                                S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+ 
+             ee = energy+c[indx[q]+p];
+             new_c = MIN2(new_c, ee);
+@@ -1040,8 +1078,15 @@
+ 
+     bonus = 0;
+     if (struct_constrained) {
+-      if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
+-      if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      if (estimate_mode) {
++        if(BP[i] < 0) bonus += BONUS * BP[i];
++        if(BP[j] < 0) bonus += BONUS * BP[j];
++        if(BP[i] > 0) bonus += BONUS * BP[i];
++        if(BP[j] > 0) bonus += BONUS * BP[j];
++      } else {
++        if ((BP[i]==j)||(BP[i]==-1)||(BP[i]==-2)) bonus -= BONUS;
++        if ((BP[j]==-1)||(BP[j]==-3)) bonus -= BONUS;
++      }
+     }
+     if (noLonelyPairs)
+       if (cij == c[ij]){
+@@ -1078,8 +1123,8 @@
+             if ((p>i+1)||(q<j-1)) continue;  /* continue unless stack */
+ 
+         /* energy = oldLoopEnergy(i, j, p, q, type, type_2); */
+-        energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                            S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++        energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                            S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+ 
+         new = energy+c[indx[q]+p]+bonus;
+         traced = (cij == new);
+@@ -1233,7 +1278,7 @@
+       nrerror("backtracking failed in repeat_gquad");
+     }
+   repeat_gquad_exit:
+-    asm("nop");
++    /*asm("nop")*/;
+ 
+   } /* end of infinite while loop */
+ 
+@@ -1347,6 +1392,8 @@
+   if (init_length < 0) init_length=0;
+ }
+ 
++void (*eos_cb)(int index, int fe) = NULL;
++
+ /*---------------------------------------------------------------------------*/
+ PUBLIC float energy_of_structure(const char *string, const char *structure, int verbosity_level){
+   return energy_of_struct_par(string, structure, NULL, verbosity_level);
+@@ -1596,6 +1643,7 @@
+   length = S[0];
+ /*   energy =  backtrack_type=='M' ? ML_Energy(0, 0) : ML_Energy(0, 1); */
+     energy =  backtrack_type=='M' ? energy_of_ml_pt(0, ptable) : energy_of_extLoop_pt(0, ptable);
++  if (eos_cb) (*eos_cb)(0, energy);
+   if (verbosity_level>0)
+     printf("External loop                           : %5d\n", energy);
+   for (i=1; i<=length; i++) {
+@@ -1606,6 +1654,7 @@
+   for (i=1; !SAME_STRAND(i,length); i++) {
+     if (!SAME_STRAND(i,pair_table[i])) {
+       energy+=P->DuplexInit;
++      if (eos_cb) (*eos_cb)(-1, P->DuplexInit);
+       break;
+     }
+   }
+@@ -1726,6 +1775,7 @@
+       }
+     }
+ 
++  if (eos_cb) (*eos_cb)(0, en0);
+   if (verbosity_level>0)
+     printf("External loop                           : %5d\n", en0);
+   energy += en0;
+@@ -1766,9 +1816,10 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      ee = E_IntLoop(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1],P);
++      ee = E_IntLoopNew(p-i-1, j-q-1, type, type_2, S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+     else
+       ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (verbosity_level>0)
+       printf("Interior loop (%3d,%3d) %c%c; (%3d,%3d) %c%c: %5d\n",
+              i,j,string[i-1],string[j-1],p,q,string[p-1],string[q-1], ee);
+@@ -1784,6 +1835,7 @@
+     else
+       ee = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
+     energy += ee;
++    if (eos_cb) (*eos_cb)(i, ee);
+     if (verbosity_level>0)
+       printf("Hairpin  loop (%3d,%3d) %c%c              : %5d\n",
+              i, j, string[i-1],string[j-1], ee);
+@@ -1805,6 +1857,7 @@
+     ee = (ii==0) ? energy_of_ml_pt(i, pair_table) : energy_of_extLoop_pt(ii, pair_table);
+   }
+   energy += ee;
++  if (eos_cb) (*eos_cb)(i, ee);
+   if (verbosity_level>0)
+     printf("Multi    loop (%3d,%3d) %c%c              : %5d\n",
+            i,j,string[i-1],string[j-1],ee);
+@@ -2211,8 +2264,8 @@
+     }
+     /* energy += LoopEnergy(i, j, p, q, type, type_2); */
+     if ( SAME_STRAND(i,p) && SAME_STRAND(q,j) )
+-      energy = E_IntLoop(p-i-1, j-q-1, type, type_2,
+-                          S1[i+1], S1[j-1], S1[p-1], S1[q+1], P);
++      energy = E_IntLoopNew(p-i-1, j-q-1, type, type_2,
++                          S1[i+1], S1[j-1], S1[p-1], S1[q+1], i, p, j, q, P);
+     else
+       energy = energy_of_extLoop_pt(cut_in_loop(i), pair_table);
+   }
+@@ -2448,6 +2501,19 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
++int E_IntLoopNew(int n1, int n2, int type, int type_2, int si1, int sj1, int sp1, int sq1, 
++                 int index_i, int index_p, int index_j, int index_q, paramT* P)
++{
++  int le = E_IntLoop(n1,n2,type,type_2,si1,sj1,sp1,sq1,P);
++  if(index_p == binding_site_p && index_q == binding_site_q && index_i == binding_site_i && index_j == binding_site_j) {
++    //fprintf(stderr,"MATCH!!!");
++    le -= binding_site_bonus;
++  } 
++  return le;	
++}
++                          
++/*---------------------------------------------------------------------------*/
++
+ PUBLIC int oldLoopEnergy(int i, int j, int p, int q, int type, int type_2) {
+   /* compute energy of degree 2 loop (stack bulge or interior) */
+   int n1, n2, m, energy;
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/gquad.c ViennaRNA-2.1.8/lib/gquad.c
+--- ViennaRNA-2.1.8_stock/lib/gquad.c	2019-11-23 17:30:39.182908800 -0500
++++ ViennaRNA-2.1.8/lib/gquad.c	2019-11-23 15:34:23.263135100 -0500
+@@ -11,7 +11,7 @@
+ #include <math.h>
+ #include <string.h>
+ 
+-#include "../config.h"
++#include "config.h"
+ #include "fold_vars.h"
+ #include "data_structures.h"
+ #include "energy_const.h"
+@@ -917,8 +917,16 @@
+                             void *S,
+                             void *n_seq){
+ 
+-  int en[2], cc;
++  int j, en[2], cc;
+   en[0] = en[1] = INF;
++
++  for(j=0;j<3;j++){
++    if(l[j] > VRNA_GQUAD_MAX_LINKER_LENGTH) return;
++    if(l[j] < VRNA_GQUAD_MIN_LINKER_LENGTH) return;
++  }
++  if(L > VRNA_GQUAD_MAX_STACK_SIZE) return;
++  if(L < VRNA_GQUAD_MIN_STACK_SIZE) return;
++
+   gquad_mfe_ali_en(i, L, l, (void *)(&(en[0])), P, S, n_seq);
+   if(en[1] != INF){
+     cc  = en[0] + en[1];
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/read_epars.c ViennaRNA-2.1.8/lib/read_epars.c
+--- ViennaRNA-2.1.8_stock/lib/read_epars.c	2019-11-23 17:30:39.122359600 -0500
++++ ViennaRNA-2.1.8/lib/read_epars.c	2019-11-23 15:34:23.266046100 -0500
+@@ -80,7 +80,7 @@
+ PRIVATE void  rd_Hexaloop37(void);
+ 
+ /*------------------------------------------------------------*/
+-PUBLIC void read_parameter_file(const char fname[]){
++PUBLIC int read_parameter_file(const char fname[]){
+   char        *line, ident[256];
+   enum parset type;
+   int         r;
+@@ -90,13 +90,13 @@
+             "\nread_parameter_file:\n"
+             "\t\tcan't open file %s\n"
+             "\t\tusing default parameters instead.\n", fname);
+-    return;
++    return -1;
+   }
+ 
+   if (!(line = get_line(fp))) {
+     fprintf(stderr," File %s is inproper.\n", fname);
+     fclose(fp);
+-    return;
++    return -2;
+   }
+ 
+   if (strncmp(line,"## RNAfold parameter file v2.0",30)!=0) {
+@@ -257,7 +257,7 @@
+   fclose(fp);
+ 
+   check_symmetry();
+-  return;
++  return 0;
+ }
+ 
+ /*------------------------------------------------------------*/
+@@ -486,9 +486,9 @@
+ 
+   i=0;
+   /* erase old tetraloop entries */
+-  memset(&Tetraloops, 0, 281);
+-  memset(&Tetraloop37, 0, sizeof(int)*40);
+-  memset(&TetraloopdH, 0, sizeof(int)*40);
++  memset(Tetraloops, 0, 281);
++  memset(Tetraloop37, 0, sizeof(int)*40);
++  memset(TetraloopdH, 0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
+@@ -508,9 +508,9 @@
+ 
+   i=0;
+   /* erase old hexaloop entries */
+-  memset(&Hexaloops, 0, 361);
+-  memset(&Hexaloop37, 0, sizeof(int)*40);
+-  memset(&HexaloopdH, 0, sizeof(int)*40);
++  memset(Hexaloops, 0, 361);
++  memset(Hexaloop37, 0, sizeof(int)*40);
++  memset(HexaloopdH, 0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
+@@ -530,9 +530,9 @@
+ 
+   i=0;
+   /* erase old hexaloop entries */
+-  memset(&Triloops,   0, 241);
+-  memset(&Triloop37,  0, sizeof(int)*40);
+-  memset(&TriloopdH,  0, sizeof(int)*40);
++  memset(Triloops,   0, 241);
++  memset(Triloop37,  0, sizeof(int)*40);
++  memset(TriloopdH,  0, sizeof(int)*40);
+   do {
+     buf = get_line(fp);
+     if (buf==NULL) break;
+diff -X .gitignore -ur ViennaRNA-2.1.8_stock/lib/utils.c ViennaRNA-2.1.8/lib/utils.c
+--- ViennaRNA-2.1.8_stock/lib/utils.c	2019-11-23 17:30:39.144006500 -0500
++++ ViennaRNA-2.1.8/lib/utils.c	2019-11-23 15:34:23.269063000 -0500
+@@ -12,7 +12,7 @@
+ #include <errno.h>
+ #include <time.h>
+ #include <string.h>
+-#include "../config.h"
++#include "config.h"
+ #include "utils.h"
+ 
+ #ifdef WITH_DMALLOC
+@@ -32,6 +32,7 @@
+ PRIVATE char  *inbuf2 = NULL;
+ PRIVATE unsigned int typebuf2 = 0;
+ 
++
+ /*-------------------------------------------------------------------------*/
+ 
+ PUBLIC void *space(unsigned size) {
+@@ -998,7 +999,6 @@
+ }
+ 
+ 
+-
+ PUBLIC void constrain_ptypes(const char *constraint, unsigned int length, char *ptype, int *BP, int min_loop_size, unsigned int idx_type){
+   int n,i,j,k,l;
+   int hx, *stack;
+@@ -1015,37 +1015,41 @@
+     index = get_indx(length);
+ 
+     for(hx=0, j=1; j<=n; j++){
+-      switch(constraint[j-1]){
+-        case '|':   if(BP) BP[j] = -1;
+-                    break;
+-        case 'x':   /* can't pair */
+-                    for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
+-                    for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
+-                    break;
+-        case '(':   stack[hx++]=j;
+-                    /* fallthrough */
+-        case '<':   /* pairs upstream */
+-                    for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
+-                    break;
+-        case ')':   if (hx<=0) {
+-                      fprintf(stderr, "%s\n", constraint);
+-                      nrerror("unbalanced brackets in constraint");
+-                    }
+-                    i = stack[--hx];
+-                    type = ptype[index[j]+i];
+-                    for (k=i+1; k<=(int)length; k++) ptype[index[k]+i] = 0;
+-                    /* don't allow pairs i<k<j<l */
+-                    for (l=j; l<=(int)length; l++)
+-                      for (k=i+1; k<=j; k++) ptype[index[l]+k] = 0;
+-                    /* don't allow pairs k<i<l<j */
+-                    for (l=i; l<=j; l++)
+-                      for (k=1; k<=i; k++) ptype[index[l]+k] = 0;
+-                    for (k=1; k<j; k++) ptype[index[j]+k] = 0;
+-                    ptype[index[j]+i] = (type==0) ? 7 : type;
+-                    /* fallthrough */
+-        case '>':   /* pairs downstream */
+-                    for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
+-                    break;
++      if (estimate_mode) {
++        BP[j] = constraint[j-1];
++      } else {
++        switch(constraint[j-1]){
++          case '|':   if(BP) BP[j] = -1;
++                      break;
++          case 'x':   /* can't pair */
++                      for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
++                      for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
++                      break;
++          case '(':   stack[hx++]=j;
++                      /* fallthrough */
++          case '<':   /* pairs upstream */
++                      for (l=1; l<j-min_loop_size; l++) ptype[index[j]+l] = 0;
++                      break;
++          case ')':   if (hx<=0) {
++                        fprintf(stderr, "%s\n", constraint);
++                        nrerror("unbalanced brackets in constraint");
++                      }
++                      i = stack[--hx];
++                      type = ptype[index[j]+i];
++                      for (k=i+1; k<=(int)length; k++) ptype[index[k]+i] = 0;
++                      /* don't allow pairs i<k<j<l */
++                      for (l=j; l<=(int)length; l++)
++                        for (k=i+1; k<=j; k++) ptype[index[l]+k] = 0;
++                      /* don't allow pairs k<i<l<j */
++                      for (l=i; l<=j; l++)
++                        for (k=1; k<=i; k++) ptype[index[l]+k] = 0;
++                      for (k=1; k<j; k++) ptype[index[j]+k] = 0;
++                      ptype[index[j]+i] = (type==0) ? 7 : type;
++                      /* fallthrough */
++          case '>':   /* pairs downstream */
++                      for (l=j+min_loop_size+1; l<=(int)length; l++) ptype[index[l]+j] = 0;
++                      break;
++        }
+       }
+     }
+   }
+Only in ViennaRNA-2.1.8/man: cmdlopt.sh
+Only in ViennaRNA-2.1.8/misc: PKGBUILD
+Only in ViennaRNA-2.1.8/misc: ViennaRNA.spec
+Only in ViennaRNA-2.1.8: stamp-h1

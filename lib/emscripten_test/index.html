@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello World</title>
+</head>
+<body>
+<script src="./hello_world.js"></script>
+<script>
+    console.log('HelloWorld initializing...');
+
+    function STLvector_to_array(v) {
+        var out = [];
+        for (var i = 0; i < v.size(); i++) {
+            out.push(v.get(i));
+        }
+        return out;
+    }
+
+    // If noInitialRun is _false_, main() will be automatically after
+    // our promise resolves. Instead, we call it manually as the first statement
+    // in the callback.
+    HelloWorld({noInitialRun: true}).then(function(HelloWorld) {
+        HelloWorld.callMain();
+
+        const my_str = "Hello from JS";
+
+        console.log('HelloWorld initialized');
+        console.log(`"${my_str}".length = ${HelloWorld.GetStringLength(my_str)}`);
+
+        var myStruct = HelloWorld.GetStruct();
+        myStruct.vectorArray = STLvector_to_array(myStruct.floatVec);
+        console.log(myStruct);
+
+        var myClass = HelloWorld.GetStructPtr();
+        console.log(`{floatVal: ${myClass.floatVal}, stringVal: ${myClass.stringVal}}`);
+        console.log(myClass);
+        myClass.delete();
+
+        HelloWorld.SendLog();
+    });
+</script>
+</body>
+</html>
