@@ -79,6 +79,17 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
 
+        this._moleculeLayer = new Container();
+        this.container.addChild(this._moleculeLayer);
+        this._moleculeLayer.visible = false;
+
+        this._energyTextLayer = new Container();
+        this.container.addChild(this._energyTextLayer);
+
+        this._paintCursor = new PaintCursor();
+        this._paintCursor.display.visible = false;
+        this.addObject(this._paintCursor, this.container);
+
         this._explosionFactorPanel = new ExplosionFactorPanel();
         this._explosionFactorPanel.display.position = new Point(17, 118 + 82);
         this._explosionFactorPanel.display.visible = false;
@@ -88,15 +99,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._redraw = true;
         });
         this.addObject(this._explosionFactorPanel, this.container);
-
-
-        this._moleculeLayer = new Container();
-        this.container.addChild(this._moleculeLayer);
-        this._moleculeLayer.visible = false;
-
-        this._paintCursor = new PaintCursor();
-        this._paintCursor.display.visible = false;
-        this.addObject(this._paintCursor, this.container);
 
         this._explosionRays = [];
         for (let ii = 0; ii < 10; ii++) {
@@ -3154,7 +3156,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 let scoreText = new Sprite(BitmapManager.getTextBitmap(scoreNode.scoreString, scoreNode.scoreColor));
                 scoreText.visible = false;
                 this._scoreTexts.push(scoreText);
-                this.container.addChild(scoreText);
+                this._energyTextLayer.addChild(scoreText);
             }
         }
 
@@ -3306,6 +3308,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     private _barcodes: number[];
     private _moleculeLayer: Container;
+    private _energyTextLayer: Container;
 
     private _coloring: boolean = false;
     private _currentColor: number = EPars.RNABASE_URACIL;

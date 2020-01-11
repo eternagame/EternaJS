@@ -12,6 +12,7 @@ export default class LinearFoldC extends LinearFoldBase {
         // We have to ts-ignore this for it to allow us to fall back to an installed package
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
+        // eslint-disable-next-line import/no-unresolved
         return import('./engines/LinearFoldC')
             // eslint-disable-next-line import/no-unresolved
             .catch(() => import('eternajs-folding-engines/engines/LinearFoldC'))
