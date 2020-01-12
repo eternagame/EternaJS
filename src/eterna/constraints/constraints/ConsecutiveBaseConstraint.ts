@@ -11,7 +11,7 @@ interface ConsecutiveConstraintStatus extends BaseConstraintStatus {
 
 abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstraintStatus> {
     public readonly baseType: number;
-    public readonly maxConsecutive: number;
+    public readonly maxConsecutive: number; // Caution: this is an exclusive limit, rather than inclusive
 
     constructor(baseType: number, count: number) {
         super();
@@ -64,7 +64,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
             ranges: EPars.getRestrictedConsecutive(
                 undoBlocks[0].sequence,
                 this.baseType,
-                this.maxConsecutive,
+                this.maxConsecutive - 1,
                 undoBlocks[0].puzzleLocks
             ),
             color: HighlightType.RESTRICTED
