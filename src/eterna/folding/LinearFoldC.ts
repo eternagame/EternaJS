@@ -1,6 +1,5 @@
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import LinearFoldBase from './LinearFoldBase';
-import Folder from './Folder';
 
 export default class LinearFoldC extends LinearFoldBase {
     public static readonly NAME = 'LinearFoldC';
