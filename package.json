@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
-    "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && concurrently \"npm run build:dev -- --watch\" \"ws -d dist/dev -p 63343\"",
+    "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && concurrently --raw \"npm:watch:dev\" \"ws -d dist/dev -p 63343\"",
     "clean": "node multiplatform/rmrf dist && node multiplatform/rmrf node_modules/.cache",
     "typecheck": "tsc --noEmit",
+    "watch:dev": "webpack --config webpack.dev.js --watch --info-verbosity verbose",
     "build:dev": "node multiplatform/mkdirp dist/dev && webpack --config webpack.dev.js",
     "build:prod": "node multiplatform/mkdirp dist/prod && webpack --config webpack.prod.js",
     "postbuild:dev": "node multiplatform/cpr ./website/frontend ./dist/dev/frontend && coffee -o ./dist/dev/frontend/jscripts -c ./website/frontend/coffee",

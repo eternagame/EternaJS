@@ -1,6 +1,6 @@
 # IDEs
 *.iml
-.vscode
+.vscode/*.json
 
 # CMake
 CMakeCache.txt
