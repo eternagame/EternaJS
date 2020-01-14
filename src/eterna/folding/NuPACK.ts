@@ -18,13 +18,7 @@ export default class NuPACK extends Folder {
      * @returns {Promise<NuPACK>}
      */
     public static create(): Promise<NuPACK> {
-        // We have to ts-ignore this for it to allow us to fall back to an installed package
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        // eslint-disable-next-line import/no-unresolved
-        return import('./engines/nupack')
-            // eslint-disable-next-line import/no-unresolved
-            .catch(() => import('eternajs-folding-engines/engines/nupack'))
+        return import('engines-bin/nupack')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new NuPACK(program));
     }

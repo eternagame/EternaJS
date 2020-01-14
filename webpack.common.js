@@ -26,6 +26,17 @@ const loadEnv = envPath => {
 loadEnv(path.join(__dirname, './.env.local'));
 loadEnv(path.join(__dirname, './.env'));
 
+function getEngineLocation() {
+    switch (process.env.ENGINE_LOCATION) {
+        case 'local':
+            return path.resolve(__dirname, './src/eterna/folding/engines');
+        case 'package':
+            return 'eternajs-folding-engines/engines';
+        default:
+            throw new Error('Invalid engine location');
+    }
+}
+
 module.exports = {
     entry: {
         main: ['babel-polyfill', "./src/eterna/index.ts"],
@@ -45,6 +56,7 @@ module.exports = {
             signals: path.resolve(__dirname, 'src/signals'),
             flashbang: path.resolve(__dirname, 'src/flashbang'),
             eterna: path.resolve(__dirname, 'src/eterna'),
+            'engines-bin': getEngineLocation()
         }
     },
     

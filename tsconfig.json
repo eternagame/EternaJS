@@ -12,7 +12,13 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "engines-bin/*": [
+        "../node_modules/eternajs-folding-engines/engines/*",
+        "eterna/folding/engines/*"
+      ]
+    }
   },
   "include": [
     "./src/**/*.ts"

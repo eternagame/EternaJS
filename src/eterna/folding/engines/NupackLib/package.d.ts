@@ -1,3 +1,3 @@
-declare module 'eternajs-folding-engines/engines/nupack' {
+declare module 'engines-bin/nupack' {
     import * as LinearFoldLib from 'eterna/folding/engines/NupackLib';
 }

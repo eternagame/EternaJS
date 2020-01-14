@@ -18,13 +18,7 @@ export default class Vienna extends Folder {
      * @returns {Promise<Vienna>}
      */
     public static create(): Promise<Vienna> {
-        // We have to ts-ignore this for it to allow us to fall back to an installed package
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        // eslint-disable-next-line import/no-unresolved
-        return import('./engines/vienna')
-            // eslint-disable-next-line import/no-unresolved
-            .catch(() => import('eternajs-folding-engines/engines/vienna'))
+        return import('engines-bin/vienna')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna(program));
     }
