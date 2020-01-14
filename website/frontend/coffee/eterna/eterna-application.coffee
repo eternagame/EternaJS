@@ -1,8 +1,5 @@
-#Application.GET_URI = "/get/"
-#Application.POST_URI = "/post/"
-# TSC: temporarily hardcoding these
-Application.GET_URI = "https://eternagame.org/get/"
-Application.POST_URI = "https://eternagame.org/post/"
+Application.GET_URI = "/get/"
+Application.POST_URI = "/post/"
 
 Application.DEFAULT_USER_PICTURE = "https://s3.amazonaws.com/eterna/icon_img/question.png"
 Application.SCRIPT_URI = "http://ec2-54-242-61-159.compute-1.amazonaws.com:3000"

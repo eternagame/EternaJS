@@ -2,13 +2,29 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
 const packageJson = require('./package.json');
 const vendorDependencies = Object.keys(packageJson['dependencies']);
+
+const dotenv = require('dotenv');
+const loadEnv = envPath => {
+    try {
+        dotenv.config({ path: envPath });
+    } catch (err) {
+        // only ignore error if file is not found
+        if (err.toString().indexOf('ENOENT') < 0) {
+            throw err;
+        }
+    }
+}
+
+// Contrary to what you'd expect, the first env loaded is the one whose values are kept
+loadEnv(path.join(__dirname, './.env.local'));
+loadEnv(path.join(__dirname, './.env'));
 
 module.exports = {
     entry: {
@@ -31,7 +47,7 @@ module.exports = {
             eterna: path.resolve(__dirname, 'src/eterna'),
         }
     },
-
+    
     module: {
         rules: [
             {
@@ -58,7 +74,7 @@ module.exports = {
             }
         ],
     },
-
+    
     // When importing a module whose path matches one of the following, just
     // assume a corresponding global variable exists and use that instead.
     // This is important because it allows us to avoid bundling all of our
@@ -67,13 +83,13 @@ module.exports = {
         // "react": "React",
         // "react-dom": "ReactDOM"
     },
-
+    
     // 5/15/18 - Cargo-culting this line in to fix 'Module not found: Error: Can't resolve 'fs''
     // https://github.com/webpack-contrib/css-loader/issues/447
     node: {
         fs: "empty"
     },
-
+    
     plugins: [
         // Caching plugin for faster builds
         // https://github.com/mzgoddard/hard-source-webpack-plugin
@@ -81,21 +97,12 @@ module.exports = {
             environmentHash: {
                 root: process.cwd(),
                 directories: [],
-                // Rebuild the cache when .env is updated; dotenv-webpack
-                // uses this file to replace process.env['xyz'] usage
-                // in code with their .env values
-                files: ['package-lock.json', 'yarn.lock', '.env']
+                files: ['package-lock.json', 'yarn.lock', '.env', '.env.local']
             }
         }),
-
-        // Access .env values
-        // https://github.com/mrsteele/dotenv-webpack
-        new Dotenv({
-            // TODO: set safe=true when "allowEmptyValues" support is added: https://github.com/mrsteele/dotenv-webpack/pull/134
-            safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
-            systemvars: true, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-        }),
-
+        
+        new webpack.EnvironmentPlugin(Object.keys(process.env)),
+        
         // Generate an index.html that includes our webpack bundles
         new HtmlWebpackPlugin({template: 'src/index.html.tmpl', inject: false}),
 
