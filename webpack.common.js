@@ -104,7 +104,15 @@ module.exports = {
         new webpack.EnvironmentPlugin(Object.keys(process.env)),
         
         // Generate an index.html that includes our webpack bundles
-        new HtmlWebpackPlugin({template: 'src/index.html.tmpl', inject: false}),
+        new HtmlWebpackPlugin({
+            template: 'src/index.html.tmpl',
+            inject: false,
+            process: {
+                env: {
+                    ...process.env
+                }
+            }
+        }),
 
         // Generate a manifest.json file containing our entry point file names:
         // https://github.com/danethurber/webpack-manifest-plugin#hooks-options
