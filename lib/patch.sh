@@ -38,12 +38,6 @@ popd
 ## This is how the patch file was created.
 ## diff -X .gitignore -ur LinearFold_stock LinearFold > linearfold-eterna.patch
 
-# Note that the most recent definitely-working hash is:
-# 05c9803ae700fc528c82e63cec12ec7c9d3b498a
-# you can obtain this revision via:
-# git clone https://github.com/LinearFold/LinearFold.git
-# git reset --hard 05c9803ae700fc528c82e63cec12ec7c9d3b498a
-
 # With your fresh git checkout of LinearFold/LinearFold...
 pushd LinearFold
 patch -t -p0 < linearfold-eterna.patch
