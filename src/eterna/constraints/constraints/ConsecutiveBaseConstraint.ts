@@ -11,12 +11,18 @@ interface ConsecutiveConstraintStatus extends BaseConstraintStatus {
 
 abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstraintStatus> {
     public readonly baseType: number;
-    public readonly maxConsecutive: number;
+    public readonly consecutiveLimit: number; // max + 1!
 
-    constructor(baseType: number, count: number) {
+    /**
+     * Creates a ConsecutiveBaseConstraint which limits the number of consecutive bases
+     * @param baseType Base to limit, e.g. EPars.RNABASE_ADENINE
+     * @param limit Number of consectuive bases to constrain against.
+     * This is the maxiumum allowed consecutive count  + 1.
+     */
+    constructor(baseType: number, limit: number) {
         super();
         this.baseType = baseType;
-        this.maxConsecutive = count;
+        this.consecutiveLimit = limit;
     }
 
     public evaluate(undoBlocks: UndoBlock[]): ConsecutiveConstraintStatus {
@@ -26,7 +32,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         );
 
         return {
-            satisfied: count < this.maxConsecutive,
+            satisfied: count < this.consecutiveLimit,
             currentConsecutive: count
         };
     }
@@ -41,7 +47,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         }
         tooltip.append('You must have ')
             .append('at most', 'altText')
-            .append(` ${this.maxConsecutive - 1} ${EPars.getColoredLetter(EPars.nucleotideToString(this.baseType, false, false))}s in a row.`);
+            .append(` ${this.consecutiveLimit - 1} ${EPars.getColoredLetter(EPars.nucleotideToString(this.baseType, false, false))}s in a row.`);
 
         if (forMissionScreen) {
             tooltip.popStyle();
@@ -50,7 +56,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         return {
             satisfied: status.satisfied,
             tooltip,
-            clarificationText: `AT MOST ${this.maxConsecutive - 1} IN A ROW`,
+            clarificationText: `AT MOST ${this.consecutiveLimit - 1} IN A ROW`,
             statText: status.currentConsecutive.toString(),
             fullTexture: forMissionScreen
                 ? BitmapManager.getBitmapNamed(`Nova${EPars.nucleotideToString(this.baseType, false, false)}RowMissionReq`)
@@ -64,7 +70,7 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
             ranges: EPars.getRestrictedConsecutive(
                 undoBlocks[0].sequence,
                 this.baseType,
-                this.maxConsecutive,
+                this.consecutiveLimit - 1,
                 undoBlocks[0].puzzleLocks
             ),
             color: HighlightType.RESTRICTED
@@ -75,14 +81,14 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
 export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_A';
 
-    constructor(count: number) {
-        super(EPars.RNABASE_ADENINE, count);
+    constructor(limit: number) {
+        super(EPars.RNABASE_ADENINE, limit);
     }
 
     public serialize(): [string, string] {
         return [
             ConsecutiveAConstraint.NAME,
-            this.maxConsecutive.toString()
+            this.consecutiveLimit.toString()
         ];
     }
 }
@@ -90,14 +96,14 @@ export class ConsecutiveAConstraint extends ConsecutiveBaseConstraint {
 export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_U';
 
-    constructor(count: number) {
-        super(EPars.RNABASE_URACIL, count);
+    constructor(limit: number) {
+        super(EPars.RNABASE_URACIL, limit);
     }
 
     public serialize(): [string, string] {
         return [
             ConsecutiveUConstraint.NAME,
-            this.maxConsecutive.toString()
+            this.consecutiveLimit.toString()
         ];
     }
 }
@@ -105,14 +111,14 @@ export class ConsecutiveUConstraint extends ConsecutiveBaseConstraint {
 export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_G';
 
-    constructor(count: number) {
-        super(EPars.RNABASE_GUANINE, count);
+    constructor(limit: number) {
+        super(EPars.RNABASE_GUANINE, limit);
     }
 
     public serialize(): [string, string] {
         return [
             ConsecutiveGConstraint.NAME,
-            this.maxConsecutive.toString()
+            this.consecutiveLimit.toString()
         ];
     }
 }
@@ -120,14 +126,14 @@ export class ConsecutiveGConstraint extends ConsecutiveBaseConstraint {
 export class ConsecutiveCConstraint extends ConsecutiveBaseConstraint {
     public static readonly NAME = 'CONSECUTIVE_C';
 
-    constructor(count: number) {
-        super(EPars.RNABASE_CYTOSINE, count);
+    constructor(limit: number) {
+        super(EPars.RNABASE_CYTOSINE, limit);
     }
 
     public serialize(): [string, string] {
         return [
             ConsecutiveCConstraint.NAME,
-            this.maxConsecutive.toString()
+            this.consecutiveLimit.toString()
         ];
     }
 }
