@@ -21,7 +21,7 @@ export class RNATreeNode {
     public goX: number = 0;
     public goY: number = 0;
 
-    public rotationDirectionSign: RotationDirection;
+    public rotationDirection: RotationDirection;
 }
 
 // The RNATree has a node for each unpaired base, each base pair, and each junction tracing a sort
@@ -279,8 +279,8 @@ export default class RNALayout {
 
     private getCoordsRecursive(rootnode: RNATreeNode, xarray: number[], yarray: number[]): void {
         if (rootnode.isPair) {
-            let crossX: number = -rootnode.goY * rootnode.rotationDirectionSign;
-            let crossY: number = rootnode.goX * rootnode.rotationDirectionSign;
+            let crossX: number = -rootnode.goY * rootnode.rotationDirection;
+            let crossY: number = rootnode.goX * rootnode.rotationDirection;
 
             xarray[rootnode.indexA] = rootnode.x + (crossX * this._pairSpace) / 2.0;
             xarray[rootnode.indexB] = rootnode.x - (crossX * this._pairSpace) / 2.0;
@@ -309,10 +309,10 @@ export default class RNALayout {
 
     private getRotationDirectionSignRecursive(rootnode: RNATreeNode, rotationDirectionSign: number[]): void {
         if (rootnode.isPair) {
-            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
-            rotationDirectionSign[rootnode.indexB] = rootnode.rotationDirectionSign;
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirection;
+            rotationDirectionSign[rootnode.indexB] = rootnode.rotationDirection;
         } else if (rootnode.indexA >= 0) {
-            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirectionSign;
+            rotationDirectionSign[rootnode.indexA] = rootnode.rotationDirection;
         }
         for (let ii = 0; ii < rootnode.children.length; ii++) {
             this.getRotationDirectionSignRecursive(rootnode.children[ii], rotationDirectionSign);
@@ -345,7 +345,7 @@ export default class RNALayout {
 
         rootnode.goX = goX;
         rootnode.goY = goY;
-        rootnode.rotationDirectionSign = rotationDirection;
+        rootnode.rotationDirection = rotationDirection;
 
         if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
             this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirection);
