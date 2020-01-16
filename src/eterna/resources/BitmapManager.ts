@@ -25,18 +25,25 @@ export default class BitmapManager {
     private static getTextBitmapImpl(
         text: string, fontName: string, fontSize: number, bold: boolean, color: number
     ): Texture {
-        let bitmap: Texture = BitmapManager._textBitmaps.get(text);
+        const styleString = [fontName, fontSize, bold, color].join(',');
+        let textMap = BitmapManager._textBitmaps.get(styleString);
+        if (textMap == null) {
+            textMap = new Map();
+            BitmapManager._textBitmaps.set(styleString, textMap);
+        }
+
+        let bitmap: Texture = textMap.get(text);
         if (bitmap == null) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);
             if (bold) {
                 builder.bold();
             }
             bitmap = TextureUtil.renderToTexture(builder.build());
-            BitmapManager._textBitmaps.set(text, bitmap);
+            textMap.set(text, bitmap);
         }
 
         return bitmap;
     }
 
-    private static readonly _textBitmaps: Map<string, Texture> = new Map();
+    private static readonly _textBitmaps: Map<string, Map<string, Texture>> = new Map();
 }
