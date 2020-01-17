@@ -73,6 +73,19 @@ export default class GameClient {
 
     // / PUZZLES
 
+    // Trying to grab puzzle from a local repository (or a relative local repository)
+    // public getLocalPuzzle(puzzlelocation: string = '../../sample_game.json'): JSONData {
+    // argh can't get the following code to pass, with error message:
+    // /Users/dosoonkim/eterna/EternaJS/src/eterna/net/GameClient.ts
+    // error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+    // error  Calls to require() should use string literals   import/no-dynamic-require
+    // error  Unexpected require()                            global-require
+
+    // let localPuzzle = require(puzzlelocation);
+    // return localPuzzle;
+
+    // }
+
     public getPuzzle(puznid: number, scriptid: number): Promise<JSONData> {
         return this.get(GameClient.GET_URI, {type: 'puzzle', nid: puznid, script: scriptid})
             .then((rsp: Response) => rsp.json());

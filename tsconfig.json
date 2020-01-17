@@ -12,7 +12,9 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    //adding to allow import JSON modules in Typescript
+    "resolveJsonModule": true
   },
   "include": [
     "./src/**/*.ts"

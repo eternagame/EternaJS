@@ -330,16 +330,30 @@ export default class PuzzleManager {
         return newpuz;
     }
 
-    public async getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
+    // //added optional arg localPuzzle, but need a way to access it--perhaps URLparams in EternaURL/createURL?
+    public async getPuzzleByID(puznid: number, scriptid: number = -1, localPuzzle: boolean = false): Promise<Puzzle> {
         for (let puzzle of this._puzzles) {
             if (puzzle.nodeID === puznid) {
                 return Promise.resolve(puzzle);
             }
         }
-
         log.info(`Loading puzzle [nid=${puznid}, scriptid=${scriptid}...]`);
+        // if localPuzzle is true, then call getLocalPuzzle and assign to json & data instead
+
+
         let json = await Eterna.client.getPuzzle(puznid, scriptid);
         let data = json['data'];
+
+        // let json: any;
+        // let data: any;
+        // if (localPuzzle) {
+        //     json = await Eterna.client.getLocalPuzzle();
+        //     data = json['data'];
+        // } else {
+        //     json = await Eterna.client.getPuzzle(puznid, scriptid);
+        //     data = json['data'];
+        // }
+
         if (data['hairpins']) {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }

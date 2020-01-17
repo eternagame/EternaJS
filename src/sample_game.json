@@ -1,0 +1,52 @@
+{
+    "data": {
+        "puzzle": {
+            "title":"[Nucleotide Mixer] Level 1 of 11",
+            "created": "15 Sep 2015",
+            "object": null,
+            "annotations": null,
+            "rna_type": "single",
+            "uid": "130245",
+            "username": "calebgeniesse",
+            "userpicture": "sites/default/files/pictures/picture-130245.jpg",
+            "reward":"100",
+            "secstruct":"...............",
+            "solved-by-bot":null,
+            "num-cleared":"14226",
+            "num-submissions":"3",
+            "id":"6502927",
+            "body":"Basic folder - demoing  Made by Player: bekeep0An original progression puzzle.",
+            "locks":"ooooooooooooooo",
+            "beginseq":"AAAAAAAAAAAAAAA",
+            "usetails":null,
+            "constraints":"U,5",
+            "scoring":null,
+            "folder":"Basic",
+            "made-by-player":"0",
+            "tutorial-level":"10",
+            "ui-specs":"{\"mission_cleared\": {\"info\": \"<p align='center'>Congratulations!</p><p align='center'>You've unlocked the <b>Undo</b> tool.</p><br><img height='51' width='53' hspace='166' src='/puzzle-progression/images/undo.png'><br><br><br><br><br><br>RNA is made up of four bases. The <font color='#3193D1'>Blue</font> base is <font color='#3193D1'>Uracil</font> (<font color='#3193D1'>U</font>). The <font color='#FFE500'>Yellow</font> base is <font color='#FFE500'>Adenine</font> (<font color='#FFE500'>A</font>).<br><br><p><font size='-3'><u><a target='_blank' href='http://www.eternagame.org/web/puzzle/6502927/'>Feedback</a></u></font><p>\"}, \"mission\": {\"text\": \"Make 5 <font color='#3193D1'>BLUE</font> bases.\"}}",
+            "rscript":"#PRE-DisableMissionScreen;#PRE-HideUI Energy, TotalEnergy;#PRE-HideUI zoomin, zoomout, undo, redo;#PRE-HideUI palette, swap, togglebar, action_menu;#PRE-HideUI BaseNumbering;#PRE-NativeMode;#PRE-HideUI objectives;RNAEnableModification false;RNASetPainter U;ShowHighlight 0,0, noedit1;ShowTextboxLocation \"This is a game where you become an RNA scientist. By solving puzzles, you will build a virtual lab.  Then you will help invent new RNA molecules to combat infectious diseases like tuberculosis.  Ready?\", .5-105, .5-90, \"Welcome to Eterna\", \"welcome\", \"Next\", true, true;WaitForTextbox welcome;HideTextbox welcome;HideHighlight noedit1;RNASetBase 1, U;RNASetBase 14, U;RNASetBase 3, C;RNASetBase 13, G;RNASetBase 4, G;RNASetBase 12, C;RNASetBase 5, U;RNASetBase 11, G;RNASetBase 10, U;ShowTextboxLocation \"This is RNA.\",.5-52,.5-245,\"\",\"rna\",\"\", true, false;ShowHighlight 1, 15, entire;WaitForTime 3000;HideTextbox rna;HideHighlight entire;ShowTextboxLocation \"Base\", .5-170, .5-170, \"\", \"base\", \"\", true, false;ShowArrowLocation .5-45, .5-142, \"base_arrow\", 180, 25, 20, false, \"\", \"DAE8F6\", \"DAE8F6\";ShowHighlight 1, 1, one;ShowTextboxLocation \"Bond\", .5-28, .5-280, \"\", \"bond\", \"\", true, false;ShowArrowLocation .5-0, .5-160, \"bond_arrow\", 270, 20, 20, false, \"\", \"DAE8F6\", \"DAE8F6\";WaitForTime 3000;HideTextbox base;HideArrow base_arrow;HideTextbox bond;HideArrow bond_arrow;HideHighlight one;RNASetBase 1, A;RNASetBase 14, A;RNASetBase 3, A;RNASetBase 13, A;RNASetBase 4, A;RNASetBase 12, A;RNASetBase 5, A;RNASetBase 11, A;RNASetBase 10, A;ShowUI objectives;ShowHighlight 0,0, noedit;WaitForTime 500;ShowUIHighlight objectives, obj, \"DAE8F6\";ShowTextboxLocation \"Make 5 or more <blue>BLUE</blue> bases\", 0+10, 0+122, \"\", \"blue\", \"Next\", true, false;WaitForTextbox blue;HideTextbox blue;HideHighlight noedit;HideHighlight obj;ShowHighlight 1, 1, one2;ShowTextboxLocation \"Click to mutate\", .5-200, .5-200, \"\", \"mut\", \"\", true, false;RNAEnableModification true;WaitForMutation 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15;HideTextbox mut;WaitForTime 1000;HideHighlight one2;",
+            "type":"Progression",
+            "last-round":null,
+            "next-puzzle":"6502942",
+            "objective":null,
+            "check_hairpin":null,
+            "cloud_round":null,
+            "hint":null,
+            "coauthor":null
+        },
+        "nid":"6502927",
+        "comments":[
+            {"cid":"97261",
+            "name":"merksan",
+            "uid":"261236",
+            "comment":"https://www.merksanmakinaturquie.com/",
+            "created":"21 Jul 2019","picture":""
+            },
+            {"cid":"82515","name":"Witch Hunter","uid":"248787","comment":"Does anyone else have the bug where it won't show the game, only a blank screen?","created":"15 Nov 2017","picture":"sites/default/files/pictures/picture-248787.jpg"
+            },
+            {"cid":"73659","name":"calebgeniesse","uid":"130245","comment":"Testing <a href='/web/player/130245/' target='_blank' class='interactive-mention'>@calebgeniesse</a>!","created":"28 Jul 2016","picture":"sites/default/files/pictures/picture-130245.jpg"
+            }]
+    },
+    "memcache":true
+}
