@@ -3,6 +3,8 @@ import Folder from "../Folder";
 import NuPACK from "../NuPACK";
 import Vienna from "../Vienna";
 import Vienna2 from "../Vienna2";
+import LinearFoldC from "../LinearFoldC";
+import LinearFoldV from "../LinearFoldV";
 import "./jest-matcher-deep-close-to";
 
 const SNOWFLAKE_SEQ = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
@@ -23,7 +25,7 @@ function CreateFolder(type: any): Promise<Folder> {
     return type.create();
 }
 
-for (let folderType of [Vienna, Vienna2, NuPACK]) {
+for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
     test(`${folderType.NAME}:snowflake`, () => {
         // expect.assertions: the async code should result in X assertions being called
         // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
@@ -58,13 +60,17 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
         const TOTAL_FE: Map<string, number> = new Map([
             [Vienna.NAME, -1080],
             [Vienna2.NAME, -1019.999],
-            [NuPACK.NAME, -1111]
+            [NuPACK.NAME, -1111],
+            [LinearFoldC.NAME, -1019.999],
+            [LinearFoldV.NAME, -1019.999],
         ]);
 
         const NNFE: Map<string, number[]> = new Map([
             [Vienna.NAME, [-1,-360,5,-330,6,-330,7,-330,8,530,23,-340,24,-140,25,-210,26,430]],
             [Vienna2.NAME, [-1,-300,5,-330,6,-330,7,-330,8,530,23,-340,24,-140,25,-210,26,430]],
             [NuPACK.NAME, [-1,-360,26,360,25,-190,24,-120,23,-340,8,410,7,-290,6,-290,5,-290]],
+            [LinearFoldC.NAME, [8,530,7,-330,6,-330,5,-330,26,430,25,-210,24,-140,23,-340,-1,-300]],
+            [LinearFoldV.NAME, [8,530,7,-330,6,-330,5,-330,26,430,25,-210,24,-140,23,-340,-1,-300]],
         ]);
 
         let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
@@ -85,6 +91,11 @@ for (let folderType of [Vienna, Vienna2, NuPACK]) {
             }))
             .resolves.toBeUndefined(); // (we're returning a promise)
     });
+
+    if ( folderType == LinearFoldC || folderType == LinearFoldV ) {
+        // dot plot not implemented
+        continue;
+    }
 
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
         expect.assertions(1);
