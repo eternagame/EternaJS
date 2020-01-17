@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "Debug in Google Chrome",
             "url": "http://localhost:63343/?puzzle=8747977",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "start"
         },
 
         {
@@ -18,7 +19,8 @@
             "version": "beta",
             "name": "Debug in Microsoft Edge",
             "url": "http://localhost:63343/?puzzle=15821",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "start"
         }
     ]
 }
