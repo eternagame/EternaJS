@@ -4,7 +4,7 @@
 ## diff -X .gitignore -ur ViennaRNA-1.8.5_stock ViennaRNA-1.8.5 > vienna1-eterna.patch
 
 pushd Vienna1
-patch -t -p0 < vienna1-eterna.patch
+patch -t -p0 --forward < vienna1-eterna.patch
 pushd ViennaRNA-1.8.5
 ./configure
 popd
@@ -16,7 +16,7 @@ popd
 ## diff -X .gitignore -ur ViennaRNA-2.1.8_stock ViennaRNA-2.1.8 > vienna2-eterna.patch
 
 pushd Vienna2
-patch -t -p0 < vienna2-eterna.patch
+patch -t -p0 --forward < vienna2-eterna.patch
 pushd ViennaRNA-2.1.8
 ./configure
 popd
@@ -29,7 +29,7 @@ popd
 
 # With your fresh download, unzipped into nupack3.0.4...
 pushd NUPACK
-patch -t -p0 < nupack-eterna.patch
+patch -t -p0 --forward < nupack-eterna.patch
 popd
 
 
@@ -40,5 +40,5 @@ popd
 
 # With your fresh git checkout of LinearFold/LinearFold...
 pushd LinearFold
-patch -t -p0 < linearfold-eterna.patch
+patch -t -p0 --forward < linearfold-eterna.patch
 popd
