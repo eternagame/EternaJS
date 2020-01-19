@@ -333,7 +333,7 @@ export default class PuzzleManager {
     public async getPuzzleByID(puznid: number, scriptid: number = -1): Promise<Puzzle> {
         for (let puzzle of this._puzzles) {
             if (puzzle.nodeID === puznid) {
-                return Promise.resolve(puzzle);
+                return puzzle;
             }
         }
 
