@@ -1,19 +1,6 @@
 import Utility from "../Utility";
 import { Point } from "pixi.js";
 
-
-test(`test_roundTo`, () => {
-    // Basic tests for rounding. There are obviously more exponents to test
-    // and more conditions (e.g., rounding up; correct behavior of 5s) but
-    // this is a start.
-    expect(Utility.roundTo(52.1, 1)).toBe("52.1");
-    expect(Utility.roundTo(52.11, 1)).toBe("52.1");
-    expect(Utility.roundTo(52.11, 2)).toBe("52.11");
-    expect(Utility.roundTo(52.19, 1)).toBe("52.2");
-    expect(Utility.roundTo(52.19, 3)).toBe("52.190");
-});
-
-
 test(`test_stripHtmlTags`, () => {
     // Basic tests for stripping <>. Ensure it can do both or one at a time
     // or doubles.

@@ -2,23 +2,6 @@ import {Point} from 'pixi.js';
 
 export default class Utility {
     /**
-     * Rounds a number to a certain number of digits past the decimal.
-     *
-     * @remarks Currently tested only for pretty trivial cases.
-     *
-     * @param num - The number to be rounded
-     * @param floating - The decimal place to which to round
-     * (i.e., 1 == 'tenths'; 2 == 'hundredths')
-     *
-     * @returns The number, rounded-off as directed
-     */
-    public static roundTo(num: number, floating: number): string {
-        // let div: number = 10 ** floating;
-        // let temp: number = num * div;
-        return num.toFixed(floating); // Number(temp) / div;
-    }
-
-    /**
      * Safely remove HTML tags from an input by replacing <> with escapes.
      *
      * @param str - The string to be escaped
