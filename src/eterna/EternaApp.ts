@@ -143,7 +143,7 @@ export default class EternaApp extends FlashbangApp {
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
-            .then(async () => {
+            .then(() => {
                 switch (this._params.mode) {
                     case InitialAppMode.TEST:
                         this._modeStack.unwindToMode(new TestMode());

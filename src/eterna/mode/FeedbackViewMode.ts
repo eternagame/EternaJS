@@ -392,9 +392,9 @@ export default class FeedbackViewMode extends GameMode {
         if (brentData != null) {
             // / Brent's theophylline data
             titleText += (`${this._solution.title}\n`);
-            titleText += `Cleavage suppression : x ${Utility.roundTo(brentData['score'], 2)}\n`;
-            titleText += `(Cleavage without Theophylline molecule : ${Utility.roundTo(brentData['ribo_without_theo'], 2)}`;
-            titleText += ` / with Theophylline : ${Utility.roundTo(brentData['ribo_with_theo'], 2)})`;
+            titleText += `Cleavage suppression : x ${brentData['score'].toFixed(2)}\n`;
+            titleText += `(Cleavage without Theophylline molecule : ${brentData['ribo_without_theo'].toFixed(2)}`;
+            titleText += ` / with Theophylline : ${brentData['ribo_with_theo'].toFixed(2)})`;
         } else {
             // / Default fallback to usual SHAPE data
             if (Eterna.DEV_MODE) {

@@ -362,8 +362,8 @@ export default class DataCol extends ContainerObject {
                         } else {
                             let brentData: any = exp.brentTheoData;
                             if (brentData != null) {
-                                dataString += `${Utility.roundTo(brentData['score'], 3)}x`;
-                                dataString += ` (${Utility.roundTo(brentData['ribo_without_theo'], 3)} / ${Utility.roundTo(brentData['ribo_with_theo'], 3)})\n`;
+                                dataString += `${brentData['score'].toFixed(3)}x`;
+                                dataString += ` (${brentData['ribo_without_theo'].toFixed(3)} / ${brentData['ribo_with_theo'].toFixed(3)})\n`;
                             } else if (this._rawData[ii] >= 0) {
                                 dataString += `${rawstr} / 100\n`;
                             } else if (this._rawData[ii] < 0) {
