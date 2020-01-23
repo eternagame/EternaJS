@@ -145,6 +145,10 @@ export default class PuzzleManager {
             newpuz.hint = json['hint'];
         }
 
+        if (json['max-votes']) {
+            newpuz.maxVotes = Number(json['max-votes']);
+        }
+
         if (newpuz.nodeID === 877668) {
             newpuz.objective = JSON.parse(PuzzleManager.OBJECTIVE_877668);
         } else if (newpuz.nodeID === 885046) {
