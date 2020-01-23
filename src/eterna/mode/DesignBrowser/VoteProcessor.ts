@@ -3,6 +3,10 @@ import int from 'eterna/util/int';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 
 export default class VoteProcessor {
+    constructor(maxVotes: number) {
+        this._maxVotes = maxVotes;
+    }
+
     public processData(data: any[]): void {
         let solutionIDs: number[] = [];
         let voteCounts: number[] = [];
@@ -45,7 +49,7 @@ export default class VoteProcessor {
             }
         }
 
-        this._votesLeft = VoteProcessor.MAX_VOTES - totalMyVotes;
+        this._votesLeft = this._maxVotes - totalMyVotes;
     }
 
     public get votesLeft(): number {
@@ -60,6 +64,5 @@ export default class VoteProcessor {
     }
 
     private _votesLeft: number = 0;
-
-    private static readonly MAX_VOTES = 8;
+    private readonly _maxVotes: number;
 }

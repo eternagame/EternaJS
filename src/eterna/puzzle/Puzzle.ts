@@ -418,6 +418,14 @@ export default class Puzzle {
         return this._useTails;
     }
 
+    public set maxVotes(max: number) {
+        this._maxVotes = max;
+    }
+
+    public get maxVotes(): number {
+        return this._maxVotes;
+    }
+
     public getSecstruct(index: number = 0): string {
         if (this._useTails) {
             if (this._useShortTails) {
@@ -581,6 +589,7 @@ export default class Puzzle {
     private _hint: string = null;
     private _isSoftConstraint: boolean = false;
     private _boosterDefs: BoostersData = null;
+    private _maxVotes: number = 0;
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];
     private static readonly T_OLIGO: string[] = ['oligo', 'aptamer+oligo'];

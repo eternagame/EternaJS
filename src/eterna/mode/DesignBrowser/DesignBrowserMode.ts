@@ -76,7 +76,7 @@ export default class DesignBrowserMode extends GameMode {
         this._novote = novote;
         this._initialDataFilters = initialFilters;
         this._wholeRowWidth = 0;
-        this._voteProcessor = new VoteProcessor();
+        this._voteProcessor = new VoteProcessor(puzzle.maxVotes);
     }
 
     public get puzzleID(): number { return this._puzzle.nodeID; }
