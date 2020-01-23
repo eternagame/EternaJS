@@ -9,13 +9,7 @@ export default class LinearFoldV extends LinearFoldBase {
      * @returns {Promise<LinearFoldV>}
      */
     public static create(): Promise<LinearFoldV> {
-        // We have to ts-ignore this for it to allow us to fall back to an installed package
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        // eslint-disable-next-line import/no-unresolved
-        return import('./engines/LinearFoldV')
-            // eslint-disable-next-line import/no-unresolved
-            .catch(() => import('eternajs-folding-engines/engines/LinearFoldV'))
+        return import('engines-bin/LinearFoldV')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new LinearFoldV(program));
     }

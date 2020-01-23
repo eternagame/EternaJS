@@ -1,7 +1,7 @@
-declare module 'eternajs-folding-engines/engines/LinearFoldC' {
+declare module 'engines-bin/LinearFoldC' {
     import * as LinearFoldLib from 'eterna/folding/engines/LinearFoldLib';
 }
 
-declare module 'eternajs-folding-engines/engines/LinearFoldV' {
+declare module 'engines-bin/LinearFoldV' {
     import * as LinearFoldLib from 'eterna/folding/engines/LinearFoldLib';
 }

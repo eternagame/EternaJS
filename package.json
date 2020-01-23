@@ -12,38 +12,6 @@
     "test": "jest --verbose",
     "lint": "eslint src --ext .ts"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "moduleDirectories": [
-      "node_modules",
-      "src",
-      ""
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "assets/__mocks__/fileMock.js",
-      "\\.(css|less)$": "assets/__mocks__/styleMock.js"
-    },
-    "rootDir": "src",
-    "transform": {
-      "\\.(ts|tsx)$": "ts-jest"
-    },
-    "testRegex": "/__tests__/.*\\.test\\.(ts|tsx|js)$",
-    "globals": {
-      "ts-jest": {
-        "babelConfig": false,
-        "tsConfig": "./tsconfig.jest.json"
-      }
-    },
-    "setupFiles": [
-      "jest-canvas-mock",
-      "dotenv/config"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/EteRNAgame/EternaJS.git"
@@ -72,7 +40,7 @@
     "coffeescript": "^1.12.7",
     "concurrently": "^4.1.2",
     "css-loader": "^3.4.0",
-    "dotenv-webpack": "^1.7.0",
+    "dotenv": "^8.2.0",
     "eslint": "^6.7.2",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-import-resolver-webpack": "^0.11.1",
