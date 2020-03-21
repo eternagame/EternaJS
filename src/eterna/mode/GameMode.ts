@@ -174,11 +174,33 @@ export default abstract class GameMode extends AppMode {
                 if (this._folder) {
                     let poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = (pairs: number[]) => this._folder.scoreStructures(newField.pose.fullSequence, pairs);
+                    let score = null;
+                    // if (this?._targetConditions["can_pseudoknot"] === 'true' && this._folder.name == "NuPACK") {
+                    if (this._targetConditions != null
+                            && this._targetConditions[0]['can_pseudoknot'] === 'true'
+                            && this._folder.name === 'NuPACK') {
+                        // log.error('setting up delta with pseudoknots');
+                        score = (pairs: number[]) => this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs, true
+                        );
+                    } else {
+                        score = (pairs: number[]) => this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs
+                        );
+                    }
 
                     // This changes between PoseEdit mode and PuzzleEditMode
+                    // log.error('setting up targetPairs');
+                    // if (this._targetPairs) {
+                    //     log.error('this._targetPairs so looking for ', this._targetPairs[poseidx]);
+                    // } else {
+                    //     log.error('this._targetPairs false so looking for ', this.getCurrentTargetPairs(poseidx));
+                    // }
                     let targetPairs: number[] = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
+                    // log.error('setting up nativepairs');
+                    // log.error('this.getCurrentUndoBlock(poseidx).getPairs() is ',
+                    // this.getCurrentUndoBlock(poseidx).getPairs());
                     let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
 
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
@@ -315,6 +337,8 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected _targetPairs: number[][];
+
+    protected _targetConditions: any;
 }
 
 class ContextMenuDialog extends Dialog<void> {

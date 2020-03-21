@@ -100,7 +100,10 @@ export default class Vienna2 extends Folder {
     }
 
     /* override */
-    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(
+        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        temp: number = 37, outNodes: number[] = null
+    ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
         };
@@ -137,7 +140,7 @@ export default class Vienna2 extends Folder {
             let seqA: number[] = seq.slice(0, cut);
             let pairsA: number[] = pairs.slice(0, cut);
             let nodesA: number[] = [];
-            let retA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+            let retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
             let seqB: number[] = seq.slice(cut + 1);
             let pairsB: number[] = pairs.slice(cut + 1);
@@ -145,7 +148,7 @@ export default class Vienna2 extends Folder {
                 if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
             }
             let nodesB: number[] = [];
-            let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+            let retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -176,7 +179,8 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         let key: any = {
             primitive: 'fold',
@@ -292,18 +296,18 @@ export default class Vienna2 extends Folder {
 
         // FIXME: what about desiredPairs? (forced structure)
         let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequence(seqA, null, null, temp);
+        let pairsA: number[] = this.foldSequence(seqA, null, null, false, temp);
         let nodesA: number[] = [];
-        let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+        let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
 
         let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, temp);
+        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
         let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceImpl(seq, desiredPairs);
         let coNodes: number[] = [];
-        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
 
         if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
@@ -369,13 +373,13 @@ export default class Vienna2 extends Folder {
         let seqA: number[] = seq.slice(0, cut);
         let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
         let nodesA: number[] = [];
-        let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+        let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
         if (FoldUtil.bindingSiteFormed(pairsA, siteGroups)) feA += bonus;
 
         let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, temp);
+        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
         let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceWithBindingSiteImpl(
             seq,
@@ -388,7 +392,7 @@ export default class Vienna2 extends Folder {
         );
 
         let coNodes: number[] = [];
-        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
         if (FoldUtil.bindingSiteFormed(coPairs, siteGroups)) coFE += bonus;
 
         if (coFE + malus >= feA + feB) {

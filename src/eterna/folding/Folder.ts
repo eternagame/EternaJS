@@ -13,12 +13,16 @@ export default abstract class Folder {
         return false;
     }
 
-    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(
+        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        temp: number = 37, outNodes: number[] = null
+    ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         return null;
     }

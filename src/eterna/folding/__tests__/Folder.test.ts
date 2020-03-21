@@ -83,6 +83,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
                 let totalFe = folder.scoreStructures(
                     EPars.stringToSequence(ZIPPERS_SEQ),
                     EPars.parenthesisToPairs(ZIPPERS_BEST_PAIRS),
+                    false,
                     ZIPPERS_TEMP,
                     outNNFE);
 
@@ -134,3 +135,122 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
             .resolves.toBeDeepCloseTo(expectedResult, 5);
     });
 }
+
+test(`NuPACK:PK_score_structures`, () => {
+    // The engines output different results
+
+
+    // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
+
+    expect.assertions(9);
+    return expect(CreateFolder(NuPACK)
+        .then((folder) => {
+            let outNNFE: number[] = [];
+            let totalFe = folder.scoreStructures(
+                EPars.stringToSequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                EPars.parenthesisToPairs("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true),
+                true,
+                37,
+                outNNFE);
+
+            expect(totalFe).toBeCloseTo(19997459);
+            // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
+            expect(outNNFE).toEqual([-1,10000000,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,15,9996510]);
+
+            // This could realistically be the target structure because we're in fact fine with the hairpin at 5'
+            let totalFe2 = folder.scoreStructures(
+                EPars.stringToSequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                EPars.parenthesisToPairs("(((....))).......(((((((((...{{{{{{{)))))))))..((((((((.........))).)))))...}}.}}}}}....", true),
+                true,
+                37,
+                outNNFE);
+
+            expect(totalFe2).toBeCloseTo(-2600);
+            // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
+            expect(outNNFE).toEqual([-1,-190,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,17,-3320,2,260,1,-90,0,-210]);
+
+            // This is the target structure, now that we've removed the bad UG pairs.
+            let totalFe3 = folder.scoreStructures(
+                EPars.stringToSequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                EPars.parenthesisToPairs(".................(((((((((...{{{{{{{)))))))))..((((((((.........))).)))))...}}.}}}}}....", true),
+                true,
+                37,
+                outNNFE);
+
+            expect(totalFe3).toBeCloseTo(-2390);
+            // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
+            expect(outNNFE).toEqual([-1,-20,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,17,-3320]);
+
+            // This is the MFE structure, I think.
+            let totalFe4 = folder.scoreStructures(
+                EPars.stringToSequence(  "GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                EPars.parenthesisToPairs("(((....))).......(((((((((...{{{{{{{)))))))))((((((((((.........))).))))))).}}.}}}}}....", true),
+                true,
+                37,
+                outNNFE);
+
+            expect(totalFe4).toBeCloseTo(-2830);
+            // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
+            expect(outNNFE).toEqual([-1,-190,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,46,-210,45,-80,17,-3550,2,260,1,-90,0,-210]);
+        }))
+        .resolves.toBeUndefined(); // (we're returning a promise)
+});
+
+test(`NuPACK:PK_foldSequence`, () => {
+    // The engines output different results
+
+
+    // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
+
+    expect.assertions(2);
+    return expect(CreateFolder(NuPACK)
+        .then((folder) => {
+            let pairs = folder.foldSequence(
+                EPars.stringToSequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                null, null, true, 37);
+
+            console.error(pairs);
+            expect(EPars.pairsToParenthesis(pairs, null, true))
+                .toEqual("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....");
+        }))
+        .resolves.toBeUndefined(); // (we're returning a promise)
+});
+
+test(`NuPACK:PK_fold1L2X`, () => {
+    // The engines output different results
+
+
+    // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
+
+    expect.assertions(2);
+    return expect(CreateFolder(NuPACK)
+        .then((folder) => {
+            let pairs = folder.foldSequence(
+                EPars.stringToSequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
+                null, null, true, 37);
+
+            expect(EPars.pairsToParenthesis(pairs, null, true))
+                .toEqual("..(((((..{{{{)))))......}}}}");
+        }))
+        .resolves.toBeUndefined(); // (we're returning a promise)
+});
+
+test(`NuPACK:PK_score1L2X`, () => {
+    // The engines output different results
+
+
+    // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
+
+    expect.assertions(2);
+    return expect(CreateFolder(NuPACK)
+        .then((folder) => {
+            let outNNFE: number[] = [];
+            let score = folder.scoreStructures(
+                EPars.stringToSequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
+                EPars.parenthesisToPairs("..(((((..{{{{)))))......}}}}", true),
+                true, 37, outNNFE);
+
+            expect(score).toEqual(-940);
+        }))
+        .resolves.toBeUndefined(); // (we're returning a promise)
+});

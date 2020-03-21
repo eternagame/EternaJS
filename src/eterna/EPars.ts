@@ -571,7 +571,7 @@ export default class EPars {
         return null;
     }
 
-    public static parenthesisToPairs(parenthesis: string): number[] {
+    public static parenthesisToPairs(parenthesis: string, pseudoknots: boolean = false): number[] {
         let pairs: number[] = [];
         let pairStack: number[] = [];
 
@@ -589,6 +589,36 @@ export default class EPars {
 
                 pairs[pairStack[pairStack.length - 1]] = jj;
                 pairStack.pop();
+            }
+        }
+
+        // If pseudoknots should be counted, manually repeat for
+        // the char pairs [], {}
+        if (pseudoknots) {
+            for (let jj = 0; jj < parenthesis.length; jj++) {
+                if (parenthesis.charAt(jj) === '[') {
+                    pairStack.push(jj);
+                } else if (parenthesis.charAt(jj) === ']') {
+                    if (pairStack.length === 0) {
+                        throw new Error('Invalid parenthesis notation');
+                    }
+
+                    pairs[pairStack[pairStack.length - 1]] = jj;
+                    pairStack.pop();
+                }
+            }
+
+            for (let jj = 0; jj < parenthesis.length; jj++) {
+                if (parenthesis.charAt(jj) === '{') {
+                    pairStack.push(jj);
+                } else if (parenthesis.charAt(jj) === '}') {
+                    if (pairStack.length === 0) {
+                        throw new Error('Invalid parenthesis notation');
+                    }
+
+                    pairs[pairStack[pairStack.length - 1]] = jj;
+                    pairStack.pop();
+                }
             }
         }
 
@@ -619,7 +649,103 @@ export default class EPars {
         return retPairs;
     }
 
-    public static pairsToParenthesis(pairs: number[], seq: number[] | null = null): string {
+    public static pairsToParenthesis(pairs: number[], seq: number[] | null = null,
+        pseudoknots: boolean = false): string {
+        if (pseudoknots) {
+            // given partner-style array, writes dot-parens notation string. handles pseudoknots!
+            // example of partner-style array: '((.))' -> [4,3,-1,1,0]
+            let bpList: number[] = new Array(pairs.length);
+
+            for (let ii = 0; ii < pairs.length; ii++) {
+                bpList[ii] = -1;
+            }
+
+            for (let ii = 0; ii < pairs.length; ii++) {
+                if (pairs[ii] > ii) {
+                    bpList[ii] = pairs[ii];
+                    bpList[pairs[ii]] = ii;
+                }
+            }
+
+            let bps: number[][] = [];
+            for (let ii = 0; ii < bpList.length; ++ii) {
+                if (bpList[ii] !== -1 && bpList[ii] > ii) {
+                    bps.push([ii, bpList[ii]]);
+                }
+            }
+            // console.warn("pairs is", pairs);
+            // console.warn("bps is", bps);
+
+            let stems: number[][][] = [];
+            // #bps: list of bp lists
+            // # i.e. '((.))' is [[0,4],[1,3]]
+            // # Returns list of (list of bp lists), now sorted into stems
+            // # i.e. [ list of all bps in stem 1, list of all bps in stem 2]
+            // if debug: print(bps)
+            for (let ii = 0; ii < bps.length; ++ii) {
+                let added = false;
+                for (let jj = 0; jj < stems.length; ++jj) {
+                    // is this bp adjacent to any element of an existing stem?
+                    for (let kk = 0; kk < stems[jj].length; ++kk) {
+                        if ((bps[ii][0] - 1 === stems[jj][kk][0] && bps[ii][1] + 1 === stems[jj][kk][1])
+                                || (bps[ii][0] + 1 === stems[jj][kk][0] && bps[ii][1] - 1 === stems[jj][kk][1])
+                                || (bps[ii][0] - 1 === stems[jj][kk][1] && bps[ii][1] + 1 === stems[jj][kk][0])
+                                || (bps[ii][0] + 1 === stems[jj][kk][1] && bps[ii][1] - 1 === stems[jj][kk][0])) {
+                            // add to this stem
+                            stems[jj].push(bps[ii]);
+                            added = true;
+                            break;
+                        }
+                    }
+                    if (added) break;
+                }
+                if (!added) {
+                    stems.push([bps[ii]]);
+                }
+            }
+            // if debug: print('stems', stems)
+
+            let dbn: string[] = new Array(pairs.length).fill('.');
+            let delimsL = [/\(/i, /\{/i, /\[/i];// ,'a','b','c']
+            let delimsR = [/\)/i, /\}/i, /\]/i];// ,'a','b','c']
+            let charsL = ['(', '{', '['];
+            let charsR = [')', '}', ']'];
+            // if debug: print(stems)
+            if (stems.length === 0) {
+                return dbn.join('');
+            } else {
+                for (let ii = 0; ii < stems.length; ++ii) {
+                    let stem = stems[ii];
+
+                    // if debug: print(stem)
+                    let pkCtr = 0;
+                    // console.error('obtaining substring of',
+                    // dbn.join(''), ' from ', stem[0][0]+1, ' to ', stem[0][1]);
+                    let substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
+                    // console.error('substring is', substring);
+                    // if debug: print('ss', ''.join(substring))
+                    // check to see how many delimiter types exist in between where stem is going to go
+                    // ah -- it's actually how many delimiters are only half-present, I think.
+                    while ((substring.search(delimsL[pkCtr]) !== -1 && substring.search(delimsR[pkCtr]) === -1)
+                            || (substring.search(delimsL[pkCtr]) === -1 && substring.search(delimsR[pkCtr]) !== -1)) {
+                        // console.error('found ', chars_L[pk_ctr], ' at ', substring.search(delims_L[pk_ctr]),
+                        // ' and ', chars_R[pk_ctr], ' at ', substring.search(delims_R[pk_ctr]))
+                        pkCtr += 1;
+                    }
+                    for (let jj = 0; jj < stem.length; ++jj) {
+                        let i = stem[jj][0];
+                        let j = stem[jj][1];
+
+                        // if debug: print(pk_ctr)
+                        dbn[i] = charsL[pkCtr];
+                        dbn[j] = charsR[pkCtr];
+                    }
+                    // console.error("after stem ", ii, dbn.join(''));
+                }
+                return dbn.join('');
+            }
+        }
+
         let biPairs: number[] = new Array(pairs.length);
 
         for (let ii = 0; ii < pairs.length; ii++) {

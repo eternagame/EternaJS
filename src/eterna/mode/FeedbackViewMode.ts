@@ -543,6 +543,6 @@ export default class FeedbackViewMode extends GameMode {
     private _sequence: number[];
     private _pairs: number[][] = [];
     private _shapePairs: any[] = [];
-    private _targetConditions: any[];
+    protected _targetConditions: any[];
     private _isExpColor: boolean;
 }

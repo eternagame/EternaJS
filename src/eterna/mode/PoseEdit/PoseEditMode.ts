@@ -534,7 +534,6 @@ export default class PoseEditMode extends GameMode {
         // }
 
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
-            this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
             this._targetConditions.push(targetConditions[ii]);
             this._targetOligos.push(null);
             this._targetOligosOrder.push(null);
@@ -659,6 +658,17 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+
+        // now that we have made the folder check, we can set _targetPairs. Used to do this
+        // above but because NuPACK can handle pseudoknots, we shouldn't
+        for (let ii = 0; ii < targetSecstructs.length; ii++) {
+            if (this._folder.name === 'NuPACK'
+                    && this._targetConditions
+                    && this._targetConditions[0]
+                    && this._targetConditions[0]['can_pseudoknot'] === 'true') {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
+            }
+        }
 
         this._folderButton = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -887,8 +897,16 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('fold', (seq: string, constraint: string = null): string => {
             let seqArr: number[] = EPars.stringToSequence(seq);
-            let folded: number[] = this._folder.foldSequence(seqArr, null, constraint);
-            return EPars.pairsToParenthesis(folded);
+            if (this._targetConditions
+                    && this._targetConditions[0]
+                    && this._targetConditions[0]['can_pseudoknot'] === 'true'
+                    && this._folder.name === 'NuPACK') {
+                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint, true);
+                return EPars.pairsToParenthesis(folded, null, true);
+            } else {
+                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint);
+                return EPars.pairsToParenthesis(folded);
+            }
         });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
@@ -903,7 +921,16 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number => {
             let seqArr: number[] = EPars.stringToSequence(seq);
             let structArr: number[] = EPars.parenthesisToPairs(secstruct);
-            let freeEnergy: number = this._folder.scoreStructures(seqArr, structArr);
+            let freeEnergy = 0;
+            if (this._targetConditions != null
+                    && this._targetConditions[0]
+                    && this._targetConditions[0]['can_pseudoknot'] === 'true'
+                    && this._folder.name === 'NuPACK') {
+                console.error('energy_of_structure callback with pseudoknots');
+                freeEnergy = this._folder.scoreStructures(seqArr, structArr, true);
+            } else {
+                freeEnergy = this._folder.scoreStructures(seqArr, structArr);
+            }
             return 0.01 * freeEnergy;
         });
 
@@ -2644,6 +2671,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetFoldTarget(ii: number): void {
+        log.error('in poseEditByTargetFoldTarget');
         let bestPairs: number[];
         let oligoOrder: number[] = null;
         let oligosPaired = 0;
@@ -2668,7 +2696,19 @@ export default class PoseEditMode extends GameMode {
         if (this._targetConditions[ii]) forceStruct = this._targetConditions[ii]['force_struct'];
 
         if (this._targetConditions[ii] == null || this._targetConditions[ii]['type'] === 'single') {
-            bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+            log.error('single type');
+            log.error('can_pseudoknot? ', this._targetConditions[ii]['can_pseudoknot']);
+
+            if (this._targetConditions[ii] != null
+                    && this._targetConditions[ii]['can_pseudoknot'] === 'true'
+                    && this._folder.name === 'NuPACK') {
+                log.info('this._targetConditions', this._targetConditions);
+                log.error('pseudoknots in foldSequence');
+                bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
+            } else {
+                log.info('this._targetConditions', this._targetConditions);
+                bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+            }
         } else if (this._targetConditions[ii]['type'] === 'aptamer') {
             bonus = this._targetConditions[ii]['bonus'];
             sites = this._targetConditions[ii]['site'];
@@ -2997,7 +3037,7 @@ export default class PoseEditMode extends GameMode {
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
-    private _targetConditions: any[] = [];
+    protected _targetConditions: any[] = [];
     private _targetOligo: number[][] = [];
     private _oligoMode: number[] = [];
     private _oligoName: string[] = [];

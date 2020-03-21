@@ -80,7 +80,10 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(
+        seq: number[], pairs: number[],
+        pseudoknots: boolean = false, temp: number = 37, outNodes: number[] = null
+    ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
         };
@@ -96,9 +99,12 @@ export default class NuPACK extends Folder {
         do {
             let result: FullEvalResult = null;
             try {
+                // log.error('pseudoknots', pseudoknots);
+                log.error('scoreStructures pairs is ', pairs);
+                log.error('scoreStructures dbn is ', EPars.pairsToParenthesis(pairs, null, pseudoknots));
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
-                    EPars.pairsToParenthesis(pairs));
+                    EPars.pairsToParenthesis(pairs, null, pseudoknots));
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -117,7 +123,7 @@ export default class NuPACK extends Folder {
                 let seqA: number[] = seq.slice(0, cut);
                 let pairsA: number[] = pairs.slice(0, cut);
                 let nodesA: number[] = [];
-                let retA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+                let retA: number = this.scoreStructures(seqA, pairsA, pseudoknots, temp, nodesA);
 
                 let seqB: number[] = seq.slice(cut + 1);
                 let pairsB: number[] = pairs.slice(cut + 1);
@@ -127,7 +133,7 @@ export default class NuPACK extends Folder {
                     }
                 }
                 let nodesB: number[] = [];
-                let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+                let retB: number = this.scoreStructures(seqB, pairsB, pseudoknots, temp, nodesB);
 
                 if (nodesA[0] >= 0 || nodesB[0] !== -1) {
                     throw new Error('Something went terribly wrong in scoreStructures()');
@@ -170,7 +176,8 @@ export default class NuPACK extends Folder {
 
     /* override */
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        pseudoknots: boolean = false, temp: number = 37
     ): number[] {
         let key = {
             primitive: 'fold',
@@ -185,7 +192,7 @@ export default class NuPACK extends Folder {
             return pairs.slice();
         }
 
-        pairs = this.foldSequenceImpl(seq, temp);
+        pairs = this.foldSequenceImpl(seq, temp, pseudoknots);
         this.putCache(key, pairs.slice());
         return pairs;
     }
@@ -272,18 +279,18 @@ export default class NuPACK extends Folder {
 
         // FIXME: what about desiredPairs? (forced structure)
         let seqA: number[] = seq.slice(0, cut);
-        let pairsA: number[] = this.foldSequence(seqA, null, null, temp);
+        let pairsA: number[] = this.foldSequence(seqA, null, null, false, temp);
         let nodesA: number[] = [];
-        let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+        let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
 
         let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, temp);
+        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
         let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceImpl(seq);
         let coNodes: number[] = [];
-        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
 
         if (coFE + malus >= feA + feB) {
             let struc = `${EPars.pairsToParenthesis(pairsA)}&${EPars.pairsToParenthesis(pairsB)}`;
@@ -349,22 +356,22 @@ export default class NuPACK extends Folder {
         let seqA: number[] = seq.slice(0, cut);
         let pairsA: number[] = this.foldSequenceWithBindingSite(seqA, null, bindingSite, bonus, 2.5, temp);
         let nodesA: number[] = [];
-        let feA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+        let feA: number = this.scoreStructures(seqA, pairsA, false, temp, nodesA);
         if (FoldUtil.bindingSiteFormed(pairsA, siteGroups)) {
             feA += bonus;
         }
 
         let seqB: number[] = seq.slice(cut + 1);
-        let pairsB: number[] = this.foldSequence(seqB, null, null, temp);
+        let pairsB: number[] = this.foldSequence(seqB, null, null, false, temp);
         let nodesB: number[] = [];
-        let feB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+        let feB: number = this.scoreStructures(seqB, pairsB, false, temp, nodesB);
 
         coPairs = this.cofoldSequenceWithBindingSiteImpl(
             seq, desiredPairs, siteGroups[0][0], siteGroups[0][siteGroups[0].length - 1],
             siteGroups[1][siteGroups[1].length - 1], siteGroups[1][0], bonus, temp
         );
         let coNodes: number[] = [];
-        let coFE: number = this.scoreStructures(seq, coPairs, temp, coNodes);
+        let coFE: number = this.scoreStructures(seq, coPairs, false, temp, coNodes);
         if (FoldUtil.bindingSiteFormed(coPairs, siteGroups)) {
             coFE += bonus;
         }
@@ -424,19 +431,19 @@ export default class NuPACK extends Folder {
                 }
                 let msPairs: number[];
                 if (ii === 0) {
-                    msPairs = this.foldSequence(msSeq, null, null, temp);
+                    msPairs = this.foldSequence(msSeq, null, null, false, temp);
                 } else {
                     msPairs = this.cofoldSeq2(msSeq, null, null, temp);
                 }
                 let msNodes: number[] = [];
-                let msFE: number = this.scoreStructures(msSeq, msPairs, temp, msNodes);
+                let msFE: number = this.scoreStructures(msSeq, msPairs, false, temp, msNodes);
                 for (let jj = 0; jj < ii; jj++) {
                     msFE += oligos[order[jj]].malus;
                 }
                 for (let jj = ii; jj < numOligo; jj++) {
-                    let sPairs: number[] = this.foldSequence(oligos[order[jj]].seq, null, null, temp);
+                    let sPairs: number[] = this.foldSequence(oligos[order[jj]].seq, null, null, false, temp);
                     let sNodes: number[] = [];
-                    let sFE: number = this.scoreStructures(oligos[order[jj]].seq, sPairs, temp, sNodes);
+                    let sFE: number = this.scoreStructures(oligos[order[jj]].seq, sPairs, false, temp, sNodes);
 
                     let struc = `${EPars.pairsToParenthesis(msPairs)}&${EPars.pairsToParenthesis(sPairs)}`;
                     msPairs = EPars.parenthesisToPairs(struc);
@@ -471,7 +478,7 @@ export default class NuPACK extends Folder {
         }
 
         for (let ii = 0; ii < numOligo; ii++) {
-            ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].seq, null, null, temp)));
+            ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].seq, null, null, false, temp)));
         }
 
         let more: boolean;
@@ -484,7 +491,7 @@ export default class NuPACK extends Folder {
                 }
 
                 if (ii === 0) {
-                    ops.push(new PoseOp(null, () => this.foldSequence(msSeq, null, null, temp)));
+                    ops.push(new PoseOp(null, () => this.foldSequence(msSeq, null, null, false, temp)));
                 } else {
                     ops.push(new PoseOp(null, () => this.cofoldSeq2(msSeq, null, null, temp)));
                 }
@@ -497,13 +504,15 @@ export default class NuPACK extends Folder {
         return ops;
     }
 
-    private foldSequenceImpl(seq: number[], temp: number = 37): number[] {
+    private foldSequenceImpl(seq: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
 
         let result: FullFoldResult = null;
         try {
-            result = this._lib.FullFoldTemperature(temp, seqStr);
-            return EPars.parenthesisToPairs(result.structure);
+            // console.error('in foldSequenceImpl ', seqStr, " ", pseudoknots);
+            result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
+            // console.error('in foldSequenceImpl', result.structure, " ", result.mfe);
+            return EPars.parenthesisToPairs(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
             return [];

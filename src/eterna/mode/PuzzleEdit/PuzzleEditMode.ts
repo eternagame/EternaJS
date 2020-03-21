@@ -858,7 +858,8 @@ export default class PuzzleEditMode extends GameMode {
 
             let bestPairs: number[];
             if (!isThereMolecule) {
-                bestPairs = this._folder.foldSequence(seq, null, null, EPars.DEFAULT_TEMPERATURE);
+                // AMW: assuming no PKs
+                bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 let bonus = -486;
                 let site: number[] = [];

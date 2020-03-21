@@ -1,9 +1,11 @@
 import {JSONUtil} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
+import * as log from 'loglevel';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
+
 
 export enum UndoBlockParam {
     GU = 0,
@@ -220,7 +222,15 @@ export default class UndoBlock {
             }
         }
         let nnfe: number[] = [];
-        let totalFE: number = folder.scoreStructures(fullSeq, bestPairs, temp, nnfe);
+        // AMW: temporarily assuming no PK
+        let totalFE = 0;
+        if (this._targetConditions != null
+                && JSON.parse(this._targetConditions)['can_pseudoknot'] === 'true'
+                && folder.name === 'NuPACK') {
+            totalFE = folder.scoreStructures(fullSeq, bestPairs, true, temp, nnfe);
+        } else {
+            totalFE = folder.scoreStructures(fullSeq, bestPairs, false, temp, nnfe);
+        }
         this.setParam(UndoBlockParam.FE, totalFE, temp);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
@@ -234,7 +244,14 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                this.setPairs(folder.foldSequence(this.sequence, null, null, ii), ii);
+                // assume no pk
+                if (folder.name === 'NuPACK' && JSON.parse(this._targetConditions[0])['can_pseudoknot'] === 'true') {
+                    log.error('setting pairs with pseudoknots');
+                    log.error(folder.foldSequence(this.sequence, null, null, true, ii));
+                    this.setPairs(folder.foldSequence(this.sequence, null, null, true, ii), ii);
+                } else {
+                    this.setPairs(folder.foldSequence(this.sequence, null, null, false, ii), ii);
+                }
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {

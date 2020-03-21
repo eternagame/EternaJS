@@ -75,6 +75,15 @@ export default class RNALayout {
         return this._root;
     }
 
+
+    public filterForPseudoknots(pairs: number[]): number[] {
+        if (!pairs) return pairs;
+        let filtered: string = EPars.pairsToParenthesis(pairs, null, true).replace(/\{/g, '.').replace(/\}/g, '.').replace(/\[/g, '.')
+            .replace(/\]/g, '.');
+        // console.error('trying ', filtered);
+        return EPars.parenthesisToPairs(filtered, true);
+    }
+
     /**
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
@@ -93,6 +102,11 @@ export default class RNALayout {
         // / save for later
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
+
+        if (targetPairs) {
+            console.error('in setupTree target ss is ', EPars.pairsToParenthesis(targetPairs, null, true));
+        }
+
         if (targetPairs == null) this._targetPairs = pairs;
 
         // / biPairs is 'symmetrized'. Like pairs,
@@ -131,6 +145,19 @@ export default class RNALayout {
         if (!foundPair) {
             return;
         }
+
+        biPairs = this.filterForPseudoknots(biPairs);
+        // console.log("bipairs now ", biPairs)
+        console.error('structure now ', EPars.pairsToParenthesis(biPairs, null, true));
+        // if (targetPairs) {
+        //     targetPairs = this.filterForPseudoknots( targetPairs );
+        // }
+
+        // the targetPairs that exist for the sake of seeing what matches the goal
+        // need to have PKs removed.
+        this._targetPairs = this.filterForPseudoknots(this._targetPairs);
+        console.error('tgt struct now ', EPars.pairsToParenthesis(this._targetPairs, null, true));
+
 
         this._root = new RNATreeNode();
 
@@ -241,13 +268,23 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        folder.scoreStructures(seq, this._origPairs, EPars.DEFAULT_TEMPERATURE, nnfe);
+        // AMW: temporarily assuming score without PK
+        if ((EPars.pairsToParenthesis(this._targetPairs).includes('{')
+                || EPars.pairsToParenthesis(this._targetPairs).includes('['))
+                && folder.name === 'NuPACK') {
+            folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
+        } else {
+            folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
+        }
         this.scoreTreeRecursive(nnfe, this._root, null);
     }
 
     private addNodesRecursive(biPairs: number[], rootnode: RNATreeNode, startIndex: number, endIndex: number): void {
         if (startIndex > endIndex) {
-            throw new Error('Error occured while drawing RNA');
+            throw new Error(`Error occured while drawing RNA for indices ${startIndex} ${endIndex}`);
+            // let tmp = endIndex;
+            // endIndex = startIndex;
+            // startIndex = tmp;
         }
 
         let newnode: RNATreeNode;

@@ -14,8 +14,8 @@ struct DotPlotResult {
     std::vector<double> plot;
 };
 
-FullFoldResult* FullFoldDefault (const std::string& seqString);
-FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString);
+FullFoldResult* FullFoldDefault (const std::string& seqString, bool const pseudoknotted);
+FullFoldResult* FullFoldTemperature (double temperature_in, const std::string& seqString, bool const pseudoknotted);
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString);
 FullFoldResult* FullFoldWithBindingSite (const std::string& string, int site_i, int site_p, int site_j, int site_q, int site_bonus);
 FullFoldResult* CoFoldSequence (const std::string& seqString);
