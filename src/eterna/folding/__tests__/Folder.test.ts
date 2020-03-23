@@ -212,8 +212,6 @@ test(`NuPACK:PK_score_structures`, () => {
                 outNNFE);
             expect(totalFe5).toBeCloseTo(-2961); // -2960.0000381469727 in EteRNA, but good enough?
 
-            // This is a mutation that appears to be giving a "wrong" score, as though the MFE 
-            // is being found and then a bad score is returned for it.
             let totalFe6 = folder.scoreStructures(
                 //                               **
                 EPars.stringToSequence(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
@@ -221,7 +219,18 @@ test(`NuPACK:PK_score_structures`, () => {
                 true,
                 37,
                 outNNFE);
-            expect(totalFe6).toBeCloseTo(-2990); // notably NOT 19997409.375
+            expect(totalFe6).toBeCloseTo(-2990); // notably NOT 19997409.375 -- caching issue
+
+            // This is a mutation that appears to be giving a "wrong" score, as though the MFE 
+            // is being found and then a bad score is returned for it.
+            let totalFe7 = folder.scoreStructures(
+                //                               **
+                EPars.stringToSequence(  "GUUUUUAGGCGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
+                EPars.parenthesisToPairs("......(((((((.(((({{{{{{...)))))))))))}}}}}}.(((((((.{{{{.{{........)))))))....}}}}}}...", true),
+                true,
+                37,
+                outNNFE);
+            expect(totalFe7).toBeCloseTo(19997409); // notably NOT 19997409.375
 
             // NNFE doesn't change because we don't do anything pseudoknotty about it?                         last two we added?
             // expect(outNNFE).toEqual([-1,-190,54,290,53,-170,52,-180,51,180,50,-180,49,-210,48,-140,47,-200,46,-210,45,-80,17,-3550,2,260,1,-90,0,-210]);

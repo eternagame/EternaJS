@@ -34,7 +34,8 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
+    public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
+        // AMW TODO: actually NOT pk aware yet
         let key: any = {
             primitive: 'dotplot', seq, pairs, temp
         };
@@ -510,9 +511,9 @@ export default class NuPACK extends Folder {
 
         let result: FullFoldResult = null;
         try {
-            // console.error('in foldSequenceImpl ', seqStr, " ", pseudoknots);
+            console.error('in foldSequenceImpl ', seqStr, ' ', pseudoknots);
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
-            // console.error('in foldSequenceImpl', result.structure, " ", result.mfe);
+            console.error('in foldSequenceImpl', result.structure, ' ', result.mfe);
             return EPars.parenthesisToPairs(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldTemperature error', e);

@@ -63,7 +63,7 @@ export default abstract class Folder {
         return false;
     }
 
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
+    public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         return null;
     }
 

@@ -620,6 +620,18 @@ export default class EPars {
                     pairStack.pop();
                 }
             }
+            for (let jj = 0; jj < parenthesis.length; jj++) {
+                if (parenthesis.charAt(jj) === '<') {
+                    pairStack.push(jj);
+                } else if (parenthesis.charAt(jj) === '>') {
+                    if (pairStack.length === 0) {
+                        throw new Error('Invalid parenthesis notation');
+                    }
+
+                    pairs[pairStack[pairStack.length - 1]] = jj;
+                    pairStack.pop();
+                }
+            }
         }
 
         for (let jj = 0; jj < pairs.length; jj++) {
@@ -674,7 +686,7 @@ export default class EPars {
                 }
             }
             // console.warn("pairs is", pairs);
-            // console.warn("bps is", bps);
+            // console.error("bps is", bps);
 
             let stems: number[][][] = [];
             // #bps: list of bp lists
@@ -706,10 +718,10 @@ export default class EPars {
             // if debug: print('stems', stems)
 
             let dbn: string[] = new Array(pairs.length).fill('.');
-            let delimsL = [/\(/i, /\{/i, /\[/i];// ,'a','b','c']
-            let delimsR = [/\)/i, /\}/i, /\]/i];// ,'a','b','c']
-            let charsL = ['(', '{', '['];
-            let charsR = [')', '}', ']'];
+            let delimsL = [/\(/i, /\{/i, /\[/i, /</i];// ,'a','b','c']
+            let delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
+            let charsL = ['(', '{', '[', '<'];
+            let charsR = [')', '}', ']', '>'];
             // if debug: print(stems)
             if (stems.length === 0) {
                 return dbn.join('');

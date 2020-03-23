@@ -756,6 +756,7 @@ export default class PuzzleEditMode extends GameMode {
         }
     }
 
+    // AMW TODO: PK awareness.
     private poseEditByTarget(index: number): void {
         let noChange = true;
         let currentUndoBlocks: UndoBlock[] = [];

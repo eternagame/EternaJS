@@ -202,30 +202,18 @@ export default class UndoBlock {
         this._paramsArray.get(pseudoknots)[temp][index] = val;
     }
 
-    public setBasics(folder: Folder, temp: number = 37): void {
+    public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
         let bestPairs: number[];
         let seq: number[] = this._sequence;
-        if (this._targetConditions != null
-            && JSON.parse(this._targetConditions)['can_pseudoknot'] === 'true'
-            && folder.name === 'NuPACK') {
-            bestPairs = this.getPairs(temp, true);
-            this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, true);
-            this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, true);
-            this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, true);
-            this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, true);
-            this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
-                EPars.sequenceToString(seq), 5
-            ), temp, true);
-        } else {
-            bestPairs = this.getPairs(temp);
-            this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp);
-            this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp);
-            this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp);
-            this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp);
-            this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
-                EPars.sequenceToString(seq), 5
-            ), temp);
-        }
+        bestPairs = this.getPairs(temp, pseudoknots);
+        // log.error('num GU pairs is ',  EPars.numGUPairs(seq, bestPairs));
+        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
+            EPars.sequenceToString(seq), 5
+        ), temp, pseudoknots);
 
         let fullSeq: number[] = seq.slice();
         if (this._targetOligo) {
@@ -242,43 +230,36 @@ export default class UndoBlock {
             }
         }
         let nnfe: number[] = [];
-        let totalFE = 0;
-        if (this._targetConditions != null
-                && JSON.parse(this._targetConditions)['can_pseudoknot'] === 'true'
-                && folder.name === 'NuPACK') {
-            totalFE = folder.scoreStructures(fullSeq, bestPairs, true, temp, nnfe);
-            console.error('UndoBlock energy of ', EPars.pairsToParenthesis(bestPairs));
+        let totalFE = folder.scoreStructures(fullSeq, bestPairs, pseudoknots, temp, nnfe);
+        if (pseudoknots) {
+            console.error('UndoBlock energy of ', EPars.pairsToParenthesis(bestPairs, null, pseudoknots));
             console.error('UndoBlock energy is ', totalFE);
-        } else {
-            totalFE = folder.scoreStructures(fullSeq, bestPairs, false, temp, nnfe);
         }
-        this.setParam(UndoBlockParam.FE, totalFE, temp);
-        this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
+        this.setParam(UndoBlockParam.FE, totalFE, temp, pseudoknots);
+        this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
     }
 
-    // AMW TODO: make PK-aware
-    public updateMeltingPointAndDotPlot(folder: Folder): void {
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37) == null) {
-            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37);
-            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37);
+    public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
+            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray.slice();
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                // assume no pk
-                if (folder.name === 'NuPACK' && JSON.parse(this._targetConditions[0])['can_pseudoknot'] === 'true') {
-                    log.error('setting pairs with pseudoknots');
-                    log.error(folder.foldSequence(this.sequence, null, null, true, ii));
-                    this.setPairs(folder.foldSequence(this.sequence, null, null, true, ii), ii);
+                if (pseudoknots) {
+                    // log.error('setting pairs with pseudoknots');
+                    // log.error(folder.foldSequence(this.sequence, null, null, pseudoknots, ii));
+                    this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
                 } else {
-                    this.setPairs(folder.foldSequence(this.sequence, null, null, false, ii), ii);
+                    this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
                 }
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii);
-                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii);
+                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }
 
@@ -289,12 +270,12 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getParam(UndoBlockParam.PROB_SCORE, ii)) {
-                pairScores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii));
+                pairScores.push(1 - this.getParam(UndoBlockParam.PAIR_SCORE, ii, pseudoknots));
                 maxPairScores.push(1.0);
                 continue;
             }
-            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii);
-            let curPairs: number[] = this.getPairs(ii);
+            let curDat: number[] = this.getParam(UndoBlockParam.DOTPLOT, ii, pseudoknots);
+            let curPairs: number[] = this.getPairs(ii, pseudoknots);
             let probScore = 0;
             let scoreCount = 0;
 
@@ -330,25 +311,25 @@ export default class UndoBlock {
             pairScores.push(1 - pairScore);
             maxPairScores.push(1.0);
 
-            this.setParam(UndoBlockParam.PROB_SCORE, probScore, ii);
-            this.setParam(UndoBlockParam.PAIR_SCORE, pairScore, ii);
+            this.setParam(UndoBlockParam.PROB_SCORE, probScore, ii, pseudoknots);
+            this.setParam(UndoBlockParam.PAIR_SCORE, pairScore, ii, pseudoknots);
         }
 
         this._meltPlotPairScores = pairScores;
         this._meltPlotMaxPairScores = maxPairScores;
 
-        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37);
+        let initScore: number = this.getParam(UndoBlockParam.PROB_SCORE, 37, pseudoknots);
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii);
+            let currentScore: number = this.getParam(UndoBlockParam.PROB_SCORE, ii, pseudoknots);
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
             }
         }
 
-        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37);
+        this.setParam(UndoBlockParam.MELTING_POINT, meltpoint, 37, pseudoknots);
     }
 
     public createDotPlot(): Plot {

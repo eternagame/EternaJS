@@ -103,9 +103,9 @@ export default class RNALayout {
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
 
-        if (targetPairs) {
-            console.error('in setupTree target ss is ', EPars.pairsToParenthesis(targetPairs, null, true));
-        }
+        // if (targetPairs) {
+        //     console.error('in setupTree target ss is ', EPars.pairsToParenthesis(targetPairs, null, true));
+        // }
 
         if (targetPairs == null) this._targetPairs = pairs;
 
@@ -148,7 +148,7 @@ export default class RNALayout {
 
         biPairs = this.filterForPseudoknots(biPairs);
         // console.log("bipairs now ", biPairs)
-        console.error('structure now ', EPars.pairsToParenthesis(biPairs, null, true));
+        // console.error('structure now ', EPars.pairsToParenthesis(biPairs, null, true));
         // if (targetPairs) {
         //     targetPairs = this.filterForPseudoknots( targetPairs );
         // }
@@ -156,7 +156,7 @@ export default class RNALayout {
         // the targetPairs that exist for the sake of seeing what matches the goal
         // need to have PKs removed.
         this._targetPairs = this.filterForPseudoknots(this._targetPairs);
-        console.error('tgt struct now ', EPars.pairsToParenthesis(this._targetPairs, null, true));
+        // console.error('tgt struct now ', EPars.pairsToParenthesis(this._targetPairs, null, true));
 
 
         this._root = new RNATreeNode();
