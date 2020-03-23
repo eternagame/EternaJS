@@ -667,6 +667,7 @@ export default class PoseEditMode extends GameMode {
                     && this._targetConditions[0]
                     && this._targetConditions[0]['can_pseudoknot'] === 'true') {
                 this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
+                this._poseFields[ii].pose.pseudoknotted = true;
             }
         }
 
