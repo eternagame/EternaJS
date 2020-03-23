@@ -85,7 +85,7 @@ export default class NuPACK extends Folder {
         pseudoknots: boolean = false, temp: number = 37, outNodes: number[] = null
     ): number {
         let key: any = {
-            primitive: 'score', seq, pairs, temp
+            primitive: 'score', seq, pairs, pseudoknots, temp
         };
         let cache: FullEvalCache = this.getCache(key);
         if (cache != null) {
@@ -184,6 +184,7 @@ export default class NuPACK extends Folder {
             seq,
             secondBestPairs,
             desiredPairs,
+            pseudoknots,
             temp
         };
         let pairs: number[] = this.getCache(key);

@@ -871,6 +871,7 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
+            console.error('obtaining UndoBlock FE');
             return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
         });
 

@@ -28,6 +28,10 @@ export enum UndoBlockParam {
 export default class UndoBlock {
     constructor(seq: number[]) {
         this._sequence = seq.slice();
+        this._pairsArray.set(false, []);
+        this._pairsArray.set(true, []);
+        this._paramsArray.set(false, []);
+        this._paramsArray.set(true, []);
     }
 
     public toJSON(): any {
@@ -175,38 +179,54 @@ export default class UndoBlock {
         this._stable = stable;
     }
 
-    public getPairs(temp: number = 37): number[] {
-        return this._pairsArray[temp];
+    public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
+        return this._pairsArray.get(pseudoknots)[temp];
     }
 
-    public getParam(index: UndoBlockParam, temp: number = 37): any {
-        if (this._paramsArray[temp] != null) {
-            return this._paramsArray[temp][index];
+    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
+        if (this._paramsArray.get(pseudoknots)[temp] != null) {
+            return this._paramsArray.get(pseudoknots)[temp][index];
         } else {
             return undefined;
         }
     }
 
-    public setPairs(pairs: number[], temp: number = 37): void {
-        this._pairsArray[temp] = pairs.slice();
+    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
+        this._pairsArray.get(pseudoknots)[temp] = pairs.slice();
     }
 
-    public setParam(index: UndoBlockParam, val: any, temp: number = 37): void {
-        if (this._paramsArray[temp] == null) {
-            this._paramsArray[temp] = [];
+    public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
+        if (this._paramsArray.get(pseudoknots)[temp] == null) {
+            this._paramsArray.get(pseudoknots)[temp] = [];
         }
-        this._paramsArray[temp][index] = val;
+        this._paramsArray.get(pseudoknots)[temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37): void {
-        let bestPairs: number[] = this.getPairs(temp);
+        let bestPairs: number[];
         let seq: number[] = this._sequence;
+        if (this._targetConditions != null
+            && JSON.parse(this._targetConditions)['can_pseudoknot'] === 'true'
+            && folder.name === 'NuPACK') {
+            bestPairs = this.getPairs(temp, true);
+            this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, true);
+            this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, true);
+            this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, true);
+            this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, true);
+            this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
+                EPars.sequenceToString(seq), 5
+            ), temp, true);
+        } else {
+            bestPairs = this.getPairs(temp);
+            this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp);
+            this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp);
+            this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp);
+            this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp);
+            this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
+                EPars.sequenceToString(seq), 5
+            ), temp);
+        }
 
-        this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp);
-        this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp);
-        this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp);
-        this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp);
-        this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(EPars.sequenceToString(seq), 5), temp);
         let fullSeq: number[] = seq.slice();
         if (this._targetOligo) {
             if (this.oligoMode === Pose2D.OLIGO_MODE_DIMER) fullSeq.push(EPars.RNABASE_CUT);
@@ -222,12 +242,13 @@ export default class UndoBlock {
             }
         }
         let nnfe: number[] = [];
-        // AMW: temporarily assuming no PK
         let totalFE = 0;
         if (this._targetConditions != null
                 && JSON.parse(this._targetConditions)['can_pseudoknot'] === 'true'
                 && folder.name === 'NuPACK') {
             totalFE = folder.scoreStructures(fullSeq, bestPairs, true, temp, nnfe);
+            console.error('UndoBlock energy of ', EPars.pairsToParenthesis(bestPairs));
+            console.error('UndoBlock energy is ', totalFE);
         } else {
             totalFE = folder.scoreStructures(fullSeq, bestPairs, false, temp, nnfe);
         }
@@ -235,6 +256,7 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp);
     }
 
+    // AMW TODO: make PK-aware
     public updateMeltingPointAndDotPlot(folder: Folder): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37) == null) {
             let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37);
@@ -369,8 +391,8 @@ export default class UndoBlock {
     }
 
     private _sequence: number[];
-    private _pairsArray: number[][] = [];
-    private _paramsArray: any[][] = [];
+    private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
+    private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
     private _stable: boolean = false;
     private _targetOligo: number[] = null;
     private _targetOligos: Oligo[] = null;

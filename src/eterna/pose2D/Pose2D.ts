@@ -3016,6 +3016,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
+            // We should figure out a way to kill this if pseudoknotted?
             for (let scoreNode of this._scoreNodes) {
                 totalScore += scoreNode.score;
             }

@@ -4,7 +4,7 @@ export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
 
-    public getCache(key: any): any {
+    public getCache(key: Record< string, any >): any {
         let keyStr = JSON.stringify(key);
         return this._cache.get(keyStr);
     }

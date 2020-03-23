@@ -20,6 +20,9 @@ import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
 
+
+import NuPACK from 'eterna/folding/NuPACK';
+
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
@@ -179,7 +182,6 @@ export default abstract class GameMode extends AppMode {
                     if (this._targetConditions != null
                             && this._targetConditions[0]['can_pseudoknot'] === 'true'
                             && this._folder.name === 'NuPACK') {
-                        // log.error('setting up delta with pseudoknots');
                         score = (pairs: number[]) => this._folder.scoreStructures(
                             newField.pose.fullSequence, pairs, true
                         );
@@ -190,11 +192,12 @@ export default abstract class GameMode extends AppMode {
                     }
 
                     // This changes between PoseEdit mode and PuzzleEditMode
-                    // log.error('setting up targetPairs');
                     // if (this._targetPairs) {
-                    //     log.error('this._targetPairs so looking for ', this._targetPairs[poseidx]);
+                    //     log.error('this._targetPairs so looking for ',
+                    //         EPars.pairsToParenthesis(this._targetPairs[poseidx], null, true));
                     // } else {
-                    //     log.error('this._targetPairs false so looking for ', this.getCurrentTargetPairs(poseidx));
+                    //     log.error('this._targetPairs false so looking for ',
+                    //         EPars.pairsToParenthesis(this.getCurrentTargetPairs(poseidx), null, true));
                     // }
                     let targetPairs: number[] = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
@@ -202,7 +205,16 @@ export default abstract class GameMode extends AppMode {
                     // log.error('this.getCurrentUndoBlock(poseidx).getPairs() is ',
                     // this.getCurrentUndoBlock(poseidx).getPairs());
                     let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
-
+                    log.error('satpairs                         ',
+                        EPars.pairsToParenthesis(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence),
+                            null, true));
+                    log.error('satseq                           ',
+                        EPars.sequenceToString(newField.pose.fullSequence));
+                    log.error('score sat part of target: ',
+                        score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence)));
+                    log.error('nativePairs                      ', EPars.pairsToParenthesis(nativePairs, null, true));
+                    log.error('score native:             ',
+                        score(nativePairs));// EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence)));
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }
