@@ -20,7 +20,7 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, bool const pseudo
     convertSeq(string, seqNum, tmpLength);
 
     if ( pseudoknotted ) {
-        mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 6, RNA,
+        mfeFullWithSym(seqNum, tmpLength, &mfeStructs, 5, RNA,
                         1 /*DANGLETYPE*/, 37, TRUE, 1, SODIUM_CONC, MAGNESIUM_CONC,
                         USE_LONG_HELIX_FOR_SALT_CORRECTION);
     } else {
