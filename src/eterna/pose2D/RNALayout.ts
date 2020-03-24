@@ -75,15 +75,6 @@ export default class RNALayout {
         return this._root;
     }
 
-
-    public filterForPseudoknots(pairs: number[]): number[] {
-        if (!pairs) return pairs;
-        let filtered: string = EPars.pairsToParenthesis(pairs, null, true).replace(/\{/g, '.').replace(/\}/g, '.').replace(/\[/g, '.')
-            .replace(/\]/g, '.');
-        // console.error('trying ', filtered);
-        return EPars.parenthesisToPairs(filtered, true);
-    }
-
     /**
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
@@ -146,18 +137,12 @@ export default class RNALayout {
             return;
         }
 
-        biPairs = this.filterForPseudoknots(biPairs);
-        // console.log("bipairs now ", biPairs)
-        // console.error('structure now ', EPars.pairsToParenthesis(biPairs, null, true));
-        // if (targetPairs) {
-        //     targetPairs = this.filterForPseudoknots( targetPairs );
-        // }
-
         // the targetPairs that exist for the sake of seeing what matches the goal
         // need to have PKs removed.
-        this._targetPairs = this.filterForPseudoknots(this._targetPairs);
-        // console.error('tgt struct now ', EPars.pairsToParenthesis(this._targetPairs, null, true));
-
+        // AMW TODO: Rhiju, we should eventually be able to remove this condition,
+        // once you work out how layouts can handle pseudoknots.
+        biPairs = EPars.filterForPseudoknots(biPairs);
+        this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
 
         this._root = new RNATreeNode();
 
