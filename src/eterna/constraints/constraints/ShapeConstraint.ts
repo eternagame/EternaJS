@@ -125,7 +125,11 @@ export default class ShapeConstraint extends BaseShapeConstraint {
             targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
         }
 
-        let pseudoknots: boolean = (targetConditions[this.stateIndex]['type'] === 'pseudoknot');
+        let pseudoknots = false;
+        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
+                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
 
         return {
@@ -141,8 +145,11 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
-        let pseudoknots: boolean = undoBlock.targetConditions
-            && undoBlock.targetConditions['type'] === 'pseudoknot';
+        let pseudoknots = false;
+        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
+                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let customLayout: Array<[number, number]> = null;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
@@ -238,8 +245,11 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
-        let pseudoknots: boolean = undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
-            && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot';
+        let pseudoknots = false;
+        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
+                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let customLayout: Array<[number, number]> = null;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];

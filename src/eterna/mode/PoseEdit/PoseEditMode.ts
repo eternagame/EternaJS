@@ -666,6 +666,8 @@ export default class PoseEditMode extends GameMode {
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
                 this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
                 this._poseFields[ii].pose.pseudoknotted = true;
+            } else {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
             }
         }
 
@@ -2698,8 +2700,11 @@ export default class PoseEditMode extends GameMode {
 
         let seq: number[] = this._poses[ii].sequence;
 
-        let pseudoknots: boolean = this._targetConditions && this._targetConditions[ii]
-            && this._targetConditions[ii]['type'] === 'pseudoknot';
+        let pseudoknots = false;
+        if (this._targetConditions && this._targetConditions[ii]
+                && this._targetConditions[ii]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
 
         if (this._targetConditions[ii]) forceStruct = this._targetConditions[ii]['force_struct'];
 
@@ -2814,8 +2819,11 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
         this.popUILock(PoseEditMode.FOLDING_LOCK);
 
-        let pseudoknots: boolean = this._targetConditions && this._targetConditions[targetIndex]
-            && this._targetConditions[targetIndex]['type'] === 'pseudoknot';
+        let pseudoknots = false;
+        if (this._targetConditions && this._targetConditions[targetIndex]
+                && this._targetConditions[targetIndex]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
 
         // this._fold_total_time = new Date().getTime() - this._fold_start_time;
         // if (!this._tools_container.contains(this._freeze_button) && this._fold_total_time >= 1000.0) {
