@@ -7,7 +7,6 @@
 #include "src/thermo/utils/DNAExternals.h"
 #include <vector>
 #include <utility>
-#include <stdio.h>
 
 FullFoldResult* FullFoldDefault (const std::string& seqString, bool const pseudoknotted = false) {
     auto autoSeqString = MakeCString(seqString);
@@ -77,25 +76,13 @@ FullFoldResult* FullFoldTemperature(double temperature_in, const std::string& se
     if ( pseudoknotted ) {
         // given partner-style array, writes dot-parens notation string. handles pseudoknots!
         // example of partner-style array: '((.))' -> [4,3,-1,1,0]
-        //mfeStructs.validStructs[0].theStruct
 
         std::vector< std::pair< int, int > > bps;
-        // for ( int ii = 0; ii < mfeStructs.seqlength; ++ii ) {
-        //     printf("%d ", ii);
-        // }
-        // printf("\n");
-        // for ( int ii = 0; ii < mfeStructs.seqlength; ++ii ) {
-        //     printf("%d ", mfeStructs.validStructs[0].theStruct[ii]);
-        // }
-        // printf("\n");
-        //float** bps = (float*)malloc( 2*mfeStructs.seqlength*sizeof(float));
         for (int ii = 0; ii < mfeStructs.seqlength; ++ii) {
             if (mfeStructs.validStructs[0].theStruct[ii] != -1 && mfeStructs.validStructs[0].theStruct[ii] > ii) {
                 bps.push_back( std::make_pair( ii, mfeStructs.validStructs[0].theStruct[ii]) );
             }
         }
-        // console.warn("pairs is", pairs);
-        // console.warn("bps is", bps);
         
         std::vector< std::vector< std::pair< int, int > > > stems;
         // #bps: list of bp lists
@@ -124,59 +111,36 @@ FullFoldResult* FullFoldTemperature(double temperature_in, const std::string& se
                 stems.push_back(std::vector< std::pair< int, int > >( 1, bps[ii] ) );
             }
         }
-        // for (int ii = 0; ii < stems.size(); ++ii ) {
-        //     printf("Stem %d:\n", ii);
-        //     for ( auto const & bp : stems[ii] ) {
-        //         printf("%d -- %d\n", bp.first, bp.second);
-        //     }
-        //     printf("\n\n");
-        // }
-        //if debug: print('stems', stems)
-
-        //std::vector< std::string > dbn;
+       
         std::string dbn( mfeStructs.seqlength, '.' );
         std::vector< char > chars_L{ '(', '{', '[', '<' };
         std::vector< char > chars_R{ ')', '}', ']', '>' };
-        //if debug: print(stems)
-        if (stems.empty()) {
-            //return dbn;
-        } else {
+        if ( !stems.empty() ) {
             for (int ii = 0; ii < stems.size(); ++ii ) {
                 auto const & stem = stems[ii];
                 
-                //if debug: print(stem)
                 size_t pk_ctr = 0;
-                // console.error('obtaining substring of', dbn.join(''), ' from ', stem[0][0]+1, ' to ', stem[0][1]);
                 std::string substring = dbn.substr(stem[0].first+1,stem[0].second);
-                // printf("Substring under study is %s\n", substring.c_str());
-                //if debug: print('ss', ''.join(substring))
                 //check to see how many delimiter types exist in between where stem is going to go
                 // ah -- it's actually how many delimiters are only half-present, I think.
                 while ( ( substring.find(chars_L[pk_ctr]) != std::string::npos && substring.find(chars_R[pk_ctr]) == std::string::npos )
                         || ( substring.find(chars_L[pk_ctr]) == std::string::npos && substring.find(chars_R[pk_ctr]) != std::string::npos ) ) {
-                    // console.error('found ', chars_L[pk_ctr], ' at ', substring.search(delims_L[pk_ctr]), ' and ', chars_R[pk_ctr], ' at ', substring.search(delims_R[pk_ctr]))
                     pk_ctr += 1;
                 }
-                // printf("pk_ctr is %d\n", pk_ctr);
                 for (int jj = 0; jj < stem.size(); ++jj ) {
                     int i = stem[jj].first;
                     int j = stem[jj].second;
                     
-                    //if debug: print(pk_ctr)
                     dbn[i] = chars_L[pk_ctr];
                     dbn[j] = chars_R[pk_ctr];
                 }
-                // printf("After stem %d, %s\n", ii, dbn.c_str());
-                // console.error("after stem ", ii, dbn.join(''));
             }
         }
         for (int j = 0; j < mfeStructs.seqlength; j++) {
-            // AMW TODO: pairs-to-dbn here
             result->structure.push_back(dbn[j]);
         }
     } else {
         for (int j = 0; j < mfeStructs.seqlength; j++) {
-            // AMW TODO: pairs-to-dbn here
             if (mfeStructs.validStructs[0].theStruct[j] > j) {
                 result->structure.push_back('(');
             } else if( mfeStructs.validStructs[0].theStruct[j] == -1) {
