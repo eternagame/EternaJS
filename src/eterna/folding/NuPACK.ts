@@ -34,6 +34,11 @@ export default class NuPACK extends Folder {
     }
 
     /* override */
+    public get canPseudoknot(): boolean {
+        return true;
+    }
+
+    /* override */
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         // AMW TODO: actually NOT pk aware yet
         let key: any = {
