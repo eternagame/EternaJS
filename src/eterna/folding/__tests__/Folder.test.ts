@@ -251,7 +251,6 @@ test(`NuPACK:PK_foldSequence`, () => {
                 EPars.stringToSequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 null, null, true, 37);
 
-            console.error(pairs);
             expect(EPars.pairsToParenthesis(pairs, null, true))
                 .toEqual("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....");
         }))

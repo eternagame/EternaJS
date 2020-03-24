@@ -105,9 +105,6 @@ export default class NuPACK extends Folder {
         do {
             let result: FullEvalResult = null;
             try {
-                // log.error('pseudoknots', pseudoknots);
-                log.error('scoreStructures pairs is ', pairs);
-                log.error('scoreStructures dbn is ', EPars.pairsToParenthesis(pairs, null, pseudoknots));
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs, null, pseudoknots));
@@ -516,9 +513,7 @@ export default class NuPACK extends Folder {
 
         let result: FullFoldResult = null;
         try {
-            console.error('in foldSequenceImpl ', seqStr, ' ', pseudoknots);
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
-            console.error('in foldSequenceImpl', result.structure, ' ', result.mfe);
             return EPars.parenthesisToPairs(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldTemperature error', e);

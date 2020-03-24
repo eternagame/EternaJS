@@ -685,8 +685,6 @@ export default class EPars {
                     bps.push([ii, bpList[ii]]);
                 }
             }
-            // console.warn("pairs is", pairs);
-            // console.error("bps is", bps);
 
             let stems: number[][][] = [];
             // #bps: list of bp lists
@@ -722,37 +720,27 @@ export default class EPars {
             let delimsR = [/\)/i, /\}/i, /\]/i, />/i];// ,'a','b','c']
             let charsL = ['(', '{', '[', '<'];
             let charsR = [')', '}', ']', '>'];
-            // if debug: print(stems)
             if (stems.length === 0) {
                 return dbn.join('');
             } else {
                 for (let ii = 0; ii < stems.length; ++ii) {
                     let stem = stems[ii];
 
-                    // if debug: print(stem)
                     let pkCtr = 0;
-                    // console.error('obtaining substring of',
-                    // dbn.join(''), ' from ', stem[0][0]+1, ' to ', stem[0][1]);
                     let substring = dbn.join('').substring(stem[0][0] + 1, stem[0][1]);
-                    // console.error('substring is', substring);
-                    // if debug: print('ss', ''.join(substring))
                     // check to see how many delimiter types exist in between where stem is going to go
                     // ah -- it's actually how many delimiters are only half-present, I think.
                     while ((substring.search(delimsL[pkCtr]) !== -1 && substring.search(delimsR[pkCtr]) === -1)
                             || (substring.search(delimsL[pkCtr]) === -1 && substring.search(delimsR[pkCtr]) !== -1)) {
-                        // console.error('found ', chars_L[pk_ctr], ' at ', substring.search(delims_L[pk_ctr]),
-                        // ' and ', chars_R[pk_ctr], ' at ', substring.search(delims_R[pk_ctr]))
                         pkCtr += 1;
                     }
                     for (let jj = 0; jj < stem.length; ++jj) {
                         let i = stem[jj][0];
                         let j = stem[jj][1];
 
-                        // if debug: print(pk_ctr)
                         dbn[i] = charsL[pkCtr];
                         dbn[j] = charsR[pkCtr];
                     }
-                    // console.error("after stem ", ii, dbn.join(''));
                 }
                 return dbn.join('');
             }

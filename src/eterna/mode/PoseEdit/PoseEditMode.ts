@@ -870,7 +870,6 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
-            console.error('obtaining UndoBlock FE');
             return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
         });
 
@@ -2678,7 +2677,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetFoldTarget(ii: number): void {
-        log.error('in poseEditByTargetFoldTarget');
         let bestPairs: number[];
         let oligoOrder: number[] = null;
         let oligosPaired = 0;
@@ -2808,7 +2806,6 @@ export default class PoseEditMode extends GameMode {
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
-        log.error('About to setBasics');
         undoBlock.setBasics(this._folder, 37, pseudoknots);
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }

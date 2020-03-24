@@ -206,7 +206,6 @@ export default class UndoBlock {
         let bestPairs: number[];
         let seq: number[] = this._sequence;
         bestPairs = this.getPairs(temp, pseudoknots);
-        // log.error('num GU pairs is ',  EPars.numGUPairs(seq, bestPairs));
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
@@ -231,10 +230,7 @@ export default class UndoBlock {
         }
         let nnfe: number[] = [];
         let totalFE = folder.scoreStructures(fullSeq, bestPairs, pseudoknots, temp, nnfe);
-        if (pseudoknots) {
-            console.error('UndoBlock energy of ', EPars.pairsToParenthesis(bestPairs, null, pseudoknots));
-            console.error('UndoBlock energy is ', totalFE);
-        }
+
         this.setParam(UndoBlockParam.FE, totalFE, temp, pseudoknots);
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
     }
@@ -249,8 +245,6 @@ export default class UndoBlock {
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
                 if (pseudoknots) {
-                    // log.error('setting pairs with pseudoknots');
-                    // log.error(folder.foldSequence(this.sequence, null, null, pseudoknots, ii));
                     this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
                 } else {
                     this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);

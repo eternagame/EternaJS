@@ -94,10 +94,6 @@ export default class RNALayout {
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
 
-        // if (targetPairs) {
-        //     console.error('in setupTree target ss is ', EPars.pairsToParenthesis(targetPairs, null, true));
-        // }
-
         if (targetPairs == null) this._targetPairs = pairs;
 
         // / biPairs is 'symmetrized'. Like pairs,
