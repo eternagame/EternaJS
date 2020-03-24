@@ -662,10 +662,8 @@ export default class PoseEditMode extends GameMode {
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
-            if (this._folder.name === 'NuPACK'
-                    && this._targetConditions
-                    && this._targetConditions[0]
-                    && this._targetConditions[0]['can_pseudoknot'] === 'true') {
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
                 this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
                 this._poseFields[ii].pose.pseudoknotted = true;
             }
@@ -899,10 +897,8 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('fold', (seq: string, constraint: string = null): string => {
             let seqArr: number[] = EPars.stringToSequence(seq);
-            if (this._targetConditions
-                    && this._targetConditions[0]
-                    && this._targetConditions[0]['can_pseudoknot'] === 'true'
-                    && this._folder.name === 'NuPACK') {
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
                 let folded: number[] = this._folder.foldSequence(seqArr, null, constraint, true);
                 return EPars.pairsToParenthesis(folded, null, true);
             } else {
@@ -924,11 +920,8 @@ export default class PoseEditMode extends GameMode {
             let seqArr: number[] = EPars.stringToSequence(seq);
             let structArr: number[] = EPars.parenthesisToPairs(secstruct);
             let freeEnergy = 0;
-            if (this._targetConditions != null
-                    && this._targetConditions[0]
-                    && this._targetConditions[0]['can_pseudoknot'] === 'true'
-                    && this._folder.name === 'NuPACK') {
-                console.error('energy_of_structure callback with pseudoknots');
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
                 freeEnergy = this._folder.scoreStructures(seqArr, structArr, true);
             } else {
                 freeEnergy = this._folder.scoreStructures(seqArr, structArr);
@@ -1615,10 +1608,8 @@ export default class PoseEditMode extends GameMode {
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder.canDotPlot) {
-            if (this._targetConditions
-                && this._targetConditions[0]
-                && this._targetConditions[0]['can_pseudoknot'] === 'true'
-                && this._folder.name === 'NuPACK') {
+            if (this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(this._folder, true);
             } else {
                 datablock.updateMeltingPointAndDotPlot(this._folder);
@@ -2247,10 +2238,8 @@ export default class PoseEditMode extends GameMode {
 
         let undoBlock: UndoBlock = this.getCurrentUndoBlock();
         let nnfe: number[];
-        let pseudoknots: boolean = this._targetConditions != null
-            && this._targetConditions[this._curTargetIndex] != null
-            && this._targetConditions[this._curTargetIndex]['can_pseudoknot'] === 'true'
-            && this._folder.name === 'NuPACK';
+        let pseudoknots: boolean = this._targetConditions && this._targetConditions[this._curTargetIndex] != null
+            && this._targetConditions[this._curTargetIndex]['type'] === 'pseudoknot';
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2711,29 +2700,15 @@ export default class PoseEditMode extends GameMode {
 
         let seq: number[] = this._poses[ii].sequence;
 
-        let pseudoknots: boolean = this._targetConditions
-            && this._targetConditions[ii]
-            && this._targetConditions[ii]['can_pseudoknot'] === 'true'
-            && this._folder.name === 'NuPACK';
+        let pseudoknots: boolean = this._targetConditions && this._targetConditions[ii]
+            && this._targetConditions[ii]['type'] === 'pseudoknot';
 
         if (this._targetConditions[ii]) forceStruct = this._targetConditions[ii]['force_struct'];
 
         if (this._targetConditions[ii] == null || this._targetConditions[ii]['type'] === 'single') {
-            log.error('single type');
-            log.error('can_pseudoknot? ', this._targetConditions[ii]['can_pseudoknot']);
-
-            if (pseudoknots) {
-                log.info('this._targetConditions', this._targetConditions);
-                log.error('pseudoknots in foldSequence');
-                log.error('forceStruct is ', forceStruct);
-                log.error('untrans seq is ', EPars.sequenceToString(seq));
-                log.error('trans   seq is ', EPars.sequenceToString(this._puzzle.transformSequence(seq, ii)));
-                bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
-                log.error('bestPairs is ', EPars.pairsToParenthesis(bestPairs, null, true));
-            } else {
-                log.info('this._targetConditions', this._targetConditions);
-                bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
-            }
+            bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+        } else if (this._targetConditions[ii]['type'] === 'pseudoknot') {
+            bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
         } else if (this._targetConditions[ii]['type'] === 'aptamer') {
             bonus = this._targetConditions[ii]['bonus'];
             sites = this._targetConditions[ii]['site'];
@@ -2842,10 +2817,8 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
         this.popUILock(PoseEditMode.FOLDING_LOCK);
 
-        let pseudoknots: boolean = this._targetConditions
-            && this._targetConditions[targetIndex]
-            && this._targetConditions[targetIndex]['can_pseudoknot'] === 'true'
-            && this._folder.name === 'NuPACK';
+        let pseudoknots: boolean = this._targetConditions && this._targetConditions[targetIndex]
+            && this._targetConditions[targetIndex]['type'] === 'pseudoknot';
 
         // this._fold_total_time = new Date().getTime() - this._fold_start_time;
         // if (!this._tools_container.contains(this._freeze_button) && this._fold_total_time >= 1000.0) {

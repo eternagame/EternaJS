@@ -179,9 +179,7 @@ export default abstract class GameMode extends AppMode {
 
                     let score = null;
                     let pseudoknots: boolean = this._targetConditions != null
-                        && this._targetConditions[0]['can_pseudoknot'] === 'true'
-                        && this._folder.name === 'NuPACK';
-                    // if (this?._targetConditions["can_pseudoknot"] === 'true' && this._folder.name == "NuPACK") {
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
                         score = (pairs: number[]) => this._folder.scoreStructures(
                             newField.pose.fullSequence, pairs, true
@@ -192,30 +190,9 @@ export default abstract class GameMode extends AppMode {
                         );
                     }
 
-                    // This changes between PoseEdit mode and PuzzleEditMode
-                    // if (this._targetPairs) {
-                    //     log.error('this._targetPairs so looking for ',
-                    //         EPars.pairsToParenthesis(this._targetPairs[poseidx], null, true));
-                    // } else {
-                    //     log.error('this._targetPairs false so looking for ',
-                    //         EPars.pairsToParenthesis(this.getCurrentTargetPairs(poseidx), null, true));
-                    // }
                     let targetPairs: number[] = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
-                    // log.error('setting up nativepairs');
-                    // log.error('this.getCurrentUndoBlock(poseidx).getPairs() is ',
-                    // this.getCurrentUndoBlock(poseidx).getPairs());
                     let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs(37, pseudoknots);
-                    // log.error('satpairs                         ',
-                    //     EPars.pairsToParenthesis(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence),
-                    //         null, true));
-                    // log.error('satseq                           ',
-                    //     EPars.sequenceToString(newField.pose.fullSequence));
-                    // log.error('score sat part of target: ',
-                    //     score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence)));
-                    // log.error('nativePairs                     ', EPars.pairsToParenthesis(nativePairs, null, true));
-                    // log.error('score native:             ',
-                    //     score(nativePairs));// EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence)));
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }
