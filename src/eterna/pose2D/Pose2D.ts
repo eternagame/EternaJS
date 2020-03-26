@@ -1817,6 +1817,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._customNumbering;
     }
 
+    public set pseudoknotted(pk: boolean) {
+        this._pseudoknotted = pk;
+    }
+
+    public get pseudoknotted(): boolean {
+        return this._pseudoknotted;
+    }
+
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
         let rnaDrawer: RNALayout = new RNALayout(radius, radius);
@@ -3016,8 +3024,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            for (let scoreNode of this._scoreNodes) {
-                totalScore += scoreNode.score;
+            if (this._pseudoknotted) {
+                totalScore = Math.round(this._scoreFolder.scoreStructures(
+                    this._sequence, this._pairs, true
+                ));
+            } else {
+                for (let scoreNode of this._scoreNodes) {
+                    totalScore += scoreNode.score;
+                }
             }
 
             let scoreLabel = 'Total';
@@ -3150,7 +3164,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodes = scoreNodes;
 
         this.clearScoreTexts();
-        if (this._displayScoreTexts) {
+        if (this._displayScoreTexts && !this._pseudoknotted) {
             this._scoreTexts = [];
             for (let scoreNode of this._scoreNodes) {
                 let scoreText = new Sprite(BitmapManager.getTextBitmap(scoreNode.scoreString, scoreNode.scoreColor));
@@ -3289,6 +3303,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _parenthesis: string;
     private _shiftLimit: number;
     private _customLayout: Array<[number, number]> = null;
+    private _pseudoknotted: boolean = false;
 
     // Oligos
     private _oligo: number[] = null;

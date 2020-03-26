@@ -20,6 +20,9 @@ import EternaURL from 'eterna/net/EternaURL';
 import Folder from 'eterna/folding/Folder';
 import Dialog from 'eterna/ui/Dialog';
 
+
+import NuPACK from 'eterna/folding/NuPACK';
+
 export default abstract class GameMode extends AppMode {
     public readonly bgLayer = new Container();
     public readonly poseLayer = new Container();
@@ -174,13 +177,22 @@ export default abstract class GameMode extends AppMode {
                 if (this._folder) {
                     let poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
-                    let score = (pairs: number[]) => this._folder.scoreStructures(newField.pose.fullSequence, pairs);
+                    let score = null;
+                    let pseudoknots: boolean = this._targetConditions != null
+                        && this._targetConditions[0]['type'] === 'pseudoknot';
+                    if (pseudoknots) {
+                        score = (pairs: number[]) => this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs, true
+                        );
+                    } else {
+                        score = (pairs: number[]) => this._folder.scoreStructures(
+                            newField.pose.fullSequence, pairs
+                        );
+                    }
 
-                    // This changes between PoseEdit mode and PuzzleEditMode
                     let targetPairs: number[] = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
-                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs();
-
+                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs(37, pseudoknots);
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }
@@ -315,6 +327,8 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected _targetPairs: number[][];
+
+    protected _targetConditions: any;
 }
 
 class ContextMenuDialog extends Dialog<void> {

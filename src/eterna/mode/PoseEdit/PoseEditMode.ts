@@ -534,7 +534,6 @@ export default class PoseEditMode extends GameMode {
         // }
 
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
-            this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
             this._targetConditions.push(targetConditions[ii]);
             this._targetOligos.push(null);
             this._targetOligosOrder.push(null);
@@ -659,6 +658,18 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+
+        // now that we have made the folder check, we can set _targetPairs. Used to do this
+        // above but because NuPACK can handle pseudoknots, we shouldn't
+        for (let ii = 0; ii < targetSecstructs.length; ii++) {
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
+                this._poseFields[ii].pose.pseudoknotted = true;
+            } else {
+                this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii]));
+            }
+        }
 
         this._folderButton = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -887,8 +898,14 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('fold', (seq: string, constraint: string = null): string => {
             let seqArr: number[] = EPars.stringToSequence(seq);
-            let folded: number[] = this._folder.foldSequence(seqArr, null, constraint);
-            return EPars.pairsToParenthesis(folded);
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint, true);
+                return EPars.pairsToParenthesis(folded, null, true);
+            } else {
+                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint);
+                return EPars.pairsToParenthesis(folded);
+            }
         });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
@@ -903,7 +920,13 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number => {
             let seqArr: number[] = EPars.stringToSequence(seq);
             let structArr: number[] = EPars.parenthesisToPairs(secstruct);
-            let freeEnergy: number = this._folder.scoreStructures(seqArr, structArr);
+            let freeEnergy = 0;
+            if (this._targetConditions && this._targetConditions[0]
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                freeEnergy = this._folder.scoreStructures(seqArr, structArr, true);
+            } else {
+                freeEnergy = this._folder.scoreStructures(seqArr, structArr);
+            }
             return 0.01 * freeEnergy;
         });
 
@@ -1586,7 +1609,12 @@ export default class PoseEditMode extends GameMode {
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
         if (this._folder.canDotPlot) {
-            datablock.updateMeltingPointAndDotPlot(this._folder);
+            if (this._targetConditions && this._targetConditions[0]
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
+                datablock.updateMeltingPointAndDotPlot(this._folder, true);
+            } else {
+                datablock.updateMeltingPointAndDotPlot(this._folder);
+            }
         }
     }
 
@@ -2211,6 +2239,8 @@ export default class PoseEditMode extends GameMode {
 
         let undoBlock: UndoBlock = this.getCurrentUndoBlock();
         let nnfe: number[];
+        let pseudoknots: boolean = this._targetConditions && this._targetConditions[this._curTargetIndex] != null
+            && this._targetConditions[this._curTargetIndex]['type'] === 'pseudoknot';
 
         if (!this._paused) {
             for (let ii = 0; ii < this._poses.length; ii++) {
@@ -2221,7 +2251,7 @@ export default class PoseEditMode extends GameMode {
                     this._poses[0].setOligo(this.getCurrentUndoBlock().targetOligo,
                         this.getCurrentUndoBlock().oligoMode,
                         this.getCurrentUndoBlock().oligoName);
-                    this._poses[0].pairs = this.getCurrentUndoBlock().getPairs();
+                    this._poses[0].pairs = this.getCurrentUndoBlock().getPairs(37, pseudoknots);
                     if (this._targetConditions != null && this._targetConditions[this._curTargetIndex] != null) {
                         let newConstraints = this._targetConditions[this._curTargetIndex]['structure_constraints'];
                         this._poses[0].structConstraints = newConstraints;
@@ -2234,7 +2264,8 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].setOligo(this.getCurrentUndoBlock(ii).targetOligo,
                     this.getCurrentUndoBlock(ii).oligoMode,
                     this.getCurrentUndoBlock(ii).oligoName);
-                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).getPairs();
+                this._poses[ii].pairs = this.getCurrentUndoBlock(ii).getPairs(37, pseudoknots);
+
                 if (this._targetConditions != null && this._targetConditions[ii] != null) {
                     this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
                 }
@@ -2300,7 +2331,9 @@ export default class PoseEditMode extends GameMode {
             }
             if (Puzzle.isOligoType(this._targetConditions[jj]['type'])) {
                 this._poses[ii].oligoMalus = this._targetConditions[jj]['malus'];
-                nnfe = this.getCurrentUndoBlock(jj).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                nnfe = this.getCurrentUndoBlock(jj).getParam(
+                    UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
+                );
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].oligoPaired = true;
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
@@ -2309,16 +2342,18 @@ export default class PoseEditMode extends GameMode {
                 }
             }
             if (this._targetConditions[jj]['type'] === 'multistrand') {
-                nnfe = this.getCurrentUndoBlock(jj).getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+                nnfe = this.getCurrentUndoBlock(jj).getParam(
+                    UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
+                );
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
                 }
             }
         }
 
-        let numAU: number = undoBlock.getParam(UndoBlockParam.AU);
-        let numGU: number = undoBlock.getParam(UndoBlockParam.GU);
-        let numGC: number = undoBlock.getParam(UndoBlockParam.GC);
+        let numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots);
+        let numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots);
+        let numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots);
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
@@ -2665,10 +2700,18 @@ export default class PoseEditMode extends GameMode {
 
         let seq: number[] = this._poses[ii].sequence;
 
+        let pseudoknots = false;
+        if (this._targetConditions && this._targetConditions[ii]
+                && this._targetConditions[ii]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
+
         if (this._targetConditions[ii]) forceStruct = this._targetConditions[ii]['force_struct'];
 
         if (this._targetConditions[ii] == null || this._targetConditions[ii]['type'] === 'single') {
             bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct);
+        } else if (this._targetConditions[ii]['type'] === 'pseudoknot') {
+            bestPairs = this._folder.foldSequence(this._puzzle.transformSequence(seq, ii), null, forceStruct, true);
         } else if (this._targetConditions[ii]['type'] === 'aptamer') {
             bonus = this._targetConditions[ii]['bonus'];
             sites = this._targetConditions[ii]['site'];
@@ -2759,7 +2802,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii));
-        undoBlock.setPairs(bestPairs);
+        undoBlock.setPairs(bestPairs, 37, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
         undoBlock.targetOligo = this._targetOligo[ii];
         undoBlock.oligoOrder = oligoOrder;
@@ -2768,13 +2811,19 @@ export default class PoseEditMode extends GameMode {
         undoBlock.targetOligoOrder = this._targetOligosOrder[ii];
         undoBlock.puzzleLocks = this._poses[ii].puzzleLocks;
         undoBlock.targetConditions = this._targetConditions[ii];
-        undoBlock.setBasics(this._folder);
+        undoBlock.setBasics(this._folder, 37, pseudoknots);
         this._seqStacks[this._stackLevel][ii] = undoBlock;
     }
 
     private poseEditByTargetEpilog(targetIndex: number): void {
         this.hideAsyncText();
         this.popUILock(PoseEditMode.FOLDING_LOCK);
+
+        let pseudoknots = false;
+        if (this._targetConditions && this._targetConditions[targetIndex]
+                && this._targetConditions[targetIndex]['type'] === 'pseudoknot') {
+            pseudoknots = true;
+        }
 
         // this._fold_total_time = new Date().getTime() - this._fold_start_time;
         // if (!this._tools_container.contains(this._freeze_button) && this._fold_total_time >= 1000.0) {
@@ -2789,11 +2838,11 @@ export default class PoseEditMode extends GameMode {
 
         // / JEEFIX
 
-        let lastBestPairs: number[] = this._seqStacks[this._stackLevel][targetIndex].getPairs();
+        let lastBestPairs: number[] = this._seqStacks[this._stackLevel][targetIndex].getPairs(37, pseudoknots);
         let bestPairs: number[] = lastBestPairs;
 
         if (this._stackLevel > 0) {
-            lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs();
+            lastBestPairs = this._seqStacks[this._stackLevel - 1][targetIndex].getPairs(37, pseudoknots);
         }
 
         if (lastBestPairs != null) {
@@ -2997,7 +3046,7 @@ export default class PoseEditMode extends GameMode {
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
-    private _targetConditions: any[] = [];
+    protected _targetConditions: any[] = [];
     private _targetOligo: number[][] = [];
     private _oligoMode: number[] = [];
     private _oligoName: string[] = [];

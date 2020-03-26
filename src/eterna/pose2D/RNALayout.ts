@@ -93,6 +93,7 @@ export default class RNALayout {
         // / save for later
         this._origPairs = pairs.slice();
         this._targetPairs = targetPairs;
+
         if (targetPairs == null) this._targetPairs = pairs;
 
         // / biPairs is 'symmetrized'. Like pairs,
@@ -131,6 +132,13 @@ export default class RNALayout {
         if (!foundPair) {
             return;
         }
+
+        // the targetPairs that exist for the sake of seeing what matches the goal
+        // need to have PKs removed.
+        // AMW TODO: Rhiju, we should eventually be able to remove this condition,
+        // once you work out how layouts can handle pseudoknots.
+        biPairs = EPars.filterForPseudoknots(biPairs);
+        this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
 
         this._root = new RNATreeNode();
 
@@ -241,13 +249,23 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        folder.scoreStructures(seq, this._origPairs, EPars.DEFAULT_TEMPERATURE, nnfe);
+        // AMW: temporarily assuming score without PK
+        if ((EPars.pairsToParenthesis(this._targetPairs).includes('{')
+                || EPars.pairsToParenthesis(this._targetPairs).includes('['))
+                && folder.name === 'NuPACK') {
+            folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
+        } else {
+            folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
+        }
         this.scoreTreeRecursive(nnfe, this._root, null);
     }
 
     private addNodesRecursive(biPairs: number[], rootnode: RNATreeNode, startIndex: number, endIndex: number): void {
         if (startIndex > endIndex) {
-            throw new Error('Error occured while drawing RNA');
+            throw new Error(`Error occured while drawing RNA for indices ${startIndex} ${endIndex}`);
+            // let tmp = endIndex;
+            // endIndex = startIndex;
+            // startIndex = tmp;
         }
 
         let newnode: RNATreeNode;

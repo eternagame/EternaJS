@@ -26,8 +26,8 @@ export = NupackLib;
 declare class NupackLib {
     FullEval(temperature_in: number, seqString: string, structString: string): NupackLib.FullEvalResult;
 
-    FullFoldDefault(seqString: string): NupackLib.FullFoldResult;
-    FullFoldTemperature(temperature_in: number, seqString: string): NupackLib.FullFoldResult;
+    FullFoldDefault(seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult;
+    FullFoldTemperature(temperature_in: number, seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult;
     GetDotPlot(temperature_in: number, seqString: string): NupackLib.DotPlotResult;
     FullFoldWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult;
     CoFoldSequence(seqString: string): NupackLib.FullFoldResult;

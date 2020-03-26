@@ -32,7 +32,10 @@ export default abstract class LinearFoldBase extends Folder {
         return true;
     }
 
-    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(
+        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        temp: number = 37, outNodes: number[] = null
+    ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
         };
@@ -70,7 +73,7 @@ export default abstract class LinearFoldBase extends Folder {
             let seqA: number[] = seq.slice(0, cut);
             let pairsA: number[] = pairs.slice(0, cut);
             let nodesA: number[] = [];
-            let retA: number = this.scoreStructures(seqA, pairsA, temp, nodesA);
+            let retA: number = this.scoreStructures(seqA, pairsA, pseudoknotted, temp, nodesA);
 
             let seqB: number[] = seq.slice(cut + 1);
             let pairsB: number[] = pairs.slice(cut + 1);
@@ -78,7 +81,7 @@ export default abstract class LinearFoldBase extends Folder {
                 if (pairsB[ii] >= 0) pairsB[ii] -= (cut + 1);
             }
             let nodesB: number[] = [];
-            let retB: number = this.scoreStructures(seqB, pairsB, temp, nodesB);
+            let retB: number = this.scoreStructures(seqB, pairsB, pseudoknotted, temp, nodesB);
 
             if (nodesA[0] !== -1 || nodesB[0] !== -1) {
                 throw new Error('Something went terribly wrong in scoreStructures()');
@@ -108,7 +111,8 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         let key: any = {
             primitive: 'fold',
