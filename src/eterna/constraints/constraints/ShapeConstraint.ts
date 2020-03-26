@@ -2,6 +2,7 @@ import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import * as log from 'loglevel';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
 
@@ -126,8 +127,8 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         }
 
         let pseudoknots = false;
-        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
-                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+        if (undoBlock.targetConditions != null
+                && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
@@ -146,10 +147,11 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let pseudoknots = false;
-        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
-                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+        if (undoBlock.targetConditions != null
+                && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
+
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let customLayout: Array<[number, number]> = null;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
