@@ -1,4 +1,4 @@
-import EPars from "../Epars"
+import EPars from "../EPars";
 
 test(`EPars:filterForPseudoknots`, () => {
     let pairs = EPars.parenthesisToPairs("...............(((((((((((...{{{{{{{)))))))))))((((((((.........))).)))))...}}.}}}}}....", true);
