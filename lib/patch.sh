@@ -43,12 +43,15 @@ pushd LinearFold
 patch -t -p0 --forward < linearfold-eterna.patch
 popd
 
-### LinearFold
+### EternaFold
 ##############
 ## This is how the patch file was created.
 ## diff -X .gitignore -ur contrafold_stock contrafold > contrafold-eterna.patch
 
 # With your fresh download, which untars into contrafold/...
 pushd contrafold 
+pushd contrafold/src/
+perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomplementary contrafold.params.profile
+popd
 patch -t -p0 < contrafold-eterna.patch
 popd

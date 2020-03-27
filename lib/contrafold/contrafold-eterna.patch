@@ -1,16 +1,4 @@
 Only in contrafold/src: contrafold
-diff -X .gitignore -ur contrafold_stock/src/Contrafold.cpp contrafold/src/Contrafold.cpp
---- contrafold_stock/src/Contrafold.cpp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/Contrafold.cpp	2020-03-25 16:42:30.224287363 -0400
-@@ -12,7 +12,7 @@
- #include "ComputationWrapper.hpp"
- #include "FileDescription.hpp"
- #include "InferenceEngine.hpp"
--#include "ParameterManager.hpp"
-+#include "ParameterManager.ipp"
- #include "OptimizationWrapper.hpp"
- 
- // constants
 Only in contrafold/src: Contrafold.cpp.orig
 Only in contrafold/src: Contrafold.o
 Only in contrafold/src: Defaults.ipp
