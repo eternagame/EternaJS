@@ -23,6 +23,7 @@ import LoadingMode from './mode/LoadingMode';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
 import NuPACK from './folding/NuPACK';
+import Eternafold from './folding/Eternafold';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import FolderManager from './folding/FolderManager';
 import LinearFoldC from './folding/LinearFoldC';
@@ -413,6 +414,7 @@ export default class EternaApp extends FlashbangApp {
             NuPACK.create(),
             LinearFoldC.create(),
             LinearFoldV.create(),
+            Eternafold.create(),
             RNAFoldBasic.create()])
             .then((folders: Folder[]) => {
                 log.info('Folding engines intialized');

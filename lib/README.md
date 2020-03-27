@@ -5,6 +5,7 @@ NOTE: If you have difficulty with this install process, especially if you are a 
 * Download & install `emscripten`: https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#platform-notes-installation-instructions-sdk
 * Install `cmake`: https://cmake.org/download/
 * Download and extract the tarballs for Vienna 1.8.5, Vienna 2.1.8, and nupack 3.0.4 into the corresponding directories of each model (see https://www.tbi.univie.ac.at/RNA/#old and http://nupack.org/downloads - note that for NUPACK that while this version is not directly linked, exchanging the version number in the URL of the latest tarball will allow you to download the correct version)
+* Download [contrafold](http://contra.stanford.edu/contrafold/contrafold_v2_02.tar.gz) into the contrafold directory.
 * Clone the [LinearFold repository]((https://github.com/LinearFold/LinearFold)).  Note that the most recent definitely-working hash is:  05c9803ae700fc528c82e63cec12ec7c9d3b498a
     - you can obtain this revision via:
       ```

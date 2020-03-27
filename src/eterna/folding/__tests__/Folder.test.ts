@@ -1,20 +1,21 @@
-import EPars from "eterna/EPars";
-import Folder from "../Folder";
-import NuPACK from "../NuPACK";
-import Vienna from "../Vienna";
-import Vienna2 from "../Vienna2";
-import LinearFoldC from "../LinearFoldC";
-import LinearFoldV from "../LinearFoldV";
-import "./jest-matcher-deep-close-to";
+import EPars from 'eterna/EPars';
+import Folder from '../Folder';
+import NuPACK from '../NuPACK';
+import Vienna from '../Vienna';
+import Vienna2 from '../Vienna2';
+import LinearFoldC from '../LinearFoldC';
+import LinearFoldV from '../LinearFoldV';
+import './jest-matcher-deep-close-to';
+import EternaFold from '../Eternafold';
 
 const SNOWFLAKE_SEQ = 'GUGGACAAGAUGAAACAUCAGUAACAAGCGCAAAGCGCGGGCAAAGCCCCCGGAAACCGGAAGUUACAGAACAAAGUUCAAGUUUACAAGUGGACAAGUUGAAACAACAGUUACAAGACGAAACGUCGGCCAAAGGCCCCAUAAAAUGGAAGUAACACUUGAAACAAGAAGUUUACAAGUUGACAAGUUCAAAGAACAGUUACAAGUGGAAACCACGCGCAAAGCGCCUCCAAAGGAGAAGUAACAGAAGAAACUUCAAGUUAGCAAGUGGUCAAGUACAAAGUACAGUAACAACAUCAAAGAUGGCGCAAAGCGCGAGCAAAGCUCAAGUUACAGAACAAAGUUCAAGAUUACAAGAGUGCAAGAAGAAACUUCAGAUAGAACUGCAAAGCAGCACCAAAGGUGGGGCAAAGCCCAACUAUCAGUUGAAACAACAAGUAUUCAAGAGGUCAAGAUCAAAGAUCAGUAACAAGUGCAAAGCACGGGCAAAGCCCGACCAAAGGUCAAGUUACAGUUCAAAGAACAAGAUUUC';
 const SNOWFLAKE_STRUCT = '((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))..((((((..((((...)))).(((((..((((...))))((((...))))((((...))))..))))).((((...))))..))))))';
 
-const BASIC_SEQ = "AAAAAAAAAAAAAA";
+const BASIC_SEQ = 'AAAAAAAAAAAAAA';
 const BASIC_RESULT = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
 
-const ZIPPERS_SEQ = "AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA";
-const ZIPPERS_BEST_PAIRS = ".....((((.........)))).((((......))))...";
+const ZIPPERS_SEQ = 'AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA';
+const ZIPPERS_BEST_PAIRS = '.....((((.........)))).((((......))))...';
 const ZIPPERS_TEMP = 37;
 
 function FoldSequence(folder: Folder, seq: string, struct: string): any[] {
@@ -38,7 +39,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
     test(`${folderType.NAME}:emptyStructure`, () => {
         expect.assertions(1);
         return expect(CreateFolder(folderType)
-            .then((folder) => FoldSequence(folder, BASIC_SEQ, "")))
+            .then((folder) => FoldSequence(folder, BASIC_SEQ, '')))
             .resolves.toEqual(BASIC_RESULT);
     });
 
@@ -47,8 +48,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
         return expect(CreateFolder(folderType)
             .then((folder) => {
                 return [
-                    FoldSequence(folder, BASIC_SEQ, ""),
-                    FoldSequence(folder, BASIC_SEQ, "")
+                    FoldSequence(folder, BASIC_SEQ, ''),
+                    FoldSequence(folder, BASIC_SEQ, '')
                 ];
             }))
             .resolves.toEqual([BASIC_RESULT, BASIC_RESULT]);
@@ -100,8 +101,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
 
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
         expect.assertions(1);
-        const SEQ = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-        const STRUCT = "........................................";
+        const SEQ = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+        const STRUCT = '........................................';
         return expect(CreateFolder(folderType)
             .then((folder) => {
                 return folder.getDotPlot(
@@ -114,8 +115,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
 
     test(`${folderType.NAME}:get_dot_plot(complex)`, () => {
         expect.assertions(1);
-        const SEQ = "AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA";
-        const STRUCT = ".....((((.........)))).((((......))))...";
+        const SEQ = 'AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA';
+        const STRUCT = '.....((((.........)))).((((......))))...';
 
         const RESULT: Map<string, number[]> = new Map([
             [Vienna.NAME, [6,20,0.003204861,6,21,0.050702623,6,22,0.994967823,6,37,0.014707212,7,20,0.050686163,7,21,0.997305727,7,22,0.049737799,7,36,0.014697534,8,19,0.048807822,8,20,0.997265654,8,21,0.049896478,8,35,0.014696120,9,19,0.981161504,9,20,0.048955465,9,34,0.014664345,19,24,0.007318126,19,26,0.006963470,19,27,0.007932088,20,25,0.006957857,20,26,0.007936614,20,27,0.007544318,21,25,0.006246202,21,26,0.007525488,24,36,0.036388827,24,37,0.996200675,25,35,0.036287239,25,36,0.998544617,25,37,0.035832064,26,34,0.035331676,26,35,0.998545990,26,36,0.035898986,27,34,0.982421238,27,35,0.035432802,22,6,0.9500000,21,7,0.9500000,20,8,0.9500000,19,9,0.9500000,37,24,0.9500000,36,25,0.9500000,35,26,0.9500000,34,27,0.9500000]],
@@ -136,6 +137,88 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
     });
 }
 
+test(`EternaFold:many_score_structures`, () => {
+    // expect.assertions: the async code should result in X assertions being called
+    // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
+
+    return expect(CreateFolder(EternaFold)
+        .then((folder) => {
+            
+            const seqs: number[][] = [
+                EPars.stringToSequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
+                EPars.stringToSequence('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
+                EPars.stringToSequence('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
+                EPars.stringToSequence('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
+                EPars.stringToSequence('UAAAGGUGAUACACUGCUCCCCAGGGGCGUCGCCUGACGAUAAUUGCAUCCGUAGGCGAA'),
+                EPars.stringToSequence('GUGAACUUAGAGGGAAGUAUUCCGCGACCGACAUUUUGUCGCGACGGAGGAUUCCUUUAU'),
+                EPars.stringToSequence('UGGCGGUCAAGUUGGGACGAUCUUUAUAACACAGCAGAAUAAACGCCUAACAUUUAUAGG'),
+                EPars.stringToSequence('UACGCGGCGCCGGGUAGUACGGCACUGCGGCAAGAUCUACCUCUUGAUCAGCAGAUUAAU'),
+                EPars.stringToSequence('AGAGACCCAGUAGGGGAUUCUCUGGGGCAAACGGGGCUCAUUUAGCGUCCUCUAGCUCCA'),
+                EPars.stringToSequence('AUAUUUUAAAGGGCCAAUCUAUUACAUUCGGCACUUCUUCUCACGACAAUAGACAUGUCA'),
+                EPars.stringToSequence('CGGCACGGCCUGCUCUACUAGUUAUUGGUAAAUCUGAAAAUAAGGCCGACAGAACUACAC'),
+            ];
+    
+            // const strs: number[][] = [
+            //     EPars.parenthesisToPairs('.((((((..(((((......)))))........((((.....))))...)))))).'),
+            //     EPars.parenthesisToPairs('((((................................................))))....'),
+            //     EPars.parenthesisToPairs('........................(((((.((.................)).)))))...'),
+            //     EPars.parenthesisToPairs('....................(((((...........((..)).......)))))......'),
+            //     EPars.parenthesisToPairs('..............................(((((....(........)....)))))..'),
+            //     EPars.parenthesisToPairs('............(((.....((((....((((.....))))...))))....))).....'),
+            //     EPars.parenthesisToPairs('............................................................'),
+            //     EPars.parenthesisToPairs('..(((((.((((.......)))).)))))...............................'),
+            //     EPars.parenthesisToPairs('.(((...............))).(((((.....((.............))....))))).'),
+            //     EPars.parenthesisToPairs('............(((..............)))............................'),
+            //     EPars.parenthesisToPairs('.....((((((...............................))))))............'),
+            // ];
+            const strs: string[] = [
+                '.((((((..(((((......)))))........((((.....))))...)))))).',
+                '((((..((....................(((.......)))........)).))))....',
+                '........................(((((.((.................)).)))))...',
+                '....................(((((........(((((())))))....)))))......',
+                '................((((...))))..((((((...((........))...)))))).',
+                '...........((((.....((((....((((.....))))...))))....))))....',
+                '.((..........................................)).............',
+                '..(((((.((((.......)))).)))))...............................',
+                '.(((((((....)))...)))).(((((....(((((.........)))))...))))).',
+                '..........(.(((..............))).)..........................',
+                '.....((((((...............................))))))............',
+            ];
+            
+            const scores: number[] = [
+                -1031.63,
+                -238.68,
+                -575.70,
+                -479.47,
+                -580.39,
+                -847.24,
+                245.57,
+                -1296.44,
+                -1352.82,
+                -177.13,
+                -711.52,
+            ];
+
+            for (let ii = 0; ii < seqs.length; ++ii ) {
+                console.error(ii);
+                let seq = seqs[ii];
+                let str = strs[ii];
+                let scr = scores[ii];
+
+                let struct = folder.foldSequence(
+                    seq,
+                    null);
+                expect(EPars.pairsToParenthesis(struct)).toEqual(str);
+
+                let score = folder.scoreStructures(
+                    seq,
+                    struct);
+                expect(score).toBeDeepCloseTo(scr, 2);
+            }
+        })).resolves.toBeUndefined();
+});
+    
+        
 test(`NuPACK:PK_score_structures`, () => {
     // The engines output different results
 

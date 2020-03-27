@@ -30,6 +30,7 @@ import URLButton from 'eterna/ui/URLButton';
 import Fonts from 'eterna/util/Fonts';
 import LinearFoldV from 'eterna/folding/LinearFoldV';
 import LinearFoldC from 'eterna/folding/LinearFoldC';
+import EternaFold from 'eterna/folding/Eternafold';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
@@ -566,6 +567,8 @@ export default class PuzzleEditMode extends GameMode {
             paramsTitle = '[LFC]';
         } else if (this._folder.name === LinearFoldV.NAME) {
             paramsTitle = '[LFV]';
+        } else if (this._folder.name === EternaFold.NAME) {
+            paramsTitle = '[ETERNA]';
         } else {
             paramsTitle = '';
         }

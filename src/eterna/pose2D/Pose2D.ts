@@ -21,6 +21,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import GameMode from 'eterna/mode/GameMode';
 import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
+import EternaFold from 'eterna/folding/Eternafold';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -3024,9 +3025,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            if (this._pseudoknotted) {
+            if (this._pseudoknotted || this._scoreFolder.name === EternaFold.NAME) {
+                // totalScore = Math.round(this._scoreFolder.scoreStructures(
+                //     this._sequence, this._pairs
+                // ));
+
+                // for target mode at least?
                 totalScore = Math.round(this._scoreFolder.scoreStructures(
-                    this._sequence, this._pairs, true
+                    this._sequence, EPars.getSatisfiedPairs(this._pairs, this._sequence)
                 ));
             } else {
                 for (let scoreNode of this._scoreNodes) {
@@ -3164,7 +3170,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodes = scoreNodes;
 
         this.clearScoreTexts();
-        if (this._displayScoreTexts && !this._pseudoknotted) {
+        if (this._displayScoreTexts && !this._pseudoknotted && this._scoreFolder.name !== EternaFold.NAME) {
             this._scoreTexts = [];
             for (let scoreNode of this._scoreNodes) {
                 let scoreText = new Sprite(BitmapManager.getTextBitmap(scoreNode.scoreString, scoreNode.scoreColor));
