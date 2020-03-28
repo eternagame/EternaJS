@@ -2,6 +2,7 @@
 #define LINEARFOLD_FULLFOLD_H
 
 #include <string>
+#include <vector>
 
 struct FullFoldResult {
     std::string structure;
@@ -9,7 +10,8 @@ struct FullFoldResult {
 
 struct DotPlotResult {
     double energy;
-    std::string probabilitiesString;
+    // std::string probabilitiesString;
+    std::vector< double > plot;
 };
 
 FullFoldResult* FullFoldDefault (std::string seqString);

@@ -8,6 +8,7 @@ using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
     register_vector<int>("VectorInt");
+    register_vector<double>("VectorDouble");
 
     class_<FullEvalResult>("FullEvalResult")
             .constructor()
@@ -20,4 +21,11 @@ EMSCRIPTEN_BINDINGS(EmscriptenBridge) {
         .property("structure", &FullFoldResult::structure);
 
     function("FullFoldDefault", &FullFoldDefault, allow_raw_pointers());
+    
+    class_<DotPlotResult>("DotPlotResult")
+        .property("energy", &DotPlotResult::energy)
+        .property("plot", &DotPlotResult::plot);
+        
+    function("GetDotPlot", &GetDotPlot, allow_raw_pointers());
+
 }

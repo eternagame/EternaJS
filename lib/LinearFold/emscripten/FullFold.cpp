@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 /**
  *  This is a Vienna datastructure we are borrowing to use for dotplot construction here
@@ -139,7 +141,7 @@ FullFoldResult* FullFoldDefault (std::string seqString) {
 // }
 
 std::unordered_map<std::pair<int,int>, float, LinearPartition::hash_pair>
-get_bpp( std::string /*const*/ & seq ) {
+get_bpp( std::string & seq, double & energy ) {
     int beamsize = 100;
     bool sharpturn = false;
     bool is_verbose = false;
@@ -154,93 +156,34 @@ get_bpp( std::string /*const*/ & seq ) {
 
     int seq_index = 0;
     std::string bpp_file_index = "";
-    // if (seq.length() == 0) return;
-
-    // validated seqs only are gonna come in here -- so some 
-    // original error checking is gone
-
-    // convert to uppercase
-    std::transform(seq.begin(), seq.end(), seq.begin(), ::toupper);
-
-    // convert T to U
-    std::replace(seq.begin(), seq.end(), 'T', 'U');
 
     // lhuang: moved inside loop, fixing an obscure but crucial bug in initialization
     LinearPartition::BeamCKYParser parser(beamsize, !sharpturn, is_verbose, "", "", pf_only, bpp_cutoff);
 
     // BeamCKYParser::DecoderResult result = parser.parse(seq);
     parser.parse(seq);
+    energy = parser.partition();
     return parser.get_Pij();
 }
 
 DotPlotResult* GetDotPlot (double temperature_in, const std::string& seqString, const std::string& dotplotStructString) {
-    // auto string = seqString.c_str();
-    // AMW: we ignore constraints, necessarily. sorry
-    // auto dotplot_structure = dotplotStructString.c_str();
-    // char* string = autoSeqString.get();
-    // char* dotplot_structure = autoDotPlotString.get();
 
-    const char* structure = "";
-
-    // this is vienna-specific, if there are constraint formats that aren't just 
-    // dbn -- don't think that applies to LinearFold
-    // char* constraints = InitConstraints(autoSeqString, autoDotPlotString);
-
-    int    length;
+    // double temperature = temperature_in;
+    auto seqString2 = seqString;
     double energy;
-    double min_en = 0;
-    double /*kT, */sfact=1.07;
-    double tmp;
-    char *probabilities;
-    char *probIndex;
-
-    plist *pl,*mf,*pl1;
-
-    // length = (int) strlen(string);
-
-    double temperature = temperature_in;
-    probabilities = (char *) calloc(sizeof(char), length * length * 30);
-    probIndex = probabilities;
-
-    // kT = (temperature+273.15)*1.98717/1000.; /* in Kcal */
-    double pf_scale = std::exp(-(sfact*min_en)/kT/length);
-
-    // init_pf_fold(length); // obsolete
-
-    // AMW: we ignore constraints fr onow I think
-    //energy = pf_fold(string,constraints);
-    auto seqString2 = seqString; // local mutable copy
-    auto pij = get_bpp(seqString2);
-
-    /*pl = make_plist(length, 1e-5);
-    mf = b2plist(dotplot_structure);
-    */
-    //fprintf(stderr, "case 1-2 %d", sizeof(char) * length * length * 30);
-
-    /* print boxes in upper right half*/
-    //int pcount = 0;
-    for (pl1=pl; pl1->i>0; pl1++) {
-        tmp = sqrt(pl1->p);
-        //pcount++;
-        probIndex += sprintf(probIndex, "%d %d %1.9f ubox ", pl1->i, pl1->j, tmp);
-    }
-
-    /* print boxes in lower left half (mfe) */
-    for (pl1=mf; pl1->i>0; pl1++) {
-        tmp = sqrt(pl1->p);
-        //pcount++;
-        probIndex += sprintf(probIndex, "%d %d %1.7f lbox ", pl1->i, pl1->j, tmp);
-    }
+    auto pij = get_bpp(seqString2, energy);
 
     DotPlotResult* result = new DotPlotResult();
+    for ( int ii = 0; ii < seqString.size(); ++ii ) {
+        for ( int jj = ii + 1; jj < seqString.size(); ++jj ) {
+            auto prob = pij[std::make_pair( ii + 1, jj + 1 )];
+            if ( prob < 1e-5) continue;
+            result->plot.push_back( ii + 1 );
+            result->plot.push_back( jj + 1 );
+            result->plot.push_back( prob  );
+        }
+    }
     result->energy = energy;
-    result->probabilitiesString = probabilities;
-
-    free_pf_arrays();
-    free(constraints);
-    free(pl);
-    free(mf);
-    free(probabilities);
 
     return result;
 }
