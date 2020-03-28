@@ -38,6 +38,7 @@ static void _eos_cb(int index, int fe) {
 extern void (*eos_cb)(int index, int fe);
 
 FullEvalResult* FullEval (int temperature_in, const std::string& seqString, const std::string& structString) {
+    // structString will have braces for pseudoknots if applicable
     auto auto_string = MakeCString(seqString);
     auto auto_structure = MakeCString(structString);
 

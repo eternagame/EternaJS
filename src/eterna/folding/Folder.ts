@@ -4,7 +4,7 @@ export default abstract class Folder {
     public abstract get name (): string;
     public abstract get isFunctional (): boolean;
 
-    public getCache(key: any): any {
+    public getCache(key: Record< string, any >): any {
         let keyStr = JSON.stringify(key);
         return this._cache.get(keyStr);
     }
@@ -13,12 +13,16 @@ export default abstract class Folder {
         return false;
     }
 
-    public scoreStructures(seq: number[], pairs: number[], temp: number = 37, outNodes: number[] = null): number {
+    public scoreStructures(
+        seq: number[], pairs: number[], pseudoknotted: boolean = false,
+        temp: number = 37, outNodes: number[] = null
+    ): number {
         return 0;
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         return null;
     }
@@ -59,7 +63,11 @@ export default abstract class Folder {
         return false;
     }
 
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
+    public get canPseudoknot(): boolean {
+        return false;
+    }
+
+    public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         return null;
     }
 

@@ -78,6 +78,7 @@ export default class Puzzle {
             || (this.hasTargetType('oligo') && !folder.canCofold)
             || (this.hasTargetType('aptamer+oligo') && !folder.canFoldWithBindingSite)
             || (this.hasTargetType('aptamer+oligo') && !folder.canCofold)
+            || (this.hasTargetType('pseudoknot') && !folder.canPseudoknot)
         );
     }
 

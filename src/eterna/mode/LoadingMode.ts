@@ -82,7 +82,7 @@ export default class LoadingMode extends AppMode {
         let ExtraBlurbs = [
             'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',
             'Developed by players for players',
-            'Afraid of pandemic flu?\nStay calm and play Eterna.',
+            'Afraid of viral pandemics?\nStay calm and play Eterna.',
             'Played by Humans, Scored by Nature.',
             'Empowering citizen scientists to invent medicine',
             "Heard of CRISPR therapies? That's RNA medicine",

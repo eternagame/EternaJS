@@ -38,9 +38,7 @@
 </div>
 
 <!-- Load our webpack bundles -->
-<% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
-<script src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
-<% } %>
+<%= htmlWebpackPlugin.tags.bodyTags %>
 
 <script>
     Application.GET_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
