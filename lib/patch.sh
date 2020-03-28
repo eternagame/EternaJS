@@ -37,8 +37,11 @@ popd
 ##############
 ## This is how the patch file was created.
 ## diff -X .gitignore -ur LinearFold_stock LinearFold > linearfold-eterna.patch
+## diff -X .gitignore -ur LinearPartition_stock LinearPartition > linearpartition-eterna.patch
 
-# With your fresh git checkout of LinearFold/LinearFold...
+# With your fresh git checkouts of LinearFold/LinearFold and LinearFold/LinearPartition...
 pushd LinearFold
 patch -t -p0 --forward < linearfold-eterna.patch
+patch -t -p0 --forward < linearpartition-eterna.patch
 popd
+
