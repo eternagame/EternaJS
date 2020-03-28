@@ -93,11 +93,6 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
             .resolves.toBeUndefined(); // (we're returning a promise)
     });
 
-    // if ( folderType == LinearFoldC || folderType == LinearFoldV ) {
-    //     // dot plot not implemented
-    //     continue;
-    // }
-
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
         expect.assertions(1);
         const SEQ = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
