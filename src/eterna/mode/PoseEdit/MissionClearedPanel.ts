@@ -46,7 +46,13 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
-            this._contentLayout.addChild(Fonts.stdRegular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
+            const moreTextObj = new HTMLTextObject(this._moreText, MissionClearedPanel.WIDTH - 60)
+                .font(Fonts.STDFONT_REGULAR)
+                .fontSize(16)
+                .color(0xffffff)
+                .lineHeight(1.2)
+                .selectable(false);
+            this.addObject(moreTextObj, this._contentLayout);
         }
 
         this._rankScrollContainer = new Container();
