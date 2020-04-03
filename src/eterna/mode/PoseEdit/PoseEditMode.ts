@@ -1163,6 +1163,11 @@ export default class PoseEditMode extends GameMode {
 
     public showMissionScreen(doShow: boolean): void {
         this._showMissionScreen = doShow;
+        if (doShow) {
+            if (this._isPlaying) {
+                this.showIntroScreen();
+            }
+        }
     }
 
     public showConstraints(doShow: boolean): void {

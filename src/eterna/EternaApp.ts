@@ -28,6 +28,7 @@ import FolderManager from './folding/FolderManager';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
+import RSignals from './rscript/RSignals';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -117,6 +118,13 @@ export default class EternaApp extends FlashbangApp {
         eternaContainer.appendChild(overlay);
 
         ExternalInterface.init(eternaContainer);
+
+        RSignals.pushPuzzle.connect(async (puzzleId) => {
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleId);
+            this._modeStack.pushMode(new PoseEditMode(puzzle, {}));
+        });
+
+        RSignals.popPuzzle.connect(() => this._modeStack.popMode());
     }
 
     /* override */

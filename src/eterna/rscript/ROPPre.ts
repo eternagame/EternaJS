@@ -1,6 +1,7 @@
 import {PoseState} from 'eterna/puzzle/Puzzle';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
+import RSignals from './RSignals';
 
 enum ROPPreType {
     DISABLE_MISSION_SCREEN = 'DISABLE_MISSION_SCREEN',
@@ -10,6 +11,7 @@ enum ROPPreType {
     DISABLE_UI_ELEMENT = 'DISABLE_UI_ELEMENT',
     DISABLE_RNA_CHANGE = 'DISABLE_RNA_CHANGE',
     SET_DEFAULT_FOLD_MODE = 'SET_DEFAULT_FOLD_MODE',
+    PUSH_PUZZLE = 'PUSH_PUZZLE'
 }
 
 export default class ROPPre extends RScriptOp {
@@ -24,6 +26,7 @@ export default class ROPPre extends RScriptOp {
         const hideUIRegex = /(Hide|Show|Disable|Enable)UI/ig;
         const disableRNAMod = /(DisableRNAModification)/ig;
         const modeRegex = /^(Native|Target)Mode$/ig;
+        const pushPuzzleRegex = /PushPuzzle/;
 
         let regResult: RegExpExecArray;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {
@@ -43,6 +46,8 @@ export default class ROPPre extends RScriptOp {
         } else if ((regResult = modeRegex.exec(command)) != null) {
             this._type = ROPPreType.SET_DEFAULT_FOLD_MODE;
             this._foldMode = (regResult[1].toUpperCase() === 'NATIVE' ? PoseState.NATIVE : PoseState.TARGET);
+        } else if ((regResult = pushPuzzleRegex.exec(command)) != null) {
+            this._type = ROPPreType.PUSH_PUZZLE;
         }
     }
 
@@ -97,6 +102,12 @@ export default class ROPPre extends RScriptOp {
                 break;
             case ROPPreType.SET_DEFAULT_FOLD_MODE:
                 this._env.puzzle.defaultMode = this._foldMode;
+                break;
+
+            case ROPPreType.PUSH_PUZZLE: {
+                const puzzleId = parseInt(this._allArgs[0], 10);
+                RSignals.pushPuzzle.emit(puzzleId);
+            }
                 break;
             default:
                 throw new Error(`Invalid Preprocessing Command: ${this._type}`);
