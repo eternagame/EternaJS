@@ -4,7 +4,6 @@ import RScriptEnv from './RScriptEnv';
 
 export default class ROPPopPuzzle extends RScriptOp {
 
-    // eslint-disable no-useless-constructor
     constructor(env: RScriptEnv) {
         super(env);
     }
