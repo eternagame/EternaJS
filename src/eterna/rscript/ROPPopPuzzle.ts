@@ -1,10 +1,12 @@
 import RScriptOp from './RScriptOp';
 import RSignals from './RSignals';
+import RScriptEnv from './RScriptEnv';
 
 export default class ROPPopPuzzle extends RScriptOp {
-    constructor() {
-        // tslint:disable-next-line
-        super({} as any);
+
+    // eslint-disable no-useless-constructor
+    constructor(env: RScriptEnv) {
+        super(env);
     }
 
     public exec(): void {
