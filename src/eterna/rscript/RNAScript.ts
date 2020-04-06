@@ -150,9 +150,9 @@ export default class RNAScript {
             let ropRNAType: ROPRNAType = regResult[1].toUpperCase();
             return new ROPRNA(ropRNAType, this._env);
         } else if ((regResult = popPuzzle.exec(op))) {
-            return new ROPPopPuzzle();
+            return new ROPPopPuzzle(this._env);
         } else if ((regResult = showMissionScreen.exec(op))) {
-            return new ROPShowMissionScreen(JSON.parse(args), this._env);
+            return new ROPShowMissionScreen(this._env);
         }
         // Shouldn't reach here ever.
         throw new Error(`Invalid operation: ${op}`);
