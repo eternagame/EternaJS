@@ -33,6 +33,7 @@ import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstra
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import NOGCConstraint from 'eterna/constraints/constraints/NOGCConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
 
@@ -302,6 +303,9 @@ export default class PuzzleManager {
                         break;
                     case BoostConstraint.NAME:
                         constraints.push(new BoostConstraint(Number(parameter)));
+                        break;
+                    case NOGCConstraint.NAME:
+                        constraints.push(new NOGCConstraint());
                         break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
