@@ -3,8 +3,7 @@ import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface ConsecutiveConstraintStatus extends BaseConstraintStatus {
     currentConsecutive: number;

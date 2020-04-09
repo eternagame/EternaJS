@@ -3,8 +3,7 @@ import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> {
     public static readonly NAME = 'BARCODE';

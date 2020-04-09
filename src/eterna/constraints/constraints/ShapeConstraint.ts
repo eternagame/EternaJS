@@ -4,8 +4,7 @@ import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import * as log from 'loglevel';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface ShapeConstraintStatus extends BaseConstraintStatus {
     wrongPairs: number[];

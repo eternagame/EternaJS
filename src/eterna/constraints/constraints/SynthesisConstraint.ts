@@ -6,8 +6,7 @@ import EPars from 'eterna/EPars';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import {ConsecutiveAConstraint, ConsecutiveGConstraint, ConsecutiveCConstraint} from './ConsecutiveBaseConstraint';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface SynthConstraintStatus extends BaseConstraintStatus {
     currentA: number;

@@ -1,8 +1,7 @@
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MinBaseConstraintStatus extends BaseConstraintStatus{
     currentCount: number;

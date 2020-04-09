@@ -3,8 +3,7 @@ import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
-import ConstraintContext from '../ConstraintContext';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MaxPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;

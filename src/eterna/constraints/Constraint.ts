@@ -1,7 +1,7 @@
 import UndoBlock from 'eterna/UndoBlock';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import Puzzle from 'eterna/puzzle/Puzzle';
 import {ConstraintBoxConfig} from './ConstraintBox';
-import ConstraintContext from './ConstraintContext';
 
 export interface BaseConstraintStatus {
     satisfied: boolean;
@@ -13,6 +13,15 @@ export interface HighlightInfo {
     color: HighlightType;
     // Set if only a specific state should have the highlight
     stateIndex?: number;
+}
+
+export interface ConstraintContext {
+    undoBlocks: UndoBlock[];
+    targetConditions?: any[];
+    puzzle?: Puzzle;
+    targetPairs?: number[][];
+    currentTargetIndex?: number;
+    sequence?: number[];
 }
 
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {

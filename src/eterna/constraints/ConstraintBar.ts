@@ -5,8 +5,7 @@ import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
-import ConstraintContext from './ConstraintContext';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;

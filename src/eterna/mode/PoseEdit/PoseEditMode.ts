@@ -886,7 +886,7 @@ export default class PoseEditMode extends GameMode {
                     puzzle: this._puzzle,
                     targetPairs: this._targetPairs,
                     currentTargetIndex: this._curTargetIndex,
-                    poses: this._poses
+                    sequence: this._poses[this._curTargetIndex].sequence
                 }).satisfied;
             } else {
                 return false;
@@ -2013,7 +2013,7 @@ export default class PoseEditMode extends GameMode {
                         puzzle: this._puzzle,
                         targetPairs: this._targetPairs,
                         currentTargetIndex: this._curTargetIndex,
-                        poses: this._poses
+                        sequence: this._poses[this._curTargetIndex].sequence
                     }),
                     true,
                     this._seqStacks[this._stackLevel],
@@ -2243,7 +2243,7 @@ export default class PoseEditMode extends GameMode {
             puzzle: this._puzzle,
             targetPairs: this._targetPairs,
             currentTargetIndex: this._curTargetIndex,
-            poses: this._poses
+            sequence: this._poses[this._curTargetIndex].sequence
         });
     }
 

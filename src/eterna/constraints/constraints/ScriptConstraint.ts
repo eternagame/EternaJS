@@ -1,8 +1,7 @@
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import ConstraintContext from '../ConstraintContext';
 
 interface ScriptConstraintStatus extends BaseConstraintStatus {
     goal: string;
