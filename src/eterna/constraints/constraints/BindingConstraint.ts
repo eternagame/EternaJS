@@ -7,6 +7,7 @@ import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import ConstraintContext from '../ConstraintContext';
 
 interface OligoInfo {
     bind: boolean;
@@ -97,11 +98,10 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
 
     public getHighlight(
         status: BaseConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        context: ConstraintContext
     ): HighlightInfo {
-        let undoBlock = undoBlocks[this.stateIndex];
-        let stateCondition = targetConditions[this.stateIndex];
+        let undoBlock = context.undoBlocks[this.stateIndex];
+        let stateCondition = context.targetConditions[this.stateIndex];
 
         return {
             ranges: [
@@ -121,13 +121,13 @@ interface MultistrandConstraintStatus extends BaseConstraintStatus {
 export class MultistrandBindingsConstraint extends BindingsConstraint<MultistrandConstraintStatus> {
     public static readonly NAME = 'BINDINGS';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): MultistrandConstraintStatus {
-        let undoBlock = undoBlocks[this.stateIndex];
-        if (targetConditions == null) {
+    public evaluate(context: ConstraintContext): MultistrandConstraintStatus {
+        let undoBlock = context.undoBlocks[this.stateIndex];
+        if (context.targetConditions == null) {
             throw new Error('Target object not available for BINDINGS constraint');
         }
 
-        let stateCondition = targetConditions[this.stateIndex];
+        let stateCondition = context.targetConditions[this.stateIndex];
 
         if (stateCondition == null) {
             throw new Error('Target condition not available for BINDINGS constraint');
@@ -170,11 +170,10 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 
     public getHighlight(
         status: MultistrandConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        context: ConstraintContext
     ): HighlightInfo {
-        let undoBlock = undoBlocks[this.stateIndex];
-        const oligos: OligoDef[] = targetConditions[this.stateIndex]['oligos'];
+        let undoBlock = context.undoBlocks[this.stateIndex];
+        const oligos: OligoDef[] = context.targetConditions[this.stateIndex]['oligos'];
 
         let highlightedIndices: number[] = [];
         // The + 1 is used to account for the "cut" base denoting split points between strands
@@ -204,15 +203,15 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatus> {
     public static readonly NAME = 'OLIGO_BOUND';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): BaseConstraintStatus {
-        let nnfe: number[] = undoBlocks[this.stateIndex]
+    public evaluate(context: ConstraintContext): BaseConstraintStatus {
+        let nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 
-        if (targetConditions == null) {
+        if (context.targetConditions == null) {
             throw new Error('Target object not available for BINDINGS constraint');
         }
 
-        let stateCondition = targetConditions[this.stateIndex];
+        let stateCondition = context.targetConditions[this.stateIndex];
         if (stateCondition == null) {
             throw new Error('Target condition not available for BINDINGS constraint');
         }
@@ -241,15 +240,15 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
 export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintStatus> {
     public static readonly NAME = 'OLIGO_UNBOUND';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): BaseConstraintStatus {
-        let nnfe: number[] = undoBlocks[this.stateIndex]
+    public evaluate(context: ConstraintContext): BaseConstraintStatus {
+        let nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 
-        if (targetConditions == null) {
+        if (context.targetConditions == null) {
             throw new Error('Target object not available for BINDINGS constraint');
         }
 
-        let stateCondition = targetConditions[this.stateIndex];
+        let stateCondition = context.targetConditions[this.stateIndex];
         if (stateCondition == null) {
             throw new Error('Target condition not available for BINDINGS constraint');
         }

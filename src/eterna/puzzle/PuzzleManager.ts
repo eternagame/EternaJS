@@ -32,9 +32,9 @@ import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
+import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
-import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {

@@ -1,7 +1,7 @@
 import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import {ConstraintBoxConfig} from './ConstraintBox';
+import ConstraintContext from './ConstraintContext';
 
 export interface BaseConstraintStatus {
     satisfied: boolean;
@@ -27,7 +27,7 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
      *
      * @returns Judge whether the constraint is satisfied
      */
-    public abstract evaluate(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): ConstraintStatus;
+    public abstract evaluate(context: ConstraintContext): ConstraintStatus;
 
     /**
      * Consume details about a constraint and emit a description of how to show
@@ -53,8 +53,7 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
 
     public getHighlight(
         status: ConstraintStatus,
-        undoBlocks: UndoBlock[],
-        targetConditions?: any[]
+        context: ConstraintContext
     ): HighlightInfo {
         return null;
     }

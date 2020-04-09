@@ -4,6 +4,7 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import ConstraintContext from '../ConstraintContext';
 
 interface ConsecutiveConstraintStatus extends BaseConstraintStatus {
     currentConsecutive: number;
@@ -25,9 +26,9 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         this.consecutiveLimit = limit;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): ConsecutiveConstraintStatus {
+    public evaluate(context: ConstraintContext): ConsecutiveConstraintStatus {
         let count = EPars.countConsecutive(
-            undoBlocks[0].sequence,
+            context.undoBlocks[0].sequence,
             this.baseType
         );
 
@@ -65,13 +66,13 @@ abstract class ConsecutiveBaseConstraint extends Constraint<ConsecutiveConstrain
         };
     }
 
-    public getHighlight(status: ConsecutiveConstraintStatus, undoBlocks: UndoBlock[]): HighlightInfo {
+    public getHighlight(status: ConsecutiveConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
             ranges: EPars.getRestrictedConsecutive(
-                undoBlocks[0].sequence,
+                context.undoBlocks[0].sequence,
                 this.baseType,
                 this.consecutiveLimit - 1,
-                undoBlocks[0].puzzleLocks
+                context.undoBlocks[0].puzzleLocks
             ),
             color: HighlightType.RESTRICTED
         };

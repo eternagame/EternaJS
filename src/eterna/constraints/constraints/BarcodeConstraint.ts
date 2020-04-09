@@ -1,18 +1,18 @@
-import UndoBlock from 'eterna/UndoBlock';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus} from '../Constraint';
+import ConstraintContext from '../ConstraintContext';
 
 export default class BarcodeConstraint extends Constraint<BaseConstraintStatus> {
     public static readonly NAME = 'BARCODE';
 
-    public evaluate(undoBlocks: UndoBlock[]): BaseConstraintStatus {
+    public evaluate(context: ConstraintContext): BaseConstraintStatus {
         return {
             satisfied: !SolutionManager.instance.checkRedundancyByHairpin(
-                EPars.sequenceToString(undoBlocks[0].sequence)
+                EPars.sequenceToString(context.undoBlocks[0].sequence)
             )
         };
     }

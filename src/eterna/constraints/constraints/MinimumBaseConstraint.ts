@@ -1,8 +1,8 @@
-import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus} from '../Constraint';
+import ConstraintContext from '../ConstraintContext';
 
 interface MinBaseConstraintStatus extends BaseConstraintStatus{
     currentCount: number;
@@ -18,9 +18,9 @@ abstract class MinimumBaseConstraint extends Constraint<MinBaseConstraintStatus>
         this.minCount = minCount;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MinBaseConstraintStatus {
+    public evaluate(context: ConstraintContext): MinBaseConstraintStatus {
         // TODO: Multistate?
-        const count = undoBlocks[0].sequence.reduce(
+        const count = context.undoBlocks[0].sequence.reduce(
             (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
         );
 

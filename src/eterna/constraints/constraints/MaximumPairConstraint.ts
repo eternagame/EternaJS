@@ -1,9 +1,10 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus} from '../Constraint';
+import ConstraintContext from '../ConstraintContext';
 
 interface MaxPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;
@@ -19,9 +20,9 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         this.maxPairs = maxPairs;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MaxPairConstraintStatus {
+    public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = undoBlocks[0].getParam(
+        const currentPairs: number = context.undoBlocks[0].getParam(
             UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
         );
         return {
