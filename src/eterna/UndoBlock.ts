@@ -343,7 +343,7 @@ export default class UndoBlock {
      * (oligo A, with the old index of 0, should be at new index 1)
      */
     public reorderedOligosIndexMap(otherOrder: number[]): number[] {
-        if (this._targetOligos == null) return null;
+        if (this._targetOligos == null) return [];
 
         let originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;

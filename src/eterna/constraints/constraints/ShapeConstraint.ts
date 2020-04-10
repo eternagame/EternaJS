@@ -29,7 +29,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
     protected _targetAlignedConstraints(constraints: boolean[], ublk: UndoBlock): boolean[] {
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
 
-        if (targetMap != null) {
+        if (targetMap != []) {
             let targetAlignedConstraints: boolean[] = [];
             for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
                 targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
@@ -54,7 +54,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
         // rawIndex => targetAlignedIndex
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
-        if (targetMap != null) {
+        if (targetMap != []) {
             // rawIndex => naturalAlignedIndex
             let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
 

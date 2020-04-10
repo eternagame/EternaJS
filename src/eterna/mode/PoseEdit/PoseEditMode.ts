@@ -606,7 +606,7 @@ export default class PoseEditMode extends GameMode {
                     if (highlightInfo && (highlightInfo.stateIndex == null || poseState === highlightInfo.stateIndex)) {
                         let currBlock = this.getCurrentUndoBlock(poseState);
                         let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
-                        let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
+                        let ranges = (this._poseState === PoseState.NATIVE && naturalMap != [])
                             ? highlightInfo.ranges.map((index) => naturalMap.indexOf(index)) : highlightInfo.ranges;
 
                         switch (highlightInfo.color) {
