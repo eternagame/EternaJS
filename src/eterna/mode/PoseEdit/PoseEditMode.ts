@@ -77,6 +77,8 @@ export interface PoseEditParams {
     initSolution?: Solution;
     // a list of solutions we can iterate through
     solutions?: Solution[];
+
+    local?: boolean;
 }
 
 export interface OligoDef {
@@ -1794,7 +1796,9 @@ export default class PoseEditMode extends GameMode {
 
         // submit our solution to the server
         log.debug('Submitting solution...');
-        let submissionPromise = Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
+        let submissionPromise = this._params.local
+            ? Promise.resolve()
+            : Eterna.client.submitSolution(this.createSubmitData(details, undoBlock));
 
         // Wait for explosion completion
         await fxComplete;
@@ -1808,14 +1812,14 @@ export default class PoseEditMode extends GameMode {
         let submissionResponse = allResults[0];
 
         // show achievements, if we were awarded any
-        let cheevs: any = submissionResponse['new_achievements'];
+        const cheevs = submissionResponse?.new_achievements;
         if (cheevs != null) {
             await this._achievements.awardAchievements(cheevs);
         }
 
         submittingRef.destroyObject();
 
-        let data: any = submissionResponse['data'];
+        const data: any = submissionResponse?.data;
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
             this.showMissionClearedPanel(data);
@@ -1825,7 +1829,7 @@ export default class PoseEditMode extends GameMode {
             this._puzzle.transformSequence(undoBlock.sequence, 0)
         );
 
-        if (data['error'] != null) {
+        if (data?.error != null) {
             log.debug(`Got solution submission error: ${data['error']}`);
             if (data['error'].indexOf('barcode') >= 0) {
                 let dialog = this.showNotification(data['error'], 'More Information');
@@ -1841,7 +1845,7 @@ export default class PoseEditMode extends GameMode {
         } else {
             log.debug('Solution submitted');
 
-            if (data['solution-id'] != null) {
+            if (data?.['solution-id'] != null) {
                 this.setAncestorId(data['solution-id']);
             }
 
@@ -1879,7 +1883,7 @@ export default class PoseEditMode extends GameMode {
             moreText = boostersData.mission_cleared['more'];
         }
 
-        let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
+        let nextPuzzleData: any = submitSolutionRspData?.['next-puzzle'];
         let nextPuzzle: Puzzle = null;
         if (nextPuzzleData) {
             try {
@@ -1894,7 +1898,9 @@ export default class PoseEditMode extends GameMode {
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
-        missionClearedPanel.createRankScroll(submitSolutionRspData);
+        if (submitSolutionRspData) {
+            missionClearedPanel.createRankScroll(submitSolutionRspData);
+        }
 
         const keepPlaying = () => {
             if (missionClearedPanel != null) {

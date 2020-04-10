@@ -32,51 +32,20 @@
 <!-- Scripts expect that an element with "maingame" will exist, so this name shouldn't be changed -->
 <div id="maingame" style="width: 100%; height: 100%; overflow: hidden; background-image: radial-gradient(circle, rgb(50, 69, 109) 0%, rgb(6, 26, 52) 75%)"></div>
 
-<!-- In-game chat. Hidden to begin with; the game is in charge of displaying it -->
-<div id="chat-container" style="position: absolute; top: 65px; right: 10px; width: 230px; overflow: hidden; display: none">
-    <iframe src="https://irc.eternagame.org/chat.html?name=Anonymous&amp;uid=0" style="width: 100%; height: 340px; border: none;"></iframe>
-</div>
-
 <!-- Load our webpack bundles -->
 <%= htmlWebpackPlugin.tags.bodyTags %>
 
 <script>
-    Application.GET_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
-    Application.POST_URI = "<%= htmlWebpackPlugin.options.process.env.APP_SERVER_URL %>/get/";
-
-    const params = new URLSearchParams(window.location.search);
-    const numberParam = (name) => params.has(name) ? Number(params.get(name)) : undefined;
-
     const containerID = "maingame";
     const appContainer = document.getElementById(containerID);
 
-    let designBrowserFilters = [];
-    for (let ii = 1; ; ++ii) {
-        let filterName = "filter" + ii;
-        if (params.has(filterName)) {
-            designBrowserFilters.push({
-                category: params.get(filterName),
-                arg1: params.get(filterName + "_arg1"),
-                arg2: params.get(filterName + "_arg2"),
-            });
-        } else {
-            break;
-        }
-    }
-
     const app = new EternaApp({
         containerID: containerID,
-        chatboxID: "chat-container",
         width: appContainer.clientWidth,
         height: appContainer.clientHeight,
-
-        mode: params.get("mode"),
-        puzzleID: numberParam("puzzle"),
-        solutionID: numberParam("solution"),
-        puzzleEditNumTargets: numberParam("puzzleEditNumTargets"),
-        folderName: params.get("folder"),
-        sequence: params.get("sequence"),
-        designBrowserFilters: designBrowserFilters,
+        mode: 'puzzle',
+		
+		puzzlePath: '/puzzles/puzzle-1.2.json'	
     });
     window.app = app;
     app.run();

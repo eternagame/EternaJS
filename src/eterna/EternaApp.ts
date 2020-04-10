@@ -80,6 +80,7 @@ export interface EternaAppParams {
     // initialization options
     mode?: InitialAppMode;
     puzzleID?: number;
+    puzzlePath?: string;
     solutionID?: number;
     puzzleEditNumTargets?: number;
     folderName?: string;
@@ -98,7 +99,8 @@ export default class EternaApp extends FlashbangApp {
         params.chatboxID = params.chatboxID || 'chat-container';
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
+        // params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
+        params.puzzlePath = '/puzzles/puzzle-1.2.json';
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
@@ -150,11 +152,17 @@ export default class EternaApp extends FlashbangApp {
                         return Promise.resolve();
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
-                    case InitialAppMode.PUZZLE:
-                        return this.loadPoseEdit(this._params.puzzleID, {
+                    case InitialAppMode.PUZZLE: {
+                        const puzzleParams = {
                             initialFolder: this._params.folderName,
                             initSequence: this._params.sequence
-                        });
+                        };
+                        if (this._params.puzzlePath) {
+                            return this.loadPoseEditFromFile(this._params.puzzlePath, puzzleParams);
+                        } else {
+                            return this.loadPoseEdit(this._params.puzzleID, puzzleParams);
+                        }
+                    }
                     case InitialAppMode.SOLUTION_SEE_RESULT:
                     case InitialAppMode.SOLUTION_COPY_AND_VIEW:
                         return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
@@ -322,6 +330,23 @@ export default class EternaApp extends FlashbangApp {
             this.popLoadingMode();
             return puzzle;
         }
+    }
+
+    public async loadPoseEditFromFile(path: string, params: PoseEditParams) {
+        const puzzle = await this.loadPuzzleFromFile(path);
+        return this._modeStack.unwindToMode(new PoseEditMode(
+            puzzle,
+            {...params, local: true},
+            await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
+        ));
+    }
+
+    private async loadPuzzleFromFile(path: string) {
+        const json = await (await fetch(path)).json();
+        this.setLoadingText('Loading puzzle...', null);
+        const puzzle = await PuzzleManager.instance.getPuzzleFromJSON(json);
+        this.popLoadingMode();
+        return puzzle;
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {

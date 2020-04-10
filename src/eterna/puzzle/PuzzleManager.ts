@@ -350,16 +350,31 @@ export default class PuzzleManager {
 
         let puzzle = this.parsePuzzle(data['puzzle']);
 
-        let isScriptConstraint = (
+        await this.preloadScripts(puzzle);
+        log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
+        return puzzle;
+    }
+
+    public async getPuzzleFromJSON(json: any): Promise<Puzzle> {
+        const existing = this._puzzles.find((p) => p.nodeID === json.id);
+        if (existing) {
+            return existing;
+        }
+        const puzzle = this.parsePuzzle(json);
+        await this.preloadScripts(puzzle);
+        log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
+        return puzzle;
+    }
+
+    private preloadScripts(puzzle: Puzzle) {
+        const isScriptConstraint = (
             constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
         ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
 
-        await Promise.all(
+        return Promise.all(
             puzzle.constraints.filter(isScriptConstraint)
                 .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
         );
-        log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
-        return puzzle;
     }
 
     private _puzzles: Puzzle[] = [];
