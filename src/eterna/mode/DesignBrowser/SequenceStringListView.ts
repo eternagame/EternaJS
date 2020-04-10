@@ -53,9 +53,9 @@ export default class SequenceStringListView extends Container {
 
         for (let ii = 0; ii < sequences.length; ii++) {
             let seq: string = sequences[ii];
-            let shapeData: number[] = null;
+            let shapeData: number[] = [];
             let shapeDataStart = 0;
-            let expPainter: ExpPainter = null;
+            let expPainter: ExpPainter | null = null;
             let isThereShapeThreshold = false;
             let shapeThreshold = 0;
             let shapeMax = 0;
@@ -117,15 +117,18 @@ export default class SequenceStringListView extends Container {
                         letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1
                     );
                 } else {
-                    let colorIndex = 0;
+                    let colorIndex: number | undefined = 0;
 
+                    // AMW TODO: Note that the only way expPainter is defined is if on this iteration, there was 
+                    // a shape threshold. But the else clause uses it too! That's not great. Thankfully, bdIndex 
+                    // then goes unused...
                     if (isThereShapeThreshold) {
-                        colorIndex = expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax);
+                        colorIndex = expPainter ? expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax) : undefined;
                     } else {
-                        colorIndex = expPainter.getColorLevel(jj);
+                        colorIndex = expPainter ? expPainter.getColorLevel(jj) : undefined;
                     }
 
-                    bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
+                    // bdIndex: number | undefined = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
                 }
 
                 let letterSprite = new Sprite(this._letterTextures[bdIndex]);
@@ -168,7 +171,7 @@ export default class SequenceStringListView extends Container {
     private readonly _letterTextures: Texture[];
     private readonly _graphics: Graphics;
 
-    private _content: Container;
+    private _content: Container | null;
 
     private _width: number;
     private _height: number;

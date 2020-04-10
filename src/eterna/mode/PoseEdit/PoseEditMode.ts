@@ -89,7 +89,7 @@ export interface OligoDef {
 }
 
 export default class PoseEditMode extends GameMode {
-    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] = null) {
+    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] = []) {
         super();
         this._puzzle = puzzle;
         this._params = params;
@@ -365,7 +365,11 @@ export default class PoseEditMode extends GameMode {
 
     public selectFolder(folderName: string): boolean {
         if (this._folder.name === folderName) return true;
-        let folder: Folder = FolderManager.instance.getFolder(folderName);
+        let folder: Folder | null = FolderManager.instance.getFolder(folderName);
+        if (folder === null ) {
+            // bad folder name passed in, probably
+            return false;
+        }
         if (this._puzzle.hasTargetType('multistrand') && !folder.canMultifold) {
             return false;
         }
@@ -418,11 +422,12 @@ export default class PoseEditMode extends GameMode {
         this.clearUndoStack();
         this.pushUILock();
 
+        // AMW TODO: any[] is an array of JSONs, basically.
         const setSolution = (foldData: any[]) => {
             this.hideAsyncText();
             this.popUILock();
 
-            if (foldData != null) {
+            if (foldData != []) {
                 this._stackLevel++;
                 this._stackSize = this._stackLevel + 1;
                 this._seqStacks[this._stackLevel] = [];
@@ -454,7 +459,7 @@ export default class PoseEditMode extends GameMode {
             this.showAsyncText('retrieving...');
             solution.queryFoldData().then((result) => setSolution(result));
         } else {
-            setSolution(null);
+            setSolution([]);
         }
     }
 
@@ -535,11 +540,11 @@ export default class PoseEditMode extends GameMode {
 
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             this._targetConditions.push(targetConditions[ii]);
-            this._targetOligos.push(null);
-            this._targetOligosOrder.push(null);
-            this._targetOligo.push(null);
-            this._oligoMode.push(null);
-            this._oligoName.push(null);
+            this._targetOligos.push([]);
+            this._targetOligosOrder.push([]);
+            this._targetOligo.push([]);
+            this._oligoMode.push(0);
+            this._oligoName.push(0);
             if (targetConditions[ii] && targetConditions[ii]['oligo_sequence']) {
                 this._targetOligo[ii] = EPars.stringToSequence(targetConditions[ii]['oligo_sequence']);
                 this._oligoMode[ii] = targetConditions[ii]['fold_mode'] == null
@@ -649,7 +654,7 @@ export default class PoseEditMode extends GameMode {
         //     }
         // }
 
-        let initialFolder: Folder = null;
+        let initialFolder: Folder | null = null;
         if (this._params.initialFolder != null) {
             initialFolder = FolderManager.instance.getFolder(this._params.initialFolder);
             if (initialFolder == null) {
@@ -657,7 +662,16 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+        let summonedFolder = FolderManager.instance.getFolder(this._puzzle.folderName);
+        if ( !summonedFolder && !initialFolder ) {
+            log.error('Could not find a folder with name', this._puzzle.folderName);
+            return;
+        }
+        if ( initialFolder !== null ) {
+            this._folder = initialFolder;
+        } else if ( summonedFolder !== null ) {
+            this._folder = summonedFolder;
+        }
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't

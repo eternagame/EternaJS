@@ -46,10 +46,14 @@ export default class Vienna extends Folder {
         let seqStr: string = EPars.sequenceToString(seq);
 
         let probabilitiesString: string;
-        let result: DotPlotResult;
+        let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
-            probabilitiesString = result.probabilitiesString;
+            if (result) {
+                probabilitiesString = result.probabilitiesString;
+            } else {
+                probabilitiesString = ""
+            }
         } catch (e) {
             log.error('GetDotPlot error', e);
             return [];
@@ -97,7 +101,7 @@ export default class Vienna extends Folder {
 
     public scoreStructures(
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] = null
+        temp: number = 37, outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -113,12 +117,14 @@ export default class Vienna extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs));
-                cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
+                if (result) {
+                    cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
+                }
             } catch (e) {
                 log.error('FullEval error', e);
                 return 0;
@@ -173,7 +179,7 @@ export default class Vienna extends Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         let key: any = {
@@ -199,7 +205,7 @@ export default class Vienna extends Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
     ): number[] {
         let key: any = {
@@ -217,7 +223,7 @@ export default class Vienna extends Folder {
             return pairs.slice();
         }
 
-        if (!(version >= 2.0)) {
+        if (!(version >= 2.0) && targetPairs !== null) {
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
             this.putCache(key, pairs.slice());
             return pairs;
@@ -247,7 +253,7 @@ export default class Vienna extends Folder {
                 seq, siteGroups[0][0], siteGroups[0][siteGroups[0].length - 1], siteGroups[1][siteGroups[1].length - 1],
                 siteGroups[1][0], bonus, temp
             );
-        } else {
+        } else if ( targetPairs !== null ) {
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
 
@@ -260,7 +266,7 @@ export default class Vienna extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -310,7 +316,7 @@ export default class Vienna extends Folder {
     }
 
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
@@ -392,7 +398,7 @@ export default class Vienna extends Folder {
         let j: number;
         let p: number;
         let q: number;
-        let u: number;
+        let u: number = 0;
         let x: number;
         let type: number;
         let count: number;
@@ -639,13 +645,17 @@ export default class Vienna extends Folder {
         return hairpinScore;
     }
 
-    private foldSequenceImpl(seq: number[], structStr: string = null, temp: number = 37): number[] {
+    private foldSequenceImpl(seq: number[], structStr: string | null = null, temp: number = 37): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, structStr || '');
-            return EPars.parenthesisToPairs(result.structure);
+            if (result) {
+                return EPars.parenthesisToPairs(result.structure);
+            } else {
+                return [];
+            }
         } catch (e) {
             log.error('FullFoldTemperature error', e);
             return [];
@@ -662,11 +672,15 @@ export default class Vienna extends Folder {
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
         const structStr = '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
-            return EPars.parenthesisToPairs(result.structure);
+            if (result) {
+                return EPars.parenthesisToPairs(result.structure);
+            } else {
+                return [];
+            }
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
             return [];
@@ -678,15 +692,19 @@ export default class Vienna extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: number[], str: string = null, temp: number = 37): number[] {
+    private cofoldSequenceImpl(seq: number[], str: string | null = null, temp: number = 37): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
         const structStr: string = str || '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.CoFoldSequence(seqStr, structStr);
             log.debug('done cofolding');
-            return EPars.parenthesisToPairs(result.structure);
+            if (result) {
+                return EPars.parenthesisToPairs(result.structure);
+            } else {
+                return [];
+            }
         } catch (e) {
             log.error('CoFoldSequence error', e);
             return [];
@@ -699,16 +717,20 @@ export default class Vienna extends Folder {
     }
 
     private cofoldSequenceWithBindingSiteImpl(
-        seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+        seq: number[], str: string | null, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
         const structStr: string = str || '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             log.debug('done cofolding');
-            return EPars.parenthesisToPairs(result.structure);
+            if (result) {
+                return EPars.parenthesisToPairs(result.structure);
+            } else {
+                return [];
+            }
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
             return [];

@@ -64,12 +64,12 @@ function AllCategories(): DesignCategory[] {
 
 export interface DesignBrowserFilter {
     category: DesignCategory;
-    arg1?: string;
+    arg1: string;
     arg2?: string;
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] = null) {
+    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] = []) {
         super();
 
         this._puzzle = puzzle;
@@ -575,7 +575,7 @@ export default class DesignBrowserMode extends GameMode {
         });
     }
 
-    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] = null): void {
+    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: string | null = null): void {
         if (sortOrder !== SortOrder.NONE) {
             this._sortOptions.addCriteria(category, sortOrder, sortArgs);
         } else {
@@ -669,7 +669,7 @@ export default class DesignBrowserMode extends GameMode {
         this.reorganize(true);
     }
 
-    private rebuildDataColumns(filters: DesignBrowserFilter[] = null): void {
+    private rebuildDataColumns(filters: DesignBrowserFilter[] = []): void {
         const FONT = 'Arial';
         const FONT_SIZE = 14;
 
@@ -720,12 +720,10 @@ export default class DesignBrowserMode extends GameMode {
             this._dataCols.push(column);
             this._dataColParent.addObject(column, this._dataColParent.container);
 
-            if (filters != null) {
-                for (let filter of filters) {
-                    if (filter.category === category) {
-                        column.setFilter(filter.arg1, filter.arg2);
-                        break;
-                    }
+            for (let filter of filters) {
+                if (filter.category === category) {
+                    column.setFilter(filter.arg1, filter.arg2);
+                    break;
                 }
             }
         }
@@ -806,7 +804,7 @@ export default class DesignBrowserMode extends GameMode {
         return -1;
     }
 
-    private getSolutionAtIndex(idx: number): Solution {
+    private getSolutionAtIndex(idx: number): Solution | null {
         return idx >= 0 && idx < this._filteredSolutions.length ? this._filteredSolutions[idx] : null;
     }
 

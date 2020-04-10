@@ -6,22 +6,22 @@ import GameObjectRef from './GameObjectRef';
 
 export default class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */
-    public get display(): DisplayObject {
+    public get display(): DisplayObject | null{
         return null;
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
         return this._addObjectInternal(obj, null, false, displayParent, displayIdx);
     }
 
     public addNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._addObjectInternal(obj, name, false, displayParent, displayIdx);
     }
 
     public replaceNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._addObjectInternal(obj, name, true, displayParent, displayIdx);
     }
@@ -94,8 +94,8 @@ export default class GameObject extends GameObjectBase {
     /* internal */
     public _addObjectInternal(
         obj: GameObjectBase,
-        name: string, replaceExisting: boolean,
-        displayParent: Container, displayIdx: number = -1
+        name: string | null, replaceExisting: boolean,
+        displayParent: Container | null, displayIdx: number = -1
     ): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal

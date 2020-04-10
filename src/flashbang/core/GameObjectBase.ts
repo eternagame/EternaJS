@@ -155,9 +155,9 @@ export default class GameObjectBase {
     private _regs: RegistrationGroup;
     private _destroyed: UnitSignal;
 
-    /* internal */ public _name: string;
-    /* internal */ public _ref: GameObjectRef;
-    /* internal */ public _parent: GameObject;
+    /* internal */ public _name: string | null;
+    /* internal */ public _ref: GameObjectRef | null;
+    /* internal */ public _parent: GameObject | null;
     /* internal */ public _mode: AppMode;
 
     private static readonly EMPTY_ARRAY: any[] = [];

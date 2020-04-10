@@ -24,14 +24,14 @@ export = ViennaLib;
 
 /*~ Write your module's methods and properties in this class */
 declare class ViennaLib {
-    FullEval (temperature_in: number, seqString: string, structString: string): ViennaLib.FullEvalResult;
+    FullEval (temperature_in: number, seqString: string, structString: string): ViennaLib.FullEvalResult | null;
 
-    FullFoldDefault(seqString: string, structString: string): ViennaLib.FullFoldResult;
-    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): ViennaLib.FullFoldResult;
-    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): ViennaLib.DotPlotResult;
-    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ViennaLib.FullFoldResult;
-    CoFoldSequence (seqString: string, structString: string): ViennaLib.FullFoldResult;
-    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ViennaLib.FullFoldResult;
+    FullFoldDefault(seqString: string, structString: string): ViennaLib.FullFoldResult | null;
+    FullFoldTemperature (temperature_in: number, seqString: string, structString: string): ViennaLib.FullFoldResult | null;
+    GetDotPlot (temperature_in: number, seqString: string, dotplotStructString: string): ViennaLib.DotPlotResult | null;
+    FullFoldWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ViennaLib.FullFoldResult | null;
+    CoFoldSequence (seqString: string, structString: string): ViennaLib.FullFoldResult | null;
+    CoFoldSequenceWithBindingSite (seqString: string, structString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): ViennaLib.FullFoldResult | null;
 }
 
 /*~ If you want to expose types from your module as well, you can

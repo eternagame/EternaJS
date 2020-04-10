@@ -2265,7 +2265,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._explosionFactorPanel.display.visible = show;
     }
 
-    public set scoreFolder(folder: Folder) {
+    public set scoreFolder(folder: Folder | null) {
         if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
             this.showTotalEnergy = this._showTotalEnergy;
@@ -3412,7 +3412,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Score display nodes
     private _scoreNodes: ScoreDisplayNode[];
     private _scoreTexts: Sprite[];
-    private _scoreFolder: Folder;
+    private _scoreFolder: Folder | null;
     private _scoreNodeIndex: number = -1;
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;

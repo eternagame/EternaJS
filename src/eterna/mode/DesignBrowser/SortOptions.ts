@@ -12,9 +12,9 @@ export enum SortOrder {
 export class SortCriterion {
     public readonly category: DesignCategory;
     public sortOrder: SortOrder;
-    public arg: string;
+    public arg: string | null;
 
-    constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg: string | null = null) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -114,9 +114,9 @@ export default class SortOptions {
         return 0;
     }
 
-    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
+    public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: string | null = null): void {
         let cur = this.getCriterion(category);
-        if (cur != null) {
+        if (cur != null && sortArgs !== null) {
             cur.sortOrder = sortOrder;
             cur.arg = sortArgs;
             this.setCriteriaIdx(category, 0);

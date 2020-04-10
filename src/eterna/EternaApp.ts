@@ -73,7 +73,7 @@ export enum InitialAppMode {
 
 export interface EternaAppParams {
     containerID?: string;
-    chatboxID?: string;
+    chatboxID: string; // this is mandatory!
     width?: number;
     height?: number;
 
@@ -104,7 +104,10 @@ export default class EternaApp extends FlashbangApp {
 
         this._params = params;
 
-        let eternaContainer: HTMLElement = document.getElementById(params.containerID);
+        let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
+        // AMW TODO: this feels rather catastrophic; we should fail proportionately
+        if (eternaContainer === null ) return;
+
         eternaContainer.style.position = 'relative';
 
         let pixiContainer: HTMLElement = document.createElement('div');
@@ -384,10 +387,10 @@ export default class EternaApp extends FlashbangApp {
                     Eterna.setPlayer(username, uid);
                 });
         } else {
-            let playerID = process.env['DEBUG_PLAYER_ID'];
+            let playerID : string | undefined = process.env['DEBUG_PLAYER_ID'];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
-            if (playerID.length === 0) {
+            if (playerID === undefined || playerID.length === 0) {
                 return Eterna.client.logout()
                     .then(() => {
                     })
@@ -397,8 +400,17 @@ export default class EternaApp extends FlashbangApp {
             }
 
             let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            if (playerPassword === undefined) {
+                return Eterna.client.logout()
+                    .then(() => {
+                    })
+                    .catch((err) => {
+                        log.debug(`Logout error: ${err}`);
+                    });
+            }
+
             log.debug(`Logging in ${playerID}...`);
-            return Eterna.client.login(playerID, playerPassword).then((uid) => {
+            return Eterna.client.login(playerID, playerPassword).then((uid: number) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
                 Eterna.setPlayer(playerID, uid);
             });
