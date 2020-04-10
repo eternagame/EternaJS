@@ -15,7 +15,7 @@ export default class PoseUtil {
         }
     }
 
-    public static addBaseWithIndex(index: number, pairs: number[]): any[] {
+    public static addBaseWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]] {
         let mutatedPairs: number[];
         mutatedPairs = pairs.slice(0, index);
         mutatedPairs.push(-1);
@@ -82,7 +82,7 @@ export default class PoseUtil {
         }
     }
 
-    public static deleteNopairWithIndex(index: number, pairs: number[]): any[] {
+    public static deleteNopairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp, number[]] {
         let mutatedPairs: number[];
         let parenthesis: string;
         mutatedPairs = pairs.slice(0, index);

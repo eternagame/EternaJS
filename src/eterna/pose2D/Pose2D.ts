@@ -389,7 +389,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.callPoseEditCallback();
         }
 
-        this._mutatedSequence = null;
+        this._mutatedSequence = [];
         this._lockUpdated = false;
         this._bindingSiteUpdated = false;
         this._designStructUpdated = false;
@@ -440,7 +440,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getBaseLoc(seq: number, out: Point = null): Point {
+    public getBaseLoc(seq: number, out: Point | null = null): Point {
         if (out == null) {
             out = new Point();
         }
@@ -449,7 +449,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
-    public getBaseOutXY(seq: number, out: Point = null): Point {
+    public getBaseOutXY(seq: number, out: Point | null = null): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
         out.y += this._offY;
@@ -478,7 +478,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public parseCommandWithPairs(command: number, closestIndex: number, pairs: number[]): any[] {
+    public parseCommandWithPairs(command: number, closestIndex: number, pairs: number[]): [string, PuzzleEditOp, number[]] | null {
         switch (command) {
             case EPars.RNABASE_ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, pairs);
@@ -656,7 +656,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ROPWait.notifyEndPaint();
     }
 
-    public deleteBaseWithIndexPairs(index: number, pairs: number[]): any[] {
+    public deleteBaseWithIndexPairs(index: number, pairs: number[]): [string, PuzzleEditOp, number[]] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }

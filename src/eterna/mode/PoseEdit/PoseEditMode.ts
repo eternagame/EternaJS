@@ -2521,12 +2521,12 @@ export default class PoseEditMode extends GameMode {
                     this._poses[ii].baseShiftWithCommand(lastShiftedCommand, lastShiftedIndex);
                 }
 
-                let results: any = this._poses[ii].parseCommandWithPairs(
+                let results: [string, PuzzleEditOp, number[]] | null = this._poses[ii].parseCommandWithPairs(
                     lastShiftedCommand, lastShiftedIndex, this._targetPairs[ii]
                 );
                 if (results != null) {
                     let parenthesis: string = results[0];
-                    let mode: number = results[1];
+                    let mode: PuzzleEditOp = results[1];
                     this._targetPairs[ii] = EPars.parenthesisToPairs(parenthesis);
                 }
 
@@ -2563,7 +2563,7 @@ export default class PoseEditMode extends GameMode {
                 let antiSecstruct: string = this._targetConditions[ii]['anti_secstruct'];
                 if (antiSecstruct != null) {
                     let antiPairs: number[] = EPars.parenthesisToPairs(antiSecstruct);
-                    let antiResult: any[] = this._poses[ii].parseCommandWithPairs(
+                    let antiResult: [string, PuzzleEditOp, number[]] | null = this._poses[ii].parseCommandWithPairs(
                         lastShiftedCommand, lastShiftedIndex, antiPairs
                     );
                     this._targetConditions[ii]['anti_secstruct'] = antiResult[0];
