@@ -99,8 +99,7 @@ export default class EternaApp extends FlashbangApp {
         params.chatboxID = params.chatboxID || 'chat-container';
         params.width = params.width || 1280;
         params.height = params.height || 1024;
-        // params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
-        params.puzzlePath = '/puzzles/puzzle-1.2.json';
+        params.puzzleID = params.puzzleID || PuzzleID.Tutorial1;
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
