@@ -19,9 +19,6 @@ export interface ConstraintContext {
     undoBlocks: UndoBlock[];
     targetConditions?: any[];
     puzzle?: Puzzle;
-    targetPairs?: number[][];
-    currentTargetIndex?: number;
-    sequence?: number[];
 }
 
 export default abstract class Constraint<ConstraintStatus extends BaseConstraintStatus> {

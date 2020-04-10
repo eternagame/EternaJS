@@ -28,10 +28,10 @@ class Loop {
     }
 }
 
-function detectLoops(targetPairs: number[][], currentTargetIndex: number, loops: Loop[]) {
+function detectLoops(targetPairs: number[], loops: Loop[]) {
     loops.splice(0);
     let loopStack = [];
-    let tmpPairs = targetPairs[currentTargetIndex].slice();
+    let tmpPairs = targetPairs.slice();
     let lastPair: [number, number] | null = null;
     let examiningLoops = false;
 
@@ -98,7 +98,7 @@ function detectLoops(targetPairs: number[][], currentTargetIndex: number, loops:
 }
 
 let loops: Loop[][] = [];
-function countLoops(targetPairs: number[][], currentTargetIndex: number, sequence: number[]) {
+function countLoops(targetPairs: number[], currentTargetIndex: number, sequence: number[]) {
     if (!targetPairs) {
         return 0;
     }
@@ -106,7 +106,7 @@ function countLoops(targetPairs: number[][], currentTargetIndex: number, sequenc
     let ret = 0;
     if (!loops[currentTargetIndex]) {
         loops[currentTargetIndex] = [];
-        detectLoops(targetPairs, currentTargetIndex, loops[currentTargetIndex]);
+        detectLoops(targetPairs, loops[currentTargetIndex]);
     }
 
     for (let i = 0; i < loops[currentTargetIndex].length; ++i) {
@@ -151,8 +151,8 @@ function countLoops(targetPairs: number[][], currentTargetIndex: number, sequenc
                 }
 
                 // Make sure that both of these indices are unpaired in target mode.
-                if (targetPairs[currentTargetIndex][idx1] !== -1
-                         || targetPairs[currentTargetIndex][idx2] !== -1) {
+                if (targetPairs[idx1] !== -1
+                         || targetPairs[idx2] !== -1) {
                     continue;
                 }
 
@@ -180,7 +180,8 @@ export default class BoostConstraint extends Constraint<BaseConstraintStatus> {
     }
 
     public evaluate(context: ConstraintContext): BoostConstraintStatus {
-        const boostCount = countLoops(context.targetPairs, context.currentTargetIndex, context.sequence);
+        const {targetPairs, sequence} = context.undoBlocks[0];
+        const boostCount = countLoops(targetPairs, 0, sequence);
         return {
             satisfied: (boostCount >= this.minBoosts),
             boostCount

@@ -883,10 +883,7 @@ export default class PoseEditMode extends GameMode {
                 return this._puzzle.constraints[idx].evaluate({
                     undoBlocks: this._seqStacks[this._stackLevel],
                     targetConditions: this._targetConditions,
-                    puzzle: this._puzzle,
-                    targetPairs: this._targetPairs,
-                    currentTargetIndex: this._curTargetIndex,
-                    sequence: this._poses[this._curTargetIndex].sequence
+                    puzzle: this._puzzle
                 }).satisfied;
             } else {
                 return false;
@@ -2010,10 +2007,7 @@ export default class PoseEditMode extends GameMode {
                     constraint.evaluate({
                         undoBlocks: this._seqStacks[this._stackLevel],
                         targetConditions: this._targetConditions,
-                        puzzle: this._puzzle,
-                        targetPairs: this._targetPairs,
-                        currentTargetIndex: this._curTargetIndex,
-                        sequence: this._poses[this._curTargetIndex].sequence
+                        puzzle: this._puzzle
                     }),
                     true,
                     this._seqStacks[this._stackLevel],
@@ -2240,10 +2234,7 @@ export default class PoseEditMode extends GameMode {
         return this._constraintBar.updateConstraints({
             undoBlocks: this._seqStacks[this._stackLevel],
             targetConditions: this._targetConditions,
-            puzzle: this._puzzle,
-            targetPairs: this._targetPairs,
-            currentTargetIndex: this._curTargetIndex,
-            sequence: this._poses[this._curTargetIndex].sequence
+            puzzle: this._puzzle
         });
     }
 
