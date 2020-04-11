@@ -86,12 +86,12 @@ export default class UndoBlock {
         this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] | null {
+    public get targetOligo(): number[] | undefined {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[] | null) {
-        this._targetOligo = targetOligo == null ? null : targetOligo.slice();
+    public set targetOligo(targetOligo: number[] | undefined) {
+        this._targetOligo = targetOligo == null ? undefined : targetOligo.slice();
     }
 
     public get oligoMode(): number {
@@ -100,12 +100,12 @@ export default class UndoBlock {
         return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string | null {
+    public get oligoName(): string | undefined {
         let tc: any = this.targetConditions;
         if (tc == null) {
-            return null;
+            return undefined;
         }
-        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
+        return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : undefined;
     }
 
     public get oligoOrder(): number[] | undefined {
@@ -379,7 +379,7 @@ export default class UndoBlock {
     private _pairsArray: Map<boolean, number[][]> = new Map([[false, []], [true, []]]);
     private _paramsArray: Map<boolean, any[][]> = new Map([[false, []], [true, []]]);
     private _stable: boolean = false;
-    private _targetOligo: number[] | null = null;
+    private _targetOligo?: number[];
     private _targetOligos?: Oligo[];
     private _oligoOrder?: number[];
     private _oligosPaired: number = 0;

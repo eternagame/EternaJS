@@ -43,7 +43,7 @@ export default class Puzzle {
         return (Puzzle.T_OLIGO.indexOf(tcType) >= 0);
     }
 
-    public static probeTail(seq: number[]): number[] {
+    public static probeTail(seq: number[] | null): number[] | null {
         if (seq == null) {
             return null;
         }
@@ -110,11 +110,11 @@ export default class Puzzle {
         this._rscriptOps = inText;
     }
 
-    public get hint(): string {
+    public get hint(): string | null {
         return this._hint;
     }
 
-    public set hint(txt: string) {
+    public set hint(txt: string | null) {
         this._hint = txt;
     }
 
@@ -150,11 +150,11 @@ export default class Puzzle {
         }
     }
 
-    public get constraints(): Constraint<BaseConstraintStatus>[] {
+    public get constraints(): Constraint<BaseConstraintStatus>[] | null {
         return this._constraints;
     }
 
-    public set constraints(constraints: Constraint<BaseConstraintStatus>[]) {
+    public set constraints(constraints: Constraint<BaseConstraintStatus>[] | null) {
         this._constraints = constraints;
     }
 
@@ -307,11 +307,11 @@ export default class Puzzle {
         }
     }
 
-    public get boosters(): BoostersData {
+    public get boosters(): BoostersData | undefined {
         return this._boosterDefs;
     }
 
-    public set boosters(obj: BoostersData) {
+    public set boosters(obj: BoostersData | undefined) {
         this._boosterDefs = obj;
     }
 
@@ -319,7 +319,7 @@ export default class Puzzle {
         return this._savedSequence;
     }
 
-    public get barcodeIndices(): number[] {
+    public get barcodeIndices(): number[] | null {
         if (!this._useBarcode) {
             return null;
         }
@@ -382,7 +382,7 @@ export default class Puzzle {
 
     public get isPairBrushAllowed(): boolean {
         let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = this._constraints.some((constraint) => constraint instanceof ShapeConstraint);
+        let hasTarget: boolean = this._constraints !== null && this._constraints.some((constraint) => constraint instanceof ShapeConstraint);
 
         return isBasic || hasTarget;
     }
@@ -575,21 +575,21 @@ export default class Puzzle {
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
-    private _targetConditions: any[] = null;
-    private _constraints: Constraint<BaseConstraintStatus>[] = null;
+    private _targetConditions: any[] | null = null;
+    private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;
     private _folder: string;
     private _reward: number = 0;
     private _rscriptOps: string = '';
-    private _defaultPoseState: PoseState;
+    private _defaultPoseState: PoseState | null;
     private _useTools: number = 0;
     private _usePallete: number = 0;
     private _useModes: number = 0;
     private _nextPuzzle: number = -1;
-    private _hint: string = null;
+    private _hint: string | null = null;
     private _isSoftConstraint: boolean = false;
-    private _boosterDefs: BoostersData = null;
+    private _boosterDefs?: BoostersData;
     private _maxVotes: number = 0;
 
     private static readonly T_APTAMER: string[] = ['aptamer', 'aptamer+oligo'];

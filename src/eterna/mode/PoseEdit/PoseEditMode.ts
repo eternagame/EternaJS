@@ -394,25 +394,27 @@ export default class PoseEditMode extends GameMode {
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
         } else {
-            let hintBox = new GamePanel();
-            hintBox.title = 'Hint'; // by " + _puzzle.get_coauthor());
+            if (this._puzzle.hint) {
+                let hintBox = new GamePanel();
+                hintBox.title = 'Hint'; // by " + _puzzle.get_coauthor());
 
-            let hintText = new HTMLTextObject(this._puzzle.hint, 400).font(Fonts.ARIAL).color(0xffffff);
-            hintText.display.position = new Point(10, 38);
-            hintBox.addObject(hintText, hintBox.container);
+                let hintText = new HTMLTextObject(this._puzzle.hint, 400).font(Fonts.ARIAL).color(0xffffff);
+                hintText.display.position = new Point(10, 38);
+                hintBox.addObject(hintText, hintBox.container);
 
-            this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
+                this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
 
-            let updatePosition = () => {
-                hintBox.display.position = new Point(
-                    Flashbang.stageWidth - 440,
-                    Flashbang.stageHeight - hintBox.container.height - 90
-                );
-            };
+                let updatePosition = () => {
+                    hintBox.display.position = new Point(
+                        Flashbang.stageWidth - 440,
+                        Flashbang.stageHeight - hintBox.container.height - 90
+                    );
+                };
 
-            updatePosition();
-            hintBox.setSize(420, hintText.height + 46);
-            hintBox.regs.add(this.resized.connect(updatePosition));
+                updatePosition();
+                hintBox.setSize(420, hintText.height + 46);
+                hintBox.regs.add(this.resized.connect(updatePosition));
+            }
         }
     }
 
@@ -425,11 +427,11 @@ export default class PoseEditMode extends GameMode {
         this.pushUILock();
 
         // AMW TODO: any[] is an array of JSONs, basically.
-        const setSolution = (foldData: any[]) => {
+        const setSolution = (foldData: any[] | null) => {
             this.hideAsyncText();
             this.popUILock();
 
-            if (foldData != []) {
+            if (foldData && foldData != []) {
                 this._stackLevel++;
                 this._stackSize = this._stackLevel + 1;
                 this._seqStacks[this._stackLevel] = [];
@@ -487,9 +489,11 @@ export default class PoseEditMode extends GameMode {
         // }
 
         let bindAddbaseCB = (pose: Pose2D, kk: number) => {
-            pose.addBaseCallback = ((parenthesis: string, mode: PuzzleEditOp, index: number) => {
-                pose.baseShift(parenthesis, mode, index);
-                this.poseEditByTarget(kk);
+            pose.addBaseCallback = ((parenthesis: string | null, mode: PuzzleEditOp | null, index: number) => {
+                if (parenthesis && mode) {
+                    pose.baseShift(parenthesis, mode, index);
+                    this.poseEditByTarget(kk);
+                }
             });
         };
 
@@ -601,7 +605,9 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.palette.clickTarget(PaletteTargetType.A);
         }
 
-        this._constraintBar = new ConstraintBar(this._puzzle.constraints);
+        if (this._puzzle.constraints) {
+            this._constraintBar = new ConstraintBar(this._puzzle.constraints);
+        }
         this.addObject(this._constraintBar, this._constraintsLayer);
         // AMW TODO: I can't figure out how to name this type yet.
         this._constraintBar.sequenceHighlights.connect((highlightInfos: any) => {
@@ -896,7 +902,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean => {
             this.checkConstraints();
-            if (idx >= 0 && idx < this.constraintCount) {
+            if (idx >= 0 && this._puzzle.constraints && this.constraintCount && idx < this.constraintCount) {
                 return this._puzzle.constraints[idx].evaluate(
                     this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
                 ).satisfied;
@@ -907,7 +913,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_tracked_indices',
             (): number[] => this.getPose(0).trackedIndices.map((mark) => mark.baseIndex));
-        this._scriptInterface.addCallback('get_barcode_indices', (): number[] => this._puzzle.barcodeIndices);
+        this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
@@ -1188,8 +1194,8 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public get constraintCount(): number {
-        return this._puzzle.constraints.length;
+    public get constraintCount(): number | null {
+        return this._puzzle.constraints ? this._puzzle.constraints.length : null;
     }
 
     public getConstraintBox(i: number): ConstraintBox {
@@ -2010,13 +2016,14 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
 
         let missionText = this._puzzle.missionText;
-        let boosters: BoostersData = this._puzzle.boosters;
+        let boosters: BoostersData | null = this._puzzle.boosters;
         if (boosters && boosters.mission != null) {
             missionText = boosters.mission['text'];
         }
 
-        let introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints.filter(
-            (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
+        let introConstraintBoxes: ConstraintBox[] = (this._puzzle.constraints
+            ? this._puzzle.constraints.filter(
+            (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)) : []
         ).map(
             (constraint) => {
                 let box = new ConstraintBox(true);
@@ -2486,9 +2493,9 @@ export default class PoseEditMode extends GameMode {
                             this.flashConstraintForTarget(xx);
                             this._poses[targetIndex].clearDesignStruct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
-                        } else if (this._targetOligos[xx] != null && this._targetOligos[xx].length > 1) {
+                        } else if (this._targetOligos[xx] != undefined && this._targetOligos[xx]!.length > 1) {
                             let newOrder: number[] = [];
-                            for (let jj = 0; jj < this._targetOligos[xx].length; jj++) newOrder.push(jj);
+                            for (let jj = 0; jj < this._targetOligos[xx]!.length; jj++) newOrder.push(jj);
                             let more: boolean;
                             do {
                                 segments = this._poses[targetIndex].designSegments;
@@ -2630,7 +2637,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        let execfoldCB = (fd: any[]) => {
+        let execfoldCB = (fd: any[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
@@ -2660,7 +2667,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.pushUILock(LOCK_NAME);
-        let sol: Solution = SolutionManager.instance.getSolutionBySequence(
+        let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
             this._poses[targetIndex].getSequenceString()
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
@@ -2699,7 +2706,7 @@ export default class PoseEditMode extends GameMode {
 
     private poseEditByTargetFoldTarget(ii: number): void {
         let bestPairs: number[] | null = null;
-        let oligoOrder: number[] | null = null;
+        let oligoOrder: number[] | undefined = undefined;
         let oligosPaired = 0;
         let forceStruct: string | null = null;
         let foldMode: number;
@@ -2807,7 +2814,7 @@ export default class PoseEditMode extends GameMode {
                     () => this.poseEditByTargetFoldTarget(ii + this._targetPairs.length)
                 ));
                 while (ops.length > 0) {
-                    let o: PoseOp = ops.pop();
+                    let o: PoseOp = ops.pop()!;
                     o.sn = ii + 1;
                     this._opQueue.unshift(o);
                 }
@@ -2865,7 +2872,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (lastBestPairs != null) {
-            let isShapeConstrained = this._puzzle.constraints.some(
+            let isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
                 (constraint) => constraint instanceof ShapeConstraint
             );
 
@@ -2919,7 +2926,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
-            let sol: Solution = SolutionManager.instance.getSolutionBySequence(
+            let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
                 this._poses[targetIndex].getSequenceString()
             );
             if (sol != null && !sol.hasFoldData) {
@@ -3068,8 +3075,8 @@ export default class PoseEditMode extends GameMode {
     protected _targetConditions: any[] = [];
     private _targetOligo: (number[] | undefined)[] = [];
     private _oligoMode: number[] = [];
-    private _oligoName: string[] = [];
-    private _targetOligos: (Oligo[] | undefined[] = [];
+    private _oligoName: (string | undefined)[] = [];
+    private _targetOligos: (Oligo[] | undefined)[] = [];
     private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderButton: GameButton;

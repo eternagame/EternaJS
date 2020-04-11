@@ -70,14 +70,15 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
 
         title.setFocus();
 
-        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
             let dict = inputPanel.getFieldValues();
+            // Validation lets us assert title and description are defined, I think.
             let details = {
-                title: dict.get(TITLE),
-                description: dict.get(DESCRIPTION),
+                title: dict.get(TITLE)!,
+                description: dict.get(DESCRIPTION)!,
                 minGU: GetNumber(dict, MIN_GU),
                 maxGC: GetNumber(dict, MAX_GC),
                 minAU: GetNumber(dict, MIN_AU)
@@ -99,7 +100,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
-    private validate(details: SubmitPuzzleDetails): string {
+    private validate(details: SubmitPuzzleDetails): string | null {
         if (details.title.length === 0) {
             return 'You must enter a title for your puzzle';
         } else if (details.description.length === 0) {

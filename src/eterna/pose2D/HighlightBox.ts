@@ -29,7 +29,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
         return this._graphics;
     }
 
-    public getQueue(): number[] {
+    public getQueue(): number[] | null {
         return this._queue == null ? null : this._queue.slice();
     }
 
@@ -100,7 +100,7 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
     private static readonly P: Point = new Point();
     private get basePositionChanged(): boolean {
-        if (this._queue == null) {
+        if (this._queue == null || this._prevPosition === null) {
             return false;
         }
 
@@ -186,6 +186,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderStack(color: number, baseSize: number): void {
+        if (!this._queue) return;
+
         let pairs: number[] = this._pose.pairs;
 
         for (let ii = 0; ii < this._queue.length; ii += 2) {
@@ -216,6 +218,8 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
     }
 
     private renderLoop(_color: number, baseSize: number): void {
+        if (!this._queue) return;
+
         let pairs: number[] = this._pose.pairs;
         let fullLen: number = this._pose.fullSequence.length;
         let strict: boolean = (this._type === HighlightType.LOOP);
@@ -325,10 +329,10 @@ export default class HighlightBox extends GameObject implements LateUpdatable {
 
     private _dirty: boolean;
     private _enabled: boolean = true;
-    private _queue: number[];
-    private _lastKnownQueue: number[];
+    private _queue: number[] | null;
+    private _lastKnownQueue: number[] | null;
     private _on: boolean;
-    private _prevPosition: Point;
+    private _prevPosition: Point | null;
     private _prevZoomLevel: number = -1;
 
     private static readonly ANIM = 'anim';

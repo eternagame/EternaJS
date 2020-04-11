@@ -75,7 +75,11 @@ export default class PuzzleEditMode extends GameMode {
         Molecule.initTextures();
         BaseGlow.initTextures();
 
-        this._folder = FolderManager.instance.getFolder(Vienna.NAME);
+        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (vienna === null) {
+            throw new Error('Could not instantiate a Vienna folder using FolderManager!');
+        }
+        this._folder = vienna;
 
         this._folderButton = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -167,10 +171,12 @@ export default class PuzzleEditMode extends GameMode {
         this._structureInputs = [];
 
         let setCB = (kk: number): void => {
-            this._poses[kk].addBaseCallback = (parenthesis: string, op: PuzzleEditOp, index: number): void => {
-                let secInput: StructureInput = this._structureInputs[kk];
-                secInput.structureString = parenthesis;
-                secInput.setPose(op, index);
+            this._poses[kk].addBaseCallback = (parenthesis: string | null, op: PuzzleEditOp | null, index: number): void => {
+                if (parenthesis) {
+                    let secInput: StructureInput = this._structureInputs[kk];
+                    secInput.structureString = parenthesis;
+                    secInput.setPose(op, index);
+                }
             };
         };
 
@@ -262,10 +268,12 @@ export default class PuzzleEditMode extends GameMode {
     private saveData(): void {
         let objs: PuzzleEditPoseData[] = [];
         for (let pose of this._poses) {
-            objs.push({
-                sequence: EPars.sequenceToString(pose.sequence),
-                structure: EPars.pairsToParenthesis(pose.molecularStructure)
-            });
+            if (pose.molecularStructure) {
+                objs.push({
+                    sequence: EPars.sequenceToString(pose.sequence),
+                    structure: EPars.pairsToParenthesis(pose.molecularStructure)
+                });
+            }
         }
 
         Eterna.saveManager.save(this.savedDataTokenName, objs);
@@ -284,7 +292,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public setFolder(engineName: string): void {
-        let newFolder: Folder = FolderManager.instance.getFolder(engineName);
+        let newFolder: Folder | null = FolderManager.instance.getFolder(engineName);
         if (newFolder) {
             this._folder = newFolder;
         }
@@ -429,9 +437,9 @@ export default class PuzzleEditMode extends GameMode {
                         }
                     }
 
-                    pose.puzzleLocks = null;
+                    pose.puzzleLocks = [];
                     pose.sequence = sequence;
-                    pose.molecularBindingSite = null;
+                    pose.molecularBindingSite = [];
                 }
                 this.poseEditByTarget(0);
             }
@@ -449,7 +457,7 @@ export default class PuzzleEditMode extends GameMode {
                 lengthLimit = -1;
             }
 
-            let error: string = EPars.validateParenthesis(secstruct, false, lengthLimit);
+            let error: string | null = EPars.validateParenthesis(secstruct, false, lengthLimit);
             if (error != null) {
                 this.showNotification(error);
                 return;
@@ -857,10 +865,10 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            let bestPairs: number[];
+            let bestPairs: number[] | null;
             if (!isThereMolecule) {
                 // AMW: assuming no PKs
-                bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
+                bestPairs = this._folder.foldSequence(seq, [], null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 let bonus = -486;
                 let site: number[] = [];

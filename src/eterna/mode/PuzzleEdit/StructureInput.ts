@@ -92,13 +92,13 @@ export default class StructureInput extends GamePanel implements Updatable {
      * @param op an "operation" (either adding or deleting a base or a base pair)
      * @param index where in the structure the operation should take place
      */
-    public setPose(op: PuzzleEditOp = null, index: number = -1): void {
+    public setPose(op: PuzzleEditOp | null = null, index: number = -1): void {
         let input = this._textInput.text;
         input = input.replace(/[^.()]/g, '');
         // Replace () with (.) -- () is illegal and causes an error
         input = input.replace(/\(\)/g, '(.)');
 
-        let error: string = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
+        let error: string | null = EPars.validateParenthesis(input, false, Eterna.MAX_PUZZLE_EDIT_LENGTH);
         this.setWarning(error || '');
         this._textInput.text = input;
 

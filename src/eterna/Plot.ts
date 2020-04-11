@@ -21,7 +21,7 @@ export default class Plot extends Container {
         this._height = height;
     }
 
-    public setData(data: number[], maxvals: number[], labels: string[] = null, ghostData: number[] = null): void {
+    public setData(data: number[], maxvals: number[], labels: string[] | null = null, ghostData: number[] | null = null): void {
         this._data = (data != null ? data.slice() : null);
         this._labels = (labels != null ? labels.slice() : null);
         this._upperBounds = (maxvals != null ? maxvals.slice() : null);
@@ -51,8 +51,12 @@ export default class Plot extends Container {
     public replotWithBase(x: number, y: number): void {
         this._graphics.clear();
 
-        if (this._data == null && this._data2D == null) {
+        if (this._data == null || this._data2D == null) {
             return;
+        }
+
+        if (this._upperBounds === null) {
+            throw new Error('replotting even though upperBounds are still null!');
         }
 
         if (this._numBases === 0) {
@@ -206,13 +210,13 @@ export default class Plot extends Container {
     }
 
     private readonly _graphics: Graphics;
-    private _data: number[];
+    private _data: number[] | null;
     private _data2D: number[];
     private _numBases: number = 0;
-    private _ghostData: number[];
-    private _labels: string[];
-    private _upperBounds: number[];
-    private _labelFields: Text[];
+    private _ghostData: number[] | null;
+    private _labels: string[] | null;
+    private _upperBounds: number[] | null;
+    private _labelFields: Text[] | null;
 
     private _width: number = 100;
     private _height: number = 100;

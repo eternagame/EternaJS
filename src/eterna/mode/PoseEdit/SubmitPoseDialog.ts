@@ -19,12 +19,16 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
 
         title.setFocus();
 
-        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
             let dict = inputPanel.getFieldValues();
-            this.close({title: dict.get(TITLE), comment: dict.get(COMMENT)});
+            if (dict.get(TITLE) === undefined || dict.get(COMMENT) === undefined) {
+                this.close(null);
+            } else {
+                this.close({title: dict.get(TITLE)!, comment: dict.get(COMMENT)!});
+            }
         });
 
         let updateLocation = () => {

@@ -65,11 +65,11 @@ export default class Solution {
         this._sequence = sequence;
     }
 
-    public get expFeedback(): Feedback {
+    public get expFeedback(): Feedback | null {
         return this._expFeedback;
     }
 
-    public set expFeedback(fb: Feedback) {
+    public set expFeedback(fb: Feedback | null) {
         this._expFeedback = fb;
     }
 
@@ -122,7 +122,7 @@ export default class Solution {
         }
     }
 
-    public queryFoldData(): Promise<any[]> {
+    public queryFoldData(): Promise<any[] | null> {
         if (this._hasFoldData) {
             if (this._foldData != null) {
                 return Promise.resolve(this._foldData);
@@ -211,8 +211,8 @@ export default class Solution {
     private _numMyVotes: number = 0;
     private _synthesizedRound: number = 0;
     private _synthesisScore: number = 0;
-    private _expFeedback: Feedback;
+    private _expFeedback: Feedback | null;
     private _shortDesc: string;
     private _hasFoldData: boolean = false;
-    private _foldData: any[] = null;
+    private _foldData: any[] | null = null;
 }
