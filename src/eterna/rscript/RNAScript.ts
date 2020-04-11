@@ -92,7 +92,7 @@ export default class RNAScript {
         op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
-        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide)?/ig;
+        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/ig;
         let highlightRegex = /(Show|Hide)(UI)?Highlight/ig;
         let uiRegex = /(Show|Hide|Enable|Disable)UI$/ig;
         let hintRegex = /(Show|Hide)(Paint)?Hint/ig;
@@ -111,9 +111,19 @@ export default class RNAScript {
             let textboxMode: ROPTextboxMode;
             if (regResult[2].toUpperCase() === 'ARROW') {
                 if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() === 'LOCATION'
-                        ? ROPTextboxMode.ARROW_LOCATION
-                        : ROPTextboxMode.ARROW_NUCLEOTIDE;
+                    switch (regResult[3].toUpperCase()) {
+                        case 'LOCATION':
+                            textboxMode = ROPTextboxMode.ARROW_LOCATION;
+                            break;
+                        case 'NUCLEOTIDE':
+                            textboxMode = ROPTextboxMode.ARROW_NUCLEOTIDE;
+                            break;
+                        case 'ENERGY':
+                            textboxMode = ROPTextboxMode.ARROW_ENERGY;
+                            break;
+                        default:
+                            throw new Error(`Invalid arrow type: ${regResult[3]}`);
+                    }
                 } else {
                     textboxMode = ROPTextboxMode.ARROW_DEFAULT;
                 }
