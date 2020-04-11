@@ -108,7 +108,7 @@ export default class FlashbangApp {
     }
 
     /** The HTMLElement that the PIXI application will be added to. */
-    protected get pixiParent(): HTMLElement {
+    protected get pixiParent(): HTMLElement | null {
         return document.body;
     }
 

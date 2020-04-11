@@ -428,7 +428,7 @@ export default class DataCol extends ContainerObject {
 
             this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
         } else {
-            this._sequencesView.setSequences([], null, null);
+            this._sequencesView.setSequences([], [], []);
         }
     }
 

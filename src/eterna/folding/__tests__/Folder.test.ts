@@ -17,8 +17,8 @@ const ZIPPERS_SEQ = "AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA";
 const ZIPPERS_BEST_PAIRS = ".....((((.........)))).((((......))))...";
 const ZIPPERS_TEMP = 37;
 
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] {
-    return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
+function FoldSequence(folder: Folder, seq: string, struct: string): number[] | null {
+    return folder.foldSequence(EPars.stringToSequence(seq), [], struct);
 }
 
 function CreateFolder(type: any): Promise<Folder> {
@@ -87,8 +87,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
                     ZIPPERS_TEMP,
                     outNNFE);
 
-                expect(totalFe).toBeCloseTo(expectedTotalFe);
-                expect(outNNFE).toEqual(expectedNNFE);
+                expect(totalFe).toBeCloseTo(expectedTotalFe!);
+                expect(outNNFE).toEqual(expectedNNFE!);
             }))
             .resolves.toBeUndefined(); // (we're returning a promise)
     });
@@ -249,9 +249,10 @@ test(`NuPACK:PK_foldSequence`, () => {
         .then((folder) => {
             let pairs = folder.foldSequence(
                 EPars.stringToSequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
-                null, null, true, 37);
+                [], null, true, 37);
 
-            expect(EPars.pairsToParenthesis(pairs, null, true))
+            expect(pairs).toBeDefined();
+            expect(EPars.pairsToParenthesis(pairs!, null, true))
                 .toEqual("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
@@ -268,9 +269,10 @@ test(`NuPACK:PK_fold1L2X`, () => {
         .then((folder) => {
             let pairs = folder.foldSequence(
                 EPars.stringToSequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
-                null, null, true, 37);
-
-            expect(EPars.pairsToParenthesis(pairs, null, true))
+                [], null, true, 37);
+            
+            expect(pairs).toBeDefined();
+            expect(EPars.pairsToParenthesis(pairs!, null, true))
                 .toEqual("..(((((..{{{{)))))......}}}}");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)

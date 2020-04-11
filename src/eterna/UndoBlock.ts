@@ -23,6 +23,7 @@ export enum UndoBlockParam {
     PAIR_SCORE = 12,
     NNFE_ARRAY = 13,
     MAX = 14,
+    ANYPAIR = 15,
 }
 
 export default class UndoBlock {
@@ -107,11 +108,11 @@ export default class UndoBlock {
         return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
     }
 
-    public get oligoOrder(): number[] {
+    public get oligoOrder(): number[] | null {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[]) {
+    public set oligoOrder(oligoOrder: number[] | null) {
         this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
@@ -191,8 +192,8 @@ export default class UndoBlock {
         }
     }
 
-    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
-        this._pairsArray.get(pseudoknots)[temp] = pairs.slice();
+    public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
+        this._pairsArray.get(pseudoknots)[temp] = pairs ? pairs.slice() : [];
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
@@ -209,6 +210,10 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.ANYPAIR, 
+            this.getParam(UndoBlockParam.GU, temp, pseudoknots) 
+                + this.getParam(UndoBlockParam.GC, temp, pseudoknots) 
+                + this.getParam(UndoBlockParam.AU, temp, pseudoknots), temp, pseudoknots);
         this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
             EPars.sequenceToString(seq), 5
@@ -365,15 +370,15 @@ export default class UndoBlock {
     private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
     private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
     private _stable: boolean = false;
-    private _targetOligo: number[] = null;
-    private _targetOligos: Oligo[] = null;
-    private _oligoOrder: number[] = null;
+    private _targetOligo: number[] | null = null;
+    private _targetOligos: Oligo[] | null = null;
+    private _oligoOrder: number[] | null = null;
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] = null;
+    private _targetOligoOrder: number[] | null = null;
     private _puzzleLocks: boolean[] = [];
     private _forcedStruct: number[] = [];
-    private _targetConditions: string = null;
+    private _targetConditions: string | null = null;
 
     private _dotPlotData: number[];
     private _meltPlotPairScores: number[];

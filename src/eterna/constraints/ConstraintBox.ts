@@ -146,9 +146,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != null;
+        this._req.visible = config.fullTexture != null && config.fullTexture != undefined;
         if (this._req.visible) {
-            this._req.texture = config.fullTexture;
+            // we just proved it's not null or undefined
+            this._req.texture = config.fullTexture!;
         }
 
         this._outline.visible = config.showOutline || false;
@@ -158,18 +159,20 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != null;
+        this._reqClarifyText.visible = config.clarificationText != null && config.clarificationText != undefined;
         if (this._reqClarifyText.visible) {
-            this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
+            // we just proved it's not null or undefined
+            this.setPossiblyStyledText(config.clarificationText!, this._reqClarifyText);
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
             );
         }
 
-        this._reqStatText.visible = config.statText != null && !this._forMissionScreen;
+        this._reqStatText.visible = config.statText != null && config.statText != undefined && !this._forMissionScreen;
         if (this._reqStatText.visible) {
-            this.setPossiblyStyledText(config.statText, this._reqStatText);
+            // we just proved it's not null or undefined
+            this.setPossiblyStyledText(config.statText!, this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 0, 50
@@ -315,8 +318,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
             this._mouseOverObject = null;
-            this._mouseOverRegs.close();
-            this._mouseOverRegs = null;
+            if ( this._mouseOverRegs != null ) {
+                this._mouseOverRegs.close();
+                this._mouseOverRegs = null;
+            }
         }
 
         if (obj != null) {
@@ -454,8 +459,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _outline: Sprite;
     private _fglow: Graphics;
 
-    private _mouseOverRegs: RegistrationGroup;
-    private _mouseOverObject: SceneObject;
+    private _mouseOverRegs: RegistrationGroup | null;
+    private _mouseOverObject: SceneObject | null;
 
     private static readonly LOCATION_ANIM = 'AnimateLocation';
     private static readonly BACKLIGHT_ANIM = 'BacklightAnim';

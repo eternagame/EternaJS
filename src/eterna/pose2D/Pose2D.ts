@@ -1801,19 +1801,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set customLayout(setting: Array<[number, number]>) {
+    public set customLayout(setting: Array<[number, number] | [null, null] > | null) {
         this._customLayout = setting;
     }
 
-    public get customLayout(): Array<[number, number]> {
+    public get customLayout(): Array<[number, number] | [null, null]> | null {
         return this._customLayout;
     }
 
-    public set customNumbering(setting: number[]) {
+    public set customNumbering(setting: number[] | null) {
         this._customNumbering = setting;
     }
 
-    public get customNumbering(): number[] {
+    public get customNumbering(): number[] | null {
         return this._customNumbering;
     }
 
@@ -2459,7 +2459,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let rnaDrawer: RNALayout;
 
-        let exceptionIndices: number[] = null;
+        let exceptionIndices: number[] = [];
         if (fullSeq.indexOf(EPars.RNABASE_CUT) >= 0) {
             exceptionIndices = [];
             exceptionIndices.push(0);
@@ -3293,30 +3293,30 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _forcedStruct: number[] = [];
     private _designStruct: boolean[] = [];
     private _bindingSite: boolean[];
-    private _molecularBindingBases: BaseGlow[] = null;
-    private _molecularBindingPairs: number[] = null;
-    private _molecule: Molecule = null;
+    private _molecularBindingBases: BaseGlow[] | null = null;
+    private _molecularBindingPairs: number[] | null = null;
+    private _molecule: Molecule | null = null;
     private _moleculeIsBound: boolean = false;
     private _moleculeIsBoundReal: boolean = false;
     private _molecularBindingBonus: number = 0;
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
-    private _customLayout: Array<[number, number]> = null;
+    private _customLayout: Array<[number, number] | [null, null]> | null = null;
     private _pseudoknotted: boolean = false;
 
     // Oligos
-    private _oligo: number[] = null;
+    private _oligo: number[] | null = null;
     private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
-    private _oligoName: string = null;
+    private _oligoName: string | null = null;
     private _duplexCost: number = EPars.DUPLEX_INIT; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
-    private _oligoBases: BaseGlow[] = null; // for glows
+    private _oligoBases: BaseGlow[] | null = null; // for glows
     private _oligoPaired: boolean = false;
 
     // Multistrands
-    private _oligos: Oligo[] = null;
-    private _oligosOrder: number[] = null;
+    private _oligos: Oligo[] | null = null;
+    private _oligosOrder: number[] | null = null;
     private _prevOligosOrder: number[];
     private _oligosPaired: number = 0;
     private _strandLabel: TextBalloon;
@@ -3341,11 +3341,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Is this pose editable?
     private _editable: boolean;
-    private _editableIndices: number[] = null;
+    private _editableIndices: number[] | null = null;
 
     // Pointer to callback function to be called after change in pose
-    private _poseEditCallback: () => void = null;
-    private _trackMovesCallback: (count: number, moves: any[]) => void = null;
+    private _poseEditCallback: (() => void) | null = null;
+    private _trackMovesCallback: ((count: number, moves: any[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
@@ -3429,7 +3429,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // For tracking a base
     private _cursorIndex: number = 0;
-    private _cursorBox: Graphics = null;
+    private _cursorBox: Graphics | null = null;
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
 
@@ -3439,10 +3439,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _simpleGraphicsMods: boolean = false;
 
     // customNumbering
-    private _customNumbering: number[] = null;
+    private _customNumbering: number[] | null = null;
 
     // Last exp paint data
-    private _expPainter: ExpPainter = null;
+    private _expPainter: ExpPainter | null = null;
     private _expMid: number = 0;
     private _expHi: number = 0;
     private _expContinuous: boolean = false;

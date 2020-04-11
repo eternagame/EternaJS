@@ -15,7 +15,7 @@ import {DesignCategory} from './DesignBrowserMode';
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> = null) {
+    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> | null = null) {
         super();
         this._allColumnCategories = allCategories.slice();
         this._initialColumns = curColumns.slice();
@@ -68,7 +68,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this._panelContent.addVSpacer(20);
 
         let okButton = new GameButton().label('Ok', 20);
-        okButton.clicked.connect(() => this.close(null));
+        okButton.clicked.connect(() => this.close());
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
@@ -247,7 +247,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
     private readonly _allColumnCategories: DesignCategory[];
     private readonly _initialColumns: DesignCategory[];
-    private readonly _disabled: Set<DesignCategory>;
+    private readonly _disabled: Set<DesignCategory> | null;
 
     private _bg: GamePanel;
 

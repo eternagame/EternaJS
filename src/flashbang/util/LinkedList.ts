@@ -1,8 +1,8 @@
 import {Registration} from 'signals';
 
 export interface LinkedElement<T> {
-    next: LinkedElement<T> | null;
-    data: T | null;
+    next: LinkedElement<T>;
+    data: T;
 }
 
 /** A singly-linked list. */
@@ -13,7 +13,7 @@ export default class LinkedList<T> {
     }
 
     public dispose(): void {
-        for (let cons: Cons<T> | null = this._head; cons != null; cons = cons._next) {
+        for (let cons: Cons<T> = this._head; cons != null; cons = cons._next) {
             cons.data = null;
             cons.owner = null;
         }
@@ -49,7 +49,7 @@ export default class LinkedList<T> {
         if (this.isIterating) {
             this._pendingRuns = LinkedList.pend(this._pendingRuns, new Runs(this.clear));
         } else {
-            for (let cons: Cons<T> | null = this._head; cons != null; cons = cons._next) {
+            for (let cons: Cons<T> = this._head; cons != null; cons = cons._next) {
                 cons.data = null;
                 cons.owner = null;
             }
@@ -57,7 +57,7 @@ export default class LinkedList<T> {
         }
     }
 
-    public beginIteration(): LinkedElement<T> | null {
+    public beginIteration(): LinkedElement<T> {
         if (this._head === this.ITERATING) {
             throw new Error('Initiated beginIteration while iterating');
         }
@@ -103,7 +103,7 @@ export default class LinkedList<T> {
         }
     }
 
-    private static pend(head: Runs | null, action: Runs): Runs {
+    private static pend(head: Runs, action: Runs): Runs {
         if (head == null) {
             return action;
         } else {
@@ -112,15 +112,11 @@ export default class LinkedList<T> {
         }
     }
 
-    private _head: Cons<T> | null;
-    private _iterating: Cons<T> | null;
-    private _pendingRuns: Runs | null;
+    private _head: Cons<T>;
+    private _iterating: Cons<T>;
+    private _pendingRuns: Runs;
 
-    // AMW: initially, this would get initialized to a new Cons(null, null);
-    // which would get interpreted as a cons of LinkedList<null>, null
-    // which is... well, it's not anything ok. thankfully we just don't need
-    // the nonsense initialization 
-    private readonly ITERATING: Cons<T>;
+    private readonly ITERATING: Cons<T> = new Cons(null, null);
 }
 
 class Runs {
@@ -134,16 +130,16 @@ class Runs {
 
 /** Implements {@link Registration} and a linked-list style list. */
 class Cons<T> implements Registration, LinkedElement<T> {
-    public _next: Cons<T> | null;
-    public data: T | null;
-    public owner: LinkedList<T> | null;
+    public _next: Cons<T>;
+    public data: T;
+    public owner: LinkedList<T>;
 
-    constructor(owner: LinkedList<T> | null, data: T | null) {
+    constructor(owner: LinkedList<T>, data: T) {
         this.owner = owner;
         this.data = data;
     }
 
-    public get next(): LinkedElement<T> | null {
+    public get next(): LinkedElement<T> {
         return this._next;
     }
 
@@ -156,7 +152,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
         }
     }
 
-    public static insertFront<T>(head: Cons<T> | null, cons: Cons<T>): Cons<T> {
+    public static insertFront<T>(head: Cons<T>, cons: Cons<T>): Cons<T> {
         if (head == null) {
             return cons;
         } else {
@@ -165,7 +161,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
         }
     }
 
-    public static insertBack<T>(head: Cons<T> | null, cons: Cons<T>): Cons<T> {
+    public static insertBack<T>(head: Cons<T>, cons: Cons<T>): Cons<T> {
         if (head == null) {
             return cons;
         } else {
@@ -174,7 +170,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
         }
     }
 
-    public static remove<T>(head: Cons<T> | null, cons: Cons<T>): Cons<T> | null {
+    public static remove<T>(head: Cons<T>, cons: Cons<T>): Cons<T> {
         if (head == null) {
             return head;
         } else if (head === cons) {
@@ -185,7 +181,7 @@ class Cons<T> implements Registration, LinkedElement<T> {
         }
     }
 
-    public static removeData<T>(head: Cons<T> | null, data: T): Cons<T> | null {
+    public static removeData<T>(head: Cons<T>, data: T): Cons<T> {
         if (head == null) {
             return head;
         } else if (head.data === data) {

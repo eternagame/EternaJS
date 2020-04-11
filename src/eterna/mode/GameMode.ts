@@ -190,9 +190,15 @@ export default abstract class GameMode extends AppMode {
                         );
                     }
 
-                    let targetPairs: number[] = this._targetPairs
+                    let targetPairs: number[] | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
-                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs(37, pseudoknots);
+                    let nativePairs: number[] | undefined = this.getCurrentUndoBlock(poseidx) !== undefined
+                        ? this.getCurrentUndoBlock(poseidx)!.getPairs(37, pseudoknots) : undefined;
+                    
+                    if (targetPairs === undefined || nativePairs === undefined) {
+                        throw new Error("targetPairs or nativePairs is undefined!");
+                    }
+                    
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }
@@ -284,7 +290,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     /** Subclasses can override to create a ContextMenu that will be shown when the user right-clicks */
-    protected createContextMenu(): ContextMenu {
+    protected createContextMenu(): ContextMenu | null {
         return null;
     }
 
@@ -318,11 +324,11 @@ export default abstract class GameMode extends AppMode {
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
     protected _folder: Folder;
     protected _curTargetIndex: number;
-    protected getCurrentUndoBlock(index: number): UndoBlock {
+    protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): number[] {
+    protected getCurrentTargetPairs(index: number): number[] | undefined {
         return undefined;
     }
 
@@ -343,11 +349,11 @@ class ContextMenuDialog extends Dialog<void> {
         this.addObject(this._menu, this.container);
 
         this._menu.display.position = this._menuLoc;
-        this._menu.menuItemSelected.connect(() => this.close(null));
+        this._menu.menuItemSelected.connect(() => this.close());
     }
 
     protected onBGClicked(): void {
-        this.close(null);
+        this.close();
     }
 
     protected get bgAlpha(): number {

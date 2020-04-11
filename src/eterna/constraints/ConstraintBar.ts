@@ -26,7 +26,7 @@ function isSSCW(
 }
 
 export default class ConstraintBar extends ContainerObject {
-    public sequenceHighlights: Value<HighlightInfo[]> = new Value(null);
+    public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     constructor(constraints: Constraint<BaseConstraintStatus>[]) {
         super();
@@ -140,7 +140,7 @@ export default class ConstraintBar extends ContainerObject {
                 constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
             );
             constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
+                ? undefined : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
             satisfied = satisfied && status.satisfied;
         }
 
@@ -185,5 +185,5 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private _constraints: ConstraintWrapper[];
-    private _flaggedConstraint: ConstraintWrapper;
+    private _flaggedConstraint: ConstraintWrapper | null;
 }

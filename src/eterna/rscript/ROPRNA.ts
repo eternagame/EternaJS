@@ -97,7 +97,7 @@ export default class ROPRNA extends RScriptOp {
     private _color: string;
     private _foldMode: number;
     private _enabled: boolean;
-    private _scope: number[] = null;
+    private _scope: number[] | null = null;
     private _state: number;
     private _zoomLevel: number;
     private _animate: boolean = true;

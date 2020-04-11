@@ -10,10 +10,10 @@ interface MinPairConstraintStatus extends BaseConstraintStatus {
 }
 
 abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus> {
-    public readonly pairType: number;
+    public readonly pairType: UndoBlockParam.GU | UndoBlockParam.GC | UndoBlockParam.AU | UndoBlockParam.ANYPAIR;
     public readonly minPairs: number;
 
-    constructor(pairType: number, minPairs: number) {
+    constructor(pairType: UndoBlockParam.GU | UndoBlockParam.GC | UndoBlockParam.AU | UndoBlockParam.ANYPAIR, minPairs: number) {
         super();
         this.pairType = pairType;
         this.minPairs = minPairs;
@@ -21,8 +21,9 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
 
     public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
         // TODO: Multistate?
+        // AMW TODO: should we be worried about pseudoknots + temp here? 
         const currentPairs: number = undoBlocks[0].getParam(
-            UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
+            this.pairType
         );
         return {
             satisfied: (
@@ -74,7 +75,7 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GCMIN';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GC_PAIR, count);
+        super(UndoBlockParam.GC, count);
     }
 
     /** @override */
@@ -102,7 +103,7 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'AU';
 
     constructor(count: number) {
-        super(EPars.RNABASE_AU_PAIR, count);
+        super(UndoBlockParam.AU, count);
     }
 
     /** @override */
@@ -130,7 +131,7 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GU';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GU_PAIR, count);
+        super(UndoBlockParam.GU, count);
     }
 
     /** @override */
@@ -158,23 +159,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'PAIRS';
 
     constructor(count: number) {
-        super(null, count);
-    }
-
-    /** @override */
-    public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
-        // TODO: Multistate?
-        const currentPairs: number = (
-            undoBlocks[0].getParam(UndoBlockParam['GC'])
-            + undoBlocks[0].getParam(UndoBlockParam['AU'])
-            + undoBlocks[0].getParam(UndoBlockParam['GU'])
-        );
-        return {
-            satisfied: (
-                currentPairs >= this.minPairs
-            ),
-            currentPairs
-        };
+        super(UndoBlockParam.ANYPAIR, count);
     }
 
     /** @override */

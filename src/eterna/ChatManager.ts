@@ -48,12 +48,14 @@ export default class ChatManager {
         }
 
         let show = this._settings.showChat.value && this._hideChat <= 0;
-        this._chatbox.style.display = show ? null : 'none';
-        if (show) this._chatIFrame.postMessage({type: 'chat-scroll'}, '*');
+        if (this._chatbox) {
+            this._chatbox.style.display = show ? 'unset' : 'none';
+        }
+        if (show && this._chatIFrame) this._chatIFrame.postMessage({type: 'chat-scroll'}, '*');
     }
 
-    private readonly _chatbox: HTMLElement;
-    private readonly _chatIFrame: Window;
+    private readonly _chatbox: HTMLElement | null;
+    private readonly _chatIFrame: Window | null;
     private readonly _settings: EternaSettings;
 
     private _hideChat: number = 0;

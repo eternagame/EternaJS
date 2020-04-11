@@ -66,8 +66,8 @@ export default class ROPWait extends RScriptOp {
         // When we finish painting, if not everything we wanted to be painted was painted,
         // then reset the player's progress on those nucleotides. And (if specified), show
         // a textbox.
-        let list: ROPWait[] = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
-        if (list == null) {
+        let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
+        if (list == undefined) {
             return;
         }
 
@@ -324,8 +324,8 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static registerROPWait(op: ROPWait): void {
-        let list: ROPWait[] = ROPWait._allROPWaitOps.get(op.waitType);
-        if (list == null) {
+        let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
+        if (list == undefined) {
             list = [];
             ROPWait._allROPWaitOps.set(op.waitType, list);
         }
@@ -339,8 +339,8 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static deregisterROPWait(op: ROPWait): void {
-        let array: ROPWait[] = ROPWait._allROPWaitOps.get(op.waitType);
-        if (array != null) {
+        let array: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
+        if (array != undefined) {
             let idx: number = array.indexOf(op);
             array.splice(idx, 1);
         }
@@ -359,13 +359,15 @@ export default class ROPWait extends RScriptOp {
             return;
         }
 
-        let list: ROPWait[] = ROPWait._allROPWaitOps.get(inType);
+        let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(inType);
         let clearOps: ROPWait[] = [];
 
-        for (let op of list) {
-            if (op.isWaitActive() && clearCheck(op)) {
-                clearOps.push(op);
-                op.clearCondition();
+        if (list !== undefined) {
+            for (let op of list) {
+                if (op.isWaitActive() && clearCheck(op)) {
+                    clearOps.push(op);
+                    op.clearCondition();
+                }
             }
         }
         ROPWait.batchDeregister(clearOps);

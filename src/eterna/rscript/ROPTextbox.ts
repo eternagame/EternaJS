@@ -109,7 +109,7 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showArrow(): void {
-        let parent: FancyTextBalloon = null;
+        let parent: FancyTextBalloon | null = null;
         if (this._hasParent) {
             let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
@@ -141,7 +141,9 @@ export default class ROPTextbox extends RScriptOp {
                 newArrow.display.position.x += 6;
             }
 
-            if (this._hasParent) {
+            // AMW: this._hasParent can be true, but parent remain null because the parent
+            // is not a FancyTextBalloon.
+            if (this._hasParent && parent) {
                 // Modify degree and length if textbox is present.
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
@@ -201,7 +203,9 @@ export default class ROPTextbox extends RScriptOp {
         newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
 
         this._env.setVar(this._id, newArrow);
-        if (this._hasParent) {
+        // AMW: this._hasParent can be true, but parent remain null because the parent
+        // is not a FancyTextBalloon.
+        if (this._hasParent && parent) {
             parent.addChildArrow(newArrow);
         }
     }
@@ -230,7 +234,7 @@ export default class ROPTextbox extends RScriptOp {
     /* override */
     protected parseArgument(arg: string, i: number): void {
         let rx = /^([^+-]*)((?:\+|-).+)$/g;
-        let regResult: RegExpExecArray = null;
+        let regResult: RegExpExecArray | null = null;
         switch (i) {
             case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
                 if (

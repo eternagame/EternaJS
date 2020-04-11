@@ -525,12 +525,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('FullFoldTemperature error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -549,12 +549,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -572,12 +572,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequence error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -597,12 +597,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 

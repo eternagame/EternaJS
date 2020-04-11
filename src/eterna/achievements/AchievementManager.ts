@@ -46,7 +46,11 @@ export default class AchievementManager extends GameObject {
 
         (this.mode as GameMode).pushUILock('ShowAchievement');
 
-        let nextData: AchievementData = this._pending.shift();
+        // Since we already checked that this._pending has an element,
+        // this is actually guaranteed not to be undefined
+        let nextData: AchievementData | undefined = this._pending.shift();
+        if (nextData === undefined) return;
+        
         let view = new AchievementBox(nextData.image, nextData.past);
         this._cur = this.addObject(view, (this.mode as GameMode).achievementsLayer);
 

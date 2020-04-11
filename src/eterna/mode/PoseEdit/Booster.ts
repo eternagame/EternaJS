@@ -129,7 +129,7 @@ export default class Booster {
         this.executeScript(null, null, -1);
     }
 
-    private executeScript(pose: Pose2D, cmd: string, baseNum: number): void {
+    private executeScript(pose: Pose2D | null, cmd: string | null, baseNum: number): void {
         let scriptInterface = new ExternalInterfaceCtx();
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
@@ -190,7 +190,8 @@ export default class Booster {
     private readonly _label: string;
     private readonly _tooltip: string;
     private readonly _scriptID: string;
-    private readonly _buttonStateTextures: Texture[] = [null, null, null, null, null];
+    private readonly _buttonStateTextures: (Texture | undefined)[] 
+        = [undefined, undefined, undefined, undefined, undefined];
 
     private static _toolColorCounter: number = EPars.RNABASE_DYNAMIC_FIRST;
 }

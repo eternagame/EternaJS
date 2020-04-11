@@ -7,7 +7,9 @@ export default class CopyTextDialogMode extends AppMode {
     constructor(text: string, dialogTitle?: string) {
         super();
         this._text = text;
-        this._dialogTitle = dialogTitle;
+        if (dialogTitle != undefined) {
+            this._dialogTitle = dialogTitle;
+        }
     }
 
     protected setup(): void {
@@ -30,7 +32,7 @@ export default class CopyTextDialogMode extends AppMode {
 
         textField.setFocus(true);
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close());
         inputPanel.okClicked.connect(() => {

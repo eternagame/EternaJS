@@ -83,8 +83,8 @@ export default abstract class Folder {
 
     public multifoldUnroll(
         seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string | null = null, temp: number = 37
-    ): PoseOp[] | null {
-        return null;
+    ): PoseOp[] {
+        return [];
     }
 
     // public load_parameters_from_buffer(buf: ByteArray, done_cb: Function = null): boolean {

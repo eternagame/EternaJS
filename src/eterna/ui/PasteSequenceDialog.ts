@@ -10,7 +10,7 @@ import TextInputPanel from './TextInputPanel';
  *  corresponding to sequence string.
  */
 export default class PasteSequenceDialog extends Dialog<number[]> {
-    constructor(customNumbering: number[] = null) {
+    constructor(customNumbering: number[] | null = null) {
         super();
         this._customNumbering = customNumbering;
     }
@@ -27,10 +27,10 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
 
         sequenceField.setFocus(true);
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
-        inputPanel.cancelClicked.connect(() => this.close(null));
-        inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
+        inputPanel.cancelClicked.connect(() => this.close([]));
+        inputPanel.okClicked.connect((values) => values.get(SEQUENCE) ? this.onSequenceEntered(values.get(SEQUENCE)!): null);
 
         let updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
@@ -50,15 +50,16 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
                 return;
             }
         }
-        let s = EPars.indexedStringToSequence(sequence, this._customNumbering);
+        let s: number[] | null = this._customNumbering 
+            ? null : EPars.indexedStringToSequence(sequence, this._customNumbering!);
         if (s == null && seq.length > 0) {
             (this.mode as GameMode).showNotification(
                 'Problem with how you formatted any input numbers after the sequence'
             );
             return;
         }
-        this.close(s);
+        this.close(s!);
     }
 
-    private readonly _customNumbering: number[];
+    private readonly _customNumbering: number[] | null;
 }

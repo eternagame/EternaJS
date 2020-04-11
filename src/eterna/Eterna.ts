@@ -30,7 +30,7 @@ export default class Eterna {
         process.env['DEBUG'] === undefined ? false : ParseBool(process.env['DEBUG']);
     public static readonly SERVER_URL: string = GetServerURL();
 
-    public static gameDiv: HTMLElement;
+    public static gameDiv: HTMLElement | null = null;
 
     public static app: EternaApp;
     public static settings: EternaSettings;

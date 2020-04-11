@@ -128,7 +128,9 @@ export default class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
-        Eterna.gameDiv = document.getElementById(this._params.containerID);
+        if (this._params.containerID != undefined) {
+            Eterna.gameDiv = document.getElementById(this._params.containerID);
+        }
 
         this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
             Flashbang.sound.muted = mute;
@@ -138,11 +140,11 @@ export default class EternaApp extends FlashbangApp {
             Flashbang.sound.volume = volume;
         }));
 
-        this.setLoadingText('Authenticating...', null);
+        this.setLoadingText('Authenticating...', '');
 
         this.authenticate()
             .then(() => {
-                this.setLoadingText('Loading game...', null);
+                this.setLoadingText('Loading game...', '');
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
@@ -154,15 +156,27 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                     case InitialAppMode.PUZZLE:
+                        if (this._params.puzzleID == undefined ) {
+                            return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
+                        }
                         return this.loadPoseEdit(this._params.puzzleID, {
                             initialFolder: this._params.folderName,
                             initSequence: this._params.sequence
                         });
                     case InitialAppMode.SOLUTION_SEE_RESULT:
                     case InitialAppMode.SOLUTION_COPY_AND_VIEW:
+                        if (this._params.puzzleID == undefined ) {
+                            return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
+                        }
+                        if (this._params.solutionID == undefined ) {
+                            return Promise.reject(new Error(`Solution ID undefined! '${this._params.solutionID}'`));
+                        }
                         return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
                             this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                     case InitialAppMode.DESIGN_BROWSER:
+                        if (this._params.puzzleID == undefined ) {
+                            return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
+                        }
                         return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
                     default:
                         return Promise.reject(new Error(`Unrecognized mode '${this._params.mode}'`));
@@ -186,7 +200,8 @@ export default class EternaApp extends FlashbangApp {
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
     public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
-        const initPoseData = initialPoseData
+        const initPoseData = this._params.puzzleEditNumTargets == undefined ? null :
+            initialPoseData
             || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
             || null;
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
@@ -308,7 +323,7 @@ export default class EternaApp extends FlashbangApp {
                     );
                 });
 
-        this.setLoadingText(`Loading solution ${solutionID}...`, null);
+        this.setLoadingText(`Loading solution ${solutionID}...`, '');
         return Promise.all([puzzlePromise, solutionPromise])
             .then((result) => {
                 this.popLoadingMode();
@@ -320,7 +335,7 @@ export default class EternaApp extends FlashbangApp {
         if (puzzleOrID instanceof Puzzle) {
             return puzzleOrID;
         } else {
-            this.setLoadingText('Loading puzzle...', null);
+            this.setLoadingText('Loading puzzle...', '');
             let puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleOrID);
             this.popLoadingMode();
             return puzzle;
@@ -360,7 +375,7 @@ export default class EternaApp extends FlashbangApp {
         });
     }
 
-    protected get pixiParent(): HTMLElement {
+    protected get pixiParent(): HTMLElement | null {
         return document.getElementById(Eterna.PIXI_CONTAINER_ID);
     }
 
@@ -412,7 +427,8 @@ export default class EternaApp extends FlashbangApp {
             log.debug(`Logging in ${playerID}...`);
             return Eterna.client.login(playerID, playerPassword).then((uid: number) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-                Eterna.setPlayer(playerID, uid);
+                // We know playerID is not undefined because we checked above.
+                Eterna.setPlayer(playerID!, uid);
             });
         }
     }

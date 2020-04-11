@@ -115,7 +115,11 @@ export default class FeedbackViewMode extends GameMode {
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
             let datablock: UndoBlock = new UndoBlock(this._sequence);
             datablock.setPairs(this._pairs[ii]);
-            datablock.setBasics(FolderManager.instance.getFolder(Vienna.NAME));
+            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+            if (!vienna) {
+                throw new Error("Could not instantiate Vienna folder by name!!")
+            }
+            datablock.setBasics(vienna);
             this._undoBlocks.push(datablock);
 
             let poseField: PoseField = new PoseField(false);
@@ -216,10 +220,10 @@ export default class FeedbackViewMode extends GameMode {
                             this._targetConditions[ii]['bonus'] / 100.0
                         );
                     } else {
-                        field.pose.setMolecularBinding(null, null, null);
+                        field.pose.setMolecularBinding([], [], 0);
                     }
                 } else {
-                    field.pose.setMolecularBinding(null, null, 0);
+                    field.pose.setMolecularBinding([], [], 0);
                 }
             }
 
@@ -330,10 +334,10 @@ export default class FeedbackViewMode extends GameMode {
                     this._targetConditions[this._currentIndex]['bonus'] / 100.0
                 );
             } else {
-                this._poseFields[0].pose.setMolecularBinding(null, null, null);
+                this._poseFields[0].pose.setMolecularBinding([], [], 0);
             }
         } else {
-            this._poseFields[0].pose.setMolecularBinding(null, null, 0);
+            this._poseFields[0].pose.setMolecularBinding([], [], 0);
         }
 
         if (this._foldMode === PoseFoldMode.ESTIMATE) {
@@ -507,8 +511,11 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        let folder: Folder = FolderManager.instance.getFolder(Vienna.NAME);
-        this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
+        let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (folder === null) {
+            throw new Error("Failed to instantiate Vienna by name from the FolderManager!!");
+        }
+        this._shapePairs[index] = folder.foldSequence(this._sequence, [], desiredPairs);
     }
 
     private loadDesignBrowser(): void {
@@ -523,7 +530,11 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         let puzzleState = this._undoBlocks[this._currentIndex];
-        puzzleState.updateMeltingPointAndDotPlot(FolderManager.instance.getFolder(Vienna.NAME));
+        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (!vienna) {
+            throw new Error("Could not instantiate Vienna folder by name!!")
+        }
+        puzzleState.updateMeltingPointAndDotPlot(vienna);
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 

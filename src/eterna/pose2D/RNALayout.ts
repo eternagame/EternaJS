@@ -547,6 +547,8 @@ export default class RNALayout {
             if (rootnode.children[ii].isPair) {
                 let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
                 let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                if (customCoordA[0] == null) continue;
+                if (customCoordB[0] == null) continue;
                 customCoord[0] = (customCoordA[0] + customCoordB[0]) / 2;
                 customCoord[1] = (customCoordA[1] + customCoordB[1]) / 2;
             }
@@ -555,7 +557,9 @@ export default class RNALayout {
             let childY = 0.0;
             let childGoX = 0.0;
             let childGoY = 0.0;
+            if (customCoord[0] == null) continue;
             childX = customCoord[0] * this._primarySpace;
+            if (customCoord[1] == null) continue;
             childY = customCoord[1] * this._primarySpace;
             if (anchornode != null) {
                 let devX: number = customCoord[0] - anchorCustomX;
@@ -571,14 +575,17 @@ export default class RNALayout {
 
             let childRotationDirection: number = rotationDirection;
             if (rootnode.children[ii].isPair) {
-                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
+                let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                if (customCoordA[0] == null) continue;
+                if (customCoordB[0] == null) continue;
                 let customCrossX: number = (customCoordA[0] - customCoordB[0]);
                 let customCrossY: number = (customCoordA[1] - customCoordB[1]);
                 let customGoX: number = customCrossY;
                 let customGoY: number = -customCrossX;
 
-                let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
+                let customCoordNext: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA + 1];
+                if (customCoordNext[0] == null) continue;
                 let customGoNextX: number = customCoordNext[0] - customCoord[0];
                 let customGoNextY: number = customCoordNext[1] - customCoord[1];
                 let childCustomDotProd = customGoNextX * customGoX + customGoNextY * customGoY;
@@ -682,7 +689,7 @@ export default class RNALayout {
 
             if (numStacks === 1 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
-            } else if (numStacks === 0) {
+            } else if (numStacks === 0 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
             } else if (numStacks > 1 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
@@ -793,12 +800,14 @@ export default class RNALayout {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
                 if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
-                    if ( customLayout[ii][0] === null || customLayout[ii + 1][0] === null
-                            || customLayout[ii][1] === null || customLayout[ii + 1][1] === null ) {
+                    if ( customLayout[ii][0] == null || customLayout[ii + 1][0] == null
+                            || customLayout[ii][1] == null || customLayout[ii + 1][1] == null ) {
                         continue;
                     }
-                    let goX = customLayout[ii][0] - customLayout[ii + 1][0];
-                    let goY = customLayout[ii][1] - customLayout[ii + 1][1];
+                    // Just checked against nulls, so I am comfortable using ! to assert.
+                    let goX = customLayout[ii][0]! - customLayout[ii + 1][0]!;
+                    let goY = customLayout[ii][1]! - customLayout[ii + 1][1]!;
+
                     let L = Math.sqrt(goX * goX + goY * goY);
                     scaleFactor = 1.0 / L;
                     return scaleFactor;

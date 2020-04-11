@@ -51,7 +51,7 @@ export default class RNAScript {
             return;
         }
 
-        let node: RScriptOp = this._ops.next();
+        let node: RScriptOp | null = this._ops.next();
         while (node) {
             node.exec();
 
@@ -63,7 +63,7 @@ export default class RNAScript {
         }
     }
 
-    private createOpFromInstruction(instruction: string): RScriptOp {
+    private createOpFromInstruction(instruction: string): RScriptOp | null {
         instruction = instruction.replace(/^\s*/, '');
         instruction = instruction.replace(/\s*$/, '');
         if (instruction === '') {
@@ -71,12 +71,12 @@ export default class RNAScript {
         }
 
         const instRegex = /(#PRE-)?(\w+)\s*(.*)/ig;
-        let regResult: RegExpExecArray;
+        let regResult: RegExpExecArray | null;
         if ((regResult = instRegex.exec(instruction)) != null) {
             let op: string = (regResult[1] ? regResult[1] : '') + regResult[2];
             let args: string = regResult[3];
             // Based on the OP, create the proper RScriptOp.
-            let ret: RScriptOp = this.opToRScriptOp(op, args);
+            let ret: RScriptOp | null = this.opToRScriptOp(op, args);
             if (ret) {
                 ret.initialize(op, args);
             }
@@ -86,7 +86,7 @@ export default class RNAScript {
         }
     }
 
-    private opToRScriptOp(op: string, args: string): RScriptOp {
+    private opToRScriptOp(op: string, args: string): RScriptOp | null {
         // Strip op of any pre/post white space
         op = op.replace(/^\s*/, '');
         op = op.replace(/\s*$/, '');
@@ -100,7 +100,7 @@ export default class RNAScript {
         let preRegex = /#PRE-(.*)/g;
         let rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
 
-        let regResult: any[];
+        let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {
             let rop: ROPPre = new ROPPre(regResult[1], this._env);
             rop.initArgs(args);
@@ -140,10 +140,10 @@ export default class RNAScript {
         } else if ((regResult = hintRegex.exec(op))) {
             return new ROPHint(regResult[1].toUpperCase() === 'SHOW', this._env);
         } else if ((regResult = waitRegex.exec(op))) {
-            let waitType: ROPWaitType = regResult[1].toUpperCase();
+            let waitType: ROPWaitType = (regResult[1].toUpperCase() as ROPWaitType);
             return new ROPWait(waitType, this._env);
         } else if ((regResult = rnaRegex.exec(op))) {
-            let ropRNAType: ROPRNAType = regResult[1].toUpperCase();
+            let ropRNAType: ROPRNAType = (regResult[1].toUpperCase() as ROPRNAType);
             return new ROPRNA(ropRNAType, this._env);
         }
         // Shouldn't reach here ever.

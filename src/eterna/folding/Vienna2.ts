@@ -46,22 +46,20 @@ export default class Vienna2 extends Folder {
         let secstructStr: string = EPars.pairsToParenthesis(pairs);
         let seqStr: string = EPars.sequenceToString(seq);
 
-        let probabilitiesString: string;
+        let probabilitiesString: string = "";
         let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
             if (result) {
                 probabilitiesString = result.probabilitiesString;
-            } else {
-                probabilitiesString = "";
             }
         } catch (e) {
             log.error('GetDotPlot error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
+                return [];
             }
         }
 
@@ -132,10 +130,10 @@ export default class Vienna2 extends Folder {
                 }
             } catch (e) {
                 log.error('FullEval error', e);
-                return 0;
             } finally {
                 if (result != null) {
                     result.delete();
+                    return 0;
                 }
             }
         } while (0);
@@ -695,12 +693,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('FullFoldTemperature error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -720,12 +718,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -744,12 +742,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequence error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 
@@ -770,12 +768,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
-            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
+            return [];
         }
     }
 

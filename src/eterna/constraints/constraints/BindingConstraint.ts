@@ -22,7 +22,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         this.stateIndex = stateIndex;
     }
 
-    protected abstract _getOligoInfo(targetConditions: any[]): OligoInfo[];
+    protected abstract _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[];
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
@@ -40,6 +40,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         tooltip.append(`In state ${this.stateIndex + 1}, your RNA must:\n`);
 
         for (let oligo of oligos) {
+            if (oligo == null) continue;
             tooltip.append('- ');
             if (forMissionScreen) {
                 tooltip.pushStyle('altText');
@@ -57,13 +58,15 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
 
         let clarifyTextBuilder = new StyledTextBuilder();
         for (let ii = 0; ii < oligos.length; ii++) {
+            if (oligos[ii] == null) continue;
             if (ii > 0) {
                 clarifyTextBuilder.append(' \u2003');
             }
 
+            // We explicitly verify these aren't null, so this is safe.
             clarifyTextBuilder.append(
-                `${oligos[ii].label}`,
-                {fill: oligos[ii].bind ? '#ffffff' : '#808080'}
+                `${oligos[ii]!.label}`,
+                {fill: oligos[ii]!.bind ? '#ffffff' : '#808080'}
             );
         }
 
@@ -79,7 +82,8 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         iconGraphics.lineTo(origLower + twLower, 27);
 
         for (let ii = 0; ii < oligos.length; ii++) {
-            let ctrlY: number = (oligos[ii].bind ? 22 : 14);
+            if (oligos[ii] === null) continue;
+            let ctrlY: number = (oligos[ii]!.bind ? 22 : 14);
             iconGraphics.moveTo(origUpper + (ii * 2) * step, ctrlY);
             iconGraphics.lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
         }
@@ -156,7 +160,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         };
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
         const oligos: OligoDef[] = targetConditions[this.stateIndex]['oligos'];
 
         return oligos.map(
@@ -229,7 +233,7 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
@@ -266,7 +270,7 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
