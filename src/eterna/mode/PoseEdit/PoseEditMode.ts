@@ -3066,11 +3066,11 @@ export default class PoseEditMode extends GameMode {
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
     protected _targetConditions: any[] = [];
-    private _targetOligo: number[][] = [];
+    private _targetOligo: (number[] | undefined)[] = [];
     private _oligoMode: number[] = [];
     private _oligoName: string[] = [];
-    private _targetOligos: Oligo[][] = [];
-    private _targetOligosOrder: number[][] = [];
+    private _targetOligos: (Oligo[] | undefined[] = [];
+    private _targetOligosOrder: (number[] | undefined)[] = [];
 
     private _folderButton: GameButton;
     private _isDatabrowserMode: boolean;

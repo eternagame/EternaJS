@@ -449,7 +449,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
-    public getBaseOutXY(seq: number, out: Point | null = null): Point {
+    public getBaseOutXY(seq: number, out?: Point): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
         out.y += this._offY;
@@ -462,7 +462,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: number, closestIndex: number): any[] {
+    public parseCommand(command: number, closestIndex: number): [string, PuzzleEditOp, number[]?] | null {
         switch (command) {
             case EPars.RNABASE_ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -520,11 +520,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this._shiftEnd = closestIndex;
                     this.updateShiftHighlight();
 
-                    let reg: Registration = null;
+                    let reg: Registration | null = null;
                     reg = this.pointerUp.connect(() => {
                         this._shiftStart = -1;
                         this._shiftEnd = -1;
-                        reg.close();
+                        reg!.close();
                     });
                 }
                 e.stopPropagation();
@@ -532,7 +532,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
             this._lastShiftedCommand = -1;
             this._lastShiftedIndex = -1;
-            let cmd: any[] = this.parseCommand(this._currentColor, closestIndex);
+            let cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(this._currentColor, closestIndex);
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
@@ -590,7 +590,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.clearMouse();
         }
 
-        this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
+        this.container.toLocal(Flashbang.globalMouse, undefined, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
 
@@ -711,8 +711,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public set puzzleLocks(puzlocks: boolean[]) {
-        if (puzlocks == null) {
-            this._locks = null;
+        if (puzlocks == []) {
+            this._locks = [];
         } else {
             this._locks = puzlocks.slice();
         }
@@ -721,7 +721,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public get puzzleLocks(): boolean[] {
-        if (this._locks == null) {
+        if (this._locks == []) {
             this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }
         return this._locks.slice();
@@ -741,8 +741,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public set forcedStruct(forced: number[]) {
         let len: number = this.fullSequenceLength;
-        if (forced == null) {
-            this._forcedStruct = null;
+        if (forced == []) {
+            this._forcedStruct = [];
         } else {
             if (forced.length !== len) {
                 throw new Error(`Forced structure length does not match sequence length ${forced.length} ${this._sequence.length} ${this._pairs.length}`);
@@ -777,9 +777,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set structConstraints(doCare: boolean[]) {
         let ii: number;
         let len: number = this.fullSequenceLength;
-        let dc: boolean[] = (doCare == null ? null : doCare.slice());
+        let dc: boolean[] | null = (doCare == null ? null : doCare.slice());
         if (dc != null && this._oligosOrder != null) {
-            let idxMap: number[] = this.getOrderMap(null);
+            let idxMap: number[] = this.getOrderMap([]);
             for (ii = 0; ii < len; ii++) {
                 dc[ii] = doCare[idxMap.indexOf(ii)];
             }
@@ -866,7 +866,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let segment: number[];
         if (ofs === 1) {
             segment = this._sequence.slice(first, last + 1 + 1);
-            segment.unshift(segment.pop());
+            // AMW TODO: it should be safe to assert this is not undefined
+            segment.unshift(segment.pop()!);
             mutated = this._sequence.slice(0, first)
                 .concat(segment)
                 .concat(this._sequence.slice(last + 1 + 1));
@@ -922,7 +923,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let segment: number[];
         if (ofs === -1) {
             segment = this._sequence.slice(first - 1, last + 1);
-            segment.push(segment.shift());
+            // AMW: it should be safe to assert hthis is not undefined
+            segment.push(segment.shift()!);
             mutated = this._sequence.slice(0, first - 1)
                 .concat(segment)
                 .concat(this._sequence.slice(last + 1));
@@ -1297,7 +1299,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._addBaseCallback = cb;
     }
 
-    public callAddBaseCallback(parenthesis: string = null, op: PuzzleEditOp = null, index: number = -1): void {
+    public callAddBaseCallback(parenthesis: string | null = null, op: PuzzleEditOp | null = null, index: number = -1): void {
         if (this._addBaseCallback != null) {
             this._addBaseCallback(parenthesis, op, index);
         }
@@ -1459,10 +1461,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._moleculeIsBoundReal = boundReal;
     }
 
-    public setOligos(oligos: Oligo[], order: number[] = null, numPaired: number = 0): void {
-        if (oligos == null) {
-            this._oligos = null;
-            this._oligosOrder = null;
+    public setOligos(oligos?: Oligo[], order?: number[] = undefined, numPaired: number = 0): void {
+        if (oligos == undefined) {
+            this._oligos = undefined;
+            this._oligosOrder = undefined;
             this._oligosPaired = 0;
             return;
         }
@@ -1477,7 +1479,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
         }
 
-        let prevOrder: number[] = this._oligosOrder;
+        let prevOrder: number[] | undefined = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
             this._oligosOrder = [];
@@ -1525,7 +1527,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public getOrderMap(otherOrder: number[]): number[] {
         if (this._oligos == null) {
-            return null;
+            return [];
         }
 
         let idxMap: number[] = [];
@@ -1533,6 +1535,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let ii: number = this._sequence.length;
         let jj: number;
         for (jj = 0; jj < this._oligos.length; jj++) {
+            if (this._oligosOrder === undefined) {
+                throw new Error("_oligos has nonzero length but _oligosOrder is undefined?!");
+            }
             ofs[this._oligosOrder[jj]] = ii;
             ii += 1 + this._oligos[this._oligosOrder[jj]].sequence.length;
         }
@@ -2567,7 +2572,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateScoreNodeGui();
     }
 
-    private deleteBaseWithIndex(index: number): any[] {
+    private deleteBaseWithIndex(index: number): [string, PuzzleEditOp, number[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
@@ -3315,9 +3320,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _oligoPaired: boolean = false;
 
     // Multistrands
-    private _oligos: Oligo[] | null = null;
-    private _oligosOrder: number[] | null = null;
-    private _prevOligosOrder: number[];
+    private _oligos?: Oligo[];
+    private _oligosOrder?: number[];
+    private _prevOligosOrder?: number[];
     private _oligosPaired: number = 0;
     private _strandLabel: TextBalloon;
 
@@ -3346,7 +3351,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Pointer to callback function to be called after change in pose
     private _poseEditCallback: (() => void) | null = null;
     private _trackMovesCallback: ((count: number, moves: any[]) => void) | null = null;
-    private _addBaseCallback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
+    private _addBaseCallback: (parenthesis: string | null, op: PuzzleEditOp, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
 
@@ -3392,7 +3397,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _origOffsetX: number;
     private _origOffsetY: number;
 
-    private _onExplosionComplete: () => void;
+    private _onExplosionComplete: (() => void) | null;
 
     // Selection box
     private _selectionHighlightBox: HighlightBox;

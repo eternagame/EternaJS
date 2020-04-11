@@ -78,19 +78,19 @@ export default class UndoBlock {
         }
     }
 
-    public get targetOligos(): Oligo[] {
+    public get targetOligos(): Oligo[] | undefined {
         return this._targetOligos;
     }
 
-    public set targetOligos(targetOligos: Oligo[]) {
+    public set targetOligos(targetOligos: Oligo[] | undefined) {
         this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] {
+    public get targetOligo(): number[] | null {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[]) {
+    public set targetOligo(targetOligo: number[] | null) {
         this._targetOligo = targetOligo == null ? null : targetOligo.slice();
     }
 
@@ -100,7 +100,7 @@ export default class UndoBlock {
         return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string {
+    public get oligoName(): string | null {
         let tc: any = this.targetConditions;
         if (tc == null) {
             return null;
@@ -108,12 +108,12 @@ export default class UndoBlock {
         return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
     }
 
-    public get oligoOrder(): number[] | null {
+    public get oligoOrder(): number[] | undefined {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[] | null) {
-        this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set oligoOrder(oligoOrder: number[] | undefined) {
+        this._oligoOrder = oligoOrder == undefined ? undefined : oligoOrder.slice();
     }
 
     public get oligosPaired(): number {
@@ -132,12 +132,12 @@ export default class UndoBlock {
         this._targetPairs = targetPairs.slice();
     }
 
-    public get targetOligoOrder(): number[] {
+    public get targetOligoOrder(): number[] | undefined {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligoOrder: number[]) {
-        this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
+    public set targetOligoOrder(oligoOrder: number[] | undefined) {
+        this._targetOligoOrder = oligoOrder == undefined ? undefined : oligoOrder.slice();
     }
 
     public get sequence(): number[] {
@@ -181,26 +181,30 @@ export default class UndoBlock {
     }
 
     public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
-        return this._pairsArray.get(pseudoknots)[temp];
+        // This can't be undefined; it's initialized in the class.
+        return this._pairsArray.get(pseudoknots)![temp];
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        if (this._paramsArray.get(pseudoknots)[temp] != null) {
-            return this._paramsArray.get(pseudoknots)[temp][index];
+        // This can't be undefined; it's initialized in the class.
+        if (this._paramsArray.get(pseudoknots)![temp] != null) {
+            return this._paramsArray.get(pseudoknots)![temp][index];
         } else {
             return undefined;
         }
     }
 
     public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
-        this._pairsArray.get(pseudoknots)[temp] = pairs ? pairs.slice() : [];
+        // This can't be undefined; it's initialized in the class.
+        this._pairsArray.get(pseudoknots)![temp] = pairs ? pairs.slice() : [];
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        if (this._paramsArray.get(pseudoknots)[temp] == null) {
-            this._paramsArray.get(pseudoknots)[temp] = [];
+        // This can't be undefined; it's initialized in the class.
+        if (this._paramsArray.get(pseudoknots)![temp] == null) {
+            this._paramsArray.get(pseudoknots)![temp] = [];
         }
-        this._paramsArray.get(pseudoknots)[temp][index] = val;
+        this._paramsArray.get(pseudoknots)![temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
@@ -228,6 +232,10 @@ export default class UndoBlock {
                 fullSeq = fullSeq.concat(this._targetOligo);
             }
         } else if (this._targetOligos) {
+            if (this._oligoOrder === undefined) {
+                throw new Error('this UndoBlock has _targetOligos but _oligoOrder remains undefined!');
+            }
+
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
                 fullSeq.push(EPars.RNABASE_CUT);
                 fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
@@ -242,18 +250,18 @@ export default class UndoBlock {
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
-            this._dotPlotData = dotArray.slice();
+            this._dotPlotData = dotArray ? dotArray.slice() : [];
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
+                this.setPairs(folder.foldSequence(this.sequence, [], null, pseudoknots, ii), ii, pseudoknots);
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }
@@ -347,8 +355,9 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder: number[]): number[] {
+    public reorderedOligosIndexMap(otherOrder?: number[]): number[] {
         if (this._targetOligos == null) return [];
+        if (otherOrder === undefined) return [];
 
         let originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;
@@ -367,15 +376,15 @@ export default class UndoBlock {
     }
 
     private _sequence: number[];
-    private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
-    private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
+    private _pairsArray: Map<boolean, number[][]> = new Map([[false, []], [true, []]]);
+    private _paramsArray: Map<boolean, any[][]> = new Map([[false, []], [true, []]]);
     private _stable: boolean = false;
     private _targetOligo: number[] | null = null;
-    private _targetOligos: Oligo[] | null = null;
-    private _oligoOrder: number[] | null = null;
+    private _targetOligos?: Oligo[];
+    private _oligoOrder?: number[];
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] | null = null;
+    private _targetOligoOrder?: number[];
     private _puzzleLocks: boolean[] = [];
     private _forcedStruct: number[] = [];
     private _targetConditions: string | null = null;

@@ -30,7 +30,7 @@ export default class PoseUtil {
         return [parenthesis, PuzzleEditOp.ADD_BASE, mutatedPairs];
     }
 
-    public static addPairWithIndex(index: number, pairs: number[]): any[] {
+    public static addPairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp] {
         let mutatedPairs: number[];
         let parenthesis: string;
         let ii: number;
@@ -97,7 +97,7 @@ export default class PoseUtil {
         return [parenthesis, PuzzleEditOp.DELETE_BASE, mutatedPairs];
     }
 
-    public static deletePairWithIndex(index: number, pairs: number[]): any[] {
+    public static deletePairWithIndex(index: number, pairs: number[]): [string, PuzzleEditOp] {
         let pindex: number = pairs[index];
         if (pindex < 0) {
             throw new Error("base doesn't have pair");
