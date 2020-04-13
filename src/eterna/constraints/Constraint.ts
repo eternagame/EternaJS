@@ -55,8 +55,8 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
         status: ConstraintStatus,
         undoBlocks: UndoBlock[],
         targetConditions?: any[]
-    ): HighlightInfo | null {
-        return null;
+    ): HighlightInfo | undefined {
+        return undefined;
     }
 
     public abstract serialize(): [string, string];
