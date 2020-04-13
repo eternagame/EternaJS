@@ -69,7 +69,7 @@ export interface DesignBrowserFilter {
 }
 
 export default class DesignBrowserMode extends GameMode {
-    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] = null) {
+    constructor(puzzle: Puzzle, novote = false, initialFilters: DesignBrowserFilter[] | null = null) {
         super();
 
         this._puzzle = puzzle;
@@ -575,7 +575,7 @@ export default class DesignBrowserMode extends GameMode {
         });
     }
 
-    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] = null): void {
+    private updateSortOption(category: DesignCategory, sortOrder: SortOrder, sortArgs: any[] | null = null): void {
         if (sortOrder !== SortOrder.NONE) {
             this._sortOptions.addCriteria(category, sortOrder, sortArgs);
         } else {
@@ -669,7 +669,7 @@ export default class DesignBrowserMode extends GameMode {
         this.reorganize(true);
     }
 
-    private rebuildDataColumns(filters: DesignBrowserFilter[] = null): void {
+    private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
         const FONT = 'Arial';
         const FONT_SIZE = 14;
 
@@ -870,7 +870,7 @@ export default class DesignBrowserMode extends GameMode {
 
     private readonly _puzzle: Puzzle;
     private readonly _novote: boolean;
-    private readonly _initialDataFilters: DesignBrowserFilter[];
+    private readonly _initialDataFilters: DesignBrowserFilter[] | null;
     private readonly _content = new Container();
 
     private _divider1: DotLine;
