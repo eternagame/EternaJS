@@ -454,8 +454,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _outline: Sprite;
     private _fglow: Graphics;
 
-    private _mouseOverRegs: RegistrationGroup;
-    private _mouseOverObject: SceneObject;
+    private _mouseOverRegs: RegistrationGroup | null;
+    private _mouseOverObject: SceneObject | null;
 
     private static readonly LOCATION_ANIM = 'AnimateLocation';
     private static readonly BACKLIGHT_ANIM = 'BacklightAnim';
