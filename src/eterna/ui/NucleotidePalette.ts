@@ -275,7 +275,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         if (target != null) {
             this.clickTarget(target.type);
         }
@@ -304,7 +304,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
         if (target !== this._lastTooltipTarget) {
             if (this._lastTooltipTarget != null) {
@@ -334,7 +334,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     private _enabled: boolean = true;
     private _overrideDefaultMode: boolean = false;
     private _overrideNoPairMode: boolean = false;
-    private _lastTooltipTarget: PaletteTarget;
+    private _lastTooltipTarget: PaletteTarget | null;
 
     private readonly _targets: PaletteTarget[];
 
