@@ -99,7 +99,7 @@ export default class ConstraintBar extends ContainerObject {
     public updateHighlights(): void {
         let highlights: HighlightInfo[] = [];
         for (let constraint of this._constraints) {
-            if (constraint.highlightCache != null && (
+            if (constraint.highlightCache != undefined && (
                 (
                     constraint.highlightCache.color === HighlightType.UNSTABLE
                     && constraint === this._flaggedConstraint
@@ -140,7 +140,7 @@ export default class ConstraintBar extends ContainerObject {
                 constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
             );
             constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
+                ? undefined : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
             satisfied = satisfied && status.satisfied;
         }
 
