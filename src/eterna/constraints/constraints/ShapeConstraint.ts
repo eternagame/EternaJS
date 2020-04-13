@@ -90,7 +90,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         };
     }
 
-    public getHighlight(status: ShapeConstraintStatus): HighlightInfo {
+    public getHighlight(status: ShapeConstraintStatus): HighlightInfo | null {
         let unstable: number[] = [];
         if (status.wrongPairs) {
             let curr = 0;
