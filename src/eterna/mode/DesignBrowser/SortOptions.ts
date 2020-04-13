@@ -12,9 +12,9 @@ export enum SortOrder {
 export class SortCriterion {
     public readonly category: DesignCategory;
     public sortOrder: SortOrder;
-    public arg: string;
+    public arg: string | null;
 
-    constructor(category: DesignCategory, order: SortOrder, arg: string = null) {
+    constructor(category: DesignCategory, order: SortOrder, arg: string | null = null) {
         this.category = category;
         this.sortOrder = order;
         this.arg = arg;
@@ -40,7 +40,7 @@ export default class SortOptions {
         return this._validCategories.filter((category) => !this.hasCriterion(category));
     }
 
-    public getCriterion(category: DesignCategory): SortCriterion | null {
+    public getCriterion(category: DesignCategory): SortCriterion | undefined {
         return this._criteria.find((value) => value.category === category);
     }
 
@@ -54,7 +54,7 @@ export default class SortOptions {
 
     public getSortOrder(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
-        return criterion != null ? criterion.sortOrder : SortOrder.NONE;
+        return criterion != undefined ? criterion.sortOrder : SortOrder.NONE;
     }
 
     public compareSolutions(a: Solution, b: Solution): number {
@@ -63,7 +63,10 @@ export default class SortOptions {
             let bProperty: any;
 
             if (criterion.category === DesignCategory.SEQUENCE) {
-                let anchorSequence: string = criterion.arg;
+                let anchorSequence: string | null = criterion.arg;
+                if (anchorSequence === null) {
+                    throw new Error('Cannot sort by sequence if the criterion argument is null!');
+                }
                 let aString: string = a.sequence;
                 if (aString == null) throw new Error(`solution ${a.nodeID} invalid`);
                 let bString: string = b.sequence;
@@ -116,7 +119,7 @@ export default class SortOptions {
 
     public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
         let cur = this.getCriterion(category);
-        if (cur != null) {
+        if (cur != undefined) {
             cur.sortOrder = sortOrder;
             cur.arg = sortArgs;
             this.setCriteriaIdx(category, 0);
@@ -140,7 +143,7 @@ export default class SortOptions {
 
     public toggleSort(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
-        if (criterion == null) {
+        if (criterion == undefined) {
             throw new Error(`Can't find category ${category}`);
         }
 
