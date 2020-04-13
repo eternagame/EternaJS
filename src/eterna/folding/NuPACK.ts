@@ -52,7 +52,7 @@ export default class NuPACK extends Folder {
 
         let seqStr: string = EPars.sequenceToString(seq);
 
-        let result: DotPlotResult = null;
+        let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr);
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
@@ -88,7 +88,7 @@ export default class NuPACK extends Folder {
     /* override */
     public scoreStructures(
         seq: number[], pairs: number[],
-        pseudoknots: boolean = false, temp: number = 37, outNodes: number[] = null
+        pseudoknots: boolean = false, temp: number = 37, outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, pseudoknots, temp
@@ -103,7 +103,7 @@ export default class NuPACK extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
@@ -179,7 +179,7 @@ export default class NuPACK extends Folder {
 
     /* override */
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknots: boolean = false, temp: number = 37
     ): number[] {
         let key = {
@@ -207,7 +207,7 @@ export default class NuPACK extends Folder {
 
     /* override */
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
     ): number[] {
         let key = {
@@ -260,7 +260,7 @@ export default class NuPACK extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -312,7 +312,7 @@ export default class NuPACK extends Folder {
 
     /* override */
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
@@ -396,7 +396,7 @@ export default class NuPACK extends Folder {
 
     /* override */
     public multifold(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string | null = null, temp: number = 37
     ): any {
         let key: any = {
             primitive: 'multifold',
@@ -470,7 +470,7 @@ export default class NuPACK extends Folder {
     }
 
     public multifoldUnroll(
-        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], oligos: any[], desiredPairs: string | null = null, temp: number = 37
     ): PoseOp[] {
         let ops: PoseOp[] = [];
 
@@ -511,7 +511,7 @@ export default class NuPACK extends Folder {
     private foldSequenceImpl(seq: number[], temp: number = 37, pseudoknots: boolean = false): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
 
-        let result: FullFoldResult = null;
+        let result: FullFoldResult | null = null;
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
             return EPars.parenthesisToPairs(result.structure, pseudoknots);
@@ -531,7 +531,7 @@ export default class NuPACK extends Folder {
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
 
-        let result: FullFoldResult = null;
+        let result: FullFoldResult | null = null;
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, i, p, j, q, -bonus);
             return EPars.parenthesisToPairs(result.structure);
@@ -549,7 +549,7 @@ export default class NuPACK extends Folder {
     private cofoldSequenceImpl(seq: number[]): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
 
-        let result: FullFoldResult = null;
+        let result: FullFoldResult | null = null;
         try {
             result = this._lib.CoFoldSequence(seqStr);
             log.debug('done cofolding');
@@ -566,11 +566,11 @@ export default class NuPACK extends Folder {
     }
 
     private cofoldSequenceWithBindingSiteImpl(
-        seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
+        seq: number[], str: string | null, i: number, p: number, j: number, q: number, bonus: number, temp: number = 37
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
 
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, i, p, j, q, -bonus);
             log.debug('done cofoldingWBS');
@@ -587,7 +587,7 @@ export default class NuPACK extends Folder {
     }
 
     private cofoldSeq2(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let key: any = {
             primitive: 'cofold2',
