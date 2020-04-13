@@ -32,7 +32,7 @@ export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
     }
 }
 
-export function StringToPaletteTargetType(value: string): PaletteTargetType {
+export function StringToPaletteTargetType(value: string): PaletteTargetType | null {
     switch (value.toUpperCase()) {
         case 'A': return PaletteTargetType.A;
         case 'U': return PaletteTargetType.U;
@@ -275,7 +275,7 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
         if (target != null) {
             this.clickTarget(target.type);
         }
@@ -304,9 +304,9 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
         }
 
         e.data.getLocalPosition(this.display, NucleotidePalette.P);
-        let target: PaletteTarget = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
+        let target: PaletteTarget | null = this.getTargetAt(NucleotidePalette.P.x, NucleotidePalette.P.y);
 
-        if (target !== this._lastTooltipTarget) {
+        if (target && target !== this._lastTooltipTarget) {
             if (this._lastTooltipTarget != null) {
                 Tooltips.instance.removeTooltip(this._lastTooltipTarget);
             }

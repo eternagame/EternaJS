@@ -30,9 +30,9 @@ export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
     }
 
     public selectable(value: boolean): HTMLTextObject {
-        this._obj.style.userSelect = value ? undefined : 'none';
-        this._obj.style.webkitUserSelect = value ? undefined : 'none';
-        this._obj.style.msUserSelect = value ? undefined : 'none';
+        this._obj.style.userSelect = value ? 'unset' : 'none';
+        this._obj.style.webkitUserSelect = value ? null : 'none';
+        this._obj.style.msUserSelect = value ? null : 'none';
         return this;
     }
 

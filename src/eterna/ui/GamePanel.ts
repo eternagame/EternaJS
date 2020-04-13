@@ -102,8 +102,8 @@ export default class GamePanel extends BaseGamePanel {
     protected _color: number = 0;
     protected _borderAlpha: number = 0;
     protected _borderColor: number = 0;
-    protected _title: string = null;
-    protected _titleText: Text = null;
+    protected _title: string | null = null;
+    protected _titleText: Text | null = null;
 
     protected _width: number = 0;
     protected _height: number = 0;

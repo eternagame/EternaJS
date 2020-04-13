@@ -1472,7 +1472,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let same: boolean = (this._oligos != null && oligos.length === this._oligos.length);
         if (same) {
             for (let k = 0; k < oligos.length && same; k++) {
-                if (!Arrays.shallowEqual(this._oligos![k].sequence, oligos[k].sequence)) {
+                if (!Arrays.shallowEqual(this._oligos[k].sequence, oligos[k].sequence)) {
                     same = false;
                     break;
                 }
@@ -1481,9 +1481,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let prevOrder: number[] | undefined = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
-        if (order == null) {
+        if (order == undefined) {
             this._oligosOrder = [];
-            for (let k = 0; k < this._oligos!.length; k++) {
+            for (let k = 0; k < this._oligos.length; k++) {
                 this._oligosOrder[k] = k;
             }
         } else {

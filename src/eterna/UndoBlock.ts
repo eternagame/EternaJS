@@ -180,44 +180,50 @@ export default class UndoBlock {
         this._stable = stable;
     }
 
-    public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
-        // This can't be undefined; it's initialized in the class.
+    public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] | undefined {
+        if (!this._pairsArray.get(pseudoknots)) return undefined;
         return this._pairsArray.get(pseudoknots)![temp];
     }
 
-    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        // This can't be undefined; it's initialized in the class.
-        if (this._paramsArray.get(pseudoknots)![temp] != null) {
-            return this._paramsArray.get(pseudoknots)![temp][index];
-        } else {
+    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): number | any[] | undefined {
+        if (this._paramsArray.get(pseudoknots) === undefined || !this._paramsArray.get(pseudoknots)![temp]) {
             return undefined;
         }
+        return this._paramsArray.get(pseudoknots)![temp][index];
     }
 
     public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
-        // This can't be undefined; it's initialized in the class.
+        if (this._pairsArray.get(pseudoknots) === undefined) {
+            this._pairsArray.set(pseudoknots, [])
+        }
         this._pairsArray.get(pseudoknots)![temp] = pairs ? pairs.slice() : [];
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
         // This can't be undefined; it's initialized in the class.
-        if (this._paramsArray.get(pseudoknots)![temp] == null) {
+        if (this._paramsArray.get(pseudoknots) == undefined) {
+            this._paramsArray.set(pseudoknots, []);
+        }
+        if (this._paramsArray.get(pseudoknots)![temp] == undefined) {
             this._paramsArray.get(pseudoknots)![temp] = [];
         }
         this._paramsArray.get(pseudoknots)![temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
-        let bestPairs: number[];
+        let bestPairs: number[] | undefined;
         let seq: number[] = this._sequence;
         bestPairs = this.getPairs(temp, pseudoknots);
+        if (bestPairs === undefined) {
+            bestPairs = Array(seq.length, -1);
+        }
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.ANYPAIR, 
-            this.getParam(UndoBlockParam.GU, temp, pseudoknots) 
-                + this.getParam(UndoBlockParam.GC, temp, pseudoknots) 
-                + this.getParam(UndoBlockParam.AU, temp, pseudoknots), temp, pseudoknots);
+            (this.getParam(UndoBlockParam.GU, temp, pseudoknots) as number)
+                + (this.getParam(UndoBlockParam.GC, temp, pseudoknots) as number) 
+                + (this.getParam(UndoBlockParam.AU, temp, pseudoknots) as number), temp, pseudoknots);
         this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
             EPars.sequenceToString(seq), 5
@@ -249,18 +255,18 @@ export default class UndoBlock {
     }
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == undefined) {
+            let dotArray: number[] | undefined = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray ? dotArray.slice() : [];
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.getPairs(ii) == null) {
+            if (this.getPairs(ii) == undefined) {
                 this.setPairs(folder.foldSequence(this.sequence, [], null, pseudoknots, ii), ii, pseudoknots);
             }
 
-            if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
+            if (this.getParam(UndoBlockParam.DOTPLOT, ii) == undefined) {
                 let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }

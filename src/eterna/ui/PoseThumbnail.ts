@@ -30,7 +30,7 @@ export default class PoseThumbnail {
         let disp: DisplayObject = PoseThumbnail.create(
             sequence, pairs, size, type,
             expStartIndex, wrongPairs, expUseThreshold, expThreshold,
-            null, customLayout
+            undefined, customLayout
         );
         return TextureUtil.renderToTexture(disp);
     }
@@ -91,10 +91,10 @@ export default class PoseThumbnail {
         wrongPairs: number[] | null,
         expUseThreshold: boolean,
         expThreshold: number,
-        canvas: Graphics = null,
+        canvas: Graphics | undefined = undefined,
         customLayout: Array<[number, number] | [null, null]> | null = null
     ): DisplayObject {
-        let frame: DisplayObject;
+        let frame: DisplayObject | null = null;
 
         if (size === 1) {
             frame = Sprite.fromImage(Bitmaps.SolutionSmallFrame);
@@ -110,6 +110,8 @@ export default class PoseThumbnail {
             frame = DisplayUtil.fillRect(200, 200, 0x0);
         } else if (size === 7) {
             frame = DisplayUtil.fillRect(300, 300, 0x0);
+        } else {
+            throw new Error('Size unsupported!')
         }
 
         let frameBounds = frame.getLocalBounds();
@@ -170,7 +172,7 @@ export default class PoseThumbnail {
         canvas.clear();
         canvas.lineStyle(0, 0x0, 0);
 
-        let expPainter: ExpPainter = null;
+        let expPainter: ExpPainter | null = null;
 
         if (type === PoseThumbnailType.EXP_COLORED) {
             expPainter = new ExpPainter(sequence, expStartIndex);
@@ -220,7 +222,7 @@ export default class PoseThumbnail {
         for (let ii = 0; ii < n; ii++) {
             color = 0;
 
-            if (type === PoseThumbnailType.WHITE) {
+            if (type === PoseThumbnailType.WHITE || !wrongPairs) {
                 color = COLOR_WHITE;
             } else if (type === PoseThumbnailType.WRONG_COLORED) {
                 if (wrongPairs[ii] === 1) {
@@ -329,7 +331,7 @@ export default class PoseThumbnail {
                 } else {
                     color = COLOR_WHITE;
                 }
-            } else if (type === PoseThumbnailType.EXP_COLORED) {
+            } else if (type === PoseThumbnailType.EXP_COLORED && expPainter) {
                 if (expUseThreshold) color = expPainter.getColorWithMidpoint(ii, expThreshold);
                 else color = expPainter.getColor(ii);
             }
