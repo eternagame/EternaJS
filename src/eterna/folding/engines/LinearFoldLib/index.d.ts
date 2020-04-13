@@ -25,8 +25,8 @@ export = LinearFoldLib;
 
 /*~ Write your module's methods and properties in this class */
 declare class LinearFoldLib {
-    FullFoldDefault(seqString: string): LinearFoldLib.FullFoldResult;
-    FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult;
+    FullFoldDefault(seqString: string): LinearFoldLib.FullFoldResult | null;
+    FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult | null;
 }
 
 /*~ If you want to expose types from your module as well, you can
