@@ -46,7 +46,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
         this._content.addChild(this._actionButtonsLayout);
 
         let playThumbnail = new Sprite();
-        let customLayout: Array<[number, number]> = null;
+        let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (this._puzzle.targetConditions && this._puzzle.targetConditions[0]) {
             customLayout = this._puzzle.targetConditions[0]['custom-layout'];
         }
@@ -148,7 +148,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
 
         this._cancelButton = new GameButton().label('Cancel', 12);
         this.addObject(this._cancelButton, this._content);
-        this._cancelButton.clicked.connect(() => this.close(null));
+        this._cancelButton.clicked.connect(() => this.close());
 
         if (Eterna.DEV_MODE) {
             this._editButton = new GameButton().label('Edit', 12);
