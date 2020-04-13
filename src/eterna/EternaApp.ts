@@ -104,7 +104,10 @@ export default class EternaApp extends FlashbangApp {
 
         this._params = params;
 
-        let eternaContainer: HTMLElement = document.getElementById(params.containerID);
+        let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
+        if (!eternaContainer){
+            throw new Error(`Could not find HTML element with ID ${params.containerID}`);
+        }
         eternaContainer.style.position = 'relative';
 
         let pixiContainer: HTMLElement = document.createElement('div');
@@ -124,7 +127,13 @@ export default class EternaApp extends FlashbangApp {
         Eterna.saveManager = new SaveGameManager('EternaSaveGame');
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
+        if (this._params.chatboxID === undefined) {
+            throw new Error("Chatbox ID undefined!");
+        }
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
+        if (this._params.containerID === undefined) {
+            throw new Error("Container ID undefined!");
+        }
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
         this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
@@ -151,15 +160,27 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                     case InitialAppMode.PUZZLE:
+                        if (this._params.puzzleID === undefined) {
+                            throw new Error("Can't load the puzzle app mode with an undefined Puzzle ID!");
+                        }
                         return this.loadPoseEdit(this._params.puzzleID, {
                             initialFolder: this._params.folderName,
                             initSequence: this._params.sequence
                         });
                     case InitialAppMode.SOLUTION_SEE_RESULT:
                     case InitialAppMode.SOLUTION_COPY_AND_VIEW:
+                        if (this._params.puzzleID === undefined) {
+                            throw new Error("Can't load the solution app mode with an undefined Puzzle ID!");
+                        }
+                        if (this._params.solutionID === undefined) {
+                            throw new Error("Can't load the solution app mode with an undefined Solution ID!");
+                        }
                         return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
                             this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                     case InitialAppMode.DESIGN_BROWSER:
+                        if (this._params.puzzleID === undefined) {
+                            throw new Error("Can't load the design browser with an undefined Puzzle ID!");
+                        }
                         return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
                     default:
                         return Promise.reject(new Error(`Unrecognized mode '${this._params.mode}'`));
@@ -183,6 +204,9 @@ export default class EternaApp extends FlashbangApp {
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
     public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
+        if (this._params.puzzleEditNumTargets === undefined) {
+            throw new Error("puzzleEditNumTargets can't be undefined here!");
+        }
         const initPoseData = initialPoseData
             || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
             || null;
@@ -357,11 +381,11 @@ export default class EternaApp extends FlashbangApp {
         });
     }
 
-    protected get pixiParent(): HTMLElement {
+    protected get pixiParent(): HTMLElement | null {
         return document.getElementById(Eterna.PIXI_CONTAINER_ID);
     }
 
-    private setLoadingText(text: string, extraBlurbText: string): void {
+    private setLoadingText(text: string, extraBlurbText: string | null): void {
         if (this._modeStack.topMode instanceof LoadingMode) {
             (this._modeStack.topMode as LoadingMode).text = text;
             if (extraBlurbText) (this._modeStack.topMode as LoadingMode).extraBlurbText = extraBlurbText;
@@ -387,7 +411,7 @@ export default class EternaApp extends FlashbangApp {
             let playerID = process.env['DEBUG_PLAYER_ID'];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
-            if (playerID.length === 0) {
+            if (playerID === undefined || playerID.length === 0) {
                 return Eterna.client.logout()
                     .then(() => {
                     })
@@ -397,10 +421,18 @@ export default class EternaApp extends FlashbangApp {
             }
 
             let playerPassword = process.env['DEBUG_PLAYER_PASSWORD'];
+            if (playerPassword === undefined || playerPassword.length === 0) {
+                return Eterna.client.logout()
+                    .then(() => {
+                    })
+                    .catch((err) => {
+                        log.debug(`Logout error: ${err}`);
+                    });
+            }
             log.debug(`Logging in ${playerID}...`);
             return Eterna.client.login(playerID, playerPassword).then((uid) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-                Eterna.setPlayer(playerID, uid);
+                Eterna.setPlayer(playerID!, uid);
             });
         }
     }

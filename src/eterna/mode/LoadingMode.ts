@@ -10,7 +10,7 @@ import Eterna from 'eterna/Eterna';
 export default class LoadingMode extends AppMode {
     public extraBlurbText: string;
 
-    constructor(text: string, extraBlurbText: string) {
+    constructor(text: string, extraBlurbText: string | null) {
         super();
         this._text = text;
         if (extraBlurbText == null) this.extraBlurbText = this.getExtraBlurb();

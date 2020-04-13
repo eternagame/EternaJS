@@ -284,7 +284,7 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public setFolder(engineName: string): void {
-        let newFolder: Folder = FolderManager.instance.getFolder(engineName);
+        let newFolder: Folder | null = FolderManager.instance.getFolder(engineName);
         if (newFolder) {
             this._folder = newFolder;
         }
