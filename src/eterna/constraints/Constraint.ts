@@ -55,7 +55,7 @@ export default abstract class Constraint<ConstraintStatus extends BaseConstraint
         status: ConstraintStatus,
         undoBlocks: UndoBlock[],
         targetConditions?: any[]
-    ): HighlightInfo {
+    ): HighlightInfo | null {
         return null;
     }
 
