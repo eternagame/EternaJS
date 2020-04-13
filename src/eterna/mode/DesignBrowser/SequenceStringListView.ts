@@ -35,7 +35,7 @@ export default class SequenceStringListView extends Container {
         this._height = height;
     }
 
-    public setSequences(sequences: string[], expData: Feedback[] | null, pairs: number[]): void {
+    public setSequences(sequences: string[] | null, expData: Feedback[] | null, pairs: number[] | null): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
