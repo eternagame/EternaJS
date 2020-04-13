@@ -31,7 +31,7 @@ export default class NotificationDialog extends Dialog<void> {
 
         let okButton = new GameButton().label(this._okButtonTitle, 14);
         box.addObject(okButton, buttonLayout);
-        okButton.clicked.connect(() => this.close(null));
+        okButton.clicked.connect(() => this.close());
 
         if (this._extraButtonTitle != null) {
             this.extraButton = new GameButton().label(this._extraButtonTitle, 14);
@@ -58,5 +58,5 @@ export default class NotificationDialog extends Dialog<void> {
 
     private readonly _message: string;
     private readonly _okButtonTitle: string;
-    private readonly _extraButtonTitle: string;
+    private readonly _extraButtonTitle?: string;
 }
