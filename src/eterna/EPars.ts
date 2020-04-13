@@ -88,8 +88,8 @@ export default class EPars {
         }
     }
 
-    public static getBarcodeHairpin(seq: string): string {
-        let hairpinMatch: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
+    public static getBarcodeHairpin(seq: string): string | null {
+        let hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
         if (hairpinMatch == null) {
             return null;
         }
@@ -415,8 +415,8 @@ export default class EPars {
      * @param strInput string inputted like 'ACUGU 11-12,,,16'
      * @returns array of Nucleotide enums like [RNABASE_ADENINE, ...]
      */
-    public static indexedStringToSequence(strInput: string, customNumbering: number[] = null):
-    number[] {
+    public static indexedStringToSequence(strInput: string, customNumbering: number[] | null = null):
+    number[] | null {
         // make robust to blanks:
         let strChunks: string[] = strInput.trim().split(/\s+/); // spaces
         if (strChunks.length === 0) return []; // blank sequence, no op.
