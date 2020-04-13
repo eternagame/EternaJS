@@ -55,6 +55,9 @@ export default class NuPACK extends Folder {
         let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr);
+            if (!result) {
+                throw new Error("NuPACK returned a null result")
+            }
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);
@@ -108,6 +111,9 @@ export default class NuPACK extends Folder {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs, null, pseudoknots));
+                if (!result) {
+                    throw new Error("NuPACK returned a null result")
+                }
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -514,6 +520,9 @@ export default class NuPACK extends Folder {
         let result: FullFoldResult | null = null;
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
+            if (!result) {
+                throw new Error("NuPACK returned a null result")
+            }
             return EPars.parenthesisToPairs(result.structure, pseudoknots);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
@@ -534,6 +543,9 @@ export default class NuPACK extends Folder {
         let result: FullFoldResult | null = null;
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, i, p, j, q, -bonus);
+            if (!result) {
+                throw new Error("NuPACK returned a null result")
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
@@ -553,6 +565,9 @@ export default class NuPACK extends Folder {
         try {
             result = this._lib.CoFoldSequence(seqStr);
             log.debug('done cofolding');
+            if (!result) {
+                throw new Error("NuPACK returned a null result")
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('CoFoldSequence error', e);
@@ -574,6 +589,9 @@ export default class NuPACK extends Folder {
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, i, p, j, q, -bonus);
             log.debug('done cofoldingWBS');
+            if (!result) {
+                throw new Error("NuPACK returned a null result")
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
