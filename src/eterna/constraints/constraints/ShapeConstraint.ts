@@ -121,7 +121,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     public evaluate(undoBlocks: UndoBlock[], targetConditions?: any[]): ShapeConstraintStatus {
         let undoBlock = undoBlocks[this.stateIndex];
 
-        let targetAlignedConstraints: boolean[] = null;
+        let targetAlignedConstraints: boolean[] | null = null;
         if (targetConditions != null && targetConditions[this.stateIndex] != null) {
             let structureConstraints: any = targetConditions[this.stateIndex]['structure_constraints'];
             targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
@@ -154,7 +154,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         }
 
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number]> = null;
+        let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
             ...details,
@@ -179,7 +179,7 @@ export default class ShapeConstraint extends BaseShapeConstraint {
     }
 
     private _getWrongPairs(
-        naturalPairs: number[], targetPairs: number[], structureConstraints: any[]
+        naturalPairs: number[], targetPairs: number[], structureConstraints: boolean[] | null
     ): number[] {
         let wrongPairs: number[] = new Array(naturalPairs.length);
 
@@ -254,7 +254,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             pseudoknots = true;
         }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
-        let customLayout: Array<[number, number]> = null;
+        let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (undoBlock.targetConditions) customLayout = undoBlock.targetConditions['custom-layout'];
         return {
             ...details,
