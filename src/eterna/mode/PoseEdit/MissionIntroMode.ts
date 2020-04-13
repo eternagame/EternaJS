@@ -16,7 +16,7 @@ import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 export default class MissionIntroMode extends AppMode {
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
         this._puzzleName = puzzleName;
@@ -311,5 +311,5 @@ export default class MissionIntroMode extends AppMode {
 
     private _constraintMask: Graphics;
 
-    private _customLayout: Array<[number, number]>;
+    private _customLayout: Array<[number, number] | [null, null]> | null;
 }
