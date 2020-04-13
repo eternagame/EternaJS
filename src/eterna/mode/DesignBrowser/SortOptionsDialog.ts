@@ -68,7 +68,7 @@ export default class SortOptionsDialog extends Dialog<void> {
         this._panelContent.addVSpacer(20);
 
         let okButton = new GameButton().label('Ok', 20);
-        okButton.clicked.connect(() => this.close(null));
+        okButton.clicked.connect(() => this.close());
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
