@@ -61,11 +61,11 @@ export default abstract class LinearFoldBase extends Folder {
                 }
             } catch (e) {
                 log.error('FullEval error', e);
+                return 0;
             } finally {
                 if (result != null) {
                     result.delete();
                 }
-                return 0;
             }
         } while (0);
 
@@ -146,12 +146,12 @@ export default abstract class LinearFoldBase extends Folder {
             }
         } catch (e) {
             log.error('FullFoldDefault error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 

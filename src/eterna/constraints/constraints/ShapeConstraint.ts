@@ -54,7 +54,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
         // rawIndex => targetAlignedIndex
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
-        if (targetMap != []) {
+        if (targetMap != undefined) {
             // rawIndex => naturalAlignedIndex
             if (ublk.oligoOrder === undefined) {
                 throw new Error('oligoOrder is undefined!');

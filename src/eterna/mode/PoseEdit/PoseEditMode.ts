@@ -480,8 +480,7 @@ export default class PoseEditMode extends GameMode {
         let poseFields: PoseField[] = [];
 
         let targetSecstructs: string[] = this._puzzle.getSecstructs();
-        let targetConditions: any[] = this._puzzle.targetConditions;
-
+        let targetConditions: NonNullable<any>[] = this._puzzle.targetConditions;
         // TSC: this crashes, and doesn't seem to accomplish anything
         // let before_reset: number[] = null;
         // if (is_reset) {
@@ -745,10 +744,15 @@ export default class PoseEditMode extends GameMode {
                 seq = Puzzle.probeTail(seq);
             }
 
-            this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii);
+            // We know seq is nonnull because the first if branch definitely forces it nonnull.
+            this._poses[ii].sequence = this._puzzle.transformSequence(seq!, ii);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
             }
+            console.error('_targetOligos', this._targetOligos[ii]);
+            console.error('_targetOligosOrder', this._targetOligosOrder[ii]);
+            console.error('_oligoMode', this._oligoMode[ii]);
+            console.error('_oligoName', this._oligoName[ii]);
             this._poses[ii].setOligos(this._targetOligos[ii], this._targetOligosOrder[ii]);
             this._poses[ii].setOligo(this._targetOligo[ii], this._oligoMode[ii], this._oligoName[ii]);
             this._poses[ii].pairs = this._targetPairs[ii];
@@ -863,7 +867,7 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('get_targets', (): any[] => {
             let conditions = this._puzzle.targetConditions;
             if (conditions.length === 0) {
-                conditions.push(null);
+                conditions.push({});
             }
             for (let ii = 0; ii < conditions.length; ii++) {
                 if (conditions[ii] == null) {
@@ -895,7 +899,7 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
-            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
+            return (this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE) as number);
         });
 
         this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
@@ -1680,11 +1684,11 @@ export default class PoseEditMode extends GameMode {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        let initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37);
+        let initScore: number = (datablock.getParam(UndoBlockParam.PROB_SCORE, 37) as number);
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii);
+            let currentScore: number = (datablock.getParam(UndoBlockParam.PROB_SCORE, ii) as number);
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
@@ -2193,6 +2197,7 @@ export default class PoseEditMode extends GameMode {
             this._poses[ii].sequence = this._puzzle.transformSequence(a, ii);
             this._poses[ii].puzzleLocks = locks;
         }
+        
         this.poseEditByTarget(0);
         return true;
     }
@@ -2674,7 +2679,7 @@ export default class PoseEditMode extends GameMode {
             this.showAsyncText('retrieving...');
             sol.queryFoldData().then((result) => execfoldCB(result));
         } else {
-            execfoldCB([]);
+            execfoldCB(null);
         }
     }
 
@@ -3072,7 +3077,7 @@ export default class PoseEditMode extends GameMode {
     protected _curTargetIndex: number = 0;
     private _poseState: PoseState = PoseState.NATIVE;
     protected _targetPairs: number[][] = [];
-    protected _targetConditions: any[] = [];
+    protected _targetConditions: NonNullable<any>[] = [];
     private _targetOligo: (number[] | undefined)[] = [];
     private _oligoMode: number[] = [];
     private _oligoName: (string | undefined)[] = [];

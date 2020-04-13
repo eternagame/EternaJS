@@ -138,11 +138,11 @@ export default class Puzzle {
         this._folder = folder;
     }
 
-    public get targetConditions(): any[] {
+    public get targetConditions(): NonNullable<any>[] {
         if (this._targetConditions == null) {
-            let targetConditions: any[] = [];
+            let targetConditions: NonNullable<any>[] = [];
             for (let ii = 0; ii < this._secstructs.length; ii++) {
-                targetConditions.push(null);
+                targetConditions.push({});
             }
             return targetConditions;
         } else {
@@ -214,7 +214,7 @@ export default class Puzzle {
         this._secstructs = secstructs.slice();
     }
 
-    public set objective(objectives: any[]) {
+    public set objective(objectives: NonNullable<any>[]) {
         this._targetConditions = objectives.slice();
         this._secstructs = [];
         let concentration: number;
@@ -575,7 +575,7 @@ export default class Puzzle {
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
-    private _targetConditions: any[] | null = null;
+    private _targetConditions: NonNullable<any>[] | null = null;
     private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;

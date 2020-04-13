@@ -185,7 +185,7 @@ export default class NuPACK extends Folder {
     public foldSequence(
         seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknots: boolean = false, temp: number = 37
-    ): number[] {
+    ): number[] | null {
         let key = {
             primitive: 'fold',
             seq,
@@ -486,7 +486,7 @@ export default class NuPACK extends Folder {
         }
 
         for (let ii = 0; ii < numOligo; ii++) {
-            ops.push(new PoseOp(null, () => this.foldSequence(oligos[ii].seq, null, null, false, temp)));
+            ops.push(new PoseOp(undefined, () => this.foldSequence(oligos[ii].seq, null, null, false, temp)));
         }
 
         let more: boolean;
@@ -508,7 +508,7 @@ export default class NuPACK extends Folder {
             more = FoldUtil.nextPerm(order);
         } while (more);
 
-        ops.push(new PoseOp(null, () => this.multifold(seq, secondBestPairs, oligos, desiredPairs, temp)));
+        ops.push(new PoseOp(undefined, () => this.multifold(seq, secondBestPairs, oligos, desiredPairs, temp)));
         return ops;
     }
 
@@ -519,18 +519,19 @@ export default class NuPACK extends Folder {
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
             if (result) {
-                return EPars.parenthesisToPairs(result.structure, pseudoknots);
+                let pairs: number[] = EPars.parenthesisToPairs(result.structure, pseudoknots)
+                return pairs;
             } else {
                 return [];
             }
         } catch (e) {
             log.error('FullFoldTemperature error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -549,12 +550,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -572,12 +573,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequence error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -597,12 +598,12 @@ export default class NuPACK extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 

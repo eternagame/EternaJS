@@ -83,7 +83,7 @@ export default class UndoBlock {
     }
 
     public set targetOligos(targetOligos: Oligo[] | undefined) {
-        this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
+        this._targetOligos = targetOligos == undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
     }
 
     public get targetOligo(): number[] | undefined {
@@ -91,7 +91,7 @@ export default class UndoBlock {
     }
 
     public set targetOligo(targetOligo: number[] | undefined) {
-        this._targetOligo = targetOligo == null ? undefined : targetOligo.slice();
+        this._targetOligo = targetOligo == undefined ? undefined : targetOligo.slice();
     }
 
     public get oligoMode(): number {
@@ -181,8 +181,13 @@ export default class UndoBlock {
     }
 
     public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] | undefined {
-        if (!this._pairsArray.get(pseudoknots)) return undefined;
-        return this._pairsArray.get(pseudoknots)![temp];
+        // if (!this._pairsArray.get(pseudoknots)) {
+        //     this._pairsArray.set(pseudoknots, [])
+        // }
+        // This has to be able to return undefined -- because that's a signal for
+        // setBasics to set it up as [-1]* seqLength and updateMeltingPointAndDotPlot
+        // to fold. 
+        return this._pairsArray.get(pseudoknots)[temp];
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): number | any[] | undefined {
@@ -196,7 +201,7 @@ export default class UndoBlock {
         if (this._pairsArray.get(pseudoknots) === undefined) {
             this._pairsArray.set(pseudoknots, [])
         }
-        this._pairsArray.get(pseudoknots)![temp] = pairs ? pairs.slice() : [];
+        this._pairsArray.get(pseudoknots)![temp] = pairs ? pairs.slice() : undefined;
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
@@ -361,9 +366,9 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder?: number[]): number[] {
-        if (this._targetOligos == null) return [];
-        if (otherOrder === undefined) return [];
+    public reorderedOligosIndexMap(otherOrder?: number[]): number[] | undefined {
+        if (this._targetOligos == undefined) return undefined;
+        if (otherOrder === undefined) return undefined;
 
         let originalIndices: number[][] = [];
         let oligoFirstBaseIndex = this._sequence.length;
@@ -382,7 +387,7 @@ export default class UndoBlock {
     }
 
     private _sequence: number[];
-    private _pairsArray: Map<boolean, number[][]> = new Map([[false, []], [true, []]]);
+    private _pairsArray: Map<boolean, (number[] | undefined)[]> = new Map([[false, []], [true, []]]);
     private _paramsArray: Map<boolean, any[][]> = new Map([[false, []], [true, []]]);
     private _stable: boolean = false;
     private _targetOligo?: number[];

@@ -55,11 +55,11 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('GetDotPlot error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
-                return [];
             }
         }
 
@@ -130,10 +130,10 @@ export default class Vienna2 extends Folder {
                 }
             } catch (e) {
                 log.error('FullEval error', e);
+                return 0;
             } finally {
                 if (result != null) {
                     result.delete();
-                    return 0;
                 }
             }
         } while (0);
@@ -693,12 +693,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('FullFoldTemperature error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -718,12 +718,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -742,12 +742,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequence error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 
@@ -768,12 +768,12 @@ export default class Vienna2 extends Folder {
             }
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);
+            return [];
         } finally {
             if (result != null) {
                 result.delete();
                 result = null;
             }
-            return [];
         }
     }
 

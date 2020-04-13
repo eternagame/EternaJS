@@ -1521,15 +1521,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getOligos(): Oligo[] {
-        return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
+    public getOligos(): Oligo[] | undefined {
+        return (this._oligos != undefined ? JSON.parse(JSON.stringify(this._oligos)) : undefined);
     }
 
     public getOrderMap(otherOrder?: number[]): number[] {
         if (otherOrder === undefined) {
             return [];
         }
-        if (this._oligos == null) {
+        if (this._oligos == undefined) {
             return [];
         }
 
@@ -1558,7 +1558,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public saveMarkersContext(): void {
-        if (this._oligos == null) {
+        if (this._oligos == undefined) {
             this._prevOligosOrder = undefined;
         } else if (this._prevOligosOrder == undefined) {
             this._prevOligosOrder = this._oligosOrder!.slice();
@@ -1568,7 +1568,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public transformMarkers(): void {
         if (
             this._prevOligosOrder == null
-            || this._oligosOrder == null
+            || this._oligosOrder == undefined
             || this._prevOligosOrder.length !== this._oligosOrder.length
         ) {
             this._prevOligosOrder = undefined;
@@ -1676,12 +1676,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public getStrandName(seqnum: number): string | null {
-        if (this._oligos != null && seqnum >= this._sequence.length) {
+        if (this._oligos != undefined && seqnum >= this._sequence.length) {
             let seq: number[] = this._sequence.slice();
             for (let ii = 0; ii < this._oligos.length; ii++) {
                 seq.push(EPars.RNABASE_CUT);
-                if (this._oligosOrder === null) {
-                    throw new Error('_oligos is nonnull but _oligosOrder is null!!');
+                if (this._oligosOrder === undefined) {
+                    throw new Error('_oligos is defined but _oligosOrder is undefined!!');
                 }
                 seq = seq.concat(this._oligos[this._oligosOrder![ii]].sequence);
                 if (seqnum < seq.length) {
@@ -1691,21 +1691,21 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
         }
-        if (this._oligo != null && seqnum >= this._sequence.length) {
+        if (this._oligo != undefined && seqnum >= this._sequence.length) {
             return this._oligoName;
         }
         return null;
     }
 
     public getBoundSequence(): number[] {
-        if (this._oligos == null) {
+        if (this._oligos == undefined) {
             return this._sequence;
         }
         let seq: number[] = this._sequence.slice();
         for (let ii = 0; ii < this._oligosPaired; ii++) {
             seq.push(EPars.RNABASE_CUT);
-            if (this._oligosOrder === null) {
-                throw new Error('oligos is nonnull but oligosOrder is null!!');
+            if (this._oligosOrder === undefined) {
+                throw new Error('oligos is defined but oligosOrder is undefined!!');
             }
             seq = seq.concat(this._oligos[this._oligosOrder![ii]].sequence);
         }
@@ -3066,8 +3066,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
             let scoreScore = '';
             let factor = 0;
             if ((this._molecularBindingBases != null)
-                || (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER)
-                || (this._oligos != null)) {
+                || (this._oligo != undefined && this._oligoMode === Pose2D.OLIGO_MODE_DIMER)
+                || (this._oligos != undefined)) {
                 let labelElems: string[] = [];
                 let scoreElems: string[] = [];
 
@@ -3083,7 +3083,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         scoreElems.push(EnergyScoreDisplay.grey(' (0 kcal)'));
                     }
                 }
-                if (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
+                console.error(this._oligo, this._oligos);
+                if (this._oligo != undefined && this._oligo != [] && this._oligoMode === Pose2D.OLIGO_MODE_DIMER) {
                     factor++;
                     let malus: number = this._duplexCost + Math.round(this._oligoMalus);
                     if (this._oligoPaired) {
@@ -3094,7 +3095,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         scoreElems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
                     }
                 }
-                if (this._oligos != null) {
+                if (this._oligos != undefined && this._oligos != []) {
                     if (!this._oligosOrder) {
                         throw new Error('Somehow oligos is non-null but oligosOrder is null!');
                     }
