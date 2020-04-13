@@ -48,7 +48,7 @@ export default class ChatManager {
         }
 
         let show = this._settings.showChat.value && this._hideChat <= 0;
-        this._chatbox.style.display = show ? null : 'none';
+        this._chatbox.style.display = show ? 'unset' : 'none';
         if (show) this._chatIFrame.postMessage({type: 'chat-scroll'}, '*');
     }
 
