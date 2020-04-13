@@ -56,6 +56,9 @@ export default abstract class LinearFoldBase extends Folder {
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs)
                 );
+                if (!result) {
+                    throw new Error("LinearFold returned a null result")
+                }
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -137,6 +140,9 @@ export default abstract class LinearFoldBase extends Folder {
 
         try {
             result = this._lib.FullFoldDefault(seqStr);
+            if (!result) {
+                throw new Error("LinearFold returned a null result")
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('FullFoldDefault error', e);
