@@ -364,7 +364,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     public selectFolder(folderName: string): boolean {
-        if (this._folder.name === folderName) return true;
+        if (this._folder && this._folder.name === folderName) return true;
         let folder: Folder | null = FolderManager.instance.getFolder(folderName);
         if (!folder) {
             return false;
@@ -611,7 +611,7 @@ export default class PoseEditMode extends GameMode {
                         let currBlock = this.getCurrentUndoBlock(poseState);
                         let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
                         let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                            ? highlightInfo.ranges.map((index) => naturalMap.indexOf(index)) : highlightInfo.ranges;
+                            ? highlightInfo.ranges.map((index: number) => naturalMap.indexOf(index)) : highlightInfo.ranges;
 
                         switch (highlightInfo.color) {
                             case HighlightType.RESTRICTED:
@@ -653,7 +653,7 @@ export default class PoseEditMode extends GameMode {
         //     }
         // }
 
-        let initialFolder: Folder = null;
+        let initialFolder: Folder | null = null;
         if (this._params.initialFolder != null) {
             initialFolder = FolderManager.instance.getFolder(this._params.initialFolder);
             if (initialFolder == null) {
@@ -662,6 +662,9 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
+        if (!this._folder) { 
+            throw new Error('Big problem; unable to initialize folder!');
+        }
 
         // now that we have made the folder check, we can set _targetPairs. Used to do this
         // above but because NuPACK can handle pseudoknots, we shouldn't
@@ -3030,7 +3033,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
 
-    protected _folder: Folder;
+    protected _folder: Folder | null;
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
     private _poseEditByTargetCb: (() => void) | null = null;
@@ -3052,8 +3055,8 @@ export default class PoseEditMode extends GameMode {
     protected _targetPairs: number[][] = [];
     protected _targetConditions: any[] = [];
     private _targetOligo: (number[] | null)[] = [];
-    private _oligoMode: (number[] | null) = [];
-    private _oligoName: (string[] | null) = [];
+    private _oligoMode: (number | null)[] = [];
+    private _oligoName: (string | null)[] = [];
     private _targetOligos: (Oligo[] | null)[] = [];
     private _targetOligosOrder: (number[] | null)[] = [];
 

@@ -2265,7 +2265,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._explosionFactorPanel.display.visible = show;
     }
 
-    public set scoreFolder(folder: Folder) {
+    public set scoreFolder(folder: Folder | null) {
         if (this._scoreFolder !== folder) {
             this._scoreFolder = folder;
             this.showTotalEnergy = this._showTotalEnergy;
@@ -3285,7 +3285,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Array of sequence/pairs
     private _sequence: number[] = [];
-    private _mutatedSequence: number[];
+    private _mutatedSequence: number[] | null;
     private _pairs: number[] = [];
     private _targetPairs: number[] = [];
     private _bases: Base[] = [];
@@ -3293,16 +3293,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _forcedStruct: number[] = [];
     private _designStruct: boolean[] = [];
     private _bindingSite: boolean[];
-    private _molecularBindingBases: BaseGlow[] = null;
-    private _molecularBindingPairs: number[] = null;
-    private _molecule: Molecule = null;
+    private _molecularBindingBases: BaseGlow[] | null = null;
+    private _molecularBindingPairs: number[] | null = null;
+    private _molecule: Molecule | null= null;
     private _moleculeIsBound: boolean = false;
     private _moleculeIsBoundReal: boolean = false;
     private _molecularBindingBonus: number = 0;
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
-    private _customLayout: Array<[number, number]> = null;
+    private _customLayout: Array<[number, number], [null, null]> | null = null;
     private _pseudoknotted: boolean = false;
 
     // Oligos
@@ -3412,7 +3412,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Score display nodes
     private _scoreNodes: ScoreDisplayNode[];
     private _scoreTexts: Sprite[];
-    private _scoreFolder: Folder;
+    private _scoreFolder: Folder | null;
     private _scoreNodeIndex: number = -1;
     private _lastScoreNodeIndex: number = -1;
     private _scoreNodeHighlight: Graphics;
