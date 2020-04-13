@@ -84,7 +84,7 @@ export default class RNALayout {
      * the structure of the puzzle "goal." A
      * comparison of pairs to targetPairs will influence application of the customLayout
      */
-    public setupTree(pairs: number[], targetPairs: number[] = null): void {
+    public setupTree(pairs: number[], targetPairs: number[] | null = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
@@ -223,7 +223,7 @@ export default class RNALayout {
      * which will override the "normal" geometry wherever the base pairs match
      * the target pairs in the structure.
      */
-    public drawTree(customLayout: Array<[number, number]> = null): void {
+    public drawTree(customLayout: Array<[number, number] | [null, null]> | null = null): void {
         this.initializeCustomLayout(customLayout);
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, RotationDirection.CW);
@@ -496,7 +496,7 @@ export default class RNALayout {
         let anchorCustomCrossY = 0;
         let anchorCustomRotationDirection = 1;
 
-        let anchornode: RNATreeNode = null;
+        let anchornode: RNATreeNode | null = null;
         if (parentnode && parentnode.isPair) {
             // this is the case in junctions, where root is 'pseudonode' in middle of junction,
             //  and parent is the exterior pair (or the global root)
@@ -756,7 +756,7 @@ export default class RNALayout {
      *
      * @param customLayout An array of x,y coords defining "custom" nt positions
      */
-    private initializeCustomLayout(customLayout: Array<[number, number]>): void {
+    private initializeCustomLayout(customLayout: Array<[number, number] | [null, null]> | null): void {
         if (customLayout === null) {
             this._customLayout = null;
             return;
@@ -805,10 +805,10 @@ export default class RNALayout {
     // indices that need to be streched (e.g., connectors for oligos)
     private readonly _exceptionIndices: number[];
 
-    private _root: RNATreeNode;
+    private _root: RNATreeNode | null;
     private _origPairs: number[];
     private _targetPairs: number[];
-    private _customLayout: Array<[number, number]>;
+    private _customLayout: Array<[number, number] | [null, null]> | null;
 
     // / "New" method to gather NN free energies, just use the folding engine
     private _scoreBiPairs: number[];
