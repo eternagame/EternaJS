@@ -47,6 +47,7 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
         return {
             satisfied: status.satisfied,
             tooltip,
+            fullTexture: null,
             drawBG: true,
             icon: MaximumMutationConstraint._icon,
             showOutline: true,

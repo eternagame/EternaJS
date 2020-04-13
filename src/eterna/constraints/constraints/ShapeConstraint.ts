@@ -85,6 +85,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         return {
             satisfied: status.satisfied,
             tooltip: '',
+            fullTexture: null,
             thumbnailBG: true,
             stateNumber: undoBlocks.length > 1 ? this.stateIndex + 1 : undefined
         };

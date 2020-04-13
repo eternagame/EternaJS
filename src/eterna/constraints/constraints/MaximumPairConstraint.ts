@@ -55,6 +55,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         return {
             satisfied: status.satisfied,
             clarificationText: `${this.maxPairs} OR FEWER`,
+            fullTexture: null,
             statText: status.currentPairs.toString(),
             tooltip,
             showOutline: true

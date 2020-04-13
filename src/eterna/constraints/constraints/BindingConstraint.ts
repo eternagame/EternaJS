@@ -87,6 +87,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         return {
             satisfied: status.satisfied,
             tooltip,
+            fullTexture: null,
             clarificationText: clarifyTextBuilder,
             showOutline: true,
             stateNumber: this.stateIndex + 1,
