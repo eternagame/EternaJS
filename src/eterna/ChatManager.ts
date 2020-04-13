@@ -52,7 +52,7 @@ export default class ChatManager {
         if (show && this._chatIFrame) this._chatIFrame.postMessage({type: 'chat-scroll'}, '*');
     }
 
-    private readonly _chatbox: HTMLElement;
+    private readonly _chatbox: HTMLElement | null;
     private readonly _chatIFrame: Window | null;
     private readonly _settings: EternaSettings;
 
