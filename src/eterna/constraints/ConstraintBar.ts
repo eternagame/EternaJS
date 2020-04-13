@@ -185,5 +185,5 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private _constraints: ConstraintWrapper[];
-    private _flaggedConstraint: ConstraintWrapper;
+    private _flaggedConstraint: ConstraintWrapper | null;
 }
