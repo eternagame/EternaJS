@@ -115,7 +115,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public hotkey(keycode: string, ctrl: boolean = false): GameButton {
+    public hotkey(keycode: string | null, ctrl: boolean = false): GameButton {
         if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
             this._hotkey = keycode;
             this._hotkeyCtrl = ctrl;
@@ -285,7 +285,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _fixedLabelWidth: number = 0;
     private _scaleIconToLabel: boolean = false;
     private _tooltip: string;
-    private _hotkey: string;
+    private _hotkey: string | null;
     private _hotkeyCtrl: boolean;
     private _buttonIcons: DisplayObject[];
     private _selectedState: DisplayObject;

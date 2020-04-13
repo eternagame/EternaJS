@@ -1390,7 +1390,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public setMolecularBinding(bindingSites: number[], bindingPairs: number[], bindingBonus: number): void {
+    public setMolecularBinding(bindingSites: number[] | null, bindingPairs: number[] | null, bindingBonus: number | null): void {
         if (this._molecule != null) {
             this._molecule.destroy({children: true});
             this._molecule = null;

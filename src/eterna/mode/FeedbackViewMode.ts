@@ -115,13 +115,17 @@ export default class FeedbackViewMode extends GameMode {
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
             let datablock: UndoBlock = new UndoBlock(this._sequence);
             datablock.setPairs(this._pairs[ii]);
-            datablock.setBasics(FolderManager.instance.getFolder(Vienna.NAME));
+            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME)
+            if (!vienna) {
+                throw new Error("Critical error: can't create a Vienna folder instance by name");
+            }
+            datablock.setBasics(vienna);
             this._undoBlocks.push(datablock);
 
             let poseField: PoseField = new PoseField(false);
             this.addObject(poseField, this.poseLayer);
 
-            poseField.pose.scoreFolder = FolderManager.instance.getFolder(Vienna.NAME);
+            poseField.pose.scoreFolder = vienna;
             poseField.pose.sequence = this._sequence;
             poseField.pose.pairs = this._pairs[ii];
             poseFields.push(poseField);
@@ -507,7 +511,10 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        let folder: Folder = FolderManager.instance.getFolder(Vienna.NAME);
+        let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (!folder) {
+            throw new Error("Critical error: can't create a Vienna folder instance by name");
+        }
         this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
     }
 
@@ -523,7 +530,11 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         let puzzleState = this._undoBlocks[this._currentIndex];
-        puzzleState.updateMeltingPointAndDotPlot(FolderManager.instance.getFolder(Vienna.NAME));
+        let vienna: Folder | null  = FolderManager.instance.getFolder(Vienna.NAME);
+        if (!vienna) {
+            throw new Error("Critical error: can't create a Vienna folder instance by name");
+        }
+        puzzleState.updateMeltingPointAndDotPlot(vienna);
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 
