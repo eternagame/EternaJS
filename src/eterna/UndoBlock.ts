@@ -23,6 +23,7 @@ export enum UndoBlockParam {
     PAIR_SCORE = 12,
     NNFE_ARRAY = 13,
     MAX = 14,
+    ANY_PAIR = 15,
 }
 
 export default class UndoBlock {
