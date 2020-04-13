@@ -21,7 +21,7 @@ export default abstract class Folder {
     }
 
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string | null = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] | null {
         return null;

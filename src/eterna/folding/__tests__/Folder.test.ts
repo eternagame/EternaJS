@@ -17,7 +17,7 @@ const ZIPPERS_SEQ = "AAAAAGGGGAAAAAAAAACCCCAGCGGAAAAAACUGCAAA";
 const ZIPPERS_BEST_PAIRS = ".....((((.........)))).((((......))))...";
 const ZIPPERS_TEMP = 37;
 
-function FoldSequence(folder: Folder, seq: string, struct: string): any[] {
+function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null {
     return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
 }
 
@@ -74,7 +74,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
         ]);
 
         let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
+        if (expectedTotalFe === undefined) {
+            throw new Error("Total FE gold standard energy missing from TOTAL_FE!");
+        }
         let expectedNNFE = NNFE.get(folderType.NAME);
+        if (expectedNNFE === undefined) {
+            throw new Error("NNFE gold standard energy missing from NNFE!");
+        }
 
         expect.assertions(3);
         return expect(CreateFolder(folderType)
@@ -87,8 +93,8 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldC, LinearFoldV]) {
                     ZIPPERS_TEMP,
                     outNNFE);
 
-                expect(totalFe).toBeCloseTo(expectedTotalFe);
-                expect(outNNFE).toEqual(expectedNNFE);
+                expect(totalFe).toBeCloseTo(expectedTotalFe!);
+                expect(outNNFE).toEqual(expectedNNFE!);
             }))
             .resolves.toBeUndefined(); // (we're returning a promise)
     });
@@ -251,7 +257,8 @@ test(`NuPACK:PK_foldSequence`, () => {
                 EPars.stringToSequence("GUUUUUAAACGGGUUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG"),
                 null, null, true, 37);
 
-            expect(EPars.pairsToParenthesis(pairs, null, true))
+            expect(pairs).toBeDefined();
+            expect(EPars.pairsToParenthesis(pairs!, null, true))
                 .toEqual("(((....))).......(((((((((...{{{{{..)))))))))((((((((((.........))).)))))))....}}}}}....");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
@@ -270,7 +277,8 @@ test(`NuPACK:PK_fold1L2X`, () => {
                 EPars.stringToSequence("GGCGCGGCACCGUCCGCGGAACAAACGG"),
                 null, null, true, 37);
 
-            expect(EPars.pairsToParenthesis(pairs, null, true))
+            expect(pairs).toBeDefined();
+            expect(EPars.pairsToParenthesis(pairs!, null, true))
                 .toEqual("..(((((..{{{{)))))......}}}}");
         }))
         .resolves.toBeUndefined(); // (we're returning a promise)
