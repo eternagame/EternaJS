@@ -167,9 +167,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         }
 
-        this._reqStatText.visible = config.statText != null && !this._forMissionScreen;
+        this._reqStatText.visible = config.statText != undefined && !this._forMissionScreen;
         if (this._reqStatText.visible) {
-            this.setPossiblyStyledText(config.statText, this._reqStatText);
+            // We know config.statText isn't undefined due to the above condition
+            this.setPossiblyStyledText((config.statText as string | StyledTextBuilder), this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 0, 50
@@ -315,8 +316,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
             this._mouseOverObject = null;
-            this._mouseOverRegs.close();
-            this._mouseOverRegs = null;
+            if (this._mouseOverRegs != null) {
+                this._mouseOverRegs.close();
+                this._mouseOverRegs = null;
+            }
         }
 
         if (obj != null) {
