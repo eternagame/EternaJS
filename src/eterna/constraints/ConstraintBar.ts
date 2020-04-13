@@ -26,7 +26,7 @@ function isSSCW(
 }
 
 export default class ConstraintBar extends ContainerObject {
-    public sequenceHighlights: Value<HighlightInfo[]> = new Value(null);
+    public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     constructor(constraints: Constraint<BaseConstraintStatus>[]) {
         super();
