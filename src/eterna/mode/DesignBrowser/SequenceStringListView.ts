@@ -35,7 +35,7 @@ export default class SequenceStringListView extends Container {
         this._height = height;
     }
 
-    public setSequences(sequences: string[], expData: Feedback[], pairs: number[]): void {
+    public setSequences(sequences: string[], expData: Feedback[] | null, pairs: number[]): void {
         this._graphics.clear();
         if (this._content != null) {
             this._content.destroy({children: true});
@@ -53,9 +53,9 @@ export default class SequenceStringListView extends Container {
 
         for (let ii = 0; ii < sequences.length; ii++) {
             let seq: string = sequences[ii];
-            let shapeData: number[] = null;
+            let shapeData: number[] | null = null;
             let shapeDataStart = 0;
-            let expPainter: ExpPainter = null;
+            let expPainter: ExpPainter | null = null;
             let isThereShapeThreshold = false;
             let shapeThreshold = 0;
             let shapeMax = 0;
@@ -65,7 +65,7 @@ export default class SequenceStringListView extends Container {
                 shapeDataStart = expData[ii].getShapeStartIndex();
             }
 
-            if (shapeData != null) {
+            if (shapeData != null && expData != null) {
                 shapeData = ExpPainter.transformData(
                     expData[ii].getShapeData(), expData[ii].getShapeMax(), expData[ii].getShapeMin()
                 );
@@ -117,12 +117,21 @@ export default class SequenceStringListView extends Container {
                         letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + ExpPainter.NUM_COLORS * 3 + 1 + 1
                     );
                 } else {
-                    let colorIndex = 0;
+                    // AMW: the false branch here is impossible: if isThereShapeThreshold is false, then
+                    // there definitely was never an ExpPainter defined! But it shouldn't be reachable
+                    // because !useExp should cover all the relevant stuff already.
+                    //
+                    // The most reasonable thing, I've decided, is to just say "if expPainter" around the whole
+                    // deal. It should be of-course-true for true and of-course-false for the never executing false.
 
-                    if (isThereShapeThreshold) {
-                        colorIndex = expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax);
-                    } else {
-                        colorIndex = expPainter.getColorLevel(jj);
+                    let colorIndex = 0;
+                    if (expPainter) {
+                        if (isThereShapeThreshold) {
+                            colorIndex = expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax);
+                        } else {
+
+                            colorIndex = expPainter.getColorLevel(jj);
+                        }
                     }
 
                     bdIndex = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
@@ -168,7 +177,7 @@ export default class SequenceStringListView extends Container {
     private readonly _letterTextures: Texture[];
     private readonly _graphics: Graphics;
 
-    private _content: Container;
+    private _content: Container | null;
 
     private _width: number;
     private _height: number;
