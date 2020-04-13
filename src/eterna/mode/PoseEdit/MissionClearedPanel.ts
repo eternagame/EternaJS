@@ -15,7 +15,7 @@ export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
     public closeButton: GameButton;
 
-    constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
+    constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
@@ -169,8 +169,8 @@ export default class MissionClearedPanel extends ContainerObject {
         );
     }
 
-    private readonly _infoText: string;
-    private readonly _moreText: string;
+    private readonly _infoText: string | null;
+    private readonly _moreText: string | null;
     private readonly _hasNextPuzzle: boolean;
 
     private readonly _bg: Graphics;
@@ -182,7 +182,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private _rankScrollHeading: GamePanel;
     private _tfPlayer: Text;
     private _rankScrollContainer: Container;
-    private _rankScroll: RankScroll = null;
+    private _rankScroll: RankScroll | null = null;
 
     private static readonly WIDTH: number = 480;
 }
