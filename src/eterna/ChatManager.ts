@@ -53,7 +53,7 @@ export default class ChatManager {
     }
 
     private readonly _chatbox: HTMLElement;
-    private readonly _chatIFrame: Window;
+    private readonly _chatIFrame: Window | null;
     private readonly _settings: EternaSettings;
 
     private _hideChat: number = 0;
