@@ -806,7 +806,7 @@ export default class DesignBrowserMode extends GameMode {
         return -1;
     }
 
-    private getSolutionAtIndex(idx: number): Solution {
+    private getSolutionAtIndex(idx: number): Solution | null {
         return idx >= 0 && idx < this._filteredSolutions.length ? this._filteredSolutions[idx] : null;
     }
 
