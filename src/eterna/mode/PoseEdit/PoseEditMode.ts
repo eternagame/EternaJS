@@ -89,7 +89,7 @@ export interface OligoDef {
 }
 
 export default class PoseEditMode extends GameMode {
-    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] = null) {
+    constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] | null = null) {
         super();
         this._puzzle = puzzle;
         this._params = params;
@@ -365,7 +365,11 @@ export default class PoseEditMode extends GameMode {
 
     public selectFolder(folderName: string): boolean {
         if (this._folder.name === folderName) return true;
-        let folder: Folder = FolderManager.instance.getFolder(folderName);
+        let folder: Folder | null = FolderManager.instance.getFolder(folderName);
+        if (!folder) {
+            return false;
+        }
+        // AMW TODO: shouldn't we have something similar here for pseudoknots??
         if (this._puzzle.hasTargetType('multistrand') && !folder.canMultifold) {
             return false;
         }
@@ -418,7 +422,7 @@ export default class PoseEditMode extends GameMode {
         this.clearUndoStack();
         this.pushUILock();
 
-        const setSolution = (foldData: any[]) => {
+        const setSolution = (foldData: any[] | null) => {
             this.hideAsyncText();
             this.popUILock();
 
@@ -2679,10 +2683,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     private poseEditByTargetFoldTarget(ii: number): void {
-        let bestPairs: number[];
-        let oligoOrder: number[] = null;
+        let bestPairs: number[] | null = null;
+        let oligoOrder: number[] | null = null;
         let oligosPaired = 0;
-        let forceStruct: string = null;
+        let forceStruct: string | null = null;
         let foldMode: number;
         let fullSeq: number[];
         let malus: number;
@@ -3018,7 +3022,7 @@ export default class PoseEditMode extends GameMode {
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
-    private readonly _autosaveData: any[];
+    private readonly _autosaveData: any[] | null;
 
     private _constraintsLayer: Container;
 
@@ -3029,7 +3033,7 @@ export default class PoseEditMode extends GameMode {
     protected _folder: Folder;
     // / Asynch folding
     private _opQueue: PoseOp[] = [];
-    private _poseEditByTargetCb: () => void = null;
+    private _poseEditByTargetCb: (() => void) | null = null;
     private _asynchText: Text;
     private _foldStartTime: number;
     private _foldTotalTime: number;
