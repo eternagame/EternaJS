@@ -22,7 +22,8 @@ export interface ConstraintBoxConfig {
     // Show the green/red outline
     showOutline?: boolean;
     // Used when the constraint image includes a background
-    fullTexture?: Texture;
+    // Due to a type constraint from Pixi, we need this to be nullable, not optional
+    fullTexture: Texture | null;
     // Whether to draw the transparent background
     drawBG?: boolean;
     // Used with drawBG, constraint image without background. If a string, it will be parsed as a base64 encoded image
@@ -158,9 +159,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != null;
+        this._reqClarifyText.visible = config.clarificationText != undefined;
         if (this._reqClarifyText.visible) {
-            this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
+            // We know config.clarificationText is not undefined because of the
+            // above condition, so we can type guard
+            this.setPossiblyStyledText(config.clarificationText!, this._reqClarifyText);
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
@@ -170,7 +173,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._reqStatText.visible = config.statText != undefined && !this._forMissionScreen;
         if (this._reqStatText.visible) {
             // We know config.statText isn't undefined due to the above condition
-            this.setPossiblyStyledText((config.statText as string | StyledTextBuilder), this._reqStatText);
+            this.setPossiblyStyledText(config.statText!, this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 0, 50

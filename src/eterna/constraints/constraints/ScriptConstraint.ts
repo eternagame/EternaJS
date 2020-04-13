@@ -42,8 +42,9 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,
-            drawBG: true,
             showOutline: true,
+            fullTexture: null,
+            drawBG: true,
             icon: status.dataPNG,
             stateNumber: status.stateIndex + 1,
             statText: !forMissionScreen ? status.resultValue : undefined,
