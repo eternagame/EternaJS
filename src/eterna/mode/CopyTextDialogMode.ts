@@ -30,7 +30,7 @@ export default class CopyTextDialogMode extends AppMode {
 
         textField.setFocus(true);
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close());
         inputPanel.okClicked.connect(() => {
@@ -60,5 +60,5 @@ export default class CopyTextDialogMode extends AppMode {
     }
 
     private readonly _text: string;
-    private readonly _dialogTitle: string;
+    private readonly _dialogTitle: string | undefined;
 }
