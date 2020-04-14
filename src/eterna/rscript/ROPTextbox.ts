@@ -109,7 +109,7 @@ export default class ROPTextbox extends RScriptOp {
     }
 
     private showArrow(): void {
-        let parent: FancyTextBalloon = null;
+        let parent: FancyTextBalloon | null = null;
         if (this._hasParent) {
             let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
@@ -145,10 +145,10 @@ export default class ROPTextbox extends RScriptOp {
                 // Modify degree and length if textbox is present.
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
-                let xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
-                let ydiff: number = parent.display.y - newArrow.display.y;
+                let xdiff: number = (parent!.display.x + parent!.container.width / 2) - newArrow.display.x;
+                let ydiff: number = parent!.display.y - newArrow.display.y;
                 if (ydiff < 0.0) {
-                    ydiff += parent.container.height;
+                    ydiff += parent!.container.height;
                 }
 
                 if (xdiff !== 0) {
@@ -166,12 +166,12 @@ export default class ROPTextbox extends RScriptOp {
                 if (ydiff < 0.0) { // Above
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent.display.x + parent.container.width * 0.5, parent.display.y + parent.container.height
+                        parent!.display.x + parent!.container.width * 0.5, parent!.display.y + parent!.container.height
                     );
                 } else { // Below
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent.display.x + parent.container.width / 2, parent.display.y - 50
+                        parent!.display.x + parent!.container.width / 2, parent!.display.y - 50
                     );
                 }
             }
@@ -202,7 +202,7 @@ export default class ROPTextbox extends RScriptOp {
 
         this._env.setVar(this._id, newArrow);
         if (this._hasParent) {
-            parent.addChildArrow(newArrow);
+            parent!.addChildArrow(newArrow);
         }
     }
 
@@ -230,7 +230,7 @@ export default class ROPTextbox extends RScriptOp {
     /* override */
     protected parseArgument(arg: string, i: number): void {
         let rx = /^([^+-]*)((?:\+|-).+)$/g;
-        let regResult: RegExpExecArray = null;
+        let regResult: RegExpExecArray | null = null;
         switch (i) {
             case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
                 if (
