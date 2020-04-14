@@ -66,9 +66,6 @@ export default class Toolbar extends ContainerObject {
     public lockButton: GameButton;
     public moleculeButton: GameButton;
 
-    // Puzzle Solving
-    public hintButton: GameButton;
-
     // Feedback
     public estimateButton: GameButton;
     public letterColorButton: GameButton;
@@ -82,12 +79,11 @@ export default class Toolbar extends ContainerObject {
 
     constructor(
         type: ToolbarType,
-        {states = 1, showHint = false, boosters = null}: {states?: number; showHint?: boolean; boosters?: BoostersData}
+        {states = 1, boosters = null}: {states?: number; boosters?: BoostersData}
     ) {
         super();
         this._type = type;
         this._states = states;
-        this._showHint = showHint;
         this._boostersData = boosters;
     }
 
@@ -489,18 +485,6 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.redoButton, lowerToolbarLayout);
         }
 
-        this.hintButton = new GameButton()
-            .up(Bitmaps.ImgHint)
-            .over(Bitmaps.ImgHintOver)
-            .down(Bitmaps.ImgHintHit)
-            .hotkey(KeyCode.KeyH)
-            .tooltip('Hint')
-            .rscriptID(RScriptUIElementID.HINT);
-
-        if (this._showHint) {
-            this.addObject(this.hintButton, lowerToolbarLayout);
-        }
-
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
 
@@ -612,8 +596,6 @@ export default class Toolbar extends ContainerObject {
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
 
-        this.hintButton.enabled = !disable;
-
         this.estimateButton.enabled = !disable;
         this.letterColorButton.enabled = !disable;
         this.expColorButton.enabled = !disable;
@@ -637,7 +619,6 @@ export default class Toolbar extends ContainerObject {
 
     private readonly _type: ToolbarType;
     private readonly _states: number;
-    private readonly _showHint: boolean;
     private readonly _boostersData: BoostersData;
 
     private _invisibleBackground: Graphics;

@@ -9,13 +9,26 @@ import TextUtil from 'eterna/util/TextUtil';
 import UITheme from './UITheme';
 import GameButton from './GameButton';
 
+interface MultiPagePanelProps {
+    title: string;
+    pages: string[];
+    width: number;
+    height: number;
+}
+
 export default class MultiPagePanel extends ContainerObject {
-    private static readonly titleFontSize = 16;
-    private static readonly titleHeight = 35;
-    private static readonly titlePadding = 7;
-    private static readonly contentFontSize = 14;
-    private static readonly contentPadding = 10;
-    private static readonly borderRadius = 5;
+    private static readonly theme = {
+        title: {
+            fontSize: 16,
+            height: 35,
+            padding: 7
+        },
+        content: {
+            fontSize: 14,
+            padding: 10
+        },
+        borderRadius: 5
+    };
 
     private _currentPage = 0;
     private _title: string;
@@ -33,29 +46,29 @@ export default class MultiPagePanel extends ContainerObject {
             : this._title;
     }
 
-    constructor(title: string, pages: string[], width: number, height: number) {
+    constructor(props: MultiPagePanelProps) {
         super();
 
+        const {theme} = MultiPagePanel;
+
+        // Background
         this._background = new Graphics();
         this._background.lineStyle(1.5, UITheme.colors.border, 1);
         this._background.beginFill(UITheme.colors.background, 1);
-        this._background.drawRoundedRect(0, 0, width, height, MultiPagePanel.borderRadius);
+        this._background.drawRoundedRect(0, 0, props.width, props.height, theme.borderRadius);
         this._background.endFill();
         this.container.addChild(this._background);
 
         // Content
         this._pagesContainer = new PIXI.Container();
-        this._pagesContainer.position = new Point(
-            MultiPagePanel.contentPadding,
-            MultiPagePanel.contentPadding + MultiPagePanel.titleHeight
-        );
-        pages.forEach((pageText, pageIndex) => {
+        this._pagesContainer.position = new Point(theme.content.padding, theme.content.padding + theme.title.height);
+        props.pages.forEach((pageText, pageIndex) => {
             const textElem = new StyledTextBuilder({
                 fontFamily: Fonts.ARIAL,
-                fontSize: MultiPagePanel.contentFontSize,
+                fontSize: theme.content.fontSize,
                 fill: 0xffffff,
                 wordWrap: true,
-                wordWrapWidth: width - 2 * MultiPagePanel.contentPadding
+                wordWrapWidth: props.width - 2 * theme.content.padding
             })
                 .appendHTMLStyledText(TextUtil.processTags(pageText))
                 .build();
@@ -66,16 +79,22 @@ export default class MultiPagePanel extends ContainerObject {
         this.container.addChild(this._pagesContainer);
 
         // Title
-        this._title = title;
+        this._title = props.title;
         this._background.beginFill(UITheme.colors.border);
-        this._background.drawRoundedRect(0, 0, width, MultiPagePanel.titleHeight, MultiPagePanel.borderRadius);
+        this._background.drawRoundedRect(
+            0,
+            0,
+            props.width,
+            theme.title.height,
+            theme.borderRadius
+        );
         this._background.endFill();
         this._titleText = Fonts.stdMedium()
-            .fontSize(MultiPagePanel.titleFontSize)
+            .fontSize(theme.title.fontSize)
             .color(UITheme.colors.background)
             .build();
         this._titleText.text = this.title;
-        this._titleText.position = new Point(MultiPagePanel.titlePadding, MultiPagePanel.titlePadding);
+        this._titleText.position = new Point(theme.title.padding, theme.title.padding);
         this.container.addChild(this._titleText);
 
         // Buttons
@@ -86,7 +105,7 @@ export default class MultiPagePanel extends ContainerObject {
         DisplayUtil.positionRelative(
             this._prevButton.display, HAlign.LEFT, VAlign.BOTTOM,
             this.container, HAlign.LEFT, VAlign.BOTTOM,
-            MultiPagePanel.contentPadding, -MultiPagePanel.contentPadding
+            theme.content.padding, -theme.content.padding
         );
         this.addObject(this._prevButton, this.container);
         this._prevButton.clicked.connect(() => {
@@ -103,7 +122,7 @@ export default class MultiPagePanel extends ContainerObject {
             this._nextButton.display, HAlign.CENTER, VAlign.BOTTOM,
             this.container, HAlign.CENTER, VAlign.BOTTOM,
             0,
-            -MultiPagePanel.contentPadding
+            -theme.content.padding
         );
         this.addObject(this._nextButton, this.container);
         this._nextButton.clicked.connect(() => {
