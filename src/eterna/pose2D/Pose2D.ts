@@ -1979,13 +1979,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (needRedraw || this._redraw) {
             // Create highlight state to pass to bases.
-            let hlState: RNAHighlightState = null;
+            let hlState: RNAHighlightState | null = null;
             if (this._allNewHighlights.length > 0) {
                 hlState = new RNAHighlightState();
                 hlState.nuc = [];
                 hlState.isOn = true;
                 for (let existingHighlight of this._allNewHighlights) {
-                    hlState.nuc = hlState.nuc.concat(existingHighlight.nuc);
+                    if (existingHighlight.nuc !== null) {
+                        hlState.nuc = hlState!.nuc.concat(existingHighlight.nuc);
+                    }
                 }
             }
 
@@ -2011,7 +2013,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     .useBarcode(useBarcode)
                     .result();
 
-                let numberBitmap: Texture = null;
+                let numberBitmap: Texture | null = null;
                 if (this._numberingMode) {
                     let displayNumber = ii + 1;
                     if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
@@ -2442,7 +2444,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.doneColoring();
     }
 
-    public forceEditable(b: boolean, editList: number[] = null): void {
+    public forceEditable(b: boolean, editList: number[] | null = null): void {
         this._editable = b;
         this._editableIndices = editList;
     }
@@ -2464,7 +2466,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         let rnaDrawer: RNALayout;
 
-        let exceptionIndices: number[] = null;
+        let exceptionIndices: number[] | undefined = undefined;
         if (fullSeq.indexOf(EPars.RNABASE_CUT) >= 0) {
             exceptionIndices = [];
             exceptionIndices.push(0);
@@ -2610,7 +2612,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     this.molecularBindingSite = this._bindingSite;
                     this._bindingSiteUpdated = true;
                 } else {
-                    let bindingBases: number[] = EPars.isInternal(seqnum, this._pairs);
+                    let bindingBases: number[] | null = EPars.isInternal(seqnum, this._pairs);
                     if (bindingBases != null && bindingBases.length > 4) {
                         this._bindingSite = [];
                         for (let ii = 0; ii < this._sequence.length; ii++) {
@@ -2735,6 +2737,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._designStructUpdated = true;
             }
         } else if (!this.isLocked(seqnum)) {
+            if (this._mutatedSequence === null) {
+                throw new Error('The clicked base is not locked, but the mutated sequence is null: critical error!');
+            }
             if (this._currentColor >= 1 && this._currentColor <= 4) {
                 this._mutatedSequence[seqnum] = this._currentColor;
                 ROPWait.notifyPaint(seqnum, this._bases[seqnum].type, this._currentColor);
@@ -3029,7 +3034,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            if (this._pseudoknotted) {
+            if (this._pseudoknotted && this._scoreFolder !== null) {
                 totalScore = Math.round(this._scoreFolder.scoreStructures(
                     this._sequence, this._pairs, true
                 ));
@@ -3071,7 +3076,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         scoreElems.push(EnergyScoreDisplay.grey(` ${malus.toFixed(2)} kcal`));
                     }
                 }
-                if (this._oligos != null) {
+                if (this._oligos != null && this._oligosOrder !== null) {
                     factor++;
                     if (this._oligosPaired === 0) {
                         if (this._oligos.length > 1) {
@@ -3182,7 +3187,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateScoreNodeGui();
     }
 
-    private generateScoreNodesRecursive(root: RNATreeNode, coords: number[], nodes: ScoreDisplayNode[]): void {
+    private generateScoreNodesRecursive(root: RNATreeNode, coords: number[] | null, nodes: ScoreDisplayNode[]): void {
         if (root == null) {
             return;
         }
@@ -3346,11 +3351,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Is this pose editable?
     private _editable: boolean;
-    private _editableIndices: number[] = null;
+    private _editableIndices: number[] | null = null;
 
     // Pointer to callback function to be called after change in pose
-    private _poseEditCallback: () => void = null;
-    private _trackMovesCallback: (count: number, moves: any[]) => void = null;
+    private _poseEditCallback: (() => void) | null = null;
+    private _trackMovesCallback: ((count: number, moves: any[]) => void) | null = null;
     private _addBaseCallback: (parenthesis: string, op: PuzzleEditOp, index: number) => void;
     private _startMousedownCallback: PoseMouseDownCallback;
     private _mouseDownAltKey: boolean = false;
@@ -3378,10 +3383,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _endOffsetY: number;
 
     // For base moving animation
-    private _baseFromX: number[];
-    private _baseFromY: number[];
-    private _baseToX: number[];
-    private _baseToY: number[];
+    private _baseFromX: number[] | null;
+    private _baseFromY: number[] | null;
+    private _baseToX: number[] | null;
+    private _baseToY: number[] | null;
     private _foldStartTime: number;
     private _foldDuration: number;
     private _paintCursor: PaintCursor;
@@ -3415,8 +3420,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _praiseSeq: number[] = [];
 
     // Score display nodes
-    private _scoreNodes: ScoreDisplayNode[];
-    private _scoreTexts: Sprite[];
+    private _scoreNodes: ScoreDisplayNode[] | null;
+    private _scoreTexts: Sprite[] | null;
     private _scoreFolder: Folder | null;
     private _scoreNodeIndex: number = -1;
     private _lastScoreNodeIndex: number = -1;
@@ -3434,7 +3439,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // For tracking a base
     private _cursorIndex: number = 0;
-    private _cursorBox: Graphics = null;
+    private _cursorBox: Graphics | null = null;
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
 
@@ -3484,6 +3489,6 @@ export interface Oligo {
 }
 
 export class RNAHighlightState {
-    public nuc: number[] = null; // nucleotides
+    public nuc: number[] | null = null; // nucleotides
     public isOn: boolean = false;
 }

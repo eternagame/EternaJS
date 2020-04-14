@@ -144,10 +144,13 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         }
 
         let oligoOrder = undoBlock.oligoOrder;
+        if (oligoOrder == null) {
+            throw new Error('Target condition not available for BINDINGS constraint');
+        }
         // Unbound oligos are always at the end of the natural mode oligo order, so to know if it's bound according to
         // target mode ordering, check if its index in natural mode is less than the number bound
         let bindMap = Utility.range(oligoOrder.length).map(
-            (targetIdx) => oligoOrder.indexOf(targetIdx) < undoBlock.oligosPaired
+            (targetIdx) => oligoOrder!.indexOf(targetIdx) < undoBlock.oligosPaired
         );
 
         let unsatisfiedOligoIndexes = oligos.map(
