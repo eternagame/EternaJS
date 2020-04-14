@@ -2,6 +2,7 @@ import ROPTextbox from './ROPTextbox';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 import {RScriptUIElementID} from './RScriptUIElement';
+import { Assert } from 'flashbang';
 
 export enum ROPWaitType {
     MOVECAMERA = 'MOVECAMERA',
@@ -66,6 +67,7 @@ export default class ROPWait extends RScriptOp {
         // When we finish painting, if not everything we wanted to be painted was painted,
         // then reset the player's progress on those nucleotides. And (if specified), show
         // a textbox.
+        Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
         if (list == undefined) {
             return;
@@ -324,6 +326,7 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static registerROPWait(op: ROPWait): void {
+        Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
         if (list == undefined) {
             list = [];
@@ -339,6 +342,7 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static deregisterROPWait(op: ROPWait): void {
+        Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let array: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
         if (array != undefined) {
             let idx: number = array.indexOf(op);
