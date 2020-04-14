@@ -47,7 +47,7 @@ export default class Feedback {
         return this._brentTheoData;
     }
 
-    public setShapeData(dat: number[], index: number, threshold: any, max: any, min: any, failed: string): void {
+    public setShapeData(dat: number[] | null, index: number, threshold: any, max: any, min: any, failed: string | null): void {
         if (dat != null) {
             this._shapeStarts[index] = dat[0] - 1;
             dat.splice(0, 1);
