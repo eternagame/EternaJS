@@ -7,6 +7,7 @@ import {
     StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil
 } from 'flashbang';
 import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
+import TextUtil from 'eterna/util/TextUtil';
 import ROPWait from './ROPWait';
 import RScriptArrow from './RScriptArrow';
 import RScriptEnv from './RScriptEnv';
@@ -35,7 +36,7 @@ export default class ROPTextbox extends RScriptOp {
         super.initialize(op, args);
         this._id = ROPTextbox.processID(this._id, this._mode);
         this._parentID = ROPTextbox.processID(this._parentID, ROPTextboxMode.TEXTBOX_LOCATION);
-        this._text = ROPTextbox.processText(this._text);
+        this._text = this._text ? TextUtil.processTags(this._text) : '';
     }
 
     private showTextbox(): void {
@@ -396,18 +397,6 @@ export default class ROPTextbox extends RScriptOp {
         return id ? id + usePostfix : usePostfix;
     }
 
-    private static processText(inText: string): string {
-        if (!inText) return '';
-        inText = inText.replace(/<color/gi, '<font color');
-        inText = inText.replace(/<red/gi, `<font color = "#${ROPTextbox.STD_RED_COLOR}"`);
-        inText = inText.replace(/<green/gi, `<font color = "#${ROPTextbox.STD_GREEN_COLOR}"`);
-        inText = inText.replace(/<blue/gi, `<font color = "#${ROPTextbox.STD_BLUE_COLOR}"`);
-        inText = inText.replace(/<yellow/gi, `<font color = "#${ROPTextbox.STD_YELLOW_COLOR}"`);
-
-        inText = inText.replace(/\/(color|red|green|blue|yellow)/gi, '/font');
-        return inText;
-    }
-
     private static parseBool(arg: string): boolean {
         return arg.toUpperCase() === 'TRUE';
     }
@@ -453,9 +442,4 @@ export default class ROPTextbox extends RScriptOp {
 
     private static readonly DEFAULT_X_OFFSET = 35;
     private static readonly DEFAULT_ARROW_OFFSET = 12;
-
-    private static readonly STD_RED_COLOR = 'F85F00';
-    private static readonly STD_BLUE_COLOR = '00BFF9';
-    private static readonly STD_GREEN_COLOR = '01EC04';
-    private static readonly STD_YELLOW_COLOR = 'FFFA00';
 }

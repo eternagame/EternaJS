@@ -3,7 +3,7 @@ import {Flashbang} from 'flashbang';
 import MultiPagePanel from './MultiPagePanel';
 
 export default class HintsPanel {
-    private static relativePos = new Point(0.01, 0.35);
+    private static relativePos = new Point(0.0098, 0.35);
     private static width = 220;
     private static height = 283;
 
