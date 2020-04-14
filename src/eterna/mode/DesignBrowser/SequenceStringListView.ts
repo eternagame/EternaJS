@@ -79,7 +79,7 @@ export default class SequenceStringListView extends Container {
             }
 
             for (let jj = 0; jj < seq.length; jj++) {
-                if (ii === 0 && expData != null) {
+                if (ii === 0 && expData != null && pairs !== null) {
                     if (pairs[jj] < 0) {
                         this._graphics.beginFill(0xCCCC00, 0.5);
                     } else {

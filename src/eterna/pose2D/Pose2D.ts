@@ -739,7 +739,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set forcedStruct(forced: number[]) {
+    public set forcedStruct(forced: number[] | null) {
         let len: number = this.fullSequenceLength;
         if (forced == null) {
             this._forcedStruct = null;
@@ -756,7 +756,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get forcedStruct(): number[] {
+    public get forcedStruct(): number[] | null {
         if (this._forcedStruct != null) {
             return this._forcedStruct.slice();
         }
@@ -774,14 +774,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._forcedHighlightBox.setHighlight(elems);
     }
 
-    public set structConstraints(doCare: boolean[]) {
+    public set structConstraints(doCare: boolean[] | null) {
         let ii: number;
         let len: number = this.fullSequenceLength;
-        let dc: boolean[] = (doCare == null ? null : doCare.slice());
+        let dc: boolean[] | null = (doCare == null ? null : doCare.slice());
         if (dc != null && this._oligosOrder != null) {
-            let idxMap: number[] = this.getOrderMap(null);
-            for (ii = 0; ii < len; ii++) {
-                dc[ii] = doCare[idxMap.indexOf(ii)];
+            let idxMap: number[] | null = this.getOrderMap(null);
+            if (idxMap !== null && dc !== null && doCare !== null) {
+                for (ii = 0; ii < len; ii++) {
+                    dc[ii] = doCare[idxMap.indexOf(ii)];
+                }
             }
         }
         for (ii = 0; ii < len; ii++) {
@@ -866,7 +868,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let segment: number[];
         if (ofs === 1) {
             segment = this._sequence.slice(first, last + 1 + 1);
-            segment.unshift(segment.pop());
+            segment.unshift(segment.pop()!);
             mutated = this._sequence.slice(0, first)
                 .concat(segment)
                 .concat(this._sequence.slice(last + 1 + 1));
@@ -922,7 +924,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let segment: number[];
         if (ofs === -1) {
             segment = this._sequence.slice(first - 1, last + 1);
-            segment.push(segment.shift());
+            segment.push(segment.shift()!);
             mutated = this._sequence.slice(0, first - 1)
                 .concat(segment)
                 .concat(this._sequence.slice(last + 1));
@@ -1459,7 +1461,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._moleculeIsBoundReal = boundReal;
     }
 
-    public setOligos(oligos: Oligo[], order: number[] = null, numPaired: number = 0): void {
+    public setOligos(oligos: Oligo[] | null, order: number[] | null = null, numPaired: number = 0): void {
         if (oligos == null) {
             this._oligos = null;
             this._oligosOrder = null;
@@ -1470,17 +1472,20 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let same: boolean = (this._oligos != null && oligos.length === this._oligos.length);
         if (same) {
             for (let k = 0; k < oligos.length && same; k++) {
-                if (!Arrays.shallowEqual(this._oligos[k].sequence, oligos[k].sequence)) {
+                if (!Arrays.shallowEqual(this._oligos![k].sequence, oligos[k].sequence)) {
                     same = false;
                     break;
                 }
             }
         }
 
-        let prevOrder: number[] = this._oligosOrder;
+        let prevOrder: number[] | null = this._oligosOrder;
         this._oligos = JSON.parse(JSON.stringify(oligos));
         if (order == null) {
             this._oligosOrder = [];
+            if (!this._oligos) {
+                throw new Error('this._oligos null when we need it not to be!');
+            }
             for (let k = 0; k < this._oligos.length; k++) {
                 this._oligosOrder[k] = k;
             }
@@ -1519,11 +1524,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getOligos(): Oligo[] {
+    public getOligos(): Oligo[] | null {
         return (this._oligos != null ? JSON.parse(JSON.stringify(this._oligos)) : null);
     }
 
-    public getOrderMap(otherOrder: number[]): number[] {
+    public getOrderMap(otherOrder: number[] | null): number[] | null {
         if (this._oligos == null) {
             return null;
         }
@@ -1588,7 +1593,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateDesignHighlight();
     }
 
-    public setOligo(oligo: number[], mode: number | string = Pose2D.OLIGO_MODE_DIMER, oName: string = null): void {
+    public setOligo(oligo: number[] | null, mode: number | string | null = Pose2D.OLIGO_MODE_DIMER, oName: string | null = null): void {
         if (oligo == null) {
             this._oligo = null;
             return;
@@ -1801,19 +1806,19 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public set customLayout(setting: Array<[number, number]>) {
+    public set customLayout(setting: Array<[number, number] | [null, null]> | null) {
         this._customLayout = setting;
     }
 
-    public get customLayout(): Array<[number, number]> {
+    public get customLayout(): Array<[number, number] | [null, null]> | null {
         return this._customLayout;
     }
 
-    public set customNumbering(setting: number[]) {
+    public set customNumbering(setting: number[] | null) {
         this._customNumbering = setting;
     }
 
-    public get customNumbering(): number[] {
+    public get customNumbering(): number[] | null {
         return this._customNumbering;
     }
 
@@ -3290,7 +3295,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _targetPairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
-    private _forcedStruct: number[] = [];
+    private _forcedStruct: number[] | null = [];
     private _designStruct: boolean[] = [];
     private _bindingSite: boolean[];
     private _molecularBindingBases: BaseGlow[] | null = null;
@@ -3302,22 +3307,22 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _moleculeTargetPairs: number[];
     private _parenthesis: string;
     private _shiftLimit: number;
-    private _customLayout: Array<[number, number], [null, null]> | null = null;
+    private _customLayout: Array<[number, number] | [null, null]> | null = null;
     private _pseudoknotted: boolean = false;
 
     // Oligos
-    private _oligo: number[] = null;
+    private _oligo: number[] | null = null;
     private _oligoMode: number = Pose2D.OLIGO_MODE_DIMER;
-    private _oligoName: string = null;
+    private _oligoName: string | null = null;
     private _duplexCost: number = EPars.DUPLEX_INIT; // total for all strands
     private _oligoMalus: number = 0; // concentration related penalty
-    private _oligoBases: BaseGlow[] = null; // for glows
+    private _oligoBases: BaseGlow[] | null = null; // for glows
     private _oligoPaired: boolean = false;
 
     // Multistrands
-    private _oligos: Oligo[] = null;
-    private _oligosOrder: number[] = null;
-    private _prevOligosOrder: number[];
+    private _oligos: Oligo[] | null= null;
+    private _oligosOrder: number[] | null = null;
+    private _prevOligosOrder: number[] | null;
     private _oligosPaired: number = 0;
     private _strandLabel: TextBalloon;
 
@@ -3439,10 +3444,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _simpleGraphicsMods: boolean = false;
 
     // customNumbering
-    private _customNumbering: number[] = null;
+    private _customNumbering: number[] | null = null;
 
     // Last exp paint data
-    private _expPainter: ExpPainter = null;
+    private _expPainter: ExpPainter | null = null;
     private _expMid: number = 0;
     private _expHi: number = 0;
     private _expContinuous: boolean = false;

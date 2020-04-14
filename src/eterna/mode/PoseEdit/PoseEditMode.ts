@@ -704,7 +704,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let initialSequence: number[] = null;
+        let initialSequence: number[] | null = null;
         if (this._params.initSolution != null) {
             initialSequence = EPars.stringToSequence(this._params.initSolution.sequence);
             this._curSolution = this._params.initSolution;
@@ -742,7 +742,7 @@ export default class PoseEditMode extends GameMode {
 
                 this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
                 if (this._poses[ii].customLayout != null
-                    && this._poses[ii].customLayout.length !== targetSecstructs[ii].length) {
+                    && this._poses[ii].customLayout!.length !== targetSecstructs[ii].length) {
                     log.warn(
                         'custom-layout field from puzzle objective json does not match target length.'
                         + ' Ignoring custom-layout'
@@ -754,14 +754,14 @@ export default class PoseEditMode extends GameMode {
                     this._targetConditions[ii]['custom-numbering']
                 );
                 if (this._poses[ii].customNumbering != null) {
-                    if (this._poses[ii].customNumbering.length !== targetSecstructs[ii].length) {
+                    if (this._poses[ii].customNumbering!.length !== targetSecstructs[ii].length) {
                         log.warn(
                             'custom-numbering field from puzzle objective json does not match target length.'
                             + ' Ignoring custom-numbering'
                         );
                         this._poses[ii].customNumbering = null;
                     } else {
-                        let x = this._poses[ii].customNumbering;
+                        let x = this._poses[ii].customNumbering!;
                         for (let jj = 0; jj < x.length; jj++) {
                             if (x[jj] == null) continue;
                             let kk = x.indexOf(x[jj]);
@@ -819,7 +819,7 @@ export default class PoseEditMode extends GameMode {
         this._poseState = this._isDatabrowserMode ? PoseState.NATIVE : this._puzzle.defaultMode;
     }
 
-    public get folder(): Folder {
+    public get folder(): Folder | null {
         return this._folder;
     }
 
@@ -831,7 +831,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
-        this._scriptInterface.addCallback('get_full_sequence', (indx: number): string => {
+        this._scriptInterface.addCallback('get_full_sequence', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             } else {
@@ -859,13 +859,13 @@ export default class PoseEditMode extends GameMode {
             return JSON.parse(JSON.stringify(conditions));
         });
 
-        this._scriptInterface.addCallback('get_native_structure', (indx: number): string => {
+        this._scriptInterface.addCallback('get_native_structure', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) return null;
             let nativepairs = this.getCurrentUndoBlock(indx).getPairs();
             return EPars.pairsToParenthesis(nativepairs);
         });
 
-        this._scriptInterface.addCallback('get_full_structure', (indx: number): string => {
+        this._scriptInterface.addCallback('get_full_structure', (indx: number): string | null => {
             if (indx < 0 || indx >= this._poses.length) {
                 return null;
             }
@@ -901,9 +901,12 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
-        this._scriptInterface.addCallback('current_folder', (): string => this._folder.name);
+        this._scriptInterface.addCallback('current_folder', (): string | null => this._folder ? this._folder.name : null);
 
-        this._scriptInterface.addCallback('fold', (seq: string, constraint: string = null): string => {
+        this._scriptInterface.addCallback('fold', (seq: string, constraint: string | null = null): string | null => {
+            if (this._folder === null) {
+                return null;
+            }
             let seqArr: number[] = EPars.stringToSequence(seq);
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
@@ -924,7 +927,10 @@ export default class PoseEditMode extends GameMode {
                 return EPars.pairsToParenthesis(folded);
             });
 
-        this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number => {
+        this._scriptInterface.addCallback('energy_of_structure', (seq: string, secstruct: string): number | null => {
+            if (this._folder === null) {
+                return null;
+            }
             let seqArr: number[] = EPars.stringToSequence(seq);
             let structArr: number[] = EPars.parenthesisToPairs(secstruct);
             let freeEnergy = 0;
@@ -938,24 +944,36 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('pairing_probabilities',
-            (seq: string, secstruct: string = null): number[] => {
+            (seq: string, secstruct: string | null = null): number[] | null => {
+                if (this._folder === null) {
+                    return null;
+                }
                 let seqArr: number[] = EPars.stringToSequence(seq);
-                let folded: number[];
+                let folded: number[] | null;
                 if (secstruct) {
                     folded = EPars.parenthesisToPairs(secstruct);
                 } else {
                     folded = this._folder.foldSequence(seqArr, null, null);
+                    if (folded === null) {
+                        return null;
+                    }
                 }
                 let pp: number[] = this._folder.getDotPlot(seqArr, folded);
                 return pp.slice();
             });
 
         this._scriptInterface.addCallback('cofold',
-            (seq: string, oligo: string, malus: number = 0.0, constraint: string = null): string => {
+            (seq: string, oligo: string, malus: number = 0.0, constraint: string | null = null): string | null => {
+                if (this._folder === null) {
+                    return null;
+                }
                 let len: number = seq.length;
                 let cseq = `${seq}&${oligo}`;
                 let seqArr: number[] = EPars.stringToSequence(cseq);
-                let folded: number[] = this._folder.cofoldSequence(seqArr, null, Math.floor(malus * 100), constraint);
+                let folded: number[] | null = this._folder.cofoldSequence(seqArr, null, Math.floor(malus * 100), constraint);
+                if (folded === null) {
+                    return null;
+                }
                 return `${EPars.pairsToParenthesis(folded.slice(0, len))
                 }&${EPars.pairsToParenthesis(folded.slice(len))}`;
             });
@@ -1237,7 +1255,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     /* override */
-    protected createContextMenu(): ContextMenu {
+    protected createContextMenu(): ContextMenu | null {
         if (this.isDialogOrNotifShowing || this.hasUILock) {
             return null;
         }
@@ -1430,7 +1448,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[poseIndex].setMolecularBinding(null, null, null);
             }
 
-            let forcedStruct: number[] = null;
+            let forcedStruct: number[] | null = null;
             if (this._targetConditions[targetIndex]['force_struct'] != null) {
                 forcedStruct = EPars.parenthesisToForcedArray(this._targetConditions[targetIndex]['force_struct']);
             }
@@ -1565,14 +1583,16 @@ export default class PoseEditMode extends GameMode {
     private ropPresets(): void {
         while (this._ropPresets.length) {
             let func = this._ropPresets.pop();
-            func();
+            func!();
         }
     }
 
     private onFolderUpdated(): void {
-        this._folderButton.label(this._folder.name);
+        if (this._folder) {
+            this._folderButton.label(this._folder.name);
+        }
 
-        let scoreFolder: Folder = this._folder.canScoreStructures ? this._folder : null;
+        let scoreFolder: Folder | null = this._folder.canScoreStructures ? this._folder : null;
         for (let pose of this._poses) {
             pose.scoreFolder = scoreFolder;
         }
@@ -1581,6 +1601,10 @@ export default class PoseEditMode extends GameMode {
     }
 
     private changeFolder(): void {
+        if (!this._folder) {
+            throw new Error('Cannot change folders if the current folder is null!');
+        }
+
         let currF: string = this._folder.name;
         this._folder = FolderManager.instance.getNextFolder(
             currF, (folder: Folder) => !this._puzzle.canUseFolder(folder)
@@ -1615,7 +1639,7 @@ export default class PoseEditMode extends GameMode {
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder.canDotPlot) {
+        if (this._folder && this._folder.canDotPlot) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(this._folder, true);
@@ -1760,7 +1784,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let submittingRef: GameObjectRef = GameObjectRef.NULL;
-        let fxComplete: Promise<void> = null;
+        let fxComplete: Promise<void> | null = null;
 
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             // Show a "Submitting now!" dialog
@@ -1837,7 +1861,7 @@ export default class PoseEditMode extends GameMode {
             if (data['error'].indexOf('barcode') >= 0) {
                 let dialog = this.showNotification(data['error'], 'More Information');
                 dialog.extraButton.clicked.connect(() => window.open(EternaURL.BARCODE_HELP, '_blank'));
-                let hairpin: string = EPars.getBarcodeHairpin(seqString);
+                let hairpin: string | null = EPars.getBarcodeHairpin(seqString);
                 if (hairpin != null) {
                     SolutionManager.instance.addHairpins([hairpin]);
                     this.checkConstraints();
@@ -1878,8 +1902,8 @@ export default class PoseEditMode extends GameMode {
         Eterna.chat.pushHideChat();
 
         // Show the panel
-        let infoText: string = null;
-        let moreText: string = null;
+        let infoText: string | null = null;
+        let moreText: string | null = null;
         let boostersData = this._puzzle.boosters;
         if (boostersData != null && boostersData.mission_cleared != null) {
             infoText = boostersData.mission_cleared['info'];
@@ -1887,7 +1911,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
-        let nextPuzzle: Puzzle = null;
+        let nextPuzzle: Puzzle | null = null;
         if (nextPuzzleData) {
             try {
                 nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
@@ -2020,7 +2044,7 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar.display.visible = false;
 
-        let customLayout: Array<[number, number]> = null;
+        let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (this._targetConditions && this._targetConditions[0]) {
             customLayout = this._targetConditions[0]['custom-layout'];
         }
@@ -2124,7 +2148,7 @@ export default class PoseEditMode extends GameMode {
         }
         this.clearUndoStack();
 
-        let json: any[] = this._autosaveData;
+        let json: any[] | null = this._autosaveData;
         // no saved data
         if (json == null) {
             // if (this.root.loaderInfo.parameters.inputsequence != null) {
@@ -2204,7 +2228,7 @@ export default class PoseEditMode extends GameMode {
         this._moves.push(muts.slice());
     }
 
-    private setPuzzleEpilog(initSeq: number[], isReset: boolean): void {
+    private setPuzzleEpilog(initSeq: number[] | null, isReset: boolean | undefined): void {
         if (isReset) {
             let newSeq: number[] = this._puzzle.transformSequence(this.getCurrentUndoBlock(0).sequence, 0);
             this.moveHistoryAddSequence('reset', EPars.sequenceToString(newSeq));
@@ -2474,13 +2498,13 @@ export default class PoseEditMode extends GameMode {
                             this.flashConstraintForTarget(xx);
                             this._poses[targetIndex].clearDesignStruct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
-                        } else if (this._targetOligos[xx] != null && this._targetOligos[xx].length > 1) {
+                        } else if (this._targetOligos[xx] != null && this._targetOligos[xx]!.length > 1) {
                             let newOrder: number[] = [];
-                            for (let jj = 0; jj < this._targetOligos[xx].length; jj++) newOrder.push(jj);
+                            for (let jj = 0; jj < this._targetOligos[xx]!.length; jj++) newOrder.push(jj);
                             let more: boolean;
                             do {
                                 segments = this._poses[targetIndex].designSegments;
-                                let newMap: number[] = this._poses[targetIndex].getOrderMap(newOrder);
+                                let newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
                                 let newPairs: number[] = [];
                                 if (newMap != null) {
                                     for (let jj = 0; jj < segments.length; jj++) {
@@ -2713,6 +2737,9 @@ export default class PoseEditMode extends GameMode {
             pseudoknots = true;
         }
 
+        if (!this._folder) {
+            throw new Error('Cannot progress through poseEditByTargetFoldTarget with a null Folder!');
+        }
         if (this._targetConditions[ii]) forceStruct = this._targetConditions[ii]['force_struct'];
 
         if (this._targetConditions[ii] == null || this._targetConditions[ii]['type'] === 'single') {

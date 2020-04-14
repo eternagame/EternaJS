@@ -10,7 +10,7 @@ import TextInputPanel from './TextInputPanel';
  *  corresponding to sequence string.
  */
 export default class PasteSequenceDialog extends Dialog<number[]> {
-    constructor(customNumbering: number[] = null) {
+    constructor(customNumbering: number[] | null = null) {
         super();
         this._customNumbering = customNumbering;
     }

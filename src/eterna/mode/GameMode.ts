@@ -174,18 +174,18 @@ export default abstract class GameMode extends AppMode {
             this._poses.push(newField.pose);
             newField.pose.getEnergyDelta = () => {
                 // Sanity check
-                if (this._folder) {
+                if (this._folder !== null) {
                     let poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
                     let score = null;
                     let pseudoknots: boolean = this._targetConditions != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
-                        score = (pairs: number[]) => this._folder.scoreStructures(
+                        score = (pairs: number[]) => this._folder!.scoreStructures(
                             newField.pose.fullSequence, pairs, true
                         );
                     } else {
-                        score = (pairs: number[]) => this._folder.scoreStructures(
+                        score = (pairs: number[]) => this._folder!.scoreStructures(
                             newField.pose.fullSequence, pairs
                         );
                     }
@@ -322,7 +322,7 @@ export default abstract class GameMode extends AppMode {
     protected _isPipMode: boolean = false;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
-    protected _folder: Folder;
+    protected _folder: Folder | null;
     protected _curTargetIndex: number;
     protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
         return undefined;

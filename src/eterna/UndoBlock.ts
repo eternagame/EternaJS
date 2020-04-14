@@ -366,15 +366,15 @@ export default class UndoBlock {
     private _pairsArray: Map<boolean, number[][]> = new Map<boolean, number[][]>();
     private _paramsArray: Map<boolean, any[][]> = new Map<boolean, any[][]>();
     private _stable: boolean = false;
-    private _targetOligo: number[] = null;
-    private _targetOligos: Oligo[] = null;
-    private _oligoOrder: number[] = null;
+    private _targetOligo: number[] | null = null;
+    private _targetOligos: Oligo[] | null = null;
+    private _oligoOrder: number[] | null = null;
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
-    private _targetOligoOrder: number[] = null;
+    private _targetOligoOrder: number[] | null = null;
     private _puzzleLocks: boolean[] = [];
     private _forcedStruct: number[] = [];
-    private _targetConditions: string = null;
+    private _targetConditions: string | null = null;
 
     private _dotPlotData: number[];
     private _meltPlotPairScores: number[];
