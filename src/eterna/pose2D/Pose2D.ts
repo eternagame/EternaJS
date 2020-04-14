@@ -2042,7 +2042,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._redraw || basesMoved) {
             this._baseRope.redraw(true /* force baseXY */);
 
-            if (this._cursorIndex > 0) {
+            if (this._cursorIndex > 0 && this._cursorBox !== null) {
                 center = this.getBaseLoc(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
                 this._cursorBox.y = center.y;
@@ -2919,7 +2919,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (this._pairs[ii] >= 0 && this.isPairSatisfied(ii, this._pairs[ii])) {
                 let pairStr: number = Pose2D.getPairStrength(fullSeq[ii], fullSeq[this._pairs[ii]]);
 
-                if (this._baseToX) {
+                if (this._baseToX && this._baseToY) {
                     this._bases[ii].setPairing(true,
                         this._baseToX[this._pairs[ii]] - this._baseToX[ii],
                         this._baseToY[this._pairs[ii]] - this._baseToY[ii],
@@ -3169,7 +3169,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let scoreTree: RNALayout = new RNALayout();
         scoreTree.setupTree(this.satisfiedPairs);
 
-        let treeroot: RNATreeNode = scoreTree.root;
+        let treeroot: RNATreeNode | null = scoreTree.root;
         scoreTree.scoreTree(this.fullSequence, this._scoreFolder);
 
         let scoreNodes: ScoreDisplayNode[] = [];
@@ -3191,7 +3191,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.updateScoreNodeGui();
     }
 
-    private generateScoreNodesRecursive(root: RNATreeNode, coords: number[] | null, nodes: ScoreDisplayNode[]): void {
+    private generateScoreNodesRecursive(root: RNATreeNode | null, coords: number[] | null, nodes: ScoreDisplayNode[]): void {
         if (root == null) {
             return;
         }
