@@ -56,7 +56,7 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
     protected onBGClicked(): void {
     }
 
-    protected close(value: T) {
+    protected close(value: T | null) {
         if (this._isClosed) {
             return;
         }
@@ -84,6 +84,6 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         return true;
     }
 
-    protected _resolvePromise: (value: T) => void;
+    protected _resolvePromise: (value: T | null) => void;
     protected _isClosed: boolean;
 }

@@ -19,7 +19,7 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
 
         title.setFocus();
 
-        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {

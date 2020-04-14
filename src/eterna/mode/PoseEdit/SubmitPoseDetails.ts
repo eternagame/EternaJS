@@ -1,4 +1,4 @@
 export default interface SubmitPoseDetails {
-    title: string;
-    comment: string;
+    title: string | undefined;
+    comment: string | undefined;
 }
