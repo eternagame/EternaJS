@@ -28,7 +28,7 @@ export default class GameObjectRef {
     }
 
     // managed by ObjectDB
-    /* internal */ public _obj: GameObjectBase;
+    /* internal */ public _obj: GameObjectBase | null;
     /* internal */ public _next: GameObjectRef;
     /* internal */ public _prev: GameObjectRef;
 }

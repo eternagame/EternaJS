@@ -192,8 +192,8 @@ export default class Utility {
      *
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
-    public static rangeStringToArray(rangeString: string): number[] {
-        let vals: number[] = [];
+    public static rangeStringToArray(rangeString: string): (number | null)[] | null {
+        let vals: (number | null)[] = [];
         const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
         for (const str of rangeString.split(',')) {
             let foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
@@ -233,11 +233,11 @@ export default class Utility {
      *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
-    public static getIndices(strInput: string): number[] {
-        let indices: number[] = [];
+    public static getIndices(strInput: string): (number | null)[] | null {
+        let indices: (number | null)[] = [];
         let splitted: string[] = strInput.split(' ');
         for (const str of splitted) {
-            let ints: number[] = this.rangeStringToArray(str);
+            let ints: (number | null)[] | null = this.rangeStringToArray(str);
             if (ints === null) {
                 return null; // signal failure
             }
@@ -300,7 +300,7 @@ export default class Utility {
      *
      * @returns array of numbers
     */
-    public static numberingJSONToArray(numberingJSON: any): number[] {
+    public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
         if (numberingJSON == null) return null;
         if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);

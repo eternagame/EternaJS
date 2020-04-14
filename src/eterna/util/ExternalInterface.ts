@@ -185,7 +185,7 @@ export default class ExternalInterface {
 
     private static maybeRunNextScript(): void {
         while (this._pendingScripts.length > 0 && this._curSyncScript == null) {
-            let nextScript = this._pendingScripts.shift();
+            let nextScript = this._pendingScripts.shift()!;
             if (nextScript.options.checkValid != null && !nextScript.options.checkValid()) {
                 log.info(`Not running stale request for script ${nextScript.scriptID}`);
             } else {
@@ -331,8 +331,8 @@ export default class ExternalInterface {
     private static readonly _pendingScripts: PendingScript[] = [];
 
     private static _scriptRoot: any;
-    private static _curSyncScript: PendingScript;
-    private static _noPendingScripts: Deferred<void>;
+    private static _curSyncScript: PendingScript | null;
+    private static _noPendingScripts: Deferred<void> | null;
     private static _preloadedScripts: string[] = [];
 }
 

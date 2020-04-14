@@ -100,7 +100,7 @@ export default class UndoBlock {
         return tc['fold_mode'] == null ? Pose2D.OLIGO_MODE_DIMER : Number(tc['fold_mode']);
     }
 
-    public get oligoName(): string {
+    public get oligoName(): string | null {
         let tc: any = this.targetConditions;
         if (tc == null) {
             return null;
@@ -194,16 +194,17 @@ export default class UndoBlock {
         }
     }
 
-    public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
+    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
         Assert.assertIsDefined(this._pairsArray.get(pseudoknots));
         this._pairsArray.get(pseudoknots)![temp] = pairs.slice();
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        if (this._paramsArray.get(pseudoknots)[temp] == null) {
-            this._paramsArray.get(pseudoknots)[temp] = [];
+        Assert.assertIsDefined(this._paramsArray.get(pseudoknots));
+        if (this._paramsArray.get(pseudoknots)![temp] == null) {
+            this._paramsArray.get(pseudoknots)![temp] = [];
         }
-        this._paramsArray.get(pseudoknots)[temp][index] = val;
+        this._paramsArray.get(pseudoknots)![temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {
@@ -249,11 +250,14 @@ export default class UndoBlock {
 
         for (let ii = 37; ii < 100; ii += 10) {
             if (this.getPairs(ii) == null) {
-                this.setPairs(folder.foldSequence(this.sequence, null, null, pseudoknots, ii), ii, pseudoknots);
+                let pairs = folder.foldSequence(this.sequence, null, null, pseudoknots, ii);
+                Assert.assertIsDefined(pairs);
+                this.setPairs(pairs, ii, pseudoknots);
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                Assert.assertIsDefined(dotTempArray);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }

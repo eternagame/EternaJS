@@ -134,7 +134,7 @@ export default class Tooltips extends GameObject {
     private readonly _layer: Container;
 
     private _curTooltipKey: any;
-    private _curTooltip: DisplayObject;
+    private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 
     private static readonly TARGET_BOUNDS = new Rectangle();

@@ -126,18 +126,18 @@ export default class AppMode {
         }
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
     public addNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
     public replaceNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
@@ -225,7 +225,7 @@ export default class AppMode {
 
         this.dispose();
 
-        this._rootObject._disposeInternal();
+        if (this._rootObject) this._rootObject._disposeInternal();
         this._rootObject = null;
 
         this.keyboardInput.dispose();
@@ -272,7 +272,8 @@ export default class AppMode {
     }
 
     /* internal */
-    public _registerObjectInternal(obj: GameObjectBase): void {
+    public _registerObjectInternal(obj: GameObjectBase | null): void {
+        Assert.assertIsDefined(obj);
         obj._mode = this;
 
         // Handle IDs
@@ -326,11 +327,11 @@ export default class AppMode {
 
     protected _runningTime: number = 0;
 
-    protected _rootObject: RootObject;
+    protected _rootObject: RootObject | null;
 
-    protected _idObjects: Map<any, GameObjectBase> = new Map();
+    protected _idObjects: Map<any, GameObjectBase> | null = new Map();
 
-    protected _regs: RegistrationGroup = new RegistrationGroup();
+    protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isActive: boolean;
     protected _isDiposed: boolean;

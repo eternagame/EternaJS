@@ -4,7 +4,7 @@ import Assert from 'flashbang/util/Assert';
 import InterpolatingTask from './InterpolatingTask';
 
 export default class DisplayObjectTask extends InterpolatingTask {
-    constructor(time: number, easing: EasingFunc, target: DisplayObject) {
+    constructor(time: number, easing: EasingFunc, target: DisplayObject | null) {
         super(time, easing);
         this._target = target;
     }
@@ -19,5 +19,5 @@ export default class DisplayObjectTask extends InterpolatingTask {
         }
     }
 
-    protected _target: DisplayObject;
+    protected _target: DisplayObject | null;
 }
