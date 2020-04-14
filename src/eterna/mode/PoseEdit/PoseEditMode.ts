@@ -114,7 +114,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
             showHint: this._puzzle.hint != null,
-            boosters: this._puzzle.boosters
+            boosters: this._puzzle.boosters ? this._puzzle.boosters : undefined
         });
         this.addObject(this._toolbar, this.uiLayer);
 
@@ -733,6 +733,7 @@ export default class PoseEditMode extends GameMode {
                 seq = Puzzle.probeTail(seq);
             }
 
+            Assert.assertIsDefined(seq);
             this._poses[ii].sequence = this._puzzle.transformSequence(seq, ii);
             if (this._puzzle.barcodeIndices != null) {
                 this._poses[ii].barcodes = this._puzzle.barcodeIndices;
@@ -890,7 +891,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean | null => {
             this.checkConstraints();
-            if (idx >= 0 && idx < this.constraintCount) {
+            if (idx >= 0 && this.constraintCount && idx < this.constraintCount) {
                 return this._puzzle.constraints ? this._puzzle.constraints[idx].evaluate(
                     this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
                 ).satisfied : null;
@@ -1725,11 +1726,11 @@ export default class PoseEditMode extends GameMode {
 
     /** Creates solution-submission data for shipping off to the server */
     private createSubmitData(details: SubmitPoseDetails, undoBlock: UndoBlock): any {
-        if (details.title.length === 0) {
+        if (!details.title || details.title.length === 0) {
             details.title = 'Default title';
         }
 
-        if (details.comment.length === 0) {
+        if (!details.comment || details.comment.length === 0) {
             details.comment = 'No comment';
         }
 
@@ -2036,25 +2037,28 @@ export default class PoseEditMode extends GameMode {
         this.hideAsyncText();
 
         let missionText = this._puzzle.missionText;
-        let boosters: BoostersData = this._puzzle.boosters;
+        let boosters: BoostersData | null = this._puzzle.boosters;
         if (boosters && boosters.mission != null) {
             missionText = boosters.mission['text'];
         }
 
-        let introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints.filter(
-            (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
-        ).map(
-            (constraint) => {
-                let box = new ConstraintBox(true);
-                box.setContent(constraint.getConstraintBoxConfig(
-                    constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
-                    true,
-                    this._seqStacks[this._stackLevel],
-                    this._targetConditions
-                ));
-                return box;
-            }
-        );
+        let introConstraintBoxes: ConstraintBox[] = []
+        if (this._puzzle.constraints) {
+            let introConstraintBoxes: ConstraintBox[] = this._puzzle.constraints.filter(
+                (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)
+            ).map(
+                (constraint) => {
+                    let box = new ConstraintBox(true);
+                    box.setContent(constraint.getConstraintBoxConfig(
+                        constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
+                        true,
+                        this._seqStacks[this._stackLevel],
+                        this._targetConditions
+                    ));
+                    return box;
+                }
+            );
+        }
 
         this._constraintBar.display.visible = false;
 
@@ -2426,7 +2430,11 @@ export default class PoseEditMode extends GameMode {
     }
 
     private flashConstraintForTarget(targetIndex: number): void {
-        this._constraintBar.getShapeBox(targetIndex).flash(0x00FFFF);
+        if (this._constraintBar) {
+            if (this._constraintBar.getShapeBox(targetIndex) !== null) {
+                this._constraintBar.getShapeBox(targetIndex)!.flash(0x00FFFF);
+            }
+        }
     }
 
     private poseEditByTarget(targetIndex: number): void {
@@ -2609,10 +2617,10 @@ export default class PoseEditMode extends GameMode {
                 let antiSecstruct: string = this._targetConditions[ii]['anti_secstruct'];
                 if (antiSecstruct != null) {
                     let antiPairs: number[] = EPars.parenthesisToPairs(antiSecstruct);
-                    let antiResult: any[] = this._poses[ii].parseCommandWithPairs(
+                    let antiResult: [string, PuzzleEditOp, number[]?] | null = this._poses[ii].parseCommandWithPairs(
                         lastShiftedCommand, lastShiftedIndex, antiPairs
                     );
-                    this._targetConditions[ii]['anti_secstruct'] = antiResult[0];
+                    if (antiResult) this._targetConditions[ii]['anti_secstruct'] = antiResult[0];
                 }
 
                 if (this._targetConditions[ii]['type'] === 'aptamer') {
@@ -2687,7 +2695,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         this.pushUILock(LOCK_NAME);
-        let sol: Solution = SolutionManager.instance.getSolutionBySequence(
+        let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
             this._poses[targetIndex].getSequenceString()
         );
         if (sol != null && this._puzzle.hasTargetType('multistrand')) {
@@ -2831,13 +2839,13 @@ export default class PoseEditMode extends GameMode {
             if (mfold == null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                let ops: PoseOp[] = this._folder.multifoldUnroll(this._puzzle.transformSequence(seq, ii), null, oligos);
+                let ops: PoseOp[] | null = this._folder.multifoldUnroll(this._puzzle.transformSequence(seq, ii), null, oligos);
                 this._opQueue.unshift(new PoseOp(
                     ii + 1,
                     () => this.poseEditByTargetFoldTarget(ii + this._targetPairs.length)
                 ));
-                while (ops.length > 0) {
-                    let o: PoseOp = ops.pop();
+                while (ops && ops.length > 0) {
+                    let o: PoseOp = ops.pop()!;
                     o.sn = ii + 1;
                     this._opQueue.unshift(o);
                 }
@@ -2895,7 +2903,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (lastBestPairs != null) {
-            let isShapeConstrained = this._puzzle.constraints.some(
+            let isShapeConstrained = this._puzzle.constraints && this._puzzle.constraints.some(
                 (constraint) => constraint instanceof ShapeConstraint
             );
 
@@ -2949,7 +2957,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         if (this._foldTotalTime >= 1000.0 && this._puzzle.hasTargetType('multistrand')) {
-            let sol: Solution = SolutionManager.instance.getSolutionBySequence(
+            let sol: Solution | null = SolutionManager.instance.getSolutionBySequence(
                 this._poses[targetIndex].getSequenceString()
             );
             if (sol != null && !sol.hasFoldData) {

@@ -148,11 +148,11 @@ export default class UndoBlock {
         this._sequence = seq.slice();
     }
 
-    public get puzzleLocks(): boolean[] {
+    public get puzzleLocks(): boolean[] | null {
         return this._puzzleLocks;
     }
 
-    public set puzzleLocks(locks: boolean[]) {
+    public set puzzleLocks(locks: boolean[] | null) {
         this._puzzleLocks = locks;
     }
 
@@ -376,7 +376,7 @@ export default class UndoBlock {
     private _oligosPaired: number = 0;
     private _targetPairs: number[] = [];
     private _targetOligoOrder: number[] | null = null;
-    private _puzzleLocks: boolean[] = [];
+    private _puzzleLocks: boolean[] | null = [];
     private _forcedStruct: number[] = [];
     private _targetConditions: string | null = null;
 
