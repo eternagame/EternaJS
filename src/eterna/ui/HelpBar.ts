@@ -18,21 +18,23 @@ export default class HelpBar extends ContainerObject {
         const {theme} = HelpBar;
         if (props.onHintClicked) {
             const hints = new GameButton()
-                .up(Bitmaps.ImgNative)
-                .over(Bitmaps.ImgNativeOver)
-                .down(Bitmaps.ImgNativeSelected)
+                .up(Bitmaps.ImgHint)
+                .over(Bitmaps.ImgHintOver)
+                .down(Bitmaps.ImgHintHit)
                 .hotkey(KeyCode.KeyH)
                 .rscriptID(RScriptUIElementID.HINT)
                 .tooltip('Hints');
 
             this.addObject(hints, this.container);
-            hints.clicked.connect(props.onHintClicked);
+            hints.clicked.connect(() => {
+                props.onHintClicked();
+            });
         }
 
         const help = new GameButton()
-            .up(Bitmaps.ImgTarget)
-            .over(Bitmaps.ImgTargetOver)
-            .down(Bitmaps.ImgTargetSelected)
+            .up(Bitmaps.ImgHelp)
+            .over(Bitmaps.ImgHelpOver)
+            .down(Bitmaps.ImgHelpHit)
             .tooltip('Help');
         this.addObject(help, this.container);
 

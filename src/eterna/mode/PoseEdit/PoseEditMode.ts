@@ -214,9 +214,9 @@ export default class PoseEditMode extends GameMode {
         this.uiLayer.addChild(this._targetName);
 
         this._homeButton = new GameButton()
-            .up(Bitmaps.NovaPuzzleImg)
-            .over(Bitmaps.NovaPuzzleImg)
-            .down(Bitmaps.NovaPuzzleImg);
+            .up(Bitmaps.ImgHome)
+            .over(Bitmaps.ImgHome)
+            .down(Bitmaps.ImgHome);
         this._homeButton.display.position = new Point(11, 8);
         this._homeButton.clicked.connect(() => {
             window.location.href = EternaURL.createURL({page: 'lab_bench'});
@@ -264,7 +264,7 @@ export default class PoseEditMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5
+            HAlign.RIGHT, VAlign.TOP, 0, 0
         );
 
         DisplayUtil.positionRelativeToStage(
