@@ -38,24 +38,24 @@ export default class GameButton extends Button implements KeyboardListener {
         this.setupTooltip();
     }
 
-    public up(display: DisplayObject | Texture | string): GameButton {
+    public up(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.UP, display);
     }
 
-    public over(display: DisplayObject | Texture | string): GameButton {
+    public over(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.OVER, display);
     }
 
-    public down(display: DisplayObject | Texture | string): GameButton {
+    public down(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.DOWN, display);
     }
 
-    public disabled(display: DisplayObject | Texture | string): GameButton {
+    public disabled(display: DisplayObject | Texture | string | undefined): GameButton {
         return this.setIconForState(ButtonState.DISABLED, display);
     }
 
     /** Sets a single DisplayObect for all states */
-    public allStates(display: DisplayObject | Texture | string): GameButton {
+    public allStates(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.up(display).over(display).down(display).disabled(display);
     }
 
