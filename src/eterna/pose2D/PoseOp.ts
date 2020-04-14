@@ -3,7 +3,11 @@ export default class PoseOp {
     public fn: () => void;
 
     constructor(sn: number | null, fn: () => void) {
-        this.sn = sn;
+        if (!sn) {
+            this.sn = undefined;
+        } else {
+            this.sn = sn;
+        }
         this.fn = fn;
     }
 }

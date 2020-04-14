@@ -72,7 +72,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     /** true if our bounds contains the given global point */
     public containsPoint(screenX: number, screenY: number): boolean {
         PoseField.P.set(screenX, screenY);
-        this.container.toLocal(PoseField.P, null, PoseField.P);
+        this.container.toLocal(PoseField.P, undefined, PoseField.P);
         const x = PoseField.P.x;
         const y = PoseField.P.y;
         return (x >= 0 && x < this._width && y >= 0 && y < this._height);
@@ -194,7 +194,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private _width: number = 0;
     private _height: number = 0;
-    private _mask: Graphics;
+    private _mask: Graphics | null;
 
     private _poseDraggerRef: GameObjectRef = GameObjectRef.NULL;
 

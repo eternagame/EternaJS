@@ -1,4 +1,4 @@
-import { AssertionError } from "assert";
+import {AssertionError} from 'assert';
 
 export default class Assert {
     public static ok(predicate: () => boolean, message?: string): void {
@@ -19,10 +19,13 @@ export default class Assert {
         Assert.ok(() => arg != null, message);
     }
 
-    public static assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
+    public static assertIsDefined<T>(
+        val: T,
+        msg: string = `Expected 'val' to be defined, but received ${val}`
+    ): asserts val is NonNullable<T> {
         if (val === undefined || val === null) {
             throw new AssertionError(
-                {message: `Expected 'val' to be defined, but received ${val}`}
+                {message: msg}
             );
         }
     }

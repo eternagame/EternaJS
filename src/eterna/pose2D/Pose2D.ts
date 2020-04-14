@@ -21,6 +21,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import GameMode from 'eterna/mode/GameMode';
 import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
+import Puzzle from 'eterna/puzzle/Puzzle';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -36,7 +37,6 @@ import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
-import Puzzle from 'eterna/puzzle/Puzzle';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 

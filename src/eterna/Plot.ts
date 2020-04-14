@@ -1,5 +1,5 @@
 import {Graphics, Text, Container} from 'pixi.js';
-import {ColorUtil} from 'flashbang';
+import {ColorUtil, Assert} from 'flashbang';
 import Fonts from './util/Fonts';
 
 export enum PlotType {
@@ -21,7 +21,7 @@ export default class Plot extends Container {
         this._height = height;
     }
 
-    public setData(data: number[], maxvals: number[], labels: string[] = null, ghostData: number[] = null): void {
+    public setData(data: number[], maxvals: number[], labels: string[] | null = null, ghostData: number[] | null = null): void {
         this._data = (data != null ? data.slice() : null);
         this._labels = (labels != null ? labels.slice() : null);
         this._upperBounds = (maxvals != null ? maxvals.slice() : null);
@@ -36,7 +36,7 @@ export default class Plot extends Container {
         }
     }
 
-    public set2DData(data2D: number[], numBases: number): void {
+    public set2DData(data2D: number[] | null, numBases: number): void {
         if (data2D) {
             this._data2D = data2D;
         }
@@ -59,6 +59,7 @@ export default class Plot extends Container {
             if (this._data != null && this._data.length === 0) {
                 return;
             }
+            Assert.assertIsDefined(this._data);
             this._numBases = this._data.length;
         }
 
@@ -73,6 +74,8 @@ export default class Plot extends Container {
 
         if (this.type === PlotType.BAR) {
             this._graphics.lineStyle(0, 0xFFFFFF);
+            Assert.assertIsDefined(this._data);
+            Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let len: number = (this._data[ii] / this._upperBounds[ii]) * this._height;
 
@@ -98,6 +101,7 @@ export default class Plot extends Container {
             }
         } else if (this.type === PlotType.LINE) {
             this._graphics.lineStyle(1, 0xAAAAAA, 1);
+            Assert.assertIsDefined(this._data);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let xCoord = Plot.W_MARGIN + (ii + 1) * horizontalSpace - horizontalSpace / 2.0 + x;
                 this._graphics.moveTo(xCoord, 0);
@@ -111,6 +115,7 @@ export default class Plot extends Container {
             }
 
             this._graphics.lineStyle(2, 0x00AA00);
+            Assert.assertIsDefined(this._upperBounds);
             for (let ii = 0; ii < this._data.length; ii++) {
                 let hlen: number = (this._data[ii] / (this._upperBounds[ii])) * (this._height - Plot.H_MARGIN);
                 if (ii === 0) {
@@ -206,13 +211,13 @@ export default class Plot extends Container {
     }
 
     private readonly _graphics: Graphics;
-    private _data: number[];
+    private _data: number[] | null;
     private _data2D: number[];
     private _numBases: number = 0;
-    private _ghostData: number[];
-    private _labels: string[];
-    private _upperBounds: number[];
-    private _labelFields: Text[];
+    private _ghostData: number[] | null;
+    private _labels: string[] | null;
+    private _upperBounds: number[] | null;
+    private _labelFields: Text[] | null;
 
     private _width: number = 100;
     private _height: number = 100;

@@ -484,7 +484,9 @@ export default class PoseEditMode extends GameMode {
         // }
 
         let bindAddbaseCB = (pose: Pose2D, kk: number) => {
-            pose.addBaseCallback = ((parenthesis: string, mode: PuzzleEditOp, index: number) => {
+            pose.addBaseCallback = ((parenthesis: string | null, mode: PuzzleEditOp | null, index: number) => {
+                Assert.assertIsDefined(parenthesis);
+                Assert.assertIsDefined(mode);
                 pose.baseShift(parenthesis, mode, index);
                 this.poseEditByTarget(kk);
             });

@@ -1,4 +1,4 @@
-import {JSONUtil} from 'flashbang';
+import {JSONUtil, Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
 import * as log from 'loglevel';
@@ -181,19 +181,22 @@ export default class UndoBlock {
     }
 
     public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
-        return this._pairsArray.get(pseudoknots)[temp];
+        Assert.assertIsDefined(this._pairsArray.get(pseudoknots));
+        return this._pairsArray.get(pseudoknots)![temp];
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        if (this._paramsArray.get(pseudoknots)[temp] != null) {
-            return this._paramsArray.get(pseudoknots)[temp][index];
+        Assert.assertIsDefined(this._paramsArray.get(pseudoknots));
+        if (this._paramsArray.get(pseudoknots)![temp] != null) {
+            return this._paramsArray.get(pseudoknots)![temp][index];
         } else {
             return undefined;
         }
     }
 
     public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
-        this._pairsArray.get(pseudoknots)[temp] = pairs.slice();
+        Assert.assertIsDefined(this._pairsArray.get(pseudoknots));
+        this._pairsArray.get(pseudoknots)![temp] = pairs.slice();
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
@@ -224,6 +227,7 @@ export default class UndoBlock {
                 fullSeq = fullSeq.concat(this._targetOligo);
             }
         } else if (this._targetOligos) {
+            Assert.assertIsDefined(this._oligoOrder);
             for (let ii = 0; ii < this._targetOligos.length; ii++) {
                 fullSeq.push(EPars.RNABASE_CUT);
                 fullSeq = fullSeq.concat(this._targetOligos[this._oligoOrder[ii]].sequence);
@@ -238,9 +242,9 @@ export default class UndoBlock {
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
-            let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
-            this._dotPlotData = dotArray.slice();
+            this._dotPlotData = dotarray ? dotArray.slice() : null;
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
@@ -343,7 +347,7 @@ export default class UndoBlock {
      * E.g., given oligos in order A B C, [1,2,0] means their new order should be C, A, B
      * (oligo A, with the old index of 0, should be at new index 1)
      */
-    public reorderedOligosIndexMap(otherOrder: number[]): number[] {
+    public reorderedOligosIndexMap(otherOrder: number[] | null): number[] | null {
         if (this._targetOligos == null) return null;
 
         let originalIndices: number[][] = [];
@@ -376,7 +380,7 @@ export default class UndoBlock {
     private _forcedStruct: number[] = [];
     private _targetConditions: string | null = null;
 
-    private _dotPlotData: number[];
+    private _dotPlotData: number[] | null;
     private _meltPlotPairScores: number[];
     private _meltPlotMaxPairScores: number[];
 }
