@@ -26,7 +26,9 @@ export default class GameClient {
                     return Promise.resolve<[string, number]>(['Anonymous', 0]);
                 } else {
                     try {
-                        let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
+                        // Optimistic ! here to resolve type error. Can regex again
+                        // and throw if we don't match, if we want.
+                        let [, username, uid] = res.match(/^(.+)\s(\d+)$/)!;
                         return Promise.resolve<[string, number]>([username, Number(uid)]);
                     } catch (e) {
                         throw new Error('Authentication response malformed');
