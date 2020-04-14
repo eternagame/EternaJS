@@ -115,7 +115,7 @@ export default class FeedbackViewMode extends GameMode {
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
             let datablock: UndoBlock = new UndoBlock(this._sequence);
             datablock.setPairs(this._pairs[ii]);
-            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME)
+            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
             if (!vienna) {
                 throw new Error("Critical error: can't create a Vienna folder instance by name");
             }
@@ -530,7 +530,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         let puzzleState = this._undoBlocks[this._currentIndex];
-        let vienna: Folder | null  = FolderManager.instance.getFolder(Vienna.NAME);
+        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
         if (!vienna) {
             throw new Error("Critical error: can't create a Vienna folder instance by name");
         }

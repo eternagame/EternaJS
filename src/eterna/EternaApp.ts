@@ -105,7 +105,7 @@ export default class EternaApp extends FlashbangApp {
         this._params = params;
 
         let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
-        if (!eternaContainer){
+        if (!eternaContainer) {
             throw new Error(`Could not find HTML element with ID ${params.containerID}`);
         }
         eternaContainer.style.position = 'relative';
@@ -128,11 +128,11 @@ export default class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         if (this._params.chatboxID === undefined) {
-            throw new Error("Chatbox ID undefined!");
+            throw new Error('Chatbox ID undefined!');
         }
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
         if (this._params.containerID === undefined) {
-            throw new Error("Container ID undefined!");
+            throw new Error('Container ID undefined!');
         }
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 

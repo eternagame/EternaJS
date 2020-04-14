@@ -196,7 +196,7 @@ export default abstract class GameMode extends AppMode {
                         throw new Error("This poses's targetPairs are undefined; energy delta cannot be computed!");
                     }
                     if (this.getCurrentUndoBlock(poseidx) === undefined) {
-                        throw new Error("getEnergyDelta is being called where UndoBlocks are unavailable!");
+                        throw new Error('getEnergyDelta is being called where UndoBlocks are unavailable!');
                     }
                     let nativePairs: number[] = this.getCurrentUndoBlock(poseidx)!.getPairs(37, pseudoknots);
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))

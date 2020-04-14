@@ -662,7 +662,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._folder = initialFolder || FolderManager.instance.getFolder(this._puzzle.folderName);
-        if (!this._folder) { 
+        if (!this._folder) {
             throw new Error('Big problem; unable to initialize folder!');
         }
 
@@ -901,7 +901,7 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
-        this._scriptInterface.addCallback('current_folder', (): string | null => this._folder ? this._folder.name : null);
+        this._scriptInterface.addCallback('current_folder', (): string | null => (this._folder ? this._folder.name : null));
 
         this._scriptInterface.addCallback('fold', (seq: string, constraint: string | null = null): string | null => {
             if (this._folder === null) {

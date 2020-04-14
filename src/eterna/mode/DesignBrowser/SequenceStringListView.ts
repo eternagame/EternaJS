@@ -129,7 +129,6 @@ export default class SequenceStringListView extends Container {
                         if (isThereShapeThreshold) {
                             colorIndex = expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax);
                         } else {
-
                             colorIndex = expPainter.getColorLevel(jj);
                         }
                     }

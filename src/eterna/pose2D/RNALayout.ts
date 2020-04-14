@@ -252,8 +252,8 @@ export default class RNALayout {
         let nnfe: number[] = [];
 
         // AMW: temporarily assuming score without PK
-        if (this._targetPairs !== null && 
-                (EPars.pairsToParenthesis(this._targetPairs).includes('{')
+        if (this._targetPairs !== null
+                && (EPars.pairsToParenthesis(this._targetPairs).includes('{')
                 || EPars.pairsToParenthesis(this._targetPairs).includes('['))
                 && folder.name === 'NuPACK') {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -594,7 +594,7 @@ export default class RNALayout {
                     let customGoY: number = -customCrossX;
                     let customCoordNext: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA + 1];
                     let childCustomRotationDirection: RotationDirection = 0;
-                    let childCustomDotProd: number = 0;
+                    let childCustomDotProd = 0;
                     if (customCoordNext !== [null, null]) {
                         let customGoNextX: number = customCoordNext[0]! - customCoord[0]!;
                         let customGoNextY: number = customCoordNext[1]! - customCoord[1]!;

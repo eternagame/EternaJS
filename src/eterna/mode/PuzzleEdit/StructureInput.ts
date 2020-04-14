@@ -144,7 +144,7 @@ export default class StructureInput extends GamePanel implements Updatable {
                 pindex = temp;
             }
             let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks ? locks.slice(index) : null ;
+            let afterLockIndex = locks ? locks.slice(index) : null;
             let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
             sequence[index] = EPars.RNABASE_ADENINE;

@@ -51,7 +51,7 @@ export default class Vienna2 extends Folder {
         try {
             result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
             if (!result) {
-                throw new Error("Vienna2 returned a null result")
+                throw new Error('Vienna2 returned a null result');
             }
             probabilitiesString = result.probabilitiesString;
         } catch (e) {
@@ -127,7 +127,7 @@ export default class Vienna2 extends Folder {
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs));
                 if (!result) {
-                    throw new Error("Vienna2 returned a null result")
+                    throw new Error('Vienna2 returned a null result');
                 }
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
@@ -438,7 +438,7 @@ export default class Vienna2 extends Folder {
         let j: number;
         let p: number;
         let q: number;
-        let u: number = 0;
+        let u = 0;
         let x: number;
         let type: number;
         let count: number;
@@ -695,7 +695,7 @@ export default class Vienna2 extends Folder {
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, structStr || '');
             if (!result) {
-                throw new Error("Vienna2 returned a null result")
+                throw new Error('Vienna2 returned a null result');
             }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
@@ -719,7 +719,7 @@ export default class Vienna2 extends Folder {
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             if (!result) {
-                throw new Error("Vienna2 returned a null result")
+                throw new Error('Vienna2 returned a null result');
             }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
@@ -742,7 +742,7 @@ export default class Vienna2 extends Folder {
             result = this._lib.CoFoldSequence(seqStr, structStr);
             log.debug('done cofolding');
             if (!result) {
-                throw new Error("Vienna2 returned a null result")
+                throw new Error('Vienna2 returned a null result');
             }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
@@ -767,7 +767,7 @@ export default class Vienna2 extends Folder {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             log.debug('done cofolding');
             if (!result) {
-                throw new Error("Vienna2 returned a null result")
+                throw new Error('Vienna2 returned a null result');
             }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
