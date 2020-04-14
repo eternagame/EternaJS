@@ -27,9 +27,9 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
      * @param ublk
      */
     protected _targetAlignedConstraints(constraints: boolean[], ublk: UndoBlock): boolean[] {
-        if (ublk.targetOligoOrder === null) {
-            throw new Error('Target condition not available for shape constraint!');
-        }
+        // if (ublk.targetOligoOrder === null) {
+        //     throw new Error('Target condition not available for shape constraint!');
+        // }
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
 
         if (targetMap != null) {
@@ -53,9 +53,9 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
      * @param ublk
      */
     protected _targetAlignedNaturalPairs(ublk: UndoBlock, pseudoknots: boolean): number[] {
-        if (ublk.targetOligoOrder === null || ublk.oligoOrder === null) {
-            throw new Error('Target condition not available for shape constraint!');
-        }
+        // if (ublk.targetOligoOrder === null || ublk.oligoOrder === null) {
+        //     throw new Error('Target condition not available for shape constraint!');
+        // }
         let naturalPairs = ublk.getPairs(37, pseudoknots);
 
         // rawIndex => targetAlignedIndex
