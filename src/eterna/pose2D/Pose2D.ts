@@ -710,7 +710,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._barcodes = barcodes.slice();
     }
 
-    public set puzzleLocks(puzlocks: boolean[]) {
+    public set puzzleLocks(puzlocks: boolean[] | null) {
         if (puzlocks == null) {
             this._locks = null;
         } else {
@@ -720,7 +720,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._redraw = true;
     }
 
-    public get puzzleLocks(): boolean[] {
+    public get puzzleLocks(): boolean[] | null {
         if (this._locks == null) {
             this._locks = Pose2D.createDefaultLocks(this._sequence.length);
         }
@@ -1355,7 +1355,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._moleculeTargetPairs;
     }
 
-    public set molecularBindingSite(bindingSite: boolean[]) {
+    public set molecularBindingSite(bindingSite: boolean[] | null) {
         if (bindingSite != null) {
             this._bindingSite = bindingSite.slice();
         } else {
@@ -1380,7 +1380,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.setMolecularBinding(bindingBases, bindingPairs, this._molecularBindingBonus);
     }
 
-    public get molecularBindingSite(): boolean[] {
+    public get molecularBindingSite(): boolean[] | null {
         if (this._bindingSite) {
             return this._bindingSite.slice();
         }
@@ -3299,10 +3299,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _pairs: number[] = [];
     private _targetPairs: number[] = [];
     private _bases: Base[] = [];
-    private _locks: boolean[] = [];
+    private _locks: boolean[] | null = [];
     private _forcedStruct: number[] | null = [];
     private _designStruct: boolean[] = [];
-    private _bindingSite: boolean[];
+    private _bindingSite: boolean[] | null;
     private _molecularBindingBases: BaseGlow[] | null = null;
     private _molecularBindingPairs: number[] | null = null;
     private _molecule: Molecule | null= null;

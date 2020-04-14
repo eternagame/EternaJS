@@ -75,7 +75,11 @@ export default class PuzzleEditMode extends GameMode {
         Molecule.initTextures();
         BaseGlow.initTextures();
 
-        this._folder = FolderManager.instance.getFolder(Vienna.NAME);
+        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (vienna === null) {
+            throw new Error('PuzzleEditMode tried to instantiate a Vienna folder using FolderManager but could not!');
+        }
+        this._folder = vienna;
 
         this._folderButton = new GameButton()
             .allStates(Bitmaps.ShapeImg)
@@ -299,11 +303,11 @@ export default class PuzzleEditMode extends GameMode {
     }
 
     public getLockString(): string {
-        let locks: boolean[] = this.getCurrentLock(0);
+        let locks: boolean[] | null = this.getCurrentLock(0);
         let len: number = this._poses[0].sequence.length;
         let lockString = '';
         for (let ii = 0; ii < len; ii++) {
-            if (locks[ii]) {
+            if (locks && locks[ii]) {
                 lockString += 'x';
             } else {
                 lockString += 'o';
@@ -449,7 +453,7 @@ export default class PuzzleEditMode extends GameMode {
                 lengthLimit = -1;
             }
 
-            let error: string = EPars.validateParenthesis(secstruct, false, lengthLimit);
+            let error: string | null = EPars.validateParenthesis(secstruct, false, lengthLimit);
             if (error != null) {
                 this.showNotification(error);
                 return;
@@ -512,7 +516,7 @@ export default class PuzzleEditMode extends GameMode {
         let locks = this.getCurrentLock(0);
         let lockString = '';
         for (let ii = 0; ii < len; ii++) {
-            if (locks[ii]) {
+            if (locks && locks[ii]) {
                 lockString += 'x';
             } else {
                 lockString += 'o';
@@ -522,7 +526,7 @@ export default class PuzzleEditMode extends GameMode {
         let sequence: string = EPars.sequenceToString(this._poses[0].sequence);
         let beginningSequence = '';
         for (let ii = 0; ii < len; ii++) {
-            if (locks[ii]) {
+            if (locks && locks[ii]) {
                 beginningSequence += sequence.substr(ii, 1);
             } else {
                 beginningSequence += 'A';
@@ -532,11 +536,13 @@ export default class PuzzleEditMode extends GameMode {
         let objectives: any[] = [];
         for (let ii = 0; ii < this._poses.length; ii++) {
             let objective: any = {};
-            let bindingSite: any[] = this.getCurrentBindingSite(ii);
-            let bindingBases: any[] = [];
-            for (let bb = 0; bb < bindingSite.length; bb++) {
-                if (bindingSite[bb]) {
-                    bindingBases.push(bb);
+            let bindingSite: boolean[] | null = this.getCurrentBindingSite(ii);
+            let bindingBases: number[] = [];
+            if (bindingSite !== null) {
+                for (let bb = 0; bb < bindingSite.length; bb++) {
+                    if (bindingSite[bb]) {
+                        bindingBases.push(bb);
+                    }
                 }
             }
 
@@ -668,11 +674,11 @@ export default class PuzzleEditMode extends GameMode {
         return this._targetPairsStack[this._stackLevel][index];
     }
 
-    private getCurrentLock(index: number): boolean[] {
+    private getCurrentLock(index: number): boolean[] | null {
         return this._lockStack[this._stackLevel][index];
     }
 
-    private getCurrentBindingSite(index: number): boolean[] {
+    private getCurrentBindingSite(index: number): boolean[] | null {
         return this._bindingSiteStack[this._stackLevel][index];
     }
 
@@ -761,8 +767,8 @@ export default class PuzzleEditMode extends GameMode {
         let noChange = true;
         let currentUndoBlocks: UndoBlock[] = [];
         let currentTargetPairs: number[][] = [];
-        let currentLock: boolean[][] = [];
-        let currentBindingSites: boolean[][] = [];
+        let currentLock: (boolean[] | null)[] = [];
+        let currentBindingSites: (boolean[] | null)[] = [];
 
         let forceSequence = this._poses[index].sequence;
         let forceLock = this._poses[index].puzzleLocks;
@@ -803,7 +809,7 @@ export default class PuzzleEditMode extends GameMode {
         for (let ii = 0; ii < this._poses.length; ii++) {
             let targetPairs: number[] = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);
             let seq = this._poses[ii].sequence;
-            let lock = this._poses[ii].puzzleLocks;
+            let lock: boolean[] | null = this._poses[ii].puzzleLocks;
             let bindingSite = this._poses[ii].molecularBindingSite;
 
             if (this._stackLevel >= 0) {
@@ -816,19 +822,25 @@ export default class PuzzleEditMode extends GameMode {
                     noChange = false;
                 }
 
-                let lastLock: boolean[] = this._lockStack[this._stackLevel][ii];
-                if (lastLock.length !== lock.length) {
+                let lastLock: boolean[] | null = this._lockStack[this._stackLevel][ii];
+                if (lock === null && lastLock !== null) {
+                    noChange = false;
+                } else if (lock !== null && lastLock === null) {
+                    noChange = false;
+                } else if (lock === null && lastLock === null) {
+                    noChange = true;
+                } else if (lastLock!.length !== lock!.length) {
                     noChange = false;
                 } else {
-                    for (let ll = 0; ll < lock.length; ll++) {
-                        if (lock[ll] !== lastLock[ll]) {
+                    for (let ll = 0; ll < lock!.length; ll++) {
+                        if (lock![ll] !== lastLock![ll]) {
                             noChange = false;
                             break;
                         }
                     }
                 }
 
-                let lastBindingSite: boolean[] = this._bindingSiteStack[this._stackLevel][ii];
+                let lastBindingSite: boolean[] | null = this._bindingSiteStack[this._stackLevel][ii];
                 if (lastBindingSite == null && bindingSite != null) {
                     noChange = false;
                 } else if (lastBindingSite != null && bindingSite == null) {
@@ -857,16 +869,18 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            let bestPairs: number[];
+            let bestPairs: number[] | null;
             if (!isThereMolecule) {
                 // AMW: assuming no PKs
                 bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
             } else {
                 let bonus = -486;
                 let site: number[] = [];
-                for (let bb = 0; bb < bindingSite.length; bb++) {
-                    if (bindingSite[bb]) {
-                        site.push(bb);
+                if (bindingSite !== null) {
+                    for (let bb = 0; bb < bindingSite.length; bb++) {
+                        if (bindingSite[bb]) {
+                            site.push(bb);
+                        }
                     }
                 }
 
@@ -907,8 +921,8 @@ export default class PuzzleEditMode extends GameMode {
     protected _folder: Folder;
     private _seqStack: UndoBlock[][];
     private _targetPairsStack: number[][][];
-    private _lockStack: boolean[][][];
-    private _bindingSiteStack: boolean[][][];
+    private _lockStack: (boolean[] | null)[][];
+    private _bindingSiteStack: (boolean[] | null)[][];
     private _stackLevel: number;
     private _stackSize: number;
     private _paused: boolean;
