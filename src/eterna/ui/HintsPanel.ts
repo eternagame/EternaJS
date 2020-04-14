@@ -22,7 +22,12 @@ export default class HintsPanel {
             pages = [puzzleHint];
         }
 
-        const panel = new MultiPagePanel('Hint', pages, HintsPanel.width, HintsPanel.height);
+        const panel = new MultiPagePanel({
+            title: 'Hint',
+            pages,
+            width: HintsPanel.width,
+            height: HintsPanel.height
+        });
         const positionUpdater = () => {
             panel.display.position = new Point(
                 Flashbang.stageWidth * HintsPanel.relativePos.x,

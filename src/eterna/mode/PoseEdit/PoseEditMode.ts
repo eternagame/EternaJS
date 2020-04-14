@@ -48,6 +48,7 @@ import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constrain
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
+import HelpBar from 'eterna/ui/HelpBar';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -116,10 +117,16 @@ export default class PoseEditMode extends GameMode {
         let toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
-            showHint: this._puzzle.hint != null,
             boosters: this._puzzle.boosters
         });
         this.addObject(this._toolbar, this.uiLayer);
+
+        this._helpBar = new HelpBar({
+            onHintClicked: this._puzzle.hint
+                ? () => this.onHintClicked()
+                : undefined
+        });
+        this.addObject(this._helpBar, this.uiLayer);
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
@@ -159,7 +166,6 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.freezeButton.clicked.connect(() => this.toggleFreeze());
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
-        this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
@@ -207,8 +213,14 @@ export default class PoseEditMode extends GameMode {
         this._targetName.visible = false;
         this.uiLayer.addChild(this._targetName);
 
-        this._homeButton = GameMode.createHomeButton();
-        this._homeButton.hideWhenModeInactive();
+        this._homeButton = new GameButton()
+            .up(Bitmaps.NovaPuzzleImg)
+            .over(Bitmaps.NovaPuzzleImg)
+            .down(Bitmaps.NovaPuzzleImg);
+        this._homeButton.display.position = new Point(11, 8);
+        this._homeButton.clicked.connect(() => {
+            window.location.href = EternaURL.createURL({page: 'lab_bench'});
+        });
         this.addObject(this._homeButton, this.uiLayer);
 
         // Async text shows above our UI lock, and right below all dialogs
@@ -251,7 +263,7 @@ export default class PoseEditMode extends GameMode {
         );
 
         DisplayUtil.positionRelativeToStage(
-            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
+            this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0, 5
         );
 
@@ -551,10 +563,6 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleIcon = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaPuzzleImg));
-        puzzleIcon.position = new Point(11, 8);
-        this.uiLayer.addChild(puzzleIcon);
-
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
             .font(Fonts.ARIAL)
             .fontSize(14)
@@ -565,7 +573,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0
+            this._homeButton.display, HAlign.RIGHT, VAlign.CENTER, 3, 0
         );
 
         this._solutionNameText = Fonts.arial('', 14).bold().color(0xc0c0c0).build();
@@ -3021,6 +3029,7 @@ export default class PoseEditMode extends GameMode {
     private _background: Background;
 
     private _toolbar: Toolbar;
+    private _helpBar: HelpBar;
 
     protected _folder: Folder;
     // / Asynch folding
@@ -3063,7 +3072,7 @@ export default class PoseEditMode extends GameMode {
 
     private _uiHighlight: SpriteObject;
 
-    private _homeButton: URLButton;
+    private _homeButton: GameButton;
     private _scriptbar: ActionBar;
     private _undockSpecBoxButton: GameButton;
     private _nidField: Text;
