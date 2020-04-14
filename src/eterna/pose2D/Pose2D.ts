@@ -2291,70 +2291,70 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public baseShift(parenthesis: string, op: PuzzleEditOp, index: number): void {
         let sequence: number[] = this.sequence;
-        let locks: boolean[] = this.puzzleLocks;
-        let bindingSite: boolean[] = this.molecularBindingSite;
+        let locks: boolean[] | null = this.puzzleLocks;
+        let bindingSite: boolean[] | null = this.molecularBindingSite;
         let sequenceBackup: number[] = this.sequence;
-        let locksBackup: boolean[] = this.puzzleLocks;
-        let bindingSiteBackup: boolean[] = this.molecularBindingSite;
+        let locksBackup: boolean[] | null = this.puzzleLocks;
+        let bindingSiteBackup: boolean[] | null = this.molecularBindingSite;
         let pindex: number;
 
         if (sequence.length > parenthesis.length) {
             sequence = sequence.slice(0, parenthesis.length);
-            locks = locks.slice(0, parenthesis.length);
-            bindingSite = bindingSite.slice(0, parenthesis.length);
+            locks = locks ? locks.slice(0, parenthesis.length) : null
+            bindingSite = bindingSite ? bindingSite.slice(0, parenthesis.length) : null;
         }
 
         for (let ii: number = sequence.length; ii < parenthesis.length; ii++) {
             sequence.push(EPars.RNABASE_ADENINE);
-            locks.push(false);
-            bindingSite.push(false);
+            if (locks) locks.push(false);
+            if (bindingSite) bindingSite.push(false);
         }
         // BASE SHIFTING MODIFIED HERE. Delete comments to apply the changes
         if (op === PuzzleEditOp.ADD_BASE) {
             // Add a base
             let afterIndex: number[] = sequence.slice(index);
-            let afterLockIndex: boolean[] = locks.slice(index);
-            let afterBindingSiteIndex: boolean[] = bindingSite.slice(index);
+            let afterLockIndex: boolean[] | null = locks ? locks.slice(index) : null;
+            let afterBindingSiteIndex: boolean[] | null = bindingSite ? bindingSite.slice(index) : null;
 
             sequence[index] = EPars.RNABASE_ADENINE;
-            locks[index] = false;
-            bindingSite[index] = false;
+            if (locks) locks[index] = false;
+            if (bindingSite) bindingSite[index] = false;
 
             for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 sequence[ii + index + 1] = afterIndex[ii];
-                locks[ii + index + 1] = afterLockIndex[ii];
-                bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
+                if (locks) locks[ii + index + 1] = afterLockIndex![ii];
+                if (bindingSite) bindingSite[ii + index + 1] = afterBindingSiteIndex![ii];
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
             pindex = this.pairs[index];
             let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks.slice(index);
-            let afterBindingSiteIndex = bindingSite.slice(index);
+            let afterLockIndex = locks ? locks.slice(index) : null;
+            let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
             sequence[index] = EPars.RNABASE_ADENINE;
             sequence[pindex + 2] = EPars.RNABASE_ADENINE;
-            locks[index] = false;
-            locks[pindex + 2] = false;
-            bindingSite[index] = false;
-            bindingSite[pindex + 2] = false;
+            if (locks) locks[index] = false;
+            if (locks) locks[pindex + 2] = false;
+            if (bindingSite) bindingSite[index] = false;
+            if (bindingSite) bindingSite[pindex + 2] = false;
 
             for (let ii = 0; ii < afterIndex.length - 2; ii++) {
                 if (ii + index > pindex) {
                     sequence[ii + index + 2] = afterIndex[ii];
-                    locks[ii + index + 2] = afterLockIndex[ii];
-                    bindingSite[ii + index + 2] = afterBindingSiteIndex[ii];
+                    if (locks) locks[ii + index + 2] = afterLockIndex![ii];
+                    if (bindingSite) bindingSite[ii + index + 2] = afterBindingSiteIndex![ii];
                 } else {
                     sequence[ii + index + 1] = afterIndex[ii];
-                    locks[ii + index + 1] = afterLockIndex[ii];
-                    bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
+                    if (locks) locks[ii + index + 1] = afterLockIndex![ii];
+                    if (bindingSite) bindingSite[ii + index + 1] = afterBindingSiteIndex![ii];
                 }
             }
         } else if (op === PuzzleEditOp.ADD_CYCLE) {
             // Add a cycle of length 3
             let afterIndex = sequence.slice(index);
-            let afterLockIndex = locks.slice(index);
-            let afterBindingSiteIndex = bindingSite.slice(index);
+            let afterLockIndex = locks ? locks.slice(index) : null;
+            let afterBindingSiteIndex = bindingSite ? bindingSite.slice(index) : null;
 
             sequence[index] = EPars.RNABASE_ADENINE;
             sequence[index + 1] = EPars.RNABASE_ADENINE;
@@ -2362,51 +2362,55 @@ export default class Pose2D extends ContainerObject implements Updatable {
             sequence[index + 3] = EPars.RNABASE_ADENINE;
             sequence[index + 4] = EPars.RNABASE_ADENINE;
 
-            locks[index] = false;
-            locks[index + 1] = false;
-            locks[index + 2] = false;
-            locks[index + 3] = false;
-            locks[index + 4] = false;
+            if (locks) {
+                locks[index] = false;
+                locks[index + 1] = false;
+                locks[index + 2] = false;
+                locks[index + 3] = false;
+                locks[index + 4] = false;
+            }
 
-            bindingSite[index] = false;
-            bindingSite[index + 1] = false;
-            bindingSite[index + 2] = false;
-            bindingSite[index + 3] = false;
-            bindingSite[index + 4] = false;
+            if (bindingSite) {
+                bindingSite[index] = false;
+                bindingSite[index + 1] = false;
+                bindingSite[index + 2] = false;
+                bindingSite[index + 3] = false;
+                bindingSite[index + 4] = false;
+            }
 
             for (let ii = 0; ii < afterIndex.length - 5; ii++) {
                 sequence[ii + index + 5] = afterIndex[ii];
-                locks[ii + index + 5] = afterLockIndex[ii];
-                bindingSite[ii + index + 5] = afterBindingSiteIndex[ii];
+                if (locks) locks[ii + index + 5] = afterLockIndex![ii];
+                if (bindingSite) bindingSite[ii + index + 5] = afterBindingSiteIndex![ii];
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
             pindex = this.pairs[index];
             let afterIndex = sequenceBackup.slice(index + 1);
-            let afterLockIndex = locksBackup.slice(index + 1);
-            let afterBindingSiteIndex = bindingSiteBackup.slice(index + 1);
+            let afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
+            let afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
 
             for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 if (ii + index >= pindex - 1) {
                     sequence[ii + index] = afterIndex[ii + 1];
-                    locks[ii + index] = afterLockIndex[ii + 1];
-                    bindingSite[ii + index] = afterBindingSiteIndex[ii + 1];
+                    if (locks) locks[ii + index] = afterLockIndex![ii + 1];
+                    if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii + 1];
                 } else {
                     sequence[ii + index] = afterIndex[ii];
-                    locks[ii + index] = afterLockIndex[ii];
-                    bindingSite[ii + index] = afterBindingSiteIndex[ii];
+                    if (locks) locks[ii + index] = afterLockIndex![ii];
+                    if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii];
                 }
             }
         } else if (op === PuzzleEditOp.DELETE_BASE) {
             // Delete a base
             let afterIndex = sequenceBackup.slice(index + 1);
-            let afterLockIndex = locksBackup.slice(index + 1);
-            let afterBindingSiteIndex = bindingSiteBackup.slice(index + 1);
+            let afterLockIndex = locksBackup ? locksBackup.slice(index + 1) : null;
+            let afterBindingSiteIndex = bindingSiteBackup ? bindingSiteBackup.slice(index + 1) : null;
 
             for (let ii = 0; ii < afterIndex.length; ii++) {
                 sequence[ii + index] = afterIndex[ii];
-                locks[ii + index] = afterLockIndex[ii];
-                bindingSite[ii + index] = afterBindingSiteIndex[ii];
+                if (locks) locks[ii + index] = afterLockIndex![ii];
+                if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii];
             }
         }
 
