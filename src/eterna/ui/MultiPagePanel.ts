@@ -25,7 +25,8 @@ export default class MultiPagePanel extends ContainerObject {
         },
         content: {
             fontSize: 14,
-            padding: 10
+            padding: 10,
+            buttonSize: new Point(59, 24) // TODO find a better way to position the prev/next buttons!
         },
         borderRadius: 5
     };
@@ -102,12 +103,12 @@ export default class MultiPagePanel extends ContainerObject {
             .up(Bitmaps.NovaPrev)
             .over(Bitmaps.NovaPrevOver)
             .down(Bitmaps.NovaPrevHit);
-        DisplayUtil.positionRelative(
-            this._prevButton.display, HAlign.LEFT, VAlign.BOTTOM,
-            this.container, HAlign.LEFT, VAlign.BOTTOM,
-            theme.content.padding, -theme.content.padding
-        );
+
         this.addObject(this._prevButton, this.container);
+        this._prevButton.display.position = new Point(
+            theme.content.padding,
+            props.height - theme.content.buttonSize.y - theme.content.padding
+        );
         this._prevButton.clicked.connect(() => {
             if (this._currentPage > 0) {
                 this.setCurrentPage(this._currentPage - 1);
@@ -118,13 +119,11 @@ export default class MultiPagePanel extends ContainerObject {
             .up(Bitmaps.NovaNext)
             .over(Bitmaps.NovaNextOver)
             .down(Bitmaps.NovaNextHit);
-        DisplayUtil.positionRelative(
-            this._nextButton.display, HAlign.CENTER, VAlign.BOTTOM,
-            this.container, HAlign.CENTER, VAlign.BOTTOM,
-            0,
-            -theme.content.padding
-        );
         this.addObject(this._nextButton, this.container);
+        this._nextButton.display.position = new Point(
+            this._prevButton.display.x + theme.content.padding + theme.content.buttonSize.x,
+            this._prevButton.display.y
+        );
         this._nextButton.clicked.connect(() => {
             if (this._currentPage < this.pageCount - 1) {
                 this.setCurrentPage(this._currentPage + 1);
