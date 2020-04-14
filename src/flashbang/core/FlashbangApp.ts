@@ -8,12 +8,13 @@ import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
+import { Assert } from 'flashbang';
 
 export default class FlashbangApp {
     /** True if the app is foregrounded */
     public readonly isActive: Value<boolean> = new Value<boolean>(true);
 
-    public get pixi(): PIXI.Application {
+    public get pixi(): PIXI.Application | null {
         return this._pixi;
     }
 
@@ -25,6 +26,7 @@ export default class FlashbangApp {
         window.addEventListener('error', (e: ErrorEvent) => this.onUncaughtError(e));
 
         this._pixi = this.createPixi();
+        Assert.assertIsDefined(this.pixiParent);
         this.pixiParent.appendChild(this._pixi.view);
 
         this._modeStack = new ModeStack(this._pixi.stage);
@@ -47,10 +49,12 @@ export default class FlashbangApp {
     }
 
     public get view(): HTMLCanvasElement {
+        Assert.assertIsDefined(this._pixi);
         return this._pixi.view;
     }
 
     public resize(width: number, height: number): void {
+        Assert.assertIsDefined(this._pixi);
         if (width !== this._pixi.renderer.screen.width || height !== this._pixi.renderer.screen.height) {
             this._pixi.renderer.resize(width, height);
             this._modeStack.onResized();
@@ -58,10 +62,12 @@ export default class FlashbangApp {
     }
 
     public addUpdatable(obj: Updatable): void {
+        Assert.assertIsDefined(this._updatables);
         this._updatables.push(obj);
     }
 
     public removeUpdatable(obj: Updatable): void {
+        Assert.assertIsDefined(this._updatables);
         let idx: number = this._updatables.indexOf(obj);
         if (idx >= 0) {
             this._updatables.splice(idx, 1);
@@ -120,8 +126,10 @@ export default class FlashbangApp {
             let dt = tickerDelta / (PIXI.settings.TARGET_FPMS * 1000);
 
             // update all our updatables
-            for (let updatable of this._updatables) {
-                updatable.update(dt);
+            if (this._updatables) {
+                for (let updatable of this._updatables) {
+                    updatable.update(dt);
+                }
             }
 
             // update viewports
@@ -131,7 +139,7 @@ export default class FlashbangApp {
 
             // should the MainLoop be stopped?
             if (this._disposePending) {
-                this._regs.close();
+                if (this._regs) this._regs.close();
                 this.disposeNow();
             }
         }
@@ -142,10 +150,10 @@ export default class FlashbangApp {
 
         this._updatables = null;
 
-        this._regs.close();
+        if (this._regs) this._regs.close();
         this._regs = null;
 
-        this._pixi.destroy();
+        if (this._pixi) this._pixi.destroy();
         this._pixi = null;
     }
 
@@ -193,12 +201,12 @@ export default class FlashbangApp {
         log.error(e);
     }
 
-    protected _pixi: PIXI.Application;
-    protected _regs: RegistrationGroup = new RegistrationGroup();
+    protected _pixi: PIXI.Application | null;
+    protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isUpdating: boolean;
     protected _disposePending: boolean;
-    protected _updatables: Updatable[] = [];
+    protected _updatables: Updatable[] | null = [];
     protected _modeStack: ModeStack;
 
     protected _keyDown: Map<string, boolean> = new Map<string, boolean>();

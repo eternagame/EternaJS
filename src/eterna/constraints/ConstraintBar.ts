@@ -1,4 +1,4 @@
-import {ContainerObject, Flashbang} from 'flashbang';
+import {ContainerObject, Flashbang, Assert} from 'flashbang';
 import UndoBlock from 'eterna/UndoBlock';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import {Point} from 'pixi.js';
@@ -57,6 +57,8 @@ export default class ConstraintBar extends ContainerObject {
      */
     public layout(animate: boolean, pipStates: number) {
         if (!this._constraints) return;
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         let nonStateConstraints = this._constraints.filter((constraint) => !isSSCW(constraint));
 
         if (animate) {

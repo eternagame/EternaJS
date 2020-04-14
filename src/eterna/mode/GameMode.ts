@@ -4,7 +4,7 @@ import Eterna from 'eterna/Eterna';
 import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import {
-    AppMode, SceneObject, Flashbang, GameObjectRef
+    AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
@@ -38,6 +38,7 @@ export default abstract class GameMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+        Assert.assertIsDefined(this.container);
 
         this.container.addChild(this.bgLayer);
         this.container.addChild(this.poseLayer);
@@ -220,6 +221,8 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected layoutPoseFields(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._isPipMode) {
             let numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
@@ -267,6 +270,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     public onContextMenuEvent(e: Event): void {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {

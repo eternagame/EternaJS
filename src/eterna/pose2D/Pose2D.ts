@@ -1825,11 +1825,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._customLayout;
     }
 
-    public set customNumbering(setting: number[] | null) {
+    public set customNumbering(setting: (number | null)[] | null) {
         this._customNumbering = setting;
     }
 
-    public get customNumbering(): number[] | null {
+    public get customNumbering(): (number | null)[] | null {
         return this._customNumbering;
     }
 

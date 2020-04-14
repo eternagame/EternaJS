@@ -35,22 +35,22 @@ export default class GameObjectBase {
         return this._ref;
     }
 
-    public /* final */ get parent(): GameObject {
+    public /* final */ get parent(): GameObject | null {
         return this._parent;
     }
 
     /**
      * Returns the AppMode that this object is contained in.
      */
-    public /* final */ get mode(): AppMode {
+    public /* final */ get mode(): AppMode | null {
         return this._mode;
     }
 
     /**
      * Returns the ModeStack that this object is a part of
      */
-    public /* final */ get modeStack(): ModeStack {
-        return this._mode.modeStack;
+    public /* final */ get modeStack(): ModeStack | null {
+        return this._mode ? this._mode.modeStack : null;
     }
 
     /** Returns true if the object belongs to an AppMode and is not pending removal */
@@ -157,8 +157,8 @@ export default class GameObjectBase {
 
     /* internal */ public _name: string;
     /* internal */ public _ref: GameObjectRef;
-    /* internal */ public _parent: GameObject;
-    /* internal */ public _mode: AppMode;
+    /* internal */ public _parent: GameObject | null;
+    /* internal */ public _mode: AppMode | null;
 
     private static readonly EMPTY_ARRAY: any[] = [];
 }

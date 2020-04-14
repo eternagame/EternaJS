@@ -1,4 +1,5 @@
 import {Point} from 'pixi.js';
+import { Assert } from 'flashbang';
 
 export default class Utility {
     /**
@@ -257,9 +258,11 @@ export default class Utility {
      *
      * @returns string like '4-6' or ''
      */
-    public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
+    public static rangeStringFromStartEnd(rangeStart: number | null, rangeEnd: number | null): string {
         if (rangeStart == null) return '';
         if (rangeStart === rangeEnd) return rangeStart.toString();
+        // we really only accept number, number or null, null to this function
+        Assert.assertIsDefined(rangeEnd);
         return `${rangeStart.toString()}-${rangeEnd.toString()}`;
     }
 
@@ -274,13 +277,13 @@ export default class Utility {
      *
      * @returns rangeString, like '1-4'
      */
-    public static arrayToRangeString(numberArray: number[]): string {
+    public static arrayToRangeString(numberArray: (number | null)[]): string {
         let rangeString = '';
         if (numberArray == null || numberArray.length === 0) return rangeString;
         let rangeStart = numberArray[0];
         let rangeEnd = numberArray[0];
         for (let ii = 1; ii < numberArray.length; ii++) {
-            if (numberArray[ii] === (numberArray[ii - 1] + 1) && (rangeStart !== null)) {
+            if (numberArray[ii - 1] !== null && numberArray[ii] === (numberArray[ii - 1]! + 1) && (rangeStart !== null)) {
                 rangeEnd = numberArray[ii]; continue;
             } else {
                 rangeString += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;

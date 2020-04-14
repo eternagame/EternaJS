@@ -185,6 +185,8 @@ export default class PoseEditMode extends GameMode {
         this._exitButton = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exitButton.display.scale = new Point(0.3, 0.3);
         this._exitButton.display.visible = false;
+
+        Assert.assertIsDefined(this.regs);
         this.regs.add(this._exitButton.clicked.connect(() => this.exitPuzzle()));
 
         this._scriptbar = new ActionBar(50);
@@ -257,6 +259,8 @@ export default class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
 
@@ -299,6 +303,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private showCopySequenceDialog(): void {
+        Assert.assertIsDefined(this.modeStack);
         let sequenceString = EPars.sequenceToString(this._poses[0].sequence);
         if (this._poses[0].customNumbering != null) sequenceString += ` ${Utility.arrayToRangeString(this._poses[0].customNumbering)}`;
         this.modeStack.pushMode(new CopyTextDialogMode(sequenceString, 'Current Sequence'));
@@ -404,6 +409,8 @@ export default class PoseEditMode extends GameMode {
             this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
 
             let updatePosition = () => {
+                Assert.assertIsDefined(Flashbang.stageWidth);
+                Assert.assertIsDefined(Flashbang.stageHeight);
                 hintBox.display.position = new Point(
                     Flashbang.stageWidth - 440,
                     Flashbang.stageHeight - hintBox.container.height - 90
@@ -691,6 +698,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._folderButton, this.uiLayer);
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             this._folderButton.clicked.connect(() => this.changeFolder());
+            Assert.assertIsDefined(this.regs);
             this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((multiEngine) => {
                 this._folderButton.display.visible = multiEngine;
             }));

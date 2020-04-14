@@ -871,7 +871,7 @@ export default class PuzzleEditMode extends GameMode {
                 }
             }
 
-            let bestPairs: number[] | null;
+            let bestPairs: number[] | null = null;
             if (!isThereMolecule) {
                 // AMW: assuming no PKs
                 bestPairs = this._folder.foldSequence(seq, null, null, false, EPars.DEFAULT_TEMPERATURE);
@@ -888,7 +888,7 @@ export default class PuzzleEditMode extends GameMode {
 
                 bestPairs = this._folder.foldSequenceWithBindingSite(seq, targetPairs, site, Number(bonus), 2.0);
             }
-
+            Assert.assertIsDefined(bestPairs);
             let undoBlock = new UndoBlock(seq);
             undoBlock.setPairs(bestPairs);
             undoBlock.setBasics(this._folder);
