@@ -8,7 +8,7 @@ import Eterna from 'eterna/Eterna';
 import ExpPainter from 'eterna/ExpPainter';
 import {
     ContainerObject, InputUtil, Flashbang, Dragger, DisplayUtil, SceneObject, SerialTask, Easing,
-    ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays, RepeatingTask, Updatable
+    ParallelTask, AlphaTask, LocationTask, DelayTask, SelfDestructTask, Vector2, Arrays, RepeatingTask, Updatable, Assert
 } from 'flashbang';
 import LightRay from 'eterna/vfx/LightRay';
 import TextBalloon from 'eterna/ui/TextBalloon';
@@ -36,6 +36,7 @@ import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
+import Puzzle from 'eterna/puzzle/Puzzle';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -396,6 +397,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setMutated(seqArr: number[]): void {
+        Assert.assertIsDefined(this._mutatedSequence);
         let n: number = Math.min(this._mutatedSequence.length, seqArr.length);
         let ofs: number = (this._oligo != null && this._oligoMode === Pose2D.OLIGO_MODE_EXT5P ? this._oligo.length : 0);
 
@@ -440,7 +442,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public getBaseLoc(seq: number, out: Point = null): Point {
+    public getBaseLoc(seq: number, out: Point | null = null): Point {
         if (out == null) {
             out = new Point();
         }
@@ -449,7 +451,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
-    public getBaseOutXY(seq: number, out: Point = null): Point {
+    public getBaseOutXY(seq: number, out: Point | null = null): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
         out.y += this._offY;
@@ -462,7 +464,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
     }
 
-    public parseCommand(command: number, closestIndex: number): any[] {
+    public parseCommand(command: number, closestIndex: number): [string, PuzzleEditOp, number[]?] | null {
         switch (command) {
             case EPars.RNABASE_ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, this._pairs);
@@ -478,7 +480,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public parseCommandWithPairs(command: number, closestIndex: number, pairs: number[]): any[] | null {
+    public parseCommandWithPairs(command: number, closestIndex: number, pairs: number[]): [string, PuzzleEditOp, number[]?] | null {
         switch (command) {
             case EPars.RNABASE_ADD_BASE:
                 return PoseUtil.addBaseWithIndex(closestIndex, pairs);
@@ -532,7 +534,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
             this._lastShiftedCommand = -1;
             this._lastShiftedIndex = -1;
-            let cmd: any[] = this.parseCommand(this._currentColor, closestIndex);
+            let cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(this._currentColor, closestIndex);
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
@@ -656,7 +658,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         ROPWait.notifyEndPaint();
     }
 
-    public deleteBaseWithIndexPairs(index: number, pairs: number[]): [string, PuzzleEditOp, number[]] {
+    public deleteBaseWithIndexPairs(index: number, pairs: number[]): [string, PuzzleEditOp, number[]?] {
         if (this.isTrackedIndex(index)) {
             this.toggleBaseMark(index);
         }
@@ -2290,7 +2292,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public baseShiftWithCommand(command: number, index: number): void {
-        let cmd: any[] = this.parseCommand(command, index);
+        let cmd: [string, PuzzleEditOp, number[]?] | null = this.parseCommand(command, index);
         if (cmd != null) {
             let parenthesis: string = cmd[0];
             let op: PuzzleEditOp = cmd[1];
