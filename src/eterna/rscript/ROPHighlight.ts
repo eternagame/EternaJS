@@ -8,7 +8,7 @@ import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import EternaMenu from 'eterna/ui/EternaMenu';
 import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from './RScriptUIElement';
 import RScriptOp from './RScriptOp';
-import RScriptEnv from './RScriptEnv';
+import RScriptEnv, { RScriptVarType } from './RScriptEnv';
 
 export enum ROPHighlightMode {
     RNA = 'RNA',
@@ -34,7 +34,7 @@ export default class ROPHighlight extends RScriptOp {
     public exec(): void {
         // Remove highlight with ID.
         if (this._env.hasVar(this._id)) {
-            let existing: any = this._env.getVar(this._id);
+            let existing: RScriptVarType | undefined = this._env.getVar(this._id);
             if (existing instanceof GameObject) {
                 existing.destroySelf();
             } else if (existing instanceof RNAHighlightState) {

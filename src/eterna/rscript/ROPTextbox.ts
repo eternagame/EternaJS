@@ -114,7 +114,7 @@ export default class ROPTextbox extends RScriptOp {
             let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
                 parent = parentVal;
-            } else if (parentVal == null) {
+            } else if (parentVal == undefined) {
                 this._hasParent = false;
             } else {
                 log.warn(`${this._parentID}: is not a FancyTextBalloon`);

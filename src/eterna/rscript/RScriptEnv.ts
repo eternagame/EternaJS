@@ -242,10 +242,10 @@ export default class RScriptEnv extends ContainerObject {
         this._vars.set(key, inValue);
     }
 
-    public getVar(key: string): RScriptVarType {
+    public getVar(key: string): RScriptVarType | undefined {
         let scriptVar = this._vars.get(key);
         if (scriptVar != null && scriptVar instanceof GameObject) {
-            return scriptVar.isLiveObject ? scriptVar : null;
+            return scriptVar.isLiveObject ? scriptVar : undefined;
         } else {
             return scriptVar;
         }
