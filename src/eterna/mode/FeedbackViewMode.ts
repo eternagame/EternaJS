@@ -14,7 +14,7 @@ import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
-    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import Utility from 'eterna/util/Utility';
@@ -135,7 +135,7 @@ export default class FeedbackViewMode extends GameMode {
 
         this.setupShape();
 
-        let seeShape: boolean = (this._feedback.getShapeData() != null);
+        let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.showExperimentalColors();
         }
@@ -354,6 +354,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showExperimentalColors(): void {
+        Assert.assertIsDefined(this._feedback);
+
         this._isExpColor = true;
         this._toolbar.letterColorButton.toggled.value = false;
         this._toolbar.expColorButton.toggled.value = true;
@@ -389,6 +391,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private scoreFeedback(): void {
+        Assert.assertIsDefined(this._feedback);
+
         let titleText = '';
         let brentData: any = this._feedback.brentTheoData;
         let score: number;
@@ -446,6 +450,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private foldEstimate(index: number): void {
+        // This won't work if _feedback is null
+        Assert.assertIsDefined(this._feedback);
         let shapeThreshold: number = this._feedback.getShapeThreshold(index);
         let shapeData: number[] = this._feedback.getShapeData(index);
         let startIndex: number = this._feedback.getShapeStartIndex(index);
@@ -550,7 +556,7 @@ export default class FeedbackViewMode extends GameMode {
     private _foldMode: PoseFoldMode;
     private _puzzleTitle: Text;
     private _title: Text;
-    private _feedback: Feedback;
+    private _feedback: Feedback | null;
     private _sequence: number[];
     private _pairs: number[][] = [];
     private _shapePairs: any[] = [];

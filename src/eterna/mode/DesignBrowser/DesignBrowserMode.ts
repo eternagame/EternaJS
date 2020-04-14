@@ -748,7 +748,7 @@ export default class DesignBrowserMode extends GameMode {
             let dataArray: any[] = [];
 
             let {category} = dataCol;
-            let feedbacks: Feedback[] = [];
+            let feedbacks: (Feedback | null)[] = [];
 
             for (let solution of solutions) {
                 feedbacks.push(solution.expFeedback);
