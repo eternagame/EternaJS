@@ -5,9 +5,9 @@ import {
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Graphics, Point, Container} from 'pixi.js';
+import TextUtil from 'eterna/util/TextUtil';
 import UITheme from './UITheme';
 import GameButton from './GameButton';
-import HTMLTextObject from './HTMLTextObject';
 
 export default class MultiPagePanel extends ContainerObject {
     private static readonly titleFontSize = 16;
@@ -45,18 +45,23 @@ export default class MultiPagePanel extends ContainerObject {
 
         // Content
         this._pagesContainer = new PIXI.Container();
+        this._pagesContainer.position = new Point(
+            MultiPagePanel.contentPadding,
+            MultiPagePanel.contentPadding + MultiPagePanel.titleHeight
+        );
         pages.forEach((pageText, pageIndex) => {
-            const textElem = new HTMLTextObject(pageText, width - 2 * MultiPagePanel.contentPadding)
-                .font(Fonts.ARIAL)
-                .color(0xffffff);
+            const textElem = new StyledTextBuilder({
+                fontFamily: Fonts.ARIAL,
+                fontSize: MultiPagePanel.contentFontSize,
+                fill: 0xffffff,
+                wordWrap: true,
+                wordWrapWidth: width - 2 * MultiPagePanel.contentPadding
+            })
+                .appendHTMLStyledText(TextUtil.processTags(pageText))
+                .build();
 
-            textElem.display.position = new Point(
-                MultiPagePanel.contentPadding,
-                MultiPagePanel.contentPadding + MultiPagePanel.titleHeight
-            );
-
-            this.addObject(textElem, this._pagesContainer);
-            textElem.display.visible = pageIndex === this._currentPage;
+            this._pagesContainer.addChild(textElem);
+            textElem.visible = pageIndex === this._currentPage;
         });
         this.container.addChild(this._pagesContainer);
 
@@ -65,13 +70,11 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.beginFill(UITheme.colors.border);
         this._background.drawRoundedRect(0, 0, width, MultiPagePanel.titleHeight, MultiPagePanel.borderRadius);
         this._background.endFill();
-        this._titleText = new StyledTextBuilder({
-            fontFamily: Fonts.ARIAL,
-            fontSize: MultiPagePanel.titleFontSize,
-            fill: UITheme.colors.background
-        })
-            .append(this.title)
+        this._titleText = Fonts.stdMedium()
+            .fontSize(MultiPagePanel.titleFontSize)
+            .color(UITheme.colors.background)
             .build();
+        this._titleText.text = this.title;
         this._titleText.position = new Point(MultiPagePanel.titlePadding, MultiPagePanel.titlePadding);
         this.container.addChild(this._titleText);
 
