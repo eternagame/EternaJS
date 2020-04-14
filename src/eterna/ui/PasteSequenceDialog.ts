@@ -1,4 +1,4 @@
-import {KeyCode, Flashbang} from 'flashbang';
+import {KeyCode, Flashbang, Assert} from 'flashbang';
 import GameMode from 'eterna/mode/GameMode';
 import EPars from 'eterna/EPars';
 import Dialog from './Dialog';
@@ -27,7 +27,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
 
         sequenceField.setFocus(true);
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
@@ -40,7 +40,8 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
-    private onSequenceEntered(sequence: string): void {
+    private onSequenceEntered(sequence: string | undefined): void {
+        Assert.assertIsDefined(sequence);
         sequence = sequence.toUpperCase().replace(/T/g, 'U');
         // make paste entry robust to blanks, and allow index specification after sequence.
         let seq = sequence.split(' ')[0];
@@ -60,5 +61,5 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         this.close(s);
     }
 
-    private readonly _customNumbering: number[];
+    private readonly _customNumbering: number[] | null;
 }

@@ -168,7 +168,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         // Create label
-        let label: Text;
+        let label: Text | null = null;
         if (this._labelBuilder != null) {
             label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
             this._content.addChild(label);
@@ -177,12 +177,12 @@ export default class GameButton extends Button implements KeyboardListener {
         // Stylebox (shown when we have text and no background image)
         const drawStyleBox = icon == null && label != null;
         if (drawStyleBox) {
-            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
+            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label!.width;
             let styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
-                    label.height + (GameButton.HMARGIN * 2),
+                    label!.height + (GameButton.HMARGIN * 2),
                     3)
                 .endFill();
             this._content.addChildAt(styleBox, 0);
@@ -257,7 +257,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    private getIconForState(state: ButtonState, selected: boolean): DisplayObject {
+    private getIconForState(state: ButtonState, selected: boolean): DisplayObject | null {
         if (state !== ButtonState.DISABLED && selected && this._selectedState != null) {
             return this._selectedState;
         } else {
@@ -267,7 +267,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private static getDisplayObject(displayOrTex: DisplayObject | Texture | string): DisplayObject {
+    private static getDisplayObject(displayOrTex: DisplayObject | Texture | string | undefined): DisplayObject | null {
         if (displayOrTex instanceof DisplayObject) {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
@@ -287,14 +287,14 @@ export default class GameButton extends Button implements KeyboardListener {
     private _tooltip: string;
     private _hotkey: string | null;
     private _hotkeyCtrl: boolean;
-    private _buttonIcons: DisplayObject[];
-    private _selectedState: DisplayObject;
+    private _buttonIcons: (DisplayObject | null)[];
+    private _selectedState: DisplayObject | null;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
 
-    private _hotkeyReg: Registration;
-    private _tooltipReg: Registration;
+    private _hotkeyReg: Registration | null;
+    private _tooltipReg: Registration | null;
 
     private static readonly TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],

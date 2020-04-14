@@ -3,7 +3,7 @@ import {GameObject, DisplayUtil} from 'flashbang';
 
 export type RScriptUIElement = GameObject | DisplayObject | Rectangle;
 
-export function GetRScriptUIElementBounds(element: RScriptUIElement): Rectangle {
+export function GetRScriptUIElementBounds(element: RScriptUIElement | null): Rectangle | null {
     if (element instanceof GameObject) {
         return element.display != null
             ? new Rectangle(

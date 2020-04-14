@@ -833,7 +833,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public shift3Prime(): void {
-        let q: number[] = this._shiftHighlightBox.getQueue();
+        let q: number[] | null = this._shiftHighlightBox.getQueue();
         if (q == null) {
             return;
         }
@@ -890,7 +890,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public shift5Prime(): void {
-        let q: number[] = this._shiftHighlightBox.getQueue();
+        let q: number[] | null = this._shiftHighlightBox.getQueue();
         if (q == null) {
             return;
         }
@@ -2960,10 +2960,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._scoreNodeIndex !== this._lastScoreNodeIndex || offsetChanged) {
             this._scoreNodeHighlight.clear();
 
-            if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null) {
+            if (this._scoreNodeIndex >= 0 && this._scoreNodes[this._scoreNodeIndex] != null
+                    && this._scoreNodes[this._scoreNodeIndex].baseIndices !== null) {
                 this._scoreNodeHighlight.lineStyle(0, 0, 0);
                 this._scoreNodeHighlight.beginFill(0xFFFFFF, 0.22);
-                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices.slice();
+                let indices: number[] = this._scoreNodes[this._scoreNodeIndex].baseIndices!.slice();
 
                 let contour: number[] = [];
                 for (let ii = 0; ii < indices.length; ii++) {
@@ -2984,7 +2985,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (this._scoreTexts != null) {
             for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                let indices: number[] = this._scoreNodes[ii].baseIndices;
+                let indices: number[] | null = this._scoreNodes[ii].baseIndices;
+                Assert.assertIsDefined(indices);
                 let xAvg = 0;
                 let yAvg = 0;
 
@@ -3032,7 +3034,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                     baseXys.push(this.getBaseLoc(ii));
                 }
                 for (let ii = 0; ii < this._scoreNodes.length; ii++) {
-                    let baseIndices: number[] = this._scoreNodes[ii].baseIndices;
+                    let baseIndices: number[] | null = this._scoreNodes[ii].baseIndices;
+                    Assert.assertIsDefined(baseIndices);
                     let nodePoints: Point[] = [];
 
                     for (let jj = 0; jj < baseIndices.length; jj++) {

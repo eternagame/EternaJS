@@ -1,7 +1,7 @@
 import * as log from 'loglevel';
 import {Graphics, Point} from 'pixi.js';
 import {
-    GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil
+    GameObject, RepeatingTask, SceneObject, SerialTask, Easing, AlphaTask, ColorUtil, Assert
 } from 'flashbang';
 import {RNAHighlightState} from 'eterna/pose2D/Pose2D';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
@@ -66,6 +66,7 @@ export default class ROPHighlight extends RScriptOp {
             const elementSize: Point = this.getUiElementSize(uiElement, padding, elementID);
 
             const uiElementBounds = GetRScriptUIElementBounds(uiElement);
+            Assert.assertIsDefined(uiElementBounds);
             const newX: number = (highlightParent === uiElement ? 0 : uiElementBounds.x) - padding.x + offset.x;
             const newY: number = (highlightParent === uiElement ? 0 : uiElementBounds.y) - padding.y + offset.y;
 
@@ -120,15 +121,19 @@ export default class ROPHighlight extends RScriptOp {
         }
     }
 
-    private getUiElementSize(uiObj: RScriptUIElement, padding: Point, key: RScriptUIElementID): Point {
+    private getUiElementSize(uiObj: RScriptUIElement | null, padding: Point, key: RScriptUIElementID): Point {
         const bounds = GetRScriptUIElementBounds(uiObj);
+        Assert.assertIsDefined(bounds);
         let size = new Point(bounds.width + (2 * padding.x), bounds.height + (2 * padding.y));
 
         switch (key) {
             case RScriptUIElementID.OBJECTIVES: {
-                let n: number = this._env.ui.constraintCount;
-                let firstObj: ConstraintBox = this._env.ui.getConstraintBox(0);
-                let lastObj: ConstraintBox = this._env.ui.getConstraintBox(n - 1);
+                let n: number | null = this._env.ui.constraintCount;
+                Assert.assertIsDefined(n);
+                let firstObj: ConstraintBox | null = this._env.ui.getConstraintBox(0);
+                Assert.assertIsDefined(firstObj);
+                let lastObj: ConstraintBox | null = this._env.ui.getConstraintBox(n - 1);
+                Assert.assertIsDefined(lastObj);
                 size.x = lastObj.display.x - firstObj.display.x + lastObj.display.width + 2 * padding.x;
                 size.y = 84;
                 break;

@@ -88,9 +88,9 @@ export default class RScriptEnv extends ContainerObject {
     // Handles parsing the element ID and getting the right object.
     // Returns: UI Element, its UI ID, and the alternate parameter (integer) that may
     //  have been passed in.
-    public getUIElementFromID(key: string): [RScriptUIElement, RScriptUIElementID, number] {
+    public getUIElementFromID(key: string): [RScriptUIElement | null, RScriptUIElementID, number] {
         // Highlight UI.
-        let uiElement: RScriptUIElement;
+        let uiElement: RScriptUIElement | null;
 
         // Used UI Element ID.
         let splitId: string[] = key.split('-');
@@ -124,7 +124,7 @@ export default class RScriptEnv extends ContainerObject {
         return [uiElement, elementID, altParam];
     }
 
-    public get totalConstraints(): number {
+    public get totalConstraints(): number | null {
         return this.ui.constraintCount;
     }
 
@@ -153,7 +153,7 @@ export default class RScriptEnv extends ContainerObject {
                 this.ui.toolbar.palette.changeNoPairMode();
             }
 
-            let obj: RScriptUIElement = this.getUIElementFromID(elementID)[0];
+            let obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
             if (obj instanceof DisplayObject) {
                 obj.visible = visible;
             } else if (obj instanceof GameObject && obj.display != null) {
@@ -166,7 +166,7 @@ export default class RScriptEnv extends ContainerObject {
         }
     }
 
-    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement {
+    public getUIElement(type: RScriptUIElementID, i: number = -1): RScriptUIElement | null {
         switch (type) {
             case RScriptUIElementID.ACTION_MENU:
                 return this.ui.toolbar.actionMenu;

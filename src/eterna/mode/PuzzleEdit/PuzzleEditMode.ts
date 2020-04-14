@@ -19,7 +19,7 @@ import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotideP
 import Folder from 'eterna/folding/Folder';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {
-    Base64, DisplayUtil, HAlign, VAlign, KeyCode
+    Base64, DisplayUtil, HAlign, VAlign, KeyCode, Assert
 } from 'flashbang';
 import {DialogCanceledError} from 'eterna/ui/Dialog';
 import Vienna2 from 'eterna/folding/Vienna2';
@@ -171,7 +171,8 @@ export default class PuzzleEditMode extends GameMode {
         this._structureInputs = [];
 
         let setCB = (kk: number): void => {
-            this._poses[kk].addBaseCallback = (parenthesis: string, op: PuzzleEditOp, index: number): void => {
+            this._poses[kk].addBaseCallback = (parenthesis: string | null, op: PuzzleEditOp | null, index: number): void => {
+                Assert.assertIsDefined(parenthesis);
                 let secInput: StructureInput = this._structureInputs[kk];
                 secInput.structureString = parenthesis;
                 secInput.setPose(op, index);
@@ -266,6 +267,7 @@ export default class PuzzleEditMode extends GameMode {
     private saveData(): void {
         let objs: PuzzleEditPoseData[] = [];
         for (let pose of this._poses) {
+            Assert.assertIsDefined(pose.molecularStructure);
             objs.push({
                 sequence: EPars.sequenceToString(pose.sequence),
                 structure: EPars.pairsToParenthesis(pose.molecularStructure)

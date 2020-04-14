@@ -244,7 +244,7 @@ export default class UndoBlock {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
             let dotArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
-            this._dotPlotData = dotarray ? dotArray.slice() : null;
+            this._dotPlotData = dotArray ? dotArray.slice() : null;
         }
 
         for (let ii = 37; ii < 100; ii += 10) {

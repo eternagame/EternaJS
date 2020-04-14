@@ -32,7 +32,7 @@ export function GetPaletteTargetBaseType(type: PaletteTargetType): number {
     }
 }
 
-export function StringToPaletteTargetType(value: string): PaletteTargetType {
+export function StringToPaletteTargetType(value: string): PaletteTargetType | null {
     switch (value.toUpperCase()) {
         case 'A': return PaletteTargetType.A;
         case 'U': return PaletteTargetType.U;
