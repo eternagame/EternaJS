@@ -32,7 +32,7 @@ export default abstract class Folder {
     }
 
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 2.0, temp: number = 37
     ): number[] | null {
         return null;

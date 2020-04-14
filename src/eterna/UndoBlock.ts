@@ -78,19 +78,19 @@ export default class UndoBlock {
         }
     }
 
-    public get targetOligos(): Oligo[] {
+    public get targetOligos(): Oligo[] | null {
         return this._targetOligos;
     }
 
-    public set targetOligos(targetOligos: Oligo[]) {
+    public set targetOligos(targetOligos: Oligo[] | null) {
         this._targetOligos = targetOligos == null ? null : JSON.parse(JSON.stringify(targetOligos));
     }
 
-    public get targetOligo(): number[] {
+    public get targetOligo(): number[] | null {
         return this._targetOligo;
     }
 
-    public set targetOligo(targetOligo: number[]) {
+    public set targetOligo(targetOligo: number[] | null) {
         this._targetOligo = targetOligo == null ? null : targetOligo.slice();
     }
 
@@ -108,11 +108,11 @@ export default class UndoBlock {
         return Object.prototype.hasOwnProperty.call(tc, 'oligo_name') ? tc['oligo_name'] : null;
     }
 
-    public get oligoOrder(): number[] {
+    public get oligoOrder(): number[] | null {
         return this._oligoOrder;
     }
 
-    public set oligoOrder(oligoOrder: number[]) {
+    public set oligoOrder(oligoOrder: number[] | null) {
         this._oligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
@@ -132,11 +132,11 @@ export default class UndoBlock {
         this._targetPairs = targetPairs.slice();
     }
 
-    public get targetOligoOrder(): number[] {
+    public get targetOligoOrder(): number[] | null {
         return this._targetOligoOrder;
     }
 
-    public set targetOligoOrder(oligoOrder: number[]) {
+    public set targetOligoOrder(oligoOrder: number[] | null) {
         this._targetOligoOrder = oligoOrder == null ? null : oligoOrder.slice();
     }
 
@@ -192,7 +192,7 @@ export default class UndoBlock {
         }
     }
 
-    public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
+    public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
         this._pairsArray.get(pseudoknots)[temp] = pairs.slice();
     }
 

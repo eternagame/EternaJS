@@ -919,11 +919,17 @@ export default class PoseEditMode extends GameMode {
         });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
-            (seq: string, site: number[], bonus: number): string => {
+            (seq: string, site: number[], bonus: number): string | null => {
+                if (this._folder === null) {
+                    return null;
+                }
                 let seqArr: number[] = EPars.stringToSequence(seq);
-                let folded: number[] = this._folder.foldSequenceWithBindingSite(
+                let folded: number[] | null = this._folder.foldSequenceWithBindingSite(
                     seqArr, null, site, Math.floor(bonus * 100), 2.5
                 );
+                if (folded === null) {
+                    return null;
+                }
                 return EPars.pairsToParenthesis(folded);
             });
 
@@ -1023,7 +1029,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('set_tracked_indices',
             (marks: (number | { baseIndex: number; colors?: number | number[] })[], colors?: number[]): void => {
-                let standardizedMarks: { baseIndex: number; colors?: number | number[] }[];
+                let standardizedMarks: { baseIndex: number; colors?: number | number[] }[] | null = null;
 
                 if (colors) {
                     log.warn(
@@ -1162,7 +1168,8 @@ export default class PoseEditMode extends GameMode {
         const startTime = new Date().getTime();
         let elapsed = 0;
         while (this._opQueue.length > 0 && elapsed < 50) { // FIXME: arbitrary
-            let op: PoseOp = this._opQueue.shift();
+            // We can ! guard because we know _opQueue.length > 0
+            let op: PoseOp = this._opQueue.shift()!;
             op.fn();
             if (op.sn) {
                 this.showAsyncText(`folding ${op.sn} of ${this._targetPairs.length} (${this._opQueue.length})`);
@@ -1370,8 +1377,8 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private getForcedHighlights(targetIndex: number): number[] {
-        let elems: number[] = null;
+    private getForcedHighlights(targetIndex: number): number[] | null {
+        let elems: number[] | null = null;
 
         if (this._targetConditions) {
             let maxLen: number = this._poses[targetIndex].sequence.length;
@@ -1592,7 +1599,7 @@ export default class PoseEditMode extends GameMode {
             this._folderButton.label(this._folder.name);
         }
 
-        let scoreFolder: Folder | null = this._folder.canScoreStructures ? this._folder : null;
+        let scoreFolder: Folder | null = this._folder && this._folder.canScoreStructures ? this._folder : null;
         for (let pose of this._poses) {
             pose.scoreFolder = scoreFolder;
         }
@@ -1878,7 +1885,7 @@ export default class PoseEditMode extends GameMode {
 
             if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
                 if (this._puzzle.useBarcode) {
-                    let hairpin: string = EPars.getBarcodeHairpin(seqString);
+                    let hairpin: string | null = EPars.getBarcodeHairpin(seqString);
                     if (hairpin != null) {
                         SolutionManager.instance.addHairpins([hairpin]);
                         this.checkConstraints();
@@ -1921,7 +1928,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
+        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
@@ -1953,7 +1960,7 @@ export default class PoseEditMode extends GameMode {
         if (nextPuzzle != null) {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 Eterna.chat.popHideChat();
-                this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
+                this.modeStack.changeMode(new PoseEditMode(nextPuzzle!, {}));
             });
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
@@ -2420,8 +2427,8 @@ export default class PoseEditMode extends GameMode {
 
         let xx: number = this._isPipMode ? targetIndex : this._curTargetIndex;
         let segments: number[] = this._poses[targetIndex].designSegments;
-        let idxMap: number[] = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
-        let structureConstraints: boolean[] = null;
+        let idxMap: number[] | null = this._poses[targetIndex].getOrderMap(this._targetOligosOrder[xx]);
+        let structureConstraints: boolean[] | null = null;
 
         if (idxMap != null) {
             for (let jj = 0; jj < segments.length; jj++) {
@@ -2506,7 +2513,8 @@ export default class PoseEditMode extends GameMode {
                                 segments = this._poses[targetIndex].designSegments;
                                 let newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
                                 let newPairs: number[] = [];
-                                if (newMap != null) {
+                                // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
+                                if (newMap != null && idxMap != null) {
                                     for (let jj = 0; jj < segments.length; jj++) {
                                         segments[jj] = newMap.indexOf(segments[jj]);
                                     }
@@ -2642,7 +2650,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        let execfoldCB = (fd: any[]) => {
+        let execfoldCB = (fd: any[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
