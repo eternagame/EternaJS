@@ -47,6 +47,7 @@ import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
+import HintsPanel from 'eterna/ui/HintsPanel';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -388,25 +389,9 @@ export default class PoseEditMode extends GameMode {
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
         } else {
-            let hintBox = new GamePanel();
-            hintBox.title = 'Hint'; // by " + _puzzle.get_coauthor());
-
-            let hintText = new HTMLTextObject(this._puzzle.hint, 400).font(Fonts.ARIAL).color(0xffffff);
-            hintText.display.position = new Point(10, 38);
-            hintBox.addObject(hintText, hintBox.container);
-
-            this._hintBoxRef = this.addObject(hintBox, this.uiLayer);
-
-            let updatePosition = () => {
-                hintBox.display.position = new Point(
-                    Flashbang.stageWidth - 440,
-                    Flashbang.stageHeight - hintBox.container.height - 90
-                );
-            };
-
-            updatePosition();
-            hintBox.setSize(420, hintText.height + 46);
-            hintBox.regs.add(this.resized.connect(updatePosition));
+            const {panel, positionUpdater} = HintsPanel.create(this._puzzle.hint);
+            this._hintBoxRef = this.addObject(panel, this.container);
+            panel.regs.add(this.resized.connect(positionUpdater));
         }
     }
 
