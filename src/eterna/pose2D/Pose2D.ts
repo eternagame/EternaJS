@@ -771,7 +771,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
-    public set forcedHighlights(elems: number[]) {
+    public set forcedHighlights(elems: number[] | null) {
         this._forcedHighlightBox.clear();
         this._forcedHighlightBox.setHighlight(elems);
     }

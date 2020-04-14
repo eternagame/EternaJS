@@ -63,20 +63,23 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         if (targetMap != null) {
             // rawIndex => naturalAlignedIndex
             let naturalMap = ublk.reorderedOligosIndexMap(ublk.oligoOrder);
+            if (naturalMap !== null) {
+                let targetAlignedNaturalPairs: number[] = [];
+                for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
+                    let naturalIndex = naturalMap[Number(rawIndex)];
+                    let naturalPairedIndex = naturalPairs[naturalIndex];
+                    let rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
 
-            let targetAlignedNaturalPairs: number[] = [];
-            for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
-                let naturalIndex = naturalMap[Number(rawIndex)];
-                let naturalPairedIndex = naturalPairs[naturalIndex];
-                let rawPairedIndex = naturalMap.indexOf(naturalPairedIndex);
+                    // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
+                    // according to target mode
+                    targetAlignedNaturalPairs[targetIndex] = naturalPairedIndex < 0
+                        ? naturalPairedIndex : targetMap[rawPairedIndex];
+                }
 
-                // If unpaired, it's unpaired, otherwise we need to get the index of the paired base
-                // according to target mode
-                targetAlignedNaturalPairs[targetIndex] = naturalPairedIndex < 0
-                    ? naturalPairedIndex : targetMap[rawPairedIndex];
+                return targetAlignedNaturalPairs;
+            } else {
+                return naturalPairs;
             }
-
-            return targetAlignedNaturalPairs;
         } else {
             return naturalPairs;
         }

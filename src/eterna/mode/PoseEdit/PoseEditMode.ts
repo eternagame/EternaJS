@@ -394,8 +394,10 @@ export default class PoseEditMode extends GameMode {
         } else {
             let hintBox = new GamePanel();
             hintBox.title = 'Hint'; // by " + _puzzle.get_coauthor());
-
-            let hintText = new HTMLTextObject(this._puzzle.hint, 400).font(Fonts.ARIAL).color(0xffffff);
+            
+            let hintText = new HTMLTextObject(
+                this._puzzle.hint ? this._puzzle.hint : 'None', 400
+                ).font(Fonts.ARIAL).color(0xffffff);
             hintText.display.position = new Point(10, 38);
             hintBox.addObject(hintText, hintBox.container);
 
@@ -602,7 +604,7 @@ export default class PoseEditMode extends GameMode {
 
         this._constraintBar = new ConstraintBar(this._puzzle.constraints);
         this.addObject(this._constraintBar, this._constraintsLayer);
-        this._constraintBar.sequenceHighlights.connect((highlightInfos) => {
+        this._constraintBar.sequenceHighlights.connect((highlightInfos: any) => {
             for (let [poseIdx, pose] of this._poses.entries()) {
                 pose.clearRestrictedHighlight();
                 pose.clearUnstableHighlight();
@@ -613,7 +615,7 @@ export default class PoseEditMode extends GameMode {
                         let currBlock = this.getCurrentUndoBlock(poseState);
                         let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
                         let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                            ? highlightInfo.ranges.map((index: number) => naturalMap.indexOf(index)) : highlightInfo.ranges;
+                            ? highlightInfo.ranges.map((index: number) => naturalMap!.indexOf(index)) : highlightInfo.ranges;
 
                         switch (highlightInfo.color) {
                             case HighlightType.RESTRICTED:
@@ -841,9 +843,9 @@ export default class PoseEditMode extends GameMode {
             }
         });
 
-        this._scriptInterface.addCallback('get_locks', (): boolean[] => {
+        this._scriptInterface.addCallback('get_locks', (): boolean[] | null => {
             let pose: Pose2D = this.getPose(0);
-            return pose.puzzleLocks.slice(0, pose.sequence.length);
+            return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
         });
 
         this._scriptInterface.addCallback('get_targets', (): any[] => {
@@ -886,12 +888,12 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
 
-        this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean => {
+        this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean | null => {
             this.checkConstraints();
             if (idx >= 0 && idx < this.constraintCount) {
-                return this._puzzle.constraints[idx].evaluate(
+                return this._puzzle.constraints ? this._puzzle.constraints[idx].evaluate(
                     this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
-                ).satisfied;
+                ).satisfied : null;
             } else {
                 return false;
             }
@@ -899,7 +901,7 @@ export default class PoseEditMode extends GameMode {
 
         this._scriptInterface.addCallback('get_tracked_indices',
             (): number[] => this.getPose(0).trackedIndices.map((mark) => mark.baseIndex));
-        this._scriptInterface.addCallback('get_barcode_indices', (): number[] => this._puzzle.barcodeIndices);
+        this._scriptInterface.addCallback('get_barcode_indices', (): number[] | null => this._puzzle.barcodeIndices);
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
@@ -912,10 +914,12 @@ export default class PoseEditMode extends GameMode {
             let seqArr: number[] = EPars.stringToSequence(seq);
             if (this._targetConditions && this._targetConditions[0]
                     && this._targetConditions[0]['type'] === 'pseudoknot') {
-                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint, true);
+                let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
+                Assert.assertIsDefined(folded);
                 return EPars.pairsToParenthesis(folded, null, true);
             } else {
-                let folded: number[] = this._folder.foldSequence(seqArr, null, constraint);
+                let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint);
+                Assert.assertIsDefined(folded);
                 return EPars.pairsToParenthesis(folded);
             }
         });
@@ -966,7 +970,8 @@ export default class PoseEditMode extends GameMode {
                         return null;
                     }
                 }
-                let pp: number[] = this._folder.getDotPlot(seqArr, folded);
+                let pp: number[] | null = this._folder.getDotPlot(seqArr, folded);
+                Assert.assertIsDefined(pp);
                 return pp.slice();
             });
 
@@ -1204,15 +1209,15 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public get constraintCount(): number {
-        return this._puzzle.constraints.length;
+    public get constraintCount(): number | null{
+        return this._puzzle.constraints ? this._puzzle.constraints.length : null;
     }
 
-    public getConstraintBox(i: number): ConstraintBox {
+    public getConstraintBox(i: number): ConstraintBox | null {
         return this._constraintBar.getConstraintBox(i);
     }
 
-    public getShapeBox(i: number): ConstraintBox {
+    public getShapeBox(i: number): ConstraintBox | null {
         return this._constraintBar.getShapeBox(i);
     }
 

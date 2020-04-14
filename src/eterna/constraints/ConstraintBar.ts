@@ -28,11 +28,12 @@ function isSSCW(
 export default class ConstraintBar extends ContainerObject {
     public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
-    constructor(constraints: Constraint<BaseConstraintStatus>[]) {
+    constructor(constraints: Constraint<BaseConstraintStatus>[] | null) {
         super();
-        this._constraints = constraints.map(
-            (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
-        );
+        this._constraints = constraints 
+            ? constraints.map(
+                (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
+            ) : null;
 
         Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
@@ -40,6 +41,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     protected added() {
+        if (!this._constraints) return;
         for (let constraint of this._constraints) {
             this.addObject(constraint.constraintBox, this.container);
             constraint.constraintBox.pointerDown.connect(() => {
@@ -54,6 +56,7 @@ export default class ConstraintBar extends ContainerObject {
      * to the states they're intended for in PiP mode
      */
     public layout(animate: boolean, pipStates: number) {
+        if (!this._constraints) return;
         let nonStateConstraints = this._constraints.filter((constraint) => !isSSCW(constraint));
 
         if (animate) {
@@ -97,6 +100,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     public updateHighlights(): void {
+        if (!this._constraints) return;
         let highlights: HighlightInfo[] = [];
         for (let constraint of this._constraints) {
             if (constraint.highlightCache != undefined && (
@@ -132,6 +136,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     public updateConstraints(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): boolean {
+        if (!this._constraints) return true;
         let satisfied = true;
 
         for (let constraint of this._constraints) {
@@ -154,6 +159,7 @@ export default class ConstraintBar extends ContainerObject {
      * @param stateIndex pass -1 to return all boxes to normal
      */
     public highlightState(stateIndex: number): void {
+        if (!this._constraints) return;
         let stateConstraints = this._constraints.filter(isSSCW);
         for (let constraint of stateConstraints) {
             constraint.constraintBox.display.alpha = (
@@ -162,11 +168,13 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public getConstraintBox(index: number): ConstraintBox {
+    public getConstraintBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints[index].constraintBox;
     }
 
-    public getShapeBox(index: number): ConstraintBox {
+    public getShapeBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints.filter(
             (constraint) => (
                 constraint.constraint instanceof ShapeConstraint
@@ -175,7 +183,8 @@ export default class ConstraintBar extends ContainerObject {
         )[0].constraintBox;
     }
 
-    public serializeConstraints(): string {
+    public serializeConstraints(): string | null {
+        if (!this._constraints) return null;
         return this._constraints.map(
             (constraint) => constraint.constraint.serialize()
         ).reduce(
@@ -184,6 +193,6 @@ export default class ConstraintBar extends ContainerObject {
         ).join(',');
     }
 
-    private _constraints: ConstraintWrapper[];
+    private _constraints: ConstraintWrapper[] | null;
     private _flaggedConstraint: ConstraintWrapper | null;
 }
