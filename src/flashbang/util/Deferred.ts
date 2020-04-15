@@ -20,8 +20,8 @@ export default class Deferred<T> {
         }
 
         let fn = this._resolve;
-        this._resolve = null;
-        this._reject = null;
+        // this._resolve = null;
+        // this._reject = null;
         fn(value);
     }
 
@@ -31,8 +31,8 @@ export default class Deferred<T> {
         }
 
         let fn = this._reject;
-        this._resolve = null;
-        this._reject = null;
+        // this._resolve = null;
+        // this._reject = null;
         fn(reason);
     }
 
