@@ -9,4 +9,9 @@ module.exports = merge(common, {
     output: {
         path: path.resolve(__dirname + "/dist/dev"),
     },
+
+    devServer: {
+        port: 63343,
+        contentBase: path.resolve(__dirname + "/dist/dev"),
+    },
 });
