@@ -3,6 +3,7 @@ import {UnitSignal} from 'signals';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
+import { Assert } from 'flashbang';
 
 /** A utility object that captures mouse input and dispatches update events until a mouseUp occurs */
 export default class Dragger extends GameObject {
@@ -15,7 +16,7 @@ export default class Dragger extends GameObject {
     public curX: number = 0;
     public curY: number = 0;
 
-    constructor(displayParent: Container = null) {
+    constructor(displayParent: Container | null = null) {
         super();
         this._displayParent = displayParent;
     }
@@ -31,10 +32,12 @@ export default class Dragger extends GameObject {
     protected added(): void {
         super.added();
 
-        let parent = this._displayParent || this.mode.container;
-        parent.addChild(this._disp);
+        let parent = this._displayParent || (this.mode && this.mode.container);
+        Assert.assertIsDefined(this._disp);
+        if (parent) parent.addChild(this._disp);
         this.updateSize();
 
+        Assert.assertIsDefined(Flashbang.globalMouse);
         this.startX = Flashbang.globalMouse.x;
         this.curX = Flashbang.globalMouse.x;
         this.startY = Flashbang.globalMouse.y;
@@ -63,17 +66,21 @@ export default class Dragger extends GameObject {
     }
 
     protected dispose(): void {
-        this._disp.destroy({children: true});
+        if (this._disp) this._disp.destroy({children: true});
         this._disp = null;
         super.dispose();
     }
 
     private updateMouseLoc(): void {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         this.curX = Flashbang.globalMouse.x;
         this.curY = Flashbang.globalMouse.y;
     }
 
     private updateSize(): void {
+        Assert.assertIsDefined(Flashbang.stageHeight);
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(this._disp);
         this._disp.clear().beginFill(0x0, 0).drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight).endFill();
     }
 
@@ -85,7 +92,7 @@ export default class Dragger extends GameObject {
         }
     }
 
-    private readonly _displayParent: Container;
-    private _disp: Graphics = new Graphics();
+    private readonly _displayParent: Container | null;
+    private _disp: Graphics | null = new Graphics();
     private _complete: boolean;
 }
