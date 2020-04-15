@@ -49,6 +49,7 @@ import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
+import HelpScreen from 'eterna/ui/HelpScreen';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -122,7 +123,8 @@ export default class PoseEditMode extends GameMode {
         this._helpBar = new HelpBar({
             onHintClicked: this._puzzle.hint
                 ? () => this.onHintClicked()
-                : undefined
+                : undefined,
+            onHelpClicked: () => this.onHelpClicked()
         });
         this.addObject(this._helpBar, this.uiLayer);
 
@@ -405,6 +407,16 @@ export default class PoseEditMode extends GameMode {
             this._hintBoxRef = this.addObject(panel, this.container);
             panel.regs.add(this.resized.connect(positionUpdater));
         }
+    }
+
+    public onHelpClicked() {
+        if (!this._helpScreen) {
+            const {panel, positionUpdater} = HelpScreen.create();
+            this._helpScreen = this.addObject(panel, this.container);
+            panel.regs.add(this.resized.connect(positionUpdater));
+            return;
+        }
+        this._helpScreen.object.display.visible = !this._helpScreen.object.display.visible;
     }
 
     public publicStartCountdown(): void {
@@ -3019,6 +3031,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
+    private _helpScreen: GameObjectRef;
 
     protected _folder: Folder;
     // / Asynch folding

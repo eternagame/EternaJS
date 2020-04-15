@@ -5,6 +5,7 @@ import GameButton from './GameButton';
 
 interface HelpBarProps {
     onHintClicked?: () => void;
+    onHelpClicked: () => void;
 }
 
 export default class HelpBar extends ContainerObject {
@@ -37,6 +38,7 @@ export default class HelpBar extends ContainerObject {
             .down(Bitmaps.ImgHelpHit)
             .tooltip('Help');
         this.addObject(help, this.container);
+        help.clicked.connect(props.onHelpClicked);
 
         this.container.children.forEach((icon, index) => {
             icon.x = index * theme.iconSize;
