@@ -107,52 +107,46 @@ export default class MissionIntroMode extends AppMode {
             // layout objects
             moleculeImg.position = new Point((Flashbang.stageWidth - moleculeImg.width) * 0.5, 0);
 
-            missionText.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5,
-                123
-            );
+            const leftEdge = Math.max(25.0, (Flashbang.stageWidth * 0.5) - 420.5);
+            const rightEdge = Math.min(Flashbang.stageWidth - 25.0, (Flashbang.stageWidth * 0.5) + 420.5);
 
-            descriptionLabel.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5,
-                123 + missionText.height + 25
-            );
+            missionText.position = new Point(leftEdge, 123);
+
+            descriptionLabel.position = new Point(leftEdge, 123 + missionText.height + 25);
 
             playButton.display.position = new Point(
                 Flashbang.stageWidth - playButton.container.width - 91.5,
                 Flashbang.stageHeight - 30 - playButton.container.height
             );
 
-            bgImage.position = new Point((Flashbang.stageWidth * 0.5) - 420.5, 0);
+            bgImage.position = new Point(leftEdge, 0);
 
             const nameLabelXOffset = 15;
-            nameLabel.display.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5 + nameLabelXOffset,
-                12
-            );
+            nameLabel.display.position = new Point(leftEdge + nameLabelXOffset, 12);
             bgImage.width = nameLabel.width + nameLabelXOffset * 2;
 
             goalsLabel.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5,
+                leftEdge,
                 367 + 15
             );
 
             this._goalsBG.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5,
+                leftEdge,
                 367 + 60
             );
 
             this._goalsThumbnail.position = new Point(
-                (Flashbang.stageWidth * 0.5) - 420.5 + 22.5,
+                leftEdge + 22.5,
                 367 + 60 + 22.5
             );
 
             this._scrollUpButton.display.position = new Point(
-                (Flashbang.stageWidth * 0.5) + 420.5 - this._scrollUpButton.container.width - 30,
+                rightEdge - this._scrollUpButton.container.width - 30,
                 367 + 40
             );
 
             this._scrollDownButton.display.position = new Point(
-                (Flashbang.stageWidth * 0.5) + 420.5 - this._scrollDownButton.container.width - 30,
+                rightEdge - this._scrollDownButton.container.width - 30,
                 Flashbang.stageHeight - 55 - playButton.container.height - this._scrollDownButton.container.height - 15
             );
 
@@ -182,11 +176,12 @@ export default class MissionIntroMode extends AppMode {
         }
 
         const updateLayout = () => {
+            const leftEdge = Math.max(25.0, (Flashbang.stageWidth * 0.5) - 420.5);
             let yLoc = 367 + 60;
             for (let constraintBox of this._constraintBoxes) {
                 let bounds = constraintBox.container.getLocalBounds();
                 constraintBox.display.position = new Point(
-                    (Flashbang.stageWidth * 0.5) - 420.5 + this._goalsBG.width + 82,
+                    leftEdge + this._goalsBG.width + 82,
                     -bounds.top + yLoc
                 );
                 yLoc += bounds.height + 10;

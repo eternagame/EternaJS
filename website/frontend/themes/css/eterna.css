@@ -323,10 +323,6 @@ html {
 }
 
 body {
-	min-width:980px; /* suppose you want minimun width of 1000px */
-	width: auto !important;  /* Firefox will set width as auto */
-	width:980px;             /* As IE ignores !important it will set width as 1000px; */
-
   font-family : 'Open Sans', sans-serif;
   /*letter-spacing: -0.5px;*/
   /*font-weight: 300;*/

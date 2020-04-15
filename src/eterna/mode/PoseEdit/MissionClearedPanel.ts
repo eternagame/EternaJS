@@ -29,13 +29,15 @@ export default class MissionClearedPanel extends ContainerObject {
     protected added(): void {
         super.added();
 
+        const panelWidth = MissionClearedPanel.calcWidth();
+
         this._contentLayout = new VLayoutContainer(25, HAlign.CENTER);
         this.container.addChild(this._contentLayout);
 
         this._contentLayout.addChild(Fonts.stdLight('Mission Accomplished!', 36).color(0xFFCC00).build());
 
         const infoText: string = this._infoText || 'You have solved the puzzle, congratulations!';
-        const infoObj = new HTMLTextObject(infoText, MissionClearedPanel.WIDTH - 60)
+        const infoObj = new HTMLTextObject(infoText, panelWidth - 60)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(20)
             .color(0xffffff)
@@ -46,7 +48,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
-            const moreTextObj = new HTMLTextObject(this._moreText, MissionClearedPanel.WIDTH - 60)
+            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - 60)
                 .font(Fonts.STDFONT_REGULAR)
                 .fontSize(16)
                 .color(0xffffff)
@@ -109,13 +111,13 @@ export default class MissionClearedPanel extends ContainerObject {
         this.drawBG();
         this.doLayout();
 
-        this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.WIDTH;
+        this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.calcWidth();
     }
 
     private drawBG(): void {
         this._bg.clear();
         this._bg.beginFill(0x0, 0.8);
-        this._bg.drawRect(0, 0, MissionClearedPanel.WIDTH, Flashbang.stageHeight);
+        this._bg.drawRect(0, 0, MissionClearedPanel.calcWidth(), Flashbang.stageHeight);
         this._bg.endFill();
     }
 
@@ -123,6 +125,8 @@ export default class MissionClearedPanel extends ContainerObject {
         this._rankScrollContainer.visible = (this._rankScroll != null);
         this.closeButton.display.visible = this._rankScrollContainer.visible;
         this.nextButton.display.visible = this._rankScrollContainer.visible;
+
+        const panelWidth = MissionClearedPanel.calcWidth();
 
         DisplayUtil.positionRelative(
             this.closeButton.display, HAlign.RIGHT, VAlign.TOP,
@@ -139,12 +143,12 @@ export default class MissionClearedPanel extends ContainerObject {
         if (this._rankScroll != null) {
             this._rankScrollHeading.setSize(310, this._tfPlayer.height + 6);
             this._rankScrollHeading.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 10,
+                ((panelWidth - this._rankScroll.realWidth) * 0.5) + 10,
                 0
             );
 
             this._rankScroll.display.position = new Point(
-                ((MissionClearedPanel.WIDTH - this._rankScroll.realWidth) * 0.5) + 20,
+                ((panelWidth - this._rankScroll.realWidth) * 0.5) + 20,
                 12 + this._tfPlayer.height
             );
         }
@@ -159,14 +163,18 @@ export default class MissionClearedPanel extends ContainerObject {
         }
 
         this._contentLayout.position = new Point(
-            (MissionClearedPanel.WIDTH - this._contentLayout.width) * 0.5,
+            (panelWidth - this._contentLayout.width) * 0.5,
             (Flashbang.stageHeight - this._contentLayout.height) * 0.5
         );
 
         this.nextButton.display.position = new Point(
-            (MissionClearedPanel.WIDTH - this.nextButton.container.width) * 0.5,
+            (panelWidth - this.nextButton.container.width) * 0.5,
             Flashbang.stageHeight - 20 - this.nextButton.container.height
         );
+    }
+
+    private static calcWidth(): number {
+        return Math.min(MissionClearedPanel.PREFERRED_WIDTH, Flashbang.stageWidth);
     }
 
     private readonly _infoText: string;
@@ -184,5 +192,5 @@ export default class MissionClearedPanel extends ContainerObject {
     private _rankScrollContainer: Container;
     private _rankScroll: RankScroll = null;
 
-    private static readonly WIDTH: number = 480;
+    private static readonly PREFERRED_WIDTH: number = 480;
 }
