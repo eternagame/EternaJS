@@ -1,9 +1,10 @@
 import {DisplayObject} from 'pixi.js';
 import {EasingFunc} from 'flashbang/util/Easing';
 import DisplayObjectTask from './DisplayObjectTask';
+import Assert from 'flashbang/util/Assert';
 
 export default class ScaleTask extends DisplayObjectTask {
-    constructor(x: number, y: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {
+    constructor(x: number, y: number, time: number = 0, easingFn: EasingFunc | null = null, target: DisplayObject | null = null) {
         super(time, easingFn, target);
         this._toX = x;
         this._toY = y;
@@ -11,7 +12,8 @@ export default class ScaleTask extends DisplayObjectTask {
 
     /* override */
     protected updateValues(): void {
-        if (this._fromX === undefined) {
+        Assert.assertIsDefined(this._target);
+        if (this._fromX === undefined || this._fromY === undefined) {
             this._fromX = this._target.scale.x;
             this._fromY = this._target.scale.y;
         }
@@ -22,6 +24,6 @@ export default class ScaleTask extends DisplayObjectTask {
 
     private readonly _toX: number;
     private readonly _toY: number;
-    private _fromX: number = undefined;
-    private _fromY: number = undefined;
+    private _fromX?: number = undefined;
+    private _fromY?: number = undefined;
 }

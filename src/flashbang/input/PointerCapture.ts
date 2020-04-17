@@ -1,5 +1,6 @@
 import {DisplayObject} from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
+import { Assert } from 'flashbang';
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -28,6 +29,7 @@ export default class PointerCapture {
         PointerCapture._captures.push(this);
 
         if (!PointerCapture._registeredEvents) {
+            Assert.assertIsDefined(Flashbang.pixi);
             for (let eventType of PointerCapture.POINTER_EVENTS) {
                 Flashbang.pixi.renderer.plugins.interaction.addListener(eventType, PointerCapture.handleEvent);
             }
@@ -35,8 +37,10 @@ export default class PointerCapture {
     }
 
     private static handleEvent(e: InteractionEvent) {
+        Assert.assertIsDefined(Flashbang.pixi);
         for (let capture of PointerCapture._captures.reverse()) {
             if (!Flashbang.pixi.renderer.plugins.interaction.hitTest(e.data.global, capture._root)) {
+                Assert.assertIsDefined(capture._onEvent);
                 capture._onEvent(e);
                 if (e.stopped) return;
             }
@@ -54,6 +58,7 @@ export default class PointerCapture {
         PointerCapture._captures.splice(PointerCapture._captures.indexOf(this), 1);
 
         if (PointerCapture._captures.length === 0) {
+            Assert.assertIsDefined(Flashbang.pixi);
             for (let eventType of PointerCapture.POINTER_EVENTS) {
                 Flashbang.pixi.renderer.plugins.interaction.removeListener(eventType, PointerCapture.handleEvent);
             }
@@ -65,7 +70,7 @@ export default class PointerCapture {
     }
 
     private readonly _root: DisplayObject;
-    private _onEvent: (e: InteractionEvent) => void;
+    private _onEvent: ((e: InteractionEvent) => void) | null;
     private _rootWasInteractive: boolean;
 
     private static _registeredEvents: boolean = false;
