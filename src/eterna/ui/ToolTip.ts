@@ -16,7 +16,7 @@ export default class ToolTip extends ContainerObject {
         },
         borderRadius: 6,
         padding: 10,
-        fontSize: 16,
+        fontSize: 14,
         tipSize: 10,
         tailWidth: 3
     };
@@ -26,9 +26,8 @@ export default class ToolTip extends ContainerObject {
         const {theme} = ToolTip;
 
         // Text
-        const text = props.text.toUpperCase();
-        const textBuilder = Fonts.stdBold(text).fontSize(theme.fontSize).color(0);
-        const textMetrics = PIXI.TextMetrics.measureText(text, textBuilder.style);
+        const textBuilder = Fonts.stdBold(props.text).fontSize(theme.fontSize).color(0);
+        const textMetrics = PIXI.TextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 
         const width = textMetrics.width + theme.padding * 2;
@@ -42,13 +41,13 @@ export default class ToolTip extends ContainerObject {
                 return [
                     tailLength + theme.tipSize,
                     tailLength + theme.tipSize,
-                    0
+                    2
                 ];
             } else {
                 return [
                     -tailLength - theme.tipSize - height,
                     -tailLength - theme.tipSize,
-                    -tailLength
+                    -tailLength - 2
                 ];
             }
         })();
