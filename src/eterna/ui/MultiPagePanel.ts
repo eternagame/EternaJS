@@ -61,7 +61,7 @@ export default class MultiPagePanel extends ContainerObject {
             this._pagesContainer.addObject(page, this._pagesContainer.container);
         });
         this._pagesContainer.container.position = new Point(
-            UITheme.panel.padding, 
+            UITheme.panel.padding,
             UITheme.panel.padding + theme.title.height
         );
         this.addObject(this._pagesContainer, this.container);

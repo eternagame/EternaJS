@@ -21,7 +21,7 @@ export default class HelpScreen {
         ['Zoom in', '+'],
         ['Zoom out', '-'],
         ['Undo', 'Z'],
-        ['Redo', 'Y'],
+        ['Redo', 'Y']
     ];
 
     public static create() {
@@ -30,12 +30,11 @@ export default class HelpScreen {
         const toolsTips: Array<[ToolTip, Point, Point]> = [
             [new ToolTip({text: 'MENU', side: 'top', tailLength: 57}), new Point(0.5, 1), new Point(-340, -70)],
             [new ToolTip({text: 'BOOSTERS', side: 'top'}), new Point(0.5, 1), new Point(-240, -70)],
-            [new ToolTip({text: 'HINTS ON/OFF', side: 'bottom' }), new Point(1, 0), new Point(-94, 55)]
+            [new ToolTip({text: 'HINTS ON/OFF', side: 'bottom'}), new Point(1, 0), new Point(-94, 55)]
         ];
 
-        
 
-        // shortcuts        
+        // shortcuts
         const shortCuts = new MultiPagePanel({
             title: 'Key Commands',
             pages: (() => {
@@ -50,26 +49,28 @@ export default class HelpScreen {
             width: theme.column.width,
             height: theme.column.height
         });
-        
-        // Help content
-        // const help = new MultiPagePanel({
-        //     title: 'Quick Help Topics',
-        //     pages: (() => {
 
-        //     })(),
-        //     width: theme.column.width * 2,
-        //     height: theme.column.height
-        // });
+        // Help content
+        const help = new MultiPagePanel({
+            title: 'Quick Help Topics',
+            pages: (() => {
+                const page = new ContainerObject();
+                
+                return [page];
+            })(),
+            width: theme.column.width * 2,
+            height: theme.column.height
+        });
 
         // help sections
         const sections = new MultiPagePanel({
             title: 'Quick Help Topics',
             pages: (() => {
                 const page = new ContainerObject();
-                
+
                 const add = (text: string, index: number, column: number) => {
                     const shortcut = new HelpItem({
-                        text, 
+                        text,
                         width: theme.item.width,
                         onClicked: () => {
 
@@ -80,13 +81,13 @@ export default class HelpScreen {
                     page.addObject(shortcut, page.container);
                 };
 
-                add("Tips & Tricks", 0, 0);
-                add("The Four Bases", 1, 0);
-                add("Moving & Magnifying RNA", 2, 0);
+                add('Tips & Tricks', 0, 0);
+                add('The Four Bases', 1, 0);
+                add('Moving & Magnifying RNA', 2, 0);
 
-                add("Placing A-U", 0, 1);
-                add("Slides", 1, 1);
-                add("Swap Tool", 2, 1);
+                add('Placing A-U', 0, 1);
+                add('Slides', 1, 1);
+                add('Swap Tool', 2, 1);
 
                 return [page];
             })(),
