@@ -136,9 +136,17 @@ export default class EternaApp extends FlashbangApp {
             Flashbang.sound.volume = volume;
         }));
 
-        this.setLoadingText('Authenticating...', null);
+        const isLocal = Boolean(this._params.puzzlePath);
 
-        this.authenticate()
+        Promise.resolve()
+            .then(() => {
+                if (!isLocal) {
+                    this.setLoadingText('Authenticating...', null);
+                    return this.authenticate();
+                } else {
+                    return Promise.resolve();
+                }
+            })
             .then(() => {
                 this.setLoadingText('Loading game...', null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
@@ -156,7 +164,7 @@ export default class EternaApp extends FlashbangApp {
                             initialFolder: this._params.folderName,
                             initSequence: this._params.sequence
                         };
-                        if (this._params.puzzlePath) {
+                        if (isLocal) {
                             return this.loadPoseEditFromFile(this._params.puzzlePath, puzzleParams);
                         } else {
                             return this.loadPoseEdit(this._params.puzzleID, puzzleParams);
