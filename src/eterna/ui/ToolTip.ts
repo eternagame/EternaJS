@@ -4,10 +4,9 @@ import Fonts from 'eterna/util/Fonts';
 
 interface ToolTipProps {
     text: string;
-    position: 'top' | 'bottom';
+    side: 'top' | 'bottom';
     tailLength?: number;
     content?: PIXI.Container;
-    pos: Point;
 }
 
 export default class ToolTip extends ContainerObject {
@@ -31,38 +30,53 @@ export default class ToolTip extends ContainerObject {
         const textBuilder = Fonts.stdBold(text).fontSize(theme.fontSize).color(0);
         const textMetrics = PIXI.TextMetrics.measureText(text, textBuilder.style);
         const textElem = textBuilder.build();
-        textElem.position = new Point(theme.padding, theme.padding);
+
+        const width = textMetrics.width + theme.padding * 2;
+        const height = textMetrics.height + theme.padding * 2;
+        const isBottom = props.side === 'bottom';
+        const tailLength = props.tailLength ?? 0;
+
+        const backgroundX = -width / 2;
+        const [backgroundY, tipY, tailY] = (() => {
+            if (isBottom) {
+                return [
+                    tailLength + theme.tipSize,
+                    tailLength + theme.tipSize,
+                    0
+                ];
+            } else {
+                return [
+                    -tailLength - theme.tipSize - height,
+                    -tailLength - theme.tipSize,
+                    -tailLength
+                ];
+            }
+        })();
 
         // Background
         const background = new Graphics();
-        const width = textMetrics.width + theme.padding * 2;
-        const height = textMetrics.height + theme.padding * 2;
         background.beginFill(theme.colors.background, 1);
-        background.drawRoundedRect(0, 0, width, height, theme.borderRadius);
-
-        const isBottom = props.position === 'bottom';
-        const yDirection = isBottom ? 1 : -1;
+        background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
+        textElem.position = new Point(backgroundX + theme.padding, backgroundY + theme.padding);
 
         // Tip
-        const tipY = isBottom ? (height - 1) : 1;
+        const tipDirection = isBottom ? -1 : 1;
         const tip = [
-            new Point(width / 2 - theme.tipSize, tipY),
-            new Point(width / 2 + theme.tipSize, tipY),
-            new Point(width / 2, tipY + theme.tipSize * yDirection)
+            new Point(backgroundX + width / 2 - theme.tipSize, tipY),
+            new Point(backgroundX + width / 2 + theme.tipSize, tipY),
+            new Point(backgroundX + width / 2, tipY + theme.tipSize * tipDirection)
         ];
         background.drawPolygon(tip);
         background.endFill();
 
         // Tail
-        if (props.tailLength !== undefined) {
-            const tailOffset = 2; // minor offset to make the tail "merge" with the tip.
+        if (tailLength > 0) {
             background.lineStyle(theme.tailWidth, theme.colors.background);
-            background.moveTo(tip[2].x, tip[2].y + tailOffset * -yDirection);
-            background.lineTo(tip[2].x, tip[2].y + props.tailLength * yDirection);
+            background.moveTo(tip[2].x, tailY);
+            background.lineTo(tip[2].x, tailY + props.tailLength);
         }
 
         this.container.addChild(background);
         this.container.addChild(textElem);
-        this.container.position = props.pos;
     }
 }

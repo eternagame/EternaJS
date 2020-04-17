@@ -1,17 +1,16 @@
 
 import {
-    ContainerObject, DisplayUtil, VAlign, HAlign, StyledTextBuilder
+    ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {Graphics, Point, Container} from 'pixi.js';
-import TextUtil from 'eterna/util/TextUtil';
-import UITheme from './UITheme';
+import {Graphics, Point} from 'pixi.js';
 import GameButton from './GameButton';
+import {UITheme} from './UITheme';
 
 interface MultiPagePanelProps {
     title: string;
-    pages: string[];
+    pages: ContainerObject[];
     width: number;
     height: number;
 }
@@ -23,24 +22,20 @@ export default class MultiPagePanel extends ContainerObject {
             height: 35,
             padding: 7
         },
-        content: {
-            fontSize: 14,
-            padding: 10,
-            buttonSize: new Point(59, 24) // TODO find a better way to position the prev/next buttons!
-        },
-        borderRadius: 5
+        borderRadius: 5,
+        buttonSize: new Point(59, 24) // TODO find a better way to position the prev/next buttons!
     };
 
     private _currentPage = 0;
     private _title: string;
 
     private _background: Graphics;
-    private _pagesContainer: Container;
+    private _pagesContainer: ContainerObject;
     private _titleText: PIXI.Text;
     private _prevButton: GameButton;
     private _nextButton: GameButton;
 
-    private get pageCount() { return this._pagesContainer.children.length; }
+    private get pageCount() { return this._pagesContainer.container.children.length; }
     private get title() {
         return this.pageCount > 1
             ? `${this._title} ${this._currentPage + 1} of ${this.pageCount}`
@@ -54,30 +49,22 @@ export default class MultiPagePanel extends ContainerObject {
 
         // Background
         this._background = new Graphics();
-        this._background.lineStyle(1.5, UITheme.colors.border, 1);
+        this._background.lineStyle(UITheme.panel.borderSize, UITheme.colors.border, 1);
         this._background.beginFill(UITheme.colors.background, 1);
         this._background.drawRoundedRect(0, 0, props.width, props.height, theme.borderRadius);
         this._background.endFill();
         this.container.addChild(this._background);
 
         // Content
-        this._pagesContainer = new PIXI.Container();
-        this._pagesContainer.position = new Point(theme.content.padding, theme.content.padding + theme.title.height);
-        props.pages.forEach((pageText, pageIndex) => {
-            const textElem = new StyledTextBuilder({
-                fontFamily: Fonts.ARIAL,
-                fontSize: theme.content.fontSize,
-                fill: 0xffffff,
-                wordWrap: true,
-                wordWrapWidth: props.width - 2 * theme.content.padding
-            })
-                .appendHTMLStyledText(TextUtil.processTags(pageText))
-                .build();
-
-            this._pagesContainer.addChild(textElem);
-            textElem.visible = pageIndex === this._currentPage;
+        this._pagesContainer = new ContainerObject();
+        props.pages.forEach((page) => {
+            this._pagesContainer.addObject(page, this._pagesContainer.container);
         });
-        this.container.addChild(this._pagesContainer);
+        this._pagesContainer.container.position = new Point(
+            UITheme.panel.padding, 
+            UITheme.panel.padding + theme.title.height
+        );
+        this.addObject(this._pagesContainer, this.container);
 
         // Title
         this._title = props.title;
@@ -106,8 +93,8 @@ export default class MultiPagePanel extends ContainerObject {
 
         this.addObject(this._prevButton, this.container);
         this._prevButton.display.position = new Point(
-            theme.content.padding,
-            props.height - theme.content.buttonSize.y - theme.content.padding
+            UITheme.panel.padding,
+            props.height - theme.buttonSize.y - UITheme.panel.padding
         );
         this._prevButton.clicked.connect(() => {
             if (this._currentPage > 0) {
@@ -121,7 +108,7 @@ export default class MultiPagePanel extends ContainerObject {
             .down(Bitmaps.NovaNextHit);
         this.addObject(this._nextButton, this.container);
         this._nextButton.display.position = new Point(
-            this._prevButton.display.x + theme.content.padding + theme.content.buttonSize.x,
+            this._prevButton.display.x + UITheme.panel.padding + theme.buttonSize.x,
             this._prevButton.display.y
         );
         this._nextButton.clicked.connect(() => {
@@ -138,8 +125,8 @@ export default class MultiPagePanel extends ContainerObject {
             return;
         }
 
-        this._pagesContainer.children[this._currentPage].visible = false;
-        this._pagesContainer.children[pageIndex].visible = true;
+        this._pagesContainer.container.children[this._currentPage].visible = false;
+        this._pagesContainer.container.children[pageIndex].visible = true;
         this._currentPage = pageIndex;
 
         this._titleText.text = this.title;
