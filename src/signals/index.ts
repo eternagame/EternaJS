@@ -1,5 +1,6 @@
 export {default as Cons} from './Cons';
-export {default as Reactor, RListener} from './Reactor';
+export {default as Reactor} from './Reactor';
+export type {RListener} from './Reactor';
 export {default as AbstractSignal} from './AbstractSignal';
 export {default as AbstractValue} from './AbstractValue';
 export {default as Connection} from './Connection';
