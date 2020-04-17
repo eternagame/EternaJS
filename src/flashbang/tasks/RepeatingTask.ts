@@ -1,7 +1,7 @@
 import ObjectTask from 'flashbang/core/ObjectTask';
 import Assert from 'flashbang/util/Assert';
 
-type TaskCreator = () => ObjectTask;
+type TaskCreator = () => ObjectTask | null;
 
 /**
  * A Task that repeats.
@@ -51,5 +51,5 @@ export default class RepeatingTask extends ObjectTask {
 }
 
 export function Repeat(count: number, taskCreator: TaskCreator): RepeatingTask {
-    return new RepeatingTask((): ObjectTask => (count-- > 0 ? taskCreator() : null));
+    return new RepeatingTask((): ObjectTask | null => (count-- > 0 ? taskCreator() : null));
 }
