@@ -1,4 +1,4 @@
-import {KeyCode, Flashbang} from 'flashbang';
+import {KeyCode, Flashbang, Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
@@ -92,10 +92,13 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         });
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
         updateLocation();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 

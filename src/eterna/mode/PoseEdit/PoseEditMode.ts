@@ -1313,6 +1313,7 @@ export default class PoseEditMode extends GameMode {
     }
 
     private createScreenshot(): ArrayBuffer {
+        Assert.assertIsDefined(this.container);
         let visibleState: Map<DisplayObject, boolean> = new Map();
         let pushVisibleState = (disp: DisplayObject) => {
             visibleState.set(disp, disp.visible);
@@ -1369,6 +1370,7 @@ export default class PoseEditMode extends GameMode {
         this.showConfirmDialog(PROMPT).closed.then((confirmed) => {
             if (confirmed) {
                 this.resetAutosaveData();
+                Assert.assertIsDefined(this.modeStack);
                 this.modeStack.changeMode(new PoseEditMode(this._puzzle, {isReset: true}));
             }
         });
@@ -1976,6 +1978,7 @@ export default class PoseEditMode extends GameMode {
         if (nextPuzzle != null) {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 Eterna.chat.popHideChat();
+                Assert.assertIsDefined(this.modeStack);
                 this.modeStack.changeMode(new PoseEditMode(nextPuzzle!, {}));
             });
         } else {
@@ -2074,6 +2077,7 @@ export default class PoseEditMode extends GameMode {
         if (this._targetConditions && this._targetConditions[0]) {
             customLayout = this._targetConditions[0]['custom-layout'];
         }
+        Assert.assertIsDefined(this.modeStack);
         this.modeStack.pushMode(new MissionIntroMode(
             this._puzzle.getName(true),
             missionText,
@@ -2867,6 +2871,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let undoBlock: UndoBlock = new UndoBlock(this._puzzle.transformSequence(seq, ii));
+        Assert.assertIsDefined(bestPairs);
         undoBlock.setPairs(bestPairs, 37, pseudoknots);
         undoBlock.targetOligos = this._targetOligos[ii];
         undoBlock.targetOligo = this._targetOligo[ii];

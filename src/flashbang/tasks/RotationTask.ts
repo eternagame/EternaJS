@@ -1,15 +1,17 @@
 import {DisplayObject} from 'pixi.js';
 import {EasingFunc} from 'flashbang/util/Easing';
 import DisplayObjectTask from './DisplayObjectTask';
+import { Assert } from 'flashbang';
 
 export default class RotationTask extends DisplayObjectTask {
-    constructor(radians: number, time: number = 0, easingFn: EasingFunc = null, target: DisplayObject = null) {
+    constructor(radians: number, time: number = 0, easingFn: EasingFunc | null = null, target: DisplayObject | null = null) {
         super(time, easingFn, target);
         this._to = radians;
     }
 
     /* override */
     protected updateValues(): void {
+        Assert.assertIsDefined(this._target);
         if (this._from === undefined) {
             this._from = this._target.rotation;
         }
@@ -17,5 +19,5 @@ export default class RotationTask extends DisplayObjectTask {
     }
 
     private readonly _to: number;
-    private _from: number = undefined;
+    private _from?: number = undefined;
 }

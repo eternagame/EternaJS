@@ -4,7 +4,7 @@ import {Point} from 'pixi.js';
 import FancyTextBalloon from 'eterna/ui/FancyTextBalloon';
 import Fonts from 'eterna/util/Fonts';
 import {
-    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil
+    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert
 } from 'flashbang';
 import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
 import ROPWait from './ROPWait';
@@ -81,6 +81,8 @@ export default class ROPTextbox extends RScriptOp {
 
         let updateLocation = () => {
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                Assert.assertIsDefined(Flashbang.stageWidth);
+                Assert.assertIsDefined(Flashbang.stageHeight);
                 textBox.display.position = new Point(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
@@ -104,6 +106,7 @@ export default class ROPTextbox extends RScriptOp {
             }
         };
 
+        Assert.assertIsDefined(this._env.mode);
         textBox.regs.add(this._env.mode.resized.connect(updateLocation));
         updateLocation();
     }
@@ -128,6 +131,8 @@ export default class ROPTextbox extends RScriptOp {
 
         let updateLocation = () => {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                Assert.assertIsDefined(Flashbang.stageHeight);
+                Assert.assertIsDefined(Flashbang.stageWidth);
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
@@ -198,6 +203,7 @@ export default class ROPTextbox extends RScriptOp {
         };
 
         updateLocation();
+        Assert.assertIsDefined(this._env.mode);
         newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
 
         this._env.setVar(this._id, newArrow);

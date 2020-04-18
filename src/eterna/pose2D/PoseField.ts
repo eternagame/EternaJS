@@ -1,7 +1,7 @@
 import {Graphics, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
-    Dragger, KeyboardEventType, KeyCode, GameObjectRef
+    Dragger, KeyboardEventType, KeyCode, GameObjectRef, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Pose2D from './Pose2D';
@@ -26,7 +26,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
-
+        
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
@@ -133,6 +134,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
         let mouse = Flashbang.globalMouse;
+        Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }

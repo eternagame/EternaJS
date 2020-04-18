@@ -1,4 +1,4 @@
-import {ContainerObject} from 'flashbang';
+import {ContainerObject, Assert} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bubble from './Bubble';
 
@@ -23,6 +23,7 @@ export default class Background extends ContainerObject {
             this._bubbles.push(bub);
         }
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResized()));
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => this.disableBubbles(value)));
     }

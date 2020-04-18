@@ -249,7 +249,7 @@ export default class DataCol extends ContainerObject {
         this.updateView();
     }
 
-    public set expFeedback(feedback: Feedback[]) {
+    public set expFeedback(feedback: (Feedback | null)[]) {
         this._feedback = feedback;
     }
 
@@ -461,7 +461,7 @@ export default class DataCol extends ContainerObject {
 
     private _numDisplay: number;
     private _sortOrder: SortOrder = SortOrder.NONE;
-    private _feedback: Feedback[];
+    private _feedback: (Feedback | null)[];
     private _showExp: boolean = false;
     private _pairsArray: number[];
     private _fillColor: number = 0;

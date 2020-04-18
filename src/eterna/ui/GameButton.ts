@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
-    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign
+    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign, Assert
 } from 'flashbang';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -226,6 +226,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         if (this._hotkey != null) {
+            Assert.assertIsDefined(this.mode);
             this._hotkeyReg = this.regs.add(this.mode.keyboardInput.pushListener(this));
         }
     }

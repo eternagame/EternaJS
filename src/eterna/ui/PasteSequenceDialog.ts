@@ -10,7 +10,7 @@ import TextInputPanel from './TextInputPanel';
  *  corresponding to sequence string.
  */
 export default class PasteSequenceDialog extends Dialog<number[]> {
-    constructor(customNumbering: number[] | null = null) {
+    constructor(customNumbering: (number | null)[] | null = null) {
         super();
         this._customNumbering = customNumbering;
     }
@@ -33,10 +33,14 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         inputPanel.okClicked.connect((values) => this.onSequenceEntered(values.get(SEQUENCE)));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            Assert.assertIsDefined(Flashbang.stageWidth);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
         updateLocation();
+
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
@@ -61,5 +65,5 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         this.close(s);
     }
 
-    private readonly _customNumbering: number[] | null;
+    private readonly _customNumbering: (number | null)[] | null;
 }

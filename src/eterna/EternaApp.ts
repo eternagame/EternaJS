@@ -1,7 +1,7 @@
 import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
 import * as log from 'loglevel';
 import {
-    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang
+    FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
@@ -136,11 +136,11 @@ export default class EternaApp extends FlashbangApp {
         }
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
-        this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
+        this._regs!.add(Eterna.settings.soundMute.connectNotify((mute) => {
             Flashbang.sound.muted = mute;
         }));
 
-        this._regs.add(Eterna.settings.soundVolume.connectNotify((volume) => {
+        this._regs!.add(Eterna.settings.soundVolume.connectNotify((volume) => {
             Flashbang.sound.volume = volume;
         }));
 
@@ -241,6 +241,7 @@ export default class EternaApp extends FlashbangApp {
      */
     public switchToDesignBrowser(puzzleOrID: number | Puzzle): Promise<void> {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
+        Assert.assertIsDefined(this.modeStack.modes);
         const existingBrowser = this.modeStack.modes.find(
             (mode) => mode instanceof DesignBrowserMode
         ) as DesignBrowserMode;
@@ -286,6 +287,7 @@ export default class EternaApp extends FlashbangApp {
         const puzzleID = (puzzleOrID instanceof Puzzle ? puzzleOrID.nodeID : puzzleOrID);
         const solutionID = (solutionOrID instanceof Solution ? solutionOrID.nodeID : solutionOrID);
 
+        Assert.assertIsDefined(this.modeStack.modes);
         const existingMode = this.modeStack.modes.find((mode) => mode instanceof FeedbackViewMode) as FeedbackViewMode;
         if (existingMode != null && existingMode.puzzleID === puzzleID && existingMode.solutionID === solutionID) {
             this.modeStack.setModeIndex(existingMode, -1);
@@ -303,6 +305,7 @@ export default class EternaApp extends FlashbangApp {
 
     /** Returns an existing PoseEditMode, if there's one on the mode stack */
     public get existingPoseEditMode(): PoseEditMode {
+        Assert.assertIsDefined(this.modeStack.modes);
         return this.modeStack.modes.find((mode) => mode instanceof PoseEditMode) as PoseEditMode;
     }
 

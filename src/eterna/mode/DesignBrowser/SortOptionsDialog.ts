@@ -4,7 +4,7 @@ import {
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Dialog from 'eterna/ui/Dialog';
 import {
-    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign, DisplayUtil
+    VLayoutContainer, HAlign, HLayoutContainer, Arrays, VAlign, DisplayUtil, Assert
 } from 'flashbang';
 import GraphicsUtil from 'eterna/util/GraphicsUtil';
 import GameButton from 'eterna/ui/GameButton';
@@ -79,6 +79,7 @@ export default class SortOptionsDialog extends Dialog<void> {
 
         this.validateCurCategoryIdx();
         this.layout();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
     }
 

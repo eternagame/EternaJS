@@ -72,5 +72,5 @@ class Sound {
     }
 
     private readonly _sound: PIXI.sound.Sound;
-    private _pendingPlayOptions: PIXI.sound.PlayOptions;
+    private _pendingPlayOptions: PIXI.sound.PlayOptions | null;
 }

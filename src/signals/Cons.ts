@@ -9,7 +9,7 @@ export default class Cons implements Connection {
     /** The next connection in our chain. */
     public next: Cons | null;
 
-    constructor(owner: Reactor, listener: RListener) {
+    constructor(owner: Reactor | null, listener: RListener | null) {
         this._owner = owner;
         this._listener = listener;
     }

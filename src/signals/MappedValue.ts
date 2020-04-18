@@ -42,7 +42,7 @@ export default abstract class MappedValue<T> extends AbstractValue<T> {
         }
     }
 
-    protected _conn: Connection;
+    protected _conn: Connection | null;
 }
 
 class MappedValueImpl<TMapped, TSource> extends MappedValue<TMapped> {

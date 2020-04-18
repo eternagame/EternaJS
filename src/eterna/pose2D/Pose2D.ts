@@ -583,6 +583,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public onMouseMoved(): void {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         if (!this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
             this.onMouseOut();
             return;
@@ -1867,9 +1868,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     // highlight the base before the cursor
-    public trackCursor(index: number): void {
+    public trackCursor(index: number | null): void {
         this._cursorIndex = index;
-        if (this._cursorIndex > 0) {
+        if (this._cursorIndex !== null && this._cursorIndex > 0) {
             let center: Point = this.getBaseLoc(this._cursorIndex - 1);
             if (this._cursorBox == null) {
                 this._cursorBox = new Graphics();
@@ -1888,7 +1889,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
     }
 
-    public get trackedCursorIdx(): number {
+    public get trackedCursorIdx(): number | null {
         return this._cursorIndex;
     }
 
@@ -1898,7 +1899,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             // update is expensive, so don't bother doing it if we're not visible
             return;
         }
-
+        Assert.assertIsDefined(this.mode);
         let currentTime: number = this.mode.time;
         for (let anchor of this._anchoredObjects) {
             if (anchor.isLive) {
@@ -2026,7 +2027,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
                 let numberBitmap: Texture | null = null;
                 if (this._numberingMode) {
-                    let displayNumber = ii + 1;
+                    let displayNumber: number | null = ii + 1;
                     if (this._customNumbering != null) displayNumber = this._customNumbering[ii];
                     if ((displayNumber != null)
                         && (ii === 0 || displayNumber % 5 === 0 || ii === fullSeq.length - 1)) {
@@ -2053,7 +2054,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (this._redraw || basesMoved) {
             this._baseRope.redraw(true /* force baseXY */);
 
-            if (this._cursorIndex > 0 && this._cursorBox !== null) {
+            if (this._cursorIndex != null && this._cursorIndex > 0 && this._cursorBox !== null) {
                 center = this.getBaseLoc(this._cursorIndex - 1);
                 this._cursorBox.x = center.x;
                 this._cursorBox.y = center.y;
@@ -3026,6 +3027,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             let nodeLabel = '';
             let nodeScore = '';
 
+            Assert.assertIsDefined(Flashbang.globalMouse);
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
                 let mouseP: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
                 let baseXys: Point[] = [];
@@ -3456,7 +3458,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _explosionFactorPanel: ExplosionFactorPanel;
 
     // For tracking a base
-    private _cursorIndex: number = 0;
+    private _cursorIndex: number | null = 0;
     private _cursorBox: Graphics | null = null;
     private _lastShiftedIndex: number = -1;
     private _lastShiftedCommand: number = -1;
@@ -3467,7 +3469,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _simpleGraphicsMods: boolean = false;
 
     // customNumbering
-    private _customNumbering: number[] | null = null;
+    private _customNumbering: (number | null)[] | null = null;
 
     // Last exp paint data
     private _expPainter: ExpPainter | null = null;

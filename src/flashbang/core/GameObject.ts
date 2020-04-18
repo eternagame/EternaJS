@@ -27,7 +27,7 @@ export default class GameObject extends GameObjectBase {
     }
 
     public getNamedObject(name: string): GameObjectBase | null {
-        let cur: GameObjectRef = this._children;
+        let cur: GameObjectRef | null = this._children;
         while (cur != null) {
             if (cur._obj != null && cur._obj._name === name) {
                 return cur._obj;
@@ -80,10 +80,10 @@ export default class GameObject extends GameObjectBase {
     }
 
     protected removeObjects(pred: (obj: GameObjectBase) => boolean): void {
-        let cur: GameObjectRef = this._children;
+        let cur: GameObjectRef | null = this._children;
         while (cur != null) {
             let next: GameObjectRef = cur._next;
-            let obj: GameObjectBase = cur._obj;
+            let obj: GameObjectBase | null = cur._obj;
             if (obj != null && pred(obj)) {
                 this.removeObject(obj);
             }
@@ -94,8 +94,8 @@ export default class GameObject extends GameObjectBase {
     /* internal */
     public _addObjectInternal(
         obj: GameObjectBase,
-        name: string, replaceExisting: boolean,
-        displayParent: Container, displayIdx: number = -1
+        name: string | null, replaceExisting: boolean,
+        displayParent: Container | null, displayIdx: number = -1
     ): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal
@@ -116,7 +116,7 @@ export default class GameObject extends GameObjectBase {
         ref._obj = obj;
 
         // add the ref to the list
-        let oldListHead: GameObjectRef = this._children;
+        let oldListHead: GameObjectRef | null = this._children;
         this._children = ref;
 
         if (oldListHead != null) {
@@ -150,6 +150,7 @@ export default class GameObject extends GameObjectBase {
             'obj must manage a non-null DisplayObject to be attached to a display parent'
         );
 
+        Assert.assertIsDefined(this.display);
         if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
             displayParent.addChild(this.display);
         } else {
@@ -159,6 +160,7 @@ export default class GameObject extends GameObjectBase {
 
     /* internal */
     public _registerObject(obj: GameObjectBase | null): void {
+        Assert.assertIsDefined(this._mode);
         this._mode._registerObjectInternal(obj);
         if (obj) obj._addedInternal();
     }

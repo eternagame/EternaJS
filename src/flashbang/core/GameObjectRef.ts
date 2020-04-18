@@ -5,7 +5,7 @@ export default class GameObjectRef {
     public static readonly NULL: GameObjectRef = new GameObjectRef();
 
     /** @return the GameObjectRef for the given GameObject, or GameObjectRef.Null() if obj is null */
-    public static forObject(obj: GameObject = null): GameObjectRef {
+    public static forObject(obj: GameObject | null = null): GameObjectRef {
         return (obj != null ? obj.ref : GameObjectRef.NULL);
     }
 

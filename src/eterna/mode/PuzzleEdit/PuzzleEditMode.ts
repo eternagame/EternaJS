@@ -91,6 +91,7 @@ export default class PuzzleEditMode extends GameMode {
 
         this._folderButton.clicked.connect(() => this.changeFolder());
 
+        Assert.assertIsDefined(this.regs);
         this.regs.add(Eterna.settings.multipleFoldingEngines.connectNotify((value) => {
             this._folderButton.display.visible = value;
         }));
@@ -130,6 +131,7 @@ export default class PuzzleEditMode extends GameMode {
         });
 
         this._toolbar.copyButton.clicked.connect(() => {
+            Assert.assertIsDefined(this.modeStack);
             this.modeStack.pushMode(new CopyTextDialogMode(
                 EPars.sequenceToString(this._poses[0].sequence),
                 'Current Sequence'
@@ -383,7 +385,7 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         let energyVisible: boolean[] = [];
-        let trackedCursorIdx: number[] = [];
+        let trackedCursorIdx: (number | null)[] = [];
         let explosionFactorVisible: boolean[] = [];
         for (let pose of this._poses) {
             energyVisible.push(pose.showTotalEnergy);
@@ -397,6 +399,8 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
+
+        Assert.assertIsDefined(this.container);
         this.container.addChildAt(tempBG, 0);
 
         let info = `Player: ${Eterna.playerName}\n`

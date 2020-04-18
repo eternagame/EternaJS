@@ -1,4 +1,4 @@
-import {Flashbang, KeyCode} from 'flashbang';
+import {Flashbang, KeyCode, Assert} from 'flashbang';
 import Dialog from 'eterna/ui/Dialog';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
 import SubmitPoseDetails from './SubmitPoseDetails';
@@ -28,10 +28,14 @@ export default class SubmitPoseDialog extends Dialog<SubmitPoseDetails> {
         });
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            Assert.assertIsDefined(Flashbang.stageWidth);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
         updateLocation();
+
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }

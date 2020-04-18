@@ -152,10 +152,10 @@ export default class GameObjectBase {
     }
 
     // lazily instantiated
-    private _regs: RegistrationGroup;
+    private _regs: RegistrationGroup | null;
     private _destroyed: UnitSignal;
 
-    /* internal */ public _name: string;
+    /* internal */ public _name: string | null;
     /* internal */ public _ref: GameObjectRef;
     /* internal */ public _parent: GameObject | null;
     /* internal */ public _mode: AppMode | null;

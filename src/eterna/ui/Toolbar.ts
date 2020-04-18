@@ -5,7 +5,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -105,6 +105,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgSubmitHit);
 
         this._invisibleBackground = new Graphics();
+        Assert.assertIsDefined(Flashbang.stageWidth);
         this._invisibleBackground
             .beginFill(0, 0)
             .drawRect(0, 0, Flashbang.stageWidth, 100)

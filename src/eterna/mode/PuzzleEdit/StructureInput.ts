@@ -269,6 +269,6 @@ export default class StructureInput extends GamePanel implements Updatable {
 
     private readonly _pose: Pose2D;
     private _textInput: TextInputObject;
-    private _prevCaretPostion: number = -1;
+    private _prevCaretPostion: number | null = -1;
     private _errorText: TextBalloon;
 }

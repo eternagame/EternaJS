@@ -15,10 +15,10 @@ import {DesignCategory} from './DesignBrowserMode';
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> | null = null) {
+    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[] | null, disabled: Set<DesignCategory> | null = null) {
         super();
         this._allColumnCategories = allCategories.slice();
-        this._initialColumns = curColumns.slice();
+        this._initialColumns = curColumns ? curColumns.slice() : null;
         this._disabled = disabled;
     }
 
@@ -72,13 +72,15 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
-        for (let ii = 0; ii < this._initialColumns.length; ++ii) {
-            this.addColumnUI(this._initialColumns[ii], ii);
+        if (this._initialColumns !== null) {
+            for (let ii = 0; ii < this._initialColumns.length; ++ii) {
+                this.addColumnUI(this._initialColumns[ii], ii);
+            }
         }
 
         this.validateCurCategoryIdx();
         this.layout();
-        this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
+        this.regs.add(this.mode!.resized.connect(() => this.repositionDialog()));
     }
 
     private addColumnUI(category: DesignCategory, idx: number): void {
@@ -246,7 +248,7 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private readonly _allColumnCategories: DesignCategory[];
-    private readonly _initialColumns: DesignCategory[];
+    private readonly _initialColumns: DesignCategory[] | null;
     private readonly _disabled: Set<DesignCategory> | null;
 
     private _bg: GamePanel;

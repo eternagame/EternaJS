@@ -2,6 +2,7 @@ import Connection from './Connection';
 import Cons from './Cons';
 import Reactor from './Reactor';
 import ValueView from './ValueView';
+import { Assert } from 'flashbang';
 
 /**
  * Handles the machinery of connecting listeners to a value and notifying them, without exposing a
@@ -30,6 +31,7 @@ export default abstract class AbstractValue<T> extends Reactor implements ValueV
         // instance will never reach the caller
         let cons: Cons = this.addConnection(listener);
         try {
+            Assert.assertIsDefined(cons.listener);
             cons.listener(this.value);
         } catch (e) {
             cons.close();

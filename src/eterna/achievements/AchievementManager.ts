@@ -69,7 +69,7 @@ export default class AchievementManager extends GameObject {
             );
         };
         updateLoc();
-        view.regs.add(this.mode.resized.connect(updateLoc));
+        view.regs.add((this.mode as GameMode).resized.connect(updateLoc));
     }
 
     private _cur: GameObjectRef = GameObjectRef.NULL;
