@@ -74,7 +74,7 @@ export default class HelpScreen {
         const sections = new ContainerObject();
         const sectionsContainer = new MultiPagePanel({
             title: 'Quick Help Topics',
-            pages: (() => [sections])(),
+            pages: [sections],
             width: theme.column.width * 2,
             height: theme.column.height
         });
@@ -85,17 +85,17 @@ export default class HelpScreen {
         toolsTips.forEach(([toolTip]) => screen.addObject(toolTip, screen.container));
 
         const locale = 'en-US'; // navigator.language;
-        fetch(`/help/help-${locale}`).then((data) => data.json())
-            .then((json: { [key: string]: string }) => {
-                const itemsPerColumn = 10;
-                Object.entries(json).forEach(([name, text], index) => {
+        import(`assets/Help/help-${locale}.json`)
+            .then(({default: json}) => {
+                const itemsPerColumn = 12;
+                Object.entries(json).forEach(([name, content], index) => {
                     const column = Math.floor(index / itemsPerColumn);
                     const localIndex = index % itemsPerColumn;
                     const shortcut = new HelpItem({
-                        text,
+                        text: name,
                         width: theme.item.width,
                         onClicked: () => {
-                            helpPage.setup(name, text);
+                            helpPage.setup(name, content as string);
                             help.display.visible = true;
                         }
                     });
@@ -121,11 +121,11 @@ export default class HelpScreen {
                 Flashbang.stageHeight * 0.5 - theme.column.height / 2
             );
 
-            sections.container.position = new Point(
+            sectionsContainer.container.position = new Point(
                 shortCuts.container.position.x + theme.column.width + spacing,
                 shortCuts.container.position.y
             );
-            help.container.position = sections.container.position;
+            help.container.position = sectionsContainer.container.position;
         };
 
         positionUpdater();
