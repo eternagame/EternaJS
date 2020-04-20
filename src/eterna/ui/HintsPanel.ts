@@ -3,7 +3,7 @@ import {Flashbang, StyledTextBuilder, ContainerObject} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import MultiPagePanel from './MultiPagePanel';
-import {UITheme} from './UITheme';
+import UITheme from './UITheme';
 
 export default class HintsPanel {
     private static readonly theme = {

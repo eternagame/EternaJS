@@ -87,6 +87,13 @@ export default class Toolbar extends ContainerObject {
         this._boostersData = boosters;
     }
 
+    public onResized() {
+        this.stateToggle.container.position = new Point(
+            Flashbang.stageWidth / 2 - this.container.position.x,
+            -this.container.position.y + 20
+        );
+    }
+
     protected added(): void {
         super.added();
 
@@ -119,7 +126,7 @@ export default class Toolbar extends ContainerObject {
         ) {
             // We create the stateToggle even if we don't add it to the mode,
             // as scripts may rely on its existence
-            this.addObject(this.stateToggle, this._content);
+            this.addObject(this.stateToggle, this.container);
         }
 
         // UPPER TOOLBAR (structure editing tools)
@@ -506,6 +513,12 @@ export default class Toolbar extends ContainerObject {
         // point-at-toolbar-buttons tips, so everything needs to be laid out *just so*,
         // unfortunately.
         let hOffset = (this.boostersMenu == null && this._type === ToolbarType.PUZZLE ? 27 : 0);
+
+        DisplayUtil.positionRelative(
+            this._content, HAlign.CENTER, VAlign.BOTTOM,
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
+            hOffset, 0
+        );
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,

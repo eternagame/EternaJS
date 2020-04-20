@@ -2,7 +2,7 @@ import {ContainerObject} from 'flashbang';
 import {Graphics, Point} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 
-interface ToolTipProps {
+interface HelpToolTipProps {
     text: string;
     // default: top
     side?: 'top' | 'bottom';
@@ -10,7 +10,7 @@ interface ToolTipProps {
     content?: PIXI.Container;
 }
 
-export default class ToolTip extends ContainerObject {
+export default class HelpToolTip extends ContainerObject {
     private static readonly theme = {
         colors: {
             background: 0xC0DCE7
@@ -22,9 +22,9 @@ export default class ToolTip extends ContainerObject {
         tailWidth: 3
     };
 
-    constructor(props: ToolTipProps) {
+    constructor(props: HelpToolTipProps) {
         super();
-        const {theme} = ToolTip;
+        const {theme} = HelpToolTip;
 
         // Text
         const textBuilder = Fonts.stdBold(props.text).fontSize(theme.fontSize).color(0);
@@ -35,7 +35,7 @@ export default class ToolTip extends ContainerObject {
         const widestElem = Math.max(textMetrics.width, props.content ? props.content.width : 0);
         const width = widestElem + theme.padding * 2;
 
-        const height = textMetrics.height 
+        const height = textMetrics.height
             + theme.padding * 2
             + (props.content ? (props.content.height + theme.padding) : 0);
 
@@ -57,12 +57,12 @@ export default class ToolTip extends ContainerObject {
                 ];
             }
         })();
-        
+
         const background = new Graphics();
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position = new Point(
-            backgroundX + (width - textMetrics.width) / 2, 
+            backgroundX + (width - textMetrics.width) / 2,
             backgroundY + theme.padding
         );
 
@@ -80,9 +80,9 @@ export default class ToolTip extends ContainerObject {
         if (tailLength > 0) {
             background.lineStyle(theme.tailWidth, theme.colors.background);
             background.moveTo(tip[2].x, tailY);
-            background.lineTo(tip[2].x, tailY + props.tailLength);
+            background.lineTo(tip[2].x, tailY + props.tailLength + 2);
         }
-        
+
         this.container.addChild(background);
 
         if (props.content) {

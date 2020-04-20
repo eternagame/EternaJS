@@ -261,6 +261,7 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
+        this._toolbar.onResized();
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
@@ -409,23 +410,32 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public onHelpClicked() {
-        if (!this._helpScreen) {
-            const {panel, positionUpdater} = HelpScreen.create({
-                toolTips: {
-                    hints: Boolean(this._puzzle.hint),
-                    modeSwitch: this.toolbar.naturalButton.display.visible
-                }
-            });
-            this._helpScreen = this.addObject(panel, this.container);
-            panel.regs.add(this.resized.connect(positionUpdater));
-            return;
-        }
-        this._helpScreen.object.display.visible = !this._helpScreen.object.display.visible;
-    }
-
     public publicStartCountdown(): void {
         this.startCountdown();
+    }
+
+    private onHelpClicked() {
+        if (this._helpScreen.isLive) {
+            this._helpScreen.destroyObject();
+        } else {
+            this.updateUILayout();
+            this.createHelpScreen();
+        }
+    }
+
+    private createHelpScreen() {
+        const {panel, positionUpdater} = HelpScreen.create({
+            toolTips: {
+                hints: Boolean(this._puzzle.hint),
+                modeSwitch: this.toolbar.naturalButton.display.visible,
+                swapPairs: this.toolbar.pairSwapButton.display.visible,
+                pip: Boolean(this.toolbar.pipButton.container.parent),
+                switchState: Boolean(this.toolbar.stateToggle.container.parent)
+                    && this.toolbar.stateToggle.display.visible
+            }
+        });
+        this._helpScreen = this.addObject(panel, this.container);
+        panel.regs.add(this.resized.connect(positionUpdater));
     }
 
     private showSolution(solution: Solution): void {
@@ -1236,6 +1246,13 @@ export default class PoseEditMode extends GameMode {
 
             this.changeTarget(this._curTargetIndex);
             this._poses[0].setZoomLevel(this._poses[0].computeDefaultZoomLevel(), true, true);
+        }
+
+        if (this._helpScreen.isLive) {
+            // This is done to hide/remove the stateToggle tooltip accordingly
+            // TODO: UI system work needed to handle these tooltips in a more generic way.
+            this._helpScreen.destroyObject();
+            this.createHelpScreen();
         }
     }
 
@@ -3036,7 +3053,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
-    private _helpScreen: GameObjectRef;
+    private _helpScreen: GameObjectRef = GameObjectRef.NULL;
 
     protected _folder: Folder;
     // / Asynch folding

@@ -6,7 +6,7 @@ import Fonts from 'eterna/util/Fonts';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {Graphics, Point} from 'pixi.js';
 import GameButton from './GameButton';
-import {UITheme} from './UITheme';
+import UITheme from './UITheme';
 
 interface MultiPagePanelProps {
     title: string;
