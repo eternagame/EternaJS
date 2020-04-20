@@ -41,7 +41,6 @@ export default class HelpPage extends ContainerObject {
 
         const titleMetrics = PIXI.TextMetrics.measureText(section, titleBuilder.style);
         const titleElem = titleBuilder.build();
-        titleElem.x = theme.padding;
 
         const contentBuilder = new StyledTextBuilder({
             fontFamily: Fonts.ARIAL,
@@ -53,7 +52,7 @@ export default class HelpPage extends ContainerObject {
         const contentElem = contentBuilder
             .appendHTMLStyledText(TextUtil.processTags(content))
             .build();
-        contentElem.position = new Point(theme.padding, titleMetrics.height + theme.padding);
+        contentElem.position = new Point(0, titleMetrics.height + theme.padding);
 
         const back = new GameButton().label(
             Fonts.stdMedium()
@@ -67,7 +66,7 @@ export default class HelpPage extends ContainerObject {
         back.clicked.connect(() => {
             this._onBack.emit();
         });
-        back.container.position = new Point(theme.padding, this._height - theme.padding);
+        back.container.position = new Point(0, this._height - theme.padding);
 
         this.container.addChild(titleElem);
         this.container.addChild(contentElem);

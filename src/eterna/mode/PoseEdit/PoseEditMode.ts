@@ -411,7 +411,12 @@ export default class PoseEditMode extends GameMode {
 
     public onHelpClicked() {
         if (!this._helpScreen) {
-            const {panel, positionUpdater} = HelpScreen.create();
+            const {panel, positionUpdater} = HelpScreen.create({
+                toolTips: {
+                    hints: Boolean(this._puzzle.hint),
+                    modeSwitch: this.toolbar.naturalButton.display.visible
+                }
+            });
             this._helpScreen = this.addObject(panel, this.container);
             panel.regs.add(this.resized.connect(positionUpdater));
             return;

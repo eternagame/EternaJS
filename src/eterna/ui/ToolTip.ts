@@ -4,7 +4,8 @@ import Fonts from 'eterna/util/Fonts';
 
 interface ToolTipProps {
     text: string;
-    side: 'top' | 'bottom';
+    // default: top
+    side?: 'top' | 'bottom';
     tailLength?: number;
     content?: PIXI.Container;
 }
@@ -30,11 +31,16 @@ export default class ToolTip extends ContainerObject {
         const textMetrics = PIXI.TextMetrics.measureText(props.text, textBuilder.style);
         const textElem = textBuilder.build();
 
-        const width = textMetrics.width + theme.padding * 2;
-        const height = textMetrics.height + theme.padding * 2;
+        // Background
+        const widestElem = Math.max(textMetrics.width, props.content ? props.content.width : 0);
+        const width = widestElem + theme.padding * 2;
+
+        const height = textMetrics.height 
+            + theme.padding * 2
+            + (props.content ? (props.content.height + theme.padding) : 0);
+
         const isBottom = props.side === 'bottom';
         const tailLength = props.tailLength ?? 0;
-
         const backgroundX = -width / 2;
         const [backgroundY, tipY, tailY] = (() => {
             if (isBottom) {
@@ -51,12 +57,14 @@ export default class ToolTip extends ContainerObject {
                 ];
             }
         })();
-
-        // Background
+        
         const background = new Graphics();
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
-        textElem.position = new Point(backgroundX + theme.padding, backgroundY + theme.padding);
+        textElem.position = new Point(
+            backgroundX + (width - textMetrics.width) / 2, 
+            backgroundY + theme.padding
+        );
 
         // Tip
         const tipDirection = isBottom ? -1 : 1;
@@ -74,8 +82,17 @@ export default class ToolTip extends ContainerObject {
             background.moveTo(tip[2].x, tailY);
             background.lineTo(tip[2].x, tailY + props.tailLength);
         }
-
+        
         this.container.addChild(background);
+
+        if (props.content) {
+            props.content.position = new Point(
+                backgroundX + (width - props.content.width) / 2,
+                backgroundY + textMetrics.height + theme.padding * 2
+            );
+            this.container.addChild(props.content);
+        }
+
         this.container.addChild(textElem);
     }
 }
