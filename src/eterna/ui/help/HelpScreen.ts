@@ -3,6 +3,7 @@ import {Point} from 'pixi.js';
 import ToolTip from '../ToolTip';
 import MultiPagePanel from '../MultiPagePanel';
 import HelpItem from './HelpItem';
+import HelpPage from './HelpPage';
 
 export default class HelpScreen {
     private static readonly theme = {
@@ -13,6 +14,9 @@ export default class HelpScreen {
         column: {
             width: 228,
             height: 356
+        },
+        page: {
+            height: 280
         }
     };
 
@@ -51,53 +55,56 @@ export default class HelpScreen {
         });
 
         // Help content
+        const helpPage = new HelpPage({
+            width: theme.column.width * 2,
+            height: theme.page.height
+        });
         const help = new MultiPagePanel({
             title: 'Quick Help Topics',
-            pages: (() => {
-                const page = new ContainerObject();
-                
-                return [page];
-            })(),
+            pages: [helpPage],
             width: theme.column.width * 2,
             height: theme.column.height
         });
+        help.display.visible = false;
+        helpPage.onBack.connect(() => {
+            help.display.visible = false;
+        });
 
         // help sections
-        const sections = new MultiPagePanel({
+        const sections = new ContainerObject();
+        const sectionsContainer = new MultiPagePanel({
             title: 'Quick Help Topics',
-            pages: (() => {
-                const page = new ContainerObject();
-
-                const add = (text: string, index: number, column: number) => {
-                    const shortcut = new HelpItem({
-                        text,
-                        width: theme.item.width,
-                        onClicked: () => {
-
-                        }
-                    });
-                    shortcut.container.position.x = column * theme.column.width;
-                    shortcut.container.position.y = index * theme.item.height;
-                    page.addObject(shortcut, page.container);
-                };
-
-                add('Tips & Tricks', 0, 0);
-                add('The Four Bases', 1, 0);
-                add('Moving & Magnifying RNA', 2, 0);
-
-                add('Placing A-U', 0, 1);
-                add('Slides', 1, 1);
-                add('Swap Tool', 2, 1);
-
-                return [page];
-            })(),
+            pages: (() => [sections])(),
             width: theme.column.width * 2,
             height: theme.column.height
         });
 
         screen.addObject(shortCuts, screen.container);
-        screen.addObject(sections, screen.container);
+        screen.addObject(sectionsContainer, screen.container);
+        screen.addObject(help, screen.container);
         toolsTips.forEach(([toolTip]) => screen.addObject(toolTip, screen.container));
+
+        const locale = 'en-US'; // navigator.language;
+        fetch(`/help/help-${locale}`).then((data) => data.json())
+            .then((json: { [key: string]: string }) => {
+                const itemsPerColumn = 10;
+                Object.entries(json).forEach(([name, text], index) => {
+                    const column = Math.floor(index / itemsPerColumn);
+                    const localIndex = index % itemsPerColumn;
+                    const shortcut = new HelpItem({
+                        text,
+                        width: theme.item.width,
+                        onClicked: () => {
+                            helpPage.setup(name, text);
+                            help.display.visible = true;
+                        }
+                    });
+                    shortcut.container.position.x = column * theme.column.width;
+                    shortcut.container.position.y = localIndex * theme.item.height;
+                    sections.addObject(shortcut, sections.container);
+                });
+            });
+
 
         const positionUpdater = () => {
             toolsTips.forEach(([toolTip, pos, offset]) => {
@@ -118,6 +125,7 @@ export default class HelpScreen {
                 shortCuts.container.position.x + theme.column.width + spacing,
                 shortCuts.container.position.y
             );
+            help.container.position = sections.container.position;
         };
 
         positionUpdater();
