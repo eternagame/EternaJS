@@ -20,7 +20,6 @@ export default class RNAScript {
         this._env = new RScriptEnv(ui, puz);
         ui.addObject(this._env, ui.container);
 
-        ROPWait.clearRopWait();
         this._ops = new RScriptOpTree();
 
         // Convert string into instructions by splitting at semicolons.
@@ -39,6 +38,7 @@ export default class RNAScript {
     /** Notify us when RNA is completed (or puzzle finishes). */
     public finishLevel(): void {
         ROPWait.notifyFinishRNA();
+        ROPWait.clearRopWait();
         if (this._env) {
             this._env.cleanup();
         }
