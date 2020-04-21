@@ -89,11 +89,21 @@ export default class HelpScreen {
             height: theme.column.height
         });
 
+        // backdrop
+        const backdrop = new PIXI.Graphics();
+        const drawBackDrop = () => {
+            backdrop.clear();
+            backdrop.beginFill(0, 0.4);
+            backdrop.drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
+            backdrop.endFill();
+        };
+
         const screen = new ContainerObject();
+        screen.container.addChild(backdrop);
         screen.addObject(shortCuts, screen.container);
         screen.addObject(sectionsContainer, screen.container);
         screen.addObject(help, screen.container);
-        tooltips.forEach(([toolTip]) => screen.addObject(toolTip, screen.container));
+        tooltips.forEach((toolTip) => screen.addObject(toolTip, screen.container));
 
         // TODO localize
         const locale = 'en-US'; // navigator.language;
@@ -118,12 +128,8 @@ export default class HelpScreen {
 
 
         const positionUpdater = () => {
-            tooltips.forEach(([toolTip, pos, offset]) => {
-                toolTip.container.position = new Point(
-                    Flashbang.stageWidth * pos.x + offset.x,
-                    Flashbang.stageHeight * pos.y + offset.y
-                );
-            });
+            drawBackDrop();
+            tooltips.forEach((toolTip) => toolTip.updatePosition());
 
             const width = theme.column.width * 3 + theme.column.margin;
             shortCuts.container.position = new Point(

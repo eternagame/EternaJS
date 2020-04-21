@@ -1,11 +1,15 @@
 import {ContainerObject} from 'flashbang';
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, Point, Rectangle} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
+
+export type ToolTipPositioner = [() => Rectangle, number];
+
+type HelpToolTipSide = 'top' | 'bottom';
 
 interface HelpToolTipProps {
     text: string;
-    // default: top
-    side?: 'top' | 'bottom';
+    positioner: ToolTipPositioner;
+    side?: HelpToolTipSide;
     tailLength?: number;
     content?: PIXI.Container;
 }
@@ -22,9 +26,26 @@ export default class HelpToolTip extends ContainerObject {
         tailWidth: 3
     };
 
+    private _side: HelpToolTipSide;
+    private _positioner: ToolTipPositioner;
+
+    public updatePosition() {
+        const [getBounds, offset] = this._positioner;
+        const bounds = getBounds();
+        this.container.position.x = bounds.x + bounds.width / 2 + offset;
+        if (this._side === 'top') {
+            this.container.position.y = bounds.y;
+        } else {
+            this.container.position.y = bounds.y + bounds.height;
+        }
+    }
+
     constructor(props: HelpToolTipProps) {
         super();
         const {theme} = HelpToolTip;
+
+        this._side = props.side ?? 'top';
+        this._positioner = props.positioner;
 
         // Text
         const textBuilder = Fonts.stdBold(props.text).fontSize(theme.fontSize).color(0);

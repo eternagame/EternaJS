@@ -59,6 +59,8 @@ export default class Toolbar extends ContainerObject {
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
 
+    public get position() { return new Point(this._content.x, this._content.y); }
+
     // Puzzle Maker
     public addbaseButton: GameButton;
     public addpairButton: GameButton;
@@ -87,13 +89,6 @@ export default class Toolbar extends ContainerObject {
         this._boostersData = boosters;
     }
 
-    public onResized() {
-        this.stateToggle.container.position = new Point(
-            Flashbang.stageWidth / 2 - this.container.position.x,
-            -this.container.position.y + 20
-        );
-    }
-
     protected added(): void {
         super.added();
 
@@ -119,15 +114,6 @@ export default class Toolbar extends ContainerObject {
         this.container.addChild(this._content);
 
         this.stateToggle = new ToggleBar(this._states);
-        if (
-            this._states > 1
-            && this._type !== ToolbarType.PUZZLEMAKER
-            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
-        ) {
-            // We create the stateToggle even if we don't add it to the mode,
-            // as scripts may rely on its existence
-            this.addObject(this.stateToggle, this.container);
-        }
 
         // UPPER TOOLBAR (structure editing tools)
         let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
@@ -207,6 +193,17 @@ export default class Toolbar extends ContainerObject {
         // LOWER TOOLBAR (palette, zoom, settings, etc)
         let lowerToolbarLayout = new HLayoutContainer();
         this._content.addChild(lowerToolbarLayout);
+
+        if (
+            this._states > 1
+            && this._type !== ToolbarType.PUZZLEMAKER
+            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
+            // We create the stateToggle even if we don't add it to the mode,
+            // as scripts may rely on its existence
+            this.addObject(this.stateToggle, lowerToolbarLayout);
+            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        }
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
         this.addObject(this.actionMenu, lowerToolbarLayout);
