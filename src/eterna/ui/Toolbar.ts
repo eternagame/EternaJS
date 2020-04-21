@@ -89,6 +89,13 @@ export default class Toolbar extends ContainerObject {
         this._boostersData = boosters;
     }
 
+    public onResized() {
+        this.stateToggle.container.position = new Point(
+            Flashbang.stageWidth / 2 - this.container.position.x,
+            -this.container.position.y + 20
+        );
+    }
+
     protected added(): void {
         super.added();
 
@@ -201,8 +208,7 @@ export default class Toolbar extends ContainerObject {
         ) {
             // We create the stateToggle even if we don't add it to the mode,
             // as scripts may rely on its existence
-            this.addObject(this.stateToggle, lowerToolbarLayout);
-            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.addObject(this.stateToggle, this.container);
         }
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);

@@ -33,7 +33,7 @@ export default class HelpToolTips {
                 : null,
 
             props.pip
-                ? new HelpToolTip({text: 'Pip MODE', tailLength, positioner: props.pip})
+                ? new HelpToolTip({text: 'PiP MODE', tailLength, positioner: props.pip})
                 : null,
 
             new HelpToolTip({
@@ -96,7 +96,7 @@ export default class HelpToolTips {
                 : null,
 
             props.switchState
-                ? new HelpToolTip({text: 'SWITCH STATE', side: 'top', positioner: props.switchState})
+                ? new HelpToolTip({text: 'SWITCH STATE', side: 'bottom', positioner: props.switchState})
                 : null
 
         ].filter(Boolean);

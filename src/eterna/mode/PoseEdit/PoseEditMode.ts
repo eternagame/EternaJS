@@ -262,6 +262,8 @@ export default class PoseEditMode extends GameMode {
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
 
+        this._toolbar.onResized();
+
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0, 0
@@ -462,7 +464,15 @@ export default class PoseEditMode extends GameMode {
                     : undefined,
 
                 switchState: switchStateButton
-                    ? [() => getBounds(this.toolbar.stateToggle), 0]
+                    ? [
+                        () => new Rectangle(
+                            this.toolbar.stateToggle.container.x + this.toolbar.container.x,
+                            this.toolbar.stateToggle.container.y + this.toolbar.container.y,
+                            this.toolbar.stateToggle.container.width,
+                            this.toolbar.stateToggle.container.height
+                        ),
+                        0
+                    ]
                     : undefined,
 
                 submit: this.toolbar.submitButton.container.parent
