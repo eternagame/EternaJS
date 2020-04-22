@@ -94,8 +94,10 @@ export default class Toolbar extends ContainerObject {
     protected added(): void {
         super.added();
 
-        const SPACE_NARROW = 7;
-        const SPACE_WIDE = 25;
+        const APPROX_ITEM_COUNT = 12;
+        const APPROX_ITEM_WIDTH = 55;
+        const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 25);
+        const SPACE_NARROW = SPACE_WIDE * 0.28;
 
         // This can be used in both puzzlemaker and lab, so we'll create the base button ahead of time
         // TODO: Maybe these should really be two separate buttons set on different properties?
@@ -517,16 +519,10 @@ export default class Toolbar extends ContainerObject {
     private updateLayout(): void {
         this._content.layout(true);
 
-        // If we have no boosters menu, we offset our entire layout by the .5 width of
-        // the boosters button. The tutorial hardcodes screen locations for its
-        // point-at-toolbar-buttons tips, so everything needs to be laid out *just so*,
-        // unfortunately.
-        let hOffset = (this.boostersMenu == null && this._type === ToolbarType.PUZZLE ? 27 : 0);
-
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
             this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
-            hOffset, 0
+            -25, 0
         );
     }
 
@@ -642,7 +638,6 @@ export default class Toolbar extends ContainerObject {
 
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
-    private _toolbarLayout: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup;
