@@ -11,7 +11,8 @@ enum ROPPreType {
     DISABLE_UI_ELEMENT = 'DISABLE_UI_ELEMENT',
     DISABLE_RNA_CHANGE = 'DISABLE_RNA_CHANGE',
     SET_DEFAULT_FOLD_MODE = 'SET_DEFAULT_FOLD_MODE',
-    PUSH_PUZZLE = 'PUSH_PUZZLE'
+    PUSH_PUZZLE = 'PUSH_PUZZLE',
+    RESET_SEQUENCE = 'RESET_SEQUENCE'
 }
 
 export default class ROPPre extends RScriptOp {
@@ -27,6 +28,7 @@ export default class ROPPre extends RScriptOp {
         const disableRNAMod = /(DisableRNAModification)/ig;
         const modeRegex = /^(Native|Target)Mode$/ig;
         const pushPuzzleRegex = /PushPuzzle/;
+        const resetSequence = /ResetSequence/g;
 
         let regResult: RegExpExecArray;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {
@@ -48,6 +50,8 @@ export default class ROPPre extends RScriptOp {
             this._foldMode = (regResult[1].toUpperCase() === 'NATIVE' ? PoseState.NATIVE : PoseState.TARGET);
         } else if ((regResult = pushPuzzleRegex.exec(command)) != null) {
             this._type = ROPPreType.PUSH_PUZZLE;
+        } else if ((regResult = resetSequence.exec(command)) != null) {
+            this._type = ROPPreType.RESET_SEQUENCE;
         }
     }
 
@@ -107,6 +111,10 @@ export default class ROPPre extends RScriptOp {
             case ROPPreType.PUSH_PUZZLE:
                 RSignals.pushPuzzle.emit(this._allArgs[0]);
                 break;
+            case ROPPreType.RESET_SEQUENCE:
+                // Do nothing, this is caught at the end of puzzle loading.
+                break;
+
             default:
                 throw new Error(`Invalid Preprocessing Command: ${this._type}`);
         }
