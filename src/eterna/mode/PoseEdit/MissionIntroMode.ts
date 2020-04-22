@@ -10,8 +10,8 @@ import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
-import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
+import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 
 export default class MissionIntroMode extends AppMode {
     constructor(
@@ -32,131 +32,117 @@ export default class MissionIntroMode extends AppMode {
         let background = new Graphics();
         this.container.addChild(background);
 
+        this._panel = new GamePanel(GamePanelType.NORMAL, 1.0, 0x21508C, 1.0, 0x4A90E2);
+        this._panel.title = 'YOUR MISSION';
+        this.container.addChild(this._panel.display);
+
+        this._scrollLayer = new Container();
+        this._panel.container.addChild(this._scrollLayer);
+
         new DisplayObjectPointerTarget(background).pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.play());
 
-        let moleculeImg = Sprite.fromImage(Bitmaps.MissionBackgroundImage);
-        this.container.addChild(moleculeImg);
-
-        let missionText = Fonts.stdLight('MISSION', 48).color(0xFFCC00).build();
-        this.container.addChild(missionText);
-
         const descriptionStyle = {
-            fontFamily: Fonts.STDFONT_LIGHT,
+            fontFamily: Fonts.STDFONT_REGULAR,
             fill: 0xBCD8E3,
-            fontSize: 36,
+            fontSize: 14,
             leading: 50
         };
         let descriptionLabel = new StyledTextBuilder(descriptionStyle)
             .appendHTMLStyledText(this._puzzleDescription)
             .build();
-        this.container.addChild(descriptionLabel);
+        this._scrollLayer.addChild(descriptionLabel);
 
         let playButton = new GameButton()
             .up(Bitmaps.PlayImage)
             .over(Bitmaps.PlayImageOver)
             .down(Bitmaps.PlayImageHit);
-        this.addObject(playButton, this.container);
+        this.addObject(playButton, this._panel.container);
         this.regs.add(playButton.clicked.connect(() => this.play()));
 
-        let bgImage = Sprite.fromImage(Bitmaps.MissionPuzzleIdImage);
-        this.container.addChild(bgImage);
-
-        let nameLabel = new HTMLTextObject(this._puzzleName)
-            .font(Fonts.STDFONT_LIGHT)
-            .fontSize(18)
-            .color(0xffffff)
-            .selectable(false)
-            .maxWidth(Flashbang.stageWidth);
-        this.addObject(nameLabel, this.container);
-
-        let goalsLabel = Fonts.stdLight('GOAL', 24).color(0xffcc00).build();
-        this.container.addChild(goalsLabel);
-
-        this._goalsBG = Sprite.fromImage(Bitmaps.MissionPuzzleThumbnailImage);
-        this.container.addChild(this._goalsBG);
-
         this._goalsThumbnail = new Sprite();
-        this.container.addChild(this._goalsThumbnail);
+        this._goalsThumbnail.scale = new Point(0.5, 0.5);
+        this._scrollLayer.addChild(this._goalsThumbnail);
 
         this._scrollUpButton = new GameButton().allStates(Bitmaps.ImgUpArrow).hotkey(KeyCode.ArrowUp);
         this._scrollUpButton.display.scale = new Point(0.15, 0.15);
         this._scrollUpButton.display.visible = false;
         this._scrollUpButton.clicked.connect(() => this.scrollUp());
-        this.addObject(this._scrollUpButton, this.container);
+        this.addObject(this._scrollUpButton, this._panel.container);
 
         this._scrollDownButton = new GameButton().allStates(Bitmaps.ImgDownArrow).hotkey(KeyCode.ArrowDown);
         this._scrollDownButton.display.scale = new Point(0.15, 0.15);
         this._scrollDownButton.display.visible = false;
         this._scrollDownButton.clicked.connect(() => this.scrollDown());
-        this.addObject(this._scrollDownButton, this.container);
+        this.addObject(this._scrollDownButton, this._panel.container);
 
-        this._constraintsLayer = new Container();
-        this.container.addChild(this._constraintsLayer);
+        this.addPuzzleThumbnails();
+        this.addConstraintBoxes();
 
         let updateLayout = () => {
             // draw background
             background.clear();
-            background.beginFill(0x000000);
-            background.drawRect(0, 0, Flashbang.stageWidth, 367);
-            background.endFill();
-
-            background.beginFill(0x0A1E39, 0.95);
-            background.drawRect(0, 367, Flashbang.stageWidth, Math.max(Flashbang.stageHeight - 367, 0));
+            background.beginFill(0x000000, 0.75);
+            background.drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
             background.endFill();
 
             // layout objects
-            moleculeImg.position = new Point((Flashbang.stageWidth - moleculeImg.width) * 0.5, 0);
+            const margin = 10;
+            const panelWidth = 314;
+            let panelY = this._panel.titleHeight + margin;
 
-            const leftEdge = Math.max(25.0, (Flashbang.stageWidth * 0.5) - 420.5);
-            const rightEdge = Math.min(Flashbang.stageWidth - 25.0, (Flashbang.stageWidth * 0.5) + 420.5);
+            descriptionLabel.position = new Point(
+                (panelWidth - descriptionLabel.width) / 2,
+                panelY
+            );
+            panelY += descriptionLabel.height + margin;
 
-            missionText.position = new Point(leftEdge, 123);
+            const thumbnailBounds = this._goalsThumbnail.getBounds();
+            this._goalsThumbnail.position = new Point(
+                (panelWidth - thumbnailBounds.width) / 2,
+                panelY
+            );
+            panelY += thumbnailBounds.height + margin;
 
-            descriptionLabel.position = new Point(leftEdge, 123 + missionText.height + 25);
+            panelY = this.updateThumbnailButtons(panelWidth, panelY, margin);
+
+            panelY = this.updateConstraintBoxes(panelWidth, panelY, margin);
+
+            this._scrollHeight = panelY;
+
+            // NOTE(johannes): Add 1 at the end to stop activateScroll to accidentally be true
+            const panelFullSize = (this._scrollHeight + playButton.display.height + margin * 2) + 1;
+
+            this._panel.setSize(panelWidth, Math.min(panelFullSize, Flashbang.stageHeight * 0.8, 400));
+            this._panel.display.position = new Point(
+                (Flashbang.stageWidth - this._panel.width) / 2,
+                (Flashbang.stageHeight - this._panel.height) / 2
+            );
 
             playButton.display.position = new Point(
-                Flashbang.stageWidth - playButton.container.width - 91.5,
-                Flashbang.stageHeight - 30 - playButton.container.height
+                (panelWidth - playButton.display.width) / 2,
+                this._panel.height - playButton.display.height - margin
             );
 
-            bgImage.position = new Point(leftEdge, 0);
+            this._panelContainHeight = playButton.display.y - margin;
 
-            const nameLabelXOffset = 15;
-            nameLabel.display.position = new Point(leftEdge + nameLabelXOffset, 12);
-            bgImage.width = nameLabel.width + nameLabelXOffset * 2;
-
-            goalsLabel.position = new Point(
-                leftEdge,
-                367 + 15
-            );
-
-            this._goalsBG.position = new Point(
-                leftEdge,
-                367 + 60
-            );
-
-            this._goalsThumbnail.position = new Point(
-                leftEdge + 22.5,
-                367 + 60 + 22.5
-            );
+            const activateScroll = this._scrollHeight > this._panelContainHeight;
+            this._scrollUpButton.display.visible = activateScroll;
+            this._scrollDownButton.display.visible = activateScroll;
 
             this._scrollUpButton.display.position = new Point(
-                rightEdge - this._scrollUpButton.container.width - 30,
-                367 + 40
+                this._panel.width + margin,
+                this._panel.titleHeight + margin
             );
 
             this._scrollDownButton.display.position = new Point(
-                rightEdge - this._scrollDownButton.container.width - 30,
-                Flashbang.stageHeight - 55 - playButton.container.height - this._scrollDownButton.container.height - 15
+                this._panel.width + margin,
+                this._panelContainHeight - this._scrollDownButton.container.height - margin
             );
 
-            this.setupConstraintScrollMask();
+            this.setupScrollMask();
         };
         updateLayout();
         this.resized.connect(updateLayout);
-
-        this.addPuzzleThumbnails();
-        this.addConstraintBoxes();
     }
 
     protected enter(): void {
@@ -171,41 +157,32 @@ export default class MissionIntroMode extends AppMode {
 
     private addConstraintBoxes(): void {
         for (let constraintBox of this._constraintBoxes) {
-            this.addObject(constraintBox, this._constraintsLayer);
+            this.addObject(constraintBox, this._scrollLayer);
             constraintBox.flare(false);
         }
+    }
 
-        const updateLayout = () => {
-            const leftEdge = Math.max(25.0, (Flashbang.stageWidth * 0.5) - 420.5);
-            let yLoc = 367 + 60;
-            for (let constraintBox of this._constraintBoxes) {
-                let bounds = constraintBox.container.getLocalBounds();
-                constraintBox.display.position = new Point(
-                    leftEdge + this._goalsBG.width + 82,
-                    -bounds.top + yLoc
-                );
-                yLoc += bounds.height + 10;
-            }
-
-            this._constraintsHeight = yLoc;
-
-            const activateScroll = this._constraintsHeight > Flashbang.stageHeight * 0.8;
-            this._scrollUpButton.display.visible = activateScroll;
-            this._scrollDownButton.display.visible = activateScroll;
-        };
-
-        updateLayout();
-        this.resized.connect(updateLayout);
+    private updateConstraintBoxes(panelWidth: number, panelY: number, margin: number): number {
+        for (let constraintBox of this._constraintBoxes) {
+            let bounds = constraintBox.container.getLocalBounds();
+            constraintBox.display.position = new Point(
+                margin,
+                -bounds.top + panelY
+            );
+            constraintBox.display.width = panelWidth - margin * 2;
+            panelY += bounds.height + margin;
+        }
+        return panelY;
     }
 
     private addPuzzleThumbnails(): void {
-        let thumbnailButtons: GameButton[] = [];
+        this._thumbnailButtons = [];
 
         if (this._puzzleThumbnails.length > 1) {
             for (let ii = 0; ii < this._puzzleThumbnails.length; ++ii) {
                 let thumbnailButton = new GameButton().label((ii + 1).toString(), 22);
-                thumbnailButtons.push(thumbnailButton);
-                this.addObject(thumbnailButton, this.container);
+                this._thumbnailButtons.push(thumbnailButton);
+                this.addObject(thumbnailButton, this._scrollLayer);
 
                 thumbnailButton.pointerOver.connect(() => {
                     this.setPuzzleThumbnail(ii);
@@ -215,18 +192,24 @@ export default class MissionIntroMode extends AppMode {
 
         this._curThumbnail = -1;
         this.setPuzzleThumbnail(0);
+    }
 
-        const updateLayout = () => {
-            for (let ii = 0; ii < thumbnailButtons.length; ++ii) {
-                let button = thumbnailButtons[ii];
+    private updateThumbnailButtons(panelWidth: number, panelY: number, margin: number): number {
+        const buttonCount = this._thumbnailButtons.length;
+        if (buttonCount > 0) {
+            const buttonWidth = this._thumbnailButtons[0].display.width;
+            const buttonHeight = this._thumbnailButtons[0].display.height;
+            const totalButtonWidth = buttonWidth * buttonCount + 20 * (buttonCount - 1);
+            for (let ii = 0; ii < buttonCount; ++ii) {
+                let button = this._thumbnailButtons[ii];
                 button.display.position = new Point(
-                    (Flashbang.stageWidth * 0.5) - 420.5 + ii * (button.container.width + 20),
-                    367 + 60 + this._goalsBG.height + 10
+                    ((panelWidth - totalButtonWidth) / 2) + ii * (buttonWidth + 20),
+                    panelY
                 );
             }
-        };
-        updateLayout();
-        this.resized.connect(updateLayout);
+            panelY += buttonHeight + margin;
+        }
+        return panelY;
     }
 
     private play(): void {
@@ -237,13 +220,12 @@ export default class MissionIntroMode extends AppMode {
     }
 
     private scrollUp(): void {
-        this._constraintsLayer.y = Math.min(this._constraintsLayer.y + 10, 0);
+        this._scrollLayer.y = Math.min(this._scrollLayer.y + 10, 0);
     }
 
     private scrollDown(): void {
-        let limit = -this._constraintsHeight + 367 + 60
-            + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
-        this._constraintsLayer.y = Math.max(this._constraintsLayer.y - 10, limit);
+        const limit = -(this._scrollHeight - this._panelContainHeight);
+        this._scrollLayer.y = Math.max(this._scrollLayer.y - 10, limit);
     }
 
     private setPuzzleThumbnail(index: number): void {
@@ -265,26 +247,25 @@ export default class MissionIntroMode extends AppMode {
             this._goalsThumbnail, sequence, targetPairs, 6, PoseThumbnailType.WRONG_COLORED, 0, wrongPairs, false, 0,
             this._customLayout
         );
-        DisplayUtil.center(this._goalsThumbnail, this._goalsBG);
     }
 
-    private setupConstraintScrollMask(): void {
-        if (this._constraintMask == null) {
-            this._constraintMask = new Graphics();
-            this.container.addChild(this._constraintMask);
+    private setupScrollMask(): void {
+        if (this._scrollMask == null) {
+            this._scrollMask = new Graphics();
+            this._panel.container.addChild(this._scrollMask);
         }
 
-        let topY = this._scrollUpButton.display.y;
-        let botY = this._scrollDownButton.display.y;
+        let topY = this._panel.titleHeight;
+        let botY = this._panelContainHeight;
 
-        this._constraintMask.clear();
-        this._constraintMask.beginFill(0x00FF00, 0);
-        this._constraintMask.drawRect(
-            0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY
+        this._scrollMask.clear();
+        this._scrollMask.beginFill(0x00FF00, 0);
+        this._scrollMask.drawRect(
+            0, topY, this._panel.width, botY - topY
         );
-        this._constraintMask.x = 0;
-        this._constraintMask.y = 0;
-        this._constraintsLayer.mask = this._constraintMask;
+        this._scrollMask.x = 0;
+        this._scrollMask.y = 0;
+        this._scrollLayer.mask = this._scrollMask;
     }
 
     private readonly _puzzleName: string;
@@ -294,17 +275,19 @@ export default class MissionIntroMode extends AppMode {
 
     private _closed: boolean = false;
 
-    private _goalsBG: Sprite;
+    private _panel: GamePanel;
+    private _panelContainHeight: number;
     private _goalsThumbnail: Sprite;
+    private _thumbnailButtons: GameButton[];
     private _curThumbnail: number = 0;
 
-    private _constraintsLayer: Container;
-    private _constraintsHeight: number = 0;
+    private _scrollLayer: Container;
+    private _scrollHeight: number = 0;
 
     private _scrollUpButton: GameButton;
     private _scrollDownButton: GameButton;
 
-    private _constraintMask: Graphics;
+    private _scrollMask: Graphics;
 
     private _customLayout: Array<[number, number]>;
 }

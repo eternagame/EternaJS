@@ -282,7 +282,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public static createTextStyle(): StyledTextBuilder {
         let style: StyledTextBuilder = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT_REGULAR,
-            fontSize: 16,
+            fontSize: 14,
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
