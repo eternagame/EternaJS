@@ -362,6 +362,14 @@ export default class PuzzleManager {
         }
         const puzzle = this.parsePuzzle(json);
         await this.preloadScripts(puzzle);
+
+        // Pre-load secondary puzzle
+        const [m, secondaryPuzzlePath] = puzzle.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        if (secondaryPuzzlePath) {
+            const secondaryPuzzleJson = await (await fetch(secondaryPuzzlePath)).json();
+            await this.getPuzzleFromJSON(secondaryPuzzleJson);
+        }
+
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
     }
