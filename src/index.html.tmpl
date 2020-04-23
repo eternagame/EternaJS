@@ -16,6 +16,7 @@
 <script>
     const containerID = "maingame";
     const appContainer = document.getElementById(containerID);
+    const params = new URLSearchParams(window.location.search);
 
     const app = new EternaApp({
         containerID: containerID,
@@ -23,7 +24,8 @@
         height: appContainer.clientHeight,
         mode: 'puzzle',
 		
-		puzzlePath: '/puzzles/puzzle-1.2.json'	
+		puzzlePath: params.get('puzzlePath') || 'puzzle-1.1.json',
+        puzzlesRoot: '/puzzles'
     });
     window.app = app;
     app.run();

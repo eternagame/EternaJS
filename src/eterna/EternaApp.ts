@@ -82,6 +82,7 @@ export interface EternaAppParams {
     mode?: InitialAppMode;
     puzzleID?: number;
     puzzlePath?: string;
+    puzzlesRoot?: string;
     solutionID?: number;
     puzzleEditNumTargets?: number;
     folderName?: string;
@@ -119,8 +120,9 @@ export default class EternaApp extends FlashbangApp {
 
         ExternalInterface.init(eternaContainer);
 
-        RSignals.pushPuzzle.connect(async (puzzleId) => {
-            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleId);
+        RSignals.pushPuzzle.connect(async (puzzlePath) => {
+            const json = await (await fetch(`${params.puzzlesRoot ?? ''}/${puzzlePath}`)).json();
+            const puzzle = await PuzzleManager.instance.getPuzzleFromJSON(json);
             this._modeStack.pushMode(new PoseEditMode(puzzle, {}));
         });
 
@@ -357,7 +359,7 @@ export default class EternaApp extends FlashbangApp {
     }
 
     private async loadPuzzleFromFile(path: string) {
-        const json = await (await fetch(path)).json();
+        const json = await (await fetch(`${this._params.puzzlesRoot ?? ''}/${path}`)).json();
         this.setLoadingText('Loading puzzle...', null);
         const puzzle = await PuzzleManager.instance.getPuzzleFromJSON(json);
         this.popLoadingMode();

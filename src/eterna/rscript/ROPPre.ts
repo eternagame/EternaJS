@@ -104,10 +104,8 @@ export default class ROPPre extends RScriptOp {
                 this._env.puzzle.defaultMode = this._foldMode;
                 break;
 
-            case ROPPreType.PUSH_PUZZLE: {
-                const puzzleId = parseInt(this._allArgs[0], 10);
-                RSignals.pushPuzzle.emit(puzzleId);
-            }
+            case ROPPreType.PUSH_PUZZLE:
+                RSignals.pushPuzzle.emit(this._allArgs[0]);
                 break;
             default:
                 throw new Error(`Invalid Preprocessing Command: ${this._type}`);
