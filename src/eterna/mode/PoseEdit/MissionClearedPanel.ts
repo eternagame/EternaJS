@@ -79,7 +79,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .tooltip('Stay in this puzzle and review your design');
         this.addObject(this.closeButton, this.container);
 
-        this.nextButton = new GameButton().label(this._hasNextPuzzle ? 'NEXT PUZZLE' : "WHAT'S NEXT?");
+        this.nextButton = new GameButton().label('NEXT PUZZLE');
         this.addObject(this.nextButton, this.container);
 
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
@@ -122,7 +122,6 @@ export default class MissionClearedPanel extends ContainerObject {
     private doLayout(): void {
         this._rankScrollContainer.visible = (this._rankScroll != null);
         this.closeButton.display.visible = this._rankScrollContainer.visible;
-        this.nextButton.display.visible = this._rankScrollContainer.visible;
 
         DisplayUtil.positionRelative(
             this.closeButton.display, HAlign.RIGHT, VAlign.TOP,

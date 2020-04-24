@@ -25,7 +25,11 @@
         mode: 'puzzle',
 		
 		puzzlePath: params.get('puzzlePath') || 'puzzle-1.1.json',
-        puzzlesRoot: '/puzzles'
+        puzzlesRoot: '/puzzles',
+
+        onPuzzleCompleted: () => console.log('onPuzzleCompleted'),
+        onNextPuzzleClicked: () => console.log('onNextPuzzleClicked'),
+        onHomeClicked: () => console.log('onHomeClicked')
     });
     window.app = app;
     app.run();

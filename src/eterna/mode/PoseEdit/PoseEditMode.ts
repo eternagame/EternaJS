@@ -49,6 +49,7 @@ import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
 import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
+import RSignals from 'eterna/rscript/RSignals';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -219,7 +220,7 @@ export default class PoseEditMode extends GameMode {
             .down(Bitmaps.ImgHome);
         this._homeButton.display.position = new Point(11, 8);
         this._homeButton.clicked.connect(() => {
-            window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            RSignals.onHomeClicked.emit();
         });
         this.addObject(this._homeButton, this.uiLayer);
 
@@ -1747,6 +1748,7 @@ export default class PoseEditMode extends GameMode {
 
     private async submitSolution(details: SubmitPoseDetails, undoBlock: UndoBlock): Promise<void> {
         this._rscript.finishLevel();
+        RSignals.onPuzzleCompleted.emit();
 
         if (this._puzzle.nodeID < 0) {
             return;
@@ -1930,8 +1932,7 @@ export default class PoseEditMode extends GameMode {
             });
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
-                keepPlaying();
-                window.open(EternaURL.getFeedURL(), '_self');
+                RSignals.onNextPuzzleClicked.emit();
             });
         }
 

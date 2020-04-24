@@ -88,6 +88,10 @@ export interface EternaAppParams {
     folderName?: string;
     sequence?: string;
     designBrowserFilters?: DesignBrowserFilter[];
+
+    onPuzzleCompleted?: () => void;
+    onNextPuzzleClicked?: () => void;
+    onHomeClicked?: () => void;
 }
 
 /** Entry point for the game */
@@ -127,6 +131,16 @@ export default class EternaApp extends FlashbangApp {
         });
 
         RSignals.popPuzzle.connect(() => this._modeStack.popMode());
+
+        if (this._params.onPuzzleCompleted) {
+            RSignals.onPuzzleCompleted.connect(() => this._params.onPuzzleCompleted());
+        }
+        if (this._params.onNextPuzzleClicked) {
+            RSignals.onNextPuzzleClicked.connect(() => this._params.onNextPuzzleClicked());
+        }
+        if (this._params.onHomeClicked) {
+            RSignals.onHomeClicked.connect(() => this._params.onHomeClicked());
+        }
     }
 
     /* override */
