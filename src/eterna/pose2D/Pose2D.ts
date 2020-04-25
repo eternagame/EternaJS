@@ -3025,7 +3025,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 }
             }
 
-            if (this._pseudoknotted || this._scoreFolder.name === EternaFold.NAME) {
+            if (this._pseudoknotted) {
                 // totalScore = Math.round(this._scoreFolder.scoreStructures(
                 //     this._sequence, this._pairs
                 // ));
@@ -3170,7 +3170,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._scoreNodes = scoreNodes;
 
         this.clearScoreTexts();
-        if (this._displayScoreTexts && !this._pseudoknotted && this._scoreFolder.name !== EternaFold.NAME) {
+        if (this._displayScoreTexts && !this._pseudoknotted) {
             this._scoreTexts = [];
             for (let scoreNode of this._scoreNodes) {
                 let scoreText = new Sprite(BitmapManager.getTextBitmap(scoreNode.scoreString, scoreNode.scoreColor));

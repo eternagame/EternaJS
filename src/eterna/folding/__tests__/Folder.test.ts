@@ -145,7 +145,9 @@ test(`EternaFold:many_score_structures`, () => {
         .then((folder) => {
             
             const seqs: number[][] = [
-                EPars.stringToSequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
+                EPars.stringToSequence('GAAAC'),
+                EPars.stringToSequence('AAGAAACAGGAAACGAAACCGAAACU'),
+                // EPars.stringToSequence('ACGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCGC'),
                 // EPars.stringToSequence('GGACAAUCAGCUAGAAUGCAAAGUGACGGGCGAUGAAGGCCAAUGAGGUGAUGUCCCAUG'),
                 // EPars.stringToSequence('CAUAUGUAUAUGCUCACCAUAGUUGACAGUGCCAGAACGAAGCUGACUAGCUCUGUCUGC'),
                 // EPars.stringToSequence('AUUCUGCUUAUAGGGUUAUUAGAUCAUAUCUCUGUUCGGCCGAGCGUCUGAUCUAGGCGA'),
@@ -159,7 +161,9 @@ test(`EternaFold:many_score_structures`, () => {
             ];
     
             const strs: string[] = [
-                '.(((((...(((((......)))))........((((.....))))....))))).',
+                '(...)',
+                '(.(...).((...)(...))(...))',
+                // '.(((((...(((((......)))))........((((.....))))....))))).',
                 // '((((..((....................(((.......)))........)).))))....',
                 // '........................(((((.((.................)).)))))...',
                 // '....................(((((........(((((())))))....)))))......',
@@ -173,7 +177,25 @@ test(`EternaFold:many_score_structures`, () => {
             ];
             
             const scores: number[] = [
-                -193.84,
+                639.00,
+                3554.27,
+                // -193.84,
+                // -238.68,
+                // -575.70,
+                // -479.47,
+                // -580.39,
+                // -847.24,
+                // 245.57,
+                // -1296.44,
+                // -1352.82,
+                // -177.13,
+                // -711.52,
+            ];
+
+            const NNFEs: number[][] = [
+                [-1, 46, 0, 593 ],
+                [-1, 93, 0, -59, 1, 748, 2, 593, 8, -153, 9, 1149, 14, 593, 20, 593]
+                // [0, -193.84],
                 // -238.68,
                 // -575.70,
                 // -479.47,
@@ -191,16 +213,35 @@ test(`EternaFold:many_score_structures`, () => {
                 let seq = seqs[ii];
                 let str = strs[ii];
                 let scr = scores[ii];
+                let expNNFE = NNFEs[ii];
+                let outNNFE: number[] = [];
 
-                let struct = folder.foldSequence(
-                    seq,
-                    null);
-                expect(EPars.pairsToParenthesis(struct)).toEqual(str);
+                if ( ii > 10 ) { // these are stable
+                    let struct = folder.foldSequence(
+                        seq,
+                        null);
+                    expect(EPars.pairsToParenthesis(struct)).toEqual(str);
+                
 
-                let score = folder.scoreStructures(
-                    seq,
-                    struct);
-                expect(score).toBeDeepCloseTo(scr, 2);
+                    let score = folder.scoreStructures(
+                        seq,
+                        struct,
+                        false,
+                        37,
+                        outNNFE);
+                    expect(score).toBeDeepCloseTo(scr, 2);
+                    expect(outNNFE).toEqual(expNNFE);
+                } else {
+
+                    let score = folder.scoreStructures(
+                        seq,
+                        EPars.parenthesisToPairs(str),
+                        false,
+                        37,
+                        outNNFE);
+                    expect(score).toBeDeepCloseTo(scr, 2);
+                    expect(outNNFE).toEqual(expNNFE);
+                }
             }
         })).resolves.toBeUndefined();
 });
