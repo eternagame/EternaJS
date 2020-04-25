@@ -46,8 +46,6 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
     ParameterManager<float> parameter_manager;
     InferenceEngine<float> inference_engine(false);
     inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
 
     SStruct sstruct;
     sstruct.LoadString(seqString);
@@ -56,29 +54,21 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
 
     std::string newstr = "@" + structString;
     printf("%s\n", newstr.c_str());
-    // inference_engine.UseConstraints(sstruct.GetMapping());
     
     std::vector<float> w;
     // alter for eternafold
     w = GetDefaultComplementaryValues<float>();
     inference_engine.LoadValues(w);// * 2.71);
 
-    // inference_engine.ComputeInside();
-    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
-
-
-    // repeated just in case.
-    // sstruct.LoadString(seqString);
-    // sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    // inference_engine.LoadSequence(sstruct);
-
-
     inference_engine.UseConstraints(sstruct.GetMapping());
 
-    inference_engine.ComputeInside();
+    // we need to do viterbi to get traceback for single structure
+
+    inference_engine.ComputeViterbi();
+    inference_engine.GetViterbiFeatures(); // gets eos_cb
 
     result->nodes;//
-    result->energy = /*logZ_unconstrained */ -inference_engine.ComputeLogPartitionCoefficient();
+    result->energy = /*logZ_unconstrained */ -inference_engine.GetViterbiScore();
 
     // std::cout << "logZ_unconstrained (" << logZ_unconstrained 
     //     << ") - inference_engine.ComputeLogPartitionCoefficient() (" 

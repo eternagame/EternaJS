@@ -1,376 +1,409 @@
-Only in contrafold/src: contrafold
-Only in contrafold/src: Contrafold.cpp.orig
 Only in contrafold/src: Contrafold.o
 Only in contrafold/src: Defaults.ipp
 Only in contrafold/src: FileDescription.o
+diff -X .gitignore -ur contrafold_stock/src/InferenceEngine.hpp contrafold/src/InferenceEngine.hpp
+--- contrafold_stock/src/InferenceEngine.hpp	2020-04-25 05:36:40.000000000 -0700
++++ contrafold/src/InferenceEngine.hpp	2020-04-25 06:57:14.000000000 -0700
+@@ -283,6 +283,7 @@
+     // Viterbi inference
+     void ComputeViterbi();
+     RealT GetViterbiScore() const;
++    void GetViterbiFeatures();
+     std::vector<int> PredictPairingsViterbi() const;
+     std::vector<RealT> ComputeViterbiFeatureCounts();
+ 
+Only in contrafold/src: InferenceEngine.hpp.orig
 diff -X .gitignore -ur contrafold_stock/src/InferenceEngine.ipp contrafold/src/InferenceEngine.ipp
---- contrafold_stock/src/InferenceEngine.ipp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/InferenceEngine.ipp	2020-03-25 16:42:30.228287230 -0400
-@@ -2,6 +2,9 @@
+--- contrafold_stock/src/InferenceEngine.ipp	2020-04-25 05:36:40.000000000 -0700
++++ contrafold/src/InferenceEngine.ipp	2020-04-25 06:58:33.000000000 -0700
+@@ -2,10 +2,13 @@
  // InferenceEngine.ipp
  //////////////////////////////////////////////////////////////////////
  
-+/* for AS3 */
 +void (*eos_cb)(int index, int fe);
 +
  //////////////////////////////////////////////////////////////////////
  // Wrapper macros for certain model features.
  //////////////////////////////////////////////////////////////////////
-@@ -1372,7 +1375,8 @@
-                 CountBasePair(i+1,j-1,reverse_sums[(i+j)*L+j-i].second);
-                 if (allow_paired[offset[i]+j])
-                 {
--                    CountHelixStacking(i,j,reverse_sums[(i+j)*L+j-i].second);
-+                    CountHelixStacking(i,j,reverse_sums[(i+j)*L+j-i].second);			
-+                    // if (eos_cb) (*eos_cb)(i, floor(.5 + reverse_sums[(i+j)*L+j-i].second * 100.));
-                 }
-                 else
-                 {
-@@ -1766,6 +1770,25 @@
-     // we allow i to be as large as L and j to be as small as 0.
-     
-     Assert(0 < i && i <= L && 0 <= j && j < L, "Invalid indices.");
-+    
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if PARAMS_HELIX_CLOSING
-+// #if PROFILE
-+//         + profile_score_helix_closing[i*(L+1)+j].first
-+// #else                                          
-+//         + score_helix_closing[s[i]][s[j+1]].first
-+// #endif
-+// #endif
-+// #if PARAMS_DANGLE
-+// #if PROFILE
-+//         + (i < L ? profile_score_dangle_left[i*(L+1)+j].first : RealT(0))
-+//         + (j > 0 ? profile_score_dangle_right[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (i < L ? score_dangle_left[s[i]][s[j+1]][s[i+1]].first : RealT(0))
-+//         + (j > 0 ? score_dangle_right[s[i]][s[j+1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100.));
  
-     return
-         RealT(0)
-@@ -1793,6 +1816,8 @@
- {
-     Assert(0 < i && i <= L && 0 <= j && j < L, "Invalid indices.");
-     
-+    //AMW
 +
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-     profile_score_helix_closing[i*(L+1)+j].second += value;
-@@ -1843,6 +1868,23 @@
-     
-     Assert(0 < i && i < L && 0 < j && j < L, "Invalid indices.");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if PARAMS_HELIX_CLOSING
-+// #if PROFILE
-+//         + profile_score_helix_closing[i*(L+1)+j].first
-+// #else
-+//         + score_helix_closing[s[i]][s[j+1]].first
-+// #endif
-+// #endif
-+// #if PARAMS_TERMINAL_MISMATCH
-+// #if PROFILE
-+//         + profile_score_terminal_mismatch[i*(L+1)+j].first
-+// #else                                           
-+//         + score_terminal_mismatch[s[i]][s[j+1]][s[i+1]][s[j]].first
-+// #endif
-+// #endif
-+//     ) * 100 ) );
-+
-     return RealT(0)
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-@@ -1866,6 +1908,7 @@
- {
-     Assert(0 < i && i < L && 0 < j && j < L, "Invalid indices.");
-     
-+    //AMW
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-     profile_score_helix_closing[i*(L+1)+j].second += value;
-@@ -1898,6 +1941,22 @@
-     
-     Assert(0 < i && i <= L && 0 < j && j <= L && i != j, "Invalid base-pair");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if defined(HAMMING_LOSS)
-+//         + loss_paired[offset[i]+j]
-+// #endif
-+// #if PARAMS_BASE_PAIR
-+// #if PROFILE
-+//         + profile_score_base_pair[i*(L+1)+j].first
-+// #else
-+//         + score_base_pair[s[i]][s[j]].first
-+// #endif
-+// #endif
-+// #if PARAMS_BASE_PAIR_DIST
-+//         + cache_score_base_pair_dist[std::min(Abs(j - i), BP_DIST_LAST_THRESHOLD)].first
-+// #endif
-+//     ) * 100 ));
-+
-     return RealT(0)
+ // score for leaving s[i] unpaired
+ 
  #if defined(HAMMING_LOSS)
-         + loss_paired[offset[i]+j]
-@@ -1920,6 +1979,7 @@
- {
-     Assert(0 < i && i <= L && 0 < j && j <= L && i != j, "Invalid base-pair");
-     
-+    // AMW
- #if PARAMS_BASE_PAIR
- #if PROFILE
-     profile_score_base_pair[i*(L+1)+j].second += value;
-@@ -1961,6 +2021,27 @@
-     
-     Assert(0 < i && i + C_MIN_HAIRPIN_LENGTH <= j && j < L, "Hairpin boundaries invalid.");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ScoreUnpaired(i,j)
-+//         + ScoreJunctionB(i,j)
-+// #if PARAMS_HAIRPIN_LENGTH
-+//         + cache_score_hairpin_length[std::min(j - i, D_MAX_HAIRPIN_LENGTH)].first
-+// #endif
-+// #if PARAMS_HAIRPIN_3_NUCLEOTIDES
-+// #if PROFILE
-+//         + (j - i == 3 ? profile_score_hairpin_3_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (j - i == 3 ? score_hairpin_3_nucleotides[s[i+1]][s[i+2]][s[i+3]].first : RealT(0))
-+// #endif                                          
-+// #endif
-+// #if PARAMS_HAIRPIN_4_NUCLEOTIDES
-+// #if PROFILE
-+//         + (j - i == 4 ? profile_score_hairpin_4_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (j - i == 4 ? score_hairpin_4_nucleotides[s[i+1]][s[i+2]][s[i+3]][s[i+4]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100 ));
+@@ -4757,3 +4760,341 @@
+         ret[i] = (posterior[i] >= posterior_cutoff ? posterior[i] : RealT(0));
+     return ret;
+ }
 +
-     return 
-         ScoreUnpaired(i,j)
-         + ScoreJunctionB(i,j)
-@@ -1989,6 +2070,7 @@
- {
-     Assert(0 < i && i + C_MIN_HAIRPIN_LENGTH <= j && j < L, "Hairpin boundaries invalid.");
-     
-+    //AMW
-     CountUnpaired(i,j,value);
-     CountJunctionB(i,j,value);
- #if PARAMS_HAIRPIN_LENGTH
-@@ -2042,6 +2124,28 @@
-     Assert(0 <= i && i + 2 * m <= j && j <= L, "Helix boundaries invalid.");
-     Assert(2 <= m && m <= D_MAX_HELIX_LENGTH, "Helix length invalid.");
-     
-+// #if FAST_HELIX_LENGTHS
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (
++//////////////////////////////////////////////////////////////////////
++// InferenceEngine::GetViterbiFeatures
++// 
++// Put features in eos_cb.
++//////////////////////////////////////////////////////////////////////
 +
-+//         cache_score_helix_sums[(i+j+1)*L+j-i-1].first - cache_score_helix_sums[(i+j+1)*L+j-i-m-m+1].first
-+// #if PARAMS_HELIX_LENGTH
-+//         + cache_score_helix_length[m].first
-+// #endif
-+//     ) * 100 ) );
-+// #else 
++template<class RealT>
++void InferenceEngine<RealT>::GetViterbiFeatures()
++{
++    std::queue<triple<int *,int,int> > traceback_queue;
++    traceback_queue.push(make_triple(&F5t[0], 0, L));
 +
-+//     RealT ret = RealT(0);
-+//     for (int k = 1; k < m; k++)
-+//         ret += ScoreHelixStacking(i+k,j-k+1) + ScoreBasePair(i+k+1,j-k);
-+    
-+// #if PARAMS_HELIX_LENGTH
-+//     ret += cache_score_helix_length[m].first;
-+// #endif
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ret) * 100 ) );
-+// #endif
++    std::vector<triple<int, int, int> > multiloops;
++    ClearCounts();
 +
++    std::map<int, RealT> eos_cb_map;
++    for (int k = -1; k <= L; k++){
++        eos_cb_map[k] = 0;
++    }
 +
++    while (!traceback_queue.empty())
++    {
++        triple<int *,int,int> t = traceback_queue.front();
++        traceback_queue.pop();
++        const int *V = t.first;
++        const int i = t.second;
++        const int j = t.third;
++        
++        std::pair<int,int> traceback = DecodeTraceback (V == &F5t[0] ? V[j] : V[offset[i]+j]);
++        
++        //std::cout << (V == FCt ? "FC " : V == FMt ? "FM " : V == FM1t ? "FM1 " : "F5 ");
++        //std::cout << i << " " << j << ": " << traceback.first << " " << traceback.second << std::endl;
++        
++        switch (traceback.first)
++        {
 +
- #if FAST_HELIX_LENGTHS
-     
-     return
-@@ -2136,6 +2240,61 @@
-     Assert(l1 + l2 > 0 && l1 >= 0 && l2 >= 0 && l1 + l2 <= C_MAX_SINGLE_LENGTH, "Invalid single-branch loop size.");
- #endif
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ScoreUnpaired(i,p)
-+//         + ScoreUnpaired(q,j)
-+// #if PARAMS_BULGE_0x1_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 1 ? profile_score_bulge_0x1_nucleotides[j].first : RealT(0))
-+//         + (l1 == 1 && l2 == 0 ? profile_score_bulge_1x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 1 ? score_bulge_0x1_nucleotides[s[j]].first : RealT(0))
-+//         + (l1 == 1 && l2 == 0 ? score_bulge_1x0_nucleotides[s[i+1]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_BULGE_0x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 2 ? profile_score_bulge_0x2_nucleotides[j].first : RealT(0))
-+//         + (l1 == 2 && l2 == 0 ? profile_score_bulge_2x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 2 ? score_bulge_0x2_nucleotides[s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 2 && l2 == 0 ? score_bulge_2x0_nucleotides[s[i+1]][s[i+2]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_BULGE_0x3_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 3 ? profile_score_bulge_0x3_nucleotides[j].first : RealT(0))
-+//         + (l1 == 3 && l2 == 0 ? profile_score_bulge_3x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 3 ? score_bulge_0x3_nucleotides[s[j-2]][s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 3 && l2 == 0 ? score_bulge_3x0_nucleotides[s[i+1]][s[i+2]][s[i+3]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_1x1_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 1 && l2 == 1 ? profile_score_internal_1x1_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (l1 == 1 && l2 == 1 ? score_internal_1x1_nucleotides[s[i+1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_1x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 1 && l2 == 2 ? profile_score_internal_1x2_nucleotides[i*(L+1)+j].first : RealT(0))
-+//         + (l1 == 2 && l2 == 1 ? profile_score_internal_2x1_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (l1 == 1 && l2 == 2 ? score_internal_1x2_nucleotides[s[i+1]][s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 2 && l2 == 1 ? score_internal_2x1_nucleotides[s[i+1]][s[i+2]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_2x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 2 && l2 == 2 ? profile_score_internal_2x2_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else                                                                   
-+//         + (l1 == 2 && l2 == 2 ? score_internal_2x2_nucleotides[s[i+1]][s[i+2]][s[j-1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100 ) );
++    // HWS: we're not using these params
++#if PARAMS_HELIX_LENGTH || PARAMS_ISOLATED_BASE_PAIR
++            case TB_FN_HAIRPIN: 
++                CountHairpin(i,j,RealT(1));
++                break;
++            case TB_FN_SINGLE: 
++            {
++                const int p = i + traceback.second / (C_MAX_SINGLE_LENGTH+1);
++                const int q = j - traceback.second % (C_MAX_SINGLE_LENGTH+1);
++                CountSingle(i,j,p,q,RealT(1));
 +
++                traceback_queue.push(make_triple(&FCt[0], p+1, q-1));
++            }
++            break;
++            case TB_FN_BIFURCATION:
++            {
++                const int k = traceback.second;
++                CountJunctionA(i,j,RealT(1));
++                CountMultiPaired(RealT(1));
++                CountMultiBase(RealT(1));
 +
-     return 
-         ScoreUnpaired(i,p)
-         + ScoreUnpaired(q,j)
-@@ -2297,6 +2456,13 @@
-     Assert(0 < i && i <= p && p + 2 <= q && q <= j && j < L, "Single-branch loop boundaries invalid.");
-     Assert(l1 + l2 > 0 && l1 >= 0 && l2 >= 0 && l1 + l2 <= C_MAX_SINGLE_LENGTH, "Invalid single-branch loop size.");
-     
-+    // if (eos_cb) (*eos_cb)(i, floor(.5 + (cache_score_single[l1][l2].first
-+    //     + ScoreBasePair(p+1,q)
-+    //     + ScoreJunctionB(i,j) 
-+    //     + ScoreJunctionB(q,p)
-+    //     + ScoreSingleNucleotides(i,j,p,q)) * 100 ) );
++                traceback_queue.push(make_triple(&FM1t[0], i, k));
++                traceback_queue.push(make_triple(&FMt[0], k, j));
++            }
++            break;
++            case TB_FE_STACKING: 
++            {
++                CountBasePair(i+1,j,RealT(1));
++                CountHelixStacking(i,j+1,RealT(1));
++
++                traceback_queue.push(make_triple(&FEt[0], i+1, j-1));
++            }
++            break;
++            case TB_FE_FN: 
++            {
++                traceback_queue.push(make_triple(&FNt[0], i, j));
++            }
++            break;
++            case TB_FC_FN:
++            {
++                CountIsolated(RealT(1));
++                traceback_queue.push(make_triple(&FNt[0], i, j));
++            }
++            break;
++            case TB_FC_HELIX:
++            {
++                const int m = traceback.second;
++                CountHelix(i-1,j+1,m,RealT(1));
++                traceback_queue.push(make_triple(&FNt[0], i+m-1, j-m+1));
++            }
++            break;
++            case TB_FC_FE:
++            {
++                const int m = D_MAX_HELIX_LENGTH;
++                CountHelix(i-1,j+1,m,RealT(1));
++                traceback_queue.push(make_triple(&FEt[0], i+m-1, j-m+1));
++            }
++            break;
++
++    //HWS: our param sections start here
++#else
++            case TB_FC_HAIRPIN: 
++                CountHairpin(i,j,RealT(1));
++                //////////////////////////////////////////////////////////////////////
++                // InferenceEngine::ScoreHairpin()
++                // InferenceEngine::CountHairpin()
++                //
++                // Returns the score for a hairpin spanning positions i to j.
++                //
++                // In an RNA structure, this would look like
++                //
++                //                           ...
++                //                       /         \. 
++                //                   x[i+2]       x[j-1]
++                //                      |            |
++                //                   x[i+1]        x[j]
++                // position i -------->  o          o  <----- position j
++                //                      x[i] -- x[j+1]
++                //                        |        |
++                //                     x[i-1] -- x[j+2]
++                //
++                //////////////////////////////////////////////////////////////////////
++
++                //HWS: subtracting off 1 to get zero-indexing for eos_cb
++
++                //std::cerr << "Hairpin " << i-1 << " " << ScoreHairpin(i,j) << std::endl;
++                eos_cb_map[i-1] += ScoreHairpin(i,j);
++
++                break;
++            case TB_FC_SINGLE: 
++            {
++                const int p = i + traceback.second / (C_MAX_SINGLE_LENGTH+1);
++                const int q = j - traceback.second % (C_MAX_SINGLE_LENGTH+1);
++
++                if (p == i && q == j)
++                {
++                    // CountBasePair(i+1,j,RealT(1));
++                    // CountHelixStacking(i,j+1,RealT(1));
++
++                //HWS: subtracting off 1 (from i+1) to get zero-indexing for eos_cb
++                //std::cerr << "BasePair " << i << " " << ScoreBasePair(i+1,j) << std::endl;
++                eos_cb_map[i] += ScoreBasePair(i+1,j);
 +
 +
-     return 
-         cache_score_single[l1][l2].first
-         + ScoreBasePair(p+1,q)
-@@ -3300,6 +3466,7 @@
-                 Fast_LogPlusEquals(sum_i, FM2i + ScoreJunctionA(i,j) + ScoreMultiPaired() + ScoreMultiBase());
-                 
-                 FNi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FE[i,j] = optimal energy for substructure between positions
-@@ -3327,6 +3494,7 @@
-                 Fast_LogPlusEquals(sum_i, FNi[offset[i]+j]);
-                 
-                 FEi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FC[i,j] = optimal energy for substructure between positions
-@@ -3366,6 +3534,7 @@
-                 }
-                 
-                 FCi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
- #else
-@@ -3441,6 +3610,7 @@
-                 Fast_LogPlusEquals(sum_i, FM2i + ScoreJunctionA(i,j) + ScoreMultiPaired() + ScoreMultiBase());
-                 
-                 FCi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
- #endif
-@@ -3471,6 +3641,7 @@
-                     Fast_LogPlusEquals(sum_i, FM1i[offset[i+1]+j] + ScoreMultiUnpaired(i+1));
-                 
-                 FM1i[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FM[i,j] = optimal energy for substructure belonging to a
-@@ -3502,6 +3673,7 @@
-                 Fast_LogPlusEquals(sum_i, FM1i[offset[i]+j]);
-                 
-                 FMi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-         }
-     }
-@@ -3530,6 +3702,7 @@
-                 Fast_LogPlusEquals(sum_i, F5i[k] + FCi[offset[k+1]+j-1] + ScoreExternalPaired() + ScoreBasePair(k+1,j) + ScoreJunctionA(j,k));
-         
-         F5i[j] = sum_i;
-+        if (eos_cb) (*eos_cb)(j, floor(0.5 + sum_i * 100));
-     }
- 
- #if SHOW_TIMINGS
++                // ScoreHelixStacking(i,j): score for a helix stacking pair of the form:
++                //
++                //       |         |
++                //    s[i+1] == s[j-1]
++                //       |         |
++                //     s[i] ==== s[j]
++                //       |         |
++                //HWS: subtracting off 1 (from i) to get zero-indexing for eos_cb
++
++                //std::cerr << "HelixStacking " << i-1 << " " << ScoreHelixStacking(i,j+1) << std::endl;
++                eos_cb_map[i-1] += ScoreHelixStacking(i,j+1);
++
++                }
++                else
++                {
++                   // CountSingle(i,j,p,q,RealT(1));
++                    //here we need to break this down because they sum a bunch of things to make ScoreSingle
++                    // here we need to subtract off the second base pair from ScoreSingle
++                // std::cerr << "Single " << i-1 << " " << ScoreSingle(i,j,p,q)-ScoreBasePair(p+1,q) << std::endl;
++                // std::cerr << "ScoreBasePair " << p << " " << ScoreBasePair(p+1,q) << std::endl;
++
++                eos_cb_map[i-1] += ScoreSingle(i,j,p,q)-ScoreBasePair(p+1,q);
++                eos_cb_map[p] += ScoreBasePair(p+1, q);
++
++                }
++                
++                traceback_queue.push(make_triple(&FCt[0], p+1, q-1));
++            }
++            break;
++            case TB_FC_BIFURCATION:
++            {
++                const int k = traceback.second;
++                // CountJunctionA(i,j,RealT(1));
++                // CountMultiPaired(RealT(1));
++                // CountMultiBase(RealT(1));
++
++                // This is where we first recognize we're in a new multiloop. Store the things at i
++                multiloops.push_back(make_triple(i,j,0));
++                // std::cerr << "New multiloop! " << i << ":" << j << std::endl;
++
++                // std::cerr << "FCBifurc:JunctionA " << i << " " << ScoreJunctionA(i,j) << std::endl;
++                // std::cerr << "FCBifurc:MultiPaired " << i << " " << ScoreMultiPaired() << std::endl;
++                // std::cerr << "FCBifurc:MultiBase " << i << " " << ScoreMultiBase() << std::endl;
++
++                eos_cb_map[i] += ScoreJunctionA(i,j) + ScoreMultiPaired() + ScoreMultiBase();
++
++                traceback_queue.push(make_triple(&FM1t[0], i, k));
++                traceback_queue.push(make_triple(&FMt[0], k, j));
++            }
++            break;
++#endif
++            case TB_FM1_PAIRED:
++            {
++                // CountJunctionA(j,i,RealT(1));
++                // CountMultiPaired(RealT(1));
++                // CountBasePair(i+1,j,RealT(1));
++
++                // HWS: We're in a multiloop -- this gets the index of the 5' base 
++                // of the current multiloop and puts in curr_multiloop ind.
++
++                int min_dist = 100000;
++                int curr_multiloop_ind = -1;
++
++                for(int ind=0; ind < multiloops.size(); ind++){
++                    if (multiloops[ind].first < i < multiloops[ind].second){
++                        if (i - multiloops[ind].first < min_dist){
++                            min_dist = i - multiloops[ind].first;
++                            curr_multiloop_ind = multiloops[ind].first;
++                        }
++                    }
++                }
++
++                // These all go in the multiloop ind
++                //std::cerr << "Paired:JunctionA " << curr_multiloop_ind << " " << ScoreJunctionA(j,i) << std::endl;
++                //std::cerr << "Paired:MultiPaired " << curr_multiloop_ind << " " << ScoreMultiPaired() << std::endl;
++                
++                eos_cb_map[curr_multiloop_ind] += ScoreJunctionA(j,i) + ScoreMultiPaired();
++
++                //This just goes with the next base pair
++                //std::cerr << "Paired:BasePair " << i << " " << ScoreBasePair(i+1, j) << std::endl;
++                eos_cb_map[i] += ScoreBasePair(i+1, j);
++
++                traceback_queue.push(make_triple(&FCt[0], i+1, j-1));
++            }
++            break;
++            case TB_FM1_UNPAIRED:
++            {
++                // CountMultiUnpaired(i+1,RealT(1));
++
++                // HWS: We're in a multiloop -- this gets the index of the 5' base 
++                // of the current multiloop and puts in curr_multiloop ind.
++
++                int min_dist = 100000;
++                int curr_multiloop_ind = -1;
++
++                for(int ind=0; ind < multiloops.size(); ind++){
++                    if (multiloops[ind].first < i+1 < multiloops[ind].second){
++                        if (i+1 - multiloops[ind].first < min_dist){
++                            min_dist = i+1 - multiloops[ind].first;
++                            curr_multiloop_ind = multiloops[ind].first;
++                        }
++                    }
++                }
++                // HWS: a score for unpaired bases in multiloops, put in curr_multiloop ind
++                //std::cerr << "MultiUnpaired " << curr_multiloop_ind << " " << ScoreMultiUnpaired(i+1) << std::endl;
++                eos_cb_map[curr_multiloop_ind] += ScoreMultiUnpaired(i+1);
++
++                traceback_queue.push(make_triple(&FM1t[0], i+1, j));
++            }
++            break;
++            case TB_FM_BIFURCATION:
++            {
++                const int k = traceback.second;
++                traceback_queue.push(make_triple(&FM1t[0], i, k));
++                traceback_queue.push(make_triple(&FMt[0], k, j));
++            }
++            break;
++            case TB_FM_UNPAIRED:
++            {
++                //CountMultiUnpaired(j,RealT(1));
++
++                // HWS: We're in a multiloop -- this gets the index of the 5' base 
++                // of the current multiloop and puts in curr_multiloop ind.
++
++                int min_dist = 100000;
++                int curr_multiloop_ind = -1;
++
++                for(int ind=0; ind < multiloops.size(); ind++){
++                    if (multiloops[ind].first < j < multiloops[ind].second){
++                        if (j - multiloops[ind].first < min_dist){
++                            min_dist = j - multiloops[ind].first;
++                            curr_multiloop_ind = multiloops[ind].first;
++                        }
++                    }
++                }
++                // HWS: a score for unpaired bases in multiloops, put in curr_multiloop ind
++
++                //std::cerr << "MultiUnpaired " << curr_multiloop_ind << " " << ScoreMultiUnpaired(j) << std::endl;
++                eos_cb_map[curr_multiloop_ind] += ScoreMultiUnpaired(j);
++
++                traceback_queue.push(make_triple(&FMt[0], i, j-1));
++            }
++            break;
++            case TB_FM_FM1: 
++                traceback_queue.push(make_triple(&FM1t[0], i, j));
++                break;
++            case TB_F5_ZERO:
++                break;
++            case TB_F5_UNPAIRED:
++                //CountExternalUnpaired(j,RealT(1));
++
++                // HWS: a score for unpaired things in the external loop, dump into the -1 eos_cb
++
++                //std::cerr << "ExternalUnpaired -1 " << ScoreExternalUnpaired(j) << std::endl;
++                eos_cb_map[-1] += ScoreExternalUnpaired(j);
++
++                traceback_queue.push(make_triple(&F5t[0], 0, j-1));
++                break;
++            case TB_F5_BIFURCATION:
++            {
++                const int k = traceback.second;
++                // CountExternalPaired(RealT(1));
++                // CountBasePair(k+1,j,RealT(1));
++                // CountJunctionA(j,k,RealT(1));
++                traceback_queue.push(make_triple(&F5t[0], 0, k));
++                traceback_queue.push(make_triple(&FCt[0], k+1, j-1));
++
++                //HWS: this is base pairs facing external loop. Hard-coding to print -1 as thinking these 
++                //should get summed in to the -1 "external loop " eos_cb category
++                
++                //std::cerr << "F5Bifurc:ExternalPaired -1 " << ScoreExternalPaired() << std::endl;
++                //std::cerr << "F5Bifurc:JunctionA -1 " << ScoreJunctionA(j,k) << std::endl;
++                eos_cb_map[-1] += ScoreExternalPaired()+ScoreJunctionA(j,k);
++
++                // HWS: another base pair, print (k+1) - 1 to zero-index
++                //std::cerr << "F5Bifurc:BasePair " << k << " " << ScoreBasePair(k+1, j) << std::endl;
++                eos_cb_map[k] += ScoreBasePair(k+1, j);
++
++            }
++            break;
++            default:
++                Assert(false, "Bad traceback.");
++        }
++    }
++    //RealT local_sum = 0;
++    //std::cout << "EOS_CB: ";
++    for (std::pair<int, RealT> element : eos_cb_map) {
++        if (element.first == -1 || element.second != 0){
++            if (eos_cb) (*eos_cb)(element.first, element.second);
++        //std::cout << element.first << ", " << element.second << ", ";
++        //local_sum += element.second;
++    }
++    }
++    //std::cout << std::endl;
++   // std::cout << "local sum " << local_sum << std::endl;
++
++}
 Only in contrafold/src: InferenceEngine.ipp.orig
-diff -X .gitignore -ur contrafold_stock/src/LBFGS.ipp contrafold/src/LBFGS.ipp
---- contrafold_stock/src/LBFGS.ipp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/LBFGS.ipp	2020-03-25 16:42:30.228287230 -0400
-@@ -107,7 +107,7 @@
- 
-         // perform line search, update f, and take step
- 
--        Real step = DoLineSearch(x[k%2], f[k%2], g[k%2], d,
-+        Real step = this->DoLineSearch(x[k%2], f[k%2], g[k%2], d,
-                                  x[(k+1)%2], f[(k+1)%2], g[(k+1)%2],
-                                  Real(0), std::min(Real(10), MAX_STEP_NORM / std::max(Real(1), Norm(d))));
-         
+Only in contrafold/src: InferenceEngine.ipp.rej
 Only in contrafold/src: LBFGS.ipp.orig
 Only in contrafold/src: Options.o
 diff -X .gitignore -ur contrafold_stock/src/ParameterManager.ipp contrafold/src/ParameterManager.ipp
---- contrafold_stock/src/ParameterManager.ipp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/ParameterManager.ipp	2020-03-25 16:42:30.228287230 -0400
-@@ -1,8 +1,13 @@
-+#pragma once
-+
- //////////////////////////////////////////////////////////////////////
+--- contrafold_stock/src/ParameterManager.ipp	2020-04-25 05:36:40.000000000 -0700
++++ contrafold/src/ParameterManager.ipp	2020-04-25 06:43:38.000000000 -0700
+@@ -2,7 +2,10 @@
  // ParameterManager.ipp
  //////////////////////////////////////////////////////////////////////
  
 -#include "ParameterManager.hpp"
++#pragma once
++
 +#ifndef PARAMETERMANAGER_IPP
 +#define PARAMETERMANAGER_IPP
-+
-+// #include "ParameterManager.hpp"
  
  //////////////////////////////////////////////////////////////////////
  // ParameterGroup::ParameterGroup()
-@@ -266,3 +271,5 @@
+@@ -266,3 +269,5 @@
      if (iter == physical_to_logical.end()) Error("Request for unknown physical parameter.");
      return iter->second;
  }
 +
 +#endif
-\ No newline at end of file
-Only in contrafold/src: ParameterManager.ipp.orig
-Only in contrafold/src: score_prediction
-Only in contrafold/src: ScorePrediction.o
 diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.cpp
---- contrafold_stock/src/SStruct.cpp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/SStruct.cpp	2020-03-27 14:18:34.295403138 -0400
-@@ -61,6 +61,37 @@
+--- contrafold_stock/src/SStruct.cpp	2020-04-25 05:36:40.000000000 -0700
++++ contrafold/src/SStruct.cpp	2020-04-25 06:47:28.000000000 -0700
+@@ -60,6 +60,38 @@
+     ValidateMapping(mapping);
  }
  
- //////////////////////////////////////////////////////////////////////
 +// SStruct::LoadString()
 +//
 +// Load from string.
@@ -402,46 +435,38 @@ diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.c
 +}
 +
 +//////////////////////////////////////////////////////////////////////
++
+ //////////////////////////////////////////////////////////////////////
  // SStruct::AnalyzeFormat()
  //
- // Determine file format.
-@@ -391,6 +422,7 @@
-     std::vector<int> mapping(parens.length(), UNKNOWN);
-     std::vector<int> stack;
-    
-+    std::cout << parens << std::endl;
-     Assert(parens[0] == '@', "Invalid parenthesized string.");
-     for (int i = 1; i < int(parens.length()); i++)
-     {
-Only in contrafold/src: SStruct.cpp.orig
-Only in contrafold/src: SStruct.cpp.rej
 diff -X .gitignore -ur contrafold_stock/src/SStruct.hpp contrafold/src/SStruct.hpp
---- contrafold_stock/src/SStruct.hpp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/SStruct.hpp	2020-03-25 16:42:30.228287230 -0400
-@@ -40,9 +40,11 @@
+--- contrafold_stock/src/SStruct.hpp	2020-04-25 05:36:40.000000000 -0700
++++ contrafold/src/SStruct.hpp	2020-04-25 06:56:08.000000000 -0700
+@@ -40,9 +40,6 @@
      std::string FilterSequence(std::string sequence) const;
      std::string FilterParens(std::string sequence) const;
  
-+public:
-     // convert a pseudoknot-free parenthesized structure to a mapping and back
-     std::vector<int> ConvertParensToMapping(const std::string &parens) const;
-     std::string ConvertMappingToParens(const std::vector<int> &mapping) const;
-+    void LoadString(const std::string &seq);
+-    // convert a pseudoknot-free parenthesized structure to a mapping and back
+-    std::vector<int> ConvertParensToMapping(const std::string &parens) const;
+-    std::string ConvertMappingToParens(const std::vector<int> &mapping) const;
  
      // check that a (possibly pseudoknotted) mapping is valid
      void ValidateMapping(const std::vector<int> &mapping) const;
-Only in contrafold/src: SStruct.hpp.orig
+@@ -62,6 +59,10 @@
+ 
+     // load sequence and struture from file
+     void Load(const std::string &filename);
++    void LoadString(const std::string &seq);
++    // convert a pseudoknot-free parenthesized structure to a mapping and back
++    std::vector<int> ConvertParensToMapping(const std::string &parens) const;
++    std::string ConvertMappingToParens(const std::vector<int> &mapping) const;
+ 
+     // assignment operator
+     const SStruct& operator=(const SStruct &rhs);
 Only in contrafold/src: SStruct.o
-diff -X .gitignore -ur contrafold_stock/src/Utilities.cpp contrafold/src/Utilities.cpp
---- contrafold_stock/src/Utilities.cpp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/Utilities.cpp	2020-03-25 16:42:30.228287230 -0400
-@@ -2,6 +2,7 @@
- // Utilities.cpp
- //////////////////////////////////////////////////////////////////////
- 
-+#include <limits.h>
- #include "Utilities.hpp"
- 
- bool toggle_error = false;
-Only in contrafold/src: Utilities.cpp.orig
+Only in contrafold/src: ScorePrediction.o
+Only in contrafold/src: Utilities.hpp.orig
 Only in contrafold/src: Utilities.o
+Only in contrafold/src: contrafold
+Only in contrafold/src: score_prediction
+Only in contrafold: unit_test_structs
