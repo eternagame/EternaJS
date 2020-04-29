@@ -316,7 +316,7 @@ export default class UndoBlock {
             this.setParam(UndoBlockParam.MEANPUNP,
                 this.sumProbUnpaired(dotArray) / this.sequence.length, 37, pseudoknots);
             // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(this.getPairs(37)), 37, pseudoknots);
+            this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(dotArray), 37, pseudoknots);
 
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray.slice();
@@ -334,7 +334,7 @@ export default class UndoBlock {
                 this.setParam(UndoBlockParam.MEANPUNP,
                     this.sumProbUnpaired(dotTempArray) / this.sequence.length, ii, pseudoknots);
                 // branchiness
-                this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(this.getPairs(ii)), ii, pseudoknots);
+                this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(dotTempArray), ii, pseudoknots);
 
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }

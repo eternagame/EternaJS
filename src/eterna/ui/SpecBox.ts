@@ -159,12 +159,12 @@ export default class SpecBox extends ContainerObject {
                 .append(`${datablock.getParam(UndoBlockParam.GC, TEMPERATURE)}   `)
                 .append(`${EPars.getColoredLetter('G')}-${EPars.getColoredLetter('U')} pairs : `, 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.GU, TEMPERATURE)}\n`)
+                .append('Free energy : ', 'bold')
+                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) / 100).toFixed(1)} kcal\t\t`)
                 .append('Melting point : ', 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
-                .append('Free energy : ', 'bold')
-                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) / 100).toFixed(1)} kcal\n`)
                 .append('Mean P-unpaired : ', 'bold')
-                .append(`${Number(datablock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE)).toFixed(3)}\n`)
+                .append(`${Number(datablock.getParam(UndoBlockParam.MEANPUNP, TEMPERATURE)).toFixed(3)}\t\t`)
                 .append('Mean BP distance : ', 'bold')
                 .append(`${Number(datablock.getParam(UndoBlockParam.BRANCHINESS, TEMPERATURE)).toFixed(1)}\n`);
 
@@ -287,7 +287,7 @@ export default class SpecBox extends ContainerObject {
             this._meltPlotSprite.position = new Point((this._width * 0.5) + 20, 70);
 
             this._stattext.visible = true;
-            this._stattext.position = new Point(20, this._height - 150);
+            this._stattext.position = new Point(20, this._height - 100);
             // this._stattext.size= new Point(200, 200);
 
             this._helpText.display.visible = true;
