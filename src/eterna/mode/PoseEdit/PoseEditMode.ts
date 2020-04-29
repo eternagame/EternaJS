@@ -166,7 +166,11 @@ export default class PoseEditMode extends GameMode {
 
             const {panel, positionUpdater} = NucleotideFinder.create({
                 onChanged: (index) => {
-                    this._poses[this._curTargetIndex].focusNucleotide(index);
+                    if (this._isPipMode) {
+                        this._poses.forEach((p) => p.focusNucleotide(index));
+                    } else {
+                        this._poses[this._curTargetIndex].focusNucleotide(index);
+                    }
                 }
             });
             this._nucleotideFinderRef = this.addObject(panel, this.container);

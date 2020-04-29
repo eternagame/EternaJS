@@ -8,7 +8,7 @@ interface NucleotideFinderProps {
 
 export default class NucleotideFinder {
     private static readonly theme = {
-        title: 'Go-to Nucleotide',
+        title: 'Jump to Nucleotide',
         fieldName: 'Nucleotide Index',
         width: 80
     };
@@ -38,13 +38,21 @@ export default class NucleotideFinder {
         field.valueChanged.connect((v) => {
             value = v;
         });
-        inputPanel.okClicked.connect(() => {
+
+        const onAccept = () => {
             const index = parseInt(value, 10);
             if (!Number.isNaN(index)) {
                 props.onChanged(index);
             }
             panel.destroySelf();
+        };
+
+        field.keyPressed.connect((key) => {
+            if (key === 'Enter') {
+                onAccept();
+            }
         });
+        inputPanel.okClicked.connect(onAccept);
         inputPanel.cancelClicked.connect(() => panel.destroySelf());
 
         const positionUpdater = () => {

@@ -281,11 +281,11 @@ export default class Toolbar extends ContainerObject {
         }
 
         this.nucleotideFindButton = new GameButton()
-            .allStates(Bitmaps.ImgPaste)
+            .allStates(Bitmaps.ImgFind)
             .disabled(null)
-            .label('Find Nucleotide', 14)
+            .label('Jump to Nucleotide', 14)
             .scaleBitmapToLabel()
-            .tooltip('Type a nucleotide index to find it')
+            .tooltip('Type a nucleotide index to jump to it')
             .hotkey(KeyCode.KeyJ);
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);
