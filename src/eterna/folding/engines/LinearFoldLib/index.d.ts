@@ -27,6 +27,7 @@ export = LinearFoldLib;
 declare class LinearFoldLib {
     FullFoldDefault(seqString: string): LinearFoldLib.FullFoldResult;
     FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult;
+    GetDotPlot(temperature_in: number, seqString: string, dotplotStructString: string): LinearFoldLib.DotPlotResult;
 }
 
 /*~ If you want to expose types from your module as well, you can
@@ -42,6 +43,13 @@ declare namespace LinearFoldLib {
     export interface FullEvalResult {
         nodes: stdcpp.vector<number>;
         energy: number;
+
+        delete (): void;
+    }
+
+    export interface DotPlotResult {
+        energy: number;
+        plot: stdcpp.vector<number>;
 
         delete (): void;
     }

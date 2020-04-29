@@ -9,9 +9,13 @@ NOTE: If you have difficulty with this install process, especially if you are a 
     - you can obtain this revision via:
       ```
 	  git clone https://github.com/LinearFold/LinearFold.git
-      git reset --hard 05c9803ae700fc528c82e63cec12ec7c9d3b498a
+	  git reset --hard 05c9803ae700fc528c82e63cec12ec7c9d3b498a
+* Clone the [LinearPartition repository]((https://github.com/LinearFold/LinearPartition)).  Note that the most recent definitely-working hash is:  be39ec075cc48769230ce07eb53900493649b639
+    - you can obtain this revision via:
+      ```
+	  git clone https://github.com/LinearFold/LinearPartition.git
+	  git reset --hard be39ec075cc48769230ce07eb53900493649b639
 	  ```
-
 * `$ ./patch.sh`
     - This applies the patchfiles with eterna's modifications (eg, for getting substructure energies and some energetic
     modifications) to the energy libraries.
