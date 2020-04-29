@@ -21,6 +21,7 @@ import {
     MaximumGCConstraint,
     MaximumGUConstraint
 } from 'eterna/constraints/constraints/MaximumPairConstraint';
+import BranchinessConstraint from 'eterna/constraints/constraints/BranchinessConstraint';
 import {
     MinimumAConstraint, MinimumCConstraint, MinimumGConstraint, MinimumUConstraint
 } from 'eterna/constraints/constraints/MinimumBaseConstraint';
@@ -238,6 +239,9 @@ export default class PuzzleManager {
                         break;
                     case ConsecutiveUConstraint.NAME:
                         constraints.push(new ConsecutiveUConstraint(Number(parameter)));
+                        break;
+                    case BranchinessConstraint.NAME:
+                        constraints.push(new BranchinessConstraint(Number(parameter)));
                         break;
                     case MaximumAConstraint.NAME:
                         constraints.push(new MaximumAConstraint(Number(parameter)));

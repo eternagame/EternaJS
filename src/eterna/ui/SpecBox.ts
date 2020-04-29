@@ -287,7 +287,7 @@ export default class SpecBox extends ContainerObject {
             this._meltPlotSprite.position = new Point((this._width * 0.5) + 20, 70);
 
             this._stattext.visible = true;
-            this._stattext.position = new Point(20, this._height - 100);
+            this._stattext.position = new Point(20, this._height - 150);
             // this._stattext.size= new Point(200, 200);
 
             this._helpText.display.visible = true;

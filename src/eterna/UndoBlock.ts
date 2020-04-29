@@ -242,10 +242,16 @@ export default class UndoBlock {
         // dotArray is organized as idx, idx, pairprob.
         let probUnpaired: number[] = Array<number>(this.sequence.length);
         for (let idx = 0; idx < this.sequence.length; ++idx) {
+            probUnpaired[idx] = 1;
             for (let ii = 0; ii < dotArray.length; ii += 3) {
                 if (dotArray[ii] === idx + 1) {
-                    probUnpaired[idx] += (1 - dotArray[ii + 2]);
+                    probUnpaired[idx] -= dotArray[ii + 2];
                 }
+            }
+        }
+        for (let idx = 0; idx < this.sequence.length; ++idx) {
+            if (probUnpaired[idx] < 0) {
+                probUnpaired[idx] = 0;
             }
         }
 
@@ -278,6 +284,30 @@ export default class UndoBlock {
         return branchiness / count;
     }
 
+    public ensembleBranchiness(dotArray: number[]) {
+        // format of pairs is
+        // '((.))' -> [4,3,-1,1,0]
+        // note that if you calculate this average, it's fine to double count
+        // pairs for obvious reasons! so this is the average difference between
+        // idx and val
+
+        let branchiness = 0;
+
+        // every bp adds jj - ii to branchiness and prob to count.
+        let count = 0;
+
+        // dotArray is organized as idx, idx, pairprob.
+        for (let ii = 0; ii < dotArray.length; ii += 3) {
+            if (dotArray[ii] > dotArray[ii + 1]) {
+                branchiness += dotArray[ii] - dotArray[ii + 1];
+            } else {
+                branchiness += dotArray[ii + 1] - dotArray[ii];
+            }
+            count += dotArray[ii + 2];
+        }
+        return branchiness / count;
+    }
+
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === null) {
             let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
@@ -286,7 +316,7 @@ export default class UndoBlock {
             this.setParam(UndoBlockParam.MEANPUNP,
                 this.sumProbUnpaired(dotArray) / this.sequence.length, 37, pseudoknots);
             // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS, this.branchiness(this.getPairs(37)), 37, pseudoknots);
+            this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(this.getPairs(37)), 37, pseudoknots);
 
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray.slice();
@@ -304,7 +334,7 @@ export default class UndoBlock {
                 this.setParam(UndoBlockParam.MEANPUNP,
                     this.sumProbUnpaired(dotTempArray) / this.sequence.length, ii, pseudoknots);
                 // branchiness
-                this.setParam(UndoBlockParam.BRANCHINESS, this.branchiness(this.getPairs(ii)), ii, pseudoknots);
+                this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(this.getPairs(ii)), ii, pseudoknots);
 
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
