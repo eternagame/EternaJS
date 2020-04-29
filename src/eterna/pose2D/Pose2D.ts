@@ -2457,6 +2457,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         })();
 
         if (baseIndex < 0 || baseIndex >= this._bases.length) {
+            // eslint-disable-next-line
+            console.warn(`Can't focus nucleotide with index '${index}'`);
             return;
         }
 

@@ -47,6 +47,7 @@ import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
+import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -157,6 +158,20 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
         this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
+
+        this._toolbar.nucleotideFindButton.clicked.connect(() => {
+            if (this._nucleotideFinderRef.isLive) {
+                return;
+            }
+
+            const {panel, positionUpdater} = NucleotideFinder.create({
+                onChanged: (index) => {
+                    this._poses[this._curTargetIndex].focusNucleotide(index);
+                }
+            });
+            this._nucleotideFinderRef = this.addObject(panel, this.container);
+            panel.regs.add(this.resized.connect(positionUpdater));
+        });
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
@@ -3061,6 +3076,7 @@ export default class PoseEditMode extends GameMode {
     private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     private _constraintBar: ConstraintBar;
+    private _nucleotideFinderRef: GameObjectRef = GameObjectRef.NULL;
 
     private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;

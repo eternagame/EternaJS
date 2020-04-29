@@ -51,6 +51,7 @@ export default class Toolbar extends ContainerObject {
     public resetButton: GameButton;
     public copyButton: GameButton;
     public pasteButton: GameButton;
+    public nucleotideFindButton: GameButton;
 
     public freezeButton: GameButton;
 
@@ -278,6 +279,16 @@ export default class Toolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.copyButton);
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
+
+        this.nucleotideFindButton = new GameButton()
+            .allStates(Bitmaps.ImgPaste)
+            .disabled(null)
+            .label('Find Nucleotide', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Type a nucleotide index to find it')
+            .hotkey(KeyCode.KeyJ);
+
+        this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
         if (this._boostersData != null && this._boostersData.actions != null) {
