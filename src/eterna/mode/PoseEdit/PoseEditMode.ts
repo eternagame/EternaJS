@@ -82,6 +82,7 @@ export interface PoseEditParams {
     solutions?: Solution[];
 
     local?: boolean;
+    showMissionCleared?: boolean;
 }
 
 export interface OligoDef {
@@ -1822,7 +1823,9 @@ export default class PoseEditMode extends GameMode {
         const data: any = submissionResponse?.data;
 
         if (this._puzzle.puzzleType !== PuzzleType.EXPERIMENTAL) {
-            this.showMissionClearedPanel(data);
+            if (this._params.showMissionCleared !== false) {
+                this.showMissionClearedPanel(data);
+            }
         }
 
         const seqString = EPars.sequenceToString(

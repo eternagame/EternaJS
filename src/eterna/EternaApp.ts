@@ -90,8 +90,12 @@ export interface EternaAppParams {
     designBrowserFilters?: DesignBrowserFilter[];
 
     onPuzzleCompleted?: () => void;
-    onNextPuzzleClicked?: () => void;
     onHomeClicked?: () => void;
+    missionClearedScreen?: {
+        /** default is true */
+        enabled?: boolean;
+        onNextPuzzleClicked?: () => void;
+    };
 }
 
 /** Entry point for the game */
@@ -135,9 +139,13 @@ export default class EternaApp extends FlashbangApp {
         if (this._params.onPuzzleCompleted) {
             RSignals.onPuzzleCompleted.connect(() => this._params.onPuzzleCompleted());
         }
-        if (this._params.onNextPuzzleClicked) {
-            RSignals.onNextPuzzleClicked.connect(() => this._params.onNextPuzzleClicked());
+
+        if (this._params.missionClearedScreen?.onNextPuzzleClicked) {
+            RSignals.onNextPuzzleClicked.connect(() => {
+                this._params.missionClearedScreen.onNextPuzzleClicked();
+            });
         }
+
         if (this._params.onHomeClicked) {
             RSignals.onHomeClicked.connect(() => this._params.onHomeClicked());
         }
@@ -184,9 +192,10 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                     case InitialAppMode.PUZZLE: {
-                        const puzzleParams = {
+                        const puzzleParams: PoseEditParams = {
                             initialFolder: this._params.folderName,
-                            initSequence: this._params.sequence
+                            initSequence: this._params.sequence,
+                            showMissionCleared: this._params.missionClearedScreen?.enabled
                         };
                         if (isLocal) {
                             return this.loadPoseEditFromFile(this._params.puzzlePath, puzzleParams);
