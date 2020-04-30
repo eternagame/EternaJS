@@ -91,6 +91,16 @@ export default class FlashbangApp {
         return this.isKeyDown(KeyCode.MetaLeft) || this.isKeyDown(KeyCode.MetaRight);
     }
 
+    public dispose() {
+        if (!this._disposePending && !this._disposed) {
+            if (this._isUpdating) {
+                this._disposePending = true;
+            } else {
+                this.disposeNow();
+            }
+        }
+    }
+
     /**
      * Called at the end of the initialization process.
      * Subclasses should override this to push their initial AppMode to the mode stack
@@ -147,6 +157,8 @@ export default class FlashbangApp {
 
         this._pixi.destroy();
         this._pixi = null;
+
+        this._disposed = true;
     }
 
     protected onKeyboardEvent(e: KeyboardEvent): void {
@@ -202,4 +214,6 @@ export default class FlashbangApp {
     protected _modeStack: ModeStack;
 
     protected _keyDown: Map<string, boolean> = new Map<string, boolean>();
+
+    private _disposed = false;
 }
