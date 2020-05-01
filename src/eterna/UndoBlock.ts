@@ -5,6 +5,8 @@ import * as log from 'loglevel';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
+import Vienna from './folding/Vienna';
+import Vienna2 from './folding/Vienna2';
 
 
 export enum UndoBlockParam {
@@ -26,6 +28,11 @@ export enum UndoBlockParam {
     MEANPUNP = 15,
     SUMPUNP = 16,
     BRANCHINESS = 17,
+}
+
+export enum BasePairProbabilityTransform {
+    LEAVE_ALONE,
+    SQUARE
 }
 
 export default class UndoBlock {
@@ -238,22 +245,26 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.NNFE_ARRAY, nnfe, temp, pseudoknots);
     }
 
-    public sumProbUnpaired(dotArray: number[]) {
+    public sumProbUnpaired(dotArray: number[], behavior: BasePairProbabilityTransform) {
         // dotArray is organized as idx, idx, pairprob.
         let probUnpaired: number[] = Array<number>(this.sequence.length);
         for (let idx = 0; idx < this.sequence.length; ++idx) {
             probUnpaired[idx] = 1;
             for (let ii = 0; ii < dotArray.length; ii += 3) {
-                if (dotArray[ii] === idx + 1) {
-                    probUnpaired[idx] -= dotArray[ii + 2];
+                if (dotArray[ii] === idx + 1 || dotArray[ii + 1] === idx + 1) {
+                    if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+                        probUnpaired[idx] -= (dotArray[ii + 2]);
+                    } else {
+                        probUnpaired[idx] -= (dotArray[ii + 2] * dotArray[ii + 2]);
+                    }
                 }
             }
         }
-        for (let idx = 0; idx < this.sequence.length; ++idx) {
-            if (probUnpaired[idx] < 0) {
-                probUnpaired[idx] = 0;
-            }
-        }
+        // for (let idx = 0; idx < this.sequence.length; ++idx) {
+        //     if (probUnpaired[idx] < 0) {
+        //         probUnpaired[idx] = 0;
+        //     }
+        // }
 
         // mean prob unpaired
         return probUnpaired.reduce((a, b) => a + b, 0);// / this.sequence.length;
@@ -284,7 +295,7 @@ export default class UndoBlock {
         return branchiness / count;
     }
 
-    public ensembleBranchiness(dotArray: number[]) {
+    public ensembleBranchiness(dotArray: number[], behavior: BasePairProbabilityTransform) {
         // format of pairs is
         // '((.))' -> [4,3,-1,1,0]
         // note that if you calculate this average, it's fine to double count
@@ -297,26 +308,44 @@ export default class UndoBlock {
         let count = 0;
 
         // dotArray is organized as idx, idx, pairprob.
-        for (let ii = 0; ii < dotArray.length; ii += 3) {
-            if (dotArray[ii] > dotArray[ii + 1]) {
-                branchiness += dotArray[ii] - dotArray[ii + 1];
-            } else {
-                branchiness += dotArray[ii + 1] - dotArray[ii];
+        if (behavior === BasePairProbabilityTransform.LEAVE_ALONE) {
+            for (let ii = 0; ii < dotArray.length; ii += 3) {
+                if (dotArray[ii] > dotArray[ii + 1]) {
+                    branchiness += (dotArray[ii] - dotArray[ii + 1]) * dotArray[ii + 2];
+                } else {
+                    branchiness += (dotArray[ii + 1] - dotArray[ii]) * dotArray[ii + 2];
+                }
+                count += (dotArray[ii + 2]);
             }
-            count += dotArray[ii + 2];
+        } else {
+            for (let ii = 0; ii < dotArray.length; ii += 3) {
+                if (dotArray[ii] > dotArray[ii + 1]) {
+                    branchiness += (dotArray[ii] - dotArray[ii + 1]) * dotArray[ii + 2] * dotArray[ii + 2];
+                } else {
+                    branchiness += (dotArray[ii + 1] - dotArray[ii]) * dotArray[ii + 2] * dotArray[ii + 2];
+                }
+                count += (dotArray[ii + 2] * dotArray[ii + 2]);
+            }
         }
         return branchiness / count;
     }
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === null) {
+        let bppStatisticBehavior: BasePairProbabilityTransform = BasePairProbabilityTransform.LEAVE_ALONE;
+        if (folder.name === Vienna.NAME || folder.name === Vienna2.NAME) {
+            bppStatisticBehavior = BasePairProbabilityTransform.SQUARE;
+        }
+
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == null) {
             let dotArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             // mean+sum prob unpaired
-            this.setParam(UndoBlockParam.SUMPUNP, this.sumProbUnpaired(dotArray), 37, pseudoknots);
+            this.setParam(UndoBlockParam.SUMPUNP,
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior), 37, pseudoknots);
             this.setParam(UndoBlockParam.MEANPUNP,
-                this.sumProbUnpaired(dotArray) / this.sequence.length, 37, pseudoknots);
+                this.sumProbUnpaired(dotArray, bppStatisticBehavior) / this.sequence.length, 37, pseudoknots);
             // branchiness
-            this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(dotArray), 37, pseudoknots);
+            this.setParam(UndoBlockParam.BRANCHINESS,
+                this.ensembleBranchiness(dotArray, bppStatisticBehavior), 37, pseudoknots);
 
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray.slice();
@@ -330,11 +359,13 @@ export default class UndoBlock {
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
                 let dotTempArray: number[] = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
                 // mean+sum prob unpaired
-                this.setParam(UndoBlockParam.SUMPUNP, this.sumProbUnpaired(dotTempArray), ii, pseudoknots);
+                this.setParam(UndoBlockParam.SUMPUNP,
+                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
                 this.setParam(UndoBlockParam.MEANPUNP,
-                    this.sumProbUnpaired(dotTempArray) / this.sequence.length, ii, pseudoknots);
+                    this.sumProbUnpaired(dotTempArray, bppStatisticBehavior) / this.sequence.length, ii, pseudoknots);
                 // branchiness
-                this.setParam(UndoBlockParam.BRANCHINESS, this.ensembleBranchiness(dotTempArray), ii, pseudoknots);
+                this.setParam(UndoBlockParam.BRANCHINESS,
+                    this.ensembleBranchiness(dotTempArray, bppStatisticBehavior), ii, pseudoknots);
 
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }

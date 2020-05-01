@@ -36,8 +36,11 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append('You must have ')
-            .append('a mean base pair distance of at most', 'altText')
+        // Typical natural RNAs have a lot of branches in them. Often,
+        // artificial RNAs that are very stable have very few branches, like
+        // they are just one long hairpin. We want to encourage natural-looking,
+        // "branchy" RNAs by contraining the mean base pair distance.
+        tooltip.append('The average distance between paired bases must be at most', 'altText')
             .append(` ${this.maxBranchiness}.`);
 
         if (forMissionScreen) {
@@ -50,7 +53,7 @@ export default class BranchinessConstraint extends Constraint<BranchinessConstra
             clarificationText: `${this.maxBranchiness} OR LESS`,
             statText: status.currentBranchiness.toString(),
             showOutline: true,
-            fullTexture: undefined
+            fullTexture: BitmapManager.getBitmapNamed('Turkey')
         };
     }
 

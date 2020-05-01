@@ -284,6 +284,7 @@ export default class Bitmaps {
     public static readonly BaseAMid: string = require('assets/RNABase/yellow_middle.png');
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
+    public static readonly Turkey: string = require('assets/turkey.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
