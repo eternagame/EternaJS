@@ -3074,7 +3074,6 @@ export default class PoseEditMode extends GameMode {
     private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     private _constraintBar: ConstraintBar;
-    // private _nucleotideFinderRef: GameObjectRef = GameObjectRef.NULL;
 
     private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;
