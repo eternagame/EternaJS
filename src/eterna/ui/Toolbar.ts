@@ -285,7 +285,7 @@ export default class Toolbar extends ContainerObject {
             .disabled(null)
             .label('Jump to Nucleotide', 14)
             .scaleBitmapToLabel()
-            .tooltip('Type a nucleotide index to jump to it')
+            .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
             .hotkey(KeyCode.KeyJ);
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);

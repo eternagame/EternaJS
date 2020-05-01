@@ -1,74 +1,55 @@
-import {ContainerObject, Flashbang} from 'flashbang';
-import {Point} from 'pixi.js';
+import {Flashbang, KeyCode} from 'flashbang';
 import TextInputPanel from './TextInputPanel';
+import Dialog from './Dialog';
 
-interface NucleotideFinderProps {
-    onChanged: (nucleotideIndex: number) => void;
+interface NucleotideFinderResult {
+    nucleotideIndex: number;
 }
 
-export default class NucleotideFinder {
-    private static readonly theme = {
+export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
+    private static readonly props = {
         title: 'Jump to Nucleotide',
-        fieldName: 'Nucleotide Index',
+        fieldName: 'Nucleotide Index'
+    };
+
+    private static readonly theme = {
         width: 80
     };
 
-    public static create(props: NucleotideFinderProps) {
-        const {theme} = NucleotideFinder;
-
-        // backdrop
-        const backdrop = new PIXI.Graphics();
-        const drawBackDrop = () => {
-            backdrop.clear();
-            backdrop.beginFill(0, 0.4);
-            backdrop.drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
-            backdrop.endFill();
-        };
-
-        const panel = new ContainerObject();
-        panel.pointerUp.connect(() => {});
-        panel.container.addChild(backdrop);
+    protected added() {
+        super.added();
+        const {props, theme} = NucleotideFinder;
 
         const inputPanel = new TextInputPanel();
-        inputPanel.title = theme.title;
-        const field = inputPanel.addField(theme.fieldName, theme.width);
-        panel.addObject(inputPanel, panel.container);
+        inputPanel.title = props.title;
+        const field = inputPanel.addField(props.fieldName, theme.width);
+        this.addObject(inputPanel, this.container);
 
-        let value = '';
-        field.valueChanged.connect((v) => {
-            value = v;
-        });
-
-        const onAccept = () => {
-            const index = parseInt(value, 10);
-            if (!Number.isNaN(index)) {
-                props.onChanged(index);
-            }
-            panel.destroySelf();
-        };
-
+        field.setFocus();
         field.keyPressed.connect((key) => {
             if (key === 'Enter') {
-                onAccept();
+                inputPanel.okClicked.emit(inputPanel.getFieldValues());
             }
         });
-        inputPanel.okClicked.connect(onAccept);
-        inputPanel.cancelClicked.connect(() => panel.destroySelf());
 
-        const positionUpdater = () => {
-            drawBackDrop();
-            inputPanel.container.position = new Point(
-                (Flashbang.stageWidth - theme.width) / 2,
-                Flashbang.stageHeight / 2
-            );
+        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+
+        inputPanel.cancelClicked.connect(() => this.close(null));
+        inputPanel.okClicked.connect(() => {
+            const dict = inputPanel.getFieldValues();
+            const nucleotideIndex = parseInt(dict.get(props.fieldName), 10);
+            if (Number.isNaN(nucleotideIndex)) {
+                this.close(null);
+            } else {
+                this.close({nucleotideIndex});
+            }
+        });
+
+        const updateLocation = () => {
+            inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
+            inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
-
-        positionUpdater();
-
-        // TODO: Investigate InputPanel construction, setFocus() doesn't work directly.
-        // field.setFocus();
-        setTimeout(() => field.setFocus(), 100);
-
-        return {panel, positionUpdater};
+        updateLocation();
+        this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }

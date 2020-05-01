@@ -2462,9 +2462,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
             return;
         }
 
+        const w = Flashbang.stageWidth;
+        const h = Flashbang.stageHeight;
         this.setOffset(
-            Flashbang.stageWidth / 2 - this._bases[baseIndex].x,
-            Flashbang.stageHeight / 2 - this._bases[baseIndex].y
+            this._width / 2 - this._bases[baseIndex].x,
+            this._height / 2 - this._bases[baseIndex].y
         );
     }
 

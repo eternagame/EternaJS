@@ -160,21 +160,15 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
 
         this._toolbar.nucleotideFindButton.clicked.connect(() => {
-            if (this._nucleotideFinderRef.isLive) {
-                return;
-            }
-
-            const {panel, positionUpdater} = NucleotideFinder.create({
-                onChanged: (index) => {
+            this.showDialog(new NucleotideFinder()).closed.then((result) => {
+                if (result != null) {
                     if (this._isPipMode) {
-                        this._poses.forEach((p) => p.focusNucleotide(index));
+                        this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
                     } else {
-                        this._poses[this._curTargetIndex].focusNucleotide(index);
+                        this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
                     }
                 }
             });
-            this._nucleotideFinderRef = this.addObject(panel, this.container);
-            panel.regs.add(this.resized.connect(positionUpdater));
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -3080,7 +3074,7 @@ export default class PoseEditMode extends GameMode {
     private _hintBoxRef: GameObjectRef = GameObjectRef.NULL;
 
     private _constraintBar: ConstraintBar;
-    private _nucleotideFinderRef: GameObjectRef = GameObjectRef.NULL;
+    // private _nucleotideFinderRef: GameObjectRef = GameObjectRef.NULL;
 
     private _dockedSpecBox: SpecBox;
     private _exitButton: GameButton;
