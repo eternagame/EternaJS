@@ -63,9 +63,9 @@ export default class HelpPage extends ContainerObject {
             undefined,
             false
         );
-        back.clicked.connect(() => {
+        this.regs.add(back.clicked.connect(() => {
             this._onBack.emit();
-        });
+        }));
         back.container.position = new Point(0, this._height - theme.padding);
 
         this.container.addChild(titleElem);

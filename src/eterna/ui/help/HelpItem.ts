@@ -21,7 +21,7 @@ export default class HelpItem extends ContainerObject {
 
         if (props.onClicked) {
             const button = new GameButton().label(props.text, theme.fontSize, false);
-            button.clicked.connect(props.onClicked);
+            this.regs.add(button.clicked.connect(props.onClicked));
             this.addObject(button, this.container);
         } else {
             const text = Fonts.stdMedium()

@@ -416,15 +416,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
-        if (this._helpScreen.isLive) {
-            this._helpScreen.destroyObject();
-        } else {
-            this.updateUILayout();
-            this.createHelpScreen();
-        }
-    }
-
-    private createHelpScreen() {
         const toolBar = this.toolbar;
         const getBounds = (elem: ContainerObject) => new Rectangle(
             // worldTransform seems unreliable. TODO investigate.
@@ -436,8 +427,7 @@ export default class PoseEditMode extends GameMode {
 
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
-
-        const {panel, positionUpdater} = HelpScreen.create({
+        this.modeStack.pushMode(new HelpScreen({
             toolTips: {
                 hints: this._puzzle.hint
                     ? [
@@ -484,9 +474,7 @@ export default class PoseEditMode extends GameMode {
                 zoom: [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2],
                 undo: [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
             }
-        });
-        this._helpScreen = this.addObject(panel, this.container);
-        panel.regs.add(this.resized.connect(positionUpdater));
+        }));
     }
 
     private showSolution(solution: Solution): void {
@@ -1297,13 +1285,6 @@ export default class PoseEditMode extends GameMode {
 
             this.changeTarget(this._curTargetIndex);
             this._poses[0].setZoomLevel(this._poses[0].computeDefaultZoomLevel(), true, true);
-        }
-
-        if (this._helpScreen.isLive) {
-            // This is done to hide/remove the stateToggle tooltip accordingly
-            // TODO: UI system work needed to handle these tooltips in a more generic way.
-            this._helpScreen.destroyObject();
-            this.createHelpScreen();
         }
     }
 
@@ -3104,7 +3085,6 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
-    private _helpScreen: GameObjectRef = GameObjectRef.NULL;
 
     protected _folder: Folder;
     // / Asynch folding

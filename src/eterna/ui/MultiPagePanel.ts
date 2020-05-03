@@ -53,6 +53,8 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.beginFill(UITheme.colors.background, 1);
         this._background.drawRoundedRect(0, 0, props.width, props.height, theme.borderRadius);
         this._background.endFill();
+        this._background.interactive = true;
+        this._background.on('click', (e) => e.stopPropagation());
         this.container.addChild(this._background);
 
         // Content
