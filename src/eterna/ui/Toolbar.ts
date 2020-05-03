@@ -92,7 +92,7 @@ export default class Toolbar extends ContainerObject {
     public onResized() {
         this.stateToggle.container.position = new Point(
             Flashbang.stageWidth / 2 - this.container.position.x,
-            -this.container.position.y + 20
+            -this.container.position.y + 8
         );
     }
 
