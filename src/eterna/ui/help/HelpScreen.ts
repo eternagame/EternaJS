@@ -1,8 +1,7 @@
 import {
-    ContainerObject, Flashbang, DisplayUtil, HAlign, VAlign
+    ContainerObject, Flashbang, DisplayUtil, HAlign, VAlign, AppMode
 } from 'flashbang';
 import {Point, Graphics} from 'pixi.js';
-import GameMode from 'eterna/mode/GameMode';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import MultiPagePanel from '../MultiPagePanel';
 import HelpItem from './HelpItem';
@@ -15,7 +14,7 @@ interface HelpScreenProps {
     toolTips: HelpToolTipsProps;
 }
 
-export default class HelpScreen extends GameMode {
+export default class HelpScreen extends AppMode {
     private static readonly theme = {
         item: {
             width: 200,
