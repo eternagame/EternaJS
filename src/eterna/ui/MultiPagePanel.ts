@@ -98,11 +98,11 @@ export default class MultiPagePanel extends ContainerObject {
             UITheme.panel.padding,
             props.height - theme.buttonSize.y - UITheme.panel.padding
         );
-        this._prevButton.clicked.connect(() => {
+        this.regs.add(this._prevButton.clicked.connect(() => {
             if (this._currentPage > 0) {
                 this.setCurrentPage(this._currentPage - 1);
             }
-        });
+        }));
 
         this._nextButton = new GameButton()
             .up(Bitmaps.NovaNext)
@@ -113,11 +113,11 @@ export default class MultiPagePanel extends ContainerObject {
             this._prevButton.display.x + UITheme.panel.padding + theme.buttonSize.x,
             this._prevButton.display.y
         );
-        this._nextButton.clicked.connect(() => {
+        this.regs.add(this._nextButton.clicked.connect(() => {
             if (this._currentPage < this.pageCount - 1) {
                 this.setCurrentPage(this._currentPage + 1);
             }
-        });
+        }));
 
         this.setCurrentPage(this._currentPage);
     }

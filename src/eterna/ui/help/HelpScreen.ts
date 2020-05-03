@@ -89,9 +89,9 @@ export default class HelpScreen extends AppMode {
             height: theme.column.height
         });
         this._help.display.visible = false;
-        helpPage.onBack.connect(() => {
+        this.regs.add(helpPage.onBack.connect(() => {
             this._help.display.visible = false;
-        });
+        }));
 
         // help sections
         const sectionsContainer = new ContainerObject();
