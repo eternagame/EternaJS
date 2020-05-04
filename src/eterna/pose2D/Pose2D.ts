@@ -2451,6 +2451,32 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._editableIndices = editList;
     }
 
+    /**
+     * Center a nucleotide into view
+     * @param index: 1-based index of the nucleotide, or its custom display number
+     *
+     */
+    public focusNucleotide(index: number) {
+        const baseIndex = (() => {
+            if (this._customNumbering) {
+                return this._customNumbering.findIndex((e) => e === index);
+            } else {
+                return index - 1;
+            }
+        })();
+
+        if (baseIndex < 0 || baseIndex >= this._bases.length) {
+            // eslint-disable-next-line
+            console.warn(`Can't focus nucleotide with index '${index}'`);
+            return;
+        }
+
+        this.setOffset(
+            this._width / 2 - this._bases[baseIndex].x,
+            this._height / 2 - this._bases[baseIndex].y
+        );
+    }
+
     private computeLayout(fast: boolean = false): void {
         let fullSeq: number[] = this.fullSequence;
 
