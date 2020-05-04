@@ -358,6 +358,13 @@ export default class PuzzleManager {
             puzzle.constraints.filter(isScriptConstraint)
                 .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
         );
+
+        // Pre-load secondary puzzle
+        const [m, secondaryPuzzleId] = puzzle.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        if (secondaryPuzzleId) {
+            await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
+        }
+
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
     }
