@@ -378,6 +378,11 @@ export default class EternaApp extends FlashbangApp {
 
     public async loadPoseEditFromFile(path: string, params: PoseEditParams) {
         const puzzle = await this.loadPuzzleFromFile(path);
+
+        if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
+            await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        }
+
         return this._modeStack.unwindToMode(new PoseEditMode(
             puzzle,
             {...params, local: true},
