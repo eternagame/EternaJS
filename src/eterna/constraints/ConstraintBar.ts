@@ -3,6 +3,8 @@ import {Point} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import ROPWait from 'eterna/rscript/ROPWait';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
@@ -126,6 +128,7 @@ export default class ConstraintBar extends ContainerObject {
                 constraint.constraintBox.flagged = true;
                 this.updateHighlights();
             }
+            ROPWait.notifyClickUI(RScriptUIElementID.SHAPEOBJECTIVE);
         }
     }
 
