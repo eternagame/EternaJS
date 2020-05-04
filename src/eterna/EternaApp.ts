@@ -180,13 +180,17 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
-    public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
-        return this.loadPuzzle(puzzleOrID)
-            .then(async (puzzle) => this._modeStack.unwindToMode(new PoseEditMode(
-                puzzle,
-                params,
-                await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
-            )));
+    public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
+        const puzzle = await this.loadPuzzle(puzzleOrID);
+
+        let autoSaveData: any | undefined;
+        if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
+            await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        } else {
+            autoSaveData = await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        }
+
+        await this._modeStack.unwindToMode(new PoseEditMode(puzzle, params, autoSaveData));
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
