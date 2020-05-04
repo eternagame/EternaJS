@@ -453,6 +453,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
+    public getEnergyScorePos(index: number, out: Point = null): Point {
+        if (out === null) {
+            out = new Point();
+        }
+        out.x = this._scoreTexts[index].x;
+        out.y = this._scoreTexts[index].y;
+        return out;
+    }
+
     public getBaseOutXY(seq: number, out: Point = null): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
