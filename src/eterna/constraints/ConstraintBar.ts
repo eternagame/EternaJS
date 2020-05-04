@@ -1,13 +1,11 @@
 import {ContainerObject, Flashbang} from 'flashbang';
-import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import {Point} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -131,16 +129,21 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public updateConstraints(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): boolean {
+    public updateConstraints(context: ConstraintContext): boolean {
         let satisfied = true;
 
         for (let constraint of this._constraints) {
-            let status = constraint.constraint.evaluate(undoBlocks, targetConditions, puzzle);
+            let status = constraint.constraint.evaluate(context);
             constraint.constraintBox.setContent(
-                constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
+                constraint.constraint.getConstraintBoxConfig(
+                    status,
+                    false,
+                    context.undoBlocks,
+                    context.targetConditions
+                )
             );
             constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
+                ? null : constraint.constraint.getHighlight(status, context);
             satisfied = satisfied && status.satisfied;
         }
 

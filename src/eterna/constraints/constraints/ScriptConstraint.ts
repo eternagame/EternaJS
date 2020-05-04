@@ -1,8 +1,6 @@
-import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 
 interface ScriptConstraintStatus extends BaseConstraintStatus {
@@ -22,7 +20,7 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
         this.scriptID = scriptID;
     }
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[], puzzle: Puzzle): ScriptConstraintStatus {
+    public evaluate(context: ConstraintContext): ScriptConstraintStatus {
         const result = ExternalInterface.runScriptSync(this.scriptID, {});
 
         return {
