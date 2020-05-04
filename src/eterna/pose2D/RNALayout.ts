@@ -176,7 +176,7 @@ export default class RNALayout {
         // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
-        } else if (xarray.length < 3) {
+        } else if (xarray.length <= 4) {
             // there is no structure (no pairs)
             // really short, just place them in a vertical line
             for (let ii = 0; ii < xarray.length; ii++) {
