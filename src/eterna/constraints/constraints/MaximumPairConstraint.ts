@@ -117,11 +117,15 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
+        const [missionBitmap, constraintBitmap] = this.maxPairs === 0
+            ? [Bitmaps.NovaNoAUMissionReq, Bitmaps.NovaNoAUReq]
+            : [Bitmaps.NovaAUMissionReq, Bitmaps.NovaAUReq];
+
         return {
             ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
+                ? BitmapManager.getBitmap(missionBitmap)
+                : BitmapManager.getBitmap(constraintBitmap)
         };
     }
 
