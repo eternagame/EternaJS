@@ -1,5 +1,6 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
+import NuPACK from 'eterna/folding/NuPACK';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -75,6 +76,10 @@ export default class RNALayout {
         return this._root;
     }
 
+    public get pseudoknotPairs(): number[] {
+        return this._pseudoknotPairs;
+    }
+
     /**
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
@@ -137,6 +142,7 @@ export default class RNALayout {
         // need to have PKs removed.
         // AMW TODO: Rhiju, we should eventually be able to remove this condition,
         // once you work out how layouts can handle pseudoknots.
+        this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
         biPairs = EPars.filterForPseudoknots(biPairs);
         this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
 
@@ -249,10 +255,9 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        // AMW: temporarily assuming score without PK
         if ((EPars.pairsToParenthesis(this._targetPairs).includes('{')
                 || EPars.pairsToParenthesis(this._targetPairs).includes('['))
-                && folder.name === 'NuPACK') {
+                && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -808,6 +813,7 @@ export default class RNALayout {
     private _root: RNATreeNode;
     private _origPairs: number[];
     private _targetPairs: number[];
+    private _pseudoknotPairs: number[];
     private _customLayout: Array<[number, number]>;
 
     // / "New" method to gather NN free energies, just use the folding engine
