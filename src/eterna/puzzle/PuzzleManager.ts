@@ -32,6 +32,7 @@ import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
+import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
 
@@ -299,6 +300,9 @@ export default class PuzzleManager {
                     case SynthesisConstraint.NAME:
                         constraints.push(new SynthesisConstraint());
                         break;
+                    case BoostConstraint.NAME:
+                        constraints.push(new BoostConstraint(Number(parameter)));
+                        break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
@@ -358,6 +362,13 @@ export default class PuzzleManager {
             puzzle.constraints.filter(isScriptConstraint)
                 .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
         );
+
+        // Pre-load secondary puzzle
+        const [m, secondaryPuzzleId] = puzzle.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        if (secondaryPuzzleId) {
+            await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
+        }
+
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
     }

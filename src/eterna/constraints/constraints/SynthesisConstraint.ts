@@ -1,4 +1,3 @@
-import UndoBlock from 'eterna/UndoBlock';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {StyledTextBuilder} from 'flashbang';
@@ -7,7 +6,7 @@ import EPars from 'eterna/EPars';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import {ConsecutiveAConstraint, ConsecutiveGConstraint, ConsecutiveCConstraint} from './ConsecutiveBaseConstraint';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface SynthConstraintStatus extends BaseConstraintStatus {
     currentA: number;
@@ -22,10 +21,10 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
     public static readonly GMAX = 4;
     public static readonly CMAX = 5;
 
-    public evaluate(undoBlocks: UndoBlock[]): SynthConstraintStatus {
-        let aRet = this._consecutiveAConstraint.evaluate(undoBlocks);
-        let gRet = this._consecutiveGConstraint.evaluate(undoBlocks);
-        let cRet = this._consecutiveCConstraint.evaluate(undoBlocks);
+    public evaluate(context: ConstraintContext): SynthConstraintStatus {
+        let aRet = this._consecutiveAConstraint.evaluate(context);
+        let gRet = this._consecutiveGConstraint.evaluate(context);
+        let cRet = this._consecutiveCConstraint.evaluate(context);
 
         return {
             satisfied: [aRet, gRet, cRet].every((ret) => ret.satisfied),
@@ -98,20 +97,20 @@ export default class SynthesisConstraint extends Constraint<SynthConstraintStatu
         };
     }
 
-    public getHighlight(status: SynthConstraintStatus, undoBlocks: UndoBlock[]): HighlightInfo {
+    public getHighlight(status: SynthConstraintStatus, context: ConstraintContext): HighlightInfo {
         return {
             ranges: [
                 ...this._consecutiveAConstraint.getHighlight(
-                    this._consecutiveAConstraint.evaluate(undoBlocks),
-                    undoBlocks
+                    this._consecutiveAConstraint.evaluate(context),
+                    context
                 ).ranges,
                 ...this._consecutiveGConstraint.getHighlight(
-                    this._consecutiveGConstraint.evaluate(undoBlocks),
-                    undoBlocks
+                    this._consecutiveGConstraint.evaluate(context),
+                    context
                 ).ranges,
                 ...this._consecutiveCConstraint.getHighlight(
-                    this._consecutiveCConstraint.evaluate(undoBlocks),
-                    undoBlocks
+                    this._consecutiveCConstraint.evaluate(context),
+                    context
                 ).ranges
             ],
             color: HighlightType.RESTRICTED

@@ -26,6 +26,7 @@ import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import HighlightBox, {HighlightType} from './HighlightBox';
 import BaseRope from './BaseRope';
+import PseudoknotLines from './PseudoknotLines';
 import Molecule from './Molecule';
 import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
@@ -63,6 +64,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._baseRope = new BaseRope(this);
         this.addObject(this._baseRope, this.container);
+
+        this._pseudoknotLines = new PseudoknotLines(this);
+        this.addObject(this._pseudoknotLines, this.container);
 
         this.container.addChild(this._baseLayer);
 
@@ -449,6 +453,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
+    public getEnergyScorePos(index: number, out: Point = null): Point {
+        if (out === null) {
+            out = new Point();
+        }
+        out.x = this._scoreTexts[index].x;
+        out.y = this._scoreTexts[index].y;
+        return out;
+    }
+
     public getBaseOutXY(seq: number, out: Point = null): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
@@ -769,6 +782,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return temp;
     }
 
+    public get pseudoknotPairs(): number[] {
+        return this._pseudoknotPairs;
+    }
+
     public set forcedHighlights(elems: number[]) {
         this._forcedHighlightBox.clear();
         this._forcedHighlightBox.setHighlight(elems);
@@ -977,6 +994,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get showRope(): boolean {
         return this._showBaseRope;
+    }
+
+    public set showPseudoknots(show: boolean) {
+        this._showPseudoknots = show;
+        this._redraw = true;
+    }
+
+    public get showPseudoknots(): boolean {
+        return this._showPseudoknots;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -2031,9 +2057,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
+        this._pseudoknotLines.enabled = this._pseudoknotPairs.filter((it) => it !== -1).length !== 0;
 
         if (this._redraw || basesMoved) {
             this._baseRope.redraw(true /* force baseXY */);
+            if (this.pseudoknotPairs.length !== 0) {
+                this._pseudoknotLines.redraw(true /* force baseXY */);
+            }
 
             if (this._cursorIndex > 0) {
                 center = this.getBaseLoc(this._cursorIndex - 1);
@@ -2442,6 +2472,32 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._editableIndices = editList;
     }
 
+    /**
+     * Center a nucleotide into view
+     * @param index: 1-based index of the nucleotide, or its custom display number
+     *
+     */
+    public focusNucleotide(index: number) {
+        const baseIndex = (() => {
+            if (this._customNumbering) {
+                return this._customNumbering.findIndex((e) => e === index);
+            } else {
+                return index - 1;
+            }
+        })();
+
+        if (baseIndex < 0 || baseIndex >= this._bases.length) {
+            // eslint-disable-next-line
+            console.warn(`Can't focus nucleotide with index '${index}'`);
+            return;
+        }
+
+        this.setOffset(
+            this._width / 2 - this._bases[baseIndex].x,
+            this._height / 2 - this._bases[baseIndex].y
+        );
+    }
+
     private computeLayout(fast: boolean = false): void {
         let fullSeq: number[] = this.fullSequence;
 
@@ -2479,6 +2535,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         rnaDrawer.getCoords(xarray, yarray);
+        this._pseudoknotPairs = rnaDrawer.pseudoknotPairs;
 
         this._baseRotationDirectionSign = new Array(n);
         rnaDrawer.getRotationDirectionSign(this._baseRotationDirectionSign);
@@ -3288,6 +3345,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _mutatedSequence: number[];
     private _pairs: number[] = [];
     private _targetPairs: number[] = [];
+    private _pseudoknotPairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] = [];
     private _forcedStruct: number[] = [];
@@ -3334,6 +3392,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Rope connecting bases for crazy user-defined layouts
     private _baseRope: BaseRope;
+
+    // lines connecting pseudoknotted BPs
+    private _pseudoknotLines: PseudoknotLines;
 
     // Scripted painters
     private _dynPaintColors: number[] = [];
@@ -3436,6 +3497,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Rendering mode
     private _numberingMode: boolean = false;
     private _showBaseRope: boolean = false;
+    private _showPseudoknots: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     // customNumbering

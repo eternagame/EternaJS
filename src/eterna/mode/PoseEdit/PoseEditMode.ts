@@ -47,6 +47,7 @@ import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import Utility from 'eterna/util/Utility';
+import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -157,6 +158,18 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.palette.targetClicked.connect((targetType) => this.onPaletteTargetSelected(targetType));
         this._toolbar.pairSwapButton.clicked.connect(() => this.onSwapClicked());
         this._toolbar.hintButton.clicked.connect(() => this.onHintClicked());
+
+        this._toolbar.nucleotideFindButton.clicked.connect(() => {
+            this.showDialog(new NucleotideFinder()).closed.then((result) => {
+                if (result != null) {
+                    if (this._isPipMode) {
+                        this._poses.forEach((p) => p.focusNucleotide(result.nucleotideIndex));
+                    } else {
+                        this._poses[this._curTargetIndex].focusNucleotide(result.nucleotideIndex);
+                    }
+                }
+            });
+        });
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
@@ -880,9 +893,11 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean => {
             this.checkConstraints();
             if (idx >= 0 && idx < this.constraintCount) {
-                return this._puzzle.constraints[idx].evaluate(
-                    this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
-                ).satisfied;
+                return this._puzzle.constraints[idx].evaluate({
+                    undoBlocks: this._seqStacks[this._stackLevel],
+                    targetConditions: this._targetConditions,
+                    puzzle: this._puzzle
+                }).satisfied;
             } else {
                 return false;
             }
@@ -1161,6 +1176,11 @@ export default class PoseEditMode extends GameMode {
 
     public showMissionScreen(doShow: boolean): void {
         this._showMissionScreen = doShow;
+        if (doShow) {
+            if (this._isPlaying) {
+                this.showIntroScreen();
+            }
+        }
     }
 
     public showConstraints(doShow: boolean): void {
@@ -2002,7 +2022,11 @@ export default class PoseEditMode extends GameMode {
             (constraint) => {
                 let box = new ConstraintBox(true);
                 box.setContent(constraint.getConstraintBoxConfig(
-                    constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
+                    constraint.evaluate({
+                        undoBlocks: this._seqStacks[this._stackLevel],
+                        targetConditions: this._targetConditions,
+                        puzzle: this._puzzle
+                    }),
                     true,
                     this._seqStacks[this._stackLevel],
                     this._targetConditions
@@ -2225,11 +2249,11 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkConstraints(): boolean {
-        return this._constraintBar.updateConstraints(
-            this._seqStacks[this._stackLevel],
-            this._targetConditions,
-            this._puzzle
-        );
+        return this._constraintBar.updateConstraints({
+            undoBlocks: this._seqStacks[this._stackLevel],
+            targetConditions: this._targetConditions,
+            puzzle: this._puzzle
+        });
     }
 
     private updateScore(): void {

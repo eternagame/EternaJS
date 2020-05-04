@@ -32,6 +32,11 @@ export default class ROPHighlight extends RScriptOp {
 
     /* override */
     public exec(): void {
+        if (this._uiElementString?.toUpperCase() === RScriptUIElementID.ENERGY) {
+            this._env.pose.showEnergyHighlight = this._opVisible;
+            return;
+        }
+
         // Remove highlight with ID.
         if (this._env.hasVar(this._id)) {
             let existing: any = this._env.getVar(this._id);
