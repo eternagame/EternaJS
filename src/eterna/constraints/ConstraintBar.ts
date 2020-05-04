@@ -66,7 +66,7 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         let xWalker = 17;
-        let yPos = 35;
+        let yPos = 37;
 
         for (let constraint of nonStateConstraints) {
             let box = constraint.constraintBox;

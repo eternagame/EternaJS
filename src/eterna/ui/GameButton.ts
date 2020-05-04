@@ -81,12 +81,13 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.toggled.value;
     }
 
-    public label(text: string | TextBuilder, fontSize?: number): GameButton {
+    public label(text: string | TextBuilder, fontSize?: number, background?: boolean): GameButton {
         if (typeof (text) === 'string') {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
+        this._labelBackground = background;
         this.needsRedraw();
         return this;
     }
@@ -175,7 +176,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox = icon == null && label != null;
+        const drawStyleBox = icon == null && label != null && this._labelBackground !== false;
         if (drawStyleBox) {
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
@@ -282,6 +283,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private readonly _content: Container;
 
     private _labelBuilder: TextBuilder;
+    private _labelBackground?: boolean;
     private _fixedLabelWidth: number = 0;
     private _scaleIconToLabel: boolean = false;
     private _tooltip: string;
