@@ -880,9 +880,11 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('constraint_satisfied', (idx: number): boolean => {
             this.checkConstraints();
             if (idx >= 0 && idx < this.constraintCount) {
-                return this._puzzle.constraints[idx].evaluate(
-                    this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle
-                ).satisfied;
+                return this._puzzle.constraints[idx].evaluate({
+                    undoBlocks: this._seqStacks[this._stackLevel],
+                    targetConditions: this._targetConditions,
+                    puzzle: this._puzzle
+                }).satisfied;
             } else {
                 return false;
             }
@@ -2007,7 +2009,11 @@ export default class PoseEditMode extends GameMode {
             (constraint) => {
                 let box = new ConstraintBox(true);
                 box.setContent(constraint.getConstraintBoxConfig(
-                    constraint.evaluate(this._seqStacks[this._stackLevel], this._targetConditions, this._puzzle),
+                    constraint.evaluate({
+                        undoBlocks: this._seqStacks[this._stackLevel],
+                        targetConditions: this._targetConditions,
+                        puzzle: this._puzzle
+                    }),
                     true,
                     this._seqStacks[this._stackLevel],
                     this._targetConditions
@@ -2230,11 +2236,11 @@ export default class PoseEditMode extends GameMode {
     }
 
     private checkConstraints(): boolean {
-        return this._constraintBar.updateConstraints(
-            this._seqStacks[this._stackLevel],
-            this._targetConditions,
-            this._puzzle
-        );
+        return this._constraintBar.updateConstraints({
+            undoBlocks: this._seqStacks[this._stackLevel],
+            targetConditions: this._targetConditions,
+            puzzle: this._puzzle
+        });
     }
 
     private updateScore(): void {

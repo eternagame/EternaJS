@@ -1,8 +1,7 @@
-import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MaxBaseConstraintStatus extends BaseConstraintStatus {
     currentCount: number;
@@ -18,9 +17,9 @@ abstract class MaximumBaseConstraint extends Constraint<MaxBaseConstraintStatus>
         this.maxCount = maxCount;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MaxBaseConstraintStatus {
+    public evaluate(context: ConstraintContext): MaxBaseConstraintStatus {
         // TODO: Multistate?
-        const count = undoBlocks[0].sequence.reduce(
+        const count = context.undoBlocks[0].sequence.reduce(
             (acc, curr) => acc + (curr === this.baseType ? 1 : 0), 0
         );
 
