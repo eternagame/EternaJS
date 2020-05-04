@@ -2057,11 +2057,12 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
-        this._pseudoknotLines.enabled = this._pseudoknotPairs.filter((it) => it !== -1).length !== 0;
+        this._pseudoknotLines.enabled = this._pseudoknotPairs
+            && this._pseudoknotPairs.filter((it) => it !== -1).length !== 0;
 
         if (this._redraw || basesMoved) {
             this._baseRope.redraw(true /* force baseXY */);
-            if (this.pseudoknotPairs.length !== 0) {
+            if (this.pseudoknotPairs && this.pseudoknotPairs.length !== 0) {
                 this._pseudoknotLines.redraw(true /* force baseXY */);
             }
 
