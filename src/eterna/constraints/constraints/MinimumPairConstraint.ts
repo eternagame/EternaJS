@@ -1,9 +1,9 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MinPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;
@@ -19,9 +19,9 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         this.minPairs = minPairs;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
+    public evaluate(context: ConstraintContext): MinPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = undoBlocks[0].getParam(
+        const currentPairs: number = context.undoBlocks[0].getParam(
             UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
         );
         return {
@@ -162,12 +162,12 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
     }
 
     /** @override */
-    public evaluate(undoBlocks: UndoBlock[]): MinPairConstraintStatus {
+    public evaluate(context: ConstraintContext): MinPairConstraintStatus {
         // TODO: Multistate?
         const currentPairs: number = (
-            undoBlocks[0].getParam(UndoBlockParam['GC'])
-            + undoBlocks[0].getParam(UndoBlockParam['AU'])
-            + undoBlocks[0].getParam(UndoBlockParam['GU'])
+            context.undoBlocks[0].getParam(UndoBlockParam['GC'])
+            + context.undoBlocks[0].getParam(UndoBlockParam['AU'])
+            + context.undoBlocks[0].getParam(UndoBlockParam['GU'])
         );
         return {
             satisfied: (

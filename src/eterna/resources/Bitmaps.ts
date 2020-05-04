@@ -16,6 +16,8 @@ export default class Bitmaps {
     public static readonly ImgAddPairSelect: string = require('assets/NOVA/Edit/add_pair_selected.png');
     public static readonly NovaAUReq: string = require('assets/NOVA/Constraints/au-requirement-carrier.png');
     public static readonly NovaAUMissionReq: string = require('assets/NOVA/Mission/au-requirement.png');
+    public static readonly NovaNoAUReq: string = require('assets/NOVA/Constraints/no-AU-pairs-box.png');
+    public static readonly NovaNoAUMissionReq: string = require('assets/NOVA/Mission/no-AU-pairs-mission.png');
     public static readonly Backbone: string = require('assets/RNABase/backbone_new.png');
     public static readonly NovaBarcodeMissionReq: string = require('assets/NOVA/Mission/barcode-req-mission.png');
     public static readonly NovaBarcodeReq: string = require('assets/NOVA/Constraints/barcode-requirement-carrier.png');
@@ -190,6 +192,7 @@ export default class Bitmaps {
     public static readonly ImgPasteOver: string = require('assets/NOVA/Copy/paste_active.png');
     public static readonly ImgPasteHit: string = require('assets/NOVA/Copy/paste_hit.png');
     public static readonly ImgPaste: string = require('assets/NOVA/Copy/paste_normal.png');
+    public static readonly ImgFind: string = require('assets/find.png');
     public static readonly BonusSymbol: string = require('assets/penalty1.png');
     public static readonly ImgPipOver: string = require('assets/NOVA/Tile/pip_active.png');
     public static readonly ImgPipHit: string = require('assets/NOVA/Tile/pip_hit.png');
