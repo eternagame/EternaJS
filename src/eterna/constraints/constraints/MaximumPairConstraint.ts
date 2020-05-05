@@ -1,9 +1,9 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MaxPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;
@@ -19,9 +19,9 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
         this.maxPairs = maxPairs;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MaxPairConstraintStatus {
+    public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = undoBlocks[0].getParam(
+        const currentPairs: number = context.undoBlocks[0].getParam(
             UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
         );
         return {
@@ -42,9 +42,16 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
             tooltip.pushStyle('altTextMain');
         }
 
-        tooltip.append('You must have ')
-            .append('at most', 'altText')
-            .append(` ${this.maxPairs} `)
+        tooltip.append('You must have ');
+
+        if (this.maxPairs === 0) {
+            tooltip.append('no ', 'altText');
+        } else {
+            tooltip.append('at most', 'altText')
+                .append(` ${this.maxPairs} `);
+        }
+
+        tooltip
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(0))}-`)
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(1))} pairs.`);
 
@@ -52,9 +59,13 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
             tooltip.popStyle();
         }
 
+        const clarificationText = this.maxPairs === 0
+            ? `NO ${EPars.nucleotidePairToString(this.pairType)} PAIRS`
+            : `${this.maxPairs} OR FEWER`;
+
         return {
             satisfied: status.satisfied,
-            clarificationText: `${this.maxPairs} OR FEWER`,
+            clarificationText,
             statText: status.currentPairs.toString(),
             tooltip,
             showOutline: true
@@ -74,11 +85,15 @@ export class MaximumGCConstraint extends MaximumPairConstraint {
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
+        const [missionBitmap, constraintBitmap] = this.maxPairs === 0
+            ? [Bitmaps.NovaNoGCMissionReq, Bitmaps.NovaNoGCReq]
+            : [Bitmaps.NovaGCMissionReq, Bitmaps.NovaGCReq];
+
         return {
             ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaGCMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaGCReq)
+                ? BitmapManager.getBitmap(missionBitmap)
+                : BitmapManager.getBitmap(constraintBitmap)
         };
     }
 
@@ -102,11 +117,15 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
+        const [missionBitmap, constraintBitmap] = this.maxPairs === 0
+            ? [Bitmaps.NovaNoAUMissionReq, Bitmaps.NovaNoAUReq]
+            : [Bitmaps.NovaAUMissionReq, Bitmaps.NovaAUReq];
+
         return {
             ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaAUMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaAUReq)
+                ? BitmapManager.getBitmap(missionBitmap)
+                : BitmapManager.getBitmap(constraintBitmap)
         };
     }
 
@@ -130,11 +149,15 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
         status: MaxPairConstraintStatus,
         forMissionScreen: boolean
     ): ConstraintBoxConfig {
+        const [missionBitmap, constraintBitmap] = this.maxPairs === 0
+            ? [Bitmaps.NovaNoGUMissionReq, Bitmaps.NovaNoGUReq]
+            : [Bitmaps.NovaGUMissionReq, Bitmaps.NovaGUReq];
+
         return {
             ...super.getConstraintBoxConfig(status, forMissionScreen),
             fullTexture: forMissionScreen
-                ? BitmapManager.getBitmap(Bitmaps.NovaGUMissionReq)
-                : BitmapManager.getBitmap(Bitmaps.NovaGUReq)
+                ? BitmapManager.getBitmap(missionBitmap)
+                : BitmapManager.getBitmap(constraintBitmap)
         };
     }
 

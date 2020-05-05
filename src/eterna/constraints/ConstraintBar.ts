@@ -1,13 +1,13 @@
 import {ContainerObject, Flashbang} from 'flashbang';
-import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import {Point} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import ROPWait from 'eterna/rscript/ROPWait';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -66,7 +66,7 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         let xWalker = 17;
-        let yPos = 35;
+        let yPos = 37;
 
         for (let constraint of nonStateConstraints) {
             let box = constraint.constraintBox;
@@ -128,19 +128,25 @@ export default class ConstraintBar extends ContainerObject {
                 constraint.constraintBox.flagged = true;
                 this.updateHighlights();
             }
+            ROPWait.notifyClickUI(RScriptUIElementID.SHAPEOBJECTIVE);
         }
     }
 
-    public updateConstraints(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): boolean {
+    public updateConstraints(context: ConstraintContext): boolean {
         let satisfied = true;
 
         for (let constraint of this._constraints) {
-            let status = constraint.constraint.evaluate(undoBlocks, targetConditions, puzzle);
+            let status = constraint.constraint.evaluate(context);
             constraint.constraintBox.setContent(
-                constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
+                constraint.constraint.getConstraintBoxConfig(
+                    status,
+                    false,
+                    context.undoBlocks,
+                    context.targetConditions
+                )
             );
             constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
+                ? null : constraint.constraint.getHighlight(status, context);
             satisfied = satisfied && status.satisfied;
         }
 

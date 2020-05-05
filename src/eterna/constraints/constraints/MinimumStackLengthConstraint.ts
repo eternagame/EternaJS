@@ -1,4 +1,4 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import {UndoBlockParam} from 'eterna/UndoBlock';
 import {
     Container, Sprite, Point, Texture
 } from 'pixi.js';
@@ -7,7 +7,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {TextureUtil} from 'flashbang';
 import Band from 'eterna/ui/Band';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MinStackConstraintStatus extends BaseConstraintStatus{
     currentLength: number;
@@ -22,9 +22,9 @@ export default class MinimumStackLengthConstraint extends Constraint<MinStackCon
         this.minLength = minLength;
     }
 
-    public evaluate(undoBlocks: UndoBlock[]): MinStackConstraintStatus {
+    public evaluate(context: ConstraintContext): MinStackConstraintStatus {
         // TODO: Multistate?
-        const stackLen = undoBlocks[0].getParam(UndoBlockParam.STACK);
+        const stackLen = context.undoBlocks[0].getParam(UndoBlockParam.STACK);
         return {
             satisfied: stackLen >= this.minLength,
             currentLength: stackLen

@@ -732,7 +732,9 @@ export default class PuzzleEditMode extends GameMode {
                 this._poses[ii].pairs = bestPairs;
             }
 
-            this._constraintBar.updateConstraints(this._seqStack[this._stackLevel]);
+            this._constraintBar.updateConstraints({
+                undoBlocks: this._seqStack[this._stackLevel]
+            });
         }
 
         let undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);

@@ -28,6 +28,7 @@ import FolderManager from './folding/FolderManager';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
+import RSignals from './rscript/RSignals';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -116,6 +117,13 @@ export default class EternaApp extends FlashbangApp {
         eternaContainer.appendChild(overlay);
 
         ExternalInterface.init(eternaContainer);
+
+        RSignals.pushPuzzle.connect(async (puzzleId) => {
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleId);
+            this._modeStack.pushMode(new PoseEditMode(puzzle, {}));
+        });
+
+        RSignals.popPuzzle.connect(() => this._modeStack.popMode());
     }
 
     /* override */
@@ -172,13 +180,17 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
-    public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
-        return this.loadPuzzle(puzzleOrID)
-            .then(async (puzzle) => this._modeStack.unwindToMode(new PoseEditMode(
-                puzzle,
-                params,
-                await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
-            )));
+    public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
+        const puzzle = await this.loadPuzzle(puzzleOrID);
+
+        let autoSaveData: any | undefined;
+        if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
+            await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        } else {
+            autoSaveData = await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        }
+
+        await this._modeStack.unwindToMode(new PoseEditMode(puzzle, params, autoSaveData));
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
