@@ -251,7 +251,9 @@ export default class Toolbar extends ContainerObject {
             .tooltip("View RNA's melting point, dotplot and other specs")
             .hotkey(KeyCode.KeyS);
 
-        this.actionMenu.addSubMenuButton(0, this.specButton);
+        if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
+            this.actionMenu.addSubMenuButton(0, this.specButton);
+        }
 
         let resetTooltip = this._type === ToolbarType.PUZZLEMAKER || this._type === ToolbarType.PUZZLEMAKER_EMBEDDED
             ? 'Reset all bases to A' : 'Reset and try this puzzle again.';
