@@ -7,12 +7,13 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import {Graphics, Point} from 'pixi.js';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
+import HTMLTextObject from './HTMLTextObject';
 
 interface MultiPagePanelProps {
     title: string;
-    pages: ContainerObject[];
+    pages: Array<HTMLTextObject|ContainerObject>;
     width: number;
-    height: number;
+    height?: number;
 }
 
 export default class MultiPagePanel extends ContainerObject {
@@ -25,6 +26,8 @@ export default class MultiPagePanel extends ContainerObject {
         borderRadius: 5,
         buttonSize: new Point(59, 24) // TODO find a better way to position the prev/next buttons!
     };
+
+    private _props: MultiPagePanelProps;
 
     private _currentPage = 0;
     private _title: string;
@@ -44,22 +47,23 @@ export default class MultiPagePanel extends ContainerObject {
 
     constructor(props: MultiPagePanelProps) {
         super();
+        this._props = props;
+    }
+
+    protected added() {
+        super.added();
 
         const {theme} = MultiPagePanel;
 
-        // Background
+        // Background - we need it on a lower layer so we're adding it here,
+        // but we want to derive the height from the pages, so we need to wait
+        // until those are added to actually draw
         this._background = new Graphics();
-        this._background.lineStyle(UITheme.panel.borderSize, UITheme.colors.border, 1);
-        this._background.beginFill(UITheme.colors.background, 1);
-        this._background.drawRoundedRect(0, 0, props.width, props.height, theme.borderRadius);
-        this._background.endFill();
-        this._background.interactive = true;
-        this._background.on('click', (e) => e.stopPropagation());
         this.container.addChild(this._background);
 
         // Content
         this._pagesContainer = new ContainerObject();
-        props.pages.forEach((page) => {
+        this._props.pages.forEach((page) => {
             this._pagesContainer.addObject(page, this._pagesContainer.container);
         });
         this._pagesContainer.container.position = new Point(
@@ -68,13 +72,33 @@ export default class MultiPagePanel extends ContainerObject {
         );
         this.addObject(this._pagesContainer, this.container);
 
+        const getHeight = (page: HTMLTextObject | ContainerObject): number => {
+            if (page instanceof HTMLTextObject) {
+                return page.height;
+            } else {
+                return page.container.height;
+            }
+        };
+
+        const panelHeight = this._props.height || Math.max(...this._props.pages.map(getHeight))
+            + theme.title.height + 2 * UITheme.panel.padding
+            + (this.pageCount > 1 ? theme.buttonSize.y + UITheme.panel.padding : 0);
+
+        // Now we draw the background
+        this._background.lineStyle(UITheme.panel.borderSize, UITheme.colors.border, 1);
+        this._background.beginFill(UITheme.colors.background, 1);
+        this._background.drawRoundedRect(0, 0, this._props.width, panelHeight, theme.borderRadius);
+        this._background.endFill();
+        this._background.interactive = true;
+        this._background.on('click', (e) => e.stopPropagation());
+
         // Title
-        this._title = props.title;
+        this._title = this._props.title;
         this._background.beginFill(UITheme.colors.border);
         this._background.drawRoundedRect(
             0,
             0,
-            props.width,
+            this._props.width,
             theme.title.height,
             theme.borderRadius
         );
@@ -96,7 +120,7 @@ export default class MultiPagePanel extends ContainerObject {
         this.addObject(this._prevButton, this.container);
         this._prevButton.display.position = new Point(
             UITheme.panel.padding,
-            props.height - theme.buttonSize.y - UITheme.panel.padding
+            panelHeight - theme.buttonSize.y - UITheme.panel.padding
         );
         this.regs.add(this._prevButton.clicked.connect(() => {
             if (this._currentPage > 0) {

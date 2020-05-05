@@ -4,6 +4,7 @@ import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import MultiPagePanel from './MultiPagePanel';
 import UITheme from './UITheme';
+import HTMLTextObject from './HTMLTextObject';
 
 export default class HintsPanel {
     private static readonly theme = {
@@ -30,25 +31,20 @@ export default class HintsPanel {
         }
 
         const pages = pagesContent.map((pageText, pageIndex) => {
-            const textElem = new StyledTextBuilder({
-                fontFamily: Fonts.ARIAL,
-                fontSize: theme.fontSize,
-                fill: 0xffffff,
-                wordWrap: true,
-                wordWrapWidth: theme.width - 2 * UITheme.panel.padding
-            })
-                .appendHTMLStyledText(TextUtil.processTags(pageText))
-                .build();
+            const textElem = new HTMLTextObject(pageText, theme.width - 2 * UITheme.panel.padding)
+                .font(Fonts.ARIAL)
+                .color(0xffffff)
+                .fontSize(theme.fontSize);
 
-            textElem.visible = pageIndex === 0;
-            return new ContainerObject(textElem);
+            textElem.display.visible = pageIndex === 0;
+            return textElem;
         });
 
         const panel = new MultiPagePanel({
             title: 'Hint',
             pages,
-            width: theme.width,
-            height: theme.height
+            width: theme.width
+            // height: theme.height
         });
         const positionUpdater = () => {
             panel.display.position = new Point(
