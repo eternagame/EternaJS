@@ -121,6 +121,8 @@ export default class Bitmaps {
     public static readonly ImgHelpOver: string = require('assets/UI/help-btn-hover.png');
     public static readonly ImgHelpHit: string = require('assets/UI/help-btn-active.png');
     public static readonly ImgHelp: string = require('assets/UI/help-btn.png');
+    public static readonly ImgHelpClose: string = require('assets/UI/help-btn-close.png');
+    public static readonly ImgHelpCloseOver: string = require('assets/UI/help-btn-close-hover.png');
     public static readonly ImgKnob: string = require('assets/NOVA/Knob/knob_bg.png');
     public static readonly ImgNotch: string = require('assets/NOVA/Knob/knob_notch.png');
     public static readonly ImgBadge2: string = require('assets/Achievements/Lab-access.png');

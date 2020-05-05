@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text
+    Container, DisplayObject, Point, Sprite, Text, Rectangle
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -14,7 +14,7 @@ import GameButton from 'eterna/ui/GameButton';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {
     KeyCode, SpriteObject, DisplayUtil, HAlign, VAlign, Flashbang, KeyboardEventType, Assert,
-    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask
+    GameObjectRef, SerialTask, AlphaTask, Easing, SelfDestructTask, ContainerObject
 } from 'flashbang';
 import ActionBar from 'eterna/ui/ActionBar';
 import Fonts from 'eterna/util/Fonts';
@@ -51,6 +51,7 @@ import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
 import RSignals from 'eterna/rscript/RSignals';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
+import HelpScreen from 'eterna/ui/help/HelpScreen';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -127,7 +128,8 @@ export default class PoseEditMode extends GameMode {
         this._helpBar = new HelpBar({
             onHintClicked: this._puzzle.hint
                 ? () => this.onHintClicked()
-                : undefined
+                : undefined,
+            onHelpClicked: () => this.onHelpClicked()
         });
         this.addObject(this._helpBar, this.uiLayer);
 
@@ -258,8 +260,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     public onResized(): void {
-        super.onResized();
         this.updateUILayout();
+        super.onResized();
     }
 
     private showAsyncText(text: string): void {
@@ -276,6 +278,8 @@ export default class PoseEditMode extends GameMode {
             this._toolbar.display, HAlign.CENTER, VAlign.BOTTOM,
             HAlign.CENTER, VAlign.BOTTOM, 20, -20
         );
+
+        this._toolbar.onResized();
 
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
@@ -426,6 +430,68 @@ export default class PoseEditMode extends GameMode {
 
     public publicStartCountdown(): void {
         this.startCountdown();
+    }
+
+    private onHelpClicked() {
+        const toolBar = this.toolbar;
+        const getBounds = (elem: ContainerObject) => new Rectangle(
+            // worldTransform seems unreliable. TODO investigate.
+            elem.container.x + toolBar.container.x + toolBar.position.x,
+            elem.container.y + toolBar.container.y + toolBar.position.y,
+            elem.container.width,
+            elem.container.height
+        );
+
+        const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
+            && this.toolbar.stateToggle.display.visible;
+        this.modeStack.pushMode(new HelpScreen({
+            toolTips: {
+                hints: this._puzzle.hint
+                    ? [
+                        () => new Rectangle(
+                            this._helpBar.container.x,
+                            this._helpBar.container.y,
+                            this._helpBar.container.width,
+                            this._helpBar.container.height
+                        ),
+                        -32
+                    ]
+                    : undefined,
+
+                modeSwitch: this.toolbar.naturalButton.display.visible
+                    ? [() => getBounds(this.toolbar.naturalButton), this.toolbar.naturalButton.container.width / 2]
+                    : undefined,
+
+                swapPairs: this.toolbar.pairSwapButton.display.visible
+                    ? [() => getBounds(this.toolbar.pairSwapButton), 0]
+                    : undefined,
+
+                pip: this.toolbar.pipButton.container.parent
+                    ? [() => getBounds(this.toolbar.pipButton), 0]
+                    : undefined,
+
+                switchState: switchStateButton
+                    ? [
+                        () => new Rectangle(
+                            this.toolbar.stateToggle.container.x + this.toolbar.container.x,
+                            this.toolbar.stateToggle.container.y + this.toolbar.container.y,
+                            this.toolbar.stateToggle.container.width,
+                            this.toolbar.stateToggle.container.height
+                        ),
+                        0
+                    ]
+                    : undefined,
+
+                submit: this.toolbar.submitButton.container.parent
+                    ? [() => getBounds(this.toolbar.submitButton), 0]
+                    : undefined,
+
+                menu: [() => getBounds(this.toolbar.actionMenu), 0],
+                palette: [() => getBounds(this.toolbar.palette), 0],
+                zoom: [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2],
+                undo: [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
+            }
+        }));
     }
 
     private showSolution(solution: Solution): void {
