@@ -1169,9 +1169,6 @@ export default class PoseEditMode extends GameMode {
             } else if (!ctrl && key === KeyCode.Comma) {
                 Eterna.settings.simpleGraphics.value = !Eterna.settings.simpleGraphics.value;
                 handled = true;
-            } else if (!ctrl && key === KeyCode.KeyS) {
-                this.showSpec();
-                handled = true;
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
@@ -1320,8 +1317,8 @@ export default class PoseEditMode extends GameMode {
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {
             menu.addItem('Design Browser').clicked.connect(() => this.openDesignBrowserForOurPuzzle());
             menu.addItem('Submit').clicked.connect(() => this.submitCurrentPose());
-            menu.addItem('Specs').clicked.connect(() => this.showSpec());
         }
+        menu.addItem('Specs').clicked.connect(() => this.showSpec());
 
         menu.addItem('Reset').clicked.connect(() => this.showResetPrompt());
         menu.addItem('Copy Sequence').clicked.connect(() => this.showCopySequenceDialog());
