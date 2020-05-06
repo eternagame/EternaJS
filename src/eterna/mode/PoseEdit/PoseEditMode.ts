@@ -131,10 +131,10 @@ export default class PoseEditMode extends GameMode {
 
         // Chat
         this._chatButton = new GameButton()
-            .up(Bitmaps.ImgHelp)
-            .over(Bitmaps.ImgHelpOver)
-            .down(Bitmaps.ImgHelpHit)
-            .tooltip('chat');
+            .up(Bitmaps.ImgChat)
+            .over(Bitmaps.ImgChat)
+            .down(Bitmaps.ImgChat)
+            .tooltip('Chat');
         this.addObject(this._chatButton, this.container);
         this.regs.add(this._chatButton.clicked.connect(() => {
             Eterna.settings.showChat.value = true;
@@ -295,7 +295,7 @@ export default class PoseEditMode extends GameMode {
 
         DisplayUtil.positionRelativeToStage(
             this._chatButton.display, HAlign.RIGHT, VAlign.BOTTOM,
-            HAlign.RIGHT, VAlign.BOTTOM, 0, 0
+            HAlign.RIGHT, VAlign.BOTTOM, -15, -15
         );
 
         DisplayUtil.positionRelativeToStage(

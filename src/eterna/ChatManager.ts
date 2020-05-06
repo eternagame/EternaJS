@@ -58,6 +58,8 @@ export default class ChatManager {
             }
         } else if (this._chat) {
             this._chat.hide();
+        } else {
+            this._chatbox.classList.add('hidden');
         }
     }
 
