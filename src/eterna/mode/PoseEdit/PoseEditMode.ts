@@ -85,6 +85,9 @@ export interface PoseEditParams {
 
     local?: boolean;
     showMissionCleared?: boolean;
+
+    onPuzzleCompleted?: () => void;
+    onHomeClicked?: () => void;
 }
 
 export interface OligoDef {

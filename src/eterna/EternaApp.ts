@@ -137,17 +137,15 @@ export default class EternaApp extends FlashbangApp {
         RSignals.popPuzzle.connect(() => this._modeStack.popMode());
 
         if (this._params.onPuzzleCompleted) {
-            RSignals.onPuzzleCompleted.connect(() => this._params.onPuzzleCompleted());
-        }
-
-        if (this._params.missionClearedScreen?.onNextPuzzleClicked) {
-            RSignals.onNextPuzzleClicked.connect(() => {
-                this._params.missionClearedScreen.onNextPuzzleClicked();
-            });
+            RSignals.onPuzzleCompleted.connect(this._params.onPuzzleCompleted);
         }
 
         if (this._params.onHomeClicked) {
-            RSignals.onHomeClicked.connect(() => this._params.onHomeClicked());
+            RSignals.onHomeClicked.connect(this._params.onHomeClicked);
+        }
+
+        if (this._params.missionClearedScreen?.onNextPuzzleClicked) {
+            RSignals.onNextPuzzleClicked.connect(this._params.missionClearedScreen.onNextPuzzleClicked);
         }
     }
 
@@ -377,6 +375,21 @@ export default class EternaApp extends FlashbangApp {
     }
 
     public async loadPoseEditFromFile(path: string, params: PoseEditParams) {
+        if (params.onPuzzleCompleted) {
+            if (this._params.onPuzzleCompleted) {
+                RSignals.onPuzzleCompleted.disconnect(this._params.onPuzzleCompleted);
+            }
+            RSignals.onPuzzleCompleted.connect(params.onPuzzleCompleted);
+            this._params.onPuzzleCompleted = params.onPuzzleCompleted;
+        }
+        if (params.onHomeClicked) {
+            if (this._params.onHomeClicked) {
+                RSignals.onHomeClicked.disconnect(this._params.onHomeClicked);
+            }
+            RSignals.onHomeClicked.connect(params.onHomeClicked);
+            this._params.onHomeClicked = params.onHomeClicked;
+        }
+
         const puzzle = await this.loadPuzzleFromFile(path);
 
         if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
