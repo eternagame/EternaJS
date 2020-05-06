@@ -27,9 +27,12 @@
 		puzzlePath: params.get('puzzlePath') || 'puzzle-1.1.json',
         puzzlesRoot: '/puzzles',
 
-        onPuzzleCompleted: () => console.log('onPuzzleCompleted'),
-        onNextPuzzleClicked: () => console.log('onNextPuzzleClicked'),
-        onHomeClicked: () => console.log('onHomeClicked')
+        onPuzzleCompleted: () => console.log('onPuzzleCompleted'),        
+        onHomeClicked: () => console.log('onHomeClicked'),
+        missionClearedScreen: {
+            enabled: false,
+            onNextPuzzleClicked: () => console.log('onNextPuzzleClicked')
+        }
     });
     window.app = app;
     app.run();
