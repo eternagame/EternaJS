@@ -129,6 +129,17 @@ export default class PoseEditMode extends GameMode {
         });
         this.addObject(this._helpBar, this.uiLayer);
 
+        // Chat
+        this._chatButton = new GameButton()
+            .up(Bitmaps.ImgHelp)
+            .over(Bitmaps.ImgHelpOver)
+            .down(Bitmaps.ImgHelpHit)
+            .tooltip('chat');
+        this.addObject(this._chatButton, this.container);
+        this.regs.add(this._chatButton.clicked.connect(() => {
+            Eterna.settings.showChat.value = true;
+        }));
+
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -280,6 +291,11 @@ export default class PoseEditMode extends GameMode {
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0, 0
+        );
+
+        DisplayUtil.positionRelativeToStage(
+            this._chatButton.display, HAlign.RIGHT, VAlign.BOTTOM,
+            HAlign.RIGHT, VAlign.BOTTOM, 0, 0
         );
 
         DisplayUtil.positionRelativeToStage(
@@ -3106,6 +3122,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
+    private _chatButton: GameButton;
 
     protected _folder: Folder;
     // / Asynch folding
