@@ -403,6 +403,17 @@ export default class EternaApp extends FlashbangApp {
         ));
     }
 
+    public disconnectExternalCallbacks() {
+        if (this._params.onPuzzleCompleted) {
+            RSignals.onPuzzleCompleted.disconnect(this._params.onPuzzleCompleted);
+            delete this._params.onPuzzleCompleted;
+        }
+        if (this._params.onHomeClicked) {
+            RSignals.onHomeClicked.disconnect(this._params.onHomeClicked);
+            delete this._params.onHomeClicked;
+        }
+    }
+
     private async loadPuzzleFromFile(path: string) {
         const json = await (await fetch(`${this._params.puzzlesRoot ?? ''}/${path}`)).json();
         this.setLoadingText('Loading puzzle...', null);
