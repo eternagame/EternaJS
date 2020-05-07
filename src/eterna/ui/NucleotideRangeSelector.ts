@@ -16,7 +16,7 @@ interface NucleotideRangeSelectorResult {
 
 export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelectorResult> {
     private static readonly config = {
-        title: 'Select nucleotide range to show',
+        title: 'Select Nucleotide Range to View',
         startFieldName: 'Start Index',
         endFieldName: 'End Index'
     };
