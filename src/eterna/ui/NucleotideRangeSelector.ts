@@ -1,4 +1,5 @@
 import {Flashbang, KeyCode} from 'flashbang';
+import {UnitSignal} from 'signals';
 import TextInputPanel from './TextInputPanel';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
@@ -12,6 +13,38 @@ interface NucleotideRangeSelectorResult {
     startIndex: number;
     endIndex: number;
     clearRange: boolean;
+}
+
+class NucleotideRangeSelectorInput extends TextInputPanel {
+    public onClear = new UnitSignal();
+    private _clearButton: GameButton;
+
+    constructor() {
+        super();
+        this._clearButton = new GameButton()
+            .label('Clear range', 14)
+            .tooltip('View all nucleotides');
+        this.addObject(this._clearButton, this.container);
+        this._clearButton.clicked.connect(() => this.onClear.emit());
+    }
+
+    protected added() {
+        super.added();
+
+        const {_okButton, _clearButton, _cancelButton} = this;
+
+        const spacing = 30;
+        const buttonsWidth = _okButton.container.width
+            + spacing
+            + _clearButton.container.width
+            + spacing
+            + _cancelButton.container.width;
+
+        _okButton.display.position.x = (this._width - buttonsWidth) / 2;
+        _clearButton.display.position.x = _okButton.display.position.x + _okButton.container.width + spacing;
+        _clearButton.display.position.y = _okButton.display.position.y;
+        _cancelButton.display.position.x = _clearButton.display.position.x + _clearButton.container.width + spacing;
+    }
 }
 
 export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelectorResult> {
@@ -37,7 +70,9 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
         super.added();
         const {config, theme} = NucleotideRangeSelector;
 
-        const inputPanel = new TextInputPanel();
+        const inputPanel = this._props.isPartialRange
+            ? new NucleotideRangeSelectorInput()
+            : new TextInputPanel();
         inputPanel.title = config.title;
 
         const startField = inputPanel.addField(config.startFieldName, theme.width);
@@ -47,23 +82,6 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
         endField.text = `${end}`;
 
         this.addObject(inputPanel, this.container);
-
-        let clearButton: GameButton | null = null;
-        if (this._props.isPartialRange) {
-            clearButton = new GameButton()
-                .label(
-                    'Clear range (View all nucleotides)',
-                    14
-                );
-            this.regs.add(clearButton.clicked.connect(() => {
-                this.close({
-                    clearRange: true,
-                    startIndex: -1,
-                    endIndex: -1
-                });
-            }));
-            this.addObject(clearButton, this.container);
-        }
 
         startField.setFocus();
         inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
@@ -84,14 +102,20 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
             }
         });
 
+        if (inputPanel instanceof NucleotideRangeSelectorInput) {
+            inputPanel.onClear.connect(() => {
+                this.close({
+                    clearRange: true,
+                    startIndex: -1,
+                    endIndex: -1
+                });
+            });
+        }
+
+
         const updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
-
-            if (clearButton) {
-                clearButton.display.position.x = (Flashbang.stageWidth - clearButton.display.width) * 0.5;
-                clearButton.display.position.y = inputPanel.display.position.y + inputPanel.height + theme.panelSpacing;
-            }
         };
         updateLocation();
         this.regs.add(this.mode.resized.connect(updateLocation));
