@@ -31,19 +31,21 @@ class NucleotideRangeSelectorInput extends TextInputPanel {
     protected added() {
         super.added();
 
-        const {_okButton, _clearButton, _cancelButton} = this;
-
         const spacing = 30;
-        const buttonsWidth = _okButton.container.width
-            + spacing
-            + _clearButton.container.width
-            + spacing
-            + _cancelButton.container.width;
+        const buttons = [this._okButton, this._clearButton, this._cancelButton];
 
-        _okButton.display.position.x = (this._width - buttonsWidth) / 2;
-        _clearButton.display.position.x = _okButton.display.position.x + _okButton.container.width + spacing;
-        _clearButton.display.position.y = _okButton.display.position.y;
-        _cancelButton.display.position.x = _clearButton.display.position.x + _clearButton.container.width + spacing;
+        const totalWidth = buttons.reduce(
+            (prev, cur) => prev + cur.container.width + spacing,
+            -spacing
+        );
+        buttons.forEach((b, index) => {
+            b.display.position.x = (this._width - totalWidth) / 2;
+            for (let i = index - 1; i >= 0; --i) {
+                b.display.position.x += buttons[i].container.width + spacing;
+            }
+        });
+
+        this._clearButton.display.position.y = this._okButton.display.position.y;
     }
 }
 
