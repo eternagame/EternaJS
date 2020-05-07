@@ -14,11 +14,6 @@ test(`test_stripQuotationsAndNewlines`, () => {
     expect(Utility.stripQuotationsAndNewlines("\"\n\"")).toBe("\' \'");
 });
 
-test(`test_generateParameterString`, () => {
-    let person_record = {first: 'Taylor', last:'Doe'};
-    expect(Utility.generateParameterString(null)).toBe("");
-    expect(Utility.generateParameterString(person_record)).toBe("first=Taylor&last=Doe");
-});
 
 test(`test_isPointWithin`, () => {
     let poly: Point[] = [new Point(0,0), new Point(1,0), new Point(1,1), new Point(0,1)];
