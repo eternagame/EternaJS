@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Chat} from 'eterna-chat';
+import {Chat} from 'eterna-chat-wrapper';
 import EternaSettings from './settings/EternaSettings';
 import Eterna from './Eterna';
 
