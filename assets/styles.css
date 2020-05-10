@@ -26,3 +26,18 @@
     font-family: OpenSans-SemiBold;
     src: url(./Fonts/OpenSans-SemiBold.ttf);
 }
+
+.ingame-chat {
+    width: 230px;
+    height: 340px;
+    position: absolute;
+    top: 140px;
+    right: 10px;
+}
+  
+.ingame-chat.mobile {
+    width: 30%;
+    height: 100%;
+    top: 0px;
+    right: 0px;
+}
