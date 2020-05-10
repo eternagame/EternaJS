@@ -1684,7 +1684,7 @@ export default class PoseEditMode extends GameMode {
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder.canDotPlot) {
+        if (this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(this._folder, true);
