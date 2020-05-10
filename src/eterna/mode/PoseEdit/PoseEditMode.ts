@@ -137,7 +137,7 @@ export default class PoseEditMode extends GameMode {
             .tooltip('Chat');
         this.addObject(this._chatButton, this.container);
         this.regs.add(this._chatButton.clicked.connect(() => {
-            Eterna.settings.showChat.value = true;
+            Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
         }));
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());

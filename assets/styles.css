@@ -38,10 +38,13 @@
     -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
 }
-  
-.ingame-chat.mobile {
-    width: 30%;
-    height: 100%;
-    top: 0px;
-    right: 0px;
+
+@media (max-height: 510px) {
+    .ingame-chat {
+        width: 30%;
+        min-width: 230px;
+        height: 100%;
+        top: 0px;
+        right: 0px;
+    }
 }
