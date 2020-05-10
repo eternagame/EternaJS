@@ -51,6 +51,7 @@ export default class ChatManager {
                     container: this._chatbox,
                     username: Eterna.playerName,
                     uid: `${Eterna.playerID}`,
+                    backgroundColor: 'rgba(0, 16, 38, 0.6)',
                     onHidden: () => {
                         this._settings.showChat.value = false;
                     }
