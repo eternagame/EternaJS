@@ -1,6 +1,5 @@
 import * as log from 'loglevel';
 import {Chat} from 'eterna-chat-wrapper';
-import * as mobile from 'is-mobile';
 import EternaSettings from './settings/EternaSettings';
 import Eterna from './Eterna';
 
@@ -9,8 +8,6 @@ export default class ChatManager {
         this._chatbox = document.getElementById(chatboxID);
         if (this._chatbox == null) {
             log.warn(`Missing chatbox (id=${chatboxID})`);
-        } else if (mobile.isMobile()) {
-            this._chatbox.classList.add('mobile');
         }
         this._settings = settings;
         settings.showChat.connectNotify(() => this.updateChatVisibility());
