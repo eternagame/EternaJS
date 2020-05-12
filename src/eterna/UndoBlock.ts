@@ -265,8 +265,7 @@ export default class UndoBlock {
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
         if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
-            let dotArray: number[] | undefined =
-                folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+            let dotArray: number[] | undefined = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray ? dotArray.slice() : [];
         }
@@ -277,8 +276,7 @@ export default class UndoBlock {
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) === undefined) {
-                let dotTempArray: number[] | null =
-                    folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }

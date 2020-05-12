@@ -1046,8 +1046,7 @@ export default class PoseEditMode extends GameMode {
                 let len: number = seq.length;
                 let cseq = `${seq}&${oligo}`;
                 let seqArr: number[] = EPars.stringToSequence(cseq);
-                let folded: number[] | null =
-                    this._folder.cofoldSequence(seqArr, [], Math.floor(malus * 100), constraint);
+                let folded: number[] | null = this._folder.cofoldSequence(seqArr, [], Math.floor(malus * 100), constraint);
                 return `${EPars.pairsToParenthesis(folded ? folded.slice(0, len) : [])
                 }&${EPars.pairsToParenthesis(folded ? folded.slice(len) : [])}`;
             });
@@ -1993,8 +1992,7 @@ export default class PoseEditMode extends GameMode {
             }
         }
 
-        let missionClearedPanel: MissionClearedPanel | null =
-            new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
+        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);

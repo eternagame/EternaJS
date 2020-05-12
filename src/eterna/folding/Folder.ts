@@ -74,8 +74,7 @@ export default abstract class Folder {
     public getDotPlot(seq: number[],
         pairs: number[],
         temp: number = 37,
-        pseudoknots: boolean = false
-    ): number[] | null {
+        pseudoknots: boolean = false): number[] | null {
         return null;
     }
 

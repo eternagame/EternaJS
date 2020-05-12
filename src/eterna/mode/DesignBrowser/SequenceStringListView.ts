@@ -123,11 +123,11 @@ export default class SequenceStringListView extends Container {
                     // a shape threshold. But the else clause uses it too! That's not great. Thankfully, bdIndex
                     // then goes unused...
                     if (isThereShapeThreshold) {
-                        colorIndex = expPainter ?
-                            expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax) : undefined;
+                        colorIndex = expPainter
+                            ? expPainter.getColorLevelWithMidpoint(jj, shapeThreshold, shapeMax) : undefined;
                     } else {
-                        colorIndex = expPainter ?
-                            expPainter.getColorLevel(jj) : undefined;
+                        colorIndex = expPainter
+                            ? expPainter.getColorLevel(jj) : undefined;
                     }
 
                     // bdIndex: number | undefined = letterIndex * SequenceStringListView.NUM_DATA_PER_LETTER + 1 + colorIndex;
