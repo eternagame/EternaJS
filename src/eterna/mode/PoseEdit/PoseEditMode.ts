@@ -650,7 +650,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(false))
             .font(Fonts.ARIAL)
             .fontSize(14)
             .bold()
@@ -660,7 +660,7 @@ export default class PoseEditMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            this._homeButton.display, HAlign.RIGHT, VAlign.CENTER, 3, 0
+            this._homeButton.display, HAlign.RIGHT, VAlign.CENTER, 10, 0
         );
 
         this._solutionNameText = Fonts.arial('', 14).bold().color(0xc0c0c0).build();
@@ -2117,7 +2117,7 @@ export default class PoseEditMode extends GameMode {
             customLayout = this._targetConditions[0]['custom-layout'];
         }
         this.modeStack.pushMode(new MissionIntroMode(
-            this._puzzle.getName(true),
+            this._puzzle.getName(false),
             missionText,
             this._targetPairs,
             introConstraintBoxes,
