@@ -222,7 +222,9 @@ export default class Toolbar extends ContainerObject {
             .label('Screenshot', 14)
             .scaleBitmapToLabel()
             .tooltip('Screenshot');
-        this.actionMenu.addSubMenuButton(0, this.screenshotButton);
+
+        // Disabled for Nova
+        // this.actionMenu.addSubMenuButton(0, this.screenshotButton);
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
@@ -282,8 +284,10 @@ export default class Toolbar extends ContainerObject {
 
         if (this._type !== ToolbarType.FEEDBACK) {
             this.actionMenu.addSubMenuButton(0, this.resetButton);
-            this.actionMenu.addSubMenuButton(0, this.copyButton);
-            this.actionMenu.addSubMenuButton(0, this.pasteButton);
+
+            // Disabled for Nova
+            // this.actionMenu.addSubMenuButton(0, this.copyButton);
+            // this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
         this.nucleotideFindButton = new GameButton()
