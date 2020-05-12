@@ -14,6 +14,12 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 
 export default class MissionIntroMode extends AppMode {
+    private get constraintAreaSize() {
+        return this._scrollDownButton.container.y
+            + this._scrollDownButton.container.height
+            - this._scrollUpButton.container.y;
+    }
+
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
         customLayout: Array<[number, number]> = null,
@@ -42,16 +48,18 @@ export default class MissionIntroMode extends AppMode {
         let missionText = Fonts.stdLight('MISSION', 48).color(0xFFCC00).build();
         this.container.addChild(missionText);
 
-        const descriptionStyle = {
+        let descriptionLabel = new StyledTextBuilder({
             fontFamily: Fonts.STDFONT_LIGHT,
             fill: 0xBCD8E3,
             fontSize: 36,
-            leading: 50
-        };
-        let descriptionLabel = new StyledTextBuilder(descriptionStyle)
+            leading: 50,
+            wordWrap: true,
+            wordWrapWidth: 880
+        })
             .appendHTMLStyledText(this._puzzleDescription)
             .build();
         this.container.addChild(descriptionLabel);
+
 
         let playButton = new GameButton()
             .up(Bitmaps.PlayImage)
@@ -150,7 +158,7 @@ export default class MissionIntroMode extends AppMode {
 
             this._scrollUpButton.display.position = new Point(
                 (Flashbang.stageWidth * 0.5) + 420.5 - this._scrollUpButton.container.width - 30,
-                367 + 40
+                367 + 60
             );
 
             this._scrollDownButton.display.position = new Point(
@@ -184,19 +192,20 @@ export default class MissionIntroMode extends AppMode {
         }
 
         const updateLayout = () => {
-            let yLoc = 367 + 60;
+            const spacing = 10;
+            const constraintStart = this._scrollUpButton.container.y;
+            let yLoc = constraintStart;
             for (let constraintBox of this._constraintBoxes) {
                 let bounds = constraintBox.container.getLocalBounds();
                 constraintBox.display.position = new Point(
                     (Flashbang.stageWidth * 0.5) - 420.5 + this._goalsBG.width + 82,
-                    -bounds.top + yLoc
+                    yLoc
                 );
-                yLoc += bounds.height + 10;
+                yLoc += bounds.height + spacing;
             }
+            this._constraintsHeight = yLoc - constraintStart - spacing;
 
-            this._constraintsHeight = yLoc;
-
-            const activateScroll = this._constraintsHeight > Flashbang.stageHeight * 0.8;
+            const activateScroll = this._constraintsHeight > this.constraintAreaSize;
             this._scrollUpButton.display.visible = activateScroll;
             this._scrollDownButton.display.visible = activateScroll;
         };
@@ -248,8 +257,7 @@ export default class MissionIntroMode extends AppMode {
     }
 
     private scrollDown(): void {
-        let limit = -this._constraintsHeight + 367 + 60
-            + this._constraintBoxes[this._constraintBoxes.length - 1].container.height;
+        let limit = -this._constraintsHeight + this.constraintAreaSize;
         this._constraintsLayer.y = Math.max(this._constraintsLayer.y - 10, limit);
     }
 
@@ -282,13 +290,10 @@ export default class MissionIntroMode extends AppMode {
             this.container.addChild(this._constraintMask);
         }
 
-        let topY = this._scrollUpButton.display.y;
-        let botY = this._scrollDownButton.display.y;
-
         this._constraintMask.clear();
         this._constraintMask.beginFill(0x00FF00, 0);
         this._constraintMask.drawRect(
-            0, topY, Flashbang.stageWidth, botY + this._scrollDownButton.container.height - topY
+            0, this._scrollUpButton.display.y, Flashbang.stageWidth, this.constraintAreaSize
         );
         this._constraintMask.x = 0;
         this._constraintMask.y = 0;
