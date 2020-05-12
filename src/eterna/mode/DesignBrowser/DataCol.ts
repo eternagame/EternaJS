@@ -159,7 +159,7 @@ export default class DataCol extends ContainerObject {
 
     public setFilter(filter1: string, filter2: string | undefined): void {
         this._filterField1.text = filter1;
-        if (filter2 != undefined) {
+        if (filter2 !== undefined) {
             this._filterField2.text = filter2;
         }
     }

@@ -28,6 +28,7 @@ import FolderManager from './folding/FolderManager';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
+import RSignals from './rscript/RSignals';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -106,7 +107,7 @@ export default class EternaApp extends FlashbangApp {
 
         let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
         // AMW TODO: this feels rather catastrophic; we should fail proportionately
-        if (eternaContainer === null ) return;
+        if (eternaContainer === null) return;
 
         eternaContainer.style.position = 'relative';
 
@@ -119,6 +120,13 @@ export default class EternaApp extends FlashbangApp {
         eternaContainer.appendChild(overlay);
 
         ExternalInterface.init(eternaContainer);
+
+        RSignals.pushPuzzle.connect(async (puzzleId) => {
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleId);
+            this._modeStack.pushMode(new PoseEditMode(puzzle, {}));
+        });
+
+        RSignals.popPuzzle.connect(() => this._modeStack.popMode());
     }
 
     /* override */
@@ -128,7 +136,7 @@ export default class EternaApp extends FlashbangApp {
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
-        if (this._params.containerID != undefined) {
+        if (this._params.containerID !== undefined) {
             Eterna.gameDiv = document.getElementById(this._params.containerID);
         }
 
@@ -156,7 +164,7 @@ export default class EternaApp extends FlashbangApp {
                     case InitialAppMode.PUZZLEMAKER:
                         return this.loadPuzzleEditor(this._params.puzzleEditNumTargets);
                     case InitialAppMode.PUZZLE:
-                        if (this._params.puzzleID == undefined ) {
+                        if (this._params.puzzleID === undefined) {
                             return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
                         }
                         return this.loadPoseEdit(this._params.puzzleID, {
@@ -165,16 +173,16 @@ export default class EternaApp extends FlashbangApp {
                         });
                     case InitialAppMode.SOLUTION_SEE_RESULT:
                     case InitialAppMode.SOLUTION_COPY_AND_VIEW:
-                        if (this._params.puzzleID == undefined ) {
+                        if (this._params.puzzleID === undefined) {
                             return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
                         }
-                        if (this._params.solutionID == undefined ) {
+                        if (this._params.solutionID === undefined) {
                             return Promise.reject(new Error(`Solution ID undefined! '${this._params.solutionID}'`));
                         }
                         return this.loadSolutionViewer(this._params.puzzleID, this._params.solutionID,
                             this._params.mode === InitialAppMode.SOLUTION_COPY_AND_VIEW);
                     case InitialAppMode.DESIGN_BROWSER:
-                        if (this._params.puzzleID == undefined ) {
+                        if (this._params.puzzleID === undefined) {
                             return Promise.reject(new Error(`Puzzle ID undefined! '${this._params.puzzleID}'`));
                         }
                         return this.loadDesignBrowser(this._params.puzzleID, this._params.designBrowserFilters);
@@ -189,19 +197,23 @@ export default class EternaApp extends FlashbangApp {
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
-    public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
-        return this.loadPuzzle(puzzleOrID)
-            .then(async (puzzle) => this._modeStack.unwindToMode(new PoseEditMode(
-                puzzle,
-                params,
-                await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
-            )));
+    public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
+        const puzzle = await this.loadPuzzle(puzzleOrID);
+
+        let autoSaveData: any | undefined;
+        if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
+            await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        } else {
+            autoSaveData = await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        }
+
+        await this._modeStack.unwindToMode(new PoseEditMode(puzzle, params, autoSaveData));
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */
     public async loadPuzzleEditor(numTargets?: number, initialPoseData?: PuzzleEditPoseData[]): Promise<void> {
-        const initPoseData = this._params.puzzleEditNumTargets == undefined ? null :
-            initialPoseData
+        const initPoseData = this._params.puzzleEditNumTargets === undefined ? null
+            : initialPoseData
             || await Eterna.saveManager.load(PuzzleEditMode.savedDataTokenName(this._params.puzzleEditNumTargets))
             || null;
         this._modeStack.unwindToMode(new PuzzleEditMode(false, numTargets, initPoseData));
@@ -402,7 +414,7 @@ export default class EternaApp extends FlashbangApp {
                     Eterna.setPlayer(username, uid);
                 });
         } else {
-            let playerID : string | undefined = process.env['DEBUG_PLAYER_ID'];
+            let playerID: string | undefined = process.env['DEBUG_PLAYER_ID'];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
             if (playerID === undefined || playerID.length === 0) {

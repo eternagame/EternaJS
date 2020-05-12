@@ -264,7 +264,11 @@ export default class NuPACK extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[],
+        secondBestPairs: number[],
+        malus: number = 0,
+        desiredPairs: string | null = null,
+        temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -519,7 +523,7 @@ export default class NuPACK extends Folder {
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, pseudoknots);
             if (result) {
-                let pairs: number[] = EPars.parenthesisToPairs(result.structure, pseudoknots)
+                let pairs: number[] = EPars.parenthesisToPairs(result.structure, pseudoknots);
                 return pairs;
             } else {
                 return [];

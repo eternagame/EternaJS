@@ -18,6 +18,9 @@ module.exports = {
         // Same with this one https://github.com/typescript-eslint/typescript-eslint/issues/586
         '@typescript-eslint/no-unused-vars': 'off',
 
+		// We only use this ! where we have explicitly validated non-nullness.
+		'@typescript-eslint/no-non-null-assertion': 'off',
+
         // Prefer typescript-eslint version
         'semi': 'off',
         '@typescript-eslint/semi': 'error',

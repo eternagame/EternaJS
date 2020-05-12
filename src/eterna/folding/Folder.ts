@@ -43,7 +43,11 @@ export default abstract class Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[],
+        secondBestPairs: number[],
+        malus: number = 0,
+        desiredPairs: string | null = null,
+        temp: number = 37
     ): number[] | null {
         return null;
     }
@@ -67,7 +71,11 @@ export default abstract class Folder {
         return false;
     }
 
-    public getDotPlot(seq: number[], pairs: number[], temp: number = 37, pseudoknots: boolean = false): number[] | null {
+    public getDotPlot(seq: number[],
+        pairs: number[],
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): number[] | null {
         return null;
     }
 

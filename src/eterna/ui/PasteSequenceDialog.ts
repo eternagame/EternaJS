@@ -30,7 +30,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
         inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close([]));
-        inputPanel.okClicked.connect((values) => values.get(SEQUENCE) ? this.onSequenceEntered(values.get(SEQUENCE)!): null);
+        inputPanel.okClicked.connect((values) => (values.get(SEQUENCE) ? this.onSequenceEntered(values.get(SEQUENCE)!) : null));
 
         let updateLocation = () => {
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
@@ -50,7 +50,7 @@ export default class PasteSequenceDialog extends Dialog<number[]> {
                 return;
             }
         }
-        let s: number[] | null = this._customNumbering 
+        let s: number[] | null = this._customNumbering
             ? null : EPars.indexedStringToSequence(sequence, this._customNumbering!);
         if (s == null && seq.length > 0) {
             (this.mode as GameMode).showNotification(

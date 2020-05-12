@@ -146,7 +146,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != null && config.fullTexture != undefined;
+        this._req.visible = config.fullTexture !== null && config.fullTexture !== undefined;
         if (this._req.visible) {
             // we just proved it's not null or undefined
             this._req.texture = config.fullTexture!;
@@ -159,7 +159,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != null && config.clarificationText != undefined;
+        this._reqClarifyText.visible = config.clarificationText !== null && config.clarificationText !== undefined;
         if (this._reqClarifyText.visible) {
             // we just proved it's not null or undefined
             this.setPossiblyStyledText(config.clarificationText!, this._reqClarifyText);
@@ -169,7 +169,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         }
 
-        this._reqStatText.visible = config.statText != null && config.statText != undefined && !this._forMissionScreen;
+        this._reqStatText.visible = config.statText !== null && config.statText !== undefined && !this._forMissionScreen;
         if (this._reqStatText.visible) {
             // we just proved it's not null or undefined
             this.setPossiblyStyledText(config.statText!, this._reqStatText);
@@ -318,7 +318,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
             this._mouseOverObject = null;
-            if ( this._mouseOverRegs != null ) {
+            if (this._mouseOverRegs != null) {
                 this._mouseOverRegs.close();
                 this._mouseOverRegs = null;
             }

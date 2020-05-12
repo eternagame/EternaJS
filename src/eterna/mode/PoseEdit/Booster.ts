@@ -190,8 +190,8 @@ export default class Booster {
     private readonly _label: string;
     private readonly _tooltip: string;
     private readonly _scriptID: string;
-    private readonly _buttonStateTextures: (Texture | undefined)[] 
-        = [undefined, undefined, undefined, undefined, undefined];
+    private readonly _buttonStateTextures: (Texture | undefined)[]
+    = [undefined, undefined, undefined, undefined, undefined];
 
     private static _toolColorCounter: number = EPars.RNABASE_DYNAMIC_FIRST;
 }

@@ -16,10 +16,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g2")
 include_directories(.)
 include_directories(./LinearFold)
 include_directories(./LinearFold/src)
+include_directories(./LinearPartition)
+include_directories(./LinearPartition/src)
 include_directories(../emscripten_common)
 
 SET(LINEARFOLD_FILES
     LinearFold/src/LinearFold.cpp
+	LinearPartition/src/LinearPartition.cpp
+	#LinearPartition/src/bpp.cpp
     emscripten/Bindings.cpp
     emscripten/FullFold.cpp
     emscripten/FullEval.cpp
@@ -34,7 +38,7 @@ target_compile_definitions(LinearFoldBase
 
 add_executable(LinearFoldV ${LINEARFOLD_FILES})
 target_link_libraries(LinearFoldV LinearFoldBase)
-target_compile_definitions(LinearFoldV PUBLIC lv)
+target_compile_definitions(LinearFoldV PUBLIC lv lpv)
 
 add_executable(LinearFoldC ${LINEARFOLD_FILES})
 target_link_libraries(LinearFoldC LinearFoldBase)

@@ -15,7 +15,11 @@ import {DesignCategory} from './DesignBrowserMode';
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> | null = null) {
+    constructor(
+        allCategories: DesignCategory[],
+        curColumns: DesignCategory[],
+        disabled: Set<DesignCategory> | null = null
+    ) {
         super();
         this._allColumnCategories = allCategories.slice();
         this._initialColumns = curColumns.slice();

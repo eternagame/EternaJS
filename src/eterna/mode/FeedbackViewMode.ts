@@ -117,7 +117,7 @@ export default class FeedbackViewMode extends GameMode {
             datablock.setPairs(this._pairs[ii]);
             let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
             if (!vienna) {
-                throw new Error("Could not instantiate Vienna folder by name!!")
+                throw new Error('Could not instantiate Vienna folder by name!!');
             }
             datablock.setBasics(vienna);
             this._undoBlocks.push(datablock);
@@ -513,7 +513,7 @@ export default class FeedbackViewMode extends GameMode {
 
         let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
         if (folder === null) {
-            throw new Error("Failed to instantiate Vienna by name from the FolderManager!!");
+            throw new Error('Failed to instantiate Vienna by name from the FolderManager!!');
         }
         this._shapePairs[index] = folder.foldSequence(this._sequence, [], desiredPairs);
     }
@@ -532,7 +532,7 @@ export default class FeedbackViewMode extends GameMode {
         let puzzleState = this._undoBlocks[this._currentIndex];
         let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
         if (!vienna) {
-            throw new Error("Could not instantiate Vienna folder by name!!")
+            throw new Error('Could not instantiate Vienna folder by name!!');
         }
         puzzleState.updateMeltingPointAndDotPlot(vienna);
         this.showDialog(new SpecBoxDialog(puzzleState, false));

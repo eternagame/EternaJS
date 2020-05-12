@@ -3,7 +3,7 @@ import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import * as LinearFoldLib from './engines/LinearFoldLib';
-import {FullFoldResult} from './engines/LinearFoldLib';
+import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
@@ -16,12 +16,38 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public get canDotPlot(): boolean {
-        return false;
+        return true;
     }
 
     public getDotPlot(seq: number[], pairs: number[], temp: number = 37): number[] {
-        log.warn('LinearFold.getDotPlot: unimplemented');
-        return [];
+        let key: any = {
+            primitive: 'dotplot', seq, pairs, temp
+        };
+        let retArray: number[] = this.getCache(key);
+        if (retArray != null) {
+            // trace("dotplot cache hit");
+            return retArray.slice();
+        }
+
+        let seqStr: string = EPars.sequenceToString(seq);
+
+        let result: DotPlotResult = null;
+        try {
+            // we don't actually do anything with structstring here yet
+            result = this._lib.GetDotPlot(temp, seqStr, EPars.pairsToParenthesis(pairs));
+            retArray = EmscriptenUtil.stdVectorToArray(result.plot);
+        } catch (e) {
+            log.error('GetDotPlot error', e);
+            return [];
+        } finally {
+            if (result != null) {
+                result.delete();
+                result = null;
+            }
+        }
+
+        this.putCache(key, retArray.slice());
+        return retArray;
     }
 
     public get isFunctional(): boolean {
@@ -172,7 +198,11 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[],
+        secondBestPairs: number[],
+        malus: number = 0,
+        desiredPairs: string | null = null,
+        temp: number = 37
     ): number[] {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);

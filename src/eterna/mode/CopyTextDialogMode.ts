@@ -7,7 +7,7 @@ export default class CopyTextDialogMode extends AppMode {
     constructor(text: string, dialogTitle?: string) {
         super();
         this._text = text;
-        if (dialogTitle != undefined) {
+        if (dialogTitle !== undefined) {
             this._dialogTitle = dialogTitle;
         }
     }

@@ -179,6 +179,7 @@ export default abstract class GameMode extends AppMode {
 
                     let score = null;
                     let pseudoknots: boolean = this._targetConditions != null
+                        && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
                         score = (pairs: number[]) => this._folder.scoreStructures(
@@ -194,11 +195,11 @@ export default abstract class GameMode extends AppMode {
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
                     let nativePairs: number[] | undefined = this.getCurrentUndoBlock(poseidx) !== undefined
                         ? this.getCurrentUndoBlock(poseidx)!.getPairs(37, pseudoknots) : undefined;
-                    
+
                     if (targetPairs === undefined || nativePairs === undefined) {
-                        throw new Error("targetPairs or nativePairs is undefined!");
+                        throw new Error('targetPairs or nativePairs is undefined!');
                     }
-                    
+
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }

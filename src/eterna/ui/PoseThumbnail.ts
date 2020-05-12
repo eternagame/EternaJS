@@ -111,7 +111,7 @@ export default class PoseThumbnail {
         } else if (size === 7) {
             frame = DisplayUtil.fillRect(300, 300, 0x0);
         } else {
-            throw new Error('Size unsupported!')
+            throw new Error('Size unsupported!');
         }
 
         let frameBounds = frame.getLocalBounds();

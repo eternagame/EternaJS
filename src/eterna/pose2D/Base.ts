@@ -107,7 +107,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         this._needsRedraw = true;
 
         if (playSound) {
-            const soundName: string | null= BaseAssets.getBaseTypeSound(type);
+            const soundName: string | null = BaseAssets.getBaseTypeSound(type);
             if (soundName != null) {
                 Flashbang.sound.playSound(soundName);
             }

@@ -52,7 +52,7 @@ export default class Vienna extends Folder {
             if (result) {
                 probabilitiesString = result.probabilitiesString;
             } else {
-                probabilitiesString = ""
+                probabilitiesString = '';
             }
         } catch (e) {
             log.error('GetDotPlot error', e);
@@ -253,7 +253,7 @@ export default class Vienna extends Folder {
                 seq, siteGroups[0][0], siteGroups[0][siteGroups[0].length - 1], siteGroups[1][siteGroups[1].length - 1],
                 siteGroups[1][0], bonus, temp
             );
-        } else if ( targetPairs !== null ) {
+        } else if (targetPairs !== null) {
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
 
@@ -266,7 +266,11 @@ export default class Vienna extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[],
+        secondBestPairs: number[],
+        malus: number = 0,
+        desiredPairs: string | null = null,
+        temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -398,7 +402,7 @@ export default class Vienna extends Folder {
         let j: number;
         let p: number;
         let q: number;
-        let u: number = 0;
+        let u = 0;
         let x: number;
         let type: number;
         let count: number;

@@ -30,7 +30,7 @@ export default class GameClient {
                         if (!match) {
                             throw new Error('Authentication response malformed');
                         }
-                        
+
                         let username = match[1];
                         let uid = match[2];
                         return Promise.resolve<[string, number]>([username, Number(uid)]);

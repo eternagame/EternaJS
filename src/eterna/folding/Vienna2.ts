@@ -46,7 +46,7 @@ export default class Vienna2 extends Folder {
         let secstructStr: string = EPars.pairsToParenthesis(pairs);
         let seqStr: string = EPars.sequenceToString(seq);
 
-        let probabilitiesString: string = "";
+        let probabilitiesString = '';
         let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
@@ -277,7 +277,11 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[],
+        secondBestPairs: number[],
+        malus: number = 0,
+        desiredPairs: string | null = null,
+        temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -430,7 +434,7 @@ export default class Vienna2 extends Folder {
         let j: number;
         let p: number;
         let q: number;
-        let u: number = 0;
+        let u = 0;
         let x: number;
         let type: number;
         let count: number;

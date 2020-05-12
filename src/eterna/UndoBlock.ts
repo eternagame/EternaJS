@@ -83,7 +83,7 @@ export default class UndoBlock {
     }
 
     public set targetOligos(targetOligos: Oligo[] | undefined) {
-        this._targetOligos = targetOligos == undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
+        this._targetOligos = targetOligos === undefined ? undefined : JSON.parse(JSON.stringify(targetOligos));
     }
 
     public get targetOligo(): number[] | undefined {
@@ -91,7 +91,7 @@ export default class UndoBlock {
     }
 
     public set targetOligo(targetOligo: number[] | undefined) {
-        this._targetOligo = targetOligo == undefined ? undefined : targetOligo.slice();
+        this._targetOligo = targetOligo === undefined ? undefined : targetOligo.slice();
     }
 
     public get oligoMode(): number {
@@ -113,7 +113,7 @@ export default class UndoBlock {
     }
 
     public set oligoOrder(oligoOrder: number[] | undefined) {
-        this._oligoOrder = oligoOrder == undefined ? undefined : oligoOrder.slice();
+        this._oligoOrder = oligoOrder === undefined ? undefined : oligoOrder.slice();
     }
 
     public get oligosPaired(): number {
@@ -137,7 +137,7 @@ export default class UndoBlock {
     }
 
     public set targetOligoOrder(oligoOrder: number[] | undefined) {
-        this._targetOligoOrder = oligoOrder == undefined ? undefined : oligoOrder.slice();
+        this._targetOligoOrder = oligoOrder === undefined ? undefined : oligoOrder.slice();
     }
 
     public get sequence(): number[] {
@@ -186,11 +186,15 @@ export default class UndoBlock {
         // }
         // This has to be able to return undefined -- because that's a signal for
         // setBasics to set it up as [-1]* seqLength and updateMeltingPointAndDotPlot
-        // to fold. 
+        // to fold.
         return this._pairsArray.get(pseudoknots)[temp];
     }
 
-    public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): number | any[] | undefined {
+    public getParam(
+        index: UndoBlockParam,
+        temp: number = 37,
+        pseudoknots: boolean = false
+    ): number | any[] | undefined {
         if (this._paramsArray.get(pseudoknots) === undefined || !this._paramsArray.get(pseudoknots)![temp]) {
             return undefined;
         }
@@ -199,17 +203,17 @@ export default class UndoBlock {
 
     public setPairs(pairs: number[] | null, temp: number = 37, pseudoknots: boolean = false): void {
         if (this._pairsArray.get(pseudoknots) === undefined) {
-            this._pairsArray.set(pseudoknots, [])
+            this._pairsArray.set(pseudoknots, []);
         }
         this._pairsArray.get(pseudoknots)![temp] = pairs ? pairs.slice() : undefined;
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
         // This can't be undefined; it's initialized in the class.
-        if (this._paramsArray.get(pseudoknots) == undefined) {
+        if (this._paramsArray.get(pseudoknots) === undefined) {
             this._paramsArray.set(pseudoknots, []);
         }
-        if (this._paramsArray.get(pseudoknots)![temp] == undefined) {
+        if (this._paramsArray.get(pseudoknots)![temp] === undefined) {
             this._paramsArray.get(pseudoknots)![temp] = [];
         }
         this._paramsArray.get(pseudoknots)![temp][index] = val;
@@ -220,14 +224,14 @@ export default class UndoBlock {
         let seq: number[] = this._sequence;
         bestPairs = this.getPairs(temp, pseudoknots);
         if (bestPairs === undefined) {
-            bestPairs = Array(seq.length, -1);
+            bestPairs = [seq.length, -1];
         }
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
-        this.setParam(UndoBlockParam.ANYPAIR, 
+        this.setParam(UndoBlockParam.ANYPAIR,
             (this.getParam(UndoBlockParam.GU, temp, pseudoknots) as number)
-                + (this.getParam(UndoBlockParam.GC, temp, pseudoknots) as number) 
+                + (this.getParam(UndoBlockParam.GC, temp, pseudoknots) as number)
                 + (this.getParam(UndoBlockParam.AU, temp, pseudoknots) as number), temp, pseudoknots);
         this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
@@ -260,24 +264,26 @@ export default class UndoBlock {
     }
 
     public updateMeltingPointAndDotPlot(folder: Folder, pseudoknots: boolean = false): void {
-        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) == undefined) {
-            let dotArray: number[] | undefined = folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
+        if (this.getParam(UndoBlockParam.DOTPLOT, 37, pseudoknots) === undefined) {
+            let dotArray: number[] | undefined =
+                folder.getDotPlot(this.sequence, this.getPairs(37), 37, pseudoknots);
             this.setParam(UndoBlockParam.DOTPLOT, dotArray, 37, pseudoknots);
             this._dotPlotData = dotArray ? dotArray.slice() : [];
         }
 
         for (let ii = 37; ii < 100; ii += 10) {
-            if (this.getPairs(ii) == undefined) {
+            if (this.getPairs(ii) === undefined) {
                 this.setPairs(folder.foldSequence(this.sequence, [], null, pseudoknots, ii), ii, pseudoknots);
             }
 
-            if (this.getParam(UndoBlockParam.DOTPLOT, ii) == undefined) {
-                let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+            if (this.getParam(UndoBlockParam.DOTPLOT, ii) === undefined) {
+                let dotTempArray: number[] | null =
+                    folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }
         }
 
-        let refPairs: number[] = this.getPairs(37);
+        let refPairs: number[] = this.getPairs(37, pseudoknots);
 
         let pairScores: number[] = [];
         let maxPairScores: number[] = [];
@@ -367,7 +373,7 @@ export default class UndoBlock {
      * (oligo A, with the old index of 0, should be at new index 1)
      */
     public reorderedOligosIndexMap(otherOrder?: number[]): number[] | undefined {
-        if (this._targetOligos == undefined) return undefined;
+        if (this._targetOligos === undefined) return undefined;
         if (otherOrder === undefined) return undefined;
 
         let originalIndices: number[][] = [];

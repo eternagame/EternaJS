@@ -1,5 +1,6 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
+import NuPACK from 'eterna/folding/NuPACK';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -75,6 +76,10 @@ export default class RNALayout {
         return this._root;
     }
 
+    public get pseudoknotPairs(): number[] {
+        return this._pseudoknotPairs;
+    }
+
     /**
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
@@ -136,6 +141,7 @@ export default class RNALayout {
         // need to have PKs removed.
         // AMW TODO: Rhiju, we should eventually be able to remove this condition,
         // once you work out how layouts can handle pseudoknots.
+        this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
         biPairs = EPars.filterForPseudoknots(biPairs);
         this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
 
@@ -169,7 +175,7 @@ export default class RNALayout {
         // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
-        } else if (xarray.length < 3) {
+        } else if (xarray.length <= 4) {
             // there is no structure (no pairs)
             // really short, just place them in a vertical line
             for (let ii = 0; ii < xarray.length; ii++) {
@@ -248,10 +254,9 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        // AMW: temporarily assuming score without PK
         if ((EPars.pairsToParenthesis(this._targetPairs).includes('{')
                 || EPars.pairsToParenthesis(this._targetPairs).includes('['))
-                && folder.name === 'NuPACK') {
+                && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -513,7 +518,7 @@ export default class RNALayout {
             let customCoordA: [number, number] | [null, null] = this._customLayout[anchornode.indexA];
             let customCoordB: [number, number] | [null, null] = this._customLayout[anchornode.indexB];
             // This has to be defined
-            if ( !customCoordA[0] || !customCoordB[0] || !customCoordA[1] || !customCoordB[1]) return;
+            if (!customCoordA[0] || !customCoordB[0] || !customCoordA[1] || !customCoordB[1]) return;
             anchorCustomX = (customCoordA[0] + customCoordB[0]) / 2;
             anchorCustomY = (customCoordA[1] + customCoordB[1]) / 2;
             anchorCustomCrossX = (customCoordA[0] - customCoordB[0]);
@@ -525,7 +530,7 @@ export default class RNALayout {
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
             let anchorCustomCoordNext: [number, number] | [null, null] = this._customLayout[anchornode.indexA + 1];
-            if ( !anchorCustomCoordNext[0] || !anchorCustomCoordNext[1] ) return;
+            if (!anchorCustomCoordNext[0] || !anchorCustomCoordNext[1]) return;
             let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
             let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
             let anchorCustomDotProd = anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY;
@@ -543,7 +548,7 @@ export default class RNALayout {
             // read out where this point should be based on 'this._customLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let customCoord: ( number | null )[] = this._customLayout[rootnode.children[ii].indexA].slice();
+            let customCoord: (number | null)[] = this._customLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
                 let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
                 let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
@@ -800,8 +805,8 @@ export default class RNALayout {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
                 if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
-                    if ( customLayout[ii][0] == null || customLayout[ii + 1][0] == null
-                            || customLayout[ii][1] == null || customLayout[ii + 1][1] == null ) {
+                    if (customLayout[ii][0] == null || customLayout[ii + 1][0] == null
+                            || customLayout[ii][1] == null || customLayout[ii + 1][1] == null) {
                         continue;
                     }
                     // Just checked against nulls, so I am comfortable using ! to assert.
@@ -825,6 +830,7 @@ export default class RNALayout {
     private _root: RNATreeNode | null;
     private _origPairs: number[];
     private _targetPairs: number[];
+    private _pseudoknotPairs: number[];
     private _customLayout: Array<[number, number] | [null, null]> | null;
 
     // / "New" method to gather NN free energies, just use the folding engine

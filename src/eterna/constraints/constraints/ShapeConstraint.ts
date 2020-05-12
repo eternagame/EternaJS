@@ -4,7 +4,7 @@ import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
 import * as log from 'loglevel';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from '../Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from '../Constraint';
 
 interface ShapeConstraintStatus extends BaseConstraintStatus {
     wrongPairs: number[];
@@ -29,7 +29,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
     protected _targetAlignedConstraints(constraints: boolean[] | undefined, ublk: UndoBlock): boolean[] | undefined {
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
 
-        if (targetMap != [] && constraints !== undefined) {
+        if (targetMap !== [] && constraints !== undefined) {
             let targetAlignedConstraints: boolean[] = [];
             for (let [rawIndex, targetIndex] of Object.entries(targetMap)) {
                 targetAlignedConstraints[targetIndex] = constraints[Number(rawIndex)];
@@ -54,7 +54,7 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 
         // rawIndex => targetAlignedIndex
         let targetMap = ublk.reorderedOligosIndexMap(ublk.targetOligoOrder);
-        if (targetMap != undefined) {
+        if (targetMap !== undefined) {
             // rawIndex => naturalAlignedIndex
             if (ublk.oligoOrder === undefined) {
                 throw new Error('oligoOrder is undefined!');
@@ -120,12 +120,12 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
 export default class ShapeConstraint extends BaseShapeConstraint {
     public static readonly NAME = 'SHAPE';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions?: any[]): ShapeConstraintStatus {
-        let undoBlock: UndoBlock = undoBlocks[this.stateIndex];
+    public evaluate(context: ConstraintContext): ShapeConstraintStatus {
+        let undoBlock = context.undoBlocks[this.stateIndex];
 
-        let targetAlignedConstraints: boolean[] | undefined = undefined;
-        if (targetConditions != undefined && targetConditions[this.stateIndex] != null) {
-            let structureConstraints: boolean[] = targetConditions[this.stateIndex]['structure_constraints'];
+        let targetAlignedConstraints: boolean[] = null;
+        if (context.targetConditions != null && context.targetConditions[this.stateIndex] != null) {
+            let structureConstraints: any = context.targetConditions[this.stateIndex]['structure_constraints'];
             targetAlignedConstraints = this._targetAlignedConstraints(structureConstraints, undoBlock);
         }
 
@@ -190,12 +190,12 @@ export default class ShapeConstraint extends BaseShapeConstraint {
         }
         for (let ii = 0; ii < wrongPairs.length; ii++) {
             if (naturalPairs[ii] !== targetPairs[ii]) {
-                if (structureConstraints == undefined || structureConstraints[ii]) {
+                if (structureConstraints === undefined || structureConstraints[ii]) {
                     wrongPairs[ii] = 1;
                 } else {
                     wrongPairs[ii] = 0;
                 }
-            } else if (structureConstraints == undefined || structureConstraints[ii]) {
+            } else if (structureConstraints === undefined || structureConstraints[ii]) {
                 wrongPairs[ii] = -1;
             } else {
                 wrongPairs[ii] = 0;
@@ -208,25 +208,25 @@ export default class ShapeConstraint extends BaseShapeConstraint {
 export class AntiShapeConstraint extends BaseShapeConstraint {
     public static readonly NAME = 'ANTISHAPE';
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any[]): ShapeConstraintStatus {
-        let undoBlock = undoBlocks[this.stateIndex];
+    public evaluate(context: ConstraintContext): ShapeConstraintStatus {
+        let undoBlock = context.undoBlocks[this.stateIndex];
 
         // TODO: These checks should probably be in Puzzle
-        if (targetConditions == null) {
+        if (context.targetConditions == null) {
             throw new Error('Target object not available for SHAPE constraint');
         }
 
-        if (targetConditions[this.stateIndex] == null) {
+        if (context.targetConditions[this.stateIndex] == null) {
             throw new Error('Target condition not available for SHAPE constraint');
         }
 
-        let antiStructureConstraints: any[] = targetConditions[this.stateIndex]['anti_structure_constraints'];
+        let antiStructureConstraints: any[] = context.targetConditions[this.stateIndex]['anti_structure_constraints'];
 
-        let pseudoknots: boolean = targetConditions[this.stateIndex]['type'] === 'pseudoknot';
+        let pseudoknots: boolean = context.targetConditions[this.stateIndex]['type'] === 'pseudoknot';
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);
         let targetAlignedConstraints = this._targetAlignedConstraints(antiStructureConstraints, undoBlock);
 
-        let antiStructureString: string = targetConditions[this.stateIndex]['anti_secstruct'];
+        let antiStructureString: string = context.targetConditions[this.stateIndex]['anti_secstruct'];
         if (antiStructureString == null) {
             throw new Error('Target structure not available for ANTISHAPE constraint');
         }
@@ -291,7 +291,7 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
             wrongPairs[ii] = 0;
         }
         for (let ii = 0; ii < wrongPairs.length; ii++) {
-            if (structureConstraints == undefined || structureConstraints[ii]) {
+            if (structureConstraints === undefined || structureConstraints[ii]) {
                 if (satisfied) {
                     wrongPairs[ii] = -1;
                 } else {
