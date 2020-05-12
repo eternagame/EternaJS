@@ -49,10 +49,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
-    constructor(poseField: PoseField, editable: boolean) {
+    constructor(poseField: PoseField, editable: boolean, forceStraightRNA?: boolean) {
         super();
         this._poseField = poseField;
         this._editable = editable;
+        this._forceStraightRNA = forceStraightRNA ?? false;
     }
 
     protected added() {
@@ -290,7 +291,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let yarray: number[] = new Array(n);
 
         let rnaCoords: RNALayout;
-        rnaCoords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0]);
+        rnaCoords = new RNALayout(Pose2D.ZOOM_SPACINGS[0], Pose2D.ZOOM_SPACINGS[0], null, this._forceStraightRNA);
         rnaCoords.setupTree(this._pairs, this._targetPairs);
         rnaCoords.drawTree(this._customLayout);
         rnaCoords.getCoords(xarray, yarray);
@@ -1836,7 +1837,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public checkOverlap(): boolean {
         let radius: number = Pose2D.ZOOM_SPACINGS[0];
-        let rnaDrawer: RNALayout = new RNALayout(radius, radius);
+        let rnaDrawer: RNALayout = new RNALayout(radius, radius, undefined, this._forceStraightRNA);
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
 
@@ -2508,7 +2509,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer = new RNALayout(
             Pose2D.ZOOM_SPACINGS[this._zoomLevel],
             Pose2D.ZOOM_SPACINGS[this._zoomLevel] * this._explosionFactor,
-            exceptionIndices
+            exceptionIndices,
+            this._forceStraightRNA
         );
 
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
@@ -3377,6 +3379,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Is this pose editable?
     private _editable: boolean;
     private _editableIndices: number[] = null;
+    private _forceStraightRNA: boolean;
 
     // Pointer to callback function to be called after change in pose
     private _poseEditCallback: () => void = null;

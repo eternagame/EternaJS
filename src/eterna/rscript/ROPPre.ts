@@ -12,7 +12,8 @@ enum ROPPreType {
     DISABLE_RNA_CHANGE = 'DISABLE_RNA_CHANGE',
     SET_DEFAULT_FOLD_MODE = 'SET_DEFAULT_FOLD_MODE',
     PUSH_PUZZLE = 'PUSH_PUZZLE',
-    RESET_SEQUENCE = 'RESET_SEQUENCE'
+    RESET_SEQUENCE = 'RESET_SEQUENCE',
+    FORCE_STRAIGHT_RNA = 'FORCE_STRAIGHT_RNA'
 }
 
 export default class ROPPre extends RScriptOp {
@@ -29,6 +30,7 @@ export default class ROPPre extends RScriptOp {
         const modeRegex = /^(Native|Target)Mode$/ig;
         const pushPuzzleRegex = /PushPuzzle/;
         const resetSequence = /ResetSequence/g;
+        const forceStraightRNA = /ForceStraightRNA/;
 
         let regResult: RegExpExecArray;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {
@@ -52,6 +54,8 @@ export default class ROPPre extends RScriptOp {
             this._type = ROPPreType.PUSH_PUZZLE;
         } else if ((regResult = resetSequence.exec(command)) != null) {
             this._type = ROPPreType.RESET_SEQUENCE;
+        } else if ((regResult = forceStraightRNA.exec(command)) != null) {
+            this._type = ROPPreType.FORCE_STRAIGHT_RNA;
         }
     }
 
@@ -112,6 +116,9 @@ export default class ROPPre extends RScriptOp {
                 RSignals.pushPuzzle.emit(this._allArgs[0]);
                 break;
             case ROPPreType.RESET_SEQUENCE:
+                // Do nothing, this is caught at the end of puzzle loading.
+                break;
+            case ROPPreType.FORCE_STRAIGHT_RNA:
                 // Do nothing, this is caught at the end of puzzle loading.
                 break;
 

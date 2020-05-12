@@ -68,13 +68,15 @@ export default class PoseThumbnail {
         wrongPairs: number[] = null,
         expUseThreshold: boolean = false,
         expThreshold: number = 0,
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number]> = null,
+        forceStraightRNA = false
     ): void {
         sprite.removeChildren();
         const graphics = new Graphics();
         PoseThumbnail.create(
             sequence, pairs, size, type, expStartIndex, wrongPairs, expUseThreshold, expThreshold, graphics,
-            customLayout
+            customLayout,
+            forceStraightRNA
         );
         let bounds = graphics.getLocalBounds();
         graphics.x = -bounds.left;
@@ -92,7 +94,8 @@ export default class PoseThumbnail {
         expUseThreshold: boolean,
         expThreshold: number,
         canvas: Graphics = null,
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number]> = null,
+        forceStraightRNA = false
     ): DisplayObject {
         let frame: DisplayObject;
 
@@ -128,7 +131,7 @@ export default class PoseThumbnail {
         let xarray: number[] = new Array(n);
         let yarray: number[] = new Array(n);
 
-        let rnaDrawer: RNALayout = new RNALayout(45, 45);
+        let rnaDrawer: RNALayout = new RNALayout(45, 45, undefined, forceStraightRNA);
         rnaDrawer.setupTree(pairs);
         rnaDrawer.drawTree(customLayout);
         rnaDrawer.getCoords(xarray, yarray);

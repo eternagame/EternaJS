@@ -10,9 +10,9 @@ type InteractionEvent = PIXI.interaction.InteractionEvent;
 
 /** Wraps a Pose2D and handles resizing, masking, and input events */
 export default class PoseField extends ContainerObject implements KeyboardListener, MouseWheelListener {
-    constructor(edit: boolean) {
+    constructor(edit: boolean, forceStraightRNA?: boolean) {
         super();
-        this._pose = new Pose2D(this, edit);
+        this._pose = new Pose2D(this, edit, forceStraightRNA);
 
         // _clickTargetDisp is an invisible rectangle with our exact size, so that we can always receive mouse events
         this._clickTargetDisp = new Graphics();

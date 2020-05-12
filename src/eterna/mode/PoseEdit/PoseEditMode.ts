@@ -601,7 +601,7 @@ export default class PoseEditMode extends GameMode {
         };
 
         for (let ii = 0; ii < targetConditions.length; ii++) {
-            let poseField: PoseField = new PoseField(true);
+            let poseField: PoseField = new PoseField(true, this.forceStraightRNA);
             this.addObject(poseField, this.poseLayer);
             let pose: Pose2D = poseField.pose;
             bindAddbaseCB(pose, ii);
@@ -2121,7 +2121,8 @@ export default class PoseEditMode extends GameMode {
             missionText,
             this._targetPairs,
             introConstraintBoxes,
-            customLayout
+            customLayout,
+            this.forceStraightRNA
         ));
 
         let conn = this.entered.connect(() => {
@@ -3118,6 +3119,9 @@ export default class PoseEditMode extends GameMode {
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
     private readonly _autosaveData: any[];
+
+    // Nova specific - force straight strands if #PRE-ForceStraightRNA
+    private get forceStraightRNA() { return this._puzzle.rscript.includes('#PRE-ForceStraightRNA'); }
 
     private _constraintsLayer: Container;
 

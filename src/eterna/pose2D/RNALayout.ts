@@ -63,12 +63,18 @@ export class RNATreeNode {
 //    -- rhiju, 2019, reviewing/updating code that was written ages ago by someone else.
 //
 export default class RNALayout {
-    constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
+    constructor(
+        primSpace: number = 45,
+        pairSpace: number = 45,
+        exceptionIndices: number[] = null,
+        forceStraightRNA = false
+    ) {
         this._primarySpace = primSpace;
         this._pairSpace = pairSpace;
         if (exceptionIndices != null) {
             this._exceptionIndices = exceptionIndices.slice();
         }
+        this._forceStraightRNA = forceStraightRNA;
     }
 
     public get root(): RNATreeNode {
@@ -170,7 +176,7 @@ export default class RNALayout {
         // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
-        } else if (xarray.length <= 4) {
+        } else if (xarray.length <= 4 || this._forceStraightRNA) {
             // there is no structure (no pairs)
             // really short, just place them in a vertical line
             for (let ii = 0; ii < xarray.length; ii++) {
@@ -804,6 +810,7 @@ export default class RNALayout {
     private readonly _pairSpace: number;
     // indices that need to be streched (e.g., connectors for oligos)
     private readonly _exceptionIndices: number[];
+    private _forceStraightRNA = false;
 
     private _root: RNATreeNode;
     private _origPairs: number[];
