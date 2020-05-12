@@ -25,7 +25,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseDown(e));
-        this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onMouseUp());
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onMouseUp(e));
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
@@ -119,10 +119,10 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
     }
 
-    private onMouseUp(): void {
+    private onMouseUp(e: InteractionEvent): void {
         this.cancelDrag();
         this._pose.doneColoring();
-        this._pose.onMouseMoved();
+        this._pose.onMouseMoved(e.data.global);
     }
 
     private cancelDrag(): void {
