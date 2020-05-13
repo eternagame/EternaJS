@@ -41,14 +41,15 @@
         cursor: pointer;
         }
 
-        .hidden {
-            display: 'none'
+        .mobile-hidden {
+            display: none !important;
+            pointer-events: none;
         }
     </style>
 
     <script>
         function mobileContinue() {
-            document.getElementById('mobile-browser-warning').classList.add('hidden');
+            document.getElementById('mobile-browser-warning').classList.add('mobile-hidden');
         }
     </script>
 </head>
@@ -64,7 +65,7 @@
 
 <div
     id="mobile-browser-warning"
-    class='hidden'
+    class='mobile-hidden'
     style="position: absolute;z-index: 2;width: 100vw;height: 100vh;left: 0px;top: 0px;align-items: center;text-align: center;display:grid"
 >
     <div

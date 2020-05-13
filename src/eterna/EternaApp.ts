@@ -182,7 +182,7 @@ export default class EternaApp extends FlashbangApp {
         // Temporary warning on mobile
         const mobile = isMobile({tablet: false});
         if (mobile) {
-            document.getElementById('mobile-browser-warning').classList.remove('hidden');
+            document.getElementById('mobile-browser-warning').classList.remove('mobile-hidden');
         }
     }
 
