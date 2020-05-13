@@ -5,6 +5,7 @@ import {
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
+import {isMobile} from 'is-mobile';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -177,6 +178,12 @@ export default class EternaApp extends FlashbangApp {
                 this.popLoadingMode();
                 Eterna.onFatalError(err);
             });
+
+        // Temporary warning on mobile
+        const mobile = isMobile({tablet: false});
+        if (mobile) {
+            document.getElementById('mobile-browser-warning').classList.remove('hidden');
+        }
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
