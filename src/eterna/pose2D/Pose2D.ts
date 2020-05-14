@@ -1924,8 +1924,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let center: Point;
 
         // Hide bases that aren't part of our current sequence
-        for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
+        if (!this._showNucleotideRange) {
+            for (let ii = 0; ii < this._bases.length; ++ii) {
+                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(ii);
+            }
         }
 
         let basesMoved = false;
@@ -2499,6 +2501,26 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._width / 2 - this._bases[baseIndex].x,
             this._height / 2 - this._bases[baseIndex].y
         );
+    }
+
+    public showNucleotideRange(range: [number, number] | null) {
+        const [start, end] = range ?? [1, this._bases.length];
+        if (start < 1 || end > this._bases.length || start >= end) {
+            // eslint-disable-next-line
+            console.warn(`Invalid nucleotide range [${start}, ${end}]`);
+            return;
+        }
+
+        this._showNucleotideRange = Boolean(range);
+        if (!range) {
+            return;
+        }
+
+        for (let i = 0; i < this._bases.length; ++i) {
+            this._bases[i].container.visible = i >= (start - 1)
+                && i < end
+                && this.isNucleotidePartOfSequence(i);
+        }
     }
 
     private computeLayout(fast: boolean = false): void {
@@ -3315,6 +3337,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return base;
     }
 
+    private isNucleotidePartOfSequence(index: number) {
+        return index < this.fullSequence.length && this._bases[index].type !== EPars.RNABASE_CUT;
+    }
+
     private static createDefaultLocks(sequenceLength: number): boolean[] {
         let locks: boolean[] = new Array<boolean>(sequenceLength);
         for (let ii = 0; ii < sequenceLength; ++ii) {
@@ -3526,6 +3552,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
+
+    private _showNucleotideRange = false;
+
     /*
      * NEW HIGHLIGHT.
      *  - Input: List of nucleotides that we wish to highlight.
