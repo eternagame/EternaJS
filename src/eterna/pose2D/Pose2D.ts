@@ -76,6 +76,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
         this._deltaScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
@@ -2284,7 +2285,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._deltaScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
         this._secondaryScoreEnergyDisplay.visible = (
             show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
@@ -3168,7 +3168,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         'Natural/Target Delta',
                         `${Math.round(this._getEnergyDelta()) / 100} kcal`
                     );
+                    this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this._scoreFolder != null);
                 } catch (e) {
+                    this._deltaScoreEnergyDisplay.visible = false;
                     setTimeout(attemptSetDelta, 1000);
                 }
             };
