@@ -179,12 +179,6 @@ export default class EternaApp extends FlashbangApp {
                 this.popLoadingMode();
                 Eterna.onFatalError(err);
             });
-
-        // Temporary warning on mobile
-        const mobile = isMobile({tablet: false});
-        if (mobile) {
-            document.getElementById('mobile-browser-warning').classList.remove('mobile-hidden');
-        }
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
