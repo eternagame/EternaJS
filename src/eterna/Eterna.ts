@@ -22,7 +22,7 @@ function ParseBool(value: string): boolean {
  */
 
 export default class Eterna {
-    public static readonly OVERLAY_DIV_ID = 'overlay';
+    public static readonly OVERLAY_DIV_ID = 'eterna-overlay';
     public static readonly PIXI_CONTAINER_ID = 'pixi-container';
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
 

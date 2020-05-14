@@ -51,6 +51,7 @@ import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
+import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -189,6 +190,45 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             });
+        });
+
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => {
+            const initialRange = this._nucleotideRangeToShow
+                ?? (() => {
+                    if (this._isPipMode) {
+                        return [
+                            1,
+                            Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                        ];
+                    } else {
+                        return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                    }
+                })() as [number, number];
+
+            this.showDialog(
+                new NucleotideRangeSelector({
+                    initialRange,
+                    isPartialRange: Boolean(this._nucleotideRangeToShow)
+                })
+            )
+                .closed
+                .then((result) => {
+                    if (result === null) {
+                        return;
+                    }
+
+                    if (result.clearRange) {
+                        this._nucleotideRangeToShow = null;
+                    } else {
+                        this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+                    }
+
+                    if (this._isPipMode) {
+                        this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+                    } else {
+                        this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+                    }
+                });
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -499,7 +539,11 @@ export default class PoseEditMode extends GameMode {
                     : undefined,
 
                 menu: [() => getBounds(this.toolbar.actionMenu), 0],
-                palette: [() => getBounds(this.toolbar.palette), 0],
+
+                palette: this.toolbar.palette.container.visible
+                    ? [() => getBounds(this.toolbar.palette), 0]
+                    : undefined,
+
                 zoom: [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2],
                 undo: [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
             }
@@ -1700,7 +1744,7 @@ export default class PoseEditMode extends GameMode {
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder.canDotPlot) {
+        if (this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(this._folder, true);
@@ -3185,6 +3229,8 @@ export default class PoseEditMode extends GameMode {
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: any;
+
+    private _nucleotideRangeToShow: [number, number] | null = null;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

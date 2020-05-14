@@ -55,7 +55,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         }
 
         tooltip.append('You must have ')
-            .append(`${this.minPairs} or more`)
+            .append(`${this.minPairs} or more `)
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(0))}-`)
             .append(`${EPars.getColoredLetter(EPars.nucleotidePairToString(this.pairType).charAt(1))} pairs.`);
 

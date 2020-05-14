@@ -65,6 +65,7 @@
   "dependencies": {
     "base64-js": "^1.3.1",
     "eterna-chat-wrapper": "github:eternagame/eterna-chat-wrapper",
+    "is-mobile": "^2.2.1",
     "js-polyfills": "^0.1.42",
     "libtess": "^1.2.2",
     "localforage": "^1.7.3",
