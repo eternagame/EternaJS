@@ -10,7 +10,7 @@ export default class ChatManager {
             log.warn(`Missing chatbox (id=${chatboxID})`);
         }
         this._settings = settings;
-        settings.showChat.connectNotify(() => this.updateChatVisibility());
+        settings.showChat.connect(() => this.updateChatVisibility());
     }
 
     /** Posts a message to the chat */

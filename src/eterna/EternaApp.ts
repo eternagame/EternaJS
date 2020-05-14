@@ -133,7 +133,6 @@ export default class EternaApp extends FlashbangApp {
         Eterna.saveManager = new SaveGameManager('EternaSaveGame');
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
-        Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
         this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
@@ -148,6 +147,8 @@ export default class EternaApp extends FlashbangApp {
 
         this.authenticate()
             .then(() => {
+                // We can only do this now, since we need the username and UID to connect
+                Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
                 this.setLoadingText('Loading game...', null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
