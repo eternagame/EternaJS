@@ -2004,6 +2004,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
         this._homeButton.display.visible = false;
+        this._helpBar.display.visible = false;
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
         }
