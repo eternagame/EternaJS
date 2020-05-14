@@ -283,7 +283,11 @@ export default class PoseEditMode extends GameMode {
             .down(Bitmaps.ImgHome);
         this._homeButton.display.position = new Point(11, 8);
         this._homeButton.clicked.connect(() => {
-            window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            if (Eterna.MOBILE_APP) {
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            } else {
+                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            }
         });
         this.addObject(this._homeButton, this.uiLayer);
 
@@ -703,7 +707,7 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.visible = false;
         this.addObject(this._exitButton, this.uiLayer);
 
-        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
+        let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
             .font(Fonts.ARIAL)
             .fontSize(14)
             .bold()

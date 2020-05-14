@@ -28,6 +28,7 @@ export default class Eterna {
 
     public static readonly DEV_MODE: boolean = ParseBool(process.env['DEBUG']);
     public static readonly SERVER_URL: string = GetServerURL();
+    public static readonly MOBILE_APP: boolean = ParseBool(process.env['MOBILE_APP']);
 
     public static gameDiv: HTMLElement;
 
