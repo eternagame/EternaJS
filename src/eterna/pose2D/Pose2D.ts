@@ -145,7 +145,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
-        this.pointerMove.connect(() => this.onMouseMoved());
+        this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
@@ -549,7 +549,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
-                dragger.dragged.connect(() => this.onMouseMoved());
+                dragger.dragged.connect((p) => {
+                    this.onMouseMoved(p);
+                });
                 dragger.dragComplete.connect(() => this.onMouseUp());
 
                 this.onBaseMouseDown(closestIndex, ctrlDown);
@@ -593,8 +595,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[index].isMarked();
     }
 
-    public onMouseMoved(): void {
-        if (!this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+    public onMouseMoved(point: Point): void {
+        if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
         }
@@ -603,7 +605,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.clearMouse();
         }
 
-        this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
+        this.container.toLocal(point, null, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
 
