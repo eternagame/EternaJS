@@ -68,16 +68,6 @@ export default class LoadingMode extends AppMode {
         this.resized.connect(updateLoc);
     }
 
-    protected enter(): void {
-        super.enter();
-        Eterna.chat.pushHideChat();
-    }
-
-    protected exit(): void {
-        Eterna.chat.popHideChat();
-        super.exit();
-    }
-
     private getExtraBlurb(): string {
         let ExtraBlurbs = [
             'A good scientist will tell you\nthat being wrong can be just\n as interesting as being right.',

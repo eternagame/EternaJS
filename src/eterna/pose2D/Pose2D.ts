@@ -76,6 +76,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
         this._deltaScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
@@ -145,7 +146,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
-        this.pointerMove.connect(() => this.onMouseMoved());
+        this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
@@ -549,7 +550,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
-                dragger.dragged.connect(() => this.onMouseMoved());
+                dragger.dragged.connect((p) => {
+                    this.onMouseMoved(p);
+                });
                 dragger.dragComplete.connect(() => this.onMouseUp());
 
                 this.onBaseMouseDown(closestIndex, ctrlDown);
@@ -593,8 +596,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[index].isMarked();
     }
 
-    public onMouseMoved(): void {
-        if (!this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+    public onMouseMoved(point: Point): void {
+        if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
         }
@@ -603,7 +606,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.clearMouse();
         }
 
-        this.container.toLocal(Flashbang.globalMouse, null, Pose2D.P);
+        this.container.toLocal(point, null, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
 
@@ -1921,8 +1924,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let center: Point;
 
         // Hide bases that aren't part of our current sequence
-        for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
+        if (!this._showNucleotideRange) {
+            for (let ii = 0; ii < this._bases.length; ++ii) {
+                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(ii);
+            }
         }
 
         let basesMoved = false;
@@ -2282,7 +2287,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._deltaScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
         this._secondaryScoreEnergyDisplay.visible = (
             show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
@@ -2497,6 +2501,26 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._width / 2 - this._bases[baseIndex].x,
             this._height / 2 - this._bases[baseIndex].y
         );
+    }
+
+    public showNucleotideRange(range: [number, number] | null) {
+        const [start, end] = range ?? [1, this._bases.length];
+        if (start < 1 || end > this._bases.length || start >= end) {
+            // eslint-disable-next-line
+            console.warn(`Invalid nucleotide range [${start}, ${end}]`);
+            return;
+        }
+
+        this._showNucleotideRange = Boolean(range);
+        if (!range) {
+            return;
+        }
+
+        for (let i = 0; i < this._bases.length; ++i) {
+            this._bases[i].container.visible = i >= (start - 1)
+                && i < end
+                && this.isNucleotidePartOfSequence(i);
+        }
     }
 
     private computeLayout(fast: boolean = false): void {
@@ -3166,7 +3190,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         'Natural/Target Delta',
                         `${Math.round(this._getEnergyDelta()) / 100} kcal`
                     );
+                    this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this._scoreFolder != null);
                 } catch (e) {
+                    this._deltaScoreEnergyDisplay.visible = false;
                     setTimeout(attemptSetDelta, 1000);
                 }
             };
@@ -3309,6 +3335,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.addObject(base, this._baseLayer);
         this._bases.push(base);
         return base;
+    }
+
+    private isNucleotidePartOfSequence(index: number) {
+        return index < this.fullSequence.length && this._bases[index].type !== EPars.RNABASE_CUT;
     }
 
     private static createDefaultLocks(sequenceLength: number): boolean[] {
@@ -3522,6 +3552,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
+
+    private _showNucleotideRange = false;
+
     /*
      * NEW HIGHLIGHT.
      *  - Input: List of nucleotides that we wish to highlight.

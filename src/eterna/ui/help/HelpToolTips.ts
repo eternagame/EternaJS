@@ -7,9 +7,9 @@ import HelpToolTip, {ToolTipPositioner} from './HelpToolTip';
 
 export interface HelpToolTipsProps {
     menu: ToolTipPositioner;
-    palette: ToolTipPositioner;
+    palette?: ToolTipPositioner;
     zoom: ToolTipPositioner;
-    undo: ToolTipPositioner;
+    undo?: ToolTipPositioner;
     hints?: ToolTipPositioner;
     swapPairs?: ToolTipPositioner;
     switchState?: ToolTipPositioner;
@@ -36,60 +36,65 @@ export default class HelpToolTips {
                 ? new HelpToolTip({text: 'PiP MODE', tailLength, positioner: props.pip})
                 : null,
 
-            new HelpToolTip({
-                text: 'BASE PALETTE',
-                tailLength,
-                positioner: props.palette,
-                content: (() => {
-                    const elemW = 75;
-                    const elemH = 18;
-                    const separation = 2;
-                    const makeRect = (x: number, y: number, color: number) => {
-                        const rect = new Graphics();
-                        rect.beginFill(color);
-                        rect.drawRect(0, 0, elemW, elemH);
-                        rect.endFill();
-                        rect.position = new Point(x, y);
-                        return rect;
-                    };
+            props.palette
+                ? new HelpToolTip({
+                    text: 'BASE PALETTE',
+                    tailLength,
+                    positioner: props.palette,
+                    content: (() => {
+                        const elemW = 75;
+                        const elemH = 18;
+                        const separation = 2;
+                        const makeRect = (x: number, y: number, color: number) => {
+                            const rect = new Graphics();
+                            rect.beginFill(color);
+                            rect.drawRect(0, 0, elemW, elemH);
+                            rect.endFill();
+                            rect.position = new Point(x, y);
+                            return rect;
+                        };
 
-                    const makeText = (text: string) => {
-                        const builder = Fonts.stdRegular(text).color(0);
-                        const metrics = PIXI.TextMetrics.measureText(text, builder.style);
-                        const textElem = builder.build();
-                        textElem.position = new Point(
-                            (elemW - metrics.width) / 2,
-                            (elemH - metrics.height) / 2
-                        );
-                        return textElem;
-                    };
+                        const makeText = (text: string) => {
+                            const builder = Fonts.stdRegular(text).color(0);
+                            const metrics = PIXI.TextMetrics.measureText(text, builder.style);
+                            const textElem = builder.build();
+                            textElem.position = new Point(
+                                (elemW - metrics.width) / 2,
+                                (elemH - metrics.height) / 2
+                            );
+                            return textElem;
+                        };
 
-                    const adenine = makeRect(0, 0, TextUtil.STD_YELLOW_COLOR);
-                    adenine.addChild(makeText('Adenine'));
-                    const guanine = makeRect(elemW + separation, 0, TextUtil.STD_RED_COLOR);
-                    guanine.addChild(makeText('Guanine'));
-                    const uracil = makeRect(0, elemH + separation, TextUtil.STD_BLUE_COLOR);
-                    uracil.addChild(makeText('Uracil'));
-                    const cytosine = makeRect(elemW + separation, elemH + separation, TextUtil.STD_GREEN_COLOR);
-                    cytosine.addChild(makeText('Cytosine'));
+                        const adenine = makeRect(0, 0, TextUtil.STD_YELLOW_COLOR);
+                        adenine.addChild(makeText('Adenine'));
+                        const guanine = makeRect(elemW + separation, 0, TextUtil.STD_RED_COLOR);
+                        guanine.addChild(makeText('Guanine'));
+                        const uracil = makeRect(0, elemH + separation, TextUtil.STD_BLUE_COLOR);
+                        uracil.addChild(makeText('Uracil'));
+                        const cytosine = makeRect(elemW + separation, elemH + separation, TextUtil.STD_GREEN_COLOR);
+                        cytosine.addChild(makeText('Cytosine'));
 
-                    const content = new Container();
-                    content.addChild(adenine);
-                    content.addChild(guanine);
-                    content.addChild(uracil);
-                    content.addChild(cytosine);
-                    content.width = elemW * 2 + separation;
-                    content.height = elemH * 2 + separation;
-                    return content;
-                })()
-            }),
+                        const content = new Container();
+                        content.addChild(adenine);
+                        content.addChild(guanine);
+                        content.addChild(uracil);
+                        content.addChild(cytosine);
+                        content.width = elemW * 2 + separation;
+                        content.height = elemH * 2 + separation;
+                        return content;
+                    })()
+                })
+                : null,
 
             props.swapPairs
                 ? new HelpToolTip({text: 'SWAP PAIR', positioner: props.swapPairs})
                 : null,
 
             new HelpToolTip({text: 'ZOOM IN/OUT', tailLength, positioner: props.zoom}),
-            new HelpToolTip({text: 'UNDO/REDO', positioner: props.undo}),
+
+            props.undo
+                ? new HelpToolTip({text: 'UNDO/REDO', positioner: props.undo})
+                : null,
 
             props.hints
                 ? new HelpToolTip({text: 'HINTS ON/OFF', side: 'bottom', positioner: props.hints})

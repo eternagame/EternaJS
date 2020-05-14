@@ -36,6 +36,10 @@ export default class Flashbang {
         return this._sound;
     }
 
+    public static get supportsTouch() {
+        return this._interaction.supportsTouchEvents;
+    }
+
     /* internal */
     public static _registerApp(app: FlashbangApp): void {
         Assert.isTrue(Flashbang._app == null, 'A FlashbangApp has already been registered');

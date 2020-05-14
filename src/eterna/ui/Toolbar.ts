@@ -52,6 +52,7 @@ export default class Toolbar extends ContainerObject {
     public copyButton: GameButton;
     public pasteButton: GameButton;
     public nucleotideFindButton: GameButton;
+    public nucleotideRangeButton: GameButton;
 
     public freezeButton: GameButton;
 
@@ -297,6 +298,16 @@ export default class Toolbar extends ContainerObject {
             .hotkey(KeyCode.KeyJ);
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);
+
+        this.nucleotideRangeButton = new GameButton()
+            .allStates(Bitmaps.NovaPuzzleImg)
+            .disabled(null)
+            .label('View Nucleotide Range', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Enter a nucleotide range to view (v)')
+            .hotkey(KeyCode.KeyV);
+
+        this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
         if (this._boostersData != null && this._boostersData.actions != null) {

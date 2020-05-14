@@ -5,6 +5,7 @@ import {
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
+import {isMobile} from 'is-mobile';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -132,7 +133,6 @@ export default class EternaApp extends FlashbangApp {
         Eterna.saveManager = new SaveGameManager('EternaSaveGame');
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
-        Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
         this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
@@ -147,6 +147,8 @@ export default class EternaApp extends FlashbangApp {
 
         this.authenticate()
             .then(() => {
+                // We can only do this now, since we need the username and UID to connect
+                Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
                 this.setLoadingText('Loading game...', null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
@@ -177,6 +179,12 @@ export default class EternaApp extends FlashbangApp {
                 this.popLoadingMode();
                 Eterna.onFatalError(err);
             });
+
+        // Temporary warning on mobile
+        const mobile = isMobile({tablet: false});
+        if (mobile) {
+            document.getElementById('mobile-browser-warning').classList.remove('mobile-hidden');
+        }
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */

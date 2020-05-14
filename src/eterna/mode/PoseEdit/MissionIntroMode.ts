@@ -14,6 +14,12 @@ import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 
 export default class MissionIntroMode extends AppMode {
+    private get constraintAreaSize() {
+        return this._scrollDownButton.container.y
+            + this._scrollDownButton.container.height
+            - this._scrollUpButton.container.y;
+    }
+
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
         customLayout: Array<[number, number]> = null
@@ -51,6 +57,7 @@ export default class MissionIntroMode extends AppMode {
             .appendHTMLStyledText(this._puzzleDescription)
             .build();
         this._scrollLayer.addChild(descriptionLabel);
+
 
         let playButton = new GameButton()
             .up(Bitmaps.PlayImage)

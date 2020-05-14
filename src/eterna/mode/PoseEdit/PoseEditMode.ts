@@ -51,6 +51,7 @@ import HintsPanel from 'eterna/ui/HintsPanel';
 import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
+import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -129,6 +130,17 @@ export default class PoseEditMode extends GameMode {
         });
         this.addObject(this._helpBar, this.uiLayer);
 
+        // Chat
+        this._chatButton = new GameButton()
+            .up(Bitmaps.ImgChat)
+            .over(Bitmaps.ImgChat)
+            .down(Bitmaps.ImgChat)
+            .tooltip('Chat');
+        this.addObject(this._chatButton, this.container);
+        this.regs.add(this._chatButton.clicked.connect(() => {
+            Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
+        }));
+
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
         this._toolbar.zoomOutButton.clicked.connect(() => {
@@ -178,6 +190,45 @@ export default class PoseEditMode extends GameMode {
                     }
                 }
             });
+        });
+
+        this._toolbar.nucleotideRangeButton.clicked.connect(() => {
+            const initialRange = this._nucleotideRangeToShow
+                ?? (() => {
+                    if (this._isPipMode) {
+                        return [
+                            1,
+                            Math.min(...this._poses.map((p) => p.fullSequenceLength))
+                        ];
+                    } else {
+                        return [1, this._poses[this._curTargetIndex].fullSequenceLength];
+                    }
+                })() as [number, number];
+
+            this.showDialog(
+                new NucleotideRangeSelector({
+                    initialRange,
+                    isPartialRange: Boolean(this._nucleotideRangeToShow)
+                })
+            )
+                .closed
+                .then((result) => {
+                    if (result === null) {
+                        return;
+                    }
+
+                    if (result.clearRange) {
+                        this._nucleotideRangeToShow = null;
+                    } else {
+                        this._nucleotideRangeToShow = [result.startIndex, result.endIndex];
+                    }
+
+                    if (this._isPipMode) {
+                        this._poses.forEach((p) => p.showNucleotideRange(this._nucleotideRangeToShow));
+                    } else {
+                        this._poses[this._curTargetIndex].showNucleotideRange(this._nucleotideRangeToShow);
+                    }
+                });
         });
 
         // Add our docked SpecBox at the bottom of uiLayer
@@ -280,6 +331,11 @@ export default class PoseEditMode extends GameMode {
         DisplayUtil.positionRelativeToStage(
             this._helpBar.display, HAlign.RIGHT, VAlign.TOP,
             HAlign.RIGHT, VAlign.TOP, 0, 0
+        );
+
+        DisplayUtil.positionRelativeToStage(
+            this._chatButton.display, HAlign.RIGHT, VAlign.BOTTOM,
+            HAlign.RIGHT, VAlign.BOTTOM, -15, -15
         );
 
         DisplayUtil.positionRelativeToStage(
@@ -483,9 +539,16 @@ export default class PoseEditMode extends GameMode {
                     : undefined,
 
                 menu: [() => getBounds(this.toolbar.actionMenu), 0],
-                palette: [() => getBounds(this.toolbar.palette), 0],
+
+                palette: this.toolbar.palette.container.visible
+                    ? [() => getBounds(this.toolbar.palette), 0]
+                    : undefined,
+
                 zoom: [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2],
-                undo: [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
+
+                undo: this.toolbar.undoButton.display.visible
+                    ? [() => getBounds(this.toolbar.undoButton), this.toolbar.undoButton.container.width / 2]
+                    : undefined
             }
         }));
     }
@@ -1684,7 +1747,7 @@ export default class PoseEditMode extends GameMode {
 
     private updateCurrentBlockWithDotAndMeltingPlot(index: number = -1): void {
         let datablock: UndoBlock = this.getCurrentUndoBlock(index);
-        if (this._folder.canDotPlot) {
+        if (this._folder.canDotPlot && datablock.sequence.length < 500) {
             if (this._targetConditions && this._targetConditions[0]
                 && this._targetConditions[0]['type'] === 'pseudoknot') {
                 datablock.updateMeltingPointAndDotPlot(this._folder, true);
@@ -1941,6 +2004,7 @@ export default class PoseEditMode extends GameMode {
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
         this._homeButton.display.visible = false;
+        this._helpBar.display.visible = false;
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
         }
@@ -3106,6 +3170,7 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
+    private _chatButton: GameButton;
 
     protected _folder: Folder;
     // / Asynch folding
@@ -3168,6 +3233,8 @@ export default class PoseEditMode extends GameMode {
 
     // Will be non-null after we submit our solution to the server
     private _submitSolutionRspData: any;
+
+    private _nucleotideRangeToShow: [number, number] | null = null;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

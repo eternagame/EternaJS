@@ -118,8 +118,8 @@ export default class TextInputPanel extends GamePanel {
         }
     }
 
-    private readonly _okButton: GameButton;
-    private readonly _cancelButton: GameButton;
+    protected readonly _okButton: GameButton;
+    protected readonly _cancelButton: GameButton;
     private readonly _fontSize: number = 14;
 
     private _fields: InputField[] = [];

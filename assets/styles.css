@@ -1,4 +1,4 @@
-#overlay {
+#eterna-overlay {
     position: absolute;
     left: 0px;
     top: 0px;
@@ -25,4 +25,26 @@
 @font-face {
     font-family: OpenSans-SemiBold;
     src: url(./Fonts/OpenSans-SemiBold.ttf);
+}
+
+.ingame-chat {
+    width: 230px;
+    height: 340px;
+    position: absolute;
+    top: 140px;
+    right: 10px;
+    border: 1px solid rgba(47, 148, 209, 0.9);
+    border-radius: 5px;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+@media (max-height: 510px) {
+    .ingame-chat {
+        width: 30%;
+        min-width: 230px;
+        height: 100%;
+        top: 0px;
+        right: 0px;
+    }
 }
