@@ -2071,7 +2071,11 @@ export default class PoseEditMode extends GameMode {
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
                 keepPlaying();
-                window.open(EternaURL.getFeedURL(), '_self');
+                if (Eterna.MOBILE_APP) {
+                    window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+                } else {
+                    window.open(EternaURL.getFeedURL(), '_self');
+                }
             });
         }
 
