@@ -43,8 +43,8 @@
     .ingame-chat {
         width: 30%;
         min-width: 230px;
-        height: 100%;
-        top: 0px;
-        right: 0px;
+        height: 85%;
+        top: 5px;
+        right: 5px;
     }
 }
