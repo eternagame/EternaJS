@@ -218,6 +218,7 @@ export default class Bitmaps {
     public static readonly MissionPuzzleThumbnailImage: string = require('assets/NOVA/Mission/puzzle-thumbnail-background.png');
     public static readonly PuzzleImg: string = require('assets/puzzle.png');
     public static readonly ImgHome: string = require('assets/UI/home-btn.png');
+    public static readonly ImgHomeArrow: string = require('assets/UI/home-arrow-right.png');
     public static readonly NovaPuzzleImg: string = require('assets/puzzle_icon.png');
     public static readonly NovaFailOutline: string = require('assets/NOVA/Constraints/red-outline.png');
     public static readonly BaseGLock: string = require('assets/RNABase/red_lock.png');
@@ -294,6 +295,11 @@ export default class Bitmaps {
     public static readonly BaseAMid: string = require('assets/RNABase/yellow_middle.png');
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
+    public static readonly ImgArrowLeft = require('assets/UI/mission/arrow-left.png');
+    public static readonly ImgArrowRight = require('assets/UI/mission/arrow-right.png');
+    public static readonly ImgGoalBackground = require('assets/UI/mission/goal-bg.png');
+    public static readonly ImgPageDot = require('assets/UI/mission/page-dot.png');
+    public static readonly ImgPageActiveDot = require('assets/UI/mission/page-active-dot.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

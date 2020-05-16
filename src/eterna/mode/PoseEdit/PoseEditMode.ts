@@ -281,7 +281,7 @@ export default class PoseEditMode extends GameMode {
             .up(Bitmaps.ImgHome)
             .over(Bitmaps.ImgHome)
             .down(Bitmaps.ImgHome);
-        this._homeButton.display.position = new Point(11, 8);
+        this._homeButton.display.position = new Point(18, 10);
         this._homeButton.clicked.connect(() => {
             if (Eterna.MOBILE_APP) {
                 window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
@@ -290,6 +290,10 @@ export default class PoseEditMode extends GameMode {
             }
         });
         this.addObject(this._homeButton, this.uiLayer);
+
+        const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
+        homeArrow.position = new Point(45, 14);
+        this.container.addChild(homeArrow);
 
         // Async text shows above our UI lock, and right below all dialogs
         this._asynchText = Fonts.arial('folding...', 12).bold().color(0xffffff).build();
@@ -708,17 +712,14 @@ export default class PoseEditMode extends GameMode {
         this.addObject(this._exitButton, this.uiLayer);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(!Eterna.MOBILE_APP))
-            .font(Fonts.ARIAL)
+            .font(Fonts.STDFONT_BOLD)
             .fontSize(14)
             .bold()
             .selectable(false)
-            .color(0xffffff);
+            .color(0xC0DCE7);
         puzzleTitle.hideWhenModeInactive();
         this.addObject(puzzleTitle, this.uiLayer);
-        DisplayUtil.positionRelative(
-            puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            this._homeButton.display, HAlign.RIGHT, VAlign.CENTER, 3, 0
-        );
+        puzzleTitle.display.position = new Point(57, 8);
 
         this._solutionNameText = Fonts.arial('', 14).bold().color(0xc0c0c0).build();
         this.uiLayer.addChild(this._solutionNameText);

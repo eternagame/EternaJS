@@ -360,6 +360,8 @@ body {
   background-attachment: fixed; */
   color:white;
   background-color:#011e46;/*#052857;#011e46;#033272;#1a3c5d;#0a203c;#061A34;*/
+
+  width: 100%;
   height:100%;
 }
 
@@ -1564,7 +1566,7 @@ text-decoration: underline;
     height:0px;
     width:100%;
     background:#21518D;
-    /*border:2px solid #467097; /*011E46;*/*/
+    /*border:2px solid #467097; /*011E46;*/
     /*background-color:#000000;*/
     color:#FFF;
     border-radius:5px;
