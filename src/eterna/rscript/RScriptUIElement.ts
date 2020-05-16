@@ -7,8 +7,8 @@ export function GetRScriptUIElementBounds(element: RScriptUIElement | null): Rec
     if (element instanceof GameObject) {
         return element.display != null
             ? new Rectangle(
-                element.display.x,
-                element.display.y,
+                element.display.worldTransform.tx,
+                element.display.worldTransform.ty,
                 DisplayUtil.width(element.display),
                 DisplayUtil.height(element.display)
             )

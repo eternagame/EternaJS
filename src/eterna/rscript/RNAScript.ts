@@ -10,6 +10,8 @@ import ROPWait, {ROPWaitType} from './ROPWait';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 import RScriptOpTree from './RScriptOpTree';
+import ROPPopPuzzle from './ROPPopPuzzle';
+import ROPShowMissionScreen from './ROPShowMissionScreen';
 
 export default class RNAScript {
     constructor(puz: Puzzle, ui: PoseEditMode) {
@@ -18,7 +20,6 @@ export default class RNAScript {
         this._env = new RScriptEnv(ui, puz);
         ui.addObject(this._env, ui.container);
 
-        ROPWait.clearRopWait();
         this._ops = new RScriptOpTree();
 
         // Convert string into instructions by splitting at semicolons.
@@ -37,6 +38,7 @@ export default class RNAScript {
     /** Notify us when RNA is completed (or puzzle finishes). */
     public finishLevel(): void {
         ROPWait.notifyFinishRNA();
+        ROPWait.clearRopWait();
         if (this._env) {
             this._env.cleanup();
         }
@@ -92,13 +94,15 @@ export default class RNAScript {
         op = op.replace(/\s*$/, '');
 
         // Regex to detect the various commands
-        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide)?/ig;
+        let textboxRegex = /(Show|Hide)(Textbox|Arrow)(Location|Nucleotide|Energy)?/ig;
         let highlightRegex = /(Show|Hide)(UI)?Highlight/ig;
         let uiRegex = /(Show|Hide|Enable|Disable)UI$/ig;
         let hintRegex = /(Show|Hide)(Paint)?Hint/ig;
         let waitRegex = /WaitFor(.*)/ig;
         let preRegex = /#PRE-(.*)/g;
         let rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
+        const popPuzzle = /PopPuzzle/;
+        const showMissionScreen = /ShowMissionScreen/;
 
         let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {
@@ -111,9 +115,19 @@ export default class RNAScript {
             let textboxMode: ROPTextboxMode;
             if (regResult[2].toUpperCase() === 'ARROW') {
                 if (regResult[3]) {
-                    textboxMode = regResult[3].toUpperCase() === 'LOCATION'
-                        ? ROPTextboxMode.ARROW_LOCATION
-                        : ROPTextboxMode.ARROW_NUCLEOTIDE;
+                    switch (regResult[3].toUpperCase()) {
+                        case 'LOCATION':
+                            textboxMode = ROPTextboxMode.ARROW_LOCATION;
+                            break;
+                        case 'NUCLEOTIDE':
+                            textboxMode = ROPTextboxMode.ARROW_NUCLEOTIDE;
+                            break;
+                        case 'ENERGY':
+                            textboxMode = ROPTextboxMode.ARROW_ENERGY;
+                            break;
+                        default:
+                            throw new Error(`Invalid arrow type: ${regResult[3]}`);
+                    }
                 } else {
                     textboxMode = ROPTextboxMode.ARROW_DEFAULT;
                 }
@@ -149,6 +163,10 @@ export default class RNAScript {
             // coercable!
             let ropRNAType: ROPRNAType = (regResult[1].toUpperCase() as ROPRNAType);
             return new ROPRNA(ropRNAType, this._env);
+        } else if ((regResult = popPuzzle.exec(op))) {
+            return new ROPPopPuzzle(this._env);
+        } else if ((regResult = showMissionScreen.exec(op))) {
+            return new ROPShowMissionScreen(this._env);
         }
         // Shouldn't reach here ever.
         throw new Error(`Invalid operation: ${op}`);

@@ -27,6 +27,7 @@ import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
 import HighlightBox, {HighlightType} from './HighlightBox';
 import BaseRope from './BaseRope';
+import PseudoknotLines from './PseudoknotLines';
 import Molecule from './Molecule';
 import PaintCursor from './PaintCursor';
 import PoseField from './PoseField';
@@ -65,6 +66,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._baseRope = new BaseRope(this);
         this.addObject(this._baseRope, this.container);
 
+        this._pseudoknotLines = new PseudoknotLines(this);
+        this.addObject(this._pseudoknotLines, this.container);
+
         this.container.addChild(this._baseLayer);
 
         this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
@@ -73,6 +77,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
         this._deltaScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
@@ -142,7 +147,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
-        this.pointerMove.connect(() => this.onMouseMoved());
+        this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
@@ -451,6 +456,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return out;
     }
 
+    public getEnergyScorePos(index: number, out: Point | null = null): Point {
+        if (out === null) {
+            out = new Point();
+        }
+        out.x = this._scoreTexts[index].x;
+        out.y = this._scoreTexts[index].y;
+        return out;
+    }
+
     public getBaseOutXY(seq: number, out: Point | null = null): Point {
         out = this._bases[seq].getOutXY(out);
         out.x += this._offX;
@@ -538,7 +552,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             if (cmd == null) {
                 let dragger = new Dragger();
                 this.addObject(dragger);
-                dragger.dragged.connect(() => this.onMouseMoved());
+                dragger.dragged.connect((p) => {
+                    this.onMouseMoved(p);
+                });
                 dragger.dragComplete.connect(() => this.onMouseUp());
 
                 this.onBaseMouseDown(closestIndex, ctrlDown);
@@ -582,9 +598,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return this._bases[index].isMarked();
     }
 
-    public onMouseMoved(): void {
+    public onMouseMoved(point: Point): void {
         Assert.assertIsDefined(Flashbang.globalMouse);
-        if (!this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
+        if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
         }
@@ -593,7 +609,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this.clearMouse();
         }
 
-        this.container.toLocal(Flashbang.globalMouse, undefined, Pose2D.P);
+        this.container.toLocal(point, undefined, Pose2D.P);
         let mouseX = Pose2D.P.x;
         let mouseY = Pose2D.P.y;
 
@@ -770,6 +786,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         return temp;
+    }
+
+    public get pseudoknotPairs(): number[] {
+        return this._pseudoknotPairs;
     }
 
     public set forcedHighlights(elems: number[] | null) {
@@ -982,6 +1002,15 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get showRope(): boolean {
         return this._showBaseRope;
+    }
+
+    public set showPseudoknots(show: boolean) {
+        this._showPseudoknots = show;
+        this._redraw = true;
+    }
+
+    public get showPseudoknots(): boolean {
+        return this._showPseudoknots;
     }
 
     public set useSimpleGraphics(simpleGraphics: boolean) {
@@ -1912,8 +1941,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         let center: Point;
 
         // Hide bases that aren't part of our current sequence
-        for (let ii = 0; ii < this._bases.length; ++ii) {
-            this._bases[ii].display.visible = ii < fullSeq.length && this._bases[ii].type !== EPars.RNABASE_CUT;
+        if (!this._showNucleotideRange) {
+            for (let ii = 0; ii < this._bases.length; ++ii) {
+                this._bases[ii].display.visible = this.isNucleotidePartOfSequence(ii);
+            }
         }
 
         let basesMoved = false;
@@ -2050,9 +2081,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         }
 
         this._baseRope.enabled = this._showBaseRope || (this._customLayout != null);
+        this._pseudoknotLines.enabled = this._pseudoknotPairs
+            && this._pseudoknotPairs.filter((it) => it !== -1).length !== 0;
 
         if (this._redraw || basesMoved) {
             this._baseRope.redraw(true /* force baseXY */);
+            if (this.pseudoknotPairs && this.pseudoknotPairs.length !== 0) {
+                this._pseudoknotLines.redraw(true /* force baseXY */);
+            }
 
             if (this._cursorIndex != null && this._cursorIndex > 0 && this._cursorBox !== null) {
                 center = this.getBaseLoc(this._cursorIndex - 1);
@@ -2270,7 +2306,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public set showTotalEnergy(show: boolean) {
         this._showTotalEnergy = show;
         this._primaryScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
-        this._deltaScoreEnergyDisplay.visible = (show && this._scoreFolder != null);
         this._secondaryScoreEnergyDisplay.visible = (
             show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
@@ -2465,6 +2500,52 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._editableIndices = editList;
     }
 
+    /**
+     * Center a nucleotide into view
+     * @param index: 1-based index of the nucleotide, or its custom display number
+     *
+     */
+    public focusNucleotide(index: number) {
+        const baseIndex = (() => {
+            if (this._customNumbering) {
+                return this._customNumbering.findIndex((e) => e === index);
+            } else {
+                return index - 1;
+            }
+        })();
+
+        if (baseIndex < 0 || baseIndex >= this._bases.length) {
+            // eslint-disable-next-line
+            console.warn(`Can't focus nucleotide with index '${index}'`);
+            return;
+        }
+
+        this.setOffset(
+            this._width / 2 - this._bases[baseIndex].x,
+            this._height / 2 - this._bases[baseIndex].y
+        );
+    }
+
+    public showNucleotideRange(range: [number, number] | null) {
+        const [start, end] = range ?? [1, this._bases.length];
+        if (start < 1 || end > this._bases.length || start >= end) {
+            // eslint-disable-next-line
+            console.warn(`Invalid nucleotide range [${start}, ${end}]`);
+            return;
+        }
+
+        this._showNucleotideRange = Boolean(range);
+        if (!range) {
+            return;
+        }
+
+        for (let i = 0; i < this._bases.length; ++i) {
+            this._bases[i].container.visible = i >= (start - 1)
+                && i < end
+                && this.isNucleotidePartOfSequence(i);
+        }
+    }
+
     private computeLayout(fast: boolean = false): void {
         let fullSeq: number[] = this.fullSequence;
 
@@ -2502,6 +2583,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         rnaDrawer.setupTree(this._pairs, this._targetPairs);
         rnaDrawer.drawTree(this._customLayout);
         rnaDrawer.getCoords(xarray, yarray);
+        this._pseudoknotPairs = rnaDrawer.pseudoknotPairs;
 
         this._baseRotationDirectionSign = new Array(n);
         rnaDrawer.getRotationDirectionSign(this._baseRotationDirectionSign);
@@ -3138,7 +3220,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         'Natural/Target Delta',
                         `${Math.round(this._getEnergyDelta()) / 100} kcal`
                     );
+                    this._deltaScoreEnergyDisplay.visible = (this._showTotalEnergy && this._scoreFolder != null);
                 } catch (e) {
+                    this._deltaScoreEnergyDisplay.visible = false;
                     setTimeout(attemptSetDelta, 1000);
                 }
             };
@@ -3283,6 +3367,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return base;
     }
 
+    private isNucleotidePartOfSequence(index: number) {
+        return index < this.fullSequence.length && this._bases[index].type !== EPars.RNABASE_CUT;
+    }
+
     private static createDefaultLocks(sequenceLength: number): boolean[] {
         let locks: boolean[] = new Array<boolean>(sequenceLength);
         for (let ii = 0; ii < sequenceLength; ++ii) {
@@ -3318,6 +3406,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _mutatedSequence: number[] | null;
     private _pairs: number[] = [];
     private _targetPairs: number[] = [];
+    private _pseudoknotPairs: number[] = [];
     private _bases: Base[] = [];
     private _locks: boolean[] | null = [];
     private _forcedStruct: number[] | null = [];
@@ -3364,6 +3453,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     // Rope connecting bases for crazy user-defined layouts
     private _baseRope: BaseRope;
+
+    // lines connecting pseudoknotted BPs
+    private _pseudoknotLines: PseudoknotLines;
 
     // Scripted painters
     private _dynPaintColors: number[] = [];
@@ -3466,6 +3558,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     // Rendering mode
     private _numberingMode: boolean = false;
     private _showBaseRope: boolean = false;
+    private _showPseudoknots: boolean = false;
     private _simpleGraphicsMods: boolean = false;
 
     // customNumbering
@@ -3489,6 +3582,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _anchoredObjects: RNAAnchorObject[] = [];
     private _highlightEnergyText: boolean = false;
     private _energyHighlights: SceneObject[] = [];
+
+    private _showNucleotideRange = false;
+
     /*
      * NEW HIGHLIGHT.
      *  - Input: List of nucleotides that we wish to highlight.

@@ -68,9 +68,9 @@ export default class RScriptEnv extends ContainerObject {
 
     /** Remove all stored highlights and hints and stuff. */
     public cleanup(): void {
-        for (let key of Object.keys(this._vars)) {
+        this._vars.forEach((value, key) => {
             this.deleteVar(key);
-        }
+        });
     }
 
     public get ui(): PoseEditMode {

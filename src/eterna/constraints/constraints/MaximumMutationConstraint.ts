@@ -2,13 +2,11 @@ import {
     Sprite, Texture, Container, Point
 } from 'pixi.js';
 import {TextureUtil} from 'flashbang';
-import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
-import Constraint, {BaseConstraintStatus} from '../Constraint';
+import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
 interface MaxMutationConstraintStatus extends BaseConstraintStatus {
     mutations: number;
@@ -23,12 +21,12 @@ export default class MaximumMutationConstraint extends Constraint<MaxMutationCon
         this.maxMutations = maxMutations;
     }
 
-    public evaluate(undoBlocks: UndoBlock[], targetConditions: any, puzzle: Puzzle): MaxMutationConstraintStatus {
-        if (!puzzle) throw new Error('Mutaiton constraint requires beginning sequence, which is unavailable');
+    public evaluate(context: ConstraintContext): MaxMutationConstraintStatus {
+        if (!context.puzzle) throw new Error('Mutaiton constraint requires beginning sequence, which is unavailable');
 
         const mutations: number = EPars.sequenceDiff(
-            puzzle.getSubsequenceWithoutBarcode(undoBlocks[0].sequence),
-            puzzle.getSubsequenceWithoutBarcode(puzzle.getBeginningSequence())
+            context.puzzle.getSubsequenceWithoutBarcode(context.undoBlocks[0].sequence),
+            context.puzzle.getSubsequenceWithoutBarcode(context.puzzle.getBeginningSequence())
         );
 
         return {

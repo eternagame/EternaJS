@@ -262,7 +262,7 @@ export default class UndoBlock {
             }
         }
 
-        let refPairs: number[] = this.getPairs(37);
+        let refPairs: number[] = this.getPairs(37, pseudoknots);
 
         let pairScores: number[] = [];
         let maxPairScores: number[] = [];

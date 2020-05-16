@@ -1,5 +1,6 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
+import NuPACK from 'eterna/folding/NuPACK';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -75,6 +76,10 @@ export default class RNALayout {
         return this._root;
     }
 
+    public get pseudoknotPairs(): number[] {
+        return this._pseudoknotPairs;
+    }
+
     /**
      * Initializes the tree structure of the RNALayout based on provided BPs.
      *
@@ -137,6 +142,7 @@ export default class RNALayout {
         // need to have PKs removed.
         // AMW TODO: Rhiju, we should eventually be able to remove this condition,
         // once you work out how layouts can handle pseudoknots.
+        this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
         biPairs = EPars.filterForPseudoknots(biPairs);
         if (this._targetPairs !== null) {
             this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
@@ -172,7 +178,7 @@ export default class RNALayout {
         // After that, start making a circle.
         if (this._root != null) {
             this.getCoordsRecursive(this._root, xarray, yarray);
-        } else if (xarray.length < 3) {
+        } else if (xarray.length <= 4) {
             // there is no structure (no pairs)
             // really short, just place them in a vertical line
             for (let ii = 0; ii < xarray.length; ii++) {
@@ -251,11 +257,10 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        // AMW: temporarily assuming score without PK
         if (this._targetPairs !== null
                 && (EPars.pairsToParenthesis(this._targetPairs).includes('{')
                 || EPars.pairsToParenthesis(this._targetPairs).includes('['))
-                && folder.name === 'NuPACK') {
+                && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
         } else {
             folder.scoreStructures(seq, this._origPairs, false, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -841,6 +846,7 @@ export default class RNALayout {
     private _root: RNATreeNode | null;
     private _origPairs: number[];
     private _targetPairs: number[] | null;
+    private _pseudoknotPairs: number[];
     private _customLayout: Array<[number, number] | [null, null]> | null;
 
     // / "New" method to gather NN free energies, just use the folding engine

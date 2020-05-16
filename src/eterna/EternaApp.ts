@@ -5,6 +5,7 @@ import {
 } from 'flashbang';
 import ChatManager from 'eterna/ChatManager';
 import Eterna from 'eterna/Eterna';
+import {isMobile} from 'is-mobile';
 import DesignBrowserMode, {DesignBrowserFilter} from './mode/DesignBrowser/DesignBrowserMode';
 import ExternalInterface, {ExternalInterfaceCtx} from './util/ExternalInterface';
 import EternaSettings from './settings/EternaSettings';
@@ -28,6 +29,7 @@ import FolderManager from './folding/FolderManager';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
+import RSignals from './rscript/RSignals';
 
 enum PuzzleID {
     FunAndEasy = 4350940,
@@ -119,6 +121,13 @@ export default class EternaApp extends FlashbangApp {
         eternaContainer.appendChild(overlay);
 
         ExternalInterface.init(eternaContainer);
+
+        RSignals.pushPuzzle.connect(async (puzzleId) => {
+            const puzzle = await PuzzleManager.instance.getPuzzleByID(puzzleId);
+            this._modeStack.pushMode(new PoseEditMode(puzzle, {}));
+        });
+
+        RSignals.popPuzzle.connect(() => this._modeStack.popMode());
     }
 
     /* override */
@@ -127,13 +136,6 @@ export default class EternaApp extends FlashbangApp {
         Eterna.saveManager = new SaveGameManager('EternaSaveGame');
         Eterna.settings = new EternaSettings();
         Eterna.client = new GameClient(Eterna.SERVER_URL);
-        if (this._params.chatboxID === undefined) {
-            throw new Error('Chatbox ID undefined!');
-        }
-        Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
-        if (this._params.containerID === undefined) {
-            throw new Error('Container ID undefined!');
-        }
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
         this._regs!.add(Eterna.settings.soundMute.connectNotify((mute) => {
@@ -148,6 +150,8 @@ export default class EternaApp extends FlashbangApp {
 
         this.authenticate()
             .then(() => {
+                // We can only do this now, since we need the username and UID to connect
+                Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
                 this.setLoadingText('Loading game...', null);
                 return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
             })
@@ -190,16 +194,29 @@ export default class EternaApp extends FlashbangApp {
                 this.popLoadingMode();
                 Eterna.onFatalError(err);
             });
+
+        // Temporary warning on mobile
+        const mobile = isMobile({tablet: false});
+        if (mobile) {
+            document.getElementById('mobile-browser-warning').classList.remove('mobile-hidden');
+        }
     }
 
     /** Creates a PoseEditMode and removes all other modes from the stack */
-    public loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams): Promise<void> {
-        return this.loadPuzzle(puzzleOrID)
-            .then(async (puzzle) => this._modeStack.unwindToMode(new PoseEditMode(
-                puzzle,
-                params,
-                await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID))
-            )));
+    public async loadPoseEdit(puzzleOrID: number | Puzzle, params: PoseEditParams) {
+        const puzzle = await this.loadPuzzle(puzzleOrID);
+
+        let autoSaveData: any | undefined;
+
+        const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
+        if (hasRscript) {
+            // Clear saved progress if puzzle has a tutorial script
+            await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        } else {
+            autoSaveData = await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID));
+        }
+
+        await this._modeStack.unwindToMode(new PoseEditMode(puzzle, params, autoSaveData));
     }
 
     /** Creates a PuzzleEditMode and removes all other modes from the stack */

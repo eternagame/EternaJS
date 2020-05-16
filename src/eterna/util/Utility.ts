@@ -32,20 +32,6 @@ export default class Utility {
         return str;
     }
 
-    /**
-     * Turn any non-null object into a stringified key-value repr.
-     *
-     * @param obj - The object to be representated
-     *
-     * @returns A string of key=val, joined by "&"
-     */
-    public static generateParameterString(obj: any): string {
-        if (obj == null) {
-            return '';
-        }
-
-        return Object.entries(obj).map(([key, val]) => `${key}=${val}`).join('&');
-    }
 
     /**
      * Determines if a point is within a polygon given as a point vector, using

@@ -1,5 +1,5 @@
-import {Container, Graphics} from 'pixi.js';
-import {UnitSignal} from 'signals';
+import {Container, Graphics, Point} from 'pixi.js';
+import {UnitSignal, Signal} from 'signals';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import DisplayObjectPointerTarget from 'flashbang/input/DisplayObjectPointerTarget';
@@ -7,7 +7,7 @@ import { Assert } from 'flashbang';
 
 /** A utility object that captures mouse input and dispatches update events until a mouseUp occurs */
 export default class Dragger extends GameObject {
-    public readonly dragged = new UnitSignal();
+    public readonly dragged = new Signal<Point>();
     public readonly dragComplete = new UnitSignal();
 
     // Global mouse coordinates
@@ -37,22 +37,28 @@ export default class Dragger extends GameObject {
         if (parent) parent.addChild(this._disp);
         this.updateSize();
 
-        Assert.assertIsDefined(Flashbang.globalMouse);
-        this.startX = Flashbang.globalMouse.x;
-        this.curX = Flashbang.globalMouse.x;
-        this.startY = Flashbang.globalMouse.y;
-        this.curY = Flashbang.globalMouse.y;
+        if (!Flashbang.supportsTouch) {
+            Assert.assertIsDefined(Flashbang.globalMouse);
+            this.startX = Flashbang.globalMouse.x;
+            this.curX = Flashbang.globalMouse.x;
+            this.startY = Flashbang.globalMouse.y;
+            this.curY = Flashbang.globalMouse.y;
+        } else {
+            this.startX = -1;
+            this.startY = -1;
+        }
 
         let touchable = new DisplayObjectPointerTarget(this._disp);
         this.regs.add(touchable.pointerMove.connect((e) => {
-            this.updateMouseLoc();
-            this.dragged.emit();
+            const point = new Point(e.data.global.x, e.data.global.y);
+            this.updateMouseLoc(point);
+            this.dragged.emit(point);
 
             e.stopPropagation();
         }));
 
         this.regs.add(touchable.pointerUp.connect((e) => {
-            this.complete();
+            this.complete(new Point(e.data.global.x, e.data.global.y));
             this.destroySelf();
 
             e.stopPropagation();
@@ -71,10 +77,15 @@ export default class Dragger extends GameObject {
         super.dispose();
     }
 
-    private updateMouseLoc(): void {
-        Assert.assertIsDefined(Flashbang.globalMouse);
-        this.curX = Flashbang.globalMouse.x;
-        this.curY = Flashbang.globalMouse.y;
+    private updateMouseLoc(point: Point): void {
+        this.curX = point.x;
+        this.curY = point.y;
+        if (this.startX < 0) {
+            this.startX = this.curX;
+        }
+        if (this.startY < 0) {
+            this.startY = this.curY;
+        }
     }
 
     private updateSize(): void {
@@ -84,10 +95,12 @@ export default class Dragger extends GameObject {
         this._disp.clear().beginFill(0x0, 0).drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight).endFill();
     }
 
-    private complete(): void {
+    private complete(point?: Point): void {
         if (!this._complete) {
             this._complete = true;
-            this.updateMouseLoc();
+            if (point) {
+                this.updateMouseLoc(point);
+            }
             this.dragComplete.emit();
         }
     }

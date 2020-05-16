@@ -1,5 +1,5 @@
 import {Graphics, Point, Sprite} from 'pixi.js';
-import {Signal} from 'signals';
+import {Signal, UnitSignal} from 'signals';
 import {DOMObject, DisplayObjectPointerTarget, TextBuilder} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Fonts from 'eterna/util/Fonts';
@@ -10,6 +10,7 @@ import Fonts from 'eterna/util/Fonts';
  */
 export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTextAreaElement> {
     public readonly valueChanged: Signal<string> = new Signal();
+    public readonly keyPressed = new Signal<string>();
 
     constructor(fontSize: number, width = 100, rows = 1) {
         super(
@@ -28,6 +29,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
 
         this._obj.onfocus = () => this.onFocusChanged(true);
         this._obj.onblur = () => this.onFocusChanged(false);
+        this._obj.onkeypress = (e) => this.keyPressed.emit(e.key);
     }
 
     protected added(): void {

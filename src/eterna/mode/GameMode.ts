@@ -180,6 +180,7 @@ export default abstract class GameMode extends AppMode {
 
                     let score = null;
                     let pseudoknots: boolean = this._targetConditions != null
+                        && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
                         score = (pairs: number[]) => this._folder!.scoreStructures(

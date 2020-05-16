@@ -789,6 +789,17 @@ export default class EPars {
         return EPars.parenthesisToPairs(filtered, true);
     }
 
+    public static onlyPseudoknots(pairs: number[]): number[] {
+        // Round-trip to remove all non-pseudoknots.
+        if (!pairs) return pairs;
+
+        let filtered: string = EPars.pairsToParenthesis(pairs, null, true)
+            .replace(/\(/g, '.')
+            .replace(/\)/g, '.');
+
+        return EPars.parenthesisToPairs(filtered, true);
+    }
+
     public static parenthesisToForcedArray(parenthesis: string): number[] {
         let forced: number[] = [];
         let pairStack: number[] = [];
