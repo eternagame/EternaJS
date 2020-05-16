@@ -1,8 +1,8 @@
+import {Assert} from 'flashbang';
 import ROPTextbox from './ROPTextbox';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
 import {RScriptUIElementID} from './RScriptUIElement';
-import { Assert } from 'flashbang';
 
 export enum ROPWaitType {
     MOVECAMERA = 'MOVECAMERA',

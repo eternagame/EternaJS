@@ -2,7 +2,9 @@ import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
-import {ContainerObject, TextBuilder, Flashbang, Assert} from 'flashbang';
+import {
+    ContainerObject, TextBuilder, Flashbang, Assert
+} from 'flashbang';
 import Feedback from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';
 import TextInputObject from 'eterna/ui/TextInputObject';

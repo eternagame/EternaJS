@@ -8,7 +8,7 @@ import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import EternaMenu from 'eterna/ui/EternaMenu';
 import {RScriptUIElement, GetRScriptUIElementBounds, RScriptUIElementID} from './RScriptUIElement';
 import RScriptOp from './RScriptOp';
-import RScriptEnv, { RScriptVarType } from './RScriptEnv';
+import RScriptEnv, {RScriptVarType} from './RScriptEnv';
 
 export enum ROPHighlightMode {
     RNA = 'RNA',

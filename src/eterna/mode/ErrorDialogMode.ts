@@ -42,7 +42,7 @@ export default class ErrorDialogMode extends AppMode {
 
         let okButton = new GameButton().label('OK', 16);
         panel.addObject(okButton, panelLayout);
-        
+
         okButton.clicked.connect(() => this.modeStack!.removeMode(this));
 
         panelLayout.layout();

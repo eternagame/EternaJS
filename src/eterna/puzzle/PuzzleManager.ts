@@ -33,9 +33,9 @@ import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstra
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import {Assert} from 'flashbang';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
-import { Assert } from 'flashbang';
 
 export default class PuzzleManager {
     public static get instance(): PuzzleManager {

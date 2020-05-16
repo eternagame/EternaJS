@@ -2190,7 +2190,7 @@ export default class PoseEditMode extends GameMode {
             missionText = boosters.mission['text'];
         }
 
-        let introConstraintBoxes: ConstraintBox[] = []
+        let introConstraintBoxes: ConstraintBox[] = [];
         if (this._puzzle.constraints) {
             introConstraintBoxes = this._puzzle.constraints.filter(
                 (constraint) => !(constraint instanceof ShapeConstraint || constraint instanceof AntiShapeConstraint)

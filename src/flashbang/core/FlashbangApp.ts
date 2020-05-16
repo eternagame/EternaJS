@@ -8,7 +8,7 @@ import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
-import { Assert } from 'flashbang';
+import {Assert} from 'flashbang';
 
 export default class FlashbangApp {
     /** True if the app is foregrounded */

@@ -247,7 +247,7 @@ test(`NuPACK:PK_foldSequence`, () => {
 
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
-    expect.assertions(2);
+    expect.assertions(3);
     return expect(CreateFolder(NuPACK)
         .then((folder) => {
             let pairs = folder.foldSequence(
@@ -287,7 +287,7 @@ test(`NuPACK:PK_score1L2X`, () => {
 
     // let expectedTotalFe = TOTAL_FE.get(folderType.NAME);
 
-    expect.assertions(3);
+    expect.assertions(2);
     return expect(CreateFolder(NuPACK)
         .then((folder) => {
             let outNNFE: number[] = [];

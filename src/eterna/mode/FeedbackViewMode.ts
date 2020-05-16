@@ -262,7 +262,7 @@ export default class FeedbackViewMode extends GameMode {
             energyVisible.push(pose.showTotalEnergy);
             pose.showTotalEnergy = false;
         }
-        
+
         Assert.assertIsDefined(this.container);
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);

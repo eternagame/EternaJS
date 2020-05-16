@@ -41,8 +41,8 @@ export default class ModeStack {
 
     /** Returns the top mode on the mode stack, or null if the stack is empty. */
     public /* final */ get topMode(): AppMode | null {
-        return this._modeStack ? 
-            (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null)
+        return this._modeStack
+            ? (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null)
             : null;
     }
 
@@ -55,7 +55,7 @@ export default class ModeStack {
         transition.type = type;
         transition.mode = mode;
         transition.index = index;
-        
+
         Assert.assertIsDefined(this._pendingModeTransitionQueue);
         this._pendingModeTransitionQueue.push(transition);
     }

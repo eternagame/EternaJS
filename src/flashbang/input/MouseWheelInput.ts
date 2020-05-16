@@ -1,6 +1,6 @@
 import {Registration} from 'signals';
 import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
-import { Assert } from 'flashbang';
+import {Assert} from 'flashbang';
 
 export interface MouseWheelListener {
     /**
@@ -20,8 +20,7 @@ export default class MouseWheelInput {
         let handled = false;
         try {
             for (
-                let elt: LinkedElement<MouseWheelListener> | null = 
-                    this._listeners ? this._listeners.beginIteration() : null;
+                let elt: LinkedElement<MouseWheelListener> | null = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {

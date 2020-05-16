@@ -107,19 +107,19 @@ export default class AppMode {
             return new Promise((resolve, reject) => {
                 this._entered.connect(() => {
                     // if (resolve != null) {
-                        let fn = resolve;
-                        // resolve = null;
-                        // reject = null;
-                        fn();
+                    let fn = resolve;
+                    // resolve = null;
+                    // reject = null;
+                    fn();
                     // }
                 });
 
                 this._disposed.connect(() => {
                     // if (reject != null) {
-                        let fn = reject;
-                        // resolve = null;
-                        // reject = null;
-                        fn('Mode was disposed');
+                    let fn = reject;
+                    // resolve = null;
+                    // reject = null;
+                    fn('Mode was disposed');
                     // }
                 });
             });

@@ -1,6 +1,6 @@
 import {DisplayObject} from 'pixi.js';
 import Flashbang from 'flashbang/core/Flashbang';
-import { Assert } from 'flashbang';
+import {Assert} from 'flashbang';
 
 type InteractionPointerEvents = PIXI.interaction.InteractionPointerEvents;
 type InteractionEvent = PIXI.interaction.InteractionEvent;

@@ -30,7 +30,7 @@ export default class ConstraintBar extends ContainerObject {
 
     constructor(constraints: Constraint<BaseConstraintStatus>[] | null) {
         super();
-        this._constraints = constraints 
+        this._constraints = constraints
             ? constraints.map(
                 (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
             ) : null;

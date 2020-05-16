@@ -1,5 +1,7 @@
 import {Graphics} from 'pixi.js';
-import {AppMode, Flashbang, KeyCode, Assert} from 'flashbang';
+import {
+    AppMode, Flashbang, KeyCode, Assert
+} from 'flashbang';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
 
 /** Show a dialog with text that the user can copy */

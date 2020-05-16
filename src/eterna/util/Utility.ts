@@ -1,5 +1,5 @@
 import {Point} from 'pixi.js';
-import { Assert } from 'flashbang';
+import {Assert} from 'flashbang';
 
 export default class Utility {
     /**

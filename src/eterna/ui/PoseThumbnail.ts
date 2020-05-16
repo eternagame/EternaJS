@@ -112,7 +112,7 @@ export default class PoseThumbnail {
             frame = DisplayUtil.fillRect(300, 300, 0x0);
         }
 
-        Assert.assertIsDefined(frame, 
+        Assert.assertIsDefined(frame,
             `frame remains undefined because PoseThumbnail::create was passed a size other than 1-7: ${size}!`);
         let frameBounds = frame.getLocalBounds();
 

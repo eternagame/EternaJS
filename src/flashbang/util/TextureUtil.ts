@@ -76,7 +76,7 @@ export default class TextureUtil {
         wrap.x = -TextureUtil.R.x;
         wrap.y = -TextureUtil.R.y;
         let tex: RenderTexture = new RenderTexture(new BaseRenderTexture(TextureUtil.R.width, TextureUtil.R.height));
-        
+
         Assert.assertIsDefined(Flashbang.pixi);
         Flashbang.pixi.renderer.render(wrap, tex, true);
         return tex;

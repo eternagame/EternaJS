@@ -1,7 +1,7 @@
 import {Graphics, Text} from 'pixi.js';
 import TextBuilder from 'flashbang/util/TextBuilder';
+import {Assert} from 'flashbang';
 import Button, {ButtonState} from './Button';
-import { Assert } from 'flashbang';
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
 export default class SimpleTextButton extends Button {
