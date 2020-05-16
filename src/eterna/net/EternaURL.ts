@@ -72,7 +72,7 @@ export default class EternaURL {
             let url = `/game/browse/${params['puznid']}/?`;
             delete params['page'];
             delete params['puznid'];
-            return url +  new URLSearchParams({params});
+            return url + new URLSearchParams({params});
         } else if (params['page'] === 'script') {
             return '/web/script/';
         } else if (params['page'] === 'group') {
