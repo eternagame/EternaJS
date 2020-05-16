@@ -13,6 +13,7 @@ import EPars from 'eterna/EPars';
 import TextBalloon from 'eterna/ui/TextBalloon';
 import {RegistrationGroup} from 'signals';
 import Sounds from 'eterna/resources/Sounds';
+import UITheme from 'eterna/ui/UITheme';
 
 export interface ConstraintBoxConfig {
     // Toggle checkmark, green vs red outline
@@ -116,16 +117,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._flag.visible = false;
 
         if (this._forMissionScreen) {
-            this._sideText = new MultiStyleText('', {
-                default: {
-                    fontFamily: Fonts.STDFONT_REGULAR,
-                    fontSize: 16,
-                    fill: 0xffffff,
-                    letterSpacing: -0.5,
-                    wordWrap: true,
-                    wordWrapWidth: 250
-                }
-            });
+            this._sideText = new MultiStyleText('', {});
             this.container.addChild(this._sideText);
         }
 
@@ -149,6 +141,19 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._req.visible = config.fullTexture != null;
         if (this._req.visible) {
             this._req.texture = config.fullTexture;
+
+            // Add border
+            const border = new Graphics();
+            border.interactiveChildren = false;
+            border.lineStyle(UITheme.panel.borderSize, UITheme.constraints.borderColor, 1);
+            border.drawRoundedRect(
+                0,
+                0,
+                this._req.texture.width,
+                this._req.texture.height,
+                UITheme.constraints.borderRadius
+            );
+            this._req.addChild(border);
         }
 
         this._outline.visible = config.showOutline || false;
@@ -190,13 +195,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (this._forMissionScreen) {
             this._outline.visible = false;
             tooltipText.apply(this._sideText);
-            if (this._req.visible) {
-                this._sideText.position = new Point(
-                    this._req.width + 18, this._req.height / 2 - this._sideText.height / 2
-                );
-            } else {
-                this._sideText.position = new Point(111 + 18, 55 / 2 - this._sideText.height / 2);
-            }
+            this._sideText.position = new Point(0, this._req.height + 10);
         }
 
         this._bgGraphics.visible = config.drawBG || false;
@@ -286,7 +285,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: 250
+            wordWrapWidth: 113
         }).addStyle('altText', {
             fontFamily: Fonts.STDFONT_MEDIUM,
             leading: 10

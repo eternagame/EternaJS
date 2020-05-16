@@ -323,9 +323,6 @@ html {
 }
 
 body {
-	min-width:980px; /* suppose you want minimun width of 1000px */
-	width: auto !important;  /* Firefox will set width as auto */
-	width:980px;             /* As IE ignores !important it will set width as 1000px; */
 
   font-family : 'Open Sans', sans-serif;
   /*letter-spacing: -0.5px;*/
@@ -364,6 +361,8 @@ body {
   background-attachment: fixed; */
   color:white;
   background-color:#011e46;/*#052857;#011e46;#033272;#1a3c5d;#0a203c;#061A34;*/
+
+  width: 100%;
   height:100%;
 }
 
