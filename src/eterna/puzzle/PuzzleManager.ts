@@ -44,7 +44,7 @@ export default class PuzzleManager {
         return PuzzleManager._instance;
     }
 
-    public parsePuzzle(json: any): Puzzle {
+    public async parsePuzzle(json: any): Promise<Puzzle> {
         let newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
 
         if (json['body']) {
@@ -335,6 +335,21 @@ export default class PuzzleManager {
             this._puzzles.push(newpuz);
         }
 
+        let isScriptConstraint = (
+            constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
+        ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
+
+        await Promise.all(
+            newpuz.constraints.filter(isScriptConstraint)
+                .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
+        );
+
+        // Pre-load secondary puzzle
+        const [m, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        if (secondaryPuzzleId) {
+            await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
+        }
+
         return newpuz;
     }
 
@@ -352,22 +367,7 @@ export default class PuzzleManager {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }
 
-        let puzzle = this.parsePuzzle(data['puzzle']);
-
-        let isScriptConstraint = (
-            constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
-        ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
-
-        await Promise.all(
-            puzzle.constraints.filter(isScriptConstraint)
-                .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
-        );
-
-        // Pre-load secondary puzzle
-        const [m, secondaryPuzzleId] = puzzle.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
-        if (secondaryPuzzleId) {
-            await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
-        }
+        let puzzle = await this.parsePuzzle(data['puzzle']);
 
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;

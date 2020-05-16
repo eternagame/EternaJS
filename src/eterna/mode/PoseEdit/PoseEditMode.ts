@@ -1996,7 +1996,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    private showMissionClearedPanel(submitSolutionRspData: any): void {
+    private async showMissionClearedPanel(submitSolutionRspData: any): Promise<void> {
         this._submitSolutionRspData = submitSolutionRspData;
 
         // Hide some UI
@@ -2020,17 +2020,17 @@ export default class PoseEditMode extends GameMode {
         }
 
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
-        let nextPuzzle: Puzzle = null;
+        let nextPuzzlePromise: Promise<Puzzle> = null;
         if (nextPuzzleData) {
             try {
-                nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
-                log.info(`Loaded next puzzle [id=${nextPuzzle.nodeID}]`);
+                nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
+                nextPuzzlePromise.then((puzzle) => log.info(`Loaded next puzzle [id=${puzzle.nodeID}]`));
             } catch (err) {
                 log.error('Failed to load next puzzle', err);
             }
         }
 
-        let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
+        let missionClearedPanel = new MissionClearedPanel(nextPuzzlePromise != null, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
@@ -2059,8 +2059,9 @@ export default class PoseEditMode extends GameMode {
             }
         };
 
-        if (nextPuzzle != null) {
-            missionClearedPanel.nextButton.clicked.connect(() => {
+        if (nextPuzzlePromise != null) {
+            missionClearedPanel.nextButton.clicked.connect(async () => {
+                const nextPuzzle = await nextPuzzlePromise;
                 Eterna.chat.popHideChat();
                 this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
             });
