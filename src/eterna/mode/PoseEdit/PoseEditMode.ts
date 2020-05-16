@@ -2020,17 +2020,8 @@ export default class PoseEditMode extends GameMode {
         }
 
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
-        let nextPuzzle: Puzzle = null;
-        if (nextPuzzleData) {
-            try {
-                nextPuzzle = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
-                log.info(`Loaded next puzzle [id=${nextPuzzle.nodeID}]`);
-            } catch (err) {
-                log.error('Failed to load next puzzle', err);
-            }
-        }
 
-        let missionClearedPanel = new MissionClearedPanel(nextPuzzle != null, infoText, moreText);
+        let missionClearedPanel = new MissionClearedPanel(nextPuzzleData != null, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
@@ -2059,10 +2050,21 @@ export default class PoseEditMode extends GameMode {
             }
         };
 
-        if (nextPuzzle != null) {
-            missionClearedPanel.nextButton.clicked.connect(() => {
-                Eterna.chat.popHideChat();
-                this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
+        if (nextPuzzleData != null) {
+            // Don't just await here nor initialize the call in the nextButton callback
+            // so that we can load in the background
+            const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
+            nextPuzzlePromise.then((puzzle) => log.info(`Loaded next puzzle [id=${puzzle.nodeID}]`));
+
+            missionClearedPanel.nextButton.clicked.connect(async () => {
+                try {
+                    const nextPuzzle = await nextPuzzlePromise;
+                    Eterna.chat.popHideChat();
+                    this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
+                } catch (err) {
+                    log.error(err);
+                    throw new Error(`Failed to load next puzzle - ${err}`);
+                }
             });
         } else {
             missionClearedPanel.nextButton.clicked.connect(() => {
