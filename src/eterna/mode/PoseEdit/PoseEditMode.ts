@@ -2050,7 +2050,10 @@ export default class PoseEditMode extends GameMode {
             }
         };
 
-        if (nextPuzzleData != null) {
+        // For some reason the backend returns 0 in the progression instead of just null
+        // when we want to redirect back to the homepage...? I imagine we should change that
+        // at some point
+        if (nextPuzzleData !== null && nextPuzzleData !== 0) {
             // Don't just await here nor initialize the call in the nextButton callback
             // so that we can load in the background
             const nextPuzzlePromise = PuzzleManager.instance.parsePuzzle(nextPuzzleData);
