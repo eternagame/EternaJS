@@ -76,7 +76,10 @@ export default class MissionIntroConstraints extends ContainerObject {
                 + numConstraints * (constraintWidth + theme.spacing)
                 + this._rightButton.container.width;
 
-        const maxWidth = Math.min(_maxWidth, evaluateWidth(theme.maxItemsPerPage));
+        const maxWidth = Math.min(
+            _maxWidth,
+            evaluateWidth(Math.min(this._props.constraints.length, theme.maxItemsPerPage))
+        );
 
         // Adapt visible pages to available space
         this._maxItemsPerPage = theme.maxItemsPerPage;
