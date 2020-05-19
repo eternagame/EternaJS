@@ -186,7 +186,10 @@ export default class EternaApp extends FlashbangApp {
         const puzzle = await this.loadPuzzle(puzzleOrID);
 
         let autoSaveData: any | undefined;
-        if (puzzle.rscript.match(/#PRE-ResetSequence/)) {
+
+        const hasRscript = Boolean(puzzle.rscript) && (puzzle.rscript.trim().length > 0);
+        if (hasRscript) {
+            // Clear saved progress if puzzle has a tutorial script
             await Eterna.saveManager.remove(PoseEditMode.savedDataTokenName(puzzle.nodeID));
         } else {
             autoSaveData = await Eterna.saveManager.load(PoseEditMode.savedDataTokenName(puzzle.nodeID));
