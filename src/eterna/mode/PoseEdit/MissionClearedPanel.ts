@@ -10,6 +10,7 @@ import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import RankScroll from 'eterna/rank/RankScroll';
+import Eterna from 'eterna/Eterna';
 
 export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
@@ -26,6 +27,17 @@ export default class MissionClearedPanel extends ContainerObject {
         this.container.addChild(this._bg);
     }
 
+    private static processHTML(input: string): string {
+        if (Eterna.MOBILE_APP && input) {
+            const regex = /<img(.*?)src=['"]\/(.*?)['"](.*?)>/gm;
+            const subst = `<img$1src="${Eterna.SERVER_URL}/$2"$3>`;
+            const output = input.replace(regex, subst);
+            return output;
+        } else {
+            return input;
+        }
+    }
+
     protected added(): void {
         super.added();
 
@@ -36,7 +48,8 @@ export default class MissionClearedPanel extends ContainerObject {
 
         this._contentLayout.addChild(Fonts.stdLight('Mission Accomplished!', 36).color(0xFFCC00).build());
 
-        const infoText: string = this._infoText || 'You have solved the puzzle, congratulations!';
+        const infoText = MissionClearedPanel.processHTML(this._infoText)
+            || 'You have solved the puzzle, congratulations!';
         const infoObj = new HTMLTextObject(infoText, panelWidth - 60)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(20)
