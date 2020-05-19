@@ -8,7 +8,7 @@ import HelpToolTip, {ToolTipPositioner} from './HelpToolTip';
 export interface HelpToolTipsProps {
     menu: ToolTipPositioner;
     palette?: ToolTipPositioner;
-    zoom: ToolTipPositioner;
+    zoom?: ToolTipPositioner;
     undo?: ToolTipPositioner;
     hints?: ToolTipPositioner;
     swapPairs?: ToolTipPositioner;
@@ -90,7 +90,9 @@ export default class HelpToolTips {
                 ? new HelpToolTip({text: 'SWAP PAIR', positioner: props.swapPairs})
                 : null,
 
-            new HelpToolTip({text: 'ZOOM IN/OUT', tailLength, positioner: props.zoom}),
+            props.zoom
+                ? new HelpToolTip({text: 'ZOOM IN/OUT', tailLength, positioner: props.zoom})
+                : null,
 
             props.undo
                 ? new HelpToolTip({text: 'UNDO/REDO', positioner: props.undo})

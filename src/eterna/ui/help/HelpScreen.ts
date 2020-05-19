@@ -3,6 +3,7 @@ import {
 } from 'flashbang';
 import {Point, Graphics} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import {isMobile} from 'is-mobile';
 import MultiPagePanel from '../MultiPagePanel';
 import HelpItem from './HelpItem';
 import HelpPage from './HelpPage';
@@ -48,8 +49,8 @@ export default class HelpScreen extends AppMode {
     ];
 
     private _backdrop: Graphics;
-    private _toolTips: HelpToolTip[];
-    private _shortCuts: MultiPagePanel;
+    private _toolTips?: HelpToolTip[];
+    private _shortCuts?: MultiPagePanel;
     private _sections: MultiPagePanel;
     private _help: MultiPagePanel;
     private _closeButton: GameButton;
@@ -58,24 +59,31 @@ export default class HelpScreen extends AppMode {
         super();
         const {theme} = HelpScreen;
 
+        const showShortcuts = !isMobile({tablet: true});
+        const showTooltips = showShortcuts;
+
         // Tooltips
-        this._toolTips = HelpToolTips.create(props.toolTips);
+        if (showTooltips) {
+            this._toolTips = HelpToolTips.create(props.toolTips);
+        }
 
         // shortcuts
-        this._shortCuts = new MultiPagePanel({
-            title: 'Key Commands',
-            pages: (() => {
-                const page = new ContainerObject();
-                HelpScreen.shortcuts.forEach(([text, label], index) => {
-                    const shortcut = new HelpItem({text, label, width: theme.item.width});
-                    shortcut.container.position.y = index * theme.item.height;
-                    page.addObject(shortcut, page.container);
-                });
-                return [page];
-            })(),
-            width: theme.column.width,
-            height: theme.column.height
-        });
+        if (showShortcuts) {
+            this._shortCuts = new MultiPagePanel({
+                title: 'Key Commands',
+                pages: (() => {
+                    const page = new ContainerObject();
+                    HelpScreen.shortcuts.forEach(([text, label], index) => {
+                        const shortcut = new HelpItem({text, label, width: theme.item.width});
+                        shortcut.container.position.y = index * theme.item.height;
+                        page.addObject(shortcut, page.container);
+                    });
+                    return [page];
+                })(),
+                width: theme.column.width,
+                height: theme.column.height
+            });
+        }
 
         // Help content
         const helpPage = new HelpPage({
@@ -105,16 +113,20 @@ export default class HelpScreen extends AppMode {
         // backdrop
         this._backdrop = new PIXI.Graphics();
         this._backdrop.interactive = true;
-        this._backdrop.once('click', () => {
-            this.modeStack.popMode();
-        });
+        this._backdrop.once('tap', () => this.modeStack.popMode());
+        this._backdrop.once('click', () => this.modeStack.popMode());
         this.drawBackDrop();
 
         this.container.addChild(this._backdrop);
-        this.addObject(this._shortCuts, this.container);
+        if (this._shortCuts) {
+            this.addObject(this._shortCuts, this.container);
+        }
         this.addObject(this._sections, this.container);
         this.addObject(this._help, this.container);
-        this._toolTips.forEach((toolTip) => this.addObject(toolTip, this.container));
+
+        if (this._toolTips) {
+            this._toolTips.forEach((toolTip) => this.addObject(toolTip, this.container));
+        }
 
         // Close button
         this._closeButton = new GameButton()
@@ -159,18 +171,30 @@ export default class HelpScreen extends AppMode {
     private updateLayout() {
         const {theme} = HelpScreen;
         this.drawBackDrop();
-        this._toolTips.forEach((toolTip) => toolTip.updatePosition());
 
-        const width = theme.column.width * 3 + theme.column.margin;
-        this._shortCuts.container.position = new Point(
-            Flashbang.stageWidth * 0.5 - width / 2,
-            Flashbang.stageHeight * 0.5 - theme.column.height / 2
-        );
+        if (this._toolTips) {
+            this._toolTips.forEach((toolTip) => toolTip.updatePosition());
+        }
 
-        this._sections.container.position = new Point(
-            this._shortCuts.container.position.x + theme.column.width + theme.column.margin,
-            this._shortCuts.container.position.y
-        );
+        let width = theme.column.width * 2 + theme.column.margin;
+
+        if (this._shortCuts) {
+            width += theme.column.width;
+            this._shortCuts.container.position = new Point(
+                Flashbang.stageWidth * 0.5 - width / 2,
+                Flashbang.stageHeight * 0.5 - theme.column.height / 2
+            );
+            this._sections.container.position = new Point(
+                this._shortCuts.container.position.x + theme.column.width + theme.column.margin,
+                this._shortCuts.container.position.y
+            );
+        } else {
+            this._sections.container.position = new Point(
+                Flashbang.stageWidth * 0.5 - width / 2,
+                Flashbang.stageHeight * 0.5 - theme.column.height / 2
+            );
+        }
+
         this._help.container.position = this._sections.container.position;
 
         DisplayUtil.positionRelativeToStage(
