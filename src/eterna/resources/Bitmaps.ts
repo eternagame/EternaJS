@@ -294,6 +294,8 @@ export default class Bitmaps {
     public static readonly BaseAMid: string = require('assets/RNABase/yellow_middle.png');
     public static readonly BaseAPattern: string = require('assets/RNABase/yellow_pattern.png');
     public static readonly BaseAMin: string = require('assets/RNABase/yellow_small.png');
+    public static readonly ImgAchievementsClose: string = require('assets/Achievements/close-button.png');
+    public static readonly ImgAchievementsCheckmark: string = require('assets/Achievements/checkmark.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {
