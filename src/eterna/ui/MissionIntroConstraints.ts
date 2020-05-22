@@ -35,7 +35,7 @@ export default class MissionIntroConstraints extends ContainerObject {
         this._props = props;
         const {theme} = MissionIntroConstraints;
 
-        const constraintHeight = this._props.constraints[0].container.height;
+        const constraintHeight = this._props.constraints[0]?.container.height ?? 0;
         this._leftButton = new GameButton()
             .up(Bitmaps.ImgArrowLeft)
             .over(Bitmaps.ImgArrowLeft)
@@ -70,7 +70,7 @@ export default class MissionIntroConstraints extends ContainerObject {
     public updateLayout(_maxWidth: number) {
         const {theme} = MissionIntroConstraints;
 
-        const constraintWidth = this._props.constraints[0].container.width;
+        const constraintWidth = this._props.constraints[0]?.container.width ?? 0;
 
         const evaluateWidth = (numConstraints: number) => this._leftButton.container.width
                 + numConstraints * (constraintWidth + theme.spacing)
