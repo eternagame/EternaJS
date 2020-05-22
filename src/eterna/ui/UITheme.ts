@@ -9,4 +9,13 @@ export default class UITheme {
         padding: 10,
         borderSize: 1.5
     };
+
+    public static readonly missionIntro = {
+        headerHeight: 61
+    };
+
+    public static readonly constraints = {
+        borderColor: 0x1B588A,
+        borderRadius: 5
+    };
 }
