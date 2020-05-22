@@ -300,6 +300,8 @@ export default class Bitmaps {
     public static readonly ImgGoalBackground = require('assets/UI/mission/goal-bg.png');
     public static readonly ImgPageDot = require('assets/UI/mission/page-dot.png');
     public static readonly ImgPageActiveDot = require('assets/UI/mission/page-active-dot.png');
+    public static readonly ImgAchievementsClose: string = require('assets/Achievements/close-button.png');
+    public static readonly ImgAchievementsCheckmark: string = require('assets/Achievements/checkmark.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

@@ -51,7 +51,7 @@ export default class AchievementManager extends GameObject {
         this._cur = this.addObject(view, (this.mode as GameMode).achievementsLayer);
 
         view.animate();
-        view.okButton.clicked.connect(() => view.destroySelf());
+        view.closed.connect(() => view.destroySelf());
 
         view.destroyed.connect(() => {
             this.maybeShowNextAchievement();
