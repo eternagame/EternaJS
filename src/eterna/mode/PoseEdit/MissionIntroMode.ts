@@ -52,7 +52,11 @@ export default class MissionIntroMode extends AppMode {
             .down(Bitmaps.ImgHome);
         homeButton.display.position = new Point(18, 10);
         homeButton.clicked.connect(() => {
-            window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            if (Eterna.MOBILE_APP) {
+                window.frameElement.dispatchEvent(new CustomEvent('navigate', {detail: '/'}));
+            } else {
+                window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            }
         });
         this.addObject(homeButton, this.container);
 

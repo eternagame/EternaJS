@@ -2176,7 +2176,7 @@ export default class PoseEditMode extends GameMode {
             customLayout = this._targetConditions[0]['custom-layout'];
         }
         this.modeStack.pushMode(new MissionIntroMode(
-            this._puzzle.getName(true),
+            this._puzzle.getName(!Eterna.MOBILE_APP),
             missionText,
             this._targetPairs,
             introConstraintBoxes,
