@@ -26,6 +26,9 @@ import Vienna2 from './folding/Vienna2';
 import NuPACK from './folding/NuPACK';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import FolderManager from './folding/FolderManager';
+import LayoutEngineManager from './layout/LayoutEngineManager';
+import LayoutEngine from './layout/LayoutEngine';
+import RNApuzzler from './layout/RNApuzzler';
 import LinearFoldC from './folding/LinearFoldC';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
@@ -150,7 +153,10 @@ export default class EternaApp extends FlashbangApp {
                 // We can only do this now, since we need the username and UID to connect
                 Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
                 this.setLoadingText('Loading game...', null);
-                return Promise.all([this.initFoldingEngines(), TextureUtil.load(Bitmaps.all), Fonts.loadFonts()]);
+                return Promise.all([this.initFoldingEngines(),
+                    this.initLayoutEngines(),
+                    TextureUtil.load(Bitmaps.all),
+                    Fonts.loadFonts()]);
             })
             .then(() => this.initScriptInterface())
             .then(() => {
@@ -441,6 +447,17 @@ export default class EternaApp extends FlashbangApp {
                 log.info('Folding engines intialized');
                 for (let folder of folders) {
                     FolderManager.instance.addFolder(folder);
+                }
+            });
+    }
+
+    private initLayoutEngines(): Promise<void> {
+        log.info('Initializing layout engines...');
+        return Promise.all([RNApuzzler.create()])
+            .then((layoutEngines: LayoutEngine[]) => {
+                log.info('Layout engines intialized');
+                for (let layoutEngine of layoutEngines) {
+                    LayoutEngineManager.instance.addLayoutEngine(layoutEngine);
                 }
             });
     }

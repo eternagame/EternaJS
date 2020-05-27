@@ -22,6 +22,18 @@ pushd ViennaRNA-2.1.8
 popd
 popd
 
+### RNApuzzler layout engine
+################
+## This is how the patch file was created.
+## diff -X .gitignore -ur RNApuzzler_stock RNApuzzler > rnapuzzler-eterna.patch
+
+pushd RNApuzzler
+patch -t -p0 --forward < rnapuzzler-eterna.patch
+pushd RNApuzzler
+./configure
+popd
+popd
+
 ### NUPACK
 ##########
 ## This is how the patch file was created.

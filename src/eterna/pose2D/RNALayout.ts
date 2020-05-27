@@ -1,6 +1,8 @@
 import EPars from 'eterna/EPars';
 import Folder from 'eterna/folding/Folder';
 import NuPACK from 'eterna/folding/NuPACK';
+import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
+import RNApuzzler from 'eterna/layout/RNApuzzler';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -231,6 +233,9 @@ export default class RNALayout {
      */
     public drawTree(customLayout: Array<[number, number]> = null): void {
         this.initializeCustomLayout(customLayout);
+        if (this._origPairs.length > 1000) {
+            this.initializePuzzlerLayout();
+        }
         if (this._root != null) {
             this.drawTreeRecursive(this._root, null, 0, 0, 0, 1, RotationDirection.CW);
         }
@@ -373,6 +378,14 @@ export default class RNALayout {
         if (this._customLayout && this.junctionMatchesTarget(rootnode, parentnode)) {
             this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirection);
             return;
+        }
+        if (this._origPairs.length > 1000) {
+            // This is equivalent to enforcing just one of the junctionMatchesTarget conditions
+            // but I'm not really sure where it comes from. Maybe just the start.
+            if (!(rootnode.children.length === 1 && rootnode.children[0].indexA < 0)) {
+                this.drawTreePuzzlerLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirection);
+                return;
+            }
         }
         if (rootnode.children.length === 1) {
             rootnode.x = startX;
@@ -613,6 +626,154 @@ export default class RNALayout {
     }
 
     /**
+     * Called if the puzzle is big enough that it needs a puzzlerLayout. Still
+     * will call the 'master function' on the next recursion, but that's mostly
+     * because it should swap back to a local customLayout if one happens to be
+     * defined.
+     *
+     * @param rootnode the root node for this recursive call
+     * @param parentnode the parent of this subtree's root; null when this
+     * function is called on the tree's root
+     * @param startX a plausible starting X for root, likely to be modified
+     * @param startY a plausible starting Y for root, likely to be modified
+     * @param goX X component of unit vector from parent to root
+     * @param goY Y component of unit vector from parent to root
+     * @param rotationDirection mapping from CW (1)/CCW (-1) to 5' => 3' direction
+     */
+    private drawTreePuzzlerLayout(
+        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        startX: number, startY: number,
+        goX: number, goY: number, rotationDirection: RotationDirection
+    ): void {
+        let ii: number;
+        let crossX: number = -goY * rotationDirection;
+        let crossY: number = goX * rotationDirection;
+
+        rootnode.x = startX;
+        rootnode.y = startY;
+        let anchorX = 0;
+        let anchorY = 0;
+        let anchorPuzzlerX = 0;
+        let anchorPuzzlerY = 0;
+        let anchorPuzzlerGoX = 0;
+        let anchorPuzzlerGoY = 1;
+        let anchorPuzzlerCrossX = -1;
+        let anchorPuzzlerCrossY = 0;
+        let anchorPuzzlerRotationDirection = 1;
+
+        let anchornode: RNATreeNode = null;
+        if (parentnode && parentnode.isPair) {
+            // this is the case in junctions, where root is 'pseudonode' in middle of junction,
+            //  and parent is the exterior pair (or the global root)
+            anchornode = parentnode;
+        } else if (rootnode && rootnode.isPair) {
+            // this can be the case in stacked pairs.
+            anchornode = rootnode;
+        }
+
+        if (anchornode != null) {
+            anchorX = anchornode.x;
+            anchorY = anchornode.y;
+            let puzzlerCoordA: [number, number] = this._puzzlerLayout[anchornode.indexA];
+            let puzzlerCoordB: [number, number] = this._puzzlerLayout[anchornode.indexB];
+            anchorPuzzlerX = (puzzlerCoordA[0] + puzzlerCoordB[0]) / 2;
+            anchorPuzzlerY = (puzzlerCoordA[1] + puzzlerCoordB[1]) / 2;
+            anchorPuzzlerCrossX = (puzzlerCoordA[0] - puzzlerCoordB[0]);
+            anchorPuzzlerCrossY = (puzzlerCoordA[1] - puzzlerCoordB[1]);
+            anchorPuzzlerGoX = anchorPuzzlerCrossY;
+            anchorPuzzlerGoY = -anchorPuzzlerCrossX;
+
+            // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirection = -1)
+            // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
+            // basically checking dot product of next base after pair with putative go direction above.
+            let anchorPuzzlerCoordNext: [number, number] = this._puzzlerLayout[anchornode.indexA + 1];
+            let anchorPuzzlerGoNextX: number = anchorPuzzlerCoordNext[0] - anchorPuzzlerX;
+            let anchorPuzzlerGoNextY: number = anchorPuzzlerCoordNext[1] - anchorPuzzlerY;
+            let anchorPuzzlerDotProd =
+                anchorPuzzlerGoNextX * anchorPuzzlerGoX + anchorPuzzlerGoNextY * anchorPuzzlerGoY;
+            anchorPuzzlerRotationDirection = Math.sign(anchorPuzzlerDotProd);
+            if (anchorPuzzlerRotationDirection === 0
+                || anchorPuzzlerCoordNext[0] === null
+                || Math.abs(anchorPuzzlerDotProd) < 1e-3) {
+                anchorPuzzlerRotationDirection = 1;
+            }
+            anchorPuzzlerGoX *= anchorPuzzlerRotationDirection;
+            anchorPuzzlerGoY *= anchorPuzzlerRotationDirection;
+        }
+
+        for (ii = 0; ii < rootnode.children.length; ii++) {
+            // read out where this point should be based on 'this._puzzlerLayout'. get coordinates in
+            // "local coordinate frame" set by parent pair in this._puzzlerLayout.
+            // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
+            let puzzlerCoord: number[] = this._puzzlerLayout[rootnode.children[ii].indexA].slice();
+            if (rootnode.children[ii].isPair) {
+                let puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
+                let puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+                puzzlerCoord[0] = (puzzlerCoordA[0] + puzzlerCoordB[0]) / 2;
+                puzzlerCoord[1] = (puzzlerCoordA[1] + puzzlerCoordB[1]) / 2;
+            }
+
+            let childX = 0.0;
+            let childY = 0.0;
+            let childGoX = 0.0;
+            let childGoY = 0.0;
+            childX = puzzlerCoord[0] * this._primarySpace;
+            childY = puzzlerCoord[1] * this._primarySpace;
+            if (anchornode != null) {
+                let devX: number = puzzlerCoord[0] - anchorPuzzlerX;
+                let devY: number = puzzlerCoord[1] - anchorPuzzlerY;
+                let templateX: number = devX * anchorPuzzlerCrossX + devY * anchorPuzzlerCrossY;
+                let templateY: number = devX * anchorPuzzlerGoX + devY * anchorPuzzlerGoY;
+                templateX *= this._primarySpace;
+                templateY *= this._primarySpace;
+                // go to Eterna RNALayout global frame.
+                childX = anchorX + crossX * templateX + goX * templateY;
+                childY = anchorY + crossY * templateX + goY * templateY;
+            }
+
+            let childRotationDirection: number = rotationDirection;
+            if (rootnode.children[ii].isPair) {
+                let puzzlerCoordA: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA];
+                let puzzlerCoordB: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexB];
+                let puzzlerCrossX: number = (puzzlerCoordA[0] - puzzlerCoordB[0]);
+                let puzzlerCrossY: number = (puzzlerCoordA[1] - puzzlerCoordB[1]);
+                let puzzlerGoX: number = puzzlerCrossY;
+                let puzzlerGoY: number = -puzzlerCrossX;
+
+                let puzzlerCoordNext: [number, number] = this._puzzlerLayout[rootnode.children[ii].indexA + 1];
+                let puzzlerGoNextX: number = puzzlerCoordNext[0] - puzzlerCoord[0];
+                let puzzlerGoNextY: number = puzzlerCoordNext[1] - puzzlerCoord[1];
+                let childPuzzlerDotProd = puzzlerGoNextX * puzzlerGoX + puzzlerGoNextY * puzzlerGoY;
+                let childPuzzlerLayoutRotationDirection: RotationDirection = Math.sign(childPuzzlerDotProd);
+                if (puzzlerCoordNext[0] === null) {
+                    childPuzzlerLayoutRotationDirection = anchorPuzzlerRotationDirection;
+                } else if (childPuzzlerLayoutRotationDirection === 0
+                    || Math.abs(childPuzzlerDotProd) < 1e-3) {
+                    childPuzzlerLayoutRotationDirection = 1;
+                }
+                puzzlerGoX *= childPuzzlerLayoutRotationDirection;
+                puzzlerGoY *= childPuzzlerLayoutRotationDirection;
+
+                childGoX = puzzlerGoX;
+                childGoY = puzzlerGoY;
+                childRotationDirection = rotationDirection
+                    * (childPuzzlerLayoutRotationDirection / anchorPuzzlerRotationDirection);
+                if (anchornode != null) {
+                    let templateGoX = puzzlerGoX * anchorPuzzlerCrossX + puzzlerGoY * anchorPuzzlerCrossY;
+                    let templateGoY = puzzlerGoX * anchorPuzzlerGoX + puzzlerGoY * anchorPuzzlerGoY;
+                    childGoX = crossX * templateGoX + goX * templateGoY;
+                    childGoY = crossY * templateGoX + goY * templateGoY;
+                }
+            }
+
+            let childGoLength: number = Math.sqrt(childGoX * childGoX + childGoY * childGoY);
+
+            this.drawTreeRecursive(rootnode.children[ii], rootnode, childX, childY,
+                childGoX / childGoLength, childGoY / childGoLength, childRotationDirection);
+        }
+    }
+
+    /**
      * Adds up the tree score by summing this node and childrens' score (typically free energy)
      * @param rootnode Node for score evaluation
      *
@@ -778,6 +939,45 @@ export default class RNALayout {
     }
 
     /**
+     * Called by initializePuzzlerLayout, this function actually makes the array
+     * of x,y coords using the RNApuzzler algorithm.
+     *
+     */
+    private generatePuzzlerLayout(): Array<[number, number]> {
+        // its idea of a pair table starts with
+        // the length of the pair table, i guess.
+        // oh, that means two things:
+        // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
+        // that means that EACH of their entries need to be ++ed
+        let pairTable: number[] =
+            [this._origPairs.length, ...this._origPairs.slice().map((value: number) => value + 1)];
+
+        let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
+
+        return rnap.getLayout(pairTable);
+    }
+
+
+    /**
+     * Called by drawTree, this function generates an array of x,y coords for
+     * RNAs where the ordinary layout would fail, and scales it to something
+     * Eterna-compatible.
+     *
+     */
+    private initializePuzzlerLayout(): void {
+        let puzzlerLayout = this.generatePuzzlerLayout();
+        let scaleFactor = this.inferCustomLayoutScaleFactor(puzzlerLayout);
+        this._puzzlerLayout = [];
+        for (const coord of puzzlerLayout) {
+            if (coord[0] === null || coord[1] === null) {
+                this._puzzlerLayout.push([null, null]);
+            } else {
+                this._puzzlerLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
+            }
+        }
+    }
+
+    /**
      * Called by initalizeCustomLayout, this function is needed so that
      * externally defined customLayouts don't need to know anything fixed about
      * Eterna display conventions.
@@ -815,6 +1015,7 @@ export default class RNALayout {
     private _targetPairs: number[];
     private _pseudoknotPairs: number[];
     private _customLayout: Array<[number, number]>;
+    private _puzzlerLayout: Array<[number, number]>;
 
     // / "New" method to gather NN free energies, just use the folding engine
     private _scoreBiPairs: number[];

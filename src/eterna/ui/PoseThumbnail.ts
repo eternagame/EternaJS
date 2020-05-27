@@ -133,28 +133,10 @@ export default class PoseThumbnail {
         rnaDrawer.drawTree(customLayout);
         rnaDrawer.getCoords(xarray, yarray);
 
-        let xmin: number = xarray[0];
-        let xmax: number = xarray[0];
-        let ymin: number = yarray[0];
-        let ymax: number = yarray[0];
-
-        for (let ii = 0; ii < n; ii++) {
-            if (xarray[ii] < xmin) {
-                xmin = xarray[ii];
-            }
-
-            if (xarray[ii] > xmax) {
-                xmax = xarray[ii];
-            }
-
-            if (yarray[ii] < ymin) {
-                ymin = yarray[ii];
-            }
-
-            if (yarray[ii] > ymax) {
-                ymax = yarray[ii];
-            }
-        }
+        let xmin: number = Math.min(...xarray);
+        let xmax: number = Math.max(...xarray);
+        let ymin: number = Math.min(...yarray);
+        let ymax: number = Math.max(...yarray);
 
         let xdiff: number = xmax - xmin;
         let xscale = 1;

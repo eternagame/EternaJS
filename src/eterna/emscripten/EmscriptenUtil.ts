@@ -36,4 +36,14 @@ export default class EmscriptenUtil {
         }
         return array;
     }
+
+    // /** Converts a C++ std::vector<std::vector<T>> with inner size 2 to a [T, T][] */
+    // public static arrayToStdVector<T>(array: T[]): stdcpp.vector<T> {
+    //     let n = array.length;
+    //     let vector: stdcpp.vector<T> = new stdcpp.vector<T>;
+    //     for (let ii = 0; ii < n; ++ii) {
+    //         vector.push_back(array[ii]);
+    //     }
+    //     return vector
+    // }
 }
