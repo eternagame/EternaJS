@@ -302,6 +302,8 @@ export default class Bitmaps {
     public static readonly ImgPageActiveDot = require('assets/UI/mission/page-active-dot.png');
     public static readonly ImgAchievementsClose: string = require('assets/Achievements/close-button.png');
     public static readonly ImgAchievementsCheckmark: string = require('assets/Achievements/checkmark.png');
+    public static readonly ImgConstraintArrowUp: string = require('assets/UI/constraint-arrow-up.png');
+    public static readonly ImgConstraintDrawerTip: string = require('assets/UI/constraint-drawer-tip.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

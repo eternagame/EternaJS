@@ -50,6 +50,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
 
+    private static readonly SCORES_POSITION_Y = 128;
+
     constructor(poseField: PoseField, editable: boolean) {
         super();
         this._poseField = poseField;
@@ -71,16 +73,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.container.addChild(this._baseLayer);
 
         this._primaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._primaryScoreEnergyDisplay.position = new Point(17, 118);
+        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
         this.container.addChild(this._primaryScoreEnergyDisplay);
 
         this._deltaScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, 118);
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119, Pose2D.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.visible = false;
         this.container.addChild(this._deltaScoreEnergyDisplay);
 
         this._secondaryScoreEnergyDisplay = new EnergyScoreDisplay(111, 40);
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2, Pose2D.SCORES_POSITION_Y);
         this._secondaryScoreEnergyDisplay.visible = false;
         this.container.addChild(this._secondaryScoreEnergyDisplay);
 
@@ -96,7 +98,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this.addObject(this._paintCursor, this.container);
 
         this._explosionFactorPanel = new ExplosionFactorPanel();
-        this._explosionFactorPanel.display.position = new Point(17, 118 + 82);
+        this._explosionFactorPanel.display.position = new Point(17, Pose2D.SCORES_POSITION_Y + 82);
         this._explosionFactorPanel.display.visible = false;
         this._explosionFactorPanel.factorUpdated.connect((factor: number) => {
             this._explosionFactor = factor;
@@ -3201,13 +3203,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     private updateEnergyDisplaySizeLocation(factor: number): void {
-        this._primaryScoreEnergyDisplay.position = new Point(17, 118);
+        this._primaryScoreEnergyDisplay.position = new Point(17, Pose2D.SCORES_POSITION_Y);
         this._primaryScoreEnergyDisplay.setSize(111 + factor * 59, 40);
 
-        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, 118);
+        this._deltaScoreEnergyDisplay.position = new Point(17 + 119 + factor * 59, Pose2D.SCORES_POSITION_Y);
         this._deltaScoreEnergyDisplay.setSize(111, 40);
 
-        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, 118);
+        this._secondaryScoreEnergyDisplay.position = new Point(17 + 119 * 2 + factor * 59, Pose2D.SCORES_POSITION_Y);
         this._secondaryScoreEnergyDisplay.setSize(111, 40);
     }
 
