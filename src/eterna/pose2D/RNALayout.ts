@@ -235,7 +235,7 @@ export default class RNALayout {
      */
     public drawTree(customLayout: Array<[number, number]> = null): void {
         this.initializeCustomLayout(customLayout);
-        if (this._origPairs.length > 1000 || Eterna.settings.usePuzzlerLayout.value) {
+        if (Eterna.settings.usePuzzlerLayout.value) {
             this.initializePuzzlerLayout();
         }
         if (this._root != null) {
@@ -381,7 +381,7 @@ export default class RNALayout {
             this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirection);
             return;
         }
-        if (this._origPairs.length > 1000 || Eterna.settings.usePuzzlerLayout.value) {
+        if (Eterna.settings.usePuzzlerLayout.value) {
             // This is equivalent to enforcing just one of the junctionMatchesTarget conditions
             // but I'm not really sure where it comes from. Maybe just the start.
             if (!(rootnode.children.length === 1 && rootnode.children[0].indexA < 0)) {
