@@ -689,8 +689,8 @@ export default class RNALayout {
             let anchorPuzzlerCoordNext: [number, number] = this._puzzlerLayout[anchornode.indexA + 1];
             let anchorPuzzlerGoNextX: number = anchorPuzzlerCoordNext[0] - anchorPuzzlerX;
             let anchorPuzzlerGoNextY: number = anchorPuzzlerCoordNext[1] - anchorPuzzlerY;
-            let anchorPuzzlerDotProd =
-                anchorPuzzlerGoNextX * anchorPuzzlerGoX + anchorPuzzlerGoNextY * anchorPuzzlerGoY;
+            let anchorPuzzlerDotProd = anchorPuzzlerGoNextX * anchorPuzzlerGoX
+                + anchorPuzzlerGoNextY * anchorPuzzlerGoY;
             anchorPuzzlerRotationDirection = Math.sign(anchorPuzzlerDotProd);
             if (anchorPuzzlerRotationDirection === 0
                 || anchorPuzzlerCoordNext[0] === null
@@ -949,8 +949,8 @@ export default class RNALayout {
         // oh, that means two things:
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
-        let pairTable: number[] =
-            [this._origPairs.length, ...this._origPairs.slice().map((value: number) => value + 1)];
+        let pairTable: number[] = [this._origPairs.length,
+            ...this._origPairs.slice().map((value: number) => value + 1)];
 
         let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
