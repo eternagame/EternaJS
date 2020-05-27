@@ -3,6 +3,7 @@ import Folder from 'eterna/folding/Folder';
 import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
 import RNApuzzler from 'eterna/layout/RNApuzzler';
+import Eterna from 'eterna/Eterna';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -145,6 +146,7 @@ export default class RNALayout {
         // AMW TODO: Rhiju, we should eventually be able to remove this condition,
         // once you work out how layouts can handle pseudoknots.
         this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
+        this._nopseudoknotPairs = EPars.filterForPseudoknots(biPairs);
         biPairs = EPars.filterForPseudoknots(biPairs);
         this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
 
@@ -233,7 +235,7 @@ export default class RNALayout {
      */
     public drawTree(customLayout: Array<[number, number]> = null): void {
         this.initializeCustomLayout(customLayout);
-        if (this._origPairs.length > 1000) {
+        if (this._origPairs.length > 1000 || Eterna.settings.usePuzzlerLayout.value) {
             this.initializePuzzlerLayout();
         }
         if (this._root != null) {
@@ -379,7 +381,7 @@ export default class RNALayout {
             this.drawTreeCustomLayout(rootnode, parentnode, startX, startY, goX, goY, rotationDirection);
             return;
         }
-        if (this._origPairs.length > 1000) {
+        if (this._origPairs.length > 1000 || Eterna.settings.usePuzzlerLayout.value) {
             // This is equivalent to enforcing just one of the junctionMatchesTarget conditions
             // but I'm not really sure where it comes from. Maybe just the start.
             if (!(rootnode.children.length === 1 && rootnode.children[0].indexA < 0)) {
@@ -949,8 +951,8 @@ export default class RNALayout {
         // oh, that means two things:
         // we encode pairs as -1 == unpaired, 0-indexed seqpos == paired
         // that means that EACH of their entries need to be ++ed
-        let pairTable: number[] = [this._origPairs.length,
-            ...this._origPairs.slice().map((value: number) => value + 1)];
+        let pairTable: number[] = [this._nopseudoknotPairs.length,
+            ...this._nopseudoknotPairs.slice().map((value: number) => value + 1)];
 
         let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
@@ -1014,6 +1016,7 @@ export default class RNALayout {
     private _origPairs: number[];
     private _targetPairs: number[];
     private _pseudoknotPairs: number[];
+    private _nopseudoknotPairs: number[];
     private _customLayout: Array<[number, number]>;
     private _puzzlerLayout: Array<[number, number]>;
 

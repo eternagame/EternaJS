@@ -1232,6 +1232,10 @@ export default class PoseEditMode extends GameMode {
             } else if (!ctrl && key === KeyCode.Comma) {
                 Eterna.settings.simpleGraphics.value = !Eterna.settings.simpleGraphics.value;
                 handled = true;
+            } else if (!ctrl && key === KeyCode.KeyL) {
+                Eterna.settings.usePuzzlerLayout.value = !Eterna.settings.usePuzzlerLayout.value;
+                console.log('Setting for usePuzzlerLayout now', Eterna.settings.usePuzzlerLayout.value);
+                handled = true;
             } else if (ctrl && key === KeyCode.KeyZ) {
                 this.moveUndoStackToLastStable();
                 handled = true;
