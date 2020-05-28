@@ -359,7 +359,7 @@ export default class PoseEditMode extends GameMode {
             Flashbang.stageHeight - 129
         );
 
-        this._constraintBar.layout();
+        this._constraintBar.layout(false, this._isPipMode ? this._targetConditions.length : 1);
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
         let s: number = this._dockedSpecBox.plotSize;
@@ -1341,7 +1341,7 @@ export default class PoseEditMode extends GameMode {
             this._targetName.visible = false;
 
             this._constraintBar.highlightState(-1);
-            this._constraintBar.layout();
+            this._constraintBar.layout(false, this._targetPairs.length);
 
             for (let ii = 0; ii < this._poses.length; ii++) {
                 this.setPoseTarget(ii, ii);
@@ -1368,7 +1368,7 @@ export default class PoseEditMode extends GameMode {
             this._targetName.visible = true;
 
             this._constraintBar.highlightState(this._curTargetIndex);
-            this._constraintBar.layout();
+            this._constraintBar.layout(false, 1);
 
             this.changeTarget(this._curTargetIndex);
             this._poses[0].setZoomLevel(this._poses[0].computeDefaultZoomLevel(), true, true);
@@ -2187,7 +2187,7 @@ export default class PoseEditMode extends GameMode {
 
         let conn = this.entered.connect(() => {
             this._constraintBar.display.visible = true;
-            this._constraintBar.layout();
+            this._constraintBar.layout(true, this._isPipMode ? this._targetPairs.length : 1);
             conn.close();
         });
     }

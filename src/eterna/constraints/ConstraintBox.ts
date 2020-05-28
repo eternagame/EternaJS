@@ -3,7 +3,7 @@ import {
     SerialTask, DelayTask, AlphaTask, TextureUtil, LocationTask, Easing, ParallelTask, ScaleTask, VisibleTask, Flashbang
 } from 'flashbang';
 import {
-    Graphics, Sprite, Text, Point, Texture, Container
+    Graphics, Sprite, Text, Point, Texture
 } from 'pixi.js';
 import MultiStyleText from 'pixi-multistyle-text';
 import Fonts from 'eterna/util/Fonts';
@@ -54,10 +54,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this._backlight = new Graphics();
         this._backlight.visible = false;
         this.container.addChild(this._backlight);
-
-        this._opaqueBackdrop = new Graphics();
-        this._opaqueBackdrop.visible = false;
-        this.container.addChild(this._opaqueBackdrop);
 
         this._req = new Sprite();
         this._req.visible = false;
@@ -139,7 +135,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.container.addChild(this._fglow);
     }
 
-    public setContent(config: ConstraintBoxConfig, toolTipContainer?: Container): void {
+    public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
         this._req.visible = config.fullTexture != null;
@@ -158,7 +154,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 UITheme.constraints.borderRadius
             );
             this._req.addChild(border);
-            this.initOpaqueBackdrop(config.fullTexture.width, config.fullTexture.height);
         }
 
         this._outline.visible = config.showOutline || false;
@@ -195,7 +190,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
 
         let balloon = new TextBalloon('', 0x0, 0.8);
         balloon.styledText = tooltipText;
-        this.setMouseOverObject(balloon, toolTipContainer);
+        this.setMouseOverObject(balloon);
 
         if (this._forMissionScreen) {
             this._outline.visible = false;
@@ -209,7 +204,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._bgGraphics.beginFill(0x1E314B, 0.5);
             this._bgGraphics.drawRoundedRect(0, 0, 111, this._forMissionScreen ? 55 : 75, 15);
             this._bgGraphics.endFill();
-            this.initOpaqueBackdrop(this._bgGraphics.width, this._bgGraphics.height);
         }
 
         this._bg.visible = config.thumbnailBG || false;
@@ -220,7 +214,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 this._bg.texture = BitmapManager.getBitmap(Bitmaps.NovaPuzThumbSmallFail);
             }
 
-            this.initOpaqueBackdrop(this._bg.texture.width, this._bg.texture.height);
             this._check.position = new Point(55, 55);
             this._noText.position = new Point(35, 1);
             this._stateText.position = new Point(3, 45);
@@ -315,7 +308,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         }
     }
 
-    private setMouseOverObject(obj: SceneObject, container?: Container): void {
+    private setMouseOverObject(obj: SceneObject): void {
         const FADE_IN_DELAY = 1.0;
 
         if (this._mouseOverObject != null) {
@@ -330,7 +323,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             obj.display.y = 78;
             obj.display.visible = false;
             obj.display.interactive = false;
-            this.addObject(obj, container ?? this.container);
+            this.addObject(obj, this.container);
 
             this._mouseOverObject = obj;
 
@@ -343,9 +336,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                     isMouseOver = true;
                     obj.display.visible = true;
                     obj.display.alpha = 0;
-                    if (obj.display.parent !== this.container) {
-                        obj.display.x = this.display.x;
-                    }
                     obj.replaceNamedObject(MOUSE_OVER_ANIM, new SerialTask(
                         new DelayTask(FADE_IN_DELAY),
                         new AlphaTask(1, 0.1)
@@ -361,13 +351,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 }
             }));
         }
-    }
-
-    private initOpaqueBackdrop(width: number, height: number) {
-        this._opaqueBackdrop.clear();
-        this._opaqueBackdrop.beginFill(0x142640, 1);
-        this._opaqueBackdrop.drawRoundedRect(0, 0, width, height, 15);
-        this._opaqueBackdrop.endFill();
     }
 
     public setLocation(p: Point, animate: boolean = false, animTime: number = 0.5): void {
@@ -450,10 +433,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         ));
     }
 
-    public setOpaqueBackdropVisible(visible: boolean) {
-        this._opaqueBackdrop.visible = visible;
-    }
-
     private _forMissionScreen: boolean;
 
     private _satisfied: boolean;
@@ -473,7 +452,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _check: Sprite;
     private _outline: Sprite;
     private _fglow: Graphics;
-    private _opaqueBackdrop: Graphics;
 
     private _mouseOverRegs: RegistrationGroup;
     private _mouseOverObject: SceneObject;
