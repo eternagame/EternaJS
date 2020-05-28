@@ -128,13 +128,13 @@ export default class ConstraintBar extends ContainerObject {
         this._constraintsLayerRoot.addChild(this._constraintsLayer);
         this.container.addChild(this._constraintsLayerRoot);
 
-        this._constraintsTooltips = new Container();
-        this._constraintsTooltips.position.y = this._constraintsLayer.position.y;
-        this._constraintsLayerRoot.addChild(this._constraintsTooltips);
-
         if (this._selectionArrow) {
             this._constraintsLayerRoot.addChild(this._selectionArrow);
         }
+
+        this._constraintsTooltips = new Container();
+        this._constraintsTooltips.position.y = this._constraintsLayer.position.y;
+        this._constraintsLayerRoot.addChild(this._constraintsTooltips);
 
         if (this._mask) {
             this._constraintsLayer.mask = this._mask;
@@ -153,7 +153,7 @@ export default class ConstraintBar extends ContainerObject {
                     return;
                 }
                 const deltaPos = e.data.global.x - this._previousDragPos;
-                if (Math.abs(deltaPos) > 2) {
+                if (Math.abs(deltaPos) > 0) {
                     this._drag = true;
                 }
 
