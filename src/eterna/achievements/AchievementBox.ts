@@ -25,6 +25,7 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import MultiStyleText from 'pixi-multistyle-text';
 import * as confetti from 'canvas-confetti';
+import Eterna from 'eterna/Eterna';
 
 export default class AchievementBox extends ContainerObject {
     public closed = new UnitSignal();
@@ -49,6 +50,14 @@ export default class AchievementBox extends ContainerObject {
         super();
         this._imageURL = imageURL;
         this._description = text;
+    }
+
+    private static getAbsUrl(relUrl: string) {
+        if (Eterna.MOBILE_APP) {
+            return Eterna.SERVER_URL + relUrl;
+        } else {
+            return relUrl;
+        }
     }
 
     protected added(): void {
@@ -89,7 +98,7 @@ export default class AchievementBox extends ContainerObject {
 
         // Icon
         const imageSprite = new Sprite();
-        TextureUtil.loadURL(this._imageURL)
+        TextureUtil.loadURL(AchievementBox.getAbsUrl(this._imageURL))
             .then((tex) => {
                 if (this.isLiveObject) {
                     const scale = Math.min(theme.iconSize / tex.width, theme.iconSize / tex.height);
