@@ -234,7 +234,7 @@ export default class PuzzleEditMode extends GameMode {
             (stateIndex) => new ShapeConstraint(stateIndex)
         ));
         this.addObject(this._constraintBar, this.container);
-        this._constraintBar.layout(true, this._numTargets);
+        this._constraintBar.layout();
 
         this.setPoseFields(poseFields);
         this.poseEditByTarget(0);
