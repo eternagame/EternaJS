@@ -77,7 +77,8 @@ export default class ConstraintBar extends ContainerObject {
 
         this._constraintsLayerRoot = new Container();
 
-        if (this._constraints.length > 1) {
+        const drawerEnabled = this._constraints.length > 1;
+        if (drawerEnabled) {
             // Background
             this._background = (() => {
                 const bg = new Graphics();
@@ -143,27 +144,37 @@ export default class ConstraintBar extends ContainerObject {
         for (const constraint of this._constraints) {
             this.addObject(constraint.constraintBox, this._constraintsLayer);
 
-            constraint.constraintBox.pointerDown.connect((e) => {
-                this._potentialDrag = true;
-                this._previousDragPos = e.data.global.x;
-            });
+            if (drawerEnabled) {
+                constraint.constraintBox.pointerDown.connect((e) => {
+                    this._potentialDrag = true;
+                    this._previousDragPos = e.data.global.x;
+                });
 
-            constraint.constraintBox.pointerMove.connect((e) => {
-                if (!this._potentialDrag) {
-                    return;
-                }
-                const deltaPos = e.data.global.x - this._previousDragPos;
-                if (Math.abs(deltaPos) > 0) {
-                    this._drag = true;
-                }
+                constraint.constraintBox.pointerMove.connect((e) => {
+                    if (!this._potentialDrag) {
+                        return;
+                    }
+                    const deltaPos = e.data.global.x - this._previousDragPos;
+                    if (Math.abs(deltaPos) > 0) {
+                        this._drag = true;
+                    }
 
-                if (!this._drag) {
-                    return;
-                }
+                    if (!this._drag) {
+                        return;
+                    }
 
-                this.scrollConstraints(deltaPos);
-                this._previousDragPos = e.data.global.x;
-            });
+                    this.scrollConstraints(deltaPos);
+                    this._previousDragPos = e.data.global.x;
+                });
+
+                constraint.constraintBox.pointerOut.connect((e) => {
+                    if (this._backgroundDrag) {
+                        return;
+                    }
+                    this._drag = false;
+                    this._potentialDrag = false;
+                });
+            }
 
             constraint.constraintBox.pointerTap.connect((e) => {
                 this._potentialDrag = false;
@@ -171,16 +182,7 @@ export default class ConstraintBar extends ContainerObject {
                     this._drag = false;
                     return;
                 }
-
                 this.onConstraintBoxClicked(constraint);
-            });
-
-            constraint.constraintBox.pointerOut.connect((e) => {
-                if (this._backgroundDrag) {
-                    return;
-                }
-                this._drag = false;
-                this._potentialDrag = false;
             });
         }
     }
