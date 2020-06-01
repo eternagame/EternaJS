@@ -70,7 +70,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
         const infoText = MissionClearedPanel.processHTML(this._infoText)
             || 'You have solved the puzzle, congratulations!';
-        const infoObj = new HTMLTextObject(infoText, panelWidth - 10, this._infoWrapper.id)
+        const infoObj = new HTMLTextObject(infoText, panelWidth - 20, this._infoWrapper.id)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(14)
             .color(0xffffff)
@@ -114,7 +114,13 @@ export default class MissionClearedPanel extends ContainerObject {
             .tooltip('Stay in this puzzle and review your design');
         this.addObject(this.closeButton, this.container);
 
-        this.nextButton = new GameButton().label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
+        const nextButtonGraphic = new Graphics()
+            .beginFill(0x54B54E)
+            .drawRoundedRect(0, 0, 170, 40, 10)
+            .endFill();
+        this.nextButton = new GameButton()
+            .customStyleBox(nextButtonGraphic)
+            .label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
         this.addObject(this.nextButton, this.container);
 
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
