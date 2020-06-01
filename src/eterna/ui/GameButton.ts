@@ -81,6 +81,11 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.toggled.value;
     }
 
+    public customStyleBox(stylebox: Graphics): GameButton {
+        this._customStyleBox = stylebox;
+        return this;
+    }
+
     public label(text: string | TextBuilder, fontSize?: number, background?: boolean): GameButton {
         if (typeof (text) === 'string') {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
@@ -176,7 +181,11 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox = icon == null && label != null && this._labelBackground !== false;
+        const drawStyleBox = this._customStyleBox == null
+            && icon == null
+            && label != null
+            && this._labelBackground !== false;
+
         if (drawStyleBox) {
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
@@ -189,6 +198,10 @@ export default class GameButton extends Button implements KeyboardListener {
             this._content.addChildAt(styleBox, 0);
         }
 
+        if (this._customStyleBox) {
+            this._content.addChildAt(this._customStyleBox, 0);
+        }
+
         // Position label
         if (label != null) {
             if (this._scaleIconToLabel && icon != null) {
@@ -197,7 +210,12 @@ export default class GameButton extends Button implements KeyboardListener {
             }
 
             this._content.addChild(label);
-            if (icon == null) {
+            if (this._customStyleBox) {
+                DisplayUtil.positionRelative(
+                    label, HAlign.CENTER, VAlign.CENTER,
+                    this._customStyleBox, HAlign.CENTER, VAlign.CENTER
+                );
+            } else if (icon == null) {
                 label.position = new Point(GameButton.WMARGIN, GameButton.HMARGIN);
             } else {
                 DisplayUtil.positionRelative(
@@ -291,6 +309,7 @@ export default class GameButton extends Button implements KeyboardListener {
     private _hotkeyCtrl: boolean;
     private _buttonIcons: DisplayObject[];
     private _selectedState: DisplayObject;
+    private _customStyleBox?: Graphics;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
