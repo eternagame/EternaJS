@@ -3,6 +3,10 @@
     left: 0px;
     top: 0px;
     z-index: 1;
+    pointer-events: none; /* Make input events fall through to the Pixi canvas */
+}
+#eterna-overlay a {
+    pointer-events: all; /* Except links */
 }
 
 #pixi-container {

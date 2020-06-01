@@ -3,8 +3,8 @@ import Eterna from 'eterna/Eterna';
 
 /** A <p> object in the DOM that contains the given HTML. Floats on top of the PIXI canvas. */
 export default class HTMLTextObject extends DOMObject<HTMLParagraphElement> {
-    constructor(htmlText: string, width?: number) {
-        super(Eterna.OVERLAY_DIV_ID, document.createElement('p'));
+    constructor(htmlText: string, width?: number, domParentID?: string) {
+        super(domParentID ?? Eterna.OVERLAY_DIV_ID, document.createElement('p'));
         this._obj.innerHTML = htmlText;
         this._obj.style.margin = '0px';
         if (width) {

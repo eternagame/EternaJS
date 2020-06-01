@@ -2010,7 +2010,7 @@ export default class PoseEditMode extends GameMode {
         this.disableTools(true);
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
-        this._homeButton.display.visible = false;
+        this._chatButton.display.visible = false;
         this._helpBar.display.visible = false;
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
@@ -2054,7 +2054,7 @@ export default class PoseEditMode extends GameMode {
                     pose.showTotalEnergy = true;
                 }
 
-                this._homeButton.display.visible = true;
+                this._chatButton.display.visible = true;
 
                 this._exitButton.display.alpha = 0;
                 this._exitButton.display.visible = true;
