@@ -4,7 +4,6 @@ import {
     KeyboardEventType, KeyCode
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
-import {isMobile} from 'is-mobile';
 import Pose2D from './Pose2D';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
@@ -27,8 +26,8 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.connect((e) => this.onMouseDown(e));
-        this.pointerUp.connect((e) => this.onMouseUp(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerDown(e));
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerUp(e));
         this.pointerMove.connect((e) => this.onPointerMove(e));
 
         this.regs.add(this.mode.keyboardInput.pushListener(this));
@@ -106,13 +105,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         return this._pose;
     }
 
-    private onMouseDown(e: InteractionEvent): void {
-        if (!isMobile()) {
-            if (!InputUtil.IsLeftMouse(e)) {
-                return;
-            }
-        }
-
+    private onPointerDown(e: InteractionEvent): void {
         if (Flashbang.app.isControlKeyDown) {
             return;
         }
@@ -170,13 +163,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         }
     }
 
-    private onMouseUp(e: InteractionEvent): void {
-        if (!isMobile()) {
-            if (!InputUtil.IsLeftMouse(e)) {
-                return;
-            }
-        }
-
+    private onPointerUp(e: InteractionEvent): void {
         this._pose.doneColoring();
         this._pose.onMouseMoved(e.data.global);
 
