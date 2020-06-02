@@ -484,6 +484,7 @@ export default class PoseEditMode extends GameMode {
         } else {
             const {panel, positionUpdater} = HintsPanel.create(this._puzzle.hint);
             this._hintBoxRef = this.addObject(panel, this.container);
+            positionUpdater(); // NOTE(johannes): Run positionUpdater() once after adding the object
             panel.regs.add(this.resized.connect(positionUpdater));
         }
     }

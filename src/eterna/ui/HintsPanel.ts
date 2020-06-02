@@ -1,7 +1,6 @@
 import {Point} from 'pixi.js';
-import {Flashbang, StyledTextBuilder, ContainerObject} from 'flashbang';
+import {Flashbang} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
-import TextUtil from 'eterna/util/TextUtil';
 import MultiPagePanel from './MultiPagePanel';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
@@ -11,7 +10,7 @@ export default class HintsPanel {
         width: 220,
         height: 283,
         fontSize: 14,
-        relativePos: new Point(0.0098, 0.35)
+        relativePos: new Point(0.0098, 0.5)
     };
 
     public static create(puzzleHint: string) {
@@ -49,7 +48,7 @@ export default class HintsPanel {
         const positionUpdater = () => {
             panel.display.position = new Point(
                 Flashbang.stageWidth * theme.relativePos.x,
-                Flashbang.stageHeight * theme.relativePos.y
+                (Flashbang.stageHeight - panel.display.height) * theme.relativePos.y
             );
         };
         positionUpdater();
