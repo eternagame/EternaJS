@@ -40,7 +40,7 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
         this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(true)));
-        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
+        this.regs.add(this.pointerTap.connect(() => {
             if (this.enabled) {
                 this.clicked.emit();
             }
