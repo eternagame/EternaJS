@@ -200,7 +200,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
     private drawMask(): void {
         this._infoMask.clear();
-        this._infoMask.beginFill(0x00FF00, 100);
+        this._infoMask.beginFill(0x00FF00, 0);
         this._infoMask.drawRect(
             0, 50, MissionClearedPanel.calcWidth(), Flashbang.stageHeight - 125
         );
@@ -270,7 +270,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private _rankScroll: RankScroll = null;
 
     private _dragging = false;
-    private _dragPointData: PIXI.interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 }
