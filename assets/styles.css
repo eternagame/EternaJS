@@ -47,7 +47,9 @@
     .ingame-chat {
         width: 30%;
         min-width: 230px;
-        height: calc(100% - 2px); /* 1px border consumes 2px in height */
+        height: 100%;
+        border: none;
+        border-radius: 0px;
         top: 0px;
         right: 0px;
         -webkit-backdrop-filter: none;
