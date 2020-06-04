@@ -11,6 +11,9 @@ export default class ChatManager {
         }
         this._settings = settings;
         settings.showChat.connect(() => this.updateChatVisibility());
+        if (settings.showChat.value) {
+            this.updateChatVisibility();
+        }
     }
 
     /** Posts a message to the chat */
