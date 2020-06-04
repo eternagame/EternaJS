@@ -3,6 +3,12 @@
 
 #include <string>
 
-long eval(std::string seq, std::string ref, bool is_verbose);
+#ifdef lv
+typedef long ENERGY_TYPE;
+#else
+typedef float ENERGY_TYPE;
+#endif
+
+ENERGY_TYPE eval(std::string seq, std::string ref, bool is_verbose);
 
 #endif

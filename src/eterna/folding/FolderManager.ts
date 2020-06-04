@@ -59,7 +59,7 @@ export default class FolderManager {
 
             if (folder.name.length === 0
                 || folder.name === RNAFoldBasic.NAME
-                || folder.name === LinearFoldC.NAME
+                // || folder.name === LinearFoldC.NAME
                 || !folder.isFunctional
                 || (filterCB != null && filterCB(folder))) {
                 continue;
