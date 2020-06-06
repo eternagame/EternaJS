@@ -23,7 +23,7 @@ export interface ConstraintBoxConfig {
     showOutline?: boolean;
     // Used when the constraint image includes a background
     // Due to a type constraint from Pixi, we need this to be nullable, not optional
-    fullTexture: Texture | null;
+    fullTexture?: Texture;
     // Whether to draw the transparent background
     drawBG?: boolean;
     // Used with drawBG, constraint image without background. If a string, it will be parsed as a base64 encoded image
@@ -147,8 +147,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != null;
-        if (this._req.visible) {
+        this._req.visible = config.fullTexture != undefined;
+        if (config.fullTexture != undefined) {
             this._req.texture = config.fullTexture;
         }
 
@@ -239,7 +239,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.icon) {
             this._icon.visible = true;
             this._icon.removeChildren();
-            this._icon.texture = null;
+            this._icon.texture = Texture.EMPTY;
             if (config.icon instanceof Texture) {
                 this._icon.texture = config.icon;
                 this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);

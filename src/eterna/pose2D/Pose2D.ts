@@ -441,6 +441,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
         if (out === null) {
             out = new Point();
         }
+        Assert.assertIsDefined(
+            this._scoreTexts,
+            "Can't get substructure score position, because the scores do not exist"
+        );
         out.x = this._scoreTexts[index].x;
         out.y = this._scoreTexts[index].y;
         return out;

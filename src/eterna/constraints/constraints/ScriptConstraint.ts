@@ -41,7 +41,6 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
         return {
             satisfied: status.satisfied,
             showOutline: true,
-            fullTexture: null,
             drawBG: true,
             icon: status.dataPNG,
             stateNumber: status.stateIndex + 1,

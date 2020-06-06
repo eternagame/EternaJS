@@ -39,7 +39,6 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
         return {
             satisfied: status.satisfied,
             clarificationText: `${this.minPairs} OR MORE`,
-            fullTexture: null,
             statText: status.currentPairs.toString(),
             showOutline: true
         };

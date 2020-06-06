@@ -1,7 +1,6 @@
 import {JSONUtil, Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import Plot, {PlotType} from 'eterna/Plot';
-import * as log from 'loglevel';
 import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
@@ -181,30 +180,34 @@ export default class UndoBlock {
     }
 
     public getPairs(temp: number = 37, pseudoknots: boolean = false): number[] {
-        Assert.assertIsDefined(this._pairsArray.get(pseudoknots));
-        return this._pairsArray.get(pseudoknots)![temp];
+        const pairsArray = this._pairsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        return pairsArray[temp];
     }
 
     public getParam(index: UndoBlockParam, temp: number = 37, pseudoknots: boolean = false): any {
-        Assert.assertIsDefined(this._paramsArray.get(pseudoknots));
-        if (this._paramsArray.get(pseudoknots)![temp] != null) {
-            return this._paramsArray.get(pseudoknots)![temp][index];
+        const parisArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(parisArray);
+        if (parisArray[temp] != null) {
+            return parisArray[temp][index];
         } else {
             return undefined;
         }
     }
 
     public setPairs(pairs: number[], temp: number = 37, pseudoknots: boolean = false): void {
-        Assert.assertIsDefined(this._pairsArray.get(pseudoknots));
-        this._pairsArray.get(pseudoknots)![temp] = pairs.slice();
+        const pairsArray = this._pairsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        pairsArray[temp] = pairs.slice();
     }
 
     public setParam(index: UndoBlockParam, val: any, temp: number = 37, pseudoknots: boolean = false): void {
-        Assert.assertIsDefined(this._paramsArray.get(pseudoknots));
-        if (this._paramsArray.get(pseudoknots)![temp] == null) {
-            this._paramsArray.get(pseudoknots)![temp] = [];
+        const pairsArray = this._paramsArray.get(pseudoknots);
+        Assert.assertIsDefined(pairsArray);
+        if (pairsArray[temp] == null) {
+            pairsArray[temp] = [];
         }
-        this._paramsArray.get(pseudoknots)![temp][index] = val;
+        pairsArray[temp][index] = val;
     }
 
     public setBasics(folder: Folder, temp: number = 37, pseudoknots: boolean = false): void {

@@ -21,7 +21,7 @@ export default class RNApuzzler extends LayoutEngine {
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new RNApuzzler(program));
     }
-    
+
     private constructor(lib: RNApuzzlerLib) {
         super();
         this._lib = lib;

@@ -26,7 +26,7 @@ export = LinearFoldLib;
 /*~ Write your module's methods and properties in this class */
 declare class LinearFoldLib {
     FullFoldDefault(seqString: string): LinearFoldLib.FullFoldResult | null;
-    FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult | Null;
+    FullEval(seqString: string, structString: string): LinearFoldLib.FullEvalResult | null;
     GetDotPlot(temperature_in: number, seqString: string, dotplotStructString: string): LinearFoldLib.DotPlotResult | null;
 }
 

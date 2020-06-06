@@ -21,7 +21,10 @@ export default class Plot extends Container {
         this._height = height;
     }
 
-    public setData(data: number[], maxvals: number[], labels: string[] | null = null, ghostData: number[] | null = null): void {
+    public setData(
+        data: number[], maxvals: number[],
+        labels: string[] | null = null, ghostData: number[] | null = null
+    ): void {
         this._data = (data != null ? data.slice() : null);
         this._labels = (labels != null ? labels.slice() : null);
         this._upperBounds = (maxvals != null ? maxvals.slice() : null);

@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Sprite, Text, Rectangle
+    Container, DisplayObject, Point, Text, Rectangle
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -23,12 +23,10 @@ import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaVi
 import FolderManager from 'eterna/folding/FolderManager';
 import Folder from 'eterna/folding/Folder';
 import {PaletteTargetType, GetPaletteTargetBaseType} from 'eterna/ui/NucleotidePalette';
-import GamePanel from 'eterna/ui/GamePanel';
 import HTMLTextObject from 'eterna/ui/HTMLTextObject';
 import PoseField from 'eterna/pose2D/PoseField';
 import Pose2D, {Oligo} from 'eterna/pose2D/Pose2D';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
-import BitmapManager from 'eterna/resources/BitmapManager';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import int from 'eterna/util/int';
@@ -42,7 +40,6 @@ import BubbleSweep from 'eterna/vfx/BubbleSweep';
 import Sounds from 'eterna/resources/Sounds';
 import EternaURL from 'eterna/net/EternaURL';
 import PuzzleManager from 'eterna/puzzle/PuzzleManager';
-import URLButton from 'eterna/ui/URLButton';
 import FoldUtil from 'eterna/folding/FoldUtil';
 import ShapeConstraint, {AntiShapeConstraint} from 'eterna/constraints/constraints/ShapeConstraint';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
@@ -137,6 +134,7 @@ export default class PoseEditMode extends GameMode {
             .down(Bitmaps.ImgChat)
             .tooltip('Chat');
         this.addObject(this._chatButton, this.container);
+        Assert.assertIsDefined(this.regs);
         this.regs.add(this._chatButton.clicked.connect(() => {
             Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
         }));
@@ -261,19 +259,6 @@ export default class PoseEditMode extends GameMode {
 
         Assert.assertIsDefined(this.regs);
         this.regs.add(this._exitButton.clicked.connect(() => this.exitPuzzle()));
-
-        this._scriptbar = new ActionBar(50);
-        this.addObject(this._scriptbar, this.uiLayer);
-
-        this._nidField = Fonts.arial('', 16).color(0xffffff).build();
-        this._nidField.width = 100;
-        this._nidField.height = 20;
-
-        this._runButton = new GameButton().allStates(Bitmaps.MingFold);
-
-        this._runStatus = Fonts.arial('idle', 16).bold().color(0xC0C0C0).build();
-        this._runStatus.width = 200;
-        this._runStatus.height = 20;
 
         this._targetName = Fonts.stdRegular('', 18).build();
         this._targetName.visible = false;
@@ -483,7 +468,7 @@ export default class PoseEditMode extends GameMode {
         if (this._hintBoxRef.isLive) {
             this._hintBoxRef.destroyObject();
         } else {
-            const {panel, positionUpdater} = HintsPanel.create(this._puzzle.hint);
+            const {panel, positionUpdater} = HintsPanel.create(this._puzzle.hint || '');
             this._hintBoxRef = this.addObject(panel, this.container);
             panel.regs.add(this.resized.connect(positionUpdater));
         }
@@ -505,6 +490,7 @@ export default class PoseEditMode extends GameMode {
 
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
+        Assert.assertIsDefined(this.modeStack);
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
                 hints: this._puzzle.hint
@@ -968,11 +954,6 @@ export default class PoseEditMode extends GameMode {
     }
 
     private buildScriptInterface(): void {
-        this._scriptInterface.addCallback('set_script_status', (txt: string): void => {
-            this._runStatus.style.fill = 0xC0C0C0;
-            this._runStatus.text = txt;
-        });
-
         this._scriptInterface.addCallback('get_sequence_string', (): string => this.getPose(0).getSequenceString());
 
         this._scriptInterface.addCallback('get_full_sequence', (indx: number): string | null => {
@@ -1229,31 +1210,6 @@ export default class PoseEditMode extends GameMode {
             this.clearUndoStack();
             this.poseEditByTarget(0);
         });
-    }
-
-    public onClickRun(): void {
-        let nid: string = this._nidField.text;
-        if (nid.length === 0) {
-            return;
-        }
-
-        this._runStatus.style.fill = 0xC0C0C0;
-        this._runStatus.text = 'running...';
-
-        const LOCK_NAME = 'RunScript';
-        this.pushUILock(LOCK_NAME);
-
-        ExternalInterface.runScriptThroughQueue(nid)
-            .then((ret) => {
-                log.info(ret);
-                if (typeof (ret['cause']) === 'string') {
-                    this._runStatus.style.fill = (ret['result'] ? 0x00FF00 : 0xFF0000);
-                    this._runStatus.text = ret['cause'];
-                }
-
-                this.popUILock(LOCK_NAME);
-            })
-            .catch(() => this.popUILock(LOCK_NAME));
     }
 
     public onKeyboardEvent(e: KeyboardEvent): void {
@@ -1653,7 +1609,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.targetButton.toggled.value = false;
         this._toolbar.naturalButton.toggled.value = true;
         this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.naturalButton.hotkey(null);
+        this._toolbar.naturalButton.hotkey();
 
         this.savePosesMarkersContexts();
         this._paused = false;
@@ -1667,7 +1623,7 @@ export default class PoseEditMode extends GameMode {
         this._toolbar.targetButton.toggled.value = true;
         this._toolbar.naturalButton.toggled.value = false;
         this._toolbar.naturalButton.hotkey(KeyCode.Space);
-        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.targetButton.hotkey();
 
         this.savePosesMarkersContexts();
 
@@ -2118,6 +2074,7 @@ export default class PoseEditMode extends GameMode {
                 try {
                     const nextPuzzle = await nextPuzzlePromise;
                     Eterna.chat.popHideChat();
+                    Assert.assertIsDefined(this.modeStack);
                     this.modeStack.changeMode(new PoseEditMode(nextPuzzle, {}));
                 } catch (err) {
                     log.error(err);
@@ -2142,11 +2099,6 @@ export default class PoseEditMode extends GameMode {
 
     private disableTools(disable: boolean): void {
         this._toolbar.disableTools(disable);
-        // this._scriptbar.enabled = !disable;
-        // if (this._pic_button) {
-        //     this._pic_button.enabled = !disable;
-        // }
-
         this._hintBoxRef.destroyObject();
 
         this._folderButton.enabled = !disable;
@@ -2161,15 +2113,6 @@ export default class PoseEditMode extends GameMode {
                 pose.clearMouse();
             }
         }
-
-        // if (this._view_options_cmi) this._view_options_cmi.enabled = !disable;
-        // if (this._view_solutions_cmi) this._view_solutions_cmi.enabled = !disable;
-        // if (this._submit_cmi) this._submit_cmi.enabled = !disable;
-        // if (this._spec_cmi) this._spec_cmi.enabled = !disable;
-        // if (this._reset_cmi) this._reset_cmi.enabled = !disable;
-        // if (this._copy_cmi) this._copy_cmi.enabled = !disable;
-        // if (this._paste_cmi) this._paste_cmi.enabled = !disable;
-        // if (this._beam_cmi) this._beam_cmi.enabled = !disable;
     }
 
     private startCountdown(): void {
@@ -3289,9 +3232,6 @@ export default class PoseEditMode extends GameMode {
     private _homeButton: GameButton;
     private _scriptbar: ActionBar;
     private _undockSpecBoxButton: GameButton;
-    private _nidField: Text;
-    private _runButton: GameButton;
-    private _runStatus: Text;
     private _ropPresets: (() => void)[] = [];
 
     private _isPlaying: boolean = false;

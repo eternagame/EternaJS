@@ -298,13 +298,8 @@ export default class MissionIntroMode extends AppMode {
             this.container.addChild(this._constraintMask);
         }
 
-<<<<<<< HEAD
-        let topY = this._scrollUpButton.display.y;
-        let botY = this._scrollDownButton.display.y;
-
         Assert.assertIsDefined(Flashbang.stageWidth);
-=======
->>>>>>> master
+
         this._constraintMask.clear();
         this._constraintMask.beginFill(0x00FF00, 0);
         this._constraintMask.drawRect(

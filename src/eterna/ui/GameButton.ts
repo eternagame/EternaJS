@@ -50,7 +50,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.setIconForState(ButtonState.DOWN, display);
     }
 
-    public disabled(display: DisplayObject | Texture | string | undefined): GameButton {
+    public disabled(display?: DisplayObject | Texture | string): GameButton {
         return this.setIconForState(ButtonState.DISABLED, display);
     }
 
@@ -116,9 +116,9 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public hotkey(keycode: string | null, ctrl: boolean = false): GameButton {
+    public hotkey(keycode?: string, ctrl: boolean = false): GameButton {
         if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
-            this._hotkey = keycode;
+            this._hotkey = keycode ?? null;
             this._hotkeyCtrl = ctrl;
             if (this.isLiveObject) {
                 this.setupHotkey();
@@ -269,7 +269,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private static getDisplayObject(displayOrTex: DisplayObject | Texture | string | undefined): DisplayObject | null {
+    private static getDisplayObject(displayOrTex?: DisplayObject | Texture | string): DisplayObject | null {
         if (displayOrTex instanceof DisplayObject) {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {

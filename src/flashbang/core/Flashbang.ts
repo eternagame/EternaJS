@@ -36,8 +36,8 @@ export default class Flashbang {
         return this._sound;
     }
 
-    public static get supportsTouch() {
-        return this._interaction.supportsTouchEvents;
+    public static get supportsTouch(): boolean | null {
+        return this._interaction?.supportsTouchEvents || null;
     }
 
     /* internal */

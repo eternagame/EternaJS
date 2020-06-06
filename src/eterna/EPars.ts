@@ -444,10 +444,13 @@ export default class EPars {
                 // assume player is copy/pasting into the same puzzle.
                 return this.stringToSequence(seqStr, true /* allowCut */, true /* allowUnknown */);
             }
-            indices = indices.filter((n) => n !== null).map((n) => customNumbering.indexOf(n!) + 1);
+            indices = indices.filter((n) => n !== null).map((n) => customNumbering.indexOf(n) + 1);
         }
 
-        let seqArray: number[] = Array(Math.max(...(indices.filter((n) => n !== null)) as number[])).fill(EPars.RNABASE_UNDEFINED);
+        let seqArray: number[] = Array(
+            Math.max(...(indices.filter((n) => n !== null)) as number[])
+        ).fill(EPars.RNABASE_UNDEFINED);
+
         for (let n = 0; n < indices.length; n++) {
             let ii = indices[n];
             if (ii !== null && ii >= 0) {

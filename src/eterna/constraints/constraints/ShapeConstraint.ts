@@ -94,13 +94,12 @@ abstract class BaseShapeConstraint extends Constraint<ShapeConstraintStatus> {
         return {
             satisfied: status.satisfied,
             tooltip: '',
-            fullTexture: null,
             thumbnailBG: true,
             stateNumber: undoBlocks.length > 1 ? this.stateIndex + 1 : undefined
         };
     }
 
-    public getHighlight(status: ShapeConstraintStatus): HighlightInfo | undefined {
+    public getHighlight(status: ShapeConstraintStatus): HighlightInfo {
         let unstable: number[] = [];
         if (status.wrongPairs) {
             let curr = 0;

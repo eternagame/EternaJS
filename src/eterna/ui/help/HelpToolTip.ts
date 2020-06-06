@@ -103,7 +103,7 @@ export default class HelpToolTip extends ContainerObject {
         if (tailLength > 0) {
             background.lineStyle(theme.tailWidth, theme.colors.background);
             background.moveTo(tip[2].x, tailY);
-            background.lineTo(tip[2].x, tailY + props.tailLength + 2);
+            background.lineTo(tip[2].x, tailY + tailLength + 2);
         }
 
         this.container.addChild(background);

@@ -3,6 +3,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import EPars from 'eterna/EPars';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
+import { Assert } from 'flashbang';
 
 interface BoostConstraintStatus extends BaseConstraintStatus {
     boostCount: number;
@@ -30,7 +31,7 @@ class Loop {
 
 function detectLoops(targetPairs: number[], loops: Loop[]) {
     loops.splice(0);
-    let loopStack = [];
+    let loopStack: Loop[] = [];
     let tmpPairs = targetPairs.slice();
     let lastPair: [number, number] | null = null;
     let examiningLoops = false;
@@ -79,7 +80,10 @@ function detectLoops(targetPairs: number[], loops: Loop[]) {
         } else if (loopStack.length > 0) {
             if (i === loopStack[loopStack.length - 1].pairs[0][1]) {
                 // Found last pair that needs to be encountered - loop finished.
-                loops.push(loopStack.pop().clone());
+                const loop: Loop | undefined = loopStack.pop();
+                // This should never happen, given that we check loopStack.length > 0
+                Assert.assertIsDefined(loop);
+                loops.push(loop.clone());
                 examiningLoops = false;
             }
             if (loopStack.length > 0) {

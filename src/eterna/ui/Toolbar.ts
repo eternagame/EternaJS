@@ -83,15 +83,16 @@ export default class Toolbar extends ContainerObject {
 
     constructor(
         type: ToolbarType,
-        {states = 1, boosters = null}: {states?: number; boosters?: BoostersData}
+        {states = 1, boosters }: {states?: number; boosters?: BoostersData}
     ) {
         super();
         this._type = type;
         this._states = states;
-        this._boostersData = boosters;
+        this._boostersData = boosters ?? null;
     }
 
     public onResized() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
         this.stateToggle.container.position = new Point(
             Flashbang.stageWidth / 2 - this.container.position.x,
             -this.container.position.y + 8
@@ -288,12 +289,9 @@ export default class Toolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
-<<<<<<< HEAD
-        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
-=======
         this.nucleotideFindButton = new GameButton()
             .allStates(Bitmaps.ImgFind)
-            .disabled(null)
+            .disabled()
             .label('Jump to Nucleotide', 14)
             .scaleBitmapToLabel()
             .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
@@ -303,7 +301,7 @@ export default class Toolbar extends ContainerObject {
 
         this.nucleotideRangeButton = new GameButton()
             .allStates(Bitmaps.NovaPuzzleImg)
-            .disabled(null)
+            .disabled()
             .label('View Nucleotide Range', 14)
             .scaleBitmapToLabel()
             .tooltip('Enter a nucleotide range to view (v)')
@@ -311,8 +309,8 @@ export default class Toolbar extends ContainerObject {
 
         this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
-        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
->>>>>>> master
+        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
+        
         if (this._boostersData != null && this._boostersData.actions != null) {
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
@@ -662,16 +660,10 @@ export default class Toolbar extends ContainerObject {
 
     private readonly _type: ToolbarType;
     private readonly _states: number;
-<<<<<<< HEAD
-    private readonly _showHint: boolean;
     private readonly _boostersData: BoostersData | null;
-=======
-    private readonly _boostersData: BoostersData;
->>>>>>> master
 
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
-    private _toolbarLayout: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
     private _autoCollapseRegs: RegistrationGroup | null;

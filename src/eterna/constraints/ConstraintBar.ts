@@ -1,4 +1,4 @@
-import {ContainerObject, Flashbang} from 'flashbang';
+import {ContainerObject, Flashbang, Assert} from 'flashbang';
 import {Point} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
@@ -12,7 +12,7 @@ import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
     constraintBox: ConstraintBox;
-    highlightCache?: HighlightInfo;
+    highlightCache: HighlightInfo | null;
 }
 
 interface StateSpecificConstraintWrapper extends ConstraintWrapper {
@@ -32,8 +32,8 @@ export default class ConstraintBar extends ContainerObject {
         super();
         this._constraints = constraints
             ? constraints.map(
-                (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
-            ) : null;
+                (constraint) => ({constraint, constraintBox: new ConstraintBox(false), highlightCache: null})
+            ) : [];
 
         Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
@@ -105,7 +105,7 @@ export default class ConstraintBar extends ContainerObject {
         if (!this._constraints) return;
         let highlights: HighlightInfo[] = [];
         for (let constraint of this._constraints) {
-            if (constraint.highlightCache != undefined && (
+            if (constraint.highlightCache != null && (
                 (
                     constraint.highlightCache.color === HighlightType.UNSTABLE
                     && constraint === this._flaggedConstraint
@@ -152,7 +152,7 @@ export default class ConstraintBar extends ContainerObject {
                 )
             );
             constraint.highlightCache = status.satisfied
-                ? undefined : constraint.constraint.getHighlight(status, context);
+                ? null : constraint.constraint.getHighlight(status, context);
             satisfied = satisfied && status.satisfied;
         }
 
@@ -202,6 +202,6 @@ export default class ConstraintBar extends ContainerObject {
         ).join(',');
     }
 
-    private _constraints: ConstraintWrapper[] | null;
+    private _constraints: ConstraintWrapper[];
     private _flaggedConstraint: ConstraintWrapper | null;
 }

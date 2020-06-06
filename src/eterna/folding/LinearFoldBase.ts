@@ -8,6 +8,7 @@ import {FullEvalResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
+import { Assert } from 'flashbang';
 
 export default abstract class LinearFoldBase extends Folder {
     protected constructor(lib: LinearFoldLib) {
@@ -31,10 +32,11 @@ export default abstract class LinearFoldBase extends Folder {
 
         let seqStr: string = EPars.sequenceToString(seq);
 
-        let result: DotPlotResult = null;
+        let result: DotPlotResult | null = null;
         try {
             // we don't actually do anything with structstring here yet
             result = this._lib.GetDotPlot(temp, seqStr, EPars.pairsToParenthesis(pairs));
+            Assert.assertIsDefined(result, 'Linearfold returned a null result');
             retArray = EmscriptenUtil.stdVectorToArray(result.plot);
         } catch (e) {
             log.error('GetDotPlot error', e);

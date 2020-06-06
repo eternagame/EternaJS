@@ -625,7 +625,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.naturalButton.toggled.value = true;
 
         this._toolbar.targetButton.hotkey(KeyCode.Space);
-        this._toolbar.naturalButton.hotkey(null);
+        this._toolbar.naturalButton.hotkey();
 
         this._paused = false;
         this.updateScore();
@@ -636,7 +636,7 @@ export default class PuzzleEditMode extends GameMode {
         this._toolbar.naturalButton.toggled.value = false;
 
         this._toolbar.naturalButton.hotkey(KeyCode.Space);
-        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.targetButton.hotkey();
 
         for (let ii = 0; ii < this._poses.length; ii++) {
             this._poses[ii].pairs = EPars.parenthesisToPairs(this._structureInputs[ii].structureString);

@@ -1,6 +1,6 @@
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import {OligoDef} from 'eterna/mode/PoseEdit/PoseEditMode';
-import {StyledTextBuilder} from 'flashbang';
+import {StyledTextBuilder, Assert} from 'flashbang';
 import {Graphics} from 'pixi.js';
 import EPars from 'eterna/EPars';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
@@ -91,7 +91,6 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         return {
             satisfied: status.satisfied,
             tooltip,
-            fullTexture: null,
             clarificationText: clarifyTextBuilder,
             showOutline: true,
             stateNumber: this.stateIndex + 1,
@@ -105,6 +104,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         context: ConstraintContext
     ): HighlightInfo {
         let undoBlock = context.undoBlocks[this.stateIndex];
+        Assert.assertIsDefined(context.targetConditions, 'BINDING constraint specified, but no oligo definitions are present');
         let stateCondition = context.targetConditions[this.stateIndex];
 
         return {
@@ -180,6 +180,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         context: ConstraintContext
     ): HighlightInfo {
         let undoBlock = context.undoBlocks[this.stateIndex];
+        Assert.assertIsDefined(context.targetConditions, 'BINDING constraint specified, but no oligo definitions are present');
         const oligos: OligoDef[] = context.targetConditions[this.stateIndex]['oligos'];
 
         let highlightedIndices: number[] = [];

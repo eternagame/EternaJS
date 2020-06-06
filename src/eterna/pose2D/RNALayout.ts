@@ -4,6 +4,7 @@ import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
 import RNApuzzler from 'eterna/layout/RNApuzzler';
 import Eterna from 'eterna/Eterna';
+import { Assert } from 'flashbang';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -666,7 +667,7 @@ export default class RNALayout {
      * @param rotationDirection mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreePuzzlerLayout(
-        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        rootnode: RNATreeNode, parentnode: RNATreeNode | null,
         startX: number, startY: number,
         goX: number, goY: number, rotationDirection: RotationDirection
     ): void {
@@ -686,7 +687,7 @@ export default class RNALayout {
         let anchorPuzzlerCrossY = 0;
         let anchorPuzzlerRotationDirection = 1;
 
-        let anchornode: RNATreeNode = null;
+        let anchornode: RNATreeNode | null = null;
         if (parentnode && parentnode.isPair) {
             // this is the case in junctions, where root is 'pseudonode' in middle of junction,
             //  and parent is the exterior pair (or the global root)
@@ -982,6 +983,8 @@ export default class RNALayout {
 
         let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
+        Assert.assertIsDefined(rnap, "Attempted to use RNAPuzzler, but it was not able to be laoded");
+
         return rnap.getLayout(pairTable);
     }
 
@@ -997,11 +1000,7 @@ export default class RNALayout {
         let scaleFactor = this.inferCustomLayoutScaleFactor(puzzlerLayout);
         this._puzzlerLayout = [];
         for (const coord of puzzlerLayout) {
-            if (coord[0] === null || coord[1] === null) {
-                this._puzzlerLayout.push([null, null]);
-            } else {
-                this._puzzlerLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
-            }
+            this._puzzlerLayout.push([coord[0] * scaleFactor, coord[1] * scaleFactor]);
         }
     }
 

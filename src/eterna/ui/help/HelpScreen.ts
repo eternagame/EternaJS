@@ -1,5 +1,5 @@
 import {
-    ContainerObject, Flashbang, DisplayUtil, HAlign, VAlign, AppMode
+    ContainerObject, Flashbang, DisplayUtil, HAlign, VAlign, AppMode, Assert
 } from 'flashbang';
 import {Point, Graphics} from 'pixi.js';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -77,6 +77,8 @@ export default class HelpScreen extends AppMode {
             height: theme.column.height
         });
 
+        Assert.assertIsDefined(this.regs);
+
         // Help content
         const helpPage = new HelpPage({
             width: theme.column.width * 2,
@@ -102,10 +104,13 @@ export default class HelpScreen extends AppMode {
             height: theme.column.height
         });
 
+        Assert.assertIsDefined(this.container);
+
         // backdrop
         this._backdrop = new PIXI.Graphics();
         this._backdrop.interactive = true;
         this._backdrop.once('click', () => {
+            Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
         });
         this.drawBackDrop();
@@ -124,6 +129,7 @@ export default class HelpScreen extends AppMode {
             .tooltip('Close Help');
         this.addObject(this._closeButton, this.container);
         this.regs.add(this._closeButton.clicked.connect(() => {
+            Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
         }));
 
@@ -161,6 +167,9 @@ export default class HelpScreen extends AppMode {
         this.drawBackDrop();
         this._toolTips.forEach((toolTip) => toolTip.updatePosition());
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
+
         const width = theme.column.width * 3 + theme.column.margin;
         this._shortCuts.container.position = new Point(
             Flashbang.stageWidth * 0.5 - width / 2,
@@ -182,6 +191,8 @@ export default class HelpScreen extends AppMode {
     private drawBackDrop() {
         this._backdrop.clear();
         this._backdrop.beginFill(0, 0.4);
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this._backdrop.drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
         this._backdrop.endFill();
     }

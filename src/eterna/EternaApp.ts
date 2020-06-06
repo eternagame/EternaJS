@@ -76,7 +76,7 @@ export enum InitialAppMode {
     TEST = 'test', // load the debugging test mode
 }
 
-export interface EternaAppParams {
+interface EternaAppParams {
     containerID?: string;
     chatboxID?: string;
     width?: number;
@@ -90,6 +90,17 @@ export interface EternaAppParams {
     folderName?: string;
     sequence?: string;
     designBrowserFilters?: DesignBrowserFilter[];
+}
+
+interface ProcessedEternaAppParams extends EternaAppParams {
+    containerID: string;
+    chatboxID: string;
+    width: number;
+    height: number;
+    mode: InitialAppMode;
+    puzzleID: number;
+    solutionID: number;
+    puzzleEditNumTargets: number;
 }
 
 /** Entry point for the game */
@@ -107,7 +118,7 @@ export default class EternaApp extends FlashbangApp {
         params.solutionID = params.solutionID || CloudLab19Solution.solutionID;
         params.puzzleEditNumTargets = params.puzzleEditNumTargets || 1;
 
-        this._params = params;
+        this._params = params as ProcessedEternaAppParams;
 
         let eternaContainer: HTMLElement | null = document.getElementById(params.containerID);
         if (!eternaContainer) {
@@ -141,11 +152,13 @@ export default class EternaApp extends FlashbangApp {
         Eterna.client = new GameClient(Eterna.SERVER_URL);
         Eterna.gameDiv = document.getElementById(this._params.containerID);
 
-        this._regs!.add(Eterna.settings.soundMute.connectNotify((mute) => {
+        Assert.assertIsDefined(this._regs);
+
+        this._regs.add(Eterna.settings.soundMute.connectNotify((mute) => {
             Flashbang.sound.muted = mute;
         }));
 
-        this._regs!.add(Eterna.settings.soundVolume.connectNotify((volume) => {
+        this._regs.add(Eterna.settings.soundVolume.connectNotify((volume) => {
             Flashbang.sound.volume = volume;
         }));
 
@@ -460,7 +473,7 @@ export default class EternaApp extends FlashbangApp {
             log.debug(`Logging in ${playerID}...`);
             return Eterna.client.login(playerID, playerPassword).then((uid) => {
                 log.debug(`Logged in [name=${playerID}, uid=${uid}]`);
-                Eterna.setPlayer(playerID!, uid);
+                Eterna.setPlayer(playerID, uid);
             });
         }
     }
@@ -510,6 +523,6 @@ export default class EternaApp extends FlashbangApp {
         ExternalInterface.pushContext(this._scriptInterface);
     }
 
-    private readonly _params: EternaAppParams;
+    private readonly _params: ProcessedEternaAppParams;
     private readonly _scriptInterface: ExternalInterfaceCtx = new ExternalInterfaceCtx();
 }

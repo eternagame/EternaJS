@@ -296,7 +296,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.targetButton.hotkey();
         this._toolbar.estimateButton.hotkey(KeyCode.Space);
         this._toolbar.estimateButton.toggled.value = false;
         this._toolbar.targetButton.toggled.value = true;
@@ -311,7 +311,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this._toolbar.estimateButton.hotkey(null);
+        this._toolbar.estimateButton.hotkey();
         this._toolbar.targetButton.hotkey(KeyCode.Space);
         this._toolbar.estimateButton.toggled.value = true;
         this._toolbar.targetButton.toggled.value = false;
