@@ -1,6 +1,27 @@
-diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearPartition/src/LinearPartition.cpp
---- LinearPartition_stock/src/LinearPartition.cpp	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/LinearPartition.cpp	2020-03-28 16:08:02.000000000 -0400
+Binary files LinearPartition_stock/.git/index and LinearPartition/.git/index differ
+@@ -1 +1 @@
+-0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591459416 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
++0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591458114 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
+diff -X .gitignore -ur LinearPartition_stock/src/bpp.cpp LinearPartition/src/bpp.cpp
+--- LinearPartition_stock/src/bpp.cpp	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/bpp.cpp	2020-06-06 11:42:29.929047869 -0400
+@@ -11,6 +11,7 @@
+ 
+ using namespace std;
+ 
++namespace LinearPartition {
+ void BeamCKYParser::output_to_file(string file_name, const char * type) {
+ 
+     if(!file_name.empty()) {
+@@ -308,4 +309,4 @@
+ 
+     return;
+ }
+-
++}
+diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearPartition/src/LinearPartition.cpp
+--- LinearPartition_stock/src/LinearPartition.cpp	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/LinearPartition.cpp	2020-06-06 11:42:29.925714547 -0400
 @@ -32,6 +32,7 @@
  
  using namespace std;
@@ -26,10 +47,10 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearPa
  }
 +}
 \ No newline at end of file
-diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPartition/src/LinearPartition.h
---- LinearPartition_stock/src/LinearPartition.h	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/LinearPartition.h	2020-03-28 16:07:20.000000000 -0400
-@@ -6,8 +6,8 @@
+diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPartition/src/LinearPartition.h
+--- LinearPartition_stock/src/LinearPartition.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/LinearPartition.h	2020-06-06 11:45:46.065111584 -0400
+@@ -6,14 +6,18 @@
   created by: 03/2019
  */
  
@@ -40,17 +61,17 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPart
  
  #include <string>
  #include <limits>
-@@ -15,6 +15,9 @@
+ #include <vector>
  #include <unordered_map>
  #include <math.h> 
- 
++#include <cassert>
++
 +namespace LinearPartition
 +{
-+
+ 
  // #define MIN_CUBE_PRUNING_SIZE 20
  #define kT 61.63207755
- 
-@@ -85,6 +88,9 @@
+@@ -85,6 +89,9 @@
      // DecoderResult parse(string& seq);
      void parse(string& seq);
  
@@ -60,7 +81,7 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPart
  private:
      void get_parentheses(char* result, string& seq);
  
-@@ -113,6 +119,7 @@
+@@ -113,6 +120,7 @@
  
      // vector<tuple<int, int, float>> Pij;
      unordered_map<pair<int,int>, float, hash_pair> Pij;
@@ -68,16 +89,16 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPart
  
      void output_to_file(string file_name, const char * type);
  
-@@ -218,5 +225,6 @@
+@@ -218,5 +226,6 @@
          return ((float(0.1199175927)*x+float(0.4815668234))*x+float(0.9975991939))*x+float(0.9999505077);
      return (x > float(46.052) ? float(1e20) : expf(x));
  }
 +}
  
  #endif //FASTCKY_BEAMCKYPAR_H
-diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h LinearPartition/src/Utils/feature_weight.h
---- LinearPartition_stock/src/Utils/feature_weight.h	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/Utils/feature_weight.h	2020-03-28 15:05:31.000000000 -0400
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h LinearPartition/src/Utils/feature_weight.h
+--- LinearPartition_stock/src/Utils/feature_weight.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/feature_weight.h	2020-06-06 11:42:29.929047869 -0400
 @@ -9,6 +9,9 @@
  
  #ifndef FASTCKY_W
@@ -97,9 +118,9 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h Linea
 +
  #endif
 \ No newline at end of file
-diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartition/src/Utils/utility.h
---- LinearPartition_stock/src/Utils/utility.h	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/Utils/utility.h	2020-03-28 15:04:34.000000000 -0400
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartition/src/Utils/utility.h
+--- LinearPartition_stock/src/Utils/utility.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/utility.h	2020-06-06 11:42:29.929047869 -0400
 @@ -15,6 +15,9 @@
  
  #include "feature_weight.h"
@@ -117,9 +138,9 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartit
 +}
 +
  #endif //FASTCKY_UTILITY_H
-diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/utility_v.h LinearPartition/src/Utils/utility_v.h
---- LinearPartition_stock/src/Utils/utility_v.h	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/Utils/utility_v.h	2020-03-28 15:04:49.000000000 -0400
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility_v.h LinearPartition/src/Utils/utility_v.h
+--- LinearPartition_stock/src/Utils/utility_v.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/utility_v.h	2020-06-06 11:42:29.929047869 -0400
 @@ -9,6 +9,7 @@
  #ifndef FASTCKY_UTILITY_V_H
  #define FASTCKY_UTILITY_V_H
@@ -135,20 +156,3 @@ diff -w -X .gitignore -ur LinearPartition_stock/src/Utils/utility_v.h LinearPart
 +}
 +
  #endif //FASTCKY_UTILITY_V_H
-diff -w -X .gitignore -ur LinearPartition_stock/src/bpp.cpp LinearPartition/src/bpp.cpp
---- LinearPartition_stock/src/bpp.cpp	2020-03-28 17:47:43.000000000 -0400
-+++ LinearPartition/src/bpp.cpp	2020-03-26 10:26:45.000000000 -0400
-@@ -11,6 +11,7 @@
- 
- using namespace std;
- 
-+namespace LinearPartition {
- void BeamCKYParser::output_to_file(string file_name, const char * type) {
- 
-     if(!file_name.empty()) {
-@@ -308,4 +309,4 @@
- 
-     return;
- }
--
-+}
