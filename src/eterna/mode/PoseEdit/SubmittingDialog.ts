@@ -2,7 +2,7 @@ import {Point} from 'pixi.js';
 import Dialog from 'eterna/ui/Dialog';
 import Fonts from 'eterna/util/Fonts';
 import {
-    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang
+    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang, Assert
 } from 'flashbang';
 
 export default class SubmittingDialog extends Dialog<void> {
@@ -19,12 +19,16 @@ export default class SubmittingDialog extends Dialog<void> {
         )));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
+            Assert.assertIsDefined(Flashbang.stageWidth);
             text.position = new Point(
                 (Flashbang.stageWidth - text.width) * 0.5,
                 (Flashbang.stageHeight - text.height) * 0.5
             );
         };
         updateLocation();
+
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }

@@ -15,7 +15,7 @@ export default class EternaSettings extends Settings {
     public readonly useContinuousColors: Setting<boolean>;
     public readonly useExtendedColors: Setting<boolean>;
     public readonly displayAuxInfo: Setting<boolean>;
-    public readonly lastUsedFolder: Setting<string>;
+    public readonly lastUsedFolder: Setting<string> | Setting<null>;
     public readonly pipEnabled: Setting<boolean>;
     public readonly simpleGraphics: Setting<boolean>;
     public readonly usePuzzlerLayout: Setting<boolean>;
@@ -23,8 +23,8 @@ export default class EternaSettings extends Settings {
     public readonly soundMute: Setting<boolean>;
     public readonly soundVolume: Setting<number>;
 
-    public readonly designBrowserColumnNames: Setting<DesignCategory[]>;
-    public readonly designBrowserSelectedSolutionIDs: Setting<number[]>;
+    public readonly designBrowserColumnNames: Setting<DesignCategory[]> | Setting<null>;
+    public readonly designBrowserSelectedSolutionIDs: Setting<number[]> | Setting<null>;
 
     public readonly saveGamesTransfered: Setting<boolean>;
 

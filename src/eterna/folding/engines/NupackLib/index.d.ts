@@ -24,14 +24,14 @@ export = NupackLib;
 
 /*~ Write your module's methods and properties in this class */
 declare class NupackLib {
-    FullEval(temperature_in: number, seqString: string, structString: string): NupackLib.FullEvalResult;
+    FullEval(temperature_in: number, seqString: string, structString: string): NupackLib.FullEvalResult | null;
 
-    FullFoldDefault(seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult;
-    FullFoldTemperature(temperature_in: number, seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult;
-    GetDotPlot(temperature_in: number, seqString: string): NupackLib.DotPlotResult;
-    FullFoldWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult;
-    CoFoldSequence(seqString: string): NupackLib.FullFoldResult;
-    CoFoldSequenceWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult;
+    FullFoldDefault(seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult | null;
+    FullFoldTemperature(temperature_in: number, seqString: string, pseudoknots: boolean): NupackLib.FullFoldResult | null;
+    GetDotPlot(temperature_in: number, seqString: string): NupackLib.DotPlotResult | null;
+    FullFoldWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult | null;
+    CoFoldSequence(seqString: string): NupackLib.FullFoldResult | null;
+    CoFoldSequenceWithBindingSite(seqString: string, switch_bp_i: number, switch_bp_p: number, switch_bp_j: number, switch_bp_q: number, switch_bp_bonus: number): NupackLib.FullFoldResult | null;
 }
 
 /*~ If you want to expose types from your module as well, you can

@@ -33,6 +33,7 @@ import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstra
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
 import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import {Assert} from 'flashbang';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
 
@@ -53,7 +54,7 @@ export default class PuzzleManager {
             // This allows to reuse existing descriptions, just insert the span element where appropriate
             // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
 
-            let res: RegExpExecArray = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
+            let res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
             if (res != null && res.length >= 2) {
                 [, newpuz.missionText] = res;
             }
@@ -315,7 +316,9 @@ export default class PuzzleManager {
 
         newpuz.constraints = constraints;
 
-        if (!newpuz.canUseFolder(FolderManager.instance.getFolder(newpuz.folderName))) {
+        let folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
+        Assert.assertIsDefined(folder, `Folder with name ${newpuz.folderName} is not defined!`);
+        if (!newpuz.canUseFolder(folder)) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
                 newpuz.folderName, (folder: Folder) => !newpuz.canUseFolder(folder)
             ).name;

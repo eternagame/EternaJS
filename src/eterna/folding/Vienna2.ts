@@ -47,9 +47,12 @@ export default class Vienna2 extends Folder {
         let seqStr: string = EPars.sequenceToString(seq);
 
         let probabilitiesString: string;
-        let result: DotPlotResult;
+        let result: DotPlotResult | null = null;
         try {
             result = this._lib.GetDotPlot(temp, seqStr, secstructStr);
+            if (!result) {
+                throw new Error('Vienna2 returned a null result');
+            }
             probabilitiesString = result.probabilitiesString;
         } catch (e) {
             log.error('GetDotPlot error', e);
@@ -102,7 +105,7 @@ export default class Vienna2 extends Folder {
     /* override */
     public scoreStructures(
         seq: number[], pairs: number[], pseudoknotted: boolean = false,
-        temp: number = 37, outNodes: number[] = null
+        temp: number = 37, outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -118,11 +121,14 @@ export default class Vienna2 extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
                     EPars.pairsToParenthesis(pairs));
+                if (!result) {
+                    throw new Error('Vienna2 returned a null result');
+                }
                 cache = {energy: result.energy, nodes: EmscriptenUtil.stdVectorToArray<number>(result.nodes)};
             } catch (e) {
                 log.error('FullEval error', e);
@@ -179,7 +185,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public foldSequence(
-        seq: number[], secondBestPairs: number[], desiredPairs: string = null,
+        seq: number[], secondBestPairs: number[] | null, desiredPairs: string | null = null,
         pseudoknotted: boolean = false, temp: number = 37
     ): number[] {
         let key: any = {
@@ -206,7 +212,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public foldSequenceWithBindingSite(
-        seq: number[], targetPairs: number[], bindingSite: number[], bonus: number,
+        seq: number[], targetPairs: number[] | null, bindingSite: number[], bonus: number,
         version: number = 1.0, temp: number = 37
     ): number[] {
         let key: any = {
@@ -225,6 +231,9 @@ export default class Vienna2 extends Folder {
         }
 
         if (!(version >= 2.0)) {
+            if (!targetPairs) {
+                throw new Error("Can't foldSequenceWithBindingSite with null targetPairs and Vienna version < 2.0!");
+            }
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
             this.putCache(key, pairs.slice());
             return pairs;
@@ -259,6 +268,9 @@ export default class Vienna2 extends Folder {
                 bonus
             );
         } else {
+            if (!targetPairs) {
+                throw new Error("Can't foldSequenceWithBindingSite with null targetPairs and siteGroups.length !== 2");
+            }
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
 
@@ -273,7 +285,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {
@@ -325,7 +337,7 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public cofoldSequenceWithBindingSite(
-        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string = null,
+        seq: number[], bindingSite: number[], bonus: number, desiredPairs: string | null = null,
         malus: number = 0, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
@@ -426,7 +438,7 @@ export default class Vienna2 extends Folder {
         let j: number;
         let p: number;
         let q: number;
-        let u: number;
+        let u = 0;
         let x: number;
         let type: number;
         let count: number;
@@ -676,12 +688,15 @@ export default class Vienna2 extends Folder {
         return hairpinScore;
     }
 
-    private foldSequenceImpl(seq: number[], structStr: string = null, temp: number = 37): number[] {
+    private foldSequenceImpl(seq: number[], structStr: string | null = null, temp: number = 37): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.FullFoldTemperature(temp, seqStr, structStr || '');
+            if (!result) {
+                throw new Error('Vienna2 returned a null result');
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('FullFoldTemperature error', e);
@@ -699,10 +714,13 @@ export default class Vienna2 extends Folder {
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
         const structStr = '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.FullFoldWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
+            if (!result) {
+                throw new Error('Vienna2 returned a null result');
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('FullFoldWithBindingSite error', e);
@@ -715,14 +733,17 @@ export default class Vienna2 extends Folder {
         }
     }
 
-    private cofoldSequenceImpl(seq: number[], str: string = null): number[] {
+    private cofoldSequenceImpl(seq: number[], str: string | null = null): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
         const structStr: string = str || '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.CoFoldSequence(seqStr, structStr);
             log.debug('done cofolding');
+            if (!result) {
+                throw new Error('Vienna2 returned a null result');
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('CoFoldSequence error', e);
@@ -736,15 +757,18 @@ export default class Vienna2 extends Folder {
     }
 
     private cofoldSequenceWithBindingSiteImpl(
-        seq: number[], str: string, i: number, p: number, j: number, q: number, bonus: number
+        seq: number[], str: string | null, i: number, p: number, j: number, q: number, bonus: number
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, true, false);
         const structStr: string = str || '';
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             result = this._lib.CoFoldSequenceWithBindingSite(seqStr, structStr, i + 1, p + 1, j + 1, q + 1, -bonus);
             log.debug('done cofolding');
+            if (!result) {
+                throw new Error('Vienna2 returned a null result');
+            }
             return EPars.parenthesisToPairs(result.structure);
         } catch (e) {
             log.error('CoFoldSequenceWithBindingSite error', e);

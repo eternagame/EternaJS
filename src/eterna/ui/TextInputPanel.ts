@@ -93,7 +93,7 @@ export default class TextInputPanel extends GamePanel {
     }
 
     public setHotkeys(
-        okKey: string = null, okText: string = '', cancelKey: string = null, cancelText: string = ''
+        okKey: string | null = null, okText: string = '', cancelKey: string | null = null, cancelText: string = ''
     ): void {
         this._okButton.hotkey(okKey, false).tooltip(okText);
         this._cancelButton.hotkey(cancelKey, false).tooltip(cancelText);

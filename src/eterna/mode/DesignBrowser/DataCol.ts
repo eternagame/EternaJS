@@ -2,7 +2,9 @@ import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
-import {ContainerObject, TextBuilder, Flashbang} from 'flashbang';
+import {
+    ContainerObject, TextBuilder, Flashbang, Assert
+} from 'flashbang';
 import Feedback from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';
 import TextInputObject from 'eterna/ui/TextInputObject';
@@ -140,6 +142,7 @@ export default class DataCol extends ContainerObject {
     }
 
     private get mouseLoc(): Point {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         return this.container.toLocal(Flashbang.globalMouse);
     }
 
@@ -157,9 +160,11 @@ export default class DataCol extends ContainerObject {
         return [ii, int(DataCol.DATA_H + (ii * this._lineHeight) - mouseLoc.y)];
     }
 
-    public setFilter(filter1: string, filter2: string): void {
-        this._filterField1.text = filter1;
-        if (filter2 != null) {
+    public setFilter(filter1: string | undefined, filter2: string | undefined): void {
+        if (filter1 != undefined) {
+            this._filterField1.text = filter1;
+        }
+        if (filter2 != undefined) {
             this._filterField2.text = filter2;
         }
     }
@@ -246,7 +251,7 @@ export default class DataCol extends ContainerObject {
         this.updateView();
     }
 
-    public set expFeedback(feedback: Feedback[]) {
+    public set expFeedback(feedback: (Feedback | null)[]) {
         this._feedback = feedback;
     }
 
@@ -352,7 +357,7 @@ export default class DataCol extends ContainerObject {
                         break;
 
                     case DesignCategory.SYNTHESIS_SCORE: {
-                        let exp: Feedback = null;
+                        let exp: Feedback | null = null;
                         if (this._feedback != null) {
                             exp = this._feedback[ii];
                         }
@@ -458,7 +463,7 @@ export default class DataCol extends ContainerObject {
 
     private _numDisplay: number;
     private _sortOrder: SortOrder = SortOrder.NONE;
-    private _feedback: Feedback[];
+    private _feedback: (Feedback | null)[];
     private _showExp: boolean = false;
     private _pairsArray: number[];
     private _fillColor: number = 0;

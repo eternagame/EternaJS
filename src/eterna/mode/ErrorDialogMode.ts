@@ -1,7 +1,7 @@
 import {Graphics, Point} from 'pixi.js';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode
+    VLayoutContainer, HAlign, ErrorUtil, Flashbang, AppMode, Assert
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import GameButton from 'eterna/ui/GameButton';
@@ -18,6 +18,10 @@ export default class ErrorDialogMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+        Assert.assertIsDefined(this.container);
+        Assert.assertIsDefined(this.modeStack);
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
 
         let bg = new Graphics();
         this.container.addChild(bg);
@@ -38,7 +42,8 @@ export default class ErrorDialogMode extends AppMode {
 
         let okButton = new GameButton().label('OK', 16);
         panel.addObject(okButton, panelLayout);
-        okButton.clicked.connect(() => this.modeStack.removeMode(this));
+
+        okButton.clicked.connect(() => this.modeStack!.removeMode(this));
 
         panelLayout.layout();
 
@@ -49,6 +54,8 @@ export default class ErrorDialogMode extends AppMode {
         panelLayout.position = new Point(W_MARGIN, H_MARGIN + panel.titleHeight);
 
         const updateView = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             bg.clear()
                 .beginFill(0x0, 0.7)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
@@ -59,6 +66,7 @@ export default class ErrorDialogMode extends AppMode {
         };
 
         updateView();
+        Assert.assertIsDefined(this.regs);
         this.regs.add(this.resized.connect(updateView));
     }
 }

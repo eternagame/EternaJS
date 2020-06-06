@@ -77,7 +77,7 @@ export class MaximumGCConstraint extends MaximumPairConstraint {
     public static readonly NAME = 'GC';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GC_PAIR, count);
+        super(UndoBlockParam.GC, count);
     }
 
     /** @override */
@@ -109,7 +109,7 @@ export class MaximumAUConstraint extends MaximumPairConstraint {
     public static readonly NAME = 'AUMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_AU_PAIR, count);
+        super(UndoBlockParam.AU, count);
     }
 
     /** @override */
@@ -141,7 +141,7 @@ export class MaximumGUConstraint extends MaximumPairConstraint {
     public static readonly NAME = 'GUMAX';
 
     constructor(count: number) {
-        super(EPars.RNABASE_GU_PAIR, count);
+        super(UndoBlockParam.GU, count);
     }
 
     /** @override */

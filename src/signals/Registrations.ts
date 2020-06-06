@@ -35,5 +35,5 @@ class FunctionRegistration implements Registration {
         }
     }
 
-    private _f: () => void;
+    private _f: (() => void) | null;
 }

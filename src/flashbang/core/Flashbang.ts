@@ -11,25 +11,25 @@ export default class Flashbang {
         return Flashbang._app;
     }
 
-    public static get curMode(): AppMode {
+    public static get curMode(): AppMode | null {
         return Flashbang._app.modeStack.topMode;
     }
 
-    public static get pixi(): PIXI.Application {
+    public static get pixi(): PIXI.Application | null {
         return Flashbang._app.pixi;
     }
 
-    public static get stageWidth(): number {
-        return Flashbang._app.pixi.screen.width;
+    public static get stageWidth(): number | null {
+        return Flashbang._app.pixi ? Flashbang._app.pixi.screen.width : null;
     }
 
-    public static get stageHeight(): number {
-        return Flashbang._app.pixi.screen.height;
+    public static get stageHeight(): number | null {
+        return Flashbang._app.pixi ? Flashbang._app.pixi.screen.height : null;
     }
 
     /** Global mouse location */
-    public static get globalMouse(): PIXI.Point {
-        return this._interaction.mouse.global;
+    public static get globalMouse(): PIXI.Point | null {
+        return this._interaction ? this._interaction.mouse.global : null;
     }
 
     public static get sound(): SoundManager {
@@ -44,11 +44,11 @@ export default class Flashbang {
     public static _registerApp(app: FlashbangApp): void {
         Assert.isTrue(Flashbang._app == null, 'A FlashbangApp has already been registered');
         Flashbang._app = app;
-        Flashbang._interaction = app.pixi.renderer.plugins.interaction;
+        Flashbang._interaction = app.pixi ? app.pixi.renderer.plugins.interaction : null;
         Flashbang._sound = new SoundManager();
     }
 
     private static _app: FlashbangApp;
-    private static _interaction: InteractionManager;
+    private static _interaction: InteractionManager | null;
     private static _sound: SoundManager;
 }

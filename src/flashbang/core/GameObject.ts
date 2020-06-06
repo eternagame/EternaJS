@@ -6,28 +6,28 @@ import GameObjectRef from './GameObjectRef';
 
 export default class GameObject extends GameObjectBase {
     /** The DisplayObject that this GameObject manages, if any */
-    public get display(): DisplayObject {
+    public get display(): DisplayObject | null {
         return null;
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
         return this._addObjectInternal(obj, null, false, displayParent, displayIdx);
     }
 
     public addNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._addObjectInternal(obj, name, false, displayParent, displayIdx);
     }
 
     public replaceNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
         return this._addObjectInternal(obj, name, true, displayParent, displayIdx);
     }
 
-    public getNamedObject(name: string): GameObjectBase {
-        let cur: GameObjectRef = this._children;
+    public getNamedObject(name: string): GameObjectBase | null {
+        let cur: GameObjectRef | null = this._children;
         while (cur != null) {
             if (cur._obj != null && cur._obj._name === name) {
                 return cur._obj;
@@ -80,10 +80,10 @@ export default class GameObject extends GameObjectBase {
     }
 
     protected removeObjects(pred: (obj: GameObjectBase) => boolean): void {
-        let cur: GameObjectRef = this._children;
+        let cur: GameObjectRef | null = this._children;
         while (cur != null) {
             let next: GameObjectRef = cur._next;
-            let obj: GameObjectBase = cur._obj;
+            let obj: GameObjectBase | null = cur._obj;
             if (obj != null && pred(obj)) {
                 this.removeObject(obj);
             }
@@ -94,8 +94,8 @@ export default class GameObject extends GameObjectBase {
     /* internal */
     public _addObjectInternal(
         obj: GameObjectBase,
-        name: string, replaceExisting: boolean,
-        displayParent: Container, displayIdx: number = -1
+        name: string | null, replaceExisting: boolean,
+        displayParent: Container | null, displayIdx: number = -1
     ): GameObjectRef {
         // Object initialization happens here.
         // Uninitialization happens in GameObjectBase._removedInternal
@@ -116,7 +116,7 @@ export default class GameObject extends GameObjectBase {
         ref._obj = obj;
 
         // add the ref to the list
-        let oldListHead: GameObjectRef = this._children;
+        let oldListHead: GameObjectRef | null = this._children;
         this._children = ref;
 
         if (oldListHead != null) {
@@ -150,6 +150,7 @@ export default class GameObject extends GameObjectBase {
             'obj must manage a non-null DisplayObject to be attached to a display parent'
         );
 
+        Assert.assertIsDefined(this.display);
         if (displayIdx < 0 || displayIdx >= displayParent.children.length) {
             displayParent.addChild(this.display);
         } else {
@@ -158,9 +159,10 @@ export default class GameObject extends GameObjectBase {
     }
 
     /* internal */
-    public _registerObject(obj: GameObjectBase): void {
+    public _registerObject(obj: GameObjectBase | null): void {
+        Assert.assertIsDefined(this._mode);
         this._mode._registerObjectInternal(obj);
-        obj._addedInternal();
+        if (obj) obj._addedInternal();
     }
 
     /* override */
@@ -187,7 +189,7 @@ export default class GameObject extends GameObjectBase {
         // GameObjectBase._removedInternal to do it at the end of the function
         this._ref._obj = null;
 
-        let cur: GameObjectRef = this._children;
+        let cur: GameObjectRef | null = this._children;
         this._children = null;
         while (cur != null) {
             let next: GameObjectRef = cur._next;
@@ -208,7 +210,7 @@ export default class GameObject extends GameObjectBase {
     public _disposeInternal(): void {
         this._ref._obj = null;
         // dispose our children
-        let cur: GameObjectRef = this._children;
+        let cur: GameObjectRef | null = this._children;
         this._children = null;
         while (cur != null) {
             let next: GameObjectRef = cur._next;
@@ -234,6 +236,6 @@ export default class GameObject extends GameObjectBase {
     }
 
     // our child list head
-    private _children: GameObjectRef;
-    private _pendingChildren: GameObjectRef[];
+    private _children: GameObjectRef | null;
+    private _pendingChildren: GameObjectRef[] | null;
 }

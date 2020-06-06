@@ -67,7 +67,7 @@ export class RNATreeNode {
 //    -- rhiju, 2019, reviewing/updating code that was written ages ago by someone else.
 //
 export default class RNALayout {
-    constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] = null) {
+    constructor(primSpace: number = 45, pairSpace: number = 45, exceptionIndices: number[] | null = null) {
         this._primarySpace = primSpace;
         this._pairSpace = pairSpace;
         if (exceptionIndices != null) {
@@ -75,7 +75,7 @@ export default class RNALayout {
         }
     }
 
-    public get root(): RNATreeNode {
+    public get root(): RNATreeNode | null {
         return this._root;
     }
 
@@ -92,7 +92,7 @@ export default class RNALayout {
      * the structure of the puzzle "goal." A
      * comparison of pairs to targetPairs will influence application of the customLayout
      */
-    public setupTree(pairs: number[], targetPairs: number[] = null): void {
+    public setupTree(pairs: number[], targetPairs: number[] | null = null): void {
         let ii: number;
         let biPairs: number[] = new Array(pairs.length);
 
@@ -148,7 +148,9 @@ export default class RNALayout {
         this._pseudoknotPairs = EPars.onlyPseudoknots(biPairs);
         this._nopseudoknotPairs = EPars.filterForPseudoknots(biPairs);
         biPairs = EPars.filterForPseudoknots(biPairs);
-        this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
+        if (this._targetPairs !== null) {
+            this._targetPairs = EPars.filterForPseudoknots(this._targetPairs);
+        }
 
         this._root = new RNATreeNode();
 
@@ -233,7 +235,7 @@ export default class RNALayout {
      * which will override the "normal" geometry wherever the base pairs match
      * the target pairs in the structure.
      */
-    public drawTree(customLayout: Array<[number, number]> = null): void {
+    public drawTree(customLayout: Array<[number, number] | [null, null]> | null = null): void {
         this.initializeCustomLayout(customLayout);
         if (Eterna.settings.usePuzzlerLayout.value) {
             this.initializePuzzlerLayout();
@@ -262,7 +264,8 @@ export default class RNALayout {
 
         let nnfe: number[] = [];
 
-        if ((EPars.pairsToParenthesis(this._targetPairs).includes('{')
+        if (this._targetPairs !== null
+                && (EPars.pairsToParenthesis(this._targetPairs).includes('{')
                 || EPars.pairsToParenthesis(this._targetPairs).includes('['))
                 && folder.name === NuPACK.NAME) {
             folder.scoreStructures(seq, this._origPairs, true, EPars.DEFAULT_TEMPERATURE, nnfe);
@@ -364,7 +367,7 @@ export default class RNALayout {
      * @param rotationDirection mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeRecursive(
-        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        rootnode: RNATreeNode, parentnode: RNATreeNode | null,
         startX: number, startY: number,
         goX: number, goY: number, rotationDirection: RotationDirection = RotationDirection.CW
     ): void {
@@ -496,10 +499,15 @@ export default class RNALayout {
      * @param rotationDirection mapping from CW (1)/CCW (-1) to 5' => 3' direction
      */
     private drawTreeCustomLayout(
-        rootnode: RNATreeNode, parentnode: RNATreeNode,
+        rootnode: RNATreeNode, parentnode: RNATreeNode | null,
         startX: number, startY: number,
         goX: number, goY: number, rotationDirection: RotationDirection
     ): void {
+        // Cheap throw if customLayout null but made to this function
+        if (this._customLayout === null) {
+            throw new Error('Made it to drawTreeCustomLayout, but the _customLayout is null!');
+        }
+
         let ii: number;
         let crossX: number = -goY * rotationDirection;
         let crossY: number = goX * rotationDirection;
@@ -516,7 +524,7 @@ export default class RNALayout {
         let anchorCustomCrossY = 0;
         let anchorCustomRotationDirection = 1;
 
-        let anchornode: RNATreeNode = null;
+        let anchornode: RNATreeNode | null = null;
         if (parentnode && parentnode.isPair) {
             // this is the case in junctions, where root is 'pseudonode' in middle of junction,
             //  and parent is the exterior pair (or the global root)
@@ -529,94 +537,109 @@ export default class RNALayout {
         if (anchornode != null) {
             anchorX = anchornode.x;
             anchorY = anchornode.y;
-            let customCoordA: [number, number] = this._customLayout[anchornode.indexA];
-            let customCoordB: [number, number] = this._customLayout[anchornode.indexB];
-            anchorCustomX = (customCoordA[0] + customCoordB[0]) / 2;
-            anchorCustomY = (customCoordA[1] + customCoordB[1]) / 2;
-            anchorCustomCrossX = (customCoordA[0] - customCoordB[0]);
-            anchorCustomCrossY = (customCoordA[1] - customCoordB[1]);
+            let customCoordA: [number, number] | [null, null] = this._customLayout[anchornode.indexA];
+            let customCoordB: [number, number] | [null, null] = this._customLayout[anchornode.indexB];
+            if (customCoordA !== [null, null] && customCoordB != [null, null]) {
+                anchorCustomX = (customCoordA[0]! + customCoordB[0]!) / 2;
+                anchorCustomY = (customCoordA[1]! + customCoordB[1]!) / 2;
+                anchorCustomCrossX = (customCoordA[0]! - customCoordB[0]!);
+                anchorCustomCrossY = (customCoordA[1]! - customCoordB[1]!);
+            }
             anchorCustomGoX = anchorCustomCrossY;
             anchorCustomGoY = -anchorCustomCrossX;
 
             // are we rendering counterclockwise (default) or clockwise (non-default, rotationDirection = -1)
             // NOTE POTENTIAL ISSUE in edge case where anchornode.indexA is at edge of pairing...
             // basically checking dot product of next base after pair with putative go direction above.
-            let anchorCustomCoordNext: [number, number] = this._customLayout[anchornode.indexA + 1];
-            let anchorCustomGoNextX: number = anchorCustomCoordNext[0] - anchorCustomX;
-            let anchorCustomGoNextY: number = anchorCustomCoordNext[1] - anchorCustomY;
-            let anchorCustomDotProd = anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY;
-            anchorCustomRotationDirection = Math.sign(anchorCustomDotProd);
-            if (anchorCustomRotationDirection === 0
-                || anchorCustomCoordNext[0] === null
-                || Math.abs(anchorCustomDotProd) < 1e-3) {
-                anchorCustomRotationDirection = 1;
+            let anchorCustomCoordNext: [number, number] | [null, null] = this._customLayout[anchornode.indexA + 1];
+            if (anchorCustomCoordNext !== [null, null]) {
+                let anchorCustomGoNextX: number | null = anchorCustomCoordNext[0]! - anchorCustomX;
+                let anchorCustomGoNextY: number | null = anchorCustomCoordNext[1]! - anchorCustomY;
+                let anchorCustomDotProd = anchorCustomGoNextX * anchorCustomGoX + anchorCustomGoNextY * anchorCustomGoY;
+                anchorCustomRotationDirection = Math.sign(anchorCustomDotProd);
+                if (anchorCustomRotationDirection === 0
+                    || anchorCustomCoordNext[0] === null
+                    || Math.abs(anchorCustomDotProd) < 1e-3) {
+                    anchorCustomRotationDirection = 1;
+                }
+                anchorCustomGoX *= anchorCustomRotationDirection;
+                anchorCustomGoY *= anchorCustomRotationDirection;
             }
-            anchorCustomGoX *= anchorCustomRotationDirection;
-            anchorCustomGoY *= anchorCustomRotationDirection;
         }
 
         for (ii = 0; ii < rootnode.children.length; ii++) {
             // read out where this point should be based on 'this._customLayout'. get coordinates in
             // "local coordinate frame" set by parent pair in this._customLayout.
             // This would be a lot easier to read if we had a notion of an (x,y) pair, dot products, and cross products.
-            let customCoord: number[] = this._customLayout[rootnode.children[ii].indexA].slice();
+            let customCoord: number[] | null[] = this._customLayout[rootnode.children[ii].indexA].slice();
             if (rootnode.children[ii].isPair) {
-                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
-                customCoord[0] = (customCoordA[0] + customCoordB[0]) / 2;
-                customCoord[1] = (customCoordA[1] + customCoordB[1]) / 2;
+                let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                if (customCoordA !== [null, null] && customCoordB != [null, null]) {
+                    customCoord[0] = (customCoordA[0]! + customCoordB[0]!) / 2;
+                    customCoord[1] = (customCoordA[1]! + customCoordB[1]!) / 2;
+                }
             }
 
             let childX = 0.0;
             let childY = 0.0;
             let childGoX = 0.0;
             let childGoY = 0.0;
-            childX = customCoord[0] * this._primarySpace;
-            childY = customCoord[1] * this._primarySpace;
+            if (customCoord !== [null, null]) {
+                childX = customCoord[0]! * this._primarySpace;
+                childY = customCoord[1]! * this._primarySpace;
+            }
             if (anchornode != null) {
-                let devX: number = customCoord[0] - anchorCustomX;
-                let devY: number = customCoord[1] - anchorCustomY;
-                let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
-                let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
-                templateX *= this._primarySpace;
-                templateY *= this._primarySpace;
-                // go to Eterna RNALayout global frame.
-                childX = anchorX + crossX * templateX + goX * templateY;
-                childY = anchorY + crossY * templateX + goY * templateY;
+                if (customCoord !== [null, null]) {
+                    let devX: number = customCoord[0]! - anchorCustomX;
+                    let devY: number = customCoord[1]! - anchorCustomY;
+                    let templateX: number = devX * anchorCustomCrossX + devY * anchorCustomCrossY;
+                    let templateY: number = devX * anchorCustomGoX + devY * anchorCustomGoY;
+                    templateX *= this._primarySpace;
+                    templateY *= this._primarySpace;
+                    // go to Eterna RNALayout global frame.
+                    childX = anchorX + crossX * templateX + goX * templateY;
+                    childY = anchorY + crossY * templateX + goY * templateY;
+                }
             }
 
             let childRotationDirection: number = rotationDirection;
             if (rootnode.children[ii].isPair) {
-                let customCoordA: [number, number] = this._customLayout[rootnode.children[ii].indexA];
-                let customCoordB: [number, number] = this._customLayout[rootnode.children[ii].indexB];
-                let customCrossX: number = (customCoordA[0] - customCoordB[0]);
-                let customCrossY: number = (customCoordA[1] - customCoordB[1]);
-                let customGoX: number = customCrossY;
-                let customGoY: number = -customCrossX;
+                let customCoordA: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA];
+                let customCoordB: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexB];
+                if (customCoordA !== [null, null] && customCoordB !== [null, null]) {
+                    let customCrossX: number = (customCoordA[0]! - customCoordB[0]!);
+                    let customCrossY: number = (customCoordA[1]! - customCoordB[1]!);
+                    let customGoX: number = customCrossY;
+                    let customGoY: number = -customCrossX;
+                    let customCoordNext: [number, number] | [null, null] = this._customLayout[rootnode.children[ii].indexA + 1];
+                    let childCustomRotationDirection: RotationDirection = 0;
+                    let childCustomDotProd = 0;
+                    if (customCoordNext !== [null, null]) {
+                        let customGoNextX: number = customCoordNext[0]! - customCoord[0]!;
+                        let customGoNextY: number = customCoordNext[1]! - customCoord[1]!;
+                        childCustomDotProd = customGoNextX * customGoX + customGoNextY * customGoY;
+                        childCustomRotationDirection = Math.sign(childCustomDotProd);
+                    }
+                    if (customCoordNext[0] === null) {
+                        childCustomRotationDirection = anchorCustomRotationDirection;
+                    } else if (childCustomRotationDirection === 0
+                        || Math.abs(childCustomDotProd) < 1e-3) {
+                        childCustomRotationDirection = 1;
+                    }
+                    customGoX *= childCustomRotationDirection;
+                    customGoY *= childCustomRotationDirection;
 
-                let customCoordNext: [number, number] = this._customLayout[rootnode.children[ii].indexA + 1];
-                let customGoNextX: number = customCoordNext[0] - customCoord[0];
-                let customGoNextY: number = customCoordNext[1] - customCoord[1];
-                let childCustomDotProd = customGoNextX * customGoX + customGoNextY * customGoY;
-                let childCustomRotationDirection: RotationDirection = Math.sign(childCustomDotProd);
-                if (customCoordNext[0] === null) {
-                    childCustomRotationDirection = anchorCustomRotationDirection;
-                } else if (childCustomRotationDirection === 0
-                    || Math.abs(childCustomDotProd) < 1e-3) {
-                    childCustomRotationDirection = 1;
-                }
-                customGoX *= childCustomRotationDirection;
-                customGoY *= childCustomRotationDirection;
-
-                childGoX = customGoX;
-                childGoY = customGoY;
-                childRotationDirection = rotationDirection
-                    * (childCustomRotationDirection / anchorCustomRotationDirection);
-                if (anchornode != null) {
-                    let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
-                    let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
-                    childGoX = crossX * templateGoX + goX * templateGoY;
-                    childGoY = crossY * templateGoX + goY * templateGoY;
+                    childGoX = customGoX;
+                    childGoY = customGoY;
+                    childRotationDirection = rotationDirection
+                        * (childCustomRotationDirection / anchorCustomRotationDirection);
+                    if (anchornode != null) {
+                        let templateGoX = customGoX * anchorCustomCrossX + customGoY * anchorCustomCrossY;
+                        let templateGoY = customGoX * anchorCustomGoX + customGoY * anchorCustomGoY;
+                        childGoX = crossX * templateGoX + goX * templateGoY;
+                        childGoY = crossY * templateGoX + goY * templateGoY;
+                    }
                 }
             }
 
@@ -796,7 +819,7 @@ export default class RNALayout {
      * @param rootnode current node for consideration
      * @param parentnode parent of roonode, null if rootnode is root_
      */
-    private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode): void {
+    private scoreTreeRecursive(nnfe: number[], rootnode: RNATreeNode, parentnode: RNATreeNode | null): void {
         if (rootnode.isPair) {
             // / Pair node
             if (rootnode.children.length > 1) {
@@ -846,7 +869,7 @@ export default class RNALayout {
 
             if (numStacks === 1 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
-            } else if (numStacks === 0) {
+            } else if (numStacks === 0 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
             } else if (numStacks > 1 && parentnode != null) {
                 rootnode.score = RNALayout.lookupFe(nnfe, parentnode.indexA);
@@ -882,7 +905,10 @@ export default class RNALayout {
      *
      * @returns true if junction is target-like, false otherwise
      */
-    private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode): boolean {
+    private junctionMatchesTarget(rootnode: RNATreeNode, parentnode: RNATreeNode | null): boolean {
+        if (this._customLayout === null) {
+            throw new Error('Call to junctionMatchesTarget likely in error, since customLayout is not defined!');
+        }
         if (this._targetPairs == null) return false;
 
         if (parentnode && parentnode.isPair) {
@@ -924,7 +950,7 @@ export default class RNALayout {
      *
      * @param customLayout An array of x,y coords defining "custom" nt positions
      */
-    private initializeCustomLayout(customLayout: Array<[number, number]>): void {
+    private initializeCustomLayout(customLayout: Array<[number, number] | [null, null]> | null): void {
         if (customLayout === null) {
             this._customLayout = null;
             return;
@@ -988,16 +1014,23 @@ export default class RNALayout {
      *
      * @returns the normalization factor to make it Eterna-compatible
      */
-    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number]>): number {
+    private inferCustomLayoutScaleFactor(customLayout: Array<[number, number] | [null, null]> | null): number {
         // Looks for a stacked pair and normalizes the distance between bases,
         // returning the normalization factor.
         let scaleFactor = 1.0;
+        if (customLayout === null) {
+            return scaleFactor;
+        }
         if (this._targetPairs !== null) {
             for (let ii = 0; ii < this._targetPairs.length - 1; ii++) {
                 // look for a stacked pair
                 if (this._targetPairs[ii] === this._targetPairs[ii + 1] + 1) {
-                    let goX = customLayout[ii][0] - customLayout[ii + 1][0];
-                    let goY = customLayout[ii][1] - customLayout[ii + 1][1];
+                    if (customLayout[ii][0] === null || customLayout[ii][1] === null
+                            || customLayout[ii + 1][0] === null || customLayout[ii + 1][1] === null) {
+                        continue;
+                    }
+                    let goX = customLayout[ii][0]! - customLayout[ii + 1][0]!;
+                    let goY = customLayout[ii][1]! - customLayout[ii + 1][1]!;
                     let L = Math.sqrt(goX * goX + goY * goY);
                     scaleFactor = 1.0 / L;
                     return scaleFactor;
@@ -1012,12 +1045,12 @@ export default class RNALayout {
     // indices that need to be streched (e.g., connectors for oligos)
     private readonly _exceptionIndices: number[];
 
-    private _root: RNATreeNode;
+    private _root: RNATreeNode | null;
     private _origPairs: number[];
-    private _targetPairs: number[];
+    private _targetPairs: number[] | null;
     private _pseudoknotPairs: number[];
     private _nopseudoknotPairs: number[];
-    private _customLayout: Array<[number, number]>;
+    private _customLayout: Array<[number, number] | [null, null]> | null;
     private _puzzlerLayout: Array<[number, number]>;
 
     // / "New" method to gather NN free energies, just use the folding engine

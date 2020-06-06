@@ -1,5 +1,6 @@
 import {Registration} from 'signals';
 import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
+import {Assert} from 'flashbang';
 
 export interface MouseWheelListener {
     /**
@@ -11,7 +12,7 @@ export interface MouseWheelListener {
 
 export default class MouseWheelInput {
     public dispose(): void {
-        this._listeners.dispose();
+        if (this._listeners) this._listeners.dispose();
         this._listeners = null;
     }
 
@@ -19,17 +20,17 @@ export default class MouseWheelInput {
         let handled = false;
         try {
             for (
-                let elt: LinkedElement<MouseWheelListener> = this._listeners.beginIteration();
+                let elt: LinkedElement<MouseWheelListener> | null = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {
-                handled = elt.data.onMouseWheelEvent(e);
+                handled = elt.data !== null && elt.data.onMouseWheelEvent(e);
                 if (handled) {
                     break;
                 }
             }
         } finally {
-            this._listeners.endIteration();
+            if (this._listeners) this._listeners.endIteration();
         }
 
         return handled;
@@ -40,13 +41,15 @@ export default class MouseWheelInput {
      * so the most recently-added listener gets the first chance at each event.
      */
     public pushListener(l: MouseWheelListener): Registration {
+        Assert.assertIsDefined(this._listeners);
         return this._listeners.pushFront(l);
     }
 
     /** Removes all listeners from the MouseWheelInput */
     public clearListeners(): void {
+        Assert.assertIsDefined(this._listeners);
         this._listeners.clear();
     }
 
-    private _listeners: LinkedList<MouseWheelListener> = new LinkedList();
+    private _listeners: LinkedList<MouseWheelListener> | null = new LinkedList();
 }

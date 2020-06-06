@@ -52,34 +52,34 @@ export default class AppMode {
 
     constructor() {
         this._rootObject = new RootObject(this);
-        this.container.interactiveChildren = false;
+        if (this.container) this.container.interactiveChildren = false;
     }
 
-    public get regs(): RegistrationGroup {
+    public get regs(): RegistrationGroup | null {
         return this._regs;
     }
 
     /** The PIXI Container that all this mode's DisplayObjects should live within */
-    public get container(): PIXI.Container {
+    public get container(): PIXI.Container | null {
         return this._container;
     }
 
     /** Returns the ModeStack that this AppMode lives in */
-    public /* final */ get modeStack(): ModeStack {
+    public /* final */ get modeStack(): ModeStack | null {
         return this._modeStack;
     }
 
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
     public destroyObjectWithId(id: any): void {
-        let obj: GameObject = this.getObjectWithId(id);
-        if (obj != null) {
+        let obj: GameObjectBase | undefined = this.getObjectWithId(id);
+        if (obj != undefined) {
             obj.destroySelf();
         }
     }
 
     /** Returns the object in this mode with the given ID, or null if no such object exists. */
-    public getObjectWithId(id: any): any {
-        return this._idObjects.get(id);
+    public getObjectWithId(id: any): GameObjectBase | undefined {
+        return this._idObjects ? this._idObjects.get(id) : undefined;
     }
 
     /** @return total time the mode has been running, as measured by calls to update(). */
@@ -106,55 +106,62 @@ export default class AppMode {
         } else {
             return new Promise((resolve, reject) => {
                 this._entered.connect(() => {
-                    if (resolve != null) {
-                        let fn = resolve;
-                        resolve = null;
-                        reject = null;
-                        fn();
-                    }
+                    // if (resolve != null) {
+                    let fn = resolve;
+                    // resolve = null;
+                    // reject = null;
+                    fn();
+                    // }
                 });
 
                 this._disposed.connect(() => {
-                    if (reject != null) {
-                        let fn = reject;
-                        resolve = null;
-                        reject = null;
-                        fn('Mode was disposed');
-                    }
+                    // if (reject != null) {
+                    let fn = reject;
+                    // resolve = null;
+                    // reject = null;
+                    fn('Mode was disposed');
+                    // }
                 });
             });
         }
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
+        Assert.assertIsDefined(this._rootObject);
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
 
     public addNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
+        Assert.assertIsDefined(this._rootObject);
         return this._rootObject.addNamedObject(name, obj, displayParent, displayIdx);
     }
 
     public replaceNamedObject(
-        name: string, obj: GameObjectBase, displayParent: Container = null, displayIdx: number = -1
+        name: string, obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
     ): GameObjectRef {
+        Assert.assertIsDefined(this._rootObject);
         return this._rootObject.replaceNamedObject(name, obj, displayParent, displayIdx);
     }
 
-    public getNamedObject(name: string): GameObjectBase {
+    public getNamedObject(name: string): GameObjectBase | null {
+        Assert.assertIsDefined(this._rootObject);
         return this._rootObject.getNamedObject(name);
     }
 
     public hasNamedObject(name: string): boolean {
+        Assert.assertIsDefined(this._rootObject);
         return this._rootObject.hasNamedObject(name);
     }
 
     public removeObject(obj: GameObjectBase): void {
+        Assert.assertIsDefined(this._rootObject);
         this._rootObject.removeObject(obj);
     }
 
     public removeNamedObjects(name: string): void {
+        Assert.assertIsDefined(this._rootObject);
         this._rootObject.removeNamedObjects(name);
     }
 
@@ -225,7 +232,7 @@ export default class AppMode {
 
         this.dispose();
 
-        this._rootObject._disposeInternal();
+        if (this._rootObject) this._rootObject._disposeInternal();
         this._rootObject = null;
 
         this.keyboardInput.dispose();
@@ -233,12 +240,12 @@ export default class AppMode {
 
         this._idObjects = null;
 
-        this._regs.close();
+        if (this._regs) this._regs.close();
         this._regs = null;
 
         this._modeStack = null;
 
-        this._container.destroy({children: true});
+        if (this._container) this._container.destroy({children: true});
         this._container = null;
 
         this._disposed.emit();
@@ -247,7 +254,7 @@ export default class AppMode {
     /* internal */
     public _enterInternal(): void {
         this._isActive = true;
-        this.container.interactiveChildren = true;
+        if (this.container) this.container.interactiveChildren = true;
         this.enter();
         this._entered.emit();
 
@@ -261,7 +268,7 @@ export default class AppMode {
     public _exitInternal(): void {
         this._exited.emit();
         this._isActive = false;
-        this.container.interactiveChildren = false;
+        if (this.container) this.container.interactiveChildren = false;
         this.exit();
     }
 
@@ -272,7 +279,10 @@ export default class AppMode {
     }
 
     /* internal */
-    public _registerObjectInternal(obj: GameObjectBase): void {
+    public _registerObjectInternal(obj: GameObjectBase | null): void {
+        Assert.assertIsDefined(obj);
+        Assert.assertIsDefined(this._regs);
+        Assert.assertIsDefined(this._idObjects);
         obj._mode = this;
 
         // Handle IDs
@@ -280,7 +290,7 @@ export default class AppMode {
         if (ids.length > 0) {
             this._regs.add(obj.destroyed.connect(() => {
                 for (let id of ids) {
-                    this._idObjects.delete(id);
+                    this._idObjects!.delete(id);
                 }
             }));
 
@@ -321,16 +331,16 @@ export default class AppMode {
     protected readonly _disposed: UnitSignal = new UnitSignal();
     protected readonly _resized: UnitSignal = new UnitSignal();
 
-    protected _container: Container = new Container();
-    protected _modeStack: ModeStack;
+    protected _container: Container | null = new Container();
+    protected _modeStack: ModeStack | null;
 
     protected _runningTime: number = 0;
 
-    protected _rootObject: RootObject;
+    protected _rootObject: RootObject | null;
 
-    protected _idObjects: Map<any, GameObjectBase> = new Map();
+    protected _idObjects: Map<any, GameObjectBase> | null = new Map();
 
-    protected _regs: RegistrationGroup = new RegistrationGroup();
+    protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isActive: boolean;
     protected _isDiposed: boolean;

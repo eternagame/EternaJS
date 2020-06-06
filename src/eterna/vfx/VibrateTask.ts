@@ -1,12 +1,13 @@
 import {DisplayObject, Point} from 'pixi.js';
-import {DisplayObjectTask, Easing} from 'flashbang';
+import {DisplayObjectTask, Easing, Assert} from 'flashbang';
 
 export default class VibrateTask extends DisplayObjectTask {
-    constructor(duration: number, target: DisplayObject = null) {
+    constructor(duration: number, target: DisplayObject | null = null) {
         super(duration, Easing.linear, target);
     }
 
     protected updateValues(): void {
+        Assert.assertIsDefined(this._target);
         if (this._startLoc == null) {
             this._startLoc = new Point(this._target.position.x, this._target.position.y);
         }

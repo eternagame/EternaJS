@@ -25,10 +25,10 @@ export default abstract class Button extends ContainerObject implements Enableab
     public readonly clickCanceled: UnitSignal = new UnitSignal();
 
     /** Sound played when the button is pressed (null for no sound) */
-    public downSound: string = null;
+    public downSound: string | null = null;
 
     /** Sound played when the button is pressed while disabled (null for no sound) */
-    public disabledSound: string = null;
+    public disabledSound: string | null = null;
 
     /* override */
     protected added(): void {
@@ -214,5 +214,5 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected _state: ButtonState = ButtonState.UP;
     protected _isPointerOver: boolean;
     protected _isPointerDown: boolean;
-    protected _pointerCapture: PointerCapture;
+    protected _pointerCapture: PointerCapture | null;
 }

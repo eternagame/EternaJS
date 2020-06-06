@@ -4,7 +4,7 @@ import {
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
 import {
-    AppMode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, Flashbang, DisplayUtil, KeyCode
+    AppMode, DisplayObjectPointerTarget, InputUtil, StyledTextBuilder, Flashbang, DisplayUtil, KeyCode, Assert
 } from 'flashbang';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -22,7 +22,7 @@ export default class MissionIntroMode extends AppMode {
 
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
-        customLayout: Array<[number, number]> = null
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
         this._puzzleName = puzzleName;
@@ -34,7 +34,8 @@ export default class MissionIntroMode extends AppMode {
 
     protected setup(): void {
         super.setup();
-
+        Assert.assertIsDefined(this.container);
+        
         let background = new Graphics();
         this.container.addChild(background);
 
@@ -64,11 +65,14 @@ export default class MissionIntroMode extends AppMode {
             .over(Bitmaps.PlayImageOver)
             .down(Bitmaps.PlayImageHit);
         this.addObject(playButton, this.container);
+        
+        Assert.assertIsDefined(this.regs);
         this.regs.add(playButton.clicked.connect(() => this.play()));
 
         let bgImage = Sprite.fromImage(Bitmaps.MissionPuzzleIdImage);
         this.container.addChild(bgImage);
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
         let nameLabel = new HTMLTextObject(this._puzzleName)
             .font(Fonts.STDFONT_LIGHT)
             .fontSize(18)
@@ -102,6 +106,8 @@ export default class MissionIntroMode extends AppMode {
         this.container.addChild(this._constraintsLayer);
 
         let updateLayout = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             // draw background
             background.clear();
             background.beginFill(0x000000);
@@ -190,6 +196,7 @@ export default class MissionIntroMode extends AppMode {
         }
 
         const updateLayout = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
             const spacing = 10;
             const constraintStart = this._scrollUpButton.container.y;
             let yLoc = constraintStart;
@@ -231,6 +238,8 @@ export default class MissionIntroMode extends AppMode {
         this.setPuzzleThumbnail(0);
 
         const updateLayout = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+
             for (let ii = 0; ii < thumbnailButtons.length; ++ii) {
                 let button = thumbnailButtons[ii];
                 button.display.position = new Point(
@@ -246,6 +255,7 @@ export default class MissionIntroMode extends AppMode {
     private play(): void {
         if (!this._closed) {
             this._closed = true;
+            Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
         }
     }
@@ -284,9 +294,17 @@ export default class MissionIntroMode extends AppMode {
     private setupConstraintScrollMask(): void {
         if (this._constraintMask == null) {
             this._constraintMask = new Graphics();
+            Assert.assertIsDefined(this.container);
             this.container.addChild(this._constraintMask);
         }
 
+<<<<<<< HEAD
+        let topY = this._scrollUpButton.display.y;
+        let botY = this._scrollDownButton.display.y;
+
+        Assert.assertIsDefined(Flashbang.stageWidth);
+=======
+>>>>>>> master
         this._constraintMask.clear();
         this._constraintMask.beginFill(0x00FF00, 0);
         this._constraintMask.drawRect(
@@ -316,5 +334,5 @@ export default class MissionIntroMode extends AppMode {
 
     private _constraintMask: Graphics;
 
-    private _customLayout: Array<[number, number]>;
+    private _customLayout: Array<[number, number] | [null, null]> | null;
 }

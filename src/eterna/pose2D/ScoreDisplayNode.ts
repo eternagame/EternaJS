@@ -5,7 +5,7 @@ export enum ScoreDisplayNodeType {
 }
 
 export default class ScoreDisplayNode {
-    public get baseIndices(): number[] {
+    public get baseIndices(): number[] | null {
         return this._baseIndices;
     }
 
@@ -63,6 +63,6 @@ export default class ScoreDisplayNode {
     }
 
     private _type: number;
-    private _baseIndices: number[];
+    private _baseIndices: number[] | null;
     private _score: number;
 }

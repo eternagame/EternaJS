@@ -1,5 +1,6 @@
 import {Registration} from 'signals';
 import LinkedList, {LinkedElement} from 'flashbang/util/LinkedList';
+import {Assert} from 'flashbang';
 
 export interface KeyboardListener {
     /**
@@ -11,7 +12,7 @@ export interface KeyboardListener {
 
 export default class KeyboardInput {
     public dispose(): void {
-        this._listeners.dispose();
+        if (this._listeners) this._listeners.dispose();
         this._listeners = null;
     }
 
@@ -19,16 +20,17 @@ export default class KeyboardInput {
         let handled = false;
         try {
             for (
-                let elt: LinkedElement<KeyboardListener> = this._listeners.beginIteration();
+                let elt: LinkedElement<KeyboardListener> | null = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {
-                handled = elt.data.onKeyboardEvent(e);
+                handled = elt.data != null && elt.data.onKeyboardEvent(e);
                 if (handled) {
                     break;
                 }
             }
         } finally {
+            Assert.assertIsDefined(this._listeners);
             this._listeners.endIteration();
         }
 
@@ -40,13 +42,15 @@ export default class KeyboardInput {
      * so the most recently-added listener gets the first chance at each event.
      */
     public pushListener(l: KeyboardListener): Registration {
+        Assert.assertIsDefined(this._listeners);
         return this._listeners.pushFront(l);
     }
 
     /** Removes all listeners from the KeyboardInput */
     public clearListeners(): void {
+        Assert.assertIsDefined(this._listeners);
         this._listeners.clear();
     }
 
-    private _listeners: LinkedList<KeyboardListener> = new LinkedList();
+    private _listeners: LinkedList<KeyboardListener> | null = new LinkedList();
 }

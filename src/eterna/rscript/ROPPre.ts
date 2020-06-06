@@ -28,7 +28,7 @@ export default class ROPPre extends RScriptOp {
         const modeRegex = /^(Native|Target)Mode$/ig;
         const pushPuzzleRegex = /PushPuzzle/;
 
-        let regResult: RegExpExecArray;
+        let regResult: RegExpExecArray | null;
         if ((regResult = disMissionScreenRegex.exec(command)) != null) {
             this._type = ROPPreType.DISABLE_MISSION_SCREEN;
         } else if ((regResult = altPaletteRegex.exec(command)) != null) {
@@ -113,7 +113,7 @@ export default class ROPPre extends RScriptOp {
         }
     }
 
-    private readonly _type: ROPPreType;
+    private readonly _type: ROPPreType | null;
     private readonly _doVisible: boolean;
     private readonly _doDisable: boolean;
     private readonly _foldMode: PoseState;

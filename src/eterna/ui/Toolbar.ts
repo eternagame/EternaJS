@@ -5,7 +5,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -112,6 +112,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgSubmitHit);
 
         this._invisibleBackground = new Graphics();
+        Assert.assertIsDefined(Flashbang.stageWidth);
         this._invisibleBackground
             .beginFill(0, 0)
             .drawRect(0, 0, Flashbang.stageWidth, 100)
@@ -215,11 +216,11 @@ export default class Toolbar extends ContainerObject {
 
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
         this.addObject(this.actionMenu, lowerToolbarLayout);
-        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(null));
+        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
         this.screenshotButton = new GameButton()
             .allStates(Bitmaps.ImgScreenshot)
-            .disabled(null)
+            .disabled(undefined)
             .label('Screenshot', 14)
             .scaleBitmapToLabel()
             .tooltip('Screenshot');
@@ -227,7 +228,7 @@ export default class Toolbar extends ContainerObject {
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
-            .disabled(null)
+            .disabled(undefined)
             .label('Settings', 14)
             .scaleBitmapToLabel()
             .tooltip('Game options');
@@ -235,7 +236,7 @@ export default class Toolbar extends ContainerObject {
 
         this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
-            .disabled(null)
+            .disabled(undefined)
             .label('Designs', 14)
             .scaleBitmapToLabel()
             .tooltip('View all submitted designs for this puzzle.');
@@ -246,7 +247,7 @@ export default class Toolbar extends ContainerObject {
 
         this.specButton = new GameButton()
             .allStates(Bitmaps.ImgSpec)
-            .disabled(null)
+            .disabled(undefined)
             .label('Specs', 14)
             .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
@@ -261,7 +262,7 @@ export default class Toolbar extends ContainerObject {
 
         this.resetButton = new GameButton()
             .allStates(Bitmaps.ImgReset)
-            .disabled(null)
+            .disabled(undefined)
             .label('Reset', 14)
             .scaleBitmapToLabel()
             .tooltip(resetTooltip)
@@ -269,14 +270,14 @@ export default class Toolbar extends ContainerObject {
 
         this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
-            .disabled(null)
+            .disabled(undefined)
             .label('Copy', 14)
             .scaleBitmapToLabel()
             .tooltip('Copy the current sequence');
 
         this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
-            .disabled(null)
+            .disabled(undefined)
             .label('Paste', 14)
             .scaleBitmapToLabel()
             .tooltip('Type in a sequence');
@@ -287,6 +288,9 @@ export default class Toolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
+<<<<<<< HEAD
+        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
+=======
         this.nucleotideFindButton = new GameButton()
             .allStates(Bitmaps.ImgFind)
             .disabled(null)
@@ -308,6 +312,7 @@ export default class Toolbar extends ContainerObject {
         this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
+>>>>>>> master
         if (this._boostersData != null && this._boostersData.actions != null) {
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
@@ -657,12 +662,17 @@ export default class Toolbar extends ContainerObject {
 
     private readonly _type: ToolbarType;
     private readonly _states: number;
+<<<<<<< HEAD
+    private readonly _showHint: boolean;
+    private readonly _boostersData: BoostersData | null;
+=======
     private readonly _boostersData: BoostersData;
+>>>>>>> master
 
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
     private _toolbarLayout: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
-    private _autoCollapseRegs: RegistrationGroup;
+    private _autoCollapseRegs: RegistrationGroup | null;
 }

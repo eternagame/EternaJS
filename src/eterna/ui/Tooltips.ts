@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import {Registration, RegistrationGroup} from 'signals';
 import {
-    StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button
+    StyledTextBuilder, GameObject, Flashbang, SerialTask, Easing, AlphaTask, DelayTask, GameObjectRef, Button, Assert
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 
@@ -19,8 +19,9 @@ export default class Tooltips extends GameObject {
         fill: 0xC0DCE7
     };
 
-    public static get instance(): Tooltips {
-        return Flashbang.curMode.getObjectWithId(Tooltips);
+    public static get instance(): Tooltips | undefined {
+        Assert.assertIsDefined(Flashbang.curMode);
+        return (Flashbang.curMode.getObjectWithId(Tooltips) as Tooltips);
     }
 
     constructor(layer: Container) {
@@ -134,7 +135,7 @@ export default class Tooltips extends GameObject {
     private readonly _layer: Container;
 
     private _curTooltipKey: any;
-    private _curTooltip: DisplayObject;
+    private _curTooltip: DisplayObject | null;
     private _curTooltipFader: GameObjectRef = GameObjectRef.NULL;
 
     private static readonly TARGET_BOUNDS = new Rectangle();

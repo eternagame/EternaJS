@@ -88,8 +88,8 @@ export default class EPars {
         }
     }
 
-    public static getBarcodeHairpin(seq: string): string {
-        let hairpinMatch: string[] = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
+    public static getBarcodeHairpin(seq: string): string | null {
+        let hairpinMatch: RegExpExecArray | null = (/[AGUC]{7}UUCG([AGUC]{7})AAAAGAAACAACAACAACAAC$/i).exec(seq);
         if (hairpinMatch == null) {
             return null;
         }
@@ -415,15 +415,15 @@ export default class EPars {
      * @param strInput string inputted like 'ACUGU 11-12,,,16'
      * @returns array of Nucleotide enums like [RNABASE_ADENINE, ...]
      */
-    public static indexedStringToSequence(strInput: string, customNumbering: number[] = null):
-    number[] {
+    public static indexedStringToSequence(strInput: string, customNumbering: (number | null)[] | null = null):
+    number[] | null {
         // make robust to blanks:
         let strChunks: string[] = strInput.trim().split(/\s+/); // spaces
         if (strChunks.length === 0) return []; // blank sequence, no op.
         let seqStr = strChunks[0]; // sequence like ACUGU
 
         // process rest of string like '11-14 16' to get indices for pasting
-        let indices: number[] = [];
+        let indices: (number | null)[] | null = [];
         if (strChunks.length > 1) {
             indices = Utility.getIndices(strChunks.slice(1).join());
             if (indices === null) return null; // signal error
@@ -444,13 +444,13 @@ export default class EPars {
                 // assume player is copy/pasting into the same puzzle.
                 return this.stringToSequence(seqStr, true /* allowCut */, true /* allowUnknown */);
             }
-            indices = indices.map((n) => customNumbering.indexOf(n) + 1);
+            indices = indices.filter((n) => n !== null).map((n) => customNumbering.indexOf(n!) + 1);
         }
 
-        let seqArray: number[] = Array(Math.max(...indices)).fill(EPars.RNABASE_UNDEFINED);
+        let seqArray: number[] = Array(Math.max(...(indices.filter((n) => n !== null)) as number[])).fill(EPars.RNABASE_UNDEFINED);
         for (let n = 0; n < indices.length; n++) {
             let ii = indices[n];
-            if (ii >= 0) {
+            if (ii !== null && ii >= 0) {
                 let char = seqStr.charAt(n);
                 seqArray[ii - 1] = this.stringToNucleotide(char, true /* allowCut */, true /* allowUnknown */);
             }

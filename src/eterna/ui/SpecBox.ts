@@ -142,7 +142,7 @@ export default class SpecBox extends ContainerObject {
         this._dotplot = datablock.createDotPlot();
         this._meltplot = datablock.createMeltPlot();
 
-        if (this._stattext != null) {
+        if (this._stattext != undefined) {
             let statString = new StyledTextBuilder({
                 fontFamily: Fonts.ARIAL,
                 fontSize: 14,

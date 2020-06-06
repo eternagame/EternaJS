@@ -1,4 +1,4 @@
-import {KeyCode, Flashbang} from 'flashbang';
+import {KeyCode, Flashbang, Assert} from 'flashbang';
 import EPars from 'eterna/EPars';
 import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
 import Dialog, {DialogCanceledError} from 'eterna/ui/Dialog';
@@ -14,8 +14,8 @@ function GetNumber(dict: Map<string, string>, name: string): number | undefined 
 }
 
 export interface SubmitPuzzleDetails {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
 
     minGU?: number;
     maxGC?: number;
@@ -70,7 +70,7 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
 
         title.setFocus();
 
-        inputPanel.setHotkeys(null, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(undefined, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
@@ -92,17 +92,20 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         });
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
         updateLocation();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
-    private validate(details: SubmitPuzzleDetails): string {
-        if (details.title.length === 0) {
+    private validate(details: SubmitPuzzleDetails): string | null {
+        if (!details.title || details.title.length === 0) {
             return 'You must enter a title for your puzzle';
-        } else if (details.description.length === 0) {
+        } else if (!details.description || details.description.length === 0) {
             return 'You must write a description of your puzzle';
         }
 

@@ -28,7 +28,7 @@ export default class RegistrationGroup implements Registration {
             let regs = this._regs;
             this._regs = null;
 
-            let err: MultiFailureError = null;
+            let err: MultiFailureError | null = null;
             for (let r of regs) {
                 try {
                     r.close();
@@ -46,5 +46,5 @@ export default class RegistrationGroup implements Registration {
         }
     }
 
-    private _regs: Set<Registration>; // lazily instantiated
+    private _regs: Set<Registration> | null; // lazily instantiated
 }

@@ -7,9 +7,9 @@ import Connection from './Connection';
  */
 export default class Cons implements Connection {
     /** The next connection in our chain. */
-    public next: Cons;
+    public next: Cons | null;
 
-    constructor(owner: Reactor, listener: RListener) {
+    constructor(owner: Reactor | null, listener: RListener | null) {
         this._owner = owner;
         this._listener = listener;
     }
@@ -20,7 +20,7 @@ export default class Cons implements Connection {
     }
 
     /** Returns the listener for this cons cell. */
-    public get listener(): RListener {
+    public get listener(): RListener | null {
         return this._listener;
     }
 
@@ -50,7 +50,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    public static _insert(head: Cons, cons: Cons): Cons {
+    public static _insert(head: Cons | null, cons: Cons): Cons {
         if (head == null) {
             return cons;
         } else if (cons._priority > head._priority) {
@@ -63,7 +63,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    public static _remove(head: Cons, cons: Cons): Cons {
+    public static _remove(head: Cons | null, cons: Cons): Cons | null {
         if (head == null) {
             return head;
         } else if (head === cons) {
@@ -75,7 +75,7 @@ export default class Cons implements Connection {
     }
 
     /* internal */
-    public static _removeAll(head: Cons, listener: RListener): Cons {
+    public static _removeAll(head: Cons | null, listener: RListener): Cons | null {
         if (head == null) {
             return null;
         } else if (head.listener === listener) {
@@ -86,8 +86,8 @@ export default class Cons implements Connection {
         }
     }
 
-    private _owner: Reactor;
-    private _listener: RListener;
+    private _owner: Reactor | null;
+    private _listener: RListener | null;
     private _oneShot: boolean;
     private _priority: number = 0;
 }

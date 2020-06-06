@@ -1,6 +1,6 @@
 import {Point, Texture} from 'pixi.js';
 import {
-    SpriteObject, Flashbang, ParallelTask, Easing, AlphaTask, ScaleTask, Updatable
+    SpriteObject, Flashbang, ParallelTask, Easing, AlphaTask, ScaleTask, Updatable, Assert
 } from 'flashbang';
 import Bitmaps from 'eterna/resources/Bitmaps';
 
@@ -45,6 +45,8 @@ export default class Bubble extends SpriteObject implements Updatable {
         this._accX = 0;
         this._accY = 0;
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         if (!this._foreground) {
             this.display.scale.x = 0;
             this.display.scale.y = 0;
@@ -87,6 +89,7 @@ export default class Bubble extends SpriteObject implements Updatable {
             return;
         }
 
+        Assert.assertIsDefined(Flashbang.globalMouse);
         let mouseLoc = this.display.toLocal(Flashbang.globalMouse, undefined, Bubble.P);
         let mX = mouseLoc.x - tex.width / 2.0;
         let mY = mouseLoc.y - tex.height / 2.0;

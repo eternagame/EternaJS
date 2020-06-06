@@ -1,7 +1,7 @@
 import {Point} from 'pixi.js';
 import Fonts from 'eterna/util/Fonts';
 import {
-    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang
+    RepeatingTask, SerialTask, AlphaTask, Easing, Flashbang, Assert
 } from 'flashbang';
 import Dialog from './Dialog';
 
@@ -23,12 +23,15 @@ export default class AsyncProcessDialog extends Dialog<void> {
         )));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             textField.position = new Point(
                 (Flashbang.stageWidth - textField.width) * 0.5,
                 (Flashbang.stageHeight - textField.height) * 0.5
             );
         };
         updateLocation();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
