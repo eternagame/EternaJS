@@ -21,6 +21,11 @@ export default class RNApuzzler extends LayoutEngine {
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new RNApuzzler(program));
     }
+    
+    private constructor(lib: RNApuzzlerLib) {
+        super();
+        this._lib = lib;
+    }
 
     public getLayout(pairTable: number[]): [number, number][] {
         // AMW: assumes pairTable is formatted appropriately for the RNApuzzler,
@@ -44,11 +49,6 @@ export default class RNApuzzler extends LayoutEngine {
             zip.push([Xs[ii], Ys[ii]]);
         }
         return zip;
-    }
-
-    private constructor(lib: RNApuzzlerLib) {
-        super();
-        this._lib = lib;
     }
 
     public get name(): string {
