@@ -109,9 +109,7 @@ export default class RNALayout {
         // /   an array the same length as RNA
         // /   with -1 for unpaired bases, and
         // /   with the partner number for each paired base.
-        for (ii = 0; ii < pairs.length; ii++) {
-            biPairs[ii] = -1;
-        }
+        biPairs.fill(-1);
 
         for (ii = 0; ii < pairs.length; ii++) {
             if (ii < pairs[ii]) {
@@ -128,6 +126,9 @@ export default class RNALayout {
             this._scoreBiPairs[ii + 1] = biPairs[ii] + 1;
         }
         this._scoreBiPairs[0] = biPairs.length;
+
+        this._pseudoknotPairs = (new Array(biPairs.length)).fill(-1);
+        this._nopseudoknotPairs = (new Array(biPairs.length)).fill(-1);
 
         // / no tree if there are no pairs -- special case to be handled
         // /  separately in getCoords.

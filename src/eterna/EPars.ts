@@ -781,7 +781,6 @@ export default class EPars {
 
     public static filterForPseudoknots(pairs: number[]): number[] {
         // Round-trip to remove all pseudoknots.
-        if (!pairs) return pairs;
         let filtered: string = EPars.pairsToParenthesis(pairs, null, true)
             .replace(/\{/g, '.')
             .replace(/\}/g, '.')
@@ -794,8 +793,6 @@ export default class EPars {
 
     public static onlyPseudoknots(pairs: number[]): number[] {
         // Round-trip to remove all non-pseudoknots.
-        if (!pairs) return pairs;
-
         let filtered: string = EPars.pairsToParenthesis(pairs, null, true)
             .replace(/\(/g, '.')
             .replace(/\)/g, '.');

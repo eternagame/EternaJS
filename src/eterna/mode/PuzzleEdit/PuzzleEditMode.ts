@@ -199,6 +199,10 @@ export default class PuzzleEditMode extends GameMode {
             };
         };
 
+        // We don't appropriately handle these, so for now just force them off
+        Eterna.settings.showRope.value = false;
+        Eterna.settings.usePuzzlerLayout.value = false;
+
         let initialPoseData = this._initialPoseData;
         for (let ii = 0; ii < this._numTargets; ii++) {
             let defaultStructure = '.....((((((((....)))))))).....';

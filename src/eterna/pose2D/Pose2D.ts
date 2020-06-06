@@ -167,6 +167,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         );
         this.regs.add(Eterna.settings.displayAuxInfo.connectNotify((value) => { this.displayAuxInfo = value; }));
         this.regs.add(Eterna.settings.simpleGraphics.connectNotify((value) => { this.useSimpleGraphics = value; }));
+        this.regs.add(Eterna.settings.usePuzzlerLayout.connect(() => this.computeLayout()));
     }
 
     public setSize(width: number, height: number): void {
