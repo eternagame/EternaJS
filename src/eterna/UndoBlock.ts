@@ -259,7 +259,12 @@ export default class UndoBlock {
             }
 
             if (this.getParam(UndoBlockParam.DOTPLOT, ii) == null) {
-                let dotTempArray: number[] | null = folder.getDotPlot(this.sequence, this.getPairs(ii), ii, pseudoknots);
+                let dotTempArray: number[] | null = folder.getDotPlot(
+                    this.sequence,
+                    this.getPairs(ii),
+                    ii,
+                    pseudoknots
+                );
                 Assert.assertIsDefined(dotTempArray);
                 this.setParam(UndoBlockParam.DOTPLOT, dotTempArray, ii, pseudoknots);
             }

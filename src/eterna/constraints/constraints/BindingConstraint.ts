@@ -65,8 +65,8 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
             }
 
             clarifyTextBuilder.append(
-                `${oligos[ii]!.label}`,
-                {fill: oligos[ii]!.bind ? '#ffffff' : '#808080'}
+                `${oligos[ii].label}`,
+                {fill: oligos[ii].bind ? '#ffffff' : '#808080'}
             );
         }
 
@@ -180,7 +180,10 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         context: ConstraintContext
     ): HighlightInfo {
         let undoBlock = context.undoBlocks[this.stateIndex];
-        Assert.assertIsDefined(context.targetConditions, 'BINDING constraint specified, but no oligo definitions are present');
+        Assert.assertIsDefined(
+            context.targetConditions,
+            'BINDING constraint specified, but no oligo definitions are present'
+        );
         const oligos: OligoDef[] = context.targetConditions[this.stateIndex]['oligos'];
 
         let highlightedIndices: number[] = [];

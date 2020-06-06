@@ -2,13 +2,13 @@ import * as log from 'loglevel';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
+import {Assert} from 'flashbang';
 import * as LinearFoldLib from './engines/LinearFoldLib';
 import {DotPlotResult, FullFoldResult} from './engines/LinearFoldLib';
 import {FullEvalResult} from './engines/ViennaLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
-import { Assert } from 'flashbang';
 
 export default abstract class LinearFoldBase extends Folder {
     protected constructor(lib: LinearFoldLib) {
@@ -200,7 +200,8 @@ export default abstract class LinearFoldBase extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0,
+        desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         log.warn('LinearFold.cofoldSequence: unimplemented');
         return this.foldSequence(seq, null);

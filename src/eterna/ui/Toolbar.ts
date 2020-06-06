@@ -83,7 +83,7 @@ export default class Toolbar extends ContainerObject {
 
     constructor(
         type: ToolbarType,
-        {states = 1, boosters }: {states?: number; boosters?: BoostersData}
+        {states = 1, boosters}: {states?: number; boosters?: BoostersData}
     ) {
         super();
         this._type = type;
@@ -310,7 +310,7 @@ export default class Toolbar extends ContainerObject {
         this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
 
         this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
-        
+
         if (this._boostersData != null && this._boostersData.actions != null) {
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {

@@ -285,7 +285,8 @@ export default class Vienna2 extends Folder {
 
     /* override */
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0,
+        desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {

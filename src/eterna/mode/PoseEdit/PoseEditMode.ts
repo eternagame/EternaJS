@@ -335,11 +335,6 @@ export default class PoseEditMode extends GameMode {
         this._exitButton.display.position = new Point(Flashbang.stageWidth - 85, Flashbang.stageHeight - 60);
         this._undockSpecBoxButton.display.position = new Point(Flashbang.stageWidth - 22, 5);
 
-        this._scriptbar.display.position = new Point(
-            Flashbang.stageWidth - 20 - this._scriptbar.width,
-            Flashbang.stageHeight - 129
-        );
-
         this._constraintBar.layout(false, this._isPipMode ? this._targetConditions.length : 1);
 
         this._dockedSpecBox.setSize(Flashbang.stageWidth, Flashbang.stageHeight - 340);
@@ -758,28 +753,6 @@ export default class PoseEditMode extends GameMode {
                 }
             }
         });
-
-        let pairs: number[] = EPars.parenthesisToPairs(this._puzzle.getSecstruct());
-
-        // / Setup Action bar
-        this._scriptbar.clearItems(false);
-
-        // this._scriptbar.visible = false;
-        // if (this.root.loaderInfo.parameters.scriptbar
-        //     && this.root.loaderInfo.parameters.scriptbar === "true") {
-        //     this._scriptbar.visible = true;
-        //     this._scriptbar.add_item(this._nid_field, false, false);
-        //     this._scriptbar.add_item(this._run_button, false, false);
-        //     this._scriptbar.add_item(this._run_status);
-        //
-        //     if (ExternalInterface.available) {
-        //         this._scriptbar.set_disabled(false);
-        //         this._run_button.set_click_callback(this.on_click_run);
-        //     } else {
-        //         this._scriptbar.enabled = false;
-        //         this._run_button.set_click_callback(null);
-        //     }
-        // }
 
         let initialFolder: Folder | null = null;
         if (this._params.initialFolder != null) {
@@ -3230,7 +3203,6 @@ export default class PoseEditMode extends GameMode {
     private _uiHighlight: SpriteObject;
 
     private _homeButton: GameButton;
-    private _scriptbar: ActionBar;
     private _undockSpecBoxButton: GameButton;
     private _ropPresets: (() => void)[] = [];
 

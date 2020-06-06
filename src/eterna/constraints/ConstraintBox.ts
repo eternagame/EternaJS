@@ -147,8 +147,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != undefined;
-        if (config.fullTexture != undefined) {
+        this._req.visible = config.fullTexture !== undefined;
+        if (config.fullTexture !== undefined) {
             this._req.texture = config.fullTexture;
         }
 
@@ -159,11 +159,11 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != undefined;
-        if (this._reqClarifyText.visible) {
+        this._reqClarifyText.visible = config.clarificationText !== undefined;
+        if (config.clarificationText !== undefined) {
             // We know config.clarificationText is not undefined because of the
             // above condition, so we can type guard
-            this.setPossiblyStyledText(config.clarificationText!, this._reqClarifyText);
+            this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 2, 32
@@ -171,9 +171,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         }
 
         this._reqStatText.visible = config.statText != undefined && !this._forMissionScreen;
-        if (this._reqStatText.visible) {
+        if (config.statText != undefined && !this._forMissionScreen) {
             // We know config.statText isn't undefined due to the above condition
-            this.setPossiblyStyledText(config.statText!, this._reqStatText);
+            this.setPossiblyStyledText(config.statText, this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
                 this._outline, HAlign.CENTER, VAlign.TOP, 0, 50

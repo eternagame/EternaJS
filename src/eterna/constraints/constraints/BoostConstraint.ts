@@ -1,9 +1,9 @@
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import EPars from 'eterna/EPars';
+import {Assert} from 'flashbang';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
-import { Assert } from 'flashbang';
 
 interface BoostConstraintStatus extends BaseConstraintStatus {
     boostCount: number;

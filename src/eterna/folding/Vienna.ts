@@ -258,7 +258,9 @@ export default class Vienna extends Folder {
             );
         } else {
             if (!targetPairs) {
-                throw new Error("Can't fold with binding site and siteGroups length other than 2 if targetPairs is null!");
+                throw new Error(
+                    "Can't fold with binding site and siteGroups length other than 2 if targetPairs is null!"
+                );
             }
             pairs = this.foldSequenceWithBindingSiteOld(seq, targetPairs, bindingSite, bonus);
         }
@@ -272,7 +274,8 @@ export default class Vienna extends Folder {
     }
 
     public cofoldSequence(
-        seq: number[], secondBestPairs: number[], malus: number = 0, desiredPairs: string | null = null, temp: number = 37
+        seq: number[], secondBestPairs: number[], malus: number = 0,
+        desiredPairs: string | null = null, temp: number = 37
     ): number[] {
         let cut: number = seq.indexOf(EPars.RNABASE_CUT);
         if (cut < 0) {

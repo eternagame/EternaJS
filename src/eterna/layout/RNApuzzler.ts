@@ -1,9 +1,5 @@
-import * as log from 'loglevel';
-import EPars from 'eterna/EPars';
 /* eslint-disable import/no-duplicates, import/no-unresolved */
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
-import Utility from 'eterna/util/Utility';
-import RNALayout from 'eterna/pose2D/RNALayout';
 import LayoutEngine from 'eterna/layout/LayoutEngine';
 import * as RNApuzzlerLib from 'eterna/folding/engines/RNApuzzlerLib';
 // import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ViennaLib';

@@ -35,7 +35,7 @@ export default class MissionIntroMode extends AppMode {
     protected setup(): void {
         super.setup();
         Assert.assertIsDefined(this.container);
-        
+
         let background = new Graphics();
         this.container.addChild(background);
 
@@ -65,7 +65,7 @@ export default class MissionIntroMode extends AppMode {
             .over(Bitmaps.PlayImageOver)
             .down(Bitmaps.PlayImageHit);
         this.addObject(playButton, this.container);
-        
+
         Assert.assertIsDefined(this.regs);
         this.regs.add(playButton.clicked.connect(() => this.play()));
 

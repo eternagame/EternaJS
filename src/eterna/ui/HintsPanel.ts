@@ -1,5 +1,7 @@
 import {Point} from 'pixi.js';
-import {Flashbang, StyledTextBuilder, ContainerObject, Assert} from 'flashbang';
+import {
+    Flashbang, StyledTextBuilder, ContainerObject, Assert
+} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import TextUtil from 'eterna/util/TextUtil';
 import MultiPagePanel from './MultiPagePanel';

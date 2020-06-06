@@ -4,7 +4,7 @@ import NuPACK from 'eterna/folding/NuPACK';
 import LayoutEngineManager from 'eterna/layout/LayoutEngineManager';
 import RNApuzzler from 'eterna/layout/RNApuzzler';
 import Eterna from 'eterna/Eterna';
-import { Assert } from 'flashbang';
+import {Assert} from 'flashbang';
 
 enum RotationDirection {
     CCW = -1, // counterclockwise
@@ -983,7 +983,7 @@ export default class RNALayout {
 
         let rnap = LayoutEngineManager.instance.getLayoutEngine(RNApuzzler.NAME);
 
-        Assert.assertIsDefined(rnap, "Attempted to use RNAPuzzler, but it was not able to be laoded");
+        Assert.assertIsDefined(rnap, 'Attempted to use RNAPuzzler, but it was not able to be laoded');
 
         return rnap.getLayout(pairTable);
     }
