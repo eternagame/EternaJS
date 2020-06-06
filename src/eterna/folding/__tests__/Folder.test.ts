@@ -25,17 +25,17 @@ function CreateFolder(type: any): Promise<Folder> {
     return type.create();
 }
 
-test('linearfoldC:HannahTests', () => {
+test('linearfoldC:MFETests', () => {
     return expect(CreateFolder(LinearFoldC).then((folder) => {
         let expectedFE: number[] = [
-            -4.30,// -4.29,
-            -2.48,
-            -6.21,
-            -4.30, //-4.32, //-4.30,
-            -10.18, //-10.19, //-10.18,
-            -2.52,
-            -8.67,
-            -4.91,
+            -430,// -4.29,
+            -248,
+            -621,
+            -430, //-4.32, //-4.30,
+            -1018, //-10.19, //-10.18,
+            -252,
+            -867,
+            -491,
         ];
         let expectedNNFE: number[][] = [
             [4,636,3,-239,2,-239,1,-239,0,-239,-1,-108],
@@ -63,7 +63,7 @@ test('linearfoldC:HannahTests', () => {
             EPars.parenthesisToPairs("...........((((....))))...........................................(((....)))........."),
             EPars.parenthesisToPairs("...........((((....))))...........................................(((.((.(((((((((((((.........((((.....))))........))))))))))))))).)))........."),
             EPars.parenthesisToPairs("((((.........((((.....))))........))))"),
-
+            
         ];
         let sequences: number[][] = [
             EPars.stringToSequence(  "GGGGGAAAAAAAACCCCC"),
@@ -87,7 +87,47 @@ test('linearfoldC:HannahTests', () => {
                 37,
                 outNNFE);
             
-            expect(FE).toBeDeepCloseTo(expectedFE[ii], 2);
+            expect(FE).toBeDeepCloseTo(expectedFE[ii], 0);
+            expect(outNNFE).toEqual(expectedNNFE[ii]);
+        }
+    })).resolves.toBeUndefined();
+    // toEqual([
+    //     EPars.parenthesisToPairs("(((((........)))))")
+    // ]);
+});
+
+
+test('linearfoldC:SubOptTests', () => {
+    return expect(CreateFolder(LinearFoldC).then((folder) => {
+        let expectedFE: number[] = [
+            192,
+            9,
+        ];
+        let expectedNNFE: number[][] = [
+            [1, 539, 0, -239, -1, -108],
+            [-1, 9],
+        ];
+        let structures: number[][] = [
+            EPars.parenthesisToPairs("((......))"),
+            EPars.parenthesisToPairs(".........."),
+            
+        ];
+        let sequences: number[][] = [
+            EPars.stringToSequence(  "GGGGAAAACC"),
+            EPars.stringToSequence(  "GGGGAAAACC"),
+        ];
+
+        for (let ii: number = 0; ii < sequences.length; ++ii ) {
+
+            let outNNFE: number[] = [];
+            let FE = folder.scoreStructures(
+                sequences[ii],
+                structures[ii],
+                false,
+                37,
+                outNNFE);
+            
+            expect(FE).toBeDeepCloseTo(expectedFE[ii], 0);
             expect(outNNFE).toEqual(expectedNNFE[ii]);
         }
     })).resolves.toBeUndefined();
