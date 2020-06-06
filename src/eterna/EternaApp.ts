@@ -153,10 +153,12 @@ export default class EternaApp extends FlashbangApp {
                 // We can only do this now, since we need the username and UID to connect
                 Eterna.chat = new ChatManager(this._params.chatboxID, Eterna.settings);
                 this.setLoadingText('Loading game...', null);
-                return Promise.all([this.initFoldingEngines(),
+                return Promise.all([
+                    this.initFoldingEngines(),
                     this.initLayoutEngines(),
                     TextureUtil.load(Bitmaps.all),
-                    Fonts.loadFonts()]);
+                    Fonts.loadFonts()
+                ]);
             })
             .then(() => this.initScriptInterface())
             .then(() => {
