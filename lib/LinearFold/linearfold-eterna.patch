@@ -12,7 +12,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFold.h LinearFold/src/LinearFo
  
 diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/LinearFoldEval.cpp
 --- LinearFold_stock/src/LinearFoldEval.cpp	2020-06-04 13:23:22.000000000 -0400
-+++ LinearFold/src/LinearFoldEval.cpp	2020-06-06 19:48:07.000000000 -0400
++++ LinearFold/src/LinearFoldEval.cpp	2020-06-07 19:27:38.000000000 -0400
 @@ -16,15 +16,34 @@
  
  using namespace std;
@@ -70,7 +70,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
      tuple<int, int> inner_loop;
  
 +    int num_external_unpaired = 0;
-+    bool all_unpaired = true;
++    // bool all_unpaired = true;
      for (int j=0; j<seq_length; j++) {
          M1_energy[j] = 0; // init multi of position j
          multi_number_unpaired[j] = 0;
@@ -85,7 +85,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
          }
  
          else if (ref[j] == '(') {
-+            all_unpaired = false;
++            // all_unpaired = false;
              if (!stk.empty()) { // +1 for outer loop page
                  stk.top().second ++;
              }
@@ -93,7 +93,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
          }
  
          else if (ref[j] == ')') {
-+            all_unpaired = false;
++            // all_unpaired = false;
              assert(!stk.empty());
              tuple<int, int> top = stk.top();
              int i = get<0>(top), page = get<1>(top);
@@ -176,7 +176,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
 +                multi_score += M1_energy[i];
 +                multi_score += -100.0 * score_multi(i, j, nuci, nuci1, nucj_1, nucj, seq_length);
 +                multi_score += -100.0 * score_multi_unpaired(i+1, i + multi_number_unpaired[i]); // current model is 0
-+                if (eos_cb) (*eos_cb)(i+1, multi_score * -1);
++                if (eos_cb) (*eos_cb)(i+1, multi_score);
 +                if (is_verbose)
 +                    printf("Multi loop ( %d, %d) %c%c : %.2f\n", i+1, j+1, seq[i], seq[j], multi_score);
 +#endif
@@ -239,7 +239,7 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
 -}
 \ No newline at end of file
 +#else
-+    if (all_unpaired) return 0;
++    // if (all_unpaired) return 0;
 +    
 +    return -1 * total_energy;
 +#endif
