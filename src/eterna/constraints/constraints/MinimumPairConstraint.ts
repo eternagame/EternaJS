@@ -5,15 +5,31 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
+enum Pair {
+    GC = EPars.RNABASE_GC_PAIR,
+    AU = EPars.RNABASE_AU_PAIR,
+    GU = EPars.RNABASE_GU_PAIR,
+    ANY = EPars.RNABASE_PAIR
+}
+
+const PAIR_PARAM_MAP = new Map<Pair, UndoBlockParam>(
+    [
+        [Pair.GC, UndoBlockParam.GC],
+        [Pair.AU, UndoBlockParam.AU],
+        [Pair.GU, UndoBlockParam.GU],
+        [Pair.ANY, UndoBlockParam.ANY_PAIR]
+    ]
+);
+
 interface MinPairConstraintStatus extends BaseConstraintStatus {
     currentPairs: number;
 }
 
 abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus> {
-    public readonly pairType: UndoBlockParam;
+    public readonly pairType: Pair;
     public readonly minPairs: number;
 
-    constructor(pairType: UndoBlockParam, minPairs: number) {
+    constructor(pairType: Pair, minPairs: number) {
         super();
         this.pairType = pairType;
         this.minPairs = minPairs;
@@ -21,9 +37,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MinPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = context.undoBlocks[0].getParam(
-            UndoBlockParam[EPars.nucleotidePairToString(this.pairType)]
-        );
+        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
         return {
             satisfied: (
                 currentPairs >= this.minPairs
@@ -74,7 +88,7 @@ export class MinimumGCConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GCMIN';
 
     constructor(count: number) {
-        super(UndoBlockParam.GC, count);
+        super(Pair.GC, count);
     }
 
     /** @override */
@@ -102,7 +116,7 @@ export class MinimumAUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'AU';
 
     constructor(count: number) {
-        super(UndoBlockParam.AU, count);
+        super(Pair.AU, count);
     }
 
     /** @override */
@@ -130,7 +144,7 @@ export class MinimumGUConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'GU';
 
     constructor(count: number) {
-        super(UndoBlockParam.GU, count);
+        super(Pair.GU, count);
     }
 
     /** @override */
@@ -158,7 +172,7 @@ export class MinimumAnyPairConstraint extends MinimumPairConstraint {
     public static readonly NAME = 'PAIRS';
 
     constructor(count: number) {
-        super(UndoBlockParam.ANY_PAIR, count);
+        super(Pair.ANY, count);
     }
 
     /** @override */

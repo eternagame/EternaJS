@@ -370,7 +370,7 @@ export default class EPars {
         } else if (value === EPars.RNABASE_GC_PAIR) {
             return 'GC';
         } else {
-            throw new Error(`Bad nucleotide '${value}`);
+            throw new Error(`Bad nucleotide "${value}"`);
         }
     }
 
