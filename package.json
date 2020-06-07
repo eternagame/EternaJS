@@ -1,6 +1,7 @@
 {
   "name": "eternajs",
-  "version": "1.0.0",
+  "version": "1.7.0",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
     "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && concurrently \"npm run build:dev -- --watch\" \"ws -d dist/dev -p 63343\"",
