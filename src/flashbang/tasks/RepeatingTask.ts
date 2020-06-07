@@ -30,8 +30,7 @@ export default class RepeatingTask extends ObjectTask {
     }
 
     protected restart(): void {
-        Assert.assertIsDefined(this.parent);
-        if (!this.isLiveObject || !this.parent.isLiveObject) {
+        if (!this.isLiveObject || (this.parent && !this.parent.isLiveObject)) {
             return;
         }
 

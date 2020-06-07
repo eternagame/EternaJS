@@ -14,8 +14,7 @@ export default class DisplayObjectTask extends InterpolatingTask {
         super.added();
         // If we weren't given a target, operate on our parent object
         if (this._target == null) {
-            Assert.assertIsDefined(this.parent);
-            Assert.notNull(this.parent.display, 'parent does not have a DisplayObject');
+            Assert.assertIsDefined(this.parent, 'parent does not have a DisplayObject');
             this._target = this.parent.display;
         }
     }
