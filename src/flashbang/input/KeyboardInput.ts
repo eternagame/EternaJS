@@ -20,7 +20,7 @@ export default class KeyboardInput {
         let handled = false;
         try {
             for (
-                let elt: LinkedElement<KeyboardListener> | null = this._listeners ? this._listeners.beginIteration() : null;
+                let elt = this._listeners ? this._listeners.beginIteration() : null;
                 elt != null;
                 elt = elt.next
             ) {

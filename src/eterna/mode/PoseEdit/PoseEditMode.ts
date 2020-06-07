@@ -734,7 +734,10 @@ export default class PoseEditMode extends GameMode {
                         let currBlock = this.getCurrentUndoBlock(poseState);
                         let naturalMap = currBlock.reorderedOligosIndexMap(currBlock.oligoOrder);
                         let ranges = (this._poseState === PoseState.NATIVE && naturalMap != null)
-                            ? highlightInfo.ranges.map((index: number) => naturalMap!.indexOf(index)) : highlightInfo.ranges;
+                            ? highlightInfo.ranges.map((index: number) => {
+                                Assert.assertIsDefined(naturalMap);
+                                return naturalMap.indexOf(index);
+                            }) : highlightInfo.ranges;
 
                         switch (highlightInfo.color) {
                             case HighlightType.RESTRICTED:
@@ -844,8 +847,8 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].structConstraints = this._targetConditions[ii]['structure_constraints'];
 
                 this._poses[ii].customLayout = this._targetConditions[ii]['custom-layout'];
-                if (this._poses[ii].customLayout != null
-                    && this._poses[ii].customLayout!.length !== targetSecstructs[ii].length) {
+                const customLayout = this._poses[ii].customLayout;
+                if (customLayout != null && customLayout.length !== targetSecstructs[ii].length) {
                     log.warn(
                         'custom-layout field from puzzle objective json does not match target length.'
                         + ' Ignoring custom-layout'
@@ -856,15 +859,16 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].customNumbering = Utility.numberingJSONToArray(
                     this._targetConditions[ii]['custom-numbering']
                 );
-                if (this._poses[ii].customNumbering != null) {
-                    if (this._poses[ii].customNumbering!.length !== targetSecstructs[ii].length) {
+                const customNumbering = this._poses[ii].customNumbering;
+                if (customNumbering != null) {
+                    if (customNumbering.length !== targetSecstructs[ii].length) {
                         log.warn(
                             'custom-numbering field from puzzle objective json does not match target length.'
                             + ' Ignoring custom-numbering'
                         );
                         this._poses[ii].customNumbering = null;
                     } else {
-                        let x = this._poses[ii].customNumbering!;
+                        let x = customNumbering;
                         for (let jj = 0; jj < x.length; jj++) {
                             if (x[jj] == null) continue;
                             let kk = x.indexOf(x[jj]);
@@ -1001,24 +1005,26 @@ export default class PoseEditMode extends GameMode {
         this._scriptInterface.addCallback('is_barcode_available',
             (seq: string): boolean => SolutionManager.instance.checkRedundancyByHairpin(seq));
 
-        this._scriptInterface.addCallback('current_folder', (): string | null => (this._folder ? this._folder.name : null));
+        this._scriptInterface.addCallback('current_folder',
+            (): string | null => (this._folder ? this._folder.name : null));
 
-        this._scriptInterface.addCallback('fold', (seq: string, constraint: string | null = null): string | null => {
-            if (this._folder === null) {
-                return null;
-            }
-            let seqArr: number[] = EPars.stringToSequence(seq);
-            if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
-                let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
-                Assert.assertIsDefined(folded);
-                return EPars.pairsToParenthesis(folded, null, true);
-            } else {
-                let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint);
-                Assert.assertIsDefined(folded);
-                return EPars.pairsToParenthesis(folded);
-            }
-        });
+        this._scriptInterface.addCallback('fold',
+            (seq: string, constraint: string | null = null): string | null => {
+                if (this._folder === null) {
+                    return null;
+                }
+                let seqArr: number[] = EPars.stringToSequence(seq);
+                if (this._targetConditions && this._targetConditions[0]
+                        && this._targetConditions[0]['type'] === 'pseudoknot') {
+                    let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
+                    Assert.assertIsDefined(folded);
+                    return EPars.pairsToParenthesis(folded, null, true);
+                } else {
+                    let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint);
+                    Assert.assertIsDefined(folded);
+                    return EPars.pairsToParenthesis(folded);
+                }
+            });
 
         this._scriptInterface.addCallback('fold_with_binding_site',
             (seq: string, site: number[], bonus: number): string | null => {
@@ -1079,7 +1085,9 @@ export default class PoseEditMode extends GameMode {
                 let len: number = seq.length;
                 let cseq = `${seq}&${oligo}`;
                 let seqArr: number[] = EPars.stringToSequence(cseq);
-                let folded: number[] | null = this._folder.cofoldSequence(seqArr, null, Math.floor(malus * 100), constraint);
+                let folded: number[] | null = this._folder.cofoldSequence(
+                    seqArr, null, Math.floor(malus * 100), constraint
+                );
                 if (folded === null) {
                     return null;
                 }
@@ -1247,7 +1255,8 @@ export default class PoseEditMode extends GameMode {
         let elapsed = 0;
         while (this._opQueue.length > 0 && elapsed < 50) { // FIXME: arbitrary
             // We can ! guard because we know _opQueue.length > 0
-            let op: PoseOp = this._opQueue.shift()!;
+            let op = this._opQueue.shift();
+            Assert.assertIsDefined(op);
             op.fn();
             if (op.sn) {
                 this.showAsyncText(`folding ${op.sn} of ${this._targetPairs.length} (${this._opQueue.length})`);
@@ -1675,7 +1684,8 @@ export default class PoseEditMode extends GameMode {
     private ropPresets(): void {
         while (this._ropPresets.length) {
             let func = this._ropPresets.pop();
-            func!();
+            Assert.assertIsDefined(func);
+            func();
         }
     }
 
@@ -2005,7 +2015,11 @@ export default class PoseEditMode extends GameMode {
 
         let nextPuzzleData: any = submitSolutionRspData['next-puzzle'];
 
-        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(nextPuzzleData != null, infoText, moreText);
+        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(
+            nextPuzzleData != null,
+            infoText,
+            moreText
+        );
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);
@@ -2506,8 +2520,9 @@ export default class PoseEditMode extends GameMode {
 
     private flashConstraintForTarget(targetIndex: number): void {
         if (this._constraintBar) {
-            if (this._constraintBar.getShapeBox(targetIndex) !== null) {
-                this._constraintBar.getShapeBox(targetIndex)!.flash(0x00FFFF);
+            const shapeBox = this._constraintBar.getShapeBox(targetIndex);
+            if (shapeBox !== null) {
+                shapeBox.flash(0x00FFFF);
             }
         }
     }
@@ -2595,47 +2610,52 @@ export default class PoseEditMode extends GameMode {
                             this.flashConstraintForTarget(xx);
                             this._poses[targetIndex].clearDesignStruct();
                             // if the above fails, and we have multi-oligos, there may be a permutation where it works
-                        } else if (this._targetOligos[xx] != null && this._targetOligos[xx]!.length > 1) {
-                            let newOrder: number[] = [];
-                            for (let jj = 0; jj < this._targetOligos[xx]!.length; jj++) newOrder.push(jj);
-                            let more: boolean;
-                            do {
-                                segments = this._poses[targetIndex].designSegments;
-                                let newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
-                                let newPairs: number[] = [];
-                                // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
-                                if (newMap != null && idxMap != null) {
-                                    for (let jj = 0; jj < segments.length; jj++) {
-                                        segments[jj] = newMap.indexOf(segments[jj]);
+                        } else if (this._targetOligos[xx] != null) {
+                            const targetOligo = this._targetOligos[xx];
+                            Assert.assertIsDefined(targetOligo);
+                            if (targetOligo.length > 1) {
+                                let newOrder: number[] = [];
+                                for (let jj = 0; jj < targetOligo.length; jj++) newOrder.push(jj);
+                                let more: boolean;
+                                do {
+                                    segments = this._poses[targetIndex].designSegments;
+                                    let newMap: number[] | null = this._poses[targetIndex].getOrderMap(newOrder);
+                                    let newPairs: number[] = [];
+                                    // shouldn't be likely that newMap isn't null but idxMap is, but must add the check
+                                    if (newMap != null && idxMap != null) {
+                                        for (let jj = 0; jj < segments.length; jj++) {
+                                            segments[jj] = newMap.indexOf(segments[jj]);
+                                        }
+                                        for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
+                                            let kk: number = idxMap.indexOf(newMap[jj]);
+                                            let pp: number = this._targetPairs[xx][kk];
+                                            newPairs[jj] = pp < 0 ? pp : newMap.indexOf(idxMap[pp]);
+                                        }
                                     }
-                                    for (let jj = 0; jj < this._targetPairs[xx].length; jj++) {
-                                        let kk: number = idxMap.indexOf(newMap[jj]);
-                                        let pp: number = this._targetPairs[xx][kk];
-                                        newPairs[jj] = pp < 0 ? pp : newMap.indexOf(idxMap[pp]);
+                                    if (
+                                        EPars.validateParenthesis(
+                                            EPars.pairsToParenthesis(newPairs).slice(segments[1] + 1, segments[2]),
+                                            false
+                                        ) == null
+                                    ) {
+                                        // compatible permutation
+                                        this._targetPairs[xx] = newPairs;
+                                        this._targetOligosOrder[xx] = newOrder;
+                                        for (let jj = segments[0]; jj <= segments[1]; jj++) {
+                                            this._targetPairs[xx][jj] = segments[3] - (jj - segments[0]);
+                                        }
+                                        for (let jj = segments[2]; jj <= segments[3]; jj++) {
+                                            this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
+                                        }
+                                        Flashbang.sound.playSound(Sounds.SoundGB);
+                                        this.flashConstraintForTarget(xx);
+                                        this._poses[targetIndex].clearDesignStruct();
+                                        more = false;
+                                    } else {
+                                        more = FoldUtil.nextPerm(newOrder);
                                     }
-                                }
-                                if (
-                                    EPars.validateParenthesis(
-                                        EPars.pairsToParenthesis(newPairs).slice(segments[1] + 1, segments[2]), false
-                                    ) == null
-                                ) {
-                                    // compatible permutation
-                                    this._targetPairs[xx] = newPairs;
-                                    this._targetOligosOrder[xx] = newOrder;
-                                    for (let jj = segments[0]; jj <= segments[1]; jj++) {
-                                        this._targetPairs[xx][jj] = segments[3] - (jj - segments[0]);
-                                    }
-                                    for (let jj = segments[2]; jj <= segments[3]; jj++) {
-                                        this._targetPairs[xx][jj] = segments[1] - (jj - segments[2]);
-                                    }
-                                    Flashbang.sound.playSound(Sounds.SoundGB);
-                                    this.flashConstraintForTarget(xx);
-                                    this._poses[targetIndex].clearDesignStruct();
-                                    more = false;
-                                } else {
-                                    more = FoldUtil.nextPerm(newOrder);
-                                }
-                            } while (more);
+                                } while (more);
+                            }
                         }
                     }
                 }
@@ -2914,15 +2934,18 @@ export default class PoseEditMode extends GameMode {
             if (mfold == null && !this.forceSync) {
                 // multistrand folding can be really slow
                 // break it down to each permutation
-                let ops: PoseOp[] | null = this._folder.multifoldUnroll(this._puzzle.transformSequence(seq, ii), null, oligos);
+                let ops: PoseOp[] | null = this._folder.multifoldUnroll(
+                    this._puzzle.transformSequence(seq, ii), null, oligos
+                );
                 this._opQueue.unshift(new PoseOp(
                     ii + 1,
                     () => this.poseEditByTargetFoldTarget(ii + this._targetPairs.length)
                 ));
                 while (ops && ops.length > 0) {
-                    let o: PoseOp = ops.pop()!;
-                    o.sn = ii + 1;
-                    this._opQueue.unshift(o);
+                    const op = ops.pop();
+                    Assert.assertIsDefined(op);
+                    op.sn = ii + 1;
+                    this._opQueue.unshift(op);
                 }
                 return;
             } else {

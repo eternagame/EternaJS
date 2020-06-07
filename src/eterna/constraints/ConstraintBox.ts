@@ -170,8 +170,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         }
 
-        this._reqStatText.visible = config.statText != undefined && !this._forMissionScreen;
-        if (config.statText != undefined && !this._forMissionScreen) {
+        this._reqStatText.visible = config.statText !== undefined && !this._forMissionScreen;
+        if (config.statText !== undefined && !this._forMissionScreen) {
             // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
             DisplayUtil.positionRelative(

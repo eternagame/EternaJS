@@ -69,7 +69,7 @@ export default class ROPWait extends RScriptOp {
         // a textbox.
         Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(ROPWaitType.PAINT);
-        if (list == undefined) {
+        if (list === undefined) {
             return;
         }
 
@@ -328,7 +328,7 @@ export default class ROPWait extends RScriptOp {
     private static registerROPWait(op: ROPWait): void {
         Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let list: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
-        if (list == undefined) {
+        if (list === undefined) {
             list = [];
             ROPWait._allROPWaitOps.set(op.waitType, list);
         }
@@ -344,7 +344,7 @@ export default class ROPWait extends RScriptOp {
     private static deregisterROPWait(op: ROPWait): void {
         Assert.assertIsDefined(ROPWait._allROPWaitOps);
         let array: ROPWait[] | undefined = ROPWait._allROPWaitOps.get(op.waitType);
-        if (array != undefined) {
+        if (array !== undefined) {
             let idx: number = array.indexOf(op);
             array.splice(idx, 1);
         }
@@ -359,7 +359,7 @@ export default class ROPWait extends RScriptOp {
     }
 
     private static genericNotifyClear(inType: ROPWaitType, clearCheck: (op: ROPWait) => boolean): void {
-        if (ROPWait._allROPWaitOps == null || ROPWait._allROPWaitOps.get(inType) == undefined) {
+        if (ROPWait._allROPWaitOps == null || ROPWait._allROPWaitOps.get(inType) === undefined) {
             return;
         }
 

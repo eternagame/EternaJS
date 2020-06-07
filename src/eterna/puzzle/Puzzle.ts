@@ -382,7 +382,9 @@ export default class Puzzle {
 
     public get isPairBrushAllowed(): boolean {
         let isBasic: boolean = (this._puzzleType !== PuzzleType.BASIC);
-        let hasTarget = this._constraints !== null && this._constraints.some((constraint) => constraint instanceof ShapeConstraint);
+        let hasTarget = this._constraints !== null && this._constraints.some(
+            (constraint) => constraint instanceof ShapeConstraint
+        );
 
         return isBasic || hasTarget;
     }

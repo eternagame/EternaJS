@@ -185,7 +185,8 @@ export default class ExternalInterface {
 
     private static maybeRunNextScript(): void {
         while (this._pendingScripts.length > 0 && this._curSyncScript == null) {
-            let nextScript = this._pendingScripts.shift()!;
+            let nextScript = this._pendingScripts.shift();
+            Assert.assertIsDefined(nextScript);
             if (nextScript.options.checkValid != null && !nextScript.options.checkValid()) {
                 log.info(`Not running stale request for script ${nextScript.scriptID}`);
             } else {
@@ -200,10 +201,12 @@ export default class ExternalInterface {
                     nextScript.options,
                     false,
                     (result) => {
+                        Assert.assertIsDefined(nextScript);
                         nextScript.resolve(result);
                         cleanup();
                     },
                     (error) => {
+                        Assert.assertIsDefined(nextScript);
                         nextScript.reject(error instanceof Error ? error : new Error(error));
                         cleanup();
                     }

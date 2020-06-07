@@ -76,7 +76,9 @@ export default class DisplayUtil {
     }
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
-    public static transformPoint(p: Point, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined): Point {
+    public static transformPoint(
+        p: Point, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
+    ): Point {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
 
@@ -86,7 +88,9 @@ export default class DisplayUtil {
      *  to another. If you pass an <code>out</code>-matrix, the result will be stored in this
      *  matrix instead of creating a new object.
      *  (Adapted from Starling-Framework) */
-    public static getTransformationMatrix(disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null): Matrix {
+    public static getTransformationMatrix(
+        disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null
+    ): Matrix {
         let commonParent: DisplayObject;
         let currentObject: DisplayObject;
 
@@ -158,7 +162,9 @@ export default class DisplayUtil {
      * Returns the bounds the given DisplayObject transformed to another DisplayObject's coordinate system.
      * (Adapted from Starling-Framework)
      */
-    public static getBoundsRelative(disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle | null = null): Rectangle {
+    public static getBoundsRelative(
+        disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle | null = null
+    ): Rectangle {
         if (out == null) out = new Rectangle();
 
         if (targetSpace === disp || targetSpace === null) {

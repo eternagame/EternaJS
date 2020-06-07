@@ -176,14 +176,13 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox = icon == null && label != null && this._labelBackground !== false;
-        if (drawStyleBox) {
-            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label!.width;
+        if (icon == null && label != null && this._labelBackground !== false) {
+            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
-                    label!.height + (GameButton.HMARGIN * 2),
+                    label.height + (GameButton.HMARGIN * 2),
                     3)
                 .endFill();
             this._content.addChildAt(styleBox, 0);

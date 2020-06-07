@@ -4,7 +4,10 @@ import Assert from 'flashbang/util/Assert';
 import DisplayObjectTask from './DisplayObjectTask';
 
 export default class ScaleTask extends DisplayObjectTask {
-    constructor(x: number, y: number, time: number = 0, easingFn: EasingFunc | null = null, target: DisplayObject | null = null) {
+    constructor(
+        x: number, y: number, time: number = 0, easingFn: EasingFunc | null = null,
+        target: DisplayObject | null = null
+    ) {
         super(time, easingFn, target);
         this._toX = x;
         this._toY = y;

@@ -4,7 +4,10 @@ import {Assert} from 'flashbang';
 import DisplayObjectTask from './DisplayObjectTask';
 
 export default class RotationTask extends DisplayObjectTask {
-    constructor(radians: number, time: number = 0, easingFn: EasingFunc | null = null, target: DisplayObject | null = null) {
+    constructor(
+        radians: number, time: number = 0, easingFn: EasingFunc | null = null,
+        target: DisplayObject | null = null
+    ) {
         super(time, easingFn, target);
         this._to = radians;
     }

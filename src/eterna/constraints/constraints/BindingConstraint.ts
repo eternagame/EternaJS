@@ -22,7 +22,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         this.stateIndex = stateIndex;
     }
 
-    protected abstract _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[];
+    protected abstract _getOligoInfo(targetConditions: any[]): OligoInfo[];
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
@@ -83,7 +83,7 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
 
         for (let ii = 0; ii < oligos.length; ii++) {
             if (!oligos[ii]) continue;
-            let ctrlY: number = (oligos[ii]!.bind ? 22 : 14);
+            let ctrlY: number = (oligos[ii].bind ? 22 : 14);
             iconGraphics.moveTo(origUpper + (ii * 2) * step, ctrlY);
             iconGraphics.lineTo(origUpper + (ii * 2 + 1) * step, ctrlY);
         }
@@ -104,7 +104,10 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         context: ConstraintContext
     ): HighlightInfo {
         let undoBlock = context.undoBlocks[this.stateIndex];
-        Assert.assertIsDefined(context.targetConditions, 'BINDING constraint specified, but no oligo definitions are present');
+        Assert.assertIsDefined(
+            context.targetConditions,
+            'BINDING constraint specified, but no oligo definitions are present'
+        );
         let stateCondition = context.targetConditions[this.stateIndex];
 
         return {
@@ -133,23 +136,18 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
 
         let stateCondition = context.targetConditions[this.stateIndex];
 
-        if (stateCondition == null) {
-            throw new Error('Target condition not available for BINDINGS constraint');
-        }
+        Assert.assertIsDefined(stateCondition, 'Target condition not available for BINDINGS constraint');
 
         const oligos: OligoDef[] = stateCondition['oligos'];
-        if (oligos == null) {
-            throw new Error('Target condition not available for BINDINGS constraint');
-        }
+        Assert.assertIsDefined(oligos, 'Target condition not available for BINDINGS constraint');
 
-        let oligoOrder = undoBlock.oligoOrder;
-        if (oligoOrder == null) {
-            throw new Error('Target condition not available for BINDINGS constraint');
-        }
+        const oligoOrder = undoBlock.oligoOrder;
+        Assert.assertIsDefined(oligoOrder, 'Undo block does not specify oligos for BINDINGS constraint');
+
         // Unbound oligos are always at the end of the natural mode oligo order, so to know if it's bound according to
         // target mode ordering, check if its index in natural mode is less than the number bound
         let bindMap = Utility.range(oligoOrder.length).map(
-            (targetIdx) => oligoOrder!.indexOf(targetIdx) < undoBlock.oligosPaired
+            (targetIdx) => oligoOrder.indexOf(targetIdx) < undoBlock.oligosPaired
         );
 
         let unsatisfiedOligoIndexes = oligos.map(
@@ -163,7 +161,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         };
     }
 
-    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
+    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
         const oligos: OligoDef[] = targetConditions[this.stateIndex]['oligos'];
 
         return oligos.map(
@@ -172,7 +170,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
                 bind: Boolean(def['bind']),
                 label: def['label'] || String.fromCharCode(65 + idx)
             } : null)
-        ).filter((oligo) => oligo != null);
+        ).filter((oligo): oligo is OligoInfo => oligo != null);
     }
 
     public getHighlight(
@@ -218,15 +216,6 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
         let nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 
-        if (context.targetConditions == null) {
-            throw new Error('Target object not available for BINDINGS constraint');
-        }
-
-        let stateCondition = context.targetConditions[this.stateIndex];
-        if (stateCondition == null) {
-            throw new Error('Target condition not available for BINDINGS constraint');
-        }
-
         return {
             satisfied: nnfe != null && nnfe[0] === -2
         };
@@ -239,7 +228,7 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
+    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
@@ -255,15 +244,6 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
         let nnfe: number[] = context.undoBlocks[this.stateIndex]
             .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
 
-        if (context.targetConditions == null) {
-            throw new Error('Target object not available for BINDINGS constraint');
-        }
-
-        let stateCondition = context.targetConditions[this.stateIndex];
-        if (stateCondition == null) {
-            throw new Error('Target condition not available for BINDINGS constraint');
-        }
-
         return {
             satisfied: nnfe != null && nnfe[0] !== -2
         };
@@ -276,7 +256,7 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): (OligoInfo | null)[] {
+    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',

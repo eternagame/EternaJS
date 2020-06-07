@@ -132,8 +132,8 @@ export default class StructureInput extends GamePanel implements Updatable {
 
             for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 sequence[ii + index + 1] = afterIndex[ii];
-                if (locks) locks[ii + index + 1] = afterLockIndex![ii];
-                if (bindingSite) bindingSite[ii + index + 1] = afterBindingSiteIndex![ii];
+                if (locks && afterLockIndex) locks[ii + index + 1] = afterLockIndex[ii];
+                if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
             }
         } else if (op === PuzzleEditOp.ADD_PAIR) {
             // Add a pair
@@ -157,12 +157,12 @@ export default class StructureInput extends GamePanel implements Updatable {
             for (let ii = 0; ii < afterIndex.length - 2; ii++) {
                 if (ii + index > pindex) {
                     sequence[ii + index + 2] = afterIndex[ii];
-                    if (locks) locks[ii + index + 2] = afterLockIndex![ii];
-                    if (bindingSite) bindingSite[ii + index + 2] = afterBindingSiteIndex![ii];
+                    if (locks && afterLockIndex) locks[ii + index + 2] = afterLockIndex[ii];
+                    if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index + 2] = afterBindingSiteIndex[ii];
                 } else {
                     sequence[ii + index + 1] = afterIndex[ii];
-                    if (locks) locks[ii + index + 1] = afterLockIndex![ii];
-                    if (bindingSite) bindingSite[ii + index + 1] = afterBindingSiteIndex![ii];
+                    if (locks && afterLockIndex) locks[ii + index + 1] = afterLockIndex[ii];
+                    if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index + 1] = afterBindingSiteIndex[ii];
                 }
             }
         } else if (op === PuzzleEditOp.ADD_CYCLE) {
@@ -195,8 +195,8 @@ export default class StructureInput extends GamePanel implements Updatable {
 
             for (let ii = 0; ii < afterIndex.length - 5; ii++) {
                 sequence[ii + index + 5] = afterIndex[ii];
-                if (locks) locks[ii + index + 5] = afterLockIndex![ii];
-                if (bindingSite) bindingSite[ii + index + 5] = afterBindingSiteIndex![ii];
+                if (locks && afterLockIndex) locks[ii + index + 5] = afterLockIndex[ii];
+                if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index + 5] = afterBindingSiteIndex[ii];
             }
         } else if (op === PuzzleEditOp.DELETE_PAIR) {
             // Delete a pair
@@ -213,12 +213,12 @@ export default class StructureInput extends GamePanel implements Updatable {
             for (let ii = 0; ii < afterIndex.length - 1; ii++) {
                 if (ii + index >= pindex - 1) {
                     sequence[ii + index] = afterIndex[ii + 1];
-                    if (locks) locks[ii + index] = afterLockIndex![ii + 1];
-                    if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii + 1];
+                    if (locks && afterLockIndex) locks[ii + index] = afterLockIndex[ii + 1];
+                    if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii + 1];
                 } else {
                     sequence[ii + index] = afterIndex[ii];
-                    if (locks) locks[ii + index] = afterLockIndex![ii];
-                    if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii];
+                    if (locks && afterLockIndex) locks[ii + index] = afterLockIndex[ii];
+                    if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
                 }
             }
         } else if (op === PuzzleEditOp.DELETE_BASE) {
@@ -229,8 +229,8 @@ export default class StructureInput extends GamePanel implements Updatable {
 
             for (let ii = 0; ii < afterIndex.length; ii++) {
                 sequence[ii + index] = afterIndex[ii];
-                if (locks) locks[ii + index] = afterLockIndex![ii];
-                if (bindingSite) bindingSite[ii + index] = afterBindingSiteIndex![ii];
+                if (locks && afterLockIndex) locks[ii + index] = afterLockIndex[ii];
+                if (bindingSite && afterBindingSiteIndex) bindingSite[ii + index] = afterBindingSiteIndex[ii];
             }
         }
         this._pose.sequence = sequence;

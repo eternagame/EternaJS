@@ -1,5 +1,3 @@
-import {AssertionError} from 'assert';
-
 export default class Assert {
     public static ok(predicate: () => boolean, message?: string): void {
         if (process.env.NODE_ENV !== 'production' && !predicate()) {
@@ -23,11 +21,7 @@ export default class Assert {
         val: T,
         msg: string = `Expected 'val' to be defined, but received ${val}`
     ): asserts val is NonNullable<T> {
-        if (val === undefined || val === null) {
-            throw new AssertionError(
-                {message: msg}
-            );
-        }
+        Assert.ok(() => !(val === undefined || val === null), msg);
     }
 
     /**

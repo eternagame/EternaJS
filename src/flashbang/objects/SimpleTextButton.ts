@@ -24,18 +24,20 @@ export default class SimpleTextButton extends Button {
 
     /* override */
     protected showState(state: ButtonState): void {
+        const bgColor = SimpleTextButton.BG_COLORS.get(state);
+        Assert.assertIsDefined(bgColor);
+        const textColor = SimpleTextButton.TEXT_COLORS.get(state);
+        Assert.assertIsDefined(textColor);
+
         this._bg.clear();
-        // Here, we are hemmed in twice by Pixi type definitions.
-        Assert.assertIsDefined(SimpleTextButton.BG_COLORS.get(state));
-        this._bg.beginFill(SimpleTextButton.BG_COLORS.get(state)!);
+        this._bg.beginFill(bgColor);
         this._bg.drawRoundedRect(0, 0,
             this._tf.width + (SimpleTextButton.PADDING * 2),
             this._tf.height + (SimpleTextButton.PADDING * 2),
             5);
         this._bg.endFill();
 
-        Assert.assertIsDefined(SimpleTextButton.TEXT_COLORS.get(state));
-        this._tf.style.fill = SimpleTextButton.TEXT_COLORS.get(state)!;
+        this._tf.style.fill = textColor;
     }
 
     protected _tf: Text;

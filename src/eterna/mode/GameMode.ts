@@ -183,24 +183,30 @@ export default abstract class GameMode extends AppMode {
                         && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
-                        score = (pairs: number[]) => this._folder!.scoreStructures(
-                            newField.pose.fullSequence, pairs, true
-                        );
+                        score = (pairs: number[]) => {
+                            Assert.assertIsDefined(this._folder);
+                            return this._folder.scoreStructures(
+                                newField.pose.fullSequence, pairs, true
+                            );
+                        };
                     } else {
-                        score = (pairs: number[]) => this._folder!.scoreStructures(
-                            newField.pose.fullSequence, pairs
-                        );
+                        score = (pairs: number[]) => {
+                            Assert.assertIsDefined(this._folder);
+                            return this._folder.scoreStructures(
+                                newField.pose.fullSequence, pairs
+                            );
+                        };
                     }
 
                     let targetPairs: number[] | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
-                    if (targetPairs === undefined) {
-                        throw new Error("This poses's targetPairs are undefined; energy delta cannot be computed!");
-                    }
-                    if (this.getCurrentUndoBlock(poseidx) === undefined) {
-                        throw new Error('getEnergyDelta is being called where UndoBlocks are unavailable!');
-                    }
-                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx)!.getPairs(37, pseudoknots);
+                    Assert.assertIsDefined(
+                        targetPairs,
+                        "This poses's targetPairs are undefined; energy delta cannot be computed!"
+                    );
+                    const ublk = this.getCurrentUndoBlock(poseidx);
+                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
+                    let nativePairs: number[] = ublk.getPairs(37, pseudoknots);
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }

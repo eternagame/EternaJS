@@ -10,7 +10,9 @@ export default class GameObject extends GameObjectBase {
         return null;
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(
+        obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
+    ): GameObjectRef {
         return this._addObjectInternal(obj, null, false, displayParent, displayIdx);
     }
 

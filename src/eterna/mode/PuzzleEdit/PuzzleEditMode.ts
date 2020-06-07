@@ -173,7 +173,9 @@ export default class PuzzleEditMode extends GameMode {
         this._structureInputs = [];
 
         let setCB = (kk: number): void => {
-            this._poses[kk].addBaseCallback = (parenthesis: string | null, op: PuzzleEditOp | null, index: number): void => {
+            this._poses[kk].addBaseCallback = (
+                parenthesis: string | null, op: PuzzleEditOp | null, index: number
+            ): void => {
                 Assert.assertIsDefined(parenthesis);
                 let secInput: StructureInput = this._structureInputs[kk];
                 secInput.structureString = parenthesis;
@@ -826,10 +828,11 @@ export default class PuzzleEditMode extends GameMode {
 
             if (this._stackLevel >= 0) {
                 if (
-                    this._structureInputs[ii].structureString
-                        !== EPars.pairsToParenthesis(this._targetPairsStack[this._stackLevel][ii])
-                    || EPars.sequenceToString(seq)
-                        !== EPars.sequenceToString(this._seqStack[this._stackLevel][ii].sequence)
+                    this._structureInputs[ii].structureString !== EPars.pairsToParenthesis(
+                        this._targetPairsStack[this._stackLevel][ii]
+                    ) || EPars.sequenceToString(seq) !== EPars.sequenceToString(
+                        this._seqStack[this._stackLevel][ii].sequence
+                    )
                 ) {
                     noChange = false;
                 }
@@ -841,13 +844,17 @@ export default class PuzzleEditMode extends GameMode {
                     noChange = false;
                 } else if (lock === null && lastLock === null) {
                     noChange = true;
-                } else if (lastLock!.length !== lock!.length) {
-                    noChange = false;
                 } else {
-                    for (let ll = 0; ll < lock!.length; ll++) {
-                        if (lock![ll] !== lastLock![ll]) {
-                            noChange = false;
-                            break;
+                    Assert.assertIsDefined(lastLock);
+                    Assert.assertIsDefined(lock);
+                    if (lastLock.length !== lock.length) {
+                        noChange = false;
+                    } else {
+                        for (let ll = 0; ll < lock.length; ll++) {
+                            if (lock[ll] !== lastLock[ll]) {
+                                noChange = false;
+                                break;
+                            }
                         }
                     }
                 }

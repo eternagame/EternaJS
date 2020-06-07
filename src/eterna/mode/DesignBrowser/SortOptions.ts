@@ -54,7 +54,7 @@ export default class SortOptions {
 
     public getSortOrder(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
-        return criterion != undefined ? criterion.sortOrder : SortOrder.NONE;
+        return criterion !== undefined ? criterion.sortOrder : SortOrder.NONE;
     }
 
     public compareSolutions(a: Solution, b: Solution): number {
@@ -119,7 +119,7 @@ export default class SortOptions {
 
     public addCriteria(category: DesignCategory, sortOrder: SortOrder, sortArgs: any = null): void {
         let cur = this.getCriterion(category);
-        if (cur != undefined) {
+        if (cur !== undefined) {
             cur.sortOrder = sortOrder;
             cur.arg = sortArgs;
             this.setCriteriaIdx(category, 0);
@@ -143,7 +143,7 @@ export default class SortOptions {
 
     public toggleSort(category: DesignCategory): SortOrder {
         let criterion = this.getCriterion(category);
-        if (criterion == undefined) {
+        if (criterion === undefined) {
             throw new Error(`Can't find category ${category}`);
         }
 

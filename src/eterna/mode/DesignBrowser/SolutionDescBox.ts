@@ -56,7 +56,10 @@ export default class SolutionDescBox extends GamePanel {
         });
         Assert.assertIsDefined(this.modeStack);
         this._copySolutionButton.clicked.connect(
-            () => this.modeStack!.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'))
+            () => {
+                Assert.assertIsDefined(this.modeStack);
+                this.modeStack.pushMode(new CopyTextDialogMode(solutionURL, 'Solution URL'));
+            }
         );
 
         this._copyPlayerButton = new GameButton().label('Get URL for all designs by this player', 10);
@@ -73,7 +76,10 @@ export default class SolutionDescBox extends GamePanel {
             /* eslint-enable @typescript-eslint/camelcase */
         });
         this._copyPlayerButton.clicked.connect(
-            () => this.modeStack!.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'))
+            () => {
+                Assert.assertIsDefined(this.modeStack);
+                this.modeStack.pushMode(new CopyTextDialogMode(playerURL, 'Player URL'));
+            }
         );
 
         this._commentInput = new TextInputObject(14)

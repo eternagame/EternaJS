@@ -72,7 +72,7 @@ export default class AppMode {
     /** Removes the GameObject with the given id from the ObjectDB, if it exists. */
     public destroyObjectWithId(id: any): void {
         let obj: GameObjectBase | undefined = this.getObjectWithId(id);
-        if (obj != undefined) {
+        if (obj !== undefined) {
             obj.destroySelf();
         }
     }
@@ -126,7 +126,9 @@ export default class AppMode {
         }
     }
 
-    public addObject(obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1): GameObjectRef {
+    public addObject(
+        obj: GameObjectBase, displayParent: Container | null = null, displayIdx: number = -1
+    ): GameObjectRef {
         Assert.assertIsDefined(this._rootObject);
         return this._rootObject.addObject(obj, displayParent, displayIdx);
     }
@@ -282,19 +284,20 @@ export default class AppMode {
     public _registerObjectInternal(obj: GameObjectBase | null): void {
         Assert.assertIsDefined(obj);
         Assert.assertIsDefined(this._regs);
-        Assert.assertIsDefined(this._idObjects);
         obj._mode = this;
 
         // Handle IDs
         let {ids} = obj;
         if (ids.length > 0) {
             this._regs.add(obj.destroyed.connect(() => {
+                Assert.assertIsDefined(this._idObjects);
                 for (let id of ids) {
-                    this._idObjects!.delete(id);
+                    this._idObjects.delete(id);
                 }
             }));
 
             for (let id of ids) {
+                Assert.assertIsDefined(this._idObjects);
                 Assert.isFalse(this._idObjects.has(id), 'two objects with the same ID added to the AppMode');
                 this._idObjects.set(id, obj);
             }

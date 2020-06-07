@@ -219,7 +219,8 @@ export default class EternaApp extends FlashbangApp {
         // Temporary warning on mobile
         const mobile = isMobile({tablet: false});
         if (mobile) {
-            document.getElementById('mobile-browser-warning').classList.remove('mobile-hidden');
+            const warningEl = document.getElementById('mobile-browser-warning');
+            if (warningEl) warningEl.classList.remove('mobile-hidden');
         }
     }
 
@@ -449,13 +450,11 @@ export default class EternaApp extends FlashbangApp {
                     Eterna.setPlayer(username, uid);
                 });
         } else {
-            let playerID = process.env['DEBUG_PLAYER_ID'];
+            const playerID = process.env['DEBUG_PLAYER_ID'];
             // If no player is specified, ensure that no user is authenticated,
             // allowing for testing as a nonauthenticated user
             if (playerID === undefined || playerID.length === 0) {
                 return Eterna.client.logout()
-                    .then(() => {
-                    })
                     .catch((err) => {
                         log.debug(`Logout error: ${err}`);
                     });

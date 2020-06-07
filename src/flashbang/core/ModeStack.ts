@@ -41,9 +41,9 @@ export default class ModeStack {
 
     /** Returns the top mode on the mode stack, or null if the stack is empty. */
     public /* final */ get topMode(): AppMode | null {
-        return this._modeStack
-            ? (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null)
-            : null;
+        if (!this._modeStack) return null;
+        if (!(this._modeStack.length > 0)) return null;
+        return this._modeStack[this._modeStack.length - 1];
     }
 
     /**

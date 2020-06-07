@@ -598,7 +598,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
         sprite.filters = null;
         sprite.alpha = 1;
 
-        if (highlightState != undefined && highlightState.nuc && highlightState.isOn) {
+        if (highlightState !== undefined && highlightState.nuc && highlightState.isOn) {
             if (highlightState.nuc.indexOf(baseIdx) === -1) {
                 sprite.alpha = 0.55;
             } else {

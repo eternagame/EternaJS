@@ -317,10 +317,11 @@ export default class PuzzleManager {
         newpuz.constraints = constraints;
 
         let folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
-        Assert.assertIsDefined(folder, `Folder with name ${newpuz.folderName} is not defined!`);
+        Assert.assertIsDefined(folder, `Folder ${newpuz.folderName} cannot be found`);
         if (!newpuz.canUseFolder(folder)) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
-                newpuz.folderName, (folder: Folder) => !newpuz.canUseFolder(folder)
+                newpuz.folderName,
+                (candidateFolder: Folder) => !newpuz.canUseFolder(candidateFolder)
             ).name;
         }
 

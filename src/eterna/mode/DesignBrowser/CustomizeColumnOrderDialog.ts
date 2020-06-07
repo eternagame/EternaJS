@@ -3,7 +3,7 @@ import {Signal} from 'signals';
 import Dialog from 'eterna/ui/Dialog';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign
+    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign, Assert
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import GraphicsUtil from 'eterna/util/GraphicsUtil';
@@ -15,7 +15,11 @@ import {DesignCategory} from './DesignBrowserMode';
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[] | null, disabled: Set<DesignCategory> | null = null) {
+    constructor(
+        allCategories: DesignCategory[],
+        curColumns: DesignCategory[] | null,
+        disabled: Set<DesignCategory> | null = null
+    ) {
         super();
         this._allColumnCategories = allCategories.slice();
         this._initialColumns = curColumns ? curColumns.slice() : null;
@@ -80,7 +84,8 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
 
         this.validateCurCategoryIdx();
         this.layout();
-        this.regs.add(this.mode!.resized.connect(() => this.repositionDialog()));
+        Assert.assertIsDefined(this.mode);
+        this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
     }
 
     private addColumnUI(category: DesignCategory, idx: number): void {

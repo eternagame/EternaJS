@@ -2,13 +2,13 @@ import * as log from 'loglevel';
 import {RegistrationGroup, Value} from 'signals';
 import KeyboardEventType from 'flashbang/input/KeyboardEventType';
 import KeyCode from 'flashbang/input/KeyCode';
+import Assert from 'flashbang/util/Assert';
 import Flashbang from './Flashbang';
 import ModeStack from './ModeStack';
 import Updatable from './Updatable';
 
 // Adds KeyboardEvent.code support to Edge
 import 'js-polyfills/keyboard';
-import {Assert} from 'flashbang';
 
 export default class FlashbangApp {
     /** True if the app is foregrounded */

@@ -269,7 +269,10 @@ export default class Utility {
         let rangeStart = numberArray[0];
         let rangeEnd = numberArray[0];
         for (let ii = 1; ii < numberArray.length; ii++) {
-            if (numberArray[ii - 1] !== null && numberArray[ii] === (numberArray[ii - 1]! + 1) && (rangeStart !== null)) {
+            const num = numberArray[ii - 1];
+            if (
+                num !== null && numberArray[ii] === (num + 1) && (rangeStart !== null)
+            ) {
                 rangeEnd = numberArray[ii]; continue;
             } else {
                 rangeString += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;
@@ -290,7 +293,7 @@ export default class Utility {
      * @returns array of numbers
     */
     public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
-        if (numberingJSON == null) return null;
+        if (numberingJSON === null) return null;
         if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);
         } else if (typeof numberingJSON === 'object') {

@@ -119,7 +119,7 @@ export default class ROPTextbox extends RScriptOp {
             let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
                 parent = parentVal;
-            } else if (parentVal == undefined) {
+            } else if (parentVal === undefined) {
                 this._hasParent = false;
             } else {
                 log.warn(`${this._parentID}: is not a FancyTextBalloon`);
@@ -151,13 +151,16 @@ export default class ROPTextbox extends RScriptOp {
             }
 
             if (this._hasParent) {
+                // We verified this earlier, but TS isn't smart enough to figure it out
+                Assert.assertIsDefined(parent);
+
                 // Modify degree and length if textbox is present.
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
-                let xdiff: number = (parent!.display.x + parent!.container.width / 2) - newArrow.display.x;
-                let ydiff: number = parent!.display.y - newArrow.display.y;
+                let xdiff: number = (parent.display.x + parent.container.width / 2) - newArrow.display.x;
+                let ydiff: number = parent.display.y - newArrow.display.y;
                 if (ydiff < 0.0) {
-                    ydiff += parent!.container.height;
+                    ydiff += parent.container.height;
                 }
 
                 if (xdiff !== 0) {
@@ -175,12 +178,12 @@ export default class ROPTextbox extends RScriptOp {
                 if (ydiff < 0.0) { // Above
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent!.display.x + parent!.container.width * 0.5, parent!.display.y + parent!.container.height
+                        parent.display.x + parent.container.width * 0.5, parent.display.y + parent.container.height
                     );
                 } else { // Below
                     this._arrowLength = Vector2.distance(
                         newArrow.display.x, newArrow.display.y,
-                        parent!.display.x + parent!.container.width / 2, parent!.display.y - 50
+                        parent.display.x + parent.container.width / 2, parent.display.y - 50
                     );
                 }
             }
@@ -224,7 +227,9 @@ export default class ROPTextbox extends RScriptOp {
 
         this._env.setVar(this._id, newArrow);
         if (this._hasParent) {
-            parent!.addChildArrow(newArrow);
+            // We verified this earlier, but TS isn't smart enough to figure it out
+            Assert.assertIsDefined(parent);
+            parent.addChildArrow(newArrow);
         }
     }
 
