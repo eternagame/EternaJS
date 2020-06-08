@@ -1,6 +1,6 @@
 {
   "name": "eternajs",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "license": "SEE LICENSE IN LICENSE",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
@@ -93,6 +93,6 @@
     }
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#266e666f41791a68bdc378e7758350ccaef350dc"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#1000cccf49d196c4a01b952e28652296a0346481"
   }
 }
