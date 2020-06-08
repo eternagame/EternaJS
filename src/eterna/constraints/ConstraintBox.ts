@@ -22,6 +22,7 @@ export interface ConstraintBoxConfig {
     // Show the green/red outline
     showOutline?: boolean;
     // Used when the constraint image includes a background
+    // Due to a type constraint from Pixi, we need this to be nullable, not optional
     fullTexture?: Texture;
     // Whether to draw the transparent background
     drawBG?: boolean;
@@ -146,8 +147,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     public setContent(config: ConstraintBoxConfig): void {
         this._check.visible = config.satisfied && !this._forMissionScreen;
 
-        this._req.visible = config.fullTexture != null;
-        if (this._req.visible) {
+        this._req.visible = config.fullTexture !== undefined;
+        if (config.fullTexture !== undefined) {
             this._req.texture = config.fullTexture;
         }
 
@@ -158,8 +159,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
                 : BitmapManager.getBitmap(Bitmaps.NovaFailOutline);
         }
 
-        this._reqClarifyText.visible = config.clarificationText != null;
-        if (this._reqClarifyText.visible) {
+        this._reqClarifyText.visible = config.clarificationText !== undefined;
+        if (config.clarificationText !== undefined) {
+            // We know config.clarificationText is not undefined because of the
+            // above condition, so we can type guard
             this.setPossiblyStyledText(config.clarificationText, this._reqClarifyText);
             DisplayUtil.positionRelative(
                 this._reqClarifyText, HAlign.CENTER, VAlign.TOP,
@@ -167,8 +170,9 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             );
         }
 
-        this._reqStatText.visible = config.statText != null && !this._forMissionScreen;
-        if (this._reqStatText.visible) {
+        this._reqStatText.visible = config.statText !== undefined && !this._forMissionScreen;
+        if (config.statText !== undefined && !this._forMissionScreen) {
+            // We know config.statText isn't undefined due to the above condition
             this.setPossiblyStyledText(config.statText, this._reqStatText);
             DisplayUtil.positionRelative(
                 this._reqStatText, HAlign.CENTER, VAlign.TOP,
@@ -235,7 +239,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (config.icon) {
             this._icon.visible = true;
             this._icon.removeChildren();
-            this._icon.texture = null;
+            this._icon.texture = Texture.EMPTY;
             if (config.icon instanceof Texture) {
                 this._icon.texture = config.icon;
                 this._icon.position = new Point((111 - this._icon.width) * 0.5, 2);
@@ -315,8 +319,10 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         if (this._mouseOverObject != null) {
             this._mouseOverObject.destroySelf();
             this._mouseOverObject = null;
-            this._mouseOverRegs.close();
-            this._mouseOverRegs = null;
+            if (this._mouseOverRegs != null) {
+                this._mouseOverRegs.close();
+                this._mouseOverRegs = null;
+            }
         }
 
         if (obj != null) {
@@ -454,8 +460,8 @@ export default class ConstraintBox extends ContainerObject implements Enableable
     private _outline: Sprite;
     private _fglow: Graphics;
 
-    private _mouseOverRegs: RegistrationGroup;
-    private _mouseOverObject: SceneObject;
+    private _mouseOverRegs: RegistrationGroup | null;
+    private _mouseOverObject: SceneObject | null;
 
     private static readonly LOCATION_ANIM = 'AnimateLocation';
     private static readonly BACKLIGHT_ANIM = 'BacklightAnim';

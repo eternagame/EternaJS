@@ -1,0 +1,158 @@
+Binary files LinearPartition_stock/.git/index and LinearPartition/.git/index differ
+@@ -1 +1 @@
+-0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591459416 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
++0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591458114 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
+diff -X .gitignore -ur LinearPartition_stock/src/bpp.cpp LinearPartition/src/bpp.cpp
+--- LinearPartition_stock/src/bpp.cpp	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/bpp.cpp	2020-06-06 11:42:29.929047869 -0400
+@@ -11,6 +11,7 @@
+ 
+ using namespace std;
+ 
++namespace LinearPartition {
+ void BeamCKYParser::output_to_file(string file_name, const char * type) {
+ 
+     if(!file_name.empty()) {
+@@ -308,4 +309,4 @@
+ 
+     return;
+ }
+-
++}
+diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearPartition/src/LinearPartition.cpp
+--- LinearPartition_stock/src/LinearPartition.cpp	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/LinearPartition.cpp	2020-06-06 11:42:29.925714547 -0400
+@@ -32,6 +32,7 @@
+ 
+ using namespace std;
+ 
++namespace LinearPartition {
+ unsigned long quickselect_partition(vector<pair<float, int>>& scores, unsigned long lower, unsigned long upper) {
+     float pivot = scores[upper].first;
+     while (lower < upper) {
+@@ -477,8 +478,10 @@
+ 
+ #ifdef lpv
+     printf("Free Energy of Ensemble: %.2f kcal/mol\n", -kT * viterbi.alpha / 100.0);
++    partition_ = -kT * viterbi.alpha / 100.0;
+ #else
+     printf("Log Partition Coefficient: %.5f\n", viterbi.alpha);
++    partition_ = viterbi.alpha;
+ #endif
+ 
+     if(is_verbose) printf("Partition Function Calculation Time: %.2f seconds.\n", parse_elapsed_time);
+@@ -604,3 +607,4 @@
+ 
+     return 0;
+ }
++}
+\ No newline at end of file
+diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPartition/src/LinearPartition.h
+--- LinearPartition_stock/src/LinearPartition.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/LinearPartition.h	2020-06-06 11:45:46.065111584 -0400
+@@ -6,14 +6,18 @@
+  created by: 03/2019
+ */
+ 
+-#ifndef FASTCKY_BEAMCKYPAR_H
+-#define FASTCKY_BEAMCKYPAR_H
++#ifndef LINEARPARTITION_FASTCKY_BEAMCKYPAR_H
++#define LINEARPARTITION_FASTCKY_BEAMCKYPAR_H
+ 
+ #include <string>
+ #include <limits>
+ #include <vector>
+ #include <unordered_map>
+ #include <math.h> 
++#include <cassert>
++
++namespace LinearPartition
++{
+ 
+ // #define MIN_CUBE_PRUNING_SIZE 20
+ #define kT 61.63207755
+@@ -85,6 +89,9 @@
+     // DecoderResult parse(string& seq);
+     void parse(string& seq);
+ 
++    unordered_map<pair<int,int>, float, hash_pair> get_Pij() { return Pij; }
++    double partition() { return partition_; }
++
+ private:
+     void get_parentheses(char* result, string& seq);
+ 
+@@ -113,6 +120,7 @@
+ 
+     // vector<tuple<int, int, float>> Pij;
+     unordered_map<pair<int,int>, float, hash_pair> Pij;
++    double partition_;
+ 
+     void output_to_file(string file_name, const char * type);
+ 
+@@ -218,5 +226,6 @@
+         return ((float(0.1199175927)*x+float(0.4815668234))*x+float(0.9975991939))*x+float(0.9999505077);
+     return (x > float(46.052) ? float(1e20) : expf(x));
+ }
++}
+ 
+ #endif //FASTCKY_BEAMCKYPAR_H
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h LinearPartition/src/Utils/feature_weight.h
+--- LinearPartition_stock/src/Utils/feature_weight.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/feature_weight.h	2020-06-06 11:42:29.929047869 -0400
+@@ -9,6 +9,9 @@
+ 
+ #ifndef FASTCKY_W
+ #define FASTCKY_W
++
++namespace LinearPartition {
++    
+ double multi_base = -1.199055076;
+ double multi_unpaired = -0.1983300391;
+ double multi_paired = -0.9253883752;
+@@ -33,4 +36,7 @@
+ double internal_length_at_least[31] = {0.0,0.0,-0.429061443,-0.3532111501,-0.3963797535,-0.3111199175,-0.2551945472,-0.05149116898,-0.04319002407,0.001985489485,-0.1761513136,-0.2639686207,-0.3460613577,-0.2926603079,-0.03624250307,-0.1199953761,-0.04354771926,-0.08209293135,-0.007113226038,0.02354824852,0.03066973571,-0.06618241094,-0.1316092383,-0.1407995514,-0.06600291862,-0.07779204744,-0.05084201265,-0.04139875601,0.003276583405,0.00592458284,0.006875738004};
+ double internal_symmetric_length_at_least[16] = {0.0,-0.5467082599,-0.3854701647,-0.2588466401,-0.2340836745,0.1450577765,-0.6562932515,-0.3021088369,-0.03032275267,-0.3517944058,-0.2159132506,-0.1228270454,-0.1552208595,-0.08541120743,-0.04592109799,-0.02232234236};
+ double internal_asymmetry_at_least[29] = {0.0,-2.105646719,-0.5520140431,-0.577070767,-0.6136667847,-0.3057156841,-0.1155052001,-0.2105612231,-0.314574313,-0.3148961681,-0.09018189492,-0.2200026794,-0.1406483243,-0.2162411259,-0.1725531435,-0.1558911866,-0.1040858663,-0.06967684228,-0.04105977494,-0.01570624316,0.01382000639,0.04131988563,0.0359418595,0.02822186282,0.01636585874,0.02550056175,0.03348032793,0.03971924412,-0.002545113932};
++
++}
++
+ #endif
+\ No newline at end of file
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartition/src/Utils/utility.h
+--- LinearPartition_stock/src/Utils/utility.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/utility.h	2020-06-06 11:42:29.929047869 -0400
+@@ -15,6 +15,9 @@
+ 
+ #include "feature_weight.h"
+ 
++namespace LinearPartition {
++
++
+ #define INF 1000000007
+ 
+ #define NOTON 5 // NUM_OF_TYPE_OF_NUCS
+@@ -274,4 +277,6 @@
+     return (j-i+1) * external_unpaired;
+ }
+ 
++}
++
+ #endif //FASTCKY_UTILITY_H
+diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility_v.h LinearPartition/src/Utils/utility_v.h
+--- LinearPartition_stock/src/Utils/utility_v.h	2020-06-06 12:03:36.479701546 -0400
++++ LinearPartition/src/Utils/utility_v.h	2020-06-06 11:42:29.929047869 -0400
+@@ -9,6 +9,7 @@
+ #ifndef FASTCKY_UTILITY_V_H
+ #define FASTCKY_UTILITY_V_H
+ 
++namespace LinearPartition {
+ #define NUM_TO_NUC(x) (x==-1?-1:((x==4?0:(x+1))))
+ #define NUM_TO_PAIR(x,y) (x==0? (y==3?5:0) : (x==1? (y==2?1:0) : (x==2 ? (y==1?2:(y==3?3:0)) : (x==3 ? (y==2?4:(y==0?6:0)) : 0))))
+ #define NUC_TO_PAIR(x,y) (x==1? (y==4?5:0) : (x==2? (y==3?1:0) : (x==3 ? (y==2?2:(y==4?3:0)) : (x==4 ? (y==3?4:(y==1?6:0)) : 0))))
+@@ -251,4 +252,6 @@
+     return 0;
+ }
+ 
++}
++
+ #endif //FASTCKY_UTILITY_V_H

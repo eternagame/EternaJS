@@ -1,4 +1,6 @@
 LinearFold/LinearFold
+LinearFold/LinearPartition
+LinearFold/LinearPartition_stock
 LinearFold/LinearFold_stock
 NUPACK/nupack3.0.4
 NUPACK/nupack3.0.4_stock
@@ -8,6 +10,8 @@ Vienna1/ViennaRNA-1.8.5
 Vienna1/ViennaRNA-1.8.5_stock
 contrafold/contrafold
 contrafold/contrafold_stock
+RNApuzzler/RNApuzzler
+RNApuzzler/RNApuzzler_stock
 CMakeCache
 CMakeFiles
 Makefile

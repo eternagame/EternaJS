@@ -1,6 +1,6 @@
 import {Point} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang
+    VLayoutContainer, HAlign, Setting, HLayoutContainer, VAlign, DisplayUtil, Flashbang, Assert
 } from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -111,6 +111,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         };
 
         updateLocation();
+        Assert.assertIsDefined(this._mode);
         this.regs.add(this._mode.resized.connect(updateLocation));
     }
 

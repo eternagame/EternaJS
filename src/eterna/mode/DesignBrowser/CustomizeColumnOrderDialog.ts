@@ -3,7 +3,7 @@ import {Signal} from 'signals';
 import Dialog from 'eterna/ui/Dialog';
 import GamePanel, {GamePanelType} from 'eterna/ui/GamePanel';
 import {
-    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign
+    HAlign, VLayoutContainer, HLayoutContainer, Arrays, DisplayUtil, VAlign, Assert
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import GraphicsUtil from 'eterna/util/GraphicsUtil';
@@ -15,10 +15,14 @@ import {DesignCategory} from './DesignBrowserMode';
 export default class CustomizeColumnOrderDialog extends Dialog<void> {
     public readonly columnsReorganized = new Signal<DesignCategory[]>();
 
-    constructor(allCategories: DesignCategory[], curColumns: DesignCategory[], disabled: Set<DesignCategory> = null) {
+    constructor(
+        allCategories: DesignCategory[],
+        curColumns: DesignCategory[] | null,
+        disabled: Set<DesignCategory> | null = null
+    ) {
         super();
         this._allColumnCategories = allCategories.slice();
-        this._initialColumns = curColumns.slice();
+        this._initialColumns = curColumns ? curColumns.slice() : null;
         this._disabled = disabled;
     }
 
@@ -68,16 +72,19 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
         this._panelContent.addVSpacer(20);
 
         let okButton = new GameButton().label('Ok', 20);
-        okButton.clicked.connect(() => this.close(null));
+        okButton.clicked.connect(() => this.close());
         this.addObject(okButton, this._panelContent);
 
         // EXISTING SORT CRITERIA
-        for (let ii = 0; ii < this._initialColumns.length; ++ii) {
-            this.addColumnUI(this._initialColumns[ii], ii);
+        if (this._initialColumns !== null) {
+            for (let ii = 0; ii < this._initialColumns.length; ++ii) {
+                this.addColumnUI(this._initialColumns[ii], ii);
+            }
         }
 
         this.validateCurCategoryIdx();
         this.layout();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.repositionDialog()));
     }
 
@@ -246,8 +253,8 @@ export default class CustomizeColumnOrderDialog extends Dialog<void> {
     }
 
     private readonly _allColumnCategories: DesignCategory[];
-    private readonly _initialColumns: DesignCategory[];
-    private readonly _disabled: Set<DesignCategory>;
+    private readonly _initialColumns: DesignCategory[] | null;
+    private readonly _disabled: Set<DesignCategory> | null;
 
     private _bg: GamePanel;
 

@@ -1,6 +1,6 @@
 import {Point} from 'pixi.js';
 import {
-    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang
+    VLayoutContainer, HAlign, HLayoutContainer, AlphaTask, Flashbang, Assert
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Dialog, {DialogCanceledError} from './Dialog';
@@ -77,6 +77,8 @@ export default class ConfirmDialog extends Dialog<boolean> {
         panel.addObject(new AlphaTask(1, 0.3));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             panel.display.position = new Point(
                 (Flashbang.stageWidth - panel.width) * 0.5,
                 (Flashbang.stageHeight - panel.height) * 0.5
@@ -84,6 +86,7 @@ export default class ConfirmDialog extends Dialog<boolean> {
         };
 
         updateLocation();
+        Assert.assertIsDefined(this._mode);
         this.regs.add(this._mode.resized.connect(updateLocation));
     }
 

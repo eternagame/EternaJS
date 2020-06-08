@@ -32,6 +32,8 @@ import ScriptConstraint from 'eterna/constraints/constraints/ScriptConstraint';
 import SynthesisConstraint from 'eterna/constraints/constraints/SynthesisConstraint';
 import BarcodeConstraint from 'eterna/constraints/constraints/BarcodeConstraint';
 import ExternalInterface from 'eterna/util/ExternalInterface';
+import BoostConstraint from 'eterna/constraints/constraints/BoostConstraint';
+import {Assert} from 'flashbang';
 import SolutionManager from './SolutionManager';
 import Puzzle from './Puzzle';
 
@@ -43,7 +45,7 @@ export default class PuzzleManager {
         return PuzzleManager._instance;
     }
 
-    public parsePuzzle(json: any): Puzzle {
+    public async parsePuzzle(json: any): Promise<Puzzle> {
         let newpuz: Puzzle = new Puzzle(Number(json['id']), json['title'], json['type']);
 
         if (json['body']) {
@@ -52,7 +54,7 @@ export default class PuzzleManager {
             // This allows to reuse existing descriptions, just insert the span element where appropriate
             // Or one can add a new mission statement, and HTML-hide it if necessary using <!-- ... -->
 
-            let res: RegExpExecArray = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
+            let res: RegExpExecArray | null = PuzzleManager.RE_MISSION_TEXT.exec(json['body']);
             if (res != null && res.length >= 2) {
                 [, newpuz.missionText] = res;
             }
@@ -299,6 +301,9 @@ export default class PuzzleManager {
                     case SynthesisConstraint.NAME:
                         constraints.push(new SynthesisConstraint());
                         break;
+                    case BoostConstraint.NAME:
+                        constraints.push(new BoostConstraint(Number(parameter)));
+                        break;
                     default:
                         log.warn(`Unknown constraint ${name} - skipping`);
                 }
@@ -311,9 +316,12 @@ export default class PuzzleManager {
 
         newpuz.constraints = constraints;
 
-        if (!newpuz.canUseFolder(FolderManager.instance.getFolder(newpuz.folderName))) {
+        let folder: Folder | null = FolderManager.instance.getFolder(newpuz.folderName);
+        Assert.assertIsDefined(folder, `Folder ${newpuz.folderName} cannot be found`);
+        if (!newpuz.canUseFolder(folder)) {
             newpuz.folderName = FolderManager.instance.getNextFolder(
-                newpuz.folderName, (folder: Folder) => !newpuz.canUseFolder(folder)
+                newpuz.folderName,
+                (candidateFolder: Folder) => !newpuz.canUseFolder(candidateFolder)
             ).name;
         }
 
@@ -329,6 +337,21 @@ export default class PuzzleManager {
 
         if (!replace) {
             this._puzzles.push(newpuz);
+        }
+
+        let isScriptConstraint = (
+            constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
+        ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
+
+        await Promise.all(
+            newpuz.constraints.filter(isScriptConstraint)
+                .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
+        );
+
+        // Pre-load secondary puzzle
+        const [m, secondaryPuzzleId] = newpuz.rscript.match(/#PRE-PushPuzzle ([0-9]+);/) ?? [null, null];
+        if (secondaryPuzzleId) {
+            await this.getPuzzleByID(parseInt(secondaryPuzzleId, 10));
         }
 
         return newpuz;
@@ -348,16 +371,8 @@ export default class PuzzleManager {
             SolutionManager.instance.addHairpins(data['hairpins']);
         }
 
-        let puzzle = this.parsePuzzle(data['puzzle']);
+        let puzzle = await this.parsePuzzle(data['puzzle']);
 
-        let isScriptConstraint = (
-            constraint: Constraint<BaseConstraintStatus> | ScriptConstraint
-        ): constraint is ScriptConstraint => constraint instanceof ScriptConstraint;
-
-        await Promise.all(
-            puzzle.constraints.filter(isScriptConstraint)
-                .map((scriptConstraint) => ExternalInterface.preloadScript(scriptConstraint.scriptID))
-        );
         log.info(`Loaded puzzle [name=${puzzle.getName()}]`);
         return puzzle;
     }

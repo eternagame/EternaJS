@@ -15,6 +15,6 @@ export default class UnitSignal extends AbstractSignal<void> {
 
     /** Causes this signal to emit an event to its connected slots. */
     public emit(): void {
-        this.notifyEmit(null);
+        this.notifyEmit();
     }
 }

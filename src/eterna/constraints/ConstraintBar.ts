@@ -1,18 +1,18 @@
-import {ContainerObject, Flashbang} from 'flashbang';
-import UndoBlock from 'eterna/UndoBlock';
-import Puzzle from 'eterna/puzzle/Puzzle';
+import {ContainerObject, Flashbang, Assert} from 'flashbang';
 import {Point} from 'pixi.js';
 import {Value} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
+import ROPWait from 'eterna/rscript/ROPWait';
+import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
-import Constraint, {BaseConstraintStatus, HighlightInfo} from './Constraint';
+import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
     constraintBox: ConstraintBox;
-    highlightCache?: HighlightInfo;
+    highlightCache: HighlightInfo | null;
 }
 
 interface StateSpecificConstraintWrapper extends ConstraintWrapper {
@@ -26,13 +26,14 @@ function isSSCW(
 }
 
 export default class ConstraintBar extends ContainerObject {
-    public sequenceHighlights: Value<HighlightInfo[]> = new Value(null);
+    public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
-    constructor(constraints: Constraint<BaseConstraintStatus>[]) {
+    constructor(constraints: Constraint<BaseConstraintStatus>[] | null) {
         super();
-        this._constraints = constraints.map(
-            (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
-        );
+        this._constraints = constraints
+            ? constraints.map(
+                (constraint) => ({constraint, constraintBox: new ConstraintBox(false), highlightCache: null})
+            ) : [];
 
         Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
@@ -40,6 +41,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     protected added() {
+        if (!this._constraints) return;
         for (let constraint of this._constraints) {
             this.addObject(constraint.constraintBox, this.container);
             constraint.constraintBox.pointerDown.connect(() => {
@@ -54,6 +56,9 @@ export default class ConstraintBar extends ContainerObject {
      * to the states they're intended for in PiP mode
      */
     public layout(animate: boolean, pipStates: number) {
+        if (!this._constraints) return;
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         let nonStateConstraints = this._constraints.filter((constraint) => !isSSCW(constraint));
 
         if (animate) {
@@ -66,7 +71,7 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         let xWalker = 17;
-        let yPos = 35;
+        let yPos = 37;
 
         for (let constraint of nonStateConstraints) {
             let box = constraint.constraintBox;
@@ -97,6 +102,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     public updateHighlights(): void {
+        if (!this._constraints) return;
         let highlights: HighlightInfo[] = [];
         for (let constraint of this._constraints) {
             if (constraint.highlightCache != null && (
@@ -128,19 +134,25 @@ export default class ConstraintBar extends ContainerObject {
                 constraint.constraintBox.flagged = true;
                 this.updateHighlights();
             }
+            ROPWait.notifyClickUI(RScriptUIElementID.SHAPEOBJECTIVE);
         }
     }
 
-    public updateConstraints(undoBlocks: UndoBlock[], targetConditions?: any[], puzzle?: Puzzle): boolean {
+    public updateConstraints(context: ConstraintContext): boolean {
         let satisfied = true;
 
         for (let constraint of this._constraints) {
-            let status = constraint.constraint.evaluate(undoBlocks, targetConditions, puzzle);
+            let status = constraint.constraint.evaluate(context);
             constraint.constraintBox.setContent(
-                constraint.constraint.getConstraintBoxConfig(status, false, undoBlocks, targetConditions)
+                constraint.constraint.getConstraintBoxConfig(
+                    status,
+                    false,
+                    context.undoBlocks,
+                    context.targetConditions
+                )
             );
             constraint.highlightCache = status.satisfied
-                ? null : constraint.constraint.getHighlight(status, undoBlocks, targetConditions);
+                ? null : constraint.constraint.getHighlight(status, context);
             satisfied = satisfied && status.satisfied;
         }
 
@@ -154,6 +166,7 @@ export default class ConstraintBar extends ContainerObject {
      * @param stateIndex pass -1 to return all boxes to normal
      */
     public highlightState(stateIndex: number): void {
+        if (!this._constraints) return;
         let stateConstraints = this._constraints.filter(isSSCW);
         for (let constraint of stateConstraints) {
             constraint.constraintBox.display.alpha = (
@@ -162,11 +175,13 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public getConstraintBox(index: number): ConstraintBox {
+    public getConstraintBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints[index].constraintBox;
     }
 
-    public getShapeBox(index: number): ConstraintBox {
+    public getShapeBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints.filter(
             (constraint) => (
                 constraint.constraint instanceof ShapeConstraint
@@ -175,15 +190,18 @@ export default class ConstraintBar extends ContainerObject {
         )[0].constraintBox;
     }
 
-    public serializeConstraints(): string {
+    public serializeConstraints(): string | null {
+        if (!this._constraints) return null;
+        // AMW: we have a cryptic ConcatArray<never>[] error if we don't
+        // explicitly cast current to any.
         return this._constraints.map(
             (constraint) => constraint.constraint.serialize()
         ).reduce(
-            (all, current) => all.concat(current),
+            (all, current) => all.concat(current as any),
             []
         ).join(',');
     }
 
     private _constraints: ConstraintWrapper[];
-    private _flaggedConstraint: ConstraintWrapper;
+    private _flaggedConstraint: ConstraintWrapper | null;
 }

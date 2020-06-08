@@ -2,7 +2,7 @@ import {
     Container, Graphics, Point, Text
 } from 'pixi.js';
 import {
-    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign, Assert
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -15,7 +15,7 @@ export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
     public closeButton: GameButton;
 
-    constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
+    constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
@@ -46,7 +46,13 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(infoObj, this._contentLayout);
 
         if (this._moreText != null) {
-            this._contentLayout.addChild(Fonts.stdRegular(this._moreText, 16).color(0xffffff).hAlignCenter().build());
+            const moreTextObj = new HTMLTextObject(this._moreText, MissionClearedPanel.WIDTH - 60)
+                .font(Fonts.STDFONT_REGULAR)
+                .fontSize(16)
+                .color(0xffffff)
+                .lineHeight(1.2)
+                .selectable(false);
+            this.addObject(moreTextObj, this._contentLayout);
         }
 
         this._rankScrollContainer = new Container();
@@ -76,6 +82,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this.nextButton = new GameButton().label(this._hasNextPuzzle ? 'NEXT PUZZLE' : "WHAT'S NEXT?");
         this.addObject(this.nextButton, this.container);
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
     }
@@ -103,12 +110,14 @@ export default class MissionClearedPanel extends ContainerObject {
         this.drawBG();
         this.doLayout();
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
         this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.WIDTH;
     }
 
     private drawBG(): void {
         this._bg.clear();
         this._bg.beginFill(0x0, 0.8);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this._bg.drawRect(0, 0, MissionClearedPanel.WIDTH, Flashbang.stageHeight);
         this._bg.endFill();
     }
@@ -146,6 +155,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this._contentLayout.scale = new Point(1, 1);
         this._contentLayout.layout(true);
 
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const maxHeight = Flashbang.stageHeight - 150;
         if (this._contentLayout.height > maxHeight) {
             const contentScale = maxHeight / this._contentLayout.height;
@@ -163,8 +173,8 @@ export default class MissionClearedPanel extends ContainerObject {
         );
     }
 
-    private readonly _infoText: string;
-    private readonly _moreText: string;
+    private readonly _infoText: string | null;
+    private readonly _moreText: string | null;
     private readonly _hasNextPuzzle: boolean;
 
     private readonly _bg: Graphics;
@@ -176,7 +186,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private _rankScrollHeading: GamePanel;
     private _tfPlayer: Text;
     private _rankScrollContainer: Container;
-    private _rankScroll: RankScroll = null;
+    private _rankScroll: RankScroll | null = null;
 
     private static readonly WIDTH: number = 480;
 }

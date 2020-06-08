@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import {Registration, Registrations, Value} from 'signals';
 import {
-    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign
+    Button, KeyboardListener, ButtonState, TextBuilder, KeyboardEventType, DisplayUtil, HAlign, VAlign, Assert
 } from 'flashbang';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import ROPWait from 'eterna/rscript/ROPWait';
@@ -38,24 +38,24 @@ export default class GameButton extends Button implements KeyboardListener {
         this.setupTooltip();
     }
 
-    public up(display: DisplayObject | Texture | string): GameButton {
+    public up(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.UP, display);
     }
 
-    public over(display: DisplayObject | Texture | string): GameButton {
+    public over(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.OVER, display);
     }
 
-    public down(display: DisplayObject | Texture | string): GameButton {
+    public down(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.setIconForState(ButtonState.DOWN, display);
     }
 
-    public disabled(display: DisplayObject | Texture | string): GameButton {
+    public disabled(display?: DisplayObject | Texture | string): GameButton {
         return this.setIconForState(ButtonState.DISABLED, display);
     }
 
     /** Sets a single DisplayObect for all states */
-    public allStates(display: DisplayObject | Texture | string): GameButton {
+    public allStates(display: DisplayObject | Texture | string| undefined): GameButton {
         return this.up(display).over(display).down(display).disabled(display);
     }
 
@@ -81,12 +81,13 @@ export default class GameButton extends Button implements KeyboardListener {
         return this.toggled.value;
     }
 
-    public label(text: string | TextBuilder, fontSize?: number): GameButton {
+    public label(text: string | TextBuilder, fontSize?: number, background?: boolean): GameButton {
         if (typeof (text) === 'string') {
             this._labelBuilder = Fonts.arial(text as string).fontSize(fontSize || 22).bold().color(0xFFFFFF);
         } else {
             this._labelBuilder = text as TextBuilder;
         }
+        this._labelBackground = background;
         this.needsRedraw();
         return this;
     }
@@ -115,9 +116,9 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    public hotkey(keycode: string, ctrl: boolean = false): GameButton {
+    public hotkey(keycode?: string, ctrl: boolean = false): GameButton {
         if (keycode !== this._hotkey || ctrl !== this._hotkeyCtrl) {
-            this._hotkey = keycode;
+            this._hotkey = keycode ?? null;
             this._hotkeyCtrl = ctrl;
             if (this.isLiveObject) {
                 this.setupHotkey();
@@ -130,7 +131,7 @@ export default class GameButton extends Button implements KeyboardListener {
     public onKeyboardEvent(e: KeyboardEvent): boolean {
         if (this.enabled
             && this.display.visible
-            && e.type === KeyboardEventType.KEY_DOWN
+            && e.type === KeyboardEventType.KEY_UP
             && e.code === this._hotkey
             && e.ctrlKey === this._hotkeyCtrl) {
             this.click();
@@ -168,15 +169,14 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         // Create label
-        let label: Text;
+        let label: Text | null = null;
         if (this._labelBuilder != null) {
             label = this._labelBuilder.color(GameButton.TEXT_COLORS.get(state) || 0xffffff).build();
             this._content.addChild(label);
         }
 
         // Stylebox (shown when we have text and no background image)
-        const drawStyleBox = icon == null && label != null;
-        if (drawStyleBox) {
+        if (icon == null && label != null && this._labelBackground !== false) {
             const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
@@ -226,6 +226,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
 
         if (this._hotkey != null) {
+            Assert.assertIsDefined(this.mode);
             this._hotkeyReg = this.regs.add(this.mode.keyboardInput.pushListener(this));
         }
     }
@@ -257,7 +258,7 @@ export default class GameButton extends Button implements KeyboardListener {
         return this;
     }
 
-    private getIconForState(state: ButtonState, selected: boolean): DisplayObject {
+    private getIconForState(state: ButtonState, selected: boolean): DisplayObject | null {
         if (state !== ButtonState.DISABLED && selected && this._selectedState != null) {
             return this._selectedState;
         } else {
@@ -267,7 +268,7 @@ export default class GameButton extends Button implements KeyboardListener {
         }
     }
 
-    private static getDisplayObject(displayOrTex: DisplayObject | Texture | string): DisplayObject {
+    private static getDisplayObject(displayOrTex?: DisplayObject | Texture | string): DisplayObject | null {
         if (displayOrTex instanceof DisplayObject) {
             return displayOrTex;
         } else if (displayOrTex instanceof Texture) {
@@ -282,19 +283,20 @@ export default class GameButton extends Button implements KeyboardListener {
     private readonly _content: Container;
 
     private _labelBuilder: TextBuilder;
+    private _labelBackground?: boolean;
     private _fixedLabelWidth: number = 0;
     private _scaleIconToLabel: boolean = false;
     private _tooltip: string;
-    private _hotkey: string;
+    private _hotkey: string | null;
     private _hotkeyCtrl: boolean;
-    private _buttonIcons: DisplayObject[];
-    private _selectedState: DisplayObject;
+    private _buttonIcons: (DisplayObject | null)[];
+    private _selectedState: DisplayObject | null;
 
     private _rscriptID: RScriptUIElementID;
     private _rscriptClickReg: Registration = Registrations.Null();
 
-    private _hotkeyReg: Registration;
-    private _tooltipReg: Registration;
+    private _hotkeyReg: Registration | null;
+    private _tooltipReg: Registration | null;
 
     private static readonly TEXT_COLORS: Map<ButtonState, number> = new Map([
         [ButtonState.UP, 0xC0DCE7],

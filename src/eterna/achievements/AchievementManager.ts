@@ -46,7 +46,10 @@ export default class AchievementManager extends GameObject {
 
         (this.mode as GameMode).pushUILock('ShowAchievement');
 
-        let nextData: AchievementData = this._pending.shift();
+        let nextData: AchievementData | undefined = this._pending.shift();
+        if (nextData === undefined) {
+            throw new Error('nextData was undefined!');
+        }
         let view = new AchievementBox(nextData.image, nextData.past);
         this._cur = this.addObject(view, (this.mode as GameMode).achievementsLayer);
 
@@ -66,7 +69,7 @@ export default class AchievementManager extends GameObject {
             );
         };
         updateLoc();
-        view.regs.add(this.mode.resized.connect(updateLoc));
+        view.regs.add((this.mode as GameMode).resized.connect(updateLoc));
     }
 
     private _cur: GameObjectRef = GameObjectRef.NULL;

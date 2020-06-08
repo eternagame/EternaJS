@@ -1,5 +1,7 @@
 import {Graphics} from 'pixi.js';
-import {AppMode, Flashbang, KeyCode} from 'flashbang';
+import {
+    AppMode, Flashbang, KeyCode, Assert
+} from 'flashbang';
 import TextInputPanel from 'eterna/ui/TextInputPanel';
 
 /** Show a dialog with text that the user can copy */
@@ -12,6 +14,8 @@ export default class CopyTextDialogMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+        Assert.assertIsDefined(this.container);
+        Assert.assertIsDefined(Flashbang.stageWidth);
 
         let bg = new Graphics();
         this.container.addChild(bg);
@@ -30,7 +34,7 @@ export default class CopyTextDialogMode extends AppMode {
 
         textField.setFocus(true);
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape, undefined);
 
         inputPanel.cancelClicked.connect(() => this.close());
         inputPanel.okClicked.connect(() => {
@@ -42,6 +46,9 @@ export default class CopyTextDialogMode extends AppMode {
         });
 
         const updateView = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
+
             bg.clear()
                 .beginFill(0x0, 0.7)
                 .drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight)
@@ -52,13 +59,15 @@ export default class CopyTextDialogMode extends AppMode {
         };
 
         updateView();
+        Assert.assertIsDefined(this.regs);
         this.regs.add(this.resized.connect(updateView));
     }
 
     private close(): void {
+        Assert.assertIsDefined(this.modeStack);
         this.modeStack.removeMode(this);
     }
 
     private readonly _text: string;
-    private readonly _dialogTitle: string;
+    private readonly _dialogTitle: string | undefined;
 }

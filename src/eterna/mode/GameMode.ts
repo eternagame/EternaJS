@@ -4,7 +4,7 @@ import Eterna from 'eterna/Eterna';
 import UndoBlock from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import {
-    AppMode, SceneObject, Flashbang, GameObjectRef
+    AppMode, SceneObject, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
 import AchievementManager from 'eterna/achievements/AchievementManager';
 import Tooltips from 'eterna/ui/Tooltips';
@@ -38,6 +38,7 @@ export default abstract class GameMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+        Assert.assertIsDefined(this.container);
 
         this.container.addChild(this.bgLayer);
         this.container.addChild(this.poseLayer);
@@ -174,25 +175,38 @@ export default abstract class GameMode extends AppMode {
             this._poses.push(newField.pose);
             newField.pose.getEnergyDelta = () => {
                 // Sanity check
-                if (this._folder) {
+                if (this._folder !== null) {
                     let poseidx = this._isPipMode ? idx : this._curTargetIndex;
 
                     let score = null;
                     let pseudoknots: boolean = this._targetConditions != null
+                        && this._targetConditions[0] != null
                         && this._targetConditions[0]['type'] === 'pseudoknot';
                     if (pseudoknots) {
-                        score = (pairs: number[]) => this._folder.scoreStructures(
-                            newField.pose.fullSequence, pairs, true
-                        );
+                        score = (pairs: number[]) => {
+                            Assert.assertIsDefined(this._folder);
+                            return this._folder.scoreStructures(
+                                newField.pose.fullSequence, pairs, true
+                            );
+                        };
                     } else {
-                        score = (pairs: number[]) => this._folder.scoreStructures(
-                            newField.pose.fullSequence, pairs
-                        );
+                        score = (pairs: number[]) => {
+                            Assert.assertIsDefined(this._folder);
+                            return this._folder.scoreStructures(
+                                newField.pose.fullSequence, pairs
+                            );
+                        };
                     }
 
-                    let targetPairs: number[] = this._targetPairs
+                    let targetPairs: number[] | undefined = this._targetPairs
                         ? this._targetPairs[poseidx] : this.getCurrentTargetPairs(poseidx);
-                    let nativePairs: number[] = this.getCurrentUndoBlock(poseidx).getPairs(37, pseudoknots);
+                    Assert.assertIsDefined(
+                        targetPairs,
+                        "This poses's targetPairs are undefined; energy delta cannot be computed!"
+                    );
+                    const ublk = this.getCurrentUndoBlock(poseidx);
+                    Assert.assertIsDefined(ublk, 'getEnergyDelta is being called where UndoBlocks are unavailable!');
+                    let nativePairs: number[] = ublk.getPairs(37, pseudoknots);
                     return score(EPars.getSatisfiedPairs(targetPairs, newField.pose.fullSequence))
                         - score(nativePairs);
                 }
@@ -214,6 +228,8 @@ export default abstract class GameMode extends AppMode {
     }
 
     protected layoutPoseFields(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         if (this._isPipMode) {
             let numFields: number = this._poseFields.length;
             for (let ii = 0; ii < numFields; ii++) {
@@ -261,6 +277,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     public onContextMenuEvent(e: Event): void {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         let handled = false;
         if (((e.target as HTMLElement).parentNode as HTMLElement).id === Eterna.PIXI_CONTAINER_ID) {
             if (this._contextMenuDialogRef.isLive) {
@@ -284,7 +301,7 @@ export default abstract class GameMode extends AppMode {
     }
 
     /** Subclasses can override to create a ContextMenu that will be shown when the user right-clicks */
-    protected createContextMenu(): ContextMenu {
+    protected createContextMenu(): ContextMenu | null {
         return null;
     }
 
@@ -316,13 +333,13 @@ export default abstract class GameMode extends AppMode {
     protected _isPipMode: boolean = false;
 
     // Things that might or might not be set in children so that getEnergyDelta can get set in setPoseFields
-    protected _folder: Folder;
+    protected _folder: Folder | null;
     protected _curTargetIndex: number;
-    protected getCurrentUndoBlock(index: number): UndoBlock {
+    protected getCurrentUndoBlock(index: number): UndoBlock | undefined {
         return undefined;
     }
 
-    protected getCurrentTargetPairs(index: number): number[] {
+    protected getCurrentTargetPairs(index: number): number[] | undefined {
         return undefined;
     }
 
@@ -343,11 +360,11 @@ class ContextMenuDialog extends Dialog<void> {
         this.addObject(this._menu, this.container);
 
         this._menu.display.position = this._menuLoc;
-        this._menu.menuItemSelected.connect(() => this.close(null));
+        this._menu.menuItemSelected.connect(() => this.close());
     }
 
     protected onBGClicked(): void {
-        this.close(null);
+        this.close();
     }
 
     protected get bgAlpha(): number {

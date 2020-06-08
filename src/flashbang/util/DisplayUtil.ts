@@ -9,6 +9,7 @@ import Assert from './Assert';
 
 export default class DisplayUtil {
     public static renderToPNG(target: DisplayObject): ArrayBuffer {
+        Assert.assertIsDefined(Flashbang.app.pixi);
         let pixels = Flashbang.app.pixi.renderer.extract.pixels(target);
         // Floor our target width/height - UPNG.encode doesn't handle fractional sizes
         return UPNG.encode(
@@ -44,7 +45,7 @@ export default class DisplayUtil {
 
     /** @return true if the given global point is within the DisplayObject's hit area */
     public static hitTest(disp: DisplayObject, globalLoc: Point): boolean {
-        disp.toLocal(globalLoc, null, DisplayUtil.P, false);
+        disp.toLocal(globalLoc, undefined, DisplayUtil.P, false);
 
         return (disp.hitArea != null
             ? disp.hitArea.contains(DisplayUtil.P.x, DisplayUtil.P.y)
@@ -61,6 +62,8 @@ export default class DisplayUtil {
     }
 
     public static fillStageRect(color: number, alpha: number = 1): Graphics {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         return this.fillRect(Flashbang.stageWidth, Flashbang.stageHeight, color, alpha);
     }
 
@@ -73,8 +76,10 @@ export default class DisplayUtil {
     }
 
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
-    public static transformPoint(p: Point, from: DisplayObject, to: DisplayObject, out: Point = null): Point {
-        return to.toLocal(from.toGlobal(p, DisplayUtil.P), null, out);
+    public static transformPoint(
+        p: Point, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
+    ): Point {
+        return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
 
     private static readonly GET_TRANSFORMATION_MATRIX: Matrix = new Matrix();
@@ -83,7 +88,9 @@ export default class DisplayUtil {
      *  to another. If you pass an <code>out</code>-matrix, the result will be stored in this
      *  matrix instead of creating a new object.
      *  (Adapted from Starling-Framework) */
-    public static getTransformationMatrix(disp: DisplayObject, targetSpace: DisplayObject, out: Matrix = null): Matrix {
+    public static getTransformationMatrix(
+        disp: DisplayObject, targetSpace: DisplayObject, out: Matrix | null = null
+    ): Matrix {
         let commonParent: DisplayObject;
         let currentObject: DisplayObject;
 
@@ -155,7 +162,9 @@ export default class DisplayUtil {
      * Returns the bounds the given DisplayObject transformed to another DisplayObject's coordinate system.
      * (Adapted from Starling-Framework)
      */
-    public static getBoundsRelative(disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle = null): Rectangle {
+    public static getBoundsRelative(
+        disp: DisplayObject, targetSpace: DisplayObject, out: Rectangle | null = null
+    ): Rectangle {
         if (out == null) out = new Rectangle();
 
         if (targetSpace === disp || targetSpace === null) {
@@ -191,7 +200,7 @@ export default class DisplayUtil {
 
     /** Transforms a Rectangle from one DisplayObject's coordinate space to another's. */
     public static transformRect(
-        r: Rectangle, from: DisplayObject, to: DisplayObject, out: Rectangle = null
+        r: Rectangle, from: DisplayObject, to: DisplayObject, out: Rectangle | null = null
     ): Rectangle {
         let left: number = Number.MAX_VALUE;
         let top: number = Number.MAX_VALUE;
@@ -278,6 +287,8 @@ export default class DisplayUtil {
         targetHAlign: HAlign, targetVAlign: VAlign,
         xOffset: number = 0, yOffset: number = 0
     ): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         RectangleUtil.setTo(DisplayUtil.SCREEN_BOUNDS, 0, 0, Flashbang.stageWidth, Flashbang.stageHeight);
         if (disp.parent != null) {
             RectangleUtil.getBounds(DisplayUtil.SCREEN_BOUNDS, disp.parent.localTransform, DisplayUtil.SCREEN_BOUNDS);

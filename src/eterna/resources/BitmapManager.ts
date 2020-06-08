@@ -32,8 +32,8 @@ export default class BitmapManager {
             BitmapManager._textBitmaps.set(styleString, textMap);
         }
 
-        let bitmap: Texture = textMap.get(text);
-        if (bitmap == null) {
+        let bitmap: Texture | undefined = textMap.get(text);
+        if (bitmap === undefined) {
             let builder = new TextBuilder(text).font(fontName).fontSize(fontSize).color(color);
             if (bold) {
                 builder.bold();

@@ -6,7 +6,7 @@ export default class TextUtil {
      * If trimmedPostfix is non-null, and the textfield must be trimmed, the
      * postfix will be added to the trimmed text.
      */
-    public static trimTextToWidth(text: Text, maxWidth: number, trimmedPostfix: string = null): void {
+    public static trimTextToWidth(text: Text, maxWidth: number, trimmedPostfix: string | null = null): void {
         if (text.width <= maxWidth) {
             return;
         }

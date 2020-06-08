@@ -86,21 +86,24 @@ export default class Booster {
     }
 
     public createButton(fontsize: number = 22): GameButton {
+        if (this._buttonStateTextures[0] === null) {
+            throw new Error('Cannot call createButton before setting at least the first button state texture!');
+        }
         let button: GameButton = new GameButton().allStates(this._buttonStateTextures[0]);
         if (this._type === BoosterType.PAINTER) {
-            if (this._buttonStateTextures[0] !== undefined) {
+            if (this._buttonStateTextures[0] !== null) {
                 button.up(this._buttonStateTextures[0]);
             }
-            if (this._buttonStateTextures[1] !== undefined) {
+            if (this._buttonStateTextures[1] !== null) {
                 button.over(this._buttonStateTextures[1]);
             }
-            if (this._buttonStateTextures[2] !== undefined) {
+            if (this._buttonStateTextures[2] !== null) {
                 button.down(this._buttonStateTextures[2]);
             }
-            if (this._buttonStateTextures[3] !== undefined) {
+            if (this._buttonStateTextures[3] !== null) {
                 button.selected(this._buttonStateTextures[3]);
             }
-            if (this._buttonStateTextures[4] !== undefined) {
+            if (this._buttonStateTextures[4] !== null) {
                 button.disabled(this._buttonStateTextures[4]);
             }
         }
@@ -129,7 +132,7 @@ export default class Booster {
         this.executeScript(null, null, -1);
     }
 
-    private executeScript(pose: Pose2D, cmd: string, baseNum: number): void {
+    private executeScript(pose: Pose2D | null, cmd: string | null, baseNum: number): void {
         let scriptInterface = new ExternalInterfaceCtx();
 
         scriptInterface.addCallback('set_sequence_string', (seq: string): boolean => {
@@ -190,7 +193,7 @@ export default class Booster {
     private readonly _label: string;
     private readonly _tooltip: string;
     private readonly _scriptID: string;
-    private readonly _buttonStateTextures: Texture[] = [null, null, null, null, null];
+    private readonly _buttonStateTextures: (Texture | null)[] = [null, null, null, null, null];
 
     private static _toolColorCounter: number = EPars.RNABASE_DYNAMIC_FIRST;
 }

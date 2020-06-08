@@ -25,10 +25,10 @@ export default abstract class Button extends ContainerObject implements Enableab
     public readonly clickCanceled: UnitSignal = new UnitSignal();
 
     /** Sound played when the button is pressed (null for no sound) */
-    public downSound: string = null;
+    public downSound: string | null = null;
 
     /** Sound played when the button is pressed while disabled (null for no sound) */
-    public disabledSound: string = null;
+    public disabledSound: string | null = null;
 
     /* override */
     protected added(): void {
@@ -40,6 +40,11 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
         this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(true)));
+        this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
+            if (this.enabled) {
+                this.clicked.emit();
+            }
+        }));
     }
 
     /* override */
@@ -107,18 +112,8 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected onPointerUp(wasClicked: boolean): void {
         this._isPointerDown = false;
         this._isPointerOver = wasClicked;
-
-        let emit = false;
-        if (wasClicked && this._state === ButtonState.DOWN) {
-            emit = true;
-        }
-
         this.updateEnabledState();
         this.endCapture();
-
-        if (emit) {
-            this.clicked.emit();
-        }
     }
 
     protected beginCapture(): void {
@@ -219,5 +214,5 @@ export default abstract class Button extends ContainerObject implements Enableab
     protected _state: ButtonState = ButtonState.UP;
     protected _isPointerOver: boolean;
     protected _isPointerDown: boolean;
-    protected _pointerCapture: PointerCapture;
+    protected _pointerCapture: PointerCapture | null;
 }

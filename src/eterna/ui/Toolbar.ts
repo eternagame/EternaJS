@@ -5,7 +5,7 @@ import Booster from 'eterna/mode/PoseEdit/Booster';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import {
     ContainerObject, Flashbang, VLayoutContainer, HLayoutContainer,
-    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing
+    KeyCode, VAlign, HAlign, DisplayUtil, LocationTask, Easing, Assert
 } from 'flashbang';
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -51,6 +51,8 @@ export default class Toolbar extends ContainerObject {
     public resetButton: GameButton;
     public copyButton: GameButton;
     public pasteButton: GameButton;
+    public nucleotideFindButton: GameButton;
+    public nucleotideRangeButton: GameButton;
 
     public freezeButton: GameButton;
 
@@ -59,15 +61,14 @@ export default class Toolbar extends ContainerObject {
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
 
+    public get position() { return new Point(this._content.x, this._content.y); }
+
     // Puzzle Maker
     public addbaseButton: GameButton;
     public addpairButton: GameButton;
     public deleteButton: GameButton;
     public lockButton: GameButton;
     public moleculeButton: GameButton;
-
-    // Puzzle Solving
-    public hintButton: GameButton;
 
     // Feedback
     public estimateButton: GameButton;
@@ -82,13 +83,20 @@ export default class Toolbar extends ContainerObject {
 
     constructor(
         type: ToolbarType,
-        {states = 1, showHint = false, boosters = null}: {states?: number; showHint?: boolean; boosters?: BoostersData}
+        {states = 1, boosters}: {states?: number; boosters?: BoostersData}
     ) {
         super();
         this._type = type;
         this._states = states;
-        this._showHint = showHint;
-        this._boostersData = boosters;
+        this._boostersData = boosters ?? null;
+    }
+
+    public onResized() {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        this.stateToggle.container.position = new Point(
+            Flashbang.stageWidth / 2 - this.container.position.x,
+            -this.container.position.y + 8
+        );
     }
 
     protected added(): void {
@@ -105,6 +113,7 @@ export default class Toolbar extends ContainerObject {
             .down(Bitmaps.ImgSubmitHit);
 
         this._invisibleBackground = new Graphics();
+        Assert.assertIsDefined(Flashbang.stageWidth);
         this._invisibleBackground
             .beginFill(0, 0)
             .drawRect(0, 0, Flashbang.stageWidth, 100)
@@ -116,15 +125,6 @@ export default class Toolbar extends ContainerObject {
         this.container.addChild(this._content);
 
         this.stateToggle = new ToggleBar(this._states);
-        if (
-            this._states > 1
-            && this._type !== ToolbarType.PUZZLEMAKER
-            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
-        ) {
-            // We create the stateToggle even if we don't add it to the mode,
-            // as scripts may rely on its existence
-            this.addObject(this.stateToggle, this._content);
-        }
 
         // UPPER TOOLBAR (structure editing tools)
         let upperToolbarLayout = new HLayoutContainer(SPACE_NARROW);
@@ -205,13 +205,23 @@ export default class Toolbar extends ContainerObject {
         let lowerToolbarLayout = new HLayoutContainer();
         this._content.addChild(lowerToolbarLayout);
 
+        if (
+            this._states > 1
+            && this._type !== ToolbarType.PUZZLEMAKER
+            && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED
+        ) {
+            // We create the stateToggle even if we don't add it to the mode,
+            // as scripts may rely on its existence
+            this.addObject(this.stateToggle, this.container);
+        }
+
         this.actionMenu = new EternaMenu(EternaMenuStyle.PULLUP);
         this.addObject(this.actionMenu, lowerToolbarLayout);
-        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(null));
+        this.actionMenu.addMenuButton(new GameButton().allStates(Bitmaps.NovaMenu).disabled(undefined));
 
         this.screenshotButton = new GameButton()
             .allStates(Bitmaps.ImgScreenshot)
-            .disabled(null)
+            .disabled(undefined)
             .label('Screenshot', 14)
             .scaleBitmapToLabel()
             .tooltip('Screenshot');
@@ -219,7 +229,7 @@ export default class Toolbar extends ContainerObject {
 
         this.viewOptionsButton = new GameButton()
             .allStates(Bitmaps.ImgSettings)
-            .disabled(null)
+            .disabled(undefined)
             .label('Settings', 14)
             .scaleBitmapToLabel()
             .tooltip('Game options');
@@ -227,7 +237,7 @@ export default class Toolbar extends ContainerObject {
 
         this.viewSolutionsButton = new GameButton()
             .allStates(Bitmaps.ImgFile)
-            .disabled(null)
+            .disabled(undefined)
             .label('Designs', 14)
             .scaleBitmapToLabel()
             .tooltip('View all submitted designs for this puzzle.');
@@ -238,13 +248,13 @@ export default class Toolbar extends ContainerObject {
 
         this.specButton = new GameButton()
             .allStates(Bitmaps.ImgSpec)
-            .disabled(null)
+            .disabled(undefined)
             .label('Specs', 14)
             .scaleBitmapToLabel()
             .tooltip("View RNA's melting point, dotplot and other specs")
             .hotkey(KeyCode.KeyS);
 
-        if (this._type === ToolbarType.FEEDBACK || this._type === ToolbarType.LAB) {
+        if (this._type !== ToolbarType.PUZZLEMAKER && this._type !== ToolbarType.PUZZLEMAKER_EMBEDDED) {
             this.actionMenu.addSubMenuButton(0, this.specButton);
         }
 
@@ -253,7 +263,7 @@ export default class Toolbar extends ContainerObject {
 
         this.resetButton = new GameButton()
             .allStates(Bitmaps.ImgReset)
-            .disabled(null)
+            .disabled(undefined)
             .label('Reset', 14)
             .scaleBitmapToLabel()
             .tooltip(resetTooltip)
@@ -261,14 +271,14 @@ export default class Toolbar extends ContainerObject {
 
         this.copyButton = new GameButton()
             .allStates(Bitmaps.ImgCopy)
-            .disabled(null)
+            .disabled(undefined)
             .label('Copy', 14)
             .scaleBitmapToLabel()
             .tooltip('Copy the current sequence');
 
         this.pasteButton = new GameButton()
             .allStates(Bitmaps.ImgPaste)
-            .disabled(null)
+            .disabled(undefined)
             .label('Paste', 14)
             .scaleBitmapToLabel()
             .tooltip('Type in a sequence');
@@ -279,7 +289,28 @@ export default class Toolbar extends ContainerObject {
             this.actionMenu.addSubMenuButton(0, this.pasteButton);
         }
 
-        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(null);
+        this.nucleotideFindButton = new GameButton()
+            .allStates(Bitmaps.ImgFind)
+            .disabled()
+            .label('Jump to Nucleotide', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Type a nucleotide index to put it in the center of the screen (j)')
+            .hotkey(KeyCode.KeyJ);
+
+        this.actionMenu.addSubMenuButton(0, this.nucleotideFindButton);
+
+        this.nucleotideRangeButton = new GameButton()
+            .allStates(Bitmaps.NovaPuzzleImg)
+            .disabled()
+            .label('View Nucleotide Range', 14)
+            .scaleBitmapToLabel()
+            .tooltip('Enter a nucleotide range to view (v)')
+            .hotkey(KeyCode.KeyV);
+
+        this.actionMenu.addSubMenuButton(0, this.nucleotideRangeButton);
+
+        this.boostersMenu = new GameButton().allStates(Bitmaps.NovaBoosters).disabled(undefined);
+
         if (this._boostersData != null && this._boostersData.actions != null) {
             let boosterMenuIdx = this.actionMenu.addMenuButton(this.boostersMenu);
             for (let ii = 0; ii < this._boostersData.actions.length; ii++) {
@@ -489,18 +520,6 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.redoButton, lowerToolbarLayout);
         }
 
-        this.hintButton = new GameButton()
-            .up(Bitmaps.ImgHint)
-            .over(Bitmaps.ImgHintOver)
-            .down(Bitmaps.ImgHintHit)
-            .hotkey(KeyCode.KeyH)
-            .tooltip('Hint')
-            .rscriptID(RScriptUIElementID.HINT);
-
-        if (this._showHint) {
-            this.addObject(this.hintButton, lowerToolbarLayout);
-        }
-
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
 
@@ -522,6 +541,12 @@ export default class Toolbar extends ContainerObject {
         // point-at-toolbar-buttons tips, so everything needs to be laid out *just so*,
         // unfortunately.
         let hOffset = (this.boostersMenu == null && this._type === ToolbarType.PUZZLE ? 27 : 0);
+
+        DisplayUtil.positionRelative(
+            this._content, HAlign.CENTER, VAlign.BOTTOM,
+            this._invisibleBackground, HAlign.CENTER, VAlign.BOTTOM,
+            hOffset, 0
+        );
 
         DisplayUtil.positionRelative(
             this._content, HAlign.CENTER, VAlign.BOTTOM,
@@ -612,8 +637,6 @@ export default class Toolbar extends ContainerObject {
         this.lockButton.enabled = !disable;
         this.moleculeButton.enabled = !disable;
 
-        this.hintButton.enabled = !disable;
-
         this.estimateButton.enabled = !disable;
         this.letterColorButton.enabled = !disable;
         this.expColorButton.enabled = !disable;
@@ -637,13 +660,11 @@ export default class Toolbar extends ContainerObject {
 
     private readonly _type: ToolbarType;
     private readonly _states: number;
-    private readonly _showHint: boolean;
-    private readonly _boostersData: BoostersData;
+    private readonly _boostersData: BoostersData | null;
 
     private _invisibleBackground: Graphics;
     private _content: VLayoutContainer;
-    private _toolbarLayout: HLayoutContainer;
 
     private _uncollapsedContentLoc: Point;
-    private _autoCollapseRegs: RegistrationGroup;
+    private _autoCollapseRegs: RegistrationGroup | null;
 }

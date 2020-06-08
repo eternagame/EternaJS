@@ -2,7 +2,7 @@ import {Graphics, Point, Text} from 'pixi.js';
 import {Signal} from 'signals';
 import Eterna from 'eterna/Eterna';
 import {
-    ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang
+    ContainerObject, KeyboardListener, Enableable, LocationTask, Easing, KeyboardEventType, KeyCode, Flashbang, Assert
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import Sounds from 'eterna/resources/Sounds';
@@ -74,6 +74,7 @@ export default class ToggleBar extends ContainerObject implements KeyboardListen
 
     protected added(): void {
         super.added();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
     }
 

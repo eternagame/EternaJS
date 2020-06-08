@@ -1,7 +1,7 @@
 import {Graphics, Point} from 'pixi.js';
 import {Signal} from 'signals';
 import {
-    ContainerObject, DisplayObjectPointerTarget, Dragger, Flashbang, GameObjectRef
+    ContainerObject, DisplayObjectPointerTarget, Dragger, Flashbang, GameObjectRef, Assert
 } from 'flashbang';
 
 export default class SliderBar extends ContainerObject {
@@ -127,6 +127,7 @@ export default class SliderBar extends ContainerObject {
     }
 
     private onSliderLineClicked(): void {
+        Assert.assertIsDefined(Flashbang.globalMouse);
         let mouse = this.container.toLocal(Flashbang.globalMouse);
 
         if (this._vertical) {
