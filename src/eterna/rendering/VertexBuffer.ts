@@ -58,32 +58,23 @@ export default class VertexBuffer {
     public bind(vertexAttribs: VertexShaderAttribs) {
         const context = Renderer.context;
         if (!this._isLoaded) {
-            for (const [attribute, value] of Object.entries(this._attributes)) {
+            Object.entries(this._attributes).forEach(([attribute, value]) => {
                 const buffer = context.createBuffer();
-                if (!buffer) {
-                    continue;
-                }
                 context.bindBuffer(context.ARRAY_BUFFER, buffer);
-                context.bufferData(
-                    context.ARRAY_BUFFER,
-                    new Float32Array(value),
-                    context.DYNAMIC_DRAW
-                );
+                context.bufferData(context.ARRAY_BUFFER, new Float32Array(value), context.DYNAMIC_DRAW);
                 this._metadata[attribute].buffer = buffer;
                 this._metadata[attribute].needsUpdate = false;
-            }
+            });
 
             if (this._indices) {
                 const buffer = context.createBuffer();
-                if (buffer) {
-                    context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, buffer);
-                    context.bufferData(
-                        context.ELEMENT_ARRAY_BUFFER,
-                        new Uint16Array(this._indices.data),
-                        context.STATIC_DRAW
-                    );
-                    this._indices.buffer = buffer;
-                }
+                context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, buffer);
+                context.bufferData(
+                    context.ELEMENT_ARRAY_BUFFER, 
+                    new Uint16Array(this._indices.data), 
+                    context.STATIC_DRAW
+                );
+                this._indices.buffer = buffer;
             }
 
             this._isLoaded = true;
@@ -93,22 +84,14 @@ export default class VertexBuffer {
             context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, this._indices.buffer);
         }
 
-        for (const [attribute, value] of Object.entries(this._metadata)) {
-            const location = vertexAttribs[attribute];
-            if (location === undefined || location < 0) {
-                // TODO log warning attribute not defined in shader
-                continue;
-            }
-            const {buffer} = value;
-            if (!buffer) {
-                continue;
-            }
+        Object.entries(this._metadata).forEach(([attribute, {buffer, componentCount}]) => {
             if (!this.updateBufferDataIfNecessary(attribute)) {
                 context.bindBuffer(context.ARRAY_BUFFER, buffer);
             }
+            const location = vertexAttribs[attribute];
             context.enableVertexAttribArray(location);
-            context.vertexAttribPointer(location, value.componentCount, context.FLOAT, false, 0, 0);
-        }
+            context.vertexAttribPointer(location, componentCount, context.FLOAT, false, 0, 0);
+        });
     }
 
     public draw(vertexCount: number) {
@@ -127,11 +110,7 @@ export default class VertexBuffer {
         }
         const context = Renderer.context;
         context.bindBuffer(context.ARRAY_BUFFER, attr.buffer);
-        context.bufferData(
-            context.ARRAY_BUFFER,
-            new Float32Array(this._attributes[attribute]),
-            context.DYNAMIC_DRAW
-        );
+        context.bufferData(context.ARRAY_BUFFER, new Float32Array(this._attributes[attribute]), context.DYNAMIC_DRAW);
         attr.needsUpdate = false;
         return true;
     }

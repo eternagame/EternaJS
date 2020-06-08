@@ -56,6 +56,7 @@ export default class Shader {
         context.attachShader(program, fragmentShader as WebGLShader);
         context.linkProgram(program);
         if (!context.getProgramParameter(program, context.LINK_STATUS)) {
+            // eslint-disable-next-line
             console.error(context.getProgramInfoLog(program) as string);
             this._bindingFailed = true;
             return false;
@@ -65,6 +66,7 @@ export default class Shader {
         for (const uniform of this._props.uniforms) {
             const location = context.getUniformLocation(program, uniform);
             if (!location) {
+                // eslint-disable-next-line
                 console.warn(`Shader uniform '${uniform}' not found`);
                 this._bindingFailed = true;
                 return false;
@@ -75,6 +77,7 @@ export default class Shader {
         for (const vertexAttrib of this._props.vertexAttribs) {
             const location = context.getAttribLocation(program, vertexAttrib);
             if (location < 0) {
+                // eslint-disable-next-line
                 console.warn(`Shader vertex attribute '${vertexAttrib}' not found`);
                 this._bindingFailed = true;
                 return false;
@@ -93,6 +96,7 @@ export default class Shader {
         context.compileShader(shader);
 
         if (!context.getShaderParameter(shader, context.COMPILE_STATUS)) {
+            // eslint-disable-next-line
             console.error(context.getShaderInfoLog(shader) as string);
             this._bindingFailed = true;
             return null;

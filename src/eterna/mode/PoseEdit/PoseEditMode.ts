@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, DisplayObject, Point, Text, Rectangle
+    Container, DisplayObject, Point, Text, Rectangle, Matrix
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
@@ -49,6 +49,9 @@ import HelpBar from 'eterna/ui/HelpBar';
 import HelpScreen from 'eterna/ui/help/HelpScreen';
 import NucleotideFinder from 'eterna/ui/NucleotideFinder';
 import NucleotideRangeSelector from 'eterna/ui/NucleotideRangeSelector';
+import Renderer from 'eterna/rendering/Renderer';
+import Shader from 'eterna/rendering/Shader';
+import Matrix44 from 'eterna/math/Matrix44';
 import {PuzzleEditPoseData} from '../PuzzleEdit/PuzzleEditMode';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
@@ -280,6 +283,8 @@ export default class PoseEditMode extends GameMode {
         this.dialogLayer.addChild(this._asynchText);
         this.hideAsyncText();
 
+        this.initBatchRendering();
+
         this.setPuzzle();
 
         this.buildScriptInterface();
@@ -296,6 +301,7 @@ export default class PoseEditMode extends GameMode {
     public onResized(): void {
         this.updateUILayout();
         super.onResized();
+        this.updateProjectionMatrix();
     }
 
     private showAsyncText(text: string): void {
@@ -774,7 +780,7 @@ export default class PoseEditMode extends GameMode {
         // above but because NuPACK can handle pseudoknots, we shouldn't
         for (let ii = 0; ii < targetSecstructs.length; ii++) {
             if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
                 this._targetPairs.push(EPars.parenthesisToPairs(targetSecstructs[ii], true));
                 this._poseFields[ii].pose.pseudoknotted = true;
             } else {
@@ -1015,7 +1021,7 @@ export default class PoseEditMode extends GameMode {
                 }
                 let seqArr: number[] = EPars.stringToSequence(seq);
                 if (this._targetConditions && this._targetConditions[0]
-                        && this._targetConditions[0]['type'] === 'pseudoknot') {
+                    && this._targetConditions[0]['type'] === 'pseudoknot') {
                     let folded: number[] | null = this._folder.foldSequence(seqArr, null, constraint, true);
                     Assert.assertIsDefined(folded);
                     return EPars.pairsToParenthesis(folded, null, true);
@@ -1049,7 +1055,7 @@ export default class PoseEditMode extends GameMode {
             let structArr: number[] = EPars.parenthesisToPairs(secstruct);
             let freeEnergy = 0;
             if (this._targetConditions && this._targetConditions[0]
-                    && this._targetConditions[0]['type'] === 'pseudoknot') {
+                && this._targetConditions[0]['type'] === 'pseudoknot') {
                 freeEnergy = this._folder.scoreStructures(seqArr, structArr, true);
             } else {
                 freeEnergy = this._folder.scoreStructures(seqArr, structArr);
@@ -1272,6 +1278,29 @@ export default class PoseEditMode extends GameMode {
         this._rscript.tick();
 
         super.update(dt);
+
+        // Batch rendering
+        Renderer.instance.clear();
+        Renderer.context.viewport(0, 0, this._webglCanvas.clientWidth, this._webglCanvas.clientHeight);
+        if (this._shader.bind()) {
+            Renderer.context.uniformMatrix4fv(
+                this._shader.getUniformLocation('projectionMatrix'),
+                false,
+                this._projectionMatrix.data
+            );
+            Renderer.context.uniformMatrix4fv(
+                this._shader.getUniformLocation('modelViewMatrix'),
+                false,
+                this._viewMatrix.data
+            );
+            for (let i = 0; i < this._poses.length; i++) {
+                const vb = this._poses[i].vertexBuffer;
+                if (vb) {
+                    vb.bind(this._shader.vertexAttribs);
+                    vb.draw(this._poses[i].indexCount);
+                }
+            }
+        }
     }
 
     public get isPlaying(): boolean {
@@ -1294,7 +1323,7 @@ export default class PoseEditMode extends GameMode {
         }
     }
 
-    public get constraintCount(): number | null{
+    public get constraintCount(): number | null {
         return this._puzzle.constraints ? this._puzzle.constraints.length : null;
     }
 
@@ -2851,7 +2880,7 @@ export default class PoseEditMode extends GameMode {
 
         let pseudoknots = false;
         if (this._targetConditions && this._targetConditions[ii]
-                && this._targetConditions[ii]['type'] === 'pseudoknot') {
+            && this._targetConditions[ii]['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
 
@@ -2977,7 +3006,7 @@ export default class PoseEditMode extends GameMode {
 
         let pseudoknots = false;
         if (this._targetConditions && this._targetConditions[targetIndex]
-                && this._targetConditions[targetIndex]['type'] === 'pseudoknot') {
+            && this._targetConditions[targetIndex]['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
 
@@ -3171,6 +3200,52 @@ export default class PoseEditMode extends GameMode {
         this._seqStacks = [];
     }
 
+    private initBatchRendering() {
+        this._webglCanvas = document.getElementById('webglCanvas') as HTMLCanvasElement;
+        Renderer.create(this._webglCanvas);
+
+        this._shader = new Shader({
+            vertexProgram: `#version 300 es
+in vec3 position;
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
+void main() {
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);    
+}
+    `,
+            fragmentProgram: `#version 300 es
+precision mediump float;
+out vec4 fragColor;
+void main() {
+    fragColor = vec4(1.);
+}
+    `,
+
+            uniforms: [
+                'projectionMatrix',
+                'modelViewMatrix'
+            ],
+
+            vertexAttribs: [
+                'position'
+            ]
+        });
+
+        this.updateProjectionMatrix();
+        this._viewMatrix = new Matrix44();
+    }
+
+    private updateProjectionMatrix() {
+        this._projectionMatrix = Matrix44.makeOrthoProjection(
+            0, 
+            this._webglCanvas.clientWidth, 
+            0, 
+            this._webglCanvas.clientHeight, 
+            -1, 
+            1
+        );
+    }
+
     private readonly _puzzle: Puzzle;
     private readonly _params: PoseEditParams;
     private readonly _scriptInterface = new ExternalInterfaceCtx();
@@ -3243,6 +3318,12 @@ export default class PoseEditMode extends GameMode {
     private _submitSolutionRspData: any;
 
     private _nucleotideRangeToShow: [number, number] | null = null;
+
+    // Batch rendering
+    private _webglCanvas: HTMLCanvasElement;
+    private _shader: Shader;
+    private _projectionMatrix: Matrix44;
+    private _viewMatrix: Matrix44;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

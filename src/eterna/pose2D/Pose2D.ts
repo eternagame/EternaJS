@@ -23,6 +23,8 @@ import GameMode from 'eterna/mode/GameMode';
 import Utility from 'eterna/util/Utility';
 import Folder from 'eterna/folding/Folder';
 import Puzzle from 'eterna/puzzle/Puzzle';
+import VertexBuffer from 'eterna/rendering/VertexBuffer';
+import Renderer from 'eterna/rendering/Renderer';
 import Base from './Base';
 import BaseDrawFlags from './BaseDrawFlags';
 import EnergyScoreDisplay from './EnergyScoreDisplay';
@@ -51,6 +53,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public static readonly OLIGO_MODE_DIMER: number = 1;
     public static readonly OLIGO_MODE_EXT3P: number = 2;
     public static readonly OLIGO_MODE_EXT5P: number = 3;
+
+    public get vertexBuffer() { return this._vertexBuffer; }
+    public get indexCount() { return this._indexCount; }
 
     constructor(poseField: PoseField, editable: boolean) {
         super();
@@ -2645,6 +2650,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         } else {
             this._foldDuration = 0.7;
         }
+
+        this.updateGeometry();
     }
 
     private printFeedback(dat: any[]): void {
@@ -3408,6 +3415,50 @@ export default class Pose2D extends ContainerObject implements Updatable {
         return (s1 === type1 && s2 === type2) || (s1 === type2 && s2 === type1);
     }
 
+    private updateGeometry() {
+        const vertexPerBase = 4;
+        const indexPerBase = 6;
+        const componentPerVertex = 3;
+
+        if (!this._vertexBuffer) {
+            this._vertexBuffer = new VertexBuffer({
+                primitiveType: Renderer.context.TRIANGLES
+            });
+
+            // Setup indices once
+            const vertexCount = this._bases.length * vertexPerBase;
+            this._indexCount = this._bases.length * indexPerBase;
+            const indices = new Array(this._indexCount);
+
+            let vertex = 0;
+            let index = 0;
+            for (let i = 0; i < this._bases.length; ++i) {
+                indices[index + 0] = vertex + 0; indices[index + 1] = vertex + 1; indices[index + 2] = vertex + 2;
+                indices[index + 3] = vertex + 1; indices[index + 4] = vertex + 3; indices[index + 5] = vertex + 2;
+                vertex += vertexPerBase;
+                index += indexPerBase;
+            }
+
+            this.vertexBuffer.setIndices(indices);
+            this._positions = new Array(vertexCount * componentPerVertex);
+        }
+
+        const p = this._positions;
+        const w = 20;
+        const h = 20;
+        let v = 0;
+        for (let i = 0; i < this._bases.length; ++i) {
+            const baseX = (this._baseToX[i] ?? this._bases[i].x) + this._offX;
+            const baseY = (this._baseToY[i] ?? this._bases[i].y) + this._offY;
+            p[v + 0] = baseX; p[v + 1] = baseY; p[v + 2] = 0; // Top left
+            p[v + 3] = baseX; p[v + 4] = baseY + h; p[v + 5] = 0; // Bottom left
+            p[v + 6] = baseX + w; p[v + 7] = baseY; p[v + 8] = 0; // Top right
+            p[v + 9] = baseX + w; p[v + 10] = baseY + h; p[v + 11] = 0; // Bottom right
+            v += vertexPerBase * componentPerVertex;
+        }
+        this._vertexBuffer.setAttribute('position', this._positions, componentPerVertex);
+    }
+
     private readonly _baseLayer: Container = new Container();
     private readonly _poseField: PoseField;
 
@@ -3597,6 +3648,11 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _energyHighlights: SceneObject[] = [];
 
     private _showNucleotideRange = false;
+
+    // Batch rendering
+    private _vertexBuffer: VertexBuffer;
+    private _indexCount = 0;
+    private _positions: number[] = [];
 
     /*
      * NEW HIGHLIGHT.
