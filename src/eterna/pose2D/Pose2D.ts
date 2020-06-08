@@ -41,6 +41,7 @@ import RNALayout, {RNATreeNode} from './RNALayout';
 import ScoreDisplayNode, {ScoreDisplayNodeType} from './ScoreDisplayNode';
 import ExplosionFactorPanel from './ExplosionFactorPanel';
 import triangulate from './triangulate';
+import Matrix44 from 'eterna/math/Matrix44';
 
 type InteractionEvent = PIXI.interaction.InteractionEvent;
 
@@ -56,6 +57,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
     public get vertexBuffer() { return this._vertexBuffer; }
     public get indexCount() { return this._indexCount; }
+    public get viewMatrix() { return this._viewMatrix; }
 
     constructor(poseField: PoseField, editable: boolean) {
         super();
@@ -259,42 +261,45 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setZoomLevel(zoomLevel: number, animate: boolean = true, center: boolean = false): void {
-        if ((this._zoomLevel !== zoomLevel || center) && animate) {
-            if (this._zoomLevel === zoomLevel && center) {
-                if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
-                    return;
-                }
-            }
+        this._zoomLevel = zoomLevel;
+        this.updateViewMatrix();
 
-            this._startOffsetX = this._offX;
-            this._startOffsetY = this._offY;
+        // if ((this._zoomLevel !== zoomLevel || center) && animate) {
+        //     if (this._zoomLevel === zoomLevel && center) {
+        //         if (Math.abs(this._width / 2 - this._offX) + Math.abs(this._height / 2 - this._offY) < 50) {
+        //             return;
+        //         }
+        //     }
 
-            let scaler = 1;
-            if (zoomLevel > this._zoomLevel) {
-                scaler = Pose2D.ZOOM_SPACINGS[zoomLevel] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
-            }
+        //     this._startOffsetX = this._offX;
+        //     this._startOffsetY = this._offY;
 
-            if (!this._offsetTranslating && !center) {
-                this._endOffsetX = scaler * (this._offX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._offY - this._height / 2) + this._height / 2;
-            } else if (this._offsetTranslating) {
-                this._endOffsetX = scaler * (this._endOffsetX - this._width / 2) + this._width / 2;
-                this._endOffsetY = scaler * (this._endOffsetY - this._height / 2) + this._height / 2;
-            } else {
-                this._endOffsetX = this._width / 2;
-                this._endOffsetY = this._height / 2;
-            }
+        //     let scaler = 1;
+        //     if (zoomLevel > this._zoomLevel) {
+        //         scaler = Pose2D.ZOOM_SPACINGS[zoomLevel] / Pose2D.ZOOM_SPACINGS[this._zoomLevel];
+        //     }
 
-            this._offsetTranslating = true;
+        //     if (!this._offsetTranslating && !center) {
+        //         this._endOffsetX = scaler * (this._offX - this._width / 2) + this._width / 2;
+        //         this._endOffsetY = scaler * (this._offY - this._height / 2) + this._height / 2;
+        //     } else if (this._offsetTranslating) {
+        //         this._endOffsetX = scaler * (this._endOffsetX - this._width / 2) + this._width / 2;
+        //         this._endOffsetY = scaler * (this._endOffsetY - this._height / 2) + this._height / 2;
+        //     } else {
+        //         this._endOffsetX = this._width / 2;
+        //         this._endOffsetY = this._height / 2;
+        //     }
 
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
-        } else if (this._zoomLevel !== zoomLevel) {
-            this._zoomLevel = zoomLevel;
-            this.computeLayout(true);
-            this._redraw = true;
-        }
+        //     this._offsetTranslating = true;
+
+        //     this._zoomLevel = zoomLevel;
+        //     this.computeLayout(true);
+        //     this._redraw = true;
+        // } else if (this._zoomLevel !== zoomLevel) {
+        //     this._zoomLevel = zoomLevel;
+        //     this.computeLayout(true);
+        //     this._redraw = true;
+        // }
     }
 
     public computeDefaultZoomLevel(): number {
@@ -708,7 +713,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public setOffset(offX: number, offY: number): void {
         this._offX = offX;
         this._offY = offY;
-        this._redraw = true;
+        this.updateViewMatrix();
     }
 
     public get shiftLimit(): number {
@@ -3448,8 +3453,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
         const h = 20;
         let v = 0;
         for (let i = 0; i < this._bases.length; ++i) {
-            const baseX = (this._baseToX[i] ?? this._bases[i].x) + this._offX;
-            const baseY = (this._baseToY[i] ?? this._bases[i].y) + this._offY;
+            const baseX = (this._baseToX[i] ?? this._bases[i].x);
+            const baseY = (this._baseToY[i] ?? this._bases[i].y);
             p[v + 0] = baseX; p[v + 1] = baseY; p[v + 2] = 0; // Top left
             p[v + 3] = baseX; p[v + 4] = baseY + h; p[v + 5] = 0; // Bottom left
             p[v + 6] = baseX + w; p[v + 7] = baseY; p[v + 8] = 0; // Top right
@@ -3457,6 +3462,13 @@ export default class Pose2D extends ContainerObject implements Updatable {
             v += vertexPerBase * componentPerVertex;
         }
         this._vertexBuffer.setAttribute('position', this._positions, componentPerVertex);
+    }
+
+    private updateViewMatrix() {
+        const scale = 1 / (this._zoomLevel + 1);
+        this._viewMatrix.setIdentity()
+            .scale(scale, scale, 1)
+            .setPosition(this._offX, this._offY, 1);
     }
 
     private readonly _baseLayer: Container = new Container();
@@ -3653,6 +3665,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _vertexBuffer: VertexBuffer;
     private _indexCount = 0;
     private _positions: number[] = [];
+    private _viewMatrix = new Matrix44();
 
     /*
      * NEW HIGHLIGHT.

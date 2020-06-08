@@ -25,14 +25,35 @@ export default class Matrix44 {
         return m;
     }
 
-    public data: number[];
+    public data: number[] = [];
 
-    constructor(data?: number[]) {
-        this.data = data ?? [
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        ];
+    constructor() {
+        this.setIdentity();
+    }
+
+    public setIdentity() {
+        const m = this.data;
+        m[0] = 1; m[4] = 0; m[8] = 0; m[12] = 0;
+        m[1] = 0; m[5] = 1; m[9] = 0; m[13] = 0;
+        m[2] = 0; m[6] = 0; m[10] = 1; m[14] = 0;
+        m[3] = 0; m[7] = 0; m[11] = 0; m[15] = 1;
+        return this;
+    }
+
+    public scale(x: number, y: number, z: number) {
+        const te = this.data;
+        te[0] *= x; te[4] *= y; te[8] *= z;
+        te[1] *= x; te[5] *= y; te[9] *= z;
+        te[2] *= x; te[6] *= y; te[10] *= z;
+        te[3] *= x; te[7] *= y; te[11] *= z;
+        return this;
+    }
+
+    public setPosition(x: number, y: number, z: number) {
+        const te = this.data;
+        te[12] = x;
+        te[13] = y;
+        te[14] = z;
+        return this;
     }
 }

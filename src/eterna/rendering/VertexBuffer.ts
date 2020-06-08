@@ -70,8 +70,8 @@ export default class VertexBuffer {
                 const buffer = context.createBuffer();
                 context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, buffer);
                 context.bufferData(
-                    context.ELEMENT_ARRAY_BUFFER, 
-                    new Uint16Array(this._indices.data), 
+                    context.ELEMENT_ARRAY_BUFFER,
+                    new Uint16Array(this._indices.data),
                     context.STATIC_DRAW
                 );
                 this._indices.buffer = buffer;

@@ -1287,15 +1287,15 @@ export default class PoseEditMode extends GameMode {
                 this._shader.getUniformLocation('projectionMatrix'),
                 false,
                 this._projectionMatrix.data
-            );
-            Renderer.context.uniformMatrix4fv(
-                this._shader.getUniformLocation('modelViewMatrix'),
-                false,
-                this._viewMatrix.data
-            );
-            for (let i = 0; i < this._poses.length; i++) {
+            );            
+            for (let i = 0; i < this._poses.length; i++) {                
                 const vb = this._poses[i].vertexBuffer;
                 if (vb) {
+                    Renderer.context.uniformMatrix4fv(
+                        this._shader.getUniformLocation('viewMatrix'),
+                        false,
+                        this._poses[i].viewMatrix.data
+                    );
                     vb.bind(this._shader.vertexAttribs);
                     vb.draw(this._poses[i].indexCount);
                 }
@@ -3208,9 +3208,9 @@ export default class PoseEditMode extends GameMode {
             vertexProgram: `#version 300 es
 in vec3 position;
 uniform mat4 projectionMatrix;
-uniform mat4 modelViewMatrix;
+uniform mat4 viewMatrix;
 void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);    
+    gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);    
 }
     `,
             fragmentProgram: `#version 300 es
@@ -3223,7 +3223,7 @@ void main() {
 
             uniforms: [
                 'projectionMatrix',
-                'modelViewMatrix'
+                'viewMatrix'
             ],
 
             vertexAttribs: [
@@ -3232,16 +3232,15 @@ void main() {
         });
 
         this.updateProjectionMatrix();
-        this._viewMatrix = new Matrix44();
     }
 
     private updateProjectionMatrix() {
         this._projectionMatrix = Matrix44.makeOrthoProjection(
-            0, 
-            this._webglCanvas.clientWidth, 
-            0, 
-            this._webglCanvas.clientHeight, 
-            -1, 
+            0,
+            this._webglCanvas.clientWidth,
+            0,
+            this._webglCanvas.clientHeight,
+            -1,
             1
         );
     }
@@ -3323,7 +3322,6 @@ void main() {
     private _webglCanvas: HTMLCanvasElement;
     private _shader: Shader;
     private _projectionMatrix: Matrix44;
-    private _viewMatrix: Matrix44;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }
