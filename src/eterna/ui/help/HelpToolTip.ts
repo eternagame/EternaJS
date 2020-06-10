@@ -4,7 +4,7 @@ import Fonts from 'eterna/util/Fonts';
 
 export type ToolTipPositioner = [() => Rectangle, number];
 
-type HelpToolTipSide = 'top' | 'bottom';
+export type HelpToolTipSide = 'top' | 'bottom';
 
 interface HelpToolTipProps {
     text: string;

@@ -1,5 +1,7 @@
 import * as log from 'loglevel';
-import {Container, DisplayObject} from 'pixi.js';
+import {
+    Container, DisplayObject, Rectangle, Point
+} from 'pixi.js';
 import {ContainerObject, Enableable, GameObject} from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
@@ -122,6 +124,36 @@ export default class RScriptEnv extends ContainerObject {
             uiElement = this.getUIElement(elementID);
         }
         return [uiElement, elementID, altParam];
+    }
+
+    public getUIElementBounds(key: string): Rectangle | null {
+        try {
+            const [uiElement] = this.getUIElementFromID(key);
+            if (uiElement instanceof Rectangle) {
+                // This is a rectangle whithin the palette
+                const [palette] = this.getUIElementFromID(RScriptUIElementID.PALETTE);
+                const obj = palette as GameObject;
+                const rect = uiElement as Rectangle;
+                const globalPos = obj.display.toGlobal(new Point());
+                return new Rectangle(
+                    globalPos.x + rect.x,
+                    globalPos.y + rect.y,
+                    rect.width,
+                    rect.height
+                );
+            } else {
+                const obj = uiElement as GameObject;
+                const globalPos = obj.display.toGlobal(new Point());
+                return new Rectangle(
+                    globalPos.x,
+                    globalPos.y,
+                    obj.display.getLocalBounds().width,
+                    obj.display.getLocalBounds().height
+                );
+            }
+        } catch (e) {
+            return null;
+        }
     }
 
     public get totalConstraints(): number | null {

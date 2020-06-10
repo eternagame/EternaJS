@@ -12,6 +12,8 @@ import RScriptOp from './RScriptOp';
 import RScriptOpTree from './RScriptOpTree';
 import ROPPopPuzzle from './ROPPopPuzzle';
 import ROPShowMissionScreen from './ROPShowMissionScreen';
+import ROPUIArrow from './ROPUIArrow';
+import ROPUITooltip from './ROPUITooltip';
 
 export default class RNAScript {
     constructor(puz: Puzzle, ui: PoseEditMode) {
@@ -103,6 +105,8 @@ export default class RNAScript {
         let rnaRegex = /^RNA(SetBase|ChangeMode|EnableModification|SetPainter|ChangeState|SetZoom|SetPIP)$/ig;
         const popPuzzle = /PopPuzzle/;
         const showMissionScreen = /ShowMissionScreen/;
+        const uiArrow = /(Show|Hide)UIArrow/;
+        const uiTooltip = /(Show|Hide)UITooltip/;
 
         let regResult: RegExpExecArray | null;
         if ((regResult = preRegex.exec(op)) != null) {
@@ -167,6 +171,12 @@ export default class RNAScript {
             return new ROPPopPuzzle(this._env);
         } else if ((regResult = showMissionScreen.exec(op))) {
             return new ROPShowMissionScreen(this._env);
+        } else if ((regResult = uiArrow.exec(op))) {
+            const [match, show] = regResult;
+            return new ROPUIArrow(this._env, show.toUpperCase() === 'SHOW');
+        } else if ((regResult = uiTooltip.exec(op))) {
+            const [match, show] = regResult;
+            return new ROPUITooltip(this._env, show.toUpperCase() === 'SHOW');
         }
         // Shouldn't reach here ever.
         throw new Error(`Invalid operation: ${op}`);

@@ -474,14 +474,15 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
-        const toolBar = this.toolbar;
-        const getBounds = (elem: ContainerObject) => new Rectangle(
-            // worldTransform seems unreliable. TODO investigate.
-            elem.container.x + toolBar.container.x + toolBar.position.x,
-            elem.container.y + toolBar.container.y + toolBar.position.y,
-            elem.container.width,
-            elem.container.height
-        );
+        const getBounds = (elem: ContainerObject) => {
+            const globalPos = elem.container.toGlobal(new Point());
+            return new Rectangle(
+                globalPos.x,
+                globalPos.y,
+                elem.container.width,
+                elem.container.height
+            );
+        };
 
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
