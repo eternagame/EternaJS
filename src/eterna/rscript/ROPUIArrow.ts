@@ -71,6 +71,9 @@ export default class ROPUIArrow extends RScriptOp {
     }
 
     private clear() {
-        (this._env.getVar(ROPUIArrow.id) as GameObject)?.destroySelf();
+        const elem = this._env.getVar(ROPUIArrow.id) as GameObject;
+        if (elem) {
+            elem.destroySelf();
+        }
     }
 }

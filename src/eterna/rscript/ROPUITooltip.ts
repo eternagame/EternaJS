@@ -17,30 +17,25 @@ export default class ROPUITooltip extends RScriptOp {
     }
 
     public exec(): void {
-        try {
-            if (this._show) {
-                this.clear();
-                const getBounds = () => this._env.getUIElementBounds(this._uiElementId);
-                if (getBounds()) {
-                    const tooltip = new HelpToolTip({
-                        text: this._text,
-                        tailLength: this._tailLength,
-                        side: this._side as HelpToolTipSide,
-                        positioner: [getBounds, 0]
-                    });
-                    const updatePosition = () => tooltip.updatePosition();
+        if (this._show) {
+            this.clear();
+            const getBounds = () => this._env.getUIElementBounds(this._uiElementId);
+            if (getBounds()) {
+                const tooltip = new HelpToolTip({
+                    text: this._text,
+                    tailLength: this._tailLength,
+                    side: this._side as HelpToolTipSide,
+                    positioner: [getBounds, 0]
+                });
+                const updatePosition = () => tooltip.updatePosition();
 
-                    updatePosition();
-                    this._env.addObject(tooltip, this._env.container);
-                    this._env.setVar(ROPUITooltip.id, tooltip);
-                    tooltip.regs.add(this._env.mode.resized.connect(updatePosition));
-                }
-            } else {
-                this.clear();
+                updatePosition();
+                this._env.addObject(tooltip, this._env.container);
+                this._env.setVar(ROPUITooltip.id, tooltip);
+                tooltip.regs.add(this._env.mode.resized.connect(updatePosition));
             }
-        } catch (e) {
-            // eslint-disable-next-line
-            console.error(e);
+        } else {
+            this.clear();
         }
     }
 
@@ -63,6 +58,9 @@ export default class ROPUITooltip extends RScriptOp {
     }
 
     private clear() {
-        (this._env.getVar(ROPUITooltip.id) as GameObject)?.destroySelf();
+        const elem = (this._env.getVar(ROPUITooltip.id) as GameObject);
+        if (elem) {
+            elem.destroySelf();
+        }
     }
 }
