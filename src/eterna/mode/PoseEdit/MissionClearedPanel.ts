@@ -64,13 +64,12 @@ export default class MissionClearedPanel extends ContainerObject {
 
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
         this._infoWrapper = document.createElement('div');
-        this._infoWrapper.id = 'mission-cleared-info-wrapper';
         this._infoWrapper.style.position = 'absolute';
         overlayEl.appendChild(this._infoWrapper);
 
         const infoText = MissionClearedPanel.processHTML(this._infoText)
             || 'You have solved the puzzle, congratulations!';
-        const infoObj = new HTMLTextObject(infoText, panelWidth - 20, this._infoWrapper.id)
+        const infoObj = new HTMLTextObject(infoText, panelWidth - 30, this._infoWrapper)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(14)
             .color(0xffffff)

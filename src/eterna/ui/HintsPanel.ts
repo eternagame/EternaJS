@@ -42,8 +42,9 @@ export default class HintsPanel {
         const panel = new MultiPagePanel({
             title: 'Hint',
             pages,
-            width: theme.width
-            // height: theme.height
+            width: theme.width,
+            // height: theme.height,
+            maxHeight: Flashbang.stageHeight * 0.8
         });
         const positionUpdater = () => {
             panel.display.position = new Point(

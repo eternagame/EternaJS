@@ -56,7 +56,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         }
     }
 
-    protected constructor(domParentID: string, obj: T) {
+    protected constructor(domParent: string | HTMLElement, obj: T) {
         super();
 
         this._obj = obj;
@@ -68,7 +68,12 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         // briefly on the frame it's added.
         this._obj.style.opacity = '0';
 
-        this._domParent = document.getElementById(domParentID);
+        if (domParent instanceof HTMLElement) {
+            this._domParent = domParent;
+        } else {
+            this._domParent = document.getElementById(domParent);
+        }
+        this._added = false;
     }
 
     /** The underlying HTMLElement */
@@ -78,6 +83,17 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
 
     public get display(): DisplayObject {
         return this._dummyDisp;
+    }
+
+    public get domParent(): HTMLElement {
+        return this._domParent;
+    }
+
+    public set domParent(value: HTMLElement) {
+        this._domParent = value;
+        if (this._added) {
+            this._domParent.appendChild(this._obj);
+        }
     }
 
     /**
@@ -124,9 +140,11 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         // Update the HTML element's transform during the PIXI postrender event -
         // this is the point where the dummy display object's transform will be up to date.
         Flashbang.pixi.renderer.addListener('postrender', this.updateElementProperties, this);
+        this._added = true;
     }
 
     protected dispose(): void {
+        this._added = false;
         this._domParent.removeChild(this._obj);
         Flashbang.pixi.renderer.removeListener('postrender', this.updateElementProperties, this);
 
@@ -177,10 +195,11 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     }
 
     protected readonly _dummyDisp: Graphics = new Graphics();
-    protected readonly _domParent: HTMLElement;
     protected readonly _obj: T;
 
     protected _hideWhenModeInactive: boolean = false;
 
+    private _added: boolean;
+    private _domParent: HTMLElement;
     private readonly _lastTransform: Matrix = new Matrix();
 }
