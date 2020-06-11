@@ -112,6 +112,9 @@ export default class PoseEditMode extends GameMode {
         this._background = new Background();
         this.addObject(this._background, this.bgLayer);
 
+        this._constraintsLayer = new Container();
+        this.uiLayer.addChild(this._constraintsLayer);
+
         let toolbarType = this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL ? ToolbarType.LAB : ToolbarType.PUZZLE;
         this._toolbar = new Toolbar(toolbarType, {
             states: this._puzzle.getSecstructs().length,
@@ -249,9 +252,6 @@ export default class PoseEditMode extends GameMode {
 
         this._uiHighlight = new SpriteObject();
         this.addObject(this._uiHighlight, this.uiLayer);
-
-        this._constraintsLayer = new Container();
-        this.uiLayer.addChild(this._constraintsLayer);
 
         this._exitButton = new GameButton().allStates(Bitmaps.ImgNextInside);
         this._exitButton.display.scale = new Point(0.3, 0.3);
