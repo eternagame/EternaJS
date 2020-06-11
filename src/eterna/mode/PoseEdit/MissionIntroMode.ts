@@ -3,7 +3,7 @@ import {
 } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
 import {
-    AppMode, Flashbang, InputUtil, DisplayObjectPointerTarget
+    AppMode, Flashbang, InputUtil, DisplayObjectPointerTarget, Assert
 } from 'flashbang';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -18,7 +18,7 @@ import UITheme from 'eterna/ui/UITheme';
 export default class MissionIntroMode extends AppMode {
     constructor(
         puzzleName: string, puzzleDescription: string, puzzleThumbnails: number[][], constraintBoxes: ConstraintBox[],
-        customLayout?: Array<[number, number]>
+        customLayout: Array<[number, number] | [null, null]> | null = null
     ) {
         super();
         this._puzzleName = puzzleName;
@@ -30,6 +30,7 @@ export default class MissionIntroMode extends AppMode {
 
     protected setup(): void {
         super.setup();
+        Assert.assertIsDefined(this.container);
 
         // Background
         const background = new Graphics();
@@ -44,6 +45,8 @@ export default class MissionIntroMode extends AppMode {
             .over(Bitmaps.PlayImageOver)
             .down(Bitmaps.PlayImageHit);
         this.addObject(playButton, this.container);
+
+        Assert.assertIsDefined(this.regs);
         this.regs.add(playButton.clicked.connect(() => this.play()));
 
         const homeButton = new GameButton()
@@ -64,6 +67,7 @@ export default class MissionIntroMode extends AppMode {
         homeArrow.position = new Point(45, 14);
         this.container.addChild(homeArrow);
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
         const nameLabel = new HTMLTextObject(this._puzzleName)
             .font(Fonts.STDFONT_BOLD)
             .fontSize(14)
@@ -85,6 +89,9 @@ export default class MissionIntroMode extends AppMode {
 
         const updateLayout = () => {
             const {headerHeight} = UITheme.missionIntro;
+
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
 
             // draw background
             background.clear();
@@ -123,6 +130,7 @@ export default class MissionIntroMode extends AppMode {
     private play(): void {
         if (!this._closed) {
             this._closed = true;
+            Assert.assertIsDefined(this.modeStack);
             this.modeStack.popMode();
         }
     }
@@ -134,5 +142,5 @@ export default class MissionIntroMode extends AppMode {
 
     private _closed: boolean = false;
 
-    private _customLayout?: Array<[number, number]>;
+    private _customLayout: Array<[number, number] | [null, null]> | null;
 }

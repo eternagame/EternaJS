@@ -10,7 +10,7 @@ import Solution from 'eterna/puzzle/Solution';
 import Puzzle from 'eterna/puzzle/Puzzle';
 import GamePanel from 'eterna/ui/GamePanel';
 import {
-    HLayoutContainer, MathUtil, Flashbang, DisplayUtil, HAlign, VAlign
+    HLayoutContainer, MathUtil, Flashbang, DisplayUtil, HAlign, VAlign, Assert
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -46,7 +46,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
         this._content.addChild(this._actionButtonsLayout);
 
         let playThumbnail = new Sprite();
-        let customLayout: Array<[number, number]> = null;
+        let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (this._puzzle.targetConditions && this._puzzle.targetConditions[0]) {
             customLayout = this._puzzle.targetConditions[0]['custom-layout'];
         }
@@ -148,7 +148,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
 
         this._cancelButton = new GameButton().label('Cancel', 12);
         this.addObject(this._cancelButton, this._content);
-        this._cancelButton.clicked.connect(() => this.close(null));
+        this._cancelButton.clicked.connect(() => this.close());
 
         if (Eterna.DEV_MODE) {
             this._editButton = new GameButton().label('Edit', 12);
@@ -159,6 +159,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
         this._solutionDescBox = new SolutionDescBox(this._solution, this._puzzle);
         this.addObject(this._solutionDescBox, this._content);
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.updateLayout()));
         this.updateLayout();
     }
@@ -169,6 +170,8 @@ export default class ViewSolutionDialog extends Dialog<void> {
     }
 
     private updateLayout(): void {
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         let width = Flashbang.stageWidth - 90;
         let height = Flashbang.stageHeight - MathUtil.clamp(Flashbang.stageHeight * 0.23, 80, 220);
 

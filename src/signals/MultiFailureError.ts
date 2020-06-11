@@ -26,7 +26,7 @@ export default class MultiFailureError extends Error {
         return `${this._failures.length}${this._failures.length !== 1 ? ' failures: ' : ' failure: '}${buf}`;
     }
 
-    private static getMessageInternal(error: any, wantStackTrace: boolean): string {
+    private static getMessageInternal(error: any, wantStackTrace: boolean): string | undefined {
         // NB: do NOT use the class-cast operator for converting to typed error objects.
         // Error() is a top-level function that creates a new error object, rather than performing
         // a class-cast, as expected.

@@ -1,5 +1,7 @@
 import {Point} from 'pixi.js';
-import {Flashbang} from 'flashbang';
+import {
+    Flashbang, Assert
+} from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import MultiPagePanel from './MultiPagePanel';
 import UITheme from './UITheme';
@@ -47,6 +49,8 @@ export default class HintsPanel {
             maxHeight: Flashbang.stageHeight * 0.8
         });
         const positionUpdater = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             panel.display.position = new Point(
                 Flashbang.stageWidth * theme.relativePos.x,
                 (Flashbang.stageHeight - panel.display.height) * theme.relativePos.y

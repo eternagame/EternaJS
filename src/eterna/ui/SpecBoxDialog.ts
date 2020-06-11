@@ -1,7 +1,7 @@
 import {Point} from 'pixi.js';
 import UndoBlock from 'eterna/UndoBlock';
 import {
-    KeyCode, Flashbang, DisplayUtil, HAlign, VAlign
+    KeyCode, Flashbang, DisplayUtil, HAlign, VAlign, Assert
 } from 'flashbang';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
@@ -42,6 +42,8 @@ export default class SpecBoxDialog extends Dialog<boolean> {
         }
 
         let updateBounds = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             specBox.setSize(Flashbang.stageWidth * 0.7, Flashbang.stageHeight * 0.7);
             specBox.display.position.x = (Flashbang.stageWidth - specBox.width) * 0.5;
             specBox.display.position.y = (Flashbang.stageHeight - specBox.height) * 0.5;
@@ -60,6 +62,7 @@ export default class SpecBoxDialog extends Dialog<boolean> {
             }
         };
         updateBounds();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateBounds));
     }
 

@@ -1,5 +1,5 @@
 import {
-    Point, Graphics, Container, Rectangle
+    Point, Graphics, Container
 } from 'pixi.js';
 import TextUtil from 'eterna/util/TextUtil';
 import Fonts from 'eterna/util/Fonts';
@@ -106,6 +106,6 @@ export default class HelpToolTips {
                 ? new HelpToolTip({text: 'SWITCH STATE', side: 'bottom', positioner: props.switchState})
                 : null
 
-        ].filter(Boolean);
+        ].filter((toolTip): toolTip is HelpToolTip => toolTip != null);
     }
 }

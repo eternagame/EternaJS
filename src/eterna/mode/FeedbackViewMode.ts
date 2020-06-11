@@ -14,7 +14,7 @@ import PoseField from 'eterna/pose2D/PoseField';
 import FolderManager from 'eterna/folding/FolderManager';
 import Vienna from 'eterna/folding/Vienna';
 import {
-    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode
+    VAlign, HAlign, DisplayUtil, KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import EternaViewOptionsDialog, {EternaViewOptionsMode} from 'eterna/ui/EternaViewOptionsDialog';
 import Utility from 'eterna/util/Utility';
@@ -115,13 +115,17 @@ export default class FeedbackViewMode extends GameMode {
             this._pairs.push(EPars.parenthesisToPairs(secstructs[ii]));
             let datablock: UndoBlock = new UndoBlock(this._sequence);
             datablock.setPairs(this._pairs[ii]);
-            datablock.setBasics(FolderManager.instance.getFolder(Vienna.NAME));
+            let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+            if (!vienna) {
+                throw new Error("Critical error: can't create a Vienna folder instance by name");
+            }
+            datablock.setBasics(vienna);
             this._undoBlocks.push(datablock);
 
             let poseField: PoseField = new PoseField(false);
             this.addObject(poseField, this.poseLayer);
 
-            poseField.pose.scoreFolder = FolderManager.instance.getFolder(Vienna.NAME);
+            poseField.pose.scoreFolder = vienna;
             poseField.pose.sequence = this._sequence;
             poseField.pose.pairs = this._pairs[ii];
             poseFields.push(poseField);
@@ -131,7 +135,7 @@ export default class FeedbackViewMode extends GameMode {
 
         this.setupShape();
 
-        let seeShape: boolean = (this._feedback.getShapeData() != null);
+        let seeShape: boolean = (this._feedback !== null && this._feedback.getShapeData() != null);
         if (seeShape) {
             this.showExperimentalColors();
         }
@@ -259,6 +263,7 @@ export default class FeedbackViewMode extends GameMode {
             pose.showTotalEnergy = false;
         }
 
+        Assert.assertIsDefined(this.container);
         let tempBG = DisplayUtil.fillStageRect(0x061A34);
         this.container.addChildAt(tempBG, 0);
 
@@ -291,7 +296,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToTargetMode(): void {
         this._foldMode = PoseFoldMode.TARGET;
-        this._toolbar.targetButton.hotkey(null);
+        this._toolbar.targetButton.hotkey();
         this._toolbar.estimateButton.hotkey(KeyCode.Space);
         this._toolbar.estimateButton.toggled.value = false;
         this._toolbar.targetButton.toggled.value = true;
@@ -306,7 +311,7 @@ export default class FeedbackViewMode extends GameMode {
 
     private setToEstimateMode(): void {
         this._foldMode = PoseFoldMode.ESTIMATE;
-        this._toolbar.estimateButton.hotkey(null);
+        this._toolbar.estimateButton.hotkey();
         this._toolbar.targetButton.hotkey(KeyCode.Space);
         this._toolbar.estimateButton.toggled.value = true;
         this._toolbar.targetButton.toggled.value = false;
@@ -350,6 +355,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private showExperimentalColors(): void {
+        Assert.assertIsDefined(this._feedback);
+
         this._isExpColor = true;
         this._toolbar.letterColorButton.toggled.value = false;
         this._toolbar.expColorButton.toggled.value = true;
@@ -385,6 +392,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private scoreFeedback(): void {
+        Assert.assertIsDefined(this._feedback);
+
         let titleText = '';
         let brentData: any = this._feedback.brentTheoData;
         let score: number;
@@ -442,6 +451,8 @@ export default class FeedbackViewMode extends GameMode {
     }
 
     private foldEstimate(index: number): void {
+        // This won't work if _feedback is null
+        Assert.assertIsDefined(this._feedback);
         let shapeThreshold: number = this._feedback.getShapeThreshold(index);
         let shapeData: number[] = this._feedback.getShapeData(index);
         let startIndex: number = this._feedback.getShapeStartIndex(index);
@@ -507,7 +518,10 @@ export default class FeedbackViewMode extends GameMode {
             }
         }
 
-        let folder: Folder = FolderManager.instance.getFolder(Vienna.NAME);
+        let folder: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (!folder) {
+            throw new Error("Critical error: can't create a Vienna folder instance by name");
+        }
         this._shapePairs[index] = folder.foldSequence(this._sequence, null, desiredPairs);
     }
 
@@ -523,7 +537,11 @@ export default class FeedbackViewMode extends GameMode {
 
     private showSpec(): void {
         let puzzleState = this._undoBlocks[this._currentIndex];
-        puzzleState.updateMeltingPointAndDotPlot(FolderManager.instance.getFolder(Vienna.NAME));
+        let vienna: Folder | null = FolderManager.instance.getFolder(Vienna.NAME);
+        if (!vienna) {
+            throw new Error("Critical error: can't create a Vienna folder instance by name");
+        }
+        puzzleState.updateMeltingPointAndDotPlot(vienna);
         this.showDialog(new SpecBoxDialog(puzzleState, false));
     }
 
@@ -539,7 +557,7 @@ export default class FeedbackViewMode extends GameMode {
     private _foldMode: PoseFoldMode;
     private _puzzleTitle: Text;
     private _title: Text;
-    private _feedback: Feedback;
+    private _feedback: Feedback | null;
     private _sequence: number[];
     private _pairs: number[][] = [];
     private _shapePairs: any[] = [];

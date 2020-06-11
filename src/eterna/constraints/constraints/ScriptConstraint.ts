@@ -40,11 +40,11 @@ export default class ScriptConstraint extends Constraint<ScriptConstraintStatus>
     ): ConstraintBoxConfig {
         return {
             satisfied: status.satisfied,
-            drawBG: true,
             showOutline: true,
+            drawBG: true,
             icon: status.dataPNG,
             stateNumber: status.stateIndex + 1,
-            statText: !forMissionScreen ? status.resultValue : null,
+            statText: !forMissionScreen ? status.resultValue : undefined,
             tooltip: ConstraintBox.createTextStyle().append(status.goal || `Your puzzle must satisfy script ${this.scriptID}`)
         };
     }

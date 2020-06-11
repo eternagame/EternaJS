@@ -4,7 +4,7 @@ import {Point} from 'pixi.js';
 import FancyTextBalloon from 'eterna/ui/FancyTextBalloon';
 import Fonts from 'eterna/util/Fonts';
 import {
-    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil
+    StyledTextBuilder, Flashbang, Vector2, GameObject, ColorUtil, Assert
 } from 'flashbang';
 import RNAAnchorObject from 'eterna/pose2D/RNAAnchorObject';
 import TextUtil from 'eterna/util/TextUtil';
@@ -83,6 +83,8 @@ export default class ROPTextbox extends RScriptOp {
 
         let updateLocation = () => {
             if (this._mode === ROPTextboxMode.TEXTBOX_LOCATION) {
+                Assert.assertIsDefined(Flashbang.stageWidth);
+                Assert.assertIsDefined(Flashbang.stageHeight);
                 textBox.display.position = new Point(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
@@ -106,17 +108,18 @@ export default class ROPTextbox extends RScriptOp {
             }
         };
 
+        Assert.assertIsDefined(this._env.mode);
         textBox.regs.add(this._env.mode.resized.connect(updateLocation));
         updateLocation();
     }
 
     private showArrow(): void {
-        let parent: FancyTextBalloon = null;
+        let parent: FancyTextBalloon | null = null;
         if (this._hasParent) {
             let parentVal = this._env.getVar(this._parentID);
             if (parentVal instanceof FancyTextBalloon) {
                 parent = parentVal;
-            } else if (parentVal == null) {
+            } else if (parentVal === undefined) {
                 this._hasParent = false;
             } else {
                 log.warn(`${this._parentID}: is not a FancyTextBalloon`);
@@ -130,6 +133,8 @@ export default class ROPTextbox extends RScriptOp {
 
         let updateLocation = () => {
             if (this._mode === ROPTextboxMode.ARROW_LOCATION) {
+                Assert.assertIsDefined(Flashbang.stageHeight);
+                Assert.assertIsDefined(Flashbang.stageWidth);
                 newArrow.display.position = new Point(
                     Flashbang.stageWidth * this._xPos + this._xRel,
                     Flashbang.stageHeight * this._yPos + this._yRel
@@ -146,6 +151,9 @@ export default class ROPTextbox extends RScriptOp {
             }
 
             if (this._hasParent) {
+                // We verified this earlier, but TS isn't smart enough to figure it out
+                Assert.assertIsDefined(parent);
+
                 // Modify degree and length if textbox is present.
                 // We want the arrow to point to the area FROM the textbox and it should extend all the way to the
                 // textbox as well.
@@ -214,10 +222,13 @@ export default class ROPTextbox extends RScriptOp {
         };
 
         updateLocation();
+        Assert.assertIsDefined(this._env.mode);
         newArrow.regs.add(this._env.mode.resized.connect(updateLocation));
 
         this._env.setVar(this._id, newArrow);
         if (this._hasParent) {
+            // We verified this earlier, but TS isn't smart enough to figure it out
+            Assert.assertIsDefined(parent);
             parent.addChildArrow(newArrow);
         }
     }
@@ -246,7 +257,7 @@ export default class ROPTextbox extends RScriptOp {
     /* override */
     protected parseArgument(arg: string, i: number): void {
         let rx = /^([^+-]*)((?:\+|-).+)$/g;
-        let regResult: RegExpExecArray = null;
+        let regResult: RegExpExecArray | null = null;
         switch (i) {
             case 0: // Always text in "Show". Is the ID in Hide and regular Show or for arrows.
                 if (

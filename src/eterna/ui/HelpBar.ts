@@ -18,6 +18,7 @@ export default class HelpBar extends ContainerObject {
 
         const {theme} = HelpBar;
         if (props.onHintClicked) {
+            const onHintClicked = props.onHintClicked;
             const hints = new GameButton()
                 .up(Bitmaps.ImgHint)
                 .over(Bitmaps.ImgHintOver)
@@ -28,7 +29,7 @@ export default class HelpBar extends ContainerObject {
 
             this.addObject(hints, this.container);
             this.regs.add(hints.clicked.connect(() => {
-                props.onHintClicked();
+                onHintClicked();
             }));
         }
 

@@ -1,5 +1,5 @@
 import * as log from 'loglevel';
-import {Base64} from 'flashbang';
+import {Base64, Assert} from 'flashbang';
 
 type JSONData = any;
 
@@ -25,11 +25,12 @@ export default class GameClient {
                 if (res === 'NOT LOGGED IN') {
                     return Promise.resolve<[string, number]>(['Anonymous', 0]);
                 } else {
-                    try {
-                        let [match, username, uid] = res.match(/^(.+)\s(\d+)$/);
-                        return Promise.resolve<[string, number]>([username, Number(uid)]);
-                    } catch (e) {
+                    const match = res.match(/^(.+)\s(\d+)$/);
+                    if (match === null) {
                         throw new Error('Authentication response malformed');
+                    } else {
+                        const [, username, uid] = match;
+                        return Promise.resolve<[string, number]>([username, Number(uid)]);
                     }
                 }
             });

@@ -26,7 +26,7 @@ export default class RectangleUtil {
 
     /** Calculates the intersection between two Rectangles. If the rectangles do not intersect,
      *  this method returns an empty Rectangle object with its properties set to 0. */
-    public static intersect(rect1: Rectangle, rect2: Rectangle, out: Rectangle = null): Rectangle {
+    public static intersect(rect1: Rectangle, rect2: Rectangle, out: Rectangle | null = null): Rectangle {
         if (out == null) out = new Rectangle();
 
         let left: number = rect1.x > rect2.x ? rect1.x : rect2.x;
@@ -79,7 +79,7 @@ export default class RectangleUtil {
     /** Calculates the bounds of a rectangle after transforming it by a matrix.
      *  If you pass an <code>out</code>-rectangle, the result will be stored in this rectangle
      *  instead of creating a new object. */
-    public static getBounds(rectangle: Rectangle, matrix: Matrix, out: Rectangle = null): Rectangle {
+    public static getBounds(rectangle: Rectangle, matrix: Matrix, out: Rectangle | null = null): Rectangle {
         if (out == null) out = new Rectangle();
 
         let minX: number = Number.MAX_VALUE;
@@ -102,7 +102,7 @@ export default class RectangleUtil {
     }
 
     /** Returns a vector containing the positions of the four edges of the given rectangle. */
-    public static getPositions(rectangle: Rectangle, out: Point[] = null): Point[] {
+    public static getPositions(rectangle: Rectangle, out: Point[] | null = null): Point[] {
         if (out == null) out = [];
 
         for (let i = 0; i < 4; ++i) {

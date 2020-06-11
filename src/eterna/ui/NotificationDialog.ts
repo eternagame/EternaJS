@@ -1,5 +1,5 @@
 import {Point} from 'pixi.js';
-import {HLayoutContainer, Flashbang} from 'flashbang';
+import {HLayoutContainer, Flashbang, Assert} from 'flashbang';
 import Dialog from './Dialog';
 import GameButton from './GameButton';
 import TextBalloon from './TextBalloon';
@@ -31,7 +31,7 @@ export default class NotificationDialog extends Dialog<void> {
 
         let okButton = new GameButton().label(this._okButtonTitle, 14);
         box.addObject(okButton, buttonLayout);
-        okButton.clicked.connect(() => this.close(null));
+        okButton.clicked.connect(() => this.close());
 
         if (this._extraButtonTitle != null) {
             this.extraButton = new GameButton().label(this._extraButtonTitle, 14);
@@ -47,16 +47,19 @@ export default class NotificationDialog extends Dialog<void> {
         box.container.addChild(buttonLayout);
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             box.display.position = new Point(
                 (Flashbang.stageWidth - box.width) * 0.5,
                 (Flashbang.stageHeight - box.height) * 0.5
             );
         };
         updateLocation();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 
     private readonly _message: string;
     private readonly _okButtonTitle: string;
-    private readonly _extraButtonTitle: string;
+    private readonly _extraButtonTitle?: string;
 }

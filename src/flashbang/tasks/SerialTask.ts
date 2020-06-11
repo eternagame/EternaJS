@@ -22,7 +22,7 @@ export default class SerialTask extends ObjectTask {
     }
 
     protected nextTask(): void {
-        if (!this.isLiveObject || !this.parent.isLiveObject) {
+        if (!this.isLiveObject || !this.parent || !this.parent.isLiveObject) {
             return;
         }
 

@@ -1,4 +1,5 @@
 import {Point} from 'pixi.js';
+import {Assert} from 'flashbang';
 
 export default class Utility {
     /**
@@ -178,8 +179,8 @@ export default class Utility {
      *
      * @returns array of integers like [-1,0,1,2,3,4,7,8,12,16]
      */
-    public static rangeStringToArray(rangeString: string): number[] {
-        let vals: number[] = [];
+    public static rangeStringToArray(rangeString: string): (number | null)[] | null {
+        let vals: (number | null)[] = [];
         const nullStrings = ['', 'null', 'NaN', 'NULL', 'NAN'];
         for (const str of rangeString.split(',')) {
             let foundDash = str.indexOf('-', 1); // look for a dash (ignoring an initial minus sign)
@@ -219,11 +220,11 @@ export default class Utility {
      *
      * @returns array of integers (indices) like [11,12,13,14,12,16]
      */
-    public static getIndices(strInput: string): number[] {
-        let indices: number[] = [];
+    public static getIndices(strInput: string): (number | null)[] | null {
+        let indices: (number | null)[] = [];
         let splitted: string[] = strInput.split(' ');
         for (const str of splitted) {
-            let ints: number[] = this.rangeStringToArray(str);
+            let ints: (number | null)[] | null = this.rangeStringToArray(str);
             if (ints === null) {
                 return null; // signal failure
             }
@@ -243,9 +244,11 @@ export default class Utility {
      *
      * @returns string like '4-6' or ''
      */
-    public static rangeStringFromStartEnd(rangeStart: number, rangeEnd: number): string {
+    public static rangeStringFromStartEnd(rangeStart: number | null, rangeEnd: number | null): string {
         if (rangeStart == null) return '';
         if (rangeStart === rangeEnd) return rangeStart.toString();
+        // we really only accept number, number or null, null to this function
+        Assert.assertIsDefined(rangeEnd);
         return `${rangeStart.toString()}-${rangeEnd.toString()}`;
     }
 
@@ -260,13 +263,16 @@ export default class Utility {
      *
      * @returns rangeString, like '1-4'
      */
-    public static arrayToRangeString(numberArray: number[]): string {
+    public static arrayToRangeString(numberArray: (number | null)[]): string {
         let rangeString = '';
         if (numberArray == null || numberArray.length === 0) return rangeString;
         let rangeStart = numberArray[0];
         let rangeEnd = numberArray[0];
         for (let ii = 1; ii < numberArray.length; ii++) {
-            if (numberArray[ii] === (numberArray[ii - 1] + 1) && (rangeStart !== null)) {
+            const num = numberArray[ii - 1];
+            if (
+                num !== null && numberArray[ii] === (num + 1) && (rangeStart !== null)
+            ) {
                 rangeEnd = numberArray[ii]; continue;
             } else {
                 rangeString += `${this.rangeStringFromStartEnd(rangeStart, rangeEnd)},`;
@@ -286,8 +292,8 @@ export default class Utility {
      *
      * @returns array of numbers
     */
-    public static numberingJSONToArray(numberingJSON: any): number[] {
-        if (numberingJSON == null) return null;
+    public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
+        if (numberingJSON === null) return null;
         if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);
         } else if (typeof numberingJSON === 'object') {

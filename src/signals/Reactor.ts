@@ -45,11 +45,11 @@ export default abstract class Reactor {
         let lners: Cons = this._listeners;
         this._listeners = Reactor.DISPATCHING;
 
-        let error: Error = null;
+        let error: Error | null = null;
         try {
-            for (let cons: Cons = lners; cons != null; cons = cons.next) {
+            for (let cons: Cons | null = lners; cons != null; cons = cons.next) {
                 // cons.listener will be null if Cons was closed after iteration started
-                if (cons.listener != null) {
+                if (cons && cons.listener != null) {
                     try {
                         cons.listener(a1, a2, a3);
                     } catch (e) {
@@ -140,7 +140,7 @@ export default abstract class Reactor {
         }
     }
 
-    protected _listeners: Cons;
+    protected _listeners: Cons | null;
     protected _pendingRuns: Runs;
 
     protected static DISPATCHING: Cons = new Cons(null, null);

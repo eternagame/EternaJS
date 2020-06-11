@@ -240,12 +240,12 @@ export default class StringUtil {
     }
 
     /** Utility function that strips whitespace from the beginning and end of a String. */
-    public static trim(str: string): string {
+    public static trim(str: string): string | null {
         return StringUtil.trimEnd(StringUtil.trimBeginning(str));
     }
 
     /** Utility function that strips whitespace from the beginning of a String. */
-    public static trimBeginning(str: string): string {
+    public static trimBeginning(str: string): string | null {
         if (str == null) {
             return null;
         }
@@ -262,7 +262,7 @@ export default class StringUtil {
     }
 
     /** Utility function that strips whitespace from the end of a String. */
-    public static trimEnd(str: string): string {
+    public static trimEnd(str: string | null): string | null {
         if (str == null) {
             return null;
         }
@@ -337,7 +337,7 @@ export default class StringUtil {
     public static parseURLs(s: string): string[] {
         let array: string[] = [];
         while (true) {
-            let result: RegExpExecArray = StringUtil.URL_REGEXP.exec(s);
+            let result: RegExpExecArray | null = StringUtil.URL_REGEXP.exec(s);
             if (result == null) {
                 break;
             }

@@ -3,7 +3,7 @@ import Updatable from 'flashbang/core/Updatable';
 import Easing, {EasingFunc} from 'flashbang/util/Easing';
 
 export default class InterpolatingTask extends ObjectTask implements Updatable {
-    constructor(time: number = 0, easingFn: EasingFunc = null) {
+    constructor(time: number = 0, easingFn: EasingFunc | null = null) {
         super();
         this._totalTime = Math.max(time, 0);
         this._easingFn = (easingFn != null ? easingFn : Easing.linear);

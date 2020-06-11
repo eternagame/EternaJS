@@ -1,4 +1,4 @@
-import {Flashbang, KeyCode} from 'flashbang';
+import {Flashbang, KeyCode, Assert} from 'flashbang';
 import {UnitSignal} from 'signals';
 import TextInputPanel from './TextInputPanel';
 import Dialog from './Dialog';
@@ -86,13 +86,13 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
         this.addObject(inputPanel, this.container);
 
         startField.setFocus();
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
             const dict = inputPanel.getFieldValues();
-            const startIndex = parseInt(dict.get(config.startFieldName), 10);
-            const endIndex = parseInt(dict.get(config.endFieldName), 10);
+            const startIndex = parseInt(dict.get(config.startFieldName) ?? '', 10);
+            const endIndex = parseInt(dict.get(config.endFieldName) ?? '', 10);
             if ([startIndex, endIndex].some(Number.isNaN)) {
                 this.close(null);
             } else {
@@ -116,10 +116,13 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
 
 
         const updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };
         updateLocation();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLocation));
     }
 }

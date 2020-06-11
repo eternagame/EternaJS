@@ -1,7 +1,7 @@
 import {Graphics, Point} from 'pixi.js';
 import {
     ContainerObject, KeyboardListener, MouseWheelListener, InputUtil, Flashbang,
-    KeyboardEventType, KeyCode
+    KeyboardEventType, KeyCode, Assert
 } from 'flashbang';
 import ROPWait from 'eterna/rscript/ROPWait';
 import Pose2D from './Pose2D';
@@ -30,6 +30,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerUp(e));
         this.pointerMove.connect((e) => this.onPointerMove(e));
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
     }
@@ -75,7 +76,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
     /** true if our bounds contains the given global point */
     public containsPoint(screenX: number, screenY: number): boolean {
         PoseField.P.set(screenX, screenY);
-        this.container.toLocal(PoseField.P, null, PoseField.P);
+        this.container.toLocal(PoseField.P, undefined, PoseField.P);
         const x = PoseField.P.x;
         const y = PoseField.P.y;
         return (x >= 0 && x < this._width && y >= 0 && y < this._height);
@@ -187,6 +188,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
         let mouse = Flashbang.globalMouse;
+        Assert.assertIsDefined(mouse);
         if (!this.display.visible || !this.containsPoint(mouse.x, mouse.y)) {
             return false;
         }
@@ -248,7 +250,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
     private _width: number = 0;
     private _height: number = 0;
-    private _mask: Graphics;
+    private _mask: Graphics | null;
 
     private _interactionCache = new Map<number, Point>();
     private _previousDragDiff = -1;

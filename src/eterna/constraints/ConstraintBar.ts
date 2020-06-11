@@ -18,7 +18,7 @@ import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
     constraintBox: ConstraintBox;
-    highlightCache?: HighlightInfo;
+    highlightCache: HighlightInfo | null;
 }
 
 interface StateSpecificConstraintWrapper extends ConstraintWrapper {
@@ -42,7 +42,7 @@ export default class ConstraintBar extends ContainerObject {
         spacing: 8
     };
 
-    public sequenceHighlights: Value<HighlightInfo[]> = new Value(null);
+    public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     private _collapsed = false;
     private _background: Graphics;
@@ -61,11 +61,12 @@ export default class ConstraintBar extends ContainerObject {
     private _drag = false;
     private _previousDragPos = -1;
 
-    constructor(constraints: Constraint<BaseConstraintStatus>[]) {
+    constructor(constraints: Constraint<BaseConstraintStatus>[] | null) {
         super();
-        this._constraints = constraints.map(
-            (constraint) => ({constraint, constraintBox: new ConstraintBox(false)})
-        );
+        this._constraints = constraints
+            ? constraints.map(
+                (constraint) => ({constraint, constraintBox: new ConstraintBox(false), highlightCache: null})
+            ) : [];
 
         Eterna.settings.highlightRestricted.connect(() => {
             this.updateHighlights();
@@ -252,6 +253,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     public updateHighlights(): void {
+        if (!this._constraints) return;
         let highlights: HighlightInfo[] = [];
         for (let constraint of this._constraints) {
             if (constraint.highlightCache != null && (
@@ -323,6 +325,7 @@ export default class ConstraintBar extends ContainerObject {
      * @param stateIndex pass -1 to return all boxes to normal
      */
     public highlightState(stateIndex: number): void {
+        if (!this._constraints) return;
         let stateConstraints = this._constraints.filter(isSSCW);
         for (let constraint of stateConstraints) {
             constraint.constraintBox.display.alpha = (
@@ -331,11 +334,13 @@ export default class ConstraintBar extends ContainerObject {
         }
     }
 
-    public getConstraintBox(index: number): ConstraintBox {
+    public getConstraintBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints[index]?.constraintBox;
     }
 
-    public getShapeBox(index: number): ConstraintBox {
+    public getShapeBox(index: number): ConstraintBox | null {
+        if (!this._constraints) return null;
         return this._constraints.filter(
             (constraint) => (
                 constraint.constraint instanceof ShapeConstraint
@@ -344,11 +349,14 @@ export default class ConstraintBar extends ContainerObject {
         )[0].constraintBox;
     }
 
-    public serializeConstraints(): string {
+    public serializeConstraints(): string | null {
+        if (!this._constraints) return null;
+        // AMW: we have a cryptic ConcatArray<never>[] error if we don't
+        // explicitly cast current to any.
         return this._constraints.map(
             (constraint) => constraint.constraint.serialize()
         ).reduce(
-            (all, current) => all.concat(current),
+            (all, current) => all.concat(current as any),
             []
         ).join(',');
     }
@@ -477,5 +485,5 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private _constraints: ConstraintWrapper[];
-    private _flaggedConstraint: ConstraintWrapper;
+    private _flaggedConstraint: ConstraintWrapper | null;
 }

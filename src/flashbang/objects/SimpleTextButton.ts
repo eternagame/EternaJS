@@ -1,5 +1,6 @@
 import {Graphics, Text} from 'pixi.js';
 import TextBuilder from 'flashbang/util/TextBuilder';
+import {Assert} from 'flashbang';
 import Button, {ButtonState} from './Button';
 
 /** A deliberately unstylish button that displays text on a rectangle. (For debugging.) */
@@ -23,15 +24,20 @@ export default class SimpleTextButton extends Button {
 
     /* override */
     protected showState(state: ButtonState): void {
+        const bgColor = SimpleTextButton.BG_COLORS.get(state);
+        Assert.assertIsDefined(bgColor);
+        const textColor = SimpleTextButton.TEXT_COLORS.get(state);
+        Assert.assertIsDefined(textColor);
+
         this._bg.clear();
-        this._bg.beginFill(SimpleTextButton.BG_COLORS.get(state));
+        this._bg.beginFill(bgColor);
         this._bg.drawRoundedRect(0, 0,
             this._tf.width + (SimpleTextButton.PADDING * 2),
             this._tf.height + (SimpleTextButton.PADDING * 2),
             5);
         this._bg.endFill();
 
-        this._tf.style.fill = SimpleTextButton.TEXT_COLORS.get(state);
+        this._tf.style.fill = textColor;
     }
 
     protected _tf: Text;

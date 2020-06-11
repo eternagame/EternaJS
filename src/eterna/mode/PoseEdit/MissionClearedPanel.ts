@@ -2,7 +2,7 @@ import {
     Container, Graphics, Point, Text, interaction
 } from 'pixi.js';
 import {
-    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign, MathUtil
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign, Assert, MathUtil
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -16,7 +16,7 @@ export default class MissionClearedPanel extends ContainerObject {
     public nextButton: GameButton;
     public closeButton: GameButton;
 
-    constructor(hasNextPuzzle: boolean, infoText: string = null, moreText: string = null) {
+    constructor(hasNextPuzzle: boolean, infoText: string | null = null, moreText: string | null = null) {
         super();
 
         this._hasNextPuzzle = hasNextPuzzle;
@@ -122,6 +122,7 @@ export default class MissionClearedPanel extends ContainerObject {
             .label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
         this.addObject(this.nextButton, this.container);
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
     }
@@ -184,6 +185,8 @@ export default class MissionClearedPanel extends ContainerObject {
         this.drawMask();
         this.doLayout();
 
+        Assert.assertIsDefined(Flashbang.stageWidth);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.calcWidth();
         this._infoWrapper.style.width = `${Flashbang.stageWidth}px`;
         this._infoWrapper.style.height = `${Flashbang.stageHeight}px`;
@@ -193,6 +196,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private drawBG(): void {
         this._bg.clear();
         this._bg.beginFill(0x0, 0.8);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this._bg.drawRect(0, 0, MissionClearedPanel.calcWidth(), Flashbang.stageHeight);
         this._bg.endFill();
     }
@@ -244,14 +248,15 @@ export default class MissionClearedPanel extends ContainerObject {
     }
 
     private static calcWidth(): number {
+        Assert.assertIsDefined(Flashbang.stageWidth);
         return Math.min(
             Flashbang.stageWidth,
             MathUtil.clamp(Flashbang.stageWidth * 0.4, 230, 480)
         );
     }
 
-    private readonly _infoText: string;
-    private readonly _moreText: string;
+    private readonly _infoText: string | null;
+    private readonly _moreText: string | null;
     private readonly _hasNextPuzzle: boolean;
 
     private readonly _bg: Graphics;
@@ -266,7 +271,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private _rankScrollHeading: GamePanel;
     private _tfPlayer: Text;
     private _rankScrollContainer: Container;
-    private _rankScroll: RankScroll = null;
+    private _rankScroll: RankScroll | null = null;
 
     private _dragging = false;
     private _dragPointData: interaction.InteractionData = null;

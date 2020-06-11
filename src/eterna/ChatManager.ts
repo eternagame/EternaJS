@@ -67,7 +67,7 @@ export default class ChatManager {
         }
     }
 
-    private readonly _chatbox: HTMLElement;
+    private readonly _chatbox: HTMLElement | null;
     private readonly _settings: EternaSettings;
     private _chat: Chat;
 

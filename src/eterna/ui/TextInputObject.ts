@@ -156,7 +156,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         }
     }
 
-    public get caretPosition(): number {
+    public get caretPosition(): number | null {
         return this._obj.selectionStart === this._obj.selectionEnd ? this._obj.selectionStart : -1;
     }
 
@@ -253,6 +253,6 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _fontFamily: string;
     private _rows: number;
     private _hasFocus: boolean;
-    private _fakeTextInput: Sprite;
+    private _fakeTextInput: Sprite | null;
     private _showFakeTextInputWhenNotFocused: boolean = false;
 }

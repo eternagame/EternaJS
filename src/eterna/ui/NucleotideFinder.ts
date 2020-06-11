@@ -1,4 +1,4 @@
-import {Flashbang, KeyCode} from 'flashbang';
+import {Flashbang, KeyCode, Assert} from 'flashbang';
 import TextInputPanel from './TextInputPanel';
 import Dialog from './Dialog';
 
@@ -32,12 +32,12 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
             }
         });
 
-        inputPanel.setHotkeys(KeyCode.Enter, null, KeyCode.Escape, null);
+        inputPanel.setHotkeys(KeyCode.Enter, undefined, KeyCode.Escape);
 
         inputPanel.cancelClicked.connect(() => this.close(null));
         inputPanel.okClicked.connect(() => {
             const dict = inputPanel.getFieldValues();
-            const nucleotideIndex = parseInt(dict.get(props.fieldName), 10);
+            const nucleotideIndex = parseInt(dict.get(props.fieldName) ?? '', 10);
             if (Number.isNaN(nucleotideIndex)) {
                 this.close(null);
             } else {
@@ -45,7 +45,11 @@ export default class NucleotideFinder extends Dialog<NucleotideFinderResult> {
             }
         });
 
+        Assert.assertIsDefined(this.mode);
+
         const updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             inputPanel.display.position.x = (Flashbang.stageWidth - inputPanel.width) * 0.5;
             inputPanel.display.position.y = (Flashbang.stageHeight - inputPanel.height) * 0.5;
         };

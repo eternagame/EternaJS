@@ -23,14 +23,14 @@ export default class MatrixUtil {
     }
 
     /** Transform a point with the given matrix. */
-    public static transformPoint(matrix: Matrix, point: Point, out: Point = null): Point {
+    public static transformPoint(matrix: Matrix, point: Point, out: Point | null = null): Point {
         return MatrixUtil.transformCoords(matrix, point.x, point.y, out);
     }
 
     /** Uses a matrix to transform 2D coordinates into a different space. If you pass an
      *  <code>out</code>-point, the result will be stored in this point instead of creating
      *  a new object. */
-    public static transformCoords(matrix: Matrix, x: number, y: number, out: Point = null): Point {
+    public static transformCoords(matrix: Matrix, x: number, y: number, out: Point | null = null): Point {
         if (out == null) out = new Point();
 
         out.x = matrix.a * x + matrix.c * y + matrix.tx;

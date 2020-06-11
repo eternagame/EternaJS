@@ -9,7 +9,7 @@ export enum ModeTransition {
 }
 
 class PendingTransition {
-    public mode: AppMode;
+    public mode: AppMode | null;
     public type: ModeTransition;
     public index: number;
 }
@@ -22,10 +22,11 @@ export default class ModeStack {
     public readonly topModeChanged: UnitSignal = new UnitSignal();
 
     constructor(parentSprite: Container) {
+        Assert.assertIsDefined(this._container);
         parentSprite.addChild(this._container);
     }
 
-    public get modes(): readonly AppMode[] {
+    public get modes(): readonly AppMode[] | null {
         return this._modeStack;
     }
 
@@ -34,23 +35,28 @@ export default class ModeStack {
      * about to change if mode transitions have been queued that have not yet been processed.
      */
     public get length(): number {
+        Assert.assertIsDefined(this._modeStack);
         return this._modeStack.length;
     }
 
     /** Returns the top mode on the mode stack, or null if the stack is empty. */
     public /* final */ get topMode(): AppMode | null {
-        return (this._modeStack.length > 0 ? this._modeStack[this._modeStack.length - 1] : null);
+        if (!this._modeStack) return null;
+        if (!(this._modeStack.length > 0)) return null;
+        return this._modeStack[this._modeStack.length - 1];
     }
 
     /**
      * Applies the specify mode transition to the mode stack.
      * (Mode changes take effect between game updates.)
      */
-    public doModeTransition(type: ModeTransition, mode: AppMode = null, index: number = 0): void {
+    public doModeTransition(type: ModeTransition, mode: AppMode | null = null, index: number = 0): void {
         let transition: PendingTransition = new PendingTransition();
         transition.type = type;
         transition.mode = mode;
         transition.index = index;
+
+        Assert.assertIsDefined(this._pendingModeTransitionQueue);
         this._pendingModeTransitionQueue.push(transition);
     }
 
@@ -144,44 +150,50 @@ export default class ModeStack {
 
     /** Called when the app is resized */
     public onResized(): void {
+        Assert.assertIsDefined(this._modeStack);
         for (let mode of this._modeStack) {
             mode._resizeInternal();
         }
     }
 
     public update(dt: number): void {
-        if (this._pendingModeTransitionQueue.length > 0) {
+        if (this._pendingModeTransitionQueue && this._pendingModeTransitionQueue.length > 0) {
             // handleModeTransition generates a lot of garbage in memory, avoid calling it on
             // updates where it will NOOP anyway.
             this._handleModeTransitions();
         }
 
         // update the top mode
-        if (this._modeStack.length > 0) {
+        if (this._modeStack && this._modeStack.length > 0) {
             this._modeStack[this._modeStack.length - 1]._updateInternal(dt);
         }
     }
 
     /* internal */
     public _handleModeTransitions(): void {
-        if (this._pendingModeTransitionQueue.length <= 0) {
+        if (!this._pendingModeTransitionQueue || this._pendingModeTransitionQueue.length <= 0) {
             return;
         }
 
         let initialTopMode = this.topMode;
 
-        const doPushMode = (newMode: AppMode) => {
+        const doPushMode = (newMode: AppMode | null) => {
+            Assert.assertIsDefined(this._modeStack);
+            Assert.assertIsDefined(this._container);
             if (newMode == null) {
                 throw new Error("Can't push a null mode to the mode stack");
             }
 
             this._modeStack.push(newMode);
+            Assert.assertIsDefined(newMode.container);
             this._container.addChild(newMode.container);
 
             newMode._setupInternal(this);
         };
 
-        const doInsertMode = (newMode: AppMode, index: number) => {
+        const doInsertMode = (newMode: AppMode | null, index: number) => {
+            Assert.assertIsDefined(this._modeStack);
+            Assert.assertIsDefined(this._container);
             if (newMode == null) {
                 throw new Error("Can't insert a null mode in the mode stack");
             }
@@ -192,12 +204,14 @@ export default class ModeStack {
             index = MathUtil.clamp(index, 0, this._modeStack.length);
 
             this._modeStack.splice(index, 0, newMode);
+            Assert.assertIsDefined(newMode.container);
             this._container.addChildAt(newMode.container, index);
 
             newMode._setupInternal(this);
         };
 
         const doRemoveMode = (modeOrIndex: AppMode | number) => {
+            Assert.assertIsDefined(this._modeStack);
             let index: number;
             if (modeOrIndex instanceof AppMode) {
                 index = this._modeStack.indexOf(modeOrIndex);
@@ -228,7 +242,8 @@ export default class ModeStack {
             this._modeStack.splice(index, 1);
         };
 
-        const doSetIndex = (mode: AppMode, newIdx: number) => {
+        const doSetIndex = (mode: AppMode | null, newIdx: number) => {
+            Assert.assertIsDefined(this._modeStack);
             if (mode == null) {
                 throw new Error("Can't insert a null mode in the mode stack");
             }
@@ -247,6 +262,8 @@ export default class ModeStack {
                     this._modeStack.splice(newIdx, 0, mode);
 
                     // Rearrange mode containers
+                    Assert.assertIsDefined(mode.container);
+                    Assert.assertIsDefined(this._container);
                     this._container.setChildIndex(mode.container, newIdx);
                 }
             }
@@ -283,6 +300,7 @@ export default class ModeStack {
 
                 case ModeTransition.UNWIND:
                 // pop modes until we find the one we're looking for
+                    Assert.assertIsDefined(this._modeStack);
                     while (this._modeStack.length > 0 && this.topMode !== mode) {
                         doRemoveMode(-1);
                     }
@@ -305,11 +323,14 @@ export default class ModeStack {
 
         // Update mode visibility. An opaque mode causes everything below it to be invisible.
         let hasOpaqueMode = false;
-        for (let ii = this._modeStack.length - 1; ii >= 0; --ii) {
-            let mode = this._modeStack[ii];
-            mode.container.visible = !hasOpaqueMode;
-            if (mode.isOpaque) {
-                hasOpaqueMode = true;
+        if (this._modeStack) {
+            for (let ii = this._modeStack.length - 1; ii >= 0; --ii) {
+                let mode: AppMode = this._modeStack[ii];
+                Assert.assertIsDefined(mode.container);
+                mode.container.visible = !hasOpaqueMode;
+                if (mode.isOpaque) {
+                    hasOpaqueMode = true;
+                }
             }
         }
 
@@ -328,8 +349,8 @@ export default class ModeStack {
 
     /* internal */
     public _clearModeStackNow(): void {
-        this._pendingModeTransitionQueue.length = 0;
-        if (this._modeStack.length > 0) {
+        if (this._pendingModeTransitionQueue) this._pendingModeTransitionQueue.length = 0;
+        if (this._modeStack && this._modeStack.length > 0) {
             this.popAllModes();
             this._handleModeTransitions();
         }
@@ -340,11 +361,11 @@ export default class ModeStack {
         this._clearModeStackNow();
         this._modeStack = null;
         this._pendingModeTransitionQueue = null;
-        this._container.destroy();
+        if (this._container) this._container.destroy();
         this._container = null;
     }
 
-    protected _container: Container = new Container();
-    protected _modeStack: AppMode[] = [];
-    protected _pendingModeTransitionQueue: PendingTransition[] = [];
+    protected _container: Container | null = new Container();
+    protected _modeStack: AppMode[] | null = [];
+    protected _pendingModeTransitionQueue: PendingTransition[] | null = [];
 }

@@ -19,6 +19,7 @@ export default class ParallelTask extends ObjectTask {
     /* override */
     protected added(): void {
         this._numActive = this._subtasks.length;
+        Assert.assertIsDefined(this.parent);
         for (let task of this._subtasks) {
             this.regs.add(task.destroyed.connect(() => {
                 this.onTaskComplete();

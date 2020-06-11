@@ -2,6 +2,7 @@ import {DisplayObject, Graphics, Matrix} from 'pixi.js';
 import GameObject from 'flashbang/core/GameObject';
 import Flashbang from 'flashbang/core/Flashbang';
 import MatrixUtil from 'flashbang/util/MatrixUtil';
+import {Assert} from 'flashbang';
 
 /**
  * Wraps an HTML element that lives in the DOM and is drawn on top of the PIXI canvas.
@@ -18,7 +19,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         element: HTMLElement,
         styles: {[property: string]: string},
         replaceIfExists: boolean = false,
-        elementNames: string[] = null
+        elementNames: string[] | null = null
     ): void {
         let isValidElement = true;
         if (elementNames != null) {
@@ -113,6 +114,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     private handleHideWhenModeInactive(): void {
         let wasExited = false;
         let wasVisible = false;
+        Assert.assertIsDefined(this.mode);
 
         this.regs.add(this.mode.exited.connect(() => {
             wasExited = true;
@@ -130,6 +132,8 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
 
     protected added(): void {
         super.added();
+        Assert.assertIsDefined(this._domParent);
+        Assert.assertIsDefined(Flashbang.pixi);
         this._domParent.appendChild(this._obj);
         this.onSizeChanged();
 
@@ -144,6 +148,8 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     }
 
     protected dispose(): void {
+        Assert.assertIsDefined(this._domParent);
+        Assert.assertIsDefined(Flashbang.pixi);
         this._added = false;
         this._domParent.removeChild(this._obj);
         Flashbang.pixi.renderer.removeListener('postrender', this.updateElementProperties, this);
@@ -169,7 +175,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     protected onSizeChanged(): void {
         if (this.isLiveObject) {
             let transfom: string = this._obj.style.transform;
-            this._obj.style.transform = null;
+            this._obj.style.transform = 'initial';
 
             let r = this._obj.getBoundingClientRect();
             this._dummyDisp.clear()
@@ -200,6 +206,6 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
     protected _hideWhenModeInactive: boolean = false;
 
     private _added: boolean;
-    private _domParent: HTMLElement;
+    private _domParent: HTMLElement | null;
     private readonly _lastTransform: Matrix = new Matrix();
 }

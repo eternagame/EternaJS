@@ -92,8 +92,8 @@ export default class FancyGamePanel extends BaseGamePanel {
     private readonly _alpha: number = 0;
     private readonly _color: number = 0;
 
-    private _title: string = null;
-    private _titleText: Text = null;
+    private _title: string | null = null;
+    private _titleText: Text | null = null;
     private _width: number = 0;
     private _height: number = 0;
 }

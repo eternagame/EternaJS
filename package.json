@@ -1,6 +1,7 @@
 {
   "name": "eternajs",
-  "version": "1.0.0",
+  "version": "1.7.1",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
     "start": "node multiplatform/mkdirp dist/dev && npm run postbuild:dev && webpack-dev-server --config webpack.dev.js",
@@ -93,6 +94,6 @@
     }
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#8197d6cdd8bffc4fd1266e693dfde826356a328f"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#1000cccf49d196c4a01b952e28652296a0346481"
   }
 }
