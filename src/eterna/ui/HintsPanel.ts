@@ -1,13 +1,13 @@
 import {Point} from 'pixi.js';
 import {
-    Flashbang, Assert
+    Flashbang, Assert, ContainerObject
 } from 'flashbang';
 import Fonts from 'eterna/util/Fonts';
 import MultiPagePanel from './MultiPagePanel';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
 
-export default class HintsPanel {
+export default class HintsPanel extends ContainerObject {
     private static readonly theme = {
         width: 220,
         height: 283,
@@ -15,7 +15,8 @@ export default class HintsPanel {
         relativePos: new Point(0.0098, 0.5)
     };
 
-    public static create(puzzleHint: string) {
+    constructor(puzzleHint: string) {
+        super();
         const {theme} = HintsPanel;
         let pagesContent: string[];
         try {
@@ -45,18 +46,24 @@ export default class HintsPanel {
             title: 'Hint',
             pages,
             width: theme.width,
-            // height: theme.height,
             maxHeight: Flashbang.stageHeight * 0.8
         });
-        const positionUpdater = () => {
+        this.addObject(panel, this.container);
+    }
+
+    protected added() {
+        super.added();
+
+        const onResize = () => {
+            const {theme} = HintsPanel;
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);
-            panel.display.position = new Point(
+            this.container.position = new Point(
                 Flashbang.stageWidth * theme.relativePos.x,
-                (Flashbang.stageHeight - panel.display.height) * theme.relativePos.y
+                (Flashbang.stageHeight - this.container.height) * theme.relativePos.y
             );
         };
-        positionUpdater();
-        return {panel, positionUpdater};
+        onResize();
+        this.regs.add(this.mode.resized.connect(onResize));
     }
 }
