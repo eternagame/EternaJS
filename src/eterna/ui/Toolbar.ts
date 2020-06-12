@@ -25,8 +25,8 @@ export enum ToolbarType {
 
 export default class Toolbar extends ContainerObject {
     // Core
-    public zoomInButton: GameButton;
-    public zoomOutButton: GameButton;
+    public zoomInButton?: GameButton;
+    public zoomOutButton?: GameButton;
     public pipButton: GameButton;
     public stateToggle: ToggleBar;
 
@@ -479,27 +479,29 @@ export default class Toolbar extends ContainerObject {
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
-        this.zoomInButton = new GameButton()
-            .up(Bitmaps.ImgZoomIn)
-            .over(Bitmaps.ImgZoomInOver)
-            .down(Bitmaps.ImgZoomInHit)
-            .disabled(Bitmaps.ImgZoomInDisable)
-            .tooltip('Zoom in')
-            .hotkey(KeyCode.Equal)
-            .rscriptID(RScriptUIElementID.ZOOMIN);
-        this.addObject(this.zoomInButton, lowerToolbarLayout);
+        if (!Eterna.MOBILE_APP) {
+            this.zoomInButton = new GameButton()
+                .up(Bitmaps.ImgZoomIn)
+                .over(Bitmaps.ImgZoomInOver)
+                .down(Bitmaps.ImgZoomInHit)
+                .disabled(Bitmaps.ImgZoomInDisable)
+                .tooltip('Zoom in')
+                .hotkey(KeyCode.Equal)
+                .rscriptID(RScriptUIElementID.ZOOMIN);
+            this.addObject(this.zoomInButton, lowerToolbarLayout);
 
-        this.zoomOutButton = new GameButton()
-            .up(Bitmaps.ImgZoomOut)
-            .over(Bitmaps.ImgZoomOutOver)
-            .down(Bitmaps.ImgZoomOutHit)
-            .disabled(Bitmaps.ImgZoomOutDisable)
-            .tooltip('Zoom out')
-            .hotkey(KeyCode.Minus)
-            .rscriptID(RScriptUIElementID.ZOOMOUT);
-        this.addObject(this.zoomOutButton, lowerToolbarLayout);
+            this.zoomOutButton = new GameButton()
+                .up(Bitmaps.ImgZoomOut)
+                .over(Bitmaps.ImgZoomOutOver)
+                .down(Bitmaps.ImgZoomOutHit)
+                .disabled(Bitmaps.ImgZoomOutDisable)
+                .tooltip('Zoom out')
+                .hotkey(KeyCode.Minus)
+                .rscriptID(RScriptUIElementID.ZOOMOUT);
+            this.addObject(this.zoomOutButton, lowerToolbarLayout);
 
-        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+        }
 
         this.undoButton = new GameButton()
             .up(Bitmaps.ImgUndo)
@@ -600,8 +602,12 @@ export default class Toolbar extends ContainerObject {
     }
 
     public disableTools(disable: boolean): void {
-        this.zoomInButton.enabled = !disable;
-        this.zoomOutButton.enabled = !disable;
+        if (this.zoomInButton) {
+            this.zoomInButton.enabled = !disable;
+        }
+        if (this.zoomOutButton) {
+            this.zoomOutButton.enabled = !disable;
+        }
         this.pipButton.enabled = !disable;
         this.stateToggle.enabled = !disable;
 

@@ -154,14 +154,16 @@ export default class RScriptEnv extends ContainerObject {
             }
 
             let obj: RScriptUIElement | null = this.getUIElementFromID(elementID)[0];
-            if (obj instanceof DisplayObject) {
-                obj.visible = visible;
-            } else if (obj instanceof GameObject && obj.display != null) {
-                obj.display.visible = visible;
-            }
+            if (obj) {
+                if (obj instanceof DisplayObject) {
+                    obj.visible = visible;
+                } else if (obj instanceof GameObject && obj.display != null) {
+                    obj.display.visible = visible;
+                }
 
-            if (((obj as any) as Enableable).enabled !== undefined) {
-                ((obj as any) as Enableable).enabled = visible && !disabled;
+                if (((obj as any) as Enableable).enabled !== undefined) {
+                    ((obj as any) as Enableable).enabled = visible && !disabled;
+                }
             }
         }
     }

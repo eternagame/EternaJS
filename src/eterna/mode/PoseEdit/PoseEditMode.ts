@@ -144,16 +144,20 @@ export default class PoseEditMode extends GameMode {
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
-        this._toolbar.zoomOutButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
-                poseField.zoomOut();
-            }
-        });
-        this._toolbar.zoomInButton.clicked.connect(() => {
-            for (let poseField of this._poseFields) {
-                poseField.zoomIn();
-            }
-        });
+        if (this._toolbar.zoomOutButton) {
+            this._toolbar.zoomOutButton.clicked.connect(() => {
+                for (let poseField of this._poseFields) {
+                    poseField.zoomOut();
+                }
+            });
+        }
+        if (this._toolbar.zoomInButton) {
+            this._toolbar.zoomInButton.clicked.connect(() => {
+                for (let poseField of this._poseFields) {
+                    poseField.zoomIn();
+                }
+            });
+        }
         this._toolbar.submitButton.clicked.connect(() => this.submitCurrentPose());
         this._toolbar.viewSolutionsButton.clicked.connect(() => {
             this.pushUILock();
