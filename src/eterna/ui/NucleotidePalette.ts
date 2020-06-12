@@ -87,43 +87,43 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
 
         this._targets[PaletteTargetType.A] = new PaletteTarget(
             PaletteTargetType.A, RScriptUIElementID.A, false, KeyCode.Digit1,
-            [new Rectangle(9, 7, 25, 25)],
+            [new Rectangle(9, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <A>A (Adenine)</A>. (1)')
         );
 
         this._targets[PaletteTargetType.U] = new PaletteTarget(
             PaletteTargetType.U, RScriptUIElementID.U, false, KeyCode.Digit2,
-            [new Rectangle(58, 7, 25, 25)],
+            [new Rectangle(58, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <U>U (Uracil)</U>. (2)')
         );
 
         this._targets[PaletteTargetType.G] = new PaletteTarget(
             PaletteTargetType.G, RScriptUIElementID.G, false, KeyCode.Digit3,
-            [new Rectangle(107, 7, 25, 25)],
+            [new Rectangle(107, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <G>G (Guanine)</G>. (3)')
         );
 
         this._targets[PaletteTargetType.C] = new PaletteTarget(
             PaletteTargetType.C, RScriptUIElementID.C, false, KeyCode.Digit4,
-            [new Rectangle(156, 7, 25, 25)],
+            [new Rectangle(156, 4, 25, 25)],
             NucleotidePalette.createTooltip('Mutate to <C>C (Cytosine)</C>. (4)')
         );
 
         this._targets[PaletteTargetType.AU] = new PaletteTarget(
             PaletteTargetType.AU, RScriptUIElementID.AU, true, KeyCode.KeyQ,
-            [new Rectangle(31, 29, 30, 20), new Rectangle(37, 15, 22, 20)],
+            [new Rectangle(31, 28, 30, 20), new Rectangle(37, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<A>A</A>, <U>U</U>). (Q)')
         );
 
         this._targets[PaletteTargetType.UG] = new PaletteTarget(
             PaletteTargetType.UG, RScriptUIElementID.UG, true, KeyCode.KeyW,
-            [new Rectangle(80, 29, 30, 20), new Rectangle(87, 15, 22, 20)],
+            [new Rectangle(80, 28, 30, 20), new Rectangle(87, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <U>U</U>). (W)')
         );
 
         this._targets[PaletteTargetType.GC] = new PaletteTarget(
             PaletteTargetType.GC, RScriptUIElementID.GC, true, KeyCode.KeyE,
-            [new Rectangle(129, 29, 30, 20), new Rectangle(137, 15, 22, 20)],
+            [new Rectangle(129, 28, 30, 20), new Rectangle(137, 15, 22, 20)],
             NucleotidePalette.createTooltip('Mutate to pair (<G>G</G>, <C>C</C>). (E)')
         );
     }
