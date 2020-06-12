@@ -545,7 +545,7 @@ export default class PoseEditMode extends GameMode {
                     ? [() => getBounds(this.toolbar.palette), 0]
                     : undefined,
 
-                zoom: this.toolbar.zoomInButton.container.visible
+                zoom: this.toolbar.zoomInButton?.container.visible
                     ? [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2]
                     : undefined,
 
