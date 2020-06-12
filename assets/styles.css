@@ -45,8 +45,8 @@
 
 @media (max-height: 510px) {
     .ingame-chat {
-        width: 30%;
-        min-width: 230px;
+        width: unset;
+        min-width: 40%;
         height: 100%;
         border: none;
         border-radius: 0px;
