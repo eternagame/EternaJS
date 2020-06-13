@@ -47,7 +47,7 @@ export default class ConstraintBar extends ContainerObject {
     private _collapsed = false;
     private _background: Graphics;
     private _mask: Graphics;
-    private _constraintsLayerRoot: Container;
+    private _constraintsRoot: Container;
     private _constraintsLayer: Container;
     private _constraintsTooltips: Container;
     private _totalWidth = 0;
@@ -75,8 +75,6 @@ export default class ConstraintBar extends ContainerObject {
 
     protected added() {
         const {config} = ConstraintBar;
-
-        this._constraintsLayerRoot = new Container();
 
         const drawerEnabled = this._constraints.length > 1;
         if (drawerEnabled) {
@@ -125,21 +123,24 @@ export default class ConstraintBar extends ContainerObject {
         }
 
         // Constraint boxes
+        const constraintsContainer = new Container(); // contains the constraints and the selection arrow
         this._constraintsLayer = new Container();
-        this._constraintsLayerRoot.position.y = config.startPos.y;
-        this._constraintsLayerRoot.addChild(this._constraintsLayer);
-        this.container.addChild(this._constraintsLayerRoot);
+        this._constraintsRoot = new Container();
+        this._constraintsRoot.position.y = config.startPos.y;
+        constraintsContainer.addChild(this._constraintsLayer);
+        this._constraintsRoot.addChild(constraintsContainer);
+        this.container.addChild(this._constraintsRoot);
 
         if (this._selectionArrow) {
-            this._constraintsLayerRoot.addChild(this._selectionArrow);
+            constraintsContainer.addChild(this._selectionArrow);
         }
 
         this._constraintsTooltips = new Container();
         this._constraintsTooltips.position.y = this._constraintsLayer.position.y;
-        this._constraintsLayerRoot.addChild(this._constraintsTooltips);
+        this._constraintsRoot.addChild(this._constraintsTooltips);
 
         if (this._mask) {
-            this._constraintsLayer.mask = this._mask;
+            constraintsContainer.mask = this._mask;
         }
 
         for (const constraint of this._constraints) {
@@ -362,9 +363,9 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private scrollConstraints(offset: number) {
-        this._constraintsLayerRoot.x = Math.min(
+        this._constraintsRoot.x = Math.min(
             0,
-            Math.max(this._constraintsLayerRoot.x + offset, this._mask.width - this._totalWidth)
+            Math.max(this._constraintsRoot.x + offset, this._mask.width - this._totalWidth)
         );
     }
 
@@ -390,10 +391,10 @@ export default class ConstraintBar extends ContainerObject {
                 // In case layer was scrolled, bring it back to 0
                 new LocationTask(
                     0,
-                    this._constraintsLayerRoot.position.y,
+                    this._constraintsRoot.position.y,
                     config.animDuration,
                     Easing.easeIn,
-                    this._constraintsLayerRoot
+                    this._constraintsRoot
                 ),
                 // Move constraint boxes
                 ...this._constraintsLayer.children.map((c, index) => new LocationTask(
