@@ -6,6 +6,7 @@ import GameButton from './GameButton';
 interface HelpBarProps {
     onHintClicked?: () => void;
     onHelpClicked: () => void;
+    onChatClicked: () => void;
 }
 
 export default class HelpBar extends ContainerObject {
@@ -17,6 +18,15 @@ export default class HelpBar extends ContainerObject {
         super();
 
         const {theme} = HelpBar;
+
+        const chat = new GameButton()
+            .up(Bitmaps.ImgChat)
+            .over(Bitmaps.ImgChatHover)
+            .down(Bitmaps.ImgChat)
+            .tooltip('Chat');
+        this.addObject(chat, this.container);
+        this.regs.add(chat.clicked.connect(props.onChatClicked));
+
         if (props.onHintClicked) {
             const onHintClicked = props.onHintClicked;
             const hints = new GameButton()

@@ -126,21 +126,12 @@ export default class PoseEditMode extends GameMode {
             onHintClicked: this._puzzle.hint
                 ? () => this.onHintClicked()
                 : undefined,
-            onHelpClicked: () => this.onHelpClicked()
+            onHelpClicked: () => this.onHelpClicked(),
+            onChatClicked: () => {
+                Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
+            }
         });
         this.addObject(this._helpBar, this.uiLayer);
-
-        // Chat
-        this._chatButton = new GameButton()
-            .up(Bitmaps.ImgChat)
-            .over(Bitmaps.ImgChat)
-            .down(Bitmaps.ImgChat)
-            .tooltip('Chat');
-        this.addObject(this._chatButton, this.container);
-        Assert.assertIsDefined(this.regs);
-        this.regs.add(this._chatButton.clicked.connect(() => {
-            Eterna.settings.showChat.value = !Eterna.settings.showChat.value;
-        }));
 
         this._toolbar.undoButton.clicked.connect(() => this.moveUndoStackBackward());
         this._toolbar.redoButton.clicked.connect(() => this.moveUndoStackForward());
@@ -333,11 +324,6 @@ export default class PoseEditMode extends GameMode {
         );
 
         DisplayUtil.positionRelativeToStage(
-            this._chatButton.display, HAlign.RIGHT, VAlign.BOTTOM,
-            HAlign.RIGHT, VAlign.BOTTOM, -15, -15
-        );
-
-        DisplayUtil.positionRelativeToStage(
             this._solutionNameText, HAlign.CENTER, VAlign.TOP,
             HAlign.CENTER, VAlign.TOP, 0, 8
         );
@@ -507,7 +493,7 @@ export default class PoseEditMode extends GameMode {
                             this._helpBar.container.width,
                             this._helpBar.container.height
                         ),
-                        -32
+                        0
                     ]
                     : undefined,
 
@@ -2007,7 +1993,6 @@ export default class PoseEditMode extends GameMode {
         this.disableTools(true);
         this._constraintsLayer.visible = false;
         this._exitButton.display.visible = false;
-        this._chatButton.display.visible = false;
         this._helpBar.display.visible = false;
         for (let pose of this._poses) {
             pose.showTotalEnergy = false;
@@ -2050,8 +2035,6 @@ export default class PoseEditMode extends GameMode {
                 for (let pose of this._poses) {
                     pose.showTotalEnergy = true;
                 }
-
-                this._chatButton.display.visible = true;
 
                 this._exitButton.display.alpha = 0;
                 this._exitButton.display.visible = true;
@@ -3194,7 +3177,6 @@ export default class PoseEditMode extends GameMode {
 
     private _toolbar: Toolbar;
     private _helpBar: HelpBar;
-    private _chatButton: GameButton;
 
     protected _folder: Folder | null;
     // / Asynch folding
