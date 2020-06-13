@@ -516,7 +516,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         if (closestIndex >= 0) {
             this._mouseDownAltKey = altDown;
-            if (ctrlDown && closestIndex < this.fullSequenceLength) {
+            if ((ctrlDown || this._markBases) && closestIndex < this.fullSequenceLength) {
                 this.toggleBaseMark(closestIndex);
                 return;
             }
@@ -2492,6 +2492,14 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._parenthesis = parenthesis;
     }
 
+    public set markBases(enable: boolean) {
+        this._markBases = enable;
+    }
+
+    public set magicGlue(enable: boolean) {
+        this._magicGlue = enable;
+    }
+
     public setBaseColor(seq: number, inColor: number): void {
         this._mutatedSequence = this._sequence.slice();
         this._mutatedSequence[seq] = inColor;
@@ -2735,7 +2743,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
                         );
                     }
                 }
-            } else if (this._mouseDownAltKey) {
+            } else if (this._mouseDownAltKey || this._magicGlue) {
                 if (this.toggleDesignStruct(seqnum)) {
                     this._designStructUpdated = true;
                 }
@@ -3598,6 +3606,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
     private _energyHighlights: SceneObject[] = [];
 
     private _showNucleotideRange = false;
+    private _magicGlue = false;
+    private _markBases = false;
 
     /*
      * NEW HIGHLIGHT.

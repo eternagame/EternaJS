@@ -1,4 +1,4 @@
-import {Graphics, Point} from 'pixi.js';
+import {Graphics, Point, Sprite} from 'pixi.js';
 import {RegistrationGroup} from 'signals';
 import Eterna from 'eterna/Eterna';
 import Booster from 'eterna/mode/PoseEdit/Booster';
@@ -10,6 +10,7 @@ import {
 import {BoostersData} from 'eterna/puzzle/Puzzle';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
+import BitmapManager from 'eterna/resources/BitmapManager';
 import NucleotidePalette from './NucleotidePalette';
 import GameButton from './GameButton';
 import ToggleBar from './ToggleBar';
@@ -58,6 +59,9 @@ export default class Toolbar extends ContainerObject {
 
     public boostersMenu: GameButton;
 
+    public baseMarkerButton: GameButton;
+    public magicGlueButton: GameButton;
+
     public dynPaintTools: GameButton[] = [];
     public dynActionTools: GameButton[] = [];
 
@@ -104,7 +108,7 @@ export default class Toolbar extends ContainerObject {
 
         const APPROX_ITEM_COUNT = 12;
         const APPROX_ITEM_WIDTH = 55;
-        const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 25);
+        const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 13);
         const SPACE_NARROW = SPACE_WIDE * 0.28;
 
         // This can be used in both puzzlemaker and lab, so we'll create the base button ahead of time
@@ -522,6 +526,32 @@ export default class Toolbar extends ContainerObject {
         if (this._type !== ToolbarType.FEEDBACK) {
             this.addObject(this.undoButton, lowerToolbarLayout);
             this.addObject(this.redoButton, lowerToolbarLayout);
+        }
+
+        if (Eterna.MOBILE_APP) {
+            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.baseMarkerButton = new GameButton()
+                .up(Bitmaps.ImgBaseMarker)
+                .over(Bitmaps.ImgBaseMarker)
+                .down(Bitmaps.ImgBaseMarker);
+            this.addObject(this.baseMarkerButton, lowerToolbarLayout);
+
+            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+            this.magicGlueButton = new GameButton()
+                .up(Bitmaps.ImgMagicGlue)
+                .over(Bitmaps.ImgMagicGlue)
+                .down(Bitmaps.ImgMagicGlue);
+            this.addObject(this.magicGlueButton, lowerToolbarLayout);
+
+            const makeArrow = () => {
+                const arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+                arrow.position.x = (this.baseMarkerButton.container.width - arrow.width) / 2;
+                arrow.visible = false;
+                return arrow;
+            };
+
+            this.baseMarkerButton.container.addChild(makeArrow());
+            this.magicGlueButton.container.addChild(makeArrow());
         }
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
