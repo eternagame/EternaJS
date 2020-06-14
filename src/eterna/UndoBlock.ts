@@ -217,6 +217,7 @@ export default class UndoBlock {
         this.setParam(UndoBlockParam.GU, EPars.numGUPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.GC, EPars.numGCPairs(seq, bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.AU, EPars.numUAPairs(seq, bestPairs), temp, pseudoknots);
+        this.setParam(UndoBlockParam.ANY_PAIR, EPars.numPairs(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.STACK, EPars.getLongestStackLength(bestPairs), temp, pseudoknots);
         this.setParam(UndoBlockParam.REPETITION, EPars.getSequenceRepetition(
             EPars.sequenceToString(seq), 5
