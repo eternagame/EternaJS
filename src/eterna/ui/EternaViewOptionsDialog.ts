@@ -36,7 +36,11 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         bind(Eterna.settings.highlightRestricted, 'Highlight restricted sequences');
         bind(Eterna.settings.showChat, 'In-game chat');
         bind(Eterna.settings.simpleGraphics, `Use simpler, less animated graphics${showShortcuts ? ' (,)' : ''}`);
-        bind(Eterna.settings.autohideToolbar, 'Autohide toolbar');
+        if (!Eterna.MOBILE_APP) {
+            // NOTE(johannes): At the time of writing, auto-hide toolbar does not work with a touchscreen,
+            // this option can be re-added once that works.
+            bind(Eterna.settings.autohideToolbar, 'Autohide toolbar');
+        }
         if (this._optionsMode !== EternaViewOptionsMode.PUZZLEMAKER) {
             bind(Eterna.settings.freezeButtonAlwaysVisible, 'Freeze button always visible');
         }
