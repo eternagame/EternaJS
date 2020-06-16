@@ -243,15 +243,15 @@ export default class NucleotidePalette extends ContainerObject implements Keyboa
     public setPairCounts(au: number, ug: number, gc: number): void {
         if (this._targets[PaletteTargetType.AU].enabled) {
             this._numAU.text = au.toString();
-            this._numAU.position = new Point(57 - this._numAU.width, 1);
+            this._numAU.position = new Point(51 - this._numAU.width, 1);
         }
         if (this._targets[PaletteTargetType.UG].enabled) {
             this._numUG.text = ug.toString();
-            this._numUG.position = new Point(103 - this._numUG.width, 1);
+            this._numUG.position = new Point(101 - this._numUG.width, 1);
         }
         if (this._targets[PaletteTargetType.GC].enabled) {
             this._numGC.text = gc.toString();
-            this._numGC.position = new Point(155 - this._numGC.width, 1);
+            this._numGC.position = new Point(149 - this._numGC.width, 1);
         }
     }
 
