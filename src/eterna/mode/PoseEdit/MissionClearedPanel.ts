@@ -69,7 +69,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
         const infoText = MissionClearedPanel.processHTML(this._infoText)
             || 'You have solved the puzzle, congratulations!';
-        const infoObj = new HTMLTextObject(infoText, panelWidth - 30, this._infoWrapper)
+        const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
             .font(Fonts.STDFONT_REGULAR)
             .fontSize(14)
             .color(0xffffff)
@@ -80,7 +80,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this.addObject(infoObj, this._infoContainer);
 
         if (this._moreText != null) {
-            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - 60)
+            const moreTextObj = new HTMLTextObject(this._moreText, panelWidth - MissionClearedPanel.PADDING_RIGHT)
                 .font(Fonts.STDFONT_REGULAR)
                 .fontSize(16)
                 .color(0xffffff)
@@ -234,7 +234,7 @@ export default class MissionClearedPanel extends ContainerObject {
             this._rankScrollHeading.display.position = new Point(0, 0);
             this._rankScroll.display.position = new Point(10, 12 + this._tfPlayer.height);
 
-            const rankScale = panelWidth / (310 + 80);
+            const rankScale = Math.min(1, panelWidth / (400 + 80));
             this._rankScrollContainer.scale = new Point(rankScale, rankScale);
         }
 
@@ -251,9 +251,11 @@ export default class MissionClearedPanel extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         return Math.min(
             Flashbang.stageWidth,
-            MathUtil.clamp(Flashbang.stageWidth * 0.4, 230, 480)
+            MathUtil.clamp(Flashbang.stageWidth * 0.4, 400, 600)
         );
     }
+
+    private static readonly PADDING_RIGHT = 80;
 
     private readonly _infoText: string | null;
     private readonly _moreText: string | null;
