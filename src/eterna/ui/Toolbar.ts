@@ -528,31 +528,29 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.redoButton, lowerToolbarLayout);
         }
 
-        if (Eterna.MOBILE_APP) {
-            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            this.baseMarkerButton = new GameButton()
-                .up(Bitmaps.ImgBaseMarker)
-                .over(Bitmaps.ImgBaseMarker)
-                .down(Bitmaps.ImgBaseMarker);
-            this.addObject(this.baseMarkerButton, lowerToolbarLayout);
+        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.baseMarkerButton = new GameButton()
+            .up(Bitmaps.ImgBaseMarker)
+            .over(Bitmaps.ImgBaseMarker)
+            .down(Bitmaps.ImgBaseMarker);
+        this.addObject(this.baseMarkerButton, lowerToolbarLayout);
 
-            lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-            this.magicGlueButton = new GameButton()
-                .up(Bitmaps.ImgMagicGlue)
-                .over(Bitmaps.ImgMagicGlue)
-                .down(Bitmaps.ImgMagicGlue);
-            this.addObject(this.magicGlueButton, lowerToolbarLayout);
+        lowerToolbarLayout.addHSpacer(SPACE_WIDE);
+        this.magicGlueButton = new GameButton()
+            .up(Bitmaps.ImgMagicGlue)
+            .over(Bitmaps.ImgMagicGlue)
+            .down(Bitmaps.ImgMagicGlue);
+        this.addObject(this.magicGlueButton, lowerToolbarLayout);
 
-            const makeArrow = () => {
-                const arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
-                arrow.position.x = (this.baseMarkerButton.container.width - arrow.width) / 2;
-                arrow.visible = false;
-                return arrow;
-            };
+        const makeArrow = () => {
+            const arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+            arrow.position.x = (this.baseMarkerButton.container.width - arrow.width) / 2;
+            arrow.visible = false;
+            return arrow;
+        };
 
-            this.baseMarkerButton.container.addChild(makeArrow());
-            this.magicGlueButton.container.addChild(makeArrow());
-        }
+        this.baseMarkerButton.container.addChild(makeArrow());
+        this.magicGlueButton.container.addChild(makeArrow());
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
