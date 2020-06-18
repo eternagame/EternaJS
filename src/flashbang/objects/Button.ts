@@ -39,7 +39,7 @@ export default abstract class Button extends ContainerObject implements Enableab
         this.regs.add(this.pointerOver.connect(() => this.onPointerOver()));
         this.regs.add(this.pointerOut.connect(() => this.onPointerOut()));
         this.regs.add(this.pointerDown.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerDown()));
-        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(true)));
+        this.regs.add(this.pointerUp.filter(InputUtil.IsLeftMouse).connect(() => this.onPointerUp(false)));
         this.regs.add(this.pointerTap.filter(InputUtil.IsLeftMouse).connect(() => {
             if (this.enabled) {
                 this.clicked.emit();
@@ -100,7 +100,9 @@ export default abstract class Button extends ContainerObject implements Enableab
 
     protected onPointerDown(): void {
         if (this.enabled && this._pointerCapture == null) {
-            this.beginCapture();
+            if (!Flashbang.supportsTouch) {
+                this.beginCapture();
+            }
             this._isPointerDown = true;
             this._isPointerOver = true;
             this.updateEnabledState();
