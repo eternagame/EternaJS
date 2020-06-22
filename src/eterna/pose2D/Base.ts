@@ -218,6 +218,10 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     public isClicked(x: number, y: number, zoomlev: number, lenient: boolean): number {
+        if (!this.container.visible) {
+            return -1;
+        }
+
         let diffx: number; let
             diffy: number;
 
