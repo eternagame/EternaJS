@@ -1,5 +1,5 @@
 import {
-    ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask
+    ContainerObject, Flashbang, ParallelTask, LocationTask, Easing, AlphaTask, SceneObject
 } from 'flashbang';
 import {
     Point, Graphics, Container, Sprite
@@ -45,7 +45,7 @@ export default class ConstraintBar extends ContainerObject {
     public sequenceHighlights: Value<HighlightInfo[]> | Value<null> = new Value(null);
 
     private _collapsed = false;
-    private _background: Graphics;
+    private _background: SceneObject<Graphics>;
     private _mask: Graphics;
     private _constraintsRoot: Container;
     private _constraintsLayer: Container;
@@ -80,15 +80,15 @@ export default class ConstraintBar extends ContainerObject {
         if (drawerEnabled) {
             // Background
             this._background = (() => {
-                const bg = new Graphics();
-                this.container.addChild(bg);
-                bg.interactive = true;
-                bg.on('pointerdown', (e) => {
+                const bg = new SceneObject(new Graphics());
+                this.addObject(bg, this.container);
+
+                bg.pointerDown.connect((e) => {
                     this._backgroundDrag = true;
                     this._drag = true;
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.on('pointermove', (e) => {
+                bg.pointerMove.connect((e) => {
                     if (!this._drag) {
                         return;
                     }
@@ -96,11 +96,11 @@ export default class ConstraintBar extends ContainerObject {
                     this.scrollConstraints(deltaPos);
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.on('pointerup', (e) => {
+                bg.pointerUp.connect((e) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.on('pointerupoutside', (e) => {
+                bg.display.on('pointerupoutside', (e) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -116,7 +116,7 @@ export default class ConstraintBar extends ContainerObject {
 
             // Drawer tip
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
-            this._background.addChild(this._drawerTip);
+            this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
             this._drawerTip.on('pointertap', (e) => this.collapse());
             this._drawerTip.visible = false;
@@ -214,15 +214,15 @@ export default class ConstraintBar extends ContainerObject {
             const drawerWidth = Math.min(Flashbang.stageWidth * config.maxWidth, positioning.totalWidth);
             const backgroundY = config.startPos.y - config.padding;
             const backgroundHeight = config.constraintHeight + config.padding * 2;
-            this._background.clear();
-            this._background.beginFill(0x2A4366, 1);
-            this._background.drawRect(
+            this._background.display.clear();
+            this._background.display.beginFill(0x2A4366, 1);
+            this._background.display.drawRect(
                 0,
                 backgroundY,
                 drawerWidth,
                 backgroundHeight
             );
-            this._background.endFill();
+            this._background.display.endFill();
 
             this._mask.clear();
             this._mask.beginFill(0, 1);
@@ -410,7 +410,7 @@ export default class ConstraintBar extends ContainerObject {
         // Fade-out
         this.addObject(
             new ParallelTask(
-                new AlphaTask(0, config.animDuration, Easing.easeIn, this._background),
+                new AlphaTask(0, config.animDuration, Easing.easeIn, this._background.display),
                 new AlphaTask(0, config.animDuration, Easing.easeIn, this._drawerTip),
                 new AlphaTask(0, config.animDuration, Easing.easeIn, this._selectionArrow)
             )
@@ -439,7 +439,7 @@ export default class ConstraintBar extends ContainerObject {
         // Fade-in
         this.addObject(
             new ParallelTask(
-                new AlphaTask(1, config.animDuration, Easing.easeIn, this._background),
+                new AlphaTask(1, config.animDuration, Easing.easeIn, this._background.display),
                 new AlphaTask(1, config.animDuration, Easing.easeIn, this._drawerTip),
                 new AlphaTask(1, config.animDuration, Easing.easeIn, this._selectionArrow)
             )
