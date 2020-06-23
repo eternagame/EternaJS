@@ -69,3 +69,16 @@ perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomple
 popd
 patch -t -p0 < contrafold-eterna.patch
 popd
+
+### EternaFold
+##############
+## This is how the patch file was created.
+## diff -X .gitignore -ur contrafold_stock contrafold > contrafold-eterna.patch
+
+# With your fresh download, which untars into contrafold/...
+pushd EternaFold 
+#pushd EternaFold/src/
+#perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomplementary contrafold.params.profile
+#popd
+patch -t -p0 < eternafold-eterna.patch
+popd
