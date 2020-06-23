@@ -9,26 +9,33 @@
 #include "../contrafold/src/Defaults.ipp"
 #include "../contrafold/src/InferenceEngine.hpp"
 #include "../contrafold/src/ParameterManager.ipp"
-
-#define WATER_MOD 1
-// water concentration modulation (which we need to cancel here)
-#ifdef WATER_MOD
-static int water_mod = 0;
-#endif
+#include "../contrafold/src/nnfe_eval.h"
 
 static FullEvalResult* gEvalResult = NULL;
 
 // a callback that fills the array above with localized free energy contributions
-static void _eos_cb(int index, int fe) {
+// static void _eos_cb(int index, int fe) {
+//     if (gEvalResult != NULL) {
+//         if (index < 0) {
+// #ifdef WATER_MOD
+//             if (index == -2) fe += water_mod;
+// #endif
+//             int to_insert[] = { index, fe };
+//             gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
+//         } else {
+//             gEvalResult->nodes.push_back(index);
+//             gEvalResult->nodes.push_back(fe);
+//         }
+//     }
+// }
+
+void _eos_cb(int index, int fe) {
     if (gEvalResult != NULL) {
         if (index < 0) {
-#ifdef WATER_MOD
-            if (index == -2) fe += water_mod;
-#endif
-            int to_insert[] = { index, fe };
+            int to_insert[] = { index-1, fe }; // shift indices from 1-based to 0-based
             gEvalResult->nodes.insert(gEvalResult->nodes.begin(), to_insert, to_insert + 2);
         } else {
-            gEvalResult->nodes.push_back(index);
+            gEvalResult->nodes.push_back(index - 1); // shift indices from 1-based to 0-based
             gEvalResult->nodes.push_back(fe);
         }
     }
@@ -37,62 +44,28 @@ static void _eos_cb(int index, int fe) {
 extern void (*eos_cb)(int index, int fe);
 
 FullEvalResult* FullEval (int temperature_in, const std::string& seqString, const std::string& structString) {
-    
+
+    double energy;
     FullEvalResult* result = new FullEvalResult();
-    gEvalResult = result;
-    eos_cb = _eos_cb;
 
+    gEvalResult = result; // set the collecting array
+    eos_cb = _eos_cb; // activate the callback
 
-    ParameterManager<float> parameter_manager;
-    InferenceEngine<float> inference_engine(false);
-    inference_engine.RegisterParameters(parameter_manager);
-    // ComputationEngine<float> computation_engine(options, descriptions, inference_engine, parameter_manager);
-    // ComputationWrapper<float> computation_wrapper(computation_engine);
+    printf("struct string: %s\n", structString.c_str());
+    energy = eval(seqString, structString, false) / -100.0;
 
-    SStruct sstruct;
-    sstruct.LoadString(seqString);
-    sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    inference_engine.LoadSequence(sstruct);
-
-    std::string newstr = "@" + structString;
-    printf("%s\n", newstr.c_str());
-    // inference_engine.UseConstraints(sstruct.GetMapping());
-    
-    std::vector<float> w;
-    // alter for eternafold
-    w = GetDefaultComplementaryValues<float>();
-    inference_engine.LoadValues(w);// * 2.71);
-
-    // inference_engine.ComputeInside();
-    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
-
-
-    // repeated just in case.
-    // sstruct.LoadString(seqString);
-    // sstruct.SetMapping(sstruct.ConvertParensToMapping("@" + structString));
-    // inference_engine.LoadSequence(sstruct);
-
-
-    inference_engine.UseConstraints(sstruct.GetMapping());
-
-    inference_engine.ComputeInside();
-
-    result->nodes;//
-    result->energy = /*logZ_unconstrained */ -inference_engine.ComputeLogPartitionCoefficient();
-
-    // std::cout << "logZ_unconstrained (" << logZ_unconstrained 
-    //     << ") - inference_engine.ComputeLogPartitionCoefficient() (" 
-    //     << inference_engine.ComputeLogPartitionCoefficient() << ") = result->energy ("
-    //     << result->energy << ")." << std::endl;
-        
+    // clean up
     eos_cb = NULL;
+    gEvalResult = NULL;
+
+    result->energy = energy;
     return result;
 }
 
 
 
 FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamma) {
-    
+
     ParameterManager<float> parameter_manager;
     InferenceEngine<float> inference_engine(false);
     inference_engine.RegisterParameters(parameter_manager);
@@ -104,30 +77,37 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamm
     inference_engine.LoadSequence(sstruct);
 
     std::vector<float> w;
-    // alter for eternafold
+    const std::vector<RealT> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
+    inference_engine.LoadValues(w * shared.log_base);
     w = GetDefaultComplementaryValues<float>();
-        // const std::vector<RealT> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
     inference_engine.LoadValues(w);// * 2.71);
-    // const std::vector<float> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
+
 
     inference_engine.ComputeInside();
-    float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
+    // float logZ_unconstrained = inference_engine.ComputeLogPartitionCoefficient();
 
-    inference_engine.ComputeOutside();
-    inference_engine.ComputePosterior();
+    // MEA
+    // inference_engine.ComputeOutside();
+    // inference_engine.ComputePosterior();
+    // SStruct solution(sstruct);
+    // solution.SetMapping(inference_engine.PredictPairingsPosterior(gamma));
+
+    // MFE
+    inference_engine.ComputeViterbi();
     SStruct solution(sstruct);
-    solution.SetMapping(inference_engine.PredictPairingsPosterior(gamma));
+    solution.SetMapping(inference_engine.PredictPairingsViterbi());
+
 
     FullFoldResult* result = new FullFoldResult();
     result->structure = solution.ConvertMappingToParens(solution.GetMapping()).substr(1);
     // std::cout << "result structure " << result->structure << std::endl;
-    
+
     // Now use a constraint to this sequence to produce the energy.
     inference_engine.LoadSequence(solution);
     inference_engine.UseConstraints(solution.GetMapping());
     inference_engine.ComputeInside();
 
-    result->mfe = logZ_unconstrained - inference_engine.ComputeLogPartitionCoefficient();
+    result->mfe = 0 - inference_engine.ComputeLogPartitionCoefficient();
     return result;
 }
 
