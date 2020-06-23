@@ -12,6 +12,7 @@ import Fonts from 'eterna/util/Fonts';
 import Solution from 'eterna/puzzle/Solution';
 import int from 'eterna/util/int';
 import Utility from 'eterna/util/Utility';
+import UITheme from 'eterna/ui/UITheme';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
@@ -40,27 +41,33 @@ export default class DataCol extends ContainerObject {
 
     protected added(): void {
         super.added();
+        const {designBrowser: theme} = UITheme;
 
         this._graphics = new Graphics();
         this.container.addChild(this._graphics);
 
-        let dataDisplayBuilder = new TextBuilder().font(this._fontType).fontSize(this._fontSize).color(0xffffff);
+        let dataDisplayBuilder = new TextBuilder()
+            .font(this._fontType)
+            .fontSize(this._fontSize)
+            .color(0xffffff)
+            .lineHeight(theme.rowHeight);
         this._lineHeight = dataDisplayBuilder.computeLineHeight();
 
+        const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
         this._dataDisplay = dataDisplayBuilder.build();
         // this._dataDisplay.setText("A\nA");
         // let metr: TextLineMetrics = this._dataDisplay.GetTextBox().getLineMetrics(0);
         // this._lineHeight = metr.height + metr.leading / 2;
-        this._dataDisplay.position = new Point(11, DataCol.DATA_H);
+        this._dataDisplay.position = new Point(11, dataStart);
         this.container.addChild(this._dataDisplay);
 
         this._sequencesView = new SequenceStringListView(
             this._fontType, this._fontSize, true, this._fontSize, this._lineHeight
         );
-        this._sequencesView.position = new Point(0, DataCol.DATA_H);
+        this._sequencesView.position = new Point(0, dataStart);
         this.container.addChild(this._sequencesView);
 
-        this._label = new GameButton().label(this.category, 14);
+        this._label = new GameButton().label(this.category, 14, false);
         this._label.display.position = new Point(11, 7);
         this.addObject(this._label, this.container);
 
@@ -75,44 +82,44 @@ export default class DataCol extends ContainerObject {
         const TEXT_INPUT_SIZE = 13;
 
         if (this._dataType === DesignBrowserDataType.STRING) {
-            this._filterField1 = new TextInputObject(
-                TEXT_INPUT_SIZE, this._dataWidth - 22
-            ).showFakeTextInputWhenNotFocused();
+            this._filterField1 = new TextInputObject({
+                fontSize: TEXT_INPUT_SIZE,
+                width: this._dataWidth - 22,
+                placeholder: 'Search',
+                bgColor: theme.colors.filterBackground,
+                borderColor: theme.colors.filterBorder
+            }).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
-            this._filterField1.display.position = new Point(11, 54);
+            this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
             this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
-
-            this._filterLabel1 = Fonts.arial('search', 14).color(0xffffff).build();
-            this._filterLabel1.position = new Point(11, 33);
-            this.container.addChild(this._filterLabel1);
         } else {
-            this._filterField1 = new TextInputObject(
-                TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5
-            ).showFakeTextInputWhenNotFocused();
+            this._filterField1 = new TextInputObject({
+                fontSize: TEXT_INPUT_SIZE,
+                width: 40,
+                placeholder: 'min',
+                bgColor: theme.colors.filterBackground,
+                borderColor: theme.colors.filterBorder
+            }).showFakeTextInputWhenNotFocused();
             this._filterField1.tabIndex = -1; // prevent tab-selection
-            this._filterField1.display.position = new Point(11, 54);
+            this._filterField1.display.position = new Point(11, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField1, this.container);
 
             this._filterField1.valueChanged.connect(() => this.filtersChanged.emit());
 
-            this._filterLabel1 = Fonts.arial('min', 14).color(0xffffff).build();
-            this._filterLabel1.position = new Point(11, 33);
-            this.container.addChild(this._filterLabel1);
-
-            this._filterField2 = new TextInputObject(
-                TEXT_INPUT_SIZE, (this._dataWidth - 29) * 0.5
-            ).showFakeTextInputWhenNotFocused();
+            this._filterField2 = new TextInputObject({
+                fontSize: TEXT_INPUT_SIZE,
+                width: 40,
+                placeholder: 'max',
+                bgColor: theme.colors.filterBackground,
+                borderColor: theme.colors.filterBorder
+            }).showFakeTextInputWhenNotFocused();
             this._filterField2.tabIndex = -1; // prevent tab-selection
-            this._filterField2.display.position = new Point(11 + (this._dataWidth - 29) / 2 + 7, 54);
+            this._filterField2.display.position = new Point(11 + 40 + 12, theme.headerHeight + theme.filterPadding);
             this.addObject(this._filterField2, this.container);
 
             this._filterField2.valueChanged.connect(() => this.filtersChanged.emit());
-
-            this._filterLabel2 = Fonts.arial('max', 14).color(0xffffff).build();
-            this._filterLabel2.position = new Point((this._dataWidth - 7) / 2 + 7, 33);
-            this.container.addChild(this._filterLabel2);
         }
 
         this.updateLayout();
@@ -147,17 +154,20 @@ export default class DataCol extends ContainerObject {
     }
 
     public getMouseIndex(): [number, number] {
+        const {designBrowser: theme} = UITheme;
+        const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding / 2;
+
         let {mouseLoc} = this;
-        if (mouseLoc.y < DataCol.DATA_H) {
+        if (mouseLoc.y < dataStart) {
             return [-1, -1];
         }
 
-        let ii = int((mouseLoc.y - DataCol.DATA_H) / this._lineHeight);
+        let ii = int((mouseLoc.y - dataStart) / this._lineHeight);
         if (ii >= this._numDisplay) {
             return [-1, -1];
         }
 
-        return [ii, int(DataCol.DATA_H + (ii * this._lineHeight) - mouseLoc.y)];
+        return [ii, int(dataStart + (ii * this._lineHeight) - mouseLoc.y)];
     }
 
     public setFilter(filter1: string | undefined, filter2: string | undefined): void {
@@ -223,6 +233,7 @@ export default class DataCol extends ContainerObject {
     public setWidth(w: number): void {
         this._dataWidth = w;
         this._filterField1.width = this._dataWidth;
+        this.drawBackground();
     }
 
     // Draws grid text if it hasn't been drawn already
@@ -283,12 +294,7 @@ export default class DataCol extends ContainerObject {
 
     public set bgColor(color: number) {
         this._fillColor = color;
-
-        this._graphics.clear();
-        this._graphics.beginFill(color);
-        this._graphics.drawRect(0, 0, this._dataWidth, this._height);
-        this._graphics.endFill();
-
+        this.drawBackground();
         if (this.category === 'Sequence') {
             this._graphics.lineStyle(1, 0x92A8BB, 0.4);
             for (let ii = 0; ii < this._dataWidth / 70 + 1; ii++) {
@@ -431,10 +437,24 @@ export default class DataCol extends ContainerObject {
                 this._sequencesView.setSequences(boardData, null, this._pairsArray);
             }
 
-            this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, DataCol.DATA_H);
+            const {designBrowser: theme} = UITheme;
+            const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
+            this._sequencesView.position = new Point(11 + this._dataDisplay.width + 5, dataStart);
         } else {
             this._sequencesView.setSequences(null, null, null);
         }
+    }
+
+    private drawBackground() {
+        const {designBrowser: theme} = UITheme;
+        this._graphics.clear();
+        this._graphics.beginFill(this._fillColor);
+        this._graphics.drawRect(0, 0, this._dataWidth, this._height);
+        this._graphics.beginFill(0x043468);
+        this._graphics.drawRect(1, 1, this._dataWidth - 1, theme.headerHeight - 1);
+        this._graphics.beginFill(0x043468, 0.5);
+        this._graphics.drawRect(1, 1 + theme.headerHeight, this._dataWidth - 1, theme.filterHeight - 1);
+        this._graphics.endFill();
     }
 
     private readonly _fontType: string;
@@ -456,8 +476,6 @@ export default class DataCol extends ContainerObject {
     private _labelArrow: Graphics;
     private _filterField1: TextInputObject;
     private _filterField2: TextInputObject;
-    private _filterLabel1: Text;
-    private _filterLabel2: Text;
     private _gridNumbers: Container;
     private _offset: number = 0;
 
@@ -469,6 +487,4 @@ export default class DataCol extends ContainerObject {
     private _fillColor: number = 0;
 
     private _sequencesView: SequenceStringListView;
-
-    private static readonly DATA_H = 88;
 }

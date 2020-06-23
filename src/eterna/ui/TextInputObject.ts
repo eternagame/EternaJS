@@ -4,6 +4,15 @@ import {DOMObject, DisplayObjectPointerTarget, TextBuilder} from 'flashbang';
 import Eterna from 'eterna/Eterna';
 import Fonts from 'eterna/util/Fonts';
 
+interface TextInputObjectProps {
+    fontSize: number;
+    width?: number;
+    rows?: number;
+    placeholder?: string;
+    bgColor?: number;
+    borderColor?: number;
+}
+
 /**
  * A text input object in the DOM. Floats on top of the PIXI canvas.
  * When it loses focus, it creates a fake text input display placeholder, and hides the DOM element.
@@ -12,19 +21,21 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     public readonly valueChanged: Signal<string> = new Signal();
     public readonly keyPressed = new Signal<string>();
 
-    constructor(fontSize: number, width = 100, rows = 1) {
+    constructor(props: TextInputObjectProps) {
         super(
-            Eterna.OVERLAY_DIV_ID, rows === 1
-                ? TextInputObject.createTextInput() : TextInputObject.createTextArea(rows)
+            Eterna.OVERLAY_DIV_ID, (props.rows ?? 1) === 1
+                ? TextInputObject.createTextInput(props.placeholder)
+                : TextInputObject.createTextArea(props.rows)
         );
 
-        this._fontSize = fontSize;
-        this._rows = rows;
+        this._props = props;
+        this._fontSize = props.fontSize;
+        this._rows = props.rows ?? 1;
 
-        this.width = width;
+        this.width = props.width ?? 100;
         this.font(Fonts.ARIAL);
 
-        this._obj.style.fontSize = DOMObject.sizeToString(fontSize);
+        this._obj.style.fontSize = DOMObject.sizeToString(props.fontSize);
         this._obj.oninput = () => this.onInput();
 
         this._obj.onfocus = () => this.onFocusChanged(true);
@@ -196,9 +207,9 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         this._fakeTextInput = new Sprite();
 
         let bg = new Graphics()
-            .lineStyle(1, 0x0)
-            .beginFill(0xffffff)
-            .drawRect(0, 0, this.width, this.height)
+            .lineStyle(1, this._props.borderColor ?? 0)
+            .beginFill(this._props.bgColor ?? 0xffffff)
+            .drawRoundedRect(0, 0, this.width, this.height, 5)
             .endFill();
         this._fakeTextInput.addChild(bg);
 
@@ -240,10 +251,12 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
         return element;
     }
 
-    private static createTextInput(): HTMLInputElement {
+    private static createTextInput(placeholder?: string): HTMLInputElement {
         let element = document.createElement('input');
         element.type = 'text';
         element.title = '';
+        element.placeholder = placeholder;
+        element.className = 'dark-input';
         return element;
     }
 
@@ -255,4 +268,5 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
     private _hasFocus: boolean;
     private _fakeTextInput: Sprite | null;
     private _showFakeTextInputWhenNotFocused: boolean = false;
+    private _props: TextInputObjectProps;
 }

@@ -23,8 +23,10 @@ import Solution from 'eterna/puzzle/Solution';
 import SolutionManager from 'eterna/puzzle/SolutionManager';
 import URLButton from 'eterna/ui/URLButton';
 import int from 'eterna/util/int';
+import EternaURL from 'eterna/net/EternaURL';
+import UITheme from 'eterna/ui/UITheme';
 import VoteProcessor from './VoteProcessor';
-import ViewSolutionDialog from './ViewSolutionDialog';
+import ViewSolutionOverlay from './ViewSolutionOverlay';
 import SortOptionsDialog from './SortOptionsDialog';
 import SortOptions, {SortOrder} from './SortOptions';
 import SelectionBox from './SelectionBox';
@@ -89,31 +91,18 @@ export default class DesignBrowserMode extends GameMode {
         this._content.position = new Point(10, 86);
         this.uiLayer.addChild(this._content);
 
-        this._votesPanel = new GamePanel();
-        this.addObject(this._votesPanel, this._content);
-
-        const WMARGIN = 22;
-        const HMARGIN = 17;
-
-        // the height of a line of text in the DataCol objects
-        let lineHeight = Fonts.arial('', 14).computeLineHeight();
-
         this._votesText = new MultiStyleText('You have...', {
             default: {
-                fontFamily: Fonts.ARIAL,
-                fontSize: 12,
+                fontFamily: Fonts.STDFONT_REGULAR,
+                fontSize: 14,
                 fill: 0xffffff
             },
             bold: {
-                fontStyle: 'bold',
-                fill: 0xffcc00
+                fontStyle: 'bold'
             }
         });
-        this._votesText.position = new Point(WMARGIN, HMARGIN);
-        this._votesPanel.container.addChild(this._votesText);
-
-        this._votesPanel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
-        this._votesPanel.display.position = new Point(0, -this._votesPanel.height - 2);
+        this._votesText.position = new Point(59, 52);
+        this.uiLayer.addChild(this._votesText);
 
         this._vSlider = new SliderBar(true);
         this._vSlider.setProgress(0);
@@ -128,18 +117,11 @@ export default class DesignBrowserMode extends GameMode {
         this._dataColParent = new ContainerObject();
         this.addObject(this._dataColParent, this._content);
 
+        const {designBrowser: theme} = UITheme;
         this._firstVisSolutionIdx = 0;
-
-        this._divider1 = new DotLine(2, 0x788891);
-        this._divider1.position = new Point(5, 34);
-        this._content.addChild(this._divider1);
-
-        this._divider2 = new DotLine(2, 0x788891);
-        this._divider2.position = new Point(5, 82);
-        this._content.addChild(this._divider2);
-
-        this._gridLines = new GridLines(2, 0x4A5F73, 5 * lineHeight);
-        this._gridLines.position = new Point(10, 168);
+        this._gridLines = new GridLines(1, 0x2f93d1, 5 * theme.rowHeight);
+        const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
+        this._gridLines.position = new Point(10, dataStart);
         this._content.addChild(this._gridLines);
 
         this._maskBox = new MaskBox();
@@ -148,14 +130,17 @@ export default class DesignBrowserMode extends GameMode {
 
         this._dataColParent.display.mask = this._maskBox;
 
-        this._markerBoxes = new MarkerBoxView(0xFF0000, lineHeight);
+        this._markerBoxes = new MarkerBoxView(0xFF0000, theme.rowHeight);
         this._markerBoxes.position = new Point(7, 88);
         this._content.addChild(this._markerBoxes);
 
+        const selectionBoxParent = new Container();
+        selectionBoxParent.mask = this._maskBox;
         this._selectionBox = new SelectionBox(0xFFFFFF);
         this._selectionBox.position = new Point(7, 0);
         this._selectionBox.visible = false;
-        this._content.addChild(this._selectionBox);
+        selectionBoxParent.addChild(this._selectionBox);
+        this._content.addChild(selectionBoxParent);
 
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
         this._dataColParent.pointerDown.connect(() => this.onMouseDown());
@@ -191,67 +176,88 @@ export default class DesignBrowserMode extends GameMode {
         this._sortOptions.sortChanged.connect(() => this.reorganize(true));
 
         this._toolbarLayout = new HLayoutContainer();
-        this._content.addChild(this._toolbarLayout);
+        this.uiLayer.addChild(this._toolbarLayout);
+
+        const sortIcon = new GameButton()
+            .up(Bitmaps.BtnSort)
+            .over(Bitmaps.BtnSort)
+            .down(Bitmaps.BtnSort)
+            .tooltip('Editor sort options.');
+        this.addObject(sortIcon, this._toolbarLayout);
+        this._toolbarLayout.addHSpacer(5);
+        const sortLabel = new GameButton()
+            .label('SORT', 12, false)
+            .tooltip('Editor sort options.');
+        this.addObject(sortLabel, this._toolbarLayout);
+        sortIcon.clicked.connect(() => this.showSortDialog());
+        sortLabel.clicked.connect(() => this.showSortDialog());
+
+        this._toolbarLayout.addHSpacer(20);
+
+        const configureIcon = new GameButton()
+            .up(Bitmaps.BtnConfigure)
+            .over(Bitmaps.BtnConfigure)
+            .down(Bitmaps.BtnConfigure)
+            .tooltip('Select and reorder columns.');
+        this.addObject(configureIcon, this._toolbarLayout);
+        this._toolbarLayout.addHSpacer(5);
+        const configureButton = new GameButton()
+            .label('CONFIGURE', 12, false)
+            .tooltip('Select and reorder columns.');
+        this.addObject(configureButton, this._toolbarLayout);
+        configureIcon.clicked.connect(() => this.showCustomizeColumnOrderDialog());
+        configureButton.clicked.connect(() => this.showCustomizeColumnOrderDialog());
+
+        this._toolbarLayout.addHSpacer(20);
 
         this._letterColorButton = new GameButton()
-            .up(Bitmaps.ImgColoring)
-            .over(Bitmaps.ImgColoringOver)
-            .down(Bitmaps.ImgColoringOver)
-            .selected(Bitmaps.ImgColoringSelected)
+            .up(Bitmaps.BtnPalette)
+            .over(Bitmaps.BtnPaletteOver)
+            .down(Bitmaps.BtnPaletteOver)
+            .selected(Bitmaps.BtnPaletteSelected)
             .tooltip('Color sequences based on base colors as in the game.');
         this._letterColorButton.toggled.value = true;
         this.addObject(this._letterColorButton, this._toolbarLayout);
         this._letterColorButton.clicked.connect(() => this.setSequenceLetterColor());
 
         this._expColorButton = new GameButton()
-            .up(Bitmaps.ImgFlask)
-            .over(Bitmaps.ImgFlaskOver)
-            .down(Bitmaps.ImgFlaskOver)
-            .selected(Bitmaps.ImgFlaskSelected)
+            .up(Bitmaps.BtnFlask)
+            .over(Bitmaps.BtnFlaskOver)
+            .down(Bitmaps.BtnFlaskOver)
+            .selected(Bitmaps.BtnFlaskSelected)
             .tooltip('Color sequences based on experimental data.');
         this._expColorButton.toggled.value = false;
         this.addObject(this._expColorButton, this._toolbarLayout);
         this._expColorButton.clicked.connect(() => this.setSequenceExpColor());
 
-        this._toolbarLayout.addHSpacer(20);
-
-        let editSortBtn = new GameButton()
-            .up(Bitmaps.ImgEditSortOptions)
-            .over(Bitmaps.ImgEditSortOptionsOver)
-            .down(Bitmaps.ImgEditSortOptionsHit)
-            .tooltip('Editor sort options.');
-        this.addObject(editSortBtn, this._toolbarLayout);
-        editSortBtn.clicked.connect(() => this.showSortDialog());
-
-        this._toolbarLayout.addHSpacer(5);
-
-        this._customizeButton = new GameButton()
-            .up(Bitmaps.ImgColumns)
-            .over(Bitmaps.ImgColumnsOver)
-            .down(Bitmaps.ImgColumnsHit)
-            .tooltip('Select and reorder columns.');
-        this.addObject(this._customizeButton, this._toolbarLayout);
-        this._customizeButton.clicked.connect(() => this.showCustomizeColumnOrderDialog());
-
-        this._toolbarLayout.addHSpacer(5);
-
-        this._returnToGameButton = new GameButton()
-            .up(Bitmaps.ImgReturn)
-            .over(Bitmaps.ImgReturnOver)
-            .down(Bitmaps.ImgReturnHit)
-            .tooltip('Return to game.');
-        this.addObject(this._returnToGameButton, this._toolbarLayout);
-        this._returnToGameButton.clicked.connect(() => this.returnToGame());
+        // this._returnToGameButton = new GameButton()
+        //     .up(Bitmaps.ImgReturn)
+        //     .over(Bitmaps.ImgReturnOver)
+        //     .down(Bitmaps.ImgReturnHit)
+        //     .tooltip('Return to game.');
+        // this.addObject(this._returnToGameButton, this._toolbarLayout);
+        // this._returnToGameButton.clicked.connect(() => this.returnToGame());
 
         this._toolbarLayout.layout();
 
-        this._homeButton = GameMode.createHomeButton();
-        this._homeButton.hideWhenModeInactive();
-        this.addObject(this._homeButton, this.uiLayer);
+        const homeButton = new GameButton()
+            .up(Bitmaps.ImgHome)
+            .over(Bitmaps.ImgHome)
+            .down(Bitmaps.ImgHome);
+        homeButton.display.position = new Point(18, 10);
+        homeButton.clicked.connect(() => {
+            // TODO uncomment when mobile branch is merged
+            // if (Eterna.MOBILE_APP) {
+            //     window.frameElement.dispatchEvent(new CustomEvent('navigate', { detail: '/' }));
+            // } else {
+            window.location.href = EternaURL.createURL({page: 'lab_bench'});
+            // }
+        });
+        this.addObject(homeButton, this.uiLayer);
 
-        let puzzleIcon = new Sprite(BitmapManager.getBitmap(Bitmaps.NovaPuzzleImg));
-        puzzleIcon.position = new Point(11, 8);
-        this.uiLayer.addChild(puzzleIcon);
+        const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
+        homeArrow.position = new Point(45, 14);
+        this.uiLayer.addChild(homeArrow);
 
         let puzzleTitle = new HTMLTextObject(this._puzzle.getName(true))
             .font(Fonts.ARIAL)
@@ -263,7 +269,7 @@ export default class DesignBrowserMode extends GameMode {
         this.addObject(puzzleTitle, this.uiLayer);
         DisplayUtil.positionRelative(
             puzzleTitle.display, HAlign.LEFT, VAlign.CENTER,
-            puzzleIcon, HAlign.RIGHT, VAlign.CENTER, 3, 0
+            homeArrow, HAlign.RIGHT, VAlign.CENTER, 8, 0
         );
 
         // Refresh our data immediately, and then every 300 seconds
@@ -283,6 +289,10 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     public onMouseWheelEvent(e: WheelEvent): void {
+        const handled = this._solutionView?.container.visible && this._solutionView?.onMouseWheelEvent(e);
+        if (handled) {
+            return;
+        }
         if (!this.isDialogOrNotifShowing && e.deltaY !== 0 && this._filteredSolutions != null) {
             const progress = (this._firstVisSolutionIdx + (e.deltaY * 0.25)) / this._filteredSolutions.length;
             this._vSlider.setProgress(MathUtil.clamp(progress, 0, 1));
@@ -308,14 +318,12 @@ export default class DesignBrowserMode extends GameMode {
         this._vSlider.display.position = new Point(this.contentWidth + 5, 50);
         this._vSlider.setSize(0, this.contentHeight - 70);
 
-        this._divider1.length = this.contentWidth - 10;
-        this._divider2.length = this.contentWidth - 10;
         this._gridLines.setSize(this.contentWidth - 10, this.contentHeight - this._gridLines.position.y);
         this._maskBox.setSize(this.contentWidth - 14, this.contentHeight - 10);
         this._markerBoxes.setSize(this.contentWidth - 14, this.contentHeight - 10);
-        this._selectionBox.setSize(this.contentWidth - 14, 20);
 
-        this._toolbarLayout.position = new Point(20, this.contentHeight + 25);
+        const {designBrowser: theme} = UITheme;
+        this._selectionBox.setSize(this.contentWidth - 14, theme.rowHeight);
 
         if (this._dataCols != null) {
             for (let col of this._dataCols) {
@@ -324,8 +332,8 @@ export default class DesignBrowserMode extends GameMode {
         }
 
         DisplayUtil.positionRelativeToStage(
-            this._homeButton.display, HAlign.RIGHT, VAlign.TOP,
-            HAlign.RIGHT, VAlign.TOP, 0, 5
+            this._toolbarLayout, HAlign.RIGHT, VAlign.TOP,
+            HAlign.RIGHT, VAlign.TOP, -24, 40
         );
     }
 
@@ -333,9 +341,9 @@ export default class DesignBrowserMode extends GameMode {
         super.enter();
         this.refreshSolutions();
         const {existingPoseEditMode} = Eterna.app;
-        this._returnToGameButton.display.visible = (
-            existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
-        );
+        // this._returnToGameButton.display.visible = (
+        //     existingPoseEditMode != null && existingPoseEditMode.puzzleID === this.puzzleID
+        // );
         Eterna.chat.pushHideChat();
     }
 
@@ -451,7 +459,8 @@ export default class DesignBrowserMode extends GameMode {
             this.closeCurDialog();
         };
 
-        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty('My Votes'))
+        const myVotes = solution.getProperty('My Votes');
+        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, myVotes)
             .then((data) => {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
@@ -461,6 +470,11 @@ export default class DesignBrowserMode extends GameMode {
                     this._achievements.awardAchievements(cheevs).then(() => { /* ignore result */ });
                 }
                 cleanup();
+
+                // Toggle vote button
+                if (this._solutionView) {
+                    this._solutionView.setVoteStatus((1 - myVotes) > 0);
+                }
             })
             .catch((err) => {
                 this.showNotification(`Vote failed: ${err}`);
@@ -483,21 +497,59 @@ export default class DesignBrowserMode extends GameMode {
             return;
         }
 
-        const solution = this.getSolutionAtIndex(index + this._firstVisSolutionIdx);
-        if (solution != null) {
-            this.showSolutionDetailsDialog(solution);
-        }
+        this.showSolutionDetailsDialog(index + this._firstVisSolutionIdx);
     }
 
-    private showSolutionDetailsDialog(solution: Solution): void {
-        let dialog = this.showDialog(new ViewSolutionDialog(solution, this._puzzle, this._novote));
+    private showSolutionDetailsDialog(index: number): void {
+        const solution = this.getSolutionAtIndex(index);
+        if (!solution) {
+            return;
+        }
 
-        dialog.playClicked.connect(() => this.switchToPoseEditForSolution(solution));
-        dialog.seeResultClicked.connect(() => this.switchToFeedbackViewForSolution(solution));
-        dialog.voteClicked.connect(() => this.vote(solution));
-        dialog.sortClicked.connect(() => this.sortOnSolution(solution));
-        dialog.editClicked.connect(() => this.navigateToSolution(solution));
-        dialog.deleteClicked.connect(() => this.unpublish(solution));
+        this._currentSolutionIndex = index;
+
+        if (!this._solutionView) {
+            const switchSolution = (newIndex: number) => {
+                const newSolution = this.getSolutionAtIndex(newIndex);
+                if (newSolution != null) {
+                    this._currentSolutionIndex = newIndex;
+                    this._solutionView.showSolution(newSolution);
+                    const {designBrowser: theme} = UITheme;
+                    const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
+                    if (rowIndex >= 0) {
+                        this._selectionBox.position.y = theme.headerHeight
+                            + theme.filterHeight
+                            + rowIndex * theme.rowHeight;
+                    }
+                }
+            };
+
+            this._solutionView = new ViewSolutionOverlay({
+                solution,
+                puzzle: this._puzzle,
+                voteDisabled: this._novote,
+                onPrevious: () => switchSolution(Math.max(0, this._currentSolutionIndex - 1)),
+                onNext: () => {
+                    const nextSolutionIndex = Math.min(
+                        this._filteredSolutions.length - 1,
+                        this._currentSolutionIndex + 1
+                    );
+                    switchSolution(nextSolutionIndex);
+                }
+            });
+            this.addObject(this._solutionView, this.dialogLayer);
+
+            this._solutionView.playClicked.connect(() => this.switchToPoseEditForSolution(this._solutionView.solution));
+            this._solutionView.seeResultClicked.connect(() => {
+                this.switchToFeedbackViewForSolution(this._solutionView.solution);
+            });
+            this._solutionView.voteClicked.connect(() => this.vote(this._solutionView.solution));
+            this._solutionView.sortClicked.connect(() => this.sortOnSolution(this._solutionView.solution));
+            this._solutionView.editClicked.connect(() => this.navigateToSolution(this._solutionView.solution));
+            this._solutionView.deleteClicked.connect(() => this.unpublish(this._solutionView.solution));
+        } else {
+            this._solutionView.showSolution(solution);
+        }
     }
 
     private onMouseMove(): void {
@@ -511,7 +563,8 @@ export default class DesignBrowserMode extends GameMode {
         const [index, yOffset] = this._dataCols[0].getMouseIndex();
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
-            this._selectionBox.position = new Point(7, this._content.toLocal(Flashbang.globalMouse).y + yOffset);
+            const {designBrowser: theme} = UITheme;
+            this._selectionBox.position.y = theme.headerHeight + theme.filterHeight + index * theme.rowHeight;
         }
     }
 
@@ -661,22 +714,18 @@ export default class DesignBrowserMode extends GameMode {
         let mySolutionTitles: string[] = SolutionManager.instance.getMyCurrentSolutionTitles(round);
 
         if (!this._novote) {
-            this._votesText.text = `You have <bold>${votesLeft}</bold> votes and `
-                + `<bold>${available - mySolutionTitles.length}</bold> solution slots left.`;
+            this._votesText.text = `You have <bold>${votesLeft} votes</bold> and `
+                + `<bold>${available - mySolutionTitles.length} solution slots</bold> left.`;
         } else {
             this._votesText.text = 'This puzzle has been cleared.';
         }
-
-        const WMARGIN = 22;
-        const HMARGIN = 17;
-        this._votesPanel.setSize(this._votesText.width + 2 * WMARGIN, this._votesText.height + 2 * HMARGIN);
 
         this.reorganize(true);
     }
 
     private rebuildDataColumns(filters: DesignBrowserFilter[] | null = null): void {
-        const FONT = 'Arial';
-        const FONT_SIZE = 14;
+        const FONT = Fonts.STDFONT_REGULAR;
+        const FONT_SIZE = 12;
 
         if (this._dataCols != null) {
             for (let dataCol of this._dataCols) {
@@ -709,7 +758,7 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol(DesignBrowserDataType.STRING, category, 100, FONT, FONT_SIZE, true);
                         break;
                     case DesignCategory.VOTES:
-                        column = new DataCol(DesignBrowserDataType.NUMBER, category, 100, FONT, FONT_SIZE, true);
+                        column = new DataCol(DesignBrowserDataType.NUMBER, category, 125, FONT, FONT_SIZE, true);
                         break;
                     case DesignCategory.SYNTHESIS_SCORE:
                         column = new DataCol(DesignBrowserDataType.NUMBER, category, 170, FONT, FONT_SIZE, true);
@@ -831,11 +880,8 @@ export default class DesignBrowserMode extends GameMode {
 
             this._wholeRowWidth += col.width;
 
-            if (ii % 2 === 0) {
-                col.bgColor = 0x012034;
-            } else {
-                col.bgColor = 0x1A2F43;
-            }
+            const {designBrowser: theme} = UITheme;
+            col.bgColor = theme.colors.background;
         }
     }
 
@@ -882,8 +928,6 @@ export default class DesignBrowserMode extends GameMode {
     private readonly _initialDataFilters: DesignBrowserFilter[] | null;
     private readonly _content = new Container();
 
-    private _divider1: DotLine;
-    private _divider2: DotLine;
     private _gridLines: GridLines;
     private _maskBox: MaskBox;
 
@@ -897,19 +941,19 @@ export default class DesignBrowserMode extends GameMode {
     private _allSolutions: Solution[];
     private _filteredSolutions: Solution[];
 
-    private _homeButton: URLButton;
     private _sortOptions: SortOptions;
     private _toolbarLayout: HLayoutContainer;
-    private _customizeButton: GameButton;
-    private _returnToGameButton: GameButton;
+    // private _returnToGameButton: GameButton;
     private _letterColorButton: GameButton;
     private _expColorButton: GameButton;
     private _votesText: MultiStyleText;
-    private _votesPanel: GamePanel;
     private _selectionBox: SelectionBox;
     private _markerBoxes: MarkerBoxView;
     private _categories: DesignCategory[] | null;
     private _voteProcessor: VoteProcessor;
+
+    private _solutionView?: ViewSolutionOverlay;
+    private _currentSolutionIndex = -1;
 
     private static readonly DEFAULT_COLUMNS: DesignCategory[] = [
         DesignCategory.ID,
@@ -941,7 +985,7 @@ class MaskBox extends Graphics {
 
         this.clear();
         this.beginFill(0x18202b, 0.9);
-        this.drawRoundedRect(0, 0, this._width, this._height, 20);
+        this.drawRect(0, 0, this._width, this._height);
         this.endFill();
     }
 
