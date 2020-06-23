@@ -27,6 +27,13 @@ NOTE: If you have difficulty with this install process, especially if you are a 
 	  cd RNApuzzler
 	  git reset --hard 0b365e31d2436d426858ed70f931da4fdced2397
 	  ```
+* If you have an appropriate license (academic or commercial) granting you permission, you can clone the [EternaFold repository](https://github.com/eternagame/EternaFold) to enable the EternaFold and LinearFoldE folders:
+    - you can obtain a working revision via:
+        ```sh
+        git clone https://github.com/eternagame/EternaFold
+        cd EternaFold
+        git reset --hard 62fbb1ccc4c7e672a28d41ba1eef7fb796fd4f79
+        ```
 * `$ ./patch.sh`
     - This applies the patchfiles with eterna's modifications (eg, for getting substructure energies and some energetic
     modifications) to the energy libraries.

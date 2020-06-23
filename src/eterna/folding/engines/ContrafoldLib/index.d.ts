@@ -54,10 +54,10 @@ declare namespace EternafoldLib {
         delete (): void;
     }
 
-    // export interface DotPlotResult {
-    //     energy: number;
-    //     probabilitiesString: string;
+    export interface DotPlotResult {
+        energy: number;
+        probabilitiesString: string;
 
-    //     delete (): void;
-    // }
+        delete (): void;
+    }
 }

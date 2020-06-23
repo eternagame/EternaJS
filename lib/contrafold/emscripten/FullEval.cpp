@@ -77,8 +77,8 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamm
     inference_engine.LoadSequence(sstruct);
 
     std::vector<float> w;
-    const std::vector<RealT> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
-    inference_engine.LoadValues(w * shared.log_base);
+    // const std::vector<RealT> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
+    // inference_engine.LoadValues(w * shared.log_base);
     w = GetDefaultComplementaryValues<float>();
     inference_engine.LoadValues(w);// * 2.71);
 

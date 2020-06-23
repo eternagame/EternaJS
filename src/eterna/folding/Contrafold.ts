@@ -4,27 +4,26 @@ import EPars from 'eterna/EPars';
 import EmscriptenUtil from 'eterna/emscripten/EmscriptenUtil';
 import Utility from 'eterna/util/Utility';
 import RNALayout from 'eterna/pose2D/RNALayout';
-import * as EternafoldLib from './engines/EternafoldLib';
-import {FullEvalResult, FullFoldResult} from './engines/EternafoldLib';
+import * as ContrafoldLib from './engines/ContrafoldLib';
+import {DotPlotResult, FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
 
-export default class EternaFold extends Folder {
-    public static readonly NAME: string = 'EternaFold';
+export default class ContraFold extends Folder {
+    public static readonly NAME: string = 'ContraFold';
 
     /**
-     * Asynchronously creates a new instance of the Eternafold folder.
-     * @returns {Promise<EternaFold>}
+     * Asynchronously creates a new instance of the ContraFold folder.
+     * @returns {Promise<ContraFold>}
      */
-    public static create(): Promise<EternaFold> | null {
-        return import('engines-bin/eternafold')
+    public static create(): Promise<ContraFold> {
+        return import('engines-bin/contrafold')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new EternaFold(program))
-            .catch((err) => null);
+            .then((program: any) => new ContraFold(program));
     }
 
-    private constructor(lib: EternafoldLib) {
+    private constructor(lib: ContrafoldLib) {
         super();
         this._lib = lib;
     }
@@ -85,7 +84,7 @@ export default class EternaFold extends Folder {
     // }
 
     public get name(): string {
-        return EternaFold.NAME;
+        return ContraFold.NAME;
     }
 
     public get isFunctional(): boolean {
@@ -100,8 +99,8 @@ export default class EternaFold extends Folder {
         seq: number[],
         pairs: number[],
         pseudoknotted: boolean = false,
-        temp: number = 37, outNodes:
-        number[] = null
+        temp: number = 37,
+        outNodes: number[] = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -182,7 +181,7 @@ export default class EternaFold extends Folder {
         desiredPairs: string = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
-        gamma: number = 0.7
+        gamma: number = 6.0
     ): number[] {
         let key: any = {
             primitive: 'fold',
@@ -397,7 +396,7 @@ export default class EternaFold extends Folder {
         seq: number[],
         structStr: string = null,
         temp: number = 37,
-        gamma: number = 6.0
+        gamma: number = 0.7
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
         let result: FullFoldResult;
@@ -528,7 +527,7 @@ export default class EternaFold extends Folder {
     //     return bestPairs;
     // }
 
-    private readonly _lib: EternafoldLib;
+    private readonly _lib: ContrafoldLib;
 }
 
 interface FullEvalCache {

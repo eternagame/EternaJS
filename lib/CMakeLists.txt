@@ -6,3 +6,8 @@ add_subdirectory(LinearFold)
 add_subdirectory(NUPACK)
 add_subdirectory(contrafold)
 add_subdirectory(RNApuzzler)
+
+# Will only work if you can, in fact, clone EternaFold
+if (EXISTS "EternaFold/")
+	add_subdirectory(EternaFold)
+endif()
