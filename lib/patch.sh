@@ -67,7 +67,7 @@ pushd contrafold
 pushd contrafold/src/
 perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomplementary contrafold.params.profile
 popd
-patch -t -p0 < contrafold-eterna.patch
+patch -t -p0 --forward < contrafold-eterna.patch
 popd
 
 ### EternaFold

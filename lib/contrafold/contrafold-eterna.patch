@@ -76,14 +76,6 @@ diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.c
  // SStruct::AnalyzeFormat()
  //
  // Determine file format.
-@@ -391,6 +422,7 @@
-     std::vector<int> mapping(parens.length(), UNKNOWN);
-     std::vector<int> stack;
-    
-+    std::cout << parens << std::endl;
-     Assert(parens[0] == '@', "Invalid parenthesized string.");
-     for (int i = 1; i < int(parens.length()); i++)
-     {
 diff -X .gitignore -ur contrafold_stock/src/SStruct.hpp contrafold/src/SStruct.hpp
 --- contrafold_stock/src/SStruct.hpp	2020-03-27 14:51:42.090266506 -0400
 +++ contrafold/src/SStruct.hpp	2020-03-25 16:42:30.228287230 -0400
