@@ -9,7 +9,7 @@
 #include "../EternaFold/src/Defaults.ipp"
 #include "../EternaFold/src/InferenceEngine.hpp"
 #include "../EternaFold/src/ParameterManager.ipp"
-#include "../nnfe_eval.h"
+#include "nnfe_eval.h"
 
 static FullEvalResult* gEvalResult = NULL;
 

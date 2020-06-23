@@ -48,7 +48,7 @@ add_executable(eternafold
         EternaFold/src/SparseMatrix.ipp
         EternaFold/src/SubgradientMethod.ipp
         EternaFold/src/Utilities.ipp
-		nnfe_eval.cpp
+		emscripten/nnfe_eval.cpp
 	#contrafold/src/ParameterManager.hpp
         emscripten/Bindings.cpp
         emscripten/FullEval.cpp

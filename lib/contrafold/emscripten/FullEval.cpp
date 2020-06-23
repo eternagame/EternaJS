@@ -9,7 +9,7 @@
 #include "../contrafold/src/Defaults.ipp"
 #include "../contrafold/src/InferenceEngine.hpp"
 #include "../contrafold/src/ParameterManager.ipp"
-#include "../contrafold/src/nnfe_eval.h"
+#include "nnfe_eval.h"
 
 static FullEvalResult* gEvalResult = NULL;
 
