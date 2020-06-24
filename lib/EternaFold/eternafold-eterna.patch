@@ -1,332 +1,18 @@
-Only in EternaFold/src: EternaFold
-Only in EternaFold/src: Contrafold.cpp.orig
-Only in EternaFold/src: Contrafold.o
-Only in EternaFold/src: Defaults.ipp
-Only in EternaFold/src: FileDescription.o
-diff -X .gitignore -ur EternaFold_stock/src/InferenceEngine.ipp EternaFold/src/InferenceEngine.ipp
---- EternaFold_stock/src/InferenceEngine.ipp	2020-03-27 14:51:42.086266204 -0400
-+++ EternaFold/src/InferenceEngine.ipp	2020-03-25 16:42:30.228287230 -0400
-@@ -2,6 +2,9 @@
- // InferenceEngine.ipp
- //////////////////////////////////////////////////////////////////////
+diff -X .gitignore -ur EternaFold_stock/src/InferenceEngine.hpp EternaFold/src/InferenceEngine.hpp
+--- EternaFold_stock/src/InferenceEngine.hpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/InferenceEngine.hpp	2020-06-24 14:49:55.466536784 -0400
+@@ -21,7 +21,7 @@
+ template<class RealT>
+ class InferenceEngine
+ {
+-    static const double DATA_LOW_THRESH = 1e-7;  // used for the data so that log is not -Inf
++    constexpr static const double DATA_LOW_THRESH = 1e-7;  // used for the data so that log is not -Inf
  
-+/* for AS3 */
-+void (*eos_cb)(int index, int fe);
-+
- //////////////////////////////////////////////////////////////////////
- // Wrapper macros for certain model features.
- //////////////////////////////////////////////////////////////////////
-@@ -1372,7 +1375,8 @@
-                 CountBasePair(i+1,j-1,reverse_sums[(i+j)*L+j-i].second);
-                 if (allow_paired[offset[i]+j])
-                 {
--                    CountHelixStacking(i,j,reverse_sums[(i+j)*L+j-i].second);
-+                    CountHelixStacking(i,j,reverse_sums[(i+j)*L+j-i].second);			
-+                    // if (eos_cb) (*eos_cb)(i, floor(.5 + reverse_sums[(i+j)*L+j-i].second * 100.));
-                 }
-                 else
-                 {
-@@ -1766,6 +1770,25 @@
-     // we allow i to be as large as L and j to be as small as 0.
-     
-     Assert(0 < i && i <= L && 0 <= j && j < L, "Invalid indices.");
-+    
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if PARAMS_HELIX_CLOSING
-+// #if PROFILE
-+//         + profile_score_helix_closing[i*(L+1)+j].first
-+// #else                                          
-+//         + score_helix_closing[s[i]][s[j+1]].first
-+// #endif
-+// #endif
-+// #if PARAMS_DANGLE
-+// #if PROFILE
-+//         + (i < L ? profile_score_dangle_left[i*(L+1)+j].first : RealT(0))
-+//         + (j > 0 ? profile_score_dangle_right[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (i < L ? score_dangle_left[s[i]][s[j+1]][s[i+1]].first : RealT(0))
-+//         + (j > 0 ? score_dangle_right[s[i]][s[j+1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100.));
- 
-     return
-         RealT(0)
-@@ -1793,6 +1816,8 @@
- {
-     Assert(0 < i && i <= L && 0 <= j && j < L, "Invalid indices.");
-     
-+    //AMW
-+
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-     profile_score_helix_closing[i*(L+1)+j].second += value;
-@@ -1843,6 +1868,23 @@
-     
-     Assert(0 < i && i < L && 0 < j && j < L, "Invalid indices.");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if PARAMS_HELIX_CLOSING
-+// #if PROFILE
-+//         + profile_score_helix_closing[i*(L+1)+j].first
-+// #else
-+//         + score_helix_closing[s[i]][s[j+1]].first
-+// #endif
-+// #endif
-+// #if PARAMS_TERMINAL_MISMATCH
-+// #if PROFILE
-+//         + profile_score_terminal_mismatch[i*(L+1)+j].first
-+// #else                                           
-+//         + score_terminal_mismatch[s[i]][s[j+1]][s[i+1]][s[j]].first
-+// #endif
-+// #endif
-+//     ) * 100 ) );
-+
-     return RealT(0)
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-@@ -1866,6 +1908,7 @@
- {
-     Assert(0 < i && i < L && 0 < j && j < L, "Invalid indices.");
-     
-+    //AMW
- #if PARAMS_HELIX_CLOSING
- #if PROFILE
-     profile_score_helix_closing[i*(L+1)+j].second += value;
-@@ -1898,6 +1941,22 @@
-     
-     Assert(0 < i && i <= L && 0 < j && j <= L && i != j, "Invalid base-pair");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + ( 0
-+// #if defined(HAMMING_LOSS)
-+//         + loss_paired[offset[i]+j]
-+// #endif
-+// #if PARAMS_BASE_PAIR
-+// #if PROFILE
-+//         + profile_score_base_pair[i*(L+1)+j].first
-+// #else
-+//         + score_base_pair[s[i]][s[j]].first
-+// #endif
-+// #endif
-+// #if PARAMS_BASE_PAIR_DIST
-+//         + cache_score_base_pair_dist[std::min(Abs(j - i), BP_DIST_LAST_THRESHOLD)].first
-+// #endif
-+//     ) * 100 ));
-+
-     return RealT(0)
- #if defined(HAMMING_LOSS)
-         + loss_paired[offset[i]+j]
-@@ -1920,6 +1979,7 @@
- {
-     Assert(0 < i && i <= L && 0 < j && j <= L && i != j, "Invalid base-pair");
-     
-+    // AMW
- #if PARAMS_BASE_PAIR
- #if PROFILE
-     profile_score_base_pair[i*(L+1)+j].second += value;
-@@ -1961,6 +2021,27 @@
-     
-     Assert(0 < i && i + C_MIN_HAIRPIN_LENGTH <= j && j < L, "Hairpin boundaries invalid.");
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ScoreUnpaired(i,j)
-+//         + ScoreJunctionB(i,j)
-+// #if PARAMS_HAIRPIN_LENGTH
-+//         + cache_score_hairpin_length[std::min(j - i, D_MAX_HAIRPIN_LENGTH)].first
-+// #endif
-+// #if PARAMS_HAIRPIN_3_NUCLEOTIDES
-+// #if PROFILE
-+//         + (j - i == 3 ? profile_score_hairpin_3_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (j - i == 3 ? score_hairpin_3_nucleotides[s[i+1]][s[i+2]][s[i+3]].first : RealT(0))
-+// #endif                                          
-+// #endif
-+// #if PARAMS_HAIRPIN_4_NUCLEOTIDES
-+// #if PROFILE
-+//         + (j - i == 4 ? profile_score_hairpin_4_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (j - i == 4 ? score_hairpin_4_nucleotides[s[i+1]][s[i+2]][s[i+3]][s[i+4]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100 ));
-+
-     return 
-         ScoreUnpaired(i,j)
-         + ScoreJunctionB(i,j)
-@@ -1989,6 +2070,7 @@
- {
-     Assert(0 < i && i + C_MIN_HAIRPIN_LENGTH <= j && j < L, "Hairpin boundaries invalid.");
-     
-+    //AMW
-     CountUnpaired(i,j,value);
-     CountJunctionB(i,j,value);
- #if PARAMS_HAIRPIN_LENGTH
-@@ -2042,6 +2124,28 @@
-     Assert(0 <= i && i + 2 * m <= j && j <= L, "Helix boundaries invalid.");
-     Assert(2 <= m && m <= D_MAX_HELIX_LENGTH, "Helix length invalid.");
-     
-+// #if FAST_HELIX_LENGTHS
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (
-+
-+//         cache_score_helix_sums[(i+j+1)*L+j-i-1].first - cache_score_helix_sums[(i+j+1)*L+j-i-m-m+1].first
-+// #if PARAMS_HELIX_LENGTH
-+//         + cache_score_helix_length[m].first
-+// #endif
-+//     ) * 100 ) );
-+// #else 
-+
-+//     RealT ret = RealT(0);
-+//     for (int k = 1; k < m; k++)
-+//         ret += ScoreHelixStacking(i+k,j-k+1) + ScoreBasePair(i+k+1,j-k);
-+    
-+// #if PARAMS_HELIX_LENGTH
-+//     ret += cache_score_helix_length[m].first;
-+// #endif
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ret) * 100 ) );
-+// #endif
-+
-+
-+
- #if FAST_HELIX_LENGTHS
-     
-     return
-@@ -2136,6 +2240,61 @@
-     Assert(l1 + l2 > 0 && l1 >= 0 && l2 >= 0 && l1 + l2 <= C_MAX_SINGLE_LENGTH, "Invalid single-branch loop size.");
- #endif
-     
-+//     if (eos_cb) (*eos_cb)(i, floor(.5 + (ScoreUnpaired(i,p)
-+//         + ScoreUnpaired(q,j)
-+// #if PARAMS_BULGE_0x1_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 1 ? profile_score_bulge_0x1_nucleotides[j].first : RealT(0))
-+//         + (l1 == 1 && l2 == 0 ? profile_score_bulge_1x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 1 ? score_bulge_0x1_nucleotides[s[j]].first : RealT(0))
-+//         + (l1 == 1 && l2 == 0 ? score_bulge_1x0_nucleotides[s[i+1]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_BULGE_0x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 2 ? profile_score_bulge_0x2_nucleotides[j].first : RealT(0))
-+//         + (l1 == 2 && l2 == 0 ? profile_score_bulge_2x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 2 ? score_bulge_0x2_nucleotides[s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 2 && l2 == 0 ? score_bulge_2x0_nucleotides[s[i+1]][s[i+2]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_BULGE_0x3_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 0 && l2 == 3 ? profile_score_bulge_0x3_nucleotides[j].first : RealT(0))
-+//         + (l1 == 3 && l2 == 0 ? profile_score_bulge_3x0_nucleotides[i].first : RealT(0))
-+// #else
-+//         + (l1 == 0 && l2 == 3 ? score_bulge_0x3_nucleotides[s[j-2]][s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 3 && l2 == 0 ? score_bulge_3x0_nucleotides[s[i+1]][s[i+2]][s[i+3]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_1x1_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 1 && l2 == 1 ? profile_score_internal_1x1_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (l1 == 1 && l2 == 1 ? score_internal_1x1_nucleotides[s[i+1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_1x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 1 && l2 == 2 ? profile_score_internal_1x2_nucleotides[i*(L+1)+j].first : RealT(0))
-+//         + (l1 == 2 && l2 == 1 ? profile_score_internal_2x1_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else
-+//         + (l1 == 1 && l2 == 2 ? score_internal_1x2_nucleotides[s[i+1]][s[j-1]][s[j]].first : RealT(0))
-+//         + (l1 == 2 && l2 == 1 ? score_internal_2x1_nucleotides[s[i+1]][s[i+2]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+// #if PARAMS_INTERNAL_2x2_NUCLEOTIDES
-+// #if PROFILE
-+//         + (l1 == 2 && l2 == 2 ? profile_score_internal_2x2_nucleotides[i*(L+1)+j].first : RealT(0))
-+// #else                                                                   
-+//         + (l1 == 2 && l2 == 2 ? score_internal_2x2_nucleotides[s[i+1]][s[i+2]][s[j-1]][s[j]].first : RealT(0))
-+// #endif
-+// #endif
-+//     ) * 100 ) );
-+
-+
-     return 
-         ScoreUnpaired(i,p)
-         + ScoreUnpaired(q,j)
-@@ -2297,6 +2456,13 @@
-     Assert(0 < i && i <= p && p + 2 <= q && q <= j && j < L, "Single-branch loop boundaries invalid.");
-     Assert(l1 + l2 > 0 && l1 >= 0 && l2 >= 0 && l1 + l2 <= C_MAX_SINGLE_LENGTH, "Invalid single-branch loop size.");
-     
-+    // if (eos_cb) (*eos_cb)(i, floor(.5 + (cache_score_single[l1][l2].first
-+    //     + ScoreBasePair(p+1,q)
-+    //     + ScoreJunctionB(i,j) 
-+    //     + ScoreJunctionB(q,p)
-+    //     + ScoreSingleNucleotides(i,j,p,q)) * 100 ) );
-+
-+
-     return 
-         cache_score_single[l1][l2].first
-         + ScoreBasePair(p+1,q)
-@@ -3300,6 +3466,7 @@
-                 Fast_LogPlusEquals(sum_i, FM2i + ScoreJunctionA(i,j) + ScoreMultiPaired() + ScoreMultiBase());
-                 
-                 FNi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FE[i,j] = optimal energy for substructure between positions
-@@ -3327,6 +3494,7 @@
-                 Fast_LogPlusEquals(sum_i, FNi[offset[i]+j]);
-                 
-                 FEi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FC[i,j] = optimal energy for substructure between positions
-@@ -3366,6 +3534,7 @@
-                 }
-                 
-                 FCi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
- #else
-@@ -3441,6 +3610,7 @@
-                 Fast_LogPlusEquals(sum_i, FM2i + ScoreJunctionA(i,j) + ScoreMultiPaired() + ScoreMultiBase());
-                 
-                 FCi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
- #endif
-@@ -3471,6 +3641,7 @@
-                     Fast_LogPlusEquals(sum_i, FM1i[offset[i+1]+j] + ScoreMultiUnpaired(i+1));
-                 
-                 FM1i[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-             
-             // FM[i,j] = optimal energy for substructure belonging to a
-@@ -3502,6 +3673,7 @@
-                 Fast_LogPlusEquals(sum_i, FM1i[offset[i]+j]);
-                 
-                 FMi[offset[i]+j] = sum_i;
-+                if (eos_cb) (*eos_cb)(i, floor(0.5 + sum_i * 100));
-             }
-         }
-     }
-@@ -3530,6 +3702,7 @@
-                 Fast_LogPlusEquals(sum_i, F5i[k] + FCi[offset[k+1]+j-1] + ScoreExternalPaired() + ScoreBasePair(k+1,j) + ScoreJunctionA(j,k));
-         
-         F5i[j] = sum_i;
-+        if (eos_cb) (*eos_cb)(j, floor(0.5 + sum_i * 100));
-     }
- 
- #if SHOW_TIMINGS
-Only in EternaFold/src: InferenceEngine.ipp.orig
-Only in EternaFold/src: LBFGS.ipp.orig
-Only in EternaFold/src: Options.o
+     const bool allow_noncomplementary;
+     unsigned char char_mapping[256];
 diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/ParameterManager.ipp
---- EternaFold_stock/src/ParameterManager.ipp	2020-03-27 14:51:42.090266506 -0400
-+++ EternaFold/src/ParameterManager.ipp	2020-03-25 16:42:30.228287230 -0400
+--- EternaFold_stock/src/ParameterManager.ipp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/ParameterManager.ipp	2020-06-24 14:49:05.852798996 -0400
 @@ -1,8 +1,13 @@
 +#pragma once
 +
@@ -334,7 +20,7 @@ diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/
  // ParameterManager.ipp
  //////////////////////////////////////////////////////////////////////
  
--#include "ParameterManager.hpp"
+-//#include "ParameterManager.hpp"
 +#ifndef PARAMETERMANAGER_IPP
 +#define PARAMETERMANAGER_IPP
 +
@@ -342,7 +28,7 @@ diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/
  
  //////////////////////////////////////////////////////////////////////
  // ParameterGroup::ParameterGroup()
-@@ -266,3 +271,5 @@
+@@ -268,3 +273,5 @@
      if (iter == physical_to_logical.end()) Error("Request for unknown physical parameter.");
      return iter->second;
  }
@@ -350,12 +36,10 @@ diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/
 +#endif
 \ No newline at end of file
 Only in EternaFold/src: ParameterManager.ipp.orig
-Only in EternaFold/src: score_prediction
-Only in EternaFold/src: ScorePrediction.o
 diff -X .gitignore -ur EternaFold_stock/src/SStruct.cpp EternaFold/src/SStruct.cpp
---- EternaFold_stock/src/SStruct.cpp	2020-03-27 14:51:42.086266204 -0400
-+++ EternaFold/src/SStruct.cpp	2020-03-27 14:18:34.295403138 -0400
-@@ -61,6 +61,37 @@
+--- EternaFold_stock/src/SStruct.cpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/SStruct.cpp	2020-06-24 14:49:05.852798996 -0400
+@@ -101,6 +101,37 @@
  }
  
  //////////////////////////////////////////////////////////////////////
@@ -393,20 +77,10 @@ diff -X .gitignore -ur EternaFold_stock/src/SStruct.cpp EternaFold/src/SStruct.c
  // SStruct::AnalyzeFormat()
  //
  // Determine file format.
-@@ -391,6 +422,7 @@
-     std::vector<int> mapping(parens.length(), UNKNOWN);
-     std::vector<int> stack;
-    
-+    std::cout << parens << std::endl;
-     Assert(parens[0] == '@', "Invalid parenthesized string.");
-     for (int i = 1; i < int(parens.length()); i++)
-     {
-Only in EternaFold/src: SStruct.cpp.orig
-Only in EternaFold/src: SStruct.cpp.rej
 diff -X .gitignore -ur EternaFold_stock/src/SStruct.hpp EternaFold/src/SStruct.hpp
---- EternaFold_stock/src/SStruct.hpp	2020-03-27 14:51:42.090266506 -0400
-+++ EternaFold/src/SStruct.hpp	2020-03-25 16:42:30.228287230 -0400
-@@ -40,9 +40,11 @@
+--- EternaFold_stock/src/SStruct.hpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/SStruct.hpp	2020-06-24 14:49:05.852798996 -0400
+@@ -52,9 +52,11 @@
      std::string FilterSequence(std::string sequence) const;
      std::string FilterParens(std::string sequence) const;
  
@@ -419,17 +93,14 @@ diff -X .gitignore -ur EternaFold_stock/src/SStruct.hpp EternaFold/src/SStruct.h
      // check that a (possibly pseudoknotted) mapping is valid
      void ValidateMapping(const std::vector<int> &mapping) const;
 Only in EternaFold/src: SStruct.hpp.orig
-Only in EternaFold/src: SStruct.o
 diff -X .gitignore -ur EternaFold_stock/src/Utilities.cpp EternaFold/src/Utilities.cpp
---- EternaFold_stock/src/Utilities.cpp	2020-03-27 14:51:42.090266506 -0400
-+++ EternaFold/src/Utilities.cpp	2020-03-25 16:42:30.228287230 -0400
+--- EternaFold_stock/src/Utilities.cpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/Utilities.cpp	2020-06-24 14:49:05.852798996 -0400
 @@ -2,6 +2,7 @@
  // Utilities.cpp
  //////////////////////////////////////////////////////////////////////
  
 +#include <limits.h>
  #include "Utilities.hpp"
+ #include <unistd.h>
  
- bool toggle_error = false;
-Only in EternaFold/src: Utilities.cpp.orig
-Only in EternaFold/src: Utilities.o
