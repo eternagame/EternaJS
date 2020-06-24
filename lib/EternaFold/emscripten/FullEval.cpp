@@ -129,10 +129,8 @@ FullFoldResult* FullFoldDefault (const std::string& seqString, double const gamm
 
     std::vector<float> w;
     // alter for eternafold
-    w = GetDefaultComplementaryValues<float>();
-        // const std::vector<RealT> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
+    parameter_manager.ReadFromFile("EternaFoldParams.v1", w);
     inference_engine.LoadValues(w);// * 2.71);
-    // const std::vector<float> w(shared.w, shared.w + parameter_manager.GetNumLogicalParameters());
 
 
     // MEA
