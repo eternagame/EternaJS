@@ -1,6 +1,18 @@
+diff -X .gitignore -ur contrafold_stock/src/Config.hpp contrafold/src/Config.hpp
+--- contrafold_stock/src/Config.hpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/Config.hpp	2020-06-24 19:56:42.963117903 -0400
+@@ -209,7 +209,7 @@
+ // (F) Miscellaneous model constants
+ //////////////////////////////////////////////////////////////////////
+ 
+-const int C_MIN_HAIRPIN_LENGTH = 0;
++const int C_MIN_HAIRPIN_LENGTH = 3;
+ const int C_MAX_SINGLE_LENGTH = 30;
+ 
+ const int D_MAX_HAIRPIN_LENGTH = 30;
 diff -X .gitignore -ur contrafold_stock/src/LBFGS.ipp contrafold/src/LBFGS.ipp
---- contrafold_stock/src/LBFGS.ipp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/LBFGS.ipp	2020-03-25 16:42:30.228287230 -0400
+--- contrafold_stock/src/LBFGS.ipp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/LBFGS.ipp	2020-06-24 19:56:42.959118079 -0400
 @@ -107,7 +107,7 @@
  
          // perform line search, update f, and take step
@@ -11,8 +23,8 @@ diff -X .gitignore -ur contrafold_stock/src/LBFGS.ipp contrafold/src/LBFGS.ipp
                                   Real(0), std::min(Real(10), MAX_STEP_NORM / std::max(Real(1), Norm(d))));
          
 diff -X .gitignore -ur contrafold_stock/src/ParameterManager.ipp contrafold/src/ParameterManager.ipp
---- contrafold_stock/src/ParameterManager.ipp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/ParameterManager.ipp	2020-03-25 16:42:30.228287230 -0400
+--- contrafold_stock/src/ParameterManager.ipp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/ParameterManager.ipp	2020-06-24 19:56:42.955118255 -0400
 @@ -1,8 +1,13 @@
 +#pragma once
 +
@@ -36,8 +48,8 @@ diff -X .gitignore -ur contrafold_stock/src/ParameterManager.ipp contrafold/src/
 +#endif
 \ No newline at end of file
 diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.cpp
---- contrafold_stock/src/SStruct.cpp	2020-03-27 14:51:42.086266204 -0400
-+++ contrafold/src/SStruct.cpp	2020-03-27 14:18:34.295403138 -0400
+--- contrafold_stock/src/SStruct.cpp	2008-08-13 20:08:30.000000000 -0400
++++ contrafold/src/SStruct.cpp	2020-06-24 19:56:42.955118255 -0400
 @@ -61,6 +61,37 @@
  }
  
@@ -77,8 +89,8 @@ diff -X .gitignore -ur contrafold_stock/src/SStruct.cpp contrafold/src/SStruct.c
  //
  // Determine file format.
 diff -X .gitignore -ur contrafold_stock/src/SStruct.hpp contrafold/src/SStruct.hpp
---- contrafold_stock/src/SStruct.hpp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/SStruct.hpp	2020-03-25 16:42:30.228287230 -0400
+--- contrafold_stock/src/SStruct.hpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/SStruct.hpp	2020-06-24 19:56:42.955118255 -0400
 @@ -40,9 +40,11 @@
      std::string FilterSequence(std::string sequence) const;
      std::string FilterParens(std::string sequence) const;
@@ -92,8 +104,8 @@ diff -X .gitignore -ur contrafold_stock/src/SStruct.hpp contrafold/src/SStruct.h
      // check that a (possibly pseudoknotted) mapping is valid
      void ValidateMapping(const std::vector<int> &mapping) const;
 diff -X .gitignore -ur contrafold_stock/src/Utilities.cpp contrafold/src/Utilities.cpp
---- contrafold_stock/src/Utilities.cpp	2020-03-27 14:51:42.090266506 -0400
-+++ contrafold/src/Utilities.cpp	2020-03-25 16:42:30.228287230 -0400
+--- contrafold_stock/src/Utilities.cpp	2008-08-13 20:08:31.000000000 -0400
++++ contrafold/src/Utilities.cpp	2020-06-24 19:56:42.955118255 -0400
 @@ -2,6 +2,7 @@
  // Utilities.cpp
  //////////////////////////////////////////////////////////////////////

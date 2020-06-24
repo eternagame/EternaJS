@@ -1,6 +1,18 @@
+diff -X .gitignore -ur EternaFold_stock/src/Config.hpp EternaFold/src/Config.hpp
+--- EternaFold_stock/src/Config.hpp	2020-06-24 14:51:01.315532154 -0400
++++ EternaFold/src/Config.hpp	2020-06-24 19:56:14.820353164 -0400
+@@ -210,7 +210,7 @@
+ // (F) Miscellaneous model constants
+ //////////////////////////////////////////////////////////////////////
+ 
+-const int C_MIN_HAIRPIN_LENGTH = 0;
++const int C_MIN_HAIRPIN_LENGTH = 3;
+ const int C_MAX_SINGLE_LENGTH = 30;
+ 
+ const int D_MAX_HAIRPIN_LENGTH = 30;
 diff -X .gitignore -ur EternaFold_stock/src/InferenceEngine.hpp EternaFold/src/InferenceEngine.hpp
---- EternaFold_stock/src/InferenceEngine.hpp	2020-06-24 14:51:01.315532154 -0400
-+++ EternaFold/src/InferenceEngine.hpp	2020-06-24 14:49:55.466536784 -0400
+--- EternaFold_stock/src/InferenceEngine.hpp	2020-06-24 19:35:52.340381905 -0400
++++ EternaFold/src/InferenceEngine.hpp	2020-06-24 14:53:36.792429721 -0400
 @@ -21,7 +21,7 @@
  template<class RealT>
  class InferenceEngine
@@ -12,7 +24,7 @@ diff -X .gitignore -ur EternaFold_stock/src/InferenceEngine.hpp EternaFold/src/I
      unsigned char char_mapping[256];
 diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/ParameterManager.ipp
 --- EternaFold_stock/src/ParameterManager.ipp	2020-06-24 14:51:01.315532154 -0400
-+++ EternaFold/src/ParameterManager.ipp	2020-06-24 14:49:05.852798996 -0400
++++ EternaFold/src/ParameterManager.ipp	2020-06-24 14:53:36.792429721 -0400
 @@ -1,8 +1,13 @@
 +#pragma once
 +
@@ -35,10 +47,10 @@ diff -X .gitignore -ur EternaFold_stock/src/ParameterManager.ipp EternaFold/src/
 +
 +#endif
 \ No newline at end of file
-Only in EternaFold/src: ParameterManager.ipp.orig
+Binary files EternaFold_stock/src/score_prediction and EternaFold/src/score_prediction differ
 diff -X .gitignore -ur EternaFold_stock/src/SStruct.cpp EternaFold/src/SStruct.cpp
 --- EternaFold_stock/src/SStruct.cpp	2020-06-24 14:51:01.315532154 -0400
-+++ EternaFold/src/SStruct.cpp	2020-06-24 14:49:05.852798996 -0400
++++ EternaFold/src/SStruct.cpp	2020-06-24 14:53:36.792429721 -0400
 @@ -101,6 +101,37 @@
  }
  
@@ -79,7 +91,7 @@ diff -X .gitignore -ur EternaFold_stock/src/SStruct.cpp EternaFold/src/SStruct.c
  // Determine file format.
 diff -X .gitignore -ur EternaFold_stock/src/SStruct.hpp EternaFold/src/SStruct.hpp
 --- EternaFold_stock/src/SStruct.hpp	2020-06-24 14:51:01.315532154 -0400
-+++ EternaFold/src/SStruct.hpp	2020-06-24 14:49:05.852798996 -0400
++++ EternaFold/src/SStruct.hpp	2020-06-24 14:53:36.792429721 -0400
 @@ -52,9 +52,11 @@
      std::string FilterSequence(std::string sequence) const;
      std::string FilterParens(std::string sequence) const;
@@ -92,10 +104,10 @@ diff -X .gitignore -ur EternaFold_stock/src/SStruct.hpp EternaFold/src/SStruct.h
  
      // check that a (possibly pseudoknotted) mapping is valid
      void ValidateMapping(const std::vector<int> &mapping) const;
-Only in EternaFold/src: SStruct.hpp.orig
+Binary files EternaFold_stock/src/SStruct.o and EternaFold/src/SStruct.o differ
 diff -X .gitignore -ur EternaFold_stock/src/Utilities.cpp EternaFold/src/Utilities.cpp
 --- EternaFold_stock/src/Utilities.cpp	2020-06-24 14:51:01.315532154 -0400
-+++ EternaFold/src/Utilities.cpp	2020-06-24 14:49:05.852798996 -0400
++++ EternaFold/src/Utilities.cpp	2020-06-24 14:53:36.792429721 -0400
 @@ -2,6 +2,7 @@
  // Utilities.cpp
  //////////////////////////////////////////////////////////////////////
