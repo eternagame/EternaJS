@@ -73,12 +73,9 @@ popd
 ### EternaFold
 ##############
 ## This is how the patch file was created.
-## diff -X .gitignore -ur contrafold_stock contrafold > contrafold-eterna.patch
+## diff -X .gitignore -ur EternaFold_stock EternaFold > eternafold-eterna.patch
 
-# With your fresh download, which untars into contrafold/...
+# With your fresh git checkout in EternaFold/EternaFold/...
 pushd EternaFold 
-#pushd EternaFold/src/
-#perl MakeDefaults.pl contrafold.params.complementary contrafold.params.noncomplementary contrafold.params.profile
-#popd
 patch -t -p0 < eternafold-eterna.patch
 popd
