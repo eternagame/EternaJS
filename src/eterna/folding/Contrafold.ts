@@ -17,10 +17,11 @@ export default class ContraFold extends Folder {
      * Asynchronously creates a new instance of the ContraFold folder.
      * @returns {Promise<ContraFold>}
      */
-    public static create(): Promise<ContraFold> {
+    public static create(): Promise<ContraFold> | null {
         return import('engines-bin/contrafold')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new ContraFold(program));
+            .then((program: any) => new ContraFold(program))
+            .catch((err) => null);
     }
 
     private constructor(lib: ContrafoldLib) {

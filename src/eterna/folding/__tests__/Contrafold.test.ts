@@ -7,7 +7,7 @@ function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null
     return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
 }
 
-function CreateFolder(type: any): Promise<Folder> {
+function CreateFolder(type: any): Promise<Folder> | null {
     return type.create();
 }
 

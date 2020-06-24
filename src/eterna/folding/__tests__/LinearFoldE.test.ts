@@ -7,12 +7,15 @@ function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null
     return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
 }
 
-function CreateFolder(type: any): Promise<Folder> {
-    return type.create();
+function CreateFolder(type: any): Promise<Folder | null> {
+	return type.create();
 }
 
 test('linearfoldE:MFETests', () => {
     return expect(CreateFolder(LinearFoldE).then((folder) => {
+		if (folder === null) {
+			return;
+		}
         let expectedFE: number[] = [
             -837,
             -45,
