@@ -150,6 +150,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._strandLabel.display.visible = false;
         this.addObject(this._strandLabel, this.container);
 
+        this.pointerMove.connect((p) => this.onMouseMoved(p.data.global));
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.callStartMousedownCallback(e));
         this.pointerOut.connect(() => this.onMouseOut());
 
@@ -589,7 +590,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public onMouseMoved(point: Point): void {
-        Assert.assertIsDefined(Flashbang.globalMouse);
         if (!this._poseField.containsPoint(point.x, point.y)) {
             this.onMouseOut();
             return;
