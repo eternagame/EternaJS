@@ -51,7 +51,7 @@ FullEvalResult* FullEval (int temperature_in, const std::string& seqString, cons
     gEvalResult = result; // set the collecting array
     eos_cb = _eos_cb; // activate the callback
 
-    printf("struct string: %s\n", structString.c_str());
+    // printf("struct string: %s\n", structString.c_str());
     energy = eval(seqString, structString, false) / -100.0;
 
     // clean up
