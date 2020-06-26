@@ -308,6 +308,7 @@ export default class Bitmaps {
     public static readonly ImgBaseMarker: string = require('assets/UI/base-marker-btn.png');
     public static readonly ImgMagicGlue: string = require('assets/UI/magic-glue-btn.png');
     public static readonly ImgToolbarArrow: string = require('assets/UI/toolbar-selection-arrow.png');
+    public static readonly ImgRankBubble: string = require('assets/UI/mission/rank-bubble.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

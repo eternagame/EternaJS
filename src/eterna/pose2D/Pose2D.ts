@@ -2316,6 +2316,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
         this._secondaryScoreEnergyDisplay.visible = (
             show && this._scoreFolder != null && this._secondaryScoreEnergyDisplay.hasText
         );
+        this._deltaScoreEnergyDisplay.visible = show && this._scoreFolder != null;
     }
 
     public get showExplosionFactor(): boolean {

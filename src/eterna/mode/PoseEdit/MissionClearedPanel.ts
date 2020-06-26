@@ -13,6 +13,18 @@ import RankScroll from 'eterna/rank/RankScroll';
 import Eterna from 'eterna/Eterna';
 
 export default class MissionClearedPanel extends ContainerObject {
+    private static readonly theme = {
+        margin: {
+            top: 30,
+            left: 17
+        },
+        mask: {
+            top: 50,
+            bottom: 65
+        }
+
+    };
+
     public nextButton: GameButton;
     public closeButton: GameButton;
 
@@ -41,12 +53,15 @@ export default class MissionClearedPanel extends ContainerObject {
     protected added(): void {
         super.added();
 
+        const {theme} = MissionClearedPanel;
         const panelWidth = MissionClearedPanel.calcWidth();
 
-        this._contentLayout = new VLayoutContainer(25, HAlign.LEFT);
+        this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
+        this._contentLayout.position = new Point(theme.margin.left, 0);
         this.container.addChild(this._contentLayout);
 
-        this._contentLayout.addChild(Fonts.stdBold('MISSION ACCOMPLISHED!', 14).color(0xFFCC00).build());
+        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 14).color(0xFFCC00).build();
+        this._contentLayout.addChild(title);
 
         this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
         this._contentLayout.addChild(this._infoContainer);
@@ -71,7 +86,7 @@ export default class MissionClearedPanel extends ContainerObject {
             || 'You have solved the puzzle, congratulations!';
         const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
             .font(Fonts.STDFONT_REGULAR)
-            .fontSize(14)
+            .fontSize(Flashbang.stageHeight < 512 ? 14 : 18)
             .color(0xffffff)
             .lineHeight(1.2)
             .selectable(false);
@@ -135,6 +150,10 @@ export default class MissionClearedPanel extends ContainerObject {
     }
 
     private maskPointerDown(event: interaction.InteractionEvent) {
+        const {theme} = MissionClearedPanel;
+        if (this._infoContainer.height < MissionClearedPanel.calcScrollHeight()) {
+            return;
+        }
         this._dragging = true;
         this._dragPointData = event.data;
         this._dragStartBoxY = this._infoContainer.y;
@@ -182,8 +201,8 @@ export default class MissionClearedPanel extends ContainerObject {
 
     private onResize(): void {
         this.drawBG();
-        this.drawMask();
         this.doLayout();
+        this.drawMask();
 
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(Flashbang.stageHeight);
@@ -202,10 +221,14 @@ export default class MissionClearedPanel extends ContainerObject {
     }
 
     private drawMask(): void {
+        const {theme} = MissionClearedPanel;
         this._infoMask.clear();
         this._infoMask.beginFill(0x00FF00, 0);
         this._infoMask.drawRect(
-            0, 50, MissionClearedPanel.calcWidth(), Flashbang.stageHeight - 125
+            0,
+            theme.mask.top,
+            MissionClearedPanel.calcWidth(),
+            MissionClearedPanel.calcScrollHeight()
         );
         this._infoMask.endFill();
     }
@@ -223,12 +246,6 @@ export default class MissionClearedPanel extends ContainerObject {
             -10, 15
         );
 
-        DisplayUtil.positionRelative(
-            this.nextButton.display, HAlign.CENTER, VAlign.BOTTOM,
-            this._bg, HAlign.CENTER, VAlign.BOTTOM,
-            0, -25
-        );
-
         if (this._rankScroll != null) {
             this._rankScrollHeading.setSize(310, this._tfPlayer.height + 6);
             this._rankScrollHeading.display.position = new Point(0, 0);
@@ -238,8 +255,13 @@ export default class MissionClearedPanel extends ContainerObject {
             this._rankScrollContainer.scale = new Point(rankScale, rankScale);
         }
 
+        const {theme} = MissionClearedPanel;
+        const contentHeight = (this._contentLayout.height + this._infoContainer.height);
+        this._contentLayout.position.y = Math.max(
+            (Flashbang.stageHeight - contentHeight) / 2,
+            theme.margin.top
+        );
         this._contentLayout.layout(true);
-        this._contentLayout.position = new Point(10, 15);
 
         this.nextButton.display.position = new Point(
             (panelWidth - this.nextButton.container.width) * 0.5,
@@ -253,6 +275,11 @@ export default class MissionClearedPanel extends ContainerObject {
             Flashbang.stageWidth,
             MathUtil.clamp(Flashbang.stageWidth * 0.4, 400, 600)
         );
+    }
+
+    private static calcScrollHeight() {
+        const {theme} = MissionClearedPanel;
+        return Flashbang.stageHeight - (theme.mask.top + theme.mask.bottom);
     }
 
     private static readonly PADDING_RIGHT = 80;

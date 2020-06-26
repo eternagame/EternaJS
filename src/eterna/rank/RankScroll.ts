@@ -1,4 +1,6 @@
-import {Graphics, Point, Text} from 'pixi.js';
+import {
+    Graphics, Point, Text, Sprite
+} from 'pixi.js';
 import {
     ContainerObject, LocationTask, Easing, SerialTask, VisibleTask, DelayTask,
     ParallelTask, AlphaTask, InterpolatingTask, EasingFunc
@@ -7,6 +9,8 @@ import Eterna from 'eterna/Eterna';
 import GamePanel from 'eterna/ui/GamePanel';
 import Fonts from 'eterna/util/Fonts';
 import VibrateTask from 'eterna/vfx/VibrateTask';
+import BitmapManager from 'eterna/resources/BitmapManager';
+import Bitmaps from 'eterna/resources/Bitmaps';
 import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
@@ -254,9 +258,15 @@ export default class RankScroll extends ContainerObject {
         this._playerRow.display.position = new Point(0, sizeIndicator * RankBoard.ROW_HEIGHT + 4);
         this.addObject(this._playerRow, this.container);
 
-        this._tfRankOffset = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0xffffff).bold().build();
+        this._tfRankOffset = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgRankBubble));
+        const rankText = Fonts.stdRegular(`+${this._rankOffset}`, 20).color(0).bold().build();
+        rankText.position = new Point(
+            (this._tfRankOffset.width - rankText.width) / 2,
+            (this._tfRankOffset.height - rankText.height) / 2
+        );
+        this._tfRankOffset.addChild(rankText);
         this._tfRankOffset.position = new Point(
-            -this._tfRankOffset.width - 10, sizeIndicator * RankBoard.ROW_HEIGHT + 4
+            -this._tfRankOffset.width - 2, sizeIndicator * RankBoard.ROW_HEIGHT - 12
         );
         this._tfRankOffset.visible = true;
         this.container.addChild(this._tfRankOffset);
@@ -308,12 +318,7 @@ export default class RankScroll extends ContainerObject {
 
     /** Necessary width, which excludes +N sign */
     public get realWidth(): number {
-        let rankOffsetVisible = this._tfRankOffset.visible;
-        this._tfRankOffset.visible = false;
-        let {width} = this.container;
-        this._tfRankOffset.visible = rankOffsetVisible;
-
-        return width + 100;
+        return this.container.width - this._tfRankOffset.width;
     }
 
     private readonly _allRanks: PlayerRank[];
@@ -330,7 +335,7 @@ export default class RankScroll extends ContainerObject {
     private _rankBoardBottom: RankBoard;
 
     private _playerRow: RankRowLayout;
-    private _tfRankOffset: Text;
+    private _tfRankOffset: Sprite;
 
     private _scrollAnimDuration: number;
 }
