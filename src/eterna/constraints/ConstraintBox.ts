@@ -201,12 +201,6 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         balloon.styledText = tooltipText;
         this.setMouseOverObject(balloon, toolTipContainer);
 
-        if (this._forMissionScreen) {
-            this._outline.visible = false;
-            tooltipText.apply(this._sideText);
-            this._sideText.position = new Point(0, this._req.height + 10);
-        }
-
         this._bgGraphics.visible = config.drawBG || false;
         if (this._bgGraphics.visible) {
             this._bgGraphics.clear();
@@ -228,6 +222,14 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             this._check.position = new Point(55, 55);
             this._noText.position = new Point(35, 1);
             this._stateText.position = new Point(3, 45);
+        }
+
+        if (this._forMissionScreen) {
+            this._outline.visible = false;
+            tooltipText.apply(this._sideText);
+            // Make the icon look centered with respect to the text
+            const deltaWidth = Math.max(0, this._sideText.width - this._opaqueBackdrop.width);
+            this._sideText.position = new Point(-deltaWidth / 2, this._opaqueBackdrop.height + 10);
         }
 
         if (config.stateNumber && !this._forMissionScreen) {
@@ -288,6 +290,18 @@ export default class ConstraintBox extends ContainerObject implements Enableable
         this.display.visible = value;
     }
 
+    public get width() {
+        if (this._forMissionScreen) {
+            return Math.max(this._sideText.width, this._opaqueBackdrop.width);
+        } else {
+            return this._opaqueBackdrop.width;
+        }
+    }
+
+    public get sideTextOffset() {
+        return this._sideText.position.x;
+    }
+
     /** Creates a StyledTextBuilder with the ConstraintBox's default settings */
     public static createTextStyle(): StyledTextBuilder {
         let style: StyledTextBuilder = new StyledTextBuilder({
@@ -296,7 +310,7 @@ export default class ConstraintBox extends ContainerObject implements Enableable
             fill: 0xffffff,
             letterSpacing: -0.5,
             wordWrap: true,
-            wordWrapWidth: 113
+            wordWrapWidth: UITheme.missionIntro.maxConstraintWidth
         }).addStyle('altText', {
             fontFamily: Fonts.STDFONT_MEDIUM,
             leading: 10

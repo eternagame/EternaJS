@@ -40,10 +40,14 @@ export default class MissionIntroMode extends AppMode {
             .pointerDown.filter(InputUtil.IsLeftMouse)
             .connect(() => this.play());
 
+        const playButtonBg = new Graphics()
+            .beginFill(0x54B54E)
+            .drawRoundedRect(0, 0, 120, 36, 10)
+            .endFill();
         const playButton = new GameButton()
-            .up(Bitmaps.PlayImage)
-            .over(Bitmaps.PlayImageOver)
-            .down(Bitmaps.PlayImageHit);
+            .customStyleBox(playButtonBg)
+            .label('PLAY', 16);
+
         this.addObject(playButton, this.container);
 
         Assert.assertIsDefined(this.regs);
@@ -77,15 +81,13 @@ export default class MissionIntroMode extends AppMode {
         this.addObject(nameLabel, this.container);
         nameLabel.display.position = new Point(57, 8);
 
-        this.addObject(
-            new MissionIntroPanel({
-                description: this._puzzleDescription,
-                puzzleThumbnails: this._puzzleThumbnails,
-                constraints: this._constraintBoxes,
-                customLayout: this._customLayout
-            }),
-            this.container
-        );
+        const missionIntroPanel = new MissionIntroPanel({
+            description: this._puzzleDescription,
+            puzzleThumbnails: this._puzzleThumbnails,
+            constraints: this._constraintBoxes,
+            customLayout: this._customLayout
+        });
+        this.addObject(missionIntroPanel, this.container);
 
         const updateLayout = () => {
             const {headerHeight} = UITheme.missionIntro;
@@ -109,8 +111,16 @@ export default class MissionIntroMode extends AppMode {
             background.endFill();
 
             playButton.display.position = new Point(
-                Flashbang.stageWidth - playButton.container.width - 27,
-                Flashbang.stageHeight - 27 - playButton.container.height
+                Math.min(
+                    Flashbang.stageWidth - playButton.container.width - 27,
+                    missionIntroPanel.container.x
+                        + missionIntroPanel.size.x
+                        - playButton.container.width
+                ),
+                Math.min(
+                    Flashbang.stageHeight - 27 - playButton.container.height,
+                    missionIntroPanel.container.y + missionIntroPanel.size.y
+                )
             );
         };
         updateLayout();

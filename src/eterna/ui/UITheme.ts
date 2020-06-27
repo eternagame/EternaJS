@@ -11,7 +11,8 @@ export default class UITheme {
     };
 
     public static readonly missionIntro = {
-        headerHeight: 61
+        headerHeight: 61,
+        maxConstraintWidth: 200
     };
 
     public static readonly constraints = {

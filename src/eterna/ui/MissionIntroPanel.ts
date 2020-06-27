@@ -24,6 +24,8 @@ export default class MissionIntroPanel extends ContainerObject {
         spacing: 10
     };
 
+    public get size() { return this._size; }
+
     private _props: MissionIntroPanelProps;
     private _goalsBG: Sprite;
     private _thumbnail: Sprite;
@@ -31,6 +33,7 @@ export default class MissionIntroPanel extends ContainerObject {
     private _titleLabel: PIXI.Text;
     private _descriptionLabel: MultiStyleText;
     private _thumbnailButtons?: GameButton[];
+    private _size = new Point();
 
     constructor(props: MissionIntroPanelProps) {
         super();
@@ -131,6 +134,8 @@ export default class MissionIntroPanel extends ContainerObject {
                 Math.max(Flashbang.stageWidth - width, 0) / 2,
                 headerHeight + Math.max(Flashbang.stageHeight - headerHeight - height, 0) / 2
             );
+
+            this._size = new Point(width, height);
         };
         updateLayout();
         this.regs.add(this.mode.resized.connect(updateLayout));

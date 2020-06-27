@@ -1,9 +1,10 @@
 import {ContainerObject} from 'flashbang';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import Bitmaps from 'eterna/resources/Bitmaps';
-import {Point, Sprite} from 'pixi.js';
+import {Point, Sprite, Graphics} from 'pixi.js';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import GameButton from './GameButton';
+import UITheme from './UITheme';
 
 interface MissionIntroConstraintsProps {
     constraints: ConstraintBox[];
@@ -13,7 +14,7 @@ export default class MissionIntroConstraints extends ContainerObject {
     private static theme = {
         spacing: 20,
         dotSpacing: 15,
-        maxItemsPerPage: 4
+        maxItemsPerPage: 3
     };
 
     private _props: MissionIntroConstraintsProps;
@@ -25,6 +26,7 @@ export default class MissionIntroConstraints extends ContainerObject {
     private _leftButton: GameButton;
     private _rightButton: GameButton;
     private _activePageDot: Sprite;
+    private _separators: Graphics;
 
     public get actualWidth() {
         return this._actualWidth;
@@ -35,7 +37,10 @@ export default class MissionIntroConstraints extends ContainerObject {
         this._props = props;
         const {theme} = MissionIntroConstraints;
 
-        const constraintHeight = this._props.constraints[0]?.container.height ?? 0;
+        const maxConstraintHeight = this._props.constraints?.reduce(
+            (prev, cur) => Math.max(prev, cur?.container.height),
+            0
+        ) ?? 0;
         this._leftButton = new GameButton()
             .up(Bitmaps.ImgArrowLeft)
             .over(Bitmaps.ImgArrowLeft)
@@ -54,7 +59,7 @@ export default class MissionIntroConstraints extends ContainerObject {
 
         // Page dots
         this._dots = new ContainerObject();
-        this._dots.container.position.y = constraintHeight + theme.spacing;
+        this._dots.container.position.y = maxConstraintHeight + theme.spacing;
         this.addObject(this._dots, this.container);
         this._activePageDot = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgPageActiveDot));
         this._activePageDot.position.y = this._dots.container.position.y;
@@ -69,8 +74,7 @@ export default class MissionIntroConstraints extends ContainerObject {
 
     public updateLayout(_maxWidth: number) {
         const {theme} = MissionIntroConstraints;
-
-        const constraintWidth = this._props.constraints[0]?.container.width ?? 0;
+        const {maxConstraintWidth: constraintWidth} = UITheme.missionIntro;
 
         const evaluateWidth = (numConstraints: number) => this._leftButton.container.width
                 + numConstraints * (constraintWidth + theme.spacing)
@@ -99,7 +103,6 @@ export default class MissionIntroConstraints extends ContainerObject {
         const multiPage = this._pageCount > 1;
         this._dots.container.visible = multiPage;
         this._activePageDot.visible = multiPage;
-        this._rightButton.container.position.x = this._actualWidth - this._rightButton.container.width;
 
         // Update page dots
         for (let i = 0; i < this._pageCount; ++i) {
@@ -146,17 +149,28 @@ export default class MissionIntroConstraints extends ContainerObject {
         const pageStart = this._currentPage * this._maxItemsPerPage;
         const pageEnd = (this._currentPage + 1) * this._maxItemsPerPage;
         let xWalker = this._leftButton.container.width;
+
+        let lastVisibleConstraint: ConstraintBox | null = null;
         this._props.constraints.forEach((constraint, index) => {
             const visible = index >= pageStart && index < pageEnd;
             constraint.container.visible = visible;
             if (visible) {
+                xWalker += Math.abs(constraint.sideTextOffset);
                 constraint.container.position.x = xWalker;
-                xWalker += constraint.container.width + theme.spacing;
+                xWalker += constraint.width
+                    + constraint.sideTextOffset
+                    + theme.spacing;
+                lastVisibleConstraint = constraint;
             }
         });
 
         // Update active dot position
         this._activePageDot.position.x = this._dots.container.position.x
             + this._currentPage * (this._activePageDot.width + theme.dotSpacing);
+
+        // Update right button position
+        this._rightButton.container.position.x = xWalker
+            - theme.spacing
+            + (lastVisibleConstraint?.sideTextOffset ?? 0) * 0;
     }
 }
