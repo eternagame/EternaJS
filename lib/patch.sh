@@ -77,5 +77,5 @@ popd
 
 # With your fresh git checkout in EternaFold/EternaFold/...
 pushd EternaFold 
-patch -t -p0 < eternafold-eterna.patch
+patch -t -p0 --forward < eternafold-eterna.patch
 popd
