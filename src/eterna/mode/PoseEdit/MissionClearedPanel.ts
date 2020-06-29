@@ -66,7 +66,7 @@ export default class MissionClearedPanel extends ContainerObject {
         this._widthEnforcer = new Graphics();
         this._contentLayout.addChild(this._widthEnforcer);
 
-        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 22).color(0xFFCC00).build();
+        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 20).color(0xFFCC00).build();
         this._contentLayout.addChild(title);
 
         this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
@@ -263,7 +263,7 @@ export default class MissionClearedPanel extends ContainerObject {
             this._rankScrollHeading.display.position = new Point(0, 0);
             this._rankScroll.display.position = new Point(10, 12 + this._tfPlayer.height);
 
-            const rankScale = Math.min(1, panelWidth / (400));
+            const rankScale = Math.min(1, panelWidth / (400 + 80));
             this._rankScrollContainer.scale = new Point(rankScale, rankScale);
         }
 
