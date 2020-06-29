@@ -90,12 +90,6 @@ export interface OligoDef {
     label?: string;
 }
 
-enum PaintMode {
-    Normal,
-    MarkBases,
-    MagicGlue
-}
-
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] | null = null) {
         super();
@@ -233,43 +227,13 @@ export default class PoseEditMode extends GameMode {
                 });
         });
 
-        if (this._toolbar.baseMarkerButton) {
-            this._toolbar.baseMarkerButton.clicked.connect(() => {
-                this._paintMode = this._paintMode === PaintMode.MarkBases
-                    ? PaintMode.Normal
-                    : PaintMode.MarkBases;
+        this._toolbar.baseMarkerButton.clicked.connect(() => {
+            this.setPosesColor(EPars.RNABASE_BASE_MARK);
+        });
 
-                const markBases = this._paintMode === PaintMode.MarkBases;
-                for (const pose of this._poses) {
-                    pose.markBases = markBases;
-                    pose.magicGlue = false;
-                }
-
-                const [btn1, baseMarkerArrow] = this._toolbar.baseMarkerButton.container.children;
-                const [btn2, magicGlueArrow] = this._toolbar.magicGlueButton.container.children;
-                baseMarkerArrow.visible = markBases;
-                magicGlueArrow.visible = false;
-            });
-        }
-
-        if (this._toolbar.magicGlueButton) {
-            this._toolbar.magicGlueButton.clicked.connect(() => {
-                this._paintMode = this._paintMode === PaintMode.MagicGlue
-                    ? PaintMode.Normal
-                    : PaintMode.MagicGlue;
-
-                const magicGlue = this._paintMode === PaintMode.MagicGlue;
-                for (const pose of this._poses) {
-                    pose.markBases = false;
-                    pose.magicGlue = magicGlue;
-                }
-
-                const [btn1, baseMarkerArrow] = this._toolbar.baseMarkerButton.container.children;
-                const [btn2, magicGlueArrow] = this._toolbar.magicGlueButton.container.children;
-                baseMarkerArrow.visible = false;
-                magicGlueArrow.visible = magicGlue;
-            });
-        }
+        this._toolbar.magicGlueButton.clicked.connect(() => {
+            this.setPosesColor(EPars.RNABASE_MAGIC_GLUE);
+        });
 
         // Add our docked SpecBox at the bottom of uiLayer
         this._dockedSpecBox = new SpecBox(true);
@@ -3281,8 +3245,6 @@ export default class PoseEditMode extends GameMode {
     private _submitSolutionRspData: any;
 
     private _nucleotideRangeToShow: [number, number] | null = null;
-
-    private _paintMode = PaintMode.Normal;
 
     private static readonly FOLDING_LOCK = 'Folding';
 }

@@ -42,6 +42,8 @@ export default class EPars {
     public static readonly RNABASE_SHIFT: number = 17;
     // public static readonly const RNABASE_ADD_ANNOTATION:int = 18; //Variable for adding an annotation by lullujune
     public static readonly RNABASE_CUT: number = 19;
+    public static readonly RNABASE_MAGIC_GLUE: number = 20;
+    public static readonly RNABASE_BASE_MARK: number = 21;
 
     // (almost) follows the Vienna convention for the BP array
     public static readonly FORCE_PAIRED: number = -1;

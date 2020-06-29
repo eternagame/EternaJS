@@ -24,6 +24,22 @@ export enum ToolbarType {
     FEEDBACK
 }
 
+class ToolbarButton extends GameButton {
+    added() {
+        super.added();
+        this._arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
+        this._arrow.position.x = (this.container.width - this._arrow.width) / 2;
+        this._arrow.visible = false;
+        this.container.addChild(this._arrow);
+
+        this.toggled.connectNotify((toggled) => {
+            this._arrow.visible = toggled;
+        });
+    }
+
+    private _arrow: Sprite;
+}
+
 export default class Toolbar extends ContainerObject {
     // Core
     public zoomInButton?: GameButton;
@@ -87,7 +103,15 @@ export default class Toolbar extends ContainerObject {
 
     constructor(
         type: ToolbarType,
-        {states = 1, boosters}: {states?: number; boosters?: BoostersData}
+        {
+            states = 1,
+            showGlue = false,
+            boosters
+        }: {
+            states?: number;
+            showGlue?: boolean;
+            boosters?: BoostersData;
+        }
     ) {
         super();
         this._type = type;
@@ -138,43 +162,38 @@ export default class Toolbar extends ContainerObject {
             this._content.addChild(upperToolbarLayout);
         }
 
-        this.addbaseButton = new GameButton()
+        this.addbaseButton = new ToolbarButton()
             .up(Bitmaps.ImgAddBase)
             .over(Bitmaps.ImgAddBaseOver)
             .down(Bitmaps.ImgAddBaseSelect)
-            .selected(Bitmaps.ImgAddBaseSelect)
             .hotkey(KeyCode.Digit6)
             .tooltip('Add a single base.');
 
-        this.addpairButton = new GameButton()
+        this.addpairButton = new ToolbarButton()
             .up(Bitmaps.ImgAddPair)
             .over(Bitmaps.ImgAddPairOver)
             .down(Bitmaps.ImgAddPairSelect)
-            .selected(Bitmaps.ImgAddPairSelect)
             .hotkey(KeyCode.Digit7)
             .tooltip('Add a pair.');
 
-        this.deleteButton = new GameButton()
+        this.deleteButton = new ToolbarButton()
             .up(Bitmaps.ImgErase)
             .over(Bitmaps.ImgEraseOver)
             .down(Bitmaps.ImgEraseSelect)
-            .selected(Bitmaps.ImgEraseSelect)
             .hotkey(KeyCode.Digit8)
             .tooltip('Delete a base or a pair.');
 
-        this.lockButton = new GameButton()
+        this.lockButton = new ToolbarButton()
             .up(Bitmaps.ImgLock)
             .over(Bitmaps.ImgLockOver)
             .down(Bitmaps.ImgLockSelect)
-            .selected(Bitmaps.ImgLockSelect)
             .hotkey(KeyCode.Digit9)
             .tooltip('Lock or unlock a base.');
 
-        this.moleculeButton = new GameButton()
+        this.moleculeButton = new ToolbarButton()
             .up(Bitmaps.ImgMolecule)
             .over(Bitmaps.ImgMoleculeOver)
             .down(Bitmaps.ImgMoleculeSelect)
-            .selected(Bitmaps.ImgMoleculeSelect)
             .hotkey(KeyCode.Digit0)
             .tooltip('Create or remove a molecular binding site.');
 
@@ -338,11 +357,10 @@ export default class Toolbar extends ContainerObject {
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
 
-        this.freezeButton = new GameButton()
+        this.freezeButton = new ToolbarButton()
             .up(Bitmaps.ImgFreeze)
             .over(Bitmaps.ImgFreezeOver)
             .down(Bitmaps.ImgFreezeSelected)
-            .selected(Bitmaps.ImgFreezeSelected)
             .tooltip('Frozen mode. Suspends/resumes folding engine calculations.')
             .hotkey(KeyCode.KeyF)
             .rscriptID(RScriptUIElementID.FREEZE);
@@ -373,7 +391,7 @@ export default class Toolbar extends ContainerObject {
             lowerToolbarLayout.addHSpacer(SPACE_NARROW);
         }
 
-        this.naturalButton = new GameButton()
+        this.naturalButton = new ToolbarButton()
             .up(Bitmaps.ImgNative)
             .over(Bitmaps.ImgNativeOver)
             .down(Bitmaps.ImgNativeSelected)
@@ -381,14 +399,14 @@ export default class Toolbar extends ContainerObject {
             .tooltip('Natural Mode. RNA folds into the most stable shape.')
             .rscriptID(RScriptUIElementID.TOGGLENATURAL);
 
-        this.estimateButton = new GameButton()
+        this.estimateButton = new ToolbarButton()
             .up(Bitmaps.ImgEstimate)
             .over(Bitmaps.ImgEstimateOver)
             .down(Bitmaps.ImgEstimateSelected)
             .selected(Bitmaps.ImgEstimateSelected)
             .tooltip('Estimate Mode. The game approximates how the RNA actually folded in a test tube.');
 
-        this.targetButton = new GameButton()
+        this.targetButton = new ToolbarButton()
             .up(Bitmaps.ImgTarget)
             .over(Bitmaps.ImgTargetOver)
             .down(Bitmaps.ImgTargetSelected)
@@ -406,14 +424,14 @@ export default class Toolbar extends ContainerObject {
             this.addObject(this.targetButton, lowerToolbarLayout);
         }
 
-        this.letterColorButton = new GameButton()
+        this.letterColorButton = new ToolbarButton()
             .up(Bitmaps.ImgColoring)
             .over(Bitmaps.ImgColoringOver)
             .down(Bitmaps.ImgColoringSelected)
             .selected(Bitmaps.ImgColoringSelected)
             .tooltip('Color sequences based on base colors as in the game.');
 
-        this.expColorButton = new GameButton()
+        this.expColorButton = new ToolbarButton()
             .up(Bitmaps.ImgFlask)
             .over(Bitmaps.ImgFlaskOver)
             .down(Bitmaps.ImgFlaskSelected)
@@ -436,11 +454,10 @@ export default class Toolbar extends ContainerObject {
             this._deselectAllPaintTools();
         }));
 
-        this.pairSwapButton = new GameButton()
+        this.pairSwapButton = new ToolbarButton()
             .up(Bitmaps.ImgSwap)
             .over(Bitmaps.ImgSwapOver)
             .down(Bitmaps.ImgSwapOver)
-            .selected(Bitmaps.ImgSwapSelect)
             .hotkey(KeyCode.Digit5)
             .tooltip('Swap paired bases.')
             .rscriptID(RScriptUIElementID.SWAP);
@@ -529,29 +546,29 @@ export default class Toolbar extends ContainerObject {
         }
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-        this.baseMarkerButton = new GameButton()
+        this.baseMarkerButton = new ToolbarButton()
             .up(Bitmaps.ImgBaseMarker)
             .over(Bitmaps.ImgBaseMarkerOver)
             .down(Bitmaps.ImgBaseMarker);
         this.addObject(this.baseMarkerButton, lowerToolbarLayout);
 
+        this.regs.add(this.baseMarkerButton.clicked.connect(() => {
+            this._deselectAllPaintTools();
+            this.baseMarkerButton.toggled.value = true;
+        }));
+
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
-        this.magicGlueButton = new GameButton()
+        this.magicGlueButton = new ToolbarButton()
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue);
         this.addObject(this.magicGlueButton, lowerToolbarLayout);
         lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
-        const makeArrow = () => {
-            const arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
-            arrow.position.x = (this.baseMarkerButton.container.width - arrow.width) / 2;
-            arrow.visible = false;
-            return arrow;
-        };
-
-        this.baseMarkerButton.container.addChild(makeArrow());
-        this.magicGlueButton.container.addChild(makeArrow());
+        this.regs.add(this.magicGlueButton.clicked.connect(() => {
+            this._deselectAllPaintTools();
+            this.magicGlueButton.toggled.value = true;
+        }));
 
         if (this._type === ToolbarType.PUZZLEMAKER) {
             this.submitButton.tooltip('Publish your puzzle!');
@@ -677,6 +694,8 @@ export default class Toolbar extends ContainerObject {
         this.deleteButton.toggled.value = false;
         this.lockButton.toggled.value = false;
         this.moleculeButton.toggled.value = false;
+        this.magicGlueButton.toggled.value = false;
+        this.baseMarkerButton.toggled.value = false;
 
         for (let button of this.dynPaintTools) {
             button.toggled.value = false;
