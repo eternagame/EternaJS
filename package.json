@@ -94,6 +94,6 @@
     }
   },
   "optionalDependencies": {
-    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#1000cccf49d196c4a01b952e28652296a0346481"
+    "eternajs-folding-engines": "github:eternagame/eternajs-folding-engines#c8a588bdc23b2c4e19b12c67dd95b41956d7df82"
   }
 }
