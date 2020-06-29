@@ -2838,7 +2838,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
             this._locks[seqnum] = !this._locks[seqnum];
             this._bases[seqnum].setDirty();
             this._lockUpdated = true;
-        } else if (this._mouseDownAltKey) {
+        } else if (this._mouseDownAltKey || this._currentColor === EPars.RNABASE_MAGIC_GLUE) {
             if (this.toggleDesignStruct(seqnum)) {
                 this._designStructUpdated = true;
             }
