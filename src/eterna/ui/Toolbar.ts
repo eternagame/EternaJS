@@ -25,7 +25,7 @@ export enum ToolbarType {
 }
 
 class ToolbarButton extends GameButton {
-    added() {
+    protected added() {
         super.added();
         this._arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));
         this._arrow.position.x = (this.container.width - this._arrow.width) / 2;

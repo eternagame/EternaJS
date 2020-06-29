@@ -2,7 +2,8 @@ import {
     Container, Graphics, Point, Text, interaction
 } from 'pixi.js';
 import {
-    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask, Flashbang, DisplayUtil, VAlign, Assert, MathUtil
+    ContainerObject, VLayoutContainer, HAlign, DOMObject, AlphaTask,
+    Flashbang, DisplayUtil, VAlign, Assert, MathUtil, MouseWheelListener
 } from 'flashbang';
 import GameButton from 'eterna/ui/GameButton';
 import Fonts from 'eterna/util/Fonts';
@@ -12,14 +13,14 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import RankScroll from 'eterna/rank/RankScroll';
 import Eterna from 'eterna/Eterna';
 
-export default class MissionClearedPanel extends ContainerObject {
+export default class MissionClearedPanel extends ContainerObject implements MouseWheelListener {
     private static readonly theme = {
         margin: {
             top: 30,
             left: 17
         },
         mask: {
-            top: 50,
+            top: 80,
             bottom: 76
         },
         separator: {
@@ -148,6 +149,8 @@ export default class MissionClearedPanel extends ContainerObject {
         this._separator = new Graphics();
         this.container.addChild(this._separator);
 
+        this.regs.add(this.mode.mouseWheelInput.pushListener(this));
+
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
@@ -179,12 +182,40 @@ export default class MissionClearedPanel extends ContainerObject {
     }
 
     private maskPointerMove(event: interaction.InteractionEvent) {
+        if (this._dragging) {
+            const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;
+            this.scrollTo(this._dragStartBoxY + dragRange);
+        }
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        let pxdelta: number;
+        switch (e.deltaMode) {
+            case WheelEvent.DOM_DELTA_PIXEL:
+                pxdelta = e.deltaY;
+                break;
+            case WheelEvent.DOM_DELTA_LINE:
+                // 13 -> body font size
+                pxdelta = e.deltaY * 13;
+                break;
+            case WheelEvent.DOM_DELTA_PAGE:
+                pxdelta = e.deltaY * this.display.height;
+                break;
+            default:
+                throw new Error('Unhandled scroll delta mode');
+        }
+
+        this.scrollTo(this._infoContainer.y - pxdelta);
+
+        return true;
+    }
+
+    public scrollTo(yPos: number) {
         const scrollHeight = Flashbang.stageHeight - (50 + 75);
         const containerHeight = this._infoContainer.height + 40; // Add a bit of margin
-        if (this._dragging && containerHeight > scrollHeight) {
-            const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;
+        if (containerHeight > scrollHeight) {
             this._infoContainer.y = MathUtil.clamp(
-                this._dragStartBoxY + dragRange,
+                yPos,
                 50 - (containerHeight - scrollHeight),
                 50
             );
