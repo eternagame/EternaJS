@@ -30,10 +30,12 @@ import URLButton from 'eterna/ui/URLButton';
 import Fonts from 'eterna/util/Fonts';
 import LinearFoldV from 'eterna/folding/LinearFoldV';
 import LinearFoldC from 'eterna/folding/LinearFoldC';
+import LinearFoldE from 'eterna/folding/LinearFoldE';
 import EternaFold from 'eterna/folding/Eternafold';
 import ConstraintBar from 'eterna/constraints/ConstraintBar';
 import Utility from 'eterna/util/Utility';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
+import ContraFold from 'eterna/folding/Contrafold';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import GameMode from '../GameMode';
 import SubmitPuzzleDialog, {SubmitPuzzleDetails} from './SubmitPuzzleDialog';
@@ -585,8 +587,12 @@ export default class PuzzleEditMode extends GameMode {
             paramsTitle = '[LFC]';
         } else if (this._folder.name === LinearFoldV.NAME) {
             paramsTitle = '[LFV]';
+        } else if (this._folder.name === LinearFoldE.NAME) {
+            paramsTitle = '[LFE]';
         } else if (this._folder.name === EternaFold.NAME) {
-            paramsTitle = '[ETERNA]';
+            paramsTitle = '[EFOLD]';
+        } else if (this._folder.name === ContraFold.NAME) {
+            paramsTitle = '[CONTRA]';
         } else {
             paramsTitle = '';
         }
