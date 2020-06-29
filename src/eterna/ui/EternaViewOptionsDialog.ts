@@ -206,12 +206,40 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     }
 
     private maskPointerMove(event: interaction.InteractionEvent) {
+        if (this._dragging) {
+            const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
+            this.scrollTo(this._dragStartBoxY + dragRange);
+        }
+    }
+
+    public onMouseWheelEvent(e: WheelEvent): boolean {
+        let pxdelta: number;
+        switch (e.deltaMode) {
+            case WheelEvent.DOM_DELTA_PIXEL:
+                pxdelta = e.deltaY;
+                break;
+            case WheelEvent.DOM_DELTA_LINE:
+                // 13 -> body font size
+                pxdelta = e.deltaY * 13;
+                break;
+            case WheelEvent.DOM_DELTA_PAGE:
+                pxdelta = e.deltaY * this.display.height;
+                break;
+            default:
+                throw new Error('Unhandled scroll delta mode');
+        }
+
+        this.scrollTo(this._viewLayout.y - pxdelta);
+
+        return true;
+    }
+
+    public scrollTo(yPos: number) {
         const scrollHeight = this._panelMask.height;
         const containerHeight = this._viewLayout.height + 20; // Add a bit of margin
-        if (this._dragging && containerHeight > scrollHeight) {
-            const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
+        if (containerHeight > scrollHeight) {
             this._viewLayout.y = MathUtil.clamp(
-                this._dragStartBoxY + dragRange,
+                yPos,
                 this._viewLayoutTop - (containerHeight - scrollHeight),
                 this._viewLayoutTop
             );
