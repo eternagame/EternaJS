@@ -31,10 +31,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     test(`${folderType.NAME}:snowflake`, () => {
         // expect.assertions: the async code should result in X assertions being called
         // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
-        expect.assertions(1);
+        expect.assertions(2);
         return expect(CreateFolder(folderType)
             .then((folder: any) => {
-                if (folder === null) return;
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    return;
+                }
 
                 expect(FoldSequence(folder, SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT)).toBeTruthy();
             }))
@@ -42,10 +45,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     });
 
     test(`${folderType.NAME}:emptyStructure`, () => {
-        expect.assertions(1);
+        expect.assertions(2);
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                if (folder === null) return;
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    return;
+                }
 
                 expect(FoldSequence(folder, BASIC_SEQ, '')).toEqual(BASIC_RESULT);
             }))
@@ -53,10 +59,13 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     });
 
     test(`${folderType.NAME}:cachedQuery`, () => {
-        expect.assertions(1);
+        expect.assertions(2);
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                if (folder === null) return;
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    return;
+                }
 
                 expect([
                     FoldSequence(folder, BASIC_SEQ, ''),
@@ -116,12 +125,15 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     });
 
     test(`${folderType.NAME}:get_dot_plot(simple)`, () => {
-        expect.assertions(1);
+        expect.assertions(2);
         const SEQ = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
         const STRUCT = '........................................';
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                if (folder === null) return;
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    return;
+                }
 
                 expect(folder.getDotPlot(
                     EPars.stringToSequence(SEQ),
@@ -133,7 +145,7 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
     });
 
     test(`${folderType.NAME}:get_dot_plot(complex)`, () => {
-        expect.assertions(1);
+        expect.assertions(2);
         const SEQ = 'AAAAACCCCAAAAAAAAAGGGGACCCCAAAAAAGGGGAAA';
         const STRUCT = '.....((((.........)))).((((......))))...';
 
@@ -148,7 +160,10 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
 
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                if (folder === null) return;
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    return;
+                }
                 
                 expect(folder.getDotPlot(
                     EPars.stringToSequence(SEQ),
