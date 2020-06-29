@@ -24,12 +24,15 @@ import LoadingMode from './mode/LoadingMode';
 import Vienna from './folding/Vienna';
 import Vienna2 from './folding/Vienna2';
 import NuPACK from './folding/NuPACK';
+import Contrafold from './folding/Contrafold';
+import EternaFold from './folding/Eternafold';
 import RNAFoldBasic from './folding/RNAFoldBasic';
 import FolderManager from './folding/FolderManager';
 import LayoutEngineManager from './layout/LayoutEngineManager';
 import LayoutEngine from './layout/LayoutEngine';
 import RNApuzzler from './layout/RNApuzzler';
 import LinearFoldC from './folding/LinearFoldC';
+import LinearFoldE from './folding/LinearFoldE';
 import LinearFoldV from './folding/LinearFoldV';
 import Folder from './folding/Folder';
 import RSignals from './rscript/RSignals';
@@ -477,12 +480,17 @@ export default class EternaApp extends FlashbangApp {
             Vienna2.create(),
             NuPACK.create(),
             LinearFoldC.create(),
+            LinearFoldE.create(),
             LinearFoldV.create(),
+            Contrafold.create(),
+            EternaFold.create(),
             RNAFoldBasic.create()])
-            .then((folders: Folder[]) => {
+            .then((folders: (Folder | null)[]) => {
                 log.info('Folding engines intialized');
                 for (let folder of folders) {
-                    FolderManager.instance.addFolder(folder);
+                    if (folder !== null) {
+                        FolderManager.instance.addFolder(folder);
+                    }
                 }
             });
     }

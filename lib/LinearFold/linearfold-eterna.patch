@@ -1,18 +1,6 @@
-diff -X .gitignore -ur LinearFold_stock/src/LinearFold.h LinearFold/src/LinearFold.h
---- LinearFold_stock/src/LinearFold.h	2020-06-04 13:23:22.000000000 -0400
-+++ LinearFold/src/LinearFold.h	2020-06-04 13:29:42.000000000 -0400
-@@ -110,6 +110,8 @@
-     // DecoderResult parse(std::string& seq);
-     DecoderResult parse(std::string& seq, std::vector<int>* cons);
- 
-+	void cal_PairProb(State& viterbi);
-+
- private:
-     void get_parentheses(char* result, std::string& seq);
- 
 diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/LinearFoldEval.cpp
---- LinearFold_stock/src/LinearFoldEval.cpp	2020-06-04 13:23:22.000000000 -0400
-+++ LinearFold/src/LinearFoldEval.cpp	2020-06-07 19:27:38.000000000 -0400
+--- LinearFold_stock/src/LinearFoldEval.cpp	2020-06-24 15:45:43.433567579 -0400
++++ LinearFold/src/LinearFoldEval.cpp	2020-06-23 19:53:08.557451053 -0400
 @@ -16,15 +16,34 @@
  
  using namespace std;
@@ -244,3 +232,30 @@ diff -X .gitignore -ur LinearFold_stock/src/LinearFoldEval.cpp LinearFold/src/Li
 +    return -1 * total_energy;
 +#endif
 +}
+diff -X .gitignore -ur LinearFold_stock/src/LinearFold.h LinearFold/src/LinearFold.h
+--- LinearFold_stock/src/LinearFold.h	2020-06-24 15:45:43.433567579 -0400
++++ LinearFold/src/LinearFold.h	2020-06-23 19:53:08.557451053 -0400
+@@ -110,6 +110,8 @@
+     // DecoderResult parse(std::string& seq);
+     DecoderResult parse(std::string& seq, std::vector<int>* cons);
+ 
++	void cal_PairProb(State& viterbi);
++
+ private:
+     void get_parentheses(char* result, std::string& seq);
+ 
+diff -X .gitignore -ur LinearFold_stock/src/Utils/utility.h LinearFold/src/Utils/utility.h
+--- LinearFold_stock/src/Utils/utility.h	2020-06-24 15:45:43.433567579 -0400
++++ LinearFold/src/Utils/utility.h	2020-06-24 15:44:38.496531308 -0400
+@@ -13,7 +13,11 @@
+ #include <cstring>
+ #include <assert.h>
+ 
++#ifdef le
++#include "../EternaFold/EternaFold/parameters/LinearFold/feature_weight_e.h"
++#else
+ #include "feature_weight.h"
++#endif
+ 
+ #define INF 1000000007
+ 

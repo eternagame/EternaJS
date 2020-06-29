@@ -3154,7 +3154,7 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             if (this._pseudoknotted && this._scoreFolder !== null) {
                 totalScore = Math.round(this._scoreFolder.scoreStructures(
-                    this._sequence, this._pairs, true
+                    this._sequence, EPars.getSatisfiedPairs(this._pairs, this._sequence)
                 ));
             } else {
                 for (let scoreNode of this._scoreNodes) {
