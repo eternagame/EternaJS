@@ -33,6 +33,8 @@ export enum RScriptUIElementID {
     PIP = 'PIP',
     FREEZE = 'FREEZE',
     SWITCH = 'SWITCH',
+    BASEMARKER = 'BASEMARKER',
+    MAGICGLUE = 'MAGICGLUE',
 
     OBJECTIVES = 'OBJECTIVES',
     OBJECTIVE = 'OBJECTIVE-',

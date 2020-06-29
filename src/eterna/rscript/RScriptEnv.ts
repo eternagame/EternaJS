@@ -244,6 +244,10 @@ export default class RScriptEnv extends ContainerObject {
                 return this.ui.toolbar.pairSwapButton;
             case RScriptUIElementID.PIP:
                 return this.ui.toolbar.pipButton;
+            case RScriptUIElementID.BASEMARKER:
+                return this.ui.toolbar.baseMarkerButton;
+            case RScriptUIElementID.MAGICGLUE:
+                return this.ui.toolbar.magicGlueButton;
             case RScriptUIElementID.A:
                 return this.ui.toolbar.palette.getTarget(PaletteTargetType.A);
             case RScriptUIElementID.U:
