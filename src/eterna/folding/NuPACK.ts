@@ -17,10 +17,12 @@ export default class NuPACK extends Folder {
      * Asynchronously creates a new instance of the NuPACK folder.
      * @returns {Promise<NuPACK>}
      */
-    public static create(): Promise<NuPACK> {
+    public static create(): Promise<NuPACK | null> {
+        // eslint-disable-next-line import/no-unresolved
         return import('engines-bin/nupack')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new NuPACK(program));
+            .then((program: any) => new NuPACK(program))
+            .catch((err) => null);
     }
 
     private constructor(lib: NupackLib) {

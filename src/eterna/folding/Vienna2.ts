@@ -17,10 +17,12 @@ export default class Vienna2 extends Folder {
      * Asynchronously creates a new instance of the Vienna folder.
      * @returns {Promise<Vienna2>}
      */
-    public static create(): Promise<Vienna2> {
+    public static create(): Promise<Vienna2 | null> {
+        // eslint-disable-next-line import/no-unresolved
         return import('engines-bin/vienna2')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
-            .then((program: any) => new Vienna2(program));
+            .then((program: any) => new Vienna2(program))
+            .catch((err) => null);
     }
 
     private constructor(lib: Vienna2Lib) {

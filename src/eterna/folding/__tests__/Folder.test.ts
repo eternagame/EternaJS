@@ -23,7 +23,7 @@ function FoldSequence(folder: Folder, seq: string, struct: string): any[] | null
     return folder.foldSequence(EPars.stringToSequence(seq), null, struct);
 }
 
-function CreateFolder(type: any): Promise<Folder> {
+function CreateFolder(type: any): Promise<Folder | null> {
     return type.create();
 }
 
@@ -33,27 +33,37 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
         // https://facebook.github.io/jest/docs/en/expect.html#expectassertionsnumber
         expect.assertions(1);
         return expect(CreateFolder(folderType)
-            .then((folder: any) => FoldSequence(folder, SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT)))
-            .resolves.toBeTruthy();
+            .then((folder: any) => {
+                if (folder === null) return;
+
+                expect(FoldSequence(folder, SNOWFLAKE_SEQ, SNOWFLAKE_STRUCT)).toBeTruthy();
+            }))
+            .resolves.toBeUndefined();
     });
 
     test(`${folderType.NAME}:emptyStructure`, () => {
         expect.assertions(1);
         return expect(CreateFolder(folderType)
-            .then((folder) => FoldSequence(folder, BASIC_SEQ, '')))
-            .resolves.toEqual(BASIC_RESULT);
+            .then((folder) => {
+                if (folder === null) return;
+
+                expect(FoldSequence(folder, BASIC_SEQ, '')).toEqual(BASIC_RESULT);
+            }))
+            .resolves.toBeUndefined();
     });
 
     test(`${folderType.NAME}:cachedQuery`, () => {
         expect.assertions(1);
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                return [
+                if (folder === null) return;
+
+                expect([
                     FoldSequence(folder, BASIC_SEQ, ''),
                     FoldSequence(folder, BASIC_SEQ, '')
-                ];
+                ]).toEqual([BASIC_RESULT, BASIC_RESULT]);
             }))
-            .resolves.toEqual([BASIC_RESULT, BASIC_RESULT]);
+            .resolves.toBeUndefined();
     });
 
     test(`${folderType.NAME}:score_structures`, () => {
@@ -85,6 +95,12 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
         expect.assertions(3);
         return expect(CreateFolder(folderType)
             .then((folder) => {
+                if (folder === null) {
+                    expect(true).toBeTruthy();
+                    expect(true).toBeTruthy();
+                    return;
+                }
+
                 let outNNFE: number[] = [];
                 let totalFe = folder.scoreStructures(
                     EPars.stringToSequence(ZIPPERS_SEQ),
@@ -105,12 +121,15 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
         const STRUCT = '........................................';
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                return folder.getDotPlot(
+                if (folder === null) return;
+
+                expect(folder.getDotPlot(
                     EPars.stringToSequence(SEQ),
                     EPars.parenthesisToPairs(STRUCT),
-                    37);
+                    37
+                )).toEqual([]);
             }))
-            .resolves.toEqual([]);
+            .resolves.toBeUndefined();
     });
 
     test(`${folderType.NAME}:get_dot_plot(complex)`, () => {
@@ -129,11 +148,14 @@ for (let folderType of [Vienna, Vienna2, NuPACK, LinearFoldV]) {
 
         return expect(CreateFolder(folderType)
             .then((folder) => {
-                return folder.getDotPlot(
+                if (folder === null) return;
+                
+                expect(folder.getDotPlot(
                     EPars.stringToSequence(SEQ),
                     EPars.parenthesisToPairs(STRUCT),
-                    37);
+                    37
+                )).toBeDeepCloseTo(expectedResult, 5);
             }))
-            .resolves.toBeDeepCloseTo(expectedResult, 5);
+            .resolves.toBeUndefined();
     });
 }

@@ -26,9 +26,6 @@ module.exports = {
         'no-dupe-class-members': 'off',
         'no-undef': 'off',
 
-		// Needed to have "optional engines"; handled via exception
-		'import/no-unresolved': 'off',
-
         // These aren't really a big issue and used well keep our code cleaner
         'no-bitwise': 'off',
         'no-continue': 'off',

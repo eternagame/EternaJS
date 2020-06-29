@@ -15,7 +15,8 @@ export default class EternaFold extends Folder {
      * Asynchronously creates a new instance of the Eternafold folder.
      * @returns {Promise<EternaFold>}
      */
-    public static create(): Promise<EternaFold> | null {
+    public static create(): Promise<EternaFold | null> {
+        // eslint-disable-next-line import/no-unresolved
         return import('engines-bin/eternafold')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new EternaFold(program))
