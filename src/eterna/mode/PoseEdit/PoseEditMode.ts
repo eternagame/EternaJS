@@ -793,7 +793,7 @@ export default class PoseEditMode extends GameMode {
             .allStates(Bitmaps.ShapeImg)
             .label(this._folder.name, 22)
             .tooltip('Select the folding engine.');
-        this._folderButton.display.position = new Point(17, 160);
+        this._folderButton.display.position = new Point(17, 175);
         this._folderButton.display.scale = new Point(0.5, 0.5);
         this.addObject(this._folderButton, this.uiLayer);
         if (this._puzzle.puzzleType === PuzzleType.EXPERIMENTAL) {

@@ -1977,7 +1977,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             this.setAnimationProgress(prog);
-            
         } else if (currentTime - this.lastSampledTime > 2 && !this._isExploding) {
             this.lastSampledTime = currentTime;
 
