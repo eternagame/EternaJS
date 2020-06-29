@@ -531,16 +531,17 @@ export default class Toolbar extends ContainerObject {
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.baseMarkerButton = new GameButton()
             .up(Bitmaps.ImgBaseMarker)
-            .over(Bitmaps.ImgBaseMarker)
+            .over(Bitmaps.ImgBaseMarkerOver)
             .down(Bitmaps.ImgBaseMarker);
         this.addObject(this.baseMarkerButton, lowerToolbarLayout);
 
         lowerToolbarLayout.addHSpacer(SPACE_WIDE);
         this.magicGlueButton = new GameButton()
             .up(Bitmaps.ImgMagicGlue)
-            .over(Bitmaps.ImgMagicGlue)
+            .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue);
         this.addObject(this.magicGlueButton, lowerToolbarLayout);
+        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
 
         const makeArrow = () => {
             const arrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgToolbarArrow));

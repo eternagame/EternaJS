@@ -306,6 +306,8 @@ export default class Bitmaps {
     public static readonly ImgConstraintArrowUp: string = require('assets/UI/constraint-arrow-up.png');
     public static readonly ImgConstraintDrawerTip: string = require('assets/UI/constraint-drawer-tip.png');
     public static readonly ImgBaseMarker: string = require('assets/UI/base-marker-btn.png');
+    public static readonly ImgBaseMarkerOver: string = require('assets/UI/base-marker-btn-over.png');
+    public static readonly ImgMagicGlueOver: string = require('assets/UI/magic-glue-btn-over.png');
     public static readonly ImgMagicGlue: string = require('assets/UI/magic-glue-btn.png');
     public static readonly ImgToolbarArrow: string = require('assets/UI/toolbar-selection-arrow.png');
     public static readonly ImgRankBubble: string = require('assets/UI/mission/rank-bubble.png');
