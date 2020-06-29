@@ -116,6 +116,7 @@ export default class Toolbar extends ContainerObject {
         super();
         this._type = type;
         this._states = states;
+        this._showGlue = showGlue;
         this._boostersData = boosters ?? null;
     }
 
@@ -562,8 +563,10 @@ export default class Toolbar extends ContainerObject {
             .up(Bitmaps.ImgMagicGlue)
             .over(Bitmaps.ImgMagicGlueOver)
             .down(Bitmaps.ImgMagicGlue);
-        this.addObject(this.magicGlueButton, lowerToolbarLayout);
-        lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+        if (this._showGlue) {
+            this.addObject(this.magicGlueButton, lowerToolbarLayout);
+            lowerToolbarLayout.addHSpacer(SPACE_NARROW);
+        }
 
         this.regs.add(this.magicGlueButton.clicked.connect(() => {
             this._deselectAllPaintTools();
@@ -704,6 +707,7 @@ export default class Toolbar extends ContainerObject {
 
     private readonly _type: ToolbarType;
     private readonly _states: number;
+    private readonly _showGlue: boolean;
     private readonly _boostersData: BoostersData | null;
 
     private _invisibleBackground: Graphics;
