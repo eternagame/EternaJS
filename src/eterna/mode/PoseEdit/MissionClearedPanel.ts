@@ -60,10 +60,13 @@ export default class MissionClearedPanel extends ContainerObject {
         const panelWidth = MissionClearedPanel.calcWidth();
 
         this._contentLayout = new VLayoutContainer(10, HAlign.CENTER);
-        this._contentLayout.position = new Point(theme.margin.left, 0);
+        this._contentLayout.position = new Point(theme.margin.left, theme.margin.top);
         this.container.addChild(this._contentLayout);
 
-        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 14).color(0xFFCC00).build();
+        this._widthEnforcer = new Graphics();
+        this._contentLayout.addChild(this._widthEnforcer);
+
+        const title = Fonts.stdBold('MISSION ACCOMPLISHED!', 22).color(0xFFCC00).build();
         this._contentLayout.addChild(title);
 
         this._infoContainer = new VLayoutContainer(25, HAlign.LEFT);
@@ -106,6 +109,8 @@ export default class MissionClearedPanel extends ContainerObject {
                 .selectable(false);
             this.addObject(moreTextObj, this._infoContainer);
         }
+
+        this._infoContainer.addVSpacer(30);
 
         this._rankScrollContainer = new Container();
         this._rankScrollContainer.visible = false;
@@ -258,16 +263,16 @@ export default class MissionClearedPanel extends ContainerObject {
             this._rankScrollHeading.display.position = new Point(0, 0);
             this._rankScroll.display.position = new Point(10, 12 + this._tfPlayer.height);
 
-            const rankScale = Math.min(1, panelWidth / (400 + 80));
+            const rankScale = Math.min(1, panelWidth / (400));
             this._rankScrollContainer.scale = new Point(rankScale, rankScale);
         }
 
         const {theme} = MissionClearedPanel;
-        const contentHeight = (this._contentLayout.height + this._infoContainer.height);
-        this._contentLayout.position.y = Math.max(
-            (Flashbang.stageHeight - contentHeight) / 2,
-            theme.margin.top
-        );
+
+        this._widthEnforcer.clear();
+        this._widthEnforcer.beginFill(0x000000, 0);
+        this._widthEnforcer.drawRect(0, 0, panelWidth - (theme.margin.left * 2), 5);
+
         this._contentLayout.layout(true);
 
         this.nextButton.display.position = new Point(
@@ -286,7 +291,7 @@ export default class MissionClearedPanel extends ContainerObject {
         Assert.assertIsDefined(Flashbang.stageWidth);
         return Math.min(
             Flashbang.stageWidth,
-            MathUtil.clamp(Flashbang.stageWidth * 0.4, 400, 600)
+            MathUtil.clamp(Flashbang.stageWidth * 0.4, 400, 500)
         );
     }
 
@@ -304,6 +309,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private readonly _bg: Graphics;
 
     private _contentLayout: VLayoutContainer;
+    private _widthEnforcer: Graphics;
     private _infoWrapper: HTMLDivElement;
     private _infoContainer: VLayoutContainer;
     private _infoMask: Graphics;
