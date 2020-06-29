@@ -57,8 +57,8 @@ export default class Background extends ContainerObject {
                 lightBlue = 'rgb(67, 93, 146) 0%';
                 darkBlue = 'rgb(10, 43, 87) 70%';
             } else {
-                lightBlue = 'rgb(45, 64, 102) 0%';
-                darkBlue = 'rgb(6, 26, 52) 70%';
+                lightBlue = 'rgb(2, 38, 76) 0%';
+                darkBlue = 'rgb(3, 27, 60) 70%';
             }
             Eterna.gameDiv.style.backgroundImage = `radial-gradient(ellipse, ${lightBlue}, ${darkBlue})`;
         }
