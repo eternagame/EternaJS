@@ -1964,11 +1964,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
             }
 
             let prog = (currentTime - this._foldStartTime) / (this._foldDuration);
-            let done = false;
 
             if (prog >= 1) {
                 prog = 1;
-                done = true;
                 this._offsetTranslating = false;
             }
 
@@ -1978,35 +1976,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 this._offY = prog * this._endOffsetY + (1 - prog) * this._startOffsetY;
             }
 
-            for (let ii = 0; ii < fullSeq.length; ii++) {
-                let vx: number = this._baseToX[ii] - this._baseFromX[ii];
-                let vy: number = this._baseToY[ii] - this._baseFromY[ii];
-
-                let currentX: number = this._baseFromX[ii] + ((vx + (vx * prog)) / 2) * prog;
-                let currentY: number = this._baseFromY[ii] + ((vy + (vy * prog)) / 2) * prog;
-
-                this._bases[ii].setXY(currentX, currentY);
-            }
-
-            if (done) {
-                this._baseToX = null;
-                this._baseToY = null;
-                this._baseFromX = null;
-                this._baseFromY = null;
-
-                this.updateScoreNodeGui();
-
-                if (this.checkOverlap()) {
-                    // If overlaps have been introduced, make sure the explosion factor input is shown
-                    this._explosionFactorPanel.display.visible = true;
-                } else if (this._explosionFactorPanel.display.visible === true) {
-                    // If all overlaps have been removed, remove the explosion
-                    this._explosionFactor = 1;
-                    this._explosionFactorPanel.display.visible = false;
-                    this.computeLayout(true);
-                    this._redraw = true;
-                }
-            }
+            this.setAnimationProgress(prog);
+            
         } else if (currentTime - this.lastSampledTime > 2 && !this._isExploding) {
             this.lastSampledTime = currentTime;
 
@@ -2285,6 +2256,38 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
         this._prevOffsetX = this._offX;
         this._prevOffsetY = this._offY;
+    }
+
+    public setAnimationProgress(progress: number) {
+        for (let ii = 0; ii < this.fullSequence.length; ii++) {
+            let vx: number = this._baseToX[ii] - this._baseFromX[ii];
+            let vy: number = this._baseToY[ii] - this._baseFromY[ii];
+
+            let currentX: number = this._baseFromX[ii] + ((vx + (vx * progress)) / 2) * progress;
+            let currentY: number = this._baseFromY[ii] + ((vy + (vy * progress)) / 2) * progress;
+
+            this._bases[ii].setXY(currentX, currentY);
+        }
+
+        if (progress >= 1) {
+            this._baseToX = null;
+            this._baseToY = null;
+            this._baseFromX = null;
+            this._baseFromY = null;
+
+            this.updateScoreNodeGui();
+
+            if (this.checkOverlap()) {
+                // If overlaps have been introduced, make sure the explosion factor input is shown
+                this._explosionFactorPanel.display.visible = true;
+            } else if (this._explosionFactorPanel.display.visible === true) {
+                // If all overlaps have been removed, remove the explosion
+                this._explosionFactor = 1;
+                this._explosionFactorPanel.display.visible = false;
+                this.computeLayout(true);
+                this._redraw = true;
+            }
+        }
     }
 
     public numPairs(satisfied: boolean): number {

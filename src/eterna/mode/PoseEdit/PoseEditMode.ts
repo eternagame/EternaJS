@@ -2120,6 +2120,11 @@ export default class PoseEditMode extends GameMode {
             this._startSolvingTime = new Date().getTime();
             this.startPlaying();
             this.showIntroScreen();
+
+            // Fast-forward the intro-animation before mission screen
+            for (let i = 0; i < this._poses.length; ++i) {
+                this._poses[i].setAnimationProgress(1);
+            }
         }
     }
 
