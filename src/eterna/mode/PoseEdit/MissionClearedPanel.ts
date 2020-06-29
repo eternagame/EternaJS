@@ -20,9 +20,12 @@ export default class MissionClearedPanel extends ContainerObject {
         },
         mask: {
             top: 50,
-            bottom: 65
+            bottom: 76
+        },
+        separator: {
+            separation: 15,
+            margin: 30
         }
-
     };
 
     public nextButton: GameButton;
@@ -137,6 +140,9 @@ export default class MissionClearedPanel extends ContainerObject {
             .label(this._hasNextPuzzle ? 'Next Puzzle' : "What's Next?");
         this.addObject(this.nextButton, this.container);
 
+        this._separator = new Graphics();
+        this.container.addChild(this._separator);
+
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
@@ -169,7 +175,7 @@ export default class MissionClearedPanel extends ContainerObject {
 
     private maskPointerMove(event: interaction.InteractionEvent) {
         const scrollHeight = Flashbang.stageHeight - (50 + 75);
-        const containerHeight = this._infoContainer.height + 20; // Add a bit of margin
+        const containerHeight = this._infoContainer.height + 40; // Add a bit of margin
         if (this._dragging && containerHeight > scrollHeight) {
             const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;
             this._infoContainer.y = MathUtil.clamp(
@@ -209,7 +215,8 @@ export default class MissionClearedPanel extends ContainerObject {
         this.display.position.x = Flashbang.stageWidth - MissionClearedPanel.calcWidth();
         this._infoWrapper.style.width = `${Flashbang.stageWidth}px`;
         this._infoWrapper.style.height = `${Flashbang.stageHeight}px`;
-        this._infoWrapper.style.clipPath = `inset(50px 0 75px ${this.display.position.x}px)`;
+        const {theme} = MissionClearedPanel;
+        this._infoWrapper.style.clipPath = `inset(${theme.mask.top}px 0 ${theme.mask.bottom}px ${this.display.position.x}px)`;
     }
 
     private drawBG(): void {
@@ -267,6 +274,12 @@ export default class MissionClearedPanel extends ContainerObject {
             (panelWidth - this.nextButton.container.width) * 0.5,
             Flashbang.stageHeight - 20 - this.nextButton.container.height
         );
+
+        const separatorPos = this.nextButton.display.position.y - theme.separator.separation;
+        this._separator.clear();
+        this._separator.lineStyle(1, 0x70707080);
+        this._separator.moveTo(theme.separator.margin, separatorPos);
+        this._separator.lineTo(panelWidth - theme.separator.margin, separatorPos);
     }
 
     private static calcWidth(): number {
@@ -294,6 +307,7 @@ export default class MissionClearedPanel extends ContainerObject {
     private _infoWrapper: HTMLDivElement;
     private _infoContainer: VLayoutContainer;
     private _infoMask: Graphics;
+    private _separator: Graphics;
 
     // private _tfLoading: Text;
 
