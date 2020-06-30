@@ -38,6 +38,8 @@ function getEngineLocation() {
 }
 
 module.exports = {
+    devtool: "inline-source-map",
+    
     entry: {
         main: ['babel-polyfill', "./src/eterna/index.ts"],
         vendor: vendorDependencies

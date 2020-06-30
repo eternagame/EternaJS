@@ -11,7 +11,6 @@ function ParseBool(value) {
 const mobile_app = ParseBool(process.env.MOBILE_APP);
 
 module.exports = merge(common, {
-    devtool: "nosources-source-map",
     mode: 'production',
 
     output: {
