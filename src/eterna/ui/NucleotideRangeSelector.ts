@@ -114,7 +114,6 @@ export default class NucleotideRangeSelector extends Dialog<NucleotideRangeSelec
             });
         }
 
-
         const updateLocation = () => {
             Assert.assertIsDefined(Flashbang.stageWidth);
             Assert.assertIsDefined(Flashbang.stageHeight);

@@ -407,7 +407,6 @@ export default class Base extends ContainerObject implements LateUpdatable {
                 st0DiffDegree = ((goRadian + st0Angle) * 180) / Math.PI - 90.0;
                 st0DiffDegree = Base.toCanonicalRange(st0DiffDegree);
 
-
                 if (Math.trunc(st0DiffDegree / 5) < 0 || Math.trunc(st0DiffDegree / 5) > 71) {
                     if (Math.trunc(st0DiffDegree / 5) < -1 || Math.trunc(st0DiffDegree / 5) > 72) {
                         log.debug(st0DiffDegree);

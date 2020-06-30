@@ -376,7 +376,6 @@ export default class EPars {
         }
     }
 
-
     public static stringToSequence(seq: string, allowCut: boolean = true, allowUnknown: boolean = true): number[] {
         let seqArray: number[] = [];
         for (const char of seq) {
@@ -1080,7 +1079,6 @@ export default class EPars {
         0, 0, 0, 0, 0, /* C@  CA  CC  CG  CU */
         0, -110, 0, 0, 0, /* G@  GA  GC  GG  GU */
         0, 0, 0, 0, -70, /* U@  UA  UC  UG  UU */
-
 
         /* GC */
         0, 0, 0, 0, 0, /* @@  @A  @C  @G  @U */

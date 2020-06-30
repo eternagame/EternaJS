@@ -97,7 +97,6 @@ export default class LoadingMode extends AppMode {
         return ExtraBlurbs[Math.floor(Math.random() * ExtraBlurbs.length)];
     }
 
-
     private _text: string;
     private _textField: Text;
 

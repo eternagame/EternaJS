@@ -5,7 +5,6 @@ import Pose2D, {Oligo} from './pose2D/Pose2D';
 import Folder from './folding/Folder';
 import Utility from './util/Utility';
 
-
 export enum UndoBlockParam {
     GU = 0,
     GC = 1,

@@ -32,7 +32,6 @@ export default class Utility {
         return str;
     }
 
-
     /**
      * Determines if a point is within a polygon given as a point vector, using
      * a consequence of the Jordan curve theorem.

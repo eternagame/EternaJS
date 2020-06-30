@@ -11,7 +11,6 @@ import TextBalloon from 'eterna/ui/TextBalloon';
 import PuzzleEditOp from 'eterna/pose2D/PuzzleEditOp';
 import Fonts from 'eterna/util/Fonts';
 
-
 function IsArrowKey(keyCode: string): boolean {
     return keyCode === KeyCode.ArrowRight
         || keyCode === KeyCode.ArrowLeft

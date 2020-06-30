@@ -18,7 +18,7 @@ export default class Vienna2 extends Folder {
      * @returns {Promise<Vienna2>}
      */
     public static create(): Promise<Vienna2 | null> {
-        // eslint-disable-next-line import/no-unresolved
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/vienna2')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new Vienna2(program))

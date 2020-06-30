@@ -15,7 +15,6 @@ export enum HighlightType {
     USER_DEFINED = 7,
 }
 
-
 /** A class for highlighting groups of bases in a Pose2D */
 export default class HighlightBox extends GameObject implements LateUpdatable {
     constructor(pose: Pose2D, type: HighlightType) {

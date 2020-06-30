@@ -261,7 +261,6 @@ export default class DisplayUtil {
         );
     }
 
-
     private static readonly POSITION_RELATIVE_RECT: Rectangle = new Rectangle();
     /** Positions a DisplayObject in relation to another DisplayObject */
     public static positionRelative(

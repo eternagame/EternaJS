@@ -22,7 +22,6 @@ export default abstract class Dialog<T> extends ContainerObject implements Keybo
         let bg = new Graphics();
         this.container.addChild(bg);
 
-
         // Eat mouse events - make sure any objects created within the dialog should set
         // interactive to true and stop propogation if the event shouldn't be passed through to the bg
         let bgTarget = new DisplayObjectPointerTarget(bg);

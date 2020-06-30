@@ -9,7 +9,7 @@ export default class LinearFoldC extends LinearFoldBase {
      * @returns {Promise<LinearFoldC>}
      */
     public static create(): Promise<LinearFoldC | null> {
-        // eslint-disable-next-line import/no-unresolved
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/LinearFoldC')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new LinearFoldC(program))

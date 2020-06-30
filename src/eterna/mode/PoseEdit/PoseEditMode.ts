@@ -729,6 +729,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         this._constraintBar = new ConstraintBar(this._puzzle.constraints);
+        this._constraintBar.display.visible = false;
         this.addObject(this._constraintBar, this._constraintsLayer);
         this._constraintBar.sequenceHighlights.connect((highlightInfos: any) => {
             for (let [poseIdx, pose] of this._poses.entries()) {
@@ -2159,8 +2160,6 @@ export default class PoseEditMode extends GameMode {
             );
         }
 
-        this._constraintBar.display.visible = false;
-
         let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (this._targetConditions && this._targetConditions[0]) {
             customLayout = this._targetConditions[0]['custom-layout'];
@@ -2173,17 +2172,14 @@ export default class PoseEditMode extends GameMode {
             introConstraintBoxes,
             customLayout
         ));
-
-        let conn = this.entered.connect(() => {
-            this._constraintBar.display.visible = true;
-            this._constraintBar.layout();
-            conn.close();
-        });
     }
 
     private startPlaying(): void {
         this._isPlaying = true;
         this.disableTools(false);
+
+        this._constraintBar.display.visible = true;
+        this._constraintBar.layout();
 
         this.setPuzzleState(PuzzleState.GAME);
     }

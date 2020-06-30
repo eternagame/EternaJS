@@ -2157,7 +2157,6 @@ export default class Pose2D extends ContainerObject implements Updatable {
                 goY *= (Pose2D.ZOOM_SPACINGS[this._zoomLevel] / goLength);
             }
 
-
             outX += goX;
             outY += goY;
 

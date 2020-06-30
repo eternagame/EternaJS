@@ -1,4 +1,3 @@
-
 export default class UITheme {
     public static readonly colors = {
         background: 0x122944,

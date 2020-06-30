@@ -1,4 +1,3 @@
-
 export default class TextUtil {
     public static readonly STD_RED_COLOR = 0xF85F00;
     public static readonly STD_BLUE_COLOR = 0x00BFF9;

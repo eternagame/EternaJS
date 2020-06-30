@@ -326,7 +326,6 @@ export default class RankScroll extends ContainerObject {
     private readonly _newScore: number;
     private readonly _newRank: number;
 
-
     private _rankOffset: number;
     private _scoreOffset: number;
     private _moveOffset: number;

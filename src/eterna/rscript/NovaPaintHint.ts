@@ -6,7 +6,6 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
 import Pose2D from 'eterna/pose2D/Pose2D';
 
-
 export default class NovaPaintHint extends ContainerObject implements Updatable {
     constructor(start: Point, end: Point, loop: boolean) {
         super();

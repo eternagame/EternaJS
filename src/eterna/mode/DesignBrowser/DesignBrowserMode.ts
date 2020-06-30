@@ -930,7 +930,6 @@ export default class DesignBrowserMode extends GameMode {
     ];
 }
 
-
 class MaskBox extends Graphics {
     public setSize(width: number, height: number): void {
         if (this._width === width && this._height === height) {

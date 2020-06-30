@@ -18,7 +18,7 @@ export default class NuPACK extends Folder {
      * @returns {Promise<NuPACK>}
      */
     public static create(): Promise<NuPACK | null> {
-        // eslint-disable-next-line import/no-unresolved
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/nupack')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new NuPACK(program))

@@ -9,7 +9,7 @@ export default class LinearFoldV extends LinearFoldBase {
      * @returns {Promise<LinearFoldV>}
      */
     public static create(): Promise<LinearFoldV | null> {
-        // eslint-disable-next-line import/no-unresolved
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/LinearFoldV')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new LinearFoldV(program))

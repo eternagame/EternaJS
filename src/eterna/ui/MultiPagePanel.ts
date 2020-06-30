@@ -1,4 +1,3 @@
-
 import {
     ContainerObject, Flashbang, MathUtil, MatrixUtil
 } from 'flashbang';

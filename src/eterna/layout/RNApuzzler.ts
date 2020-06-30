@@ -13,6 +13,7 @@ export default class RNApuzzler extends LayoutEngine {
      * @returns {Promise<RNApuzzler>}
      */
     public static create(): Promise<RNApuzzler> {
+        // eslint-disable-next-line import/no-extraneous-dependencies
         return import('engines-bin/rnapuzzler')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new RNApuzzler(program));
@@ -28,7 +29,6 @@ export default class RNApuzzler extends LayoutEngine {
         // which ultimately should be this function's responsibility.
         // If we ever have multiple LayoutEngines, this function should take a
         // "normal" pairTable like origPairs and modify it HERE.
-
 
         // New implementation
         // return EmscriptenUtil.stdVectorVectorToArray<number>(this._lib.GetLayout(pairTable).layout);

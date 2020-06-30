@@ -204,13 +204,7 @@ export default class ConstraintBar extends ContainerObject {
 
         // Drawer elements
         const constraintHeight = this.getConstraintBox(0)?.container.height;
-        if (this._background
-            && this.display.visible
-            // Sanity check, in some puzzles like 8489875,
-            // The bar is layed out before the constraints have a proper height
-            // This prevents showing an empty background with no constraints
-            // TODO investigate
-            && constraintHeight === config.constraintHeight) {
+        if (this._background && this.display.visible) {
             const drawerWidth = Math.min(Flashbang.stageWidth * config.maxWidth, positioning.totalWidth);
             const backgroundY = config.startPos.y - config.padding;
             const backgroundHeight = config.constraintHeight + config.padding * 2;

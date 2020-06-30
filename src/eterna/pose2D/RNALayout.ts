@@ -860,7 +860,6 @@ export default class RNALayout {
         } else if (!rootnode.isPair && rootnode.indexA >= 0) {
             // / Single residue node
 
-
         } else {
             // / Virtual node
 
@@ -1008,7 +1007,6 @@ export default class RNALayout {
 
         return rnap.getLayout(pairTable);
     }
-
 
     /**
      * Called by drawTree, this function generates an array of x,y coords for

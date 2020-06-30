@@ -16,7 +16,7 @@ export default class ContraFold extends Folder {
      * @returns {Promise<ContraFold>}
      */
     public static create(): Promise<ContraFold | null> {
-        // eslint-disable-next-line import/no-unresolved
+        // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
         return import('engines-bin/contrafold')
             .then((module: any) => EmscriptenUtil.loadProgram(module))
             .then((program: any) => new ContraFold(program))
