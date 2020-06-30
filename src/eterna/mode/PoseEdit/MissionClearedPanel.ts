@@ -87,6 +87,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
         this._infoWrapper = document.createElement('div');
         this._infoWrapper.style.position = 'absolute';
+        // assets/style.css ensures that links are still clickable
         this._infoWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._infoWrapper);
 
