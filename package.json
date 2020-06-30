@@ -1,6 +1,6 @@
 {
   "name": "eternajs",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "license": "SEE LICENSE IN LICENSE",
   "description": "TypeScript port of the Eterna ActionScript game",
   "scripts": {
