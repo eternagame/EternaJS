@@ -103,7 +103,7 @@ export default class DisplayUtil {
         if (targetSpace === disp) {
             return out;
         } else if (targetSpace === disp.parent || (targetSpace == null && disp.parent == null)) {
-            disp.localTransform.copy(out);
+            disp.localTransform.copyTo(out);
             return out;
         } else if (targetSpace == null || targetSpace === DisplayUtil.base(disp)) {
             // targetCoordinateSpace 'null' represents the target space of the base object.
