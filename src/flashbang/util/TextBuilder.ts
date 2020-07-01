@@ -1,4 +1,4 @@
-import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
+import {Text, TextStyle} from 'pixi.js';
 
 export default class TextBuilder {
     constructor(text = '') {
@@ -51,7 +51,7 @@ export default class TextBuilder {
         if (value) {
             this.fontWeight('bold');
         } else if (this._style.fontWeight === 'bold') {
-            this._style.fontWeight = undefined;
+            this._style.fontWeight = 'normal';
         }
         return this;
     }
@@ -123,7 +123,7 @@ export default class TextBuilder {
         return this;
     }
 
-    private _style: TextStyleOptions = {};
+    private _style: TextStyle;
     private _text: string;
     private _scale = 1;
 }
