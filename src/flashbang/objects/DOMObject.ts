@@ -86,13 +86,13 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         return this._dummyDisp;
     }
 
-    public get domParent(): HTMLElement {
+    public get domParent(): HTMLElement | null {
         return this._domParent;
     }
 
-    public set domParent(value: HTMLElement) {
+    public set domParent(value: HTMLElement | null) {
         this._domParent = value;
-        if (this._added) {
+        if (this._added && this._domParent) {
             this._domParent.appendChild(this._obj);
         }
     }
