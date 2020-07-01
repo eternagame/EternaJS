@@ -12,6 +12,12 @@ enum Pair {
     ANY = EPars.RNABASE_PAIR
 }
 
+// const PAIR_PARAM_MAP = {
+//     Pair.GC: UndoBlockParam.GC,
+//     Pair.AU: UndoBlockParam.AU,
+//     Pair.GU: UndoBlockParam.GU,
+//     Pair.ANY: UndoBlockParam.ANY_PAIR
+// };
 const PAIR_PARAM_MAP = new Map<Pair, UndoBlockParam>(
     [
         [Pair.GC, UndoBlockParam.GC],
@@ -37,7 +43,8 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
+        // AMW: This is non-null by definition. 
+        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType)!);
         return {
             satisfied: (
                 currentPairs <= this.maxPairs

@@ -37,7 +37,7 @@ abstract class MinimumPairConstraint extends Constraint<MinPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MinPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
+        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType)!);
         return {
             satisfied: (
                 currentPairs >= this.minPairs

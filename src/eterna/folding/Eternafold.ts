@@ -44,8 +44,8 @@ export default class EternaFold extends Folder {
         seq: number[],
         pairs: number[],
         pseudoknotted: boolean = false,
-        temp: number = 37, outNodes:
-        number[] = null
+        temp: number = 37,
+        outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -61,7 +61,7 @@ export default class EternaFold extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
@@ -123,7 +123,7 @@ export default class EternaFold extends Folder {
     public foldSequence(
         seq: number[],
         secondBestPairs: number[],
-        desiredPairs: string = null,
+        desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 0.7
@@ -149,12 +149,12 @@ export default class EternaFold extends Folder {
 
     private foldSequenceImpl(
         seq: number[],
-        structStr: string = null,
+        structStr: string | null = null,
         temp: number = 37,
         gamma: number = 6.0
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             // can't do anything with structStr for now. constrained folding later.

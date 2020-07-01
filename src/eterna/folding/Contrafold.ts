@@ -7,6 +7,7 @@ import {FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
+import { NamedModulesPlugin } from 'webpack';
 
 export default class ContraFold extends Folder {
     public static readonly NAME: string = 'ContraFold';
@@ -45,7 +46,7 @@ export default class ContraFold extends Folder {
         pairs: number[],
         pseudoknotted: boolean = false,
         temp: number = 37,
-        outNodes: number[] = null
+        outNodes: number[] | null = null
     ): number {
         let key: any = {
             primitive: 'score', seq, pairs, temp
@@ -61,7 +62,7 @@ export default class ContraFold extends Folder {
         }
 
         do {
-            let result: FullEvalResult = null;
+            let result: FullEvalResult | null = null;
             try {
                 result = this._lib.FullEval(temp,
                     EPars.sequenceToString(seq),
@@ -123,7 +124,7 @@ export default class ContraFold extends Folder {
     public foldSequence(
         seq: number[],
         secondBestPairs: number[],
-        desiredPairs: string = null,
+        desiredPairs: string | null = null,
         pseudoknotted: boolean = false,
         temp: number = 37,
         gamma: number = 6.0
@@ -149,12 +150,12 @@ export default class ContraFold extends Folder {
 
     private foldSequenceImpl(
         seq: number[],
-        structStr: string = null,
+        structStr: string | null = null,
         temp: number = 37,
         gamma: number = 0.7
     ): number[] {
         const seqStr = EPars.sequenceToString(seq, false, false);
-        let result: FullFoldResult;
+        let result: FullFoldResult | null = null;
 
         try {
             // can't do anything with structStr for now. constrained folding later.
