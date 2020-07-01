@@ -27,7 +27,7 @@ export default class Eterna {
     public static readonly MAX_PUZZLE_EDIT_LENGTH = 400; // max length of PuzzleEditMode input
 
     // If DEBUG is not set, dev mode isn't true.
-    public static readonly DEV_MODE: boolean = process.env['DEBUG'] ? ParseBool(process.env['DEBUG']) : false;
+    public static readonly DEV_MODE: boolean = ParseBool(process.env['DEBUG']);
     public static readonly SERVER_URL: string = GetServerURL();
     public static readonly MOBILE_APP: boolean = ParseBool(process.env['MOBILE_APP']);
 

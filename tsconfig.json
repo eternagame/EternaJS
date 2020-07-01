@@ -11,7 +11,7 @@
     "moduleResolution": "node",
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "baseUrl": "./src",
     "paths": {
       "engines-bin/*": [
