@@ -141,7 +141,8 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice();
     }
 
-    private get mouseLoc(): Point {
+    // AMW TODO POINT IPOINT
+    private get mouseLoc(): IPoint {
         Assert.assertIsDefined(Flashbang.globalMouse);
         return this.container.toLocal(Flashbang.globalMouse);
     }
