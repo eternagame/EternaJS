@@ -12,8 +12,8 @@ function GetServerURL(): string {
     return (url != null && url !== '' ? url : window.location.origin);
 }
 
-function ParseBool(value: string): boolean {
-    return value.toLowerCase() === 'true';
+function ParseBool(value: string | undefined): boolean {
+    return value !== undefined && value.toLowerCase() === 'true';
 }
 
 /**
