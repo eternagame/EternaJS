@@ -409,12 +409,15 @@ export default class EternaApp extends FlashbangApp {
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
 
-        return new PIXI.Application(this._params.width, this._params.height, {
+        return new PIXI.Application({
+            width: this._params.width,
+            height: this._params.height,
             backgroundColor: 0x0,
             transparent: true,
             antialias: true,
-            roundPixels: true,
-            autoResize: true,
+            // roundPixels: true,
+            // autoResize: true,
+            autoDensity: true,
             resolution: devicePixelRatio
         });
     }
