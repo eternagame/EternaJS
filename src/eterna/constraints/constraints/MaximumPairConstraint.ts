@@ -2,6 +2,7 @@ import {UndoBlockParam} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Assert from 'flashbang/util/Assert';
 import ConstraintBox, {ConstraintBoxConfig} from '../ConstraintBox';
 import Constraint, {BaseConstraintStatus, ConstraintContext} from '../Constraint';
 
@@ -43,8 +44,10 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        // AMW: This is non-null by definition. 
-        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType)!);
+        // AMW: This is non-null by definition.
+        const param = PAIR_PARAM_MAP.get(this.pairType);
+        Assert.assertIsDefined(param);
+        const currentPairs: number = context.undoBlocks[0].getParam(param);
         return {
             satisfied: (
                 currentPairs <= this.maxPairs

@@ -103,7 +103,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
      * when a DOMObject's mode is not the top-most mode.
      */
     public hideWhenModeInactive(): void {
-    if (!this._hideWhenModeInactive) {
+        if (!this._hideWhenModeInactive) {
             this._hideWhenModeInactive = true;
             if (this.isLiveObject) {
                 this.handleHideWhenModeInactive();

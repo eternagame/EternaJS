@@ -25,20 +25,20 @@ export default class SoundManager {
         }
 
         try {
-            let sound = this.getSound(name);
-            sound.play({volume: this.volume, start: startTime});
+            let tsound = this.getSound(name);
+            tsound.play({volume: this.volume, start: startTime});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);
         }
     }
 
     private getSound(url: string): Sound {
-        let sound = this._sounds.get(url);
-        if (sound === undefined) {
-            sound = new Sound(url);
-            this._sounds.set(url, sound);
+        let tsound = this._sounds.get(url);
+        if (tsound === undefined) {
+            tsound = new Sound(url);
+            this._sounds.set(url, tsound);
         }
-        return sound;
+        return tsound;
     }
 
     private _muted: boolean;

@@ -2,7 +2,9 @@ import * as log from 'loglevel';
 import {
     Container, DisplayObject, Rectangle, Point
 } from 'pixi.js';
-import {ContainerObject, Enableable, GameObject, Assert} from 'flashbang';
+import {
+    ContainerObject, Enableable, GameObject, Assert
+} from 'flashbang';
 import EPars from 'eterna/EPars';
 import PoseEditMode from 'eterna/mode/PoseEdit/PoseEditMode';
 import Puzzle from 'eterna/puzzle/Puzzle';

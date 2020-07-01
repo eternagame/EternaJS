@@ -27,11 +27,14 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.addObject(this._pose, this.container);
 
         this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerDown(e));
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerDown(e)
+        );
         this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e)
+        );
         this.pointerMove.connect(
-            (e: PIXI.interaction.InteractionEvent) => this.onPointerMove(e));
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerMove(e)
+        );
         this.container.on('pointercancel',
             (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
         this.container.on('pointerout',

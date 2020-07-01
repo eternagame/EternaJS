@@ -38,7 +38,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
         if (!this._enabled) {
             // clear if not cleared.
             // AMW: Protected in Pixi v5. Clear unconditionally for now.
-            //if (this._graphics.currentPath !== null) 
+            // if (this._graphics.currentPath !== null)
             this._graphics.clear();
             return;
         }
@@ -62,7 +62,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
 
         if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
             && Arrays.shallowEqual(basePosY, this._lastBasePosY)
-            /*&& this._graphics.currentPath !== null*/) {
+            /* && this._graphics.currentPath !== null */) {
             // base positions haven't changed, and baseRope has not been cleared,
             // so no need to update -- just return.
             return;

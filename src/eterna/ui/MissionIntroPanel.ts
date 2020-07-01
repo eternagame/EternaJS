@@ -7,11 +7,11 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import ConstraintBox from 'eterna/constraints/ConstraintBox';
 import EPars from 'eterna/EPars';
 import MultiStyleText from 'pixi-multistyle-text';
+import Assert from 'flashbang/util/Assert';
 import MissionIntroConstraints from './MissionIntroConstraints';
 import GameButton from './GameButton';
 import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
 import UITheme from './UITheme';
-import Assert from 'flashbang/util/Assert'
 
 interface MissionIntroPanelProps {
     description: string;

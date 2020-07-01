@@ -482,7 +482,8 @@ export default class PoseEditMode extends GameMode {
     }
 
     private onHelpClicked() {
-        const getBounds = (elem: ContainerObject) => {
+        const getBounds = (elem: ContainerObject | undefined) => {
+            Assert.assertIsDefined(elem);
             const globalPos = elem.container.toGlobal(new Point());
             return new Rectangle(
                 globalPos.x,
@@ -543,9 +544,8 @@ export default class PoseEditMode extends GameMode {
                     ? [() => getBounds(this.toolbar.palette), 0]
                     : undefined,
 
-                // Can ! zoomInButton because we only hit that condition if it is defined.
-                zoom: this.toolbar.zoomInButton && this.toolbar.zoomInButton.container.visible
-                    ? [() => getBounds(this.toolbar.zoomInButton!), this.toolbar.zoomInButton!.container.width / 2]
+                zoom: this.toolbar.zoomInButton !== undefined && this.toolbar.zoomInButton.container.visible
+                    ? [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2]
                     : undefined,
 
                 undo: this.toolbar.undoButton.display.visible
@@ -2029,7 +2029,9 @@ export default class PoseEditMode extends GameMode {
         // at some point
         const hasNextPuzzle = nextPuzzleData !== null && nextPuzzleData !== 0;
 
-        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(hasNextPuzzle, infoText, moreText);
+        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(
+            hasNextPuzzle, infoText, moreText
+        );
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);

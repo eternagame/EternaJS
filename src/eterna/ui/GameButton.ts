@@ -189,12 +189,13 @@ export default class GameButton extends Button implements KeyboardListener {
         if (drawStyleBox) {
             // We can safely assert label is non-null because
             // that is a requirement for drawStyleBox
-            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label!.width;
+            Assert.assertIsDefined(label);
+            const labelWidth = this._fixedLabelWidth > 0 ? this._fixedLabelWidth : label.width;
             let styleBox = new Graphics()
                 .beginFill(GameButton.STYLEBOX_COLORS.get(state) || 0x0)
                 .drawRoundedRect(0, 0,
                     labelWidth + (GameButton.WMARGIN * 2),
-                    label!.height + (GameButton.HMARGIN * 2),
+                    label.height + (GameButton.HMARGIN * 2),
                     3)
                 .endFill();
             this._content.addChildAt(styleBox, 0);

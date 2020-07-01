@@ -7,7 +7,6 @@ import {FullEvalResult, FullFoldResult} from './engines/ContrafoldLib';
 /* eslint-enable import/no-duplicates, import/no-unresolved */
 import Folder from './Folder';
 import FoldUtil from './FoldUtil';
-import { NamedModulesPlugin } from 'webpack';
 
 export default class ContraFold extends Folder {
     public static readonly NAME: string = 'ContraFold';

@@ -7,10 +7,10 @@ import {
     Graphics, Point, interaction, Matrix
 } from 'pixi.js';
 import Eterna from 'eterna/Eterna';
+import Assert from 'flashbang/util/Assert';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
-import Assert from 'flashbang/util/Assert';
 
 interface MultiPagePanelProps {
     title: string;

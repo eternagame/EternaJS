@@ -409,7 +409,7 @@ export default class EternaApp extends FlashbangApp {
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
-        
+
         settings.ROUND_PIXELS = true;
 
         return new Application({

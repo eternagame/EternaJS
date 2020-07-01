@@ -155,7 +155,7 @@ export default class SolutionDescBox extends GamePanel {
                 // AMW: text.dirty no longer exists.
                 // We can see if this is needed. Maybe now it's automated for
                 // style changes.
-                //text.dirty = true;
+                // text.dirty = true;
             }
         }
     }

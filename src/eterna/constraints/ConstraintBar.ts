@@ -11,10 +11,10 @@ import ROPWait from 'eterna/rscript/ROPWait';
 import {RScriptUIElementID} from 'eterna/rscript/RScriptUIElement';
 import BitmapManager from 'eterna/resources/BitmapManager';
 import Bitmaps from 'eterna/resources/Bitmaps';
+import Assert from 'flashbang/util/Assert';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
-import Assert from 'flashbang/util/Assert'
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;

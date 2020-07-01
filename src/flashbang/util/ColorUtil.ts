@@ -1,4 +1,4 @@
-import {filters} from 'pixi.js'
+import {filters} from 'pixi.js';
 import MathUtil from './MathUtil';
 import StringUtil from './StringUtil';
 

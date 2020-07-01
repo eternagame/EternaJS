@@ -43,11 +43,11 @@ export default class TextureUtil {
         //     if (base.valid) return tex;
         //     else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
         // } else {
-            // log.debug(`Loading image... [url=${base.imageUrl}]`);
-            return new Promise<Texture>((resolve, reject) => {
-                base.once('loaded', () => resolve(tex));
-                base.once('error', () => reject(new Error(`texture failed to load [url=temptemptemp]`)));
-            });
+        // log.debug(`Loading image... [url=${base.imageUrl}]`);
+        return new Promise<Texture>((resolve, reject) => {
+            base.once('loaded', () => resolve(tex));
+            base.once('error', () => reject(new Error('texture failed to load [url=temptemptemp]')));
+        });
         // }
     }
 

@@ -35,7 +35,7 @@ export default class HelpToolTip extends ContainerObject {
     public updatePosition() {
         const [getBounds, offset] = this._positioner;
         const bounds = getBounds();
-        Assert.assertIsDefined(bounds)
+        Assert.assertIsDefined(bounds);
         this.container.position.x = bounds.x + bounds.width / 2 + offset;
         if (this._side === 'top') {
             this.container.position.y = bounds.y;
