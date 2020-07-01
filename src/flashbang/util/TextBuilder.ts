@@ -1,4 +1,42 @@
-import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
+import {Text, TextStyle} from 'pixi.js';
+
+// AMW right now we kind of need to be able to gradually build up a TextStyle
+// in this way. At least, refactoring that system should be separate from our 
+// version port. PIXI v5+ no longer exports TextStyleOptions; rather, TextStyle
+// has a ctor that takes an anonymous struct of args that follows that pattern.
+// So here, I'll define my own.
+
+class TextStyleOptions {
+    align?: string;
+    breakWords?: boolean;
+    dropShadow?: boolean;
+    dropShadowAlpha?: number;
+    dropShadowAngle?: number;
+    dropShadowBlur?: number;
+    dropShadowColor?: string | number;
+    dropShadowDistance?: number;
+    fill?: string | string[] | number | number[] | CanvasGradient | CanvasPattern;
+    fillGradientType?: number;
+    fillGradientStops?: number[];
+    fontFamily?: string | string[];
+    fontSize?: number | string;
+    fontStyle?: string;
+    fontVariant?: string;
+    fontWeight?: string;
+    leading?: number;
+    letterSpacing?: number;
+    lineHeight?: number;
+    lineJoin?: string;
+    miterLimit?: number;
+    padding?: number;
+    stroke?: string | number;
+    strokeThickness?: number;
+    trim?: boolean;
+    textBaseline?: string;
+    whiteSpace?: string;
+    wordWrap?: boolean;
+    wordWrapWidth?: number;
+}
 
 export default class TextBuilder {
     constructor(text = '') {
