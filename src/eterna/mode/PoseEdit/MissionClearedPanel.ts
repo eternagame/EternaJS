@@ -85,11 +85,14 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
             .on('pointermove', this.maskPointerMove.bind(this));
 
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
+        Assert.assertIsDefined(overlayEl);
         this._infoWrapper = document.createElement('div');
         this._infoWrapper.style.position = 'absolute';
         this._infoWrapper.style.pointerEvents = 'none';
         overlayEl.appendChild(this._infoWrapper);
 
+        Assert.assertIsDefined(this._infoText);
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const infoText = MissionClearedPanel.processHTML(this._infoText)
             || 'You have solved the puzzle, congratulations!';
         const infoObj = new HTMLTextObject(infoText, panelWidth - MissionClearedPanel.PADDING_RIGHT, this._infoWrapper)
@@ -150,15 +153,16 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         this._separator = new Graphics();
         this.container.addChild(this._separator);
 
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.mouseWheelInput.pushListener(this));
 
-        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(() => this.onResize()));
         this.onResize();
     }
 
     protected dispose(): void {
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
+        Assert.assertIsDefined(overlayEl);
         overlayEl.removeChild(this._infoWrapper);
 
         super.dispose();
@@ -184,6 +188,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
     private maskPointerMove(event: interaction.InteractionEvent) {
         if (this._dragging) {
+            Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this._contentLayout).y - this._dragStartPointY;
             this.scrollTo(this._dragStartBoxY + dragRange);
         }
@@ -212,6 +217,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     public scrollTo(yPos: number) {
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const scrollHeight = Flashbang.stageHeight - (50 + 75);
         const containerHeight = this._infoContainer.height + 40; // Add a bit of margin
         if (containerHeight > scrollHeight) {
@@ -307,6 +313,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
 
         this._contentLayout.layout(true);
 
+        Assert.assertIsDefined(Flashbang.stageHeight);
         this.nextButton.display.position = new Point(
             (panelWidth - this.nextButton.container.width) * 0.5,
             Flashbang.stageHeight - 20 - this.nextButton.container.height
@@ -328,6 +335,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     }
 
     private static calcScrollHeight() {
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const {theme} = MissionClearedPanel;
         return Flashbang.stageHeight - (theme.mask.top + theme.mask.bottom);
     }
@@ -355,7 +363,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     private _rankScroll: RankScroll | null = null;
 
     private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData | null = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 }
