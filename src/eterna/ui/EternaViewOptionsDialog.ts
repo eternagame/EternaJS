@@ -125,6 +125,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
         closeButton.clicked.connect(() => this.close(null));
 
         let updateLocation = () => {
+            Assert.assertIsDefined(Flashbang.stageHeight);
             const idealHeight = this._viewLayout.height + 40 + this._panel.titleHeight;
             const maxHeight = Flashbang.stageHeight * 0.8;
             const panelHeight = Math.min(idealHeight, maxHeight);
@@ -207,6 +208,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
 
     private maskPointerMove(event: interaction.InteractionEvent) {
         if (this._dragging) {
+            Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this._panelMask).y - this._dragStartPointY;
             this.scrollTo(this._dragStartBoxY + dragRange);
         }
@@ -255,7 +257,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
     private _volumeButtons: GameButton[] = [];
 
     private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData | null = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 }

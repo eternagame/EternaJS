@@ -207,6 +207,7 @@ export default class MultiPagePanel extends ContainerObject {
             this._contentWrapper.style.width = `${Flashbang.stageWidth}px`;
             this._contentWrapper.style.height = `${Flashbang.stageHeight}px`;
             Assert.assertIsDefined(Flashbang.stageWidth);
+            Assert.assertIsDefined(Flashbang.stageHeight);
             this._contentWrapper.style.clipPath = `inset(${m.ty + MultiPagePanel.theme.title.height}px ${Flashbang.stageWidth - (m.tx + this._props.width)}px ${Flashbang.stageHeight - (m.ty + this._panelHeight)}px ${m.tx}px)`;
             this._sizeChanged = false;
             // AMW: Used to be copy in prior PIXI. clone doesn't make sense (has

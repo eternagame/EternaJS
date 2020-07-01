@@ -32,11 +32,11 @@ export default class StyledTextBuilder {
         textField.styles = this.cloneStyles();
     }
 
-    public defaultStyle(style: ExtendedTextStyle): StyledTextBuilder {
+    public defaultStyle(style: TextStyleExtended): StyledTextBuilder {
         return this.addStyle('default', style);
     }
 
-    public addStyle(name: string, style: ExtendedTextStyle): StyledTextBuilder {
+    public addStyle(name: string, style: TextStyleExtended): StyledTextBuilder {
         if (this._styles[name] != null) {
             log.warn(`Redefining existing style '${name}'`);
         }
@@ -44,7 +44,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public pushStyle(style: ExtendedTextStyle | string): StyledTextBuilder {
+    public pushStyle(style: TextStyleExtended | string): StyledTextBuilder {
         let styleName: string;
         if (typeof (style) === 'string') {
             if (this._styles[style] == null) {
@@ -73,7 +73,7 @@ export default class StyledTextBuilder {
         return this;
     }
 
-    public append(text: string, style?: ExtendedTextStyle | string): StyledTextBuilder {
+    public append(text: string, style?: TextStyleExtended | string): StyledTextBuilder {
         if (style) {
             this.pushStyle(style);
         }
@@ -90,7 +90,7 @@ export default class StyledTextBuilder {
      * Supported tags: <font color = "#xxxxxx">, <b>
      */
     public appendHTMLStyledText(text: string): StyledTextBuilder {
-        type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, ExtendedTextStyle];
+        type CreateStyleCallback = (openTagMatch: RegExpExecArray) => [string, TextStyleExtended];
 
         const parseHTMLStyle = (
             rawText: string, openTag: RegExp, closeTag: RegExp, createStyle: CreateStyleCallback
@@ -144,7 +144,7 @@ export default class StyledTextBuilder {
         return this.append(text);
     }
 
-    public getStyle(name: string): ExtendedTextStyle {
+    public getStyle(name: string): TextStyleExtended {
         return this._styles[name];
     }
 

@@ -133,6 +133,7 @@ export default class Toolbar extends ContainerObject {
 
         const APPROX_ITEM_COUNT = 12;
         const APPROX_ITEM_WIDTH = 55;
+        Assert.assertIsDefined(Flashbang.stageWidth);
         const SPACE_WIDE = Math.min((Flashbang.stageWidth / APPROX_ITEM_COUNT) - APPROX_ITEM_WIDTH, 13);
         const SPACE_NARROW = SPACE_WIDE * 0.28;
 
