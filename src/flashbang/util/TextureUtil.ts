@@ -54,7 +54,7 @@ export default class TextureUtil {
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
     public static loadURL(texURL: string): Promise<Texture> {
-        return this.loadTexture(Texture.fromImage(texURL));
+        return this.loadTexture(Texture.from(texURL));
     }
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */

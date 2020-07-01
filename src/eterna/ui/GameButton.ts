@@ -293,7 +293,7 @@ export default class GameButton extends Button implements KeyboardListener {
         } else if (displayOrTex instanceof Texture) {
             return new Sprite(displayOrTex);
         } else if (typeof (displayOrTex) === 'string') {
-            return Sprite.fromImage(displayOrTex);
+            return Sprite.from(displayOrTex);
         } else {
             return null;
         }

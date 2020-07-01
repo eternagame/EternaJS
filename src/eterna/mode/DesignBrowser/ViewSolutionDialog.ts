@@ -96,11 +96,11 @@ export default class ViewSolutionDialog extends Dialog<void> {
             let voteButton = new ThumbnailAndTextButton();
             if (this._solution.getProperty('My Votes') === 0) {
                 voteButton
-                    .thumbnail(Sprite.fromImage(Bitmaps.ImgVotes))
+                    .thumbnail(Sprite.from(Bitmaps.ImgVotes))
                     .text('Vote')
                     .tooltip('Vote on this design.');
             } else {
-                let rotatedSprite = Sprite.fromImage(Bitmaps.ImgVotes);
+                let rotatedSprite = Sprite.from(Bitmaps.ImgVotes);
                 rotatedSprite.rotation = MathUtil.deg2Rad * 180;
                 let thumbnail = new Container();
                 thumbnail.addChild(rotatedSprite);
@@ -113,7 +113,7 @@ export default class ViewSolutionDialog extends Dialog<void> {
             this.addObject(voteButton, this._actionButtonsLayout);
         }
 
-        let sortImage = Sprite.fromImage(Bitmaps.ImgNextInside);
+        let sortImage = Sprite.from(Bitmaps.ImgNextInside);
         sortImage.scale = new Point(0.3, 0.3);
         let sortButton = new ThumbnailAndTextButton()
             .text('Sort')

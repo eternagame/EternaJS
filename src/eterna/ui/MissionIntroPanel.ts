@@ -42,7 +42,7 @@ export default class MissionIntroPanel extends ContainerObject {
         this._titleLabel = Fonts.stdBold('GOAL', 24).color(0xFAC244).build();
         this.container.addChild(this._titleLabel);
 
-        this._goalsBG = Sprite.fromImage(Bitmaps.ImgGoalBackground);
+        this._goalsBG = Sprite.from(Bitmaps.ImgGoalBackground);
         this.container.addChild(this._goalsBG);
 
         // Constraints

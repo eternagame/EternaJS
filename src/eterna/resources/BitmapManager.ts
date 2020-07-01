@@ -5,7 +5,7 @@ import Bitmaps from './Bitmaps';
 
 export default class BitmapManager {
     public static getBitmap(url: string): Texture {
-        return Texture.fromImage(url);
+        return Texture.from(url);
     }
 
     public static getBitmapNamed(name: string): Texture {
