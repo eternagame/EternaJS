@@ -408,6 +408,8 @@ export default class EternaApp extends FlashbangApp {
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
+        
+        PIXI.settings.ROUND_PIXELS = true;
 
         return new PIXI.Application({
             width: this._params.width,
@@ -415,7 +417,7 @@ export default class EternaApp extends FlashbangApp {
             backgroundColor: 0x0,
             transparent: true,
             antialias: true,
-            // roundPixels: true,
+            // roundPixels: true, now a global setting
             // autoResize: true,
             autoDensity: true,
             resolution: devicePixelRatio

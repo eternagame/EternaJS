@@ -18,20 +18,24 @@ export default abstract class LayoutContainer extends Container {
         return super.addChild(...children);
     }
 
+    // AMW TODO: Painfully, because pixi type definitions require specific
+    // return types for removeChildAt and removeChildren, we have to return 
+    // DisplayObject instead of T.
+
     /* override */
-    public removeChildAt<T extends DisplayObject = Container>(index: number): T {
+    public removeChildAt<T extends DisplayObject = Container>(index: number): DisplayObject {
         this._needsLayout = true;
         return super.removeChildAt(index);
     }
 
     /* override */
-    public removeChild<T extends DisplayObject = Container>(child: DisplayObject): T {
+    public removeChild<T extends DisplayObject = Container>(...children: T[]): T {
         this._needsLayout = true;
-        return super.removeChild(child);
+        return super.removeChild(...children);
     }
 
     /* override */
-    public removeChildren<T extends DisplayObject = Container>(beginIndex?: number, endIndex?: number): T[] {
+    public removeChildren<T extends DisplayObject = Container>(beginIndex?: number, endIndex?: number): DisplayObject[] {
         this._needsLayout = true;
         return super.removeChildren(beginIndex, endIndex);
     }

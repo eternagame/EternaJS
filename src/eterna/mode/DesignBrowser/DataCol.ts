@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Point, IPoint, Text
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
