@@ -598,7 +598,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     private static showHighlightState(sprite: Sprite, baseIdx: number, highlightState?: RNAHighlightState) {
-        sprite.filters = null;
+        sprite.filters = [];
         sprite.alpha = 1;
 
         if (highlightState !== undefined && highlightState.nuc && highlightState.isOn) {
