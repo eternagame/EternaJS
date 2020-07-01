@@ -169,10 +169,6 @@ export default class MissionIntroConstraints extends ContainerObject {
             + this._currentPage * (this._activePageDot.width + theme.dotSpacing);
 
         // Update right button position
-        // AMW: Explicitly handling the case where lastVisibleConstraint is
-        // null, rather than using ? chaining (type 'never' issue)
-        this._rightButton.container.position.x = lastVisibleConstraint ? 
-            xWalker - theme.spacing + (lastVisibleConstraint!.sideTextOffset) * 0
-            : xWalker - theme.spacing + (0) * 0;
+        this._rightButton.container.position.x = xWalker - theme.spacing;
     }
 }
