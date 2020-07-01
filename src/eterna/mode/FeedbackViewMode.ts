@@ -60,12 +60,14 @@ export default class FeedbackViewMode extends GameMode {
         this._toolbar = new Toolbar(ToolbarType.FEEDBACK, {states: this._puzzle.getSecstructs().length});
         this.addObject(this._toolbar, this.uiLayer);
 
+        Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
+        Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomIn();
