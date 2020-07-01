@@ -14,7 +14,7 @@ export default class TextureUtil {
         let baseTex = new BaseTexture(img);
         let tex = new Texture(baseTex);
 
-        if (baseTex.hasLoaded) {
+        if (baseTex.valid) {
             // The image may already be loaded
             return tex;
         } else {
@@ -37,17 +37,18 @@ export default class TextureUtil {
     /** Returns a promise that will resolve when the texture is loaded */
     public static async loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
-        if (!base.isLoading) {
-            // AMW hasLoaded => valid in v5
-            if (base.valid) return tex;
-            else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
-        } else {
+        if (base.valid) return tex;
+        // if (!base.isLoading) {
+        //     // AMW hasLoaded => valid in v5
+        //     if (base.valid) return tex;
+        //     else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
+        // } else {
             // log.debug(`Loading image... [url=${base.imageUrl}]`);
             return new Promise<Texture>((resolve, reject) => {
                 base.once('loaded', () => resolve(tex));
-                base.once('error', () => reject(new Error(`texture failed to load [url=${base.imageUrl}]`)));
+                base.once('error', () => reject(new Error(`texture failed to load [url=temptemptemp]`)));
             });
-        }
+        // }
     }
 
     /**
