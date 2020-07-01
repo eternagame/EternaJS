@@ -410,7 +410,7 @@ export default class SpecBox extends ContainerObject {
     // calculate it's origin and axis by from and to
     private calculateCoordPosition(from: Text, index: number, d: number): Point {
         let posFrom: Point = new Point();
-        posFrom.copy(from.position);
+        posFrom.copyFrom(from.position);
         let diffX: number = this.dotplotOffsetSize;
         let diffY: number = this.dotplotOffsetSize;
         if (d === SpecBox.HORIZONTAL) {
