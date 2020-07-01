@@ -80,6 +80,7 @@ export default class MultiPagePanel extends ContainerObject {
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
         this._contentWrapper = document.createElement('div');
         this._contentWrapper.style.position = 'absolute';
+        this._contentWrapper.style.pointerEvents = 'none';
         if (overlayEl) {
             overlayEl.appendChild(this._contentWrapper);
         }

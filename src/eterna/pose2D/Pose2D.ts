@@ -501,9 +501,10 @@ export default class Pose2D extends ContainerObject implements Updatable {
     public onPoseMouseDownPropagate(e: InteractionEvent, closestIndex: number): void {
         let altDown: boolean = Flashbang.app.isAltKeyDown;
         let ctrlDown: boolean = Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown;
+        const ctrlDownOrBaseMarking = ctrlDown || this.currentColor === EPars.RNABASE_BASE_MARK;
 
-        if ((this._coloring && !altDown) || ctrlDown) {
-            if (ctrlDown && closestIndex >= this.sequence.length) {
+        if ((this._coloring && !altDown) || ctrlDownOrBaseMarking) {
+            if (ctrlDownOrBaseMarking && closestIndex >= this.sequence.length) {
                 return;
             }
             this.onPoseMouseDown(e, closestIndex);
