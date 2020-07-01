@@ -152,7 +152,10 @@ export default class SolutionDescBox extends GamePanel {
 
             for (let text of this._descriptionAndCommentsTexts) {
                 text.style.wordWrapWidth = this._width - 40;
-                text.dirty = true;
+                // AMW: text.dirty no longer exists.
+                // We can see if this is needed. Maybe now it's automated for
+                // style changes.
+                //text.dirty = true;
             }
         }
     }
