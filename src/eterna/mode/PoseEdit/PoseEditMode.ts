@@ -494,6 +494,7 @@ export default class PoseEditMode extends GameMode {
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
         Assert.assertIsDefined(this.modeStack);
+        Assert.assertIsDefined(this.toolbar.zoomInButton);
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
                 hints: this._puzzle.hint
@@ -2027,7 +2028,7 @@ export default class PoseEditMode extends GameMode {
         // at some point
         const hasNextPuzzle = nextPuzzleData !== null && nextPuzzleData !== 0;
 
-        let missionClearedPanel = new MissionClearedPanel(hasNextPuzzle, infoText, moreText);
+        let missionClearedPanel: MissionClearedPanel | null = new MissionClearedPanel(hasNextPuzzle, infoText, moreText);
         missionClearedPanel.display.alpha = 0;
         missionClearedPanel.addObject(new AlphaTask(1, 0.3));
         this.addObject(missionClearedPanel, this.dialogLayer);

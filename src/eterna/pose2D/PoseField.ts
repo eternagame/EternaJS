@@ -26,12 +26,18 @@ export default class PoseField extends ContainerObject implements KeyboardListen
 
         this.addObject(this._pose, this.container);
 
-        this.pointerDown.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerDown(e));
-        this.pointerUp.filter(InputUtil.IsLeftMouse).connect((e) => this.onPointerUp(e));
-        this.pointerMove.connect((e) => this.onPointerMove(e));
-        this.container.on('pointercancel', (e) => this.onPointerUp(e));
-        this.container.on('pointerout', (e) => this.onPointerUp(e));
-        this.container.on('pointerupoutside', (e) => this.onPointerUp(e));
+        this.pointerDown.filter(InputUtil.IsLeftMouse).connect(
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerDown(e));
+        this.pointerUp.filter(InputUtil.IsLeftMouse).connect(
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+        this.pointerMove.connect(
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerMove(e));
+        this.container.on('pointercancel',
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+        this.container.on('pointerout',
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
+        this.container.on('pointerupoutside',
+            (e: PIXI.interaction.InteractionEvent) => this.onPointerUp(e));
 
         Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.keyboardInput.pushListener(this));

@@ -121,12 +121,14 @@ export default class PuzzleEditMode extends GameMode {
 
         this._toolbar.screenshotButton.clicked.connect(() => this.postScreenshot(this.createScreenshot()));
 
+        Assert.assertIsDefined(this._toolbar.zoomOutButton);
         this._toolbar.zoomOutButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomOut();
             }
         });
 
+        Assert.assertIsDefined(this._toolbar.zoomInButton);
         this._toolbar.zoomInButton.clicked.connect(() => {
             for (let poseField of this._poseFields) {
                 poseField.zoomIn();

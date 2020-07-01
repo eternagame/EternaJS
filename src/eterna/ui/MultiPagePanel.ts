@@ -117,7 +117,7 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.drawRoundedRect(0, 0, this._props.width, this._panelHeight, theme.borderRadius);
         this._background.endFill();
         this._background.interactive = true;
-        this._background.on('click', (e) => e.stopPropagation());
+        this._background.on('click', (e: any) => e.stopPropagation());
 
         this._pageMask.beginFill(0x00FF00, 0);
         const maskBeginY = theme.title.height;
@@ -209,7 +209,9 @@ export default class MultiPagePanel extends ContainerObject {
             Assert.assertIsDefined(Flashbang.stageWidth);
             this._contentWrapper.style.clipPath = `inset(${m.ty + MultiPagePanel.theme.title.height}px ${Flashbang.stageWidth - (m.tx + this._props.width)}px ${Flashbang.stageHeight - (m.ty + this._panelHeight)}px ${m.tx}px)`;
             this._sizeChanged = false;
-            m.copy(this._lastTransform);
+            // AMW: Used to be copy in prior PIXI. clone doesn't make sense (has
+            // an arg); copyFrom doesn't make sense because m const.
+            m.copyTo(this._lastTransform);
         }
     }
 
@@ -247,6 +249,7 @@ export default class MultiPagePanel extends ContainerObject {
         const scrollHeight = this._panelHeight - (theme.title.height + theme.title.padding);
         const containerHeight = this._pagesContainer.display.height + theme.title.padding;
         if (this._dragging && containerHeight > scrollHeight) {
+            Assert.assertIsDefined(this._dragPointData);
             const dragRange = this._dragPointData.getLocalPosition(this.container).y - this._dragStartPointY;
             this._pagesContainer.display.y = MathUtil.clamp(
                 this._dragStartBoxY + dragRange,

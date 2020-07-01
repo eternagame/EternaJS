@@ -1,4 +1,5 @@
 import 'assets/styles.css'; // css-loader will pick up on this and embed our stylesheet
+import {settings, Application} from 'pixi.js';
 import * as log from 'loglevel';
 import {
     FlashbangApp, SaveGameManager, TextureUtil, ErrorUtil, Flashbang, Assert
@@ -403,15 +404,15 @@ export default class EternaApp extends FlashbangApp {
         }
     }
 
-    protected createPixi(): PIXI.Application {
+    protected createPixi(): Application {
         // When roundPixels is true, the renderer floor()s pixel locations
         // to avoid pixel interpolation. This makes our text look much better,
         // though slow movement animation will end up looking a bit worse.
         // Eterna isn't an animation-heavy game, so the tradeoff seems worth it.
         
-        PIXI.settings.ROUND_PIXELS = true;
+        settings.ROUND_PIXELS = true;
 
-        return new PIXI.Application({
+        return new Application({
             width: this._params.width,
             height: this._params.height,
             backgroundColor: 0x0,

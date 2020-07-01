@@ -11,12 +11,13 @@ import MissionIntroConstraints from './MissionIntroConstraints';
 import GameButton from './GameButton';
 import PoseThumbnail, {PoseThumbnailType} from './PoseThumbnail';
 import UITheme from './UITheme';
+import Assert from 'flashbang/util/Assert'
 
 interface MissionIntroPanelProps {
     description: string;
     puzzleThumbnails: number[][];
     constraints: ConstraintBox[];
-    customLayout?: Array<[number, number]>;
+    customLayout: Array<[number, number] | [null, null]> | null;
 }
 
 export default class MissionIntroPanel extends ContainerObject {
@@ -87,6 +88,7 @@ export default class MissionIntroPanel extends ContainerObject {
     protected added() {
         const updateLayout = () => {
             const {theme} = MissionIntroPanel;
+            Assert.assertIsDefined(Flashbang.stageWidth);
             this._constraints.updateLayout(Flashbang.stageWidth - (this._goalsBG.width + theme.spacing));
             const width = this._goalsBG.width + theme.spacing + this._constraints.actualWidth;
 
@@ -130,6 +132,7 @@ export default class MissionIntroPanel extends ContainerObject {
                 + (this._thumbnailButtons ? (this._thumbnailButtons[0].container.height + theme.spacing) : 0);
 
             const {headerHeight} = UITheme.missionIntro;
+            Assert.assertIsDefined(Flashbang.stageHeight);
             this.container.position = new Point(
                 Math.max(Flashbang.stageWidth - width, 0) / 2,
                 headerHeight + Math.max(Flashbang.stageHeight - headerHeight - height, 0) / 2
@@ -138,6 +141,7 @@ export default class MissionIntroPanel extends ContainerObject {
             this._size = new Point(width, height);
         };
         updateLayout();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(updateLayout));
     }
 }
