@@ -285,6 +285,7 @@ export default class PoseEditMode extends GameMode {
 
         const homeArrow = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgHomeArrow));
         homeArrow.position = new Point(45, 14);
+        Assert.assertIsDefined(this.container);
         this.container.addChild(homeArrow);
 
         // Async text shows above our UI lock, and right below all dialogs
@@ -494,7 +495,6 @@ export default class PoseEditMode extends GameMode {
         const switchStateButton = Boolean(this.toolbar.stateToggle.container.parent)
             && this.toolbar.stateToggle.display.visible;
         Assert.assertIsDefined(this.modeStack);
-        Assert.assertIsDefined(this.toolbar.zoomInButton);
         this.modeStack.pushMode(new HelpScreen({
             toolTips: {
                 hints: this._puzzle.hint
@@ -543,8 +543,9 @@ export default class PoseEditMode extends GameMode {
                     ? [() => getBounds(this.toolbar.palette), 0]
                     : undefined,
 
-                zoom: this.toolbar.zoomInButton?.container.visible
-                    ? [() => getBounds(this.toolbar.zoomInButton), this.toolbar.zoomInButton.container.width / 2]
+                // Can ! zoomInButton because we only hit that condition if it is defined.
+                zoom: this.toolbar.zoomInButton && this.toolbar.zoomInButton.container.visible
+                    ? [() => getBounds(this.toolbar.zoomInButton!), this.toolbar.zoomInButton!.container.width / 2]
                     : undefined,
 
                 undo: this.toolbar.undoButton.display.visible
