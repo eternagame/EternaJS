@@ -10,6 +10,7 @@ import Eterna from 'eterna/Eterna';
 import GameButton from './GameButton';
 import UITheme from './UITheme';
 import HTMLTextObject from './HTMLTextObject';
+import Assert from 'flashbang/util/Assert';
 
 interface MultiPagePanelProps {
     title: string;
@@ -47,7 +48,7 @@ export default class MultiPagePanel extends ContainerObject {
 
     private _pageMask: Graphics;
     private _dragging = false;
-    private _dragPointData: interaction.InteractionData = null;
+    private _dragPointData: interaction.InteractionData | null = null;
     private _dragStartPointY = 0;
     private _dragStartBoxY = 0;
 
@@ -79,7 +80,9 @@ export default class MultiPagePanel extends ContainerObject {
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
         this._contentWrapper = document.createElement('div');
         this._contentWrapper.style.position = 'absolute';
-        overlayEl.appendChild(this._contentWrapper);
+        if (overlayEl) {
+            overlayEl.appendChild(this._contentWrapper);
+        }
 
         // Content
         this._pagesContainer = new ContainerObject();
@@ -181,13 +184,18 @@ export default class MultiPagePanel extends ContainerObject {
 
         this.setCurrentPage(this._currentPage);
 
+        Assert.assertIsDefined(this.mode);
+        Assert.assertIsDefined(Flashbang.pixi);
         this.regs.add(this.mode.resized.connect(() => { this._sizeChanged = true; }));
         Flashbang.pixi.renderer.addListener('postrender', this.updateDOMMask, this);
     }
 
     protected dispose(): void {
+        Assert.assertIsDefined(Flashbang.pixi);
         const overlayEl = document.getElementById(Eterna.OVERLAY_DIV_ID);
-        overlayEl.removeChild(this._contentWrapper);
+        if (overlayEl) {
+            overlayEl.removeChild(this._contentWrapper);
+        }
         Flashbang.pixi.renderer.removeListener('postrender', this.updateDOMMask, this);
 
         super.dispose();
@@ -198,6 +206,7 @@ export default class MultiPagePanel extends ContainerObject {
         if (this._sizeChanged || !MatrixUtil.equals(this._lastTransform, m)) {
             this._contentWrapper.style.width = `${Flashbang.stageWidth}px`;
             this._contentWrapper.style.height = `${Flashbang.stageHeight}px`;
+            Assert.assertIsDefined(Flashbang.stageWidth);
             this._contentWrapper.style.clipPath = `inset(${m.ty + MultiPagePanel.theme.title.height}px ${Flashbang.stageWidth - (m.tx + this._props.width)}px ${Flashbang.stageHeight - (m.ty + this._panelHeight)}px ${m.tx}px)`;
             this._sizeChanged = false;
             m.copy(this._lastTransform);
