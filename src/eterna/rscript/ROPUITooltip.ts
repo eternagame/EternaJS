@@ -2,6 +2,7 @@ import HelpToolTip, {HelpToolTipSide} from 'eterna/ui/help/HelpToolTip';
 import {GameObject} from 'flashbang';
 import RScriptEnv from './RScriptEnv';
 import RScriptOp from './RScriptOp';
+import Assert from 'flashbang/util/Assert'
 
 export default class ROPUITooltip extends RScriptOp {
     private static id = 'uiTooltip';
@@ -32,6 +33,7 @@ export default class ROPUITooltip extends RScriptOp {
                 updatePosition();
                 this._env.addObject(tooltip, this._env.container);
                 this._env.setVar(ROPUITooltip.id, tooltip);
+                Assert.assertIsDefined(this._env.mode)
                 tooltip.regs.add(this._env.mode.resized.connect(updatePosition));
             }
         } else {
