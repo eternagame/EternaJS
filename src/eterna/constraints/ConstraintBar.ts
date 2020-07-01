@@ -14,6 +14,7 @@ import Bitmaps from 'eterna/resources/Bitmaps';
 import ShapeConstraint, {AntiShapeConstraint} from './constraints/ShapeConstraint';
 import ConstraintBox from './ConstraintBox';
 import Constraint, {BaseConstraintStatus, HighlightInfo, ConstraintContext} from './Constraint';
+import Assert from 'flashbang/util/Assert'
 
 interface ConstraintWrapper {
     constraint: Constraint<BaseConstraintStatus>;
@@ -205,6 +206,7 @@ export default class ConstraintBar extends ContainerObject {
         // Drawer elements
         const constraintHeight = this.getConstraintBox(0)?.container.height;
         if (this._background && this.display.visible) {
+            Assert.assertIsDefined(Flashbang.stageWidth);
             const drawerWidth = Math.min(Flashbang.stageWidth * config.maxWidth, positioning.totalWidth);
             const backgroundY = config.startPos.y - config.padding;
             const backgroundHeight = config.constraintHeight + config.padding * 2;
@@ -236,6 +238,8 @@ export default class ConstraintBar extends ContainerObject {
                 this._selectionArrow.position = new Point(
                     (() => {
                         const info = positioning.positions.find((p) => p.constraint === this._selectedConstraint);
+                        // AMW TODO: What is the correct behavior here?
+                        Assert.assertIsDefined(info);
                         return info.position + info.size / 2 - this._selectionArrow.width / 2;
                     })(),
                     config.constraintHeight
@@ -364,6 +368,7 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private collapse() {
+        Assert.assertIsDefined(this._selectedConstraint);
         this._collapsed = true;
         const {config} = ConstraintBar;
 
@@ -412,6 +417,8 @@ export default class ConstraintBar extends ContainerObject {
     }
 
     private expand() {
+        Assert.assertIsDefined(this._selectedConstraint);
+
         this._collapsed = false;
         const {config} = ConstraintBar;
 
