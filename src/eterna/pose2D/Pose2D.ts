@@ -2257,14 +2257,16 @@ export default class Pose2D extends ContainerObject implements Updatable {
     }
 
     public setAnimationProgress(progress: number) {
-        for (let ii = 0; ii < this.fullSequence.length; ii++) {
-            let vx: number = this._baseToX[ii] - this._baseFromX[ii];
-            let vy: number = this._baseToY[ii] - this._baseFromY[ii];
+        if (this._baseToX && this._baseToY && this._baseFromX && this._baseFromY) {
+            for (let ii = 0; ii < this.fullSequence.length; ii++) {
+                let vx: number = this._baseToX[ii] - this._baseFromX[ii];
+                let vy: number = this._baseToY[ii] - this._baseFromY[ii];
 
-            let currentX: number = this._baseFromX[ii] + ((vx + (vx * progress)) / 2) * progress;
-            let currentY: number = this._baseFromY[ii] + ((vy + (vy * progress)) / 2) * progress;
+                let currentX: number = this._baseFromX[ii] + ((vx + (vx * progress)) / 2) * progress;
+                let currentY: number = this._baseFromY[ii] + ((vy + (vy * progress)) / 2) * progress;
 
-            this._bases[ii].setXY(currentX, currentY);
+                this._bases[ii].setXY(currentX, currentY);
+            }
         }
 
         if (progress >= 1) {
@@ -3125,7 +3127,9 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             Assert.assertIsDefined(Flashbang.globalMouse);
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                let mouseP: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+                // AMW TODO POINT IPOINT
+                let mouseP: Point = new Point(0, 0);
+                mouseP = mouseP.copyFrom(this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC));
                 let baseXys: Point[] = [];
 
                 for (let ii = 0; ii < this.fullSequenceLength; ii++) {
