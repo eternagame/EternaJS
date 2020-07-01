@@ -42,6 +42,7 @@ export default class HintsPanel extends ContainerObject {
             return textElem;
         });
 
+        Assert.assertIsDefined(Flashbang.stageHeight);
         const panel = new MultiPagePanel({
             title: 'Hint',
             pages,
@@ -64,6 +65,7 @@ export default class HintsPanel extends ContainerObject {
             );
         };
         onResize();
+        Assert.assertIsDefined(this.mode);
         this.regs.add(this.mode.resized.connect(onResize));
     }
 }
