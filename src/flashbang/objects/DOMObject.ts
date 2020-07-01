@@ -103,7 +103,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
      * when a DOMObject's mode is not the top-most mode.
      */
     public hideWhenModeInactive(): void {
-        if (!this._hideWhenModeInactive) {
+    if (!this._hideWhenModeInactive) {
             this._hideWhenModeInactive = true;
             if (this.isLiveObject) {
                 this.handleHideWhenModeInactive();
@@ -161,7 +161,7 @@ export default abstract class DOMObject<T extends HTMLElement> extends GameObjec
         let m = this.display.worldTransform;
         if (!MatrixUtil.equals(this._lastTransform, m)) {
             this._obj.style.transform = `matrix(${m.a}, ${m.b}, ${m.c}, ${m.d}, ${m.tx}, ${m.ty})`;
-            m.copy(this._lastTransform);
+            m.copyTo(this._lastTransform);
         }
 
         this._obj.style.visibility = this.display.worldVisible ? 'visible' : 'hidden';
