@@ -84,12 +84,12 @@ export default class ConstraintBar extends ContainerObject {
                 const bg = new SceneObject(new Graphics());
                 this.addObject(bg, this.container);
 
-                bg.pointerDown.connect((e) => {
+                bg.pointerDown.connect((e: any) => {
                     this._backgroundDrag = true;
                     this._drag = true;
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.pointerMove.connect((e) => {
+                bg.pointerMove.connect((e: any) => {
                     if (!this._drag) {
                         return;
                     }
@@ -97,11 +97,11 @@ export default class ConstraintBar extends ContainerObject {
                     this.scrollConstraints(deltaPos);
                     this._previousDragPos = e.data.global.x;
                 });
-                bg.pointerUp.connect((e) => {
+                bg.pointerUp.connect((e: any) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.display.on('pointerupoutside', (e) => {
+                bg.display.on('pointerupoutside', (e: any) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -119,7 +119,7 @@ export default class ConstraintBar extends ContainerObject {
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
-            this._drawerTip.on('pointertap', (e) => this.collapse());
+            this._drawerTip.on('pointertap', (e: any) => this.collapse());
             this._drawerTip.visible = false;
         }
 
