@@ -114,7 +114,7 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.drawRoundedRect(0, 0, this._props.width, this._panelHeight, theme.borderRadius);
         this._background.endFill();
         this._background.interactive = true;
-        this._background.on('click', (e) => e.stopPropagation());
+        this._background.on('click', (e: any) => e.stopPropagation());
 
         this._pageMask.beginFill(0x00FF00, 0);
         const maskBeginY = theme.title.height;
@@ -200,7 +200,7 @@ export default class MultiPagePanel extends ContainerObject {
             this._contentWrapper.style.height = `${Flashbang.stageHeight}px`;
             this._contentWrapper.style.clipPath = `inset(${m.ty + MultiPagePanel.theme.title.height}px ${Flashbang.stageWidth - (m.tx + this._props.width)}px ${Flashbang.stageHeight - (m.ty + this._panelHeight)}px ${m.tx}px)`;
             this._sizeChanged = false;
-            m.copy(this._lastTransform);
+            m.copyTo(this._lastTransform);
         }
     }
 
