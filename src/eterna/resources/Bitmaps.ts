@@ -311,7 +311,6 @@ export default class Bitmaps {
     public static readonly ImgMagicGlue: string = require('assets/UI/magic-glue-btn.png');
     public static readonly ImgToolbarArrow: string = require('assets/UI/toolbar-selection-arrow.png');
     public static readonly ImgRankBubble: string = require('assets/UI/mission/rank-bubble.png');
-    public static readonly PaletteBtn: string = require('assets/DesignBrowser/palette-btn.png');
     public static readonly BtnPalette: string = require('assets/DesignBrowser/palette-btn.png');
     public static readonly BtnPaletteOver: string = require('assets/DesignBrowser/palette-btn-over.png');
     public static readonly BtnPaletteSelected: string = require('assets/DesignBrowser/palette-btn-selected.png');
