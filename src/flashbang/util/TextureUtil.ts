@@ -48,7 +48,6 @@ export default class TextureUtil {
             base.once('loaded', () => resolve(tex));
             base.once('error', () => reject(new Error('texture failed to load [url=temptemptemp]')));
         });
-        // }
     }
 
     /**
