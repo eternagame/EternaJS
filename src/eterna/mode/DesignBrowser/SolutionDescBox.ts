@@ -152,7 +152,6 @@ export default class SolutionDescBox extends GamePanel {
 
             for (let text of this._descriptionAndCommentsTexts) {
                 text.style.wordWrapWidth = this._width - 40;
-                text.dirty = true;
             }
         }
     }

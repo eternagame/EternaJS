@@ -81,7 +81,7 @@ export default class HelpToolTip extends ContainerObject {
 
         const background = new Graphics();
         background.interactive = true;
-        background.on('click', (e) => e.stopPropagation());
+        background.on('click', (e: any) => e.stopPropagation());
         background.beginFill(theme.colors.background, 1);
         background.drawRoundedRect(backgroundX, backgroundY, width, height, theme.borderRadius);
         textElem.position = new Point(
