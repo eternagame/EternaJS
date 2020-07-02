@@ -111,7 +111,7 @@ export default class FlashbangApp {
      */
     protected createPixi(): Application {
         settings.SCALE_MODE = SCALE_MODES.LINEAR;
-        return new Application(800, 600, {backgroundColor: 0x1099bb});
+        return new Application({width: 800, height: 600, backgroundColor: 0x1099bb});
     }
 
     /** The HTMLElement that the PIXI application will be added to. */

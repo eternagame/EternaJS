@@ -1,4 +1,36 @@
-import {Text, TextStyle, TextStyleOptions} from 'pixi.js';
+import {Text, TextStyle} from 'pixi.js';
+
+class TextStyleOptions {
+    public align?: string;
+    public breakWords?: boolean;
+    public dropShadow?: boolean;
+    public dropShadowAlpha?: number;
+    public dropShadowAngle?: number;
+    public dropShadowBlur?: number;
+    public dropShadowColor?: string | number;
+    public dropShadowDistance?: number;
+    public fill?: string | string[] | number | number[] | CanvasGradient | CanvasPattern;
+    public fillGradientType?: number;
+    public fillGradientStops?: number[];
+    public fontFamily?: string | string[];
+    public fontSize?: number | string;
+    public fontStyle?: string;
+    public fontVariant?: string;
+    public fontWeight?: string;
+    public leading?: number;
+    public letterSpacing?: number;
+    public lineHeight?: number;
+    public lineJoin?: string;
+    public miterLimit?: number;
+    public padding?: number;
+    public stroke?: string | number;
+    public strokeThickness?: number;
+    public trim?: boolean;
+    public textBaseline?: string;
+    public whiteSpace?: string;
+    public wordWrap?: boolean;
+    public wordWrapWidth?: number;
+}
 
 export default class TextBuilder {
     constructor(text = '') {

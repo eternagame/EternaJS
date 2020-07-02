@@ -37,24 +37,13 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
             // clear if not cleared.
-            if (this._graphics.currentPath !== null) this._graphics.clear();
+            this._graphics.clear();
             return;
         }
 
         let idx: number[] = [];
         let starts: Point[] = [];
         let ends: Point[] = [];
-        // for (let i = 0; i < this._pose.fullSequence.length; i++) {
-        //     let center: Point = this._pose.getBaseLoc(i);
-        //     if (!forceBaseXY && !this._pose.getBase(i).needRedraw) {
-        //         center = this._pose.getBase(i).getLastDrawnPos();
-        //     }
-        //     if (center) {
-        //         idx.push(i);
-        //         basePosX.push(center.x);
-        //         basePosY.push(center.y);
-        //     }
-        // }
 
         // Iterate over this._pose.pseudoknotPairs. If val isn't -1 and val is > idx,
         // push back idx's coords onto start and val's coords onto end.
@@ -82,7 +71,7 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
 
         if (Arrays.shallowEqual(starts, this._laststarts)
             && Arrays.shallowEqual(ends, this._lastends)
-            && this._graphics.currentPath !== null) {
+            && false) {
             // base positions haven't changed, and pseudoknotLines have not been cleared,
             // so no need to update -- just return.
             return;
@@ -108,53 +97,10 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
     }
 
     private drawPseudoknotLine(starts: Point[], ends: Point[]): void {
-        // this._graphics.moveTo(this._lastBasePosX[0], this._lastBasePosY[0]);
-        // for (let ii = 0; ii < interpBasePosXY.length; ii++) {
-        //     this._graphics.lineTo(interpBasePosXY[ii][0], interpBasePosXY[ii][1]);
-        // }
         for (let ii = 0; ii < starts.length; ii++) {
             this._graphics.moveTo(starts[ii].x, starts[ii].y);
             this._graphics.lineTo(ends[ii].x, ends[ii].y);
         }
-    }
-
-    /**
-     * Currently allows use of cubic interpolation or Pchip -- if we are still using
-     *   only Pchip in mid-2020, get rid of cubic, and consolidate functions.
-     *
-     * The most beautiful  solution would be to use planar elastica, either Euler's solution (which
-     *   still requires a numerical integral) or numerical minmization of a discrete elastica--
-     *
-     *  Let rhiju know if you want to try it. =)
-     */
-    private updateInterpBasePos(basePosX: number[], basePosY: number[]): Array<[number, number]> {
-        const smoothFactor = 5;
-        // return this.updateInterpBasePosCubic( smoothFactor, basePosX, basePosY);
-        return this.updateInterpBasePosPchip(smoothFactor, basePosX, basePosY);
-    }
-
-    /**
-     * PCHIP ( Piecewise Cubic Hermite Interpolating Polynomial) interpolation between points.
-     * A little choppier, but keeps lines in stacks straight.
-     *  Note that this function updates the _interpBasePosX and _interpBasePosY class variables.
-     * @param smoothFactor number of interpolation points between each input point
-     * @param basePosX input points' X values
-     * @param basePosY input points' Y values
-     */
-    private updateInterpBasePosPchip(smoothFactor: number, basePosX: number[], basePosY: number[]):
-    Array<[number, number]> {
-        let interpBasePosX = this.interpPchip(smoothFactor, basePosX);
-        let interpBasePosY = this.interpPchip(smoothFactor, basePosY);
-        let interpBasePosXY: Array<[number, number]> = interpBasePosX.map((x, idx) => [x, interpBasePosY[idx]]);
-        return interpBasePosXY;
-    }
-
-    private interpPchip(smoothFactor: number, points: number[]): number[] {
-        // have to pack in ii for pchip.fit
-        let inputPoints = points.map((x, idx) => [idx, x]);
-        let pchipFitPoints: Array<[number, number]> = pchip.fit(inputPoints, smoothFactor, 'shape_preserving');
-        let interpBasePos = pchipFitPoints.map((x) => x[1]);
-        return interpBasePos;
     }
 
     private readonly _pose: Pose2D;
