@@ -1,13 +1,13 @@
 import * as log from 'loglevel';
-import 'pixi-sound';
+import sound from 'pixi-sound';
 import Flashbang from 'flashbang/core/Flashbang';
 
 export default class SoundManager {
     public set muted(mute: boolean) {
         if (mute) {
-            PIXI.sound.muteAll();
+            sound.muteAll();
         } else {
-            PIXI.sound.unmuteAll();
+            sound.unmuteAll();
         }
 
         this._muted = mute;
@@ -25,20 +25,20 @@ export default class SoundManager {
         }
 
         try {
-            let sound = this.getSound(name);
-            sound.play({volume: this.volume, start: startTime});
+            let tsound = this.getSound(name);
+            tsound.play({volume: this.volume, start: startTime});
         } catch (e) {
             log.error(`Failed to play sound ${name}`, e);
         }
     }
 
     private getSound(url: string): Sound {
-        let sound = this._sounds.get(url);
-        if (sound === undefined) {
-            sound = new Sound(url);
-            this._sounds.set(url, sound);
+        let tsound = this._sounds.get(url);
+        if (tsound === undefined) {
+            tsound = new Sound(url);
+            this._sounds.set(url, tsound);
         }
-        return sound;
+        return tsound;
     }
 
     private _muted: boolean;
@@ -52,10 +52,10 @@ export default class SoundManager {
  */
 class Sound {
     constructor(url: string) {
-        this._sound = PIXI.sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
+        this._sound = sound.Sound.from({url, preload: true, loaded: () => this.onLoaded()});
     }
 
-    public play(options: PIXI.sound.PlayOptions) {
+    public play(options: sound.PlayOptions) {
         if (this._sound.isLoaded) {
             this._sound.play(options);
         } else {
@@ -71,6 +71,6 @@ class Sound {
         this._pendingPlayOptions = null;
     }
 
-    private readonly _sound: PIXI.sound.Sound;
-    private _pendingPlayOptions: PIXI.sound.PlayOptions | null;
+    private readonly _sound: sound.Sound;
+    private _pendingPlayOptions: sound.PlayOptions | null;
 }

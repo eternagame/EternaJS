@@ -1,4 +1,5 @@
 import * as log from 'loglevel';
+import {settings, SCALE_MODES, Application} from 'pixi.js';
 import {RegistrationGroup, Value} from 'signals';
 import KeyboardEventType from 'flashbang/input/KeyboardEventType';
 import KeyCode from 'flashbang/input/KeyCode';
@@ -14,7 +15,7 @@ export default class FlashbangApp {
     /** True if the app is foregrounded */
     public readonly isActive: Value<boolean> = new Value<boolean>(true);
 
-    public get pixi(): PIXI.Application | null {
+    public get pixi(): Application | null {
         return this._pixi;
     }
 
@@ -108,9 +109,9 @@ export default class FlashbangApp {
      * Creates a PIXI.Application instance.
      * Subclasses can override to do custom initialization.
      */
-    protected createPixi(): PIXI.Application {
-        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
-        return new PIXI.Application(800, 600, {backgroundColor: 0x1099bb});
+    protected createPixi(): Application {
+        settings.SCALE_MODE = SCALE_MODES.LINEAR;
+        return new Application(800, 600, {backgroundColor: 0x1099bb});
     }
 
     /** The HTMLElement that the PIXI application will be added to. */
@@ -123,7 +124,7 @@ export default class FlashbangApp {
 
         try {
             // convert PIXI's weird ticker delta into elapsed seconds
-            let dt = tickerDelta / (PIXI.settings.TARGET_FPMS * 1000);
+            let dt = tickerDelta / (settings.TARGET_FPMS * 1000);
 
             // update all our updatables
             if (this._updatables) {
@@ -201,7 +202,7 @@ export default class FlashbangApp {
         log.error(e);
     }
 
-    protected _pixi: PIXI.Application | null;
+    protected _pixi: Application | null;
     protected _regs: RegistrationGroup | null = new RegistrationGroup();
 
     protected _isUpdating: boolean;
