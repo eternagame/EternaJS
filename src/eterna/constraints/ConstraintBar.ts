@@ -100,7 +100,7 @@ export default class ConstraintBar extends ContainerObject {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
-                bg.display.on('pointerupoutside', (e) => {
+                bg.display.on('pointerupoutside', (e: any) => {
                     this._drag = false;
                     this._backgroundDrag = false;
                 });
@@ -118,7 +118,7 @@ export default class ConstraintBar extends ContainerObject {
             this._drawerTip = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgConstraintDrawerTip));
             this._background.display.addChild(this._drawerTip);
             this._drawerTip.interactive = true;
-            this._drawerTip.on('pointertap', (e) => this.collapse());
+            this._drawerTip.on('pointertap', (e: any) => this.collapse());
             this._drawerTip.visible = false;
         }
 
