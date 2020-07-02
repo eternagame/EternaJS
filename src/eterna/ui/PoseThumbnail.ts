@@ -97,9 +97,9 @@ export default class PoseThumbnail {
         let frame: DisplayObject | null = null;
 
         if (size === 1) {
-            frame = Sprite.fromImage(Bitmaps.SolutionSmallFrame);
+            frame = Sprite.from(Bitmaps.SolutionSmallFrame);
         } else if (size === 2) {
-            frame = Sprite.fromImage(Bitmaps.SolutionBigFrame);
+            frame = Sprite.from(Bitmaps.SolutionBigFrame);
         } else if (size === 3) {
             frame = DisplayUtil.fillRect(62, 62, 0x0);
         } else if (size === 4) {

@@ -14,7 +14,7 @@ export default class TextureUtil {
         let baseTex = new BaseTexture(img);
         let tex = new Texture(baseTex);
 
-        if (baseTex.hasLoaded) {
+        if (baseTex.valid) {
             // The image may already be loaded
             return tex;
         } else {
@@ -37,16 +37,14 @@ export default class TextureUtil {
     /** Returns a promise that will resolve when the texture is loaded */
     public static async loadTexture(tex: Texture): Promise<Texture> {
         let base: BaseTexture = tex.baseTexture;
-        if (!base.isLoading) {
-            if (base.hasLoaded) return tex;
-            else throw new Error(`texture failed to load [url=${base.imageUrl}]`);
-        } else {
-            // log.debug(`Loading image... [url=${base.imageUrl}]`);
-            return new Promise<Texture>((resolve, reject) => {
-                base.once('loaded', () => resolve(tex));
-                base.once('error', () => reject(new Error(`texture failed to load [url=${base.imageUrl}]`)));
-            });
+        if (!base.valid) {
+            return tex;
         }
+        // log.debug(`Loading image... [url=${base.imageUrl}]`);
+        return new Promise<Texture>((resolve, reject) => {
+            base.once('loaded', () => resolve(tex));
+            base.once('error', () => reject(new Error(`texture failed to load [url=temptemptemp]`)));
+        });
     }
 
     /**
@@ -54,7 +52,7 @@ export default class TextureUtil {
      * Textures are cached after being loaded, so calling this multiple times is fine.
      */
     public static loadURL(texURL: string): Promise<Texture> {
-        return this.loadTexture(Texture.fromImage(texURL));
+        return this.loadTexture(Texture.from(texURL));
     }
 
     /** Returns a promise that will resolve when the textures at the given URLs are loaded. */
