@@ -43,7 +43,7 @@ export default class TextureUtil {
         // log.debug(`Loading image... [url=${base.imageUrl}]`);
         return new Promise<Texture>((resolve, reject) => {
             base.once('loaded', () => resolve(tex));
-            base.once('error', () => reject(new Error(`texture failed to load [url=temptemptemp]`)));
+            base.once('error', () => reject(new Error('texture failed to load [url=temptemptemp]')));
         });
     }
 

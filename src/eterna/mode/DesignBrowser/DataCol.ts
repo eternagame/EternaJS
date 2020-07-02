@@ -1,5 +1,5 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Point, IPoint, Text
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
@@ -141,7 +141,7 @@ export default class DataCol extends ContainerObject {
         this._pairsArray = pairs.slice();
     }
 
-    private get mouseLoc(): Point {
+    private get mouseLoc(): IPoint {
         Assert.assertIsDefined(Flashbang.globalMouse);
         return this.container.toLocal(Flashbang.globalMouse);
     }

@@ -1,6 +1,6 @@
+import {filters} from 'pixi.js';
 import MathUtil from './MathUtil';
 import StringUtil from './StringUtil';
-import {filters} from 'pixi.js';
 
 export default class ColorUtil {
     public static fromString(str: string): number {

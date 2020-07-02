@@ -69,14 +69,6 @@ export default class PseudoknotLines extends GameObject implements LateUpdatable
             }
         }
 
-        if (Arrays.shallowEqual(starts, this._laststarts)
-            && Arrays.shallowEqual(ends, this._lastends)
-            && false) {
-            // base positions haven't changed, and pseudoknotLines have not been cleared,
-            // so no need to update -- just return.
-            return;
-        }
-
         this._laststarts = starts;
         this._lastends = ends;
         this.drawPseudoknotLines(starts, ends);

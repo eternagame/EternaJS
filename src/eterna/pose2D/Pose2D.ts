@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Container, Graphics, Point, Sprite, Texture, Rectangle
+    Container, Graphics, Point, IPoint, Sprite, Texture, Rectangle
 } from 'pixi.js';
 import {Registration} from 'signals';
 import EPars from 'eterna/EPars';
@@ -3125,7 +3125,8 @@ export default class Pose2D extends ContainerObject implements Updatable {
 
             Assert.assertIsDefined(Flashbang.globalMouse);
             if (this._poseField.containsPoint(Flashbang.globalMouse.x, Flashbang.globalMouse.y)) {
-                let mouseP: Point = this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC);
+                let mouseP: Point = new Point(0, 0);
+                mouseP = mouseP.copyFrom(this.display.toLocal(Flashbang.globalMouse, undefined, Pose2D.MOUSE_LOC));
                 let baseXys: Point[] = [];
 
                 for (let ii = 0; ii < this.fullSequenceLength; ii++) {

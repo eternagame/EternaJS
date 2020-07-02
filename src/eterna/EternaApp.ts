@@ -416,8 +416,8 @@ export default class EternaApp extends FlashbangApp {
             backgroundColor: 0x0,
             transparent: true,
             antialias: true,
-            //roundPixels: true,
-            //autoResize: true,
+            // roundPixels: true,
+            // autoResize: true,
             resolution: devicePixelRatio
         });
     }

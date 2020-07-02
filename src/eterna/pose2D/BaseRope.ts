@@ -37,7 +37,7 @@ export default class BaseRope extends GameObject implements LateUpdatable {
     public redraw(forceBaseXY: boolean): void {
         if (!this._enabled) {
             // clear if not cleared.
-            // if (this._graphics.currentPath !== null) 
+            // if (this._graphics.currentPath !== null)
             this._graphics.clear();
             return;
         }
@@ -57,14 +57,6 @@ export default class BaseRope extends GameObject implements LateUpdatable {
                 basePosX.push(center.x);
                 basePosY.push(center.y);
             }
-        }
-
-        if (Arrays.shallowEqual(basePosX, this._lastBasePosX)
-            && Arrays.shallowEqual(basePosY, this._lastBasePosY)
-            && false) {//this._graphics.currentPath !== null) {
-            // base positions haven't changed, and baseRope has not been cleared,
-            // so no need to update -- just return.
-            return;
         }
 
         this._lastBasePosX = basePosX;

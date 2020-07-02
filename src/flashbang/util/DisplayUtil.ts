@@ -1,5 +1,5 @@
 import {
-    DisplayObject, Graphics, Matrix, Point, Rectangle
+    DisplayObject, Graphics, Matrix, Point, IPoint, Rectangle
 } from 'pixi.js';
 import * as UPNG from 'upng-js';
 import Flashbang from 'flashbang/core/Flashbang';
@@ -78,7 +78,7 @@ export default class DisplayUtil {
     /** Transforms a point from one DisplayObject's coordinate space to another's. */
     public static transformPoint(
         p: Point, from: DisplayObject, to: DisplayObject, out: Point | undefined = undefined
-    ): Point {
+    ): IPoint {
         return to.toLocal(from.toGlobal(p, DisplayUtil.P), undefined, out);
     }
 
