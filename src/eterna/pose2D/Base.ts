@@ -1,6 +1,6 @@
 import * as log from 'loglevel';
 import {
-    Point, Sprite, Texture, Graphics
+    Point, Sprite, Texture, Graphics, filters
 } from 'pixi.js';
 import {ContainerObject, LateUpdatable, Flashbang} from 'flashbang';
 import Constants from 'eterna/Constants';
@@ -10,7 +10,7 @@ import BaseAssets from './BaseAssets';
 import BaseDrawFlags from './BaseDrawFlags';
 import Pose2D, {RNAHighlightState} from './Pose2D';
 
-type ColorMatrixFilter = PIXI.filters.ColorMatrixFilter;
+type ColorMatrixFilter = filters.ColorMatrixFilter;
 
 export default class Base extends ContainerObject implements LateUpdatable {
     public static NUM_ZOOM_LEVELS = 2;
@@ -611,7 +611,7 @@ export default class Base extends ContainerObject implements LateUpdatable {
     }
 
     private static multiplyAlphaFilter(multiplier: number): ColorMatrixFilter {
-        let filter = new PIXI.filters.ColorMatrixFilter();
+        let filter = new filters.ColorMatrixFilter();
         filter.matrix = [
             1, 0, 0, 0, 0,
             0, 1, 0, 0, 0,

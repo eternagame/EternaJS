@@ -1,5 +1,6 @@
 import MathUtil from './MathUtil';
 import StringUtil from './StringUtil';
+import {filters} from 'pixi.js';
 
 export default class ColorUtil {
     public static fromString(str: string): number {
@@ -75,7 +76,7 @@ export default class ColorUtil {
         blueOffset: number = 0,
         alphaOffset: number = 0
     ): PIXI.filters.ColorMatrixFilter {
-        const filter = new PIXI.filters.ColorMatrixFilter();
+        const filter = new filters.ColorMatrixFilter();
         filter.matrix = [
             redMultiplier, 0, 0, 0, redOffset,
             0, greenMultiplier, 0, 0, greenOffset,
