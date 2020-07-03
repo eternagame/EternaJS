@@ -128,17 +128,19 @@ export default class ViewSolutionDialog extends Dialog<void> {
             && this._solution.playerID === Eterna.playerID
             && this._solution.getProperty('Votes') === 0
         ) {
+            let thumb = new Graphics()
+                .beginFill(0)
+                .lineStyle(2, 0xC0DCE7)
+                .drawRoundedRect(0, 0, 75, 75, 10)
+                .endFill()
+                .moveTo(10, 10)
+                .lineTo(65, 65)
+                .moveTo(65, 10)
+                .lineTo(10, 65);
+            thumb.alpha = 0;
             let deleteButton = new ThumbnailAndTextButton()
                 .text('Delete')
-                .thumbnail(new Graphics()
-                    .beginFill(0, 0)
-                    .lineStyle(2, 0xC0DCE7)
-                    .drawRoundedRect(0, 0, 75, 75, 10)
-                    .endFill()
-                    .moveTo(10, 10)
-                    .lineTo(65, 65)
-                    .moveTo(65, 10)
-                    .lineTo(10, 65))
+                .thumbnail(thumb)
                 .tooltip('Delete this design to retrieve your slots for this round');
             deleteButton.clicked.connect(() => this.deleteClicked.emit());
             this.addObject(deleteButton, this._actionButtonsLayout);
@@ -228,9 +230,10 @@ class ThumbnailAndTextButton extends GameButton {
 
         this._bgFrame = new Graphics()
             .lineStyle(2, 0xC0DCE7)
-            .beginFill(0x0, 0)
+            .beginFill(0x0)
             .drawRoundedRect(0, 0, 75, 75, 10)
             .endFill();
+        this._bgFrame.alpha = 0;
         this._view.addChild(this._bgFrame);
 
         this._textField = Fonts.arial('', 14).bold().color(0xffffff).build();

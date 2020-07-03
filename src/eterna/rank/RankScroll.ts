@@ -226,6 +226,7 @@ export default class RankScroll extends ContainerObject {
         // Set up rankboard according to above infos
         this._rankBoardTop = new RankBoard(topStartingIdx + 1, rankDataTop.reverse(), maxWidth);
         let maskTop: Graphics = new Graphics();
+        maskTop.alpha = 0;
         maskTop.beginFill(0x00FF00);
         maskTop.drawRect(0, 0, RankBoard.ROW_WIDTH, sizeIndicator * RankBoard.ROW_HEIGHT);
         this.container.addChild(maskTop);
@@ -239,6 +240,7 @@ export default class RankScroll extends ContainerObject {
         this._rankBoardBottom = new RankBoard(this._newRank + 1, rankDataBottom.reverse(), maxWidth);
 
         let maskBottom: Graphics = new Graphics();
+        maskBottom.alpha = 0;
         maskBottom.beginFill(0x00FF00);
         maskBottom.drawRect(
             0, sizeIndicator * RankBoard.ROW_HEIGHT + RankBoard.PLAYER_ROW_HEIGHT,
