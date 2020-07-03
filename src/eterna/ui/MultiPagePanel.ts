@@ -119,7 +119,7 @@ export default class MultiPagePanel extends ContainerObject {
         this._background.interactive = true;
         this._background.on('click', (e: any) => e.stopPropagation());
 
-        this._pageMask.beginFill(0x00FF00, 0);
+        this._pageMask.beginFill(0x00FF00);
         const maskBeginY = theme.title.height;
         this._pageMask.drawRect(0, maskBeginY, this._props.width, this._panelHeight - maskBeginY);
         this._pageMask.endFill();

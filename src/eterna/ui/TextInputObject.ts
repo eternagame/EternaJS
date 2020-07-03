@@ -202,7 +202,7 @@ export default class TextInputObject extends DOMObject<HTMLInputElement | HTMLTe
             .endFill();
         this._fakeTextInput.addChild(bg);
 
-        let textMask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, this.width, this.height).endFill();
+        let textMask = new Graphics().beginFill(0x0).drawRect(0, 0, this.width, this.height).endFill();
         this._fakeTextInput.addChild(textMask);
 
         let displayText = this.text;

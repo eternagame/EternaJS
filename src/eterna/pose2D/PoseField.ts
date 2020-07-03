@@ -75,7 +75,7 @@ export default class PoseField extends ContainerObject implements KeyboardListen
         this.container.mask = null;
 
         if (useMask) {
-            this._mask = new Graphics().beginFill(0x0, 0).drawRect(0, 0, width, height).endFill();
+            this._mask = new Graphics().beginFill(0x0).drawRect(0, 0, width, height).endFill();
             this.container.addChild(this._mask);
             this.container.mask = this._mask;
         }

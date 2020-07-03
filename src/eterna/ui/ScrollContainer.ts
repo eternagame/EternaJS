@@ -55,7 +55,7 @@ export default class ScrollContainer extends Container {
         this._width = width;
         this._height = height;
 
-        this._contentMask.clear().beginFill(0x00ff00, 0).drawRect(0, 0, this._width, this._height).endFill();
+        this._contentMask.clear().beginFill(0x00ff00).drawRect(0, 0, this._width, this._height).endFill();
         this.setScroll(prevScrollX, prevScrollY);
     }
 
