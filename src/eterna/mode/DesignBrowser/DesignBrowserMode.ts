@@ -289,7 +289,7 @@ export default class DesignBrowserMode extends GameMode {
     }
 
     public onMouseWheelEvent(e: WheelEvent): void {
-        const handled = this._solutionView?.container.visible && this._solutionView?.onMouseWheelEvent(e);
+        const handled = this._solutionView?.onMouseWheelEvent(e);
         if (handled) {
             return;
         }

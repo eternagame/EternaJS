@@ -14,7 +14,10 @@ import {
     Assert,
     ContainerObject,
     SceneObject,
-    VLayoutContainer
+    VLayoutContainer,
+    RepeatingTask,
+    AlphaTask,
+    SerialTask
 } from 'flashbang';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import Bitmaps from 'eterna/resources/Bitmaps';
@@ -24,11 +27,15 @@ import BitmapManager from 'eterna/resources/BitmapManager';
 import Utility from 'eterna/util/Utility';
 import EternaURL from 'eterna/net/EternaURL';
 import TextInputObject from 'eterna/ui/TextInputObject';
-import SolutionDescBox from './SolutionDescBox';
+import VScrollBox from 'eterna/ui/VScrollBox';
+import MultiStyleText from 'pixi-multistyle-text';
+import Feedback from 'eterna/Feedback';
+import SliderBar from 'eterna/ui/SliderBar';
 import CopyTextDialogMode from '../CopyTextDialogMode';
 import ThumbnailAndTextButton from './ThumbnailAndTextButton';
 import GameMode from '../GameMode';
 import ButtonWithIcon from './ButtonWithIcon';
+import LabComments from './LabComments';
 
 interface ViewSolutionOverlayProps {
     solution: Solution;
@@ -51,6 +58,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
             commentsBackground: 0x010101,
             commentsBorder: 0x707070
         }
+    };
+
+    private static readonly config = {
+        nullDescription: 'No comment'
     };
 
     public readonly playClicked = new UnitSignal();
@@ -107,10 +118,31 @@ export default class ViewSolutionOverlay extends ContainerObject {
     }
 
     public onMouseWheelEvent(e: WheelEvent): boolean {
-        if (e.x < this.container.position.x) {
+        if (!this.container.visible || e.x < this.container.position.x) {
             return false;
         }
-        this._solutionDescBox.updateScroll(e);
+
+        // update scroll
+        let pxdelta: number;
+        switch (e.deltaMode) {
+            case WheelEvent.DOM_DELTA_PIXEL:
+                pxdelta = e.deltaY;
+                break;
+            case WheelEvent.DOM_DELTA_LINE:
+                // 13 -> body font size
+                pxdelta = e.deltaY * 13;
+                break;
+            case WheelEvent.DOM_DELTA_PAGE:
+                pxdelta = e.deltaY * this._scrollView.height;
+                break;
+            default:
+                throw new Error('Unhandled scroll delta mode');
+        }
+
+        this._scrollView.scrollTo(
+            this._scrollView.scrollProgress + pxdelta / this._scrollView.content.height
+        );
+
         return true;
     }
 
@@ -237,53 +269,41 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(playerDesigns, headerLinks);
 
         // Scrollable content
-        if (this._solutionDescBox) {
-            this._solutionDescBox.destroySelf();
+        this._scrollViewContainer = new Container();
+        this._content.display.addChild(this._scrollViewContainer);
+        this._scrollView = new VScrollBox(200, 200);
+        this._content.addObject(this._scrollView, this._scrollViewContainer);
+        this._contentLayout = new VLayoutContainer(10, HAlign.LEFT);
+        this._scrollView.content.addChild(this._contentLayout);
+
+        // Solution description
+        const description = this.getSolutionText();
+        this._contentLayout.addChild(description);
+        this._contentLayout.addVSpacer(6);
+
+        const isSynthetized = this._props.solution.expFeedback !== null
+            && this._props.solution.expFeedback.isFailed() === 0;
+
+        // Vote button
+        if (
+            !isSynthetized
+            && this._props.solution.getProperty('Synthesized') === 'n'
+            && this._props.solution.getProperty('Round') === this._props.puzzle.round
+            && !this._props.voteDisabled
+        ) {
+            // VOTE (disallowed is solution is synthesized or old)
+            this._voteButton = new ButtonWithIcon({text: {text: ''}, icon: Bitmaps.ImgVote});
+            this._voteButton.clicked.connect(() => this.voteClicked.emit());
+            this.setVoteStatus(this._props.solution.getProperty('My Votes') > 0);
+            this._content.addObject(this._voteButton, this._contentLayout);
         }
-        this._solutionDescBox = new SolutionDescBox({
-            solution: this._props.solution,
-            puzzle: this._props.puzzle,
-            width: theme.width - theme.margin.left - theme.margin.right
-        });
-        this._content.addObject(this._solutionDescBox, this._content.display);
 
-        // Footer
-        this._footer = new VLayoutContainer(12, HAlign.LEFT);
-        this._content.display.addChild(this._footer);
-
+        // Play button
         const playThumbnail = new Sprite();
         let customLayout: Array<[number, number] | [null, null]> | null = null;
         if (this._props.puzzle.targetConditions && this._props.puzzle.targetConditions[0]) {
             customLayout = this._props.puzzle.targetConditions[0]['custom-layout'];
         }
-
-        // Footer buttons
-        this._inputContainer = new VLayoutContainer(10, HAlign.RIGHT);
-        this._footer.addChild(this._inputContainer);
-        this._commentInput = new TextInputObject({
-            fontSize: 14,
-            bgColor: theme.colors.commentsBackground,
-            borderColor: theme.colors.commentsBorder,
-            // TextInputObject seems to be 10px bigger than specified in the width param.
-            // TODO investigate
-            width: theme.width - theme.margin.left - theme.margin.right - 10,
-            rows: 3
-        })
-            .placeholderText('Enter your comment here')
-            .showFakeTextInputWhenNotFocused();
-        this._content.addObject(this._commentInput, this._inputContainer);
-
-        const commentButtonIcon = new Graphics()
-            .beginFill(0x54B54E)
-            .drawRoundedRect(0, 0, 64, 30, 5)
-            .endFill();
-        this._commentButton = new GameButton()
-            .customStyleBox(commentButtonIcon)
-            .label('Post', 14);
-        this._commentButton.clicked.connect(() => this.submitComment());
-        this._commentButton.container.x = theme.width - commentButtonIcon.width;
-        this._content.addObject(this._commentButton, this._inputContainer);
-
         PoseThumbnail.drawToSprite(
             playThumbnail,
             EPars.stringToSequence(this._props.solution.sequence),
@@ -296,10 +316,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
             text: 'View/Copy design'
         }).tooltip('Click to view this design in the game.\nYou can also modify the design and create a new one.');
         playButton.clicked.connect(() => this.playClicked.emit());
-        this._content.addObject(playButton, this._footer);
+        this._content.addObject(playButton, this._contentLayout);
 
-        if (this._props.solution.expFeedback != null && this._props.solution.expFeedback.isFailed() === 0) {
-            // SEE RESULT (allowed if the solution is synthesized)
+        // See result button
+        if (isSynthetized) {
             let expdata = this._props.solution.expFeedback;
             let shapeData = ExpPainter.transformData(
                 expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()
@@ -324,28 +344,18 @@ export default class ViewSolutionOverlay extends ContainerObject {
             })
                 .tooltip('Click to see the experimental result!');
             seeResultButton.clicked.connect(() => this.seeResultClicked.emit());
-            this._content.addObject(seeResultButton, this._footer);
-        } else if (
-            this._props.solution.getProperty('Synthesized') === 'n'
-            && this._props.solution.getProperty('Round') === this._props.puzzle.round
-            && !this._props.voteDisabled
-        ) {
-            // VOTE (disallowed is solution is synthesized or old)
-            this._voteButton = new ButtonWithIcon({text: {text: ''}, icon: Bitmaps.ImgVote});
-            this._voteButton.clicked.connect(() => this.voteClicked.emit());
-            this.setVoteStatus(this._props.solution.getProperty('My Votes') > 0);
-            this._footer.addChildAt(this._voteButton.container, 1);
+            this._content.addObject(seeResultButton, this._contentLayout);
         }
 
+        // Sort button
         const sortImage = Sprite.fromImage(Bitmaps.ImgSort);
-        // sortImage.scale = new Point(0.3, 0.3);
         const sortButton = new ThumbnailAndTextButton({
             thumbnail: sortImage,
             text: 'Sort by sequence similarity'
         })
             .tooltip('Sort based on similarity to this design.');
         sortButton.clicked.connect(() => this.sortClicked.emit());
-        this._content.addObject(sortButton, this._footer);
+        this._content.addObject(sortButton, this._contentLayout);
 
         // DELETE (only allowed if the puzzle belongs to us and has no votes)
         if (
@@ -367,14 +377,52 @@ export default class ViewSolutionOverlay extends ContainerObject {
             })
                 .tooltip('Delete this design to retrieve your slots for this round');
             deleteButton.clicked.connect(() => this.deleteClicked.emit());
-            this._content.addObject(deleteButton, this._footer);
+            this._content.addObject(deleteButton, this._contentLayout);
         }
 
         if (Eterna.DEV_MODE) {
-            this._editButton = new GameButton().label('Edit', 12);
-            this._content.addObject(this._editButton, this._footer);
-            this._editButton.clicked.connect(() => this.editClicked.emit());
+            const editButton = new GameButton().label('Edit', 12);
+            this._content.addObject(editButton, this._contentLayout);
+            editButton.clicked.connect(() => this.editClicked.emit());
         }
+
+        this._contentLayout.addVSpacer(10);
+        // Comment input
+        this._commentsTitle = Fonts.stdBold('Comments', 13).color(0xffffff).bold().build();
+        this._contentLayout.addChild(this._commentsTitle);
+        this._inputContainer = new VLayoutContainer(10, HAlign.RIGHT);
+        this._contentLayout.addChild(this._inputContainer);
+
+        this._commentsInput = new TextInputObject({
+            fontSize: 14,
+            bgColor: theme.colors.commentsBackground,
+            borderColor: theme.colors.commentsBorder,
+            // TextInputObject seems to be 10px bigger than specified in the width param.
+            // TODO investigate
+            width: theme.width - theme.margin.left - theme.margin.right - 10 - SliderBar.THUMB_SIZE,
+            rows: 3
+        })
+            .placeholderText('Enter your comment here')
+            .showFakeTextInputWhenNotFocused();
+        this._content.addObject(this._commentsInput, this._inputContainer);
+
+        const commentButtonIcon = new Graphics()
+            .beginFill(0x54B54E)
+            .drawRoundedRect(0, 0, 64, 30, 5)
+            .endFill();
+        this._commentsButton = new GameButton()
+            .customStyleBox(commentButtonIcon)
+            .label('Post', 14);
+        this._commentsButton.clicked.connect(() => this.submitComment());
+        this._commentsButton.container.x = theme.width - commentButtonIcon.width;
+        this._content.addObject(this._commentsButton, this._inputContainer);
+
+        this._commentsContainer = new VLayoutContainer(10, HAlign.LEFT);
+        this._contentLayout.addChild(this._commentsContainer);
+
+        // Footer
+        this._footer = new VLayoutContainer(12, HAlign.LEFT);
+        this._content.display.addChild(this._footer);
 
         // Footer separator
         this._footer.addChild((() => {
@@ -419,15 +467,16 @@ export default class ViewSolutionOverlay extends ContainerObject {
 
         this._footer.addVSpacer(20);
 
+        this.updateLayout();
+
         // Load comments
+        this._comments = new LabComments(this._props.solution.nodeID);
         this._inputContainer.visible = false;
-        this._solutionDescBox.loadComments().then(() => {
+        this.loadComments().then(() => {
             this._inputContainer.visible = true;
-            this._commentInput.text = '';
+            this._commentsInput.text = '';
             this.updateLayout();
         });
-
-        this.updateLayout();
     }
 
     private updateLayout(): void {
@@ -440,47 +489,165 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._panelBG.display.clear();
         this._panelBG.display.beginFill(0x101010);
         this._panelBG.display.drawRect(0, 0, theme.width, Flashbang.stageHeight);
-
         this._header.layout(true);
-        this._inputContainer.layout(true);
         this._footer.layout(true);
         this._footer.position = new Point(theme.margin.left, Flashbang.stageHeight - this._footer.height);
 
-        this._solutionDescBox.container.position = new Point(
+        this._contentLayout.layout(true);
+        this._scrollViewContainer.position = new Point(
             theme.margin.left,
             this._header.position.y + this._header.height + theme.margin.top
         );
-        this._solutionDescBox.setSize(
-            theme.width - theme.margin.left - theme.margin.right,
-            Flashbang.stageHeight - this._solutionDescBox.container.y - this._footer.height - 20
-        );
+        this.updateScrollViewSize();
     }
 
     private async submitComment() {
-        if (this._commentInput.text === '') {
+        if (this._commentsInput.text === '') {
             (this.mode as GameMode).showNotification('You cannot post an empty comment');
             return;
         }
 
+        this._commentsContainer.removeChildren();
         this._inputContainer.visible = false;
-        await this._solutionDescBox.submitComment(this._commentInput.text);
-        this._commentInput.text = '';
+        const submittingText = ViewSolutionOverlay.createLoadingText('Submitting your comment...');
+        this._content.addObject(submittingText, this._commentsContainer);
+        const commentsData = await this._comments.submitComment(this._commentsInput.text);
+        submittingText.destroySelf();
+
+        this._commentsInput.text = '';
         this._inputContainer.visible = true;
+
+        if (commentsData) {
+            this.updateCommentsView(commentsData);
+            this.updateLayout();
+        }
+    }
+
+    private async loadComments() {
+        const loadingText = ViewSolutionOverlay.createLoadingText('Loading comments...');
+        this._content.addObject(loadingText, this._commentsContainer);
+
+        const commentsData = await this._comments.update();
+        loadingText.destroySelf();
+        if (commentsData) {
+            this.updateCommentsView(commentsData);
+        }
+    }
+
+    private updateCommentsView(commentsData: any[]) {
+        const {theme} = ViewSolutionOverlay;
+        const commentsCount = commentsData?.length ?? 0;
+        this._commentsTitle.text = `Comments (${commentsCount})`;
+
+        this._commentsContainer.removeChildren();
+        for (const comment of commentsData) {
+            const commentLayout = new VLayoutContainer(4, HAlign.LEFT);
+            this._commentsContainer.addChild(commentLayout);
+
+            const url = EternaURL.createURL({page: 'player', uid: comment['uid']});
+            const userButton = new GameButton().label(comment['name'], 12, false);
+            this._content.addObject(userButton, commentLayout);
+
+            // eslint-disable-next-line no-loop-func
+            userButton.clicked.connect(() => window.open(url, '_blank'));
+
+            commentLayout.addChild(Fonts.stdLight(comment['created'], 10).color(0xffffff).build());
+            commentLayout.addVSpacer(6);
+
+            const comm = Fonts.stdLight(comment['comment'], 14)
+                .color(0xffffff)
+                .wordWrap(true, theme.width - 40)
+                .build();
+            commentLayout.addChild(comm);
+        }
+
+        this._commentsContainer.layout(true);
+        this.updateScrollViewSize(true);
+    }
+
+    private getSolutionText() {
+        const {solution, puzzle} = this._props;
+        let text = '';
+
+        if (solution.expFeedback != null) {
+            if (solution.expFeedback.isFailed() === 0) {
+                text += '<bold>[SYNTHESIZED!]</bold>\n'
+                    + '<orange>This design was synthesized with score </orange>'
+                    + `<bold>${solution.getProperty('Synthesis score')} / 100</bold>\n`;
+            } else {
+                let failureIdx = Feedback.EXPCODES.indexOf(solution.expFeedback.isFailed());
+                text += `${Feedback.EXPDISPLAYS_LONG[failureIdx]
+                } Score : <bold>${Feedback.EXPSCORES[failureIdx]} / 100</bold>\n`;
+            }
+        } else if (solution.getProperty('Synthesized') === 'y') {
+            text += '<bold>[WAITING]</bold>\n'
+                    + '<orange>This design is being synthesized and waiting for results. </orange>\n';
+        } else if (solution.getProperty('Round') < puzzle.round) {
+            text += '<bold>[OLD]</bold>\n'
+                    + '<orange>This design was submitted in round </orange>'
+                    + `<bold>${solution.getProperty('Round')}.</bold>`
+                    + "<orange> You can't vote on designs from previous rounds."
+                    + 'But you can use or resubmit this design by clicking on </orange>'
+                    + '<bold>"Modify".</bold>\n';
+        }
+
+        // text += '<bold>Design description</bold>\n\n';
+        if (solution.fullDescription !== ViewSolutionOverlay.config.nullDescription) {
+            text += Utility.stripHtmlTags(solution.fullDescription);
+        }
+
+        const {theme} = ViewSolutionOverlay;
+        return new MultiStyleText(text, {
+            default: {
+                fontFamily: Fonts.STDFONT_REGULAR,
+                fontSize: 13,
+                fill: 0xffffff,
+                wordWrap: true,
+                wordWrapWidth: theme.width - 40
+            },
+            bold: {fontStyle: 'bold'},
+            orange: {fill: 0xffcc00}
+        });
+    }
+
+    private updateScrollViewSize(forceScrollBarCheck?: boolean) {
+        const {theme} = ViewSolutionOverlay;
+        const width = theme.width - theme.margin.left;
+        let height = Flashbang.stageHeight - this._scrollViewContainer.y - this._footer.height - 20;
+
+        // Based on previous code, it seems the scrollbox only updates the bar if it receives a different height
+        if (forceScrollBarCheck) {
+            height++;
+        }
+
+        this._scrollView.setSize(width, height);
+    }
+
+    private static createLoadingText(text: string): SceneObject<Text> {
+        let loadingText = new SceneObject(Fonts.stdBold(text, 14).color(0xffffff).build());
+        loadingText.addObject(new RepeatingTask(() => new SerialTask(
+            new AlphaTask(0, 0.7),
+            new AlphaTask(1, 0.7)
+        )));
+        return loadingText;
     }
 
     private readonly _props: ViewSolutionOverlayProps;
 
     private _content: SceneObject<Container>;
     private _panelBG: SceneObject<Graphics>;
-    private _solutionDescBox: SolutionDescBox;
-    private _inputContainer: VLayoutContainer;
-    private _commentInput: TextInputObject;
-    private _commentButton: GameButton;
-    private _voteButton: ButtonWithIcon;
 
-    private _cancelButton: GameButton;
-    private _editButton: GameButton;
+    private _inputContainer: VLayoutContainer;
+    private _commentsTitle: Text;
+    private _commentsInput: TextInputObject;
+    private _commentsButton: GameButton;
+    private _commentsContainer: VLayoutContainer;
+    private _comments: LabComments;
 
     private _header: VLayoutContainer;
+    private _scrollViewContainer: Container;
+    private _scrollView: VScrollBox;
+    private _contentLayout: VLayoutContainer;
+    private _voteButton: ButtonWithIcon;
     private _footer: VLayoutContainer;
 }

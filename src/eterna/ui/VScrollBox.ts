@@ -21,6 +21,8 @@ export default class VScrollBox extends SceneObject<ScrollContainer> {
         return this.display.content;
     }
 
+    public get height() { return this._height; }
+
     public setSize(width: number, height: number): void {
         if (this._width === width && this._height === height) {
             return;
