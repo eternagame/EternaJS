@@ -255,7 +255,7 @@ export default class SpecBox extends ContainerObject {
                 this._dotPlotSprite.mask = null;
             }
 
-            let mask = new Graphics().beginFill(0, 0).drawRect(0, 0, plotSize, plotSize).endFill();
+            let mask = new Graphics().beginFill(0).drawRect(0, 0, plotSize, plotSize).endFill();
             this._dotPlotSprite.addChild(mask);
             this._dotPlotSprite.mask = mask;
 

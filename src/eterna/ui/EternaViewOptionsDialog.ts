@@ -132,7 +132,7 @@ export default class EternaViewOptionsDialog extends Dialog<void> {
             this._panel.setSize(this._viewLayout.width + 40, panelHeight);
 
             this._panelMask.clear();
-            this._panelMask.beginFill(0x00FF00, 0);
+            this._panelMask.beginFill(0x00FF00);
             this._panelMask.drawRect(
                 0, this._panel.titleHeight, this._viewLayout.width + 40, panelHeight - this._panel.titleHeight
             );
