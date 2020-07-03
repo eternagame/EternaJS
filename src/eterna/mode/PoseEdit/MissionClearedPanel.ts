@@ -273,6 +273,7 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
     private drawMask(): void {
         const {theme} = MissionClearedPanel;
         this._infoMask.clear();
+        this._infoMask.alpha = 0;
         this._infoMask.beginFill(0x00FF00);
         this._infoMask.drawRect(
             0,
@@ -308,7 +309,8 @@ export default class MissionClearedPanel extends ContainerObject implements Mous
         const {theme} = MissionClearedPanel;
 
         this._widthEnforcer.clear();
-        this._widthEnforcer.beginFill(0x000000, 0);
+        this._widthEnforcer.beginFill(0x000000);
+        this._widthEnforcer.alpha = 0;
         this._widthEnforcer.drawRect(0, 0, panelWidth - (theme.margin.left * 2), 5);
 
         this._contentLayout.layout(true);

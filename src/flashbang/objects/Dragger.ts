@@ -92,7 +92,8 @@ export default class Dragger extends GameObject {
         Assert.assertIsDefined(Flashbang.stageHeight);
         Assert.assertIsDefined(Flashbang.stageWidth);
         Assert.assertIsDefined(this._disp);
-        this._disp.clear().beginFill(0x0, 0).drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight).endFill();
+        this._disp.clear().beginFill(0x0).drawRect(0, 0, Flashbang.stageWidth, Flashbang.stageHeight).endFill();
+        this._disp.alpha = 0;
     }
 
     private complete(point?: Point): void {
