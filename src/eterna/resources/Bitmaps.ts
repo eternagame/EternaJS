@@ -327,6 +327,9 @@ export default class Bitmaps {
     public static readonly ImgSort: string = require('assets/DesignBrowser/sort-icon.png');
     public static readonly ImgPrevious: string = require('assets/DesignBrowser/previous-icon.png');
     public static readonly ImgNext: string = require('assets/DesignBrowser/next-icon.png');
+    public static readonly ImgRemove: string = require('assets/TangoIcons/remove.png');
+    public static readonly ImgResetCriteria: string = require('assets/DesignBrowser/reset.png');
+    public static readonly ImgAdd: string = require('assets/DesignBrowser/add.png');
 
     public static get all(): string[] {
         if (Bitmaps.ALL_URLS == null) {

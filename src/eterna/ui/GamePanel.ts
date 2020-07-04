@@ -86,7 +86,7 @@ export default class GamePanel extends BaseGamePanel {
                 }
 
                 this._titleText.text = this._title.toUpperCase();
-                this._titleText.position = new Point((this._width - this._titleText.width) * 0.5, 6);
+                this._titleText.position = new Point((this._width - this._titleText.width) * 0.5, 10);
                 this._background.beginFill(this._borderColor, this._borderAlpha);
                 this._background
                     .moveTo(0, 35)

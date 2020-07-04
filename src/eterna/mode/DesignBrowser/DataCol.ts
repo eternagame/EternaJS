@@ -212,6 +212,7 @@ export default class DataCol extends ContainerObject {
     /** True if the solution passes our filter options */
     public shouldDisplay(sol: Solution): boolean {
         if (this._dataType === DesignBrowserDataType.VOTE) {
+            // Vote filtering goes here
             return true;
         } else if (this._dataType === DesignBrowserDataType.STRING) {
             let queryString: string = this._filterField1.text;
@@ -317,6 +318,13 @@ export default class DataCol extends ContainerObject {
         }
     }
 
+    public setVoteStatus(index: number, voted: boolean) {
+        const voteButton = this._votesContainer.getNamedObject(`vote${index}`) as GameButton;
+        if (voteButton) {
+            voteButton.allStates(voted ? Bitmaps.ImgUnvote : Bitmaps.ImgVote);
+        }
+    }
+
     private toggleSortState(): void {
         if (this._sortOrder === SortOrder.INCREASING) {
             this._sortOrder = SortOrder.DECREASING;
@@ -360,7 +368,7 @@ export default class DataCol extends ContainerObject {
                         this.voteChanged.emit(solutionIndex);
                         e.stopPropagation();
                     });
-                    this._votesContainer.addObject(voteButton, this._votesContainer.target);
+                    this._votesContainer.addNamedObject(`vote${solutionIndex}`, voteButton, this._votesContainer.target);
                 } else {
                     this._votesContainer.target.addVSpacer(dummySprite.height);
                 }

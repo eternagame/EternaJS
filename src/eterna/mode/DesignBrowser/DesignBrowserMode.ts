@@ -474,9 +474,20 @@ export default class DesignBrowserMode extends GameMode {
                 }
                 cleanup();
 
+                const newVoteStatus = (1 - myVotes) > 0;
+
                 // Toggle vote button
                 if (this._solutionView) {
-                    this._solutionView.setVoteStatus((1 - myVotes) > 0);
+                    this._solutionView.setVoteStatus(newVoteStatus);
+                }
+
+                // Update corresponding icon in Vote column
+                const voteColumn = this._dataCols.find((c) => c.category === DesignCategory.VOTE);
+                if (voteColumn) {
+                    const solutionIndex = this._allSolutions.indexOf(solution);
+                    if (solutionIndex >= 0) {
+                        voteColumn.setVoteStatus(solutionIndex, newVoteStatus);
+                    }
                 }
             })
             .catch((err) => {
@@ -754,7 +765,10 @@ export default class DesignBrowserMode extends GameMode {
                         column = new DataCol(DesignBrowserDataType.VOTE, category, 60, FONT, FONT_SIZE, false);
                         column.voteChanged.connect((solutionIndex) => {
                             const solution = this._allSolutions[solutionIndex];
-                            this.vote(solution);
+                            Assert.assertIsDefined(solution);
+                            if (solution) {
+                                this.vote(solution);
+                            }
                         });
                         break;
                     case DesignCategory.TITLE:
