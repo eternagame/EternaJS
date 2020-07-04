@@ -93,6 +93,16 @@ export default class Solution {
         this._hasFoldData = avail;
     }
 
+    public get synthetized() {
+        return this.expFeedback?.isFailed() === 0;
+    }
+
+    public canVote(round: number) {
+        return !this.synthetized
+            && this.getProperty('Synthesized') === 'n'
+            && this.getProperty('Round') === round;
+    }
+
     public setNumPairs(gc: number, gu: number, ua: number): void {
         this._numGCs = gc;
         this._numGUs = gu;

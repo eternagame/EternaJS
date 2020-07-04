@@ -30,6 +30,6 @@ export default class UITheme {
         headerHeight: 36,
         filterHeight: 44,
         filterPadding: 8,
-        dataPadding: 20
+        dataPadding: 24
     };
 }

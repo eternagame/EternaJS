@@ -281,15 +281,10 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._contentLayout.addChild(description);
         this._contentLayout.addVSpacer(6);
 
-        const isSynthetized = this._props.solution.expFeedback !== null
-            && this._props.solution.expFeedback.isFailed() === 0;
-
         // Vote button
         if (
-            !isSynthetized
-            && this._props.solution.getProperty('Synthesized') === 'n'
-            && this._props.solution.getProperty('Round') === this._props.puzzle.round
-            && !this._props.voteDisabled
+            !this._props.voteDisabled
+            && this._props.solution.canVote(this._props.puzzle.round)
         ) {
             // VOTE (disallowed is solution is synthesized or old)
             this._voteButton = new ButtonWithIcon({text: {text: ''}, icon: Bitmaps.ImgVote});
@@ -319,7 +314,7 @@ export default class ViewSolutionOverlay extends ContainerObject {
         this._content.addObject(playButton, this._contentLayout);
 
         // See result button
-        if (isSynthetized) {
+        if (this._props.solution.synthetized) {
             let expdata = this._props.solution.expFeedback;
             let shapeData = ExpPainter.transformData(
                 expdata.getShapeData(), expdata.getShapeMax(), expdata.getShapeMin()

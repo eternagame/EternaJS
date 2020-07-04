@@ -48,7 +48,7 @@ export default class EternaSettings extends Settings {
         this.pipEnabled = this.setting<boolean>('pipEnabled', false);
         this.simpleGraphics = this.setting<boolean>('simpleGraphics', false);
         this.usePuzzlerLayout = this.setting<boolean>('usePuzzlerLayout', false);
-        this.designBrowserColumnNames = this.setting('designBrowserColumnNames', null);
+        this.designBrowserColumnNames = this.setting('designBrowserColumnNames-2', null);
         this.designBrowserSelectedSolutionIDs = this.setting('designBrowserSelectedSolutionIDs', null);
 
         // Denotes whether savegames have been transfered from localstorage/storeJS/EternaSettings to

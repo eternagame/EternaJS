@@ -40,9 +40,11 @@ export enum DesignBrowserDataType {
     INT = 0,
     STRING = 1,
     NUMBER = 2,
+    VOTE = 3
 }
 
 export enum DesignCategory {
+    VOTE = 'Vote',
     ID = 'Id',
     TITLE = 'Title',
     DESIGNER = 'Designer',
@@ -136,19 +138,20 @@ export default class DesignBrowserMode extends GameMode {
 
         const selectionBoxParent = new Container();
         selectionBoxParent.mask = this._maskBox;
-        this._selectionBox = new SelectionBox(0xFFFFFF);
+        this._selectionBox = new SelectionBox(0x2F94D1);
         this._selectionBox.position = new Point(7, 0);
         this._selectionBox.visible = false;
         selectionBoxParent.addChild(this._selectionBox);
         this._content.addChild(selectionBoxParent);
 
         this._dataColParent.pointerMove.connect(() => this.onMouseMove());
-        this._dataColParent.pointerDown.connect(() => this.onMouseDown());
+        this._dataColParent.pointerUp.connect(() => this.onMouseUp());
 
         this._categories = Eterna.settings.designBrowserColumnNames.value;
         if (this._categories == null) {
             this._categories = DesignBrowserMode.DEFAULT_COLUMNS.slice();
         }
+
         this._selectedSolutionIDs = Eterna.settings.designBrowserSelectedSolutionIDs.value;
         if (this._selectedSolutionIDs == null) {
             this._selectedSolutionIDs = [];
@@ -482,7 +485,7 @@ export default class DesignBrowserMode extends GameMode {
             });
     }
 
-    private onMouseDown(): void {
+    private onMouseUp(): void {
         if (Flashbang.app.isControlKeyDown || Flashbang.app.isMetaKeyDown) {
             this.mark();
             return;
@@ -517,9 +520,7 @@ export default class DesignBrowserMode extends GameMode {
                     const {designBrowser: theme} = UITheme;
                     const rowIndex = this._currentSolutionIndex - this._firstVisSolutionIdx;
                     if (rowIndex >= 0) {
-                        this._selectionBox.position.y = theme.headerHeight
-                            + theme.filterHeight
-                            + rowIndex * theme.rowHeight;
+                        this.updateSelectionBoxPos(rowIndex);
                     }
                 }
             };
@@ -563,9 +564,16 @@ export default class DesignBrowserMode extends GameMode {
         const [index, yOffset] = this._dataCols[0].getMouseIndex();
         if (index >= 0 && index < this._filteredSolutions.length) {
             this._selectionBox.visible = true;
-            const {designBrowser: theme} = UITheme;
-            this._selectionBox.position.y = theme.headerHeight + theme.filterHeight + index * theme.rowHeight;
+            this.updateSelectionBoxPos(index);
         }
+    }
+
+    private updateSelectionBoxPos(index: number) {
+        const {designBrowser: theme} = UITheme;
+        this._selectionBox.position.y = theme.headerHeight
+            + theme.filterHeight
+            + index * theme.rowHeight
+            + theme.dataPadding / 2;
     }
 
     private mark(): void {
@@ -742,6 +750,13 @@ export default class DesignBrowserMode extends GameMode {
 
                 let column: DataCol;
                 switch (category) {
+                    case DesignCategory.VOTE:
+                        column = new DataCol(DesignBrowserDataType.VOTE, category, 60, FONT, FONT_SIZE, false);
+                        column.voteChanged.connect((solutionIndex) => {
+                            const solution = this._allSolutions[solutionIndex];
+                            this.vote(solution);
+                        });
+                        break;
                     case DesignCategory.TITLE:
                         column = new DataCol(DesignBrowserDataType.STRING, category, 250, FONT, FONT_SIZE, true);
                         break;
@@ -804,11 +819,6 @@ export default class DesignBrowserMode extends GameMode {
             let dataArray: any[] = [];
 
             let {category} = dataCol;
-            let feedbacks: (Feedback | null)[] = [];
-
-            for (let solution of solutions) {
-                feedbacks.push(solution.expFeedback);
-            }
 
             for (let ii = 0; ii < solutions.length; ii++) {
                 // single row of raw data
@@ -834,6 +844,10 @@ export default class DesignBrowserMode extends GameMode {
                     } else {
                         dataArray.push(`${des.substr(0, 25)}...`);
                     }
+                } else if (category === DesignCategory.VOTE) {
+                    const canVote = !this._novote && singleLineRawData.canVote(puz.round);
+                    const voted = singleLineRawData.getProperty('My Votes') > 0;
+                    dataArray.push({canVote, voted, solutionIndex: ii});
                 } else {
                     let rawdata: any = singleLineRawData.getProperty(category);
                     dataArray.push(rawdata);
@@ -841,7 +855,7 @@ export default class DesignBrowserMode extends GameMode {
             }
 
             if (category === DesignCategory.SEQUENCE || category === DesignCategory.SYNTHESIS_SCORE) {
-                dataCol.expFeedback = feedbacks;
+                dataCol.expFeedback = solutions.map((solution) => solution.expFeedback);
             }
             dataCol.setPairs(EPars.parenthesisToPairs(puz.getSecstruct()));
 
@@ -956,6 +970,7 @@ export default class DesignBrowserMode extends GameMode {
     private _currentSolutionIndex = -1;
 
     private static readonly DEFAULT_COLUMNS: DesignCategory[] = [
+        DesignCategory.VOTE,
         DesignCategory.ID,
         DesignCategory.TITLE,
         DesignCategory.DESIGNER,

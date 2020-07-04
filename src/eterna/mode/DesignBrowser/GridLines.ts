@@ -24,7 +24,7 @@ export default class GridLines extends Graphics {
         const {designBrowser: theme} = UITheme;
         this.lineStyle(this._thickness, this._color);
         for (let ii = 1; ii < Math.ceil(height / this._intervalSpacing); ii++) {
-            const y = ii * this._intervalSpacing - theme.dataPadding;
+            const y = ii * this._intervalSpacing - theme.dataPadding / 2;
             this.moveTo(0, y);
             this.lineTo(width, y);
         }

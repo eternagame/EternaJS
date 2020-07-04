@@ -1,9 +1,9 @@
 import {
-    Container, Graphics, Point, Text
+    Container, Graphics, Point, Text, Sprite, Texture
 } from 'pixi.js';
 import {Signal, UnitSignal} from 'signals';
 import {
-    ContainerObject, TextBuilder, Flashbang, Assert
+    ContainerObject, TextBuilder, Flashbang, Assert, VLayoutContainer, SceneObject, HAlign
 } from 'flashbang';
 import Feedback from 'eterna/Feedback';
 import GameButton from 'eterna/ui/GameButton';
@@ -13,6 +13,8 @@ import Solution from 'eterna/puzzle/Solution';
 import int from 'eterna/util/int';
 import Utility from 'eterna/util/Utility';
 import UITheme from 'eterna/ui/UITheme';
+import Bitmaps from 'eterna/resources/Bitmaps';
+import BitmapManager from 'eterna/resources/BitmapManager';
 import {SortOrder} from './SortOptions';
 import SequenceStringListView from './SequenceStringListView';
 import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
@@ -20,6 +22,7 @@ import {DesignBrowserDataType, DesignCategory} from './DesignBrowserMode';
 export default class DataCol extends ContainerObject {
     public readonly sortOrderChanged = new Signal<SortOrder>();
     public readonly filtersChanged = new UnitSignal();
+    public readonly voteChanged = new Signal<number>();
     public readonly category: DesignCategory;
 
     constructor(dataType: DesignBrowserDataType, category: DesignCategory,
@@ -46,20 +49,24 @@ export default class DataCol extends ContainerObject {
         this._graphics = new Graphics();
         this.container.addChild(this._graphics);
 
-        let dataDisplayBuilder = new TextBuilder()
-            .font(this._fontType)
-            .fontSize(this._fontSize)
-            .color(0xffffff)
-            .lineHeight(theme.rowHeight);
-        this._lineHeight = dataDisplayBuilder.computeLineHeight();
-
         const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
-        this._dataDisplay = dataDisplayBuilder.build();
-        // this._dataDisplay.setText("A\nA");
-        // let metr: TextLineMetrics = this._dataDisplay.GetTextBox().getLineMetrics(0);
-        // this._lineHeight = metr.height + metr.leading / 2;
-        this._dataDisplay.position = new Point(11, dataStart);
-        this.container.addChild(this._dataDisplay);
+        this._lineHeight = theme.rowHeight;
+
+        if (this._dataType !== DesignBrowserDataType.VOTE) {
+            let dataDisplayBuilder = new TextBuilder()
+                .font(this._fontType)
+                .fontSize(this._fontSize)
+                .color(0xffffff)
+                .lineHeight(theme.rowHeight);
+            this._lineHeight = dataDisplayBuilder.computeLineHeight();
+
+            this._dataDisplay = dataDisplayBuilder.build();
+            // this._dataDisplay.setText("A\nA");
+            // let metr: TextLineMetrics = this._dataDisplay.GetTextBox().getLineMetrics(0);
+            // this._lineHeight = metr.height + metr.leading / 2;
+            this._dataDisplay.position = new Point(11, dataStart);
+            this.container.addChild(this._dataDisplay);
+        }
 
         this._sequencesView = new SequenceStringListView(
             this._fontType, this._fontSize, true, this._fontSize, this._lineHeight
@@ -81,7 +88,9 @@ export default class DataCol extends ContainerObject {
 
         const TEXT_INPUT_SIZE = 13;
 
-        if (this._dataType === DesignBrowserDataType.STRING) {
+        if (this._dataType === DesignBrowserDataType.VOTE) {
+            // Vote filtering goes here
+        } else if (this._dataType === DesignBrowserDataType.STRING) {
             this._filterField1 = new TextInputObject({
                 fontSize: TEXT_INPUT_SIZE,
                 width: this._dataWidth - 22,
@@ -202,7 +211,9 @@ export default class DataCol extends ContainerObject {
 
     /** True if the solution passes our filter options */
     public shouldDisplay(sol: Solution): boolean {
-        if (this._dataType === DesignBrowserDataType.STRING) {
+        if (this._dataType === DesignBrowserDataType.VOTE) {
+            return true;
+        } else if (this._dataType === DesignBrowserDataType.STRING) {
             let queryString: string = this._filterField1.text;
             if (queryString.length === 0) {
                 return true;
@@ -276,6 +287,8 @@ export default class DataCol extends ContainerObject {
                 this._rawData.push(`${raw[ii]}`);
             } else if (this._dataType === DesignBrowserDataType.NUMBER) {
                 this._rawData.push(Number(raw[ii]));
+            } else if (this._dataType === DesignBrowserDataType.VOTE) {
+                this._rawData.push(raw[ii]);
             } else {
                 throw new Error(`Unrecognized data type ${this._dataType}`);
             }
@@ -320,6 +333,42 @@ export default class DataCol extends ContainerObject {
         let dataString = '';
         let boardData: string[] = [];
         let boardExpData: any[] = [];
+
+        if (this.category === DesignCategory.VOTE) {
+            const {designBrowser: theme} = UITheme;
+            const dataStart = theme.headerHeight + theme.filterHeight + theme.dataPadding;
+            const dummySprite = new Sprite(BitmapManager.getBitmap(Bitmaps.ImgVote));
+            if (this._votesContainer) {
+                this._votesContainer.destroySelf();
+            }
+            this._votesContainer = new SceneObject(new VLayoutContainer(theme.rowHeight - dummySprite.height));
+            this._votesContainer.display.position = new Point(
+                (this._dataWidth - dummySprite.width) / 2,
+                dataStart
+            );
+            this.addObject(this._votesContainer, this.container);
+
+            for (let ii = this._offset; ii < this._offset + this._numDisplay; ii++) {
+                if (ii >= this._rawData.length) {
+                    break;
+                }
+                const {canVote, voted, solutionIndex} = this._rawData[ii];
+                if (canVote) {
+                    const voteSprite = voted ? Bitmaps.ImgUnvote : Bitmaps.ImgVote;
+                    const voteButton = new GameButton().allStates(voteSprite);
+                    voteButton.pointerUp.connect((e) => {
+                        this.voteChanged.emit(solutionIndex);
+                        e.stopPropagation();
+                    });
+                    this._votesContainer.addObject(voteButton, this._votesContainer.target);
+                } else {
+                    this._votesContainer.target.addVSpacer(dummySprite.height);
+                }
+            }
+
+            this._votesContainer.target.layout(true);
+            return;
+        }
 
         let pairsLength = 0;
         if (this._pairsArray != null) {
@@ -468,6 +517,7 @@ export default class DataCol extends ContainerObject {
     private _height: number = 0;
 
     private _dataDisplay: Text;
+    private _votesContainer: SceneObject<VLayoutContainer>;
 
     private _rawData: any[] = [];
     private _dataWidth: number;
