@@ -1,10 +1,6 @@
-Binary files LinearPartition_stock/.git/index and LinearPartition/.git/index differ
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591459416 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
-+0000000000000000000000000000000000000000 be39ec075cc48769230ce07eb53900493649b639 Jonathan Romano <jonathan@luxaritas.com> 1591458114 -0400	clone: from https://github.com/LinearFold/LinearPartition.git
 diff -X .gitignore -ur LinearPartition_stock/src/bpp.cpp LinearPartition/src/bpp.cpp
---- LinearPartition_stock/src/bpp.cpp	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/bpp.cpp	2020-06-06 11:42:29.929047869 -0400
+--- LinearPartition_stock/src/bpp.cpp	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/bpp.cpp	2020-06-23 19:53:08.561450868 -0400
 @@ -11,6 +11,7 @@
  
  using namespace std;
@@ -20,8 +16,8 @@ diff -X .gitignore -ur LinearPartition_stock/src/bpp.cpp LinearPartition/src/bpp
 -
 +}
 diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearPartition/src/LinearPartition.cpp
---- LinearPartition_stock/src/LinearPartition.cpp	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/LinearPartition.cpp	2020-06-06 11:42:29.925714547 -0400
+--- LinearPartition_stock/src/LinearPartition.cpp	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/LinearPartition.cpp	2020-06-23 19:53:08.561450868 -0400
 @@ -32,6 +32,7 @@
  
  using namespace std;
@@ -48,8 +44,8 @@ diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.cpp LinearParti
 +}
 \ No newline at end of file
 diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPartition/src/LinearPartition.h
---- LinearPartition_stock/src/LinearPartition.h	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/LinearPartition.h	2020-06-06 11:45:46.065111584 -0400
+--- LinearPartition_stock/src/LinearPartition.h	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/LinearPartition.h	2020-06-23 19:53:08.565450683 -0400
 @@ -6,14 +6,18 @@
   created by: 03/2019
  */
@@ -97,8 +93,8 @@ diff -X .gitignore -ur LinearPartition_stock/src/LinearPartition.h LinearPartiti
  
  #endif //FASTCKY_BEAMCKYPAR_H
 diff -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h LinearPartition/src/Utils/feature_weight.h
---- LinearPartition_stock/src/Utils/feature_weight.h	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/Utils/feature_weight.h	2020-06-06 11:42:29.929047869 -0400
+--- LinearPartition_stock/src/Utils/feature_weight.h	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/Utils/feature_weight.h	2020-06-23 19:53:08.565450683 -0400
 @@ -9,6 +9,9 @@
  
  #ifndef FASTCKY_W
@@ -119,19 +115,26 @@ diff -X .gitignore -ur LinearPartition_stock/src/Utils/feature_weight.h LinearPa
  #endif
 \ No newline at end of file
 diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartition/src/Utils/utility.h
---- LinearPartition_stock/src/Utils/utility.h	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/Utils/utility.h	2020-06-06 11:42:29.929047869 -0400
-@@ -15,6 +15,9 @@
+--- LinearPartition_stock/src/Utils/utility.h	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/Utils/utility.h	2020-07-06 16:10:18.755086425 -0400
+@@ -13,7 +13,16 @@
+ #include <cstring>
+ #include <assert.h>
  
++#ifdef le
++namespace LinearPartition {
++#include "../../../../EternaFold/EternaFold/parameters/LinearFold/feature_weight_e.h"
++}
++#else
  #include "feature_weight.h"
- 
++#endif
++
 +namespace LinearPartition {
 +
-+
+ 
  #define INF 1000000007
  
- #define NOTON 5 // NUM_OF_TYPE_OF_NUCS
-@@ -274,4 +277,6 @@
+@@ -274,4 +283,6 @@
      return (j-i+1) * external_unpaired;
  }
  
@@ -139,8 +142,8 @@ diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility.h LinearPartition
 +
  #endif //FASTCKY_UTILITY_H
 diff -X .gitignore -ur LinearPartition_stock/src/Utils/utility_v.h LinearPartition/src/Utils/utility_v.h
---- LinearPartition_stock/src/Utils/utility_v.h	2020-06-06 12:03:36.479701546 -0400
-+++ LinearPartition/src/Utils/utility_v.h	2020-06-06 11:42:29.929047869 -0400
+--- LinearPartition_stock/src/Utils/utility_v.h	2020-07-06 16:20:56.645672402 -0400
++++ LinearPartition/src/Utils/utility_v.h	2020-06-23 19:53:08.565450683 -0400
 @@ -9,6 +9,7 @@
  #ifndef FASTCKY_UTILITY_V_H
  #define FASTCKY_UTILITY_V_H
