@@ -13,7 +13,7 @@ export default class Assert {
         Assert.ok(() => !predicate, message);
     }
 
-    public static notNull(arg: any, message?: string): void {
+    public static notNull<T>(arg: T, message?: string): void {
         Assert.ok(() => arg != null, message);
     }
 

@@ -291,13 +291,14 @@ export default class Utility {
      *
      * @returns array of numbers
     */
-    public static numberingJSONToArray(numberingJSON: any): (number | null)[] | null {
+    public static numberingJSONToArray(numberingJSON: string | null): (number | null)[] | null {
         if (numberingJSON === null) return null;
-        if (typeof numberingJSON === 'string') {
+        else { // if (typeof numberingJSON === 'string') {
             return this.getIndices(numberingJSON);
-        } else if (typeof numberingJSON === 'object') {
-            return numberingJSON;
         }
-        return numberingJSON;
+        //  else if (typeof numberingJSON === 'object') {
+        //     return numberingJSON;
+        // }
+        // return numberingJSON;
     }
 }

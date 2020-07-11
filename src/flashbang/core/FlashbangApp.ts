@@ -197,7 +197,7 @@ export default class FlashbangApp {
      * Called when an uncaught error is thrown. No assumptions should be made about the state
      * of the application when this is called!
      */
-    protected onUncaughtError(e: any): void {
+    protected onUncaughtError(e: ErrorEvent): void {
         log.error(e);
     }
 

@@ -193,8 +193,10 @@ export default class RScriptEnv extends ContainerObject {
                     obj.display.visible = visible;
                 }
 
-                if (((obj as any) as Enableable).enabled !== undefined) {
-                    ((obj as any) as Enableable).enabled = visible && !disabled;
+                // AMW TODO: this concerns me. Neither DisplayObject nor GameObject
+                // seem to actually implement Enableable...
+                if (((obj as unknown) as Enableable).enabled !== undefined) {
+                    ((obj as unknown) as Enableable).enabled = visible && !disabled;
                 }
             }
         }
