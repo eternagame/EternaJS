@@ -1,8 +1,43 @@
 import * as log from 'loglevel';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import Feedback from 'eterna/Feedback';
+import Feedback, {BrentTheoData} from 'eterna/Feedback';
 import Solution from './Solution';
+
+interface SolutionSpec {
+    id: string;
+    puznid: string;
+    sequence: string;
+    title: string;
+    name: string | null;
+    uid: string | null;
+    gc: string;
+    gu: string;
+    au: string;
+    meltpoint: string;
+    energy: string;
+    body: string;
+    'submitted-round': string;
+    'synthesis-round': string;
+    'synthesis-score': string;
+    'synthesis-data': string;
+    SHAPE: string;
+    'SHAPE-threshold': string;
+    'SHAPE-max': string;
+    'SHAPE-min': string;
+    'has-fold-data': number | null;
+    'fold-data': string;
+}
+
+interface SynthesisData {
+    reactive: string;
+    start_index: string;
+    peaks: string[];
+    target_index: string;
+    threshold: string;
+    max: string;
+    min: string;
+}
 
 export default class SolutionManager {
     public static get instance(): SolutionManager {
@@ -75,7 +110,7 @@ export default class SolutionManager {
         return titles;
     }
 
-    private static processData(obj: any): Solution {
+    private static processData(obj: SolutionSpec): Solution {
         let newsol: Solution = new Solution(Number(obj['id']), Number(obj['puznid']));
         newsol.sequence = obj['sequence'];
         newsol.title = obj['title'];
@@ -102,12 +137,12 @@ export default class SolutionManager {
         newsol.setSynthesis(Number(obj['synthesis-round']), Number(obj['synthesis-score']));
 
         if (obj['synthesis-data'] && obj['synthesis-data'].length > 0) {
-            let synthesisDataRaw: any = JSON.parse(obj['synthesis-data']);
+            let synthesisDataRaw: SynthesisData[] | BrentTheoData = JSON.parse(obj['synthesis-data']);
             if (Array.isArray(synthesisDataRaw)) {
-                let synthesisData: any[] = synthesisDataRaw;
+                let synthesisData: SynthesisData[] = synthesisDataRaw;
 
                 for (let ii = 0; ii < synthesisData.length; ii++) {
-                    let synthesis: any = synthesisData[ii];
+                    let synthesis: SynthesisData = synthesisData[ii];
                     if (synthesis['reactive'] === 'SHAPE') {
                         let peaks: number[] = [];
                         peaks.push(Number(synthesis['start_index']));
@@ -145,14 +180,15 @@ export default class SolutionManager {
             if (Feedback.EXPSTRINGS.indexOf(obj['SHAPE']) >= 0) {
                 newfb.setShapeData(null, 0, null, null, null, obj['SHAPE']);
             } else {
-                let shapeArray = obj['SHAPE'].split(',');
-                for (let kk = 0; kk < shapeArray.length; kk++) {
-                    shapeArray[kk] = Number(shapeArray[kk]);
+                const protoshapeArray = obj['SHAPE'].split(',');
+                let shapeArray: number[];
+                for (let kk = 0; kk < protoshapeArray.length; kk++) {
+                    shapeArray[kk] = Number(protoshapeArray[kk]);
                 }
 
-                let max: any = null;
-                let min: any = null;
-                let threshold: any = null;
+                let max: number | null = null;
+                let min: number | null = null;
+                let threshold: number | null = null;
 
                 if (obj['SHAPE-threshold'] != null && obj['SHAPE-threshold'] !== '') {
                     threshold = Number(obj['SHAPE-threshold']);

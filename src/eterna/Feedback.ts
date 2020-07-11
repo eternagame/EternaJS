@@ -1,3 +1,6 @@
+export interface BrentTheoData {
+    type: string;
+}
 export default class Feedback {
     public static readonly EXPCODES: number[] = [1, -100, -200];
     public static readonly EXPSTRINGS: string[] = ['NOT SYNTHESIZED', 'FAILED', 'NOT INTERPRETABLE'];
@@ -39,17 +42,17 @@ export default class Feedback {
     }
 
     // / Ad-hoc object for Brent's theophylline puzzle
-    public set brentTheoData(dat: any) {
+    public set brentTheoData(dat: BrentTheoData) {
         this._brentTheoData = dat;
     }
 
-    public get brentTheoData(): any {
+    public get brentTheoData(): BrentTheoData {
         return this._brentTheoData;
     }
 
     public setShapeData(
         dat: number[] | null, index: number,
-        threshold: any, max: any, min: any, failed: string | null
+        threshold: number | null, max: number | null, min: number | null, failed: string | null
     ): void {
         if (dat != null) {
             this._shapeStarts[index] = dat[0] - 1;
@@ -140,5 +143,5 @@ export default class Feedback {
     private _shapeMins: number[] = [];
     private _faileds: number[] = [];
     // / Ad-hoc data storage object for Brent's theophylline puzzle
-    private _brentTheoData: any = null;
+    private _brentTheoData: BrentTheoData | null = null;
 }
