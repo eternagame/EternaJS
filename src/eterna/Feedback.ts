@@ -42,11 +42,11 @@ export default class Feedback {
     }
 
     // / Ad-hoc object for Brent's theophylline puzzle
-    public set brentTheoData(dat: BrentTheoData) {
+    public set brentTheoData(dat: BrentTheoData | null) {
         this._brentTheoData = dat;
     }
 
-    public get brentTheoData(): BrentTheoData {
+    public get brentTheoData(): BrentTheoData | null {
         return this._brentTheoData;
     }
 

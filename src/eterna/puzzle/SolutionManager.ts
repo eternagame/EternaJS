@@ -170,7 +170,7 @@ export default class SolutionManager {
                 if (newfb == null) {
                     newfb = new Feedback();
                 }
-                newfb.brentTheoData(synthesisDataRaw);
+                newfb.brentTheoData = synthesisDataRaw;
             }
         } else if (obj['SHAPE'] != null && obj['SHAPE'].length > 0) {
             if (newfb == null) {
