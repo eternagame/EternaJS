@@ -15,29 +15,48 @@ import RankRowLayout from './RankRowLayout';
 import RankBoard from './RankBoard';
 import PlayerRank from './PlayerRank';
 
+interface SubmissionResponse {
+    'pointsrank-before': RankScrollData | null;
+    'pointsrank-after': RankScrollData | null;
+}
+
+interface RankScrollData {
+    points: number;
+    rank: number;
+    richer: PlayerRankData[];
+    poorer: PlayerRankData[];
+}
+
+interface PlayerRankData {
+    name: string;
+    points: number | string;
+    rank: number;
+    uid: number;
+}
+
 export default class RankScroll extends ContainerObject {
-    public static hasRankScrollData(submissionRsp: any): boolean {
+    public static hasRankScrollData(submissionRsp: SubmissionResponse): boolean {
         return (submissionRsp['pointsrank-before'] != null && submissionRsp['pointsrank-after'] != null);
     }
 
     /** Creates a RankScroll object with data returned from the submit-solution server response */
-    public static fromSubmissionResponse(submissionRsp: any): RankScroll {
+    public static fromSubmissionResponse(submissionRsp: SubmissionResponse): RankScroll {
         if (!RankScroll.hasRankScrollData(submissionRsp)) {
             throw new Error('No RankScroll data in submission response');
         }
 
-        let pointsrankBefore: any = submissionRsp['pointsrank-before'];
-        let pointsrankAfter: any = submissionRsp['pointsrank-after'];
+        let pointsrankBefore: RankScrollData = submissionRsp['pointsrank-before'];
+        let pointsrankAfter: RankScrollData = submissionRsp['pointsrank-after'];
         let player: PlayerRank;
         let ranks: PlayerRank[] = [];
         let prevRank: number = pointsrankBefore['rank'];
         let newRank: number = pointsrankAfter['rank'];
         let prevPoints: number = pointsrankBefore['points'];
         let newPoints: number = pointsrankAfter['points'];
-        let prevRicher: any[] = pointsrankBefore['richer'];
-        let prevPoorer: any[] = pointsrankBefore['poorer'];
-        let newRicher: any[] = pointsrankAfter['richer'];
-        let newPoorer: any[] = pointsrankAfter['poorer'];
+        let prevRicher: PlayerRankData[] = pointsrankBefore['richer'];
+        let prevPoorer: PlayerRankData[] = pointsrankBefore['poorer'];
+        let newRicher: PlayerRankData[] = pointsrankAfter['richer'];
+        let newPoorer: PlayerRankData[] = pointsrankAfter['poorer'];
 
         // / Don't even need to move
         if (prevPoints >= newPoints || prevRank <= newRank) {
@@ -206,7 +225,7 @@ export default class RankScroll extends ContainerObject {
         }
 
         // Make rank data coming out of bottom (of player)
-        let rankDataBottom: any[] = [];
+        let rankDataBottom: PlayerRank[] = [];
         for (let ii = bottomStartingIdx; ii <= bottomEndingIndex; ii++) {
             if (ii < this._allRanks.length) {
                 let clone: PlayerRank = this._allRanks[ii].clone();
