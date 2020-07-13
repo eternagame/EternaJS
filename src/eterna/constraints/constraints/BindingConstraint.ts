@@ -1,5 +1,4 @@
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
-import {OligoDef} from 'eterna/mode/PoseEdit/PoseEditMode';
+import UndoBlock, {UndoBlockParam, TargetConditions, OligoDef} from 'eterna/UndoBlock';
 import {StyledTextBuilder, Assert} from 'flashbang';
 import {Graphics} from 'pixi.js';
 import EPars from 'eterna/EPars';
@@ -22,13 +21,13 @@ abstract class BindingsConstraint<ConstraintStatus extends BaseConstraintStatus>
         this.stateIndex = stateIndex;
     }
 
-    protected abstract _getOligoInfo(targetConditions: any[]): OligoInfo[];
+    protected abstract _getOligoInfo(targetConditions: TargetConditions[]): OligoInfo[];
 
     public getConstraintBoxConfig(
         status: BaseConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
         let oligos = this._getOligoInfo(targetConditions);
 
@@ -161,7 +160,7 @@ export class MultistrandBindingsConstraint extends BindingsConstraint<Multistran
         };
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: TargetConditions[]): OligoInfo[] {
         const oligos: OligoDef[] = targetConditions[this.stateIndex]['oligos'];
 
         return oligos.map(
@@ -228,7 +227,7 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: TargetConditions[]): OligoInfo[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',
@@ -256,7 +255,7 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
         ];
     }
 
-    protected _getOligoInfo(targetConditions: any[]): OligoInfo[] {
+    protected _getOligoInfo(targetConditions: TargetConditions[]): OligoInfo[] {
         return [{
             name: targetConditions[this.stateIndex]['oligo_name'] || 'Oligo 1',
             label: targetConditions[this.stateIndex]['oligo_label'] || 'A',

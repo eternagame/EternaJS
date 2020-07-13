@@ -4,7 +4,9 @@ import {
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {UndoBlockParam, FoldData} from 'eterna/UndoBlock';
+import UndoBlock, {
+    UndoBlockParam, FoldData, TargetConditions, OligoDef
+} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle, {PuzzleType, PoseState, BoostersData} from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
@@ -81,14 +83,14 @@ export interface PoseEditParams {
     solutions?: Solution[];
 }
 
-export interface OligoDef {
-    sequence: string;
-    malus: number;
-    name: string;
-    bind?: boolean;
-    concentration?: string;
-    label?: string;
+interface MoveHistory {
+    beginFrom: string;
+    numMoves: number;
+    moves: Move[];
+    elapsed: string;
 }
+
+type Move = any;
 
 export default class PoseEditMode extends GameMode {
     constructor(puzzle: Puzzle, params: PoseEditParams, autosaveData: any[] | null = null) {
@@ -610,7 +612,7 @@ export default class PoseEditMode extends GameMode {
         let poseFields: PoseField[] = [];
 
         let targetSecstructs: string[] = this._puzzle.getSecstructs();
-        let targetConditions: any[] = this._puzzle.targetConditions;
+        let targetConditions: TargetConditions[] = this._puzzle.targetConditions;
 
         // TSC: this crashes, and doesn't seem to accomplish anything
         // let before_reset: number[] = null;
@@ -633,7 +635,7 @@ export default class PoseEditMode extends GameMode {
             });
         };
         let bindTrackMoves = (pose: Pose2D, index: number) => {
-            pose.trackMovesCallback = ((count: number, moves: any[]) => {
+            pose.trackMovesCallback = ((count: number, moves: Move[]) => {
                 this._moveCount += count;
                 if (moves) {
                     this._moves.push(moves.slice());
@@ -954,7 +956,7 @@ export default class PoseEditMode extends GameMode {
             return pose.puzzleLocks ? pose.puzzleLocks.slice(0, pose.sequence.length) : null;
         });
 
-        this._scriptInterface.addCallback('get_targets', (): any[] => {
+        this._scriptInterface.addCallback('get_targets', (): TargetConditions[] => {
             let conditions = this._puzzle.targetConditions;
             if (conditions.length === 0) {
                 conditions.push(null);
@@ -1851,7 +1853,7 @@ export default class PoseEditMode extends GameMode {
         }
 
         let elapsed: number = (new Date().getTime() - this._startSolvingTime) / 1000;
-        let moveHistory: any = {
+        let moveHistory: MoveHistory = {
             beginFrom: this._startingPoint,
             numMoves: this._moveCount,
             moves: this._moves.slice(),

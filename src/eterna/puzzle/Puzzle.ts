@@ -7,7 +7,7 @@ import EternaURL from 'eterna/net/EternaURL';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
-import {TargetConditions, OligoStruct} from 'eterna/UndoBlock';
+import {TargetConditions, OligoDef} from 'eterna/UndoBlock';
 
 export interface BoostersData {
     mission?: any;
@@ -276,7 +276,7 @@ export default class Puzzle {
             // Multi-strands
 
             if (this._targetConditions[ii]['type'] === 'multistrand') {
-                let oligos: OligoStruct[] = this._targetConditions[ii]['oligos'];
+                let oligos: OligoDef[] = this._targetConditions[ii]['oligos'];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
                     if (oligos[jj]['concentration'] != null) {

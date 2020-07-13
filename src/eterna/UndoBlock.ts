@@ -36,7 +36,7 @@ export interface TargetConditions {
     oligo_label?: string; // really, 'T' | 'R'
     oligo_name?: string;
     concentration?: number;
-    oligos?: OligoStruct[];
+    oligos?: OligoDef[];
     shift_locks?: string;
     shift_limit?: number;
     anti_secstruct?: string;
@@ -54,13 +54,13 @@ export interface TargetConditions {
     malus?: number;
 }
 
-export interface OligoStruct {
+export interface OligoDef {
     sequence: string;
-    concentration: string; // a Numberable one
-    bind: boolean;
+    malus: number;
     name: string;
-    label: string;
-    malus?: number;
+    bind?: boolean;
+    concentration?: string; // a Numberable one
+    label?: string;
 }
 
 export enum UndoBlockParam {
