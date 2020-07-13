@@ -198,7 +198,8 @@ export default class DataCol extends ContainerObject {
                 return true;
             }
 
-            let targetLow: string = sol.getProperty(this.category).toLowerCase();
+            // Will convert number to string as needed, or will keep as string.
+            let targetLow: string = String(sol.getProperty(this.category)).toLowerCase();
 
             return (targetLow.search(queryString.toLowerCase()) >= 0);
         } else {

@@ -1,4 +1,4 @@
-import UndoBlock from 'eterna/UndoBlock';
+import UndoBlock, {TargetConditions} from 'eterna/UndoBlock';
 import EPars from 'eterna/EPars';
 import PoseThumbnail, {PoseThumbnailType} from 'eterna/ui/PoseThumbnail';
 import {HighlightType} from 'eterna/pose2D/HighlightBox';
@@ -252,13 +252,13 @@ export class AntiShapeConstraint extends BaseShapeConstraint {
         status: ShapeConstraintStatus,
         forMissionScreen: boolean,
         undoBlocks: UndoBlock[],
-        targetConditions: any[]
+        targetConditions: TargetConditions[]
     ): ConstraintBoxConfig {
         let details = super.getConstraintBoxConfig(status, forMissionScreen, undoBlocks);
         let undoBlock = undoBlocks[this.stateIndex];
         let pseudoknots = false;
-        if (undoBlock.targetConditions && undoBlock.targetConditions[this.stateIndex]
-                && undoBlock.targetConditions[this.stateIndex]['type'] === 'pseudoknot') {
+        if (undoBlock.targetConditions && undoBlock.targetConditions
+                && undoBlock.targetConditions['type'] === 'pseudoknot') {
             pseudoknots = true;
         }
         let naturalPairs = this._targetAlignedNaturalPairs(undoBlock, pseudoknots);

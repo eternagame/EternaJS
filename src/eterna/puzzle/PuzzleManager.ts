@@ -42,24 +42,24 @@ interface PuzzleJSON {
     title: string;
     type: PuzzleType; // AMW: worried this is actually stored as a string
     body: string;
-    locks: string;
-    objective: string;
-    beginseq: string;
+    locks?: string;
+    objective?: string;
+    beginseq?: string;
     secstruct: string;
-    saved_sequence: string;
+    saved_sequence?: string;
     usetails: string;
-    folder: string; // AMW TODO: make a valid folder name somehow!
-    reward: string;
-    'ui-specs': string;
-    'next-puzzle': string;
-    'last-round': string;
-    check_hairpin: string;
-    'num-submissions': string;
-    rscript: string;
-    events: string;
-    hint: string;
-    'max-votes': string;
-    constraints: string;
+    folder?: string; // AMW TODO: make a valid folder name somehow!
+    reward?: string;
+    'ui-specs'?: string;
+    'next-puzzle'?: string;
+    'last-round'?: string;
+    check_hairpin?: string;
+    'num-submissions'?: string;
+    rscript?: string;
+    events?: string;
+    hint?: string;
+    'max-votes'?: string;
+    constraints?: string; // AMW TODO: string formatting restrictions
 }
 
 interface ObjectiveString {

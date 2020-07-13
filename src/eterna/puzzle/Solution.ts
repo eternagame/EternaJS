@@ -1,5 +1,6 @@
 import Eterna from 'eterna/Eterna';
 import Feedback from 'eterna/Feedback';
+import {FoldData} from 'eterna/UndoBlock';
 
 export default class Solution {
     constructor(nid: number, puzzleNID: number) {
@@ -29,7 +30,7 @@ export default class Solution {
         }
     }
 
-    public set foldData(fd: any[]) {
+    public set foldData(fd: FoldData[]) {
         this._foldData = fd;
         if (this._foldData != null) {
             this._hasFoldData = true;
@@ -122,7 +123,7 @@ export default class Solution {
         }
     }
 
-    public queryFoldData(): Promise<any[] | null> {
+    public queryFoldData(): Promise<FoldData[] | null> {
         if (this._hasFoldData) {
             if (this._foldData != null) {
                 return Promise.resolve(this._foldData);
@@ -141,7 +142,8 @@ export default class Solution {
         }
     }
 
-    public getProperty(keyword: string): any {
+    // AMW TODO what why
+    public getProperty(keyword: string): string | number {
         if (keyword === 'Title') {
             return this._title;
         } else if (keyword === 'GU Pairs') {
@@ -214,5 +216,5 @@ export default class Solution {
     private _expFeedback: Feedback | null;
     private _shortDesc: string;
     private _hasFoldData: boolean = false;
-    private _foldData: any[] | null = null;
+    private _foldData: FoldData[] | null = null;
 }

@@ -451,7 +451,7 @@ export default class DesignBrowserMode extends GameMode {
             this.closeCurDialog();
         };
 
-        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty('My Votes'))
+        Eterna.client.toggleSolutionVote(solution.nodeID, this._puzzle.nodeID, solution.getProperty('My Votes') as number)
             .then((data) => {
                 this._voteProcessor.processData(data['votes']);
                 this.syncVotes();
@@ -772,14 +772,14 @@ export default class DesignBrowserMode extends GameMode {
                         dataCol.drawGridText();
                     }
                 } else if (category === DesignCategory.DESCRIPTION) {
-                    let des = singleLineRawData.getProperty('Description');
+                    let des = singleLineRawData.getProperty('Description') as string;
                     if (des.length < 45) {
                         dataArray.push(des);
                     } else {
                         dataArray.push(`${des.substr(0, 40)}...`);
                     }
                 } else if (category === DesignCategory.TITLE) {
-                    let des = singleLineRawData.getProperty('Title');
+                    let des = singleLineRawData.getProperty('Title') as string;
                     if (des.length < 30) {
                         dataArray.push(des);
                     } else {

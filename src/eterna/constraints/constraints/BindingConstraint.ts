@@ -214,7 +214,7 @@ export class OligoBoundConstraint extends BindingsConstraint<BaseConstraintStatu
 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
         let nnfe: number[] = context.undoBlocks[this.stateIndex]
-            .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE) as number[];
 
         return {
             satisfied: nnfe != null && nnfe[0] === -2
@@ -242,7 +242,7 @@ export class OligoUnboundConstraint extends BindingsConstraint<BaseConstraintSta
 
     public evaluate(context: ConstraintContext): BaseConstraintStatus {
         let nnfe: number[] = context.undoBlocks[this.stateIndex]
-            .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE);
+            .getParam(UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE) as number[];
 
         return {
             satisfied: nnfe != null && nnfe[0] !== -2

@@ -7,12 +7,17 @@ import EternaURL from 'eterna/net/EternaURL';
 import Pose2D from 'eterna/pose2D/Pose2D';
 import Constraint, {BaseConstraintStatus} from 'eterna/constraints/Constraint';
 import ShapeConstraint from 'eterna/constraints/constraints/ShapeConstraint';
+import {TargetConditions, OligoStruct} from 'eterna/UndoBlock';
 
 export interface BoostersData {
     mission?: any;
     paint_tools?: any;
     actions?: any;
-    mission_cleared?: any;
+    mission_cleared?: MissionCleared;
+}
+export interface MissionCleared {
+    info: string;
+    more: string;
 }
 
 export enum PuzzleType {
@@ -138,9 +143,9 @@ export default class Puzzle {
         this._folder = folder;
     }
 
-    public get targetConditions(): any[] {
+    public get targetConditions(): TargetConditions[] {
         if (this._targetConditions == null) {
-            let targetConditions: any[] = [];
+            let targetConditions: TargetConditions[] = [];
             for (let ii = 0; ii < this._secstructs.length; ii++) {
                 targetConditions.push(null);
             }
@@ -214,7 +219,7 @@ export default class Puzzle {
         this._secstructs = secstructs.slice();
     }
 
-    public set objective(objectives: any[]) {
+    public set objective(objectives: TargetConditions[]) {
         this._targetConditions = objectives.slice();
         this._secstructs = [];
         let concentration: number;
@@ -229,14 +234,16 @@ export default class Puzzle {
             // Aptamers
 
             if (Puzzle.isAptamerType(tcType) && this._targetConditions[ii]['site'] != null) {
-                let bindingPairs: any[] = [];
-                let bindingSite: any[] = this._targetConditions[ii]['site'];
+                let bindingPairs: number[] = [];
+                let bindingSite: number[] = this._targetConditions[ii]['site'];
                 let targetPairs: number[] = EPars.parenthesisToPairs(this.getSecstruct(ii));
 
                 for (let jj = 0; jj < bindingSite.length; jj++) {
                     bindingPairs.push(targetPairs[bindingSite[jj]]);
                 }
 
+                // AMW TODO: these do not exist in the schema defined by the JSON
+                // entered in the admin interface. Are they only defined here?
                 this._targetConditions[ii]['binding_pairs'] = bindingPairs;
                 this._targetConditions[ii]['bonus'] = (
                     -0.6 * Math.log(this._targetConditions[ii]['concentration'] / 3) * 100
@@ -255,7 +262,9 @@ export default class Puzzle {
             if (Puzzle.isOligoType(tcType) && this._targetConditions[ii]['oligo_sequence'] != null) {
                 concentration = 0;
                 if (this._targetConditions[ii]['oligo_concentration'] != null) {
-                    concentration = this._targetConditions[ii]['oligo_concentration'];
+                    // AMW: consider altering the JSON online so it is always
+                    // a number, not a string-that-can-be-converted.
+                    concentration = Number(this._targetConditions[ii]['oligo_concentration']);
                 } else {
                     concentration = 1.0;
                 }
@@ -267,11 +276,11 @@ export default class Puzzle {
             // Multi-strands
 
             if (this._targetConditions[ii]['type'] === 'multistrand') {
-                let oligos: any[] = this._targetConditions[ii]['oligos'];
+                let oligos: OligoStruct[] = this._targetConditions[ii]['oligos'];
                 for (let jj = 0; jj < oligos.length; jj++) {
                     concentration = 0;
                     if (oligos[jj]['concentration'] != null) {
-                        concentration = oligos[jj]['concentration'];
+                        concentration = Number(oligos[jj]['concentration']);
                     } else {
                         concentration = 1.0;
                     }
@@ -502,7 +511,7 @@ export default class Puzzle {
         return seq;
     }
 
-    public getSubsequenceWithoutBarcode(seq: any[]): any[] {
+    public getSubsequenceWithoutBarcode(seq: number[]): number[] {
         if (!this._useBarcode) {
             return seq.slice();
         }
@@ -577,7 +586,7 @@ export default class Puzzle {
     private _useTails: boolean = false;
     private _useShortTails: boolean = false;
     private _useBarcode: boolean = false;
-    private _targetConditions: any[] | null = null;
+    private _targetConditions: TargetConditions[] | null = null;
     private _constraints: Constraint<BaseConstraintStatus>[] | null = null;
     private _round: number = -1;
     private _numSubmissions: number = 3;

@@ -4,7 +4,7 @@ import {
 } from 'pixi.js';
 import EPars from 'eterna/EPars';
 import Eterna from 'eterna/Eterna';
-import UndoBlock, {UndoBlockParam} from 'eterna/UndoBlock';
+import UndoBlock, {UndoBlockParam, FoldData} from 'eterna/UndoBlock';
 import Solution from 'eterna/puzzle/Solution';
 import Puzzle, {PuzzleType, PoseState, BoostersData} from 'eterna/puzzle/Puzzle';
 import Background from 'eterna/vfx/Background';
@@ -557,7 +557,7 @@ export default class PoseEditMode extends GameMode {
         this.clearUndoStack();
         this.pushUILock();
 
-        const setSolution = (foldData: any[] | null) => {
+        const setSolution = (foldData: FoldData[] | null) => {
             this.hideAsyncText();
             this.popUILock();
 
@@ -961,9 +961,13 @@ export default class PoseEditMode extends GameMode {
             }
             for (let ii = 0; ii < conditions.length; ii++) {
                 if (conditions[ii] == null) {
-                    conditions[ii] = {};
-                    conditions[ii]['type'] = 'single';
-                    conditions[ii]['secstruct'] = this._puzzle.getSecstruct(ii);
+                    // conditions[ii] = {};
+                    conditions[ii] = {
+                        type: 'single',
+                        secstruct: this._puzzle.getSecstruct(ii)
+                    };
+                    // conditions[ii]['type'] = 'single';
+                    // conditions[ii]['secstruct'] = this._puzzle.getSecstruct(ii);
                 }
             }
             return JSON.parse(JSON.stringify(conditions));
@@ -989,7 +993,7 @@ export default class PoseEditMode extends GameMode {
             if (indx < 0 || indx >= this._poses.length) {
                 return Number.NaN;
             }
-            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE);
+            return this.getCurrentUndoBlock(indx).getParam(UndoBlockParam.FE) as number;
         });
 
         this._scriptInterface.addCallback('check_constraints', (): boolean => this.checkConstraints());
@@ -1796,11 +1800,11 @@ export default class PoseEditMode extends GameMode {
             this.updateCurrentBlockWithDotAndMeltingPlot();
         }
 
-        let initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37);
+        let initScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, 37) as number;
 
         let meltpoint = 107;
         for (let ii = 47; ii < 100; ii += 10) {
-            let currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii);
+            let currentScore: number = datablock.getParam(UndoBlockParam.PROB_SCORE, ii) as number;
             if (currentScore < initScore * 0.5) {
                 meltpoint = ii;
                 break;
@@ -1862,7 +1866,7 @@ export default class PoseEditMode extends GameMode {
         let seqString: string = EPars.sequenceToString(this._puzzle.transformSequence(undoBlock.sequence, 0));
 
         postData['title'] = details.title;
-        postData['energy'] = undoBlock.getParam(UndoBlockParam.FE) / 100.0;
+        postData['energy'] = undoBlock.getParam(UndoBlockParam.FE) as number / 100.0;
         postData['puznid'] = this._puzzle.nodeID;
         postData['sequence'] = seqString;
         postData['repetition'] = undoBlock.getParam(UndoBlockParam.REPETITION);
@@ -2478,7 +2482,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[ii].oligoMalus = this._targetConditions[jj]['malus'];
                 nnfe = this.getCurrentUndoBlock(jj).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
-                );
+                ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].oligoPaired = true;
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
@@ -2489,16 +2493,16 @@ export default class PoseEditMode extends GameMode {
             if (this._targetConditions[jj]['type'] === 'multistrand') {
                 nnfe = this.getCurrentUndoBlock(jj).getParam(
                     UndoBlockParam.NNFE_ARRAY, EPars.DEFAULT_TEMPERATURE, pseudoknots
-                );
+                ) as number[];
                 if (nnfe != null && nnfe[0] === -2) {
                     this._poses[ii].duplexCost = nnfe[1] * 0.01;
                 }
             }
         }
 
-        let numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots);
-        let numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots);
-        let numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots);
+        let numAU: number = undoBlock.getParam(UndoBlockParam.AU, 37, pseudoknots) as number;
+        let numGU: number = undoBlock.getParam(UndoBlockParam.GU, 37, pseudoknots) as number;
+        let numGC: number = undoBlock.getParam(UndoBlockParam.GC, 37, pseudoknots) as number;
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
 
         if (!this._isFrozen) {
@@ -2767,7 +2771,7 @@ export default class PoseEditMode extends GameMode {
 
         const LOCK_NAME = 'ExecFold';
 
-        let execfoldCB = (fd: any[] | null) => {
+        let execfoldCB = (fd: FoldData[] | null) => {
             this.hideAsyncText();
             this.popUILock(LOCK_NAME);
 
@@ -3067,7 +3071,7 @@ export default class PoseEditMode extends GameMode {
                 this._poses[targetIndex].getSequenceString()
             );
             if (sol != null && !sol.hasFoldData) {
-                let fd: any[] = [];
+                let fd: FoldData[] = [];
                 for (let ii = 0; ii < this._poses.length; ii++) {
                     fd.push(this.getCurrentUndoBlock(ii).toJSON());
                 }

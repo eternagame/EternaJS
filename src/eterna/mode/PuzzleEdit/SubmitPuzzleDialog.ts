@@ -110,9 +110,9 @@ export default class SubmitPuzzleDialog extends Dialog<SubmitPuzzleDetails> {
         }
 
         if (this._numPoses === 1) {
-            let numAU: number = this._puzzleState.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE);
-            let numGU: number = this._puzzleState.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE);
-            let numGC: number = this._puzzleState.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE);
+            let numAU: number = this._puzzleState.getParam(UndoBlockParam.AU, EPars.DEFAULT_TEMPERATURE) as number;
+            let numGU: number = this._puzzleState.getParam(UndoBlockParam.GU, EPars.DEFAULT_TEMPERATURE) as number;
+            let numGC: number = this._puzzleState.getParam(UndoBlockParam.GC, EPars.DEFAULT_TEMPERATURE) as number;
 
             if (details.minGU) {
                 let maxGU = (numAU + numGU + numGC) / 3;

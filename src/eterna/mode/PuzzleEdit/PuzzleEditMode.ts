@@ -765,9 +765,9 @@ export default class PuzzleEditMode extends GameMode {
         }
 
         let undoblock: UndoBlock = this.getCurrentUndoBlock(this._poses.length - 1);
-        let numAU: number = undoblock.getParam(UndoBlockParam.AU);
-        let numGU: number = undoblock.getParam(UndoBlockParam.GU);
-        let numGC: number = undoblock.getParam(UndoBlockParam.GC);
+        let numAU: number = undoblock.getParam(UndoBlockParam.AU) as number;
+        let numGU: number = undoblock.getParam(UndoBlockParam.GU) as number;
+        let numGC: number = undoblock.getParam(UndoBlockParam.GC) as number;
 
         this._toolbar.palette.setPairCounts(numAU, numGU, numGC);
     }

@@ -162,7 +162,7 @@ export default class SpecBox extends ContainerObject {
                 .append('Melting point : ', 'bold')
                 .append(`${datablock.getParam(UndoBlockParam.MELTING_POINT, TEMPERATURE)}°C\n`)
                 .append('Free energy : ', 'bold')
-                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) / 100).toFixed(1)}kcal\n`);
+                .append(`${Number(datablock.getParam(UndoBlockParam.FE, TEMPERATURE) as number / 100).toFixed(1)}kcal\n`);
 
             statString.apply(this._stattext);
         }

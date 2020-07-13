@@ -37,7 +37,7 @@ abstract class MaximumPairConstraint extends Constraint<MaxPairConstraintStatus>
 
     public evaluate(context: ConstraintContext): MaxPairConstraintStatus {
         // TODO: Multistate?
-        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType));
+        const currentPairs: number = context.undoBlocks[0].getParam(PAIR_PARAM_MAP.get(this.pairType)) as number;
         return {
             satisfied: (
                 currentPairs <= this.maxPairs
